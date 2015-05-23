@@ -190,7 +190,7 @@ public abstract class WebUtils {
 	 * i.e. the value of the "defaultHtmlEscape" context-param in {@code web.xml}
 	 * (if any). Falls back to {@code false} in case of no explicit default given.
 	 * @param servletContext the servlet context of the web application
-	 * @return whether default HTML escaping is enabled (default is false)
+	 * @return whether default HTML escaping is enabled (default is {@code false})
 	 * @deprecated as of Spring 4.1, in favor of {@link #getDefaultHtmlEscape}
 	 */
 	@Deprecated
@@ -210,7 +210,8 @@ public abstract class WebUtils {
 	 * an actual boolean value specified, allowing to have a context-specific
 	 * default in case of no setting at the global level.
 	 * @param servletContext the servlet context of the web application
-	 * @return whether default HTML escaping is enabled (null = no explicit default)
+	 * @return whether default HTML escaping is enabled for the given application
+	 * ({@code null} = no explicit default)
 	 */
 	public static Boolean getDefaultHtmlEscape(ServletContext servletContext) {
 		if (servletContext == null) {
@@ -230,7 +231,8 @@ public abstract class WebUtils {
 	 * an actual boolean value specified, allowing to have a context-specific
 	 * default in case of no setting at the global level.
 	 * @param servletContext the servlet context of the web application
-	 * @return whether response encoding is used for HTML escaping (null = no explicit default)
+	 * @return whether response encoding is to be used for HTML escaping
+	 * ({@code null} = no explicit default)
 	 * @since 4.1.2
 	 */
 	public static Boolean getResponseEncodedHtmlEscape(ServletContext servletContext) {
@@ -749,7 +751,7 @@ public abstract class WebUtils {
 	 * keys {@code "q1"} and {@code "q2"} with values {@code ["a","b"]} and
 	 * {@code ["a","b","c"]} respectively.
 	 * @param matrixVariables the unparsed matrix variables string
-	 * @return a map with matrix variable names and values, never {@code null}
+	 * @return a map with matrix variable names and values (never {@code null})
 	 * @since 3.2
 	 */
 	public static MultiValueMap<String, String> parseMatrixVariables(String matrixVariables) {
@@ -779,7 +781,7 @@ public abstract class WebUtils {
 	 * Check the given request origin against a list of allowed origins.
 	 * A list containing "*" means that all origins are allowed.
 	 * An empty list means only same origin is allowed.
-	 * @return true if the request origin is valid, false otherwise
+	 * @return {@code true} if the request origin is valid, {@code false} otherwise
 	 * @since 4.1.5
 	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>
 	 */

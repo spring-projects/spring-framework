@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,10 +55,11 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.socket.server.HandshakeFailureException;
 
-
 /**
  * A {@link org.springframework.web.socket.server.RequestUpgradeStrategy} for use
  * with WildFly and its underlying Undertow web server.
+ *
+ * <p>Compatible with Undertow 1.0, 1.1, 1.2 - as included in WildFly 8.x and 9.0.
  *
  * @author Rossen Stoyanchev
  * @since 4.0.1
@@ -201,11 +202,11 @@ public class UndertowRequestUpgradeStrategy extends AbstractStandardUpgradeStrat
 				Collections.<Class<?>, List<InstanceFactory<? extends Encoder>>>emptyMap(),
 				Collections.<Class<?>, List<InstanceFactory<? extends Decoder>>>emptyMap());
 		try {
-			return undertow11Present ?
+			return (undertow11Present ?
 					endpointConstructor.newInstance(endpointRegistration,
-						new EndpointInstanceFactory(endpoint), null, encodingFactory, null) :
+							new EndpointInstanceFactory(endpoint), null, encodingFactory, null) :
 					endpointConstructor.newInstance(endpointRegistration,
-						new EndpointInstanceFactory(endpoint), null, encodingFactory);
+							new EndpointInstanceFactory(endpoint), null, encodingFactory));
 		}
 		catch (Exception ex) {
 			throw new HandshakeFailureException("Failed to instantiate ConfiguredServerEndpoint", ex);
