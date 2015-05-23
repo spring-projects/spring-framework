@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -69,6 +70,9 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		if (isEqualsMethod(method)) {
 			return equals(proxy, args[0]);
+		}
+		if (isHashCodeMethod(method)) {
+			return hashCode(proxy);
 		}
 		if (isToStringMethod(method)) {
 			return toString(proxy);
@@ -137,6 +141,12 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 		return value;
 	}
 
+	/**
+	 * See {@link Annotation#equals(Object)} for a definition of the required algorithm.
+	 *
+	 * @param proxy the synthesized annotation
+	 * @param other the other object to compare against
+	 */
 	private boolean equals(Object proxy, Object other) {
 		if (this == other) {
 			return true;
@@ -156,6 +166,72 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 		return true;
 	}
 
+	/**
+	 * See {@link Annotation#hashCode()} for a definition of the required algorithm.
+	 *
+	 * @param proxy the synthesized annotation
+	 */
+	private int hashCode(Object proxy) {
+		int result = 0;
+
+		for (Method attributeMethod : getAttributeMethods(this.annotationType)) {
+			Object value = invokeMethod(attributeMethod, proxy);
+			int hashCode;
+			if (value.getClass().isArray()) {
+				hashCode = hashCodeForArray(value);
+			}
+			else {
+				hashCode = value.hashCode();
+			}
+			result += (127 * attributeMethod.getName().hashCode()) ^ hashCode;
+		}
+
+		return result;
+	}
+
+	/**
+	 * WARNING: we can NOT use any of the {@code nullSafeHashCode()} methods
+	 * in Spring's {@link ObjectUtils} because those hash code generation
+	 * algorithms do not comply with the requirements specified in
+	 * {@link Annotation#hashCode()}.
+	 *
+	 * @param array the array to compute the hash code for
+	 */
+	private int hashCodeForArray(Object array) {
+		if (array instanceof boolean[]) {
+			return Arrays.hashCode((boolean[]) array);
+		}
+		if (array instanceof byte[]) {
+			return Arrays.hashCode((byte[]) array);
+		}
+		if (array instanceof char[]) {
+			return Arrays.hashCode((char[]) array);
+		}
+		if (array instanceof double[]) {
+			return Arrays.hashCode((double[]) array);
+		}
+		if (array instanceof float[]) {
+			return Arrays.hashCode((float[]) array);
+		}
+		if (array instanceof int[]) {
+			return Arrays.hashCode((int[]) array);
+		}
+		if (array instanceof long[]) {
+			return Arrays.hashCode((long[]) array);
+		}
+		if (array instanceof short[]) {
+			return Arrays.hashCode((short[]) array);
+		}
+
+		// else
+		return Arrays.hashCode((Object[]) array);
+	}
+
+	/**
+	 * See {@link Annotation#toString()} for guidelines on the recommended format.
+	 *
+	 * @param proxy the synthesized annotation
+	 */
 	private String toString(Object proxy) {
 		StringBuilder sb = new StringBuilder("@").append(annotationType.getName()).append("(");
 
