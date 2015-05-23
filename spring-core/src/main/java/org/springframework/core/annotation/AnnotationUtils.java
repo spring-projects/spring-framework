@@ -1289,8 +1289,15 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * TODO Document getAttributeMethods().
+	 * Get all methods declared in the supplied {@code annotationType} that
+	 * match Java's requirements for annotation <em>attributes</em>.
 	 *
+	 * <p>All methods in the returned list will be
+	 * {@linkplain ReflectionUtils#makeAccessible(Method) made accessible}.
+	 *
+	 * @param annotationType the type in which to search for attribute methods
+	 * @return all annotation attribute methods in the specified annotation
+	 * type; never {@code null}, though potentially <em>empty</em>
 	 * @since 4.2
 	 */
 	static List<Method> getAttributeMethods(Class<? extends Annotation> annotationType) {
