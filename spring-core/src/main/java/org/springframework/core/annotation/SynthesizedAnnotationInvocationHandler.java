@@ -67,7 +67,8 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		String methodName = method.getName();
-		int parameterCount = method.getParameterCount();
+		Class<?>[] parameterTypes = method.getParameterTypes();
+		int parameterCount = parameterTypes.length;
 
 		if ("toString".equals(methodName) && (parameterCount == 0)) {
 			return toString(proxy);
