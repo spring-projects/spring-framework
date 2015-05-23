@@ -105,24 +105,24 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 			}
 
 			makeAccessible(aliasedMethod);
-			Object aliasedValue = invokeMethod(aliasedMethod, this.annotation, args);
+			Object aliasedValue = invokeMethod(aliasedMethod, this.annotation);
 			Object defaultValue = getDefaultValue(this.annotation, methodName);
 
-			if (!ObjectUtils.nullSafeEquals(value, aliasedValue) && !ObjectUtils.nullSafeEquals(value, defaultValue)
-					&& !ObjectUtils.nullSafeEquals(aliasedValue, defaultValue)) {
+			if (!nullSafeEquals(value, aliasedValue) && !nullSafeEquals(value, defaultValue)
+					&& !nullSafeEquals(aliasedValue, defaultValue)) {
 				String elementName = (this.annotatedElement == null ? "unknown element"
 						: this.annotatedElement.toString());
 				String msg = String.format(
 					"In annotation [%s] declared on [%s], attribute [%s] and its alias [%s] are "
 							+ "declared with values of [%s] and [%s], but only one declaration is permitted.",
 					this.annotationType.getName(), elementName, methodName, aliasedAttributeName,
-					ObjectUtils.nullSafeToString(value), ObjectUtils.nullSafeToString(aliasedValue));
+					nullSafeToString(value), nullSafeToString(aliasedValue));
 				throw new AnnotationConfigurationException(msg);
 			}
 
 			// If the user didn't declare the annotation with an explicit value, return
 			// the value of the alias.
-			if (ObjectUtils.nullSafeEquals(value, defaultValue)) {
+			if (nullSafeEquals(value, defaultValue)) {
 				value = aliasedValue;
 			}
 		}
@@ -158,7 +158,7 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 		for (Method attributeMethod : getAttributeMethods(this.annotationType)) {
 			Object thisValue = invokeMethod(attributeMethod, proxy);
 			Object otherValue = invokeMethod(attributeMethod, other);
-			if (!ObjectUtils.nullSafeEquals(thisValue, otherValue)) {
+			if (!nullSafeEquals(thisValue, otherValue)) {
 				return false;
 			}
 		}
@@ -254,6 +254,14 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 
 		// else
 		return String.valueOf(value);
+	}
+
+	private static boolean nullSafeEquals(Object o1, Object o2) {
+		return ObjectUtils.nullSafeEquals(o1, o2);
+	}
+
+	private static String nullSafeToString(Object obj) {
+		return ObjectUtils.nullSafeToString(obj);
 	}
 
 }
