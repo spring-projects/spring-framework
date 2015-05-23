@@ -17,10 +17,13 @@
 package org.springframework.core.annotation;
 
 /**
- * Thrown by {@link AnnotationUtils} if an annotation is improperly configured.
+ * Thrown by {@link AnnotationUtils} and <em>synthesized annotations</em>
+ * if an annotation is improperly configured.
  *
  * @author Sam Brannen
  * @since 4.2
+ * @see AnnotationUtils
+ * @see SynthesizedAnnotation
  */
 @SuppressWarnings("serial")
 public class AnnotationConfigurationException extends RuntimeException {
