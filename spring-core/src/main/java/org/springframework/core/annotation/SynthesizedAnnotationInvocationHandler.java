@@ -24,10 +24,10 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.springframework.util.ObjectUtils;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 import static org.springframework.core.annotation.AnnotationUtils.*;
+import static org.springframework.util.ReflectionUtils.*;
 
 /**
  * {@link InvocationHandler} for an {@link Annotation} that Spring has
@@ -67,24 +67,21 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-		String methodName = method.getName();
-		Class<?>[] parameterTypes = method.getParameterTypes();
-		int parameterCount = parameterTypes.length;
-
-		if ("equals".equals(methodName) && (parameterCount == 1) && (parameterTypes[0] == Object.class)) {
+		if (isEqualsMethod(method)) {
 			return equals(proxy, args[0]);
 		}
-		else if ("toString".equals(methodName) && (parameterCount == 0)) {
+		if (isToStringMethod(method)) {
 			return toString(proxy);
 		}
 
+		String methodName = method.getName();
 		Class<?> returnType = method.getReturnType();
 		boolean nestedAnnotation = (Annotation[].class.isAssignableFrom(returnType) || Annotation.class.isAssignableFrom(returnType));
 		String aliasedAttributeName = aliasMap.get(methodName);
 		boolean aliasPresent = (aliasedAttributeName != null);
 
-		ReflectionUtils.makeAccessible(method);
-		Object value = ReflectionUtils.invokeMethod(method, this.annotation, args);
+		makeAccessible(method);
+		Object value = invokeMethod(method, this.annotation, args);
 
 		// No custom processing necessary?
 		if (!aliasPresent && !nestedAnnotation) {
@@ -103,8 +100,8 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 				throw new AnnotationConfigurationException(msg);
 			}
 
-			ReflectionUtils.makeAccessible(aliasedMethod);
-			Object aliasedValue = ReflectionUtils.invokeMethod(aliasedMethod, this.annotation, args);
+			makeAccessible(aliasedMethod);
+			Object aliasedValue = invokeMethod(aliasedMethod, this.annotation, args);
 			Object defaultValue = getDefaultValue(this.annotation, methodName);
 
 			if (!ObjectUtils.nullSafeEquals(value, aliasedValue) && !ObjectUtils.nullSafeEquals(value, defaultValue)
@@ -149,8 +146,8 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 		}
 
 		for (Method attributeMethod : getAttributeMethods(this.annotationType)) {
-			Object thisValue = ReflectionUtils.invokeMethod(attributeMethod, proxy);
-			Object otherValue = ReflectionUtils.invokeMethod(attributeMethod, other);
+			Object thisValue = invokeMethod(attributeMethod, proxy);
+			Object otherValue = invokeMethod(attributeMethod, other);
 			if (!ObjectUtils.nullSafeEquals(thisValue, otherValue)) {
 				return false;
 			}
@@ -167,7 +164,7 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 			Method attributeMethod = iterator.next();
 			sb.append(attributeMethod.getName());
 			sb.append('=');
-			sb.append(valueToString(ReflectionUtils.invokeMethod(attributeMethod, proxy)));
+			sb.append(valueToString(invokeMethod(attributeMethod, proxy)));
 			sb.append(iterator.hasNext() ? ", " : "");
 		}
 
