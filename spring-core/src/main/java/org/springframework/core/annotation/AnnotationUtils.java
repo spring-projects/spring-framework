@@ -118,6 +118,9 @@ public abstract class AnnotationUtils {
 	private static final Map<Class<? extends Annotation>, Boolean> synthesizableCache =
 			new ConcurrentReferenceHashMap<Class<? extends Annotation>, Boolean>(256);
 
+	private static final Map<Class<? extends Annotation>, Map<String, String>> attributeAliasCache =
+			new ConcurrentReferenceHashMap<Class<? extends Annotation>, Map<String, String>>(256);
+
 	private static transient Log logger;
 
 
@@ -1058,20 +1061,38 @@ public abstract class AnnotationUtils {
 			return annotation;
 		}
 
-		InvocationHandler handler = new SynthesizedAnnotationInvocationHandler(annotatedElement, annotation, getAliasMap(annotationType));
+		InvocationHandler handler = new SynthesizedAnnotationInvocationHandler(annotatedElement, annotation,
+			getAttributeAliasMap(annotationType));
 		A synthesizedAnnotation = (A) Proxy.newProxyInstance(ClassUtils.getDefaultClassLoader(), new Class<?>[] {
 			(Class<A>) annotationType, SynthesizedAnnotation.class }, handler);
 
 		return synthesizedAnnotation;
 	}
 
+
 	/**
-	 * TODO Document getAliasMap().
+	 * Get a map of all attribute alias pairs, declared via {@code @AliasFor}
+	 * in the supplied annotation type.
+	 *
+	 * <p>The map is keyed by attribute name with each value representing
+	 * the name of the aliased attribute. For each entry {@code [x, y]} in
+	 * the map there will be a corresponding {@code [y, x]} entry in the map.
+	 *
+	 * <p>An empty return value implies that the annotation does not declare
+	 * any attribute aliases.
+	 *
+	 * @param annotationType the annotation type to find attribute aliases in
+	 * @return a map containing attribute alias pairs; never {@code null}
 	 * @since 4.2
 	 */
-	private static Map<String, String> getAliasMap(Class<? extends Annotation> annotationType) {
+	private static Map<String, String> getAttributeAliasMap(Class<? extends Annotation> annotationType) {
 		if (annotationType == null) {
-			return null;
+			return Collections.emptyMap();
+		}
+
+		Map<String, String> cachedMap = attributeAliasCache.get(annotationType);
+		if (cachedMap != null) {
+			return cachedMap;
 		}
 
 		Map<String, String> map = new HashMap<String, String>();
@@ -1082,6 +1103,9 @@ public abstract class AnnotationUtils {
 				map.put(attributeName, aliasedAttributeName);
 			}
 		}
+
+		attributeAliasCache.put(annotationType, map);
+
 		return map;
 	}
 
@@ -1283,9 +1307,9 @@ public abstract class AnnotationUtils {
 	/**
 	 * TODO Document postProcessAnnotationAttributes().
 	 *
-	 * @param annotatedElement the element that is annotated with the supplied
-	 * annotation, used for contextual logging; may be {@code null} if unknown
-	 * @param attributes the annotation attributes to validate
+	 * @param element the element that is annotated with the supplied annotation,
+	 * used for contextual logging; may be {@code null} if unknown
+	 * @param attributes the annotation attributes to post-process
 	 * @since 4.2
 	 */
 	static void postProcessAnnotationAttributes(AnnotatedElement element, AnnotationAttributes attributes,
@@ -1297,39 +1321,36 @@ public abstract class AnnotationUtils {
 		}
 
 		Class<? extends Annotation> annotationType = attributes.annotationType();
-		Map<String, String> aliasMap = getAliasMap(annotationType);
 
 		// Validate @AliasFor configuration
-		if (aliasMap != null) {
-			Set<String> validated = new HashSet<String>();
+		Map<String, String> aliasMap = getAttributeAliasMap(annotationType);
+		Set<String> validated = new HashSet<String>();
+		for (String attributeName : aliasMap.keySet()) {
+			String aliasedAttributeName = aliasMap.get(attributeName);
 
-			for (String attributeName : aliasMap.keySet()) {
-				String aliasedAttributeName = aliasMap.get(attributeName);
+			if (validated.add(attributeName) && validated.add(aliasedAttributeName)) {
+				Object value = attributes.get(attributeName);
+				Object aliasedValue = attributes.get(aliasedAttributeName);
 
-				if (validated.add(attributeName) && validated.add(aliasedAttributeName)) {
-					Object value = attributes.get(attributeName);
-					Object aliasedValue = attributes.get(aliasedAttributeName);
+				if (!ObjectUtils.nullSafeEquals(value, aliasedValue) && !DEFAULT_VALUE_PLACEHOLDER.equals(value)
+						&& !DEFAULT_VALUE_PLACEHOLDER.equals(aliasedValue)) {
+					String elementAsString = (element == null ? "unknown element" : element.toString());
+					String msg = String.format(
+						"In AnnotationAttributes for annotation [%s] declared on [%s], attribute [%s] and its alias [%s] are "
+								+ "declared with values of [%s] and [%s], but only one declaration is permitted.",
+						annotationType.getName(), elementAsString, attributeName, aliasedAttributeName,
+						ObjectUtils.nullSafeToString(value), ObjectUtils.nullSafeToString(aliasedValue));
+					throw new AnnotationConfigurationException(msg);
+				}
 
-					if (!ObjectUtils.nullSafeEquals(value, aliasedValue) && !DEFAULT_VALUE_PLACEHOLDER.equals(value)
-							&& !DEFAULT_VALUE_PLACEHOLDER.equals(aliasedValue)) {
-						String elementAsString = (element == null ? "unknown element" : element.toString());
-						String msg = String.format(
-							"In AnnotationAttributes for annotation [%s] declared on [%s], attribute [%s] and its alias [%s] are "
-									+ "declared with values of [%s] and [%s], but only one declaration is permitted.",
-							annotationType.getName(), elementAsString, attributeName, aliasedAttributeName,
-							ObjectUtils.nullSafeToString(value), ObjectUtils.nullSafeToString(aliasedValue));
-						throw new AnnotationConfigurationException(msg);
-					}
-
-					// Replace default values with aliased values...
-					if (DEFAULT_VALUE_PLACEHOLDER.equals(value)) {
-						attributes.put(attributeName,
-							adaptValue(element, aliasedValue, classValuesAsString, nestedAnnotationsAsMap));
-					}
-					if (DEFAULT_VALUE_PLACEHOLDER.equals(aliasedValue)) {
-						attributes.put(aliasedAttributeName,
-							adaptValue(element, value, classValuesAsString, nestedAnnotationsAsMap));
-					}
+				// Replace default values with aliased values...
+				if (DEFAULT_VALUE_PLACEHOLDER.equals(value)) {
+					attributes.put(attributeName,
+						adaptValue(element, aliasedValue, classValuesAsString, nestedAnnotationsAsMap));
+				}
+				if (DEFAULT_VALUE_PLACEHOLDER.equals(aliasedValue)) {
+					attributes.put(aliasedAttributeName,
+						adaptValue(element, value, classValuesAsString, nestedAnnotationsAsMap));
 				}
 			}
 		}
