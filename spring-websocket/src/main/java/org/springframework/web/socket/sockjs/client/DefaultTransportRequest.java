@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -205,7 +205,7 @@ class DefaultTransportRequest implements TransportRequest {
 				if (isTimeoutFailure) {
 					String message = "Connect timed out for " + DefaultTransportRequest.this;
 					logger.error(message);
-					ex = new SockJsTransportFailureException(message, getSockJsUrlInfo().getSessionId(), null);
+					ex = new SockJsTransportFailureException(message, getSockJsUrlInfo().getSessionId(), ex);
 				}
 				if (fallbackRequest != null) {
 					logger.error(DefaultTransportRequest.this + " failed. Falling back on next transport.", ex);
