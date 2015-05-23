@@ -201,7 +201,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 			return "(this Map)";
 		}
 		if (value instanceof Object[]) {
-			return "[" + StringUtils.arrayToCommaDelimitedString((Object[]) value) + "]";
+			return "[" + StringUtils.arrayToDelimitedString((Object[]) value, ", ") + "]";
 		}
 		return String.valueOf(value);
 	}
