@@ -121,6 +121,9 @@ public abstract class AnnotationUtils {
 	private static final Map<Class<? extends Annotation>, Map<String, String>> attributeAliasesCache =
 			new ConcurrentReferenceHashMap<Class<? extends Annotation>, Map<String, String>>(256);
 
+	private static final Map<Class<? extends Annotation>, List<Method>> attributeMethodsCache =
+			new ConcurrentReferenceHashMap<Class<? extends Annotation>, List<Method>>(256);
+
 	private static transient Log logger;
 
 
@@ -1311,13 +1314,22 @@ public abstract class AnnotationUtils {
 	 * @since 4.2
 	 */
 	static List<Method> getAttributeMethods(Class<? extends Annotation> annotationType) {
-		List<Method> methods = new ArrayList<Method>();
+
+		List<Method> methods = attributeMethodsCache.get(annotationType);
+		if (methods != null) {
+			return methods;
+		}
+
+		methods = new ArrayList<Method>();
 		for (Method method : annotationType.getDeclaredMethods()) {
 			if ((method.getParameterTypes().length == 0) && (method.getReturnType() != void.class)) {
 				ReflectionUtils.makeAccessible(method);
 				methods.add(method);
 			}
 		}
+
+		attributeMethodsCache.put(annotationType, methods);
+
 		return methods;
 	}
 
