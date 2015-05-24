@@ -107,7 +107,7 @@ public abstract class AnnotationUtils {
 	 * An object that can be stored in {@link AnnotationAttributes} as a
 	 * placeholder for an attribute's declared default value.
 	 */
-	private static final Object DEFAULT_VALUE_PLACEHOLDER = "<SPRING DEFAULT VALUE PLACEHOLDER>";
+	private static final Object DEFAULT_VALUE_PLACEHOLDER = new String("<SPRING DEFAULT VALUE PLACEHOLDER>");
 
 	private static final Map<AnnotationCacheKey, Annotation> findAnnotationCache =
 			new ConcurrentReferenceHashMap<AnnotationCacheKey, Annotation>(256);
@@ -803,15 +803,15 @@ public abstract class AnnotationUtils {
 	 * <p>This method provides fully recursive annotation reading capabilities on par with
 	 * the reflection-based {@link org.springframework.core.type.StandardAnnotationMetadata}.
 	 *
-	 * <p><strong>NOTE</strong>: this variant of {@code getAnnotationAttributes()} is
-	 * only intended for use within the framework. Specifically, the
-	 * {@code defaultValuesAsPlaceholder} flag can be set to {@code true} in order to
-	 * support processing of attribute aliases while merging attributes within an annotation
-	 * hierarchy. If this method is invoked with {@code defaultValuesAsPlaceholder} set to
-	 * {@code true}:
+	 * <p><strong>NOTE</strong>: This variant of {@code getAnnotationAttributes()} is
+	 * only intended for use within the framework. Specifically, the {@code mergeMode} flag
+	 * can be set to {@code true} in order to support processing of attribute aliases while
+	 * merging attributes within an annotation hierarchy. When running in <em>merge mode</em>,
+	 * the following special rules apply:
 	 * <ol>
 	 * <li>The supplied annotation will <strong>not</strong> be
 	 * {@linkplain #synthesizeAnnotation synthesized} before retrieving its attributes.</li>
+	 * <li>Default values will be replaced with {@link #DEFAULT_VALUE_PLACEHOLDER}.</li>
 	 * <li>The resulting, merged annotation attributes should eventually be
 	 * {@linkplain #postProcessAnnotationAttributes post-processed} in order to
 	 * ensure that placeholders have been replaced by actual default values and
@@ -828,17 +828,17 @@ public abstract class AnnotationUtils {
 	 * {@link AnnotationAttributes} maps (for compatibility with
 	 * {@link org.springframework.core.type.AnnotationMetadata}) or to preserve them as
 	 * {@code Annotation} instances
-	 * @param defaultValuesAsPlaceholder whether to replace default values with
-	 * {@link #DEFAULT_VALUE_PLACEHOLDER} or leave them as is
+	 * @param mergeMode whether the annotation attributes should be created
+	 * using <em>merge mode</em>
 	 * @return the annotation attributes (a specialized Map) with attribute names as keys
 	 * and corresponding attribute values as values; never {@code null}
 	 * @since 4.2
 	 * @see #postProcessAnnotationAttributes
 	 */
 	static AnnotationAttributes getAnnotationAttributes(AnnotatedElement annotatedElement, Annotation annotation,
-			boolean classValuesAsString, boolean nestedAnnotationsAsMap, boolean defaultValuesAsPlaceholder) {
+			boolean classValuesAsString, boolean nestedAnnotationsAsMap, boolean mergeMode) {
 
-		if (!defaultValuesAsPlaceholder) {
+		if (!mergeMode) {
 			annotation = synthesizeAnnotation(annotation, annotatedElement);
 		}
 
@@ -848,7 +848,7 @@ public abstract class AnnotationUtils {
 			try {
 				Object value = method.invoke(annotation);
 				Object defaultValue = method.getDefaultValue();
-				if (defaultValuesAsPlaceholder && (defaultValue != null)) {
+				if (mergeMode && (defaultValue != null)) {
 					if (ObjectUtils.nullSafeEquals(value, defaultValue)) {
 						value = DEFAULT_VALUE_PLACEHOLDER;
 					}
@@ -1390,8 +1390,8 @@ public abstract class AnnotationUtils {
 				Object value = attributes.get(attributeName);
 				Object aliasedValue = attributes.get(aliasedAttributeName);
 
-				if (!ObjectUtils.nullSafeEquals(value, aliasedValue) && !DEFAULT_VALUE_PLACEHOLDER.equals(value)
-						&& !DEFAULT_VALUE_PLACEHOLDER.equals(aliasedValue)) {
+				if (!ObjectUtils.nullSafeEquals(value, aliasedValue) && (value != DEFAULT_VALUE_PLACEHOLDER)
+						&& (aliasedValue != DEFAULT_VALUE_PLACEHOLDER)) {
 					String elementAsString = (element == null ? "unknown element" : element.toString());
 					String msg = String.format(
 						"In AnnotationAttributes for annotation [%s] declared on [%s], attribute [%s] and its alias [%s] are "
@@ -1402,11 +1402,11 @@ public abstract class AnnotationUtils {
 				}
 
 				// Replace default values with aliased values...
-				if (DEFAULT_VALUE_PLACEHOLDER.equals(value)) {
+				if (value == DEFAULT_VALUE_PLACEHOLDER) {
 					attributes.put(attributeName,
 						adaptValue(element, aliasedValue, classValuesAsString, nestedAnnotationsAsMap));
 				}
-				if (DEFAULT_VALUE_PLACEHOLDER.equals(aliasedValue)) {
+				if (aliasedValue == DEFAULT_VALUE_PLACEHOLDER) {
 					attributes.put(aliasedAttributeName,
 						adaptValue(element, value, classValuesAsString, nestedAnnotationsAsMap));
 				}
@@ -1415,7 +1415,7 @@ public abstract class AnnotationUtils {
 
 		for (String attributeName : attributes.keySet()) {
 			Object value = attributes.get(attributeName);
-			if (DEFAULT_VALUE_PLACEHOLDER.equals(value)) {
+			if (value == DEFAULT_VALUE_PLACEHOLDER) {
 				attributes.put(attributeName,
 					adaptValue(element, getDefaultValue(annotationType, attributeName), classValuesAsString,
 						nestedAnnotationsAsMap));

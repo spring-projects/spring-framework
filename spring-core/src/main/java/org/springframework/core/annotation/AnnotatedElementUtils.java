@@ -31,7 +31,6 @@ import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -941,35 +940,25 @@ public class AnnotatedElementUtils {
 					targetAnnotationType);
 
 				// Explicit annotation attribute override declared via @AliasFor
-				if (StringUtils.hasText(aliasedAttributeName)) {
-					if (attributes.containsKey(aliasedAttributeName)) {
-						Object value = AnnotationUtils.getValue(annotation, attributeName);
-						attributes.put(aliasedAttributeName, AnnotationUtils.adaptValue(element, value,
-							this.classValuesAsString, this.nestedAnnotationsAsMap));
-					}
+				if (StringUtils.hasText(aliasedAttributeName) && attributes.containsKey(aliasedAttributeName)) {
+					overrideAttribute(element, annotation, attributes, attributeName, aliasedAttributeName);
 				}
 				// Implicit annotation attribute override based on convention
 				else if (!AnnotationUtils.VALUE.equals(attributeName) && attributes.containsKey(attributeName)) {
-					Object value = AnnotationUtils.getValue(annotation, attributeName);
-					Object adaptedValue = AnnotationUtils.adaptValue(element, value, this.classValuesAsString,
-						this.nestedAnnotationsAsMap);
-					attributes.put(attributeName, adaptedValue);
-
-					// If an aliased attribute defined by @AliasFor semantics does not
-					// already have an explicit value, ensure that the aliased attribute
-					// is also present in the map with a value identical to its mirror
-					// alias.
-					Method attributeMethodInTarget = ReflectionUtils.findMethod(targetAnnotationType, attributeName);
-					if (attributeMethodInTarget != null) {
-						String aliasedAttributeNameInTarget = AnnotationUtils.getAliasedAttributeName(
-							attributeMethodInTarget, null);
-						if (aliasedAttributeNameInTarget != null) {
-							attributes.putIfAbsent(aliasedAttributeNameInTarget, adaptedValue);
-						}
-					}
+					overrideAttribute(element, annotation, attributes, attributeName, attributeName);
 				}
 			}
 		}
+
+		private void overrideAttribute(AnnotatedElement element, Annotation annotation,
+				AnnotationAttributes attributes, String sourceAttributeName, String targetAttributeName) {
+
+			Object value = AnnotationUtils.getValue(annotation, sourceAttributeName);
+			Object adaptedValue = AnnotationUtils.adaptValue(element, value, this.classValuesAsString,
+				this.nestedAnnotationsAsMap);
+			attributes.put(targetAttributeName, adaptedValue);
+		}
+
 	}
 
 }
