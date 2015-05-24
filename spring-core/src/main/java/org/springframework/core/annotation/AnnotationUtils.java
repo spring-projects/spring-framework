@@ -118,7 +118,7 @@ public abstract class AnnotationUtils {
 	private static final Map<Class<? extends Annotation>, Boolean> synthesizableCache =
 			new ConcurrentReferenceHashMap<Class<? extends Annotation>, Boolean>(256);
 
-	private static final Map<Class<? extends Annotation>, Map<String, String>> attributeAliasCache =
+	private static final Map<Class<? extends Annotation>, Map<String, String>> attributeAliasesCache =
 			new ConcurrentReferenceHashMap<Class<? extends Annotation>, Map<String, String>>(256);
 
 	private static transient Log logger;
@@ -437,11 +437,11 @@ public abstract class AnnotationUtils {
 	}
 
 	static boolean isInterfaceWithAnnotatedMethods(Class<?> iface) {
-		Boolean flag = annotatedInterfaceCache.get(iface);
-		if (flag != null) {
-			return flag.booleanValue();
+		Boolean found = annotatedInterfaceCache.get(iface);
+		if (found != null) {
+			return found.booleanValue();
 		}
-		Boolean found = Boolean.FALSE;
+		found = Boolean.FALSE;
 		for (Method ifcMethod : iface.getMethods()) {
 			try {
 				if (ifcMethod.getAnnotations().length > 0) {
@@ -831,14 +831,12 @@ public abstract class AnnotationUtils {
 		for (Method method : getAttributeMethods(annotationType)) {
 			try {
 				Object value = method.invoke(annotation);
-
 				Object defaultValue = method.getDefaultValue();
 				if (defaultValuesAsPlaceholder && (defaultValue != null)) {
 					if (ObjectUtils.nullSafeEquals(value, defaultValue)) {
 						value = DEFAULT_VALUE_PLACEHOLDER;
 					}
 				}
-
 				attrs.put(method.getName(),
 					adaptValue(annotatedElement, value, classValuesAsString, nestedAnnotationsAsMap));
 			}
@@ -1090,12 +1088,12 @@ public abstract class AnnotationUtils {
 			return Collections.emptyMap();
 		}
 
-		Map<String, String> cachedMap = attributeAliasCache.get(annotationType);
-		if (cachedMap != null) {
-			return cachedMap;
+		Map<String, String> map = attributeAliasesCache.get(annotationType);
+		if (map != null) {
+			return map;
 		}
 
-		Map<String, String> map = new HashMap<String, String>();
+		map = new HashMap<String, String>();
 		for (Method attribute : getAttributeMethods(annotationType)) {
 			String attributeName = attribute.getName();
 			String aliasedAttributeName = getAliasedAttributeName(attribute);
@@ -1104,7 +1102,7 @@ public abstract class AnnotationUtils {
 			}
 		}
 
-		attributeAliasCache.put(annotationType, map);
+		attributeAliasesCache.put(annotationType, map);
 
 		return map;
 	}
@@ -1127,12 +1125,12 @@ public abstract class AnnotationUtils {
 	@SuppressWarnings("unchecked")
 	private static boolean isSynthesizable(Class<? extends Annotation> annotationType) {
 
-		Boolean flag = synthesizableCache.get(annotationType);
-		if (flag != null) {
-			return flag.booleanValue();
+		Boolean synthesizable = synthesizableCache.get(annotationType);
+		if (synthesizable != null) {
+			return synthesizable.booleanValue();
 		}
 
-		Boolean synthesizable = Boolean.FALSE;
+		synthesizable = Boolean.FALSE;
 
 		for (Method attribute : getAttributeMethods(annotationType)) {
 			if (getAliasedAttributeName(attribute) != null) {
@@ -1306,7 +1304,8 @@ public abstract class AnnotationUtils {
 	 * <p>All methods in the returned list will be
 	 * {@linkplain ReflectionUtils#makeAccessible(Method) made accessible}.
 	 *
-	 * @param annotationType the type in which to search for attribute methods
+	 * @param annotationType the type in which to search for attribute methods;
+	 * never {@code null}
 	 * @return all annotation attribute methods in the specified annotation
 	 * type; never {@code null}, though potentially <em>empty</em>
 	 * @since 4.2
