@@ -23,6 +23,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -57,6 +58,8 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 
 	private final Map<String, String> aliasMap;
 
+	private final Map<String, Object> computedValueCache;
+
 
 	/**
 	 * Construct a new {@code SynthesizedAnnotationInvocationHandler}.
@@ -73,6 +76,7 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 		this.annotation = annotation;
 		this.annotationType = annotation.annotationType();
 		this.aliasMap = aliasMap;
+		this.computedValueCache = new ConcurrentHashMap<String, Object>(aliasMap.size());
 	}
 
 	@Override
@@ -94,12 +98,18 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 		boolean aliasPresent = (aliasedAttributeName != null);
 
 		makeAccessible(method);
-		Object value = invokeMethod(method, this.annotation, args);
 
 		// No custom processing necessary?
 		if (!aliasPresent && !nestedAnnotation) {
-			return value;
+			return invokeMethod(method, this.annotation, args);
 		}
+
+		Object cachedValue = this.computedValueCache.get(methodName);
+		if (cachedValue != null) {
+			return cachedValue;
+		}
+
+		Object value = invokeMethod(method, this.annotation, args);
 
 		if (aliasPresent) {
 			Method aliasedMethod = null;
@@ -146,6 +156,8 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 				annotations[i] = synthesizeAnnotation(annotations[i], this.annotatedElement);
 			}
 		}
+
+		this.computedValueCache.put(methodName, value);
 
 		return value;
 	}
