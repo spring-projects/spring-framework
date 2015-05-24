@@ -1061,7 +1061,7 @@ public abstract class AnnotationUtils {
 			return annotation;
 		}
 
-		InvocationHandler handler = new SynthesizedAnnotationInvocationHandler(annotatedElement, annotation,
+		InvocationHandler handler = new SynthesizedAnnotationInvocationHandler(annotation, annotatedElement,
 			getAttributeAliasMap(annotationType));
 		A synthesizedAnnotation = (A) Proxy.newProxyInstance(ClassUtils.getDefaultClassLoader(), new Class<?>[] {
 			(Class<A>) annotationType, SynthesizedAnnotation.class }, handler);

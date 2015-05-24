@@ -58,7 +58,16 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 	private final Map<String, String> aliasMap;
 
 
-	SynthesizedAnnotationInvocationHandler(AnnotatedElement annotatedElement, Annotation annotation,
+	/**
+	 * Construct a new {@code SynthesizedAnnotationInvocationHandler}.
+	 *
+	 * @param annotation the annotation to synthesize
+	 * @param annotatedElement the element that is annotated with the supplied
+	 * annotation; may be {@code null} if unknown
+	 * @param aliasMap the map of attribute alias pairs, declared via
+	 * {@code @AliasFor} in the supplied annotation
+	 */
+	SynthesizedAnnotationInvocationHandler(Annotation annotation, AnnotatedElement annotatedElement,
 			Map<String, String> aliasMap) {
 		this.annotatedElement = annotatedElement;
 		this.annotation = annotation;
