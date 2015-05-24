@@ -927,7 +927,7 @@ public class AnnotatedElementUtils {
 		public AnnotationAttributes process(AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
 			boolean found = annotation.annotationType().getName().equals(this.annotationTypeName);
 			return (found ? AnnotationUtils.getAnnotationAttributes(annotatedElement, annotation,
-				this.classValuesAsString, this.nestedAnnotationsAsMap, true, false) : null);
+				this.classValuesAsString, this.nestedAnnotationsAsMap, true) : null);
 		}
 
 		@Override

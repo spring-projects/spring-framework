@@ -102,12 +102,12 @@ public abstract class AnnotationUtils {
 	 */
 	public static final String VALUE = "value";
 
+
 	/**
 	 * An object that can be stored in {@link AnnotationAttributes} as a
 	 * placeholder for an attribute's declared default value.
 	 */
-	public static final Object DEFAULT_VALUE_PLACEHOLDER = "<SPRING DEFAULT VALUE PLACEHOLDER>";
-
+	private static final Object DEFAULT_VALUE_PLACEHOLDER = "<SPRING DEFAULT VALUE PLACEHOLDER>";
 
 	private static final Map<AnnotationCacheKey, Annotation> findAnnotationCache =
 			new ConcurrentReferenceHashMap<AnnotationCacheKey, Annotation>(256);
@@ -709,6 +709,7 @@ public abstract class AnnotationUtils {
 	 * @param annotation the annotation to retrieve the attributes for
 	 * @return the Map of annotation attributes, with attribute names as keys and
 	 * corresponding attribute values as values; never {@code null}
+	 * @see #getAnnotationAttributes(AnnotatedElement, Annotation)
 	 * @see #getAnnotationAttributes(Annotation, boolean, boolean)
 	 * @see #getAnnotationAttributes(AnnotatedElement, Annotation, boolean, boolean)
 	 */
@@ -723,7 +724,7 @@ public abstract class AnnotationUtils {
 	 * <p>Note: This method actually returns an {@link AnnotationAttributes} instance.
 	 * However, the {@code Map} signature has been preserved for binary compatibility.
 	 * @param annotation the annotation to retrieve the attributes for
-	 * @param classValuesAsString whether to turn Class references into Strings (for
+	 * @param classValuesAsString whether to convert Class references into Strings (for
 	 * compatibility with {@link org.springframework.core.type.AnnotationMetadata})
 	 * or to preserve them as Class references
 	 * @return the Map of annotation attributes, with attribute names as keys and
@@ -742,10 +743,10 @@ public abstract class AnnotationUtils {
 	 * @param classValuesAsString whether to convert Class references into Strings (for
 	 * compatibility with {@link org.springframework.core.type.AnnotationMetadata})
 	 * or to preserve them as Class references
-	 * @param nestedAnnotationsAsMap whether to turn nested Annotation instances into
+	 * @param nestedAnnotationsAsMap whether to convert nested annotations into
 	 * {@link AnnotationAttributes} maps (for compatibility with
 	 * {@link org.springframework.core.type.AnnotationMetadata}) or to preserve them as
-	 * Annotation instances
+	 * {@code Annotation} instances
 	 * @return the annotation attributes (a specialized Map) with attribute names as keys
 	 * and corresponding attribute values as values; never {@code null}
 	 * @since 3.1.1
@@ -760,9 +761,11 @@ public abstract class AnnotationUtils {
 	 * <p>Equivalent to calling {@link #getAnnotationAttributes(AnnotatedElement, Annotation, boolean, boolean)}
 	 * with the {@code classValuesAsString} and {@code nestedAnnotationsAsMap} parameters
 	 * set to {@code false}.
+	 * @param annotatedElement the element that is annotated with the supplied annotation;
+	 * may be {@code null} if unknown
 	 * @param annotation the annotation to retrieve the attributes for
-	 * @return the Map of annotation attributes, with attribute names as keys and
-	 * corresponding attribute values as values; never {@code null}
+	 * @return the annotation attributes (a specialized Map) with attribute names as keys
+	 * and corresponding attribute values as values; never {@code null}
 	 * @see #getAnnotationAttributes(AnnotatedElement, Annotation, boolean, boolean)
 	 * @since 4.2
 	 */
@@ -774,18 +777,16 @@ public abstract class AnnotationUtils {
 	 * Retrieve the given annotation's attributes as an {@link AnnotationAttributes} map.
 	 * <p>This method provides fully recursive annotation reading capabilities on par with
 	 * the reflection-based {@link org.springframework.core.type.StandardAnnotationMetadata}.
-	 * @param annotatedElement the element that is annotated with the supplied annotation,
-	 * used for contextual logging; may be {@code null} if unknown
+	 * @param annotatedElement the element that is annotated with the supplied annotation;
+	 * may be {@code null} if unknown
 	 * @param annotation the annotation to retrieve the attributes for
 	 * @param classValuesAsString whether to convert Class references into Strings (for
 	 * compatibility with {@link org.springframework.core.type.AnnotationMetadata})
 	 * or to preserve them as Class references
-	 * @param nestedAnnotationsAsMap whether to convert nested Annotation instances into
+	 * @param nestedAnnotationsAsMap whether to convert nested annotations into
 	 * {@link AnnotationAttributes} maps (for compatibility with
 	 * {@link org.springframework.core.type.AnnotationMetadata}) or to preserve them as
-	 * Annotation instances
-	 * @param defaultValuesAsPlaceholder whether to replace default values with
-	 * {@link #DEFAULT_VALUE_PLACEHOLDER} or leave them as is
+	 * {@code Annotation} instances
 	 * @return the annotation attributes (a specialized Map) with attribute names as keys
 	 * and corresponding attribute values as values; never {@code null}
 	 * @since 4.2
@@ -793,8 +794,7 @@ public abstract class AnnotationUtils {
 	public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement annotatedElement,
 			Annotation annotation, boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
 
-		return getAnnotationAttributes(annotatedElement, annotation, classValuesAsString, nestedAnnotationsAsMap,
-			false, true);
+		return getAnnotationAttributes(annotatedElement, annotation, classValuesAsString, nestedAnnotationsAsMap, false);
 	}
 
 	/**
@@ -803,29 +803,42 @@ public abstract class AnnotationUtils {
 	 * <p>This method provides fully recursive annotation reading capabilities on par with
 	 * the reflection-based {@link org.springframework.core.type.StandardAnnotationMetadata}.
 	 *
-	 * @param annotatedElement the element that is annotated with the supplied annotation,
-	 * used for contextual logging; may be {@code null} if unknown
+	 * <p><strong>NOTE</strong>: this variant of {@code getAnnotationAttributes()} is
+	 * only intended for use within the framework. Specifically, the
+	 * {@code defaultValuesAsPlaceholder} flag can be set to {@code true} in order to
+	 * support processing of attribute aliases while merging attributes within an annotation
+	 * hierarchy. If this method is invoked with {@code defaultValuesAsPlaceholder} set to
+	 * {@code true}:
+	 * <ol>
+	 * <li>The supplied annotation will <strong>not</strong> be
+	 * {@linkplain #synthesizeAnnotation synthesized} before retrieving its attributes.</li>
+	 * <li>The resulting, merged annotation attributes should eventually be
+	 * {@linkplain #postProcessAnnotationAttributes post-processed} in order to
+	 * ensure that placeholders have been replaced by actual default values and
+	 * in order to enforce {@code @AliasFor} semantics.</li>
+	 * </ol>
+	 *
+	 * @param annotatedElement the element that is annotated with the supplied annotation;
+	 * may be {@code null} if unknown
 	 * @param annotation the annotation to retrieve the attributes for
 	 * @param classValuesAsString whether to convert Class references into Strings (for
 	 * compatibility with {@link org.springframework.core.type.AnnotationMetadata})
 	 * or to preserve them as Class references
-	 * @param nestedAnnotationsAsMap whether to convert nested Annotation instances into
+	 * @param nestedAnnotationsAsMap whether to convert nested annotations into
 	 * {@link AnnotationAttributes} maps (for compatibility with
 	 * {@link org.springframework.core.type.AnnotationMetadata}) or to preserve them as
-	 * Annotation instances
+	 * {@code Annotation} instances
 	 * @param defaultValuesAsPlaceholder whether to replace default values with
 	 * {@link #DEFAULT_VALUE_PLACEHOLDER} or leave them as is
-	 * @param synthesizeAnnotation whether or not the annotation should be
-	 * {@linkplain #synthesizeAnnotation synthesized} before processing
 	 * @return the annotation attributes (a specialized Map) with attribute names as keys
 	 * and corresponding attribute values as values; never {@code null}
 	 * @since 4.2
+	 * @see #postProcessAnnotationAttributes
 	 */
-	static AnnotationAttributes getAnnotationAttributes(AnnotatedElement annotatedElement,
-			Annotation annotation, boolean classValuesAsString, boolean nestedAnnotationsAsMap,
-			boolean defaultValuesAsPlaceholder, boolean synthesizeAnnotation) {
+	static AnnotationAttributes getAnnotationAttributes(AnnotatedElement annotatedElement, Annotation annotation,
+			boolean classValuesAsString, boolean nestedAnnotationsAsMap, boolean defaultValuesAsPlaceholder) {
 
-		if (synthesizeAnnotation) {
+		if (!defaultValuesAsPlaceholder) {
 			annotation = synthesizeAnnotation(annotation, annotatedElement);
 		}
 
@@ -861,13 +874,13 @@ public abstract class AnnotationUtils {
 	 * @param annotatedElement the element that is annotated, used for contextual
 	 * logging; may be {@code null} if unknown
 	 * @param value the annotation attribute value
-	 * @param classValuesAsString whether to turn Class references into Strings (for
+	 * @param classValuesAsString whether to convert Class references into Strings (for
 	 * compatibility with {@link org.springframework.core.type.AnnotationMetadata})
 	 * or to preserve them as Class references
-	 * @param nestedAnnotationsAsMap whether to turn nested Annotation instances into
+	 * @param nestedAnnotationsAsMap whether to convert nested annotations into
 	 * {@link AnnotationAttributes} maps (for compatibility with
 	 * {@link org.springframework.core.type.AnnotationMetadata}) or to preserve them as
-	 * Annotation instances
+	 * {@code Annotation} instances
 	 * @return the adapted value, or the original value if no adaptation is needed
 	 */
 	static Object adaptValue(AnnotatedElement annotatedElement, Object value, boolean classValuesAsString,
@@ -1334,12 +1347,28 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * TODO Document postProcessAnnotationAttributes().
+	 * Post-process the supplied {@link AnnotationAttributes}.
 	 *
-	 * @param element the element that is annotated with the supplied annotation,
-	 * used for contextual logging; may be {@code null} if unknown
+	 * <p>Specifically, this method enforces <em>attribute alias</em> semantics
+	 * for annotation attributes that are annotated with {@link AliasFor @AliasFor}
+	 * and replaces {@linkplain #DEFAULT_VALUE_PLACEHOLDER placeholders} with their
+	 * original default values.
+	 *
+	 * @param element the element that is annotated with an annotation or
+	 * annotation hierarchy from which the supplied attributes were created;
+	 * may be {@code null} if unknown
 	 * @param attributes the annotation attributes to post-process
+	 * @param classValuesAsString whether to convert Class references into Strings (for
+	 * compatibility with {@link org.springframework.core.type.AnnotationMetadata})
+	 * or to preserve them as Class references
+	 * @param nestedAnnotationsAsMap whether to convert nested annotations into
+	 * {@link AnnotationAttributes} maps (for compatibility with
+	 * {@link org.springframework.core.type.AnnotationMetadata}) or to preserve them as
+	 * {@code Annotation} instances
 	 * @since 4.2
+	 * @see #getAnnotationAttributes(AnnotatedElement, Annotation, boolean, boolean, boolean)
+	 * @see #DEFAULT_VALUE_PLACEHOLDER
+	 * @see #getDefaultValue(Class, String)
 	 */
 	static void postProcessAnnotationAttributes(AnnotatedElement element, AnnotationAttributes attributes,
 			boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
