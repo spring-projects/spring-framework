@@ -22,12 +22,10 @@ import java.util.List;
 
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringValueResolver;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -49,6 +47,7 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMappi
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 3.1
  */
 public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMapping
@@ -212,7 +211,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * @param handlerType the handler type for which to create the condition
 	 * @return the condition, or {@code null}
 	 */
-	@SuppressWarnings("unused")
 	protected RequestCondition<?> getCustomTypeCondition(Class<?> handlerType) {
 		return null;
 	}
@@ -228,77 +226,41 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * @param method the handler method for which to create the condition
 	 * @return the condition, or {@code null}
 	 */
-	@SuppressWarnings("unused")
 	protected RequestCondition<?> getCustomMethodCondition(Method method) {
 		return null;
 	}
 
 	/**
-	 * Transitional method used to invoke one of two createRequestMappingInfo
-	 * variants one of which is deprecated.
+	 * Delegates to {@link #createRequestMappingInfo(RequestMapping, RequestCondition)},
+	 * supplying the appropriate custom {@link RequestCondition} depending on whether
+	 * the supplied {@code annotatedElement} is a class or method.
+	 *
+	 * @see #getCustomTypeCondition(Class)
+	 * @see #getCustomMethodCondition(Method)
 	 */
-	@SuppressWarnings("deprecation")
 	private RequestMappingInfo createRequestMappingInfo(AnnotatedElement annotatedElement) {
-		RequestMapping annotation;
-		AnnotationAttributes attributes;
-		RequestCondition<?> customCondition;
-		String annotationType = RequestMapping.class.getName();
-		if (annotatedElement instanceof Class<?>) {
-			Class<?> type = (Class<?>) annotatedElement;
-			annotation = AnnotationUtils.findAnnotation(type, RequestMapping.class);
-			attributes = AnnotatedElementUtils.findAnnotationAttributes(type, annotationType);
-			customCondition = getCustomTypeCondition(type);
-		}
-		else {
-			Method method = (Method) annotatedElement;
-			annotation = AnnotationUtils.findAnnotation(method, RequestMapping.class);
-			attributes = AnnotatedElementUtils.findAnnotationAttributes(method, annotationType);
-			customCondition = getCustomMethodCondition(method);
-		}
-		RequestMappingInfo info = null;
-		if (annotation != null) {
-			info = createRequestMappingInfo(annotation, customCondition);
-			if (info == null) {
-				info = createRequestMappingInfo(attributes, customCondition);
-			}
-		}
-		return info;
+		RequestMapping requestMapping = AnnotatedElementUtils.findAnnotation(annotatedElement, RequestMapping.class);
+		RequestCondition<?> customCondition = ((annotatedElement instanceof Class<?>) ? getCustomTypeCondition((Class<?>) annotatedElement)
+				: getCustomMethodCondition((Method) annotatedElement));
+		return ((requestMapping != null) ? createRequestMappingInfo(requestMapping, customCondition) : null);
 	}
 
 	/**
-	 * Create a RequestMappingInfo from a RequestMapping annotation.
-	 * @deprecated as of 4.2 after the introduction of support for
-	 * {@code @RequestMapping} as meta-annotation. Please use
-	 * {@link #createRequestMappingInfo(AnnotationAttributes, RequestCondition)}.
+	 * Create a {@link RequestMappingInfo} from the supplied
+	 * {@link RequestMapping @RequestMapping} annotation, which is either
+	 * a directly declared annotation, a meta-annotation, or the synthesized
+	 * result of merging annotation attributes within an annotation hierarchy.
 	 */
-	@Deprecated
-	@SuppressWarnings("unused")
-	protected RequestMappingInfo createRequestMappingInfo(RequestMapping annotation,
+	protected RequestMappingInfo createRequestMappingInfo(RequestMapping requestMapping,
 			RequestCondition<?> customCondition) {
 
-		return null;
-	}
-
-	/**
-	 * Create a RequestMappingInfo from the attributes of an
-	 * {@code @RequestMapping} annotation or a meta-annotation, i.e. a custom
-	 * annotation annotated with {@code @RequestMapping}.
-	 * @since 4.2
-	 */
-	protected RequestMappingInfo createRequestMappingInfo(AnnotationAttributes attributes,
-			RequestCondition<?> customCondition) {
-
-		String[] paths = attributes.getStringArray("path");
-		paths = ObjectUtils.isEmpty(paths) ? attributes.getStringArray("value") : paths;
-		paths = resolveEmbeddedValuesInPatterns(paths);
-
-		return RequestMappingInfo.paths(paths)
-				.methods((RequestMethod[]) attributes.get("method"))
-				.params(attributes.getStringArray("params"))
-				.headers(attributes.getStringArray("headers"))
-				.consumes(attributes.getStringArray("consumes"))
-				.produces(attributes.getStringArray("produces"))
-				.mappingName(attributes.getString("name"))
+		return RequestMappingInfo.paths(resolveEmbeddedValuesInPatterns(requestMapping.path()))
+				.methods(requestMapping.method())
+				.params(requestMapping.params())
+				.headers(requestMapping.headers())
+				.consumes(requestMapping.consumes())
+				.produces(requestMapping.produces())
+				.mappingName(requestMapping.name())
 				.customCondition(customCondition)
 				.options(this.config)
 				.build();

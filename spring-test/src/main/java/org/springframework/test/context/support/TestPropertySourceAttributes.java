@@ -19,7 +19,6 @@ package org.springframework.test.context.support;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.test.context.TestPropertySource;
@@ -58,17 +57,17 @@ class TestPropertySourceAttributes {
 
 	/**
 	 * Create a new {@code TestPropertySourceAttributes} instance for the
-	 * supplied {@link AnnotationAttributes} (parsed from a
-	 * {@link TestPropertySource @TestPropertySource} annotation) and
-	 * the {@linkplain Class test class} that declared them, enforcing
+	 * supplied {@link TestPropertySource @TestPropertySource} annotation and
+	 * the {@linkplain Class test class} that declared it, enforcing
 	 * configuration rules and detecting a default properties file if
 	 * necessary.
 	 * @param declaringClass the class that declared {@code @TestPropertySource}
-	 * @param annAttrs the annotation attributes from which to retrieve the attributes
+	 * @param testPropertySource the annotation from which to retrieve the attributes
+	 * @since 4.2
 	 */
-	TestPropertySourceAttributes(Class<?> declaringClass, AnnotationAttributes annAttrs) {
-		this(declaringClass, annAttrs.getStringArray("locations"), annAttrs.getBoolean("inheritLocations"),
-			annAttrs.getStringArray("properties"), annAttrs.getBoolean("inheritProperties"));
+	TestPropertySourceAttributes(Class<?> declaringClass, TestPropertySource testPropertySource) {
+		this(declaringClass, testPropertySource.locations(), testPropertySource.inheritLocations(),
+			testPropertySource.properties(), testPropertySource.inheritProperties());
 	}
 
 	private TestPropertySourceAttributes(Class<?> declaringClass, String[] locations, boolean inheritLocations,

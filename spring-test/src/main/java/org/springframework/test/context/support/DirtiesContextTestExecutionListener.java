@@ -23,7 +23,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
@@ -150,28 +149,27 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 	 */
 	private void beforeOrAfterTestMethod(TestContext testContext, String phase, MethodMode requiredMethodMode,
 			ClassMode requiredClassMode) throws Exception {
+
 		Class<?> testClass = testContext.getTestClass();
-		Assert.notNull(testClass, "The test class of the supplied TestContext must not be null");
 		Method testMethod = testContext.getTestMethod();
+		Assert.notNull(testClass, "The test class of the supplied TestContext must not be null");
 		Assert.notNull(testMethod, "The test method of the supplied TestContext must not be null");
 
-		final String annotationType = DirtiesContext.class.getName();
-		AnnotationAttributes methodAnnAttrs = AnnotatedElementUtils.findAnnotationAttributes(testMethod, annotationType);
-		AnnotationAttributes classAnnAttrs = AnnotatedElementUtils.findAnnotationAttributes(testClass, annotationType);
-		boolean methodAnnotated = methodAnnAttrs != null;
-		boolean classAnnotated = classAnnAttrs != null;
-		MethodMode methodMode = methodAnnotated ? methodAnnAttrs.<MethodMode> getEnum("methodMode") : null;
-		ClassMode classMode = classAnnotated ? classAnnAttrs.<ClassMode> getEnum("classMode") : null;
+		DirtiesContext methodAnn = AnnotatedElementUtils.findAnnotation(testMethod, DirtiesContext.class);
+		DirtiesContext classAnn = AnnotatedElementUtils.findAnnotation(testClass, DirtiesContext.class);
+		boolean methodAnnotated = (methodAnn != null);
+		boolean classAnnotated = (classAnn != null);
+		MethodMode methodMode = (methodAnnotated ? methodAnn.methodMode() : null);
+		ClassMode classMode = (classAnnotated ? classAnn.classMode() : null);
 
 		if (logger.isDebugEnabled()) {
-			logger.debug(String.format(
-				"%s test method: context %s, class annotated with @DirtiesContext [%s] with mode [%s], method annotated with @DirtiesContext [%s] with mode [%s].",
-				phase, testContext, classAnnotated, classMode, methodAnnotated, methodMode));
+			logger.debug(String.format("%s test method: context %s, class annotated with @DirtiesContext [%s] "
+					+ "with mode [%s], method annotated with @DirtiesContext [%s] with mode [%s].", phase, testContext,
+				classAnnotated, classMode, methodAnnotated, methodMode));
 		}
 
 		if ((methodMode == requiredMethodMode) || (classMode == requiredClassMode)) {
-			HierarchyMode hierarchyMode = methodAnnotated ? methodAnnAttrs.<HierarchyMode> getEnum("hierarchyMode")
-					: classAnnAttrs.<HierarchyMode> getEnum("hierarchyMode");
+			HierarchyMode hierarchyMode = (methodAnnotated ? methodAnn.hierarchyMode() : classAnn.hierarchyMode());
 			dirtyContext(testContext, hierarchyMode);
 		}
 	}
@@ -185,10 +183,9 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 		Class<?> testClass = testContext.getTestClass();
 		Assert.notNull(testClass, "The test class of the supplied TestContext must not be null");
 
-		final String annotationType = DirtiesContext.class.getName();
-		AnnotationAttributes classAnnAttrs = AnnotatedElementUtils.findAnnotationAttributes(testClass, annotationType);
-		boolean classAnnotated = classAnnAttrs != null;
-		ClassMode classMode = classAnnotated ? classAnnAttrs.<ClassMode> getEnum("classMode") : null;
+		DirtiesContext dirtiesContext = AnnotatedElementUtils.findAnnotation(testClass, DirtiesContext.class);
+		boolean classAnnotated = (dirtiesContext != null);
+		ClassMode classMode = (classAnnotated ? dirtiesContext.classMode() : null);
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format(
@@ -197,8 +194,7 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 		}
 
 		if (classMode == requiredClassMode) {
-			HierarchyMode hierarchyMode = classAnnAttrs.<HierarchyMode> getEnum("hierarchyMode");
-			dirtyContext(testContext, hierarchyMode);
+			dirtyContext(testContext, dirtiesContext.hierarchyMode());
 		}
 	}
 

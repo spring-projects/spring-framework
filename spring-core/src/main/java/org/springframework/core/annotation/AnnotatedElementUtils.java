@@ -48,8 +48,8 @@ import org.springframework.util.StringUtils;
  * <h3>Annotation Attribute Overrides</h3>
  * <p>Support for meta-annotations with <em>attribute overrides</em> in
  * <em>composed annotations</em> is provided by all variants of the
- * {@code getAnnotationAttributes()} and {@code findAnnotationAttributes()}
- * methods.
+ * {@code getAnnotationAttributes()}, {@code findAnnotation()}, and
+ * {@code findAnnotationAttributes()} methods.
  *
  * <h3>Find vs. Get Semantics</h3>
  * <p>The search algorithms used by methods in this class follow either
@@ -224,6 +224,9 @@ public class AnnotatedElementUtils {
 	 * merge that annotation's attributes with <em>matching</em> attributes from
 	 * annotations in lower levels of the annotation hierarchy.
 	 *
+	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both
+	 * within a single annotation and within the annotation hierarchy.
+	 *
 	 * <p>This method delegates to {@link #getAnnotationAttributes(AnnotatedElement, String, boolean, boolean)},
 	 * supplying {@code false} for {@code classValuesAsString} and {@code nestedAnnotationsAsMap}.
 	 *
@@ -233,8 +236,8 @@ public class AnnotatedElementUtils {
 	 * @return the merged {@code AnnotationAttributes}, or {@code null} if
 	 * not found
 	 * @see #getAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
-	 * @see #findAnnotationAttributes(AnnotatedElement, Class)
-	 * @see #findAnnotationAttributes(AnnotatedElement, String)
+	 * @see #findAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
+	 * @see #findAnnotation(AnnotatedElement, Class)
 	 * @see #getAllAnnotationAttributes(AnnotatedElement, String)
 	 */
 	public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement element, String annotationType) {
@@ -248,7 +251,9 @@ public class AnnotatedElementUtils {
 	 * annotations in lower levels of the annotation hierarchy.
 	 *
 	 * <p>Attributes from lower levels in the annotation hierarchy override
-	 * attributes of the same name from higher levels.
+	 * attributes of the same name from higher levels, and
+	 * {@link AliasFor @AliasFor} semantics are fully supported, both
+	 * within a single annotation and within the annotation hierarchy.
 	 *
 	 * <p>In contrast to {@link #getAllAnnotationAttributes}, the search
 	 * algorithm used by this method will stop searching the annotation
@@ -269,8 +274,7 @@ public class AnnotatedElementUtils {
 	 * as Annotation instances
 	 * @return the merged {@code AnnotationAttributes}, or {@code null} if
 	 * not found
-	 * @see #findAnnotationAttributes(AnnotatedElement, Class)
-	 * @see #findAnnotationAttributes(AnnotatedElement, String)
+	 * @see #findAnnotation(AnnotatedElement, Class)
 	 * @see #findAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
 	 * @see #getAllAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
 	 */
@@ -286,47 +290,59 @@ public class AnnotatedElementUtils {
 
 	/**
 	 * Find the first annotation of the specified {@code annotationType} within
-	 * the annotation hierarchy <em>above</em> the supplied {@code element} and
+	 * the annotation hierarchy <em>above</em> the supplied {@code element},
 	 * merge that annotation's attributes with <em>matching</em> attributes from
-	 * annotations in lower levels of the annotation hierarchy.
+	 * annotations in lower levels of the annotation hierarchy, and synthesize
+	 * the result back into an annotation of the specified {@code annotationType}.
+	 *
+	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both
+	 * within a single annotation and within the annotation hierarchy.
 	 *
 	 * <p>This method delegates to {@link #findAnnotationAttributes(AnnotatedElement, String, boolean, boolean)}
-	 * supplying {@code false} for {@code classValuesAsString} and {@code nestedAnnotationsAsMap}.
+	 * (supplying {@code false} for {@code classValuesAsString} and {@code nestedAnnotationsAsMap})
+	 * and {@link AnnotationUtils#synthesizeAnnotation(Map, Class, AnnotatedElement)}.
 	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the annotation type to find; never {@code null}
-	 * @return the merged {@code AnnotationAttributes}, or {@code null} if
-	 * not found
+	 * @return the merged, synthesized {@code Annotation}, or {@code null} if not found
 	 * @since 4.2
-	 * @see #findAnnotationAttributes(AnnotatedElement, String)
+	 * @see #findAnnotation(AnnotatedElement, String)
 	 * @see #findAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
+	 * @see AnnotationUtils#synthesizeAnnotation(Map, Class, AnnotatedElement)
 	 */
-	public static AnnotationAttributes findAnnotationAttributes(AnnotatedElement element,
-			Class<? extends Annotation> annotationType) {
+	public static <A extends Annotation> A findAnnotation(AnnotatedElement element, Class<A> annotationType) {
 		Assert.notNull(annotationType, "annotationType must not be null");
-		return findAnnotationAttributes(element, annotationType.getName());
+		return findAnnotation(element, annotationType.getName());
 	}
 
 	/**
 	 * Find the first annotation of the specified {@code annotationType} within
-	 * the annotation hierarchy <em>above</em> the supplied {@code element} and
+	 * the annotation hierarchy <em>above</em> the supplied {@code element},
 	 * merge that annotation's attributes with <em>matching</em> attributes from
-	 * annotations in lower levels of the annotation hierarchy.
+	 * annotations in lower levels of the annotation hierarchy, and synthesize
+	 * the result back into an annotation of the specified {@code annotationType}.
+	 *
+	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both
+	 * within a single annotation and within the annotation hierarchy.
 	 *
 	 * <p>This method delegates to {@link #findAnnotationAttributes(AnnotatedElement, String, boolean, boolean)}
-	 * supplying {@code false} for {@code classValuesAsString} and {@code nestedAnnotationsAsMap}.
+	 * (supplying {@code false} for {@code classValuesAsString} and {@code nestedAnnotationsAsMap})
+	 * and {@link AnnotationUtils#synthesizeAnnotation(Map, Class, AnnotatedElement)}.
 	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the fully qualified class name of the annotation
 	 * type to find; never {@code null} or empty
-	 * @return the merged {@code AnnotationAttributes}, or {@code null} if
-	 * not found
+	 * @return the merged, synthesized {@code Annotation}, or {@code null} if not found
 	 * @since 4.2
-	 * @see #findAnnotationAttributes(AnnotatedElement, Class)
+	 * @see #findAnnotation(AnnotatedElement, Class)
 	 * @see #findAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
+	 * @see AnnotationUtils#synthesizeAnnotation(Map, Class, AnnotatedElement)
 	 */
-	public static AnnotationAttributes findAnnotationAttributes(AnnotatedElement element, String annotationType) {
-		return findAnnotationAttributes(element, annotationType, false, false);
+	@SuppressWarnings("unchecked")
+	public static <A extends Annotation> A findAnnotation(AnnotatedElement element, String annotationType) {
+		AnnotationAttributes attributes = findAnnotationAttributes(element, annotationType, false, false);
+		return ((attributes != null) ? AnnotationUtils.synthesizeAnnotation(attributes,
+			(Class<A>) attributes.annotationType(), element) : null);
 	}
 
 	/**
@@ -336,7 +352,9 @@ public class AnnotatedElementUtils {
 	 * annotations in lower levels of the annotation hierarchy.
 	 *
 	 * <p>Attributes from lower levels in the annotation hierarchy override
-	 * attributes of the same name from higher levels.
+	 * attributes of the same name from higher levels, and
+	 * {@link AliasFor @AliasFor} semantics are fully supported, both
+	 * within a single annotation and within the annotation hierarchy.
 	 *
 	 * <p>In contrast to {@link #getAllAnnotationAttributes}, the search
 	 * algorithm used by this method will stop searching the annotation
@@ -358,8 +376,7 @@ public class AnnotatedElementUtils {
 	 * @return the merged {@code AnnotationAttributes}, or {@code null} if
 	 * not found
 	 * @since 4.2
-	 * @see #findAnnotationAttributes(AnnotatedElement, Class)
-	 * @see #findAnnotationAttributes(AnnotatedElement, String)
+	 * @see #findAnnotation(AnnotatedElement, Class)
 	 * @see #getAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
 	 */
 	public static AnnotationAttributes findAnnotationAttributes(AnnotatedElement element, String annotationType,

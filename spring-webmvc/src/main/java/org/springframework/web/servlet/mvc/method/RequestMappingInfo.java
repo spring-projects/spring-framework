@@ -401,7 +401,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		Builder mappingName(String name);
 
 		/**
-		 * Set a custom conditions to use.
+		 * Set a custom condition to use.
 		 */
 		Builder customCondition(RequestCondition<?> condition);
 

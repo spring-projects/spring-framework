@@ -16,11 +16,13 @@
 
 package org.springframework.core.annotation;
 
+import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
@@ -30,6 +32,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 
 import static java.util.Arrays.*;
@@ -450,14 +453,33 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	@Test
-	public void findAnnotationAttributesOnClassWithAttributeAliasesInTargetAnnotation() {
+	public void findAndSynthesizeAnnotationAttributesOnClassWithAttributeAliasesInTargetAnnotation() {
+		String qualifier = "aliasForQualifier";
+
+		// 1) Find and merge AnnotationAttributes from the annotation hierarchy
 		AnnotationAttributes attributes = findAnnotationAttributes(AliasedTransactionalComponentClass.class,
 			AliasedTransactional.class);
-		assertNotNull("Should find @AliasedTransactional on AliasedTransactionalComponentClass", attributes);
-		assertEquals("TX value for AliasedTransactionalComponentClass.", "aliasForQualifier",
-			attributes.getString("value"));
-		assertEquals("TX qualifier for AliasedTransactionalComponentClass.", "aliasForQualifier",
-			attributes.getString("qualifier"));
+		assertNotNull("@AliasedTransactional on AliasedTransactionalComponentClass.", attributes);
+
+		// 2) Synthesize the AnnotationAttributes back into the target annotation
+		AliasedTransactional annotation = AnnotationUtils.synthesizeAnnotation(attributes,
+			AliasedTransactional.class, AliasedTransactionalComponentClass.class);
+		assertNotNull(annotation);
+
+		// 3) Verify that the AnnotationAttributes and synthesized annotation are equivalent
+		assertEquals("TX value via attributes.", qualifier, attributes.getString("value"));
+		assertEquals("TX value via synthesized annotation.", qualifier, annotation.value());
+		assertEquals("TX qualifier via attributes.", qualifier, attributes.getString("qualifier"));
+		assertEquals("TX qualifier via synthesized annotation.", qualifier, annotation.qualifier());
+	}
+
+	@Test
+	public void findAnnotationWithAttributeAliasesInTargetAnnotation() {
+		Class<?> element = AliasedTransactionalComponentClass.class;
+		AliasedTransactional annotation = findAnnotation(element, AliasedTransactional.class);
+		assertNotNull("@AliasedTransactional on " + element, annotation);
+		assertEquals("TX value via synthesized annotation.", "aliasForQualifier", annotation.value());
+		assertEquals("TX qualifier via synthesized annotation.", "aliasForQualifier", annotation.qualifier());
 	}
 
 	@Test
@@ -477,6 +499,12 @@ public class AnnotatedElementUtilsTests {
 
 	private Set<String> names(Class<?>... classes) {
 		return stream(classes).map(Class::getName).collect(toSet());
+	}
+
+
+	static AnnotationAttributes findAnnotationAttributes(AnnotatedElement element, Class<? extends Annotation> annotationType) {
+		Assert.notNull(annotationType, "annotationType must not be null");
+		return AnnotatedElementUtils.findAnnotationAttributes(element, annotationType.getName(), false, false);
 	}
 
 

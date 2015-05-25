@@ -272,12 +272,16 @@ public abstract class MetaAnnotationUtils {
 
 		private final T annotation;
 
+		private final T mergedAnnotation;
+
 		private final AnnotationAttributes annotationAttributes;
+
 
 		public AnnotationDescriptor(Class<?> rootDeclaringClass, T annotation) {
 			this(rootDeclaringClass, rootDeclaringClass, null, annotation);
 		}
 
+		@SuppressWarnings("unchecked")
 		public AnnotationDescriptor(Class<?> rootDeclaringClass, Class<?> declaringClass,
 				Annotation composedAnnotation, T annotation) {
 			Assert.notNull(rootDeclaringClass, "rootDeclaringClass must not be null");
@@ -286,8 +290,10 @@ public abstract class MetaAnnotationUtils {
 			this.declaringClass = declaringClass;
 			this.composedAnnotation = composedAnnotation;
 			this.annotation = annotation;
-			this.annotationAttributes = AnnotatedElementUtils.findAnnotationAttributes(
-					rootDeclaringClass, annotation.annotationType());
+			this.annotationAttributes = AnnotatedElementUtils.findAnnotationAttributes(rootDeclaringClass,
+				annotation.annotationType().getName(), false, false);
+			this.mergedAnnotation = AnnotationUtils.synthesizeAnnotation(annotationAttributes,
+				(Class<T>) annotation.annotationType(), rootDeclaringClass);
 		}
 
 		public Class<?> getRootDeclaringClass() {
@@ -300,6 +306,16 @@ public abstract class MetaAnnotationUtils {
 
 		public T getAnnotation() {
 			return this.annotation;
+		}
+
+		/**
+		 * Get the annotation that was synthesized from the merged
+		 * {@link #getAnnotationAttributes AnnotationAttributes}.
+		 * @see #getAnnotationAttributes()
+		 * @see AnnotationUtils#synthesizeAnnotation(java.util.Map, Class, java.lang.reflect.AnnotatedElement)
+		 */
+		public T getMergedAnnotation() {
+			return this.mergedAnnotation;
 		}
 
 		public Class<? extends Annotation> getAnnotationType() {

@@ -809,8 +809,10 @@ public abstract class AnnotationUtils {
 	 * merging attributes within an annotation hierarchy. When running in <em>merge mode</em>,
 	 * the following special rules apply:
 	 * <ol>
-	 * <li>The supplied annotation will <strong>not</strong> be
-	 * {@linkplain #synthesizeAnnotation synthesized} before retrieving its attributes.</li>
+	 * <li>The supplied annotation will <em>not</em> be
+	 * {@linkplain #synthesizeAnnotation synthesized} before retrieving its attributes;
+	 * however, nested annotations and arrays of nested annotations <em>will</em> be
+	 * synthesized.</li>
 	 * <li>Default values will be replaced with {@link #DEFAULT_VALUE_PLACEHOLDER}.</li>
 	 * <li>The resulting, merged annotation attributes should eventually be
 	 * {@linkplain #postProcessAnnotationAttributes post-processed} in order to
@@ -1051,12 +1053,13 @@ public abstract class AnnotationUtils {
 	 * @param annotation the annotation to synthesize
 	 * @param annotatedElement the element that is annotated with the supplied
 	 * annotation; may be {@code null} if unknown
-	 * @return the synthesized annotation, if the supplied annotation is
+	 * @return the synthesized annotation if the supplied annotation is
 	 * <em>synthesizable</em>; {@code null} if the supplied annotation is
-	 * {@code null}; otherwise, the supplied annotation unmodified
+	 * {@code null}; otherwise the supplied annotation unmodified
 	 * @throws AnnotationConfigurationException if invalid configuration of
 	 * {@code @AliasFor} is detected
 	 * @since 4.2
+	 * @see #synthesizeAnnotation(Map, Class, AnnotatedElement)
 	 */
 	@SuppressWarnings("unchecked")
 	public static <A extends Annotation> A synthesizeAnnotation(A annotation, AnnotatedElement annotatedElement) {
@@ -1068,20 +1071,58 @@ public abstract class AnnotationUtils {
 		}
 
 		Class<? extends Annotation> annotationType = annotation.annotationType();
-
-		// No need to synthesize?
 		if (!isSynthesizable(annotationType)) {
 			return annotation;
 		}
 
-		InvocationHandler handler = new SynthesizedAnnotationInvocationHandler(annotation, annotatedElement,
-			getAttributeAliasMap(annotationType));
+		AnnotationAttributeExtractor attributeExtractor = new DefaultAnnotationAttributeExtractor(annotation,
+			annotatedElement);
+		InvocationHandler handler = new SynthesizedAnnotationInvocationHandler(attributeExtractor);
 		A synthesizedAnnotation = (A) Proxy.newProxyInstance(ClassUtils.getDefaultClassLoader(), new Class<?>[] {
 			(Class<A>) annotationType, SynthesizedAnnotation.class }, handler);
 
 		return synthesizedAnnotation;
 	}
 
+	/**
+	 * <em>Synthesize</em> the supplied map of annotation attributes by
+	 * wrapping it in a dynamic proxy that implements an annotation of type
+	 * {@code annotationType} and transparently enforces <em>attribute alias</em>
+	 * semantics for annotation attributes that are annotated with
+	 * {@link AliasFor @AliasFor}.
+	 * <p>The supplied map must contain key-value pairs for every attribute
+	 * defined by the supplied {@code annotationType}.
+	 * <p>Note that {@link AnnotationAttributes} is a specialized type of
+	 * {@link Map} that is a suitable candidate for this method's
+	 * {@code attributes} argument.
+	 *
+	 * @param attributes the map of annotation attributes to synthesize
+	 * @param annotationType the type of annotation to synthesize; never {@code null}
+	 * @param annotatedElement the element that is annotated with the annotation
+	 * corresponding to the supplied attributes; may be {@code null} if unknown
+	 * @return the synthesized annotation, or {@code null} if the supplied attributes
+	 * map is {@code null}
+	 * @throws AnnotationConfigurationException if invalid configuration is detected
+	 * @since 4.2
+	 * @see #synthesizeAnnotation(Annotation, AnnotatedElement)
+	 */
+	@SuppressWarnings("unchecked")
+	public static <A extends Annotation> A synthesizeAnnotation(Map<String, Object> attributes,
+			Class<A> annotationType, AnnotatedElement annotatedElement) {
+		Assert.notNull(annotationType, "annotationType must not be null");
+
+		if (attributes == null) {
+			return null;
+		}
+
+		AnnotationAttributeExtractor attributeExtractor = new MapAnnotationAttributeExtractor(attributes,
+			annotationType, annotatedElement);
+		InvocationHandler handler = new SynthesizedAnnotationInvocationHandler(attributeExtractor);
+		A synthesizedAnnotation = (A) Proxy.newProxyInstance(ClassUtils.getDefaultClassLoader(), new Class<?>[] {
+			annotationType, SynthesizedAnnotation.class }, handler);
+
+		return synthesizedAnnotation;
+	}
 
 	/**
 	 * Get a map of all attribute alias pairs, declared via {@code @AliasFor}
@@ -1098,7 +1139,7 @@ public abstract class AnnotationUtils {
 	 * @return a map containing attribute alias pairs; never {@code null}
 	 * @since 4.2
 	 */
-	private static Map<String, String> getAttributeAliasMap(Class<? extends Annotation> annotationType) {
+	static Map<String, String> getAttributeAliasMap(Class<? extends Annotation> annotationType) {
 		if (annotationType == null) {
 			return Collections.emptyMap();
 		}
@@ -1334,7 +1375,7 @@ public abstract class AnnotationUtils {
 
 		methods = new ArrayList<Method>();
 		for (Method method : annotationType.getDeclaredMethods()) {
-			if ((method.getParameterTypes().length == 0) && (method.getReturnType() != void.class)) {
+			if (isAttributeMethod(method)) {
 				ReflectionUtils.makeAccessible(method);
 				methods.add(method);
 			}
@@ -1343,6 +1384,24 @@ public abstract class AnnotationUtils {
 		attributeMethodsCache.put(annotationType, methods);
 
 		return methods;
+	}
+
+	/**
+	 * Determine if the supplied {@code method} is an annotation attribute method.
+	 * @param method the method to check
+	 * @return {@code true} if the method is an attribute method
+	 */
+	static boolean isAttributeMethod(Method method) {
+		return ((method != null) && (method.getParameterTypes().length == 0) && (method.getReturnType() != void.class));
+	}
+
+	/**
+	 * Determine if the supplied method is an "annotationType" method.
+	 * @return {@code true} if the method is an "annotationType" method
+	 * @see Annotation#annotationType()
+	 */
+	static boolean isAnnotationTypeMethod(Method method) {
+		return ((method != null) && method.getName().equals("annotationType") && (method.getParameterTypes().length == 0));
 	}
 
 	/**

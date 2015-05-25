@@ -32,7 +32,6 @@ import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.expression.EvaluationContext;
@@ -248,11 +247,9 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	 */
 	protected String getCondition() {
 		if (this.condition == null) {
-			AnnotationAttributes annotationAttributes = AnnotatedElementUtils
-					.findAnnotationAttributes(this.method, EventListener.class);
-			if (annotationAttributes != null) {
-				String value = annotationAttributes.getString("condition");
-				this.condition = (value != null ? value : "");
+			EventListener eventListener = AnnotatedElementUtils.findAnnotation(this.method, EventListener.class);
+			if (eventListener != null) {
+				this.condition = eventListener.condition();
 			}
 		}
 		return this.condition;
