@@ -22,8 +22,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -32,9 +32,9 @@ import org.junit.rules.ExpectedException;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
 
-import static org.hamcrest.Matchers.*;
-
 import static java.util.Arrays.*;
+import static java.util.stream.Collectors.*;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.springframework.core.annotation.AnnotatedElementUtils.*;
 
@@ -460,8 +460,23 @@ public class AnnotatedElementUtilsTests {
 			attributes.getString("qualifier"));
 	}
 
+	@Test
+	public void findAnnotationAttributesOnClassWithAttributeAliasInComposedAnnotationAndNestedAnnotationsInTargetAnnotation() {
+		Class<?> element = TestComponentScanClass.class;
+		AnnotationAttributes attributes = findAnnotationAttributes(element, ComponentScan.class);
+		assertNotNull("Should find @ComponentScan on " + element, attributes);
+		assertArrayEquals("basePackages for " + element, new String[] { "com.example.app.test" },
+			attributes.getStringArray("basePackages"));
+
+		Filter[] excludeFilters = attributes.getAnnotationArray("excludeFilters", Filter.class);
+		assertNotNull(excludeFilters);
+
+		List<String> patterns = stream(excludeFilters).map(Filter::pattern).collect(toList());
+		assertEquals(asList("*Test", "*Tests"), patterns);
+	}
+
 	private Set<String> names(Class<?>... classes) {
-		return stream(classes).map(clazz -> clazz.getName()).collect(Collectors.toSet());
+		return stream(classes).map(Class::getName).collect(toSet());
 	}
 
 
@@ -627,6 +642,32 @@ public class AnnotatedElementUtilsTests {
 		String[] xmlConfigFiles();
 	}
 
+	/**
+	 * Mock of {@code org.springframework.context.annotation.ComponentScan}
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface ComponentScan {
+
+		String[] basePackages() default {};
+
+		Filter[] excludeFilters() default {};
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({})
+	@interface Filter {
+
+		String pattern();
+	}
+
+	@ComponentScan(excludeFilters = { @Filter(pattern = "*Test"), @Filter(pattern = "*Tests") })
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface TestComponentScan {
+
+		@AliasFor(attribute = "basePackages", annotation = ComponentScan.class)
+		String[] packages();
+	}
+
 	// -------------------------------------------------------------------------
 
 	static class NonAnnotatedClass {
@@ -776,4 +817,9 @@ public class AnnotatedElementUtilsTests {
 	@InvalidAliasedComposedContextConfig(xmlConfigFiles = "test.xml")
 	static class InvalidAliasedComposedContextConfigClass {
 	}
+
+	@TestComponentScan(packages = "com.example.app.test")
+	static class TestComponentScanClass {
+	}
+
 }

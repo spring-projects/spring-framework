@@ -924,11 +924,10 @@ public abstract class AnnotationUtils {
 				return mappedAnnotations;
 			}
 			else {
-				Annotation[] synthesizedAnnotations = new Annotation[annotations.length];
 				for (int i = 0; i < annotations.length; i++) {
-					synthesizedAnnotations[i] = synthesizeAnnotation(annotations[i], annotatedElement);
+					annotations[i] = synthesizeAnnotation(annotations[i], annotatedElement);
 				}
-				return synthesizedAnnotations;
+				return annotations;
 			}
 		}
 

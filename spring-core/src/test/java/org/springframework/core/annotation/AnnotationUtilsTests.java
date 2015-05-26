@@ -21,6 +21,7 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -35,6 +36,7 @@ import org.springframework.core.annotation.subpackage.NonPublicAnnotatedClass;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 
+import static java.util.Arrays.*;
 import static java.util.stream.Collectors.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -391,6 +393,22 @@ public class AnnotationUtilsTests {
 		assertNotNull(attributes);
 		assertEquals("value attribute: ", "webController", attributes.getString(VALUE));
 		assertEquals(Component.class, attributes.annotationType());
+	}
+
+	@Test
+	public void getAnnotationAttributesWithNestedAnnotations() {
+		ComponentScan componentScan = ComponentScanClass.class.getAnnotation(ComponentScan.class);
+		assertNotNull(componentScan);
+
+		AnnotationAttributes attributes = getAnnotationAttributes(ComponentScanClass.class, componentScan);
+		assertNotNull(attributes);
+		assertEquals(ComponentScan.class, attributes.annotationType());
+
+		Filter[] filters = attributes.getAnnotationArray("excludeFilters", Filter.class);
+		assertNotNull(filters);
+
+		List<String> patterns = stream(filters).map(Filter::pattern).collect(toList());
+		assertEquals(asList("*Foo", "*Bar"), patterns);
 	}
 
 	@Test
@@ -1220,6 +1238,24 @@ public class AnnotationUtilsTests {
 
 		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
 		String xmlConfigFile();
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({})
+	@interface Filter {
+		String pattern();
+	}
+
+	/**
+	 * Mock of {@code org.springframework.context.annotation.ComponentScan}
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface ComponentScan {
+		Filter[] excludeFilters() default {};
+	}
+
+	@ComponentScan(excludeFilters = { @Filter(pattern = "*Foo"), @Filter(pattern = "*Bar") })
+	static class ComponentScanClass {
 	}
 
 }
