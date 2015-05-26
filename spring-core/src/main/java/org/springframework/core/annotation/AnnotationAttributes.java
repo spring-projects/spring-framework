@@ -26,8 +26,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * {@link LinkedHashMap} subclass representing annotation attribute key/value
- * pairs as read by Spring's reflection- or ASM-based
+ * {@link LinkedHashMap} subclass representing annotation attribute
+ * <em>key-value</em> pairs as read by Spring's reflection- or ASM-based
  * {@link org.springframework.core.type.AnnotationMetadata} implementations,
  * {@link AnnotationUtils}, and {@link AnnotatedElementUtils}.
  *
@@ -59,17 +59,18 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 * Create a new, empty {@link AnnotationAttributes} instance for the
 	 * specified {@code annotationType}.
 	 * @param annotationType the type of annotation represented by this
-	 * {@code AnnotationAttributes} instance
+	 * {@code AnnotationAttributes} instance; never {@code null}
 	 * @since 4.2
 	 */
 	public AnnotationAttributes(Class<? extends Annotation> annotationType) {
+		Assert.notNull(annotationType, "annotationType must not be null");
 		this.annotationType = annotationType;
-		this.displayName = (annotationType() != null ? annotationType.getName() : "unknown");
+		this.displayName = annotationType.getName();
 	}
 
 	/**
-	 * Create a new, empty {@link AnnotationAttributes} instance with the given initial
-	 * capacity to optimize performance.
+	 * Create a new, empty {@link AnnotationAttributes} instance with the
+	 * given initial capacity to optimize performance.
 	 * @param initialCapacity initial size of the underlying map
 	 */
 	public AnnotationAttributes(int initialCapacity) {
@@ -79,9 +80,10 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	}
 
 	/**
-	 * Create a new {@link AnnotationAttributes} instance, wrapping the provided map
-	 * and all its key/value pairs.
-	 * @param map original source of annotation attribute key/value pairs to wrap
+	 * Create a new {@link AnnotationAttributes} instance, wrapping the
+	 * provided map and all its <em>key-value</em> pairs.
+	 * @param map original source of annotation attribute <em>key-value</em>
+	 * pairs
 	 * @see #fromMap(Map)
 	 */
 	public AnnotationAttributes(Map<String, Object> map) {
@@ -91,8 +93,8 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	}
 
 	/**
-	 * Get the type of annotation represented by this {@code AnnotationAttributes}
-	 * instance.
+	 * Get the type of annotation represented by this
+	 * {@code AnnotationAttributes} instance.
 	 * @return the annotation type, or {@code null} if unknown
 	 * @since 4.2
 	 */
@@ -100,45 +102,151 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 		return this.annotationType;
 	}
 
+	/**
+	 * Get the value stored under the specified {@code attributeName} as a
+	 * string.
+	 * @param attributeName the name of the attribute to get; never
+	 * {@code null} or empty
+	 * @return the value
+	 * @throws IllegalArgumentException if the attribute does not exist or
+	 * if it is not of the expected type
+	 */
 	public String getString(String attributeName) {
 		return doGet(attributeName, String.class);
 	}
 
+	/**
+	 * Get the value stored under the specified {@code attributeName} as an
+	 * array of strings.
+	 * <p>If the value stored under the specified {@code attributeName} is
+	 * a string, it will be wrapped in a single-element array before
+	 * returning it.
+	 * @param attributeName the name of the attribute to get; never
+	 * {@code null} or empty
+	 * @return the value
+	 * @throws IllegalArgumentException if the attribute does not exist or
+	 * if it is not of the expected type
+	 */
 	public String[] getStringArray(String attributeName) {
 		return doGet(attributeName, String[].class);
 	}
 
+	/**
+	 * Get the value stored under the specified {@code attributeName} as a
+	 * boolean.
+	 * @param attributeName the name of the attribute to get; never
+	 * {@code null} or empty
+	 * @return the value
+	 * @throws IllegalArgumentException if the attribute does not exist or
+	 * if it is not of the expected type
+	 */
 	public boolean getBoolean(String attributeName) {
 		return doGet(attributeName, Boolean.class);
 	}
 
+	/**
+	 * Get the value stored under the specified {@code attributeName} as a
+	 * number.
+	 * @param attributeName the name of the attribute to get; never
+	 * {@code null} or empty
+	 * @return the value
+	 * @throws IllegalArgumentException if the attribute does not exist or
+	 * if it is not of the expected type
+	 */
 	@SuppressWarnings("unchecked")
 	public <N extends Number> N getNumber(String attributeName) {
 		return (N) doGet(attributeName, Number.class);
 	}
 
+	/**
+	 * Get the value stored under the specified {@code attributeName} as an
+	 * enum.
+	 * @param attributeName the name of the attribute to get; never
+	 * {@code null} or empty
+	 * @return the value
+	 * @throws IllegalArgumentException if the attribute does not exist or
+	 * if it is not of the expected type
+	 */
 	@SuppressWarnings("unchecked")
 	public <E extends Enum<?>> E getEnum(String attributeName) {
 		return (E) doGet(attributeName, Enum.class);
 	}
 
+	/**
+	 * Get the value stored under the specified {@code attributeName} as a
+	 * class.
+	 * @param attributeName the name of the attribute to get; never
+	 * {@code null} or empty
+	 * @return the value
+	 * @throws IllegalArgumentException if the attribute does not exist or
+	 * if it is not of the expected type
+	 */
 	@SuppressWarnings("unchecked")
 	public <T> Class<? extends T> getClass(String attributeName) {
 		return doGet(attributeName, Class.class);
 	}
 
+	/**
+	 * Get the value stored under the specified {@code attributeName} as an
+	 * array of classes.
+	 * <p>If the value stored under the specified {@code attributeName} is
+	 * a class, it will be wrapped in a single-element array before
+	 * returning it.
+	 * @param attributeName the name of the attribute to get; never
+	 * {@code null} or empty
+	 * @return the value
+	 * @throws IllegalArgumentException if the attribute does not exist or
+	 * if it is not of the expected type
+	 */
 	public Class<?>[] getClassArray(String attributeName) {
 		return doGet(attributeName, Class[].class);
 	}
 
+	/**
+	 * Get the {@link AnnotationAttributes} stored under the specified
+	 * {@code attributeName}.
+	 * @param attributeName the name of the attribute to get; never
+	 * {@code null} or empty
+	 * @return the {@code AnnotationAttributes}
+	 * @throws IllegalArgumentException if the attribute does not exist or
+	 * if it is not of the expected type
+	 */
 	public AnnotationAttributes getAnnotation(String attributeName) {
 		return doGet(attributeName, AnnotationAttributes.class);
 	}
 
+	/**
+	 * Get the array of {@link AnnotationAttributes} stored under the specified
+	 * {@code attributeName}.
+	 * <p>If the value stored under the specified {@code attributeName} is
+	 * an instance of {@code AnnotationAttributes}, it will be wrapped in
+	 * a single-element array before returning it.
+	 * @param attributeName the name of the attribute to get; never
+	 * {@code null} or empty
+	 * @return the array of {@code AnnotationAttributes}
+	 * @throws IllegalArgumentException if the attribute does not exist or
+	 * if it is not of the expected type
+	 */
 	public AnnotationAttributes[] getAnnotationArray(String attributeName) {
 		return doGet(attributeName, AnnotationAttributes[].class);
 	}
 
+	/**
+	 * Get the value stored under the specified {@code attributeName},
+	 * ensuring that the value is of the {@code expectedType}.
+	 * <p>If the {@code expectedType} is an array and the value stored
+	 * under the specified {@code attributeName} is a single element of the
+	 * component type of the expected array type, the single element will be
+	 * wrapped in a single-element array of the appropriate type before
+	 * returning it.
+	 * @param attributeName the name of the attribute to get; never
+	 * {@code null} or empty
+	 * @param expectedType the expected type; never {@code null}
+	 * @return the value
+	 * @throws IllegalArgumentException if the attribute does not exist or
+	 * if it is not of the expected type
+	 * @since 4.2
+	 */
 	@SuppressWarnings("unchecked")
 	private <T> T doGet(String attributeName, Class<T> expectedType) {
 		Assert.hasText(attributeName, "attributeName must not be null or empty");
@@ -149,9 +257,9 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 		}
 		if (!expectedType.isInstance(value)) {
 			if (expectedType.isArray() && expectedType.getComponentType().isInstance(value)) {
-				Object arrayValue = Array.newInstance(expectedType.getComponentType(), 1);
-				Array.set(arrayValue, 0, value);
-				value = arrayValue;
+				Object array = Array.newInstance(expectedType.getComponentType(), 1);
+				Array.set(array, 0, value);
+				value = array;
 			}
 			else {
 				throw new IllegalArgumentException(String.format(
@@ -171,6 +279,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 * value was previously stored in this map
 	 * @see #get
 	 * @see #put
+	 * @since 4.2
 	 */
 	@Override
 	public Object putIfAbsent(String key, Object value) {
@@ -213,7 +322,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 * will be cast and returned immediately without creating a new instance.
 	 * Otherwise a new instance will be created by passing the supplied map
 	 * to the {@link #AnnotationAttributes(Map)} constructor.
-	 * @param map original source of annotation attribute key/value pairs
+	 * @param map original source of annotation attribute <em>key-value</em> pairs
 	 */
 	public static AnnotationAttributes fromMap(Map<String, Object> map) {
 		if (map == null) {

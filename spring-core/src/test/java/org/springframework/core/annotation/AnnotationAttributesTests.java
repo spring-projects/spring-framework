@@ -44,18 +44,18 @@ public class AnnotationAttributesTests {
 
 	@Test
 	public void typeSafeAttributeAccess() {
+		AnnotationAttributes nestedAttributes = new AnnotationAttributes();
+		nestedAttributes.put("value", 10);
+		nestedAttributes.put("name", "algernon");
+
 		attributes.put("name", "dave");
 		attributes.put("names", new String[] { "dave", "frank", "hal" });
 		attributes.put("bool1", true);
 		attributes.put("bool2", false);
 		attributes.put("color", Color.RED);
-		attributes.put("clazz", Integer.class);
+		attributes.put("class", Integer.class);
 		attributes.put("classes", new Class<?>[] { Number.class, Short.class, Integer.class });
 		attributes.put("number", 42);
-		attributes.put("numbers", new int[] { 42, 43 });
-		AnnotationAttributes nestedAttributes = new AnnotationAttributes();
-		nestedAttributes.put("value", 10);
-		nestedAttributes.put("name", "algernon");
 		attributes.put("anno", nestedAttributes);
 		attributes.put("annoArray", new AnnotationAttributes[] { nestedAttributes });
 
@@ -64,11 +64,31 @@ public class AnnotationAttributesTests {
 		assertThat(attributes.getBoolean("bool1"), equalTo(true));
 		assertThat(attributes.getBoolean("bool2"), equalTo(false));
 		assertThat(attributes.<Color>getEnum("color"), equalTo(Color.RED));
-		assertTrue(attributes.getClass("clazz").equals(Integer.class));
+		assertTrue(attributes.getClass("class").equals(Integer.class));
 		assertThat(attributes.getClassArray("classes"), equalTo(new Class[] { Number.class, Short.class, Integer.class }));
 		assertThat(attributes.<Integer>getNumber("number"), equalTo(42));
 		assertThat(attributes.getAnnotation("anno").<Integer>getNumber("value"), equalTo(10));
 		assertThat(attributes.getAnnotationArray("annoArray")[0].getString("name"), equalTo("algernon"));
+	}
+
+	@Test
+	public void singleElementToSingleElementArrayConversionSupport() {
+		AnnotationAttributes nestedAttributes = new AnnotationAttributes();
+		nestedAttributes.put("name", "Dilbert");
+
+		// Store single elements
+		attributes.put("names", "Dogbert");
+		attributes.put("classes", Number.class);
+		attributes.put("nestedAttributes", nestedAttributes);
+
+		// Get back arrays of single elements
+		assertThat(attributes.getStringArray("names"), equalTo(new String[] { "Dogbert" }));
+		assertThat(attributes.getClassArray("classes"), equalTo(new Class[] { Number.class }));
+		AnnotationAttributes[] array = attributes.getAnnotationArray("nestedAttributes");
+		assertNotNull(array);
+		assertTrue(array.getClass().isArray());
+		assertThat(array.length, is(1));
+		assertThat(array[0].getString("name"), equalTo("Dilbert"));
 	}
 
 	@Test
