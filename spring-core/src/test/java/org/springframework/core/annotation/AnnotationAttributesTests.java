@@ -16,6 +16,9 @@
 
 package org.springframework.core.annotation;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -31,10 +34,6 @@ import static org.junit.Assert.*;
  * @since 3.1.1
  */
 public class AnnotationAttributesTests {
-
-	enum Color {
-		RED, WHITE, BLUE
-	}
 
 	private final AnnotationAttributes attributes = new AnnotationAttributes();
 
@@ -72,7 +71,9 @@ public class AnnotationAttributesTests {
 	}
 
 	@Test
-	public void singleElementToSingleElementArrayConversionSupport() {
+	public void singleElementToSingleElementArrayConversionSupport() throws Exception {
+		Filter filter = FilteredClass.class.getAnnotation(Filter.class);
+
 		AnnotationAttributes nestedAttributes = new AnnotationAttributes();
 		nestedAttributes.put("name", "Dilbert");
 
@@ -80,15 +81,38 @@ public class AnnotationAttributesTests {
 		attributes.put("names", "Dogbert");
 		attributes.put("classes", Number.class);
 		attributes.put("nestedAttributes", nestedAttributes);
+		attributes.put("filters", filter);
 
 		// Get back arrays of single elements
 		assertThat(attributes.getStringArray("names"), equalTo(new String[] { "Dogbert" }));
 		assertThat(attributes.getClassArray("classes"), equalTo(new Class[] { Number.class }));
+
 		AnnotationAttributes[] array = attributes.getAnnotationArray("nestedAttributes");
 		assertNotNull(array);
-		assertTrue(array.getClass().isArray());
 		assertThat(array.length, is(1));
 		assertThat(array[0].getString("name"), equalTo("Dilbert"));
+
+		Filter[] filters = attributes.getAnnotationArray("filters", Filter.class);
+		assertNotNull(filters);
+		assertThat(filters.length, is(1));
+		assertThat(filters[0].pattern(), equalTo("foo"));
+	}
+
+	@Test
+	public void nestedAnnotations() throws Exception {
+		Filter filter = FilteredClass.class.getAnnotation(Filter.class);
+
+		attributes.put("filter", filter);
+		attributes.put("filters", new Filter[] { filter, filter });
+
+		Filter retrievedFilter = attributes.getAnnotation("filter", Filter.class);
+		assertThat(retrievedFilter, equalTo(filter));
+		assertThat(retrievedFilter.pattern(), equalTo("foo"));
+
+		Filter[] retrievedFilters = attributes.getAnnotationArray("filters", Filter.class);
+		assertNotNull(retrievedFilters);
+		assertEquals(2, retrievedFilters.length);
+		assertThat(retrievedFilters[1].pattern(), equalTo("foo"));
 	}
 
 	@Test
@@ -120,4 +144,17 @@ public class AnnotationAttributesTests {
 		attributes.getEnum("color");
 	}
 
+
+	enum Color {
+		RED, WHITE, BLUE
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface Filter {
+		String pattern();
+	}
+
+	@Filter(pattern = "foo")
+	static class FilteredClass {
+	}
 }

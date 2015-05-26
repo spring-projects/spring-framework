@@ -205,6 +205,8 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	/**
 	 * Get the {@link AnnotationAttributes} stored under the specified
 	 * {@code attributeName}.
+	 * <p>Note: if you expect an actual annotation, invoke
+	 * {@link #getAnnotation(String, Class)} instead.
 	 * @param attributeName the name of the attribute to get; never
 	 * {@code null} or empty
 	 * @return the {@code AnnotationAttributes}
@@ -216,11 +218,28 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	}
 
 	/**
+	 * Get the annotation of type {@code annotationType} stored under the
+	 * specified {@code attributeName}.
+	 * @param attributeName the name of the attribute to get; never
+	 * {@code null} or empty
+	 * @param annotationType the expected annotation type; never {@code null}
+	 * @return the annotation
+	 * @throws IllegalArgumentException if the attribute does not exist or
+	 * if it is not of the expected type
+	 * @since 4.2
+	 */
+	public <A extends Annotation> A getAnnotation(String attributeName, Class<A> annotationType) {
+		return doGet(attributeName, annotationType);
+	}
+
+	/**
 	 * Get the array of {@link AnnotationAttributes} stored under the specified
 	 * {@code attributeName}.
 	 * <p>If the value stored under the specified {@code attributeName} is
 	 * an instance of {@code AnnotationAttributes}, it will be wrapped in
 	 * a single-element array before returning it.
+	 * <p>Note: if you expect an actual array of annotations, invoke
+	 * {@link #getAnnotationArray(String, Class)} instead.
 	 * @param attributeName the name of the attribute to get; never
 	 * {@code null} or empty
 	 * @return the array of {@code AnnotationAttributes}
@@ -229,6 +248,26 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 */
 	public AnnotationAttributes[] getAnnotationArray(String attributeName) {
 		return doGet(attributeName, AnnotationAttributes[].class);
+	}
+
+	/**
+	 * Get the array of type {@code annotationType} stored under the specified
+	 * {@code attributeName}.
+	 * <p>If the value stored under the specified {@code attributeName} is
+	 * an {@code Annotation}, it will be wrapped in a single-element array
+	 * before returning it.
+	 * @param attributeName the name of the attribute to get; never
+	 * {@code null} or empty
+	 * @param annotationType the expected annotation type; never {@code null}
+	 * @return the annotation array
+	 * @throws IllegalArgumentException if the attribute does not exist or
+	 * if it is not of the expected type
+	 * @since 4.2
+	 */
+	@SuppressWarnings("unchecked")
+	public <A extends Annotation> A[] getAnnotationArray(String attributeName, Class<A> annotationType) {
+		Object array = Array.newInstance(annotationType, 0);
+		return (A[]) doGet(attributeName, array.getClass());
 	}
 
 	/**
