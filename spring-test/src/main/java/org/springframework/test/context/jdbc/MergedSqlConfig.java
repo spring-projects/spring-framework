@@ -87,7 +87,7 @@ class MergedSqlConfig {
 
 		// Get global attributes, if any.
 		AnnotationAttributes attributes = AnnotatedElementUtils.findAnnotationAttributes(testClass,
-			SqlConfig.class.getName());
+			SqlConfig.class.getName(), false, false);
 
 		// Override global attributes with local attributes.
 		if (attributes != null) {

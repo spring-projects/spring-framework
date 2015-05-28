@@ -18,6 +18,7 @@ package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -25,6 +26,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -36,150 +38,141 @@ import static org.springframework.util.ReflectionUtils.*;
  * <em>synthesized</em> (i.e., wrapped in a dynamic proxy) with additional
  * functionality.
  *
- * <p>{@code SynthesizedAnnotationInvocationHandler} transparently enforces
- * attribute alias semantics for annotation attributes that are annotated
- * with {@link AliasFor @AliasFor}. In addition, nested annotations and
- * arrays of nested annotations will be synthesized upon first access (i.e.,
- * <em>lazily</em>).
- *
  * @author Sam Brannen
  * @since 4.2
  * @see Annotation
- * @see AliasFor
+ * @see AnnotationAttributeExtractor
  * @see AnnotationUtils#synthesizeAnnotation(Annotation, AnnotatedElement)
  */
 class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 
-	private final AnnotatedElement annotatedElement;
+	private final AnnotationAttributeExtractor attributeExtractor;
 
-	private final Annotation annotation;
-
-	private final Class<? extends Annotation> annotationType;
-
-	private final Map<String, String> aliasMap;
-
-	private final Map<String, Object> computedValueCache;
+	private final Map<String, Object> valueCache = new ConcurrentHashMap<String, Object>(8);
 
 
 	/**
-	 * Construct a new {@code SynthesizedAnnotationInvocationHandler}.
-	 *
-	 * @param annotation the annotation to synthesize
-	 * @param annotatedElement the element that is annotated with the supplied
-	 * annotation; may be {@code null} if unknown
-	 * @param aliasMap the map of attribute alias pairs, declared via
-	 * {@code @AliasFor} in the supplied annotation
+	 * Construct a new {@code SynthesizedAnnotationInvocationHandler} for
+	 * the supplied {@link AnnotationAttributeExtractor}.
+	 * @param attributeExtractor the extractor to delegate to
 	 */
-	SynthesizedAnnotationInvocationHandler(Annotation annotation, AnnotatedElement annotatedElement,
-			Map<String, String> aliasMap) {
-		this.annotatedElement = annotatedElement;
-		this.annotation = annotation;
-		this.annotationType = annotation.annotationType();
-		this.aliasMap = aliasMap;
-		this.computedValueCache = new ConcurrentHashMap<String, Object>(aliasMap.size());
+	SynthesizedAnnotationInvocationHandler(AnnotationAttributeExtractor attributeExtractor) {
+		Assert.notNull(attributeExtractor, "AnnotationAttributeExtractor must not be null");
+		this.attributeExtractor = attributeExtractor;
 	}
 
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		if (isEqualsMethod(method)) {
-			return equals(proxy, args[0]);
+			return annotationEquals(args[0]);
 		}
 		if (isHashCodeMethod(method)) {
-			return hashCode(proxy);
+			return annotationHashCode();
 		}
 		if (isToStringMethod(method)) {
-			return toString(proxy);
+			return annotationToString();
 		}
-
-		String methodName = method.getName();
-		Class<?> returnType = method.getReturnType();
-		boolean nestedAnnotation = (Annotation[].class.isAssignableFrom(returnType) || Annotation.class.isAssignableFrom(returnType));
-		String aliasedAttributeName = aliasMap.get(methodName);
-		boolean aliasPresent = (aliasedAttributeName != null);
-
-		makeAccessible(method);
-
-		// No custom processing necessary?
-		if (!aliasPresent && !nestedAnnotation) {
-			return invokeMethod(method, this.annotation, args);
+		if (isAnnotationTypeMethod(method)) {
+			return annotationType();
 		}
-
-		Object cachedValue = this.computedValueCache.get(methodName);
-		if (cachedValue != null) {
-			return cachedValue;
+		if (!isAttributeMethod(method)) {
+			String msg = String.format("Method [%s] is unsupported for synthesized annotation type [%s]", method,
+				annotationType());
+			throw new AnnotationConfigurationException(msg);
 		}
+		return getAttributeValue(method);
+	}
 
-		Object value = invokeMethod(method, this.annotation, args);
+	private Class<? extends Annotation> annotationType() {
+		return this.attributeExtractor.getAnnotationType();
+	}
 
-		if (aliasPresent) {
-			Method aliasedMethod = null;
-			try {
-				aliasedMethod = this.annotationType.getDeclaredMethod(aliasedAttributeName);
-			}
-			catch (NoSuchMethodException e) {
-				String msg = String.format("In annotation [%s], attribute [%s] is declared as an @AliasFor [%s], "
-						+ "but attribute [%s] does not exist.", this.annotationType.getName(), methodName,
-					aliasedAttributeName, aliasedAttributeName);
-				throw new AnnotationConfigurationException(msg);
+	private Object getAttributeValue(Method attributeMethod) {
+		String attributeName = attributeMethod.getName();
+		Object value = this.valueCache.get(attributeName);
+		if (value == null) {
+			value = this.attributeExtractor.getAttributeValue(attributeMethod);
+			if (value == null) {
+				throw new IllegalStateException(String.format(
+					"%s returned null for attribute name [%s] from attribute source [%s]",
+					this.attributeExtractor.getClass().getName(), attributeName, this.attributeExtractor.getSource()));
 			}
 
-			makeAccessible(aliasedMethod);
-			Object aliasedValue = invokeMethod(aliasedMethod, this.annotation);
-			Object defaultValue = getDefaultValue(this.annotation, methodName);
-
-			if (!nullSafeEquals(value, aliasedValue) && !nullSafeEquals(value, defaultValue)
-					&& !nullSafeEquals(aliasedValue, defaultValue)) {
-				String elementName = (this.annotatedElement == null ? "unknown element"
-						: this.annotatedElement.toString());
-				String msg = String.format(
-					"In annotation [%s] declared on [%s], attribute [%s] and its alias [%s] are "
-							+ "declared with values of [%s] and [%s], but only one declaration is permitted.",
-					this.annotationType.getName(), elementName, methodName, aliasedAttributeName,
-					nullSafeToString(value), nullSafeToString(aliasedValue));
-				throw new AnnotationConfigurationException(msg);
+			// Synthesize nested annotations before returning them.
+			if (value instanceof Annotation) {
+				value = synthesizeAnnotation((Annotation) value, this.attributeExtractor.getAnnotatedElement());
+			}
+			else if (value instanceof Annotation[]) {
+				Annotation[] orig = (Annotation[]) value;
+				Annotation[] clone = (Annotation[]) Array.newInstance(orig.getClass().getComponentType(), orig.length);
+				for (int i = 0; i < orig.length; i++) {
+					clone[i] = synthesizeAnnotation(orig[i], this.attributeExtractor.getAnnotatedElement());
+				}
+				value = clone;
 			}
 
-			// If the user didn't declare the annotation with an explicit value, return
-			// the value of the alias.
-			if (nullSafeEquals(value, defaultValue)) {
-				value = aliasedValue;
-			}
+			this.valueCache.put(attributeName, value);
 		}
 
-		// Synthesize nested annotations before returning them.
-		if (value instanceof Annotation) {
-			value = synthesizeAnnotation((Annotation) value, this.annotatedElement);
+		// Clone arrays so that users cannot alter the contents of values in our cache.
+		if (value.getClass().isArray()) {
+			value = cloneArray(value);
 		}
-		else if (value instanceof Annotation[]) {
-			Annotation[] annotations = (Annotation[]) value;
-			for (int i = 0; i < annotations.length; i++) {
-				annotations[i] = synthesizeAnnotation(annotations[i], this.annotatedElement);
-			}
-		}
-
-		this.computedValueCache.put(methodName, value);
 
 		return value;
 	}
 
 	/**
+	 * Clone the provided array, ensuring that original component type is
+	 * retained.
+	 * @param array the array to clone
+	 */
+	private Object cloneArray(Object array) {
+		if (array instanceof boolean[]) {
+			return ((boolean[]) array).clone();
+		}
+		if (array instanceof byte[]) {
+			return ((byte[]) array).clone();
+		}
+		if (array instanceof char[]) {
+			return ((char[]) array).clone();
+		}
+		if (array instanceof double[]) {
+			return ((double[]) array).clone();
+		}
+		if (array instanceof float[]) {
+			return ((float[]) array).clone();
+		}
+		if (array instanceof int[]) {
+			return ((int[]) array).clone();
+		}
+		if (array instanceof long[]) {
+			return ((long[]) array).clone();
+		}
+		if (array instanceof short[]) {
+			return ((short[]) array).clone();
+		}
+
+		// else
+		return ((Object[]) array).clone();
+	}
+
+	/**
 	 * See {@link Annotation#equals(Object)} for a definition of the required algorithm.
-	 *
-	 * @param proxy the synthesized annotation
 	 * @param other the other object to compare against
 	 */
-	private boolean equals(Object proxy, Object other) {
+	private boolean annotationEquals(Object other) {
 		if (this == other) {
 			return true;
 		}
-		if (!this.annotationType.isInstance(other)) {
+		if (!annotationType().isInstance(other)) {
 			return false;
 		}
 
-		for (Method attributeMethod : getAttributeMethods(this.annotationType)) {
-			Object thisValue = invokeMethod(attributeMethod, proxy);
+		for (Method attributeMethod : getAttributeMethods(annotationType())) {
+			Object thisValue = getAttributeValue(attributeMethod);
 			Object otherValue = invokeMethod(attributeMethod, other);
-			if (!nullSafeEquals(thisValue, otherValue)) {
+			if (!ObjectUtils.nullSafeEquals(thisValue, otherValue)) {
 				return false;
 			}
 		}
@@ -189,14 +182,12 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 
 	/**
 	 * See {@link Annotation#hashCode()} for a definition of the required algorithm.
-	 *
-	 * @param proxy the synthesized annotation
 	 */
-	private int hashCode(Object proxy) {
+	private int annotationHashCode() {
 		int result = 0;
 
-		for (Method attributeMethod : getAttributeMethods(this.annotationType)) {
-			Object value = invokeMethod(attributeMethod, proxy);
+		for (Method attributeMethod : getAttributeMethods(annotationType())) {
+			Object value = getAttributeValue(attributeMethod);
 			int hashCode;
 			if (value.getClass().isArray()) {
 				hashCode = hashCodeForArray(value);
@@ -250,39 +241,27 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 
 	/**
 	 * See {@link Annotation#toString()} for guidelines on the recommended format.
-	 *
-	 * @param proxy the synthesized annotation
 	 */
-	private String toString(Object proxy) {
-		StringBuilder sb = new StringBuilder("@").append(annotationType.getName()).append("(");
+	private String annotationToString() {
+		StringBuilder sb = new StringBuilder("@").append(annotationType().getName()).append("(");
 
-		Iterator<Method> iterator = getAttributeMethods(this.annotationType).iterator();
+		Iterator<Method> iterator = getAttributeMethods(annotationType()).iterator();
 		while (iterator.hasNext()) {
 			Method attributeMethod = iterator.next();
 			sb.append(attributeMethod.getName());
 			sb.append('=');
-			sb.append(valueToString(invokeMethod(attributeMethod, proxy)));
+			sb.append(attributeValueToString(getAttributeValue(attributeMethod)));
 			sb.append(iterator.hasNext() ? ", " : "");
 		}
 
 		return sb.append(")").toString();
 	}
 
-	private String valueToString(Object value) {
+	private String attributeValueToString(Object value) {
 		if (value instanceof Object[]) {
 			return "[" + StringUtils.arrayToDelimitedString((Object[]) value, ", ") + "]";
 		}
-
-		// else
 		return String.valueOf(value);
-	}
-
-	private static boolean nullSafeEquals(Object o1, Object o2) {
-		return ObjectUtils.nullSafeEquals(o1, o2);
-	}
-
-	private static String nullSafeToString(Object obj) {
-		return ObjectUtils.nullSafeToString(obj);
 	}
 
 }

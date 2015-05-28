@@ -26,6 +26,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.aopalliance.intercept.MethodInterceptor;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -42,7 +43,6 @@ import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.objenesis.Objenesis;
 import org.springframework.objenesis.SpringObjenesis;
 import org.springframework.util.AntPathMatcher;
@@ -418,13 +418,11 @@ public class MvcUriComponentsBuilder {
 
 	private static String getTypeRequestMapping(Class<?> controllerType) {
 		Assert.notNull(controllerType, "'controllerType' must not be null");
-		String annotType = RequestMapping.class.getName();
-		AnnotationAttributes attrs = AnnotatedElementUtils.findAnnotationAttributes(controllerType, annotType);
-		if (attrs == null) {
+		RequestMapping requestMapping = AnnotatedElementUtils.findAnnotation(controllerType, RequestMapping.class);
+		if (requestMapping == null) {
 			return "/";
 		}
-		String[] paths = attrs.getStringArray("path");
-		paths = ObjectUtils.isEmpty(paths) ? attrs.getStringArray("value") : paths;
+		String[] paths = requestMapping.path();
 		if (ObjectUtils.isEmpty(paths) || StringUtils.isEmpty(paths[0])) {
 			return "/";
 		}
@@ -435,13 +433,11 @@ public class MvcUriComponentsBuilder {
 	}
 
 	private static String getMethodRequestMapping(Method method) {
-		String annotType = RequestMapping.class.getName();
-		AnnotationAttributes attrs = AnnotatedElementUtils.findAnnotationAttributes(method, annotType);
-		if (attrs == null) {
+		RequestMapping requestMapping = AnnotatedElementUtils.findAnnotation(method, RequestMapping.class);
+		if (requestMapping == null) {
 			throw new IllegalArgumentException("No @RequestMapping on: " + method.toGenericString());
 		}
-		String[] paths = attrs.getStringArray("path");
-		paths = ObjectUtils.isEmpty(paths) ? attrs.getStringArray("value") : paths;
+		String[] paths = requestMapping.path();
 		if (ObjectUtils.isEmpty(paths) || StringUtils.isEmpty(paths[0])) {
 			return "/";
 		}
@@ -759,7 +755,6 @@ public class MvcUriComponentsBuilder {
 		 * that accept the controllerType.
 		 */
 		@Deprecated
-		@SuppressWarnings("unused")
 		public MethodArgumentBuilder(Method method) {
 			this(method.getDeclaringClass(), method);
 		}

@@ -24,7 +24,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.Rule;
@@ -436,7 +438,7 @@ public class AnnotationUtilsTests {
 		exception.expect(AnnotationConfigurationException.class);
 		exception.expectMessage(containsString("attribute [value] and its alias [path]"));
 		exception.expectMessage(containsString("values of [/enigma] and [/test]"));
-		exception.expectMessage(containsString("but only one declaration is permitted"));
+		exception.expectMessage(containsString("but only one is permitted"));
 		getAnnotationAttributes(webMapping);
 	}
 
@@ -504,7 +506,8 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void getRepeatableWithAttributeAliases() throws Exception {
-		Set<ContextConfig> annotations = getRepeatableAnnotation(TestCase.class, Hierarchy.class, ContextConfig.class);
+		Set<ContextConfig> annotations = getRepeatableAnnotation(ConfigHierarchyTestCase.class, Hierarchy.class,
+			ContextConfig.class);
 		assertNotNull(annotations);
 
 		List<String> locations = annotations.stream().map(ContextConfig::locations).collect(toList());
@@ -522,12 +525,35 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void synthesizeAnnotationWithoutAttributeAliases() throws Exception {
-		Component component = findAnnotation(WebController.class, Component.class);
+		Component component = WebController.class.getAnnotation(Component.class);
 		assertNotNull(component);
 		Component synthesizedComponent = synthesizeAnnotation(component);
 		assertNotNull(synthesizedComponent);
 		assertSame(component, synthesizedComponent);
 		assertEquals("value attribute: ", "webController", synthesizedComponent.value());
+	}
+
+	@Test
+	public void synthesizeAnnotationsFromNullSources() throws Exception {
+		assertNull("null annotation", synthesizeAnnotation(null, null));
+		assertNull("null map", synthesizeAnnotation(null, WebMapping.class, null));
+	}
+
+	@Test
+	public void synthesizeAlreadySynthesizedAnnotation() throws Exception {
+		Method method = WebController.class.getMethod("handleMappedWithValueAttribute");
+		WebMapping webMapping = method.getAnnotation(WebMapping.class);
+		assertNotNull(webMapping);
+		WebMapping synthesizedWebMapping = synthesizeAnnotation(webMapping);
+		assertNotSame(webMapping, synthesizedWebMapping);
+		WebMapping synthesizedAgainWebMapping = synthesizeAnnotation(synthesizedWebMapping);
+		assertSame(synthesizedWebMapping, synthesizedAgainWebMapping);
+		assertThat(synthesizedAgainWebMapping, instanceOf(SynthesizedAnnotation.class));
+
+		assertNotNull(synthesizedAgainWebMapping);
+		assertEquals("name attribute: ", "foo", synthesizedAgainWebMapping.name());
+		assertEquals("aliased path attribute: ", "/test", synthesizedAgainWebMapping.path());
+		assertEquals("actual value attribute: ", "/test", synthesizedAgainWebMapping.value());
 	}
 
 	@Test
@@ -639,6 +665,78 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
+	public void synthesizeAnnotationFromMapWithoutAttributeAliases() throws Exception {
+		Component component = WebController.class.getAnnotation(Component.class);
+		assertNotNull(component);
+
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put(VALUE, "webController");
+		Component synthesizedComponent = synthesizeAnnotation(map, Component.class, WebController.class);
+		assertNotNull(synthesizedComponent);
+
+		assertNotSame(component, synthesizedComponent);
+		assertEquals("value from component: ", "webController", component.value());
+		assertEquals("value from synthesized component: ", "webController", synthesizedComponent.value());
+	}
+
+	@Test
+	public void synthesizeAnnotationFromMapWithMissingAttributeValue() throws Exception {
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(startsWith("Attributes map"));
+		exception.expectMessage(containsString("returned null for required attribute [value]"));
+		exception.expectMessage(containsString("defined by annotation type [" + Component.class.getName() + "]"));
+		synthesizeAnnotation(new HashMap<String, Object>(), Component.class, null);
+	}
+
+	@Test
+	public void synthesizeAnnotationFromMapWithNullAttributeValue() throws Exception {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put(VALUE, null);
+
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(startsWith("Attributes map"));
+		exception.expectMessage(containsString("returned null for required attribute [value]"));
+		exception.expectMessage(containsString("defined by annotation type [" + Component.class.getName() + "]"));
+		synthesizeAnnotation(map, Component.class, null);
+	}
+
+	@Test
+	public void synthesizeAnnotationFromMapWithAttributeOfIncorrectType() throws Exception {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put(VALUE, 42L);
+
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(startsWith("Attributes map"));
+		exception.expectMessage(containsString("returned a value of type [java.lang.Long]"));
+		exception.expectMessage(containsString("for attribute [value]"));
+		exception.expectMessage(containsString("but a value of type [java.lang.String] is required"));
+		exception.expectMessage(containsString("as defined by annotation type [" + Component.class.getName() + "]"));
+		synthesizeAnnotation(map, Component.class, null);
+	}
+
+	@Test
+	public void synthesizeAnnotationFromAnnotationAttributesWithoutAttributeAliases() throws Exception {
+
+		// 1) Get an annotation
+		Component component = WebController.class.getAnnotation(Component.class);
+		assertNotNull(component);
+
+		// 2) Convert the annotation into AnnotationAttributes
+		AnnotationAttributes attributes = getAnnotationAttributes(WebController.class, component);
+		assertNotNull(attributes);
+
+		// 3) Synthesize the AnnotationAttributes back into an annotation
+		Component synthesizedComponent = synthesizeAnnotation(attributes, Component.class, WebController.class);
+		assertNotNull(synthesizedComponent);
+
+		// 4) Verify that the original and synthesized annotations are equivalent
+		assertNotSame(component, synthesizedComponent);
+		assertEquals(component, synthesizedComponent);
+		assertEquals("value from component: ", "webController", component.value());
+		assertEquals("value from synthesized component: ", "webController", synthesizedComponent.value());
+	}
+
+	@Test
 	public void toStringForSynthesizedAnnotations() throws Exception {
 		Method methodWithPath = WebController.class.getMethod("handleMappedWithPathAttribute");
 		WebMapping webMappingWithAliases = methodWithPath.getAnnotation(WebMapping.class);
@@ -670,7 +768,7 @@ public class AnnotationUtilsTests {
 		assertThat(string, containsString("path=/test"));
 		assertThat(string, containsString("name=bar"));
 		assertThat(string, containsString("method="));
-		assertThat(string, either(containsString("[GET, POST]")).or(containsString("[POST, GET]")));
+		assertThat(string, containsString("[GET, POST]"));
 		assertThat(string, endsWith(")"));
 	}
 
@@ -778,7 +876,7 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void synthesizeAnnotationWithAttributeAliasesInNestedAnnotations() throws Exception {
-		Hierarchy hierarchy = TestCase.class.getAnnotation(Hierarchy.class);
+		Hierarchy hierarchy = ConfigHierarchyTestCase.class.getAnnotation(Hierarchy.class);
 		assertNotNull(hierarchy);
 		Hierarchy synthesizedHierarchy = synthesizeAnnotation(hierarchy);
 		assertNotSame(hierarchy, synthesizedHierarchy);
@@ -797,20 +895,44 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void synthesizeAlreadySynthesizedAnnotation() throws Exception {
-		Method method = WebController.class.getMethod("handleMappedWithValueAttribute");
-		WebMapping webMapping = method.getAnnotation(WebMapping.class);
-		assertNotNull(webMapping);
-		WebMapping synthesizedWebMapping = synthesizeAnnotation(webMapping);
-		assertNotSame(webMapping, synthesizedWebMapping);
-		WebMapping synthesizedAgainWebMapping = synthesizeAnnotation(synthesizedWebMapping);
-		assertSame(synthesizedWebMapping, synthesizedAgainWebMapping);
-		assertThat(synthesizedAgainWebMapping, instanceOf(SynthesizedAnnotation.class));
+	public void synthesizeAnnotationWithArrayOfAnnotations() throws Exception {
+		Hierarchy hierarchy = ConfigHierarchyTestCase.class.getAnnotation(Hierarchy.class);
+		assertNotNull(hierarchy);
+		Hierarchy synthesizedHierarchy = synthesizeAnnotation(hierarchy);
+		assertThat(synthesizedHierarchy, instanceOf(SynthesizedAnnotation.class));
 
-		assertNotNull(synthesizedAgainWebMapping);
-		assertEquals("name attribute: ", "foo", synthesizedAgainWebMapping.name());
-		assertEquals("aliased path attribute: ", "/test", synthesizedAgainWebMapping.path());
-		assertEquals("actual value attribute: ", "/test", synthesizedAgainWebMapping.value());
+		ContextConfig contextConfig = SimpleConfigTestCase.class.getAnnotation(ContextConfig.class);
+		assertNotNull(contextConfig);
+
+		ContextConfig[] configs = synthesizedHierarchy.value();
+		List<String> locations = Arrays.stream(configs).map(ContextConfig::locations).collect(toList());
+		assertThat(locations, equalTo(Arrays.asList("A", "B")));
+
+		// Alter array returned from synthesized annotation
+		configs[0] = contextConfig;
+
+		// Re-retrieve the array from the synthesized annotation
+		configs = synthesizedHierarchy.value();
+		List<String> values = Arrays.stream(configs).map(ContextConfig::value).collect(toList());
+		assertThat(values, equalTo(Arrays.asList("A", "B")));
+	}
+
+	@Test
+	public void synthesizeAnnotationWithArrayOfChars() throws Exception {
+		CharsContainer charsContainer = GroupOfCharsClass.class.getAnnotation(CharsContainer.class);
+		assertNotNull(charsContainer);
+		CharsContainer synthesizedCharsContainer = synthesizeAnnotation(charsContainer);
+		assertThat(synthesizedCharsContainer, instanceOf(SynthesizedAnnotation.class));
+
+		char[] chars = synthesizedCharsContainer.chars();
+		assertArrayEquals(new char[] { 'x', 'y', 'z' }, chars);
+
+		// Alter array returned from synthesized annotation
+		chars[0] = '?';
+
+		// Re-retrieve the array from the synthesized annotation
+		chars = synthesizedCharsContainer.chars();
+		assertArrayEquals(new char[] { 'x', 'y', 'z' }, chars);
 	}
 
 
@@ -1149,8 +1271,27 @@ public class AnnotationUtilsTests {
 	}
 
 	@Hierarchy({ @ContextConfig("A"), @ContextConfig(locations = "B") })
-	static class TestCase {
+	static class ConfigHierarchyTestCase {
 	}
+
+	@ContextConfig("simple.xml")
+	static class SimpleConfigTestCase {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface CharsContainer {
+
+		@AliasFor(attribute = "chars")
+		char[] value() default {};
+
+		@AliasFor(attribute = "value")
+		char[] chars() default {};
+	}
+
+	@CharsContainer(chars = { 'x', 'y', 'z' })
+	static class GroupOfCharsClass {
+	}
+
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface AliasForNonexistentAttribute {

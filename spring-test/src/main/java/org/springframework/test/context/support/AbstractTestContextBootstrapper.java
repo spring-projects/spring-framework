@@ -32,7 +32,6 @@ import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.support.SpringFactoriesLoader;
@@ -115,7 +114,6 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	/**
 	 * {@inheritDoc}
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public final List<TestExecutionListener> getTestExecutionListeners() {
 		Class<?> clazz = getBootstrapContext().getTestClass();
@@ -139,23 +137,20 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			// Traverse the class hierarchy...
 			while (descriptor != null) {
 				Class<?> declaringClass = descriptor.getDeclaringClass();
-				AnnotationAttributes annAttrs = descriptor.getAnnotationAttributes();
+				TestExecutionListeners testExecutionListeners = descriptor.getMergedAnnotation();
 				if (logger.isTraceEnabled()) {
-					logger.trace(String.format(
-						"Retrieved @TestExecutionListeners attributes [%s] for declaring class [%s].", annAttrs,
-						declaringClass.getName()));
+					logger.trace(String.format("Retrieved @TestExecutionListeners [%s] for declaring class [%s].",
+						testExecutionListeners, declaringClass.getName()));
 				}
 
-				Class<? extends TestExecutionListener>[] listenerClasses = (Class<? extends TestExecutionListener>[]) annAttrs.getClassArray("listeners");
-
-				boolean inheritListeners = annAttrs.getBoolean("inheritListeners");
+				boolean inheritListeners = testExecutionListeners.inheritListeners();
 				AnnotationDescriptor<TestExecutionListeners> superDescriptor = MetaAnnotationUtils.findAnnotationDescriptor(
 					descriptor.getRootDeclaringClass().getSuperclass(), annotationType);
 
 				// If there are no listeners to inherit, we might need to merge the
 				// locally declared listeners with the defaults.
 				if ((!inheritListeners || superDescriptor == null)
-						&& (annAttrs.getEnum("mergeMode") == MergeMode.MERGE_WITH_DEFAULTS)) {
+						&& (testExecutionListeners.mergeMode() == MergeMode.MERGE_WITH_DEFAULTS)) {
 					if (logger.isDebugEnabled()) {
 						logger.debug(String.format(
 							"Merging default listeners with listeners configured via @TestExecutionListeners for class [%s].",
@@ -165,7 +160,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 					classesList.addAll(getDefaultTestExecutionListenerClasses());
 				}
 
-				classesList.addAll(0, Arrays.<Class<? extends TestExecutionListener>> asList(listenerClasses));
+				classesList.addAll(0, Arrays.asList(testExecutionListeners.listeners()));
 
 				descriptor = (inheritListeners ? superDescriptor : null);
 			}

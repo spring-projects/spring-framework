@@ -79,7 +79,7 @@ public class SqlScriptsTestExecutionListenerTests {
 				containsString("attribute [scripts] and its alias [value]")));
 		exception.expectMessage(either(containsString("values of [{foo}] and [{bar}]")).or(
 				containsString("values of [{bar}] and [{foo}]")));
-		exception.expectMessage(containsString("but only one declaration is permitted"));
+		exception.expectMessage(containsString("but only one is permitted"));
 		listener.beforeTestMethod(testContext);
 	}
 

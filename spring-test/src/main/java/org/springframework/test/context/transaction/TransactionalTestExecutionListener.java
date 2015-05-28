@@ -30,7 +30,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
@@ -500,18 +499,18 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 		if (this.configurationAttributes == null) {
 			Class<?> clazz = testContext.getTestClass();
 
-			AnnotationAttributes annAttrs = AnnotatedElementUtils.findAnnotationAttributes(clazz,
-				TransactionConfiguration.class.getName());
+			TransactionConfiguration txConfig = AnnotatedElementUtils.findAnnotation(clazz,
+				TransactionConfiguration.class);
 			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Retrieved @TransactionConfiguration attributes [%s] for test class [%s].",
-					annAttrs, clazz));
+				logger.debug(String.format("Retrieved @TransactionConfiguration [%s] for test class [%s].",
+					txConfig, clazz));
 			}
 
 			String transactionManagerName;
 			boolean defaultRollback;
-			if (annAttrs != null) {
-				transactionManagerName = annAttrs.getString("transactionManager");
-				defaultRollback = annAttrs.getBoolean("defaultRollback");
+			if (txConfig != null) {
+				transactionManagerName = txConfig.transactionManager();
+				defaultRollback = txConfig.defaultRollback();
 			}
 			else {
 				transactionManagerName = DEFAULT_TRANSACTION_MANAGER_NAME;

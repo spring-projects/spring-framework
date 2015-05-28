@@ -19,7 +19,6 @@ package org.springframework.test.annotation;
 import java.lang.reflect.Method;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 
 /**
@@ -38,13 +37,12 @@ public class TestAnnotationUtils {
 	 * annotated with {@code @Timed}
 	 */
 	public static long getTimeout(Method method) {
-		AnnotationAttributes attributes = AnnotatedElementUtils.findAnnotationAttributes(method, Timed.class.getName());
-		if (attributes == null) {
+		Timed timed = AnnotatedElementUtils.findAnnotation(method, Timed.class);
+		if (timed == null) {
 			return 0;
 		}
 		else {
-			long millis = attributes.<Long> getNumber("millis").longValue();
-			return Math.max(0, millis);
+			return Math.max(0, timed.millis());
 		}
 	}
 

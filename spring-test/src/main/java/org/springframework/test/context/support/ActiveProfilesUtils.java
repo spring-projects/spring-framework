@@ -23,7 +23,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ActiveProfilesResolver;
 import org.springframework.test.util.MetaAnnotationUtils;
@@ -87,14 +86,14 @@ abstract class ActiveProfilesUtils {
 		while (descriptor != null) {
 			Class<?> rootDeclaringClass = descriptor.getRootDeclaringClass();
 			Class<?> declaringClass = descriptor.getDeclaringClass();
+			ActiveProfiles annotation = descriptor.getMergedAnnotation();
 
-			AnnotationAttributes annAttrs = descriptor.getAnnotationAttributes();
 			if (logger.isTraceEnabled()) {
-				logger.trace(String.format("Retrieved @ActiveProfiles attributes [%s] for declaring class [%s].",
-					annAttrs, declaringClass.getName()));
+				logger.trace(String.format("Retrieved @ActiveProfiles [%s] for declaring class [%s].", annotation,
+					declaringClass.getName()));
 			}
 
-			Class<? extends ActiveProfilesResolver> resolverClass = annAttrs.getClass("resolver");
+			Class<? extends ActiveProfilesResolver> resolverClass = annotation.resolver();
 			if (ActiveProfilesResolver.class == resolverClass) {
 				resolverClass = DefaultActiveProfilesResolver.class;
 			}
@@ -125,8 +124,8 @@ abstract class ActiveProfilesUtils {
 				}
 			}
 
-			descriptor = annAttrs.getBoolean("inheritProfiles") ? MetaAnnotationUtils.findAnnotationDescriptor(
-				rootDeclaringClass.getSuperclass(), annotationType) : null;
+			descriptor = (annotation.inheritProfiles() ? MetaAnnotationUtils.findAnnotationDescriptor(
+				rootDeclaringClass.getSuperclass(), annotationType) : null);
 		}
 
 		return StringUtils.toStringArray(activeProfiles);
