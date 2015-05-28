@@ -147,7 +147,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		emitter.send(event().comment("a test").name("update").id("1").reconnectTime(5000L).data(bean1).data(bean2));
 
 		assertEquals(":a test\n" +
-						"name:update\n" +
+						"event:update\n" +
 						"id:1\n" +
 						"retry:5000\n" +
 						"data:{\"id\":1,\"name\":\"Joe\"}\n" +
