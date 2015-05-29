@@ -26,6 +26,7 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 
 /**
@@ -36,6 +37,7 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @author Rob Harrop
  * @author Andy Clement
+ * @author Sam Brannen
  * @since 2.0
  * @see GenericCollectionTypeResolver
  */
@@ -386,7 +388,7 @@ public class MethodParameter {
 	 * Return the annotations associated with the target method/constructor itself.
 	 */
 	public Annotation[] getMethodAnnotations() {
-		return getAnnotatedElement().getAnnotations();
+		return AnnotationUtils.synthesizeAnnotationArray(getAnnotatedElement().getAnnotations(), getAnnotatedElement());
 	}
 
 	/**
@@ -395,7 +397,8 @@ public class MethodParameter {
 	 * @return the annotation object, or {@code null} if not found
 	 */
 	public <T extends Annotation> T getMethodAnnotation(Class<T> annotationType) {
-		return getAnnotatedElement().getAnnotation(annotationType);
+		AnnotatedElement element = getAnnotatedElement();
+		return AnnotationUtils.synthesizeAnnotation(element.getAnnotation(annotationType), element);
 	}
 
 	/**
@@ -406,7 +409,8 @@ public class MethodParameter {
 			Annotation[][] annotationArray = (this.method != null ?
 					this.method.getParameterAnnotations() : this.constructor.getParameterAnnotations());
 			if (this.parameterIndex >= 0 && this.parameterIndex < annotationArray.length) {
-				this.parameterAnnotations = annotationArray[this.parameterIndex];
+				this.parameterAnnotations = AnnotationUtils.synthesizeAnnotationArray(
+					annotationArray[this.parameterIndex], getAnnotatedElement());
 			}
 			else {
 				this.parameterAnnotations = new Annotation[0];
