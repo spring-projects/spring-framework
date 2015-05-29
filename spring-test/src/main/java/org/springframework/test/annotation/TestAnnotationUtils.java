@@ -41,9 +41,7 @@ public class TestAnnotationUtils {
 		if (timed == null) {
 			return 0;
 		}
-		else {
-			return Math.max(0, timed.millis());
-		}
+		return Math.max(0, timed.millis());
 	}
 
 	/**
