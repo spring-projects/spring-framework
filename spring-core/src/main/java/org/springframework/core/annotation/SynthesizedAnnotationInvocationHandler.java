@@ -18,7 +18,6 @@ package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -103,12 +102,7 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 				value = synthesizeAnnotation((Annotation) value, this.attributeExtractor.getAnnotatedElement());
 			}
 			else if (value instanceof Annotation[]) {
-				Annotation[] orig = (Annotation[]) value;
-				Annotation[] clone = (Annotation[]) Array.newInstance(orig.getClass().getComponentType(), orig.length);
-				for (int i = 0; i < orig.length; i++) {
-					clone[i] = synthesizeAnnotation(orig[i], this.attributeExtractor.getAnnotatedElement());
-				}
-				value = clone;
+				value = synthesizeAnnotationArray((Annotation[]) value, this.attributeExtractor.getAnnotatedElement());
 			}
 
 			this.valueCache.put(attributeName, value);

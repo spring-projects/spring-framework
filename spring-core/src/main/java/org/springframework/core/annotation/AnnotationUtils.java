@@ -18,6 +18,7 @@ package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Array;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -926,10 +927,7 @@ public abstract class AnnotationUtils {
 				return mappedAnnotations;
 			}
 			else {
-				for (int i = 0; i < annotations.length; i++) {
-					annotations[i] = synthesizeAnnotation(annotations[i], annotatedElement);
-				}
-				return annotations;
+				return synthesizeAnnotationArray(annotations, annotatedElement);
 			}
 		}
 
@@ -1122,6 +1120,35 @@ public abstract class AnnotationUtils {
 			annotationType, SynthesizedAnnotation.class }, handler);
 
 		return synthesizedAnnotation;
+	}
+
+	/**
+	 * <em>Synthesize</em> the supplied array of {@code annotations} by
+	 * creating a new array of the same size and type and populating it
+	 * with {@linkplain #synthesizeAnnotation(Annotation) synthesized}
+	 * versions of the annotations from the input array.
+	 *
+	 * @param annotations the array of annotations to synthesize
+	 * @param annotatedElement the element that is annotated with the supplied
+	 * array of annotations; may be {@code null} if unknown
+	 * @return a new array of synthesized annotations, or {@code null} if
+	 * the supplied array is {@code null}
+	 * @throws AnnotationConfigurationException if invalid configuration of
+	 * {@code @AliasFor} is detected
+	 * @since 4.2
+	 * @see #synthesizeAnnotation(Annotation, AnnotatedElement)
+	 * @see #synthesizeAnnotation(Map, Class, AnnotatedElement)
+	 */
+	public static Annotation[] synthesizeAnnotationArray(Annotation[] annotations, AnnotatedElement annotatedElement) {
+		if (annotations == null) {
+			return null;
+		}
+
+		Annotation[] synthesized = (Annotation[]) Array.newInstance(annotations.getClass().getComponentType(), annotations.length);
+		for (int i = 0; i < annotations.length; i++) {
+			synthesized[i] = synthesizeAnnotation(annotations[i], annotatedElement);
+		}
+		return synthesized;
 	}
 
 	/**
