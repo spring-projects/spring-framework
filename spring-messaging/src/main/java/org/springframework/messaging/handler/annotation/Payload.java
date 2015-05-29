@@ -43,19 +43,18 @@ public @interface Payload {
 	/**
 	 * Alias for {@link #expression}.
 	 */
-	@AliasFor(attribute="expression")
+	@AliasFor(attribute = "expression")
 	String value() default "";
 
 	/**
 	 * A SpEL expression to be evaluated against the payload object as the root context.
-	 * <p>
-	 * This attribute may or may not be supported depending on whether the message being
+	 * <p>This attribute may or may not be supported depending on whether the message being
 	 * handled contains a non-primitive Object as its payload or is in serialized form and
 	 * requires message conversion.
-	 * <p>
-	 * When processing STOMP over WebSocket messages this attribute is not supported.
+	 * <p>When processing STOMP over WebSocket messages this attribute is not supported.
+	 * @since 4.2
 	 */
-	@AliasFor(attribute="value")
+	@AliasFor(attribute = "value")
 	String expression() default "";
 
 	/**
