@@ -1486,6 +1486,7 @@ public abstract class AnnotationUtils {
 	 * it will be cast to an {@code AnnotationConfigurationException} and thrown,
 	 * allowing it to propagate to the caller.
 	 * <p>Otherwise, this method does nothing.
+	 * @param t the throwable to inspect
 	 * @since 4.2
 	 */
 	static void rethrowAnnotationConfigurationException(Throwable t) {
@@ -1621,6 +1622,7 @@ public abstract class AnnotationUtils {
 				return synthesizedAnnotations;
 			}
 			catch (Exception ex) {
+				rethrowAnnotationConfigurationException(ex);
 				// Unable to read value from repeating annotation container -> ignore it.
 				return Collections.emptyList();
 			}

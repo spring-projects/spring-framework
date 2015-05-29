@@ -505,6 +505,15 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
+	public void getRepeatableWithMissingAttributeAliasDeclaration() throws Exception {
+		exception.expect(AnnotationConfigurationException.class);
+		exception.expectMessage(containsString("Attribute [value] in"));
+		exception.expectMessage(containsString(BrokenContextConfig.class.getName()));
+		exception.expectMessage(containsString("must be declared as an @AliasFor [locations]"));
+		getRepeatableAnnotation(BrokenConfigHierarchyTestCase.class, BrokenHierarchy.class, BrokenContextConfig.class);
+	}
+
+	@Test
 	public void getRepeatableWithAttributeAliases() throws Exception {
 		Set<ContextConfig> annotations = getRepeatableAnnotation(ConfigHierarchyTestCase.class, Hierarchy.class,
 			ContextConfig.class);
@@ -1261,17 +1270,36 @@ public class AnnotationUtilsTests {
 		String locations() default "";
 	}
 
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface BrokenContextConfig {
+
+		// Intentionally missing:
+		// @AliasFor(attribute = "locations")
+		String value() default "";
+
+		@AliasFor(attribute = "value")
+		String locations() default "";
+	}
+
 	/**
 	 * Mock of {@code org.springframework.test.context.ContextHierarchy}.
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface Hierarchy {
-
 		ContextConfig[] value();
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface BrokenHierarchy {
+		BrokenContextConfig[] value();
 	}
 
 	@Hierarchy({ @ContextConfig("A"), @ContextConfig(locations = "B") })
 	static class ConfigHierarchyTestCase {
+	}
+
+	@BrokenHierarchy(@BrokenContextConfig)
+	static class BrokenConfigHierarchyTestCase {
 	}
 
 	@ContextConfig("simple.xml")
