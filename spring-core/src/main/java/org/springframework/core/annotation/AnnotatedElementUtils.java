@@ -220,6 +220,32 @@ public class AnnotatedElementUtils {
 
 	/**
 	 * Get the first annotation of the specified {@code annotationType} within
+	 * the annotation hierarchy <em>above</em> the supplied {@code element},
+	 * merge that annotation's attributes with <em>matching</em> attributes from
+	 * annotations in lower levels of the annotation hierarchy, and synthesize
+	 * the result back into an annotation of the specified {@code annotationType}.
+	 *
+	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both
+	 * within a single annotation and within the annotation hierarchy.
+	 *
+	 * <p>This method delegates to {@link #getAnnotationAttributes(AnnotatedElement, Class)}
+	 * and {@link AnnotationUtils#synthesizeAnnotation(Map, Class, AnnotatedElement)}.
+	 *
+	 * @param element the annotated element; never {@code null}
+	 * @param annotationType the annotation type to find; never {@code null}
+	 * @return the merged {@code AnnotationAttributes}, or {@code null} if not found
+	 * @since 4.2
+	 * @see #getAnnotationAttributes(AnnotatedElement, Class)
+	 * @see #findAnnotation(AnnotatedElement, Class)
+	 * @see AnnotationUtils#synthesizeAnnotation(Map, Class, AnnotatedElement)
+	 */
+	public static <A extends Annotation> A getAnnotation(AnnotatedElement element, Class<A> annotationType) {
+		AnnotationAttributes attributes = getAnnotationAttributes(element, annotationType);
+		return ((attributes != null) ? AnnotationUtils.synthesizeAnnotation(attributes, annotationType, element) : null);
+	}
+
+	/**
+	 * Get the first annotation of the specified {@code annotationType} within
 	 * the annotation hierarchy <em>above</em> the supplied {@code element} and
 	 * merge that annotation's attributes with <em>matching</em> attributes from
 	 * annotations in lower levels of the annotation hierarchy.
@@ -232,9 +258,10 @@ public class AnnotatedElementUtils {
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the annotation type to find; never {@code null}
 	 * @return the merged {@code AnnotationAttributes}, or {@code null} if not found
+	 * @since 4.2
 	 * @see #getAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
-	 * @see #getAllAnnotationAttributes(AnnotatedElement, String)
 	 * @see #findAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
+	 * @see #getAnnotation(AnnotatedElement, Class)
 	 * @see #findAnnotation(AnnotatedElement, Class)
 	 */
 	public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement element,
@@ -945,8 +972,9 @@ public class AnnotatedElementUtils {
 	 * target annotation during the {@link #process} phase and then merges
 	 * annotation attributes from lower levels in the annotation hierarchy
 	 * during the {@link #postProcess} phase.
-	 * @see AnnotationUtils#getAnnotationAttributes(Annotation)
 	 * @since 4.2
+	 * @see AnnotationUtils#getAnnotationAttributes(AnnotatedElement, Annotation, boolean, boolean, boolean)
+	 * @see AnnotationUtils#postProcessAnnotationAttributes
 	 */
 	private static class MergedAnnotationAttributesProcessor implements Processor<AnnotationAttributes> {
 

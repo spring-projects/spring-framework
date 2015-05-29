@@ -766,8 +766,8 @@ public abstract class AnnotationUtils {
 	 * @param annotation the annotation to retrieve the attributes for
 	 * @return the annotation attributes (a specialized Map) with attribute names as keys
 	 * and corresponding attribute values as values; never {@code null}
-	 * @see #getAnnotationAttributes(AnnotatedElement, Annotation, boolean, boolean)
 	 * @since 4.2
+	 * @see #getAnnotationAttributes(AnnotatedElement, Annotation, boolean, boolean)
 	 */
 	public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement annotatedElement, Annotation annotation) {
 		return getAnnotationAttributes(annotatedElement, annotation, false, false);
@@ -1233,8 +1233,8 @@ public abstract class AnnotationUtils {
 	 * not from an annotation, or if the supplied target type is {@link Annotation}
 	 * @throws AnnotationConfigurationException if invalid configuration of
 	 * {@code @AliasFor} is detected
-	 * @see #getAliasedAttributeName(Method, Class)
 	 * @since 4.2
+	 * @see #getAliasedAttributeName(Method, Class)
 	 */
 	static String getAliasedAttributeName(Method attribute) {
 		return getAliasedAttributeName(attribute, null);

@@ -323,6 +323,19 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	@Test
+	public void getAnnotationWithAliasedValueComposedAnnotation() {
+		Class<?> element = AliasedValueComposedContextConfigClass.class;
+		ContextConfig contextConfig = getAnnotation(element, ContextConfig.class);
+
+		assertNotNull("Should find @ContextConfig on " + element.getSimpleName(), contextConfig);
+		assertArrayEquals("locations", new String[] { "test.xml" }, contextConfig.locations());
+		assertArrayEquals("value", new String[] { "test.xml" }, contextConfig.value());
+
+		// Verify contracts between utility methods:
+		assertTrue(isAnnotated(element, ContextConfig.class.getName()));
+	}
+
+	@Test
 	public void getAnnotationAttributesWithInvalidConventionBasedComposedAnnotation() {
 		Class<?> element = InvalidConventionBasedComposedContextConfigClass.class;
 		exception.expect(AnnotationConfigurationException.class);
