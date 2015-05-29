@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -139,8 +139,8 @@ public class HeaderMethodArgumentResolverTests {
 	@SuppressWarnings("unused")
 	private void handleMessage(
 			@Header String param1,
-			@Header(value = "name", defaultValue = "bar") String param2,
-			@Header(value = "name", defaultValue="#{systemProperties.systemProperty}") String param3,
+			@Header(name = "name", defaultValue = "bar") String param2,
+			@Header(name = "name", defaultValue = "#{systemProperties.systemProperty}") String param3,
 			String param4,
 			@Header("nativeHeaders.param1") String nativeHeaderParam1) {
 	}

@@ -164,6 +164,17 @@ public class MethodJmsListenerEndpointTests {
 	}
 
 	@Test
+	public void resolveCustomHeaderNameAndPayloadWithHeaderNameSet() throws JMSException {
+		MessagingMessageListenerAdapter listener = createDefaultInstance(String.class, int.class);
+
+		Session session = mock(Session.class);
+		StubTextMessage message = createSimpleJmsTextMessage("my payload");
+		message.setIntProperty("myCounter", 24);
+		listener.onMessage(message, session);
+		assertDefaultListenerMethodInvocation();
+	}
+
+	@Test
 	public void resolveHeaders() throws JMSException {
 		MessagingMessageListenerAdapter listener = createDefaultInstance(String.class, Map.class);
 
@@ -480,6 +491,12 @@ public class MethodJmsListenerEndpointTests {
 
 		public void resolveCustomHeaderNameAndPayload(@Payload String content, @Header("myCounter") int counter) {
 			invocations.put("resolveCustomHeaderNameAndPayload", true);
+			assertEquals("Wrong @Payload resolution", "my payload", content);
+			assertEquals("Wrong @Header resolution", 24, counter);
+		}
+
+		public void resolveCustomHeaderNameAndPayloadWithHeaderNameSet(@Payload String content, @Header(name = "myCounter") int counter) {
+			invocations.put("resolveCustomHeaderNameAndPayloadWithHeaderNameSet", true);
 			assertEquals("Wrong @Payload resolution", "my payload", content);
 			assertEquals("Wrong @Header resolution", 24, counter);
 		}

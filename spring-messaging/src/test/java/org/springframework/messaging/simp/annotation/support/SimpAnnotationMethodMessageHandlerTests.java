@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -371,7 +371,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		}
 
 		@MessageMapping("/optionalHeaders")
-		public void optionalHeaders(@Header(value="foo", required=false) String foo1, @Header(value="foo") Optional<String> foo2) {
+		public void optionalHeaders(@Header(name="foo", required=false) String foo1, @Header("foo") Optional<String> foo2) {
 			this.method = "optionalHeaders";
 			this.arguments.put("foo1", foo1);
 			this.arguments.put("foo2", (foo2.isPresent() ? foo2.get() : null));
