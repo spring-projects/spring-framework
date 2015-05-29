@@ -39,9 +39,9 @@ public class SpringTransactionAnnotationParser implements TransactionAnnotationP
 
 	@Override
 	public TransactionAttribute parseTransactionAnnotation(AnnotatedElement ae) {
-		AnnotationAttributes ann = AnnotatedElementUtils.getAnnotationAttributes(ae, Transactional.class.getName());
-		if (ann != null) {
-			return parseTransactionAnnotation(ann);
+		AnnotationAttributes attributes = AnnotatedElementUtils.getAnnotationAttributes(ae, Transactional.class);
+		if (attributes != null) {
+			return parseTransactionAnnotation(attributes);
 		}
 		else {
 			return null;

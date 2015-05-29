@@ -227,6 +227,31 @@ public class AnnotatedElementUtils {
 	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both
 	 * within a single annotation and within the annotation hierarchy.
 	 *
+	 * <p>This method delegates to {@link #getAnnotationAttributes(AnnotatedElement, String)}.
+	 *
+	 * @param element the annotated element; never {@code null}
+	 * @param annotationType the annotation type to find; never {@code null}
+	 * @return the merged {@code AnnotationAttributes}, or {@code null} if not found
+	 * @see #getAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
+	 * @see #getAllAnnotationAttributes(AnnotatedElement, String)
+	 * @see #findAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
+	 * @see #findAnnotation(AnnotatedElement, Class)
+	 */
+	public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement element,
+			Class<? extends Annotation> annotationType) {
+		Assert.notNull(annotationType, "annotationType must not be null");
+		return getAnnotationAttributes(element, annotationType.getName());
+	}
+
+	/**
+	 * Get the first annotation of the specified {@code annotationType} within
+	 * the annotation hierarchy <em>above</em> the supplied {@code element} and
+	 * merge that annotation's attributes with <em>matching</em> attributes from
+	 * annotations in lower levels of the annotation hierarchy.
+	 *
+	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both
+	 * within a single annotation and within the annotation hierarchy.
+	 *
 	 * <p>This method delegates to {@link #getAnnotationAttributes(AnnotatedElement, String, boolean, boolean)},
 	 * supplying {@code false} for {@code classValuesAsString} and {@code nestedAnnotationsAsMap}.
 	 *
@@ -298,9 +323,7 @@ public class AnnotatedElementUtils {
 	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both
 	 * within a single annotation and within the annotation hierarchy.
 	 *
-	 * <p>This method delegates to {@link #findAnnotationAttributes(AnnotatedElement, String, boolean, boolean)}
-	 * (supplying {@code false} for {@code classValuesAsString} and {@code nestedAnnotationsAsMap})
-	 * and {@link AnnotationUtils#synthesizeAnnotation(Map, Class, AnnotatedElement)}.
+	 * <p>This method delegates to {@link #findAnnotation(AnnotatedElement, String)}.
 	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the annotation type to find; never {@code null}
@@ -308,7 +331,7 @@ public class AnnotatedElementUtils {
 	 * @since 4.2
 	 * @see #findAnnotation(AnnotatedElement, String)
 	 * @see #findAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
-	 * @see AnnotationUtils#synthesizeAnnotation(Map, Class, AnnotatedElement)
+	 * @see #getAnnotationAttributes(AnnotatedElement, Class)
 	 */
 	public static <A extends Annotation> A findAnnotation(AnnotatedElement element, Class<A> annotationType) {
 		Assert.notNull(annotationType, "annotationType must not be null");

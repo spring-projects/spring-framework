@@ -325,8 +325,6 @@ public class AnnotatedElementUtilsTests {
 	@Test
 	public void getAnnotationAttributesWithInvalidConventionBasedComposedAnnotation() {
 		Class<?> element = InvalidConventionBasedComposedContextConfigClass.class;
-		String name = ContextConfig.class.getName();
-
 		exception.expect(AnnotationConfigurationException.class);
 		exception.expectMessage(either(containsString("attribute [value] and its alias [locations]")).or(
 			containsString("attribute [locations] and its alias [value]")));
@@ -334,21 +332,19 @@ public class AnnotatedElementUtilsTests {
 			containsString("values of [{duplicateDeclaration}] and [{requiredLocationsDeclaration}]")).or(
 			containsString("values of [{requiredLocationsDeclaration}] and [{duplicateDeclaration}]")));
 		exception.expectMessage(containsString("but only one declaration is permitted"));
-		getAnnotationAttributes(element, name);
+		getAnnotationAttributes(element, ContextConfig.class);
 	}
 
 	@Test
 	public void getAnnotationAttributesWithInvalidAliasedComposedAnnotation() {
 		Class<?> element = InvalidAliasedComposedContextConfigClass.class;
-		String name = ContextConfig.class.getName();
-
 		exception.expect(AnnotationConfigurationException.class);
 		exception.expectMessage(either(containsString("attribute [value] and its alias [locations]")).or(
 			containsString("attribute [locations] and its alias [value]")));
 		exception.expectMessage(either(containsString("values of [{duplicateDeclaration}] and [{test.xml}]")).or(
 			containsString("values of [{test.xml}] and [{duplicateDeclaration}]")));
 		exception.expectMessage(containsString("but only one declaration is permitted"));
-		getAnnotationAttributes(element, name);
+		getAnnotationAttributes(element, ContextConfig.class);
 	}
 
 	@Test

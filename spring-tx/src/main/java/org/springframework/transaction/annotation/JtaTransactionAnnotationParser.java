@@ -39,9 +39,9 @@ public class JtaTransactionAnnotationParser implements TransactionAnnotationPars
 
 	@Override
 	public TransactionAttribute parseTransactionAnnotation(AnnotatedElement ae) {
-		AnnotationAttributes ann = AnnotatedElementUtils.getAnnotationAttributes(ae, javax.transaction.Transactional.class.getName());
-		if (ann != null) {
-			return parseTransactionAnnotation(ann);
+		AnnotationAttributes attributes = AnnotatedElementUtils.getAnnotationAttributes(ae, javax.transaction.Transactional.class);
+		if (attributes != null) {
+			return parseTransactionAnnotation(attributes);
 		}
 		else {
 			return null;
