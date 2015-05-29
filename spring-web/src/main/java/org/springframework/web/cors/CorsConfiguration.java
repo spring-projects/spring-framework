@@ -101,7 +101,7 @@ public class CorsConfiguration {
 		List<String> combined = new ArrayList<String>(source);
 		combined.addAll(other);
 		return combined;
-	} 
+	}
 
 	/**
 	 * Configure origins to allow, e.g. "http://domain1.com". The special value

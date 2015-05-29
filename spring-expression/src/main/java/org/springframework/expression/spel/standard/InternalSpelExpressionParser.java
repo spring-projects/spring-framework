@@ -644,7 +644,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 				while (peekToken(TokenKind.COMMA,true));
 				closingCurly = eatToken(TokenKind.RCURLY);
 				expr = new InlineList(toPos(t.startPos,closingCurly.endPos),listElements.toArray(new SpelNodeImpl[listElements.size()]));
-	
+
 			}
 			else if (peekToken(TokenKind.COLON, true)) {  // map!
 				List<SpelNodeImpl> mapElements = new ArrayList<SpelNodeImpl>();

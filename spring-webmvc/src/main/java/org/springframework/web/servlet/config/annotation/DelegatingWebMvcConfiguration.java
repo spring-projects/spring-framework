@@ -136,5 +136,5 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 	protected void configureCors(CorsConfigurer configurer) {
 		this.configurers.configureCors(configurer);
 	}
-	
+
 }

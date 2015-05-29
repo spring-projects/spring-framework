@@ -80,7 +80,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	private final List<HandlerInterceptor> adaptedInterceptors = new ArrayList<HandlerInterceptor>();
 
 	private CorsProcessor corsProcessor = new DefaultCorsProcessor();
-	
+
 	private final Map<String, CorsConfiguration> corsConfiguration =
 			new LinkedHashMap<String, CorsConfiguration>();
 

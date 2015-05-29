@@ -113,7 +113,7 @@ public class CorsAbstractHandlerMappingTests {
 		assertNotNull(config);
 		assertArrayEquals(config.getAllowedOrigins().toArray(), new String[]{"*"});
 	}
-	
+
 	@Test
 	public void actualRequestWithMappedCorsConfiguration() throws Exception {
 		CorsConfiguration config = new CorsConfiguration();

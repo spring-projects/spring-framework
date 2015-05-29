@@ -39,7 +39,7 @@ public class CorsConfigurationTests {
 	public void setup() {
 		config = new CorsConfiguration();
 	}
-	
+
 	@Test
 	public void setNullValues() {
 		config.setAllowedOrigins(null);
@@ -55,7 +55,7 @@ public class CorsConfigurationTests {
 		config.setMaxAge(null);
 		assertNull(config.getMaxAge());
 	}
-	
+
 	@Test
 	public void setValues() {
 		config.addAllowedOrigin("*");
@@ -72,24 +72,24 @@ public class CorsConfigurationTests {
 		config.setMaxAge(123L);
 		assertEquals(new Long(123), config.getMaxAge());
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
 	public void asteriskWildCardOnAddExposedHeader() {
 		config.addExposedHeader("*");
 	}
-	
+
 	@Test(expected = IllegalArgumentException.class)
 	public void asteriskWildCardOnSetExposedHeaders() {
 		config.setExposedHeaders(Arrays.asList("*"));
 	}
-	
+
 	@Test
 	public void combineWithNull() {
 		config.setAllowedOrigins(Arrays.asList("*"));
 		config.combine(null);
 		assertEquals(Arrays.asList("*"), config.getAllowedOrigins());
 	}
-	
+
 	@Test
 	public void combineWithNullProperties() {
 		config.addAllowedOrigin("*");
@@ -107,7 +107,7 @@ public class CorsConfigurationTests {
 		assertEquals(new Long(123), config.getMaxAge());
 		assertTrue(config.getAllowCredentials());
 	}
-	
+
 	@Test
 	public void combineWithAsteriskWildCard() {
 		config.addAllowedOrigin("*");
@@ -124,7 +124,7 @@ public class CorsConfigurationTests {
 		assertEquals(Arrays.asList("header2"), config.getExposedHeaders());
 		assertEquals(Arrays.asList(HttpMethod.PUT.name()), config.getAllowedMethods());
 	}
-	
+
 	@Test
 	public void combine() {
 		config.addAllowedOrigin("http://domain1.com");

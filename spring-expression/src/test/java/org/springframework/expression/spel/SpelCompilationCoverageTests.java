@@ -2999,7 +2999,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	    context.setVariable("it", person);
 	    expression.setEvaluationContext(context);
 	    assertTrue(expression.getValue(Boolean.class));
-	    assertTrue(expression.getValue(Boolean.class));	  
+	    assertTrue(expression.getValue(Boolean.class));	 
 	    assertCanCompile(expression);
 	    assertTrue(expression.getValue(Boolean.class));
 	}
@@ -3899,7 +3899,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		float[] fs = new float[]{6.0f,7.0f,8.0f};
 		byte[] bs = new byte[]{(byte)2,(byte)3,(byte)4};
 		char[] cs = new char[]{'a','b','c'};
-	
+
 		// Access String (reference type) array
 		expression = parser.parseExpression("[0]");
 		assertEquals("a",expression.getValue(sss));
@@ -5022,7 +5022,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 				for (String[] varg: vargs) {
 					s+="{";
 					for (String v: varg) {
-						s+=v;			
+						s+=v;		
 					}
 					s+="}";
 				}
@@ -5038,7 +5038,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 				for (int[] varg: vargs) {
 					s+="{";
 					for (int v: varg) {
-						s+=Integer.toString(v);			
+						s+=Integer.toString(v);		
 					}
 					s+="}";
 				}
@@ -5150,7 +5150,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
         	}
         	output = b.toString();
         }
-     
+    
         public Obj3(String s, Float f, int... ints) {
         	StringBuilder b = new StringBuilder();
         	b.append(s);
@@ -5163,9 +5163,9 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
         	output = b.toString();
         }
     }
- 
+
     public static class Obj4 {
-   
+  
         public final String output;
 
         public Obj4(int[] params) {

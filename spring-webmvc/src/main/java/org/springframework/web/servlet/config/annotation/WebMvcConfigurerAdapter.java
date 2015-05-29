@@ -172,5 +172,5 @@ public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {
 	@Override
 	public void configureCors(CorsConfigurer configurer) {
 	}
-	
+
 }

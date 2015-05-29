@@ -236,7 +236,7 @@ public class MvcUriComponentsBuilderTests {
 		assertThat(uriComponents.toUriString(), startsWith("http://localhost"));
 		assertThat(uriComponents.toUriString(), endsWith("/extended/else"));
 	}
- 
+
 	@Test
 	public void testFromMethodCallWithTypeLevelUriVars() {
 		UriComponents uriComponents = fromMethodCall(on(
@@ -430,7 +430,7 @@ public class MvcUriComponentsBuilderTests {
 	static class ExtendedController extends ControllerWithMethods {
 
 	}
-	
+
 	@RequestMapping("/user/{userId}/contacts")
 	static class UserContactController {
 

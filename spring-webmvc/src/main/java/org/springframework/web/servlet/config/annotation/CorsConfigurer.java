@@ -26,19 +26,19 @@ import org.springframework.web.cors.CorsConfiguration;
 /**
  * Assist with the registration of {@link CorsConfiguration} mapped to one or more path patterns.
  * @author Sebastien Deleuze
- * 
+ *
  * @since 4.2
  * @see CorsRegistration
  */
 public class CorsConfigurer {
-	
+
 	private final List<CorsRegistration> registrations = new ArrayList<CorsRegistration>();
 
 
 	/**
 	 * Enable cross origin requests on the specified path patterns. If no path pattern is specified,
 	 * cross-origin request handling is mapped on "/**" .
-	 * 
+	 *
 	 * <p>By default, all origins, all headers and credentials are allowed. Max age is set to 30 minutes.</p>
 	 */
 	public CorsRegistration enableCors(String... pathPatterns) {
@@ -46,7 +46,7 @@ public class CorsConfigurer {
 		this.registrations.add(registration);
 		return registration;
 	}
-	
+
 	protected Map<String, CorsConfiguration> getCorsConfigurations() {
 		Map<String, CorsConfiguration> configs = new LinkedHashMap<String, CorsConfiguration>(this.registrations.size());
 		for (CorsRegistration registration : this.registrations) {

@@ -200,7 +200,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	private ContentNegotiationManager contentNegotiationManager;
 
 	private List<HttpMessageConverter<?>> messageConverters;
-	
+
 	private Map<String, CorsConfiguration> corsConfigurations;
 
 
@@ -881,7 +881,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		}
 		return this.corsConfigurations;
 	}
-	
+
 	/**
 	 * Override this method to configure cross-origin requests handling.
 	 * @since 4.2

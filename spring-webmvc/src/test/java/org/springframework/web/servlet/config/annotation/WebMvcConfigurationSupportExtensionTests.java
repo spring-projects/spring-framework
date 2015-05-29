@@ -271,7 +271,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 		assertEquals("/", accessor.getPropertyValue("prefix"));
 		assertEquals(".jsp", accessor.getPropertyValue("suffix"));
 	}
-	
+
 	@Test
 	public void crossOrigin() {
 		Map<String, CorsConfiguration> configs = this.config.getCorsConfigurations();
@@ -407,7 +407,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 		public void configureCors(CorsConfigurer registry) {
 			registry.enableCors("/resources/**");
 		}
-		
+	
 	}
 
 	private class TestPathHelper extends UrlPathHelper {}

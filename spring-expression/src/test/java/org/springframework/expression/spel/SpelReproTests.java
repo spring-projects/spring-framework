@@ -1917,7 +1917,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		sec.setVariable("no", "1.0");
 		assertTrue(expression.getValue(sec).toString().startsWith("Object"));
 	}
-	
+
 	@Test
 	@SuppressWarnings("rawtypes")
 	public void SPR13055() throws Exception {
@@ -1962,7 +1962,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 		assertTrue(expression2.getValue(new BeanClass(new ListOf(1.1), new ListOf(-2.2)),
 				Boolean.class));
 	}
-	
+
 	static class CCC {
 		public boolean method(Object o) {
 			System.out.println(o);

@@ -28,30 +28,30 @@ import org.springframework.web.cors.CorsConfiguration;
 
 /**
  * Test fixture with a {@link CorsConfigurer}.
- * 
+ *
  * @author Sebastien Deleuze
  */
 public class CorsConfigurerTests {
-	
+
 	private CorsConfigurer configurer;
-	
+
 	@Before
 	public void setUp() {
 		this.configurer = new CorsConfigurer();
 	}
-	
+
 	@Test
 	public void noCorsConfigured() {
 		assertTrue(this.configurer.getCorsConfigurations().isEmpty());
 	}
-	
+
 	@Test
 	public void multipleCorsConfigured() {
 		this.configurer.enableCors("/foo");
 		this.configurer.enableCors("/bar");
 		assertEquals(2, this.configurer.getCorsConfigurations().size());
 	}
-	
+
 	@Test
 	public void defaultCorsRegistration() {
 		this.configurer.enableCors();
@@ -64,7 +64,7 @@ public class CorsConfigurerTests {
 		assertEquals(true, config.getAllowCredentials());
 		assertEquals(Long.valueOf(1800), config.getMaxAge());
 	}
-	
+
 	@Test
 	public void customizedCorsRegistration() {
 		this.configurer.enableCors("/foo").allowedOrigins("http://domain2.com", "http://domain2.com")
@@ -80,5 +80,5 @@ public class CorsConfigurerTests {
 		assertEquals(false, config.getAllowCredentials());
 		assertEquals(Long.valueOf(3600), config.getMaxAge());
 	}
-	
+
 }
