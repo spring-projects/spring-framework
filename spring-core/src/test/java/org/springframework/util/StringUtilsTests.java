@@ -700,4 +700,9 @@ public class StringUtilsTests {
 		assertEquals("Variant containing country code not extracted correctly", variant, locale.getVariant());
 	}
 
+	@Test
+	public void testNullToEmpty() throws Exception {
+		assertEquals("", StringUtils.nullToEmpty(null));
+		assertEquals("abc", StringUtils.nullToEmpty("abc"));
+	}
 }

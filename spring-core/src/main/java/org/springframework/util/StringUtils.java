@@ -85,6 +85,20 @@ public abstract class StringUtils {
 	}
 
 	/**
+	 * Convert {@code null} to empty string.
+	 * <p><pre class="code">
+	 * StringUtils.nullToEmpty(null) = ""
+	 * StringUtils.nullToEmpty("abc") = "abc"
+	 * </pre>
+	 * @param str string that may be {@code null}
+	 * @return given string if it is not {@code null} otherwise an empty string
+	 * @since 4.2.2
+	 */
+	public static String nullToEmpty(String str) {
+		return str == null ? "" : str;
+	}
+
+	/**
 	 * Check that the given {@code CharSequence} is neither {@code null} nor
 	 * of length 0.
 	 * <p>Note: this method returns {@code true} for a {@code CharSequence}
