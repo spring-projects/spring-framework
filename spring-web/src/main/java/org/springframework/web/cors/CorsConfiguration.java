@@ -242,12 +242,11 @@ public class CorsConfiguration {
 	}
 
 	/**
-	 * Return the configure maxAge value, possibly {@code null}.
+	 * Return the configured maxAge value, possibly {@code null}.
 	 */
 	public Long getMaxAge() {
 		return maxAge;
 	}
-
 
 	/**
 	 * Check the origin of the request against the configured allowed origins.
