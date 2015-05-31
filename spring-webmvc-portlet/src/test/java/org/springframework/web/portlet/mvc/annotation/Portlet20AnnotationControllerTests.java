@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1260,7 +1260,7 @@ public class Portlet20AnnotationControllerTests {
 	}
 
 
-	@RequestMapping(value="view")
+	@RequestMapping("view")
 	public static class FirstController {
 
 		@RenderMapping
@@ -1277,7 +1277,7 @@ public class Portlet20AnnotationControllerTests {
 	}
 
 
-	@RequestMapping(value="view")
+	@RequestMapping("view")
 	public static class SecondController {
 
 		@ResourceMapping("second")
@@ -1286,7 +1286,7 @@ public class Portlet20AnnotationControllerTests {
 			return "resourceSecond";
 		}
 
-		@RenderMapping(value = "MAXIMIZED", params = "report=second")
+		@RenderMapping(windowState = "MAXIMIZED", params = "report=second")
 		public String renderSecond(RenderResponse response) {
 			response.setProperty("RESPONSE", "renderSecond");
 			return "renderSecond";
@@ -1294,7 +1294,7 @@ public class Portlet20AnnotationControllerTests {
 	}
 
 
-	@RequestMapping(value="view")
+	@RequestMapping("view")
 	public static class ThirdController {
 
 		@ResourceMapping("third")
@@ -1303,7 +1303,7 @@ public class Portlet20AnnotationControllerTests {
 			return "resourceThird";
 		}
 
-		@RenderMapping(value = "MAXIMIZED", params = "report=third")
+		@RenderMapping(windowState = "MAXIMIZED", params = "report=third")
 		public String renderSecond(RenderResponse response) {
 			response.setProperty("RESPONSE", "renderThird");
 			return "renderThird";

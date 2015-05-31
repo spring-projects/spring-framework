@@ -167,7 +167,7 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 					}
 					else if (renderMapping != null) {
 						params = StringUtils.mergeStringArrays(params, renderMapping.params());
-						predicate = new RenderMappingPredicate(renderMapping.value(), params);
+						predicate = new RenderMappingPredicate(renderMapping.windowState(), params);
 					}
 					else if (resourceMapping != null) {
 						predicate = new ResourceMappingPredicate(resourceMapping.value());

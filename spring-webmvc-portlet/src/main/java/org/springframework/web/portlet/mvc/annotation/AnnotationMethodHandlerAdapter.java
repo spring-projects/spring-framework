@@ -459,7 +459,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 				mappingInfo.initPhaseMapping(PortletRequest.ACTION_PHASE, actionMapping.name(), actionMapping.params());
 			}
 			if (renderMapping != null) {
-				mappingInfo.initPhaseMapping(PortletRequest.RENDER_PHASE, renderMapping.value(), renderMapping.params());
+				mappingInfo.initPhaseMapping(PortletRequest.RENDER_PHASE, renderMapping.windowState(), renderMapping.params());
 			}
 			if (resourceMapping != null) {
 				mappingInfo.initPhaseMapping(PortletRequest.RESOURCE_PHASE, resourceMapping.value(), new String[0]);
