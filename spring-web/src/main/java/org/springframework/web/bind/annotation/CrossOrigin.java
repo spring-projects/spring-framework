@@ -84,7 +84,7 @@ public @interface CrossOrigin {
 	 * The maximum age (in seconds) of the cache duration for pre-flight responses.
 	 * <p>This property controls the value of the {@code Access-Control-Max-Age}
 	 * header in the pre-flight response.
-	 * <p>A value of {@code -1} means <em>undefined</em>.
+	 * <p>A negative value means <em>undefined</em>.
 	 * <p>Setting this to a reasonable value can reduce the number of pre-flight
 	 * request/response interactions required by the browser.
 	 * <p>Defaults to {@code 1800} seconds (i.e., 30 minutes).

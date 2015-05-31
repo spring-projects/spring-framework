@@ -340,7 +340,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			throw new IllegalStateException("@CrossOrigin's allowCredentials value must be \"true\", \"false\", "
 					+ "or an empty string (\"\"); current value is [" + allowCredentials + "].");
 		}
-		if (annotation.maxAge() != -1 && config.getMaxAge() == null) {
+
+		if ((annotation.maxAge() >= 0) && (config.getMaxAge() == null)) {
 			config.setMaxAge(annotation.maxAge());
 		}
 	}
