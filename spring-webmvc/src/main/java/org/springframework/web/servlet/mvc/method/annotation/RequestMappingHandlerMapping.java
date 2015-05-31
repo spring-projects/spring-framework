@@ -328,15 +328,17 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		for (String header : annotation.exposedHeaders()) {
 			config.addExposedHeader(header);
 		}
-		if (annotation.allowCredentials().equalsIgnoreCase("true")) {
+
+		String allowCredentials = annotation.allowCredentials();
+		if ("true".equalsIgnoreCase(allowCredentials)) {
 			config.setAllowCredentials(true);
 		}
-		else if (annotation.allowCredentials().equalsIgnoreCase("false")) {
+		else if ("false".equalsIgnoreCase(allowCredentials)) {
 			config.setAllowCredentials(false);
 		}
-		else if (!annotation.allowCredentials().isEmpty()) {
-			throw new IllegalStateException("AllowCredentials value must be \"true\", \"false\" " +
-					"or \"\" (empty string), current value is " + annotation.allowCredentials());
+		else if (!allowCredentials.isEmpty()) {
+			throw new IllegalStateException("@CrossOrigin's allowCredentials value must be \"true\", \"false\", "
+					+ "or an empty string (\"\"); current value is [" + allowCredentials + "].");
 		}
 		if (annotation.maxAge() != -1 && config.getMaxAge() == null) {
 			config.setMaxAge(annotation.maxAge());
