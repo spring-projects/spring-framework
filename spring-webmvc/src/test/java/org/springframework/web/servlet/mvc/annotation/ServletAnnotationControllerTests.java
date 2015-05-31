@@ -2163,7 +2163,7 @@ public class ServletAnnotationControllerTests {
 
 	@Controller
 	@RequestMapping("/myPage")
-	@SessionAttributes({"object1", "object2"})
+	@SessionAttributes(names = { "object1", "object2" })
 	public static class MySessionAttributesController {
 
 		@RequestMapping(method = RequestMethod.GET)
