@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
+
 import org.mockito.Mockito;
 
 import org.springframework.cache.annotation.Cacheable;
@@ -140,8 +141,8 @@ public class CacheReproTests {
 
 		@Override
 		@Caching(cacheable = {
-				@Cacheable(value = "bigCache", unless = "#result.size() < 4"),
-				@Cacheable(value = "smallCache", unless = "#result.size() > 3") })
+				@Cacheable(cacheNames = "bigCache", unless = "#result.size() < 4"),
+				@Cacheable(cacheNames = "smallCache", unless = "#result.size() > 3") })
 		public List<String> multiple(int id) {
 			if (this.multipleCount > 0) {
 				fail("Called too many times");
@@ -208,7 +209,7 @@ public class CacheReproTests {
 			return new Object();
 		}
 
-		@Cacheable(value = "cache", condition = "false")
+		@Cacheable(cacheNames = "cache", condition = "false")
 		public Object getNeverCache(String key) {
 			return new Object();
 		}

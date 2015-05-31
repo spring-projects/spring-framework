@@ -24,6 +24,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.cache.Cache;
+import org.springframework.core.annotation.AliasFor;
 
 /**
  * Annotation indicating that a method (or all methods on a class) triggers
@@ -47,11 +48,21 @@ import org.springframework.cache.Cache;
 public @interface CachePut {
 
 	/**
+	 * Alias for {@link #cacheNames}.
+	 */
+	@AliasFor(attribute = "cacheNames")
+	String[] value() default {};
+
+	/**
 	 * Names of the caches to use for the cache put operation.
 	 * <p>Names may be used to determine the target cache (or caches), matching
 	 * the qualifier value or bean name of a specific bean definition.
+	 * @since 4.2
+	 * @see #value
+	 * @see CacheConfig#cacheNames
 	 */
-	String[] value() default {};
+	@AliasFor(attribute = "value")
+	String[] cacheNames() default {};
 
 	/**
 	 * Spring Expression Language (SpEL) expression for computing the key dynamically.

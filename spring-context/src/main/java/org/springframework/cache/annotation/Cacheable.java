@@ -23,6 +23,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.core.annotation.AliasFor;
+
 /**
  * Annotation indicating that the result of invoking a method (or all methods
  * in a class) can be cached.
@@ -51,11 +53,21 @@ import java.lang.annotation.Target;
 public @interface Cacheable {
 
 	/**
+	 * Alias for {@link #cacheNames}.
+	 */
+	@AliasFor(attribute = "cacheNames")
+	String[] value() default {};
+
+	/**
 	 * Names of the caches in which method invocation results are stored.
 	 * <p>Names may be used to determine the target cache (or caches), matching
 	 * the qualifier value or bean name of a specific bean definition.
+	 * @since 4.2
+	 * @see #value
+	 * @see CacheConfig#cacheNames
 	 */
-	String[] value() default {};
+	@AliasFor(attribute = "value")
+	String[] cacheNames() default {};
 
 	/**
 	 * Spring Expression Language (SpEL) expression for computing the key dynamically.

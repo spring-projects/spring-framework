@@ -23,6 +23,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.core.annotation.AliasFor;
+
 /**
  * Annotation indicating that a method (or all methods on a class) triggers
  * a cache eviction operation.
@@ -40,11 +42,21 @@ import java.lang.annotation.Target;
 public @interface CacheEvict {
 
 	/**
+	 * Alias for {@link #cacheNames}.
+	 */
+	@AliasFor(attribute = "cacheNames")
+	String[] value() default {};
+
+	/**
 	 * Names of the caches to use for the cache eviction operation.
 	 * <p>Names may be used to determine the target cache (or caches), matching
 	 * the qualifier value or bean name of a specific bean definition.
+	 * @since 4.2
+	 * @see #value
+	 * @see CacheConfig#cacheNames
 	 */
-	String[] value() default {};
+	@AliasFor(attribute = "value")
+	String[] cacheNames() default {};
 
 	/**
 	 * Spring Expression Language (SpEL) expression for computing the key dynamically.
