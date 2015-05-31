@@ -30,6 +30,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.annotation.AnnotationConfigurationException;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.filter.AbstractTypeHierarchyTraversingFilter;
@@ -40,6 +41,7 @@ import org.springframework.core.type.filter.RegexPatternTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -115,11 +117,7 @@ class ComponentScanAnnotationParser {
 		}
 
 		Set<String> basePackages = new LinkedHashSet<String>();
-		Set<String> specifiedPackages = new LinkedHashSet<String>();
-		specifiedPackages.addAll(Arrays.asList(componentScan.getStringArray("value")));
-		specifiedPackages.addAll(Arrays.asList(componentScan.getStringArray("basePackages")));
-
-		for (String pkg : specifiedPackages) {
+		for (String pkg : getBasePackages(componentScan, declaringClass)) {
 			String[] tokenized = StringUtils.tokenizeToStringArray(this.environment.resolvePlaceholders(pkg),
 					ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS);
 			basePackages.addAll(Arrays.asList(tokenized));
@@ -138,6 +136,25 @@ class ComponentScanAnnotationParser {
 			}
 		});
 		return scanner.doScan(StringUtils.toStringArray(basePackages));
+	}
+
+	private String[] getBasePackages(AnnotationAttributes componentScan, String declaringClass) {
+		String[] value = componentScan.getStringArray("value");
+		String[] basePackages = componentScan.getStringArray("basePackages");
+		boolean valueDeclared = !ObjectUtils.isEmpty(value);
+		boolean basePackagesDeclared = !ObjectUtils.isEmpty(basePackages);
+
+		if (valueDeclared && basePackagesDeclared && !ObjectUtils.nullSafeEquals(value, basePackages)) {
+			String msg = String.format("In @ComponentScan declared on [%s], attribute [value] "
+					+ "and its alias [basePackages] are present with values of [%s] and [%s], "
+					+ "but only one is permitted.", declaringClass, ObjectUtils.nullSafeToString(value),
+				ObjectUtils.nullSafeToString(basePackages));
+			throw new AnnotationConfigurationException(msg);
+		}
+		if (!basePackagesDeclared) {
+			basePackages = value;
+		}
+		return basePackages;
 	}
 
 	private List<TypeFilter> typeFiltersFor(AnnotationAttributes filterAttributes) {

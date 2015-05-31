@@ -23,6 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.beans.factory.support.BeanNameGenerator;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.type.filter.TypeFilter;
 
 /**
@@ -46,6 +47,7 @@ import org.springframework.core.type.filter.TypeFilter;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.1
  * @see Configuration
  */
@@ -60,6 +62,7 @@ public @interface ComponentScan {
 	 * are needed &mdash; for example, {@code @ComponentScan("org.my.pkg")}
 	 * instead of {@code @ComponentScan(basePackages = "org.my.pkg")}.
 	 */
+	@AliasFor(attribute = "basePackages")
 	String[] value() default {};
 
 	/**
@@ -69,6 +72,7 @@ public @interface ComponentScan {
 	 * <p>Use {@link #basePackageClasses} for a type-safe alternative to
 	 * String-based package names.
 	 */
+	@AliasFor(attribute = "value")
 	String[] basePackages() default {};
 
 	/**
