@@ -267,7 +267,7 @@ public class HandlerMethodInvoker {
 				}
 				else if (RequestHeader.class.isInstance(paramAnn)) {
 					RequestHeader requestHeader = (RequestHeader) paramAnn;
-					headerName = requestHeader.value();
+					headerName = requestHeader.name();
 					required = requestHeader.required();
 					defaultValue = parseDefaultValueAttribute(requestHeader.defaultValue());
 					annotationsFound++;

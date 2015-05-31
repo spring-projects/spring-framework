@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.core.annotation.AliasFor;
+
 /**
  * Annotation which indicates that a method parameter should be bound to a web request header.
- * Supported for annotated handler methods in Servlet and Portlet environments.
+ *
+ * <p>Supported for annotated handler methods in Servlet and Portlet environments.
  *
  * <p>If the method parameter is {@link java.util.Map Map&lt;String, String&gt;} or
  * {@link org.springframework.util.MultiValueMap MultiValueMap&lt;String, String&gt;},
@@ -32,6 +35,7 @@ import java.lang.annotation.Target;
  * populated with all header names and values.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  * @see RequestMapping
  * @see RequestParam
@@ -45,9 +49,17 @@ import java.lang.annotation.Target;
 public @interface RequestHeader {
 
 	/**
-	 * The name of the request header to bind to.
+	 * Alias for {@link #name}.
 	 */
+	@AliasFor(attribute = "name")
 	String value() default "";
+
+	/**
+	 * The name of the request header to bind to.
+	 * @since 4.2
+	 */
+	@AliasFor(attribute = "value")
+	String name() default "";
 
 	/**
 	 * Whether the header is required.
