@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Map;
 
+import org.springframework.core.annotation.AliasFor;
+
 /**
  * Annotation which indicates that a method parameter should be bound to a web
- * request parameter. Supported for annotated handler methods in Servlet and
- * Portlet environments.
+ * request parameter.
+ *
+ * <p>Supported for annotated handler methods in Servlet and Portlet environments.
  *
  * <p>If the method parameter type is {@link Map} and a request parameter name
  * is specified, then the request parameter value is converted to a {@link Map}
@@ -39,6 +42,7 @@ import java.util.Map;
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 2.5
  * @see RequestMapping
  * @see RequestHeader
@@ -53,9 +57,17 @@ import java.util.Map;
 public @interface RequestParam {
 
 	/**
-	 * The name of the request parameter to bind to.
+	 * Alias for {@link #name}.
 	 */
+	@AliasFor(attribute = "name")
 	String value() default "";
+
+	/**
+	 * The name of the request parameter to bind to.
+	 * @since 4.2
+	 */
+	@AliasFor(attribute = "value")
+	String name() default "";
 
 	/**
 	 * Whether the parameter is required.

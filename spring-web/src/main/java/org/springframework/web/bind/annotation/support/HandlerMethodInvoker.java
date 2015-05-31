@@ -260,7 +260,7 @@ public class HandlerMethodInvoker {
 			for (Annotation paramAnn : paramAnns) {
 				if (RequestParam.class.isInstance(paramAnn)) {
 					RequestParam requestParam = (RequestParam) paramAnn;
-					paramName = requestParam.value();
+					paramName = requestParam.name();
 					required = requestParam.required();
 					defaultValue = parseDefaultValueAttribute(requestParam.defaultValue());
 					annotationsFound++;
@@ -432,7 +432,7 @@ public class HandlerMethodInvoker {
 			for (Annotation paramAnn : paramAnns) {
 				if (RequestParam.class.isInstance(paramAnn)) {
 					RequestParam requestParam = (RequestParam) paramAnn;
-					paramName = requestParam.value();
+					paramName = requestParam.name();
 					paramRequired = requestParam.required();
 					paramDefaultValue = parseDefaultValueAttribute(requestParam.defaultValue());
 					break;

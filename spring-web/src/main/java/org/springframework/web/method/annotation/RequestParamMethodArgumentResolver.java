@@ -127,7 +127,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 		Class<?> paramType = parameter.getParameterType();
 		if (parameter.hasParameterAnnotation(RequestParam.class)) {
 			if (Map.class.isAssignableFrom(paramType)) {
-				String paramName = parameter.getParameterAnnotation(RequestParam.class).value();
+				String paramName = parameter.getParameterAnnotation(RequestParam.class).name();
 				return StringUtils.hasText(paramName);
 			}
 			else {
@@ -261,8 +261,8 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 			return;
 		}
 
-		RequestParam ann = parameter.getParameterAnnotation(RequestParam.class);
-		String name = (ann == null || StringUtils.isEmpty(ann.value()) ? parameter.getParameterName() : ann.value());
+		RequestParam requestParam = parameter.getParameterAnnotation(RequestParam.class);
+		String name = (requestParam == null || StringUtils.isEmpty(requestParam.name()) ? parameter.getParameterName() : requestParam.name());
 
 		if (value == null) {
 			builder.queryParam(name);
@@ -301,7 +301,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 		}
 
 		public RequestParamNamedValueInfo(RequestParam annotation) {
-			super(annotation.value(), annotation.required(), annotation.defaultValue());
+			super(annotation.name(), annotation.required(), annotation.defaultValue());
 		}
 	}
 
