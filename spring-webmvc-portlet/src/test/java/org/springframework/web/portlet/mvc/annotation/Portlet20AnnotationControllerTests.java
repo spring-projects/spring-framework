@@ -1163,7 +1163,7 @@ public class Portlet20AnnotationControllerTests {
 	@RequestMapping("VIEW")
 	private static class MyPortlet20DispatchingController {
 
-		@ActionMapping("this")
+		@ActionMapping(name = "this")
 		public void myHandle(StateAwareResponse response) {
 			response.setRenderParameter("test", "value");
 		}

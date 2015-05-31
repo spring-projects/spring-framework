@@ -456,7 +456,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 			EventMapping eventMapping = AnnotationUtils.findAnnotation(method, EventMapping.class);
 			RequestMapping requestMapping = AnnotationUtils.findAnnotation(method, RequestMapping.class);
 			if (actionMapping != null) {
-				mappingInfo.initPhaseMapping(PortletRequest.ACTION_PHASE, actionMapping.value(), actionMapping.params());
+				mappingInfo.initPhaseMapping(PortletRequest.ACTION_PHASE, actionMapping.name(), actionMapping.params());
 			}
 			if (renderMapping != null) {
 				mappingInfo.initPhaseMapping(PortletRequest.RENDER_PHASE, renderMapping.value(), renderMapping.params());
