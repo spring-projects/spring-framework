@@ -188,8 +188,8 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 			}
 		}
 
-		RequestPart ann = parameter.getParameterAnnotation(RequestPart.class);
-		boolean isRequired = ((ann == null || ann.required()) && !optional);
+		RequestPart requestPart = parameter.getParameterAnnotation(RequestPart.class);
+		boolean isRequired = ((requestPart == null || requestPart.required()) && !optional);
 
 		if (arg == null && isRequired) {
 			throw new MissingServletRequestPartException(partName);
@@ -209,8 +209,8 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 	}
 
 	private String getPartName(MethodParameter methodParam) {
-		RequestPart ann = methodParam.getParameterAnnotation(RequestPart.class);
-		String partName = (ann != null ? ann.value() : "");
+		RequestPart requestPart = methodParam.getParameterAnnotation(RequestPart.class);
+		String partName = (requestPart != null ? requestPart.name() : "");
 		if (partName.length() == 0) {
 			partName = methodParam.getParameterName();
 			if (partName == null) {

@@ -179,14 +179,13 @@ public class RequestPartIntegrationTests {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	@Controller
 	private static class RequestPartTestController {
 
 		@RequestMapping(value = "/test", method = RequestMethod.POST, consumes = { "multipart/mixed", "multipart/form-data" })
-		public ResponseEntity<Object> create(@RequestPart("json-data") TestData testData,
+		public ResponseEntity<Object> create(@RequestPart(name = "json-data") TestData testData,
 				@RequestPart("file-data") MultipartFile file,
-				@RequestPart(value = "empty-data", required = false) TestData emptyData) {
+				@RequestPart(name = "empty-data", required = false) TestData emptyData) {
 
 			String url = "http://localhost:8080/test/" + testData.getName() + "/" + file.getOriginalFilename();
 			HttpHeaders headers = new HttpHeaders();
