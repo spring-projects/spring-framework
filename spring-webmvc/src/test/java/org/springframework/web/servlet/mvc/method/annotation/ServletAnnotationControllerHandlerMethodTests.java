@@ -2657,7 +2657,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	public static class ResponseStatusController {
 
 		@RequestMapping("/something")
-		@ResponseStatus(value = HttpStatus.CREATED, reason = "It's alive!")
+		@ResponseStatus(code = HttpStatus.CREATED, reason = "It's alive!")
 		public void handle(Writer writer) throws IOException {
 			writer.write("something");
 		}

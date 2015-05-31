@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,18 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.http.HttpStatus;
 
 /**
- * Marks a method or exception class with the status code and reason that should be returned. The status code is applied
- * to the HTTP response when the handler method is invoked, or whenever said exception is thrown.
+ * Marks a method or exception class with the status {@link #code} and
+ * {@link #reason} that should be returned.
+ *
+ * <p>The status code is applied to the HTTP response when the handler
+ * method is invoked, or whenever said exception is thrown.
  *
  * @author Arjen Poutsma
+ * @author Sam Brannen
  * @see org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver
  * @since 3.0
  */
@@ -38,16 +43,27 @@ import org.springframework.http.HttpStatus;
 public @interface ResponseStatus {
 
 	/**
-	 * The status code to use for the response.
-	 *
-	 * @see javax.servlet.http.HttpServletResponse#setStatus(int)
+	 * Alias for {@link #code}.
 	 */
-	HttpStatus value();
+	@AliasFor(attribute = "code")
+	HttpStatus value() default HttpStatus.INTERNAL_SERVER_ERROR;
 
 	/**
-	 * The reason to be used for the response. <p>If this element is not set, it will default to the standard status
-	 * message for the status code. Note that due to the use of {@code HttpServletResponse.sendError(int, String)},
-	 * the response will be considered complete and should not be written to any further.
+	 * The status <em>code</em> to use for the response.
+	 * <p>Default is {@link HttpStatus#INTERNAL_SERVER_ERROR}, which should
+	 * typically be changed to something more appropriate.
+	 * @since 4.2
+	 * @see javax.servlet.http.HttpServletResponse#setStatus(int)
+	 */
+	@AliasFor(attribute = "value")
+	HttpStatus code() default HttpStatus.INTERNAL_SERVER_ERROR;
+
+	/**
+	 * The <em>reason</em> to be used for the response.
+	 * <p>If this attribute is not set, it will default to the standard status
+	 * message for the status code. Note that due to the use of
+	 * {@code HttpServletResponse.sendError(int, String)}, the response will be
+	 * considered complete and should not be written to any further.
 	 *
 	 * @see javax.servlet.http.HttpServletResponse#sendError(int, String)
 	 */

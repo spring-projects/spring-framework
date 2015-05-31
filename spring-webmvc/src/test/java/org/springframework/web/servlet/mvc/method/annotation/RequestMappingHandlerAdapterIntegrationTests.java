@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -353,14 +353,14 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 			return "viewName";
 		}
 
-		@ResponseStatus(value=HttpStatus.ACCEPTED)
+		@ResponseStatus(HttpStatus.ACCEPTED)
 		@ResponseBody
 		public String handleRequestBody(@RequestBody byte[] bytes) throws Exception {
 			String requestBody = new String(bytes, "UTF-8");
 			return "Handled requestBody=[" + requestBody + "]";
 		}
 
-		@ResponseStatus(value=HttpStatus.ACCEPTED)
+		@ResponseStatus(code = HttpStatus.ACCEPTED)
 		@ResponseBody
 		public String handleAndValidateRequestBody(@Valid TestBean modelAttr, Errors errors) throws Exception {
 			return "Error count [" + errors.getErrorCount() + "]";

@@ -16,9 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,7 +23,6 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.MethodParameter;
@@ -50,36 +46,29 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandlerCom
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.view.RedirectView;
 
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * Test fixture with {@link ServletInvocableHandlerMethod}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class ServletInvocableHandlerMethodTests {
 
-	private HandlerMethodArgumentResolverComposite argumentResolvers;
+	private final HandlerMethodArgumentResolverComposite argumentResolvers = new HandlerMethodArgumentResolverComposite();
 
-	private HandlerMethodReturnValueHandlerComposite returnValueHandlers;
+	private final HandlerMethodReturnValueHandlerComposite returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
 
-	private ModelAndViewContainer mavContainer;
+	private final ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 
-	private ServletWebRequest webRequest;
+	private final MockHttpServletRequest request = new MockHttpServletRequest();
 
-	private MockHttpServletRequest request;
+	private final MockHttpServletResponse response = new MockHttpServletResponse();
 
-	private MockHttpServletResponse response;
+	private final ServletWebRequest webRequest = new ServletWebRequest(this.request, this.response);
 
-
-	@Before
-	public void setUp() throws Exception {
-		this.returnValueHandlers = new HandlerMethodReturnValueHandlerComposite();
-		this.argumentResolvers = new HandlerMethodArgumentResolverComposite();
-		this.mavContainer = new ModelAndViewContainer();
-		this.request = new MockHttpServletRequest();
-		this.response = new MockHttpServletResponse();
-		this.webRequest = new ServletWebRequest(this.request, this.response);
-	}
 
 	@Test
 	public void invokeAndHandle_VoidWithResponseStatus() throws Exception {
@@ -279,11 +268,11 @@ public class ServletInvocableHandlerMethodTests {
 			return "view";
 		}
 
-		@ResponseStatus(value = HttpStatus.BAD_REQUEST)
+		@ResponseStatus(HttpStatus.BAD_REQUEST)
 		public void responseStatus() {
 		}
 
-		@ResponseStatus(value = HttpStatus.BAD_REQUEST, reason = "400 Bad Request")
+		@ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "400 Bad Request")
 		public String responseStatusWithReason() {
 			return "foo";
 		}
@@ -299,7 +288,6 @@ public class ServletInvocableHandlerMethodTests {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	private static class MethodLevelResponseBodyHandler {
 
 		@ResponseBody
@@ -324,12 +312,11 @@ public class ServletInvocableHandlerMethodTests {
 			return new DeferredResult<>();
 		}
 
-		public ResponseEntity handleRawType() {
+		public ResponseEntity<Void> handleRawType() {
 			return ResponseEntity.ok().build();
 		}
 	}
 
-	@SuppressWarnings("unused")
 	private static class ExceptionRaisingReturnValueHandler implements HandlerMethodReturnValueHandler {
 
 		@Override
