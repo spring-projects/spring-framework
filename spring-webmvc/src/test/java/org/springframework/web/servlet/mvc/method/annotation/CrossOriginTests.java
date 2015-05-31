@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -128,7 +129,17 @@ public class CrossOriginTests {
 		assertArrayEquals(new String[]{"header1", "header2"}, config.getAllowedHeaders().toArray());
 		assertArrayEquals(new String[]{"header3", "header4"}, config.getExposedHeaders().toArray());
 		assertEquals(new Long(123), config.getMaxAge());
-		assertEquals(false, config.getAllowCredentials());
+		assertFalse(config.getAllowCredentials());
+	}
+
+	@Test
+	public void customOriginDefinedViaValueAttribute() throws Exception {
+		this.handlerMapping.registerHandler(new MethodLevelController());
+		this.request.setRequestURI("/customOrigin");
+		CorsConfiguration config = getCorsConfiguration(this.handlerMapping.getHandler(request), false);
+		assertNotNull(config);
+		assertEquals(Arrays.asList("http://example.com"), config.getAllowedOrigins());
+		assertTrue(config.getAllowCredentials());
 	}
 
 	@Test
@@ -278,6 +289,11 @@ public class CrossOriginTests {
 				exposedHeaders = { "header3", "header4" }, method = RequestMethod.DELETE, maxAge = 123, allowCredentials = "false")
 		@RequestMapping(path = "/customized", method = { RequestMethod.GET, RequestMethod.POST })
 		public void customized() {
+		}
+
+		@CrossOrigin("http://example.com")
+		@RequestMapping("/customOrigin")
+		public void customOriginDefinedViaValueAttribute() {
 		}
 	}
 

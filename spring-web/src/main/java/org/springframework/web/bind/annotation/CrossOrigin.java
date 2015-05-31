@@ -22,6 +22,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.core.annotation.AliasFor;
+
 /**
  * Marks the annotated method or type as permitting cross origin requests.
  *
@@ -38,12 +40,20 @@ import java.lang.annotation.Target;
 public @interface CrossOrigin {
 
 	/**
+	 * Alias for {@link #origin}.
+	 */
+	@AliasFor(attribute = "origin")
+	String[] value() default { "*" };
+
+	/**
 	 * List of allowed origins.
 	 * <p>These values are placed in the {@code Access-Control-Allow-Origin}
 	 * header of both the pre-flight response and the actual response.
 	 * <p>Defaults to {@code "*"} which means that all origins are allowed.
+	 * @see #value
 	 */
-	String[] origin() default {"*"};
+	@AliasFor(attribute = "value")
+	String[] origin() default { "*" };
 
 	/**
 	 * List of request headers that can be used during the actual request.
@@ -52,7 +62,7 @@ public @interface CrossOrigin {
 	 * <p>Defaults to {@code "*"} which means that all headers requested
 	 * by the client are allowed.
 	 */
-	String[] allowedHeaders() default {"*"};
+	String[] allowedHeaders() default { "*" };
 
 	/**
 	 * List of response headers that the user-agent will allow the client to access.
