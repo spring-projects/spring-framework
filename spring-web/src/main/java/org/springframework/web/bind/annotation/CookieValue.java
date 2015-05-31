@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,14 +22,18 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.core.annotation.AliasFor;
+
 /**
  * Annotation which indicates that a method parameter should be bound to an HTTP cookie.
- * Supported for annotated handler methods in Servlet and Portlet environments.
+ *
+ * <p>Supported for annotated handler methods in Servlet and Portlet environments.
  *
  * <p>The method parameter may be declared as type {@link javax.servlet.http.Cookie}
  * or as cookie value type (String, int, etc).
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.0
  * @see RequestMapping
  * @see RequestParam
@@ -45,9 +49,17 @@ import java.lang.annotation.Target;
 public @interface CookieValue {
 
 	/**
-	 * The name of the cookie to bind to.
+	 * Alias for {@link #name}.
 	 */
+	@AliasFor(attribute = "name")
 	String value() default "";
+
+	/**
+	 * The name of the cookie to bind to.
+	 * @since 4.2
+	 */
+	@AliasFor(attribute = "value")
+	String name() default "";
 
 	/**
 	 * Whether the header is required.

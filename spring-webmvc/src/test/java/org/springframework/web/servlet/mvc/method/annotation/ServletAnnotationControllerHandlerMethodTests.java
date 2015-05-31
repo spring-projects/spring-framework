@@ -1657,7 +1657,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		@RequestMapping("/myPath2.do")
 		public void myHandle(@RequestParam("param1") String p1, @RequestParam("param2") int p2,
-				@RequestHeader("header1") long h1, @CookieValue("cookie1") Cookie c1,
+				@RequestHeader("header1") long h1, @CookieValue(name = "cookie1") Cookie c1,
 				HttpServletResponse response) throws IOException {
 			response.getWriter().write("test-" + p1 + "-" + p2 + "-" + h1 + "-" + c1.getValue());
 		}

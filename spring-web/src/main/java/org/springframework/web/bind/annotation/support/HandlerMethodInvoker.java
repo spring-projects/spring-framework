@@ -278,7 +278,7 @@ public class HandlerMethodInvoker {
 				}
 				else if (CookieValue.class.isInstance(paramAnn)) {
 					CookieValue cookieValue = (CookieValue) paramAnn;
-					cookieName = cookieValue.value();
+					cookieName = cookieValue.name();
 					required = cookieValue.required();
 					defaultValue = parseDefaultValueAttribute(cookieValue.defaultValue());
 					annotationsFound++;
