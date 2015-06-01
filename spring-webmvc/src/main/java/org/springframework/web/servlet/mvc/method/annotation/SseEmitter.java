@@ -171,7 +171,7 @@ public class SseEmitter extends ResponseBodyEmitter {
 
 		@Override
 		public SseEventBuilder name(String name) {
-			append("name:").append(name != null ? name : "").append("\n");
+			append("event:").append(name != null ? name : "").append("\n");
 			return this;
 		}
 
