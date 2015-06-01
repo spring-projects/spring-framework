@@ -201,6 +201,22 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
+	 * Delegates to {@link #createRequestMappingInfo(RequestMapping, RequestCondition)},
+	 * supplying the appropriate custom {@link RequestCondition} depending on whether
+	 * the supplied {@code annotatedElement} is a class or method.
+	 *
+	 * @see #getCustomTypeCondition(Class)
+	 * @see #getCustomMethodCondition(Method)
+	 */
+	private RequestMappingInfo createRequestMappingInfo(AnnotatedElement element) {
+		RequestMapping requestMapping = AnnotatedElementUtils.findAnnotation(element, RequestMapping.class);
+		RequestCondition<?> condition = (element instanceof Class<?> ?
+				getCustomTypeCondition((Class<?>) element) :
+				getCustomMethodCondition((Method) element));
+		return (requestMapping != null ? createRequestMappingInfo(requestMapping, condition) : null);
+	}
+
+	/**
 	 * Provide a custom type-level request condition.
 	 * The custom {@link RequestCondition} can be of any type so long as the
 	 * same condition type is returned from all calls to this method in order
@@ -211,6 +227,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * @param handlerType the handler type for which to create the condition
 	 * @return the condition, or {@code null}
 	 */
+	@SuppressWarnings("unused")
 	protected RequestCondition<?> getCustomTypeCondition(Class<?> handlerType) {
 		return null;
 	}
@@ -226,23 +243,9 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * @param method the handler method for which to create the condition
 	 * @return the condition, or {@code null}
 	 */
+	@SuppressWarnings("unused")
 	protected RequestCondition<?> getCustomMethodCondition(Method method) {
 		return null;
-	}
-
-	/**
-	 * Delegates to {@link #createRequestMappingInfo(RequestMapping, RequestCondition)},
-	 * supplying the appropriate custom {@link RequestCondition} depending on whether
-	 * the supplied {@code annotatedElement} is a class or method.
-	 *
-	 * @see #getCustomTypeCondition(Class)
-	 * @see #getCustomMethodCondition(Method)
-	 */
-	private RequestMappingInfo createRequestMappingInfo(AnnotatedElement annotatedElement) {
-		RequestMapping requestMapping = AnnotatedElementUtils.findAnnotation(annotatedElement, RequestMapping.class);
-		RequestCondition<?> customCondition = ((annotatedElement instanceof Class<?>) ? getCustomTypeCondition((Class<?>) annotatedElement)
-				: getCustomMethodCondition((Method) annotatedElement));
-		return ((requestMapping != null) ? createRequestMappingInfo(requestMapping, customCondition) : null);
 	}
 
 	/**
@@ -254,7 +257,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	protected RequestMappingInfo createRequestMappingInfo(RequestMapping requestMapping,
 			RequestCondition<?> customCondition) {
 
-		return RequestMappingInfo.paths(resolveEmbeddedValuesInPatterns(requestMapping.path()))
+		return RequestMappingInfo
+				.paths(resolveEmbeddedValuesInPatterns(requestMapping.path()))
 				.methods(requestMapping.method())
 				.params(requestMapping.params())
 				.headers(requestMapping.headers())
