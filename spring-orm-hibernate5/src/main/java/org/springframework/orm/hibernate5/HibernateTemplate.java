@@ -420,10 +420,10 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 			@SuppressWarnings("unchecked")
 			public T doInHibernate(Session session) throws HibernateException {
 				if (lockMode != null) {
-					return (T) session.get(entityClass, id, new LockOptions(lockMode));
+					return session.get(entityClass, id, new LockOptions(lockMode));
 				}
 				else {
-					return (T) session.get(entityClass, id);
+					return session.get(entityClass, id);
 				}
 			}
 		});
@@ -465,10 +465,10 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 			@SuppressWarnings("unchecked")
 			public T doInHibernate(Session session) throws HibernateException {
 				if (lockMode != null) {
-					return (T) session.load(entityClass, id, new LockOptions(lockMode));
+					return session.load(entityClass, id, new LockOptions(lockMode));
 				}
 				else {
-					return (T) session.load(entityClass, id);
+					return session.load(entityClass, id);
 				}
 			}
 		});

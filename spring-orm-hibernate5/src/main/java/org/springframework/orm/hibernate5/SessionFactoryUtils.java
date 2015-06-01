@@ -39,13 +39,14 @@ import org.hibernate.UnresolvableObjectException;
 import org.hibernate.WrongClassException;
 import org.hibernate.dialect.lock.OptimisticEntityLockException;
 import org.hibernate.dialect.lock.PessimisticEntityLockException;
+import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.exception.DataException;
 import org.hibernate.exception.JDBCConnectionException;
 import org.hibernate.exception.LockAcquisitionException;
 import org.hibernate.exception.SQLGrammarException;
-import org.hibernate.service.spi.Wrapped;
+import org.hibernate.service.UnknownServiceException;
 
 import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.dao.DataAccessException;
@@ -88,14 +89,22 @@ public abstract class SessionFactoryUtils {
 	 * Determine the DataSource of the given SessionFactory.
 	 * @param sessionFactory the SessionFactory to check
 	 * @return the DataSource, or {@code null} if none found
-	 * @see SessionFactoryImplementor#getConnectionProvider
+	 * @see ConnectionProvider
 	 */
 	@SuppressWarnings("deprecation")
 	public static DataSource getDataSource(SessionFactory sessionFactory) {
 		if (sessionFactory instanceof SessionFactoryImplementor) {
-			Wrapped cp = ((SessionFactoryImplementor) sessionFactory).getConnectionProvider();
-			if (cp != null) {
-				return cp.unwrap(DataSource.class);
+			try {
+				ConnectionProvider cp = ((SessionFactoryImplementor) sessionFactory).getServiceRegistry().getService(
+						ConnectionProvider.class);
+				if (cp != null) {
+					return cp.unwrap(DataSource.class);
+				}
+			}
+			catch (UnknownServiceException ex) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("No ConnectionProvider found - cannot determine DataSource for SessionFactory: " + ex);
+				}
 			}
 		}
 		return null;
