@@ -17,10 +17,6 @@
 package org.springframework.messaging.simp.annotation.support;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
-import static org.springframework.messaging.handler.annotation.support.DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER;
-import static org.springframework.messaging.support.MessageHeaderAccessor.*;
 
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
@@ -33,6 +29,7 @@ import javax.security.auth.Subject;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -56,6 +53,11 @@ import org.springframework.messaging.simp.user.DestinationUserNameProvider;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.MimeType;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+import static org.springframework.messaging.handler.annotation.support.DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER;
+import static org.springframework.messaging.support.MessageHeaderAccessor.*;
 
 /**
  * Test fixture for {@link SendToMethodReturnValueHandlerTests}.
@@ -466,55 +468,46 @@ public class SendToMethodReturnValueHandlerTests {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	public String handleNoAnnotations() {
 		return PAYLOAD;
 	}
 
-	@SuppressWarnings("unused")
 	@SendTo
 	public String handleAndSendToDefaultDestination() {
 		return PAYLOAD;
 	}
 
-	@SuppressWarnings("unused")
 	@SendTo({"/dest1", "/dest2"})
 	public String handleAndSendTo() {
 		return PAYLOAD;
 	}
 
-	@SuppressWarnings("unused")
 	@SendTo("/topic/chat.message.filtered.{roomName}")
 	public String handleAndSendToWithPlaceholders() {
 		return PAYLOAD;
 	}
 
-	@SuppressWarnings("unused")
 	@SendToUser
 	public String handleAndSendToUserDefaultDestination() {
 		return PAYLOAD;
 	}
 
-	@SuppressWarnings("unused")
-	@SendToUser(broadcast=false)
+	@SendToUser(broadcast = false)
 	public String handleAndSendToUserDefaultDestinationSingleSession() {
 		return PAYLOAD;
 	}
 
-	@SuppressWarnings("unused")
 	@SendToUser({"/dest1", "/dest2"})
 	public String handleAndSendToUser() {
 		return PAYLOAD;
 	}
 
-	@SuppressWarnings("unused")
-	@SendToUser(value={"/dest1", "/dest2"}, broadcast=false)
+	@SendToUser(destinations = { "/dest1", "/dest2" }, broadcast = false)
 	public String handleAndSendToUserSingleSession() {
 		return PAYLOAD;
 	}
 
-	@SuppressWarnings("unused")
-	@SendTo({"/dest"})
+	@SendTo("/dest")
 	@JsonView(MyJacksonView1.class)
 	public JacksonViewBean handleAndSendToJsonView() {
 		JacksonViewBean payload = new JacksonViewBean();
@@ -528,6 +521,7 @@ public class SendToMethodReturnValueHandlerTests {
 	private interface MyJacksonView1 {};
 	private interface MyJacksonView2 {};
 
+	@SuppressWarnings("unused")
 	private static class JacksonViewBean {
 
 		@JsonView(MyJacksonView1.class)
