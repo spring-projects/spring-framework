@@ -50,8 +50,8 @@ abstract class ReadOnlySystemAttributesMap implements Map<String, String> {
 	public String get(Object key) {
 		if (!(key instanceof String)) {
 			throw new IllegalArgumentException(
-					"Key of type [" + (key != null ? key.getClass().getName() : "null") +
-					"] must be an instance of java.lang.String.");
+					"Type of key [" + (key != null ? key.getClass().getName() : "null") +
+					"] must be java.lang.String.");
 		}
 		return this.getSystemAttribute((String) key);
 	}
