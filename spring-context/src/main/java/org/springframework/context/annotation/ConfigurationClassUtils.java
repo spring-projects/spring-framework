@@ -161,12 +161,24 @@ abstract class ConfigurationClassUtils {
 		if (metadata.isInterface()) {
 			return false;
 		}
+
+		// Any of the typical annotations found?
 		for (String indicator : candidateIndicators) {
 			if (metadata.isAnnotated(indicator)) {
 				return true;
 			}
 		}
-		return metadata.hasAnnotatedMethods(Bean.class.getName());
+
+		// Finally, let's look for @Bean methods...
+		try {
+			return metadata.hasAnnotatedMethods(Bean.class.getName());
+		}
+		catch (Throwable ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Failed to introspect @Bean methods on class [" + metadata.getClass() + "]: " + ex);
+			}
+			return false;
+		}
 	}
 
 	/**
