@@ -44,6 +44,7 @@ public class MvcNamespaceHandler extends NamespaceHandlerSupport {
 		registerBeanDefinitionParser("velocity-configurer", new VelocityConfigurerBeanDefinitionParser());
 		registerBeanDefinitionParser("groovy-configurer", new GroovyMarkupConfigurerBeanDefinitionParser());
 		registerBeanDefinitionParser("script-template-configurer", new ScriptTemplateConfigurerBeanDefinitionParser());
+		registerBeanDefinitionParser("cors", new CorsBeanDefinitionParser());
 	}
 
 }

@@ -116,6 +116,9 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		// Use a default of near-lowest precedence, still allowing for even lower precedence in other mappings
 		handlerMappingDef.getPropertyValues().add("order", StringUtils.hasText(order) ? order : Ordered.LOWEST_PRECEDENCE - 1);
 
+		RuntimeBeanReference corsConfigurationRef = MvcNamespaceUtils.registerCorsConfiguration(null, parserContext, source);
+		handlerMappingDef.getPropertyValues().add("corsConfiguration", corsConfigurationRef);
+
 		String beanName = parserContext.getReaderContext().generateBeanName(handlerMappingDef);
 		parserContext.getRegistry().registerBeanDefinition(beanName, handlerMappingDef);
 		parserContext.registerComponent(new BeanComponentDefinition(handlerMappingDef, beanName));

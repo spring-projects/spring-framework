@@ -1234,4 +1234,87 @@
 		</xsd:complexType>
 	</xsd:element>
 
+	<xsd:element name="cors">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	Configure cross origin requests handling.
+	By default, all origins, GET HEAD POST methods, all headers and credentials
+	are allowed and max age is set to 30 minutes.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="mapping" minOccurs="0" maxOccurs="unbounded">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+				Enable cross origin requests handling on the specified path patterns.
+				By default, all origins, GET HEAD POST methods, all headers and credentials
+				are allowed and max age is set to 30 minutes.
+						]]></xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:attribute name="path" type="xsd:string" use="required">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+				A path into the application that should handle CORS requests.
+				Exact path mapping URIs (such as "/admin") are supported as well as Ant-stype path patterns (such as /admin/**).
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="allowed-origins" type="xsd:string">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+				Comma-separated list of origins to allow, e.g. "http://domain1.com, http://domain2.com".
+				The special value "*" allows all domains (default).
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="allowed-methods" type="xsd:string">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+				Comma-separated list of HTTP methods to allow, e.g. "GET, POST".
+				The special value "*" allows all method.
+				By default GET, HEAD and POST methods are allowed.
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="allowed-headers" type="xsd:string">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+				Comma-separated list of headers that a pre-flight request can list as allowed for use during an actual request.
+				The special value of "*" allows actual requests to send any header (default).
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="exposed-headers" type="xsd:string">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+				Comma-separated list of response headers other than simple headers (i.e.
+				Cache-Control, Content-Language, Content-Type, Expires, Last-Modified, Pragma) that an
+				actual response might have and can be exposed.
+				Empty by default.
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="allow-credentials" type="xsd:boolean">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+				Whether user credentials are supported (true by default).
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="max-age" type="xsd:long">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+				How long, in seconds, the response from a pre-flight request can be cached by clients.
+				1800 seconds (30 minutes) by default.
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+					</xsd:complexType>
+				</xsd:element>
+			</xsd:sequence>
+		</xsd:complexType>
+	</xsd:element>
+
 </xsd:schema>

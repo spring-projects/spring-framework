@@ -84,6 +84,7 @@ import org.springframework.web.context.request.async.CallableProcessingIntercept
 import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
 import org.springframework.web.context.request.async.DeferredResultProcessingInterceptorAdapter;
 import org.springframework.web.context.support.GenericWebApplicationContext;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.CompositeUriComponentsContributor;
 import org.springframework.web.method.support.InvocableHandlerMethod;
@@ -91,6 +92,7 @@ import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
 import org.springframework.web.servlet.handler.MappedInterceptor;
@@ -187,7 +189,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testDefaultConfig() throws Exception {
-		loadBeanDefinitions("mvc-config.xml", 13);
+		loadBeanDefinitions("mvc-config.xml", 14);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
@@ -250,7 +252,7 @@ public class MvcNamespaceTests {
 
 	@Test(expected = TypeMismatchException.class)
 	public void testCustomConversionService() throws Exception {
-		loadBeanDefinitions("mvc-config-custom-conversion-service.xml", 13);
+		loadBeanDefinitions("mvc-config-custom-conversion-service.xml", 14);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
@@ -285,7 +287,7 @@ public class MvcNamespaceTests {
 	}
 
 	private void doTestCustomValidator(String xml) throws Exception {
-		loadBeanDefinitions(xml, 13);
+		loadBeanDefinitions(xml, 14);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
@@ -307,7 +309,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testInterceptors() throws Exception {
-		loadBeanDefinitions("mvc-config-interceptors.xml", 20);
+		loadBeanDefinitions("mvc-config-interceptors.xml", 21);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
@@ -343,7 +345,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testResources() throws Exception {
-		loadBeanDefinitions("mvc-config-resources.xml", 9);
+		loadBeanDefinitions("mvc-config-resources.xml", 10);
 
 		HttpRequestHandlerAdapter adapter = appContext.getBean(HttpRequestHandlerAdapter.class);
 		assertNotNull(adapter);
@@ -383,7 +385,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testResourcesWithOptionalAttributes() throws Exception {
-		loadBeanDefinitions("mvc-config-resources-optional-attrs.xml", 9);
+		loadBeanDefinitions("mvc-config-resources-optional-attrs.xml", 10);
 
 		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(mapping);
@@ -400,7 +402,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testResourcesWithResolversTransformers() throws Exception {
-		loadBeanDefinitions("mvc-config-resources-chain.xml", 10);
+		loadBeanDefinitions("mvc-config-resources-chain.xml", 11);
 
 		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(mapping);
@@ -439,7 +441,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testResourcesWithResolversTransformersCustom() throws Exception {
-		loadBeanDefinitions("mvc-config-resources-chain-no-auto.xml", 11);
+		loadBeanDefinitions("mvc-config-resources-chain-no-auto.xml", 12);
 
 		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(mapping);
@@ -472,7 +474,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testDefaultServletHandler() throws Exception {
-		loadBeanDefinitions("mvc-config-default-servlet.xml", 5);
+		loadBeanDefinitions("mvc-config-default-servlet.xml", 6);
 
 		HttpRequestHandlerAdapter adapter = appContext.getBean(HttpRequestHandlerAdapter.class);
 		assertNotNull(adapter);
@@ -498,7 +500,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testDefaultServletHandlerWithOptionalAttributes() throws Exception {
-		loadBeanDefinitions("mvc-config-default-servlet-optional-attrs.xml", 5);
+		loadBeanDefinitions("mvc-config-default-servlet-optional-attrs.xml", 6);
 
 		HttpRequestHandlerAdapter adapter = appContext.getBean(HttpRequestHandlerAdapter.class);
 		assertNotNull(adapter);
@@ -524,7 +526,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testBeanDecoration() throws Exception {
-		loadBeanDefinitions("mvc-config-bean-decoration.xml", 15);
+		loadBeanDefinitions("mvc-config-bean-decoration.xml", 16);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
@@ -545,7 +547,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testViewControllers() throws Exception {
-		loadBeanDefinitions("mvc-config-view-controllers.xml", 18);
+		loadBeanDefinitions("mvc-config-view-controllers.xml", 19);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
@@ -626,7 +628,7 @@ public class MvcNamespaceTests {
 	/** WebSphere gives trailing servlet path slashes by default!! */
 	@Test
 	public void testViewControllersOnWebSphere() throws Exception {
-		loadBeanDefinitions("mvc-config-view-controllers.xml", 18);
+		loadBeanDefinitions("mvc-config-view-controllers.xml", 19);
 
 		SimpleUrlHandlerMapping mapping2 = appContext.getBean(SimpleUrlHandlerMapping.class);
 		SimpleControllerHandlerAdapter adapter = appContext.getBean(SimpleControllerHandlerAdapter.class);
@@ -670,7 +672,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testViewControllersDefaultConfig() {
-		loadBeanDefinitions("mvc-config-view-controllers-minimal.xml", 6);
+		loadBeanDefinitions("mvc-config-view-controllers-minimal.xml", 7);
 
 		SimpleUrlHandlerMapping hm = this.appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(hm);
@@ -693,7 +695,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testContentNegotiationManager() throws Exception {
-		loadBeanDefinitions("mvc-config-content-negotiation-manager.xml", 13);
+		loadBeanDefinitions("mvc-config-content-negotiation-manager.xml", 14);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		ContentNegotiationManager manager = mapping.getContentNegotiationManager();
@@ -705,7 +707,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testAsyncSupportOptions() throws Exception {
-		loadBeanDefinitions("mvc-config-async-support.xml", 14);
+		loadBeanDefinitions("mvc-config-async-support.xml", 15);
 
 		RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
 		assertNotNull(adapter);
@@ -845,7 +847,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testPathMatchingHandlerMappings() throws Exception {
-		loadBeanDefinitions("mvc-config-path-matching-mappings.xml", 22);
+		loadBeanDefinitions("mvc-config-path-matching-mappings.xml", 23);
 
 		RequestMappingHandlerMapping requestMapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(requestMapping);
@@ -861,6 +863,59 @@ public class MvcNamespaceTests {
 			assertNotNull(handlerMapping);
 			assertEquals(TestPathHelper.class, handlerMapping.getUrlPathHelper().getClass());
 			assertEquals(TestPathMatcher.class, handlerMapping.getPathMatcher().getClass());
+		}
+	}
+
+	@Test
+	public void testCorsMinimal() throws Exception {
+		loadBeanDefinitions("mvc-config-cors-minimal.xml", 14);
+
+		String[] beanNames = appContext.getBeanNamesForType(AbstractHandlerMapping.class);
+		assertEquals(2, beanNames.length);
+		for (String beanName : beanNames) {
+			AbstractHandlerMapping handlerMapping = (AbstractHandlerMapping)appContext.getBean(beanName);
+			assertNotNull(handlerMapping);
+			Map<String, CorsConfiguration> configs = handlerMapping.getCorsConfiguration();
+			assertNotNull(configs);
+			assertEquals(1, configs.size());
+			CorsConfiguration config = configs.get("/**");
+			assertNotNull(config);
+			assertArrayEquals(new String[]{"*"}, config.getAllowedOrigins().toArray());
+			assertArrayEquals(new String[]{"GET", "HEAD", "POST"}, config.getAllowedMethods().toArray());
+			assertArrayEquals(new String[]{"*"}, config.getAllowedHeaders().toArray());
+			assertNull(config.getExposedHeaders());
+			assertTrue(config.getAllowCredentials());
+			assertEquals(new Long(1600), config.getMaxAge());
+		}
+	}
+
+	@Test
+	public void testCors() throws Exception {
+		loadBeanDefinitions("mvc-config-cors.xml", 14);
+
+		String[] beanNames = appContext.getBeanNamesForType(AbstractHandlerMapping.class);
+		assertEquals(2, beanNames.length);
+		for (String beanName : beanNames) {
+			AbstractHandlerMapping handlerMapping = (AbstractHandlerMapping)appContext.getBean(beanName);
+			assertNotNull(handlerMapping);
+			Map<String, CorsConfiguration> configs = handlerMapping.getCorsConfiguration();
+			assertNotNull(configs);
+			assertEquals(2, configs.size());
+			CorsConfiguration config = configs.get("/api/**");
+			assertNotNull(config);
+			assertArrayEquals(new String[]{"http://domain1.com", "http://domain2.com"}, config.getAllowedOrigins().toArray());
+			assertArrayEquals(new String[]{"GET", "PUT"}, config.getAllowedMethods().toArray());
+			assertArrayEquals(new String[]{"header1", "header2", "header3"}, config.getAllowedHeaders().toArray());
+			assertArrayEquals(new String[]{"header1", "header2"}, config.getExposedHeaders().toArray());
+			assertFalse(config.getAllowCredentials());
+			assertEquals(new Long(123), config.getMaxAge());
+			config = configs.get("/resources/**");
+			assertArrayEquals(new String[]{"http://domain1.com"}, config.getAllowedOrigins().toArray());
+			assertArrayEquals(new String[]{"GET", "HEAD", "POST"}, config.getAllowedMethods().toArray());
+			assertArrayEquals(new String[]{"*"}, config.getAllowedHeaders().toArray());
+			assertNull(config.getExposedHeaders());
+			assertTrue(config.getAllowCredentials());
+			assertEquals(new Long(1600), config.getMaxAge());
 		}
 	}
 
