@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,12 +149,24 @@ abstract class ConfigurationClassUtils {
 		if (metadata.isInterface()) {
 			return false;
 		}
+
+		// Any of the typical annotations found?
 		for (String indicator : candidateIndicators) {
 			if (metadata.isAnnotated(indicator)) {
 				return true;
 			}
 		}
-		return metadata.hasAnnotatedMethods(Bean.class.getName());
+
+		// Finally, let's look for @Bean methods...
+		try {
+			return metadata.hasAnnotatedMethods(Bean.class.getName());
+		}
+		catch (Throwable ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Failed to introspect @Bean methods on class [" + metadata.getClass() + "]: " + ex);
+			}
+			return false;
+		}
 	}
 
 	/**
