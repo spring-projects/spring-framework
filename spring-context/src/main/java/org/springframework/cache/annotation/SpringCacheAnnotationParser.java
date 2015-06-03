@@ -236,11 +236,6 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 					"default cache resolver if none is set. If a cache resolver is set, the cache manager" +
 					"won't be used.");
 		}
-		if (operation.getCacheNames().isEmpty()) {
-			throw new IllegalStateException("No cache names could be detected on '" +
-					ae.toString() + "'. Make sure to set the value parameter on the annotation or " +
-					"declare a @CacheConfig at the class-level with the default cache name(s) to use.");
-		}
 	}
 
 	@Override

@@ -191,9 +191,12 @@ public class AnnotationCacheOperationSourceTests {
 	}
 
 	@Test
-	public void validateAtLeastOneCacheNameMustBeSet() {
-		thrown.expect(IllegalStateException.class);
-		getOps(AnnotatedClass.class, "noCacheNameSpecified");
+	public void validateNoCacheIsValid() {
+		// Valid as a CacheResolver might return the cache names to use with other info
+		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "noCacheNameSpecified");
+		CacheOperation cacheOperation = ops.iterator().next();
+		assertNotNull("cache names set must not be null", cacheOperation.getCacheNames());
+		assertEquals("no cache names specified", 0, cacheOperation.getCacheNames().size());
 	}
 
 	@Test
