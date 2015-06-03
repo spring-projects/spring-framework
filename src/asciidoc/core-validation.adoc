@@ -853,28 +853,29 @@ Favor Converter or ConverterFactory for basic type conversion needs.
 
 [[core-convert-ConditionalGenericConverter-SPI]]
 ==== ConditionalGenericConverter
-Sometimes you only want a Converter to execute if a specific condition holds true. For
-example, you might only want to execute a Converter if a specific annotation is present
-on the target field. Or you might only want to execute a Converter if a specific method,
-such as static valueOf method, is defined on the target class.
-ConditionalGenericConverter is an subinterface of GenericConverter that allows you to
-define such custom matching criteria:
+Sometimes you only want a `Converter` to execute if a specific condition holds true. For
+example, you might only want to execute a `Converter` if a specific annotation is present
+on the target field. Or you might only want to execute a `Converter` if a specific method,
+such as a `static valueOf` method, is defined on the target class.
+`ConditionalGenericConverter` is the union of the `GenericConverter` and
+`ConditionalConverter` interfaces that allows you to define such custom matching criteria:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	public interface ConditionalGenericConverter extends GenericConverter {
+	public interface ConditionalGenericConverter
+	        extends GenericConverter, ConditionalConverter {
 
 		boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType);
 
 	}
 ----
 
-A good example of a ConditionalGenericConverter is an EntityConverter that converts
+A good example of a `ConditionalGenericConverter` is an EntityConverter that converts
 between an persistent entity identifier and an entity reference. Such a EntityConverter
 might only match if the target entity type declares a static finder method e.g.
-findAccount(Long). You would perform such a finder method check in the implementation of
-matches(TypeDescriptor, TypeDescriptor).
+`findAccount(Long)`. You would perform such a finder method check in the implementation of
+`matches(TypeDescriptor, TypeDescriptor)`.
 
 
 
