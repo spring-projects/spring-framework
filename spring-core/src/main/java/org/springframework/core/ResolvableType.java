@@ -67,6 +67,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Phillip Webb
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 4.0
  * @see #forField(Field)
  * @see #forMethodParameter(Method, int)
@@ -74,6 +75,8 @@ import org.springframework.util.StringUtils;
  * @see #forConstructorParameter(Constructor, int)
  * @see #forClass(Class)
  * @see #forType(Type)
+ * @see #forInstance(Object)
+ * @see ResolvableTypeProvider
  */
 @SuppressWarnings("serial")
 public class ResolvableType implements Serializable {
@@ -982,6 +985,26 @@ public class ResolvableType implements Serializable {
 
 		ParameterizedType syntheticType = new SyntheticParameterizedType(sourceClass, arguments);
 		return forType(syntheticType, new TypeVariablesVariableResolver(variables, generics));
+	}
+
+	/**
+	 * Return a {@link ResolvableType} for the specified instance. The instance does not
+	 * convey generic information but if it implements {@link ResolvableTypeProvider} a
+	 * more precise {@link ResolvableType} can be used than the simple one based on
+	 * the {@link #forClass(Class) Class instance}.
+	 * @param instance the instance
+	 * @return a {@link ResolvableType} for the specified instance
+	 * @see ResolvableTypeProvider
+	 */
+	public static ResolvableType forInstance(Object instance) {
+		Assert.notNull(instance, "Instance must not be null");
+		if (instance instanceof ResolvableTypeProvider) {
+			ResolvableType type = ((ResolvableTypeProvider) instance).getResolvableType();
+			if (type != null) {
+				return type;
+			}
+		}
+		return ResolvableType.forClass(instance.getClass());
 	}
 
 	/**

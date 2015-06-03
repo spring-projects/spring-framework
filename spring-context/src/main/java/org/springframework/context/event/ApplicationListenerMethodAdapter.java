@@ -124,10 +124,11 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	protected Object[] resolveArguments(ApplicationEvent event) {
 		if (!ApplicationEvent.class.isAssignableFrom(this.declaredEventType.getRawClass())
 				&& event instanceof PayloadApplicationEvent) {
-			@SuppressWarnings("rawtypes")
-			Object payload = ((PayloadApplicationEvent) event).getPayload();
-			if (this.declaredEventType.isAssignableFrom(ResolvableType.forClass(payload.getClass()))) {
-				return new Object[] {payload};
+			PayloadApplicationEvent<?> payloadEvent = (PayloadApplicationEvent<?>) event;
+			ResolvableType payloadType =  payloadEvent.getResolvableType()
+					.as(PayloadApplicationEvent.class).getGeneric(0);
+			if (this.declaredEventType.isAssignableFrom(payloadType)) {
+				return new Object[] {payloadEvent.getPayload()};
 			}
 		}
 		else {

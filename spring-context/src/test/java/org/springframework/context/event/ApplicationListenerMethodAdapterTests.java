@@ -29,6 +29,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.ResolvableTypeProvider;
 import org.springframework.core.annotation.Order;
 import org.springframework.util.ReflectionUtils;
 
@@ -153,6 +154,42 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 		GenericTestEvent<String> event = createGenericTestEvent("test");
 		invokeListener(method, event);
 		verify(this.sampleEvents, times(1)).handleGenericString(event);
+	}
+
+	@Test
+	public void invokeListenerWithGenericEvent() {
+		Method method = ReflectionUtils.findMethod(SampleEvents.class,
+				"handleGenericString", GenericTestEvent.class);
+		GenericTestEvent<String> event = new SmartGenericTestEvent<>(this, "test");
+		invokeListener(method, event);
+		verify(this.sampleEvents, times(1)).handleGenericString(event);
+	}
+
+	@Test
+	public void invokeListenerWithGenericPayload() {
+		Method method = ReflectionUtils.findMethod(SampleEvents.class,
+				"handleGenericStringPayload", EntityWrapper.class);
+		EntityWrapper<String> payload = new EntityWrapper<>("test");
+		invokeListener(method, new PayloadApplicationEvent<>(this, payload));
+		verify(this.sampleEvents, times(1)).handleGenericStringPayload(payload);
+	}
+
+	@Test
+	public void invokeListenerWithWrongGenericPayload() {
+		Method method = ReflectionUtils.findMethod(SampleEvents.class,
+				"handleGenericStringPayload", EntityWrapper.class);
+		EntityWrapper<Integer> payload = new EntityWrapper<>(123);
+		invokeListener(method, new PayloadApplicationEvent<>(this, payload));
+		verify(this.sampleEvents, times(0)).handleGenericStringPayload(any());
+	}
+
+	@Test
+	public void invokeListenerWithAnyGenericPayload() {
+		Method method = ReflectionUtils.findMethod(SampleEvents.class,
+				"handleGenericAnyPayload", EntityWrapper.class);
+		EntityWrapper<String> payload = new EntityWrapper<>("test");
+		invokeListener(method, new PayloadApplicationEvent<>(this, payload));
+		verify(this.sampleEvents, times(1)).handleGenericAnyPayload(payload);
 	}
 
 	@Test
@@ -285,6 +322,16 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 		}
 
 		@EventListener
+		public void handleGenericStringPayload(EntityWrapper<String> event) {
+
+		}
+
+		@EventListener
+		public void handleGenericAnyPayload(EntityWrapper<?> event) {
+
+		}
+
+		@EventListener
 		public void tooManyParameters(String event, String whatIsThis) {
 		}
 
@@ -311,6 +358,19 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 
 		void handleIt(ApplicationEvent event);
 
+	}
+
+	private static class EntityWrapper<T> implements ResolvableTypeProvider {
+		private final T entity;
+
+		public EntityWrapper(T entity) {
+			this.entity = entity;
+		}
+
+		@Override
+		public ResolvableType getResolvableType() {
+			return ResolvableType.forClassWithGenerics(getClass(), this.entity.getClass());
+		}
 	}
 
 	static class InvalidProxyTestBean implements SimpleService {

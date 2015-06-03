@@ -75,7 +75,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 				getGenericApplicationEventType("longEvent"));
 	}
 
-	@Test // Unfortunate - this should work as well
+	@Test
 	public void multicastGenericEventWildcardSubType() {
 		multicastEvent(false, StringEventListener.class, createGenericTestEvent("test"),
 				getGenericApplicationEventType("wildcardEvent"));
@@ -89,6 +89,16 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 	@Test
 	public void multicastConcreteWrongTypeGenericListener() {
 		multicastEvent(false, StringEventListener.class, new LongEvent(this, 123L), null);
+	}
+
+	@Test
+	public void multicastSmartGenericTypeGenericListener() {
+		multicastEvent(true, StringEventListener.class, new SmartGenericTestEvent<>(this, "test"), null);
+	}
+
+	@Test
+	public void multicastSmartGenericWrongTypeGenericListener() {
+		multicastEvent(false, StringEventListener.class, new SmartGenericTestEvent<>(this, 123L), null);
 	}
 
 	private void multicastEvent(boolean match, Class<?> listenerType,
