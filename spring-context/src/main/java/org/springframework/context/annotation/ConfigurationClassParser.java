@@ -94,6 +94,7 @@ import org.springframework.util.StringUtils;
  * @author Chris Beams
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 3.0
  * @see ConfigurationClassBeanDefinitionReader
  */
@@ -277,7 +278,7 @@ class ConfigurationClassParser {
 		// Process any @ImportResource annotations
 		if (sourceClass.getMetadata().isAnnotated(ImportResource.class.getName())) {
 			AnnotationAttributes importResource = AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(), ImportResource.class);
-			String[] resources = importResource.getStringArray("value");
+			String[] resources = importResource.getAliasedStringArray("locations", ImportResource.class, sourceClass);
 			Class<? extends BeanDefinitionReader> readerClass = importResource.getClass("reader");
 			for (String resource : resources) {
 				String resolvedResource = this.environment.resolveRequiredPlaceholders(resource);
