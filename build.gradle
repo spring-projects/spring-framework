@@ -53,6 +53,7 @@ configure(allprojects) { project ->
 	ext.junitVersion         = "4.12"
 	ext.nettyVersion         = "4.0.28.Final"
 	ext.openjpaVersion       = "2.4.0"
+	ext.poiVersion           = "3.12"
 	ext.protobufVersion      = "2.6.1"
 	ext.reactorVersion       = "2.0.3.RELEASE"
 	ext.slf4jVersion         = "1.7.12"
@@ -414,7 +415,7 @@ project("spring-aop") {
 		compile("aopalliance:aopalliance:1.0")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("commons-pool:commons-pool:1.6")
-		optional("org.apache.commons:commons-pool2:2.3")
+		optional("org.apache.commons:commons-pool2:2.4.1")
 		optional("com.jamonapi:jamon:2.81")
 	}
 }
@@ -475,7 +476,7 @@ project("spring-context") {
 		testCompile("javax.inject:javax.inject-tck:1")
 		testCompile("org.javamoney:moneta:1.0")
 		testCompile("commons-dbcp:commons-dbcp:1.4")
-		testCompile("org.apache.commons:commons-pool2:2.2")
+		testCompile("org.apache.commons:commons-pool2:2.4.1")
 		testCompile("org.slf4j:slf4j-api:${slf4jVersion}")
 	}
 }
@@ -648,7 +649,7 @@ project("spring-context-support") {
 			exclude group: "org.springframework", module: "spring-context"
 		}
 		testCompile(project(":spring-context"))
-		testCompile("org.apache.poi:poi:3.11")
+		testCompile("org.apache.poi:poi:${poiVersion}")
 		testCompile("commons-beanutils:commons-beanutils:1.8.0")  // for Velocity/JasperReports
 		testCompile("commons-digester:commons-digester:1.8.1")  // for Velocity/JasperReports
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
@@ -860,8 +861,8 @@ project("spring-webmvc") {
 		optional("javax.servlet.jsp:javax.servlet.jsp-api:2.2.1")
 		optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1")
 		optional("net.sourceforge.jexcelapi:jxl:2.6.12")
-		optional("org.apache.poi:poi:3.11")
-		optional("org.apache.poi:poi-ooxml:3.11")
+		optional("org.apache.poi:poi:${poiVersion}")
+		optional("org.apache.poi:poi-ooxml:${poiVersion}")
 		optional("org.apache.velocity:velocity:1.7")
 		optional("velocity-tools:velocity-tools-view:1.4")
 		optional("org.freemarker:freemarker:${freemarkerVersion}")
