@@ -39,43 +39,54 @@ import org.springframework.core.annotation.AliasFor;
 @Documented
 public @interface CrossOrigin {
 
+	String[] DEFAULT_ORIGIN = { "*" };
+
+	String[] DEFAULT_ALLOWED_HEADERS = { "*" };
+
+	boolean DEFAULT_ALLOW_CREDENTIALS = true;
+
+	long DEFAULT_MAX_AGE = 1800;
+
+
 	/**
 	 * Alias for {@link #origin}.
 	 */
 	@AliasFor(attribute = "origin")
-	String[] value() default { "*" };
+	String[] value() default {};
 
 	/**
 	 * List of allowed origins.
 	 * <p>These values are placed in the {@code Access-Control-Allow-Origin}
 	 * header of both the pre-flight response and the actual response.
-	 * <p>Defaults to {@code "*"} which means that all origins are allowed.
+	 * {@code "*"} means that all origins are allowed.
+	 * <p>If undefined, all origins are allowed.
 	 * @see #value
 	 */
 	@AliasFor(attribute = "value")
-	String[] origin() default { "*" };
+	String[] origin() default {};
 
 	/**
 	 * List of request headers that can be used during the actual request.
 	 * <p>This property controls the value of the pre-flight response's
 	 * {@code Access-Control-Allow-Headers} header.
-	 * <p>Defaults to {@code "*"} which means that all headers requested
-	 * by the client are allowed.
+	 * {@code "*"}  means that all headers requested by the client are allowed.
+	 * <p>If undefined, all requested headers are allowed.
 	 */
-	String[] allowedHeaders() default { "*" };
+	String[] allowedHeaders() default {};
 
 	/**
 	 * List of response headers that the user-agent will allow the client to access.
 	 * <p>This property controls the value of actual response's
 	 * {@code Access-Control-Expose-Headers} header.
-	 * <p>Defaults to an empty array.
+	 * <p>If undefined, an empty exposed header list is used.
 	 */
 	String[] exposedHeaders() default {};
 
 	/**
 	 * List of supported HTTP request methods.
 	 * <p>Methods specified here override those specified via {@code RequestMapping}.
-	 * <p>Defaults to an empty array.
+	 * <p>If undefined, methods defined by {@link RequestMapping} annotation
+	 * are used.
 	 */
 	RequestMethod[] method() default {};
 
@@ -83,22 +94,22 @@ public @interface CrossOrigin {
 	 * Whether the browser should include any cookies associated with the
 	 * domain of the request being annotated.
 	 * <p>Set to {@code "false"} if such cookies should not included.
-	 * <p>An empty string ({@code ""}) means <em>undefined</em>.
-	 * <p>Defaults to {@code "true"} which means that the pre-flight
-	 * response will include the header
+	 * An empty string ({@code ""}) means <em>undefined</em>.
+	 * {@code "true"} means that the pre-flight response will include the header
 	 * {@code Access-Control-Allow-Credentials=true}.
+	 * <p>If undefined, credentials are allowed.
 	 */
-	String allowCredentials() default "true";
+	String allowCredentials() default "";
 
 	/**
 	 * The maximum age (in seconds) of the cache duration for pre-flight responses.
 	 * <p>This property controls the value of the {@code Access-Control-Max-Age}
 	 * header in the pre-flight response.
-	 * <p>A negative value means <em>undefined</em>.
 	 * <p>Setting this to a reasonable value can reduce the number of pre-flight
 	 * request/response interactions required by the browser.
-	 * <p>Defaults to {@code 1800} seconds (i.e., 30 minutes).
+	 * A negative value means <em>undefined</em>.
+	 * <p>If undefined, max age is set to {@code 1800} seconds (i.e., 30 minutes).
 	 */
-	long maxAge() default 1800;
+	long maxAge() default -1;
 
 }

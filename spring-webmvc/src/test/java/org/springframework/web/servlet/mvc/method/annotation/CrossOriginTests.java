@@ -136,7 +136,8 @@ public class CrossOriginTests {
 	public void customOriginDefinedViaValueAttribute() throws Exception {
 		this.handlerMapping.registerHandler(new MethodLevelController());
 		this.request.setRequestURI("/customOrigin");
-		CorsConfiguration config = getCorsConfiguration(this.handlerMapping.getHandler(request), false);
+		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
+		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertNotNull(config);
 		assertEquals(Arrays.asList("http://example.com"), config.getAllowedOrigins());
 		assertTrue(config.getAllowCredentials());
@@ -153,12 +154,30 @@ public class CrossOriginTests {
 	@Test
 	public void classLevel() throws Exception {
 		this.handlerMapping.registerHandler(new ClassLevelController());
+
 		this.request.setRequestURI("/foo");
 		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertNotNull(config);
 		assertArrayEquals(new String[]{"GET"}, config.getAllowedMethods().toArray());
 		assertArrayEquals(new String[]{"*"}, config.getAllowedOrigins().toArray());
+		assertFalse(config.getAllowCredentials());
+
+		this.request.setRequestURI("/bar");
+		chain = this.handlerMapping.getHandler(request);
+		config = getCorsConfiguration(chain, false);
+		assertNotNull(config);
+		assertArrayEquals(new String[]{"GET"}, config.getAllowedMethods().toArray());
+		assertArrayEquals(new String[]{"*"}, config.getAllowedOrigins().toArray());
+		assertFalse(config.getAllowCredentials());
+
+		this.request.setRequestURI("/baz");
+		chain = this.handlerMapping.getHandler(request);
+		config = getCorsConfiguration(chain, false);
+		assertNotNull(config);
+		assertArrayEquals(new String[]{"GET"}, config.getAllowedMethods().toArray());
+		assertArrayEquals(new String[]{"*"}, config.getAllowedOrigins().toArray());
+		assertTrue(config.getAllowCredentials());
 	}
 
 	@Test
@@ -307,12 +326,23 @@ public class CrossOriginTests {
 	}
 
 	@Controller
-	@CrossOrigin
+	@CrossOrigin(allowCredentials = "false")
 	private static class ClassLevelController {
 
 		@RequestMapping(path = "/foo", method = RequestMethod.GET)
 		public void foo() {
 		}
+
+		@CrossOrigin
+		@RequestMapping(path = "/bar", method = RequestMethod.GET)
+		public void bar() {
+		}
+
+		@CrossOrigin(allowCredentials = "true")
+		@RequestMapping(path = "/baz", method = RequestMethod.GET)
+		public void baz() {
+		}
+
 	}
 
 	private static class TestRequestMappingInfoHandlerMapping extends RequestMappingHandlerMapping {

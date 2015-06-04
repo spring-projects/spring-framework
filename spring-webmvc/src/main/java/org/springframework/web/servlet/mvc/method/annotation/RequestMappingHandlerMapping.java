@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.context.EmbeddedValueResolverAware;
@@ -301,17 +302,22 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		updateCorsConfig(config, typeAnnotation);
 		updateCorsConfig(config, methodAnnotation);
 
+		if (CollectionUtils.isEmpty(config.getAllowedOrigins())) {
+			config.setAllowedOrigins(Arrays.asList(CrossOrigin.DEFAULT_ORIGIN));
+		}
 		if (CollectionUtils.isEmpty(config.getAllowedMethods())) {
 			for (RequestMethod allowedMethod : mappingInfo.getMethodsCondition().getMethods()) {
 				config.addAllowedMethod(allowedMethod.name());
 			}
 		}
 		if (CollectionUtils.isEmpty(config.getAllowedHeaders())) {
-			for (NameValueExpression<String> headerExpression : mappingInfo.getHeadersCondition().getExpressions()) {
-				if (!headerExpression.isNegated()) {
-					config.addAllowedHeader(headerExpression.getName());
-				}
-			}
+			config.setAllowedHeaders(Arrays.asList(CrossOrigin.DEFAULT_ALLOWED_HEADERS));
+		}
+		if (config.getAllowCredentials() == null) {
+			config.setAllowCredentials(CrossOrigin.DEFAULT_ALLOW_CREDENTIALS);
+		}
+		if (config.getMaxAge() == null) {
+			config.setMaxAge(CrossOrigin.DEFAULT_MAX_AGE);
 		}
 		return config;
 	}
