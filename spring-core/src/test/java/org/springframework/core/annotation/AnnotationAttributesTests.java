@@ -209,6 +209,71 @@ public class AnnotationAttributesTests {
 		return attributes.getAliasedStringArray(attributeName, ContextConfig.class, null);
 	}
 
+	@Test
+	public void getAliasedClassArray() {
+		final Class<?>[] INPUT = new Class<?>[] { String.class };
+		final Class<?>[] EMPTY = new Class<?>[0];
+
+		attributes.clear();
+		attributes.put("classes", INPUT);
+		assertArrayEquals(INPUT, getAliasedClassArray("classes"));
+		assertArrayEquals(INPUT, getAliasedClassArray("value"));
+
+		attributes.clear();
+		attributes.put("value", INPUT);
+		assertArrayEquals(INPUT, getAliasedClassArray("classes"));
+		assertArrayEquals(INPUT, getAliasedClassArray("value"));
+
+		attributes.clear();
+		attributes.put("classes", INPUT);
+		attributes.put("value", INPUT);
+		assertArrayEquals(INPUT, getAliasedClassArray("classes"));
+		assertArrayEquals(INPUT, getAliasedClassArray("value"));
+
+		attributes.clear();
+		attributes.put("classes", INPUT);
+		attributes.put("value", EMPTY);
+		assertArrayEquals(INPUT, getAliasedClassArray("classes"));
+		assertArrayEquals(INPUT, getAliasedClassArray("value"));
+
+		attributes.clear();
+		attributes.put("classes", EMPTY);
+		attributes.put("value", INPUT);
+		assertArrayEquals(INPUT, getAliasedClassArray("classes"));
+		assertArrayEquals(INPUT, getAliasedClassArray("value"));
+
+		attributes.clear();
+		attributes.put("classes", EMPTY);
+		attributes.put("value", EMPTY);
+		assertArrayEquals(EMPTY, getAliasedClassArray("classes"));
+		assertArrayEquals(EMPTY, getAliasedClassArray("value"));
+	}
+
+	@Test
+	public void getAliasedClassArrayWithMissingAliasedAttributes() {
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(equalTo("Neither attribute 'classes' nor its alias 'value' was found in attributes for annotation [unknown]"));
+		getAliasedClassArray("classes");
+	}
+
+	@Test
+	public void getAliasedClassArrayWithDifferentAliasedValues() {
+		attributes.put("classes", new Class[] { String.class });
+		attributes.put("value", new Class[] { Number.class });
+
+		exception.expect(AnnotationConfigurationException.class);
+		exception.expectMessage(containsString("In annotation [unknown]"));
+		exception.expectMessage(containsString("attribute [classes] and its alias [value]"));
+		exception.expectMessage(containsString("[{class java.lang.String}] and [{class java.lang.Number}]"));
+		exception.expectMessage(containsString("but only one is permitted"));
+
+		getAliasedClassArray("classes");
+	}
+
+	private Class<?>[] getAliasedClassArray(String attributeName) {
+		return attributes.getAliasedClassArray(attributeName, Filter.class, null);
+	}
+
 
 	enum Color {
 		RED, WHITE, BLUE
@@ -216,6 +281,13 @@ public class AnnotationAttributesTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface Filter {
+
+		@AliasFor(attribute = "classes")
+		Class<?>[] value() default {};
+
+		@AliasFor(attribute = "value")
+		Class<?>[] classes() default {};
+
 		String pattern();
 	}
 
