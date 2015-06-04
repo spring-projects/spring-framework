@@ -144,6 +144,71 @@ public class AnnotationAttributesTests {
 		attributes.getEnum("color");
 	}
 
+	@Test
+	public void getAliasedStringArray() {
+		final String[] INPUT = new String[] { "test.xml" };
+		final String[] EMPTY = new String[0];
+
+		attributes.clear();
+		attributes.put("locations", INPUT);
+		assertArrayEquals(INPUT, getAliasedStringArray("locations"));
+		assertArrayEquals(INPUT, getAliasedStringArray("value"));
+
+		attributes.clear();
+		attributes.put("value", INPUT);
+		assertArrayEquals(INPUT, getAliasedStringArray("locations"));
+		assertArrayEquals(INPUT, getAliasedStringArray("value"));
+
+		attributes.clear();
+		attributes.put("locations", INPUT);
+		attributes.put("value", INPUT);
+		assertArrayEquals(INPUT, getAliasedStringArray("locations"));
+		assertArrayEquals(INPUT, getAliasedStringArray("value"));
+
+		attributes.clear();
+		attributes.put("locations", INPUT);
+		attributes.put("value", EMPTY);
+		assertArrayEquals(INPUT, getAliasedStringArray("locations"));
+		assertArrayEquals(INPUT, getAliasedStringArray("value"));
+
+		attributes.clear();
+		attributes.put("locations", EMPTY);
+		attributes.put("value", INPUT);
+		assertArrayEquals(INPUT, getAliasedStringArray("locations"));
+		assertArrayEquals(INPUT, getAliasedStringArray("value"));
+
+		attributes.clear();
+		attributes.put("locations", EMPTY);
+		attributes.put("value", EMPTY);
+		assertArrayEquals(EMPTY, getAliasedStringArray("locations"));
+		assertArrayEquals(EMPTY, getAliasedStringArray("value"));
+	}
+
+	@Test
+	public void getAliasedStringArrayWithMissingAliasedAttributes() {
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(equalTo("Neither attribute 'locations' nor its alias 'value' was found in attributes for annotation [unknown]"));
+		getAliasedStringArray("locations");
+	}
+
+	@Test
+	public void getAliasedStringArrayWithDifferentAliasedValues() {
+		attributes.put("locations", new String[] { "1.xml" });
+		attributes.put("value", new String[] { "2.xml" });
+
+		exception.expect(AnnotationConfigurationException.class);
+		exception.expectMessage(containsString("In annotation [unknown]"));
+		exception.expectMessage(containsString("attribute [locations] and its alias [value]"));
+		exception.expectMessage(containsString("[{1.xml}] and [{2.xml}]"));
+		exception.expectMessage(containsString("but only one is permitted"));
+
+		getAliasedStringArray("locations");
+	}
+
+	private String[] getAliasedStringArray(String attributeName) {
+		return attributes.getAliasedStringArray(attributeName, ContextConfig.class, null);
+	}
+
 
 	enum Color {
 		RED, WHITE, BLUE
@@ -157,4 +222,18 @@ public class AnnotationAttributesTests {
 	@Filter(pattern = "foo")
 	static class FilteredClass {
 	}
+
+	/**
+	 * Mock of {@code org.springframework.test.context.ContextConfiguration}.
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface ContextConfig {
+
+		@AliasFor(attribute = "locations")
+		String value() default "";
+
+		@AliasFor(attribute = "value")
+		String locations() default "";
+	}
+
 }
