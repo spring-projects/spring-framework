@@ -157,9 +157,17 @@ public @interface ComponentScan {
 		/**
 		 * The type of filter to use.
 		 * <p>Default is {@link FilterType#ANNOTATION}.
+		 * @see #classes
 		 * @see #pattern
 		 */
 		FilterType type() default FilterType.ANNOTATION;
+
+		/**
+		 * Alias for {@link #classes}.
+		 * @see #classes
+		 */
+		@AliasFor(attribute = "classes")
+		Class<?>[] value() default {};
 
 		/**
 		 * The class or classes to use as the filter.
@@ -178,8 +186,12 @@ public @interface ComponentScan {
 		 * &mdash; for example, "include types annotated with {@code @Foo} OR {@code @Bar}".
 		 * <p>Specifying zero classes is permitted but will have no effect on component
 		 * scanning.
+		 * @since 4.2
+		 * @see #value
+		 * @see #type
 		 */
-		Class<?>[] value() default {};
+		@AliasFor(attribute = "value")
+		Class<?>[] classes() default {};
 
 		/**
 		 * The pattern (or patterns) to use for the filter, as an alternative
