@@ -175,7 +175,7 @@ abstract class ConfigurationClassUtils {
 		}
 		catch (Throwable ex) {
 			if (logger.isDebugEnabled()) {
-				logger.debug("Failed to introspect @Bean methods on class [" + metadata.getClass() + "]: " + ex);
+				logger.debug("Failed to introspect @Bean methods on class [" + metadata.getClassName() + "]: " + ex);
 			}
 			return false;
 		}
