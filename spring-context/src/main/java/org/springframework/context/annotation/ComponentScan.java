@@ -157,16 +157,23 @@ public @interface ComponentScan {
 		/**
 		 * The type of filter to use.
 		 * <p>Default is {@link FilterType#ANNOTATION}.
+		 * @see #pattern
 		 */
 		FilterType type() default FilterType.ANNOTATION;
 
 		/**
 		 * The class or classes to use as the filter.
-		 * <p>In the case of {@link FilterType#ANNOTATION}, the class will be the
-		 * annotation itself. In the case of {@link FilterType#ASSIGNABLE_TYPE},
-		 * the class will be the type that detected components should be assignable
-		 * to. In the case of {@link FilterType#CUSTOM}, the class will be an
-		 * implementation of {@link TypeFilter}.
+		 * <p>The following table explains how the classes will be interpreted
+		 * based on the configured value of the {@link #type} attribute.
+		 * <table border="1">
+		 * <tr><th>{@code FilterType}</th><th>Class Interpreted As</th></tr>
+		 * <tr><td>{@link FilterType#ANNOTATION ANNOTATION}</td>
+		 * <td>the annotation itself</td></tr>
+		 * <tr><td>{@link FilterType#ASSIGNABLE_TYPE ASSIGNABLE_TYPE}</td>
+		 * <td>the type that detected components should be assignable to</td></tr>
+		 * <tr><td>{@link FilterType#CUSTOM CUSTOM}</td>
+		 * <td>an implementation of {@link TypeFilter}</td></tr>
+		 * </table>
 		 * <p>When multiple classes are specified, <em>OR</em> logic is applied
 		 * &mdash; for example, "include types annotated with {@code @Foo} OR {@code @Bar}".
 		 * <p>Specifying zero classes is permitted but will have no effect on component
@@ -175,13 +182,17 @@ public @interface ComponentScan {
 		Class<?>[] value() default {};
 
 		/**
-		 * The String pattern (or patterns) to use for the filter, as an
-		 * alternative to specifying a Class {@link #value}.
-		 * <p>In the case of {@link FilterType#ASPECTJ}, this is an AspectJ
-		 * type pattern expression; in the case of {@link FilterType#REGEX},
-		 * this is a regex pattern for the fully-qualified class names to match.
+		 * The pattern (or patterns) to use for the filter, as an alternative
+		 * to specifying a Class {@link #value}.
+		 * <p>If {@link #type} is set to {@link FilterType#ASPECTJ ASPECTJ},
+		 * this is an AspectJ type pattern expression. If {@link #type} is
+		 * set to {@link FilterType#REGEX REGEX}, this is a regex pattern
+		 * for the fully-qualified class names to match.
+		 * @see #type
+		 * @see #classes
 		 */
 		String[] pattern() default {};
+
 	}
 
 }
