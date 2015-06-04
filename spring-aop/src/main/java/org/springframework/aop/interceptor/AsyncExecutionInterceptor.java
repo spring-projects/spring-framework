@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.aop.interceptor;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 
@@ -111,6 +112,9 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 					if (result instanceof Future) {
 						return ((Future<?>) result).get();
 					}
+				}
+				catch (ExecutionException ex) {
+					handleError(ex.getCause(), userDeclaredMethod, invocation.getArguments());
 				}
 				catch (Throwable ex) {
 					handleError(ex, userDeclaredMethod, invocation.getArguments());
