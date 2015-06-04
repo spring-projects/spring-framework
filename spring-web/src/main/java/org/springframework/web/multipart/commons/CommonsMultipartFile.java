@@ -57,6 +57,7 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 		this.size = this.fileItem.getSize();
 	}
 
+
 	/**
 	 * Return the underlying {@code org.apache.commons.fileupload.FileItem}
 	 * instance. There is hardly any need to access this.
@@ -64,7 +65,6 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 	public final FileItem getFileItem() {
 		return this.fileItem;
 	}
-
 
 	@Override
 	public String getName() {
@@ -78,18 +78,18 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 			// Should never happen.
 			return "";
 		}
-		// check for Unix-style path
+		// Check for Unix-style path
 		int pos = filename.lastIndexOf("/");
 		if (pos == -1) {
-			// check for Windows-style path
+			// Check for Windows-style path
 			pos = filename.lastIndexOf("\\");
 		}
 		if (pos != -1)  {
-			// any sort of path separator found
+			// Any sort of path separator found...
 			return filename.substring(pos + 1);
 		}
 		else {
-			// plain name
+			// A plain name
 			return filename;
 		}
 	}
