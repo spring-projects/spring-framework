@@ -404,8 +404,8 @@ public class WebMvcConfigurationSupportExtensionTests {
 		}
 
 		@Override
-		public void configureCors(CorsConfigurer registry) {
-			registry.enableCors("/resources/**");
+		public void addCorsMappings(CorsRegistry registry) {
+			registry.addMapping("/resources/**");
 		}
 	
 	}

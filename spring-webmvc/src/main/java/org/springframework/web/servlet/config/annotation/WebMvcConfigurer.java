@@ -183,9 +183,9 @@ public interface WebMvcConfigurer {
 	void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer);
 
 	/**
-	 * Configure cross-origin requests handling.
+	 * Configure cross origin requests processing.
 	 * @since 4.2
 	 */
-	void configureCors(CorsConfigurer configurer);
+	void addCorsMappings(CorsRegistry registry);
 
 }

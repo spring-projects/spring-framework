@@ -24,25 +24,27 @@ import java.util.Map;
 import org.springframework.web.cors.CorsConfiguration;
 
 /**
- * Assist with the registration of {@link CorsConfiguration} mapped to one or more path patterns.
+ * Assist with the registration of {@link CorsConfiguration} mapped on a path pattern.
  * @author Sebastien Deleuze
  *
  * @since 4.2
  * @see CorsRegistration
  */
-public class CorsConfigurer {
+public class CorsRegistry {
 
 	private final List<CorsRegistration> registrations = new ArrayList<CorsRegistration>();
 
 
 	/**
-	 * Enable cross origin requests on the specified path patterns. If no path pattern is specified,
-	 * cross-origin request handling is mapped on "/**" .
+	 * Enable cross origin requests processing on the specified path pattern.
+	 * Exact path mapping URIs (such as "/admin") are supported as well as Ant-stype path
+	 * patterns (such as /admin/**).
 	 *
-	 * <p>By default, all origins, all headers and credentials are allowed. Max age is set to 30 minutes.</p>
+	 * <p>By default, all origins, all headers, credentials and GET, HEAD, POST methods are allowed.
+	 * Max age is set to 30 minutes.</p>
 	 */
-	public CorsRegistration enableCors(String... pathPatterns) {
-		CorsRegistration registration = new CorsRegistration(pathPatterns);
+	public CorsRegistration addMapping(String pathPattern) {
+		CorsRegistration registration = new CorsRegistration(pathPattern);
 		this.registrations.add(registration);
 		return registration;
 	}
@@ -50,9 +52,7 @@ public class CorsConfigurer {
 	protected Map<String, CorsConfiguration> getCorsConfigurations() {
 		Map<String, CorsConfiguration> configs = new LinkedHashMap<String, CorsConfiguration>(this.registrations.size());
 		for (CorsRegistration registration : this.registrations) {
-			for (String pathPattern : registration.getPathPatterns()) {
-				configs.put(pathPattern, registration.getCorsConfiguration());
-			}
+			configs.put(registration.getPathPattern(), registration.getCorsConfiguration());
 		}
 		return configs;
 	}

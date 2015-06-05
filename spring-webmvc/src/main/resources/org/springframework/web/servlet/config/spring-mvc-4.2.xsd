@@ -1237,17 +1237,15 @@
 	<xsd:element name="cors">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
-	Configure cross origin requests handling.
-	By default, all origins, GET HEAD POST methods, all headers and credentials
-	are allowed and max age is set to 30 minutes.
+	Configure cross origin requests processing.
 			]]></xsd:documentation>
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:sequence>
-				<xsd:element name="mapping" minOccurs="0" maxOccurs="unbounded">
+				<xsd:element name="mapping" minOccurs="1" maxOccurs="unbounded">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[
-				Enable cross origin requests handling on the specified path patterns.
+				Enable cross origin requests processing on the specified path pattern.
 				By default, all origins, GET HEAD POST methods, all headers and credentials
 				are allowed and max age is set to 30 minutes.
 						]]></xsd:documentation>

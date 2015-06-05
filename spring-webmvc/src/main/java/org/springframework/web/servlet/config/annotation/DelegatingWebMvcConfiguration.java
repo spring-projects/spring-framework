@@ -133,8 +133,8 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 	}
 
 	@Override
-	protected void configureCors(CorsConfigurer configurer) {
-		this.configurers.configureCors(configurer);
+	protected void addCorsMappings(CorsRegistry registry) {
+		this.configurers.addCorsMappings(registry);
 	}
 
 }

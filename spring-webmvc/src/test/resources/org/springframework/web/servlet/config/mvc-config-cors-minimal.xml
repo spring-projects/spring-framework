@@ -6,7 +6,9 @@
 		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
 	<!-- <mvc:cors /> element before <mvc:annotation-driven /> one -->
-	<mvc:cors />
+	<mvc:cors>
+		<mvc:mapping path="/**" />
+	</mvc:cors>
 
 	<mvc:annotation-driven />
 

@@ -34,12 +34,12 @@ import org.springframework.web.cors.CorsConfiguration;
  */
 public class CorsRegistration {
 
-	private final String[] pathPatterns;
+	private final String pathPattern;
 
 	private final CorsConfiguration config;
 
-	public CorsRegistration(String... pathPatterns) {
-		this.pathPatterns = (pathPatterns.length == 0 ? new String[]{ "/**" } : pathPatterns);
+	public CorsRegistration(String pathPattern) {
+		this.pathPattern = pathPattern;
 		// Same default values than @CrossOrigin annotation + allows simple methods
 		this.config = new CorsConfiguration();
 		this.config.addAllowedOrigin("*");
@@ -81,8 +81,8 @@ public class CorsRegistration {
 		return this;
 	}
 
-	protected String[] getPathPatterns() {
-		return this.pathPatterns;
+	protected String getPathPattern() {
+		return this.pathPattern;
 	}
 
 	protected CorsConfiguration getCorsConfiguration() {

@@ -27,50 +27,37 @@ import org.junit.Test;
 import org.springframework.web.cors.CorsConfiguration;
 
 /**
- * Test fixture with a {@link CorsConfigurer}.
+ * Test fixture with a {@link CorsRegistry}.
  *
  * @author Sebastien Deleuze
  */
-public class CorsConfigurerTests {
+public class CorsRegistryTests {
 
-	private CorsConfigurer configurer;
+	private CorsRegistry registry;
 
 	@Before
 	public void setUp() {
-		this.configurer = new CorsConfigurer();
+		this.registry = new CorsRegistry();
 	}
 
 	@Test
-	public void noCorsConfigured() {
-		assertTrue(this.configurer.getCorsConfigurations().isEmpty());
+	public void noMapping() {
+		assertTrue(this.registry.getCorsConfigurations().isEmpty());
 	}
 
 	@Test
-	public void multipleCorsConfigured() {
-		this.configurer.enableCors("/foo");
-		this.configurer.enableCors("/bar");
-		assertEquals(2, this.configurer.getCorsConfigurations().size());
+	public void multipleMappings() {
+		this.registry.addMapping("/foo");
+		this.registry.addMapping("/bar");
+		assertEquals(2, this.registry.getCorsConfigurations().size());
 	}
 
 	@Test
-	public void defaultCorsRegistration() {
-		this.configurer.enableCors();
-		Map<String, CorsConfiguration> configs = this.configurer.getCorsConfigurations();
-		assertEquals(1, configs.size());
-		CorsConfiguration config = configs.get("/**");
-		assertEquals(Arrays.asList("*"), config.getAllowedOrigins());
-		assertEquals(Arrays.asList("GET", "HEAD", "POST"), config.getAllowedMethods());
-		assertEquals(Arrays.asList("*"), config.getAllowedHeaders());
-		assertEquals(true, config.getAllowCredentials());
-		assertEquals(Long.valueOf(1800), config.getMaxAge());
-	}
-
-	@Test
-	public void customizedCorsRegistration() {
-		this.configurer.enableCors("/foo").allowedOrigins("http://domain2.com", "http://domain2.com")
+	public void customizedMapping() {
+		this.registry.addMapping("/foo").allowedOrigins("http://domain2.com", "http://domain2.com")
 				.allowedMethods("DELETE").allowCredentials(false).allowedHeaders("header1", "header2")
 				.exposedHeaders("header3", "header4").maxAge(3600);
-		Map<String, CorsConfiguration> configs = this.configurer.getCorsConfigurations();
+		Map<String, CorsConfiguration> configs = this.registry.getCorsConfigurations();
 		assertEquals(1, configs.size());
 		CorsConfiguration config = configs.get("/foo");
 		assertEquals(Arrays.asList("http://domain2.com", "http://domain2.com"), config.getAllowedOrigins());

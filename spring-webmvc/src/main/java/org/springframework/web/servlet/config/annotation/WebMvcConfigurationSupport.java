@@ -875,19 +875,19 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	protected final Map<String, CorsConfiguration> getCorsConfigurations() {
 		if (this.corsConfigurations == null) {
-			CorsConfigurer registry = new CorsConfigurer();
-			configureCors(registry);
+			CorsRegistry registry = new CorsRegistry();
+			addCorsMappings(registry);
 			this.corsConfigurations = registry.getCorsConfigurations();
 		}
 		return this.corsConfigurations;
 	}
 
 	/**
-	 * Override this method to configure cross-origin requests handling.
+	 * Override this method to configure cross origin requests processing.
 	 * @since 4.2
-	 * @see CorsConfigurer
+	 * @see CorsRegistry
 	 */
-	protected void configureCors(CorsConfigurer configurer) {
+	protected void addCorsMappings(CorsRegistry registry) {
 	}
 
 
