@@ -23,9 +23,13 @@ import static org.mockito.Mockito.*;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -52,6 +56,8 @@ import org.springframework.web.servlet.HandlerMapping;
  */
 public class ResourceHttpRequestHandlerTests {
 
+	private SimpleDateFormat dateFormat;
+
 	private ResourceHttpRequestHandler handler;
 
 	private MockHttpServletRequest request;
@@ -61,6 +67,9 @@ public class ResourceHttpRequestHandlerTests {
 
 	@Before
 	public void setUp() throws Exception {
+		dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+
 		List<Resource> paths = new ArrayList<>(2);
 		paths.add(new ClassPathResource("test/", getClass()));
 		paths.add(new ClassPathResource("testalternatepath/", getClass()));
@@ -127,7 +136,7 @@ public class ResourceHttpRequestHandlerTests {
 
 		assertEquals("no-cache", this.response.getHeader("Pragma"));
 		assertThat(this.response.getHeaderValues("Cache-Control"), Matchers.contains("no-cache", "no-store"));
-		assertTrue(headerAsLong("Expires") == 1);
+		assertEquals(this.response.getHeaderValue("Expires"), dateFormat.format(System.currentTimeMillis()));
 		assertTrue(this.response.containsHeader("Last-Modified"));
 		assertEquals(headerAsLong("Last-Modified"), resourceLastModified("test/foo.css"));
 	}
@@ -467,8 +476,8 @@ public class ResourceHttpRequestHandlerTests {
 	}
 
 
-	private long headerAsLong(String responseHeaderName) {
-		return Long.valueOf(this.response.getHeader(responseHeaderName));
+	private long headerAsLong(String responseHeaderName) throws Exception {
+		return dateFormat.parse(this.response.getHeader(responseHeaderName)).getTime();
 	}
 
 	private long resourceLastModified(String resourceName) throws IOException {

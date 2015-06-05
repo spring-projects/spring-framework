@@ -23,9 +23,12 @@ import static org.springframework.web.servlet.HandlerMapping.*;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -61,6 +64,8 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public class HttpEntityMethodProcessorMockTests {
 
+	private SimpleDateFormat dateFormat;
+
 	private HttpEntityMethodProcessor processor;
 
 	private HttpMessageConverter<String> messageConverter;
@@ -87,6 +92,9 @@ public class HttpEntityMethodProcessorMockTests {
 	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() throws Exception {
+		dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+
 		messageConverter = mock(HttpMessageConverter.class);
 		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 
@@ -341,7 +349,7 @@ public class HttpEntityMethodProcessorMockTests {
 
 		assertTrue(mavContainer.isRequestHandled());
 		assertEquals(HttpStatus.NOT_MODIFIED.value(), servletResponse.getStatus());
-		assertEquals(oneMinuteAgo/1000 * 1000, Long.parseLong(servletResponse.getHeader(HttpHeaders.LAST_MODIFIED)));
+		assertEquals(dateFormat.format(oneMinuteAgo), servletResponse.getHeader(HttpHeaders.LAST_MODIFIED));
 		assertEquals(0, servletResponse.getContentAsByteArray().length);
 	}
 
@@ -385,7 +393,7 @@ public class HttpEntityMethodProcessorMockTests {
 
 		assertTrue(mavContainer.isRequestHandled());
 		assertEquals(HttpStatus.NOT_MODIFIED.value(), servletResponse.getStatus());
-		assertEquals(oneMinuteAgo/1000 * 1000, Long.parseLong(servletResponse.getHeader(HttpHeaders.LAST_MODIFIED)));
+		assertEquals(dateFormat.format(oneMinuteAgo), servletResponse.getHeader(HttpHeaders.LAST_MODIFIED));
 		assertEquals(etagValue, servletResponse.getHeader(HttpHeaders.ETAG));
 		assertEquals(0, servletResponse.getContentAsByteArray().length);
 	}
@@ -411,7 +419,7 @@ public class HttpEntityMethodProcessorMockTests {
 
 		assertTrue(mavContainer.isRequestHandled());
 		assertEquals(HttpStatus.OK.value(), servletResponse.getStatus());
-		assertEquals(oneMinuteAgo/1000 * 1000, Long.parseLong(servletResponse.getHeader(HttpHeaders.LAST_MODIFIED)));
+		assertEquals(dateFormat.format(oneMinuteAgo), servletResponse.getHeader(HttpHeaders.LAST_MODIFIED));
 		assertEquals(changedEtagValue, servletResponse.getHeader(HttpHeaders.ETAG));
 		assertEquals(0, servletResponse.getContentAsByteArray().length);
 	}

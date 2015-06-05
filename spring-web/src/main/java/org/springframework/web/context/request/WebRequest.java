@@ -194,7 +194,7 @@ public interface WebRequest extends RequestAttributes {
 	 * Check whether the request qualifies as not modified given the
 	 * supplied {@code ETag} (entity tag) and last-modified timestamp,
 	 * as determined by the application.
-	 * <p>This will also transparently set the appropriate response headers,
+	 * <p>This will also transparently set the "Etag" and "Last-Modified" response headers,
 	 * for both the modified case and the not-modified case.
 	 * <p>Typical usage:
 	 * <pre class="code">
