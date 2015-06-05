@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2013 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,10 @@ package org.springframework.aop.target;
 
 import java.util.NoSuchElementException;
 
+import org.apache.commons.pool.impl.GenericObjectPool;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -44,12 +43,8 @@ import static org.junit.Assert.*;
  * @author Rod Johnson
  * @author Rob Harrop
  * @author Chris Beams
- * @author Stephane Nicoll
  */
-public class CommonsPool2TargetSourceTests {
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
+public class CommonsPoolTargetSourceTests {
 
 	/**
 	 * Initial count value set in bean factory XML
@@ -114,7 +109,7 @@ public class CommonsPool2TargetSourceTests {
 
 	@Test
 	public void testTargetSourceSerializableWithoutConfigMixin() throws Exception {
-		CommonsPool2TargetSource cpts = (CommonsPool2TargetSource) beanFactory.getBean("personPoolTargetSource");
+		CommonsPoolTargetSource cpts = (CommonsPoolTargetSource) beanFactory.getBean("personPoolTargetSource");
 
 		SingletonTargetSource serialized = (SingletonTargetSource) SerializationTestUtils.serializeAndDeserialize(cpts);
 		assertTrue(serialized.getTarget() instanceof Person);
@@ -126,7 +121,7 @@ public class CommonsPool2TargetSourceTests {
 		Person pooled = (Person) beanFactory.getBean("pooledPerson");
 
 		//System.out.println(((Advised) pooled).toProxyConfigString());
-		assertTrue(((Advised) pooled).getTargetSource() instanceof CommonsPool2TargetSource);
+		assertTrue(((Advised) pooled).getTargetSource() instanceof CommonsPoolTargetSource);
 
 		//((Advised) pooled).setTargetSource(new SingletonTargetSource(new SerializablePerson()));
 		Person serialized = (Person) SerializationTestUtils.serializeAndDeserialize(pooled);
@@ -139,7 +134,7 @@ public class CommonsPool2TargetSourceTests {
 	public void testHitMaxSize() throws Exception {
 		int maxSize = 10;
 
-		CommonsPool2TargetSource targetSource = new CommonsPool2TargetSource();
+		CommonsPoolTargetSource targetSource = new CommonsPoolTargetSource();
 		targetSource.setMaxSize(maxSize);
 		targetSource.setMaxWait(1);
 		prepareTargetSource(targetSource);
@@ -174,7 +169,7 @@ public class CommonsPool2TargetSourceTests {
 	@Test
 	public void testHitMaxSizeLoadedFromContext() throws Exception {
 		Advised person = (Advised) beanFactory.getBean("maxSizePooledPerson");
-		CommonsPool2TargetSource targetSource = (CommonsPool2TargetSource) person.getTargetSource();
+		CommonsPoolTargetSource targetSource = (CommonsPoolTargetSource) person.getTargetSource();
 
 		int maxSize = targetSource.getMaxSize();
 		Object[] pooledInstances = new Object[maxSize];
@@ -200,35 +195,18 @@ public class CommonsPool2TargetSourceTests {
 
 		// release all objects
 		for (int i = 0; i < pooledInstances.length; i++) {
-			System.out.println(i);
 			targetSource.releaseTarget(pooledInstances[i]);
 		}
 	}
 
 	@Test
 	public void testSetWhenExhaustedAction() {
-		CommonsPool2TargetSource targetSource = new CommonsPool2TargetSource();
-		targetSource.setBlockWhenExhausted(true);
-		assertEquals(true, targetSource.isBlockWhenExhausted());
+		CommonsPoolTargetSource targetSource = new CommonsPoolTargetSource();
+		targetSource.setWhenExhaustedActionName("WHEN_EXHAUSTED_BLOCK");
+		assertEquals(GenericObjectPool.WHEN_EXHAUSTED_BLOCK, targetSource.getWhenExhaustedAction());
 	}
 
-	@Test
-	public void referenceIdentityByDefault() throws Exception {
-		CommonsPool2TargetSource targetSource = new CommonsPool2TargetSource();
-		targetSource.setMaxWait(1);
-		prepareTargetSource(targetSource);
-
-		Object first = targetSource.getTarget();
-		Object second = targetSource.getTarget();
-		assertTrue(first instanceof SerializablePerson);
-		assertTrue(second instanceof SerializablePerson);
-		assertEquals(first, second);
-
-		targetSource.releaseTarget(first);
-		targetSource.releaseTarget(second);
-	}
-
-	private void prepareTargetSource(CommonsPool2TargetSource targetSource) {
+	private void prepareTargetSource(CommonsPoolTargetSource targetSource) {
 		String beanName = "target";
 
 		StaticApplicationContext applicationContext = new StaticApplicationContext();
