@@ -1,0 +1,18 @@
+
+apply plugin: 'java'
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  compile "org.springframework:spring-core:4.1.2.RELEASE"
+  compile "org.reactivestreams:reactive-streams:1.0.0.RC3"
+  compile "io.netty:netty-buffer:4.0.25.Final"
+  compile "org.slf4j:slf4j-api:1.7.6"
+  compile "ch.qos.logback:logback-classic:1.1.2"
+
+  testCompile "junit:junit:4.12"
+}
+
+
