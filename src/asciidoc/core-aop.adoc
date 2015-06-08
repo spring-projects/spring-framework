@@ -2432,13 +2432,10 @@ so. However, there are some issues to consider:
   CGLIB classes are repackaged under org.springframework and included directly in the
   spring-core JAR. This means that CGLIB-based proxy support 'just works' in the same
   way that JDK dynamic proxies always have.
-* The constructor of your proxied object will be called twice. This is a natural
-  consequence of the CGLIB proxy model whereby a subclass is generated for each proxied
-  object. For each proxied instance, two objects are created: the actual proxied object
-  and an instance of the subclass that implements the advice. This behavior is not
-  exhibited when using JDK proxies. Usually, calling the constructor of the proxied type
-  twice, is not an issue, as there are usually only assignments taking place and no real
-  logic is implemented in the constructor.
+* As of Spring 4.0, the constructor of your proxied object will NOT be called twice
+  anymore since the CGLIB proxy instance will be created via Objenesis. Only if your
+  JVM does not allow for constructor bypassing, you might see double invocations and
+  corresponding debug log entries from Spring's AOP support.
 
 To force the use of CGLIB proxies set the value of the `proxy-target-class` attribute of
 the `<aop:config>` element to true:
