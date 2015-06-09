@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,6 +84,28 @@ public class StopWatch {
 	 */
 	public StopWatch(String id) {
 		this.id = id;
+	}
+
+	/**
+	 * Construct a new stop watch and optionally start an unnamed task.
+	 * @param start if true starts an unnamed task.
+	 * @since 4.2
+	 */
+	public StopWatch(boolean start) {
+		this("", start);
+	}
+
+	/**
+	 * Construct a new stop watch with the given id and optionally start an unnamed task.
+	 * @param id identifier for this stop watch.
+	 * @param start if true starts an unnamed task.
+	 * @since 4.2
+	 */
+	public StopWatch(String id, boolean start) {
+		this.id = id;
+		if(start){
+			start();
+		}
 	}
 
 
