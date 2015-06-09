@@ -215,10 +215,10 @@ public class StompDecoder {
 			if (headerStream.size() > 0) {
 				String header = new String(headerStream.toByteArray(), UTF8_CHARSET);
 				int colonIndex = header.indexOf(':');
-				if (colonIndex <= 0 || colonIndex == header.length() - 1) {
-					if (buffer.remaining() > 0) {
+				if (colonIndex <= 0) {
+					if(buffer.remaining() > 0) {
 						throw new StompConversionException("Illegal header: '" + header +
-								"'. A header must be of the form <name>:<value>.");
+								"'. A header must be of the form <name>:[<value>].");
 					}
 				}
 				else {
