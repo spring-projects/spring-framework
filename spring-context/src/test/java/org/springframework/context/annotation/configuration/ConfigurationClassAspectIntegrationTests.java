@@ -80,7 +80,6 @@ public class ConfigurationClassAspectIntegrationTests {
 	}
 
 	@Test
-	@Ignore  // SPR-11807
 	public void withInnerClassAndLambdaExpression() {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(Application.class, CountingAspect.class);
 		ctx.getBeansOfType(Runnable.class).forEach((k, v) -> v.run());
