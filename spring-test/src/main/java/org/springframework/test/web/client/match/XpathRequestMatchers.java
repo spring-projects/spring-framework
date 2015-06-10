@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ import org.springframework.test.web.client.RequestMatcher;
  */
 public class XpathRequestMatchers {
 
+	private static final String DEFAULT_ENCODING = "UTF-8";
+
 	private final XpathExpectationsHelper xpathHelper;
 
 
@@ -65,7 +67,7 @@ public class XpathRequestMatchers {
 		return new AbstractXpathRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws Exception {
-				xpathHelper.assertNode(request.getBodyAsString(), matcher);
+				xpathHelper.assertNode(request.getBodyAsBytes(), DEFAULT_ENCODING, matcher);
 			}
 		};
 	}
@@ -77,7 +79,7 @@ public class XpathRequestMatchers {
 		return new AbstractXpathRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws Exception {
-				xpathHelper.exists(request.getBodyAsString());
+				xpathHelper.exists(request.getBodyAsBytes(), DEFAULT_ENCODING);
 			}
 		};
 	}
@@ -89,7 +91,7 @@ public class XpathRequestMatchers {
 		return new AbstractXpathRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws Exception {
-				xpathHelper.doesNotExist(request.getBodyAsString());
+				xpathHelper.doesNotExist(request.getBodyAsBytes(), DEFAULT_ENCODING);
 			}
 		};
 	}
@@ -102,7 +104,7 @@ public class XpathRequestMatchers {
 		return new AbstractXpathRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws Exception {
-				xpathHelper.assertNodeCount(request.getBodyAsString(), matcher);
+				xpathHelper.assertNodeCount(request.getBodyAsBytes(), DEFAULT_ENCODING, matcher);
 			}
 		};
 	}
@@ -114,7 +116,7 @@ public class XpathRequestMatchers {
 		return new AbstractXpathRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws Exception {
-				xpathHelper.assertNodeCount(request.getBodyAsString(), expectedCount);
+				xpathHelper.assertNodeCount(request.getBodyAsBytes(), DEFAULT_ENCODING, expectedCount);
 			}
 		};
 	}
@@ -126,7 +128,7 @@ public class XpathRequestMatchers {
 		return new AbstractXpathRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws Exception {
-				xpathHelper.assertString(request.getBodyAsString(), matcher);
+				xpathHelper.assertString(request.getBodyAsBytes(), DEFAULT_ENCODING, matcher);
 			}
 		};
 	}
@@ -138,7 +140,7 @@ public class XpathRequestMatchers {
 		return new AbstractXpathRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws Exception {
-				xpathHelper.assertString(request.getBodyAsString(), value);
+				xpathHelper.assertString(request.getBodyAsBytes(), DEFAULT_ENCODING, value);
 			}
 		};
 	}
@@ -150,7 +152,7 @@ public class XpathRequestMatchers {
 		return new AbstractXpathRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws Exception {
-				xpathHelper.assertNumber(request.getBodyAsString(), matcher);
+				xpathHelper.assertNumber(request.getBodyAsBytes(), DEFAULT_ENCODING, matcher);
 			}
 		};
 	}
@@ -162,7 +164,7 @@ public class XpathRequestMatchers {
 		return new AbstractXpathRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws Exception {
-				xpathHelper.assertNumber(request.getBodyAsString(), value);
+				xpathHelper.assertNumber(request.getBodyAsBytes(), DEFAULT_ENCODING, value);
 			}
 		};
 	}
@@ -174,7 +176,7 @@ public class XpathRequestMatchers {
 		return new AbstractXpathRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws Exception {
-				xpathHelper.assertBoolean(request.getBodyAsString(), value);
+				xpathHelper.assertBoolean(request.getBodyAsBytes(), DEFAULT_ENCODING, value);
 			}
 		};
 	}
