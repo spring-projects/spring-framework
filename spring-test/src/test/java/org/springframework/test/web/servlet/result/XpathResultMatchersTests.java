@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,15 @@
  */
 package org.springframework.test.web.servlet.result;
 
+import java.nio.charset.Charset;
+
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.StubMvcResult;
+import org.springframework.util.StreamUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Tests for {@link XpathResultMatchers}.
@@ -98,12 +102,25 @@ public class XpathResultMatchersTests {
 		new XpathResultMatchers("/foo/bar[2]", null).booleanValue(false).match(getStubMvcResult());
 	}
 
+	@Test
+	public void testStringEncodingDetection() throws Exception {
+		String content = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
+				"<person><name>Jürgen</name></person>";
+		byte[] bytes = content.getBytes(Charset.forName("UTF-8"));
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		response.addHeader("Content-Type", "application/xml");
+		StreamUtils.copy(bytes, response.getOutputStream());
+		StubMvcResult result = new StubMvcResult(null, null, null, null, null, null, response);
+
+		new XpathResultMatchers("/person/name", null).string("Jürgen").match(result);
+	}
+
 
 	private static final String RESPONSE_CONTENT = "<foo><bar>111</bar><bar>true</bar></foo>";
 
 	private StubMvcResult getStubMvcResult() throws Exception {
 		MockHttpServletResponse response = new MockHttpServletResponse();
-		response.addHeader("Content-Type", "application/json");
+		response.addHeader("Content-Type", "application/xml");
 		response.getWriter().print(new String(RESPONSE_CONTENT.getBytes("ISO-8859-1")));
 		return new StubMvcResult(null, null, null, null, null, null, response);
 	}

@@ -140,6 +140,14 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		return this.writerAccessAllowed;
 	}
 
+	/**
+	 * Return whether the character encoding has been set.
+	 * <p>If {@code false}, {@link #getCharacterEncoding()} will return a default encoding value.
+	 */
+	public boolean isCharset() {
+		return charset;
+	}
+
 	@Override
 	public void setCharacterEncoding(String characterEncoding) {
 		this.characterEncoding = characterEncoding;
