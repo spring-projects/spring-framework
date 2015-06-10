@@ -109,7 +109,7 @@ public class ResponseBodyEmitterReturnValueHandler implements HandlerMethodRetur
 		outputMessage.getBody();
 		outputMessage = new StreamingServletServerHttpResponse(outputMessage);
 
-		DeferredResult<?> deferredResult = new DeferredResult<Object>();
+		DeferredResult<?> deferredResult = new DeferredResult<Object>(emitter.getTimeout());
 		WebAsyncUtils.getAsyncManager(webRequest).startDeferredResultProcessing(deferredResult, mavContainer);
 
 		HttpMessageConvertingHandler handler = new HttpMessageConvertingHandler(outputMessage, deferredResult);

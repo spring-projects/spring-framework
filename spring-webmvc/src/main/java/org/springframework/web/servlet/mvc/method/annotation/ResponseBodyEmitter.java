@@ -58,6 +58,8 @@ import org.springframework.util.Assert;
  */
 public class ResponseBodyEmitter {
 
+	private final Long timeout;
+
 	private volatile Handler handler;
 
 	/* Cache for objects sent before handler is set. */
@@ -70,6 +72,33 @@ public class ResponseBodyEmitter {
 	private Runnable timeoutCallback;
 
 	private Runnable completionCallback;
+
+
+	/**
+	 * Create a new ResponseBodyEmitter instance.
+	 */
+	public ResponseBodyEmitter() {
+		this.timeout = null;
+	}
+
+	/**
+	 * Create a ResponseBodyEmitter with a custom timeout value.
+	 * <p>By default not set in which case the default configured in the MVC
+	 * Java Config or the MVC namespace is used, or if that's not set, then the
+	 * timeout depends on the default of the underlying server.
+	 * @param timeout timeout value in milliseconds
+	 */
+	public ResponseBodyEmitter(Long timeout) {
+		this.timeout = timeout;
+	}
+
+
+	/**
+	 * Return the configured timeout value, if any.
+	 */
+	public Long getTimeout() {
+		return this.timeout;
+	}
 
 
 	/**
