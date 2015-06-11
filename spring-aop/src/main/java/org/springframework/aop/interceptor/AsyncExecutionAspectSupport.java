@@ -155,7 +155,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	/**
 	 * Handles a fatal error thrown while asynchronously invoking the specified
 	 * {@link Method}.
-	 * <p>If the return type of the method is a {@link java.util.concurrent.Future} object, the original
+	 * <p>If the return type of the method is a {@link Future} object, the original
 	 * exception can be propagated by just throwing it at the higher level. However,
 	 * for all other cases, the exception will not be transmitted back to the client.
 	 * In that later case, the current {@link AsyncUncaughtExceptionHandler} will be
