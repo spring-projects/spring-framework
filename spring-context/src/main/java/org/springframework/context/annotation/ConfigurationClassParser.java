@@ -73,6 +73,7 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -326,7 +327,18 @@ class ConfigurationClassParser {
 		for (SourceClass memberClass : sourceClass.getMemberClasses()) {
 			if (ConfigurationClassUtils.isConfigurationCandidate(memberClass.getMetadata()) &&
 					!memberClass.getMetadata().getClassName().equals(configClass.getMetadata().getClassName())) {
-				processConfigurationClass(memberClass.asConfigClass(configClass));
+				if (this.importStack.contains(configClass)) {
+					this.problemReporter.error(new CircularImportProblem(configClass, this.importStack));
+				}
+				else {
+					this.importStack.push(configClass);
+					try {
+						processConfigurationClass(memberClass.asConfigClass(configClass));
+					}
+					finally {
+						this.importStack.pop();
+					}
+				}
 			}
 		}
 	}
@@ -459,7 +471,7 @@ class ConfigurationClassParser {
 		}
 
 		if (checkForCircularImports && this.importStack.contains(configClass)) {
-			this.problemReporter.error(new CircularImportProblem(configClass, this.importStack, configClass.getMetadata()));
+			this.problemReporter.error(new CircularImportProblem(configClass, this.importStack));
 		}
 		else {
 			this.importStack.push(configClass);
@@ -632,7 +644,7 @@ class ConfigurationClassParser {
 		@Override
 		public AnnotationMetadata getImportingClassFor(String importedClass) {
 			List<AnnotationMetadata> list = this.imports.get(importedClass);
-			return (list == null || list.isEmpty() ? null : list.get(list.size() - 1));
+			return (!CollectionUtils.isEmpty(list) ? list.get(list.size() - 1) : null);
 		}
 
 		/**
@@ -646,7 +658,7 @@ class ConfigurationClassParser {
 			Comparator<ConfigurationClass> comparator = new Comparator<ConfigurationClass>() {
 				@Override
 				public int compare(ConfigurationClass first, ConfigurationClass second) {
-					return first.getMetadata().getClassName().equals(second.getMetadata().getClassName()) ? 0 : 1;
+					return (first.getMetadata().getClassName().equals(second.getMetadata().getClassName()) ? 0 : 1);
 				}
 			};
 			return (Collections.binarySearch(this, configClass, comparator) != -1);
@@ -659,11 +671,11 @@ class ConfigurationClassParser {
 		 * <li>com.acme.Bar</li>
 		 * <li>com.acme.Baz</li>
 		 * </ul>
-		 * return "ImportStack: [Foo->Bar->Baz]".
+		 * return "[Foo->Bar->Baz]".
 		 */
 		@Override
 		public String toString() {
-			StringBuilder builder = new StringBuilder("ImportStack: [");
+			StringBuilder builder = new StringBuilder("[");
 			Iterator<ConfigurationClass> iterator = iterator();
 			while (iterator.hasNext()) {
 				builder.append(iterator.next().getSimpleName());
@@ -862,12 +874,12 @@ class ConfigurationClassParser {
 	 */
 	private static class CircularImportProblem extends Problem {
 
-		public CircularImportProblem(ConfigurationClass attemptedImport, Stack<ConfigurationClass> importStack, AnnotationMetadata metadata) {
+		public CircularImportProblem(ConfigurationClass attemptedImport, Stack<ConfigurationClass> importStack) {
 			super(String.format("A circular @Import has been detected: " +
 					"Illegal attempt by @Configuration class '%s' to import class '%s' as '%s' is " +
-					"already present in the current import stack [%s]", importStack.peek().getSimpleName(),
+					"already present in the current import stack %s", importStack.peek().getSimpleName(),
 					attemptedImport.getSimpleName(), attemptedImport.getSimpleName(), importStack),
-					new Location(importStack.peek().getResource(), metadata));
+					new Location(importStack.peek().getResource(), attemptedImport.getMetadata()));
 		}
 	}
 
