@@ -2032,15 +2032,17 @@ overrides the method.
 
 [NOTE]
 ====
-For this dynamic subclassing to work, the class that the Spring container will subclass
-cannot be `final`, and the method to be overridden cannot be `final` either. Also,
-testing a class that has an `abstract` method requires you to subclass the class
-yourself and to supply a stub implementation of the `abstract` method. Finally, objects
-that have been the target of method injection cannot be serialized. As of Spring 3.2 it
-is no longer necessary to add CGLIB to your classpath, because CGLIB classes are
-repackaged under org.springframework and distributed within the spring-core JAR. This is
-done both for convenience as well as to avoid potential conflicts with other projects
-that use differing versions of CGLIB.
+* For this dynamic subclassing to work, the class that the Spring bean container will
+  subclass cannot be `final`, and the method to be overridden cannot be `final` either.
+* Unit-testing a class that has an `abstract` method requires you to subclass the class
+  yourself and to supply a stub implementation of the `abstract` method.
+* Concrete methods are also necessary for component scanning which requires concrete
+  classes to pick up.
+* A further key limitation is that lookup methods won't work with factory methods and
+  in particular not with `@Bean` methods in configuration classes, since the container
+  is not in charge of creating the instance in that case and therefore cannot create
+  a runtime-generated subclass on the fly.
+* Finally, objects that have been the target of method injection cannot be serialized.
 ====
 
 Looking at the `CommandManager` class in the previous code snippet, you see that the
@@ -2116,7 +2118,7 @@ these classes for additional information.
 
 [[beans-factory-arbitrary-method-replacement]]
 ==== Arbitrary method replacement
-A less useful form of method injection than lookup method Injection is the ability to
+A less useful form of method injection than lookup method injection is the ability to
 replace arbitrary methods in a managed bean with another method implementation. Users
 may safely skip the rest of this section until the functionality is actually needed.
 
