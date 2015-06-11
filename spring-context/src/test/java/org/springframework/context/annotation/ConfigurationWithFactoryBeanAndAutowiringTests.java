@@ -82,15 +82,6 @@ public class ConfigurationWithFactoryBeanAndAutowiringTests {
 		ctx.refresh();
 	}
 
-	@Test
-	public void withFactoryBeanCallingBean() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(AppConfig.class);
-		ctx.register(FactoryBeanCallingConfig.class);
-		ctx.refresh();
-		assertEquals("true", ctx.getBean("myString"));
-	}
-
 
 	static class DummyBean {
 	}
@@ -243,25 +234,6 @@ public class ConfigurationWithFactoryBeanAndAutowiringTests {
 		public FactoryBean<?> factoryBean() {
 			Assert.notNull(dummyBean, "DummyBean was not injected.");
 			return new MyFactoryBean();
-		}
-	}
-
-
-	@Configuration
-	static class FactoryBeanCallingConfig {
-
-		@Autowired
-		private DummyBean dummyBean;
-
-		@Bean
-		public MyFactoryBean factoryBean() {
-			Assert.notNull(dummyBean, "DummyBean was not injected.");
-			return new MyFactoryBean();
-		}
-
-		@Bean
-		public String myString() {
-			return factoryBean().getString();
 		}
 	}
 
