@@ -19,6 +19,7 @@ package org.springframework.aop.aspectj;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -326,29 +327,41 @@ public class AspectJExpressionPointcut extends AbstractExpressionPointcut
 		catch (IllegalStateException ex) {
 			// No current invocation...
 			// TODO: Should we really proceed here?
-			logger.debug("Couldn't access current invocation - matching with limited context: " + ex);
-		}
-
-		JoinPointMatch joinPointMatch = shadowMatch.matchesJoinPoint(thisObject, targetObject, args);
-
-		/*
-		 * Do a final check to see if any this(TYPE) kind of residue match. For
-		 * this purpose, we use the original method's (proxy method's) shadow to
-		 * ensure that 'this' is correctly checked against. Without this check,
-		 * we get incorrect match on this(TYPE) where TYPE matches the target
-		 * type but not 'this' (as would be the case of JDK dynamic proxies).
-		 * <p>See SPR-2979 for the original bug.
-		 */
-		if (pmi != null) {  // there is a current invocation
-			RuntimeTestWalker originalMethodResidueTest = getRuntimeTestWalker(originalShadowMatch);
-			if (!originalMethodResidueTest.testThisInstanceOfResidue(thisObject.getClass())) {
-				return false;
-			}
-			if (joinPointMatch.matches()) {
-				bindParameters(pmi, joinPointMatch);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Could not access current invocation - matching with limited context: " + ex);
 			}
 		}
-		return joinPointMatch.matches();
+
+		try {
+			JoinPointMatch joinPointMatch = shadowMatch.matchesJoinPoint(thisObject, targetObject, args);
+
+			/*
+			 * Do a final check to see if any this(TYPE) kind of residue match. For
+			 * this purpose, we use the original method's (proxy method's) shadow to
+			 * ensure that 'this' is correctly checked against. Without this check,
+			 * we get incorrect match on this(TYPE) where TYPE matches the target
+			 * type but not 'this' (as would be the case of JDK dynamic proxies).
+			 * <p>See SPR-2979 for the original bug.
+			 */
+			if (pmi != null) {  // there is a current invocation
+				RuntimeTestWalker originalMethodResidueTest = getRuntimeTestWalker(originalShadowMatch);
+				if (!originalMethodResidueTest.testThisInstanceOfResidue(thisObject.getClass())) {
+					return false;
+				}
+				if (joinPointMatch.matches()) {
+					bindParameters(pmi, joinPointMatch);
+				}
+			}
+
+			return joinPointMatch.matches();
+		}
+		catch (Throwable ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Failed to evaluate join point for arguments " + Arrays.asList(args) +
+						" - falling back to non-match", ex);
+			}
+			return false;
+		}
 	}
 
 	protected String getCurrentProxiedBeanName() {
