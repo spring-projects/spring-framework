@@ -134,9 +134,11 @@ import org.springframework.util.ReflectionUtils;
 public abstract class AbstractMessageListenerContainer extends AbstractJmsListeningContainer
 		implements MessageListenerContainer {
 
+	/** The JMS 2.0 Session.createSharedConsumer method, if available */
 	private static final Method createSharedConsumerMethod = ClassUtils.getMethodIfAvailable(
 			Session.class, "createSharedConsumer", Topic.class, String.class, String.class);
 
+	/** The JMS 2.0 Session.createSharedDurableConsumer method, if available */
 	private static final Method createSharedDurableConsumerMethod = ClassUtils.getMethodIfAvailable(
 			Session.class, "createSharedDurableConsumer", Topic.class, String.class, String.class);
 

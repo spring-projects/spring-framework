@@ -221,7 +221,6 @@ public interface WebRequest extends RequestAttributes {
 	 * @return whether the request qualifies as not modified,
 	 * allowing to abort request processing and relying on the response
 	 * telling the client that the content has not been modified
-	 *
 	 * @since 4.2
 	 */
 	boolean checkNotModified(String etag, long lastModifiedTimestamp);
