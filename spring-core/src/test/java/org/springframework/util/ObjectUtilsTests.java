@@ -18,6 +18,11 @@ package org.springframework.util;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -25,6 +30,7 @@ import org.junit.rules.ExpectedException;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
+import static org.springframework.util.ObjectUtils.*;
 
 /**
  * Unit tests for {@link ObjectUtils}.
@@ -82,6 +88,58 @@ public class ObjectUtilsTests {
 		assertFalse(ObjectUtils.isCompatibleWithThrowsClause(new Throwable(), exception));
 		assertFalse(ObjectUtils.isCompatibleWithThrowsClause(new Throwable(), sqlAndIO));
 		assertTrue(ObjectUtils.isCompatibleWithThrowsClause(new Throwable(), throwable));
+	}
+
+	@Test
+	public void isEmptyNull() {
+		assertTrue(isEmpty(null));
+	}
+
+	@Test
+	public void isEmptyArray() {
+		assertTrue(isEmpty(new char[0]));
+		assertTrue(isEmpty(new Object[0]));
+		assertTrue(isEmpty(new Integer[0]));
+
+		assertFalse(isEmpty(new int[] { 42 }));
+		assertFalse(isEmpty(new Integer[] { new Integer(42) }));
+	}
+
+	@Test
+	public void isEmptyCollection() {
+		assertTrue(isEmpty(Collections.emptyList()));
+		assertTrue(isEmpty(Collections.emptySet()));
+
+		Set<String> set = new HashSet<String>();
+		set.add("foo");
+		assertFalse(isEmpty(set));
+		assertFalse(isEmpty(Arrays.asList("foo")));
+	}
+
+	@Test
+	public void isEmptyMap() {
+		assertTrue(isEmpty(Collections.emptyMap()));
+
+		HashMap<String, Object> map = new HashMap<String, Object>();
+		map.put("foo", 42L);
+		assertFalse(isEmpty(map));
+	}
+
+	@Test
+	public void isEmptyCharSequence() {
+		assertTrue(isEmpty(new StringBuilder()));
+		assertTrue(isEmpty(""));
+
+		assertFalse(isEmpty(new StringBuilder("foo")));
+		assertFalse(isEmpty("   "));
+		assertFalse(isEmpty("\t"));
+		assertFalse(isEmpty("foo"));
+	}
+
+	@Test
+	public void isEmptyUnsupportedObjectType() {
+		assertFalse(isEmpty(42L));
+		assertFalse(isEmpty(new Object()));
 	}
 
 	@Test
