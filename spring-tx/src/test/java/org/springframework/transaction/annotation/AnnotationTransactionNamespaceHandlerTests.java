@@ -37,6 +37,7 @@ import org.springframework.transaction.event.TransactionalEventListenerFactory;
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 
@@ -127,6 +128,10 @@ public class AnnotationTransactionNamespaceHandlerTests extends TestCase {
 
 		@Transactional("qualifiedTransactionManager")
 		public void saveQualifiedFoo() {
+		}
+
+		@Transactional(transactionManager = "qualifiedTransactionManager")
+		public void saveQualifiedFooWithAttributeAlias() {
 		}
 
 		@Transactional

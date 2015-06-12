@@ -23,6 +23,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.transaction.TransactionDefinition;
 
 /**
@@ -56,13 +57,23 @@ import org.springframework.transaction.TransactionDefinition;
 public @interface Transactional {
 
 	/**
+	 * Alias for {@link #transactionManager}.
+	 * @see #transactionManager
+	 */
+	@AliasFor(attribute = "transactionManager")
+	String value() default "";
+
+	/**
 	 * A <em>qualifier</em> value for the specified transaction.
 	 * <p>May be used to determine the target transaction manager,
 	 * matching the qualifier value (or the bean name) of a specific
 	 * {@link org.springframework.transaction.PlatformTransactionManager}
 	 * bean definition.
+	 * @since 4.2
+	 * @see #value
 	 */
-	String value() default "";
+	@AliasFor(attribute = "value")
+	String transactionManager() default "";
 
 	/**
 	 * The transaction propagation type.
