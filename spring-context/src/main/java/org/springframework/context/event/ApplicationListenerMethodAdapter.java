@@ -248,7 +248,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	 */
 	protected String getCondition() {
 		if (this.condition == null) {
-			EventListener eventListener = AnnotatedElementUtils.findAnnotation(this.method, EventListener.class);
+			EventListener eventListener = AnnotatedElementUtils.findMergedAnnotation(this.method, EventListener.class);
 			if (eventListener != null) {
 				this.condition = eventListener.condition();
 			}

@@ -499,7 +499,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 		if (this.configurationAttributes == null) {
 			Class<?> clazz = testContext.getTestClass();
 
-			TransactionConfiguration txConfig = AnnotatedElementUtils.findAnnotation(clazz,
+			TransactionConfiguration txConfig = AnnotatedElementUtils.findMergedAnnotation(clazz,
 				TransactionConfiguration.class);
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("Retrieved @TransactionConfiguration [%s] for test class [%s].",

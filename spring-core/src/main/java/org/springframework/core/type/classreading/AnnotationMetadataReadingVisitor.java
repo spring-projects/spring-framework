@@ -94,13 +94,13 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 	}
 
 	@Override
-	public Set<String> getMetaAnnotationTypes(String annotationType) {
-		return this.metaAnnotationMap.get(annotationType);
+	public Set<String> getMetaAnnotationTypes(String annotationName) {
+		return this.metaAnnotationMap.get(annotationName);
 	}
 
 	@Override
-	public boolean hasAnnotation(String annotationType) {
-		return this.annotationSet.contains(annotationType);
+	public boolean hasAnnotation(String annotationName) {
+		return this.annotationSet.contains(annotationName);
 	}
 
 	@Override
@@ -115,31 +115,32 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 	}
 
 	@Override
-	public boolean isAnnotated(String annotationType) {
-		return (!AnnotationUtils.isInJavaLangAnnotationPackage(annotationType) && this.attributesMap.containsKey(annotationType));
+	public boolean isAnnotated(String annotationName) {
+		return (!AnnotationUtils.isInJavaLangAnnotationPackage(annotationName) && this.attributesMap.containsKey(annotationName));
 	}
 
 	@Override
-	public AnnotationAttributes getAnnotationAttributes(String annotationType) {
-		return getAnnotationAttributes(annotationType, false);
+	public AnnotationAttributes getAnnotationAttributes(String annotationName) {
+		return getAnnotationAttributes(annotationName, false);
 	}
 
 	@Override
-	public AnnotationAttributes getAnnotationAttributes(String annotationType, boolean classValuesAsString) {
+	public AnnotationAttributes getAnnotationAttributes(String annotationName, boolean classValuesAsString) {
 		AnnotationAttributes raw = AnnotationReadingVisitorUtils.getMergedAnnotationAttributes(
-				this.attributesMap, this.metaAnnotationMap, annotationType);
+this.attributesMap,
+			this.metaAnnotationMap, annotationName);
 		return AnnotationReadingVisitorUtils.convertClassValues(this.classLoader, raw, classValuesAsString);
 	}
 
 	@Override
-	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationType) {
-		return getAllAnnotationAttributes(annotationType, false);
+	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName) {
+		return getAllAnnotationAttributes(annotationName, false);
 	}
 
 	@Override
-	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationType, boolean classValuesAsString) {
+	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName, boolean classValuesAsString) {
 		MultiValueMap<String, Object> allAttributes = new LinkedMultiValueMap<String, Object>();
-		List<AnnotationAttributes> attributes = this.attributesMap.get(annotationType);
+		List<AnnotationAttributes> attributes = this.attributesMap.get(annotationName);
 		if (attributes == null) {
 			return null;
 		}
@@ -153,9 +154,9 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 	}
 
 	@Override
-	public boolean hasAnnotatedMethods(String annotationType) {
+	public boolean hasAnnotatedMethods(String annotationName) {
 		for (MethodMetadata methodMetadata : this.methodMetadataSet) {
-			if (methodMetadata.isAnnotated(annotationType)) {
+			if (methodMetadata.isAnnotated(annotationName)) {
 				return true;
 			}
 		}
@@ -163,10 +164,10 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 	}
 
 	@Override
-	public Set<MethodMetadata> getAnnotatedMethods(String annotationType) {
+	public Set<MethodMetadata> getAnnotatedMethods(String annotationName) {
 		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>(4);
 		for (MethodMetadata methodMetadata : this.methodMetadataSet) {
-			if (methodMetadata.isAnnotated(annotationType)) {
+			if (methodMetadata.isAnnotated(annotationName)) {
 				annotatedMethods.add(methodMetadata);
 			}
 		}

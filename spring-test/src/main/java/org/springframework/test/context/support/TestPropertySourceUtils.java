@@ -96,7 +96,7 @@ public abstract class TestPropertySourceUtils {
 			annotationType.getName(), testClass.getName()));
 
 		while (descriptor != null) {
-			TestPropertySource testPropertySource = descriptor.getMergedAnnotation();
+			TestPropertySource testPropertySource = descriptor.synthesizeAnnotation();
 			Class<?> rootDeclaringClass = descriptor.getRootDeclaringClass();
 
 			if (logger.isTraceEnabled()) {

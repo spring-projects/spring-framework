@@ -31,7 +31,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
- * ASM method visitor which looks for the annotations defined on the method,
+ * ASM method visitor which looks for the annotations defined on a method,
  * exposing them through the {@link org.springframework.core.type.MethodMetadata}
  * interface.
  *
@@ -106,34 +106,34 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 	}
 
 	@Override
-	public boolean isAnnotated(String annotationType) {
-		return this.attributeMap.containsKey(annotationType);
+	public boolean isAnnotated(String annotationName) {
+		return this.attributeMap.containsKey(annotationName);
 	}
 
 	@Override
-	public Map<String, Object> getAnnotationAttributes(String annotationType) {
-		return getAnnotationAttributes(annotationType, false);
+	public Map<String, Object> getAnnotationAttributes(String annotationName) {
+		return getAnnotationAttributes(annotationName, false);
 	}
 
 	@Override
-	public Map<String, Object> getAnnotationAttributes(String annotationType, boolean classValuesAsString) {
-		List<AnnotationAttributes> attributes = this.attributeMap.get(annotationType);
+	public Map<String, Object> getAnnotationAttributes(String annotationName, boolean classValuesAsString) {
+		List<AnnotationAttributes> attributes = this.attributeMap.get(annotationName);
 		return (attributes == null ? null : AnnotationReadingVisitorUtils.convertClassValues(
 				this.classLoader, attributes.get(0), classValuesAsString));
 	}
 
 	@Override
-	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationType) {
-		return getAllAnnotationAttributes(annotationType, false);
+	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName) {
+		return getAllAnnotationAttributes(annotationName, false);
 	}
 
 	@Override
-	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationType, boolean classValuesAsString) {
-		if (!this.attributeMap.containsKey(annotationType)) {
+	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName, boolean classValuesAsString) {
+		if (!this.attributeMap.containsKey(annotationName)) {
 			return null;
 		}
 		MultiValueMap<String, Object> allAttributes = new LinkedMultiValueMap<String, Object>();
-		for (AnnotationAttributes annotationAttributes : this.attributeMap.get(annotationType)) {
+		for (AnnotationAttributes annotationAttributes : this.attributeMap.get(annotationName)) {
 			for (Map.Entry<String, Object> entry : AnnotationReadingVisitorUtils.convertClassValues(
 					this.classLoader, annotationAttributes, classValuesAsString).entrySet()) {
 				allAttributes.add(entry.getKey(), entry.getValue());

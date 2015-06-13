@@ -26,6 +26,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextHierarchy;
@@ -132,8 +133,10 @@ abstract class ContextLoaderUtils {
 			final List<ContextConfigurationAttributes> configAttributesList = new ArrayList<ContextConfigurationAttributes>();
 
 			if (contextConfigDeclaredLocally) {
-				convertContextConfigToConfigAttributesAndAddToList(
-					(ContextConfiguration) descriptor.getMergedAnnotation(), rootDeclaringClass,
+				ContextConfiguration contextConfiguration = AnnotationUtils.synthesizeAnnotation(
+					descriptor.getAnnotationAttributes(), ContextConfiguration.class,
+					descriptor.getRootDeclaringClass());
+				convertContextConfigToConfigAttributesAndAddToList(contextConfiguration, rootDeclaringClass,
 					configAttributesList);
 			}
 			else if (contextHierarchyDeclaredLocally) {
@@ -256,7 +259,7 @@ abstract class ContextLoaderUtils {
 			annotationType.getName(), testClass.getName()));
 
 		while (descriptor != null) {
-			convertContextConfigToConfigAttributesAndAddToList(descriptor.getMergedAnnotation(),
+			convertContextConfigToConfigAttributesAndAddToList(descriptor.synthesizeAnnotation(),
 				descriptor.getRootDeclaringClass(), attributesList);
 			descriptor = findAnnotationDescriptor(descriptor.getRootDeclaringClass().getSuperclass(), annotationType);
 		}

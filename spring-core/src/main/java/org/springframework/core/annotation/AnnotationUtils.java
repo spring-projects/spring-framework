@@ -1024,10 +1024,10 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * <em>Synthesize</em> the supplied {@code annotation} by wrapping it in
-	 * a dynamic proxy that transparently enforces <em>attribute alias</em>
-	 * semantics for annotation attributes that are annotated with
-	 * {@link AliasFor @AliasFor}.
+	 * <em>Synthesize</em> an annotation from the supplied {@code annotation}
+	 * by wrapping it in a dynamic proxy that transparently enforces
+	 * <em>attribute alias</em> semantics for annotation attributes that are
+	 * annotated with {@link AliasFor @AliasFor}.
 	 *
 	 * @param annotation the annotation to synthesize
 	 * @return the synthesized annotation, if the supplied annotation is
@@ -1043,10 +1043,10 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * <em>Synthesize</em> the supplied {@code annotation} by wrapping it in
-	 * a dynamic proxy that transparently enforces <em>attribute alias</em>
-	 * semantics for annotation attributes that are annotated with
-	 * {@link AliasFor @AliasFor}.
+	 * <em>Synthesize</em> an annotation from the supplied {@code annotation}
+	 * by wrapping it in a dynamic proxy that transparently enforces
+	 * <em>attribute alias</em> semantics for annotation attributes that are
+	 * annotated with {@link AliasFor @AliasFor}.
 	 *
 	 * @param annotation the annotation to synthesize
 	 * @param annotatedElement the element that is annotated with the supplied
@@ -1083,15 +1083,15 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * <em>Synthesize</em> the supplied map of annotation attributes by
-	 * wrapping it in a dynamic proxy that implements an annotation of type
-	 * {@code annotationType} and transparently enforces <em>attribute alias</em>
-	 * semantics for annotation attributes that are annotated with
-	 * {@link AliasFor @AliasFor}.
+	 * <em>Synthesize</em> an annotation from the supplied map of annotation
+	 * attributes by wrapping the map in a dynamic proxy that implements an
+	 * annotation of the specified {@code annotationType} and transparently
+	 * enforces <em>attribute alias</em> semantics for annotation attributes
+	 * that are annotated with {@link AliasFor @AliasFor}.
 	 * <p>The supplied map must contain key-value pairs for every attribute
 	 * defined by the supplied {@code annotationType}.
 	 * <p>Note that {@link AnnotationAttributes} is a specialized type of
-	 * {@link Map} that is a suitable candidate for this method's
+	 * {@link Map} that is an ideal candidate for this method's
 	 * {@code attributes} argument.
 	 *
 	 * @param attributes the map of annotation attributes to synthesize

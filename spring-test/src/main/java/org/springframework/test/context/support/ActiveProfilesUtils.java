@@ -86,7 +86,7 @@ abstract class ActiveProfilesUtils {
 		while (descriptor != null) {
 			Class<?> rootDeclaringClass = descriptor.getRootDeclaringClass();
 			Class<?> declaringClass = descriptor.getDeclaringClass();
-			ActiveProfiles annotation = descriptor.getMergedAnnotation();
+			ActiveProfiles annotation = descriptor.synthesizeAnnotation();
 
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Retrieved @ActiveProfiles [%s] for declaring class [%s].", annotation,

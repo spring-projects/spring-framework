@@ -155,8 +155,8 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 		Assert.notNull(testClass, "The test class of the supplied TestContext must not be null");
 		Assert.notNull(testMethod, "The test method of the supplied TestContext must not be null");
 
-		DirtiesContext methodAnn = AnnotatedElementUtils.findAnnotation(testMethod, DirtiesContext.class);
-		DirtiesContext classAnn = AnnotatedElementUtils.findAnnotation(testClass, DirtiesContext.class);
+		DirtiesContext methodAnn = AnnotatedElementUtils.findMergedAnnotation(testMethod, DirtiesContext.class);
+		DirtiesContext classAnn = AnnotatedElementUtils.findMergedAnnotation(testClass, DirtiesContext.class);
 		boolean methodAnnotated = (methodAnn != null);
 		boolean classAnnotated = (classAnn != null);
 		MethodMode methodMode = (methodAnnotated ? methodAnn.methodMode() : null);
@@ -183,7 +183,7 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 		Class<?> testClass = testContext.getTestClass();
 		Assert.notNull(testClass, "The test class of the supplied TestContext must not be null");
 
-		DirtiesContext dirtiesContext = AnnotatedElementUtils.findAnnotation(testClass, DirtiesContext.class);
+		DirtiesContext dirtiesContext = AnnotatedElementUtils.findMergedAnnotation(testClass, DirtiesContext.class);
 		boolean classAnnotated = (dirtiesContext != null);
 		ClassMode classMode = (classAnnotated ? dirtiesContext.classMode() : null);
 

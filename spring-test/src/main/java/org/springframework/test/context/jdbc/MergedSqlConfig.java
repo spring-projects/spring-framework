@@ -86,7 +86,7 @@ class MergedSqlConfig {
 		Assert.notNull(testClass, "testClass must not be null");
 
 		// Get global attributes, if any.
-		AnnotationAttributes attributes = AnnotatedElementUtils.findAnnotationAttributes(testClass,
+		AnnotationAttributes attributes = AnnotatedElementUtils.findMergedAnnotationAttributes(testClass,
 			SqlConfig.class.getName(), false, false);
 
 		// Override global attributes with local attributes.

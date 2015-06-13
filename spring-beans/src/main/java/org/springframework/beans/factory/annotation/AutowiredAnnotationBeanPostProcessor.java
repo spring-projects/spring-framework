@@ -442,7 +442,7 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 
 	private AnnotationAttributes findAutowiredAnnotation(AccessibleObject ao) {
 		for (Class<? extends Annotation> type : this.autowiredAnnotationTypes) {
-			AnnotationAttributes attributes = AnnotatedElementUtils.getAnnotationAttributes(ao, type);
+			AnnotationAttributes attributes = AnnotatedElementUtils.getMergedAnnotationAttributes(ao, type);
 			if (attributes != null) {
 				return attributes;
 			}

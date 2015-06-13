@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ import org.springframework.util.MultiValueMap;
  * @author Mark Fisher
  * @author Chris Beams
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 2.5
  */
 public class StandardAnnotationMetadata extends StandardClassMetadata implements AnnotationMetadata {
@@ -77,15 +78,15 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	}
 
 	@Override
-	public Set<String> getMetaAnnotationTypes(String annotationType) {
-		return AnnotatedElementUtils.getMetaAnnotationTypes(getIntrospectedClass(), annotationType);
+	public Set<String> getMetaAnnotationTypes(String annotationName) {
+		return AnnotatedElementUtils.getMetaAnnotationTypes(getIntrospectedClass(), annotationName);
 	}
 
 	@Override
-	public boolean hasAnnotation(String annotationType) {
+	public boolean hasAnnotation(String annotationName) {
 		Annotation[] anns = getIntrospectedClass().getAnnotations();
 		for (Annotation ann : anns) {
-			if (ann.annotationType().getName().equals(annotationType)) {
+			if (ann.annotationType().getName().equals(annotationName)) {
 				return true;
 			}
 		}
@@ -93,42 +94,42 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	}
 
 	@Override
-	public boolean hasMetaAnnotation(String annotationType) {
-		return AnnotatedElementUtils.hasMetaAnnotationTypes(getIntrospectedClass(), annotationType);
+	public boolean hasMetaAnnotation(String annotationName) {
+		return AnnotatedElementUtils.hasMetaAnnotationTypes(getIntrospectedClass(), annotationName);
 	}
 
 	@Override
-	public boolean isAnnotated(String annotationType) {
-		return AnnotatedElementUtils.isAnnotated(getIntrospectedClass(), annotationType);
+	public boolean isAnnotated(String annotationName) {
+		return AnnotatedElementUtils.isAnnotated(getIntrospectedClass(), annotationName);
 	}
 
 	@Override
-	public Map<String, Object> getAnnotationAttributes(String annotationType) {
-		return this.getAnnotationAttributes(annotationType, false);
+	public Map<String, Object> getAnnotationAttributes(String annotationName) {
+		return this.getAnnotationAttributes(annotationName, false);
 	}
 
 	@Override
-	public Map<String, Object> getAnnotationAttributes(String annotationType, boolean classValuesAsString) {
-		return AnnotatedElementUtils.getAnnotationAttributes(getIntrospectedClass(),
-				annotationType, classValuesAsString, this.nestedAnnotationsAsMap);
+	public Map<String, Object> getAnnotationAttributes(String annotationName, boolean classValuesAsString) {
+		return AnnotatedElementUtils.getMergedAnnotationAttributes(getIntrospectedClass(),
+			annotationName, classValuesAsString, this.nestedAnnotationsAsMap);
 	}
 
 	@Override
-	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationType) {
-		return getAllAnnotationAttributes(annotationType, false);
+	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName) {
+		return getAllAnnotationAttributes(annotationName, false);
 	}
 
 	@Override
-	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationType, boolean classValuesAsString) {
+	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName, boolean classValuesAsString) {
 		return AnnotatedElementUtils.getAllAnnotationAttributes(getIntrospectedClass(),
-				annotationType, classValuesAsString, this.nestedAnnotationsAsMap);
+			annotationName, classValuesAsString, this.nestedAnnotationsAsMap);
 	}
 
 	@Override
-	public boolean hasAnnotatedMethods(String annotationType) {
+	public boolean hasAnnotatedMethods(String annotationName) {
 		Method[] methods = getIntrospectedClass().getDeclaredMethods();
 		for (Method method : methods) {
-			if (!method.isBridge() && AnnotatedElementUtils.isAnnotated(method, annotationType)) {
+			if (!method.isBridge() && AnnotatedElementUtils.isAnnotated(method, annotationName)) {
 				return true;
 			}
 		}
@@ -136,11 +137,11 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	}
 
 	@Override
-	public Set<MethodMetadata> getAnnotatedMethods(String annotationType) {
+	public Set<MethodMetadata> getAnnotatedMethods(String annotationName) {
 		Method[] methods = getIntrospectedClass().getDeclaredMethods();
 		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>();
 		for (Method method : methods) {
-			if (!method.isBridge() && AnnotatedElementUtils.isAnnotated(method, annotationType)) {
+			if (!method.isBridge() && AnnotatedElementUtils.isAnnotated(method, annotationName)) {
 				annotatedMethods.add(new StandardMethodMetadata(method, this.nestedAnnotationsAsMap));
 			}
 		}

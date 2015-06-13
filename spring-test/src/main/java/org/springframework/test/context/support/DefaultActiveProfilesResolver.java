@@ -73,7 +73,7 @@ public class DefaultActiveProfilesResolver implements ActiveProfilesResolver {
 		}
 		else {
 			Class<?> declaringClass = descriptor.getDeclaringClass();
-			ActiveProfiles annotation = descriptor.getMergedAnnotation();
+			ActiveProfiles annotation = descriptor.synthesizeAnnotation();
 
 			if (logger.isTraceEnabled()) {
 				logger.trace(String.format("Retrieved @ActiveProfiles [%s] for declaring class [%s].", annotation,
