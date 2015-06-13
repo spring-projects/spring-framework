@@ -39,19 +39,19 @@ import org.springframework.core.annotation.AliasFor;
 @Documented
 public @interface CrossOrigin {
 
-	String[] DEFAULT_ORIGIN = { "*" };
+	static final String[] DEFAULT_ORIGIN = { "*" };
 
-	String[] DEFAULT_ALLOWED_HEADERS = { "*" };
+	static final String[] DEFAULT_ALLOWED_HEADERS = { "*" };
 
-	boolean DEFAULT_ALLOW_CREDENTIALS = true;
+	static final boolean DEFAULT_ALLOW_CREDENTIALS = true;
 
-	long DEFAULT_MAX_AGE = 1800;
+	static final long DEFAULT_MAX_AGE = 1800;
 
 
 	/**
-	 * Alias for {@link #origin}.
+	 * Alias for {@link #origins}.
 	 */
-	@AliasFor(attribute = "origin")
+	@AliasFor(attribute = "origins")
 	String[] value() default {};
 
 	/**
@@ -63,7 +63,7 @@ public @interface CrossOrigin {
 	 * @see #value
 	 */
 	@AliasFor(attribute = "value")
-	String[] origin() default {};
+	String[] origins() default {};
 
 	/**
 	 * List of request headers that can be used during the actual request.
@@ -88,7 +88,7 @@ public @interface CrossOrigin {
 	 * <p>If undefined, methods defined by {@link RequestMapping} annotation
 	 * are used.
 	 */
-	RequestMethod[] method() default {};
+	RequestMethod[] methods() default {};
 
 	/**
 	 * Whether the browser should include any cookies associated with the

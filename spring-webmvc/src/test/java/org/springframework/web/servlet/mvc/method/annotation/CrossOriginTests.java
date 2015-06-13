@@ -56,8 +56,9 @@ import static org.junit.Assert.*;
  */
 public class CrossOriginTests {
 
-	private TestRequestMappingInfoHandlerMapping handlerMapping;
-	private MockHttpServletRequest request;
+	private final TestRequestMappingInfoHandlerMapping handlerMapping = new TestRequestMappingInfoHandlerMapping();
+
+	private final MockHttpServletRequest request = new MockHttpServletRequest();
 
 	@Rule
 	public ExpectedException exception = ExpectedException.none();
@@ -65,11 +66,10 @@ public class CrossOriginTests {
 
 	@Before
 	public void setUp() {
-		this.handlerMapping = new TestRequestMappingInfoHandlerMapping();
 		this.handlerMapping.setRemoveSemicolonContent(false);
 		this.handlerMapping.setApplicationContext(new StaticWebApplicationContext());
 		this.handlerMapping.afterPropertiesSet();
-		this.request = new MockHttpServletRequest();
+
 		this.request.setMethod("GET");
 		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain.com/");
 	}
@@ -304,8 +304,8 @@ public class CrossOriginTests {
 			return "{}";
 		}
 
-		@CrossOrigin(origin = { "http://site1.com", "http://site2.com" }, allowedHeaders = { "header1", "header2" },
-				exposedHeaders = { "header3", "header4" }, method = RequestMethod.DELETE, maxAge = 123, allowCredentials = "false")
+		@CrossOrigin(origins = { "http://site1.com", "http://site2.com" }, allowedHeaders = { "header1", "header2" },
+				exposedHeaders = { "header3", "header4" }, methods = RequestMethod.DELETE, maxAge = 123, allowCredentials = "false")
 		@RequestMapping(path = "/customized", method = { RequestMethod.GET, RequestMethod.POST })
 		public void customized() {
 		}

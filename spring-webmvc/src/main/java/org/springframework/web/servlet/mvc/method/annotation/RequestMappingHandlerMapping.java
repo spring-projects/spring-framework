@@ -36,7 +36,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.condition.AbstractRequestCondition;
 import org.springframework.web.servlet.mvc.condition.CompositeRequestCondition;
-import org.springframework.web.servlet.mvc.condition.NameValueExpression;
 import org.springframework.web.servlet.mvc.condition.RequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping;
@@ -228,7 +227,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * @param handlerType the handler type for which to create the condition
 	 * @return the condition, or {@code null}
 	 */
-	@SuppressWarnings("unused")
 	protected RequestCondition<?> getCustomTypeCondition(Class<?> handlerType) {
 		return null;
 	}
@@ -244,7 +242,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * @param method the handler method for which to create the condition
 	 * @return the condition, or {@code null}
 	 */
-	@SuppressWarnings("unused")
 	protected RequestCondition<?> getCustomMethodCondition(Method method) {
 		return null;
 	}
@@ -326,10 +323,10 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		if (annotation == null) {
 			return;
 		}
-		for (String origin : annotation.origin()) {
+		for (String origin : annotation.origins()) {
 			config.addAllowedOrigin(origin);
 		}
-		for (RequestMethod method : annotation.method()) {
+		for (RequestMethod method : annotation.methods()) {
 			config.addAllowedMethod(method.name());
 		}
 		for (String header : annotation.allowedHeaders()) {
