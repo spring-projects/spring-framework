@@ -23,6 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.core.annotation.AliasFor;
 
 /**
  * When used as a type-level annotation in conjunction with
@@ -57,14 +58,25 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 public @interface Scope {
 
 	/**
-	 * Specifies the scope to use for the annotated component/bean.
-	 * <p>Defaults to {@link ConfigurableBeanFactory#SCOPE_SINGLETON SCOPE_SINGLETON}.
-	 * @see ConfigurableBeanFactory#SCOPE_SINGLETON
+	 * Alias for {@link #name}.
+	 * @see #name
+	 */
+	@AliasFor(attribute = "name")
+	String value() default "";
+
+	/**
+	 * Specifies the name of the scope to use for the annotated component/bean.
+	 * <p>Defaults to an empty string ({@code ""}) which implies
+	 * {@link ConfigurableBeanFactory#SCOPE_SINGLETON SCOPE_SINGLETON}.
+	 * @since 4.2
 	 * @see ConfigurableBeanFactory#SCOPE_PROTOTYPE
+	 * @see ConfigurableBeanFactory#SCOPE_SINGLETON
 	 * @see org.springframework.web.context.WebApplicationContext#SCOPE_REQUEST
 	 * @see org.springframework.web.context.WebApplicationContext#SCOPE_SESSION
+	 * @see #value
 	 */
-	String value() default ConfigurableBeanFactory.SCOPE_SINGLETON;
+	@AliasFor(attribute = "value")
+	String name() default "";
 
 	/**
 	 * Specifies whether a component should be configured as a scoped proxy

@@ -65,6 +65,7 @@ import org.springframework.util.StringUtils;
  * @author Chris Beams
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 3.0
  * @see ConfigurationClassParser
  */
@@ -242,10 +243,12 @@ class ConfigurationClassBeanDefinitionReader {
 
 		// Consider scoping
 		ScopedProxyMode proxyMode = ScopedProxyMode.NO;
-		AnnotationAttributes scope = AnnotationConfigUtils.attributesFor(metadata, Scope.class);
-		if (scope != null) {
-			beanDef.setScope(scope.getString("value"));
-			proxyMode = scope.getEnum("proxyMode");
+		// TODO Determine why type is hard coded to org.springframework.context.annotation.Scope,
+		// since AnnotationScopeMetadataResolver supports a custom scope annotation type.
+		AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(metadata, Scope.class);
+		if (attributes != null) {
+			beanDef.setScope(attributes.getAliasedString("value", Scope.class, configClass.getResource()));
+			proxyMode = attributes.getEnum("proxyMode");
 			if (proxyMode == ScopedProxyMode.DEFAULT) {
 				proxyMode = ScopedProxyMode.NO;
 			}
