@@ -86,28 +86,6 @@ public class StopWatch {
 		this.id = id;
 	}
 
-	/**
-	 * Construct a new stop watch and optionally start an unnamed task.
-	 * @param start if true starts an unnamed task.
-	 * @since 4.2
-	 */
-	public StopWatch(boolean start) {
-		this("", start);
-	}
-
-	/**
-	 * Construct a new stop watch with the given id and optionally start an unnamed task.
-	 * @param id identifier for this stop watch.
-	 * @param start if true starts an unnamed task.
-	 * @since 4.2
-	 */
-	public StopWatch(String id, boolean start) {
-		this.id = id;
-		if(start){
-			start();
-		}
-	}
-
 
 	/**
 	 * Determine whether the TaskInfo array is built over time. Set this to
@@ -122,25 +100,28 @@ public class StopWatch {
 	/**
 	 * Start an unnamed task. The results are undefined if {@link #stop()}
 	 * or timing methods are called without invoking this method.
+	 * @return this StopWatch
 	 * @see #stop()
 	 */
-	public void start() throws IllegalStateException {
-		start("");
+	public StopWatch start() throws IllegalStateException {
+		return start("");
 	}
 
 	/**
 	 * Start a named task. The results are undefined if {@link #stop()}
 	 * or timing methods are called without invoking this method.
 	 * @param taskName the name of the task to start
+	 * @return this StopWatch
 	 * @see #stop()
 	 */
-	public void start(String taskName) throws IllegalStateException {
+	public StopWatch start(String taskName) throws IllegalStateException {
 		if (this.running) {
 			throw new IllegalStateException("Can't start StopWatch: it's already running");
 		}
 		this.startTimeMillis = System.currentTimeMillis();
 		this.running = true;
 		this.currentTaskName = taskName;
+		return this;
 	}
 
 	/**

@@ -141,8 +141,8 @@ public class StopWatchTests extends TestCase {
 		}
 	}
 
-	public void testStartOnConstruction() {
-		StopWatch sw = new StopWatch(true);
+	public void testStopWatchStartBuilder() {
+		StopWatch sw = new StopWatch().start();
 		assertTrue(sw.isRunning());
 	}
 
