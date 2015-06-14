@@ -141,7 +141,7 @@ public class MergedContextConfigurationTests {
 				EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, activeProfiles1, loader);
 		MergedContextConfiguration mergedConfig2 = new MergedContextConfiguration(getClass(),
 				EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, activeProfiles2, loader);
-		assertEquals(mergedConfig1.hashCode(), mergedConfig2.hashCode());
+		assertNotEquals(mergedConfig1.hashCode(), mergedConfig2.hashCode());
 	}
 
 	@Test
@@ -337,7 +337,7 @@ public class MergedContextConfigurationTests {
 				EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, activeProfiles1, loader);
 		MergedContextConfiguration mergedConfig2 = new MergedContextConfiguration(getClass(),
 				EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, activeProfiles2, loader);
-		assertEquals(mergedConfig1, mergedConfig2);
+		assertNotEquals(mergedConfig1, mergedConfig2);
 	}
 
 	@Test

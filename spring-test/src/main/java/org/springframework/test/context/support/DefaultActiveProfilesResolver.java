@@ -16,7 +16,7 @@
 
 package org.springframework.test.context.support;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
@@ -59,7 +59,7 @@ public class DefaultActiveProfilesResolver implements ActiveProfilesResolver {
 	public String[] resolve(Class<?> testClass) {
 		Assert.notNull(testClass, "Class must not be null");
 
-		final Set<String> activeProfiles = new HashSet<String>();
+		final Set<String> activeProfiles = new LinkedHashSet<String>();
 
 		Class<ActiveProfiles> annotationType = ActiveProfiles.class;
 		AnnotationDescriptor<ActiveProfiles> descriptor = findAnnotationDescriptor(testClass, annotationType);
