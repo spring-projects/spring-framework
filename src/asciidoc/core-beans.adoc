@@ -7851,6 +7851,58 @@ This new method will publish a new `ListUpdateEvent` for every `BlackListEvent` 
 by the method above. If you need to publish several events, just return a `Collection` of
 events instead.
 
+[[context-functionality-events-generics]]
+==== Generic Events
+
+You may also use generics to further define the structure of your event. Consider an
+`EntityCreatedEvent<T>` where `T` is the type of the actual entity that got created. You
+can create the following listener definition to only receive `EntityCreatedEvent` for a
+`Person`:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@EventListener
+	public void onPersonCreated(EntityCreatedEvent<Person> event) {
+		...
+	}
+----
+
+
+Due to type erasure, this will only work if the event that is fired resolves the generic
+parameter(s) on which the event listener filters on (that is something like
+`class PersonCreatedEvent extends EntityCreatedEvent<Person> { ... }`).
+
+In certain circumstances, this may become quite tedious if all events follow the same
+structure (as it should be the case for the event above). In such a case, you can
+implement `ResolvableTypeProvider` to _guide_ the framework beyond what the runtime
+environment provides:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	public class EntityCreatedEvent<T>
+    		extends ApplicationEvent implements ResolvableTypeProvider {
+
+    	public EntityCreatedEvent(T entity) {
+    		super(entity);
+    	}
+
+    	@Override
+    	public ResolvableType getResolvableType() {
+    		return ResolvableType.forClassWithGenerics(getClass(),
+    				ResolvableType.forInstance(getSource()));
+    	}
+    }
+----
+
+[TIP]
+====
+This works not only for `ApplicationEvent` but any arbitrary object that you'd send as
+an event.
+====
+
+
 
 [[context-functionality-resources]]
 === Convenient access to low-level resources
