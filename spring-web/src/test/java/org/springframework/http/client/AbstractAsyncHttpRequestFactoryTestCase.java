@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -206,6 +206,10 @@ public abstract class AbstractAsyncHttpRequestFactoryTestCase extends AbstractJe
 		ClientHttpResponse response = null;
 		try {
 			AsyncClientHttpRequest request = this.factory.createAsyncRequest(new URI(baseUrl + "/methods/" + path), method);
+			if (method == HttpMethod.POST || method == HttpMethod.PUT || method == HttpMethod.PATCH) {
+				// requires a body
+				request.getBody().write(32);
+			}
 			Future<ClientHttpResponse> futureResponse = request.executeAsync();
 			response = futureResponse.get();
 			assertEquals("Invalid response status", HttpStatus.OK, response.getStatusCode());
