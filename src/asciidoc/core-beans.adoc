@@ -2957,9 +2957,10 @@ but does not couple the code to Spring.
 ====
 The `destroy-method` attribute of a `<bean>` element can be assigned a special
 `(inferred)` value which instructs Spring to automatically detect a public `close` or
-`shutdown` method on the specific bean class. This special `(inferred)` value can also be
-set on the `default-destroy-method` attribute of a `<beans>` element to apply this
-behavior to an entire set of beans (see
+`shutdown` method on the specific bean class (any class that implements
+`java.lang.AutoCloseable` or `java.io.Closeable` would therefore match). This special
+`(inferred)` value can also be set on the `default-destroy-method` attribute of a
+`<beans>` element to apply this behavior to an entire set of beans (see
 <<beans-factory-lifecycle-default-init-destroy-methods>>). Note that this is the
 default behavior with Java config.
 ====
