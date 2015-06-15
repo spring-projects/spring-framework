@@ -47,7 +47,7 @@ configure(allprojects) { project ->
 	ext.jasperreportsVersion = "6.1.0"
 	ext.javamailVersion      = "1.5.3"
 	ext.jettyVersion         = "9.2.11.v20150529"
-	ext.jodaVersion          = "2.8"
+	ext.jodaVersion          = "2.8.1"
 	ext.jrubyVersion         = "1.7.20"
 	ext.jtaVersion           = "1.2"
 	ext.junitVersion         = "4.12"
@@ -616,7 +616,7 @@ project("spring-jdbc") {
 		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
 		optional("com.mchange:c3p0:0.9.2.1")
 		optional("org.hsqldb:hsqldb:${hsqldbVersion}")
-		optional("com.h2database:h2:1.4.186")
+		optional("com.h2database:h2:1.4.187")
 		optional("org.apache.derby:derby:10.11.1.1")
 		optional("org.apache.derby:derbyclient:10.11.1.1")
 	}
@@ -697,7 +697,7 @@ project("spring-web") {
 		optional("org.apache.httpcomponents:httpclient:${httpclientVersion}")
 		optional("org.apache.httpcomponents:httpasyncclient:${httpasyncVersion}")
 		optional("io.netty:netty-all:${nettyVersion}")
-		optional("com.squareup.okhttp:okhttp:2.3.0")
+		optional("com.squareup.okhttp:okhttp:2.4.0")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jackson2Version}")
 		optional("com.google.code.gson:gson:${gsonVersion}")
