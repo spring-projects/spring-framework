@@ -876,13 +876,6 @@ proxy will take care of forwarding the call to the server-side object via JMS.
 	}
 ----
 
-You may also wish to investigate the support provided by the
-http://lingo.codehaus.org/[Lingo] project, which (to quote the homepage blurb) "__... is
-a lightweight POJO based remoting and messaging library based on the Spring Framework's
-remoting libraries which extends it to support JMS.__"
-
-
-
 
 [[remoting-amqp]]
 === AMQP
@@ -8039,8 +8032,8 @@ in the Spring Framework.
 Find below links to further resources about the various dynamic languages described in
 this chapter.
 
-* The http://jruby.codehaus.org/[JRuby] homepage
-* The http://groovy.codehaus.org/[Groovy] homepage
+* The http://jruby.org/[JRuby] homepage
+* The http://www.groovy-lang.org/[Groovy] homepage
 * The http://www.beanshell.org/[BeanShell] homepage
 
 

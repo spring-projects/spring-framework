@@ -7046,7 +7046,7 @@ Available attributes are:
 XStream is a simple library to serialize objects to XML and back again. It does not
 require any mapping, and generates clean XML.
 
-For more information on XStream, refer to the http://xstream.codehaus.org/[__XStream
+For more information on XStream, refer to the http://x-stream.github.io/[__XStream
 web site__]. The Spring integration classes reside in the
 `org.springframework.oxm.xstream` package.
 

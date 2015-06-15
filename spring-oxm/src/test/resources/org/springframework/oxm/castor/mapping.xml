@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!DOCTYPE mapping PUBLIC "-//EXOLAB/Castor Mapping DTD Version 1.0//EN" "http://castor.codehaus.org/mapping.dtd">
+<!DOCTYPE mapping PUBLIC "-//EXOLAB/Castor Mapping DTD Version 1.0//EN" "http://castor.org/mapping.dtd">
 <mapping>
     <description>Castor generated mapping file</description>
     <class name="org.springframework.oxm.castor.Flights">
