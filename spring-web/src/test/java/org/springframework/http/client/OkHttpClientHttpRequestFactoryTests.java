@@ -33,6 +33,7 @@ public class OkHttpClientHttpRequestFactoryTests extends AbstractHttpRequestFact
 	@Override
 	@Test
 	public void httpMethods() throws Exception {
+		super.httpMethods();
 		assertHttpMethod("patch", HttpMethod.PATCH);
 	}
 
