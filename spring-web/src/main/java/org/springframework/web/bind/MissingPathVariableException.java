@@ -51,7 +51,7 @@ public class MissingPathVariableException extends ServletRequestBindingException
 	@Override
 	public String getMessage() {
 		return "Missing URI template variable '" + this.variableName +
-				"' for method parameter of type " + parameter.getParameterType().getSimpleName();
+				"' for method parameter of type " + this.parameter.getParameterType().getSimpleName();
 	}
 
 	/**
