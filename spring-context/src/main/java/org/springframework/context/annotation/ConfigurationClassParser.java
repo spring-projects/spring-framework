@@ -779,7 +779,16 @@ class ConfigurationClassParser {
 			String[] memberClassNames = sourceReader.getClassMetadata().getMemberClassNames();
 			List<SourceClass> members = new ArrayList<SourceClass>(memberClassNames.length);
 			for (String memberClassName : memberClassNames) {
-				members.add(asSourceClass(memberClassName));
+				try {
+					members.add(asSourceClass(memberClassName));
+				}
+				catch (IOException ex) {
+					// Let's skip it if it's not resolvable - we're just looking for candidates
+					if (logger.isDebugEnabled()) {
+						logger.debug("Failed to resolve member class [" + memberClassName +
+								"] - not considering it as a configuration class candidate");
+					}
+				}
 			}
 			return members;
 		}
