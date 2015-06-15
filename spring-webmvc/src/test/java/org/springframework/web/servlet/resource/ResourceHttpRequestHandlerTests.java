@@ -40,7 +40,6 @@ import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.servlet.HandlerMapping;
 
-
 /**
  * Unit tests for ResourceHttpRequestHandler.
  *
@@ -310,6 +309,7 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals(200, this.response.getStatus());
 		assertEquals(0, this.response.getContentLength());
 	}
+
 
 	private long headerAsLong(String responseHeaderName) {
 		return Long.valueOf(this.response.getHeader(responseHeaderName));
