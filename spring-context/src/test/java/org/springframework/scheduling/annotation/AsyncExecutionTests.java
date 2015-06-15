@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.HashMap;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -71,23 +72,47 @@ public class AsyncExecutionTests {
 		assertEquals("20", future.get());
 		ListenableFuture<String> listenableFuture = asyncTest.returnSomethingListenable(20);
 		assertEquals("20", listenableFuture.get());
+		CompletableFuture<String> completableFuture = asyncTest.returnSomethingCompletable(20);
+		assertEquals("20", completableFuture.get());
 
-		future = asyncTest.returnSomething(0);
 		try {
-			future.get();
+			asyncTest.returnSomething(0).get();
 			fail("Should have thrown ExecutionException");
 		}
 		catch (ExecutionException ex) {
 			assertTrue(ex.getCause() instanceof IllegalArgumentException);
 		}
 
-		future = asyncTest.returnSomething(-1);
 		try {
-			future.get();
+			asyncTest.returnSomething(-1).get();
 			fail("Should have thrown ExecutionException");
 		}
 		catch (ExecutionException ex) {
 			assertTrue(ex.getCause() instanceof IOException);
+		}
+
+		try {
+			asyncTest.returnSomethingListenable(0).get();
+			fail("Should have thrown ExecutionException");
+		}
+		catch (ExecutionException ex) {
+			assertTrue(ex.getCause() instanceof IllegalArgumentException);
+		}
+
+		try {
+			asyncTest.returnSomethingListenable(-1).get();
+			fail("Should have thrown ExecutionException");
+		}
+		catch (ExecutionException ex) {
+			assertTrue(ex.getCause() instanceof IOException);
+		}
+
+		try {
+			asyncTest.returnSomethingCompletable(0).get();
+			fail("Should have thrown ExecutionException");
+		}
+		catch (ExecutionException ex) {
+			assertTrue(ex.getCause() instanceof IllegalArgumentException);
 		}
 	}
 
@@ -163,6 +188,32 @@ public class AsyncExecutionTests {
 		assertEquals("20", future.get());
 		ListenableFuture<String> listenableFuture = asyncTest.returnSomethingListenable(20);
 		assertEquals("20", listenableFuture.get());
+		CompletableFuture<String> completableFuture = asyncTest.returnSomethingCompletable(20);
+		assertEquals("20", completableFuture.get());
+
+		try {
+			asyncTest.returnSomething(0).get();
+			fail("Should have thrown ExecutionException");
+		}
+		catch (ExecutionException ex) {
+			assertTrue(ex.getCause() instanceof IllegalArgumentException);
+		}
+
+		try {
+			asyncTest.returnSomethingListenable(0).get();
+			fail("Should have thrown ExecutionException");
+		}
+		catch (ExecutionException ex) {
+			assertTrue(ex.getCause() instanceof IllegalArgumentException);
+		}
+
+		try {
+			asyncTest.returnSomethingCompletable(0).get();
+			fail("Should have thrown ExecutionException");
+		}
+		catch (ExecutionException ex) {
+			assertTrue(ex.getCause() instanceof IllegalArgumentException);
+		}
 	}
 
 	@Test
@@ -397,7 +448,22 @@ public class AsyncExecutionTests {
 		@Async
 		public ListenableFuture<String> returnSomethingListenable(int i) {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			if (i == 0) {
+				throw new IllegalArgumentException();
+			}
+			else if (i < 0) {
+				return AsyncResult.forExecutionException(new IOException());
+			}
 			return new AsyncResult<String>(Integer.toString(i));
+		}
+
+		@Async
+		public CompletableFuture<String> returnSomethingCompletable(int i) {
+			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			if (i == 0) {
+				throw new IllegalArgumentException();
+			}
+			return CompletableFuture.completedFuture(Integer.toString(i));
 		}
 	}
 
@@ -459,12 +525,27 @@ public class AsyncExecutionTests {
 
 		public Future<String> returnSomething(int i) {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			if (i == 0) {
+				throw new IllegalArgumentException();
+			}
 			return new AsyncResult<String>(Integer.toString(i));
 		}
 
 		public ListenableFuture<String> returnSomethingListenable(int i) {
 			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			if (i == 0) {
+				throw new IllegalArgumentException();
+			}
 			return new AsyncResult<String>(Integer.toString(i));
+		}
+
+		@Async
+		public CompletableFuture<String> returnSomethingCompletable(int i) {
+			assertTrue(!Thread.currentThread().getName().equals(originalThreadName));
+			if (i == 0) {
+				throw new IllegalArgumentException();
+			}
+			return CompletableFuture.completedFuture(Integer.toString(i));
 		}
 
 		@Override
