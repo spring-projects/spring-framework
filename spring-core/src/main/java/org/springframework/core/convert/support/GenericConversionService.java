@@ -12,6 +12,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ *
  */
 
 package org.springframework.core.convert.support;
@@ -43,6 +45,7 @@ import org.springframework.core.convert.converter.GenericConverter;
 import org.springframework.core.convert.converter.GenericConverter.ConvertiblePair;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -59,6 +62,7 @@ import org.springframework.util.StringUtils;
  * @since 3.0
  */
 public class GenericConversionService implements ConfigurableConversionService {
+
 
 	/**
 	 * General NO-OP converter used when conversion is not required.
@@ -89,7 +93,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 	private final Converters converters = new Converters();
 
 	private final Map<ConverterCacheKey, GenericConverter> converterCache =
-			new ConcurrentHashMap<ConverterCacheKey, GenericConverter>(64);
+			new ConcurrentReferenceHashMap<ConverterCacheKey, GenericConverter>(64);
 
 
 	// ConverterRegistry implementation
