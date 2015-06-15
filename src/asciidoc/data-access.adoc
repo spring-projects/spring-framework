@@ -6816,7 +6816,7 @@ not require any further configuration, though a mapping file can be used to have
 control over the behavior of Castor.
 
 For more information on Castor, refer to the
-http://castor.codehaus.org/xml-framework.html[__Castor web site__]. The Spring
+http://castor-data-binding.github.io/castor[__Castor web site__]. The Spring
 integration classes reside in the `org.springframework.oxm.castor` package.
 
 
@@ -6841,7 +6841,7 @@ interface. It can be wired up as follows:
 ==== Mapping
 Although it is possible to rely on Castor's default marshalling behavior, it might be
 necessary to have more control over it. This can be accomplished using a Castor mapping
-file. For more information, refer to http://castor.codehaus.org/xml-mapping.html[Castor
+file. For more information, refer to http://castor-data-binding.github.io/castor/reference-guides/1.3.3/html-single/index.html#xml.mapping[Castor
 XML Mapping].
 
 The mapping can be set using the `mappingLocation` resource property, indicated below
