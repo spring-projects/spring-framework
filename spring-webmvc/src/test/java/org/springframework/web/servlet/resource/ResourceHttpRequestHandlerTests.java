@@ -94,7 +94,7 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals(17, this.response.getContentLength());
 		assertEquals("max-age=3600", this.response.getHeader("Cache-Control"));
 		assertTrue(this.response.containsHeader("Last-Modified"));
-		assertEquals(headerAsLong("Last-Modified"), resourceLastModified("test/foo.css"));
+		assertEquals(headerAsLong("Last-Modified") / 1000, resourceLastModified("test/foo.css") / 1000);
 		assertEquals("h1 { color:red; }", this.response.getContentAsString());
 	}
 
@@ -106,7 +106,7 @@ public class ResourceHttpRequestHandlerTests {
 
 		assertEquals("no-store", this.response.getHeader("Cache-Control"));
 		assertTrue(this.response.containsHeader("Last-Modified"));
-		assertEquals(headerAsLong("Last-Modified"), resourceLastModified("test/foo.css"));
+		assertEquals(headerAsLong("Last-Modified") / 1000, resourceLastModified("test/foo.css") / 1000);
 	}
 
 	@Test
@@ -122,7 +122,7 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals("max-age=3600, must-revalidate", this.response.getHeader("Cache-Control"));
 		assertTrue(headerAsLong("Expires") >= System.currentTimeMillis() - 1000 + (3600 * 1000));
 		assertTrue(this.response.containsHeader("Last-Modified"));
-		assertEquals(headerAsLong("Last-Modified"), resourceLastModified("test/foo.css"));
+		assertEquals(headerAsLong("Last-Modified") / 1000, resourceLastModified("test/foo.css") / 1000);
 	}
 
 	@Test
@@ -138,7 +138,7 @@ public class ResourceHttpRequestHandlerTests {
 		assertThat(this.response.getHeaderValues("Cache-Control"), Matchers.contains("no-cache", "no-store"));
 		assertEquals(this.response.getHeaderValue("Expires"), dateFormat.format(System.currentTimeMillis()));
 		assertTrue(this.response.containsHeader("Last-Modified"));
-		assertEquals(headerAsLong("Last-Modified"), resourceLastModified("test/foo.css"));
+		assertEquals(headerAsLong("Last-Modified") / 1000, resourceLastModified("test/foo.css") / 1000);
 	}
 
 	@Test
@@ -149,7 +149,7 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals("text/html", this.response.getContentType());
 		assertEquals("max-age=3600", this.response.getHeader("Cache-Control"));
 		assertTrue(this.response.containsHeader("Last-Modified"));
-		assertEquals(headerAsLong("Last-Modified"), resourceLastModified("test/foo.html"));
+		assertEquals(headerAsLong("Last-Modified") / 1000, resourceLastModified("test/foo.html") / 1000);
 	}
 
 	@Test
@@ -161,7 +161,7 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals(17, this.response.getContentLength());
 		assertEquals("max-age=3600", this.response.getHeader("Cache-Control"));
 		assertTrue(this.response.containsHeader("Last-Modified"));
-		assertEquals(headerAsLong("Last-Modified"), resourceLastModified("testalternatepath/baz.css"));
+		assertEquals(headerAsLong("Last-Modified") / 1000, resourceLastModified("testalternatepath/baz.css") / 1000);
 		assertEquals("h1 { color:red; }", this.response.getContentAsString());
 	}
 
