@@ -32,6 +32,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.CachedIntrospectionResults;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -536,6 +537,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				// Propagate exception to caller.
 				throw ex;
 			}
+
+			finally {
+				// Reset common introspection caches in Spring's core, since we
+				// might not ever need metadata for singleton beans anymore...
+				resetCommonCaches();
+			}
 		}
 	}
 
@@ -838,6 +845,18 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void cancelRefresh(BeansException ex) {
 		this.active.set(false);
+	}
+
+	/**
+	 * Reset Spring's common core caches, in particular the {@link ResolvableType}
+	 * and the {@link CachedIntrospectionResults} caches.
+	 * @since 4.2
+	 * @see ResolvableType#clearCache()
+	 * @see CachedIntrospectionResults#clearClassLoader(ClassLoader)
+	 */
+	protected void resetCommonCaches() {
+		ResolvableType.clearCache();
+		CachedIntrospectionResults.clearClassLoader(getClassLoader());
 	}
 
 

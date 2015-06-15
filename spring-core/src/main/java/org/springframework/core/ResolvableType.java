@@ -1307,11 +1307,19 @@ public class ResolvableType implements Serializable {
 		return resolvableType;
 	}
 
+	/**
+	 * Clear the internal {@code ResolvableType} cache.
+	 * @since 4.2
+	 */
+	public static void clearCache() {
+		cache.clear();
+	}
+
 
 	/**
 	 * Strategy interface used to resolve {@link TypeVariable}s.
 	 */
-	static interface VariableResolver extends Serializable {
+	interface VariableResolver extends Serializable {
 
 		/**
 		 * Return the source of the resolver (used for hashCode and equals).
@@ -1481,7 +1489,7 @@ public class ResolvableType implements Serializable {
 		/**
 		 * The various kinds of bounds.
 		 */
-		static enum Kind {UPPER, LOWER}
+		enum Kind {UPPER, LOWER}
 	}
 
 }
