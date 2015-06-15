@@ -245,7 +245,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		return this.requestConfig;
 	}
 
-	private RequestConfig mergeRequestConfig(RequestConfig defaultRequestConfig) {
+	protected RequestConfig mergeRequestConfig(RequestConfig defaultRequestConfig) {
 		if (this.requestConfig == null) { // nothing to merge
 			return defaultRequestConfig;
 		}
@@ -263,6 +263,10 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 			builder.setSocketTimeout(socketTimeout);
 		}
 		return builder.build();
+	}
+
+	protected final RequestConfig getInternalRequestConfig() {
+		return this.requestConfig;
 	}
 
 	/**

@@ -40,6 +40,7 @@ import org.springframework.util.Assert;
  * HttpAsyncClient 4.0</a> to create requests.
  *
  * @author Arjen Poutsma
+ * @author Stephane Nicoll
  * @since 4.0
  * @see HttpAsyncClient
  */
@@ -122,19 +123,39 @@ public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsC
         if (context == null) {
             context = HttpClientContext.create();
         }
-        // Request configuration not set in the context
-        if (context.getAttribute(HttpClientContext.REQUEST_CONFIG) == null) {
-            // Use request configuration given by the user, when available
-            RequestConfig config = null;
-            if (httpRequest instanceof Configurable) {
-                config = ((Configurable) httpRequest).getConfig();
-            }
-            if (config == null) {
-                config = RequestConfig.DEFAULT;
-            }
-            context.setAttribute(HttpClientContext.REQUEST_CONFIG, config);
-        }
+		// Request configuration not set in the context
+		if (context.getAttribute(HttpClientContext.REQUEST_CONFIG) == null) {
+			// Use request configuration given by the user, when available
+			RequestConfig config = null;
+			if (httpRequest instanceof Configurable) {
+				config = ((Configurable) httpRequest).getConfig();
+			}
+			if (config == null) {
+				config = createRequestConfig(asyncClient);
+			}
+			if (config != null) {
+				context.setAttribute(HttpClientContext.REQUEST_CONFIG, config);
+			}
+		}
 		return new HttpComponentsAsyncClientHttpRequest(asyncClient, httpRequest, context);
+	}
+
+	/**
+	 * Create a default {@link RequestConfig} to use with the given client.
+	 * Can return {@code null} to indicate that no custom request config should
+	 * be set and the defaults of the {@link HttpAsyncClient} should be used.
+	 * <p>The default implementation tries to merge the defaults of the client
+	 * with the local customizations of this instance, if any.
+	 * @param client the client
+	 * @return the RequestConfig to use
+	 * @since 4.2
+	 */
+	protected RequestConfig createRequestConfig(HttpAsyncClient client) {
+		if (client instanceof Configurable) {
+			RequestConfig clientRequestConfig = ((Configurable) client).getConfig();
+			return mergeRequestConfig(clientRequestConfig);
+		}
+		return getInternalRequestConfig();
 	}
 
 	@Override
