@@ -673,35 +673,8 @@ public class AnnotatedElementUtils {
 	 * @since 4.2
 	 */
 	private static <T> T searchWithFindSemantics(AnnotatedElement element, String annotationName, Processor<T> processor) {
-		return searchWithFindSemantics(element, annotationName, true, true, true, true, processor);
-	}
-
-	/**
-	 * Search for annotations of the specified {@code annotationName} on
-	 * the specified {@code element}, following <em>find semantics</em>.
-	 *
-	 * @param element the annotated element; never {@code null}
-	 * @param annotationName the fully qualified class name of the annotation
-	 * type to find; never {@code null} or empty
-	 * @param searchOnInterfaces whether to search on interfaces, if the
-	 * annotated element is a class
-	 * @param searchOnSuperclasses whether to search on superclasses, if
-	 * the annotated element is a class
-	 * @param searchOnMethodsInInterfaces whether to search on methods in
-	 * interfaces, if the annotated element is a method
-	 * @param searchOnMethodsInSuperclasses whether to search on methods
-	 * in superclasses, if the annotated element is a method
-	 * @param processor the processor to delegate to
-	 * @return the result of the processor, potentially {@code null}
-	 * @since 4.2
-	 */
-	private static <T> T searchWithFindSemantics(AnnotatedElement element, String annotationName,
-			boolean searchOnInterfaces, boolean searchOnSuperclasses, boolean searchOnMethodsInInterfaces,
-			boolean searchOnMethodsInSuperclasses, Processor<T> processor) {
-
 		try {
-			return searchWithFindSemantics(element, annotationName, searchOnInterfaces, searchOnSuperclasses,
-				searchOnMethodsInInterfaces, searchOnMethodsInSuperclasses, processor, new HashSet<AnnotatedElement>(), 0);
+			return searchWithFindSemantics(element, annotationName, processor, new HashSet<AnnotatedElement>(), 0);
 		}
 		catch (Throwable ex) {
 			AnnotationUtils.rethrowAnnotationConfigurationException(ex);
@@ -721,14 +694,6 @@ public class AnnotatedElementUtils {
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationName the fully qualified class name of the annotation
 	 * type to find; never {@code null} or empty
-	 * @param searchOnInterfaces whether to search on interfaces, if the
-	 * annotated element is a class
-	 * @param searchOnSuperclasses whether to search on superclasses, if
-	 * the annotated element is a class
-	 * @param searchOnMethodsInInterfaces whether to search on methods in
-	 * interfaces, if the annotated element is a method
-	 * @param searchOnMethodsInSuperclasses whether to search on methods
-	 * in superclasses, if the annotated element is a method
 	 * @param processor the processor to delegate to
 	 * @param visited the set of annotated elements that have already been visited
 	 * @param metaDepth the meta-depth of the annotation
@@ -736,18 +701,15 @@ public class AnnotatedElementUtils {
 	 * @since 4.2
 	 */
 	private static <T> T searchWithFindSemantics(AnnotatedElement element, String annotationName,
-			boolean searchOnInterfaces, boolean searchOnSuperclasses, boolean searchOnMethodsInInterfaces,
-			boolean searchOnMethodsInSuperclasses, Processor<T> processor, Set<AnnotatedElement> visited, int metaDepth) {
+			Processor<T> processor, Set<AnnotatedElement> visited, int metaDepth) {
 
 		Assert.notNull(element, "AnnotatedElement must not be null");
 		Assert.hasText(annotationName, "annotationName must not be null or empty");
 
 		if (visited.add(element)) {
 			try {
-
-				// Local annotations: declared or (declared + inherited).
-				Annotation[] annotations = (searchOnSuperclasses ? element.getDeclaredAnnotations()
-						: element.getAnnotations());
+				// Locally declared annotations (ignoring @Inherited)
+				Annotation[] annotations = element.getDeclaredAnnotations();
 
 				// Search in local annotations
 				for (Annotation annotation : annotations) {
@@ -763,9 +725,8 @@ public class AnnotatedElementUtils {
 				// Search in meta annotations on local annotations
 				for (Annotation annotation : annotations) {
 					if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
-						T result = searchWithFindSemantics(annotation.annotationType(), annotationName,
-							searchOnInterfaces, searchOnSuperclasses, searchOnMethodsInInterfaces,
-							searchOnMethodsInSuperclasses, processor, visited, metaDepth + 1);
+						T result = searchWithFindSemantics(annotation.annotationType(), annotationName, processor,
+							visited, metaDepth + 1);
 						if (result != null) {
 							processor.postProcess(annotation.annotationType(), annotation, result);
 							return result;
@@ -778,56 +739,45 @@ public class AnnotatedElementUtils {
 
 					// Search on possibly bridged method
 					Method resolvedMethod = BridgeMethodResolver.findBridgedMethod(method);
-					T result = searchWithFindSemantics(resolvedMethod, annotationName, searchOnInterfaces,
-						searchOnSuperclasses, searchOnMethodsInInterfaces, searchOnMethodsInSuperclasses, processor,
-						visited, metaDepth);
+					T result = searchWithFindSemantics(resolvedMethod, annotationName, processor, visited, metaDepth);
 					if (result != null) {
 						return result;
 					}
 
 					// Search on methods in interfaces declared locally
-					if (searchOnMethodsInInterfaces) {
-						Class<?>[] ifcs = method.getDeclaringClass().getInterfaces();
-						result = searchOnInterfaces(method, annotationName, searchOnInterfaces, searchOnSuperclasses,
-							searchOnMethodsInInterfaces, searchOnMethodsInSuperclasses, processor, visited, metaDepth, ifcs);
-						if (result != null) {
-							return result;
-						}
+					Class<?>[] ifcs = method.getDeclaringClass().getInterfaces();
+					result = searchOnInterfaces(method, annotationName, processor, visited, metaDepth, ifcs);
+					if (result != null) {
+						return result;
 					}
 
 					// Search on methods in class hierarchy and interface hierarchy
-					if (searchOnMethodsInSuperclasses) {
-						Class<?> clazz = method.getDeclaringClass();
-						while (true) {
-							clazz = clazz.getSuperclass();
-							if (clazz == null || Object.class == clazz) {
-								break;
-							}
+					Class<?> clazz = method.getDeclaringClass();
+					while (true) {
+						clazz = clazz.getSuperclass();
+						if (clazz == null || Object.class == clazz) {
+							break;
+						}
 
-							try {
-								Method equivalentMethod = clazz.getDeclaredMethod(method.getName(),
-									method.getParameterTypes());
-								Method resolvedEquivalentMethod = BridgeMethodResolver.findBridgedMethod(equivalentMethod);
-								result = searchWithFindSemantics(resolvedEquivalentMethod, annotationName,
-									searchOnInterfaces, searchOnSuperclasses, searchOnMethodsInInterfaces,
-									searchOnMethodsInSuperclasses, processor, visited, metaDepth);
-								if (result != null) {
-									return result;
-								}
+						try {
+							Method equivalentMethod = clazz.getDeclaredMethod(method.getName(),
+								method.getParameterTypes());
+							Method resolvedEquivalentMethod = BridgeMethodResolver.findBridgedMethod(equivalentMethod);
+							result = searchWithFindSemantics(resolvedEquivalentMethod, annotationName, processor,
+								visited, metaDepth);
+							if (result != null) {
+								return result;
 							}
-							catch (NoSuchMethodException ex) {
-								// No equivalent method found
-							}
+						}
+						catch (NoSuchMethodException ex) {
+							// No equivalent method found
+						}
 
-							// Search on interfaces declared on superclass
-							if (searchOnMethodsInInterfaces) {
-								result = searchOnInterfaces(method, annotationName, searchOnInterfaces,
-									searchOnSuperclasses, searchOnMethodsInInterfaces, searchOnMethodsInSuperclasses,
-									processor, visited, metaDepth, clazz.getInterfaces());
-								if (result != null) {
-									return result;
-								}
-							}
+						// Search on interfaces declared on superclass
+						result = searchOnInterfaces(method, annotationName, processor, visited, metaDepth,
+							clazz.getInterfaces());
+						if (result != null) {
+							return result;
 						}
 					}
 				}
@@ -836,27 +786,19 @@ public class AnnotatedElementUtils {
 					Class<?> clazz = (Class<?>) element;
 
 					// Search on interfaces
-					if (searchOnInterfaces) {
-						for (Class<?> ifc : clazz.getInterfaces()) {
-							T result = searchWithFindSemantics(ifc, annotationName, searchOnInterfaces,
-								searchOnSuperclasses, searchOnMethodsInInterfaces, searchOnMethodsInSuperclasses,
-								processor, visited, metaDepth);
-							if (result != null) {
-								return result;
-							}
+					for (Class<?> ifc : clazz.getInterfaces()) {
+						T result = searchWithFindSemantics(ifc, annotationName, processor, visited, metaDepth);
+						if (result != null) {
+							return result;
 						}
 					}
 
 					// Search on superclass
-					if (searchOnSuperclasses) {
-						Class<?> superclass = clazz.getSuperclass();
-						if (superclass != null && Object.class != superclass) {
-							T result = searchWithFindSemantics(superclass, annotationName, searchOnInterfaces,
-								searchOnSuperclasses, searchOnMethodsInInterfaces, searchOnMethodsInSuperclasses,
-								processor, visited, metaDepth);
-							if (result != null) {
-								return result;
-							}
+					Class<?> superclass = clazz.getSuperclass();
+					if (superclass != null && Object.class != superclass) {
+						T result = searchWithFindSemantics(superclass, annotationName, processor, visited, metaDepth);
+						if (result != null) {
+							return result;
 						}
 					}
 				}
@@ -871,18 +813,14 @@ public class AnnotatedElementUtils {
 	/**
 	 * @since 4.2
 	 */
-	private static <T> T searchOnInterfaces(Method method, String annotationName, boolean searchOnInterfaces,
-			boolean searchOnSuperclasses, boolean searchOnMethodsInInterfaces, boolean searchOnMethodsInSuperclasses,
-			Processor<T> processor, Set<AnnotatedElement> visited, int metaDepth, Class<?>[] ifcs) {
+	private static <T> T searchOnInterfaces(Method method, String annotationName, Processor<T> processor,
+			Set<AnnotatedElement> visited, int metaDepth, Class<?>[] ifcs) {
 
 		for (Class<?> iface : ifcs) {
 			if (AnnotationUtils.isInterfaceWithAnnotatedMethods(iface)) {
 				try {
 					Method equivalentMethod = iface.getMethod(method.getName(), method.getParameterTypes());
-					T result = searchWithFindSemantics(equivalentMethod, annotationName, searchOnInterfaces,
-						searchOnSuperclasses, searchOnMethodsInInterfaces, searchOnMethodsInSuperclasses, processor,
-						visited, metaDepth);
-
+					T result = searchWithFindSemantics(equivalentMethod, annotationName, processor, visited, metaDepth);
 					if (result != null) {
 						return result;
 					}
