@@ -630,6 +630,7 @@ public class AnnotatedElementUtils {
 	 * @param visited the set of annotated elements that have already been visited
 	 * @param metaDepth the meta-depth of the annotation
 	 * @return the result of the processor, potentially {@code null}
+	 * @since 4.2
 	 */
 	private static <T> T searchWithGetSemanticsInAnnotations(AnnotatedElement annotatedElement, List<Annotation> annotations,
 			String annotationName, Processor<T> processor, Set<AnnotatedElement> visited, int metaDepth) {
@@ -669,6 +670,7 @@ public class AnnotatedElementUtils {
 	 * type to find; never {@code null} or empty
 	 * @param processor the processor to delegate to
 	 * @return the result of the processor, potentially {@code null}
+	 * @since 4.2
 	 */
 	private static <T> T searchWithFindSemantics(AnnotatedElement element, String annotationName, Processor<T> processor) {
 		return searchWithFindSemantics(element, annotationName, true, true, true, true, processor);
@@ -691,6 +693,7 @@ public class AnnotatedElementUtils {
 	 * in superclasses, if the annotated element is a method
 	 * @param processor the processor to delegate to
 	 * @return the result of the processor, potentially {@code null}
+	 * @since 4.2
 	 */
 	private static <T> T searchWithFindSemantics(AnnotatedElement element, String annotationName,
 			boolean searchOnInterfaces, boolean searchOnSuperclasses, boolean searchOnMethodsInInterfaces,
@@ -730,6 +733,7 @@ public class AnnotatedElementUtils {
 	 * @param visited the set of annotated elements that have already been visited
 	 * @param metaDepth the meta-depth of the annotation
 	 * @return the result of the processor, potentially {@code null}
+	 * @since 4.2
 	 */
 	private static <T> T searchWithFindSemantics(AnnotatedElement element, String annotationName,
 			boolean searchOnInterfaces, boolean searchOnSuperclasses, boolean searchOnMethodsInInterfaces,
@@ -864,6 +868,9 @@ public class AnnotatedElementUtils {
 		return null;
 	}
 
+	/**
+	 * @since 4.2
+	 */
 	private static <T> T searchOnInterfaces(Method method, String annotationName, boolean searchOnInterfaces,
 			boolean searchOnSuperclasses, boolean searchOnMethodsInInterfaces, boolean searchOnMethodsInSuperclasses,
 			Processor<T> processor, Set<AnnotatedElement> visited, int metaDepth, Class<?>[] ifcs) {
@@ -889,6 +896,9 @@ public class AnnotatedElementUtils {
 		return null;
 	}
 
+	/**
+	 * @since 4.2
+	 */
 	private static Annotation getAnnotation(AnnotatedElement element, String annotationName) {
 		for (Annotation annotation : element.getAnnotations()) {
 			if (annotation.annotationType().getName().equals(annotationName)) {
