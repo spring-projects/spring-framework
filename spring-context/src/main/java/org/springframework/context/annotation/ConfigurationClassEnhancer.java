@@ -46,9 +46,7 @@ import org.springframework.cglib.proxy.NoOp;
 import org.springframework.cglib.transform.ClassEmitterTransformer;
 import org.springframework.cglib.transform.TransformingClassGenerator;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.objenesis.Objenesis;
 import org.springframework.objenesis.ObjenesisException;
-import org.springframework.objenesis.ObjenesisStd;
 import org.springframework.objenesis.SpringObjenesis;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -85,11 +83,10 @@ class ConfigurationClassEnhancer {
 
 	private static final String BEAN_FACTORY_FIELD = "$$beanFactory";
 
+
 	private static final Log logger = LogFactory.getLog(ConfigurationClassEnhancer.class);
 
-	private static final Objenesis cachedObjenesis = new SpringObjenesis();
-
-	private static final Objenesis nonCachedObjenesis = new ObjenesisStd(false);
+	private static final SpringObjenesis objenesis = new SpringObjenesis();
 
 
 	/**
@@ -393,7 +390,7 @@ class ConfigurationClassEnhancer {
 		 * it will not be proxied. This too is aligned with the way XML configuration works.
 		 */
 		private Object enhanceFactoryBean(final Object factoryBean, final ConfigurableBeanFactory beanFactory,
-				final String beanName) throws InstantiationException, IllegalAccessException {
+				final String beanName) {
 
 			Enhancer enhancer = new Enhancer();
 			enhancer.setSuperclass(factoryBean.getClass());
@@ -403,19 +400,29 @@ class ConfigurationClassEnhancer {
 			// Ideally create enhanced FactoryBean proxy without constructor side effects,
 			// analogous to AOP proxy creation in ObjenesisCglibAopProxy...
 			Class<?> fbClass = enhancer.createClass();
-			Objenesis objenesis = (enhancer.getUseCache() ? cachedObjenesis : nonCachedObjenesis);
-			Factory factory;
-			try {
-				factory = (Factory) objenesis.newInstance(fbClass);
-			}
-			catch (ObjenesisException ex) {
-				// Fallback to regular proxy construction on unsupported JVMs
-				logger.debug("Unable to instantiate enhanced FactoryBean using Objenesis, " +
-						"falling back to regular construction", ex);
-				factory = (Factory) fbClass.newInstance();
+			Object fbProxy = null;
+
+			if (objenesis.isWorthTrying()) {
+				try {
+					fbProxy = objenesis.newInstance(fbClass, enhancer.getUseCache());
+				}
+				catch (ObjenesisException ex) {
+					logger.debug("Unable to instantiate enhanced FactoryBean using Objenesis, " +
+							"falling back to regular construction", ex);
+				}
 			}
 
-			factory.setCallback(0, new MethodInterceptor() {
+			if (fbProxy == null) {
+				try {
+					fbProxy = fbClass.newInstance();
+				}
+				catch (Exception ex) {
+					throw new IllegalStateException("Unable to instantiate enhanced FactoryBean using Objenesis, " +
+							"and regular FactoryBean instantiation via default constructor fails as well", ex);
+				}
+			}
+
+			((Factory) fbProxy).setCallback(0, new MethodInterceptor() {
 				@Override
 				public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
 					if (method.getName().equals("getObject") && args.length == 0) {
@@ -425,7 +432,7 @@ class ConfigurationClassEnhancer {
 				}
 			});
 
-			return factory;
+			return fbProxy;
 		}
 
 		private ConfigurableBeanFactory getBeanFactory(Object enhancedConfigInstance) {

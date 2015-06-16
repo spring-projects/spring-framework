@@ -22,11 +22,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.aopalliance.intercept.MethodInterceptor;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -43,7 +41,7 @@ import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.objenesis.Objenesis;
+import org.springframework.objenesis.ObjenesisException;
 import org.springframework.objenesis.SpringObjenesis;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
@@ -97,7 +95,7 @@ public class MvcUriComponentsBuilder {
 
 	private static final Log logger = LogFactory.getLog(MvcUriComponentsBuilder.class);
 
-	private static final Objenesis objenesis = new SpringObjenesis();
+	private static final SpringObjenesis objenesis = new SpringObjenesis();
 
 	private static final PathMatcher pathMatcher = new AntPathMatcher();
 
@@ -605,15 +603,39 @@ public class MvcUriComponentsBuilder {
 			factory.addAdvice(interceptor);
 			return (T) factory.getProxy();
 		}
+
 		else {
 			Enhancer enhancer = new Enhancer();
 			enhancer.setSuperclass(type);
 			enhancer.setInterfaces(new Class<?>[] {MethodInvocationInfo.class});
 			enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
 			enhancer.setCallbackType(org.springframework.cglib.proxy.MethodInterceptor.class);
-			Factory factory = (Factory) objenesis.newInstance(enhancer.createClass());
-			factory.setCallbacks(new Callback[] {interceptor});
-			return (T) factory;
+
+			Class<?> proxyClass = enhancer.createClass();
+			Object proxy = null;
+
+			if (objenesis.isWorthTrying()) {
+				try {
+					proxy = objenesis.newInstance(proxyClass, enhancer.getUseCache());
+				}
+				catch (ObjenesisException ex) {
+					logger.debug("Unable to instantiate controller proxy using Objenesis, " +
+							"falling back to regular construction", ex);
+				}
+			}
+
+			if (proxy == null) {
+				try {
+					proxy = proxyClass.newInstance();
+				}
+				catch (Exception ex) {
+					throw new IllegalStateException("Unable to instantiate controller proxy using Objenesis, " +
+							"and regular controller instantiation via default constructor fails as well", ex);
+				}
+			}
+
+			((Factory) proxy).setCallbacks(new Callback[] {interceptor});
+			return (T) proxy;
 		}
 	}
 
