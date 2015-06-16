@@ -210,15 +210,15 @@ public class GsonHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		this.converter.setPrefixJson(true);
 		this.converter.writeInternal("foo", outputMessage);
-		assertEquals("{} && \"foo\"", outputMessage.getBodyAsString(UTF8));
+		assertEquals(")]}', \"foo\"", outputMessage.getBodyAsString(UTF8));
 	}
 
 	@Test
 	public void prefixJsonCustom() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		this.converter.setJsonPrefix(")]}',");
+		this.converter.setJsonPrefix(")))");
 		this.converter.writeInternal("foo", outputMessage);
-		assertEquals(")]}',\"foo\"", outputMessage.getBodyAsString(UTF8));
+		assertEquals(")))\"foo\"", outputMessage.getBodyAsString(UTF8));
 	}
 
 

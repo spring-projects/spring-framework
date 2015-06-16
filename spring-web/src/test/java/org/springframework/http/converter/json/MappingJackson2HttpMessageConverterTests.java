@@ -233,16 +233,16 @@ public class MappingJackson2HttpMessageConverterTests {
 		this.converter.setPrefixJson(true);
 		this.converter.writeInternal("foo", outputMessage);
 
-		assertEquals("{} && \"foo\"", outputMessage.getBodyAsString(Charset.forName("UTF-8")));
+		assertEquals(")]}', \"foo\"", outputMessage.getBodyAsString(Charset.forName("UTF-8")));
 	}
 
 	@Test
 	public void prefixJsonCustom() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		this.converter.setJsonPrefix(")]}',");
+		this.converter.setJsonPrefix(")))");
 		this.converter.writeInternal("foo", outputMessage);
 
-		assertEquals(")]}',\"foo\"", outputMessage.getBodyAsString(Charset.forName("UTF-8")));
+		assertEquals(")))\"foo\"", outputMessage.getBodyAsString(Charset.forName("UTF-8")));
 	}
 
 	@Test
