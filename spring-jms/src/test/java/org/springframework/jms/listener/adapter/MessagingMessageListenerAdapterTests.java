@@ -285,21 +285,21 @@ public class MessagingMessageListenerAdapterTests {
 					.build();
 		}
 
-		public JmsResponse replyPayloadToQueue(Message<String> input) {
+		public JmsResponse<String> replyPayloadToQueue(Message<String> input) {
 			return JmsResponse.forQueue(input.getPayload(), "queueOut");
 		}
 
-		public JmsResponse replyPayloadToTopic(Message<String> input) {
+		public JmsResponse<String> replyPayloadToTopic(Message<String> input) {
 			return JmsResponse.forTopic(input.getPayload(), "topicOut");
 		}
 
-		public JmsResponse replyPayloadToDestination(Message<String> input) {
+		public JmsResponse<String> replyPayloadToDestination(Message<String> input) {
 			return JmsResponse.forDestination(input.getPayload(),
 					input.getHeaders().get("destination", Destination.class));
 		}
 
-		public JmsResponse replyPayloadNoDestination(Message<String> input) {
-			return new JmsResponse(input.getPayload(), null);
+		public JmsResponse<String> replyPayloadNoDestination(Message<String> input) {
+			return new JmsResponse<>(input.getPayload(), null);
 		}
 
 		public void fail(String input) {

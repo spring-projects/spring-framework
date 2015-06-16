@@ -52,7 +52,7 @@ public class JmsResponseTests {
 		Destination destination = mock(Destination.class);
 
 		given(destinationResolver.resolveDestinationName(session, "myQueue", false)).willReturn(destination);
-		JmsResponse jmsResponse = JmsResponse.forQueue("foo", "myQueue");
+		JmsResponse<String> jmsResponse = JmsResponse.forQueue("foo", "myQueue");
 		Destination actual = jmsResponse.resolveDestination(destinationResolver, session);
 		assertSame(destination, actual);
 	}

@@ -267,7 +267,7 @@ public abstract class AbstractAdaptableMessageListener
 	 */
 	protected Message buildMessage(Session session, Object result) throws JMSException {
 		Object content = (result instanceof JmsResponse
-				? ((JmsResponse) result).getResponse() : result);
+				? ((JmsResponse<?>) result).getResponse() : result);
 
 		MessageConverter converter = getMessageConverter();
 		if (converter != null) {
@@ -308,7 +308,7 @@ public abstract class AbstractAdaptableMessageListener
 	private Destination getResponseDestination(Message request, Message response, Session session, Object result)
 			throws JMSException {
 		if (result instanceof JmsResponse) {
-			JmsResponse jmsResponse = (JmsResponse) result;
+			JmsResponse<?> jmsResponse = (JmsResponse) result;
 			Destination destination = jmsResponse.resolveDestination(getDestinationResolver(), session);
 			if (destination != null) {
 				return destination;

@@ -50,10 +50,11 @@ import org.springframework.util.Assert;
  * @since 4.2
  * @see org.springframework.jms.annotation.JmsListener
  * @see org.springframework.messaging.handler.annotation.SendTo
+ * @param <T> the type of the response
  */
-public class JmsResponse {
+public class JmsResponse<T> {
 
-	private final Object response;
+	private final T response;
 
 	private final Object destination;
 
@@ -62,7 +63,7 @@ public class JmsResponse {
 	 * @param response the content of the result
 	 * @param destination the destination
 	 */
-	protected JmsResponse(Object response, Object destination) {
+	protected JmsResponse(T response, Object destination) {
 		Assert.notNull(response, "Result must not be null");
 		this.response = response;
 		this.destination = destination;
@@ -71,32 +72,42 @@ public class JmsResponse {
 	/**
 	 * Create a {@link JmsResponse} targeting the queue with the specified name.
 	 */
-	public static JmsResponse forQueue(Object result, String queueName) {
+	public static <T> JmsResponse<T> forQueue(T result, String queueName) {
 		Assert.notNull(queueName, "Queue name must not be null");
-		return new JmsResponse(result, new DestinationNameHolder(queueName, false));
+		return new JmsResponse<T>(result, new DestinationNameHolder(queueName, false));
 	}
 
 	/**
 	 * Create a {@link JmsResponse} targeting the topic with the specified name.
 	 */
-	public static JmsResponse forTopic(Object result, String topicName) {
+	public static <T> JmsResponse<T> forTopic(T result, String topicName) {
 		Assert.notNull(topicName, "Topic name must not be null");
-		return new JmsResponse(result, new DestinationNameHolder(topicName, true));
+		return new JmsResponse<T>(result, new DestinationNameHolder(topicName, true));
 	}
 
 	/**
 	 * Create a {@link JmsResponse} targeting the specified {@link Destination}.
 	 */
-	public static JmsResponse forDestination(Object result, Destination destination) {
+	public static <T> JmsResponse<T> forDestination(T result, Destination destination) {
 		Assert.notNull(destination, "Destination must not be null");
-		return new JmsResponse(result, destination);
+		return new JmsResponse<T>(result, destination);
 	}
 
-
-	public Object getResponse() {
-		return response;
+	/**
+	 * Return the content of the response.
+	 */
+	public T getResponse() {
+		return this.response;
 	}
 
+	/**
+	 * Resolve the {@link Destination} to use for this instance. The {@link DestinationResolver}
+	 * and {@link Session} can be used to resolve a destination at runtime.
+	 * @param destinationResolver the destination resolver to use if necessary
+	 * @param session the session to use, if necessary
+	 * @return the {@link Destination} to use
+	 * @throws JMSException if the DestinationResolver failed to resolve the destination
+	 */
 	public Destination resolveDestination(DestinationResolver destinationResolver, Session session)
 			throws JMSException {
 
