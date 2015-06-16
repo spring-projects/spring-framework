@@ -242,7 +242,7 @@ public abstract class AbstractAdaptableMessageListener
 			try {
 				Message response = buildMessage(session, result);
 				postProcessResponse(request, response);
-				Destination destination = getResponseDestination(request, response, session);
+				Destination destination = getResponseDestination(request, response, session, result);
 				sendResponse(session, destination, response);
 			}
 			catch (Exception ex) {
@@ -266,21 +266,24 @@ public abstract class AbstractAdaptableMessageListener
 	 * @see #setMessageConverter
 	 */
 	protected Message buildMessage(Session session, Object result) throws JMSException {
+		Object content = (result instanceof JmsResponse
+				? ((JmsResponse) result).getResponse() : result);
+
 		MessageConverter converter = getMessageConverter();
 		if (converter != null) {
-			if (result instanceof org.springframework.messaging.Message) {
-				return this.messagingMessageConverter.toMessage(result, session);
+			if (content instanceof org.springframework.messaging.Message) {
+				return this.messagingMessageConverter.toMessage(content, session);
 			}
 			else {
-				return converter.toMessage(result, session);
+				return converter.toMessage(content, session);
 			}
 		}
 		else {
-			if (!(result instanceof Message)) {
+			if (!(content instanceof Message)) {
 				throw new MessageConversionException(
-						"No MessageConverter specified - cannot handle message [" + result + "]");
+						"No MessageConverter specified - cannot handle message [" + content + "]");
 			}
-			return (Message) result;
+			return (Message) content;
 		}
 	}
 
@@ -300,6 +303,18 @@ public abstract class AbstractAdaptableMessageListener
 			correlation = request.getJMSMessageID();
 		}
 		response.setJMSCorrelationID(correlation);
+	}
+
+	private Destination getResponseDestination(Message request, Message response, Session session, Object result)
+			throws JMSException {
+		if (result instanceof JmsResponse) {
+			JmsResponse jmsResponse = (JmsResponse) result;
+			Destination destination = jmsResponse.resolveDestination(getDestinationResolver(), session);
+			if (destination != null) {
+				return destination;
+			}
+		}
+		return getResponseDestination(request, response, session);
 	}
 
 	/**
