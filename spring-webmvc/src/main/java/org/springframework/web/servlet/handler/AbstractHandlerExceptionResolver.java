@@ -51,7 +51,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 
 	private Class<?>[] mappedHandlerClasses;
 
-	private Log warnLogger;
+	private Log warnLogger = LogFactory.getLog(getClass());
 
 	private boolean preventResponseCaching = false;
 
@@ -94,14 +94,15 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * Set the log category for warn logging. The name will be passed to the underlying logger
 	 * implementation through Commons Logging, getting interpreted as log category according
 	 * to the logger's configuration.
-	 * <p>Default is no warn logging. Specify this setting to activate warn logging into a specific
-	 * category. Alternatively, override the {@link #logException} method for custom logging.
+	 * <p>Default is warn logging using the {@link AbstractHandlerExceptionResolver} class name derived logger.
+	 * Set to {@code null} to disable warn logging.
+	 * Override the {@link #logException} method for custom logging.
 	 * @see org.apache.commons.logging.LogFactory#getLog(String)
 	 * @see org.apache.log4j.Logger#getLogger(String)
 	 * @see java.util.logging.Logger#getLogger(String)
 	 */
 	public void setWarnLogCategory(String loggerName) {
-		this.warnLogger = LogFactory.getLog(loggerName);
+		this.warnLogger = (loggerName != null ? LogFactory.getLog(loggerName) : null);
 	}
 
 	/**
@@ -125,13 +126,17 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 			Object handler, Exception ex) {
 
 		if (shouldApplyTo(request, handler)) {
-			// Log exception, both at debug log level and at warn level, if desired.
-			if (logger.isDebugEnabled()) {
-				logger.debug("Resolving exception from handler [" + handler + "]: " + ex);
+			// Log exception at debug log level
+			if (this.logger.isDebugEnabled()) {
+				this.logger.debug("Resolving exception from handler [" + handler + "]: " + ex);
 			}
-			logException(ex, request);
 			prepareResponse(ex, response);
-			return doResolveException(request, response, handler, ex);
+			ModelAndView mav = doResolveException(request, response, handler, ex);
+			if (mav != null) {
+				// Log exception message at warn log level
+				logException(ex, request);
+			}
+			return mav;
 		}
 		else {
 			return null;
@@ -168,10 +173,8 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	}
 
 	/**
-	 * Log the given exception at warn level, provided that warn logging has been
-	 * activated through the {@link #setWarnLogCategory "warnLogCategory"} property.
+	 * Log the given exception message at warn level.
 	 * <p>Calls {@link #buildLogMessage} in order to determine the concrete message to log.
-	 * Always passes the full exception to the logger.
 	 * @param ex the exception that got thrown during handler execution
 	 * @param request current HTTP request (useful for obtaining metadata)
 	 * @see #setWarnLogCategory
@@ -180,7 +183,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 */
 	protected void logException(Exception ex, HttpServletRequest request) {
 		if (this.warnLogger != null && this.warnLogger.isWarnEnabled()) {
-			this.warnLogger.warn(buildLogMessage(ex, request), ex);
+			this.warnLogger.warn(buildLogMessage(ex, request));
 		}
 	}
 
@@ -191,7 +194,8 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * @return the log message to use
 	 */
 	protected String buildLogMessage(Exception ex, HttpServletRequest request) {
-		return "Handler execution resulted in exception";
+		String message = (ex != null ? ex.getMessage() : "null");
+		return "Handler execution resulted in exception: " + (message != null ? message : "null");
 	}
 
 	/**
