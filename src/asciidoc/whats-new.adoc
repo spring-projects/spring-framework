@@ -411,10 +411,16 @@ method has been added.
   annotation can be used to declare a pair of aliased attributes within
   a single annotation or to declare an alias from one attribute in a
   custom composed annotation to an attribute in a meta-annotation.
-** The following annotations have been retrofitted with `@AliasFor`
-   support: `@ManagedResource`, `@ContextConfiguration`,
-   `@ActiveProfiles`, `@TestExecutionListeners`, `@TestPropertySource`,
-   `@Sql`, `@ControllerAdvice`, `@RequestMapping`.
+** The following annotations have been retrofitted with `@AliasFor` support
+   in order to provide meaningful aliases for their `value` attributes:
+   `@Cacheable`, `@CacheEvict`, `@CachePut`, `@ComponentScan`,
+   `@ComponentScan.Filter`, `@ImportResource`, `@Scope`, `@ManagedResource`,
+   `@Header`, `@Payload`, `@SendToUser`, `@ActiveProfiles`,
+   `@ContextConfiguration`, `@Sql`, `@TestExecutionListeners`,
+   `@TestPropertySource`, `@Transactional`, `@ControllerAdvice`,
+   `@CookieValue`, `@CrossOrigin`, `@MatrixVariable`, `@RequestHeader`,
+   `@RequestMapping`, `@RequestParam`, `@RequestPart`, `@ResponseStatus`,
+   `@SessionAttributes`, `@ActionMapping`, `@RenderMapping`.
 ** For example, `@ContextConfiguration` from the `spring-test` module
    is now declared as follows:
 [source,java,indent=0]
