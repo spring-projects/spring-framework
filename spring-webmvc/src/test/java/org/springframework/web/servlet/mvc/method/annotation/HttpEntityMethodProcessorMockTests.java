@@ -349,6 +349,7 @@ public class HttpEntityMethodProcessorMockTests {
 
 		assertTrue(mavContainer.isRequestHandled());
 		assertEquals(HttpStatus.NOT_MODIFIED.value(), servletResponse.getStatus());
+		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.LAST_MODIFIED).size());
 		assertEquals(dateFormat.format(oneMinuteAgo), servletResponse.getHeader(HttpHeaders.LAST_MODIFIED));
 		assertEquals(0, servletResponse.getContentAsByteArray().length);
 	}
@@ -369,6 +370,7 @@ public class HttpEntityMethodProcessorMockTests {
 
 		assertTrue(mavContainer.isRequestHandled());
 		assertEquals(HttpStatus.NOT_MODIFIED.value(), servletResponse.getStatus());
+		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
 		assertEquals(etagValue, servletResponse.getHeader(HttpHeaders.ETAG));
 		assertEquals(0, servletResponse.getContentAsByteArray().length);
 	}
@@ -393,7 +395,9 @@ public class HttpEntityMethodProcessorMockTests {
 
 		assertTrue(mavContainer.isRequestHandled());
 		assertEquals(HttpStatus.NOT_MODIFIED.value(), servletResponse.getStatus());
+		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.LAST_MODIFIED).size());
 		assertEquals(dateFormat.format(oneMinuteAgo), servletResponse.getHeader(HttpHeaders.LAST_MODIFIED));
+		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
 		assertEquals(etagValue, servletResponse.getHeader(HttpHeaders.ETAG));
 		assertEquals(0, servletResponse.getContentAsByteArray().length);
 	}
@@ -419,7 +423,9 @@ public class HttpEntityMethodProcessorMockTests {
 
 		assertTrue(mavContainer.isRequestHandled());
 		assertEquals(HttpStatus.OK.value(), servletResponse.getStatus());
+		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.LAST_MODIFIED).size());
 		assertEquals(dateFormat.format(oneMinuteAgo), servletResponse.getHeader(HttpHeaders.LAST_MODIFIED));
+		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
 		assertEquals(changedEtagValue, servletResponse.getHeader(HttpHeaders.ETAG));
 		assertEquals(0, servletResponse.getContentAsByteArray().length);
 	}

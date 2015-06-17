@@ -168,17 +168,25 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		}
 
 		HttpHeaders entityHeaders = responseEntity.getHeaders();
-		if (!entityHeaders.isEmpty()) {
-			outputMessage.getHeaders().putAll(entityHeaders);
-		}
 
 		Object body = responseEntity.getBody();
 		if (responseEntity instanceof ResponseEntity) {
+			for (String headerName : entityHeaders.keySet()) {
+				if(!HttpHeaders.LAST_MODIFIED.equals(headerName)
+					&& !HttpHeaders.ETAG.equals(headerName)) {
+					outputMessage.getHeaders().put(headerName, entityHeaders.get(headerName));
+				}
+			}
 			if (isResourceNotModified(webRequest, (ResponseEntity<?>) responseEntity)) {
 				// Ensure headers are flushed, no body should be written.
 				outputMessage.flush();
 				// Skip call to converters, as they may update the body.
 				return;
+			}
+		}
+		else {
+			if (!entityHeaders.isEmpty()) {
+				outputMessage.getHeaders().putAll(entityHeaders);
 			}
 		}
 
