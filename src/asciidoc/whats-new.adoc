@@ -486,6 +486,7 @@ public @interface MyTestConfig {
 * The `autoStartup` attribute can be controlled via `JmsListenerContainerFactory`.
 * The type of the reply `Destination` can now be configured per listener container.
 * The value of the `@SendTo` annotation can now use a SpEL expression.
+* The response destination can be <<jms-annotated-response,computed at runtime using `JmsResponse`>>
 
 === Web Improvements
 

@@ -2739,8 +2739,8 @@ annotate the payload with `@Valid` and configure the necessary validator as foll
 	}
 ----
 
-[[jms-annotated-reply]]
-==== Reply management
+[[jms-annotated-response]]
+==== Response management
 
 The existing support in <<jms-receiving-async-message-listener-adapter,MessageListenerAdapter>>
 already allows your method to have a non-`void` return type. When that's the case, the result of
@@ -2750,7 +2750,7 @@ the listener. That default destination can now be set using the `@SendTo` annota
 messaging abstraction.
 
 Assuming our `processOrder` method should now return an `OrderStatus`, it is possible to write it
-as follow to automatically send a reply:
+as follow to automatically send a response:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -2779,6 +2779,26 @@ If you need to set additional headers in a transport-independent manner, you cou
             	.build();
 	}
 ----
+
+If you need to compute the response destination at runtime, you can encapsulate your response
+in a `JmsResponse` instance that also provides the destination to use at runtime. The previous
+example can be rewritten as follows:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@JmsListener(destination = "myDestination")
+	public JmsResponse<Message<OrderStatus>> processOrder(Order order) {
+    	// order processing
+    	Message<OrderStatus> response = MessageBuilder
+        	    .withPayload(status)
+            	.setHeader("code", 1234)
+            	.build();
+		return JmsResponse.forQueue(response, "status");
+	}
+----
+
+
 
 [[jms-namespace]]
 === JMS Namespace Support
