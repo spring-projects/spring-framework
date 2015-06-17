@@ -60,11 +60,12 @@ public @interface ResponseStatus {
 
 	/**
 	 * The <em>reason</em> to be used for the response.
-	 * <p>If this attribute is not set, it will default to the standard status
-	 * message for the status code. Note that due to the use of
+	 * <p><strong>Note:</strong> due to the use of
 	 * {@code HttpServletResponse.sendError(int, String)}, the response will be
-	 * considered complete and should not be written to any further.
-	 *
+	 * considered complete and should not be written to any further. Furthermore
+	 * servlet container will typically write an HTML error page therefore making
+	 * the use of a reason unsuitable for REST APIs. For such cases prefer
+	 * sending error details in the body of the response.
 	 * @see javax.servlet.http.HttpServletResponse#sendError(int, String)
 	 */
 	String reason() default "";
