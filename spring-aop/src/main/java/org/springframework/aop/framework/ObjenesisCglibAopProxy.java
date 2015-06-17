@@ -22,7 +22,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.Factory;
-import org.springframework.objenesis.ObjenesisException;
 import org.springframework.objenesis.SpringObjenesis;
 
 /**
@@ -60,7 +59,7 @@ class ObjenesisCglibAopProxy extends CglibAopProxy {
 			try {
 				proxyInstance = objenesis.newInstance(proxyClass, enhancer.getUseCache());
 			}
-			catch (ObjenesisException ex) {
+			catch (Throwable ex) {
 				logger.debug("Unable to instantiate proxy using Objenesis, " +
 						"falling back to regular proxy construction", ex);
 			}
@@ -73,7 +72,7 @@ class ObjenesisCglibAopProxy extends CglibAopProxy {
 						proxyClass.getConstructor(this.constructorArgTypes).newInstance(this.constructorArgs) :
 						proxyClass.newInstance());
 			}
-			catch (Exception ex) {
+			catch (Throwable ex) {
 				throw new AopConfigException("Unable to instantiate proxy using Objenesis, " +
 						"and regular proxy instantiation via default constructor fails as well", ex);
 			}
