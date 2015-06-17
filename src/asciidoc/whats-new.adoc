@@ -463,6 +463,8 @@ public @interface MyTestConfig {
   can now be discovered on interfaces and on abstract, bridge, & interface
   methods as well as on classes, standard methods, constructors, and 
   fields.
+* Maps representing annotation attributes (and `AnnotationAttributes` instances)
+  can be _synthesized_ (i.e., converted) into an annotation.
 * The features of field-based data binding (`DirectFieldAccessor`) have been aligned with the current
   property-based data binding (`BeanWrapper`). In particular, field-based binding now supports
   navigation for Collections, Arrays, and Maps.
