@@ -173,6 +173,8 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 					ClassUtils.getAllInterfacesForClass(targetSource.getTargetClass(), this.proxyClassLoader));
 		}
 
+		postProcessProxyFactory(proxyFactory);
+
 		this.proxy = proxyFactory.getProxy(this.proxyClassLoader);
 	}
 
@@ -189,6 +191,15 @@ public abstract class AbstractSingletonProxyFactoryBean extends ProxyConfig
 		else {
 			return new SingletonTargetSource(target);
 		}
+	}
+
+	/**
+	 * A hook for subclasses to post-process the {@link ProxyFactory}
+	 * before creating the proxy instance with it.
+	 * @param proxyFactory the AOP ProxyFactory about to be used
+	 * @since 4.2
+	 */
+	protected void postProcessProxyFactory(ProxyFactory proxyFactory) {
 	}
 
 

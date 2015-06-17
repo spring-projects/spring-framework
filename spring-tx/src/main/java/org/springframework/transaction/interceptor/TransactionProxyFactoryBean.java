@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.Properties;
 
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.framework.AbstractSingletonProxyFactoryBean;
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -197,6 +198,15 @@ public class TransactionProxyFactoryBean extends AbstractSingletonProxyFactoryBe
 			// Rely on default pointcut.
 			return new TransactionAttributeSourceAdvisor(this.transactionInterceptor);
 		}
+	}
+
+	/**
+	 * As of 4.2, this method adds {@link TransactionalProxy} to the set of
+	 * proxy interfaces in order to avoid re-processing of transaction metadata.
+	 */
+	@Override
+	protected void postProcessProxyFactory(ProxyFactory proxyFactory) {
+		proxyFactory.addInterface(TransactionalProxy.class);
 	}
 
 }
