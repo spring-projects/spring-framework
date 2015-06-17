@@ -101,7 +101,7 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 			reason = this.messageSource.getMessage(reason, null, reason, LocaleContextHolder.getLocale());
 		}
 		if (!StringUtils.hasLength(reason)) {
-			response.sendError(statusCode);
+			response.setStatus(statusCode);
 		}
 		else {
 			response.sendError(statusCode, reason);
