@@ -562,6 +562,10 @@ public @interface MyTestConfig {
   `TestContext`.
 * `ReflectionTestUtils` now supports setting and getting `static` fields,
   including constants.
+* The original ordering of bean definition profiles declared via 
+  `@ActiveProfiles` is now retained in order to support use cases such 
+  as Spring Boot's `ConfigFileApplicationListener` which loads 
+  configuration files based on the names of active profiles.
 * `@DirtiesContext` supports new `BEFORE_METHOD`, `BEFORE_CLASS`, and
   `BEFORE_EACH_TEST_METHOD` modes for closing the `ApplicationContext`
   _before_ a test -- for example, if some rogue (i.e., yet to be
