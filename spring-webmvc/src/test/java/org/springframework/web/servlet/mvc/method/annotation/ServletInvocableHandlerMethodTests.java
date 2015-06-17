@@ -16,9 +16,12 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -45,9 +48,6 @@ import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.view.RedirectView;
-
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 
 /**
  * Test fixture with {@link ServletInvocableHandlerMethod}.
@@ -185,7 +185,7 @@ public class ServletInvocableHandlerMethodTests {
 	public void wrapConcurrentResult_ResponseEntityNullBody() throws Exception {
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
 		converters.add(new StringHttpMessageConverter());
-		List<Object> advice = Arrays.asList(mock(ResponseBodyAdvice.class));
+		List<Object> advice = Collections.singletonList(mock(ResponseBodyAdvice.class));
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters, null, advice);
 		this.returnValueHandlers.addHandler(processor);
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new ResponseEntityHandler(), "handleDeferred");
@@ -200,7 +200,7 @@ public class ServletInvocableHandlerMethodTests {
 	public void wrapConcurrentResult_ResponseEntityNullReturnValue() throws Exception {
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
 		converters.add(new StringHttpMessageConverter());
-		List<Object> advice = Arrays.asList(mock(ResponseBodyAdvice.class));
+		List<Object> advice = Collections.singletonList(mock(ResponseBodyAdvice.class));
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters, null, advice);
 		this.returnValueHandlers.addHandler(processor);
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new ResponseEntityHandler(), "handleDeferred");
@@ -239,8 +239,8 @@ public class ServletInvocableHandlerMethodTests {
 
 	@Test
 	public void responseEntityRawTypeWithNullBody() throws Exception {
-		List<HttpMessageConverter<?>> converters = Arrays.asList(new StringHttpMessageConverter());
-		List<Object> advice = Arrays.asList(mock(ResponseBodyAdvice.class));
+		List<HttpMessageConverter<?>> converters = Collections.singletonList(new StringHttpMessageConverter());
+		List<Object> advice = Collections.singletonList(mock(ResponseBodyAdvice.class));
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters, null, advice);
 		this.returnValueHandlers.addHandler(processor);
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new ResponseEntityHandler(), "handleRawType");
