@@ -479,6 +479,10 @@ public class AntPathMatcherTests {
 
 		// longer is better
 		assertEquals(1, comparator.compare("/hotels", "/hotels2"));
+		
+		//SPR-13139
+		assertEquals(-1, comparator.compare("*", "*/**"));
+		assertEquals(1, comparator.compare("*/**", "*"));
 	}
 
 	@Test
