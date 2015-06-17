@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItem;
@@ -30,7 +31,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
- * MultipartFile implementation for Jakarta Commons FileUpload.
+ * MultipartFile implementation for Apache Commons FileUpload.
  *
  * @author Trevor D. Cook
  * @author Juergen Hoeller
@@ -56,6 +57,7 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 		this.size = this.fileItem.getSize();
 	}
 
+
 	/**
 	 * Return the underlying {@code org.apache.commons.fileupload.FileItem}
 	 * instance. There is hardly any need to access this.
@@ -75,18 +77,18 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 			// Should never happen.
 			return "";
 		}
-		// check for Unix-style path
+		// Check for Unix-style path
 		int pos = filename.lastIndexOf("/");
 		if (pos == -1) {
-			// check for Windows-style path
+			// Check for Windows-style path
 			pos = filename.lastIndexOf("\\");
 		}
 		if (pos != -1)  {
-			// any sort of path separator found
+			// Any sort of path separator found...
 			return filename.substring(pos + 1);
 		}
 		else {
-			// plain name
+			// A plain name
 			return filename;
 		}
 	}

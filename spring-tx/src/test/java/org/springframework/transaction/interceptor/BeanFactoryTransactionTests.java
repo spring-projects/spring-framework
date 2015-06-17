@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +20,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Map;
 
-import junit.framework.TestCase;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.junit.Before;
+import org.junit.Test;
+
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import org.springframework.aop.target.HotSwappableTargetSource;
@@ -40,31 +41,38 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 
+import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
+
 
 /**
  * Test cases for AOP transaction management.
  *
  * @author Rod Johnson
+ * @author Juergen Hoeller
  * @since 23.04.2003
  */
-public class BeanFactoryTransactionTests extends TestCase {
+public class BeanFactoryTransactionTests {
 
 	private DefaultListableBeanFactory factory;
 
-	@Override
+
+	@Before
 	public void setUp() {
 		this.factory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(this.factory).loadBeanDefinitions(
 				new ClassPathResource("transactionalBeanFactory.xml", getClass()));
 	}
 
+
+	@Test
 	public void testGetsAreNotTransactionalWithProxyFactory1() throws NoSuchMethodException {
 		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory1");
 		assertTrue("testBean is a dynamic proxy", Proxy.isProxyClass(testBean.getClass()));
 		doTestGetsAreNotTransactional(testBean);
 	}
 
+	@Test
 	public void testGetsAreNotTransactionalWithProxyFactory2DynamicProxy() throws NoSuchMethodException {
 		this.factory.preInstantiateSingletons();
 		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory2DynamicProxy");
@@ -72,12 +80,14 @@ public class BeanFactoryTransactionTests extends TestCase {
 		doTestGetsAreNotTransactional(testBean);
 	}
 
+	@Test
 	public void testGetsAreNotTransactionalWithProxyFactory2Cglib() throws NoSuchMethodException {
 		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory2Cglib");
 		assertTrue("testBean is CGLIB advised", AopUtils.isCglibProxy(testBean));
 		doTestGetsAreNotTransactional(testBean);
 	}
 
+	@Test
 	public void testProxyFactory2Lazy() throws NoSuchMethodException {
 		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory2Lazy");
 		assertFalse(factory.containsSingleton("target"));
@@ -85,6 +95,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 		assertTrue(factory.containsSingleton("target"));
 	}
 
+	@Test
 	public void testCglibTransactionProxyImplementsNoInterfaces() throws NoSuchMethodException {
 		ImplementsNoInterfaces ini = (ImplementsNoInterfaces) factory.getBean("cglibNoInterfaces");
 		assertTrue("testBean is CGLIB advised", AopUtils.isCglibProxy(ini));
@@ -99,6 +110,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 		assertEquals(2, ptm.commits);
 	}
 
+	@Test
 	public void testGetsAreNotTransactionalWithProxyFactory3() throws NoSuchMethodException {
 		ITestBean testBean = (ITestBean) factory.getBean("proxyFactory3");
 		assertTrue("testBean is a full proxy", testBean instanceof DerivedTestBean);
@@ -158,14 +170,16 @@ public class BeanFactoryTransactionTests extends TestCase {
 		assertTrue(testBean.getAge() == age);
 	}
 
+	@Test
 	public void testGetBeansOfTypeWithAbstract() {
-		Map beansOfType = factory.getBeansOfType(ITestBean.class, true, true);
+		Map<String, ITestBean> beansOfType = factory.getBeansOfType(ITestBean.class, true, true);
 		assertNotNull(beansOfType);
 	}
 
 	/**
 	 * Check that we fail gracefully if the user doesn't set any transaction attributes.
 	 */
+	@Test
 	public void testNoTransactionAttributeSource() {
 		try {
 			DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
@@ -181,6 +195,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 	/**
 	 * Test that we can set the target to a dynamic TargetSource.
 	 */
+	@Test
 	public void testDynamicTargetSource() throws NoSuchMethodException {
 		// Install facade
 		CallCountingTransactionManager txMan = new CallCountingTransactionManager();
@@ -211,7 +226,7 @@ public class BeanFactoryTransactionTests extends TestCase {
 		int counter = 0;
 
 		@Override
-		public boolean matches(Method method, Class clazz) {
+		public boolean matches(Method method, Class<?> clazz) {
 			counter++;
 			return true;
 		}

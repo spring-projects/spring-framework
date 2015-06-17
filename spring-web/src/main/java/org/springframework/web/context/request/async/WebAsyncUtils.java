@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.context.request.async;
 
 import java.lang.reflect.Constructor;
@@ -67,18 +68,17 @@ public abstract class WebAsyncUtils {
 	}
 
 	/**
-	 * Create an AsyncWebRequest instance. By default an instance of
-	 * {@link StandardServletAsyncWebRequest} is created if running in Servlet
-	 * 3.0 (or higher) environment or as a fallback, an instance of
-	 * {@link NoSupportAsyncWebRequest} is returned.
-	 *
+	 * Create an AsyncWebRequest instance. By default, an instance of
+	 * {@link StandardServletAsyncWebRequest} gets created when running in
+	 * Servlet 3.0 (or higher) environment - as a fallback, an instance
+	 * of {@link NoSupportAsyncWebRequest} will be returned.
 	 * @param request the current request
 	 * @param response the current response
-	 * @return an AsyncWebRequest instance, never {@code null}
+	 * @return an AsyncWebRequest instance (never {@code null})
 	 */
 	public static AsyncWebRequest createAsyncWebRequest(HttpServletRequest request, HttpServletResponse response) {
-		return ClassUtils.hasMethod(ServletRequest.class, "startAsync") ?
-				createStandardServletAsyncWebRequest(request, response) : new NoSupportAsyncWebRequest(request, response);
+		return (ClassUtils.hasMethod(ServletRequest.class, "startAsync") ?
+				createStandardServletAsyncWebRequest(request, response) : new NoSupportAsyncWebRequest(request, response));
 	}
 
 	private static AsyncWebRequest createStandardServletAsyncWebRequest(HttpServletRequest request, HttpServletResponse response) {
@@ -90,8 +90,8 @@ public abstract class WebAsyncUtils {
 			}
 			return (AsyncWebRequest) BeanUtils.instantiateClass(standardAsyncRequestConstructor, request, response);
 		}
-		catch (Throwable t) {
-			throw new IllegalStateException("Failed to instantiate StandardServletAsyncWebRequest", t);
+		catch (Throwable ex) {
+			throw new IllegalStateException("Failed to instantiate StandardServletAsyncWebRequest", ex);
 		}
 	}
 
