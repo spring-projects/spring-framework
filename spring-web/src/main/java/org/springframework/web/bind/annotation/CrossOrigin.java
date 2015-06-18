@@ -39,13 +39,13 @@ import org.springframework.core.annotation.AliasFor;
 @Documented
 public @interface CrossOrigin {
 
-	static final String[] DEFAULT_ORIGIN = { "*" };
+	String[] DEFAULT_ORIGIN = { "*" };
 
-	static final String[] DEFAULT_ALLOWED_HEADERS = { "*" };
+	String[] DEFAULT_ALLOWED_HEADERS = { "*" };
 
-	static final boolean DEFAULT_ALLOW_CREDENTIALS = true;
+	boolean DEFAULT_ALLOW_CREDENTIALS = true;
 
-	static final long DEFAULT_MAX_AGE = 1800;
+	long DEFAULT_MAX_AGE = 1800;
 
 
 	/**
