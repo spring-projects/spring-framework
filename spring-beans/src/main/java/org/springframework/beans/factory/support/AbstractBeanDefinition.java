@@ -758,6 +758,11 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 		return this.factoryMethodName;
 	}
 
+	@Override
+	public String getFactoryMethodReturnType() {
+		return null;
+	}
+
 	/**
 	 * Set the name of the initializer method. The default is {@code null}
 	 * in which case there is no initializer method.

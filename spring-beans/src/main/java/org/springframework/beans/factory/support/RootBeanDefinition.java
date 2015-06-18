@@ -61,6 +61,9 @@ public class RootBeanDefinition extends AbstractBeanDefinition {
 	/** Package-visible field for caching the resolved constructor or factory method */
 	Object resolvedConstructorOrFactoryMethod;
 
+	/** Package-visible field for caching the loaded factory method return type */
+	volatile Class<?> factoryMethodReturnType;
+
 	/** Package-visible field for caching the return type of a generically typed factory method */
 	volatile Class<?> resolvedFactoryMethodReturnType;
 

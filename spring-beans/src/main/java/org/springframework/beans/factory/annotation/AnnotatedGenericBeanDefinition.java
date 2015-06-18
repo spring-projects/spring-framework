@@ -98,6 +98,11 @@ public class AnnotatedGenericBeanDefinition extends GenericBeanDefinition implem
 	}
 
 	@Override
+	public String getFactoryMethodReturnType() {
+		return (this.factoryMethodMetadata == null ? null : this.factoryMethodMetadata.getReturnTypeName());
+	}
+
+	@Override
 	public final MethodMetadata getFactoryMethodMetadata() {
 		return this.factoryMethodMetadata;
 	}

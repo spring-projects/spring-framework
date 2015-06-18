@@ -60,6 +60,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
+import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanPostProcessor;
@@ -74,6 +75,7 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.PriorityOrdered;
+import org.springframework.core.type.MethodMetadata;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -653,24 +655,25 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			return preResolved;
 		}
 
-		Class<?> factoryClass;
-		boolean isStatic = true;
-
 		String factoryBeanName = mbd.getFactoryBeanName();
-		if (factoryBeanName != null) {
-			if (factoryBeanName.equals(beanName)) {
-				throw new BeanDefinitionStoreException(mbd.getResourceDescription(), beanName,
-						"factory-bean reference points back to the same bean definition");
+		boolean isStatic = (factoryBeanName == null);
+
+		// Use the predetermined return type if possible
+		if (factoryBeanName != null && mbd.getFactoryMethodReturnType() != null) {
+			if (mbd.getFactoryMethodReturnType() != null) {
+				try {
+					if (mbd.factoryMethodReturnType == null) {
+						mbd.factoryMethodReturnType = ClassUtils.forName(
+								mbd.getFactoryMethodReturnType(), getBeanClassLoader());
+					}
+					return mbd.factoryMethodReturnType;
+				}
+				catch (Exception ex) {
+				}
 			}
-			// Check declared factory method return type on factory class.
-			factoryClass = getType(factoryBeanName);
-			isStatic = false;
-		}
-		else {
-			// Check declared factory method return type on bean class.
-			factoryClass = resolveBeanClass(mbd, beanName, typesToMatch);
 		}
 
+		Class<?> factoryClass = getFactoryClass(beanName, mbd, factoryBeanName, typesToMatch);
 		if (factoryClass == null) {
 			return null;
 		}
@@ -689,29 +692,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 				if (factoryMethod.getTypeParameters().length > 0) {
 					try {
 						// Fully resolve parameter names and argument values.
-						Class<?>[] paramTypes = factoryMethod.getParameterTypes();
-						String[] paramNames = null;
-						ParameterNameDiscoverer pnd = getParameterNameDiscoverer();
-						if (pnd != null) {
-							paramNames = pnd.getParameterNames(factoryMethod);
-						}
-						ConstructorArgumentValues cav = mbd.getConstructorArgumentValues();
-						Set<ConstructorArgumentValues.ValueHolder> usedValueHolders =
-								new HashSet<ConstructorArgumentValues.ValueHolder>(paramTypes.length);
-						Object[] args = new Object[paramTypes.length];
-						for (int i = 0; i < args.length; i++) {
-							ConstructorArgumentValues.ValueHolder valueHolder = cav.getArgumentValue(
-									i, paramTypes[i], (paramNames != null ? paramNames[i] : null), usedValueHolders);
-							if (valueHolder == null) {
-								valueHolder = cav.getGenericArgumentValue(null, null, usedValueHolders);
-							}
-							if (valueHolder != null) {
-								args[i] = valueHolder.getValue();
-								usedValueHolders.add(valueHolder);
-							}
-						}
-						Class<?> returnType = AutowireUtils.resolveReturnTypeForFactoryMethod(
-								factoryMethod, args, getBeanClassLoader());
+						Class<?> returnType = getReturnType(mbd, factoryMethod);
 						if (returnType != null) {
 							cache = true;
 							commonType = ClassUtils.determineCommonAncestor(returnType, commonType);
@@ -730,16 +711,61 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 
 		if (commonType != null) {
+			if(mbd.resolvedFactoryMethodReturnType != null && !mbd.resolvedFactoryMethodReturnType.equals(commonType)) {
+				throw new IllegalStateException(commonType+" "+mbd.factoryMethodReturnType );
+			}
 			// Clear return type found: all factory methods return same type.
 			if (cache) {
 				mbd.resolvedFactoryMethodReturnType = commonType;
 			}
 			return commonType;
 		}
-		else {
-			// Ambiguous return types found: return null to indicate "not determinable".
-			return null;
+		// Ambiguous return types found: return null to indicate "not determinable".
+		return null;
+	}
+
+	private Class<?> getFactoryClass(String beanName, RootBeanDefinition mbd, String factoryBeanName,
+			Class<?>... typesToMatch) {
+		if (factoryBeanName != null) {
+			if (factoryBeanName.equals(beanName)) {
+				throw new BeanDefinitionStoreException(mbd.getResourceDescription(), beanName,
+						"factory-bean reference points back to the same bean definition");
+			}
+			// Check declared factory method return type on factory class.
+			return getType(factoryBeanName);
 		}
+		// Check declared factory method return type on bean class.
+		return resolveBeanClass(mbd, beanName, typesToMatch);
+	}
+
+	private Class<?> getReturnType(RootBeanDefinition mbd, Method factoryMethod) {
+		Class<?>[] paramTypes = factoryMethod.getParameterTypes();
+		String[] paramNames = getParameterNames(factoryMethod);
+		ConstructorArgumentValues cav = mbd.getConstructorArgumentValues();
+		Set<ConstructorArgumentValues.ValueHolder> usedValueHolders =
+				new HashSet<ConstructorArgumentValues.ValueHolder>(paramTypes.length);
+		Object[] args = new Object[paramTypes.length];
+		for (int i = 0; i < args.length; i++) {
+			ConstructorArgumentValues.ValueHolder valueHolder = cav.getArgumentValue(
+					i, paramTypes[i], (paramNames != null ? paramNames[i] : null), usedValueHolders);
+			if (valueHolder == null) {
+				valueHolder = cav.getGenericArgumentValue(null, null, usedValueHolders);
+			}
+			if (valueHolder != null) {
+				args[i] = valueHolder.getValue();
+				usedValueHolders.add(valueHolder);
+			}
+		}
+		return AutowireUtils.resolveReturnTypeForFactoryMethod(
+				factoryMethod, args, getBeanClassLoader());
+	}
+
+	private String[] getParameterNames(Method factoryMethod) {
+		ParameterNameDiscoverer discoverer = getParameterNameDiscoverer();
+		if (discoverer != null) {
+			return discoverer.getParameterNames(factoryMethod);
+		}
+		return null;
 	}
 
 	/**
