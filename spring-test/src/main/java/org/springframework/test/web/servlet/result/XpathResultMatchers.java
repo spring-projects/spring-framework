@@ -70,7 +70,7 @@ public class XpathResultMatchers {
 	}
 
 	/**
-	 * Get the response encoding if explicitely defined in the response, null otherwise
+	 * Get the response encoding if explicitly defined in the response, {code null} otherwise.
 	 */
 	private String getDefinedEncoding(MockHttpServletResponse response) {
 		return response.isCharset() ? response.getCharacterEncoding() : null;
