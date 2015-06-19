@@ -493,40 +493,130 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void findRepeatableAnnotationOnComposedAnnotation() {
-		Repeatable repeatable = findAnnotation(MyRepeatableMeta.class, Repeatable.class);
+		Repeatable repeatable = findAnnotation(MyRepeatableMeta1.class, Repeatable.class);
 		assertNotNull(repeatable);
 		assertEquals(MyRepeatableContainer.class, repeatable.value());
 	}
 
 	@Test
-	public void getRepeatableFromMethod() throws Exception {
+	public void getRepeatableAnnotationsDeclaredOnMethod() throws Exception {
 		Method method = InterfaceWithRepeated.class.getMethod("foo");
-		Set<MyRepeatable> annotations = getRepeatableAnnotation(method, MyRepeatableContainer.class, MyRepeatable.class);
+		Set<MyRepeatable> annotations = getRepeatableAnnotations(method, MyRepeatableContainer.class, MyRepeatable.class);
 		assertNotNull(annotations);
 		List<String> values = annotations.stream().map(MyRepeatable::value).collect(toList());
-		assertThat(values, equalTo(Arrays.asList("a", "b", "c", "meta")));
+		assertThat(values, is(Arrays.asList("A", "B", "C", "meta1")));
 	}
 
 	@Test
-	public void getRepeatableWithMissingAttributeAliasDeclaration() throws Exception {
+	public void getRepeatableAnnotationsDeclaredOnClassWithMissingAttributeAliasDeclaration() throws Exception {
 		exception.expect(AnnotationConfigurationException.class);
 		exception.expectMessage(containsString("Attribute [value] in"));
 		exception.expectMessage(containsString(BrokenContextConfig.class.getName()));
 		exception.expectMessage(containsString("must be declared as an @AliasFor [locations]"));
-		getRepeatableAnnotation(BrokenConfigHierarchyTestCase.class, BrokenHierarchy.class, BrokenContextConfig.class);
+		getRepeatableAnnotations(BrokenConfigHierarchyTestCase.class, BrokenHierarchy.class, BrokenContextConfig.class);
 	}
 
 	@Test
-	public void getRepeatableWithAttributeAliases() throws Exception {
-		Set<ContextConfig> annotations = getRepeatableAnnotation(ConfigHierarchyTestCase.class, Hierarchy.class,
-			ContextConfig.class);
+	public void getRepeatableAnnotationsDeclaredOnClassWithAttributeAliases() throws Exception {
+		final List<String> expectedLocations = Arrays.asList("A", "B");
+
+		Set<ContextConfig> annotations = getRepeatableAnnotations(ConfigHierarchyTestCase.class, Hierarchy.class, ContextConfig.class);
 		assertNotNull(annotations);
 
 		List<String> locations = annotations.stream().map(ContextConfig::locations).collect(toList());
-		assertThat(locations, equalTo(Arrays.asList("A", "B")));
+		assertThat(locations, is(expectedLocations));
 
 		List<String> values = annotations.stream().map(ContextConfig::value).collect(toList());
-		assertThat(values, equalTo(Arrays.asList("A", "B")));
+		assertThat(values, is(expectedLocations));
+	}
+
+	@Test
+	public void getRepeatableAnnotationsDeclaredOnClass() {
+		final List<String> expectedValuesJava = Arrays.asList("A", "B", "C");
+		final List<String> expectedValuesSpring = Arrays.asList("A", "B", "C", "meta1");
+
+		// Java 8
+		MyRepeatable[] array = MyRepeatableClass.class.getAnnotationsByType(MyRepeatable.class);
+		assertNotNull(array);
+		List<String> values = stream(array).map(MyRepeatable::value).collect(toList());
+		assertThat(values, is(expectedValuesJava));
+
+		// Spring
+		Set<MyRepeatable> set = getRepeatableAnnotations(MyRepeatableClass.class, MyRepeatableContainer.class, MyRepeatable.class);
+		assertNotNull(set);
+		values = set.stream().map(MyRepeatable::value).collect(toList());
+		assertThat(values, is(expectedValuesSpring));
+	}
+
+	@Test
+	public void getRepeatableAnnotationsDeclaredOnSuperclass() {
+		final Class<?> clazz = SubMyRepeatableClass.class;
+		final List<String> expectedValuesJava = Arrays.asList("A", "B", "C");
+		final List<String> expectedValuesSpring = Arrays.asList("A", "B", "C", "meta1");
+
+		// Java 8
+		MyRepeatable[] array = clazz.getAnnotationsByType(MyRepeatable.class);
+		assertNotNull(array);
+		List<String> values = stream(array).map(MyRepeatable::value).collect(toList());
+		assertThat(values, is(expectedValuesJava));
+
+		// Spring
+		Set<MyRepeatable> set = getRepeatableAnnotations(clazz, MyRepeatableContainer.class, MyRepeatable.class);
+		assertNotNull(set);
+		values = set.stream().map(MyRepeatable::value).collect(toList());
+		assertThat(values, is(expectedValuesSpring));
+	}
+
+	@Test
+	public void getRepeatableAnnotationsDeclaredOnClassAndSuperclass() {
+		final Class<?> clazz = SubMyRepeatableWithAdditionalLocalDeclarationsClass.class;
+		final List<String> expectedValuesJava = Arrays.asList("X", "Y", "Z");
+		final List<String> expectedValuesSpring = Arrays.asList("X", "Y", "Z", "meta2");
+
+		// Java 8
+		MyRepeatable[] array = clazz.getAnnotationsByType(MyRepeatable.class);
+		assertNotNull(array);
+		List<String> values = stream(array).map(MyRepeatable::value).collect(toList());
+		assertThat(values, is(expectedValuesJava));
+
+		// Spring
+		Set<MyRepeatable> set = getRepeatableAnnotations(clazz, MyRepeatableContainer.class, MyRepeatable.class);
+		assertNotNull(set);
+		values = set.stream().map(MyRepeatable::value).collect(toList());
+		assertThat(values, is(expectedValuesSpring));
+	}
+
+	@Test
+	public void getDeclaredRepeatableAnnotationsDeclaredOnClass() {
+		final List<String> expectedValuesJava = Arrays.asList("A", "B", "C");
+		final List<String> expectedValuesSpring = Arrays.asList("A", "B", "C", "meta1");
+
+		// Java 8
+		MyRepeatable[] array = MyRepeatableClass.class.getDeclaredAnnotationsByType(MyRepeatable.class);
+		assertNotNull(array);
+		List<String> values = stream(array).map(MyRepeatable::value).collect(toList());
+		assertThat(values, is(expectedValuesJava));
+
+		// Spring
+		Set<MyRepeatable> set = getDeclaredRepeatableAnnotations(MyRepeatableClass.class, MyRepeatableContainer.class, MyRepeatable.class);
+		assertNotNull(set);
+		values = set.stream().map(MyRepeatable::value).collect(toList());
+		assertThat(values, is(expectedValuesSpring));
+	}
+
+	@Test
+	public void getDeclaredRepeatableAnnotationsDeclaredOnSuperclass() {
+		final Class<?> clazz = SubMyRepeatableClass.class;
+
+		// Java 8
+		MyRepeatable[] array = clazz.getDeclaredAnnotationsByType(MyRepeatable.class);
+		assertNotNull(array);
+		assertThat(array.length, is(0));
+
+		// Spring
+		Set<MyRepeatable> set = getDeclaredRepeatableAnnotations(clazz, MyRepeatableContainer.class, MyRepeatable.class);
+		assertNotNull(set);
+		assertThat(set.size(), is(0));
 	}
 
 	@Test
@@ -915,6 +1005,8 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void synthesizeAnnotationWithAttributeAliasesInNestedAnnotations() throws Exception {
+		List<String> expectedLocations = Arrays.asList("A", "B");
+
 		Hierarchy hierarchy = ConfigHierarchyTestCase.class.getAnnotation(Hierarchy.class);
 		assertNotNull(hierarchy);
 		Hierarchy synthesizedHierarchy = synthesizeAnnotation(hierarchy);
@@ -927,14 +1019,16 @@ public class AnnotationUtilsTests {
 			Arrays.stream(configs).allMatch(c -> c instanceof SynthesizedAnnotation));
 
 		List<String> locations = Arrays.stream(configs).map(ContextConfig::locations).collect(toList());
-		assertThat(locations, equalTo(Arrays.asList("A", "B")));
+		assertThat(locations, is(expectedLocations));
 
 		List<String> values = Arrays.stream(configs).map(ContextConfig::value).collect(toList());
-		assertThat(values, equalTo(Arrays.asList("A", "B")));
+		assertThat(values, is(expectedLocations));
 	}
 
 	@Test
 	public void synthesizeAnnotationWithArrayOfAnnotations() throws Exception {
+		List<String> expectedLocations = Arrays.asList("A", "B");
+
 		Hierarchy hierarchy = ConfigHierarchyTestCase.class.getAnnotation(Hierarchy.class);
 		assertNotNull(hierarchy);
 		Hierarchy synthesizedHierarchy = synthesizeAnnotation(hierarchy);
@@ -945,7 +1039,7 @@ public class AnnotationUtilsTests {
 
 		ContextConfig[] configs = synthesizedHierarchy.value();
 		List<String> locations = Arrays.stream(configs).map(ContextConfig::locations).collect(toList());
-		assertThat(locations, equalTo(Arrays.asList("A", "B")));
+		assertThat(locations, is(expectedLocations));
 
 		// Alter array returned from synthesized annotation
 		configs[0] = contextConfig;
@@ -953,7 +1047,7 @@ public class AnnotationUtilsTests {
 		// Re-retrieve the array from the synthesized annotation
 		configs = synthesizedHierarchy.value();
 		List<String> values = Arrays.stream(configs).map(ContextConfig::value).collect(toList());
-		assertThat(values, equalTo(Arrays.asList("A", "B")));
+		assertThat(values, is(expectedLocations));
 	}
 
 	@Test
@@ -1231,16 +1325,37 @@ public class AnnotationUtilsTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Inherited
-	@MyRepeatable("meta")
-	@interface MyRepeatableMeta {
+	@MyRepeatable("meta1")
+	@interface MyRepeatableMeta1 {
 	}
 
-	public interface InterfaceWithRepeated {
+	@Retention(RetentionPolicy.RUNTIME)
+	@Inherited
+	@MyRepeatable("meta2")
+	@interface MyRepeatableMeta2 {
+	}
 
-		@MyRepeatable("a")
-		@MyRepeatableContainer({ @MyRepeatable("b"), @MyRepeatable("c") })
-		@MyRepeatableMeta
+	interface InterfaceWithRepeated {
+
+		@MyRepeatable("A")
+		@MyRepeatableContainer({ @MyRepeatable("B"), @MyRepeatable("C") })
+		@MyRepeatableMeta1
 		void foo();
+	}
+
+	@MyRepeatable("A")
+	@MyRepeatableContainer({ @MyRepeatable("B"), @MyRepeatable("C") })
+	@MyRepeatableMeta1
+	static class MyRepeatableClass {
+	}
+
+	static class SubMyRepeatableClass extends MyRepeatableClass {
+	}
+
+	@MyRepeatable("X")
+	@MyRepeatableContainer({ @MyRepeatable("Y"), @MyRepeatable("Z") })
+	@MyRepeatableMeta2
+	static class SubMyRepeatableWithAdditionalLocalDeclarationsClass extends MyRepeatableClass {
 	}
 
 	enum RequestMethod {
