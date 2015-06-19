@@ -90,7 +90,6 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 			String attributeName = attributeMethod.getName();
 			Object attributeValue = attributes.get(attributeName);
 
-
 			// if attribute not present, check alias
 			if (attributeValue == null) {
 				String aliasName = attributeAliasMap.get(attributeName);
