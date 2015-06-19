@@ -257,7 +257,7 @@ public abstract class AnnotationUtils {
 	@Deprecated
 	public static <A extends Annotation> Set<A> getRepeatableAnnotation(Method method,
 			Class<? extends Annotation> containerAnnotationType, Class<A> annotationType) {
-		return getRepeatableAnnotations(method, containerAnnotationType, annotationType);
+		return getRepeatableAnnotations(method, annotationType, containerAnnotationType);
 	}
 
 	/**
@@ -269,7 +269,7 @@ public abstract class AnnotationUtils {
 	@Deprecated
 	public static <A extends Annotation> Set<A> getRepeatableAnnotation(AnnotatedElement annotatedElement,
 			Class<? extends Annotation> containerAnnotationType, Class<A> annotationType) {
-		return getRepeatableAnnotations(annotatedElement, containerAnnotationType, annotationType);
+		return getRepeatableAnnotations(annotatedElement, annotationType, containerAnnotationType);
 	}
 
 	/**
@@ -287,9 +287,9 @@ public abstract class AnnotationUtils {
 	 * <p>Meta-annotations will be searched if the annotation is not
 	 * <em>present</em> on the supplied element.
 	 * @param annotatedElement the element to look for annotations on; never {@code null}
+	 * @param annotationType the annotation type to look for; never {@code null}
 	 * @param containerAnnotationType the type of the container that holds
 	 * the annotations; may be {@code null} if a container is not supported
-	 * @param annotationType the annotation type to look for; never {@code null}
 	 * @return the annotations found or an empty set; never {@code null}
 	 * @since 4.2
 	 * @see #getDeclaredRepeatableAnnotations(AnnotatedElement, Class, Class)
@@ -298,14 +298,14 @@ public abstract class AnnotationUtils {
 	 * @see java.lang.reflect.AnnotatedElement#getAnnotationsByType
 	 */
 	public static <A extends Annotation> Set<A> getRepeatableAnnotations(AnnotatedElement annotatedElement,
-			Class<? extends Annotation> containerAnnotationType, Class<A> annotationType) {
+			Class<A> annotationType, Class<? extends Annotation> containerAnnotationType) {
 
-		Set<A> annotations = getDeclaredRepeatableAnnotations(annotatedElement, containerAnnotationType, annotationType);
+		Set<A> annotations = getDeclaredRepeatableAnnotations(annotatedElement, annotationType, containerAnnotationType);
 		if (!annotations.isEmpty()) {
 			return annotations;
 		}
 
-		return getRepeatableAnnotations(annotatedElement, containerAnnotationType, annotationType, false);
+		return getRepeatableAnnotations(annotatedElement, annotationType, containerAnnotationType, false);
 	}
 
 	/**
@@ -323,9 +323,9 @@ public abstract class AnnotationUtils {
 	 * <p>Meta-annotations will be searched if the annotation is not
 	 * <em>present</em> on the supplied element.
 	 * @param annotatedElement the element to look for annotations on; never {@code null}
+	 * @param annotationType the annotation type to look for; never {@code null}
 	 * @param containerAnnotationType the type of the container that holds
 	 * the annotations; may be {@code null} if a container is not supported
-	 * @param annotationType the annotation type to look for; never {@code null}
 	 * @return the annotations found or an empty set; never {@code null}
 	 * @since 4.2
 	 * @see #getRepeatableAnnotations(AnnotatedElement, Class, Class)
@@ -334,8 +334,8 @@ public abstract class AnnotationUtils {
 	 * @see java.lang.reflect.AnnotatedElement#getDeclaredAnnotationsByType
 	 */
 	public static <A extends Annotation> Set<A> getDeclaredRepeatableAnnotations(AnnotatedElement annotatedElement,
-			Class<? extends Annotation> containerAnnotationType, Class<A> annotationType) {
-		return getRepeatableAnnotations(annotatedElement, containerAnnotationType, annotationType, true);
+			Class<A> annotationType, Class<? extends Annotation> containerAnnotationType) {
+		return getRepeatableAnnotations(annotatedElement, annotationType, containerAnnotationType, true);
 	}
 
 	/**
@@ -347,9 +347,9 @@ public abstract class AnnotationUtils {
 	 * <em>present</em> on the supplied element.
 	 *
 	 * @param annotatedElement the element to look for annotations on; never {@code null}
+	 * @param annotationType the annotation type to look for; never {@code null}
 	 * @param containerAnnotationType the type of the container that holds
 	 * the annotations; may be {@code null} if a container is not supported
-	 * @param annotationType the annotation type to look for; never {@code null}
 	 * @param declaredMode {@code true} if only declared annotations (i.e.,
 	 * directly or indirectly present) should be considered.
 	 * @return the annotations found or an empty set; never {@code null}
@@ -358,7 +358,7 @@ public abstract class AnnotationUtils {
 	 * @see java.lang.annotation.Repeatable
 	 */
 	private static <A extends Annotation> Set<A> getRepeatableAnnotations(AnnotatedElement annotatedElement,
-			Class<? extends Annotation> containerAnnotationType, Class<A> annotationType, boolean declaredMode) {
+			Class<A> annotationType, Class<? extends Annotation> containerAnnotationType, boolean declaredMode) {
 
 		Assert.notNull(annotatedElement, "annotatedElement must not be null");
 		Assert.notNull(annotationType, "annotationType must not be null");
@@ -367,7 +367,7 @@ public abstract class AnnotationUtils {
 			if (annotatedElement instanceof Method) {
 				annotatedElement = BridgeMethodResolver.findBridgedMethod((Method) annotatedElement);
 			}
-			return new AnnotationCollector<A>(containerAnnotationType, annotationType, declaredMode).getResult(annotatedElement);
+			return new AnnotationCollector<A>(annotationType, containerAnnotationType, declaredMode).getResult(annotatedElement);
 		}
 		catch (Exception ex) {
 			handleIntrospectionFailure(annotatedElement, ex);
@@ -1665,9 +1665,9 @@ public abstract class AnnotationUtils {
 
 	private static class AnnotationCollector<A extends Annotation> {
 
-		private final Class<? extends Annotation> containerAnnotationType;
-
 		private final Class<A> annotationType;
+
+		private final Class<? extends Annotation> containerAnnotationType;
 
 		private final boolean declaredMode;
 
@@ -1676,9 +1676,9 @@ public abstract class AnnotationUtils {
 		private final Set<A> result = new LinkedHashSet<A>();
 
 
-		AnnotationCollector(Class<? extends Annotation> containerAnnotationType, Class<A> annotationType, boolean declaredMode) {
-			this.containerAnnotationType = containerAnnotationType;
+		AnnotationCollector(Class<A> annotationType, Class<? extends Annotation> containerAnnotationType, boolean declaredMode) {
 			this.annotationType = annotationType;
+			this.containerAnnotationType = containerAnnotationType;
 			this.declaredMode = declaredMode;
 		}
 
@@ -1691,7 +1691,7 @@ public abstract class AnnotationUtils {
 		private void process(AnnotatedElement element) {
 			if (this.visited.add(element)) {
 				try {
-					Annotation[] annotations = (declaredMode ? element.getDeclaredAnnotations() : element.getAnnotations());
+					Annotation[] annotations = (this.declaredMode ? element.getDeclaredAnnotations() : element.getAnnotations());
 					for (Annotation ann : annotations) {
 						Class<? extends Annotation> currentAnnotationType = ann.annotationType();
 						if (ObjectUtils.nullSafeEquals(this.annotationType, currentAnnotationType)) {

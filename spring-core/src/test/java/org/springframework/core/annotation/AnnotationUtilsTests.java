@@ -501,7 +501,7 @@ public class AnnotationUtilsTests {
 	@Test
 	public void getRepeatableAnnotationsDeclaredOnMethod() throws Exception {
 		Method method = InterfaceWithRepeated.class.getMethod("foo");
-		Set<MyRepeatable> annotations = getRepeatableAnnotations(method, MyRepeatableContainer.class, MyRepeatable.class);
+		Set<MyRepeatable> annotations = getRepeatableAnnotations(method, MyRepeatable.class, MyRepeatableContainer.class);
 		assertNotNull(annotations);
 		List<String> values = annotations.stream().map(MyRepeatable::value).collect(toList());
 		assertThat(values, is(Arrays.asList("A", "B", "C", "meta1")));
@@ -513,14 +513,14 @@ public class AnnotationUtilsTests {
 		exception.expectMessage(containsString("Attribute [value] in"));
 		exception.expectMessage(containsString(BrokenContextConfig.class.getName()));
 		exception.expectMessage(containsString("must be declared as an @AliasFor [locations]"));
-		getRepeatableAnnotations(BrokenConfigHierarchyTestCase.class, BrokenHierarchy.class, BrokenContextConfig.class);
+		getRepeatableAnnotations(BrokenConfigHierarchyTestCase.class, BrokenContextConfig.class, BrokenHierarchy.class);
 	}
 
 	@Test
 	public void getRepeatableAnnotationsDeclaredOnClassWithAttributeAliases() throws Exception {
 		final List<String> expectedLocations = Arrays.asList("A", "B");
 
-		Set<ContextConfig> annotations = getRepeatableAnnotations(ConfigHierarchyTestCase.class, Hierarchy.class, ContextConfig.class);
+		Set<ContextConfig> annotations = getRepeatableAnnotations(ConfigHierarchyTestCase.class, ContextConfig.class, Hierarchy.class);
 		assertNotNull(annotations);
 
 		List<String> locations = annotations.stream().map(ContextConfig::locations).collect(toList());
@@ -542,7 +542,7 @@ public class AnnotationUtilsTests {
 		assertThat(values, is(expectedValuesJava));
 
 		// Spring
-		Set<MyRepeatable> set = getRepeatableAnnotations(MyRepeatableClass.class, MyRepeatableContainer.class, MyRepeatable.class);
+		Set<MyRepeatable> set = getRepeatableAnnotations(MyRepeatableClass.class, MyRepeatable.class, MyRepeatableContainer.class);
 		assertNotNull(set);
 		values = set.stream().map(MyRepeatable::value).collect(toList());
 		assertThat(values, is(expectedValuesSpring));
@@ -561,7 +561,7 @@ public class AnnotationUtilsTests {
 		assertThat(values, is(expectedValuesJava));
 
 		// Spring
-		Set<MyRepeatable> set = getRepeatableAnnotations(clazz, MyRepeatableContainer.class, MyRepeatable.class);
+		Set<MyRepeatable> set = getRepeatableAnnotations(clazz, MyRepeatable.class, MyRepeatableContainer.class);
 		assertNotNull(set);
 		values = set.stream().map(MyRepeatable::value).collect(toList());
 		assertThat(values, is(expectedValuesSpring));
@@ -580,7 +580,7 @@ public class AnnotationUtilsTests {
 		assertThat(values, is(expectedValuesJava));
 
 		// Spring
-		Set<MyRepeatable> set = getRepeatableAnnotations(clazz, MyRepeatableContainer.class, MyRepeatable.class);
+		Set<MyRepeatable> set = getRepeatableAnnotations(clazz, MyRepeatable.class, MyRepeatableContainer.class);
 		assertNotNull(set);
 		values = set.stream().map(MyRepeatable::value).collect(toList());
 		assertThat(values, is(expectedValuesSpring));
@@ -598,7 +598,7 @@ public class AnnotationUtilsTests {
 		assertThat(values, is(expectedValuesJava));
 
 		// Spring
-		Set<MyRepeatable> set = getDeclaredRepeatableAnnotations(MyRepeatableClass.class, MyRepeatableContainer.class, MyRepeatable.class);
+		Set<MyRepeatable> set = getDeclaredRepeatableAnnotations(MyRepeatableClass.class, MyRepeatable.class, MyRepeatableContainer.class);
 		assertNotNull(set);
 		values = set.stream().map(MyRepeatable::value).collect(toList());
 		assertThat(values, is(expectedValuesSpring));
@@ -614,7 +614,7 @@ public class AnnotationUtilsTests {
 		assertThat(array.length, is(0));
 
 		// Spring
-		Set<MyRepeatable> set = getDeclaredRepeatableAnnotations(clazz, MyRepeatableContainer.class, MyRepeatable.class);
+		Set<MyRepeatable> set = getDeclaredRepeatableAnnotations(clazz, MyRepeatable.class, MyRepeatableContainer.class);
 		assertNotNull(set);
 		assertThat(set.size(), is(0));
 	}

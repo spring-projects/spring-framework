@@ -224,7 +224,7 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 				@Override
 				public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
 					for (Scheduled scheduled :
-							AnnotationUtils.getRepeatableAnnotations(method, Schedules.class, Scheduled.class)) {
+							AnnotationUtils.getRepeatableAnnotations(method, Scheduled.class, Schedules.class)) {
 						processScheduled(scheduled, method, bean);
 						annotatedMethods.add(method);
 					}

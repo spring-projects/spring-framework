@@ -123,11 +123,11 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	private void executeSqlScripts(TestContext testContext, ExecutionPhase executionPhase) throws Exception {
 		boolean classLevel = false;
 
-		Set<Sql> sqlAnnotations = AnnotationUtils.getRepeatableAnnotations(testContext.getTestMethod(), SqlGroup.class,
-			Sql.class);
+		Set<Sql> sqlAnnotations = AnnotationUtils.getRepeatableAnnotations(testContext.getTestMethod(), Sql.class,
+			SqlGroup.class);
 		if (sqlAnnotations.isEmpty()) {
-			sqlAnnotations = AnnotationUtils.getRepeatableAnnotations(testContext.getTestClass(), SqlGroup.class,
-				Sql.class);
+			sqlAnnotations = AnnotationUtils.getRepeatableAnnotations(testContext.getTestClass(), Sql.class,
+				SqlGroup.class);
 			if (!sqlAnnotations.isEmpty()) {
 				classLevel = true;
 			}
