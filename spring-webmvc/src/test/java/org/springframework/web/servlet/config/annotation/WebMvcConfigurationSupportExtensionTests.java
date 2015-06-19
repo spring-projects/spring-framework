@@ -407,7 +407,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 		public void addCorsMappings(CorsRegistry registry) {
 			registry.addMapping("/resources/**");
 		}
-	
+
 	}
 
 	private class TestPathHelper extends UrlPathHelper {}

@@ -129,7 +129,7 @@ public class DefaultUserDestinationResolverTests {
 
 	@Test
 	public void handleMessageToOtherUser() {
-	
+
 		TestSimpUser otherSimpUser = new TestSimpUser("anna");
 		otherSimpUser.addSessions(new TestSimpSession("456"));
 		when(this.registry.getUser("anna")).thenReturn(otherSimpUser);

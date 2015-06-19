@@ -238,11 +238,11 @@ public class Jackson2ObjectMapperBuilderTests {
 	@Test
 	public void defaultModules() throws JsonProcessingException, UnsupportedEncodingException {
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().build();
-	
+
 		Long timestamp = 1322903730000L;
 		DateTime dateTime = new DateTime(timestamp, DateTimeZone.UTC);
 		assertEquals(timestamp.toString(), new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8"));
-	
+
 		Optional<String> optional = Optional.of("test");
 		assertEquals("\"test\"", new String(objectMapper.writeValueAsBytes(optional), "UTF-8"));
 	}

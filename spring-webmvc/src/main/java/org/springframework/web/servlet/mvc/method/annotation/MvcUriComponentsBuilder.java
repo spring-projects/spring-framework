@@ -701,7 +701,7 @@ public class MvcUriComponentsBuilder {
 		ControllerMethodInvocationInterceptor(Class<?> controllerType) {
 			this.controllerType = controllerType;
 		}
-	
+
 		@Override
 		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) {
 			if (getControllerMethod.equals(method)) {
