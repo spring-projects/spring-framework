@@ -42,8 +42,9 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 
 	/**
 	 * Construct a new {@code MapAnnotationAttributeExtractor}.
-	 * <p>The supplied map must contain key-value pairs for every attribute
-	 * defined in the supplied {@code annotationType}.
+	 * <p>The supplied map must contain a key-value pair for every attribute
+	 * defined in the supplied {@code annotationType} that is not aliased or
+	 * does not have a default value.
 	 * @param attributes the map of annotation attributes; never {@code null}
 	 * @param annotationType the type of annotation to synthesize; never {@code null}
 	 * @param annotatedElement the element that is annotated with the annotation
@@ -51,8 +52,7 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 	 */
 	MapAnnotationAttributeExtractor(Map<String, Object> attributes, Class<? extends Annotation> annotationType,
 			AnnotatedElement annotatedElement) {
-		super(annotationType, annotatedElement, new HashMap<String, Object>(attributes));
-		validateAttributes(attributes, annotationType);
+		super(annotationType, annotatedElement, enrichAndValidateAttributes(new HashMap<String, Object>(attributes), annotationType));
 	}
 
 	@Override
@@ -71,22 +71,55 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 	}
 
 	/**
-	 * Validate the supplied {@code attributes} map by verifying that it
-	 * contains a non-null entry for each annotation attribute in the specified
-	 * {@code annotationType} and that the type of the entry matches the
-	 * return type for the corresponding annotation attribute.
+	 * Enrich and validate the supplied {@code attributes} map by ensuring
+	 * that it contains a non-null entry for each annotation attribute in
+	 * the specified {@code annotationType} and that the type of the entry
+	 * matches the return type for the corresponding annotation attribute.
+	 * <p>If an attribute is missing in the supplied map, it will be set
+	 * either to value of its alias (if an alias value exists) or to the
+	 * value of the attribute's default value (if defined), and otherwise
+	 * an {@link IllegalArgumentException} will be thrown.
+	 * @see AliasFor
 	 */
-	private static void validateAttributes(Map<String, Object> attributes, Class<? extends Annotation> annotationType) {
+	private static Map<String, Object> enrichAndValidateAttributes(Map<String, Object> attributes,
+			Class<? extends Annotation> annotationType) {
+
+		Map<String, String> attributeAliasMap = getAttributeAliasMap(annotationType);
+
 		for (Method attributeMethod : getAttributeMethods(annotationType)) {
 			String attributeName = attributeMethod.getName();
-
 			Object attributeValue = attributes.get(attributeName);
+
+
+			// if attribute not present, check alias
+			if (attributeValue == null) {
+				String aliasName = attributeAliasMap.get(attributeName);
+				if (aliasName != null) {
+					Object aliasValue = attributes.get(aliasName);
+					if (aliasValue != null) {
+						attributeValue = aliasValue;
+						attributes.put(attributeName, attributeValue);
+					}
+				}
+			}
+
+			// if alias not present, check default
+			if (attributeValue == null) {
+				Object defaultValue = getDefaultValue(annotationType, attributeName);
+				if (defaultValue != null) {
+					attributeValue = defaultValue;
+					attributes.put(attributeName, attributeValue);
+				}
+			}
+
+			// if still null
 			if (attributeValue == null) {
 				throw new IllegalArgumentException(String.format(
 					"Attributes map [%s] returned null for required attribute [%s] defined by annotation type [%s].",
 					attributes, attributeName, annotationType.getName()));
 			}
 
+			// else, ensure correct type
 			Class<?> returnType = attributeMethod.getReturnType();
 			if (!ClassUtils.isAssignable(returnType, attributeValue.getClass())) {
 				throw new IllegalArgumentException(String.format(
@@ -95,6 +128,8 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 					attributeValue.getClass().getName(), attributeName, returnType.getName(), annotationType.getName()));
 			}
 		}
+
+		return attributes;
 	}
 
 }

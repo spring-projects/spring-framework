@@ -1088,8 +1088,9 @@ public abstract class AnnotationUtils {
 	 * annotation of the specified {@code annotationType} and transparently
 	 * enforces <em>attribute alias</em> semantics for annotation attributes
 	 * that are annotated with {@link AliasFor @AliasFor}.
-	 * <p>The supplied map must contain key-value pairs for every attribute
-	 * defined by the supplied {@code annotationType}.
+	 * <p>The supplied map must contain a key-value pair for every attribute
+	 * defined in the supplied {@code annotationType} that is not aliased or
+	 * does not have a default value.
 	 * <p>Note that {@link AnnotationAttributes} is a specialized type of
 	 * {@link Map} that is an ideal candidate for this method's
 	 * {@code attributes} argument.
@@ -1100,7 +1101,10 @@ public abstract class AnnotationUtils {
 	 * corresponding to the supplied attributes; may be {@code null} if unknown
 	 * @return the synthesized annotation, or {@code null} if the supplied attributes
 	 * map is {@code null}
-	 * @throws AnnotationConfigurationException if invalid configuration is detected
+	 * @throws IllegalArgumentException if a required attribute is missing or if an
+	 * attribute is not of the correct type
+	 * @throws AnnotationConfigurationException if invalid configuration of
+	 * {@code @AliasFor} is detected
 	 * @since 4.2
 	 * @see #synthesizeAnnotation(Annotation, AnnotatedElement)
 	 */

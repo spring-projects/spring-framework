@@ -24,6 +24,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +55,8 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
  * @author Phillip Webb
  */
 public class AnnotationUtilsTests {
+
+	private static final Map<String, Object> EMPTY_ATTRS = Collections.emptyMap();
 
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
@@ -689,24 +692,51 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
+	public void synthesizeAnnotationFromMapWithEmptyAttributesWithDefaultsWithoutAttributeAliases() throws Exception {
+		AnnotationWithDefaults annotationWithDefaults = synthesizeAnnotation(EMPTY_ATTRS, AnnotationWithDefaults.class, null);
+		assertNotNull(annotationWithDefaults);
+		assertEquals("text: ", "enigma", annotationWithDefaults.text());
+		assertTrue("predicate: ", annotationWithDefaults.predicate());
+		assertArrayEquals("characters: ", new char[] { 'a', 'b', 'c' }, annotationWithDefaults.characters());
+	}
+
+	@Test
+	public void synthesizeAnnotationFromMapWithEmptyAttributesWithDefaultsWithAttributeAliases() throws Exception {
+		ContextConfig contextConfig = synthesizeAnnotation(EMPTY_ATTRS, ContextConfig.class, null);
+		assertNotNull(contextConfig);
+		assertEquals("value: ", "", contextConfig.value());
+		assertEquals("locations: ", "", contextConfig.locations());
+	}
+
+	@Test
+	public void synthesizeAnnotationFromMapWithMinimalAttributesWithAttributeAliases() throws Exception {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("locations", "test.xml");
+		ContextConfig contextConfig = synthesizeAnnotation(map, ContextConfig.class, null);
+		assertNotNull(contextConfig);
+		assertEquals("value: ", "test.xml", contextConfig.value());
+		assertEquals("locations: ", "test.xml", contextConfig.locations());
+	}
+
+	@Test
 	public void synthesizeAnnotationFromMapWithMissingAttributeValue() throws Exception {
-		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(startsWith("Attributes map"));
-		exception.expectMessage(containsString("returned null for required attribute [value]"));
-		exception.expectMessage(containsString("defined by annotation type [" + Component.class.getName() + "]"));
-		synthesizeAnnotation(new HashMap<String, Object>(), Component.class, null);
+		assertMissingTextAttribute(EMPTY_ATTRS);
 	}
 
 	@Test
 	public void synthesizeAnnotationFromMapWithNullAttributeValue() throws Exception {
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put(VALUE, null);
+		map.put("text", null);
+		assertTrue(map.containsKey("text"));
+		assertMissingTextAttribute(map);
+	}
 
+	private void assertMissingTextAttribute(Map<String, Object> attributes) {
 		exception.expect(IllegalArgumentException.class);
 		exception.expectMessage(startsWith("Attributes map"));
-		exception.expectMessage(containsString("returned null for required attribute [value]"));
-		exception.expectMessage(containsString("defined by annotation type [" + Component.class.getName() + "]"));
-		synthesizeAnnotation(map, Component.class, null);
+		exception.expectMessage(containsString("returned null for required attribute [text]"));
+		exception.expectMessage(containsString("defined by annotation type [" + AnnotationWithoutDefaults.class.getName() + "]"));
+		synthesizeAnnotation(attributes, AnnotationWithoutDefaults.class, null);
 	}
 
 	@Test
@@ -945,14 +975,14 @@ public class AnnotationUtilsTests {
 	}
 
 
-	@Component(value = "meta1")
+	@Component("meta1")
 	@Order
 	@Retention(RetentionPolicy.RUNTIME)
 	@Inherited
 	@interface Meta1 {
 	}
 
-	@Component(value = "meta2")
+	@Component("meta2")
 	@Transactional(readOnly = true)
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface Meta2 {
@@ -1425,6 +1455,18 @@ public class AnnotationUtilsTests {
 
 	@ComponentScan(excludeFilters = { @Filter(pattern = "*Foo"), @Filter(pattern = "*Bar") })
 	static class ComponentScanClass {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface AnnotationWithDefaults {
+		String text() default "enigma";
+		boolean predicate() default true;
+		char[] characters() default {'a', 'b', 'c'};
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface AnnotationWithoutDefaults {
+		String text();
 	}
 
 }

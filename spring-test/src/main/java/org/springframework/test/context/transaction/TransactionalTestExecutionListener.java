@@ -30,6 +30,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
@@ -133,11 +134,8 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 	private static final Log logger = LogFactory.getLog(TransactionalTestExecutionListener.class);
 
-	private static final String DEFAULT_TRANSACTION_MANAGER_NAME = (String) getDefaultValue(
-		TransactionConfiguration.class, "transactionManager");
-
-	private static final Boolean DEFAULT_DEFAULT_ROLLBACK = (Boolean) getDefaultValue(TransactionConfiguration.class,
-		"defaultRollback");
+	private static final TransactionConfiguration defaultTransactionConfiguration =
+			AnnotationUtils.synthesizeAnnotation(Collections.<String, Object> emptyMap(), TransactionConfiguration.class, null);
 
 	protected final TransactionAttributeSource attributeSource = new AnnotationTransactionAttributeSource();
 
@@ -506,21 +504,14 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 					txConfig, clazz));
 			}
 
-			String transactionManagerName;
-			boolean defaultRollback;
-			if (txConfig != null) {
-				transactionManagerName = txConfig.transactionManager();
-				defaultRollback = txConfig.defaultRollback();
-			}
-			else {
-				transactionManagerName = DEFAULT_TRANSACTION_MANAGER_NAME;
-				defaultRollback = DEFAULT_DEFAULT_ROLLBACK;
+			if (txConfig == null) {
+				txConfig = defaultTransactionConfiguration;
 			}
 
 			TransactionConfigurationAttributes configAttributes = new TransactionConfigurationAttributes(
-				transactionManagerName, defaultRollback);
+				txConfig.transactionManager(), txConfig.defaultRollback());
 			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Retrieved TransactionConfigurationAttributes %s for class [%s].",
+				logger.debug(String.format("Using TransactionConfigurationAttributes %s for class [%s].",
 					configAttributes, clazz));
 			}
 			this.configurationAttributes = configAttributes;
