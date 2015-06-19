@@ -8,11 +8,11 @@
 		<non-jta-data-source>jdbc/MyDB</non-jta-data-source>
 		<mapping-file>order-mappings.xml</mapping-file>
 
-		<class>com.acme.Order</class>		
+		<class>com.acme.Order</class>	
 		<class>com.acme.Customer</class>
 		<class>com.acme.Item</class>
 		<exclude-unlisted-classes />
-		
+	
 	</persistence-unit>
 
 </persistence>

@@ -12,11 +12,11 @@
 			</map>
 		</property>
 	</bean>
-	
+
 	<bean id="viewHandler" class="java.lang.Object"/>
 
 	<bean id="editHandler" class="java.lang.Object"/>
-	
+
 	<bean id="helpHandler" class="java.lang.Object"/>
-	
+
 </beans>

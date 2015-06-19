@@ -37,4 +37,4 @@
 
 	<bean id="starController"	class="java.lang.Object"/>
 
-</beans>		
+</beans>	

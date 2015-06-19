@@ -11,7 +11,7 @@
 		<jdbc:script location="#{properties['schema.scripts']}" />
 		<jdbc:script location="#{properties['insert.scripts']}" />
 	</jdbc:initialize-database>
-	
+
 	<util:properties id="properties">
 		<prop key="schema.scripts">classpath:org/springframework/jdbc/config/db-schema.sql</prop>
 		<prop key="insert.scripts">classpath*:org/springframework/jdbc/config/*-data.sql</prop>

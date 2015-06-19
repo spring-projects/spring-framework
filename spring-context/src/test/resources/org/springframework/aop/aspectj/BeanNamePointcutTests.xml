@@ -48,15 +48,15 @@
 	</bean>
 
 	<bean id="counterAspect" class="org.springframework.aop.aspectj.Counter"/>
- 
+
 	<aop:config>
      <aop:advisor pointcut="bean(*This) and !bean(dont*)" advice-ref="testInterceptor"/>
-	</aop:config> 
+	</aop:config>
 
 	<bean id="interceptThis" class="org.springframework.tests.sample.beans.TestBean"/>
 
 	<bean id="dontInterceptThis" class="org.springframework.tests.sample.beans.TestBean"/>
-	
+
 	<bean id="testInterceptor" class="org.springframework.aop.aspectj.BeanNamePointcutTests$TestInterceptor"/>
-	
+
 </beans>

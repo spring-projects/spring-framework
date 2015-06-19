@@ -10,7 +10,7 @@
 	package org.springframework.scripting.groovy;
 
 	import org.springframework.scripting.Messenger;
-				
+			
 	class Bingo {
 
 		@Property String message;

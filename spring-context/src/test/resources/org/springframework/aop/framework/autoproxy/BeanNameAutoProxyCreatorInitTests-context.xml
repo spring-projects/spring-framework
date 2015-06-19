@@ -26,4 +26,4 @@
 
 	<bean id="bean" class="org.springframework.tests.sample.beans.TestBean"/>
 
-</beans>		
+</beans>	
