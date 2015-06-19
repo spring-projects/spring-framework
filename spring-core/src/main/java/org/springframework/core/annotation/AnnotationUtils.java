@@ -150,10 +150,9 @@ public abstract class AnnotationUtils {
 			return synthesizeAnnotation(annotatedElement.getAnnotation(annotationType), annotatedElement);
 		}
 		catch (Exception ex) {
-			// Assuming nested Class values not resolvable within annotation attributes...
 			handleIntrospectionFailure(annotatedElement, ex);
-			return null;
 		}
+		return null;
 	}
 
 	/**
@@ -182,10 +181,9 @@ public abstract class AnnotationUtils {
 			return synthesizeAnnotation(annotation, annotatedElement);
 		}
 		catch (Exception ex) {
-			// Assuming nested Class values not resolvable within annotation attributes...
 			handleIntrospectionFailure(annotatedElement, ex);
-			return null;
 		}
+		return null;
 	}
 
 	/**
@@ -222,7 +220,6 @@ public abstract class AnnotationUtils {
 			return annotatedElement.getAnnotations();
 		}
 		catch (Exception ex) {
-			// Assuming nested Class values not resolvable within annotation attributes...
 			handleIntrospectionFailure(annotatedElement, ex);
 		}
 		return null;
@@ -245,7 +242,6 @@ public abstract class AnnotationUtils {
 			return BridgeMethodResolver.findBridgedMethod(method).getAnnotations();
 		}
 		catch (Exception ex) {
-			// Assuming nested Class values not resolvable within annotation attributes...
 			handleIntrospectionFailure(method, ex);
 		}
 		return null;
@@ -301,7 +297,6 @@ public abstract class AnnotationUtils {
 			}
 		}
 		catch (Exception ex) {
-			// Assuming nested Class values not resolvable within annotation attributes...
 			handleIntrospectionFailure(annotatedElement, ex);
 		}
 		return Collections.emptySet();
@@ -360,7 +355,6 @@ public abstract class AnnotationUtils {
 			}
 		}
 		catch (Exception ex) {
-			// Assuming nested Class values not resolvable within annotation attributes...
 			handleIntrospectionFailure(annotatedElement, ex);
 		}
 		return null;
@@ -454,7 +448,6 @@ public abstract class AnnotationUtils {
 				}
 			}
 			catch (Exception ex) {
-				// Assuming nested Class values not resolvable within annotation attributes...
 				handleIntrospectionFailure(ifcMethod, ex);
 			}
 		}
@@ -527,7 +520,6 @@ public abstract class AnnotationUtils {
 			}
 		}
 		catch (Exception ex) {
-			// Assuming nested Class values not resolvable within annotation attributes...
 			handleIntrospectionFailure(clazz, ex);
 			return null;
 		}
@@ -645,7 +637,6 @@ public abstract class AnnotationUtils {
 			}
 		}
 		catch (Exception ex) {
-			// Assuming nested Class values not resolvable within annotation attributes...
 			handleIntrospectionFailure(clazz, ex);
 		}
 		return false;
@@ -1532,8 +1523,11 @@ public abstract class AnnotationUtils {
 	 * it will simply be thrown, allowing it to propagate to the caller, and
 	 * nothing will be logged.
 	 * <p>Otherwise, this method logs an introspection failure (in particular
-	 * {@code TypeNotPresentExceptions}) &mdash; before moving on, pretending
-	 * there were no annotations on this specific element.
+	 * {@code TypeNotPresentExceptions}) before moving on, assuming nested
+	 * Class values were not resolvable within annotation attributes and
+	 * thereby effectively pretending there were no annotations on the specified
+	 * element.
+	 *
 	 * @param element the element that we tried to introspect annotations on
 	 * @param ex the exception that we encountered
 	 * @see #rethrowAnnotationConfigurationException
@@ -1547,16 +1541,16 @@ public abstract class AnnotationUtils {
 			loggerToUse = LogFactory.getLog(AnnotationUtils.class);
 			logger = loggerToUse;
 		}
-		if (element instanceof Class && Annotation.class.isAssignableFrom((Class<?>) element)) {
+		if ((element instanceof Class) && Annotation.class.isAssignableFrom((Class<?>) element)) {
 			// Meta-annotation lookup on an annotation type
-			if (logger.isDebugEnabled()) {
-				logger.debug("Failed to introspect meta-annotations on [" + element + "]: " + ex);
+			if (loggerToUse.isDebugEnabled()) {
+				loggerToUse.debug("Failed to introspect meta-annotations on [" + element + "]: " + ex);
 			}
 		}
 		else {
 			// Direct annotation lookup on regular Class, Method, Field
 			if (loggerToUse.isInfoEnabled()) {
-				logger.info("Failed to introspect annotations on [" + element + "]: " + ex);
+				loggerToUse.info("Failed to introspect annotations on [" + element + "]: " + ex);
 			}
 		}
 	}
@@ -1653,10 +1647,10 @@ public abstract class AnnotationUtils {
 				return synthesizedAnnotations;
 			}
 			catch (Exception ex) {
-				rethrowAnnotationConfigurationException(ex);
-				// Unable to read value from repeating annotation container -> ignore it.
-				return Collections.emptyList();
+				handleIntrospectionFailure(element, ex);
 			}
+			// Unable to read value from repeating annotation container -> ignore it.
+			return Collections.emptyList();
 		}
 	}
 
