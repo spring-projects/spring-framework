@@ -143,7 +143,7 @@ public class AnnotatedElementUtils {
 		final Set<String> types = new LinkedHashSet<String>();
 
 		try {
-			Annotation annotation = getAnnotation(element, annotationName);
+			Annotation annotation = AnnotationUtils.getAnnotation(element, annotationName);
 			if (annotation != null) {
 				searchWithGetSemantics(annotation.annotationType(), annotationName, new SimpleAnnotationProcessor<Object>() {
 
@@ -833,19 +833,6 @@ public class AnnotatedElementUtils {
 
 		return null;
 	}
-
-	/**
-	 * @since 4.2
-	 */
-	private static Annotation getAnnotation(AnnotatedElement element, String annotationName) {
-		for (Annotation annotation : element.getAnnotations()) {
-			if (annotation.annotationType().getName().equals(annotationName)) {
-				return annotation;
-			}
-		}
-		return null;
-	}
-
 
 	/**
 	 * Callback interface that is used to process annotations during a search.

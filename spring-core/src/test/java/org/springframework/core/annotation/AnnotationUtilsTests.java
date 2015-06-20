@@ -520,7 +520,11 @@ public class AnnotationUtilsTests {
 	public void getRepeatableAnnotationsDeclaredOnClassWithAttributeAliases() throws Exception {
 		final List<String> expectedLocations = Arrays.asList("A", "B");
 
-		Set<ContextConfig> annotations = getRepeatableAnnotations(ConfigHierarchyTestCase.class, ContextConfig.class, Hierarchy.class);
+		Set<ContextConfig> annotations = getRepeatableAnnotations(ConfigHierarchyTestCase.class, ContextConfig.class, null);
+		assertNotNull(annotations);
+		assertEquals("size if container type is omitted: ", 0, annotations.size());
+
+		annotations = getRepeatableAnnotations(ConfigHierarchyTestCase.class, ContextConfig.class, Hierarchy.class);
 		assertNotNull(annotations);
 
 		List<String> locations = annotations.stream().map(ContextConfig::locations).collect(toList());
@@ -546,6 +550,12 @@ public class AnnotationUtilsTests {
 		assertNotNull(set);
 		values = set.stream().map(MyRepeatable::value).collect(toList());
 		assertThat(values, is(expectedValuesSpring));
+
+		// When container type is omitted and therefore inferred from @Repeatable
+		set = getRepeatableAnnotations(MyRepeatableClass.class, MyRepeatable.class);
+		assertNotNull(set);
+		values = set.stream().map(MyRepeatable::value).collect(toList());
+		assertThat(values, is(expectedValuesSpring));
 	}
 
 	@Test
@@ -562,6 +572,12 @@ public class AnnotationUtilsTests {
 
 		// Spring
 		Set<MyRepeatable> set = getRepeatableAnnotations(clazz, MyRepeatable.class, MyRepeatableContainer.class);
+		assertNotNull(set);
+		values = set.stream().map(MyRepeatable::value).collect(toList());
+		assertThat(values, is(expectedValuesSpring));
+
+		// When container type is omitted and therefore inferred from @Repeatable
+		set = getRepeatableAnnotations(clazz, MyRepeatable.class);
 		assertNotNull(set);
 		values = set.stream().map(MyRepeatable::value).collect(toList());
 		assertThat(values, is(expectedValuesSpring));
@@ -584,6 +600,12 @@ public class AnnotationUtilsTests {
 		assertNotNull(set);
 		values = set.stream().map(MyRepeatable::value).collect(toList());
 		assertThat(values, is(expectedValuesSpring));
+
+		// When container type is omitted and therefore inferred from @Repeatable
+		set = getRepeatableAnnotations(clazz, MyRepeatable.class);
+		assertNotNull(set);
+		values = set.stream().map(MyRepeatable::value).collect(toList());
+		assertThat(values, is(expectedValuesSpring));
 	}
 
 	@Test
@@ -600,6 +622,12 @@ public class AnnotationUtilsTests {
 
 		// Spring
 		Set<MyRepeatable> set = getRepeatableAnnotations(clazz, MyRepeatable.class, MyRepeatableContainer.class);
+		assertNotNull(set);
+		values = set.stream().map(MyRepeatable::value).collect(toList());
+		assertThat(values, is(expectedValuesSpring));
+
+		// When container type is omitted and therefore inferred from @Repeatable
+		set = getRepeatableAnnotations(clazz, MyRepeatable.class);
 		assertNotNull(set);
 		values = set.stream().map(MyRepeatable::value).collect(toList());
 		assertThat(values, is(expectedValuesSpring));
@@ -621,6 +649,12 @@ public class AnnotationUtilsTests {
 		assertNotNull(set);
 		values = set.stream().map(MyRepeatable::value).collect(toList());
 		assertThat(values, is(expectedValuesSpring));
+
+		// When container type is omitted and therefore inferred from @Repeatable
+		set = getDeclaredRepeatableAnnotations(MyRepeatableClass.class, MyRepeatable.class);
+		assertNotNull(set);
+		values = set.stream().map(MyRepeatable::value).collect(toList());
+		assertThat(values, is(expectedValuesSpring));
 	}
 
 	@Test
@@ -634,6 +668,11 @@ public class AnnotationUtilsTests {
 
 		// Spring
 		Set<MyRepeatable> set = getDeclaredRepeatableAnnotations(clazz, MyRepeatable.class, MyRepeatableContainer.class);
+		assertNotNull(set);
+		assertThat(set.size(), is(0));
+
+		// When container type is omitted and therefore inferred from @Repeatable
+		set = getDeclaredRepeatableAnnotations(clazz, MyRepeatable.class);
 		assertNotNull(set);
 		assertThat(set.size(), is(0));
 	}
