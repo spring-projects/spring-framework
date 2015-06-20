@@ -135,7 +135,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	private static final Log logger = LogFactory.getLog(TransactionalTestExecutionListener.class);
 
 	private static final TransactionConfiguration defaultTransactionConfiguration =
-			AnnotationUtils.synthesizeAnnotation(Collections.<String, Object> emptyMap(), TransactionConfiguration.class, null);
+			AnnotationUtils.synthesizeAnnotation(TransactionConfiguration.class);
 
 	protected final TransactionAttributeSource attributeSource = new AnnotationTransactionAttributeSource();
 

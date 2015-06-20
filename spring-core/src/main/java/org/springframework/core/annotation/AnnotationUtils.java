@@ -1207,6 +1207,7 @@ public abstract class AnnotationUtils {
 	 * {@code @AliasFor} is detected
 	 * @since 4.2
 	 * @see #synthesizeAnnotation(Map, Class, AnnotatedElement)
+	 * @see #synthesizeAnnotation(Class)
 	 */
 	@SuppressWarnings("unchecked")
 	public static <A extends Annotation> A synthesizeAnnotation(A annotation, AnnotatedElement annotatedElement) {
@@ -1256,6 +1257,7 @@ public abstract class AnnotationUtils {
 	 * {@code @AliasFor} is detected
 	 * @since 4.2
 	 * @see #synthesizeAnnotation(Annotation, AnnotatedElement)
+	 * @see #synthesizeAnnotation(Class)
 	 */
 	@SuppressWarnings("unchecked")
 	public static <A extends Annotation> A synthesizeAnnotation(Map<String, Object> attributes,
@@ -1273,6 +1275,26 @@ public abstract class AnnotationUtils {
 			annotationType, SynthesizedAnnotation.class }, handler);
 
 		return synthesizedAnnotation;
+	}
+
+	/**
+	 * <em>Synthesize</em> an annotation from its default attributes values.
+	 * <p>This method simply delegates to
+	 * {@link #synthesizeAnnotation(Map, Class, AnnotatedElement)},
+	 * supplying an empty map for the source attribute values and {@code null}
+	 * for the {@link AnnotatedElement}.
+	 *
+	 * @param annotationType the type of annotation to synthesize; never {@code null}
+	 * @return the synthesized annotation
+	 * @throws IllegalArgumentException if a required attribute is missing
+	 * @throws AnnotationConfigurationException if invalid configuration of
+	 * {@code @AliasFor} is detected
+	 * @since 4.2
+	 * @see #synthesizeAnnotation(Map, Class, AnnotatedElement)
+	 * @see #synthesizeAnnotation(Annotation, AnnotatedElement)
+	 */
+	public static <A extends Annotation> A synthesizeAnnotation(Class<A> annotationType) {
+		return synthesizeAnnotation(Collections.<String, Object> emptyMap(), annotationType, null);
 	}
 
 	/**

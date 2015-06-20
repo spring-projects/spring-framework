@@ -56,8 +56,6 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
  */
 public class AnnotationUtilsTests {
 
-	private static final Map<String, Object> EMPTY_ATTRS = Collections.emptyMap();
-
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
 
@@ -840,8 +838,8 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void synthesizeAnnotationFromMapWithEmptyAttributesWithDefaultsWithoutAttributeAliases() throws Exception {
-		AnnotationWithDefaults annotationWithDefaults = synthesizeAnnotation(EMPTY_ATTRS, AnnotationWithDefaults.class, null);
+	public void synthesizeAnnotationFromDefaultsWithoutAttributeAliases() throws Exception {
+		AnnotationWithDefaults annotationWithDefaults = synthesizeAnnotation(AnnotationWithDefaults.class);
 		assertNotNull(annotationWithDefaults);
 		assertEquals("text: ", "enigma", annotationWithDefaults.text());
 		assertTrue("predicate: ", annotationWithDefaults.predicate());
@@ -849,8 +847,8 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void synthesizeAnnotationFromMapWithEmptyAttributesWithDefaultsWithAttributeAliases() throws Exception {
-		ContextConfig contextConfig = synthesizeAnnotation(EMPTY_ATTRS, ContextConfig.class, null);
+	public void synthesizeAnnotationFromDefaultsWithAttributeAliases() throws Exception {
+		ContextConfig contextConfig = synthesizeAnnotation(ContextConfig.class);
 		assertNotNull(contextConfig);
 		assertEquals("value: ", "", contextConfig.value());
 		assertEquals("locations: ", "", contextConfig.locations());
@@ -868,7 +866,7 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void synthesizeAnnotationFromMapWithMissingAttributeValue() throws Exception {
-		assertMissingTextAttribute(EMPTY_ATTRS);
+		assertMissingTextAttribute(Collections.emptyMap());
 	}
 
 	@Test
