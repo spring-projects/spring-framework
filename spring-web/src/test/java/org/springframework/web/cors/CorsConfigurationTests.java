@@ -20,25 +20,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static org.junit.Assert.*;
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.http.HttpMethod;
 
+import static org.junit.Assert.*;
+
 /**
- * Test case for {@link CorsConfiguration}.
+ * Unit tests for {@link CorsConfiguration}.
  *
  * @author Sebastien Deleuze
+ * @author Sam Brannen
  */
 public class CorsConfigurationTests {
 
-	private CorsConfiguration config;
-
-	@Before
-	public void setup() {
-		config = new CorsConfiguration();
-	}
+	private CorsConfiguration config = new CorsConfiguration();
 
 	@Test
 	public void setNullValues() {
@@ -204,10 +200,14 @@ public class CorsConfigurationTests {
 	@Test
 	public void checkHeadersNotAllowed() {
 		assertNull(config.checkHeaders(null));
+
 		assertNull(config.checkHeaders(Arrays.asList("header1")));
+
+		config.setAllowedHeaders(Collections.emptyList());
+		assertNull(config.checkHeaders(Arrays.asList("header1")));
+
 		config.addAllowedHeader("header2");
-		assertNull(config.checkHeaders(Arrays.asList("header1")));
-		config.setAllowedHeaders(new ArrayList<>());
+		config.addAllowedHeader("header3");
 		assertNull(config.checkHeaders(Arrays.asList("header1")));
 	}
 

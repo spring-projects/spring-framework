@@ -23,14 +23,21 @@ import org.springframework.http.HttpMethod;
 import org.springframework.web.cors.CorsConfiguration;
 
 /**
- * Assists with the creation of a {@link CorsConfiguration} mapped to one or more path patterns.
- * If no path pattern is specified, cross-origin request handling is mapped on "/**" .
+ * {@code CorsRegistration} assists with the creation of a
+ * {@link CorsConfiguration} instance mapped to a path pattern.
  *
- * <p>By default, all origins, all headers, credentials and GET, HEAD, POST methods are allowed.
- * Max age is set to 30 minutes.</p>
+ * <p>If no path pattern is specified, cross-origin request handling is
+ * mapped to {@code "/**"}.
+ *
+ * <p>By default, all origins, all headers, credentials and {@code GET},
+ * {@code HEAD}, and {@code POST} methods are allowed, and the max age is
+ * set to 30 minutes.
  *
  * @author Sebastien Deleuze
+ * @author Sam Brannen
  * @since 4.2
+ * @see CorsConfiguration
+ * @see CorsRegistry
  */
 public class CorsRegistration {
 
@@ -40,15 +47,15 @@ public class CorsRegistration {
 
 	public CorsRegistration(String pathPattern) {
 		this.pathPattern = pathPattern;
-		// Same default values than @CrossOrigin annotation + allows simple methods
+		// Same implicit default values as the @CrossOrigin annotation + allows simple methods
 		this.config = new CorsConfiguration();
-		this.config.addAllowedOrigin("*");
-		this.config.addAllowedMethod(HttpMethod.GET.name());
-		this.config.addAllowedMethod(HttpMethod.HEAD.name());
-		this.config.addAllowedMethod(HttpMethod.POST.name());
-		this.config.addAllowedHeader("*");
-		this.config.setAllowCredentials(true);
-		this.config.setMaxAge(1800L);
+		this.config.addAllowedOrigin(CorsConfiguration.ALL);
+		this.config.addAllowedMethod(HttpMethod.GET);
+		this.config.addAllowedMethod(HttpMethod.HEAD);
+		this.config.addAllowedMethod(HttpMethod.POST);
+		this.config.addAllowedHeader(CorsConfiguration.ALL);
+		this.config.setAllowCredentials(Boolean.TRUE);
+		this.config.setMaxAge(CorsConfiguration.DEFAULT_MAX_AGE);
 	}
 
 	public CorsRegistration allowedOrigins(String... origins) {

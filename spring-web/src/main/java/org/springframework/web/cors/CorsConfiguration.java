@@ -22,17 +22,30 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
- * A container for CORS configuration also providing methods to check actual or
- * or requested origin, HTTP method, and headers.
+ * A container for CORS configuration that also provides methods to check
+ * the actual or requested origin, HTTP methods, and headers.
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 4.2
- * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+ * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommendation</a>
  */
 public class CorsConfiguration {
+
+	/**
+	 * Wildcard representing <em>all</em> origins, methods, or headers.
+	 */
+	public static final String ALL = "*";
+
+	/**
+	 * Default maximum age (30 minutes).
+	 */
+	public static final Long DEFAULT_MAX_AGE = Long.valueOf(1800);
 
 	private List<String> allowedOrigins;
 
@@ -48,13 +61,14 @@ public class CorsConfiguration {
 
 
 	/**
-	 * Default constructor.
+	 * Construct a new, empty {@code CorsConfiguration} instance.
 	 */
 	public CorsConfiguration() {
 	}
 
 	/**
-	 * Copy constructor.
+	 * Construct a new {@code CorsConfiguration} instance by copying all
+	 * values from the supplied {@code CorsConfiguration}.
 	 */
 	public CorsConfiguration(CorsConfiguration other) {
 		this.allowedOrigins = other.allowedOrigins;
@@ -66,10 +80,11 @@ public class CorsConfiguration {
 	}
 
 	/**
-	 * Combine the specified {@link CorsConfiguration} with this one.
-	 * Properties of this configuration are overridden only by non-null properties
-	 * of the provided one.
-	 * @return the combined {@link CorsConfiguration}
+	 * Combine the supplied {@code CorsConfiguration} with this one.
+	 * <p>Properties of this configuration are overridden by any non-null
+	 * properties of the supplied one.
+	 * @return the combined {@code CorsConfiguration} or {@code this}
+	 * configuration if the supplied configuration is {@code null}
 	 */
 	public CorsConfiguration combine(CorsConfiguration other) {
 		if (other == null) {
@@ -95,7 +110,7 @@ public class CorsConfiguration {
 		if (other == null) {
 			return source;
 		}
-		if (source == null || source.contains("*")) {
+		if (source == null || source.contains(ALL)) {
 			return other;
 		}
 		List<String> combined = new ArrayList<String>(source);
@@ -104,12 +119,12 @@ public class CorsConfiguration {
 	}
 
 	/**
-	 * Configure origins to allow, e.g. "http://domain1.com". The special value
-	 * "*" allows all domains.
+	 * Set the origins to allow, e.g. {@code "http://domain1.com"}.
+	 * <p>The special value {@code "*"} allows all domains.
 	 * <p>By default this is not set.
 	 */
-	public void setAllowedOrigins(List<String> origins) {
-		this.allowedOrigins = origins;
+	public void setAllowedOrigins(List<String> allowedOrigins) {
+		this.allowedOrigins = (allowedOrigins == null ? null : new ArrayList<String>(allowedOrigins));
 	}
 
 	/**
@@ -124,51 +139,72 @@ public class CorsConfiguration {
 
 	/**
 	 * Return the configured origins to allow, possibly {@code null}.
+	 * @see #addAllowedOrigin(String)
+	 * @see #setAllowedOrigins(List)
 	 */
 	public List<String> getAllowedOrigins() {
 		return this.allowedOrigins;
 	}
 
 	/**
-	 * Configure HTTP methods to allow, e.g. "GET", "POST", "PUT". The special
-	 * value "*" allows all method. When not set only "GET is allowed.
+	 * Set the HTTP methods to allow, e.g. {@code "GET"}, {@code "POST"},
+	 * {@code "PUT"}, etc.
+	 * <p>The special value {@code "*"} allows all methods.
+	 * <p>If not set, only {@code "GET"} is allowed.
 	 * <p>By default this is not set.
 	 */
-	public void setAllowedMethods(List<String> methods) {
-		this.allowedMethods = methods;
+	public void setAllowedMethods(List<String> allowedMethods) {
+		this.allowedMethods = (allowedMethods == null ? null : new ArrayList<String>(allowedMethods));
+	}
+
+	/**
+	 * Add an HTTP method to allow.
+	 */
+	public void addAllowedMethod(HttpMethod method) {
+		if (method != null) {
+			addAllowedMethod(method.name());
+		}
 	}
 
 	/**
 	 * Add an HTTP method to allow.
 	 */
 	public void addAllowedMethod(String method) {
-		if (this.allowedMethods == null) {
-			this.allowedMethods = new ArrayList<String>();
+		if (StringUtils.hasText(method)) {
+			if (this.allowedMethods == null) {
+				this.allowedMethods = new ArrayList<String>();
+			}
+			this.allowedMethods.add(method);
 		}
-		this.allowedMethods.add(method);
 	}
 
 	/**
-	 * Return the allowed HTTP methods, possibly {@code null} in which case only
-	 * HTTP GET is allowed.
+	 * Return the allowed HTTP methods, possibly {@code null} in which case
+	 * only {@code "GET"} is allowed.
+	 * @see #addAllowedMethod(HttpMethod)
+	 * @see #addAllowedMethod(String)
+	 * @see #setAllowedMethods(List)
 	 */
 	public List<String> getAllowedMethods() {
 		return this.allowedMethods;
 	}
 
 	/**
-	 * Configure the list of headers that a pre-flight request can list as allowed
-	 * for use during an actual request. The special value of "*" allows actual
-	 * requests to send any header. A header name is not required to be listed if
-	 * it is one of: Cache-Control, Content-Language, Expires, Last-Modified, Pragma.
+	 * Set the list of headers that a pre-flight request can list as allowed
+	 * for use during an actual request.
+	 * <p>The special value {@code "*"} allows actual requests to send any
+	 * header.
+	 * <p>A header name is not required to be listed if it is one of:
+	 * {@code Cache-Control}, {@code Content-Language}, {@code Expires},
+	 * {@code Last-Modified}, or {@code Pragma}.
 	 * <p>By default this is not set.
 	 */
 	public void setAllowedHeaders(List<String> allowedHeaders) {
-		this.allowedHeaders = allowedHeaders;
+		this.allowedHeaders = (allowedHeaders == null ? null : new ArrayList<String>(allowedHeaders));
 	}
 
 	/**
-	 * Add one actual request header to allow.
+	 * Add an actual request header to allow.
 	 */
 	public void addAllowedHeader(String allowedHeader) {
 		if (this.allowedHeaders == null) {
@@ -179,29 +215,34 @@ public class CorsConfiguration {
 
 	/**
 	 * Return the allowed actual request headers, possibly {@code null}.
+	 * @see #addAllowedHeader(String)
+	 * @see #setAllowedHeaders(List)
 	 */
 	public List<String> getAllowedHeaders() {
 		return this.allowedHeaders;
 	}
 
 	/**
-	 * Configure the list of response headers other than simple headers (i.e.
-	 * Cache-Control, Content-Language, Content-Type, Expires, Last-Modified,
-	 * Pragma) that an actual response might have and can be exposed.
+	 * Set the list of response headers other than simple headers (i.e.
+	 * {@code Cache-Control}, {@code Content-Language}, {@code Content-Type},
+	 * {@code Expires}, {@code Last-Modified}, or {@code Pragma}) that an
+	 * actual response might have and can be exposed.
+	 * <p>Note that {@code "*"} is not a valid exposed header value.
 	 * <p>By default this is not set.
 	 */
 	public void setExposedHeaders(List<String> exposedHeaders) {
-		if (exposedHeaders != null && exposedHeaders.contains("*")) {
+		if (exposedHeaders != null && exposedHeaders.contains(ALL)) {
 			throw new IllegalArgumentException("'*' is not a valid exposed header value");
 		}
-		this.exposedHeaders = exposedHeaders;
+		this.exposedHeaders = (exposedHeaders == null ? null : new ArrayList<String>(exposedHeaders));
 	}
 
 	/**
-	 * Add a single response header to expose.
+	 * Add a response header to expose.
+	 * <p>Note that {@code "*"} is not a valid exposed header value.
 	 */
 	public void addExposedHeader(String exposedHeader) {
-		if ("*".equals(exposedHeader)) {
+		if (ALL.equals(exposedHeader)) {
 			throw new IllegalArgumentException("'*' is not a valid exposed header value");
 		}
 		if (this.exposedHeaders == null) {
@@ -212,6 +253,8 @@ public class CorsConfiguration {
 
 	/**
 	 * Return the configured response headers to expose, possibly {@code null}.
+	 * @see #addExposedHeader(String)
+	 * @see #setExposedHeaders(List)
 	 */
 	public List<String> getExposedHeaders() {
 		return this.exposedHeaders;
@@ -219,14 +262,15 @@ public class CorsConfiguration {
 
 	/**
 	 * Whether user credentials are supported.
-	 * <p>By default this is not set (i.e. user credentials not supported).
+	 * <p>By default this is not set (i.e. user credentials are not supported).
 	 */
 	public void setAllowCredentials(Boolean allowCredentials) {
 		this.allowCredentials = allowCredentials;
 	}
 
 	/**
-	 * Return the configured allowCredentials, possibly {@code null}.
+	 * Return the configured {@code allowCredentials} flag, possibly {@code null}.
+	 * @see #setAllowCredentials(Boolean)
 	 */
 	public Boolean getAllowCredentials() {
 		return this.allowCredentials;
@@ -242,7 +286,8 @@ public class CorsConfiguration {
 	}
 
 	/**
-	 * Return the configured maxAge value, possibly {@code null}.
+	 * Return the configured {@code maxAge} value, possibly {@code null}.
+	 * @see #setMaxAge(Long)
 	 */
 	public Long getMaxAge() {
 		return maxAge;
@@ -250,24 +295,26 @@ public class CorsConfiguration {
 
 	/**
 	 * Check the origin of the request against the configured allowed origins.
-	 * @param requestOrigin the origin to check.
+	 * @param requestOrigin the origin to check
 	 * @return the origin to use for the response, possibly {@code null} which
-	 * means the request origin is not allowed.
+	 * means the request origin is not allowed
 	 */
 	public String checkOrigin(String requestOrigin) {
-		if (requestOrigin == null) {
+		if (!StringUtils.hasText(requestOrigin)) {
 			return null;
 		}
-		List<String> allowedOrigins = this.allowedOrigins == null ?
-				new ArrayList<String>() : this.allowedOrigins;
-		if (allowedOrigins.contains("*")) {
-			if (this.allowCredentials == null || !this.allowCredentials) {
-				return "*";
+		if (ObjectUtils.isEmpty(this.allowedOrigins)) {
+			return null;
+		}
+
+		if (this.allowedOrigins.contains(ALL)) {
+			if ((this.allowCredentials == null) || !this.allowCredentials.booleanValue()) {
+				return ALL;
 			} else {
 				return requestOrigin;
 			}
 		}
-		for (String allowedOrigin : allowedOrigins) {
+		for (String allowedOrigin : this.allowedOrigins) {
 			if (requestOrigin.equalsIgnoreCase(allowedOrigin)) {
 				return requestOrigin;
 			}
@@ -276,20 +323,19 @@ public class CorsConfiguration {
 	}
 
 	/**
-	 * Check the request HTTP method (or the method from the
-	 * Access-Control-Request-Method header on a pre-flight request) against the
-	 * configured allowed methods.
-	 * @param requestMethod the HTTP method to check.
+	 * Check the HTTP request method (or the method from the
+	 * {@code Access-Control-Request-Method} header on a pre-flight request)
+	 * against the configured allowed methods.
+	 * @param requestMethod the HTTP request method to check
 	 * @return the list of HTTP methods to list in the response of a pre-flight
-	 * request, or {@code null} if the requestMethod is not allowed.
+	 * request, or {@code null} if the supplied {@code requestMethod} is not allowed
 	 */
 	public List<HttpMethod> checkHttpMethod(HttpMethod requestMethod) {
 		if (requestMethod == null) {
 			return null;
 		}
-		List<String> allowedMethods = this.allowedMethods == null ?
-				new ArrayList<String>() : this.allowedMethods;
-		if (allowedMethods.contains("*")) {
+		List<String> allowedMethods = (this.allowedMethods == null ? new ArrayList<String>() : this.allowedMethods);
+		if (allowedMethods.contains(ALL)) {
 			return Arrays.asList(requestMethod);
 		}
 		if (allowedMethods.isEmpty()) {
@@ -298,21 +344,21 @@ public class CorsConfiguration {
 		List<HttpMethod> result = new ArrayList<HttpMethod>(allowedMethods.size());
 		boolean allowed = false;
 		for (String method : allowedMethods) {
-			if (method.equals(requestMethod.name())) {
+			if (requestMethod.name().equals(method)) {
 				allowed = true;
 			}
 			result.add(HttpMethod.valueOf(method));
 		}
-		return allowed ? result : null;
+		return (allowed ? result : null);
 	}
 
 	/**
-	 * Check the request headers (or the headers listed in the
-	 * Access-Control-Request-Headers of a pre-flight request) against the
-	 * configured allowed headers.
-	 * @param requestHeaders the headers to check.
+	 * Check the supplied request headers (or the headers listed in the
+	 * {@code Access-Control-Request-Headers} of a pre-flight request) against
+	 * the configured allowed headers.
+	 * @param requestHeaders the request headers to check
 	 * @return the list of allowed headers to list in the response of a pre-flight
-	 * request, or {@code null} if a requestHeader is not allowed.
+	 * request, or {@code null} if none of the supplied request headers is allowed
 	 */
 	public List<String> checkHeaders(List<String> requestHeaders) {
 		if (requestHeaders == null) {
@@ -321,20 +367,24 @@ public class CorsConfiguration {
 		if (requestHeaders.isEmpty()) {
 			return Collections.emptyList();
 		}
-		List<String> allowedHeaders = this.allowedHeaders == null ?
-				new ArrayList<String>() : this.allowedHeaders;
-		boolean allowAnyHeader = allowedHeaders.contains("*");
+		if (ObjectUtils.isEmpty(this.allowedHeaders)) {
+			return null;
+		}
+
+		boolean allowAnyHeader = this.allowedHeaders.contains(ALL);
 		List<String> result = new ArrayList<String>();
 		for (String requestHeader : requestHeaders) {
-			requestHeader = requestHeader.trim();
-			for (String allowedHeader : allowedHeaders) {
-				if (allowAnyHeader || requestHeader.equalsIgnoreCase(allowedHeader)) {
-					result.add(requestHeader);
-					break;
+			if (StringUtils.hasText(requestHeader)) {
+				requestHeader = requestHeader.trim();
+				for (String allowedHeader : this.allowedHeaders) {
+					if (allowAnyHeader || requestHeader.equalsIgnoreCase(allowedHeader)) {
+						result.add(requestHeader);
+						break;
+					}
 				}
 			}
 		}
-		return result.isEmpty() ? null : result;
+		return (result.isEmpty() ? null : result);
 	}
 
 }
