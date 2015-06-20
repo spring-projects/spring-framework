@@ -37,7 +37,7 @@ public class CorsRegistry {
 
 	/**
 	 * Enable cross origin requests processing on the specified path pattern.
-	 * Exact path mapping URIs (such as "/admin") are supported as well as Ant-stype path
+	 * Exact path mapping URIs (such as "/admin") are supported as well as Ant-style path
 	 * patterns (such as /admin/**).
 	 *
 	 * <p>By default, all origins, all headers, credentials and GET, HEAD, POST methods are allowed.
