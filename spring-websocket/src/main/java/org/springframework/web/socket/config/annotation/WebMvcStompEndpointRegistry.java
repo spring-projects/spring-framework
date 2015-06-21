@@ -30,6 +30,7 @@ import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
+import org.springframework.web.socket.messaging.StompSubProtocolErrorHandler;
 import org.springframework.web.socket.messaging.StompSubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 import org.springframework.web.util.UrlPathHelper;
@@ -132,6 +133,12 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 
 	public UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
+	}
+
+	@Override
+	public WebMvcStompEndpointRegistry setErrorHandler(StompSubProtocolErrorHandler errorHandler) {
+		this.stompHandler.setErrorHandler(errorHandler);
+		return this;
 	}
 
 	/**

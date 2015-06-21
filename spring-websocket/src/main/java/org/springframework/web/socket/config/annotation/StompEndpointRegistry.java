@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.web.socket.config.annotation;
 
+import org.springframework.web.socket.messaging.StompSubProtocolErrorHandler;
+
 /**
  * A contract for registering STOMP over WebSocket endpoints.
  *
@@ -28,5 +30,12 @@ public interface StompEndpointRegistry {
 	 * Register a STOMP over WebSocket endpoint at the given mapping path.
 	 */
 	StompWebSocketEndpointRegistration addEndpoint(String... paths);
+
+	/**
+	 * Configure a handler for customizing or handling STOMP ERROR frames to clients.
+	 * @param errorHandler the error handler
+	 * @since 4.2
+	 */
+	WebMvcStompEndpointRegistry setErrorHandler(StompSubProtocolErrorHandler errorHandler);
 
 }

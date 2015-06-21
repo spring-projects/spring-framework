@@ -30,9 +30,9 @@ public interface SubProtocolErrorHandler<P> {
 	 * opportunity to prepare the error message or to prevent one from being sent.
 	 *
 	 * <p>Note that the STOMP protocol requires a server to close the connection
-	 * after sending an ERROR frame. To prevent that, a handler could return
-	 * {@code null} and send a message through the broker instead, e.g. via a
-	 * user destination targeting the user.
+	 * after sending an ERROR frame. To prevent an ERROR frame from being sent,
+	 * a handler could return {@code null} and send a notification message
+	 * through the broker instead, e.g. via a user destination.
 	 *
 	 * @param clientMessage the client message related to the error, possibly
 	 * {@code null} if error occurred while parsing a WebSocket message

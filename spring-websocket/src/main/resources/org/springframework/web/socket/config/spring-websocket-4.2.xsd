@@ -727,6 +727,22 @@
 						</xsd:attribute>
 					</xsd:complexType>
 				</xsd:element>
+				<xsd:element name="stomp-error-handler" minOccurs="0">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+    Configures a StompSubProtocolErrorHandler to customize or handle STOMP ERROR to clients.
+						]]></xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:attribute name="ref" type="xsd:string" use="required">
+							<xsd:annotation>
+								<xsd:documentation source="java:org.springframework.web.socket.messaging.StompSubProtocolErrorHandler"><![CDATA[
+    The bean name of a StompSubProtocolErrorHandler.
+                ]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+					</xsd:complexType>
+				</xsd:element>
 				<xsd:choice>
 					<xsd:element name="simple-broker" type="simple-broker"/>
 					<xsd:element name="stomp-broker-relay" type="stomp-broker-relay"/>

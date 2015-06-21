@@ -73,6 +73,7 @@ import org.springframework.web.socket.handler.TestWebSocketSession;
 import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
 import org.springframework.web.socket.handler.WebSocketHandlerDecoratorFactory;
 import org.springframework.web.socket.messaging.DefaultSimpUserRegistry;
+import org.springframework.web.socket.messaging.StompSubProtocolErrorHandler;
 import org.springframework.web.socket.messaging.StompSubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
@@ -144,6 +145,8 @@ public class MessageBrokerBeanDefinitionParserTests {
 		StompSubProtocolHandler stompHandler = (StompSubProtocolHandler) handlerMap.get("v12.stomp");
 		assertNotNull(stompHandler);
 		assertEquals(128 * 1024, stompHandler.getMessageSizeLimit());
+		assertNotNull(stompHandler.getErrorHandler());
+		assertEquals(TestStompErrorHandler.class, stompHandler.getErrorHandler().getClass());
 
 		assertNotNull(new DirectFieldAccessor(stompHandler).getPropertyValue("eventPublisher"));
 
@@ -498,4 +501,8 @@ class TestWebSocketHandlerDecoratorFactory implements WebSocketHandlerDecoratorF
 			}
 		};
 	}
+}
+
+class TestStompErrorHandler extends StompSubProtocolErrorHandler {
+
 }

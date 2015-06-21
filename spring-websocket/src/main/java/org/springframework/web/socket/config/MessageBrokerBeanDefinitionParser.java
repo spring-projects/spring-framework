@@ -271,6 +271,12 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		RootBeanDefinition stompHandlerDef = new RootBeanDefinition(StompSubProtocolHandler.class);
 		registerBeanDef(stompHandlerDef, context, source);
 
+		Element errorHandlerElem = DomUtils.getChildElementByTagName(element, "stomp-error-handler");
+		if (errorHandlerElem != null) {
+			RuntimeBeanReference errorHandlerRef = new RuntimeBeanReference(errorHandlerElem.getAttribute("ref"));
+			stompHandlerDef.getPropertyValues().add("errorHandler", errorHandlerRef);
+		}
+
 		ConstructorArgumentValues cavs = new ConstructorArgumentValues();
 		cavs.addIndexedArgumentValue(0, inChannel);
 		cavs.addIndexedArgumentValue(1, outChannel);
