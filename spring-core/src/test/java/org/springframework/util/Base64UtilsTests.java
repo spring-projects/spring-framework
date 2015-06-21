@@ -18,44 +18,32 @@ package org.springframework.util;
 
 import java.io.UnsupportedEncodingException;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 /**
- * @author Arjen Poutsma
+ * @author Juergen Hoeller
  */
-public class DigestUtilsTests {
-
-	private byte[] bytes;
-
-
-	@Before
-	public void createBytes() throws UnsupportedEncodingException {
-		bytes = "Hello World".getBytes("UTF-8");
-	}
-
+public class Base64UtilsTests {
 
 	@Test
-	public void md5() {
-		byte[] result = DigestUtils.md5Digest(bytes);
-		byte[] expected = new byte[]
+	public void jdk8VsCommonsCodec() throws UnsupportedEncodingException {
+		Base64Utils.Base64Delegate jdkDelegate = new Base64Utils.JdkBase64Delegate();
+		Base64Utils.Base64Delegate commonsDelegate = new Base64Utils.CommonsCodecBase64Delegate();
+
+		byte[] bytes = new byte[]
 				{-0x4f, 0xa, -0x73, -0x4f, 0x64, -0x20, 0x75, 0x41, 0x5, -0x49, -0x57, -0x65, -0x19, 0x2e, 0x3f, -0x1b};
-		assertArrayEquals("Invalid hash", expected, result);
-	}
+		assertArrayEquals(jdkDelegate.encode(bytes), commonsDelegate.encode(bytes));
 
-	@Test
-	public void md5Hex() throws UnsupportedEncodingException {
-		String hash = DigestUtils.md5DigestAsHex(bytes);
-		assertEquals("Invalid hash", "b10a8db164e0754105b7a99be72e3fe5", hash);
-	}
+		bytes = "Hello World".getBytes("UTF-8");
+		assertArrayEquals(jdkDelegate.encode(bytes), commonsDelegate.encode(bytes));
 
-	@Test
-	public void md5StringBuilder() throws UnsupportedEncodingException {
-		StringBuilder builder = new StringBuilder();
-		DigestUtils.appendMd5DigestAsHex(bytes, builder);
-		assertEquals("Invalid hash", "b10a8db164e0754105b7a99be72e3fe5", builder.toString());
+		bytes = "Hello World\r\nSecond Line".getBytes("UTF-8");
+		assertArrayEquals(jdkDelegate.encode(bytes), commonsDelegate.encode(bytes));
+
+		bytes = "Hello World\r\nSecond Line\r\n".getBytes("UTF-8");
+		assertArrayEquals(jdkDelegate.encode(bytes), commonsDelegate.encode(bytes));
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,7 +125,7 @@ public abstract class Base64Utils {
 	}
 
 
-	private interface Base64Delegate {
+	interface Base64Delegate {
 
 		byte[] encode(byte[] src);
 
@@ -134,7 +134,7 @@ public abstract class Base64Utils {
 
 
 	@UsesJava8
-	private static class JdkBase64Delegate implements Base64Delegate {
+	static class JdkBase64Delegate implements Base64Delegate {
 
 		public byte[] encode(byte[] src) {
 			if (src == null || src.length == 0) {
@@ -152,7 +152,7 @@ public abstract class Base64Utils {
 	}
 
 
-	private static class CommonsCodecBase64Delegate implements Base64Delegate {
+	static class CommonsCodecBase64Delegate implements Base64Delegate {
 
 		private final org.apache.commons.codec.binary.Base64 base64 = new org.apache.commons.codec.binary.Base64();
 
