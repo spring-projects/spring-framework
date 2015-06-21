@@ -18,12 +18,9 @@ package org.springframework.aop.interceptor;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
-import java.util.function.Supplier;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -31,11 +28,8 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.Ordered;
-import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.AsyncTaskExecutor;
-import org.springframework.lang.UsesJava8;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * AOP Alliance {@code MethodInterceptor} that processes method invocations
@@ -69,13 +63,7 @@ import org.springframework.util.concurrent.ListenableFuture;
  * @see org.springframework.scheduling.annotation.AsyncAnnotationAdvisor
  * @see org.springframework.scheduling.annotation.AnnotationAsyncExecutionInterceptor
  */
-public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
-		implements MethodInterceptor, Ordered {
-
-	// Java 8's CompletableFuture type present?
-	private static final boolean completableFuturePresent = ClassUtils.isPresent(
-			"java.util.concurrent.CompletableFuture", AsyncExecutionInterceptor.class.getClassLoader());
-
+public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport implements MethodInterceptor, Ordered {
 
 	/**
 	 * Create a new {@code AsyncExecutionInterceptor}.
@@ -132,23 +120,7 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 			}
 		};
 
-		Class<?> returnType = invocation.getMethod().getReturnType();
-		if (completableFuturePresent) {
-			Future<Object> result = CompletableFutureDelegate.processCompletableFuture(returnType, task, executor);
-			if (result != null) {
-				return result;
-			}
-		}
-		if (ListenableFuture.class.isAssignableFrom(returnType)) {
-			return ((AsyncListenableTaskExecutor) executor).submitListenable(task);
-		}
-		else if (Future.class.isAssignableFrom(returnType)) {
-			return executor.submit(task);
-		}
-		else {
-			executor.submit(task);
-			return null;
-		}
+		return doSubmit(task, executor, invocation.getMethod().getReturnType());
 	}
 
 	/**
@@ -167,31 +139,6 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 	@Override
 	public int getOrder() {
 		return Ordered.HIGHEST_PRECEDENCE;
-	}
-
-
-	/**
-	 * Inner class to avoid a hard dependency on Java 8.
-	 */
-	@UsesJava8
-	private static class CompletableFutureDelegate {
-
-		public static <T> Future<T> processCompletableFuture(Class<?> returnType, final Callable<T> task, Executor executor) {
-			if (!CompletableFuture.class.isAssignableFrom(returnType)) {
-				return null;
-			}
-			return CompletableFuture.supplyAsync(new Supplier<T>() {
-				@Override
-				public T get() {
-					try {
-						return task.call();
-					}
-					catch (Throwable ex) {
-						throw new CompletionException(ex);
-					}
-				}
-			}, executor);
-		}
 	}
 
 }
