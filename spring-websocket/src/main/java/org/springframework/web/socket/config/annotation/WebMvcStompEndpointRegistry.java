@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,18 +47,18 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 
 	private final WebSocketHandler webSocketHandler;
 
+	private final TaskScheduler sockJsScheduler;
+
+	private int order = 1;
+
+	private UrlPathHelper urlPathHelper;
+
 	private final SubProtocolWebSocketHandler subProtocolWebSocketHandler;
 
 	private final StompSubProtocolHandler stompHandler;
 
 	private final List<WebMvcStompWebSocketEndpointRegistration> registrations =
 			new ArrayList<WebMvcStompWebSocketEndpointRegistration>();
-
-	private final TaskScheduler sockJsScheduler;
-
-	private int order = 1;
-
-	private UrlPathHelper urlPathHelper;
 
 
 	@SuppressWarnings("deprecation")
@@ -91,9 +91,9 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 		this.sockJsScheduler = defaultSockJsTaskScheduler;
 	}
 
-	private static SubProtocolWebSocketHandler unwrapSubProtocolWebSocketHandler(WebSocketHandler wsHandler) {
-		WebSocketHandler actual = WebSocketHandlerDecorator.unwrap(wsHandler);
-		Assert.isInstanceOf(SubProtocolWebSocketHandler.class, actual, "No SubProtocolWebSocketHandler in " + wsHandler);
+	private static SubProtocolWebSocketHandler unwrapSubProtocolWebSocketHandler(WebSocketHandler handler) {
+		WebSocketHandler actual = WebSocketHandlerDecorator.unwrap(handler);
+		Assert.isInstanceOf(SubProtocolWebSocketHandler.class, actual, "No SubProtocolWebSocketHandler in " + handler);
 		return (SubProtocolWebSocketHandler) actual;
 	}
 
@@ -115,11 +115,12 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 	 * other handler mappings configured in Spring MVC.
 	 * <p>The default value is 1.
 	 */
+	@Override
 	public void setOrder(int order) {
 		this.order = order;
 	}
 
-	public int getOrder() {
+	protected int getOrder() {
 		return this.order;
 	}
 
@@ -127,11 +128,12 @@ public class WebMvcStompEndpointRegistry implements StompEndpointRegistry {
 	 * Set the UrlPathHelper to configure on the {@code SimpleUrlHandlerMapping}
 	 * used to map handshake requests.
 	 */
+	@Override
 	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
 		this.urlPathHelper = urlPathHelper;
 	}
 
-	public UrlPathHelper getUrlPathHelper() {
+	protected UrlPathHelper getUrlPathHelper() {
 		return this.urlPathHelper;
 	}
 
