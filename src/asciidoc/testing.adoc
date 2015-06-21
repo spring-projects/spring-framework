@@ -548,8 +548,8 @@ for examples and further details.
 +
 
 A class-level annotation that is used to configure the locations of properties files and
-inlined properties to be added to the `Environment`'s set of `PropertySources` for an
-`ApplicationContext` loaded for an integration test.
+inlined properties to be added to the set of `PropertySources` in the `Environment` for
+an `ApplicationContext` loaded for an integration test.
 
 + 
 
@@ -1336,7 +1336,7 @@ same manner via their own `META-INF/spring.factories` properties file.
 [[testcontext-tel-config-ordering]]
 ===== Ordering TestExecutionListeners
 
-When the TestContext framework discovers default ++TestExecutionListeners++ via the
+When the TestContext framework discovers default ++TestExecutionListener++s via the
 aforementioned `SpringFactoriesLoader` mechanism, the instantiated listeners are sorted
 using Spring's `AnnotationAwareOrderComparator` which honors Spring's `Ordered` interface
 and `@Order` annotation for ordering. `AbstractTestExecutionListener` and all default
@@ -1782,8 +1782,8 @@ Similarly, the initializers for a given test class will be added to the set of
 initializers defined by test superclasses. Thus, subclasses have the option
 of __extending__ the resource locations, annotated classes, or context initializers.
 
-If `@ContextConfiguration`'s `inheritLocations` or `inheritInitializers` attribute is
-set to `false`, the resource locations or annotated classes and the context
+If the `inheritLocations` or `inheritInitializers` attribute in `@ContextConfiguration`
+is set to `false`, the resource locations or annotated classes and the context
 initializers, respectively, for the test class __shadow__ and effectively replace the
 configuration defined by superclasses.
 
@@ -2193,8 +2193,8 @@ tests can be configured with test-specific property sources. In contrast to the
 `@PropertySource` annotation used on `@Configuration` classes, the `@TestPropertySource`
 annotation can be declared on a test class to declare resource locations for test
 properties files or _inlined_ properties. These test property sources will be added to
-the `Environment`'s set of `PropertySources` for the `ApplicationContext` loaded for the
-annotated integration test.
+the set of `PropertySources` in the `Environment` for the `ApplicationContext` loaded
+for the annotated integration test.
 
 [NOTE]
 ====
@@ -2306,8 +2306,8 @@ inlined properties. Note that properties that appear later will __shadow__ (i.e.
 override) properties of the same name that appear earlier. In addition, the
 aforementioned precedence rules apply for inherited test property sources as well.
 
-If `@TestPropertySource`'s `inheritLocations` or `inheritProperties` attribute is set to
-`false`, the locations or inlined properties, respectively, for the test class __shadow__
+If the `inheritLocations` or `inheritProperties` attribute in `@TestPropertySource` is set
+to `false`, the locations or inlined properties, respectively, for the test class __shadow__
 and effectively replace the configuration defined by superclasses.
 
 In the following example, the `ApplicationContext` for `BaseTest` will be loaded using
@@ -2672,12 +2672,12 @@ __merge__ the configuration for specific levels in a context hierarchy. `BaseTes
 defines two levels in the hierarchy, `parent` and `child`. `ExtendedTests` extends
 `BaseTests` and instructs the Spring TestContext Framework to merge the context
 configuration for the `child` hierarchy level, simply by ensuring that the names
-declared via `ContextConfiguration`'s `name` attribute are both `"child"`. The result is
-that three application contexts will be loaded: one for `"/app-config.xml"`, one for
-`"/user-config.xml"`, and one for `{"/user-config.xml", "/order-config.xml"}`. As with
-the previous example, the application context loaded from `"/app-config.xml"` will be
-set as the parent context for the contexts loaded from `"/user-config.xml"` and
-`{"/user-config.xml", "/order-config.xml"}`.
+declared via the `name` attribute in `@ContextConfiguration` are both `"child"`. The
+result is that three application contexts will be loaded: one for `"/app-config.xml"`,
+one for `"/user-config.xml"`, and one for `{"/user-config.xml", "/order-config.xml"}`.
+As with the previous example, the application context loaded from `"/app-config.xml"`
+will be set as the parent context for the contexts loaded from `"/user-config.xml"`
+and `{"/user-config.xml", "/order-config.xml"}`.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -2699,8 +2699,8 @@ set as the parent context for the contexts loaded from `"/user-config.xml"` and
 .Class hierarchy with overridden context hierarchy configuration
 --
 In contrast to the previous example, this example demonstrates how to __override__ the
-configuration for a given named level in a context hierarchy by setting
-++ContextConfiguration++'s `inheritLocations` flag to `false`. Consequently, the
+configuration for a given named level in a context hierarchy by setting the
+`inheritLocations` flag in `@ContextConfiguration` to `false`. Consequently, the
 application context for `ExtendedTests` will be loaded only from
 `"/test-user-config.xml"` and will have its parent set to the context loaded from
 `"/app-config.xml"`.
@@ -3113,7 +3113,7 @@ See <<testing-examples-petclinic>> for an additional example.
 		}
 
 		protected void assertNumUsers(int expected) {
-			assertEquals("Number of rows in the ''user'' table.", expected, countRowsInTable("user"));
+			assertEquals("Number of rows in the [user] table.", expected, countRowsInTable("user"));
 		}
 	}
 ----
@@ -3165,7 +3165,7 @@ javadocs for `TestTransaction` for further details.
 		}
 
 		protected void assertNumUsers(int expected) {
-			assertEquals("Number of rows in the ''user'' table.", expected, countRowsInTable("user"));
+			assertEquals("Number of rows in the [user] table.", expected, countRowsInTable("user"));
 		}
 	}
 ----
@@ -3566,7 +3566,7 @@ be automatically rolled back by the `TransactionalTestExecutionListener` (see
 		}
 
 		protected void assertNumUsers(int expected) {
-			assertEquals("Number of rows in the ''user'' table.", expected, countRowsInTable("user"));
+			assertEquals("Number of rows in the [user] table.", expected, countRowsInTable("user"));
 		}
 	}
 ----
