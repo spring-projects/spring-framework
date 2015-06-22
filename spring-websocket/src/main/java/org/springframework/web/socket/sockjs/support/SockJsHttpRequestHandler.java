@@ -17,10 +17,12 @@
 package org.springframework.web.socket.sockjs.support;
 
 import java.io.IOException;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.context.Lifecycle;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -44,13 +46,16 @@ import org.springframework.web.socket.sockjs.SockJsService;
  * @author Sebastien Deleuze
  * @since 4.0
  */
-public class SockJsHttpRequestHandler implements HttpRequestHandler, CorsConfigurationSource {
+public class SockJsHttpRequestHandler
+		implements HttpRequestHandler, CorsConfigurationSource, Lifecycle {
 
 	// No logging: HTTP transports too verbose and we don't know enough to log anything of value
 
 	private final SockJsService sockJsService;
 
 	private final WebSocketHandler webSocketHandler;
+
+	private volatile boolean running = false;
 
 
 	/**
@@ -79,6 +84,31 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler, CorsConfigu
 	 */
 	public WebSocketHandler getWebSocketHandler() {
 		return this.webSocketHandler;
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.running;
+	}
+
+	@Override
+	public void start() {
+		if (!isRunning()) {
+			this.running = true;
+			if (this.sockJsService instanceof Lifecycle) {
+				((Lifecycle) this.sockJsService).start();
+			}
+		}
+	}
+
+	@Override
+	public void stop() {
+		if (isRunning()) {
+			this.running = false;
+			if (this.sockJsService instanceof Lifecycle) {
+				((Lifecycle) this.sockJsService).stop();
+			}
+		}
 	}
 
 

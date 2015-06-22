@@ -59,7 +59,6 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
-import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.handler.WebSocketHandlerDecoratorFactory;
 import org.springframework.web.socket.messaging.DefaultSimpUserRegistry;
@@ -67,6 +66,7 @@ import org.springframework.web.socket.messaging.StompSubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 import org.springframework.web.socket.messaging.WebSocketAnnotationMethodMessageHandler;
 import org.springframework.web.socket.server.support.OriginHandshakeInterceptor;
+import org.springframework.web.socket.server.support.WebSocketHandlerMapping;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
 import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
 
@@ -74,7 +74,7 @@ import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
  * A {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that provides
  * the configuration for the {@code <websocket:message-broker/>} XML namespace element.
  *
- * <p>Registers a Spring MVC {@link org.springframework.web.servlet.handler.SimpleUrlHandlerMapping}
+ * <p>Registers a Spring MVC {@link org.springframework.web.servlet.HandlerMapping}
  * with order 1 to map HTTP WebSocket handshake requests from STOMP/WebSocket clients.
  *
  * <p>Registers the following {@link org.springframework.messaging.MessageChannel}s:
@@ -188,7 +188,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 	private ManagedMap<String, Object> registerHandlerMapping(Element element,
 			ParserContext context, Object source) {
 
-		RootBeanDefinition handlerMappingDef = new RootBeanDefinition(SimpleUrlHandlerMapping.class);
+		RootBeanDefinition handlerMappingDef = new RootBeanDefinition(WebSocketHandlerMapping.class);
 
 		String orderAttribute = element.getAttribute("order");
 		int order = orderAttribute.isEmpty() ? DEFAULT_MAPPING_ORDER : Integer.valueOf(orderAttribute);

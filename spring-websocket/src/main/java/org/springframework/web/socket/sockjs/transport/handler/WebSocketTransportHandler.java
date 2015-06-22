@@ -18,6 +18,7 @@ package org.springframework.web.socket.sockjs.transport.handler;
 
 import java.util.Map;
 
+import org.springframework.context.Lifecycle;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.Assert;
@@ -45,9 +46,11 @@ import org.springframework.web.socket.sockjs.transport.session.WebSocketServerSo
  * @since 4.0
  */
 public class WebSocketTransportHandler extends AbstractTransportHandler
-		implements SockJsSessionFactory, HandshakeHandler {
+		implements SockJsSessionFactory, HandshakeHandler, Lifecycle {
 
 	private final HandshakeHandler handshakeHandler;
+
+	private boolean running;
 
 
 	public WebSocketTransportHandler(HandshakeHandler handshakeHandler) {
@@ -63,6 +66,31 @@ public class WebSocketTransportHandler extends AbstractTransportHandler
 
 	public HandshakeHandler getHandshakeHandler() {
 		return this.handshakeHandler;
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.running;
+	}
+
+	@Override
+	public void start() {
+		if (!isRunning()) {
+			this.running = true;
+			if (this.handshakeHandler instanceof Lifecycle) {
+				((Lifecycle) this.handshakeHandler).start();
+			}
+		}
+	}
+
+	@Override
+	public void stop() {
+		if (isRunning()) {
+			this.running = false;
+			if (this.handshakeHandler instanceof Lifecycle) {
+				((Lifecycle) this.handshakeHandler).stop();
+			}
+		}
 	}
 
 	@Override
@@ -91,5 +119,4 @@ public class WebSocketTransportHandler extends AbstractTransportHandler
 
 		return this.handshakeHandler.doHandshake(request, response, handler, attributes);
 	}
-
 }

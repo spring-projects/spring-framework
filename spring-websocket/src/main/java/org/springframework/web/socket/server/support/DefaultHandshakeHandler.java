@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.context.Lifecycle;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
@@ -59,7 +60,7 @@ import org.springframework.web.socket.server.RequestUpgradeStrategy;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class DefaultHandshakeHandler implements HandshakeHandler {
+public class DefaultHandshakeHandler implements HandshakeHandler, Lifecycle {
 
 	private static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
 
@@ -85,6 +86,8 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 	private final RequestUpgradeStrategy requestUpgradeStrategy;
 
 	private final List<String> supportedProtocols = new ArrayList<String>();
+
+	private volatile boolean running = false;
 
 
 	/**
@@ -159,6 +162,31 @@ public class DefaultHandshakeHandler implements HandshakeHandler {
 	 */
 	public String[] getSupportedProtocols() {
 		return this.supportedProtocols.toArray(new String[this.supportedProtocols.size()]);
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.running;
+	}
+
+	@Override
+	public void start() {
+		if (!isRunning()) {
+			this.running = true;
+			if (this.requestUpgradeStrategy instanceof Lifecycle) {
+				((Lifecycle) this.requestUpgradeStrategy).start();
+			}
+		}
+	}
+
+	@Override
+	public void stop() {
+		if (isRunning()) {
+			this.running = false;
+			if (this.requestUpgradeStrategy instanceof Lifecycle) {
+				((Lifecycle) this.requestUpgradeStrategy).stop();
+			}
+		}
 	}
 
 
