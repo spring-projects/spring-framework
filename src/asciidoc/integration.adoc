@@ -2577,6 +2577,10 @@ provides).
 The annotated endpoint infrastructure creates a message listener container
 behind the scenes for each annotated method, using a `JmsListenerContainerFactory`.
 
+TIP: `@JmsListener` is a _repeatable_ annotation so it is possible to associate several
+JMS destinations to the same method by adding additional `@JmsListener` declaration on
+it. For pre Java8 use cases, you can use `@JmsListeners`.
+
 [[jms-annotated-support]]
 ==== Enable listener endpoint annotations
 

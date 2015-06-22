@@ -73,6 +73,12 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 	@Test
 	public abstract void jmsHandlerMethodFactoryConfiguration() throws JMSException;
 
+	@Test
+	public abstract void jmsListenerIsRepeatable();
+
+	@Test
+	public abstract void jmsListeners();
+
 	/**
 	 * Test for {@link SampleBean} discovery. If a factory with the default name
 	 * is set, an endpoint will use it automatically
@@ -232,6 +238,50 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 		@JmsListener(containerFactory = "defaultFactory", destination = "myQueue")
 		public void defaultHandle(@Validated String msg) {
 		}
+	}
+
+	/**
+	 * Test for {@link JmsListenerRepeatableBean} and {@link JmsListenersBean} that validates that the
+	 * {@code @JmsListener} annotation is repeatable and generate one specific container per annotation.
+	 */
+	public void testJmsListenerRepeatable(ApplicationContext context) {
+		JmsListenerContainerTestFactory simpleFactory =
+				context.getBean("jmsListenerContainerFactory", JmsListenerContainerTestFactory.class);
+		assertEquals(2, simpleFactory.getListenerContainers().size());
+
+		MethodJmsListenerEndpoint first = (MethodJmsListenerEndpoint)
+				simpleFactory.getListenerContainer("first").getEndpoint();
+		assertEquals("first", first.getId());
+		assertEquals("myQueue", first.getDestination());
+		assertEquals(null, first.getConcurrency());
+
+		MethodJmsListenerEndpoint second = (MethodJmsListenerEndpoint)
+				simpleFactory.getListenerContainer("second").getEndpoint();
+		assertEquals("second", second.getId());
+		assertEquals("anotherQueue", second.getDestination());
+		assertEquals("2-10", second.getConcurrency());
+	}
+
+	@Component
+	static class JmsListenerRepeatableBean {
+
+		@JmsListener(id = "first", destination = "myQueue")
+		@JmsListener(id = "second", destination = "anotherQueue", concurrency = "2-10")
+		public void repeatableHandle(String msg) {
+		}
+
+	}
+
+	@Component
+	static class JmsListenersBean {
+
+		@JmsListeners({
+				@JmsListener(id = "first", destination = "myQueue"),
+				@JmsListener(id = "second", destination = "anotherQueue", concurrency = "2-10")
+		})
+		public void repeatableHandle(String msg) {
+		}
+
 	}
 
 	static class TestValidator implements Validator {
