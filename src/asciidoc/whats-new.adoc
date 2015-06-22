@@ -495,6 +495,8 @@ public @interface MyTestConfig {
 * The type of the reply `Destination` can now be configured per listener container.
 * The value of the `@SendTo` annotation can now use a SpEL expression.
 * The response destination can be <<jms-annotated-response,computed at runtime using `JmsResponse`>>
+* `@JmsListener` is now a repeatable annotation to declare several JMS containers on the same
+  method (use the newly introduced `@JmsListeners` if you're not using Java8 yet).
 
 === Web Improvements
 
