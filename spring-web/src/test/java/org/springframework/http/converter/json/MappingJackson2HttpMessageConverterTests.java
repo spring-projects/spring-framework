@@ -221,7 +221,7 @@ public class MappingJackson2HttpMessageConverterTests {
 		bean.setName("Jason");
 
 		this.converter.setPrettyPrint(true);
-		this.converter.writeInternal(bean, outputMessage);
+		this.converter.writeInternal(bean, null, outputMessage);
 		String result = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
 
 		assertEquals("{" + NEWLINE_SYSTEM_PROPERTY + "  \"name\" : \"Jason\"" + NEWLINE_SYSTEM_PROPERTY + "}", result);
@@ -231,7 +231,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	public void prefixJson() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		this.converter.setPrefixJson(true);
-		this.converter.writeInternal("foo", outputMessage);
+		this.converter.writeInternal("foo", null, outputMessage);
 
 		assertEquals(")]}', \"foo\"", outputMessage.getBodyAsString(Charset.forName("UTF-8")));
 	}
@@ -240,7 +240,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	public void prefixJsonCustom() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		this.converter.setJsonPrefix(")))");
-		this.converter.writeInternal("foo", outputMessage);
+		this.converter.writeInternal("foo", null, outputMessage);
 
 		assertEquals(")))\"foo\"", outputMessage.getBodyAsString(Charset.forName("UTF-8")));
 	}
@@ -255,7 +255,7 @@ public class MappingJackson2HttpMessageConverterTests {
 
 		MappingJacksonValue jacksonValue = new MappingJacksonValue(bean);
 		jacksonValue.setSerializationView(MyJacksonView1.class);
-		this.converter.writeInternal(jacksonValue, outputMessage);
+		this.converter.writeInternal(jacksonValue, null, outputMessage);
 
 		String result = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
 		assertThat(result, containsString("\"withView1\":\"with\""));
@@ -274,7 +274,7 @@ public class MappingJackson2HttpMessageConverterTests {
 		FilterProvider filters = new SimpleFilterProvider().addFilter("myJacksonFilter",
 				SimpleBeanPropertyFilter.serializeAllExcept("property2"));
 		jacksonValue.setFilters(filters);
-		this.converter.writeInternal(jacksonValue, outputMessage);
+		this.converter.writeInternal(jacksonValue, null, outputMessage);
 
 		String result = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
 		assertThat(result, containsString("\"property1\":\"value\""));
@@ -288,7 +288,7 @@ public class MappingJackson2HttpMessageConverterTests {
 		jacksonValue.setJsonpFunction("callback");
 
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		this.converter.writeInternal(jacksonValue, outputMessage);
+		this.converter.writeInternal(jacksonValue, null, outputMessage);
 
 		assertEquals("callback(\"foo\");", outputMessage.getBodyAsString(Charset.forName("UTF-8")));
 	}
@@ -304,7 +304,7 @@ public class MappingJackson2HttpMessageConverterTests {
 		MappingJacksonValue jacksonValue = new MappingJacksonValue(bean);
 		jacksonValue.setSerializationView(MyJacksonView1.class);
 		jacksonValue.setJsonpFunction("callback");
-		this.converter.writeInternal(jacksonValue, outputMessage);
+		this.converter.writeInternal(jacksonValue, null, outputMessage);
 
 		String result = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
 		assertThat(result, startsWith("callback("));

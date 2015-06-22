@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
+import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonValue;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -142,7 +142,7 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 	private void writeInternal(Object object, HttpOutputMessage outputMessage)
 			throws NoSuchMethodException, InvocationTargetException,
 			IllegalAccessException {
-		Method method = AbstractJackson2HttpMessageConverter.class.getDeclaredMethod(
+		Method method = AbstractHttpMessageConverter.class.getDeclaredMethod(
 				"writeInternal", Object.class, HttpOutputMessage.class);
 		method.setAccessible(true);
 		method.invoke(this.converter, object, outputMessage);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,10 +40,12 @@ import javax.xml.transform.Source;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
+import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.HttpMessageNotWritableException;
 
 /**
  * An {@code HttpMessageConverter} that can read XML collections using JAXB2.
@@ -109,6 +111,15 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 	 */
 	@Override
 	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
+		return false;
+	}
+
+	/**
+	 * Always returns {@code false} since Jaxb2CollectionHttpMessageConverter
+	 * does not convert collections to XML.
+	 */
+	@Override
+	public boolean canWrite(Type type, Class<?> contextClass, MediaType mediaType) {
 		return false;
 	}
 
@@ -214,6 +225,12 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 			event = streamReader.next();
 		}
 		return event;
+	}
+
+	@Override
+	public void write(T t, Type type, MediaType contentType, HttpOutputMessage outputMessage)
+			throws IOException, HttpMessageNotWritableException {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

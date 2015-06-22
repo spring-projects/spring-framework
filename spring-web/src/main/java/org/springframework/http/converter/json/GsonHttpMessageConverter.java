@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.AbstractHttpMessageConverter;
+import org.springframework.http.converter.AbstractGenericHttpMessageConverter;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
@@ -54,7 +54,7 @@ import org.springframework.util.Assert;
  * @see #setGson
  * @see #setSupportedMediaTypes
  */
-public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Object>
+public class GsonHttpMessageConverter extends AbstractGenericHttpMessageConverter<Object>
 		implements GenericHttpMessageConverter<Object> {
 
 	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
@@ -125,7 +125,7 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 	}
 
 	@Override
-	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
+	public boolean canWrite(Type type, Class<?> clazz, MediaType mediaType) {
 		return canWrite(mediaType);
 	}
 
@@ -191,7 +191,7 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 	}
 
 	@Override
-	protected void writeInternal(Object o, HttpOutputMessage outputMessage)
+	protected void writeInternal(Object o, Type type, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
 		Charset charset = getCharset(outputMessage.getHeaders());
@@ -200,7 +200,12 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 			if (this.jsonPrefix != null) {
 				writer.append(this.jsonPrefix);
 			}
-			this.gson.toJson(o, writer);
+			if (type != null) {
+				this.gson.toJson(o, type, writer);
+			}
+			else {
+				this.gson.toJson(o, writer);
+			}
 			writer.close();
 		}
 		catch (JsonIOException ex) {

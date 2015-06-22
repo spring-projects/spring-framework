@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -27,8 +28,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
@@ -158,7 +161,20 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 							(Class<? extends HttpMessageConverter<?>>) messageConverter.getClass(),
 							inputMessage, outputMessage);
 					if (returnValue != null) {
-						((HttpMessageConverter<T>) messageConverter).write(returnValue, selectedMediaType, outputMessage);
+						if (messageConverter instanceof GenericHttpMessageConverter) {
+							Type type;
+							if (HttpEntity.class.isAssignableFrom(returnType.getParameterType())) {
+								returnType.increaseNestingLevel();
+								type = returnType.getNestedGenericParameterType();
+							}
+							else {
+								type = returnType.getGenericParameterType();
+							}
+							((GenericHttpMessageConverter<T>) messageConverter).write(returnValue, type, selectedMediaType, outputMessage);
+						}
+						else {
+							((HttpMessageConverter<T>) messageConverter).write(returnValue, selectedMediaType, outputMessage);
+						}
 						if (logger.isDebugEnabled()) {
 							logger.debug("Written [" + returnValue + "] as \"" +
 									selectedMediaType + "\" using [" + messageConverter + "]");

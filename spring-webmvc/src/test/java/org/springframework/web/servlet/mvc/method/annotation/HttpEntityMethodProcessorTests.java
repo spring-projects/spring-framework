@@ -16,6 +16,8 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import static org.junit.Assert.*;
 
 import java.io.Serializable;
@@ -36,6 +38,8 @@ import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -64,6 +68,8 @@ public class HttpEntityMethodProcessorTests {
 
 	private ServletWebRequest webRequest;
 
+	private MockHttpServletResponse servletResponse;
+
 
 	@Before
 	public void setUp() throws Exception {
@@ -74,7 +80,8 @@ public class HttpEntityMethodProcessorTests {
 		mavContainer = new ModelAndViewContainer();
 		binderFactory = new ValidatingBinderFactory();
 		servletRequest = new MockHttpServletRequest();
-		webRequest = new ServletWebRequest(servletRequest, new MockHttpServletResponse());
+		servletResponse = new MockHttpServletResponse();
+		webRequest = new ServletWebRequest(servletRequest, servletResponse);
 	}
 
 	@Test
@@ -153,6 +160,24 @@ public class HttpEntityMethodProcessorTests {
 		assertEquals("Jad", result.getBody().getName());
 	}
 
+	@Test  // SPR-12811
+	public void jacksonTypeInfoList() throws Exception {
+		Method method = JacksonController.class.getMethod("handleList");
+		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
+		MethodParameter methodReturnType = handlerMethod.getReturnType();
+
+		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		converters.add(new MappingJackson2HttpMessageConverter());
+		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
+
+		Object returnValue = new JacksonController().handleList();
+		processor.handleReturnValue(returnValue, methodReturnType, this.mavContainer, this.webRequest);
+
+		String content = this.servletResponse.getContentAsString();
+		assertTrue(content.contains("\"type\":\"foo\""));
+		assertTrue(content.contains("\"type\":\"bar\""));
+	}
+
 
 	@SuppressWarnings("unused")
 	public void handle(HttpEntity<List<SimpleBean>> arg1, HttpEntity<SimpleBean> arg2) {
@@ -214,6 +239,61 @@ public class HttpEntityMethodProcessorTests {
 			WebDataBinder dataBinder = new WebDataBinder(target, objectName);
 			dataBinder.setValidator(validator);
 			return dataBinder;
+		}
+	}
+
+	@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+	private static class ParentClass {
+
+		private String parentProperty;
+
+		public ParentClass() {
+		}
+
+		public ParentClass(String parentProperty) {
+			this.parentProperty = parentProperty;
+		}
+
+		public String getParentProperty() {
+			return parentProperty;
+		}
+
+		public void setParentProperty(String parentProperty) {
+			this.parentProperty = parentProperty;
+		}
+	}
+
+	@JsonTypeName("foo")
+	private static class Foo extends ParentClass {
+
+		public Foo() {
+		}
+
+		public Foo(String parentProperty) {
+			super(parentProperty);
+		}
+	}
+
+	@JsonTypeName("bar")
+	private static class Bar extends ParentClass {
+
+		public Bar() {
+		}
+
+		public Bar(String parentProperty) {
+			super(parentProperty);
+		}
+	}
+
+	private static class JacksonController {
+
+		@RequestMapping
+		@ResponseBody
+		public HttpEntity<List<ParentClass>> handleList() {
+			List<ParentClass> list = new ArrayList<>();
+			list.add(new Foo("foo"));
+			list.add(new Bar("bar"));
+			return new HttpEntity<>(list);
 		}
 	}
 

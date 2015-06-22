@@ -27,6 +27,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Before;
 import org.junit.Test;
@@ -349,8 +351,8 @@ public class RequestResponseBodyMethodProcessorTests {
 
 	@Test
 	public void jacksonJsonViewWithResponseBodyAndJsonMessageConverter() throws Exception {
-		Method method = JacksonViewController.class.getMethod("handleResponseBody");
-		HandlerMethod handlerMethod = new HandlerMethod(new JacksonViewController(), method);
+		Method method = JacksonController.class.getMethod("handleResponseBody");
+		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
 		MethodParameter methodReturnType = handlerMethod.getReturnType();
 
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
@@ -359,7 +361,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(
 				converters, null, Collections.singletonList(new JsonViewResponseBodyAdvice()));
 
-		Object returnValue = new JacksonViewController().handleResponseBody();
+		Object returnValue = new JacksonController().handleResponseBody();
 		processor.handleReturnValue(returnValue, methodReturnType, this.mavContainer, this.webRequest);
 
 		String content = this.servletResponse.getContentAsString();
@@ -370,8 +372,8 @@ public class RequestResponseBodyMethodProcessorTests {
 
 	@Test
 	public void jacksonJsonViewWithResponseEntityAndJsonMessageConverter() throws Exception {
-		Method method = JacksonViewController.class.getMethod("handleResponseEntity");
-		HandlerMethod handlerMethod = new HandlerMethod(new JacksonViewController(), method);
+		Method method = JacksonController.class.getMethod("handleResponseEntity");
+		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
 		MethodParameter methodReturnType = handlerMethod.getReturnType();
 
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
@@ -380,7 +382,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(
 				converters, null, Collections.singletonList(new JsonViewResponseBodyAdvice()));
 
-		Object returnValue = new JacksonViewController().handleResponseEntity();
+		Object returnValue = new JacksonController().handleResponseEntity();
 		processor.handleReturnValue(returnValue, methodReturnType, this.mavContainer, this.webRequest);
 
 		String content = this.servletResponse.getContentAsString();
@@ -391,8 +393,8 @@ public class RequestResponseBodyMethodProcessorTests {
 
 	@Test  // SPR-12149
 	public void jacksonJsonViewWithResponseBodyAndXmlMessageConverter() throws Exception {
-		Method method = JacksonViewController.class.getMethod("handleResponseBody");
-		HandlerMethod handlerMethod = new HandlerMethod(new JacksonViewController(), method);
+		Method method = JacksonController.class.getMethod("handleResponseBody");
+		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
 		MethodParameter methodReturnType = handlerMethod.getReturnType();
 
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
@@ -401,7 +403,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(
 				converters, null, Collections.singletonList(new JsonViewResponseBodyAdvice()));
 
-		Object returnValue = new JacksonViewController().handleResponseBody();
+		Object returnValue = new JacksonController().handleResponseBody();
 		processor.handleReturnValue(returnValue, methodReturnType, this.mavContainer, this.webRequest);
 
 		String content = this.servletResponse.getContentAsString();
@@ -412,8 +414,8 @@ public class RequestResponseBodyMethodProcessorTests {
 
 	@Test  // SPR-12149
 	public void jacksonJsonViewWithResponseEntityAndXmlMessageConverter() throws Exception {
-		Method method = JacksonViewController.class.getMethod("handleResponseEntity");
-		HandlerMethod handlerMethod = new HandlerMethod(new JacksonViewController(), method);
+		Method method = JacksonController.class.getMethod("handleResponseEntity");
+		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
 		MethodParameter methodReturnType = handlerMethod.getReturnType();
 
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
@@ -422,7 +424,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(
 				converters, null, Collections.singletonList(new JsonViewResponseBodyAdvice()));
 
-		Object returnValue = new JacksonViewController().handleResponseEntity();
+		Object returnValue = new JacksonController().handleResponseEntity();
 		processor.handleReturnValue(returnValue, methodReturnType, this.mavContainer, this.webRequest);
 
 		String content = this.servletResponse.getContentAsString();
@@ -437,8 +439,8 @@ public class RequestResponseBodyMethodProcessorTests {
 		this.servletRequest.setContent(content.getBytes("UTF-8"));
 		this.servletRequest.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-		Method method = JacksonViewController.class.getMethod("handleRequestBody", JacksonViewBean.class);
-		HandlerMethod handlerMethod = new HandlerMethod(new JacksonViewController(), method);
+		Method method = JacksonController.class.getMethod("handleRequestBody", JacksonViewBean.class);
+		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
 		MethodParameter methodParameter = handlerMethod.getMethodParameters()[0];
 
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
@@ -463,8 +465,8 @@ public class RequestResponseBodyMethodProcessorTests {
 		this.servletRequest.setContent(content.getBytes("UTF-8"));
 		this.servletRequest.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-		Method method = JacksonViewController.class.getMethod("handleHttpEntity", HttpEntity.class);
-		HandlerMethod handlerMethod = new HandlerMethod(new JacksonViewController(), method);
+		Method method = JacksonController.class.getMethod("handleHttpEntity", HttpEntity.class);
+		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
 		MethodParameter methodParameter = handlerMethod.getMethodParameters()[0];
 
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
@@ -490,8 +492,8 @@ public class RequestResponseBodyMethodProcessorTests {
 		this.servletRequest.setContent(content.getBytes("UTF-8"));
 		this.servletRequest.setContentType(MediaType.APPLICATION_XML_VALUE);
 
-		Method method = JacksonViewController.class.getMethod("handleRequestBody", JacksonViewBean.class);
-		HandlerMethod handlerMethod = new HandlerMethod(new JacksonViewController(), method);
+		Method method = JacksonController.class.getMethod("handleRequestBody", JacksonViewBean.class);
+		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
 		MethodParameter methodParameter = handlerMethod.getMethodParameters()[0];
 
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
@@ -516,8 +518,8 @@ public class RequestResponseBodyMethodProcessorTests {
 		this.servletRequest.setContent(content.getBytes("UTF-8"));
 		this.servletRequest.setContentType(MediaType.APPLICATION_XML_VALUE);
 
-		Method method = JacksonViewController.class.getMethod("handleHttpEntity", HttpEntity.class);
-		HandlerMethod handlerMethod = new HandlerMethod(new JacksonViewController(), method);
+		Method method = JacksonController.class.getMethod("handleHttpEntity", HttpEntity.class);
+		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
 		MethodParameter methodParameter = handlerMethod.getMethodParameters()[0];
 
 		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
@@ -535,6 +537,24 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertEquals("with", result.getBody().getWithView1());
 		assertNull(result.getBody().getWithView2());
 		assertNull(result.getBody().getWithoutView());
+	}
+
+	@Test  // SPR-12811
+	public void jacksonTypeInfoList() throws Exception {
+		Method method = JacksonController.class.getMethod("handleList");
+		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
+		MethodParameter methodReturnType = handlerMethod.getReturnType();
+
+		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		converters.add(new MappingJackson2HttpMessageConverter());
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
+
+		Object returnValue = new JacksonController().handleList();
+		processor.handleReturnValue(returnValue, methodReturnType, this.mavContainer, this.webRequest);
+
+		String content = this.servletResponse.getContentAsString();
+		assertTrue(content.contains("\"type\":\"foo\""));
+		assertTrue(content.contains("\"type\":\"bar\""));
 	}
 
 
@@ -670,7 +690,50 @@ public class RequestResponseBodyMethodProcessorTests {
 		}
 	}
 
-	private static class JacksonViewController {
+	@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+	public static class ParentClass {
+
+		private String parentProperty;
+
+		public ParentClass() {
+		}
+
+		public ParentClass(String parentProperty) {
+			this.parentProperty = parentProperty;
+		}
+
+		public String getParentProperty() {
+			return parentProperty;
+		}
+
+		public void setParentProperty(String parentProperty) {
+			this.parentProperty = parentProperty;
+		}
+	}
+
+	@JsonTypeName("foo")
+	public static class Foo extends ParentClass {
+
+		public Foo() {
+		}
+
+		public Foo(String parentProperty) {
+			super(parentProperty);
+		}
+	}
+
+	@JsonTypeName("bar")
+	public static class Bar extends ParentClass {
+
+		public Bar() {
+		}
+
+		public Bar(String parentProperty) {
+			super(parentProperty);
+		}
+	}
+
+	private static class JacksonController {
 
 		@RequestMapping
 		@ResponseBody
@@ -706,8 +769,17 @@ public class RequestResponseBodyMethodProcessorTests {
 		public JacksonViewBean handleHttpEntity(@JsonView(MyJacksonView1.class) HttpEntity<JacksonViewBean> entity) {
 			return entity.getBody();
 		}
-	}
 
+		@RequestMapping
+		@ResponseBody
+		public List<ParentClass> handleList() {
+			List<ParentClass> list = new ArrayList<>();
+			list.add(new Foo("foo"));
+			list.add(new Bar("bar"));
+			return list;
+		}
+	}
+	
 	private static class EmptyRequestBodyAdvice implements RequestBodyAdvice {
 
 		@Override
