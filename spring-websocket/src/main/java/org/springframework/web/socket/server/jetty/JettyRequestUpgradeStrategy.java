@@ -17,11 +17,13 @@
 package org.springframework.web.socket.server.jetty;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -42,7 +44,9 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.adapter.jetty.JettyWebSocketHandlerAdapter;
@@ -59,7 +63,11 @@ import org.springframework.web.socket.server.RequestUpgradeStrategy;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Lifecycle {
+public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Lifecycle, ServletContextAware {
+
+	// Pre-Jetty 9.3 init method without ServletContext
+	private static final Method webSocketFactoryInitMethod =
+			ClassUtils.getMethodIfAvailable(WebSocketServerFactory.class, "init");
 
 	private static final ThreadLocal<WebSocketHandlerContainer> wsContainerHolder =
 			new NamedThreadLocal<WebSocketHandlerContainer>("WebSocket Handler Container");
@@ -68,6 +76,8 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 	private final WebSocketServerFactory factory;
 
 	private volatile List<WebSocketExtension> supportedExtensions;
+
+	private ServletContext servletContext;
 
 	private volatile boolean running = false;
 
@@ -94,7 +104,6 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 				// Cast to avoid infinite recursion
 				return createWebSocket((UpgradeRequest) request, (UpgradeResponse) response);
 			}
-
 			// For Jetty 9.0.x
 			public Object createWebSocket(UpgradeRequest request, UpgradeResponse response) {
 				WebSocketHandlerContainer container = wsContainerHolder.get();
@@ -129,6 +138,11 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 	}
 
 	@Override
+	public void setServletContext(ServletContext servletContext) {
+		this.servletContext = servletContext;
+	}
+
+	@Override
 	public boolean isRunning() {
 		return this.running;
 	}
@@ -139,7 +153,12 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 		if (!isRunning()) {
 			this.running = true;
 			try {
-				this.factory.init();
+				if (webSocketFactoryInitMethod != null) {
+					webSocketFactoryInitMethod.invoke(this.factory);
+				}
+				else {
+					this.factory.init(this.servletContext);
+				}
 			}
 			catch (Exception ex) {
 				throw new IllegalStateException("Unable to initialize Jetty WebSocketServerFactory", ex);

@@ -18,6 +18,7 @@ package org.springframework.web.socket.sockjs.support;
 
 import java.io.IOException;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -29,6 +30,7 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestHandler;
+import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.servlet.HandlerMapping;
@@ -47,7 +49,7 @@ import org.springframework.web.socket.sockjs.SockJsService;
  * @since 4.0
  */
 public class SockJsHttpRequestHandler
-		implements HttpRequestHandler, CorsConfigurationSource, Lifecycle {
+		implements HttpRequestHandler, CorsConfigurationSource, Lifecycle, ServletContextAware {
 
 	// No logging: HTTP transports too verbose and we don't know enough to log anything of value
 
@@ -84,6 +86,13 @@ public class SockJsHttpRequestHandler
 	 */
 	public WebSocketHandler getWebSocketHandler() {
 		return this.webSocketHandler;
+	}
+
+	@Override
+	public void setServletContext(ServletContext servletContext) {
+		if (this.sockJsService instanceof ServletContextAware) {
+			((ServletContextAware) this.sockJsService).setServletContext(servletContext);
+		}
 	}
 
 	@Override

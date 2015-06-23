@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -35,6 +37,7 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestHandler;
+import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator;
 import org.springframework.web.socket.handler.LoggingWebSocketHandlerDecorator;
@@ -53,7 +56,7 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class WebSocketHttpRequestHandler implements HttpRequestHandler, Lifecycle {
+public class WebSocketHttpRequestHandler implements HttpRequestHandler, Lifecycle, ServletContextAware {
 
 	private final Log logger = LogFactory.getLog(WebSocketHttpRequestHandler.class);
 
@@ -107,6 +110,13 @@ public class WebSocketHttpRequestHandler implements HttpRequestHandler, Lifecycl
 	 */
 	public List<HandshakeInterceptor> getHandshakeInterceptors() {
 		return this.interceptors;
+	}
+
+	@Override
+	public void setServletContext(ServletContext servletContext) {
+		if (this.handshakeHandler instanceof ServletContextAware) {
+			((ServletContextAware) this.handshakeHandler).setServletContext(servletContext);
+		}
 	}
 
 	@Override

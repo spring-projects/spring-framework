@@ -18,10 +18,13 @@ package org.springframework.web.socket.sockjs.transport.handler;
 
 import java.util.Map;
 
+import javax.servlet.ServletContext;
+
 import org.springframework.context.Lifecycle;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeFailureException;
@@ -46,7 +49,7 @@ import org.springframework.web.socket.sockjs.transport.session.WebSocketServerSo
  * @since 4.0
  */
 public class WebSocketTransportHandler extends AbstractTransportHandler
-		implements SockJsSessionFactory, HandshakeHandler, Lifecycle {
+		implements SockJsSessionFactory, HandshakeHandler, Lifecycle, ServletContextAware {
 
 	private final HandshakeHandler handshakeHandler;
 
@@ -66,6 +69,13 @@ public class WebSocketTransportHandler extends AbstractTransportHandler
 
 	public HandshakeHandler getHandshakeHandler() {
 		return this.handshakeHandler;
+	}
+
+	@Override
+	public void setServletContext(ServletContext servletContext) {
+		if (this.handshakeHandler instanceof ServletContextAware) {
+			((ServletContextAware) this.handshakeHandler).setServletContext(servletContext);
+		}
 	}
 
 	@Override

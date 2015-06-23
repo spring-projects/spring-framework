@@ -46,7 +46,7 @@ configure(allprojects) { project ->
 	ext.jackson2Version      = "2.6.0-rc2"  // to be upgraded to 2.6 final in time for Spring Framework 4.2 GA
 	ext.jasperreportsVersion = "6.1.0"
 	ext.javamailVersion      = "1.5.3"
-	ext.jettyVersion         = "9.2.11.v20150529"
+	ext.jettyVersion         = "9.3.0.v20150612"
 	ext.jodaVersion          = "2.8.1"
 	ext.jrubyVersion         = "1.7.20"
 	ext.jtaVersion           = "1.2"

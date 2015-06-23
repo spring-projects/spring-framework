@@ -15,8 +15,11 @@
  */
 package org.springframework.web.socket.server.support;
 
+import javax.servlet.ServletContext;
+
 import org.springframework.context.Lifecycle;
 import org.springframework.context.SmartLifecycle;
+import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 
 /**
@@ -32,6 +35,15 @@ public class WebSocketHandlerMapping extends SimpleUrlHandlerMapping implements 
 
 	private volatile boolean running = false;
 
+
+	@Override
+	protected void initServletContext(ServletContext servletContext) {
+		for (Object handler : getUrlMap().values()) {
+			if (handler instanceof ServletContextAware) {
+				((ServletContextAware) handler).setServletContext(servletContext);
+			}
+		}
+	}
 
 	@Override
 	public boolean isAutoStartup() {

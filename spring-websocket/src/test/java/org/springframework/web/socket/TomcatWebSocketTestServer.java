@@ -22,6 +22,8 @@ import java.io.IOException;
 import javax.servlet.Filter;
 
 import org.apache.catalina.Context;
+import org.apache.catalina.LifecycleEvent;
+import org.apache.catalina.LifecycleListener;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.coyote.http11.Http11NioProtocol;
@@ -115,6 +117,12 @@ public class TomcatWebSocketTestServer implements WebSocketTestServer {
 	@Override
 	public void start() throws Exception {
 		this.tomcatServer.start();
+		this.context.addLifecycleListener(new LifecycleListener() {
+			@Override
+			public void lifecycleEvent(LifecycleEvent event) {
+				System.out.println(event.getType());
+			}
+		});
 	}
 
 	@Override

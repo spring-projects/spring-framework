@@ -78,7 +78,6 @@ public abstract class AbstractWebSocketIntegrationTests {
 		this.wac = new AnnotationConfigWebApplicationContext();
 		this.wac.register(getAnnotatedConfigClasses());
 		this.wac.register(upgradeStrategyConfigTypes.get(this.server.getClass()));
-		this.wac.refresh();
 
 		if (this.webSocketClient instanceof Lifecycle) {
 			((Lifecycle) this.webSocketClient).start();
