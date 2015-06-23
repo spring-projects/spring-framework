@@ -76,6 +76,12 @@ import org.springframework.util.StringUtils;
  * for meta-annotations with <em>attribute overrides</em> in
  * <em>composed annotations</em>, use {@link AnnotatedElementUtils} instead.
  *
+ * <h3>Attribute Aliases</h3>
+ * <p>All public methods in this class that return annotations, arrays of
+ * annotations, or {@link AnnotationAttributes} transparently support attribute
+ * aliases configured via {@link AliasFor @AliasFor}. Consult the various
+ * {@code synthesizeAnnotation*(..)} methods for details.
+ *
  * <h3>Search Scope</h3>
  * <p>The search algorithms used by methods in this class stop searching for
  * an annotation once the first annotation of the specified type has been
