@@ -23,8 +23,6 @@ import java.nio.charset.Charset;
 import java.util.EnumSet;
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonView;
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.io.ClassPathResource;
@@ -40,6 +38,8 @@ import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import com.fasterxml.jackson.annotation.JsonView;
+
 import static org.junit.Assert.*;
 
 /**
@@ -47,12 +47,8 @@ import static org.junit.Assert.*;
  */
 public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 
-	private RestTemplate template;
+	private final RestTemplate template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
 
-	@Before
-	public void createTemplate() {
-		template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
-	}
 
 	@Test
 	public void getString() {

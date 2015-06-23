@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,27 +50,22 @@ import static org.junit.Assert.*;
  */
 public class AbstractJettyServerTestCase {
 
-	protected static String helloWorld = "H\u00e9llo W\u00f6rld";
+	protected static final String helloWorld = "H\u00e9llo W\u00f6rld";
 
-	protected static int port;
-	protected static String baseUrl;
+	protected static final int port = SocketUtils.findAvailableTcpPort();
 
-	protected static MediaType textContentType;
-	protected static MediaType jsonContentType;
+	protected static final String baseUrl = "http://localhost:" + port;
 
-	private static Server jettyServer;
+	protected static final MediaType textContentType = new MediaType("text", "plain", Collections.singletonMap("charset", "utf-8"));
+
+	protected static final MediaType jsonContentType = new MediaType("application", "json", Collections.singletonMap("charset", "utf-8"));
+
+	private static final Server jettyServer = new Server(port);
 
 	@BeforeClass
 	public static void startJettyServer() throws Exception {
-		port = SocketUtils.findAvailableTcpPort();
-		jettyServer = new Server(port);
-		baseUrl = "http://localhost:" + port;
 		ServletContextHandler handler = new ServletContextHandler();
-		byte[] bytes = helloWorld.getBytes("UTF-8");
-		textContentType = new MediaType("text", "plain", Collections
-				.singletonMap("charset", "UTF-8"));
-		jsonContentType = new MediaType("application", "json", Collections
-				.singletonMap("charset", "UTF-8"));
+		byte[] bytes = helloWorld.getBytes("utf-8");
 		handler.addServlet(new ServletHolder(new GetServlet(bytes, textContentType)), "/get");
 		handler.addServlet(new ServletHolder(new GetServlet(new byte[0], textContentType)), "/get/nothing");
 		handler.addServlet(new ServletHolder(new GetServlet(bytes, null)), "/get/nocontenttype");
@@ -212,7 +207,7 @@ public class AbstractJettyServerTestCase {
 			response.setStatus(HttpServletResponse.SC_CREATED);
 			response.setHeader("Location", location);
 			response.setContentType(contentType.toString());
-			byte[] bytes = body.getBytes("UTF-8");
+			byte[] bytes = body.getBytes("utf-8");
 			response.setContentLength(bytes.length);;
 			FileCopyUtils.copy(bytes, response.getOutputStream());
 		}
@@ -244,7 +239,7 @@ public class AbstractJettyServerTestCase {
 		@Override
 		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 			resp.setContentType("text/plain");
-			resp.setCharacterEncoding("UTF-8");
+			resp.setCharacterEncoding("utf-8");
 			resp.getWriter().write(req.getRequestURI());
 		}
 	}
