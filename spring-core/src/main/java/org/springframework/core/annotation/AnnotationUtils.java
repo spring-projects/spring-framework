@@ -219,7 +219,7 @@ public abstract class AnnotationUtils {
 	 */
 	public static Annotation[] getAnnotations(AnnotatedElement annotatedElement) {
 		try {
-			return annotatedElement.getAnnotations();
+			return synthesizeAnnotationArray(annotatedElement.getAnnotations(), annotatedElement);
 		}
 		catch (Exception ex) {
 			handleIntrospectionFailure(annotatedElement, ex);
@@ -241,7 +241,7 @@ public abstract class AnnotationUtils {
 	 */
 	public static Annotation[] getAnnotations(Method method) {
 		try {
-			return BridgeMethodResolver.findBridgedMethod(method).getAnnotations();
+			return synthesizeAnnotationArray(BridgeMethodResolver.findBridgedMethod(method).getAnnotations(), method);
 		}
 		catch (Exception ex) {
 			handleIntrospectionFailure(method, ex);
@@ -1811,6 +1811,9 @@ public abstract class AnnotationUtils {
 			this.declaredMode = declaredMode;
 		}
 
+		/**
+		 * @since 4.2
+		 */
 		@SuppressWarnings("unchecked")
 		static Class<? extends Annotation> resolveContainerAnnotationType(Class<? extends Annotation> annotationType) {
 			try {
