@@ -573,6 +573,8 @@ public @interface MyTestConfig {
   _before_ a test -- for example, if some rogue (i.e., yet to be
   determined) test within a large test suite has corrupted the original
   configuration for the `ApplicationContext`.
+* `@Sql` now supports execution of _inlined SQL statements_ via a new
+  `statements` attribute.
 * The JDBC XML namespace supports a new `database-name` attribute in
   `<jdbc:embedded-database>`, allowing developers to set unique names
   for embedded databases –- for example, via a SpEL expression or a

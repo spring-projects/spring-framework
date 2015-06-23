@@ -50,8 +50,8 @@ public class SqlScriptsTestExecutionListenerTests {
 
 
 	@Test
-	public void missingValueAndScriptsAtClassLevel() throws Exception {
-		Class<?> clazz = MissingValueAndScriptsAtClassLevel.class;
+	public void missingValueAndScriptsAndStatementsAtClassLevel() throws Exception {
+		Class<?> clazz = MissingValueAndScriptsAndStatementsAtClassLevel.class;
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("foo"));
 
@@ -59,8 +59,8 @@ public class SqlScriptsTestExecutionListenerTests {
 	}
 
 	@Test
-	public void missingValueAndScriptsAtMethodLevel() throws Exception {
-		Class<?> clazz = MissingValueAndScriptsAtMethodLevel.class;
+	public void missingValueAndScriptsAndStatementsAtMethodLevel() throws Exception {
+		Class<?> clazz = MissingValueAndScriptsAndStatementsAtMethodLevel.class;
 		BDDMockito.<Class<?>> given(testContext.getTestClass()).willReturn(clazz);
 		given(testContext.getTestMethod()).willReturn(clazz.getDeclaredMethod("foo"));
 
@@ -126,13 +126,13 @@ public class SqlScriptsTestExecutionListenerTests {
 	// -------------------------------------------------------------------------
 
 	@Sql
-	static class MissingValueAndScriptsAtClassLevel {
+	static class MissingValueAndScriptsAndStatementsAtClassLevel {
 
 		public void foo() {
 		}
 	}
 
-	static class MissingValueAndScriptsAtMethodLevel {
+	static class MissingValueAndScriptsAndStatementsAtMethodLevel {
 
 		@Sql
 		public void foo() {
