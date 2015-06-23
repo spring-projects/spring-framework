@@ -56,7 +56,7 @@ public class AbstractJettyServerTestCase {
 
 	protected static final String baseUrl = "http://localhost:" + port;
 
-	protected static final MediaType textContentType = new MediaType("text", "plain", Collections.singletonMap("charset", "utf-8"));
+	protected static final MediaType textContentType = new MediaType("text", "plain", Collections.singletonMap("charset", "UTF-8"));
 
 	protected static final MediaType jsonContentType = new MediaType("application", "json", Collections.singletonMap("charset", "utf-8"));
 

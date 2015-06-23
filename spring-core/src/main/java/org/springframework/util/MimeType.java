@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeSet;
 
 /**
@@ -430,7 +431,37 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		MimeType otherType = (MimeType) other;
 		return (this.type.equalsIgnoreCase(otherType.type) &&
 				this.subtype.equalsIgnoreCase(otherType.subtype) &&
-				this.parameters.equals(otherType.parameters));
+				parametersAreEqual(otherType));
+	}
+
+	/**
+	 * Determine if the parameters in this {@code MimeType} and the supplied
+	 * {@code MimeType} are equal, performing case-insensitive comparisons
+	 * for {@link Charset}s.
+	 * @since 4.2
+	 */
+	private boolean parametersAreEqual(MimeType that) {
+		if (this.parameters.size() != that.parameters.size()) {
+			return false;
+		}
+
+		for (Entry<String, String> entry : this.parameters.entrySet()) {
+			String key = entry.getKey();
+			if (!that.parameters.containsKey(key)) {
+				return false;
+			}
+
+			if (PARAM_CHARSET.equals(key)) {
+				if (!ObjectUtils.nullSafeEquals(this.getCharSet(), that.getCharSet())) {
+					return false;
+				}
+			}
+			else if (!ObjectUtils.nullSafeEquals(this.parameters.get(key), that.parameters.get(key))) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	@Override
