@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,6 @@
 
 package org.springframework.web.socket;
 
-import java.io.IOException;
-import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
-import javax.servlet.Servlet;
-import javax.servlet.ServletException;
-
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.servlet.api.DeploymentInfo;
@@ -30,14 +24,24 @@ import io.undertow.servlet.api.FilterInfo;
 import io.undertow.servlet.api.InstanceFactory;
 import io.undertow.servlet.api.InstanceHandle;
 import io.undertow.websockets.jsr.WebSocketDeploymentInfo;
-import org.xnio.ByteBufferSlicePool;
-import org.xnio.OptionMap;
-import org.xnio.Xnio;
 
+import java.io.IOException;
+
+import javax.servlet.DispatcherType;
+import javax.servlet.Filter;
+import javax.servlet.Servlet;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+
+import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.util.Assert;
 import org.springframework.util.SocketUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+
+import org.xnio.ByteBufferSlicePool;
+import org.xnio.OptionMap;
+import org.xnio.Xnio;
 
 import static io.undertow.servlet.Servlets.*;
 
@@ -45,6 +49,7 @@ import static io.undertow.servlet.Servlets.*;
  * Undertow-based {@link WebSocketTestServer}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class UndertowTestServer implements WebSocketTestServer {
 
@@ -161,6 +166,11 @@ public class UndertowTestServer implements WebSocketTestServer {
 				public void release() {}
 			};
 		}
+	}
+
+	@Override
+	public ServletContext getServletContext() {
+		return new MockServletContext();
 	}
 
 }

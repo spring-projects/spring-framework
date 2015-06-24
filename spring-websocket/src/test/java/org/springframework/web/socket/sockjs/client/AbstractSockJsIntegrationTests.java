@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -37,6 +39,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -63,11 +66,12 @@ import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import static org.junit.Assert.*;
 
 /**
- * Integration tests using the
- * {@link org.springframework.web.socket.sockjs.client.SockJsClient}.
+ * Abstract base class for integration tests using the
+ * {@link org.springframework.web.socket.sockjs.client.SockJsClient}
  * against actual SockJS server endpoints.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public abstract class AbstractSockJsIntegrationTests {
 
@@ -77,28 +81,35 @@ public abstract class AbstractSockJsIntegrationTests {
 	protected Log logger = LogFactory.getLog(getClass());
 
 
+	private final AnnotationConfigWebApplicationContext wac = new AnnotationConfigWebApplicationContext();
+
+	private final ErrorFilter errorFilter = new ErrorFilter();
+
 	private SockJsClient sockJsClient;
 
 	private WebSocketTestServer server;
 
-	private AnnotationConfigWebApplicationContext wac;
-
-	private ErrorFilter errorFilter;
-
 	private String baseUrl;
-
 
 	@Before
 	public void setup() throws Exception {
 		logger.debug("Setting up '" + this.testName.getMethodName() + "'");
-		this.errorFilter = new ErrorFilter();
-		this.wac = new AnnotationConfigWebApplicationContext();
-		this.wac.register(TestConfig.class, upgradeStrategyConfigClass());
-		this.wac.refresh();
+
 		this.server = createWebSocketTestServer();
 		this.server.setup();
+
+		// Set the ServletContext after invoking server.setup() to ensure
+		// that the ServletContext is available and ready for use.
+		//
+		// Failure to set the ServletContext to Jetty's own ServletContext will cause
+		// Jetty 9.3 to fail to start.
+		this.wac.setServletContext(this.server.getServletContext());
+		this.wac.register(TestConfig.class, upgradeStrategyConfigClass());
+		this.wac.refresh();
+
 		this.server.deployConfig(this.wac, this.errorFilter);
 		this.server.start();
+
 		this.baseUrl = "http://localhost:" + this.server.getPort();
 	}
 
@@ -142,8 +153,6 @@ public abstract class AbstractSockJsIntegrationTests {
 		this.sockJsClient = new SockJsClient(Arrays.asList(transports));
 		this.sockJsClient.start();
 	}
-
-	// Temporarily @Ignore failures caused by suspected Jetty bug
 
 	@Test
 	public void echoWebSocket() throws Exception {
@@ -282,14 +291,10 @@ public abstract class AbstractSockJsIntegrationTests {
 		}
 	}
 
-	private static interface Condition {
-		boolean match();
-	}
-
-	private static void awaitEvent(Condition condition, long timeToWait, String description) {
+	private static void awaitEvent(Supplier<Boolean> condition, long timeToWait, String description) {
 		long timeToSleep = 200;
 		for (int i = 0 ; i < Math.floor(timeToWait / timeToSleep); i++) {
-			if (condition.match()) {
+			if (condition.get()) {
 				return;
 			}
 			try {
@@ -327,7 +332,7 @@ public abstract class AbstractSockJsIntegrationTests {
 		}
 
 		public void awaitMessageCount(final int count, long timeToWait) throws Exception {
-			awaitEvent(() -> receivedMessages.size() >= count, timeToWait,
+			awaitEvent(() -> this.receivedMessages.size() >= count, timeToWait,
 					count + " number of messages. Received so far: " + this.receivedMessages);
 		}
 

@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.servlet.Filter;
+import javax.servlet.ServletContext;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleEvent;
@@ -31,6 +32,7 @@ import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
 import org.apache.tomcat.websocket.server.WsContextListener;
 
+import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.util.Assert;
 import org.springframework.util.SocketUtils;
 import org.springframework.web.context.WebApplicationContext;
@@ -40,6 +42,7 @@ import org.springframework.web.servlet.DispatcherServlet;
  * Tomcat based {@link WebSocketTestServer}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class TomcatWebSocketTestServer implements WebSocketTestServer {
 
@@ -128,6 +131,11 @@ public class TomcatWebSocketTestServer implements WebSocketTestServer {
 	@Override
 	public void stop() throws Exception {
 		this.tomcatServer.stop();
+	}
+
+	@Override
+	public ServletContext getServletContext() {
+		return new MockServletContext();
 	}
 
 }
