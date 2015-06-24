@@ -25,7 +25,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.TreeSet;
 
 /**
@@ -445,8 +444,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 			return false;
 		}
 
-		for (Entry<String, String> entry : this.parameters.entrySet()) {
-			String key = entry.getKey();
+		for (String key : this.parameters.keySet()) {
 			if (!that.parameters.containsKey(key)) {
 				return false;
 			}
