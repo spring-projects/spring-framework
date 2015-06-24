@@ -51,7 +51,7 @@ configure(allprojects) { project ->
 	ext.jrubyVersion         = "1.7.20"
 	ext.jtaVersion           = "1.2"
 	ext.junitVersion         = "4.12"
-	ext.nettyVersion         = "4.0.28.Final"
+	ext.nettyVersion         = "4.0.29.Final"
 	ext.openjpaVersion       = "2.4.0"
 	ext.poiVersion           = "3.12"
 	ext.protobufVersion      = "2.6.1"
