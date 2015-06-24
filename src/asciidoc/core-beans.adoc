@@ -7852,6 +7852,19 @@ This new method will publish a new `ListUpdateEvent` for every `BlackListEvent` 
 by the method above. If you need to publish several events, just return a `Collection` of
 events instead.
 
+Finally if you need the listener to be invoked before another one, just add the `@Order`
+annotation to the method declaration:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@EventListener
+	@Order(42)
+	public void processBlackListEvent(BlackListEvent event) {
+		// notify appropriate parties via notificationAddress...
+	}
+----
+
 [[context-functionality-events-generics]]
 ==== Generic Events
 
