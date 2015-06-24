@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,7 +94,6 @@ public abstract class AbstractSockJsIntegrationTests {
 		this.errorFilter = new ErrorFilter();
 		this.wac = new AnnotationConfigWebApplicationContext();
 		this.wac.register(TestConfig.class, upgradeStrategyConfigClass());
-		this.wac.refresh();
 		this.server = createWebSocketTestServer();
 		this.server.setup();
 		this.server.deployConfig(this.wac, this.errorFilter);
@@ -218,7 +217,9 @@ public abstract class AbstractSockJsIntegrationTests {
 		this.errorFilter.sleepDelayMap.put("/xhr_streaming", 10000L);
 		this.errorFilter.responseStatusMap.put("/xhr_streaming", 503);
 		initSockJsClient(createXhrTransport());
-		this.sockJsClient.setConnectTimeoutScheduler(this.wac.getBean(ThreadPoolTaskScheduler.class));
+		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+		scheduler.afterPropertiesSet();
+		this.sockJsClient.setConnectTimeoutScheduler(scheduler);
 		WebSocketSession clientSession = sockJsClient.doHandshake(clientHandler, this.baseUrl + "/echo").get();
 		assertEquals("Fallback didn't occur", XhrClientSockJsSession.class, clientSession.getClass());
 		TextMessage message = new TextMessage("message1");
