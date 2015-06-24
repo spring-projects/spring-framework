@@ -897,7 +897,7 @@ project("spring-webmvc") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 			exclude group: "org.springframework", module: "spring-web"
 		}
-		optional 'org.webjars:webjars-locator:0.22'
+		optional 'org.webjars:webjars-locator:0.26'
 		testCompile(project(":spring-aop"))
 		testCompile("rhino:js:1.7R1")
 		testCompile("xmlunit:xmlunit:${xmlunitVersion}")
