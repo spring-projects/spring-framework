@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.servlet.Filter;
+import javax.servlet.ServletContext;
 
 import org.apache.catalina.Context;
 import org.apache.catalina.LifecycleEvent;
@@ -40,6 +41,7 @@ import org.springframework.web.servlet.DispatcherServlet;
  * Tomcat based {@link WebSocketTestServer}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class TomcatWebSocketTestServer implements WebSocketTestServer {
 
@@ -104,6 +106,11 @@ public class TomcatWebSocketTestServer implements WebSocketTestServer {
 			filterMap.setDispatcher("REQUEST,FORWARD,INCLUDE,ASYNC");
 			this.context.addFilterMap(filterMap);
 		}
+	}
+
+	@Override
+	public ServletContext getServletContext() {
+		return this.context.getServletContext();
 	}
 
 	@Override
