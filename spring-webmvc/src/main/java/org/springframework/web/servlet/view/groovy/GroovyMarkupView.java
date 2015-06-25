@@ -45,7 +45,7 @@ import org.springframework.web.util.NestedServletException;
  * @since 4.1
  * @see GroovyMarkupViewResolver
  * @see GroovyMarkupConfigurer
- * @see <a href="http://beta.groovy-lang.org/docs/groovy-2.3.2/html/documentation/markup-template-engine.html">
+ * @see <a href="http://groovy-lang.org/templating.html#_the_markuptemplateengine">
  *     Groovy Markup Template engine documentation</a>
  */
 public class GroovyMarkupView extends AbstractTemplateView {

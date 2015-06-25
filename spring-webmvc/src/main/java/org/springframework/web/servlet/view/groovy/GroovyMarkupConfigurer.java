@@ -79,7 +79,7 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @since 4.1
  * @see GroovyMarkupView
- * @see <a href="http://beta.groovy-lang.org/docs/groovy-2.3.2/html/documentation/markup-template-engine.html">
+ * @see <a href="http://groovy-lang.org/templating.html#_the_markuptemplateengine">
  *     Groovy Markup Template engine documentation</a>
  */
 public class GroovyMarkupConfigurer extends TemplateConfiguration
