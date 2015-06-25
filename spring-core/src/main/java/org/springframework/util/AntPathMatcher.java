@@ -52,6 +52,11 @@ import java.util.regex.Pattern;
  * {@code org/springframework/testing/servlet/bla.jsp} and {@code org/servlet/bla.jsp}</li>
  * </ul>
  *
+ * <p><strong>Note:</strong> a pattern and a path must both be absolute or must
+ * both be relative in order for the two to match. Therefore it is recommended
+ * that users of this implementation to sanitize patterns in order to prefix
+ * them with "/" as it makes sense in the context in which they're used.
+ *
  * @author Alef Arendsen
  * @author Juergen Hoeller
  * @author Rob Harrop
