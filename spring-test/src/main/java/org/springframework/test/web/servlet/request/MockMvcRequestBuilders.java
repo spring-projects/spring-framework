@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -221,6 +221,10 @@ public abstract class MockMvcRequestBuilders {
 	 * @param mvcResult the result from the request that started async processing
 	 */
 	public static RequestBuilder asyncDispatch(final MvcResult mvcResult) {
+
+		// There must be an async result before dispatching
+		mvcResult.getAsyncResult();
+
 		return new RequestBuilder() {
 			@Override
 			public MockHttpServletRequest buildRequest(ServletContext servletContext) {
