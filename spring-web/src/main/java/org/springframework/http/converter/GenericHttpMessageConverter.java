@@ -38,6 +38,9 @@ public interface GenericHttpMessageConverter<T> extends HttpMessageConverter<T> 
 
 	/**
 	 * Indicates whether the given type can be read by this converter.
+	 * This method should perform the same checks than
+	 * {@link HttpMessageConverter#canRead(Class, MediaType)} with additional ones
+	 * related to the generic type.
 	 * @param type the type to test for readability
 	 * @param contextClass a context class for the target type, for example a class
 	 * in which the target type appears in a method signature (can be {@code null})
@@ -64,6 +67,9 @@ public interface GenericHttpMessageConverter<T> extends HttpMessageConverter<T> 
 
 	/**
 	 * Indicates whether the given class can be written by this converter.
+	 * This method should perform the same checks than
+	 * {@link HttpMessageConverter#canWrite(Class, MediaType)} with additional ones
+	 * related to the generic type.
 	 * @param type the type to test for writability, can be {@code null} if not specified.
 	 * @param contextClass the class to test for writability
 	 * @param mediaType the media type to write, can be {@code null} if not specified.

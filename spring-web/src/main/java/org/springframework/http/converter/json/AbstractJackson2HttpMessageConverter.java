@@ -160,7 +160,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	}
 
 	@Override
-	public boolean canWrite(Type type, Class<?> clazz, MediaType mediaType) {
+	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
 		if (!jackson23Available || !logger.isWarnEnabled()) {
 			return (this.objectMapper.canSerialize(clazz) && canWrite(mediaType));
 		}

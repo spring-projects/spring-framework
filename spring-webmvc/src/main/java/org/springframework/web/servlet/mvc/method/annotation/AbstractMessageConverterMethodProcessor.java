@@ -116,9 +116,10 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			throws IOException, HttpMediaTypeNotAcceptableException {
 
 		Class<?> returnValueClass = getReturnValueType(returnValue, returnType);
+		Type returnValueType = getGenericType(returnType);
 		HttpServletRequest servletRequest = inputMessage.getServletRequest();
 		List<MediaType> requestedMediaTypes = getAcceptableMediaTypes(servletRequest);
-		List<MediaType> producibleMediaTypes = getProducibleMediaTypes(servletRequest, returnValueClass);
+		List<MediaType> producibleMediaTypes = getProducibleMediaTypes(servletRequest, returnValueClass, returnValueType);
 
 		Assert.isTrue(returnValue == null || !producibleMediaTypes.isEmpty(),
 				"No converter found for return value of type: " + returnValueClass);
@@ -156,25 +157,30 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		if (selectedMediaType != null) {
 			selectedMediaType = selectedMediaType.removeQualityValue();
 			for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
-				if (messageConverter.canWrite(returnValueClass, selectedMediaType)) {
+				if (messageConverter instanceof GenericHttpMessageConverter) {
+					if (((GenericHttpMessageConverter<T>) messageConverter).canWrite(returnValueType,
+							returnValueClass, selectedMediaType)) {
+						returnValue = (T) getAdvice().beforeBodyWrite(returnValue, returnType, selectedMediaType,
+								(Class<? extends HttpMessageConverter<?>>) messageConverter.getClass(),
+								inputMessage, outputMessage);
+						if (returnValue != null) {
+							((GenericHttpMessageConverter<T>) messageConverter).write(returnValue,
+									returnValueType, selectedMediaType, outputMessage);
+							if (logger.isDebugEnabled()) {
+								logger.debug("Written [" + returnValue + "] as \"" +
+										selectedMediaType + "\" using [" + messageConverter + "]");
+							}
+						}
+						return;
+					}
+				}
+				else if (messageConverter.canWrite(returnValueClass, selectedMediaType)) {
 					returnValue = (T) getAdvice().beforeBodyWrite(returnValue, returnType, selectedMediaType,
 							(Class<? extends HttpMessageConverter<?>>) messageConverter.getClass(),
 							inputMessage, outputMessage);
 					if (returnValue != null) {
-						if (messageConverter instanceof GenericHttpMessageConverter) {
-							Type type;
-							if (HttpEntity.class.isAssignableFrom(returnType.getParameterType())) {
-								returnType.increaseNestingLevel();
-								type = returnType.getNestedGenericParameterType();
-							}
-							else {
-								type = returnType.getGenericParameterType();
-							}
-							((GenericHttpMessageConverter<T>) messageConverter).write(returnValue, type, selectedMediaType, outputMessage);
-						}
-						else {
-							((HttpMessageConverter<T>) messageConverter).write(returnValue, selectedMediaType, outputMessage);
-						}
+						((HttpMessageConverter<T>) messageConverter).write(returnValue,
+								selectedMediaType, outputMessage);
 						if (logger.isDebugEnabled()) {
 							logger.debug("Written [" + returnValue + "] as \"" +
 									selectedMediaType + "\" using [" + messageConverter + "]");
@@ -201,15 +207,40 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	}
 
 	/**
+	 * Return the generic type of the {@code returnType} (or of the nested type if it is
+	 * a {@link HttpEntity}).
+	 */
+	private Type getGenericType(MethodParameter returnType) {
+		Type type;
+		if (HttpEntity.class.isAssignableFrom(returnType.getParameterType())) {
+			returnType.increaseNestingLevel();
+			type = returnType.getNestedGenericParameterType();
+		}
+		else {
+			type = returnType.getGenericParameterType();
+		}
+		return type;
+	}
+
+	/**
+	 * @see #getProducibleMediaTypes(HttpServletRequest, Class, Type)
+	 */
+	@SuppressWarnings("unchecked")
+	protected List<MediaType> getProducibleMediaTypes(HttpServletRequest request, Class<?> returnValueClass) {
+		return getProducibleMediaTypes(request, returnValueClass, null);
+	}
+
+	/**
 	 * Returns the media types that can be produced:
 	 * <ul>
 	 * <li>The producible media types specified in the request mappings, or
 	 * <li>Media types of configured converters that can write the specific return value, or
 	 * <li>{@link MediaType#ALL}
 	 * </ul>
+	 * @since 4.2
 	 */
 	@SuppressWarnings("unchecked")
-	protected List<MediaType> getProducibleMediaTypes(HttpServletRequest request, Class<?> returnValueClass) {
+	protected List<MediaType> getProducibleMediaTypes(HttpServletRequest request, Class<?> returnValueClass, Type returnValueType) {
 		Set<MediaType> mediaTypes = (Set<MediaType>) request.getAttribute(HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE);
 		if (!CollectionUtils.isEmpty(mediaTypes)) {
 			return new ArrayList<MediaType>(mediaTypes);
@@ -217,7 +248,12 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		else if (!this.allSupportedMediaTypes.isEmpty()) {
 			List<MediaType> result = new ArrayList<MediaType>();
 			for (HttpMessageConverter<?> converter : this.messageConverters) {
-				if (converter.canWrite(returnValueClass, null)) {
+				if (converter instanceof GenericHttpMessageConverter && returnValueType != null) {
+					if (((GenericHttpMessageConverter<?>) converter).canWrite(returnValueType, returnValueClass, null)) {
+						result.addAll(converter.getSupportedMediaTypes());
+					}
+				}
+				else if (converter.canWrite(returnValueClass, null)) {
 					result.addAll(converter.getSupportedMediaTypes());
 				}
 			}
