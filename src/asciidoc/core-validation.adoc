@@ -25,7 +25,7 @@ There are pros and cons for considering validation as business logic, and Spring
 a design for validation (and data binding) that does not exclude either one of them.
 Specifically validation should not be tied to the web tier, should be easy to localize
 and it should be possible to plug in any validator available. Considering the above,
-Spring has come up with a `Validator` interface that is both basic ands eminently usable
+Spring has come up with a `Validator` interface that is both basic and eminently usable
 in every layer of an application.
 
 Data binding is useful for allowing user input to be dynamically bound to the domain
