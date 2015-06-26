@@ -208,13 +208,14 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		return readJavaType(javaType, inputMessage);
 	}
 
+	@SuppressWarnings("deprecation")
 	private Object readJavaType(JavaType javaType, HttpInputMessage inputMessage) {
 		try {
 			if (inputMessage instanceof MappingJacksonInputMessage) {
 				Class<?> deserializationView = ((MappingJacksonInputMessage)inputMessage).getDeserializationView();
 				if (deserializationView != null) {
 					return this.objectMapper.readerWithView(deserializationView)
-							.forType(javaType).readValue(inputMessage.getBody());
+							.withType(javaType).readValue(inputMessage.getBody());
 				}
 			}
 			return this.objectMapper.readValue(inputMessage.getBody(), javaType);
