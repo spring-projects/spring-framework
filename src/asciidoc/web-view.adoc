@@ -1853,134 +1853,92 @@ XSLT in a Spring Web MVC application.
 This example is a trivial Spring application that creates a list of words in the
 `Controller` and adds them to the model map. The map is returned along with the view
 name of our XSLT view. See <<mvc-controller>> for details of Spring Web MVC's
-`Controller` interface. The XSLT view will turn the list of words into a simple XML
+`Controller` interface. The XSLT Controller will turn the list of words into a simple XML
 document ready for transformation.
 
 
 [[view-xslt-beandefs]]
 ==== Bean definitions
-Configuration is standard for a simple Spring application. The dispatcher servlet config
-file contains a reference to a `ViewResolver`, URL mappings and a single controller
-bean...
+Configuration is standard for a simple Spring application.
+The MVC configuration has to define a `XsltViewResolver` bean and
+regular MVC annotation configuration.
 
-[source,xml,indent=0]
+[source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<bean id="homeController"class="xslt.HomeController"/>
+@EnableWebMvc
+@ComponentScan
+@Configuration
+public class WebConfig extends WebMvcConfigurerAdapter {
+
+	@Bean
+	public XsltViewResolver xsltViewResolver() {
+		XsltViewResolver viewResolver = new XsltViewResolver();
+		viewResolver.setPrefix("/WEB-INF/xsl/");
+		viewResolver.setSuffix(".xslt");
+		return viewResolver;
+	}
+
+}
 ----
 
-... that encapsulates our word generation logic.
+And we need a Controller that encapsulates our word generation logic.
 
 
 [[view-xslt-controllercode]]
 ==== Standard MVC controller code
-The controller logic is encapsulated in a subclass of `AbstractController`, with the
+
+The controller logic is encapsulated in a `@Controller` class, with the
 handler method being defined like so...
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	protected ModelAndView handleRequestInternal(HttpServletRequest request,
-			HttpServletResponse response) throws Exception {
+	@Controller
+	public class XsltController {
 
-		Map map = new HashMap();
-		List wordList = new ArrayList();
-
-		wordList.add("hello");
-		wordList.add("world");
-
-		map.put("wordList", wordList);
-
-		return new ModelAndView("home", map);
-	}
-----
-
-So far we've done nothing that's XSLT specific. The model data has been created in the
-same way as you would for any other Spring MVC application. Depending on the
-configuration of the application now, that list of words could be rendered by JSP/JSTL
-by having them added as request attributes, or they could be handled by Velocity by
-adding the object to the `VelocityContext`. In order to have XSLT render them, they of
-course have to be converted into an XML document somehow. There are software packages
-available that will automatically 'domify' an object graph, but within Spring, you have
-complete flexibility to create the DOM from your model in any way you choose. This
-prevents the transformation of XML playing too great a part in the structure of your
-model data which is a danger when using tools to manage the domification process.
-
-
-[[view-xslt-subclassing]]
-==== Convert the model data to XML
-In order to create a DOM document from our list of words or any other model data, we
-must subclass the (provided)
-`org.springframework.web.servlet.view.xslt.AbstractXsltView` class. In doing so, we must
-also typically implement the abstract method `createXsltSource(..)` method. The first
-parameter passed to this method is our model map. Here's the complete listing of the
-`HomePage` class in our trivial word application:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	package xslt;
-
-	// imports omitted for brevity
-
-	public class HomePage extends AbstractXsltView {
-
-		protected Source createXsltSource(Map model, String rootName,
-				HttpServletRequest request, HttpServletResponse response) throws Exception {
+		@RequestMapping("/")
+		public String home(Model model) throws Exception {
 
 			Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-			Element root = document.createElement(rootName);
+			Element root = document.createElement("wordList");
 
-			List words = (List) model.get("wordList");
-			for (Iterator it = words.iterator(); it.hasNext();) {
-				String nextWord = (String) it.next();
+			List<String> words = Arrays.asList("Hello", "Spring", "Framework");
+			for (String word : words) {
 				Element wordNode = document.createElement("word");
-				Text textNode = document.createTextNode(nextWord);
+				Text textNode = document.createTextNode(word);
 				wordNode.appendChild(textNode);
 				root.appendChild(wordNode);
 			}
-			return new DOMSource(root);
+
+			model.addAttribute("wordList", root);
+			return "home";
 		}
 
 	}
 ----
 
-A series of parameter name/value pairs can optionally be defined by your subclass which
-will be added to the transformation object. The parameter names must match those defined
-in your XSLT template declared with `<xsl:param
-name="myParam">defaultValue</xsl:param>`. To specify the parameters, override the
-`getParameters()` method of the `AbstractXsltView` class and return a `Map` of the
-name/value pairs. If your parameters need to derive information from the current
-request, you can override the `getParameters(HttpServletRequest request)` method instead.
+So far we've only created a DOM document and added it to the Model map. Note that you
+can also load an XML file as a `Resource` and use it instead of a custom DOM document.
 
+Of course, there are software packages available that will automatically 'domify'
+an object graph, but within Spring, you have complete flexibility to create the DOM
+from your model in any way you choose. This prevents the transformation of XML playing
+too great a part in the structure of your model data which is a danger when using tools
+to manage the domification process.
 
-[[view-xslt-viewdefinitions]]
-==== Defining the view properties
-The views.properties file (or equivalent xml definition if you're using an XML based
-view resolver as we did in the Velocity examples above) looks like this for the one-view
-application that is 'My First Words':
-
-[literal]
-[subs="verbatim,quotes"]
-----
-home.(class)=xslt.HomePage
-home.stylesheetLocation=/WEB-INF/xsl/home.xslt
-home.root=words
-----
-
-Here, you can see how the view is tied in with the `HomePage` class just written which
-handles the model domification in the first property `'.(class)'`. The
-`'stylesheetLocation'` property points to the XSLT file which will handle the XML
-transformation into HTML for us and the final property `'.root'` is the name that will
-be used as the root of the XML document. This gets passed to the `HomePage` class above
-in the second parameter to the `createXsltSource(..)` method(s).
+Next, `XsltViewResolver` will resolve the "home" XSLT template file and merge the
+DOM document into it to generate our view.
 
 
 [[view-xslt-transforming]]
 ==== Document transformation
-Finally, we have the XSLT code used for transforming the above document. As shown in the
-above `'views.properties'` file, the stylesheet is called `'home.xslt'` and it lives in
-the war file in the `'WEB-INF/xsl'` directory.
+
+Finally, the `XsltViewResolver` will resolve the "home" XSLT template file and merge the
+DOM document into it to generate our view. As shown in the `XsltViewResolver`
+configuration, XSLT templates live in the war file in the `'WEB-INF/xsl'` directory
+and end with a `"xslt"` file extension.
+
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -1995,60 +1953,40 @@ the war file in the `'WEB-INF/xsl'` directory.
 				<head><title>Hello!</title></head>
 				<body>
 					<h1>My First Words</h1>
-					<xsl:apply-templates/>
+					<ul>
+						<xsl:apply-templates/>
+					</ul>
 				</body>
 			</html>
 		</xsl:template>
 
 		<xsl:template match="word">
-			<xsl:value-of select="."/><br/>
+			<li><xsl:value-of select="."/></li>
 		</xsl:template>
 
 	</xsl:stylesheet>
 ----
 
+This is rendered as:
 
-
-[[view-xslt-summary]]
-=== Summary
-A summary of the files discussed and their location in the WAR file is shown in the
-simplified WAR structure below.
-
-[literal]
+[source,html,indent=0]
 [subs="verbatim,quotes"]
 ----
-ProjectRoot
-  |
-  +- WebContent
-      |
-      +- WEB-INF
-          |
-          +- classes
-          |    |
-          |    +- xslt
-          |    |   |
-          |    |   +- HomePageController.class
-          |    |   +- HomePage.class
-          |    |
-          |    +- views.properties
-          |
-          +- lib
-          |   |
-          |   +- spring-*.jar
-          |
-          +- xsl
-          |   |
-          |   +- home.xslt
-          |
-          +- frontcontroller-servlet.xml
+<html>
+	<head>
+		<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>Hello!</title>
+	</head>
+	<body>
+		<h1>My First Words</h1>
+		<ul>
+			<li>Hello</li>
+			<li>Spring</li>
+			<li>Framework</li>
+		</ul>
+	</body>
+</html>
 ----
-
-You will also need to ensure that an XML parser and an XSLT engine are available on the
-classpath. JDK 1.4 provides them by default, and most Java EE containers will also make
-them available by default, but it's a possible source of errors to be aware of.
-
-
-
 
 [[view-document]]
 == Document views (PDF/Excel)
