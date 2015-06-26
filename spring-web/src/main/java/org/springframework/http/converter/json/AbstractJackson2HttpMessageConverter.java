@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -64,6 +65,10 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	// Check for Jackson 2.3's overloaded canDeserialize/canSerialize variants with cause reference
 	private static final boolean jackson23Available = ClassUtils.hasMethod(ObjectMapper.class,
 			"canDeserialize", JavaType.class, AtomicReference.class);
+
+	// Check for Jackson 2.6+ for support of generic type aware serialization of polymorphic collections
+	private static final boolean jackson26Available = ClassUtils.hasMethod(ObjectMapper.class,
+			"setDefaultPrettyPrinter", PrettyPrinter.class);
 
 
 	protected ObjectMapper objectMapper;
@@ -233,14 +238,15 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			FilterProvider filters = null;
 			Object value = object;
 			JavaType javaType = null;
-			if (type != null) {
-				javaType = getJavaType(type, null);
-			}
 			if (object instanceof MappingJacksonValue) {
 				MappingJacksonValue container = (MappingJacksonValue) object;
 				value = container.getValue();
 				serializationView = container.getSerializationView();
 				filters = container.getFilters();
+			}
+			if (jackson26Available && type != null && value != null
+					&& TypeUtils.isAssignable(type, value.getClass())) {
+				javaType = getJavaType(type, null);
 			}
 			ObjectWriter objectWriter;
 			if (serializationView != null) {
@@ -252,7 +258,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			else {
 				objectWriter = this.objectMapper.writer();
 			}
-			if (javaType != null && value != null && TypeUtils.isAssignable(type, value.getClass())) {
+			if (javaType != null) {
 				objectWriter = objectWriter.withType(javaType);
 			}
 			objectWriter.writeValue(generator, value);
