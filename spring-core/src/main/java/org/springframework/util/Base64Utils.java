@@ -18,21 +18,25 @@ package org.springframework.util;
 
 import java.nio.charset.Charset;
 import java.util.Base64;
+import javax.xml.bind.DatatypeConverter;
 
 import org.springframework.lang.UsesJava8;
 
 /**
  * A simple utility class for Base64 encoding and decoding.
  *
- * <p>Adapts to either Java 8's {@link java.util.Base64} class or Apache
- * Commons Codec's {@link org.apache.commons.codec.binary.Base64} class.
- * With neither Java 8 nor Commons Codec present, encode/decode calls
- * will fail with an IllegalStateException.
+ * <p>Adapts to either Java 8's {@link java.util.Base64} class or Apache Commons Codec's
+ * {@link org.apache.commons.codec.binary.Base64} class. With neither Java 8 nor Commons
+ * Codec present, {@link #encode}/{@link #decode} calls will throw an IllegalStateException.
+ * However, as of Spring 4.2, {@link #encodeToString} and {@link #decodeFromString} will
+ * nevertheless work since they can delegate to the JAXB DatatypeConverter as a fallback.
  *
  * @author Juergen Hoeller
  * @since 4.1
  * @see java.util.Base64
  * @see org.apache.commons.codec.binary.Base64
+ * @see javax.xml.bind.DatatypeConverter#printBase64Binary
+ * @see javax.xml.bind.DatatypeConverter#parseBase64Binary
  */
 public abstract class Base64Utils {
 
@@ -55,11 +59,12 @@ public abstract class Base64Utils {
 	}
 
 	/**
-	 * Assert that Byte64 encoding is actually supported.
+	 * Assert that Byte64 encoding between byte arrays is actually supported.
 	 * @throws IllegalStateException if neither Java 8 nor Apache Commons Codec is present
 	 */
-	private static void assertSupported() {
-		Assert.state(delegate != null, "Neither Java 8 nor Apache Commons Codec found - Base64 encoding not supported");
+	private static void assertDelegateAvailable() {
+		Assert.state(delegate != null,
+				"Neither Java 8 nor Apache Commons Codec found - Base64 encoding between byte arrays not supported");
 	}
 
 
@@ -67,12 +72,24 @@ public abstract class Base64Utils {
 	 * Base64-encode the given byte array.
 	 * @param src the original byte array (may be {@code null})
 	 * @return the encoded byte array (or {@code null} if the input was {@code null})
-	 * @throws IllegalStateException if Base64 encoding is not supported,
-	 * i.e. neither Java 8 nor Apache Commons Codec is present at runtime
+	 * @throws IllegalStateException if Base64 encoding between byte arrays is not
+	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
 	 */
 	public static byte[] encode(byte[] src) {
-		assertSupported();
+		assertDelegateAvailable();
 		return delegate.encode(src);
+	}
+
+	/**
+	 * Base64-decode the given byte array.
+	 * @param src the encoded byte array (may be {@code null})
+	 * @return the original byte array (or {@code null} if the input was {@code null})
+	 * @throws IllegalStateException if Base64 encoding between byte arrays is not
+	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
+	 */
+	public static byte[] decode(byte[] src) {
+		assertDelegateAvailable();
+		return delegate.decode(src);
 	}
 
 	/**
@@ -80,48 +97,46 @@ public abstract class Base64Utils {
 	 * @param src the original byte array (may be {@code null})
 	 * @return the encoded byte array as a UTF-8 String
 	 * (or {@code null} if the input was {@code null})
-	 * @throws IllegalStateException if Base64 encoding is not supported,
-	 * i.e. neither Java 8 nor Apache Commons Codec is present at runtime
 	 */
 	public static String encodeToString(byte[] src) {
-		assertSupported();
 		if (src == null) {
 			return null;
 		}
 		if (src.length == 0) {
 			return "";
 		}
-		return new String(delegate.encode(src), DEFAULT_CHARSET);
-	}
 
-	/**
-	 * Base64-decode the given byte array.
-	 * @param src the encoded byte array (may be {@code null})
-	 * @return the original byte array (or {@code null} if the input was {@code null})
-	 * @throws IllegalStateException if Base64 encoding is not supported,
-	 * i.e. neither Java 8 nor Apache Commons Codec is present at runtime
-	 */
-	public static byte[] decode(byte[] src) {
-		assertSupported();
-		return delegate.decode(src);
+		if (delegate != null) {
+			// Full encoder available
+			return new String(delegate.encode(src), DEFAULT_CHARSET);
+		}
+		else {
+			// JAXB fallback for String case
+			return DatatypeConverter.printBase64Binary(src);
+		}
 	}
 
 	/**
 	 * Base64-decode the given byte array from an UTF-8 String.
 	 * @param src the encoded UTF-8 String (may be {@code null})
 	 * @return the original byte array (or {@code null} if the input was {@code null})
-	 * @throws IllegalStateException if Base64 encoding is not supported,
-	 * i.e. neither Java 8 nor Apache Commons Codec is present at runtime
 	 */
 	public static byte[] decodeFromString(String src) {
-		assertSupported();
 		if (src == null) {
 			return null;
 		}
 		if (src.length() == 0) {
 			return new byte[0];
 		}
-		return delegate.decode(src.getBytes(DEFAULT_CHARSET));
+
+		if (delegate != null) {
+			// Full encoder available
+			return delegate.decode(src.getBytes(DEFAULT_CHARSET));
+		}
+		else {
+			// JAXB fallback for String case
+			return DatatypeConverter.parseBase64Binary(src);
+		}
 	}
 
 
