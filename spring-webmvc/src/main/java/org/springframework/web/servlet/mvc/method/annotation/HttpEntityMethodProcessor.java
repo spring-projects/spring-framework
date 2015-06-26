@@ -27,6 +27,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -163,30 +164,20 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 		Assert.isInstanceOf(HttpEntity.class, returnValue);
 		HttpEntity<?> responseEntity = (HttpEntity<?>) returnValue;
-		if (responseEntity instanceof ResponseEntity) {
-			outputMessage.setStatusCode(((ResponseEntity<?>) responseEntity).getStatusCode());
-		}
 
 		HttpHeaders entityHeaders = responseEntity.getHeaders();
-
+		if (!entityHeaders.isEmpty()) {
+			outputMessage.getHeaders().putAll(entityHeaders);
+		}
 		Object body = responseEntity.getBody();
 		if (responseEntity instanceof ResponseEntity) {
-			for (String headerName : entityHeaders.keySet()) {
-				if(!HttpHeaders.LAST_MODIFIED.equals(headerName)
-					&& !HttpHeaders.ETAG.equals(headerName)) {
-					outputMessage.getHeaders().put(headerName, entityHeaders.get(headerName));
-				}
-			}
-			if (isResourceNotModified(webRequest, (ResponseEntity<?>) responseEntity)) {
+			outputMessage.setStatusCode(((ResponseEntity<?>) responseEntity).getStatusCode());
+			if (isResourceNotModified(inputMessage, outputMessage)) {
+				outputMessage.setStatusCode(HttpStatus.NOT_MODIFIED);
 				// Ensure headers are flushed, no body should be written.
 				outputMessage.flush();
 				// Skip call to converters, as they may update the body.
 				return;
-			}
-		}
-		else {
-			if (!entityHeaders.isEmpty()) {
-				outputMessage.getHeaders().putAll(entityHeaders);
 			}
 		}
 
@@ -197,20 +188,50 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		outputMessage.flush();
 	}
 
-	private boolean isResourceNotModified(NativeWebRequest webRequest, ResponseEntity<?> responseEntity) {
-		String eTag = responseEntity.getHeaders().getETag();
-		long lastModified = responseEntity.getHeaders().getLastModified();
+	private boolean isResourceNotModified(ServletServerHttpRequest inputMessage, ServletServerHttpResponse outputMessage) {
+
+		List<String> ifNoneMatch = inputMessage.getHeaders().getIfNoneMatch();
+		long ifModifiedSince = inputMessage.getHeaders().getIfModifiedSince();
+		String eTag = addEtagPadding(outputMessage.getHeaders().getETag());
+		long lastModified = outputMessage.getHeaders().getLastModified();
 		boolean notModified = false;
+
 		if (lastModified != -1 && StringUtils.hasLength(eTag)) {
-			notModified = webRequest.checkNotModified(eTag, lastModified);
+			notModified = isETagNotModified(ifNoneMatch, eTag) && isTimeStampNotModified(ifModifiedSince, lastModified);
 		}
 		else if (lastModified != -1) {
-			notModified = webRequest.checkNotModified(lastModified);
+			notModified = isTimeStampNotModified(ifModifiedSince, lastModified);
 		}
 		else if (StringUtils.hasLength(eTag)) {
-			notModified = webRequest.checkNotModified(eTag);
+			notModified = isETagNotModified(ifNoneMatch, eTag);
 		}
 		return notModified;
+	}
+
+	private boolean isETagNotModified(List<String> ifNoneMatch, String etag) {
+		if (StringUtils.hasLength(etag)) {
+			for (String clientETag : ifNoneMatch) {
+				// compare weak/strong ETags as per https://tools.ietf.org/html/rfc7232#section-2.3
+				if (StringUtils.hasLength(clientETag) &&
+						(clientETag.replaceFirst("^W/", "").equals(etag.replaceFirst("^W/", ""))
+								|| clientETag.equals("*"))) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private boolean isTimeStampNotModified(long ifModifiedSince, long lastModifiedTimestamp) {
+		return (ifModifiedSince >= (lastModifiedTimestamp / 1000 * 1000));
+	}
+
+	private String addEtagPadding(String etag) {
+		if (StringUtils.hasLength(etag) &&
+				(!(etag.startsWith("\"") || etag.startsWith("W/\"")) || !etag.endsWith("\"")) ) {
+			etag = "\"" + etag + "\"";
+		}
+		return etag;
 	}
 
 	@Override

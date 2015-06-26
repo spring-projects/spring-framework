@@ -181,31 +181,19 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	public boolean checkNotModified(long lastModifiedTimestamp) {
 		HttpServletResponse response = getResponse();
 		if (lastModifiedTimestamp >= 0 && !this.notModified) {
-			if (response == null || isResponseCompatibleWithConditional(response, HEADER_LAST_MODIFIED)) {
+			if (response == null || HttpStatus.valueOf(response.getStatus()).is2xxSuccessful()) {
 				this.notModified = isTimeStampNotModified(lastModifiedTimestamp);
 				if (response != null) {
 					if (this.notModified && supportsNotModifiedStatus()) {
 						response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 					}
-					response.setHeader(HEADER_LAST_MODIFIED, formatDate(lastModifiedTimestamp));
+					if(response.getHeader(HEADER_LAST_MODIFIED) == null) {
+						response.setHeader(HEADER_LAST_MODIFIED, formatDate(lastModifiedTimestamp));
+					}
 				}
 			}
 		}
 		return this.notModified;
-	}
-
-	private boolean isResponseCompatibleWithConditional(HttpServletResponse response, String... headers) {
-		if (response != null) {
-			if (HttpStatus.valueOf(response.getStatus()).is2xxSuccessful()) {
-				for (String header : headers) {
-					if (response.containsHeader(header)) {
-						return false;
-					}
-				}
-				return true;
-			}
-		}
-		return false;
 	}
 
 	@SuppressWarnings("deprecation")
@@ -235,14 +223,16 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	public boolean checkNotModified(String etag) {
 		HttpServletResponse response = getResponse();
 		if (StringUtils.hasLength(etag) && !this.notModified) {
-			if (response == null || isResponseCompatibleWithConditional(response, HEADER_ETAG)) {
+			if (response == null || HttpStatus.valueOf(response.getStatus()).is2xxSuccessful()) {
 				etag = addEtagPadding(etag);
 				this.notModified = isETagNotModified(etag);
 				if (response != null) {
 					if (this.notModified && supportsNotModifiedStatus()) {
 						response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 					}
-					response.setHeader(HEADER_ETAG, etag);
+					if(response.getHeader(HEADER_ETAG) == null) {
+						response.setHeader(HEADER_ETAG, etag);
+					}
 				}
 			}
 		}
@@ -283,15 +273,19 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	public boolean checkNotModified(String etag, long lastModifiedTimestamp) {
 		HttpServletResponse response = getResponse();
 		if (StringUtils.hasLength(etag) && !this.notModified) {
-			if (response == null || isResponseCompatibleWithConditional(response, HEADER_ETAG, HEADER_LAST_MODIFIED)) {
+			if (response == null || HttpStatus.valueOf(response.getStatus()).is2xxSuccessful()) {
 				etag = addEtagPadding(etag);
 				this.notModified = isETagNotModified(etag) && isTimeStampNotModified(lastModifiedTimestamp);
 				if (response != null) {
 					if (this.notModified && supportsNotModifiedStatus()) {
 						response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 					}
-					response.setHeader(HEADER_ETAG, etag);
-					response.setHeader(HEADER_LAST_MODIFIED, formatDate(lastModifiedTimestamp));
+					if(response.getHeader(HEADER_ETAG) == null) {
+						response.setHeader(HEADER_ETAG, etag);
+					}
+					if(response.getHeader(HEADER_LAST_MODIFIED) == null) {
+						response.setHeader(HEADER_LAST_MODIFIED, formatDate(lastModifiedTimestamp));
+					}
 				}
 			}
 		}
