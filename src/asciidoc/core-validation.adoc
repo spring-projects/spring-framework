@@ -325,7 +325,7 @@ the properties of instantiated `Companies` and `Employees`:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	BeanWrapper company = BeanWrapperImpl(new Company());
+	BeanWrapper company = new BeanWrapperImpl(new Company());
 	// setting the company name..
 	company.setPropertyValue("name", "Some Company Inc.");
 	// ... can also be done like this:
@@ -333,7 +333,7 @@ the properties of instantiated `Companies` and `Employees`:
 	company.setPropertyValue(value);
 
 	// ok, let's create the director and tie it to the company:
-	BeanWrapper jim = BeanWrapperImpl(new Employee());
+	BeanWrapper jim = new BeanWrapperImpl(new Employee());
 	jim.setPropertyValue("name", "Jim Stravinsky");
 	company.setPropertyValue("managingDirector", jim.getWrappedInstance());
 
