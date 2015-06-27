@@ -24,9 +24,10 @@ import org.springframework.util.CollectionUtils;
  * Static, factory methods for {@link ResultHandler}-based result actions.
  *
  * <p><strong>Eclipse users:</strong> consider adding this class as a Java editor
- * favorite. To navigate, open the Preferences and type "favorites".
+ * favorite. To navigate to this setting, open the Preferences and type "favorites".
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 3.2
  */
 public abstract class MockMvcResultHandlers {
@@ -49,14 +50,14 @@ public abstract class MockMvcResultHandlers {
 				@Override
 				public void printHeading(String heading) {
 					System.out.println();
-					System.out.println(String.format("%20s:", heading));
+					System.out.println(String.format("%s:", heading));
 				}
 				@Override
 				public void printValue(String label, Object value) {
 					if (value != null && value.getClass().isArray()) {
 						value = CollectionUtils.arrayToList(value);
 					}
-					System.out.println(String.format("%20s = %s", label, value));
+					System.out.println(String.format("%17s = %s", label, value));
 				}
 			});
 		}
