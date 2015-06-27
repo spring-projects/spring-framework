@@ -123,16 +123,15 @@ public abstract class MockMvcResultHandlers {
 	 */
 	private static class LoggingResultHandler implements ResultHandler {
 
-		private final StringWriter stringWriter = new StringWriter();
-
-		private final ResultHandler printingResultHandler = new PrintWriterPrintingResultHandler(
-			new PrintWriter(stringWriter, true));
-
-
 		@Override
 		public void handle(MvcResult result) throws Exception {
-			this.printingResultHandler.handle(result);
-			logger.debug("MvcResult details:\n" + this.stringWriter);
+			if (logger.isDebugEnabled()) {
+				StringWriter stringWriter = new StringWriter();
+				ResultHandler printingResultHandler = new PrintWriterPrintingResultHandler(
+					new PrintWriter(stringWriter));
+				printingResultHandler.handle(result);
+				logger.debug("MvcResult details:\n" + stringWriter);
+			}
 		}
 	}
 
