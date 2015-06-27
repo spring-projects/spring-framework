@@ -40,10 +40,13 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
- * Result handler that prints {@link MvcResult} details to the "standard" output
- * stream.
- * <p>An instance of this class is typically accessed via
- * {@link MockMvcResultHandlers#print()}.
+ * Result handler that prints {@link MvcResult} details to a given output
+ * stream &mdash; for example: {@code System.out}, {@code System.err}, a
+ * custom {@code java.io.PrintWriter}, etc.
+ *
+ * <p>An instance of this class is typically accessed via one of the
+ * {@link MockMvcResultHandlers#print print} or {@link MockMvcResultHandlers#log log}
+ * methods in {@link MockMvcResultHandlers}.
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
@@ -70,7 +73,7 @@ public class PrintingResultHandler implements ResultHandler {
 	}
 
 	/**
-	 * Print {@link MvcResult} details to the "standard" output stream.
+	 * Print {@link MvcResult} details.
 	 */
 	@Override
 	public final void handle(MvcResult result) throws Exception {

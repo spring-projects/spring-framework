@@ -16,6 +16,14 @@
 
 package org.springframework.test.web.servlet.result;
 
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.util.CollectionUtils;
@@ -32,34 +40,99 @@ import org.springframework.util.CollectionUtils;
  */
 public abstract class MockMvcResultHandlers {
 
+	private static final Log logger = LogFactory.getLog(MockMvcResultHandlers.class.getPackage().getName());
+
+
+	/**
+	 * Log {@link MvcResult} details as a {@code DEBUG} log message via
+	 * Apache Commons Logging using the log category
+	 * {@code org.springframework.test.web.servlet.result}.
+	 * @since 4.2
+	 * @see #print()
+	 * @see #print(OutputStream)
+	 * @see #print(Writer)
+	 */
+	public static ResultHandler log() {
+		return new LoggingResultHandler();
+	}
+
 	/**
 	 * Print {@link MvcResult} details to the "standard" output stream.
+	 * @see System#out
+	 * @see #print(OutputStream)
+	 * @see #print(Writer)
+	 * @see #log()
 	 */
 	public static ResultHandler print() {
-		return new ConsolePrintingResultHandler();
+		return print(System.out);
+	}
+
+	/**
+	 * Print {@link MvcResult} details to the supplied {@link OutputStream}.
+	 * @since 4.2
+	 * @see #print()
+	 * @see #print(Writer)
+	 * @see #log()
+	 */
+	public static ResultHandler print(OutputStream stream) {
+		return new PrintWriterPrintingResultHandler(new PrintWriter(stream, true));
+	}
+
+	/**
+	 * Print {@link MvcResult} details to the supplied {@link Writer}.
+	 * @since 4.2
+	 * @see #print()
+	 * @see #print(OutputStream)
+	 * @see #log()
+	 */
+	public static ResultHandler print(Writer writer) {
+		return new PrintWriterPrintingResultHandler(new PrintWriter(writer, true));
 	}
 
 
 	/**
-	 * An {@link PrintingResultHandler} that writes to the "standard" output stream
+	 * A {@link PrintingResultHandler} that writes to a {@link PrintWriter}.
 	 */
-	private static class ConsolePrintingResultHandler extends PrintingResultHandler {
+	private static class PrintWriterPrintingResultHandler extends PrintingResultHandler {
 
-		public ConsolePrintingResultHandler() {
+		PrintWriterPrintingResultHandler(final PrintWriter writer) {
 			super(new ResultValuePrinter() {
 				@Override
 				public void printHeading(String heading) {
-					System.out.println();
-					System.out.println(String.format("%s:", heading));
+					writer.println();
+					writer.println(String.format("%s:", heading));
 				}
 				@Override
 				public void printValue(String label, Object value) {
 					if (value != null && value.getClass().isArray()) {
 						value = CollectionUtils.arrayToList(value);
 					}
-					System.out.println(String.format("%17s = %s", label, value));
+					writer.println(String.format("%17s = %s", label, value));
 				}
 			});
+		}
+	}
+
+	/**
+	 * A {@link ResultHandler} that logs {@link MvcResult} details at
+	 * {@code DEBUG} level via Apache Commons Logging.
+	 *
+	 * <p>Delegates to a {@link PrintWriterPrintingResultHandler} for
+	 * building the log message.
+	 * @since 4.2
+	 */
+	private static class LoggingResultHandler implements ResultHandler {
+
+		private final StringWriter stringWriter = new StringWriter();
+
+		private final ResultHandler printingResultHandler = new PrintWriterPrintingResultHandler(
+			new PrintWriter(stringWriter, true));
+
+
+		@Override
+		public void handle(MvcResult result) throws Exception {
+			this.printingResultHandler.handle(result);
+			logger.debug("MvcResult details:\n" + this.stringWriter);
 		}
 	}
 

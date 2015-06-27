@@ -42,10 +42,11 @@ import org.springframework.web.servlet.ModelAndView;
 import static org.junit.Assert.*;
 
 /**
- * Tests for {@link PrintingResultHandler}.
+ * Unit tests for {@link PrintingResultHandler}.
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @see org.springframework.test.web.servlet.samples.standalone.resulthandlers.PrintingResultHandlerSmokeTests
  */
 public class PrintingResultHandlerTests {
 
