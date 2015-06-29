@@ -501,7 +501,8 @@ public @interface MyTestConfig {
 === Web Improvements
 
 * HTTP Streaming and Server-Sent Events support, see <<mvc-ann-async-http-streaming>>.
-* Built-in support for CORS including global (MVC Java config) and local (e.g. `@CrossOrigin`) configuration.
+* Built-in support for CORS including global (MVC Java config and XML namespace) and
+  local (e.g. `@CrossOrigin`) configuration. See <<cors>> for details.
 * HTTP caching updates:
 ** new `CacheControl` builder; plug into `WebContentGenerator`, `ResourceHttpRequestHandler`, `ResponseEntity`.
 ** improved ETag/Last-Modified support in `WebRequest`.
