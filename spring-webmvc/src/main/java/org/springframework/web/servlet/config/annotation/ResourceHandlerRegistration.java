@@ -139,7 +139,8 @@ public class ResourceHandlerRegistration {
 	 * 	    development, especially when applying a version strategy.
 	 * @param cache the cache to use for storing resolved and transformed resources;
 	 *      by default a {@link org.springframework.cache.concurrent.ConcurrentMapCache}
-	 *      is used.
+	 *      is used. As Resources aren't serializable and can be dependent of the application host,
+	 *      one should not use a distributed cache but rather an in-memory cache.
 	 * @return the same {@link ResourceHandlerRegistration} instance for chained method invocation
 	 * @since 4.1
 	 */
