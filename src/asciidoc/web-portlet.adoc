@@ -1295,7 +1295,7 @@ The following code snippet from the PetPortal sample application shows the usage
 
 Parameters using this annotation are required by default, but you can specify that a
 parameter is optional by setting `@RequestParam`'s `required` attribute to `false`
-(e.g., `@RequestParam(value="id", required=false)`).
+(e.g., `@RequestParam(name="id", required=false)`).
 
 
 

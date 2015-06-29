@@ -8275,13 +8275,13 @@ do yourself a favor and read <<expressions>>:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(value="books", **key="#isbn"**)
+	@Cacheable(cacheNames="books", **key="#isbn"**)
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 
-	@Cacheable(value="books", **key="#isbn.rawNumber"**)
+	@Cacheable(cacheNames="books", **key="#isbn.rawNumber"**)
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 
-	@Cacheable(value="books", **key="T(someType).hash(#isbn)"**)
+	@Cacheable(cacheNames="books", **key="T(someType).hash(#isbn)"**)
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 ----
 
@@ -8295,7 +8295,7 @@ this, specify the name of the `KeyGenerator` bean implementation to use:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(value="books", **keyGenerator="myKeyGenerator"**)
+	@Cacheable(cacheNames="books", **keyGenerator="myKeyGenerator"**)
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 ----
 
@@ -8329,7 +8329,7 @@ to set the `cacheManager` to use per operation:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(value="books", **cacheManager="anotherCacheManager"**)
+	@Cacheable(cacheNames="books", **cacheManager="anotherCacheManager"**)
 	public Book findBook(ISBN isbn) {...}
 ----
 
@@ -8371,7 +8371,7 @@ only if the argument `name` has a length shorter than 32:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(value="book", **condition="#name.length < 32"**)
+	@Cacheable(cacheNames="book", **condition="#name.length < 32"**)
 	public Book findBook(String name)
 ----
 
@@ -8383,7 +8383,7 @@ only want to cache paperback books:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(value="book", condition="#name.length < 32", **unless="#result.hardback"**)
+	@Cacheable(cacheNames="book", condition="#name.length < 32", **unless="#result.hardback"**)
 	public Book findBook(String name)
 ----
 
@@ -8460,7 +8460,7 @@ than method flow optimization:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@CachePut(value="book", key="#isbn")
+	@CachePut(cacheNames="book", key="#isbn")
 	public Book updateBook(ISBN isbn, BookDescriptor descriptor)
 ----
 
@@ -8494,7 +8494,7 @@ rather then just an entry one (based on the key):
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@CacheEvict(value="books", **allEntries=true**)
+	@CacheEvict(cacheNames="books", **allEntries=true**)
 	public void loadBooks(InputStream batch)
 ----
 
@@ -8533,7 +8533,7 @@ this case, `@Caching`. `@Caching` allows multiple nested `@Cacheable`, `@CachePu
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Caching(evict = { @CacheEvict("primary"), @CacheEvict(value="secondary", key="#p0") })
+	@Caching(evict = { @CacheEvict("primary"), @CacheEvict(cacheNames="secondary", key="#p0") })
 	public Book importBooks(String deposit, Date date)
 ----
 
@@ -8753,7 +8753,7 @@ that is annotations that can annotate other annotations. To wit, let us replace 
 ----
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ElementType.METHOD})
-	@Cacheable(value="books", key="#isbn")
+	@Cacheable(cacheNames="books", key="#isbn")
 	public @interface SlowService {
 	}
 ----
@@ -8764,7 +8764,7 @@ Above, we have defined our own `SlowService` annotation which itself is annotate
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(value="books", key="#isbn")
+	@Cacheable(cacheNames="books", key="#isbn")
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 ----
 
@@ -8846,7 +8846,7 @@ possible to customize the factory per cache operation:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@CacheResult(value="books", *cacheResolverFactory=MyCacheResolverFactory.class*)
+	@CacheResult(cacheNames="books", *cacheResolverFactory=MyCacheResolverFactory.class*)
 	public Book findBook(ISBN isbn)
 ----
 
@@ -8867,7 +8867,7 @@ abstraction and the other with JCache:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(value="books", **key="#isbn"**)
+	@Cacheable(cacheNames="books", **key="#isbn"**)
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 
 	@CacheResult(cacheName="books")
