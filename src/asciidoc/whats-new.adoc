@@ -509,7 +509,7 @@ public @interface MyTestConfig {
 * Custom `@RequestMapping` annotations.
 * Public methods in `AbstractHandlerMethodMapping` to register and unregister request mappings at runtime.
 * New `RequestBodyAdvice` extension point and a built-in implementation to support Jackson's `@JsonView`
-  on`@RequestBody` method arguments.
+  on `@RequestBody` method arguments.
 * `HandlerMethod` as a method argument on `@ExceptionHandler` methods, especially
   handy in `@ControllerAdvice` components.
 * `java.util.concurrent.CompletableFuture` as an `@Controller` method return value type.
@@ -519,7 +519,11 @@ public @interface MyTestConfig {
 ** `DefaultUriTemplateHandler` exposes `baseUrl` property and path segment encoding options.
 ** the extension point can also be used to plug in any URI template library.
 * http://square.github.io/okhttp/[OkHTTP] integration with the `RestTemplate`.
-* Custom `baseUrl" alternative for methods in `MvcUriComponentsBuilder`.
+* Custom `baseUrl` alternative for methods in `MvcUriComponentsBuilder`.
+* Serialization/deserialization exception messages are now logged at WARN level.
+* When using GSON or Jackson 2.6+, the handler method return type is used to improve
+  serialization of parameterized types like `List<Foo>`.
+* Default JSON prefix has been changed from "{} && " to the safer ")]}', " one.
 
 === WebSocket Messaging Improvements
 
