@@ -491,7 +491,7 @@
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
 	The name of the Cache Manager to cache resource resolution. By default, a ConcurrentCacheMap will be used.
-	As Resources aren't serializable and can be dependent of the application host, one should not use a
+	Since Resources aren't serializable and can be dependent on the application host, one should not use a
 	distributed cache but rather an in-memory cache.
 					]]></xsd:documentation>
 			</xsd:annotation>
