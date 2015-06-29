@@ -427,13 +427,13 @@ method has been added.
 [subs="verbatim,quotes"]
 ----
 public @interface ContextConfiguration {
- 
+
     @AliasFor(attribute = "locations")
     String[] value() default {};
- 
+
     @AliasFor(attribute = "value")
     String[] locations() default {};
- 
+
     // ...
 }
 ----
@@ -442,17 +442,17 @@ public @interface ContextConfiguration {
    over exactly which attributes are overridden within an annotation
    hierarchy. In fact, it is now possible to declare an alias for the
    `value` attribute of a meta-annotation.
-** For example, one can now develop a composed annotation with a custom 
+** For example, one can now develop a composed annotation with a custom
    attribute override as follows.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 @ContextConfiguration
 public @interface MyTestConfig {
- 
-    @AliasFor(annotation = ContextConfiguration.class, attribute = "locations")
+
+    @AliasFor(annotation = ContextConfiguration.class, attribute = "value")
     String[] xmlFiles();
- 
+
     // ...
 }
 ----
