@@ -1361,7 +1361,7 @@ type, for example:
 			this.template = template;
 		}
 
-		@RequestMapping(value="/greetings", method=POST)
+		@RequestMapping(path="/greetings", method=POST)
 		public void greet(String greeting) {
 			String text = "[" + getTimestamp() + "]:" + greeting;
 			this.template.convertAndSend("/topic/greetings", text);
@@ -1684,7 +1684,7 @@ public class MyController {
     }
 
     @MessageExceptionHandler
-    @SendToUser(value="/queue/errors", broadcast=false)
+    @SendToUser(destinations="/queue/errors", broadcast=false)
     public ApplicationError handleException(MyBusinessException exception) {
         // ...
         return appError;
@@ -1961,7 +1961,7 @@ scope proxy mode for WebSocket-scoped beans:
 [subs="verbatim,quotes"]
 ----
 @Component
-@Scope(value="websocket", proxyMode = ScopedProxyMode.TARGET_CLASS)
+@Scope(name = "websocket", proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class MyBean {
 
     @PostConstruct

@@ -1723,7 +1723,7 @@ To trigger validation of a `@Controller` input, simply annotate the input argume
 	@Controller
 	public class MyController {
 
-		@RequestMapping("/foo", method=RequestMethod.POST)
+		@RequestMapping(path="/foo", method=RequestMethod.POST)
 		public void processFoo(**@Valid** Foo foo) { /* ... */ }
 ----
 
@@ -1755,7 +1755,7 @@ instance per `@Controller` class:
 			binder.setValidator(new FooValidator());
 		}
 
-		@RequestMapping("/foo", method=RequestMethod.POST)
+		@RequestMapping(path="/foo", method=RequestMethod.POST)
 		public void processFoo(@Valid Foo foo) { ... }
 
 	}
