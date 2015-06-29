@@ -30,12 +30,14 @@ import org.springframework.util.Assert;
 
 /**
  * Helper class that encapsulates the specification of a method parameter, i.e.
- * a Method or Constructor plus a parameter index and a nested type index for
- * a declared generic type. Useful as a specification object to pass along.
+ * a {@link Method} or {@link Constructor} plus a parameter index and a nested
+ * type index for a declared generic type. Useful as a specification object to
+ * pass along.
  *
- * <p>As of 4.2, there is a {@link org.springframework.core.annotation.SynthesizingMethodParameter}
- * subclass available which synthesizes annotations based on overridden annotation attributes.
- * That subclass is being used for web and message endpoint processing, in particular.
+ * <p>As of 4.2, there is a {@link org.springframework.core.annotation.SynthesizingMethodParameter
+ * SynthesizingMethodParameter} subclass available which synthesizes annotations
+ * with attribute aliases. That subclass is used for web and message endpoint
+ * processing, in particular.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -43,6 +45,7 @@ import org.springframework.util.Assert;
  * @author Sam Brannen
  * @since 2.0
  * @see GenericCollectionTypeResolver
+ * @see org.springframework.core.annotation.SynthesizingMethodParameter
  */
 public class MethodParameter {
 

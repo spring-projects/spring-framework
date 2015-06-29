@@ -22,9 +22,8 @@ import java.lang.reflect.Method;
 import org.springframework.core.MethodParameter;
 
 /**
- * A {@link MethodParameter} variant which synthesizes annotations
- * based on overridden annotation attributes, e.g. as declared with
- * {@link AliasFor @AliasFor}.
+ * A {@link MethodParameter} variant which synthesizes annotations that
+ * declare attribute aliases via {@link AliasFor @AliasFor}.
  *
  * @author Juergen Hoeller
  * @author Sam Brannen
