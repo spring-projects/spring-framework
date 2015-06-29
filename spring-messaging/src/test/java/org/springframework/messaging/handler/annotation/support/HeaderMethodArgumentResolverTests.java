@@ -27,6 +27,7 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandlingException;
@@ -62,15 +63,16 @@ public class HeaderMethodArgumentResolverTests {
 
 		Method method = getClass().getDeclaredMethod("handleMessage",
 				String.class, String.class, String.class, String.class, String.class);
-		this.paramRequired = new MethodParameter(method, 0);
-		this.paramNamedDefaultValueStringHeader = new MethodParameter(method, 1);
-		this.paramSystemProperty = new MethodParameter(method, 2);
-		this.paramNotAnnotated = new MethodParameter(method, 3);
-		this.paramNativeHeader = new MethodParameter(method, 4);
+		this.paramRequired = new SynthesizingMethodParameter(method, 0);
+		this.paramNamedDefaultValueStringHeader = new SynthesizingMethodParameter(method, 1);
+		this.paramSystemProperty = new SynthesizingMethodParameter(method, 2);
+		this.paramNotAnnotated = new SynthesizingMethodParameter(method, 3);
+		this.paramNativeHeader = new SynthesizingMethodParameter(method, 4);
 
 		this.paramRequired.initParameterNameDiscovery(new DefaultParameterNameDiscoverer());
 		GenericTypeResolver.resolveParameterType(this.paramRequired, HeaderMethodArgumentResolver.class);
 	}
+
 
 	@Test
 	public void supportsParameter() {

@@ -41,6 +41,7 @@ import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.objenesis.ObjenesisException;
 import org.springframework.objenesis.SpringObjenesis;
 import org.springframework.util.AntPathMatcher;
@@ -486,7 +487,7 @@ public class MvcUriComponentsBuilder {
 
 		final Map<String, Object> uriVars = new HashMap<String, Object>();
 		for (int i = 0; i < paramCount; i++) {
-			MethodParameter param = new MethodParameter(method, i);
+			MethodParameter param = new SynthesizingMethodParameter(method, i);
 			param.initParameterNameDiscovery(parameterNameDiscoverer);
 			contributor.contributeMethodArgument(param, args[i], builder, uriVars);
 		}

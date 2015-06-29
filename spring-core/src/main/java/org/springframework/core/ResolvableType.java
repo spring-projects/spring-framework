@@ -1122,7 +1122,7 @@ public class ResolvableType implements Serializable {
 	 */
 	public static ResolvableType forMethodReturnType(Method method) {
 		Assert.notNull(method, "Method must not be null");
-		return forMethodParameter(MethodParameter.forMethodOrConstructor(method, -1));
+		return forMethodParameter(new MethodParameter(method, -1));
 	}
 
 	/**
@@ -1136,7 +1136,7 @@ public class ResolvableType implements Serializable {
 	 */
 	public static ResolvableType forMethodReturnType(Method method, Class<?> implementationClass) {
 		Assert.notNull(method, "Method must not be null");
-		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(method, -1);
+		MethodParameter methodParameter = new MethodParameter(method, -1);
 		methodParameter.setContainingClass(implementationClass);
 		return forMethodParameter(methodParameter);
 	}

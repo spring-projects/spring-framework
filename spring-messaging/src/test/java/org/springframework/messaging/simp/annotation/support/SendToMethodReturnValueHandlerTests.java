@@ -16,20 +16,17 @@
 
 package org.springframework.messaging.simp.annotation.support;
 
-import com.fasterxml.jackson.annotation.JsonView;
-
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import javax.security.auth.Subject;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -37,6 +34,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
@@ -56,7 +54,7 @@ import org.springframework.util.MimeType;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
-import static org.springframework.messaging.handler.annotation.support.DestinationVariableMethodArgumentResolver.DESTINATION_TEMPLATE_VARIABLES_HEADER;
+import static org.springframework.messaging.handler.annotation.support.DestinationVariableMethodArgumentResolver.*;
 import static org.springframework.messaging.support.MessageHeaderAccessor.*;
 
 /**
@@ -95,7 +93,6 @@ public class SendToMethodReturnValueHandlerTests {
 
 	@Before
 	public void setup() throws Exception {
-
 		MockitoAnnotations.initMocks(this);
 
 		SimpMessagingTemplate messagingTemplate = new SimpMessagingTemplate(this.messageChannel);
@@ -108,31 +105,31 @@ public class SendToMethodReturnValueHandlerTests {
 		this.jsonHandler = new SendToMethodReturnValueHandler(jsonMessagingTemplate, true);
 
 		Method method = this.getClass().getDeclaredMethod("handleNoAnnotations");
-		this.noAnnotationsReturnType = new MethodParameter(method, -1);
+		this.noAnnotationsReturnType = new SynthesizingMethodParameter(method, -1);
 
 		method = this.getClass().getDeclaredMethod("handleAndSendToDefaultDestination");
-		this.sendToDefaultDestReturnType = new MethodParameter(method, -1);
+		this.sendToDefaultDestReturnType = new SynthesizingMethodParameter(method, -1);
 
 		method = this.getClass().getDeclaredMethod("handleAndSendTo");
-		this.sendToReturnType = new MethodParameter(method, -1);
+		this.sendToReturnType = new SynthesizingMethodParameter(method, -1);
 
 		method = this.getClass().getDeclaredMethod("handleAndSendToWithPlaceholders");
-		this.sendToWithPlaceholdersReturnType = new MethodParameter(method, -1);
+		this.sendToWithPlaceholdersReturnType = new SynthesizingMethodParameter(method, -1);
 
 		method = this.getClass().getDeclaredMethod("handleAndSendToUser");
-		this.sendToUserReturnType = new MethodParameter(method, -1);
+		this.sendToUserReturnType = new SynthesizingMethodParameter(method, -1);
 
 		method = this.getClass().getDeclaredMethod("handleAndSendToUserSingleSession");
-		this.sendToUserSingleSessionReturnType = new MethodParameter(method, -1);
+		this.sendToUserSingleSessionReturnType = new SynthesizingMethodParameter(method, -1);
 
 		method = this.getClass().getDeclaredMethod("handleAndSendToUserDefaultDestination");
-		this.sendToUserDefaultDestReturnType = new MethodParameter(method, -1);
+		this.sendToUserDefaultDestReturnType = new SynthesizingMethodParameter(method, -1);
 
 		method = this.getClass().getDeclaredMethod("handleAndSendToUserDefaultDestinationSingleSession");
-		this.sendToUserSingleSessionDefaultDestReturnType = new MethodParameter(method, -1);
+		this.sendToUserSingleSessionDefaultDestReturnType = new SynthesizingMethodParameter(method, -1);
 
 		method = this.getClass().getDeclaredMethod("handleAndSendToJsonView");
-		this.jsonViewReturnType = new MethodParameter(method, -1);
+		this.jsonViewReturnType = new SynthesizingMethodParameter(method, -1);
 	}
 
 

@@ -26,13 +26,16 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.Assert;
 
 /**
  * Helper class that encapsulates the specification of a method parameter, i.e.
  * a Method or Constructor plus a parameter index and a nested type index for
  * a declared generic type. Useful as a specification object to pass along.
+ *
+ * <p>As of 4.2, there is a {@link org.springframework.core.annotation.SynthesizingMethodParameter}
+ * subclass available which synthesizes annotations based on overridden annotation attributes.
+ * That subclass is being used for web and message endpoint processing, in particular.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -388,7 +391,7 @@ public class MethodParameter {
 	 * Return the annotations associated with the target method/constructor itself.
 	 */
 	public Annotation[] getMethodAnnotations() {
-		return AnnotationUtils.synthesizeAnnotationArray(getAnnotatedElement().getAnnotations(), getAnnotatedElement());
+		return adaptAnnotationArray(getAnnotatedElement().getAnnotations());
 	}
 
 	/**
@@ -396,9 +399,8 @@ public class MethodParameter {
 	 * @param annotationType the annotation type to look for
 	 * @return the annotation object, or {@code null} if not found
 	 */
-	public <T extends Annotation> T getMethodAnnotation(Class<T> annotationType) {
-		AnnotatedElement element = getAnnotatedElement();
-		return AnnotationUtils.synthesizeAnnotation(element.getAnnotation(annotationType), element);
+	public <A extends Annotation> A getMethodAnnotation(Class<A> annotationType) {
+		return adaptAnnotation(getAnnotatedElement().getAnnotation(annotationType));
 	}
 
 	/**
@@ -409,8 +411,7 @@ public class MethodParameter {
 			Annotation[][] annotationArray = (this.method != null ?
 					this.method.getParameterAnnotations() : this.constructor.getParameterAnnotations());
 			if (this.parameterIndex >= 0 && this.parameterIndex < annotationArray.length) {
-				this.parameterAnnotations = AnnotationUtils.synthesizeAnnotationArray(
-					annotationArray[this.parameterIndex], getAnnotatedElement());
+				this.parameterAnnotations = adaptAnnotationArray(annotationArray[this.parameterIndex]);
 			}
 			else {
 				this.parameterAnnotations = new Annotation[0];
@@ -477,6 +478,31 @@ public class MethodParameter {
 			this.parameterNameDiscoverer = null;
 		}
 		return this.parameterName;
+	}
+
+
+	/**
+	 * A template method to post-process a given annotation instance before
+	 * returning it to the caller.
+	 * <p>The default implementation simply returns the given annotation as-is.
+	 * @param annotation the annotation about to be returned
+	 * @return the post-processed annotation (or simply the original one)
+	 * @since 4.2
+	 */
+	protected <A extends Annotation> A adaptAnnotation(A annotation) {
+		return annotation;
+	}
+
+	/**
+	 * A template method to post-process a given annotation array before
+	 * returning it to the caller.
+	 * <p>The default implementation simply returns the given annotation array as-is.
+	 * @param annotations the annotation array about to be returned
+	 * @return the post-processed annotation array (or simply the original one)
+	 * @since 4.2
+	 */
+	protected Annotation[] adaptAnnotationArray(Annotation[] annotations) {
+		return annotations;
 	}
 
 

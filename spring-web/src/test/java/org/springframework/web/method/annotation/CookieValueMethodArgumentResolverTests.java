@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.bind.ServletRequestBindingException;
@@ -52,18 +53,20 @@ public class CookieValueMethodArgumentResolverTests {
 
 	private MockHttpServletRequest request;
 
+
 	@Before
 	public void setUp() throws Exception {
 		resolver = new TestCookieValueMethodArgumentResolver();
 
 		Method method = getClass().getMethod("params", Cookie.class, String.class, String.class);
-		paramNamedCookie = new MethodParameter(method, 0);
-		paramNamedDefaultValueString = new MethodParameter(method, 1);
-		paramString = new MethodParameter(method, 2);
+		paramNamedCookie = new SynthesizingMethodParameter(method, 0);
+		paramNamedDefaultValueString = new SynthesizingMethodParameter(method, 1);
+		paramString = new SynthesizingMethodParameter(method, 2);
 
 		request = new MockHttpServletRequest();
 		webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
 	}
+
 
 	@Test
 	public void supportsParameter() {
@@ -97,6 +100,7 @@ public class CookieValueMethodArgumentResolverTests {
 			return null;
 		}
 	}
+
 
 	public void params(@CookieValue("name") Cookie param1,
 					   @CookieValue(name = "name", defaultValue = "bar") String param2,

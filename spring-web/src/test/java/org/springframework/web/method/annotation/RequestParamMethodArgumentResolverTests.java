@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import javax.servlet.http.Part;
 
 import org.junit.Before;
@@ -31,6 +30,7 @@ import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -99,28 +99,28 @@ public class RequestParamMethodArgumentResolverTests {
 				String.class, MultipartFile.class, List.class, Part.class,
 				MultipartFile.class, String.class, String.class, Optional.class);
 
-		paramNamedDefaultValueString = new MethodParameter(method, 0);
-		paramNamedStringArray = new MethodParameter(method, 1);
-		paramNamedMap = new MethodParameter(method, 2);
-		paramMultipartFile = new MethodParameter(method, 3);
-		paramMultipartFileList = new MethodParameter(method, 4);
-		paramMultipartFileArray = new MethodParameter(method, 5);
-		paramPart = new MethodParameter(method, 6);
-		paramPartList  = new MethodParameter(method, 7);
-		paramPartArray  = new MethodParameter(method, 8);
-		paramMap = new MethodParameter(method, 9);
-		paramStringNotAnnot = new MethodParameter(method, 10);
+		paramNamedDefaultValueString = new SynthesizingMethodParameter(method, 0);
+		paramNamedStringArray = new SynthesizingMethodParameter(method, 1);
+		paramNamedMap = new SynthesizingMethodParameter(method, 2);
+		paramMultipartFile = new SynthesizingMethodParameter(method, 3);
+		paramMultipartFileList = new SynthesizingMethodParameter(method, 4);
+		paramMultipartFileArray = new SynthesizingMethodParameter(method, 5);
+		paramPart = new SynthesizingMethodParameter(method, 6);
+		paramPartList  = new SynthesizingMethodParameter(method, 7);
+		paramPartArray  = new SynthesizingMethodParameter(method, 8);
+		paramMap = new SynthesizingMethodParameter(method, 9);
+		paramStringNotAnnot = new SynthesizingMethodParameter(method, 10);
 		paramStringNotAnnot.initParameterNameDiscovery(paramNameDiscoverer);
-		paramMultipartFileNotAnnot = new MethodParameter(method, 11);
+		paramMultipartFileNotAnnot = new SynthesizingMethodParameter(method, 11);
 		paramMultipartFileNotAnnot.initParameterNameDiscovery(paramNameDiscoverer);
-		paramMultipartFileListNotAnnot = new MethodParameter(method, 12);
+		paramMultipartFileListNotAnnot = new SynthesizingMethodParameter(method, 12);
 		paramMultipartFileListNotAnnot.initParameterNameDiscovery(paramNameDiscoverer);
-		paramPartNotAnnot = new MethodParameter(method, 13);
+		paramPartNotAnnot = new SynthesizingMethodParameter(method, 13);
 		paramPartNotAnnot.initParameterNameDiscovery(paramNameDiscoverer);
-		paramRequestPartAnnot = new MethodParameter(method, 14);
-		paramRequired = new MethodParameter(method, 15);
-		paramNotRequired = new MethodParameter(method, 16);
-		paramOptional = new MethodParameter(method, 17);
+		paramRequestPartAnnot = new SynthesizingMethodParameter(method, 14);
+		paramRequired = new SynthesizingMethodParameter(method, 15);
+		paramNotRequired = new SynthesizingMethodParameter(method, 16);
+		paramOptional = new SynthesizingMethodParameter(method, 17);
 
 		request = new MockHttpServletRequest();
 		webRequest = new ServletWebRequest(request, new MockHttpServletResponse());

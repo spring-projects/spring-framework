@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
@@ -241,7 +242,7 @@ public class HandlerMethodInvoker {
 		Object[] args = new Object[paramTypes.length];
 
 		for (int i = 0; i < args.length; i++) {
-			MethodParameter methodParam = new MethodParameter(handlerMethod, i);
+			MethodParameter methodParam = new SynthesizingMethodParameter(handlerMethod, i);
 			methodParam.initParameterNameDiscovery(this.parameterNameDiscoverer);
 			GenericTypeResolver.resolveParameterType(methodParam, handler.getClass());
 			String paramName = null;
@@ -420,7 +421,7 @@ public class HandlerMethodInvoker {
 		Object[] initBinderArgs = new Object[initBinderParams.length];
 
 		for (int i = 0; i < initBinderArgs.length; i++) {
-			MethodParameter methodParam = new MethodParameter(initBinderMethod, i);
+			MethodParameter methodParam = new SynthesizingMethodParameter(initBinderMethod, i);
 			methodParam.initParameterNameDiscovery(this.parameterNameDiscoverer);
 			GenericTypeResolver.resolveParameterType(methodParam, handler.getClass());
 			String paramName = null;
