@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
@@ -56,6 +57,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  */
 public class SourceHttpMessageConverterTests {
 
@@ -226,8 +228,13 @@ public class SourceHttpMessageConverterTests {
 		streamReader.next();
 		String s = streamReader.getLocalName();
 		assertEquals("root", s);
-		s = streamReader.getElementText();
-		assertNotEquals("Foo Bar", s);
+		try {
+			s = streamReader.getElementText();
+			assertNotEquals("Foo Bar", s);
+		}
+		catch (XMLStreamException ex) {
+			// Some parsers raise a parse exception
+		}
 		streamReader.close();
 	}
 

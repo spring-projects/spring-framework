@@ -51,6 +51,7 @@ import static org.junit.Assert.assertTrue;
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  */
 @SuppressWarnings("unused")
 public class Jaxb2RootElementHttpMessageConverterTests {

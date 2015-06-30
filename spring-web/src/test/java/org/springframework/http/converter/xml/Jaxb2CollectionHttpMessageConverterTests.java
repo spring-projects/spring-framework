@@ -43,6 +43,7 @@ import static org.junit.Assert.*;
  * Test fixture for {@link Jaxb2CollectionHttpMessageConverter}.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  */
 @SuppressWarnings("unused")
 public class Jaxb2CollectionHttpMessageConverterTests {
@@ -151,9 +152,14 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 			}
 		};
 
-		Collection<RootElement> result = converter.read(rootElementListType, null, inputMessage);
-		assertEquals(1, result.size());
-		assertEquals("", result.iterator().next().external);
+		try {
+			Collection<RootElement> result = converter.read(rootElementListType, null, inputMessage);
+			assertEquals(1, result.size());
+			assertEquals("", result.iterator().next().external);
+		}
+		catch (HttpMessageNotReadableException ex) {
+			// Some parsers raise an exception
+		}
 	}
 
 	@Test
