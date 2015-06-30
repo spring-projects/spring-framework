@@ -43,6 +43,7 @@ configure(allprojects) { project ->
 	ext.hsqldbVersion        = "2.3.2"
 	ext.httpclientVersion    = "4.5"
 	ext.httpasyncVersion     = "4.1"
+	ext.htmlunitVersion      = "2.17"
 	ext.jackson2Version      = "2.6.0-rc2"  // to be upgraded to 2.6 final in time for Spring Framework 4.2 GA
 	ext.jasperreportsVersion = "6.1.0"
 	ext.javamailVersion      = "1.5.3"
@@ -56,6 +57,7 @@ configure(allprojects) { project ->
 	ext.poiVersion           = "3.12"
 	ext.protobufVersion      = "2.6.1"
 	ext.reactorVersion       = "2.0.3.RELEASE"
+	ext.seleniumVersion      = "2.46.0"
 	ext.slf4jVersion         = "1.7.12"
 	ext.snakeyamlVersion     = "1.15"
 	ext.snifferVersion       = "1.14"
@@ -1005,6 +1007,8 @@ project("spring-test") {
 		optional("com.jayway.jsonpath:json-path:2.0.0")
 		optional("org.skyscreamer:jsonassert:1.2.3")
 		optional("xmlunit:xmlunit:${xmlunitVersion}")
+		optional("net.sourceforge.htmlunit:htmlunit:$htmlunitVersion")
+		optional("org.seleniumhq.selenium:selenium-htmlunit-driver:$seleniumVersion")
 		testCompile(project(":spring-context-support"))
 		testCompile(project(":spring-oxm"))
 		testCompile("javax.mail:javax.mail-api:${javamailVersion}")
