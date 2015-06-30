@@ -212,6 +212,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 
 		Class<?>[] parameterTypes = new Class<?>[] { byte[].class };
 
+		request.setMethod("POST");
 		request.addHeader("Content-Type", "text/plain; charset=utf-8");
 		request.setContent("Hello Server".getBytes("UTF-8"));
 

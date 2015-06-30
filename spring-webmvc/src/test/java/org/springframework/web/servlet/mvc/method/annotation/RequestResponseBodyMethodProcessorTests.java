@@ -112,6 +112,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		mavContainer = new ModelAndViewContainer();
 
 		servletRequest = new MockHttpServletRequest();
+		servletRequest.setMethod("POST");
 		servletResponse = new MockHttpServletResponse();
 		webRequest = new ServletWebRequest(servletRequest, servletResponse);
 
@@ -140,6 +141,7 @@ public class RequestResponseBodyMethodProcessorTests {
 	@Test
 	public void resolveArgumentRawTypeFromParameterizedType() throws Exception {
 		String content = "fruit=apple&vegetable=kale";
+		this.servletRequest.setMethod("GET");
 		this.servletRequest.setContent(content.getBytes("UTF-8"));
 		this.servletRequest.setContentType(MediaType.APPLICATION_FORM_URLENCODED_VALUE);
 

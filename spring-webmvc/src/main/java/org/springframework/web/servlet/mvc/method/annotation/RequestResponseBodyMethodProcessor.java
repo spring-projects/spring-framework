@@ -18,6 +18,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -25,7 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.http.HttpInputMessage;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -57,6 +58,9 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  * @since 3.1
  */
 public class RequestResponseBodyMethodProcessor extends AbstractMessageConverterMethodProcessor {
+
+	private static final List<HttpMethod> SUPPORTED_METHODS =
+			Arrays.asList(HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH);
 
 	/**
 	 * Basic constructor with converters only. Suitable for resolving
@@ -143,16 +147,19 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 			Type paramType) throws IOException, HttpMediaTypeNotSupportedException {
 
 		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
-		HttpInputMessage inputMessage = new ServletServerHttpRequest(servletRequest);
+		ServletServerHttpRequest inputMessage = new ServletServerHttpRequest(servletRequest);
 
-		Object arg = readWithMessageConverters(inputMessage, methodParam, paramType);
-		if (arg == null) {
-			if (methodParam.getParameterAnnotation(RequestBody.class).required()) {
-				throw new HttpMessageNotReadableException("Required request body is missing: " +
-						methodParam.getMethod().toGenericString());
+		Object arg = null;
+		if (webRequest.getHeader("Content-Type") != null ||
+				SUPPORTED_METHODS.contains(inputMessage.getMethod())) {
+			arg = readWithMessageConverters(inputMessage, methodParam, paramType);
+			if (arg == null) {
+				if (methodParam.getParameterAnnotation(RequestBody.class).required()) {
+					throw new HttpMessageNotReadableException("Required request body is missing: " +
+							methodParam.getMethod().toGenericString());
+				}
 			}
 		}
-
 		return arg;
 	}
 
