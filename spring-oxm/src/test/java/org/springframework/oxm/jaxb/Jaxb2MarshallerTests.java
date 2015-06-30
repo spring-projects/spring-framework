@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -308,7 +308,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 	// SPR-10806
 
 	@Test
-	public void unmarshalStreamSourceExternalEntities() throws Exception {
+	public void unmarshalStreamSourceWithXmlOptions() throws Exception {
 
 		final javax.xml.bind.Unmarshaller unmarshaller = mock(javax.xml.bind.Unmarshaller.class);
 		Jaxb2Marshaller marshaller = new Jaxb2Marshaller() {
@@ -318,24 +318,27 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 			}
 		};
 
-		// 1. external-general-entities disabled (default)
+		// 1. external-general-entities and dtd support disabled (default)
 
 		marshaller.unmarshal(new StreamSource("1"));
 		ArgumentCaptor<SAXSource> sourceCaptor = ArgumentCaptor.forClass(SAXSource.class);
 		verify(unmarshaller).unmarshal(sourceCaptor.capture());
 
 		SAXSource result = sourceCaptor.getValue();
+		assertEquals(true, result.getXMLReader().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
 		assertEquals(false, result.getXMLReader().getFeature("http://xml.org/sax/features/external-general-entities"));
 
-		// 2. external-general-entities enabled
+		// 2. external-general-entities and dtd support enabled
 
 		reset(unmarshaller);
+		marshaller.setSupportDtd(true);
 		marshaller.setProcessExternalEntities(true);
 
 		marshaller.unmarshal(new StreamSource("1"));
 		verify(unmarshaller).unmarshal(sourceCaptor.capture());
 
 		result = sourceCaptor.getValue();
+		assertEquals(false, result.getXMLReader().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
 		assertEquals(true, result.getXMLReader().getFeature("http://xml.org/sax/features/external-general-entities"));
 	}
 
@@ -352,24 +355,27 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 			}
 		};
 
-		// 1. external-general-entities disabled (default)
+		// 1. external-general-entities and dtd support disabled (default)
 
 		marshaller.unmarshal(new SAXSource(new InputSource("1")));
 		ArgumentCaptor<SAXSource> sourceCaptor = ArgumentCaptor.forClass(SAXSource.class);
 		verify(unmarshaller).unmarshal(sourceCaptor.capture());
 
 		SAXSource result = sourceCaptor.getValue();
+		assertEquals(true, result.getXMLReader().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
 		assertEquals(false, result.getXMLReader().getFeature("http://xml.org/sax/features/external-general-entities"));
 
-		// 2. external-general-entities enabled
+		// 2. external-general-entities and dtd support enabled
 
 		reset(unmarshaller);
+		marshaller.setSupportDtd(true);
 		marshaller.setProcessExternalEntities(true);
 
 		marshaller.unmarshal(new SAXSource(new InputSource("1")));
 		verify(unmarshaller).unmarshal(sourceCaptor.capture());
 
 		result = sourceCaptor.getValue();
+		assertEquals(false, result.getXMLReader().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
 		assertEquals(true, result.getXMLReader().getFeature("http://xml.org/sax/features/external-general-entities"));
 	}
 

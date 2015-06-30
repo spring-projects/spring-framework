@@ -206,21 +206,24 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 			}
 		};
 
-		// 1. external-general-entities disabled (default)
+		// 1. external-general-entities and dtd support disabled (default)
 		marshaller.unmarshal(new StreamSource("1"));
 		assertNotNull(result.get());
+		assertEquals(true, result.get().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
 		assertEquals(false, result.get().getFeature("http://xml.org/sax/features/external-general-entities"));
 
-		// 2. external-general-entities disabled (default)
+		// 2. external-general-entities and dtd support enabled
 		result.set(null);
+		marshaller.setSupportDtd(true);
 		marshaller.setProcessExternalEntities(true);
 		marshaller.unmarshal(new StreamSource("1"));
 		assertNotNull(result.get());
+		assertEquals(false, result.get().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
 		assertEquals(true, result.get().getFeature("http://xml.org/sax/features/external-general-entities"));
 	}
 
 	@Test
-	public void unmarshalSaxSourceExternalEntities() throws Exception {
+	public void unmarshalSaxSourceWithXmlOptions() throws Exception {
 		final AtomicReference<XMLReader> result = new AtomicReference<XMLReader>();
 		CastorMarshaller marshaller = new CastorMarshaller() {
 			@Override
@@ -230,16 +233,19 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 			}
 		};
 
-		// 1. external-general-entities disabled (default)
+		// 1. external-general-entities and dtd support disabled (default)
 		marshaller.unmarshal(new SAXSource(new InputSource("1")));
 		assertNotNull(result.get());
+		assertEquals(true, result.get().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
 		assertEquals(false, result.get().getFeature("http://xml.org/sax/features/external-general-entities"));
 
-		// 2. external-general-entities disabled (default)
+		// 2. external-general-entities and dtd support enabled
 		result.set(null);
+		marshaller.setSupportDtd(true);
 		marshaller.setProcessExternalEntities(true);
 		marshaller.unmarshal(new SAXSource(new InputSource("1")));
 		assertNotNull(result.get());
+		assertEquals(false, result.get().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
 		assertEquals(true, result.get().getFeature("http://xml.org/sax/features/external-general-entities"));
 	}
 

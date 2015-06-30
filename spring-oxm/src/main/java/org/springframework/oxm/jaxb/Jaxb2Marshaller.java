@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,6 +175,8 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	private volatile JAXBContext jaxbContext;
 
 	private Schema schema;
+
+	private boolean supportDtd = false;
 
 	private boolean processExternalEntities = false;
 
@@ -391,15 +393,35 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	}
 
 	/**
+	 * Indicates whether DTD parsing should be supported.
+	 * <p>Default is {@code false} meaning that DTD is disabled.
+	 */
+	public void setSupportDtd(boolean supportDtd) {
+		this.supportDtd = supportDtd;
+	}
+
+	/**
+	 * Whether DTD parsing is supported.
+	 */
+	public boolean isSupportDtd() {
+		return this.supportDtd;
+	}
+
+	/**
 	 * Indicates whether external XML entities are processed when unmarshalling.
 	 * <p>Default is {@code false}, meaning that external entities are not resolved.
 	 * Note that processing of external entities will only be enabled/disabled when the
 	 * {@code Source} passed to {@link #unmarshal(Source)} is a {@link SAXSource} or
 	 * {@link StreamSource}. It has no effect for {@link DOMSource} or {@link StAXSource}
 	 * instances.
+	 * <p><strong>Note:</strong> setting this option to {@code true} also
+	 * automatically sets {@link #setSupportDtd} to {@code true}.
 	 */
 	public void setProcessExternalEntities(boolean processExternalEntities) {
 		this.processExternalEntities = processExternalEntities;
+		if (processExternalEntities) {
+			setSupportDtd(true);
+		}
 	}
 
 	/**
@@ -746,6 +768,14 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 				return unmarshaller.unmarshal(source);
 			}
 		}
+		catch (NullPointerException ex) {
+			if (!isSupportDtd()) {
+				throw new UnmarshallingFailureException("NPE while unmarshalling. " +
+						"This can happen on JDK 1.6 due to the presence of DTD " +
+						"declarations, which are disabled.", ex);
+			}
+			throw ex;
+		}
 		catch (JAXBException ex) {
 			throw convertJaxbException(ex);
 		}
@@ -801,6 +831,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 			if (xmlReader == null) {
 				xmlReader = XMLReaderFactory.createXMLReader();
 			}
+			xmlReader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
 			String name = "http://xml.org/sax/features/external-general-entities";
 			xmlReader.setFeature(name, isProcessExternalEntities());
 			if (!isProcessExternalEntities()) {

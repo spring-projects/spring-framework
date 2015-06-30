@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -226,6 +226,7 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 	 */
 	protected XMLInputFactory createXmlInputFactory() {
 		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+		inputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
 		inputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
 		inputFactory.setXMLResolver(NO_OP_XML_RESOLVER);
 		return inputFactory;
