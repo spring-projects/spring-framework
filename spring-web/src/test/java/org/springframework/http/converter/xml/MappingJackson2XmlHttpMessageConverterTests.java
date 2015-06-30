@@ -17,7 +17,6 @@
 package org.springframework.http.converter.xml;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 
@@ -26,10 +25,8 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.xml.sax.SAXException;
 
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
@@ -45,6 +42,7 @@ import static org.junit.Assert.*;
  * Jackson 2.x XML converter tests.
  *
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  */
 public class MappingJackson2XmlHttpMessageConverterTests {
 
@@ -70,17 +68,16 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 
 	@Test
 	public void read() throws IOException {
-		String body =
-				"<MyBean><string>Foo</string><number>42</number><fraction>42.0</fraction><array><array>Foo</array><array>Bar</array></array><bool>true</bool><bytes>AQI=</bytes></MyBean>";
+		String body = "<MyBean><string>Foo</string><number>42</number><fraction>42.0</fraction><array><array>Foo</array><array>Bar</array></array><bool>true</bool><bytes>AQI=</bytes></MyBean>";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
 		MyBean result = (MyBean) converter.read(MyBean.class, inputMessage);
 		assertEquals("Foo", result.getString());
 		assertEquals(42, result.getNumber());
 		assertEquals(42F, result.getFraction(), 0F);
-		assertArrayEquals(new String[] {"Foo", "Bar"}, result.getArray());
+		assertArrayEquals(new String[]{"Foo", "Bar"}, result.getArray());
 		assertTrue(result.isBool());
-		assertArrayEquals(new byte[] {0x1, 0x2}, result.getBytes());
+		assertArrayEquals(new byte[]{0x1, 0x2}, result.getBytes());
 	}
 
 	@Test
@@ -149,7 +146,6 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 
 	@Test
 	public void readWithExternalReference() throws IOException {
-
 		String body = "<!DOCTYPE MyBean SYSTEM \"http://192.168.28.42/1.jsp\" [" +
 				"  <!ELEMENT root ANY >\n" +
 				"  <!ENTITY ext SYSTEM \"" +
@@ -160,14 +156,11 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
 
 		this.thrown.expect(HttpMessageNotReadableException.class);
-		this.thrown.expectMessage("entity \"ext\"");
-
 		this.converter.read(MyBean.class, inputMessage);
 	}
 
 	@Test
 	public void readWithXmlBomb() throws IOException {
-
 		// https://en.wikipedia.org/wiki/Billion_laughs
 		// https://msdn.microsoft.com/en-us/magazine/ee335713.aspx
 		String body = "<?xml version=\"1.0\"?>\n" +
@@ -190,15 +183,11 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
 
 		this.thrown.expect(HttpMessageNotReadableException.class);
-		this.thrown.expectMessage("entity \"lol9\"");
-
 		this.converter.read(MyBean.class, inputMessage);
 	}
 
 
-	private void writeInternal(Object object, HttpOutputMessage outputMessage)
-			throws NoSuchMethodException, InvocationTargetException,
-			IllegalAccessException {
+	private void writeInternal(Object object, HttpOutputMessage outputMessage) throws Exception {
 		Method method = AbstractHttpMessageConverter.class.getDeclaredMethod(
 				"writeInternal", Object.class, HttpOutputMessage.class);
 		method.setAccessible(true);
@@ -269,8 +258,11 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		}
 	}
 
+
 	private interface MyJacksonView1 {};
+
 	private interface MyJacksonView2 {};
+
 
 	@SuppressWarnings("unused")
 	private static class JacksonViewBean {
@@ -307,6 +299,7 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 			this.withoutView = withoutView;
 		}
 	}
+
 
 	@SuppressWarnings("serial")
 	private static class MyXmlMapper extends XmlMapper {

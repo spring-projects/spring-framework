@@ -16,18 +16,10 @@
 
 package org.springframework.oxm.castor;
 
-import static junit.framework.Assert.assertEquals;
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.*;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.concurrent.atomic.AtomicReference;
-
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 
@@ -40,6 +32,9 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.oxm.AbstractUnmarshallerTests;
 import org.springframework.oxm.MarshallingException;
 import org.springframework.oxm.Unmarshaller;
+
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma

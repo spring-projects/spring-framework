@@ -16,16 +16,10 @@
 
 package org.springframework.http.converter.xml;
 
-import static org.custommonkey.xmlunit.XMLAssert.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertTrue;
-
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.nio.charset.Charset;
-
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
@@ -53,6 +47,11 @@ import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.util.FileCopyUtils;
 
+import static org.custommonkey.xmlunit.XMLAssert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
+
 // Do NOT statically import org.junit.Assert.*, since XMLAssert extends junit.framework.Assert
 
 /**
@@ -79,6 +78,7 @@ public class SourceHttpMessageConverterTests {
 				"  <!ELEMENT root ANY >\n" +
 				"  <!ENTITY ext SYSTEM \"" + external.getURI() + "\" >]><root>&ext;</root>";
 	}
+
 
 	@Test
 	public void canRead() {
@@ -135,7 +135,7 @@ public class SourceHttpMessageConverterTests {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
 
 		this.thrown.expect(HttpMessageNotReadableException.class);
-		this.thrown.expectMessage("DOCTYPE is disallowed");
+		this.thrown.expectMessage("DOCTYPE");
 
 		this.converter.read(DOMSource.class, inputMessage);
 	}
@@ -192,7 +192,7 @@ public class SourceHttpMessageConverterTests {
 		SAXSource result = (SAXSource) this.converter.read(SAXSource.class, inputMessage);
 
 		this.thrown.expect(SAXException.class);
-		this.thrown.expectMessage("DOCTYPE is disallowed");
+		this.thrown.expectMessage("DOCTYPE");
 
 		InputSource inputSource = result.getInputSource();
 		XMLReader reader = result.getXMLReader();

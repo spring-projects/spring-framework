@@ -74,6 +74,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 
 	private Flights flights;
 
+
 	@Override
 	public Marshaller createMarshaller() throws Exception {
 		marshaller = new Jaxb2Marshaller();
@@ -90,6 +91,7 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 		flights.getFlight().add(flight);
 		return flights;
 	}
+
 
 	@Test
 	public void marshalSAXResult() throws Exception {
