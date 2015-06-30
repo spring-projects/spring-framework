@@ -48,6 +48,8 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 
 	private int statusCode = HttpServletResponse.SC_OK;
 
+	private Integer contentLength;
+
 
 	/**
 	 * Create a new ContentCachingResponseWrapper for the given servlet response.
@@ -74,14 +76,27 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	@Override
 	public void sendError(int sc) throws IOException {
 		copyBodyToResponse();
-		super.sendError(sc);
+		try {
+			super.sendError(sc);
+		}
+		catch (IllegalStateException ex) {
+			// Possibly on Tomcat when called too late: fall back to silent setStatus
+			super.setStatus(sc);
+		}
 		this.statusCode = sc;
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void sendError(int sc, String msg) throws IOException {
 		copyBodyToResponse();
-		super.sendError(sc, msg);
+		try {
+			super.sendError(sc, msg);
+		}
+		catch (IllegalStateException ex) {
+			// Possibly on Tomcat when called too late: fall back to silent setStatus
+			super.setStatus(sc, msg);
+		}
 		this.statusCode = sc;
 	}
 
@@ -111,6 +126,7 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 		if (len > this.content.capacity()) {
 			this.content.resize(len);
 		}
+		this.contentLength = len;
 	}
 
 	// Overrides Servlet 3.1 setContentLengthLong(long) at runtime
@@ -119,9 +135,11 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 			throw new IllegalArgumentException("Content-Length exceeds ShallowEtagHeaderFilter's maximum (" +
 					Integer.MAX_VALUE + "): " + len);
 		}
-		if (len > this.content.capacity()) {
-			this.content.resize((int) len);
+		int lenInt = (int) len;
+		if (lenInt > this.content.capacity()) {
+			this.content.resize(lenInt);
 		}
+		this.contentLength = lenInt;
 	}
 
 	@Override
@@ -158,7 +176,10 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 
 	private void copyBodyToResponse() throws IOException {
 		if (this.content.size() > 0) {
-			getResponse().setContentLength(this.content.size());
+			if (this.contentLength != null) {
+				getResponse().setContentLength(this.contentLength);
+				this.contentLength = null;
+			}
 			StreamUtils.copy(this.content.toByteArray(), getResponse().getOutputStream());
 			this.content.reset();
 		}

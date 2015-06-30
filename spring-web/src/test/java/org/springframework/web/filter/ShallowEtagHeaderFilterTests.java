@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ public class ShallowEtagHeaderFilterTests {
 		assertFalse(filter.isEligibleForEtag(request, response, 200, new byte[0]));
 
 		request = new MockHttpServletRequest("POST", "/hotels");
-		request.addHeader("Cache-Control","must-revalidate, no-store");
+		request.addHeader("Cache-Control", "must-revalidate, no-store");
 		assertFalse(filter.isEligibleForEtag(request, response, 200, new byte[0]));
 	}
 
@@ -146,6 +146,7 @@ public class ShallowEtagHeaderFilterTests {
 			public void doFilter(ServletRequest filterRequest, ServletResponse filterResponse)
 					throws IOException, ServletException {
 				assertEquals("Invalid request passed", request, filterRequest);
+				response.setContentLength(100);
 				FileCopyUtils.copy(responseBody, filterResponse.getOutputStream());
 				((HttpServletResponse) filterResponse).sendError(HttpServletResponse.SC_FORBIDDEN);
 			}
@@ -154,7 +155,7 @@ public class ShallowEtagHeaderFilterTests {
 
 		assertEquals("Invalid status", 403, response.getStatus());
 		assertNull("Invalid ETag header", response.getHeader("ETag"));
-		assertTrue("Invalid Content-Length header", response.getContentLength() > 0);
+		assertEquals("Invalid Content-Length header", 100, response.getContentLength());
 		assertArrayEquals("Invalid content", responseBody, response.getContentAsByteArray());
 	}
 
@@ -169,6 +170,7 @@ public class ShallowEtagHeaderFilterTests {
 			public void doFilter(ServletRequest filterRequest, ServletResponse filterResponse)
 					throws IOException, ServletException {
 				assertEquals("Invalid request passed", request, filterRequest);
+				response.setContentLength(100);
 				FileCopyUtils.copy(responseBody, filterResponse.getOutputStream());
 				((HttpServletResponse) filterResponse).sendError(HttpServletResponse.SC_FORBIDDEN, "ERROR");
 			}
@@ -177,7 +179,7 @@ public class ShallowEtagHeaderFilterTests {
 
 		assertEquals("Invalid status", 403, response.getStatus());
 		assertNull("Invalid ETag header", response.getHeader("ETag"));
-		assertTrue("Invalid Content-Length header", response.getContentLength() > 0);
+		assertEquals("Invalid Content-Length header", 100, response.getContentLength());
 		assertArrayEquals("Invalid content", responseBody, response.getContentAsByteArray());
 		assertEquals("Invalid error message", "ERROR", response.getErrorMessage());
 	}
@@ -193,6 +195,7 @@ public class ShallowEtagHeaderFilterTests {
 			public void doFilter(ServletRequest filterRequest, ServletResponse filterResponse)
 					throws IOException, ServletException {
 				assertEquals("Invalid request passed", request, filterRequest);
+				response.setContentLength(100);
 				FileCopyUtils.copy(responseBody, filterResponse.getOutputStream());
 				((HttpServletResponse) filterResponse).sendRedirect("http://www.google.com");
 			}
@@ -201,7 +204,7 @@ public class ShallowEtagHeaderFilterTests {
 
 		assertEquals("Invalid status", 302, response.getStatus());
 		assertNull("Invalid ETag header", response.getHeader("ETag"));
-		assertTrue("Invalid Content-Length header", response.getContentLength() > 0);
+		assertEquals("Invalid Content-Length header", 100, response.getContentLength());
 		assertArrayEquals("Invalid content", responseBody, response.getContentAsByteArray());
 		assertEquals("Invalid redirect URL", "http://www.google.com", response.getRedirectedUrl());
 	}
