@@ -170,6 +170,7 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 
 	/**
 	 * Return an {@link InputStream} to the cached content.
+	 * @since 4.2
 	 */
 	public InputStream getContentInputStream(){
 		return this.content.getInputStream();
@@ -177,6 +178,7 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 
 	/**
 	 * Return the current size of the cached content.
+	 * @since 4.2
 	 */
 	public int getContentSize(){
 		return this.content.size();
@@ -184,6 +186,7 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 
 	/**
 	 * Copy the complete cached body content to the response.
+	 * @since 4.2
 	 */
 	public void copyBodyToResponse() throws IOException {
 		copyBodyToResponse(true);
@@ -193,6 +196,7 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	 * Copy the cached body content to the response.
 	 * @param complete whether to set a corresponding content length
 	 * for the complete cached body content
+	 * @since 4.2
 	 */
 	protected void copyBodyToResponse(boolean complete) throws IOException {
 		if (this.content.size() > 0) {
