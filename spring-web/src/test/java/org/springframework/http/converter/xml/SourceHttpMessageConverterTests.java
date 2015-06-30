@@ -130,7 +130,7 @@ public class SourceHttpMessageConverterTests {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
 
 		this.thrown.expect(HttpMessageNotReadableException.class);
-		this.thrown.expectMessage("DOCTYPE is disallowed");
+		this.thrown.expectMessage("DOCTYPE");
 
 		this.converter.read(DOMSource.class, inputMessage);
 	}
@@ -187,7 +187,7 @@ public class SourceHttpMessageConverterTests {
 		SAXSource result = (SAXSource) this.converter.read(SAXSource.class, inputMessage);
 
 		this.thrown.expect(SAXException.class);
-		this.thrown.expectMessage("DOCTYPE is disallowed");
+		this.thrown.expectMessage("DOCTYPE");
 
 		InputSource inputSource = result.getInputSource();
 		XMLReader reader = result.getXMLReader();
