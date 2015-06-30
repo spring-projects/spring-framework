@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.io.OutputStream;
 import java.io.StringReader;
 import java.util.HashSet;
 import java.util.Set;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -79,6 +80,8 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 
 	private final TransformerFactory transformerFactory = TransformerFactory.newInstance();
 
+	private boolean supportDtd = false;
+
 	private boolean processExternalEntities = false;
 
 
@@ -92,11 +95,31 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 
 
 	/**
+	 * Indicates whether DTD parsing should be supported.
+	 * <p>Default is {@code false} meaning that DTD is disabled.
+	 */
+	public void setSupportDtd(boolean supportDtd) {
+		this.supportDtd = supportDtd;
+	}
+
+	/**
+	 * Whether DTD parsing is supported.
+	 */
+	public boolean isSupportDtd() {
+		return this.supportDtd;
+	}
+
+	/**
 	 * Indicates whether external XML entities are processed when converting to a Source.
 	 * <p>Default is {@code false}, meaning that external entities are not resolved.
+	 * <p><strong>Note:</strong> setting this option to {@code true} also
+	 * automatically sets {@link #setSupportDtd} to {@code true}.
 	 */
 	public void setProcessExternalEntities(boolean processExternalEntities) {
 		this.processExternalEntities = processExternalEntities;
+		if (processExternalEntities) {
+			setSupportDtd(true);
+		}
 	}
 
 	/**
@@ -141,6 +164,8 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 			DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
 			documentBuilderFactory.setNamespaceAware(true);
 			documentBuilderFactory.setFeature(
+					"http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
+			documentBuilderFactory.setFeature(
 					"http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
 			DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
 			if (!isProcessExternalEntities()) {
@@ -148,6 +173,14 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 			}
 			Document document = documentBuilder.parse(body);
 			return new DOMSource(document);
+		}
+		catch (NullPointerException ex) {
+			if (!isSupportDtd()) {
+				throw new HttpMessageNotReadableException("NPE while unmarshalling. " +
+						"This can happen on JDK 1.6 due to the presence of DTD " +
+						"declarations, which are disabled.", ex);
+			}
+			throw ex;
 		}
 		catch (ParserConfigurationException ex) {
 			throw new HttpMessageNotReadableException("Could not set feature: " + ex.getMessage(), ex);
@@ -160,11 +193,12 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 	private SAXSource readSAXSource(InputStream body) throws IOException {
 		try {
 			XMLReader reader = XMLReaderFactory.createXMLReader();
+			reader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
 			reader.setFeature("http://xml.org/sax/features/external-general-entities", isProcessExternalEntities());
-			byte[] bytes = StreamUtils.copyToByteArray(body);
 			if (!isProcessExternalEntities()) {
 				reader.setEntityResolver(NO_OP_ENTITY_RESOLVER);
 			}
+			byte[] bytes = StreamUtils.copyToByteArray(body);
 			return new SAXSource(reader, new InputSource(new ByteArrayInputStream(bytes)));
 		}
 		catch (SAXException ex) {
@@ -174,7 +208,8 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 
 	private Source readStAXSource(InputStream body) {
 		try {
-			XMLInputFactory inputFactory = XMLInputFactory.newFactory();
+			XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+			inputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, isSupportDtd());
 			inputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, isProcessExternalEntities());
 			if (!isProcessExternalEntities()) {
 				inputFactory.setXMLResolver(NO_OP_XML_RESOLVER);

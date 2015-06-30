@@ -16,10 +16,18 @@
 
 package org.springframework.oxm.castor;
 
+import static junit.framework.Assert.assertEquals;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.concurrent.atomic.AtomicReference;
+
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 
@@ -32,9 +40,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.oxm.AbstractUnmarshallerTests;
 import org.springframework.oxm.MarshallingException;
 import org.springframework.oxm.Unmarshaller;
-
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
@@ -86,7 +91,7 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 	@Test
 	public void unmarshalTargetClass() throws Exception {
 		CastorMarshaller unmarshaller = new CastorMarshaller();
-		unmarshaller.setTargetClasses(new Class[] { Flights.class } );
+		unmarshaller.setTargetClasses(new Class[] {Flights.class});
 		unmarshaller.afterPropertiesSet();
 		StreamSource source = new StreamSource(new ByteArrayInputStream(INPUT_STRING.getBytes("UTF-8")));
 		Object flights = unmarshaller.unmarshal(source);
@@ -97,7 +102,7 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 	public void testSetBothTargetClassesAndMapping() throws IOException {
 		CastorMarshaller unmarshaller = new CastorMarshaller();
 		unmarshaller.setMappingLocation(new ClassPathResource("order-mapping.xml", CastorMarshaller.class));
-		unmarshaller.setTargetClasses(new Class[] { Order.class } );
+		unmarshaller.setTargetClasses(new Class[] {Order.class});
 		unmarshaller.afterPropertiesSet();
 
 		String xml = "<order>" +
@@ -183,7 +188,7 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 	@Ignore("Fails on the build server for some reason")
 	public void testClearCollectionsFalse() throws Exception {
 		Flights flights = new Flights();
-		flights.setFlight(new Flight[]{new Flight(), null});
+		flights.setFlight(new Flight[] {new Flight(), null});
 		getCastorUnmarshaller().setRootObject(flights);
 		getCastorUnmarshaller().setClearCollections(false);
 		Object result = unmarshalFlights();
@@ -196,7 +201,7 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 	}
 
 	@Test
-	public void unmarshalStreamSourceExternalEntities() throws Exception {
+	public void unmarshalStreamSourceWithXmlOptions() throws Exception {
 		final AtomicReference<XMLReader> result = new AtomicReference<XMLReader>();
 		CastorMarshaller marshaller = new CastorMarshaller() {
 			@Override
@@ -206,21 +211,24 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 			}
 		};
 
-		// 1. external-general-entities disabled (default)
+		// 1. external-general-entities and dtd support disabled (default)
 		marshaller.unmarshal(new StreamSource("1"));
 		assertNotNull(result.get());
+		assertEquals(true, result.get().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
 		assertEquals(false, result.get().getFeature("http://xml.org/sax/features/external-general-entities"));
 
-		// 2. external-general-entities disabled (default)
+		// 2. external-general-entities and dtd support enabled
 		result.set(null);
+		marshaller.setSupportDtd(true);
 		marshaller.setProcessExternalEntities(true);
 		marshaller.unmarshal(new StreamSource("1"));
 		assertNotNull(result.get());
+		assertEquals(false, result.get().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
 		assertEquals(true, result.get().getFeature("http://xml.org/sax/features/external-general-entities"));
 	}
 
 	@Test
-	public void unmarshalSaxSourceExternalEntities() throws Exception {
+	public void unmarshalSaxSourceWithXmlOptions() throws Exception {
 		final AtomicReference<XMLReader> result = new AtomicReference<XMLReader>();
 		CastorMarshaller marshaller = new CastorMarshaller() {
 			@Override
@@ -230,16 +238,19 @@ public class CastorUnmarshallerTests extends AbstractUnmarshallerTests {
 			}
 		};
 
-		// 1. external-general-entities disabled (default)
+		// 1. external-general-entities and dtd support disabled (default)
 		marshaller.unmarshal(new SAXSource(new InputSource("1")));
 		assertNotNull(result.get());
+		assertEquals(true, result.get().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
 		assertEquals(false, result.get().getFeature("http://xml.org/sax/features/external-general-entities"));
 
-		// 2. external-general-entities disabled (default)
+		// 2. external-general-entities and dtd support enabled
 		result.set(null);
+		marshaller.setSupportDtd(true);
 		marshaller.setProcessExternalEntities(true);
 		marshaller.unmarshal(new SAXSource(new InputSource("1")));
 		assertNotNull(result.get());
+		assertEquals(false, result.get().getFeature("http://apache.org/xml/features/disallow-doctype-decl"));
 		assertEquals(true, result.get().getFeature("http://xml.org/sax/features/external-general-entities"));
 	}
 
