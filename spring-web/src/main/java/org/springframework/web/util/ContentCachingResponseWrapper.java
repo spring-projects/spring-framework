@@ -48,6 +48,8 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 
 	private int statusCode = HttpServletResponse.SC_OK;
 
+	private Integer contentLength;
+
 
 	/**
 	 * Create a new ContentCachingResponseWrapper for the given servlet response.
@@ -73,21 +75,34 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 
 	@Override
 	public void sendError(int sc) throws IOException {
-		copyBodyToResponse();
-		super.sendError(sc);
+		copyBodyToResponse(false);
+		try {
+			super.sendError(sc);
+		}
+		catch (IllegalStateException ex) {
+			// Possibly on Tomcat when called too late: fall back to silent setStatus
+			super.setStatus(sc);
+		}
 		this.statusCode = sc;
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void sendError(int sc, String msg) throws IOException {
-		copyBodyToResponse();
-		super.sendError(sc, msg);
+		copyBodyToResponse(false);
+		try {
+			super.sendError(sc, msg);
+		}
+		catch (IllegalStateException ex) {
+			// Possibly on Tomcat when called too late: fall back to silent setStatus
+			super.setStatus(sc, msg);
+		}
 		this.statusCode = sc;
 	}
 
 	@Override
 	public void sendRedirect(String location) throws IOException {
-		copyBodyToResponse();
+		copyBodyToResponse(false);
 		super.sendRedirect(location);
 	}
 
@@ -109,6 +124,7 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	@Override
 	public void setContentLength(int len) {
 		this.content.resize(len);
+		this.contentLength = len;
 	}
 
 	// Overrides Servlet 3.1 setContentLengthLong(long) at runtime
@@ -117,7 +133,9 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 			throw new IllegalArgumentException("Content-Length exceeds ShallowEtagHeaderFilter's maximum (" +
 					Integer.MAX_VALUE + "): " + len);
 		}
-		this.content.resize((int) len);
+		int lenInt = (int) len;
+		this.content.resize(lenInt);
+		this.contentLength = lenInt;
 	}
 
 	@Override
@@ -150,24 +168,44 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 		return this.content.toByteArray();
 	}
 
+	/**
+	 * Return an {@link InputStream} to the cached content.
+	 */
+	public InputStream getContentInputStream(){
+		return this.content.getInputStream();
+	}
+
+	/**
+	 * Return the current size of the cached content.
+	 */
+	public int getContentSize(){
+		return this.content.size();
+	}
+
+	/**
+	 * Copy the complete cached body content to the response.
+	 */
 	public void copyBodyToResponse() throws IOException {
+		copyBodyToResponse(true);
+	}
+
+	/**
+	 * Copy the cached body content to the response.
+	 * @param complete whether to set a corresponding content length
+	 * for the complete cached body content
+	 */
+	protected void copyBodyToResponse(boolean complete) throws IOException {
 		if (this.content.size() > 0) {
 			HttpServletResponse rawResponse = (HttpServletResponse) getResponse();
-			if(! rawResponse.isCommitted()){
-				rawResponse.setContentLength(this.content.size());
+			if ((complete || this.contentLength != null) && !rawResponse.isCommitted()){
+				rawResponse.setContentLength(complete ? this.content.size() : this.contentLength);
+				this.contentLength = null;
 			}
 			this.content.writeTo(rawResponse.getOutputStream());
 			this.content.reset();
 		}
 	}
 
-	public int getContentSize(){
-		return this.content.size();
-	}
-
-	public InputStream getContentInputStream(){
-		return this.content.getInputStream();
-	}
 
 	private class ResponseServletOutputStream extends ServletOutputStream {
 
