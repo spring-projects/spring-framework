@@ -52,6 +52,7 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  */
 public class SourceHttpMessageConverterTests {
 

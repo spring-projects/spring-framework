@@ -22,10 +22,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import static org.custommonkey.xmlunit.XMLAssert.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -41,7 +37,16 @@ import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
-/** @author Arjen Poutsma */
+import static org.custommonkey.xmlunit.XMLAssert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+
+/**
+ * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
+ */
 public class Jaxb2RootElementHttpMessageConverterTest {
 
 	private Jaxb2RootElementHttpMessageConverter converter;
@@ -65,6 +70,7 @@ public class Jaxb2RootElementHttpMessageConverterTest {
 		AopProxy proxy = proxyFactory.createAopProxy(advisedSupport);
 		rootElementCglib = (RootElement) proxy.getProxy();
 	}
+
 
 	@Test
 	public void canRead() throws Exception {
@@ -197,7 +203,6 @@ public class Jaxb2RootElementHttpMessageConverterTest {
 	}
 
 	public static class RootElementSubclass extends RootElement {
-
 	}
 
 }

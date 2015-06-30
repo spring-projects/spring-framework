@@ -16,14 +16,10 @@
 
 package org.springframework.http.converter.xml;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -41,10 +37,13 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
+import static org.junit.Assert.*;
+
 /**
  * Test fixture for {@link Jaxb2CollectionHttpMessageConverter}.
  *
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  */
 public class Jaxb2CollectionHttpMessageConverterTests {
 
@@ -70,6 +69,7 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 		typeListType = new ParameterizedTypeReference<List<TestType>>() {}.getType();
 		typeSetType = new ParameterizedTypeReference<Set<TestType>>() {}.getType();
 	}
+
 
 	@Test
 	public void canRead() throws Exception {
@@ -151,9 +151,14 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 			}
 		};
 
-		Collection<RootElement> result = converter.read(rootElementListType, null, inputMessage);
-		assertEquals(1, result.size());
-		assertEquals("", result.iterator().next().external);
+		try {
+			Collection<RootElement> result = converter.read(rootElementListType, null, inputMessage);
+			assertEquals(1, result.size());
+			assertEquals("", result.iterator().next().external);
+		}
+		catch (HttpMessageNotReadableException ex) {
+			// Some parsers raise exception by default
+		}
 	}
 
 	@Test
@@ -207,6 +212,7 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	@XmlRootElement
 	public static class RootElement {
 
@@ -270,9 +276,6 @@ public class Jaxb2CollectionHttpMessageConverterTests {
 		public int hashCode() {
 			return s.hashCode();
 		}
-
-
-
 	}
 
 }
