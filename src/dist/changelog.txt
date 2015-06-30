@@ -3,6 +3,32 @@ SPRING FRAMEWORK CHANGELOG
 http://www.spring.io
 
 
+Changes in version 3.2.14 (2015-06-30)
+-------------------------------------
+
+fixed disable DTD by default when parsing untrusted XML input (SPR-13136)
+fixed remoting over JMS with receiveTimeout blocks service forever (SPR-13052)
+fixed NPE when using @args as pointcut (SPR-13102)
+fixed NPE for alias resolved to null in SimpleAliasRegistry (SPR-13106)
+fixed NPE if CustomBooleanEditor is configured with allowEmpty=false (SPR-13010)
+fixed infinite loop in PatternMatchUtils (SPR-12971)
+fixed infinite loop when CronSequenceGenerator constructor is called with invalid increments (SPR-12871)
+fixed incorrect value in InvalidPropertyException message from BeanWrapperImpl.setPropertyValue (SPR-12866)
+fixed SpEL chooses wrong method to invoke when varargs method is present (SPR-12803)
+fixed StandardMultipartHttpServletRequest.StandardMultipartFile not serializable (SPR-12975)
+fixed EncodedResource does not include charset in equals() implementation (SPR-12767)
+fixed Specified MVC resource at root level not considered "under location" (SPR-12747)
+fixed deadlock publishing event while creating listener bean (SPR-12739)
+fixed NPE in ServletUriComponentsBuilder#initFromRequest (SPR-12723)
+fixed @Scheduled handling with multiple proxied target classes implementing the same interface (SPR-12709)
+upgraded to ASM 5.0.4 (SPR-13039)
+improved documentation of Lifecycle callbacks (SPR-12855)
+improved documentation of null handling in Converter (SPR-12870)
+improved documentation of acknowledgment modes (SPR-12705)
+improved javadoc of ModelAttributeMethodProcessor.validateIfApplicable (SPR-12655)
+improved documentation of SimpleJdbcInsert (SPR-12639)
+
+
 Changes in version 3.2.13 (2014-12-30)
 -------------------------------------
 
