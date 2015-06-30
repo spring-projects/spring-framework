@@ -16,15 +16,10 @@
 
 package org.springframework.rx.io;
 
-import java.io.EOFException;
-
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.rx.util.BlockingByteBufQueue;
-import org.springframework.rx.util.BlockingByteBufQueuePublisher;
+import org.springframework.rx.util.BlockingSignalQueue;
 
 import static org.junit.Assert.*;
 
@@ -33,25 +28,22 @@ import static org.junit.Assert.*;
  */
 public class ByteBufPublisherInputStreamTests {
 
-	private BlockingByteBufQueue queue;
+	private BlockingSignalQueue<byte[]> queue;
 
-	private ByteBufPublisherInputStream is;
+	private ByteArrayPublisherInputStream is;
 
 
 	@Before
 	public void setUp() throws Exception {
-		queue = new BlockingByteBufQueue();
-		is = new ByteBufPublisherInputStream(queue);
+		queue = new BlockingSignalQueue<byte[]>();
+		is = new ByteArrayPublisherInputStream(queue);
 
 	}
 
 	@Test
 	public void readSingleByte() throws Exception {
-		ByteBuf abc = Unpooled.copiedBuffer(new byte[]{'a', 'b', 'c'});
-		ByteBuf def = Unpooled.copiedBuffer(new byte[]{'d', 'e', 'f'});
-
-		queue.putBuffer(abc);
-		queue.putBuffer(def);
+		queue.putSignal(new byte[]{'a', 'b', 'c'});
+		queue.putSignal(new byte[]{'d', 'e', 'f'});
 		queue.complete();
 
 
@@ -75,11 +67,8 @@ public class ByteBufPublisherInputStreamTests {
 
 	@Test
 	public void readBytes() throws Exception {
-		ByteBuf abc = Unpooled.copiedBuffer(new byte[]{'a', 'b', 'c'});
-		ByteBuf def = Unpooled.copiedBuffer(new byte[]{'d', 'e', 'f'});
-
-		queue.putBuffer(abc);
-		queue.putBuffer(def);
+		queue.putSignal(new byte[]{'a', 'b', 'c'});
+		queue.putSignal(new byte[]{'d', 'e', 'f'});
 		queue.complete();
 
 		byte[] buf = new byte[2];

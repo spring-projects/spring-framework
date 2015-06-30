@@ -27,11 +27,11 @@ import org.junit.Test;
  */
 public class BlockingByteBufQueueTests {
 
-	private BlockingByteBufQueue queue;
+	private BlockingSignalQueue queue;
 
 	@Before
 	public void setUp() throws Exception {
-		queue = new BlockingByteBufQueue();
+		queue = new BlockingSignalQueue();
 	}
 
 	@Test
@@ -39,41 +39,37 @@ public class BlockingByteBufQueueTests {
 		ByteBuf abc = Unpooled.copiedBuffer(new byte[]{'a', 'b', 'c'});
 		ByteBuf def = Unpooled.copiedBuffer(new byte[]{'d', 'e', 'f'});
 
-		queue.putBuffer(abc);
-		queue.putBuffer(def);
+		queue.putSignal(abc);
+		queue.putSignal(def);
 		queue.complete();
 
-		assertTrue(queue.isHeadBuffer());
+		assertTrue(queue.isHeadSignal());
 		assertFalse(queue.isHeadError());
-		assertSame(abc, queue.pollBuffer());
+		assertSame(abc, queue.pollSignal());
 
-		assertTrue(queue.isHeadBuffer());
+		assertTrue(queue.isHeadSignal());
 		assertFalse(queue.isHeadError());
-		assertSame(def, queue.pollBuffer());
+		assertSame(def, queue.pollSignal());
 
 		assertTrue(queue.isComplete());
 	}
 
-	@Test
-	public void empty() throws Exception {
-		assertNull(queue.pollBuffer());
-	}
 
 	@Test
 	public void error() throws Exception {
 		ByteBuf abc = Unpooled.copiedBuffer(new byte[]{'a', 'b', 'c'});
 		Throwable error = new IllegalStateException();
 
-		queue.putBuffer(abc);
+		queue.putSignal(abc);
 		queue.putError(error);
 		queue.complete();
 
-		assertTrue(queue.isHeadBuffer());
+		assertTrue(queue.isHeadSignal());
 		assertFalse(queue.isHeadError());
-		assertSame(abc, queue.pollBuffer());
+		assertSame(abc, queue.pollSignal());
 
 		assertTrue(queue.isHeadError());
-		assertFalse(queue.isHeadBuffer());
+		assertFalse(queue.isHeadSignal());
 		assertSame(error, queue.pollError());
 
 		assertTrue(queue.isComplete());

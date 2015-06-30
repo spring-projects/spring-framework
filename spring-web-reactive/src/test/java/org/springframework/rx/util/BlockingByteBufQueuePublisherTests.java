@@ -33,14 +33,14 @@ import org.reactivestreams.Subscription;
  */
 public class BlockingByteBufQueuePublisherTests {
 
-	private BlockingByteBufQueue queue;
+	private BlockingSignalQueue queue;
 
-	private BlockingByteBufQueuePublisher publisher;
+	private BlockingSignalQueuePublisher publisher;
 
 	@Before
 	public void setUp() throws Exception {
-		queue = new BlockingByteBufQueue();
-		publisher = new BlockingByteBufQueuePublisher(queue);
+		queue = new BlockingSignalQueue();
+		publisher = new BlockingSignalQueuePublisher(queue);
 	}
 
 	@Test
@@ -48,8 +48,8 @@ public class BlockingByteBufQueuePublisherTests {
 		ByteBuf abc = Unpooled.copiedBuffer(new byte[]{'a', 'b', 'c'});
 		ByteBuf def = Unpooled.copiedBuffer(new byte[]{'d', 'e', 'f'});
 
-		queue.putBuffer(abc);
-		queue.putBuffer(def);
+		queue.putSignal(abc);
+		queue.putSignal(def);
 		queue.complete();
 
 		final AtomicBoolean complete = new AtomicBoolean(false);
@@ -90,8 +90,8 @@ public class BlockingByteBufQueuePublisherTests {
 		ByteBuf abc = Unpooled.copiedBuffer(new byte[]{'a', 'b', 'c'});
 		ByteBuf def = Unpooled.copiedBuffer(new byte[]{'d', 'e', 'f'});
 
-		queue.putBuffer(abc);
-		queue.putBuffer(def);
+		queue.putSignal(abc);
+		queue.putSignal(def);
 		queue.complete();
 
 		final AtomicBoolean complete = new AtomicBoolean(false);

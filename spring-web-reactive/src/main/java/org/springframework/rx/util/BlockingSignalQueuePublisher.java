@@ -16,7 +16,6 @@
 
 package org.springframework.rx.util;
 
-import io.netty.buffer.ByteBuf;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -26,21 +25,21 @@ import org.springframework.util.Assert;
 /**
  * @author Arjen Poutsma
  */
-public class BlockingByteBufQueuePublisher implements Publisher<ByteBuf> {
+public class BlockingSignalQueuePublisher<T> implements Publisher<T> {
 
-	private final BlockingByteBufQueue queue;
+	private final BlockingSignalQueue<T> queue;
 
-	private Subscriber<? super ByteBuf> subscriber;
+	private Subscriber<? super T> subscriber;
 
 	private final Object subscriberMutex = new Object();
 
-	public BlockingByteBufQueuePublisher(BlockingByteBufQueue queue) {
+	public BlockingSignalQueuePublisher(BlockingSignalQueue<T> queue) {
 		Assert.notNull(queue, "'queue' must not be null");
 		this.queue = queue;
 	}
 
 	@Override
-	public void subscribe(Subscriber<? super ByteBuf> subscriber) {
+	public void subscribe(Subscriber<? super T> subscriber) {
 		synchronized (this.subscriberMutex) {
 			if (this.subscriber != null) {
 				subscriber.onError(
@@ -74,10 +73,10 @@ public class BlockingByteBufQueuePublisher implements Publisher<ByteBuf> {
 		@Override
 		public void run() {
 			try {
-				while (!Thread.currentThread().isInterrupted())
+				while (!Thread.currentThread().isInterrupted()) {
 					if ((l < requestCount || requestCount == Long.MAX_VALUE) &&
-							queue.isHeadBuffer()) {
-						subscriber.onNext(queue.pollBuffer());
+							queue.isHeadSignal()) {
+						subscriber.onNext(queue.pollSignal());
 						l++;
 					}
 					else if (queue.isHeadError()) {
@@ -88,6 +87,7 @@ public class BlockingByteBufQueuePublisher implements Publisher<ByteBuf> {
 						subscriber.onComplete();
 						break;
 					}
+				}
 			}
 			catch (InterruptedException ex) {
 				// Allow thread to exit

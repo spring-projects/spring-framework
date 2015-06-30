@@ -14,34 +14,40 @@ package org.springframework.rx.io;/*
  * limitations under the License.
  */
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufInputStream;
 import org.reactivestreams.Publisher;
 
-import org.springframework.rx.util.BlockingByteBufQueue;
-import org.springframework.rx.util.BlockingByteBufQueueSubscriber;
+import org.springframework.rx.util.BlockingSignalQueue;
+import org.springframework.rx.util.BlockingSignalQueueSubscriber;
 import org.springframework.util.Assert;
 
 /**
+ * {@code InputStream} implementation based on a byte array {@link Publisher}.
+ *
  * @author Arjen Poutsma
  */
-public class ByteBufPublisherInputStream extends InputStream {
+public class ByteArrayPublisherInputStream extends InputStream {
 
-	private final BlockingByteBufQueue queue;
+	private final BlockingSignalQueue<byte[]> queue;
 
-	private ByteBufInputStream currentStream;
+	private ByteArrayInputStream currentStream;
 
-	public ByteBufPublisherInputStream(Publisher<ByteBuf> publisher) {
+
+	/**
+	 * Creates a new {@code ByteArrayPublisherInputStream} based on the given publisher.
+	 * @param publisher the publisher to use
+	 */
+	public ByteArrayPublisherInputStream(Publisher<byte[]> publisher) {
 		Assert.notNull(publisher, "'publisher' must not be null");
 
-		this.queue = new BlockingByteBufQueue();
-		publisher.subscribe(new BlockingByteBufQueueSubscriber(this.queue));
+		this.queue = new BlockingSignalQueue<byte[]>();
+		publisher.subscribe(new BlockingSignalQueueSubscriber<byte[]>(this.queue));
 	}
 
-	ByteBufPublisherInputStream(BlockingByteBufQueue queue) {
+	ByteArrayPublisherInputStream(BlockingSignalQueue<byte[]> queue) {
 		Assert.notNull(queue, "'queue' must not be null");
 		this.queue = queue;
 	}
@@ -91,6 +97,7 @@ public class ByteBufPublisherInputStream extends InputStream {
 			}
 		}
 		while (is != null);
+
 		return -1;
 	}
 
@@ -102,24 +109,20 @@ public class ByteBufPublisherInputStream extends InputStream {
 			else if (this.queue.isComplete()) {
 				return null;
 			}
-			else if (this.queue.isHeadBuffer()) {
-				ByteBuf current = this.queue.pollBuffer();
-				this.currentStream = new ByteBufInputStream(current);
+			else if (this.queue.isHeadSignal()) {
+				byte[] current = this.queue.pollSignal();
+				this.currentStream = new ByteArrayInputStream(current);
 				return this.currentStream;
 			}
 			else if (this.queue.isHeadError()) {
 				Throwable t = this.queue.pollError();
-				throw toIOException(t);
+				throw t instanceof IOException ? (IOException) t : new IOException(t);
 			}
 		}
 		catch (InterruptedException ex) {
 			Thread.currentThread().interrupt();
 		}
 		return null;
-	}
-
-	private static IOException toIOException(Throwable t) {
-		return t instanceof IOException ? (IOException) t : new IOException(t);
 	}
 
 }

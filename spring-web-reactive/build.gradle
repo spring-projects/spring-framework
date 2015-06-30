@@ -1,5 +1,17 @@
+buildscript {
+    repositories {
+        maven { url 'http://repo.springsource.org/plugins-release' }
+    }
+    dependencies {
+        classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.7'
+    }
+}
 
 apply plugin: 'java'
+apply plugin: 'propdeps'
+apply plugin: 'propdeps-idea'
+apply plugin: 'propdeps-maven'
+
 
 repositories {
   mavenCentral()
@@ -11,6 +23,8 @@ dependencies {
   compile "io.netty:netty-buffer:4.0.25.Final"
   compile "org.slf4j:slf4j-api:1.7.6"
   compile "ch.qos.logback:logback-classic:1.1.2"
+
+  provided "javax.servlet:javax.servlet-api:3.1.0"
 
   testCompile "junit:junit:4.12"
 }
