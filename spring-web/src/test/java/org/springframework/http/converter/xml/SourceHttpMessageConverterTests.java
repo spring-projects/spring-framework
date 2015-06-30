@@ -21,6 +21,7 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
@@ -49,13 +50,13 @@ import org.springframework.util.FileCopyUtils;
 
 import static org.custommonkey.xmlunit.XMLAssert.*;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotEquals;
 
 // Do NOT statically import org.junit.Assert.*, since XMLAssert extends junit.framework.Assert
 
 /**
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  */
 public class SourceHttpMessageConverterTests {
 
@@ -226,8 +227,13 @@ public class SourceHttpMessageConverterTests {
 		streamReader.next();
 		String s = streamReader.getLocalName();
 		assertEquals("root", s);
-		s = streamReader.getElementText();
-		assertNotEquals("Foo Bar", s);
+		try {
+			s = streamReader.getElementText();
+			assertNotEquals("Foo Bar", s);
+		}
+		catch (XMLStreamException ex) {
+			// Some parsers raise a parse exception
+		}
 		streamReader.close();
 	}
 
