@@ -5697,16 +5697,14 @@ For more information on Spring's transaction facilities, see the chapter entitle
 [[mail-introduction]]
 === Introduction
 
-.Library dependencies
+.Library dependency
 ****
-The following additional jars to be on the classpath of your application in order to be
+The following additional jar to be on the classpath of your application in order to be
 able to use the Spring Framework's email library.
 
 * The https://java.net/projects/javamail/pages/Home[JavaMail] `mail.jar` library
-* The http://www.oracle.com/technetwork/java/jaf11-139815.html[JAF]
-  `activation.jar` library
 
-All of these libraries are freely available on the web.
+An above library is freely available on the web.
 ****
 
 The Spring Framework provides a helpful utility library for sending email that shields
