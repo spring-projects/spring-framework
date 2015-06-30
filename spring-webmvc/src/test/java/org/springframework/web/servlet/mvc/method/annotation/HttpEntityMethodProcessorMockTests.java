@@ -16,15 +16,10 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
-import static org.springframework.web.servlet.HandlerMapping.*;
-
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
@@ -52,6 +47,10 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+import static org.springframework.web.servlet.HandlerMapping.*;
 
 /**
  * Test fixture for {@link HttpEntityMethodProcessor} delegating to a mock
@@ -113,7 +112,7 @@ public class HttpEntityMethodProcessorMockTests {
 		returnTypeInt = new MethodParameter(getClass().getMethod("handle3"), -1);
 
 		mavContainer = new ModelAndViewContainer();
-		servletRequest = new MockHttpServletRequest("GET", "/foo");
+		servletRequest = new MockHttpServletRequest("POST", "/foo");
 		servletResponse = new MockHttpServletResponse();
 		webRequest = new ServletWebRequest(servletRequest, servletResponse);
 	}
@@ -185,7 +184,7 @@ public class HttpEntityMethodProcessorMockTests {
 		MediaType contentType = MediaType.TEXT_PLAIN;
 		servletRequest.addHeader("Content-Type", contentType.toString());
 
-		given(messageConverter.getSupportedMediaTypes()).willReturn(Arrays.asList(contentType));
+		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(contentType));
 		given(messageConverter.canRead(String.class, contentType)).willReturn(false);
 
 		processor.resolveArgument(paramHttpEntity, mavContainer, webRequest, null);
@@ -266,7 +265,7 @@ public class HttpEntityMethodProcessorMockTests {
 		servletRequest.addHeader("Accept", accepted.toString());
 
 		given(messageConverter.canWrite(String.class, null)).willReturn(true);
-		given(messageConverter.getSupportedMediaTypes()).willReturn(Arrays.asList(MediaType.TEXT_PLAIN));
+		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 		given(messageConverter.canWrite(String.class, accepted)).willReturn(false);
 
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);

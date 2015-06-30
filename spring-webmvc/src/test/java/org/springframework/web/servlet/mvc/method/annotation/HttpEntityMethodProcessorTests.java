@@ -16,16 +16,15 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.JsonTypeName;
-import static org.junit.Assert.*;
-
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -46,6 +45,8 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import static org.junit.Assert.*;
+
 /**
  * Test fixture with {@link HttpEntityMethodProcessor} delegating to
  * actual {@link HttpMessageConverter} instances.
@@ -54,6 +55,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  *
  * @author Rossen Stoyanchev
  */
+@SuppressWarnings("unused")
 public class HttpEntityMethodProcessorTests {
 
 	private MethodParameter paramList;
@@ -81,7 +83,9 @@ public class HttpEntityMethodProcessorTests {
 		binderFactory = new ValidatingBinderFactory();
 		servletRequest = new MockHttpServletRequest();
 		servletResponse = new MockHttpServletResponse();
+		servletRequest.setMethod("POST");
 		webRequest = new ServletWebRequest(servletRequest, servletResponse);
+
 	}
 
 	@Test
@@ -109,7 +113,7 @@ public class HttpEntityMethodProcessorTests {
 		this.servletRequest.setContent(new byte[0]);
 		this.servletRequest.setContentType("application/json");
 
-		List<HttpMessageConverter<?>> converters = Arrays.asList(new MappingJackson2HttpMessageConverter());
+		List<HttpMessageConverter<?>> converters = Collections.singletonList(new MappingJackson2HttpMessageConverter());
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
 
 		HttpEntity<?> result = (HttpEntity<?>) processor.resolveArgument(this.paramSimpleBean,
@@ -196,9 +200,9 @@ public class HttpEntityMethodProcessorTests {
 
 	private interface Identifiable extends Serializable {
 
-		public Long getId();
+		Long getId();
 
-		public void setId(Long id);
+		void setId(Long id);
 	}
 
 

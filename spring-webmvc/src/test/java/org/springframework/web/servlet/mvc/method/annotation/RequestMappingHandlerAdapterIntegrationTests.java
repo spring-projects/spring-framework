@@ -80,7 +80,12 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 /**
  * A test fixture with a controller with all supported method signature styles
@@ -101,6 +106,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 	private MockHttpServletRequest request;
 
 	private MockHttpServletResponse response;
+
 
 	@Before
 	public void setup() throws Exception {
@@ -123,6 +129,8 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		request = new MockHttpServletRequest();
 		response = new MockHttpServletResponse();
 
+		request.setMethod("POST");
+
 		// Expose request to the current thread (for SpEL expressions)
 		RequestContextHolder.setRequestAttributes(new ServletWebRequest(request));
 	}
@@ -131,6 +139,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 	public void teardown() {
 		RequestContextHolder.resetRequestAttributes();
 	}
+
 
 	@Test
 	public void handle() throws Exception {
