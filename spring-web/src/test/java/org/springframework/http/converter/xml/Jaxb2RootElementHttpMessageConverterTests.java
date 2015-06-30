@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,7 @@
 
 package org.springframework.http.converter.xml;
 
-import static org.custommonkey.xmlunit.XMLAssert.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.nio.charset.Charset;
-
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -46,6 +40,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+
+import static org.custommonkey.xmlunit.XMLAssert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for {@link Jaxb2RootElementHttpMessageConverter}.
@@ -77,6 +76,7 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 		AopProxy proxy = proxyFactory.createAopProxy(advisedSupport);
 		rootElementCglib = (RootElement) proxy.getProxy();
 	}
+
 
 	@Test
 	public void canRead() throws Exception {
@@ -165,7 +165,7 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 				"<rootElement><external>&lol9;</external></rootElement>";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
 		this.thrown.expect(HttpMessageNotReadableException.class);
-		this.thrown.expectMessage("DOCTYPE is disallowed");
+		this.thrown.expectMessage("DOCTYPE");
 		this.converter.read(RootElement.class, inputMessage);
 	}
 
@@ -210,6 +210,7 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 		assertEquals("b", result.getElement().getField2());
 	}
 
+
 	@XmlRootElement
 	public static class RootElement {
 
@@ -228,6 +229,7 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 		}
 	}
 
+
 	@XmlType
 	public static class Type {
 
@@ -236,9 +238,10 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 
 	}
 
-	public static class RootElementSubclass extends RootElement {
 
+	public static class RootElementSubclass extends RootElement {
 	}
+
 
 	public static class MyJaxb2RootElementHttpMessageConverter extends Jaxb2RootElementHttpMessageConverter {
 
@@ -253,8 +256,11 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 		}
 	}
 
+
 	public static class MyCustomElement {
+
 		private String field1;
+
 		private String field2;
 
 		public MyCustomElement() {
@@ -282,6 +288,7 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 		}
 	}
 
+
 	@XmlRootElement
 	public static class MyRootElement {
 
@@ -304,6 +311,7 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 			this.element = element;
 		}
 	}
+
 
 	public static class MyCustomElementAdapter extends XmlAdapter<String, MyCustomElement> {
 
