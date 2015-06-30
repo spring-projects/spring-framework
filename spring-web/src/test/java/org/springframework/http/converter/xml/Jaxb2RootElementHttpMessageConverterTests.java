@@ -16,7 +16,13 @@
 
 package org.springframework.http.converter.xml;
 
+import static org.custommonkey.xmlunit.XMLAssert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.nio.charset.Charset;
+
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -27,7 +33,9 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.AopProxy;
@@ -37,11 +45,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
-
-import static org.custommonkey.xmlunit.XMLAssert.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 
 /**
  * Tests for {@link Jaxb2RootElementHttpMessageConverter}.
@@ -49,6 +53,7 @@ import static org.junit.Assert.assertTrue;
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  */
+@SuppressWarnings("unused")
 public class Jaxb2RootElementHttpMessageConverterTests {
 
 	private Jaxb2RootElementHttpMessageConverter converter;
@@ -56,6 +61,10 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 	private RootElement rootElement;
 
 	private RootElement rootElementCglib;
+
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
+
 
 	@Before
 	public void setUp() {
@@ -115,6 +124,7 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 				"  <!ENTITY ext SYSTEM \"" + external.getURI() + "\" >]>" +
 				"  <rootElement><external>&ext;</external></rootElement>";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
+		converter.setSupportDtd(true);
 		RootElement rootElement = (RootElement) converter.read(RootElement.class, inputMessage);
 
 		assertEquals("", rootElement.external);
@@ -132,6 +142,31 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 		RootElement rootElement = (RootElement) converter.read(RootElement.class, inputMessage);
 
 		assertEquals("Foo Bar", rootElement.external);
+	}
+
+	@Test
+	public void testXmlBomb() throws Exception {
+		// https://en.wikipedia.org/wiki/Billion_laughs
+		// https://msdn.microsoft.com/en-us/magazine/ee335713.aspx
+		String content = "<?xml version=\"1.0\"?>\n" +
+				"<!DOCTYPE lolz [\n" +
+				" <!ENTITY lol \"lol\">\n" +
+				" <!ELEMENT lolz (#PCDATA)>\n" +
+				" <!ENTITY lol1 \"&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;\">\n" +
+				" <!ENTITY lol2 \"&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;\">\n" +
+				" <!ENTITY lol3 \"&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;\">\n" +
+				" <!ENTITY lol4 \"&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;\">\n" +
+				" <!ENTITY lol5 \"&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;\">\n" +
+				" <!ENTITY lol6 \"&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;\">\n" +
+				" <!ENTITY lol7 \"&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;\">\n" +
+				" <!ENTITY lol8 \"&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;\">\n" +
+				" <!ENTITY lol9 \"&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;\">\n" +
+				"]>\n" +
+				"<rootElement><external>&lol9;</external></rootElement>";
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
+		this.thrown.expect(HttpMessageNotReadableException.class);
+		this.thrown.expectMessage("DOCTYPE is disallowed");
+		this.converter.read(RootElement.class, inputMessage);
 	}
 
 	@Test

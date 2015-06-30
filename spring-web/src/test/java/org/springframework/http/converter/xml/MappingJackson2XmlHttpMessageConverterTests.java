@@ -23,8 +23,13 @@ import java.nio.charset.Charset;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.xml.sax.SAXException;
 
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
@@ -44,6 +49,9 @@ import static org.junit.Assert.*;
 public class MappingJackson2XmlHttpMessageConverterTests {
 
 	private final MappingJackson2XmlHttpMessageConverter converter = new MappingJackson2XmlHttpMessageConverter();
+
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 
 
 	@Test
@@ -70,9 +78,9 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		assertEquals("Foo", result.getString());
 		assertEquals(42, result.getNumber());
 		assertEquals(42F, result.getFraction(), 0F);
-		assertArrayEquals(new String[]{"Foo", "Bar"}, result.getArray());
+		assertArrayEquals(new String[] {"Foo", "Bar"}, result.getArray());
 		assertTrue(result.isBool());
-		assertArrayEquals(new byte[]{0x1, 0x2}, result.getBytes());
+		assertArrayEquals(new byte[] {0x1, 0x2}, result.getBytes());
 	}
 
 	@Test
@@ -138,6 +146,55 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		new MappingJackson2XmlHttpMessageConverter(new MyXmlMapper());
 		// Assert no exception is thrown
 	}
+
+	@Test
+	public void readWithExternalReference() throws IOException {
+
+		String body = "<!DOCTYPE MyBean SYSTEM \"http://192.168.28.42/1.jsp\" [" +
+				"  <!ELEMENT root ANY >\n" +
+				"  <!ENTITY ext SYSTEM \"" +
+				new ClassPathResource("external.txt", getClass()).getURI() +
+				"\" >]><MyBean><string>&ext;</string></MyBean>";
+
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
+		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
+
+		this.thrown.expect(HttpMessageNotReadableException.class);
+		this.thrown.expectMessage("entity \"ext\"");
+
+		this.converter.read(MyBean.class, inputMessage);
+	}
+
+	@Test
+	public void readWithXmlBomb() throws IOException {
+
+		// https://en.wikipedia.org/wiki/Billion_laughs
+		// https://msdn.microsoft.com/en-us/magazine/ee335713.aspx
+		String body = "<?xml version=\"1.0\"?>\n" +
+				"<!DOCTYPE lolz [\n" +
+				" <!ENTITY lol \"lol\">\n" +
+				" <!ELEMENT lolz (#PCDATA)>\n" +
+				" <!ENTITY lol1 \"&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;\">\n" +
+				" <!ENTITY lol2 \"&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;\">\n" +
+				" <!ENTITY lol3 \"&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;\">\n" +
+				" <!ENTITY lol4 \"&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;\">\n" +
+				" <!ENTITY lol5 \"&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;\">\n" +
+				" <!ENTITY lol6 \"&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;\">\n" +
+				" <!ENTITY lol7 \"&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;\">\n" +
+				" <!ENTITY lol8 \"&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;\">\n" +
+				" <!ENTITY lol9 \"&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;\">\n" +
+				"]>\n" +
+				"<MyBean>&lol9;</MyBean>";
+
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
+		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
+
+		this.thrown.expect(HttpMessageNotReadableException.class);
+		this.thrown.expectMessage("entity \"lol9\"");
+
+		this.converter.read(MyBean.class, inputMessage);
+	}
+
 
 	private void writeInternal(Object object, HttpOutputMessage outputMessage)
 			throws NoSuchMethodException, InvocationTargetException,

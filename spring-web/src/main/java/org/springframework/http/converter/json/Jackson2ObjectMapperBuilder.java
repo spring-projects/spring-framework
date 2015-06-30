@@ -16,6 +16,7 @@
 
 package org.springframework.http.converter.json;
 
+import java.io.ByteArrayInputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -26,6 +27,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
+
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLResolver;
 
 import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -520,22 +524,15 @@ public class Jackson2ObjectMapperBuilder {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends ObjectMapper> T build() {
-		ObjectMapper objectMapper;
+		ObjectMapper mapper;
 		if (this.createXmlMapper) {
-			try {
-				Class<? extends ObjectMapper> xmlMapper = (Class<? extends ObjectMapper>)
-						ClassUtils.forName("com.fasterxml.jackson.dataformat.xml.XmlMapper", this.moduleClassLoader);
-				objectMapper = BeanUtils.instantiate(xmlMapper);
-			}
-			catch (ClassNotFoundException ex) {
-				throw new IllegalStateException("Could not instantiate XmlMapper - not found on classpath");
-			}
+			mapper = new XmlObjectMapperInitializer().create();
 		}
 		else {
-			objectMapper = new ObjectMapper();
+			mapper = new ObjectMapper();
 		}
-		configure(objectMapper);
-		return (T) objectMapper;
+		configure(mapper);
+		return (T) mapper;
 	}
 
 	/**
@@ -719,6 +716,25 @@ public class Jackson2ObjectMapperBuilder {
 	@SuppressWarnings("unchecked")
 	public static Jackson2ObjectMapperBuilder xml() {
 		return new Jackson2ObjectMapperBuilder().createXmlMapper(true);
+	}
+
+
+	private static class XmlObjectMapperInitializer {
+
+		public ObjectMapper create() {
+			XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+			inputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+			inputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+			inputFactory.setXMLResolver(NO_OP_XML_RESOLVER);
+			return new XmlMapper(inputFactory);
+		}
+
+		private static final XMLResolver NO_OP_XML_RESOLVER = new XMLResolver() {
+			@Override
+			public Object resolveEntity(String publicID, String systemID, String base, String ns) {
+				return new ByteArrayInputStream(new byte[0]);
+			}
+		};
 	}
 
 }

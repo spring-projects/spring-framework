@@ -246,6 +246,7 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 	 */
 	protected XMLInputFactory createXmlInputFactory() {
 		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
+		inputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
 		inputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
 		inputFactory.setXMLResolver(NO_OP_XML_RESOLVER);
 		return inputFactory;

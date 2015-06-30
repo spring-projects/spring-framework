@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,16 @@
 
 package org.springframework.http.converter.xml;
 
+import static org.custommonkey.xmlunit.XMLAssert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.nio.charset.Charset;
+
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
@@ -29,7 +35,9 @@ import javax.xml.transform.stax.StAXSource;
 import javax.xml.transform.stream.StreamSource;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
@@ -42,13 +50,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.util.FileCopyUtils;
 
-import static org.custommonkey.xmlunit.XMLAssert.*;
 // Do NOT statically import org.junit.Assert.*, since XMLAssert extends junit.framework.Assert
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Arjen Poutsma
@@ -60,6 +65,10 @@ public class SourceHttpMessageConverterTests {
 	private SourceHttpMessageConverter<Source> converter;
 
 	private String bodyExternal;
+
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
+
 
 	@Before
 	public void setUp() throws IOException {
@@ -97,10 +106,38 @@ public class SourceHttpMessageConverterTests {
 	public void readDOMSourceExternal() throws Exception {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(bodyExternal.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
+		converter.setSupportDtd(true);
 		DOMSource result = (DOMSource) converter.read(DOMSource.class, inputMessage);
 		Document document = (Document) result.getNode();
 		assertEquals("Invalid result", "root", document.getDocumentElement().getLocalName());
 		assertNotEquals("Invalid result", "Foo Bar", document.getDocumentElement().getTextContent());
+	}
+
+	@Test
+	public void readDomSourceWithXmlBomb() throws Exception {
+		// https://en.wikipedia.org/wiki/Billion_laughs
+		// https://msdn.microsoft.com/en-us/magazine/ee335713.aspx
+		String content = "<?xml version=\"1.0\"?>\n" +
+				"<!DOCTYPE lolz [\n" +
+				" <!ENTITY lol \"lol\">\n" +
+				" <!ELEMENT lolz (#PCDATA)>\n" +
+				" <!ENTITY lol1 \"&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;\">\n" +
+				" <!ENTITY lol2 \"&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;\">\n" +
+				" <!ENTITY lol3 \"&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;\">\n" +
+				" <!ENTITY lol4 \"&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;\">\n" +
+				" <!ENTITY lol5 \"&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;\">\n" +
+				" <!ENTITY lol6 \"&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;\">\n" +
+				" <!ENTITY lol7 \"&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;\">\n" +
+				" <!ENTITY lol8 \"&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;\">\n" +
+				" <!ENTITY lol9 \"&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;\">\n" +
+				"]>\n" +
+				"<root>&lol9;</root>";
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
+
+		this.thrown.expect(HttpMessageNotReadableException.class);
+		this.thrown.expectMessage("DOCTYPE is disallowed");
+
+		this.converter.read(DOMSource.class, inputMessage);
 	}
 
 	@Test
@@ -117,6 +154,7 @@ public class SourceHttpMessageConverterTests {
 	public void readSAXSourceExternal() throws Exception {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(bodyExternal.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
+		converter.setSupportDtd(true);
 		SAXSource result = (SAXSource) converter.read(SAXSource.class, inputMessage);
 		InputSource inputSource = result.getInputSource();
 		XMLReader reader = result.getXMLReader();
@@ -127,6 +165,37 @@ public class SourceHttpMessageConverterTests {
 				assertNotEquals("Invalid result", "Foo Bar", s);
 			}
 		});
+		reader.parse(inputSource);
+	}
+
+	@Test
+	public void readSAXSourceWithXmlBomb() throws Exception {
+		// https://en.wikipedia.org/wiki/Billion_laughs
+		// https://msdn.microsoft.com/en-us/magazine/ee335713.aspx
+		String content = "<?xml version=\"1.0\"?>\n" +
+				"<!DOCTYPE lolz [\n" +
+				" <!ENTITY lol \"lol\">\n" +
+				" <!ELEMENT lolz (#PCDATA)>\n" +
+				" <!ENTITY lol1 \"&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;\">\n" +
+				" <!ENTITY lol2 \"&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;\">\n" +
+				" <!ENTITY lol3 \"&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;\">\n" +
+				" <!ENTITY lol4 \"&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;\">\n" +
+				" <!ENTITY lol5 \"&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;\">\n" +
+				" <!ENTITY lol6 \"&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;\">\n" +
+				" <!ENTITY lol7 \"&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;\">\n" +
+				" <!ENTITY lol8 \"&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;\">\n" +
+				" <!ENTITY lol9 \"&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;\">\n" +
+				"]>\n" +
+				"<root>&lol9;</root>";
+
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
+		SAXSource result = (SAXSource) this.converter.read(SAXSource.class, inputMessage);
+
+		this.thrown.expect(SAXException.class);
+		this.thrown.expectMessage("DOCTYPE is disallowed");
+
+		InputSource inputSource = result.getInputSource();
+		XMLReader reader = result.getXMLReader();
 		reader.parse(inputSource);
 	}
 
@@ -149,6 +218,7 @@ public class SourceHttpMessageConverterTests {
 	public void readStAXSourceExternal() throws Exception {
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(bodyExternal.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
+		converter.setSupportDtd(true);
 		StAXSource result = (StAXSource) converter.read(StAXSource.class, inputMessage);
 		XMLStreamReader streamReader = result.getXMLStreamReader();
 		assertTrue(streamReader.hasNext());
@@ -159,6 +229,39 @@ public class SourceHttpMessageConverterTests {
 		s = streamReader.getElementText();
 		assertNotEquals("Foo Bar", s);
 		streamReader.close();
+	}
+
+	@Test
+	public void readStAXSourceWithXmlBomb() throws Exception {
+		// https://en.wikipedia.org/wiki/Billion_laughs
+		// https://msdn.microsoft.com/en-us/magazine/ee335713.aspx
+		String content = "<?xml version=\"1.0\"?>\n" +
+				"<!DOCTYPE lolz [\n" +
+				" <!ENTITY lol \"lol\">\n" +
+				" <!ELEMENT lolz (#PCDATA)>\n" +
+				" <!ENTITY lol1 \"&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;\">\n" +
+				" <!ENTITY lol2 \"&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;\">\n" +
+				" <!ENTITY lol3 \"&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;\">\n" +
+				" <!ENTITY lol4 \"&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;\">\n" +
+				" <!ENTITY lol5 \"&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;\">\n" +
+				" <!ENTITY lol6 \"&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;\">\n" +
+				" <!ENTITY lol7 \"&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;\">\n" +
+				" <!ENTITY lol8 \"&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;\">\n" +
+				" <!ENTITY lol9 \"&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;\">\n" +
+				"]>\n" +
+				"<root>&lol9;</root>";
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(content.getBytes("UTF-8"));
+		StAXSource result = (StAXSource) this.converter.read(StAXSource.class, inputMessage);
+
+		XMLStreamReader streamReader = result.getXMLStreamReader();
+		assertTrue(streamReader.hasNext());
+		streamReader.next();
+		streamReader.next();
+		String s = streamReader.getLocalName();
+		assertEquals("root", s);
+
+		this.thrown.expectMessage("\"lol9\"");
+		s = streamReader.getElementText();
 	}
 
 	@Test
