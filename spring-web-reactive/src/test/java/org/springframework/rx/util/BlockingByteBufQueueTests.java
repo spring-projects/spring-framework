@@ -16,28 +16,27 @@
 
 package org.springframework.rx.util;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
  */
 public class BlockingByteBufQueueTests {
 
-	private BlockingSignalQueue queue;
+	private BlockingSignalQueue<byte[]> queue;
 
 	@Before
 	public void setUp() throws Exception {
-		queue = new BlockingSignalQueue();
+		queue = new BlockingSignalQueue<byte[]>();
 	}
 
 	@Test
 	public void normal() throws Exception {
-		ByteBuf abc = Unpooled.copiedBuffer(new byte[]{'a', 'b', 'c'});
-		ByteBuf def = Unpooled.copiedBuffer(new byte[]{'d', 'e', 'f'});
+		byte[] abc = new byte[]{'a', 'b', 'c'};
+		byte[] def = new byte[]{'d', 'e', 'f'};
 
 		queue.putSignal(abc);
 		queue.putSignal(def);
@@ -57,7 +56,7 @@ public class BlockingByteBufQueueTests {
 
 	@Test
 	public void error() throws Exception {
-		ByteBuf abc = Unpooled.copiedBuffer(new byte[]{'a', 'b', 'c'});
+		byte[] abc = new byte[]{'a', 'b', 'c'};
 		Throwable error = new IllegalStateException();
 
 		queue.putSignal(abc);

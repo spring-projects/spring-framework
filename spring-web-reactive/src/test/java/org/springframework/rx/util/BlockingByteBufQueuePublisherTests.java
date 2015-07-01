@@ -20,50 +20,53 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
  */
 public class BlockingByteBufQueuePublisherTests {
 
-	private BlockingSignalQueue queue;
+	private BlockingSignalQueue<byte[]> queue;
 
-	private BlockingSignalQueuePublisher publisher;
+	private BlockingSignalQueuePublisher<byte[]> publisher;
 
 	@Before
 	public void setUp() throws Exception {
-		queue = new BlockingSignalQueue();
-		publisher = new BlockingSignalQueuePublisher(queue);
+		queue = new BlockingSignalQueue<byte[]>();
+		publisher = new BlockingSignalQueuePublisher<byte[]>(queue);
 	}
 
 	@Test
 	public void normal() throws Exception {
-		ByteBuf abc = Unpooled.copiedBuffer(new byte[]{'a', 'b', 'c'});
-		ByteBuf def = Unpooled.copiedBuffer(new byte[]{'d', 'e', 'f'});
+		byte[] abc = new byte[]{'a', 'b', 'c'};
+		byte[] def = new byte[]{'d', 'e', 'f'};
 
 		queue.putSignal(abc);
 		queue.putSignal(def);
 		queue.complete();
 
 		final AtomicBoolean complete = new AtomicBoolean(false);
-		final List<ByteBuf> received = new ArrayList<ByteBuf>(2);
+		final List<byte[]> received = new ArrayList<byte[]>(2);
 
-		publisher.subscribe(new Subscriber<ByteBuf>() {
+		publisher.subscribe(new Subscriber<byte[]>() {
+			private Subscription subscription;
+
 			@Override
 			public void onSubscribe(Subscription s) {
-				s.request(2);
+				s.request(1);
+				this.subscription = s;
 			}
 
 			@Override
-			public void onNext(ByteBuf byteBuf) {
-				received.add(byteBuf);
+			public void onNext(byte[] bytes) {
+				received.add(bytes);
+				this.subscription.request(1);
 			}
 
 			@Override
@@ -87,25 +90,25 @@ public class BlockingByteBufQueuePublisherTests {
 
 	@Test
 	public void unbounded() throws Exception {
-		ByteBuf abc = Unpooled.copiedBuffer(new byte[]{'a', 'b', 'c'});
-		ByteBuf def = Unpooled.copiedBuffer(new byte[]{'d', 'e', 'f'});
+		byte[] abc = new byte[]{'a', 'b', 'c'};
+		byte[] def = new byte[]{'d', 'e', 'f'};
 
 		queue.putSignal(abc);
 		queue.putSignal(def);
 		queue.complete();
 
 		final AtomicBoolean complete = new AtomicBoolean(false);
-		final List<ByteBuf> received = new ArrayList<ByteBuf>(2);
+		final List<byte[]> received = new ArrayList<byte[]>(2);
 
-		publisher.subscribe(new Subscriber<ByteBuf>() {
+		publisher.subscribe(new Subscriber<byte[]>() {
 			@Override
 			public void onSubscribe(Subscription s) {
 				s.request(Long.MAX_VALUE);
 			}
 
 			@Override
-			public void onNext(ByteBuf byteBuf) {
-				received.add(byteBuf);
+			public void onNext(byte[] bytes) {
+				received.add(bytes);
 			}
 
 			@Override
@@ -129,14 +132,14 @@ public class BlockingByteBufQueuePublisherTests {
 
 	@Test
 	public void multipleSubscribe() throws Exception {
-		publisher.subscribe(new Subscriber<ByteBuf>() {
+		publisher.subscribe(new Subscriber<byte[]>() {
 			@Override
 			public void onSubscribe(Subscription s) {
 
 			}
 
 			@Override
-			public void onNext(ByteBuf byteBuf) {
+			public void onNext(byte[] bytes) {
 
 			}
 
@@ -150,14 +153,14 @@ public class BlockingByteBufQueuePublisherTests {
 
 			}
 		});
-		publisher.subscribe(new Subscriber<ByteBuf>() {
+		publisher.subscribe(new Subscriber<byte[]>() {
 			@Override
 			public void onSubscribe(Subscription s) {
 				fail("onSubscribe not expected");
 			}
 
 			@Override
-			public void onNext(ByteBuf byteBuf) {
+			public void onNext(byte[] bytes) {
 				fail("onNext not expected");
 			}
 
@@ -171,8 +174,54 @@ public class BlockingByteBufQueuePublisherTests {
 				fail("onComplete not expected");
 			}
 		});
-
 	}
+
+	@Test
+	public void cancel() throws Exception {
+		byte[] abc = new byte[]{'a', 'b', 'c'};
+		byte[] def = new byte[]{'d', 'e', 'f'};
+
+		queue.putSignal(abc);
+		queue.putSignal(def);
+		queue.complete();
+
+		final AtomicBoolean complete = new AtomicBoolean(false);
+		final List<byte[]> received = new ArrayList<byte[]>(1);
+
+		publisher.subscribe(new Subscriber<byte[]>() {
+
+			private Subscription subscription;
+
+			@Override
+			public void onSubscribe(Subscription s) {
+				s.request(1);
+				this.subscription = s;
+			}
+
+			@Override
+			public void onNext(byte[] bytes) {
+				received.add(bytes);
+				this.subscription.cancel();
+				complete.set(true);
+			}
+
+			@Override
+			public void onError(Throwable t) {
+				fail("onError not expected");
+			}
+
+			@Override
+			public void onComplete() {
+			}
+		});
+
+		while (!complete.get()) {
+		}
+
+		assertEquals(1, received.size());
+		assertSame(abc, received.get(0));
+	}
+
 
 
 }
