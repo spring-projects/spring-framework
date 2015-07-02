@@ -16,9 +16,6 @@
 
 package org.springframework.web.socket.config;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -70,6 +67,8 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.handler.ExceptionWebSocketHandlerDecorator;
+import org.springframework.web.socket.handler.LoggingWebSocketHandlerDecorator;
 import org.springframework.web.socket.handler.TestWebSocketSession;
 import org.springframework.web.socket.handler.WebSocketHandlerDecorator;
 import org.springframework.web.socket.handler.WebSocketHandlerDecoratorFactory;
@@ -86,6 +85,17 @@ import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
+
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Test fixture for MessageBrokerBeanDefinitionParser.
@@ -133,9 +143,15 @@ public class MessageBrokerBeanDefinitionParserTests {
 		wsHttpRequestHandler.getWebSocketHandler().afterConnectionEstablished(session);
 		assertEquals(true, session.getAttributes().get("decorated"));
 
-		WebSocketHandler wsHandler = unwrapWebSocketHandler(wsHttpRequestHandler.getWebSocketHandler());
-		assertNotNull(wsHandler);
+		WebSocketHandler wsHandler = wsHttpRequestHandler.getWebSocketHandler();
+		assertThat(wsHandler, Matchers.instanceOf(ExceptionWebSocketHandlerDecorator.class));
+		wsHandler = ((ExceptionWebSocketHandlerDecorator) wsHandler).getDelegate();
+		assertThat(wsHandler, Matchers.instanceOf(LoggingWebSocketHandlerDecorator.class));
+		wsHandler = ((LoggingWebSocketHandlerDecorator) wsHandler).getDelegate();
+		assertThat(wsHandler, Matchers.instanceOf(TestWebSocketHandlerDecorator.class));
+		wsHandler = ((TestWebSocketHandlerDecorator) wsHandler).getDelegate();
 		assertThat(wsHandler, Matchers.instanceOf(SubProtocolWebSocketHandler.class));
+		assertSame(wsHandler, this.appContext.getBean(MessageBrokerBeanDefinitionParser.WEB_SOCKET_HANDLER_BEAN_NAME));
 
 		SubProtocolWebSocketHandler subProtocolWsHandler = (SubProtocolWebSocketHandler) wsHandler;
 		assertEquals(Arrays.asList("v10.stomp", "v11.stomp", "v12.stomp"), subProtocolWsHandler.getSubProtocols());
@@ -495,13 +511,20 @@ class TestWebSocketHandlerDecoratorFactory implements WebSocketHandlerDecoratorF
 
 	@Override
 	public WebSocketHandler decorate(WebSocketHandler handler) {
-		return new WebSocketHandlerDecorator(handler) {
-			@Override
-			public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-				session.getAttributes().put("decorated", true);
-				super.afterConnectionEstablished(session);
-			}
-		};
+		return new TestWebSocketHandlerDecorator(handler);
+	}
+}
+
+class TestWebSocketHandlerDecorator extends WebSocketHandlerDecorator {
+
+	public TestWebSocketHandlerDecorator(WebSocketHandler delegate) {
+		super(delegate);
+	}
+
+	@Override
+	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+		session.getAttributes().put("decorated", true);
+		super.afterConnectionEstablished(session);
 	}
 }
 

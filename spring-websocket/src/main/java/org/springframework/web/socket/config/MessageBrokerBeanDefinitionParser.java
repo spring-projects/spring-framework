@@ -301,7 +301,7 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			if (factoriesElement != null) {
 				ManagedList<Object> factories = extractBeanSubElements(factoriesElement, context);
 				RootBeanDefinition factoryBean = new RootBeanDefinition(DecoratingFactoryBean.class);
-				factoryBean.getConstructorArgumentValues().addIndexedArgumentValue(0, handlerDef);
+				factoryBean.getConstructorArgumentValues().addIndexedArgumentValue(0, result);
 				factoryBean.getConstructorArgumentValues().addIndexedArgumentValue(1, factories);
 				result = new RuntimeBeanReference(registerBeanDef(factoryBean, context, source));
 			}
