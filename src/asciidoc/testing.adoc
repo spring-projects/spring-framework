@@ -4020,7 +4020,7 @@ asserts that binding/validation failed:
 		.andExpect(model().attributeHasErrors("person"));
 ----
 
-Many times when writing tests, it's useful to dump the result of the performed request.
+Many times when writing tests, it's useful to _dump_ the results of the performed request.
 This can be done as follows, where `print()` is a static import from
 `MockMvcResultHandlers`:
 
@@ -4033,8 +4033,15 @@ This can be done as follows, where `print()` is a static import from
 		.andExpect(model().attributeHasErrors("person"));
 ----
 
-As long as request processing causes an unhandled exception, the `print()` method will
-print all the available result data to `System.out`.
+As long as request processing does not cause an unhandled exception, the `print()` method
+will print all the available result data to `System.out`. Spring Framework 4.2 introduces
+a new `log()` method and two additional variants of the `print()` method: one that accepts
+an `OutputStream` and one that accepts a `Writer`. For example, invoking
+`print(System.err)` will print the result data to `System.err`; while invoking
+`print(myWriter)` will print the result data to a custom writer. If you would like to
+have the result data _logged_ instead of printed, simply invoke the `log()` method which
+will log the result data as a single `DEBUG` message under the
+`org.springframework.test.web.servlet.result` logging category.
 
 In some cases, you may want to get direct access to the result and verify something that
 cannot be verified otherwise. This can be done by appending `.andReturn()` at the end
