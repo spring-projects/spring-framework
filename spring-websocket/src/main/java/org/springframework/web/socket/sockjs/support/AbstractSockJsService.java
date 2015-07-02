@@ -81,7 +81,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 
 	private String name = "SockJSService@" + ObjectUtils.getIdentityHexString(this);
 
-	private String clientLibraryUrl = "https://cdn.jsdelivr.net/sockjs/0.3.4/sockjs.min.js";
+	private String clientLibraryUrl = "https://cdn.jsdelivr.net/sockjs/1.0.0/sockjs.min.js";
 
 	private int streamBytesLimit = 128 * 1024;
 
@@ -134,7 +134,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	 * server. Since the iframe needs to load the SockJS javascript client library,
 	 * this property allows specifying where to load it from.
 	 * <p>By default this is set to point to
-	 * "https://cdn.jsdelivr.net/sockjs/0.3.4/sockjs.min.js".
+	 * "https://cdn.jsdelivr.net/sockjs/1.0.0/sockjs.min.js".
 	 * However, it can also be set to point to a URL served by the application.
 	 * <p>Note that it's possible to specify a relative URL in which case the URL
 	 * must be relative to the iframe URL. For example assuming a SockJS endpoint

@@ -633,14 +633,14 @@ SockJS consists of:
 * The https://github.com/sockjs/sockjs-protocol[SockJS protocol]
 defined in the form of executable
 http://sockjs.github.io/sockjs-protocol/sockjs-protocol-0.3.3.html[narrated tests].
-* The https://github.com/sockjs/sockjs-client/tree/v0.3.4[SockJS JavaScript client] - a client library for use in browsers.
+* The https://github.com/sockjs/sockjs-client/[SockJS JavaScript client] - a client library for use in browsers.
 * SockJS server implementations including one in the Spring Framework `spring-websocket` module.
 * As of 4.1 `spring-websocket` also provides a SockJS Java client.
 
 SockJS is designed for use in browsers. It goes to great lengths
 to support a wide range of browser versions using a variety of techniques.
 For the full list of SockJS transport types and browsers see the
-https://github.com/sockjs/sockjs-client/tree/v0.3.4[SockJS client] page. Transports
+https://github.com/sockjs/sockjs-client/[SockJS client] page. Transports
 fall in 3 general categories: WebSocket, HTTP Streaming, and HTTP Long Polling.
 For an overview of these categories see
 https://spring.io/blog/2012/05/08/spring-mvc-3-2-preview-techniques-for-real-time-updates/[this blog post].
@@ -737,10 +737,10 @@ integrate into other HTTP serving environments with the help of
 {javadoc-baseurl}/org/springframework/web/socket/sockjs/support/SockJsHttpRequestHandler.html[SockJsHttpRequestHandler].
 
 On the browser side, applications can use the
-https://github.com/sockjs/sockjs-client/tree/v0.3.4[sockjs-client] (version 0.3.x) that
+https://github.com/sockjs/sockjs-client/[sockjs-client] (version 1.0.x) that
 emulates the W3C WebSocket API and communicates with the server to select the best
 transport option depending on the browser it's running in. Review the
-https://github.com/sockjs/sockjs-client/tree/v0.3.4[sockjs-client] page and the list of
+https://github.com/sockjs/sockjs-client/[sockjs-client] page and the list of
 transport types supported by browser. The client also provides several
 configuration options, for example, to specify which transports to include.
 
@@ -822,7 +822,7 @@ similar option via the `<websocket:sockjs>` element:
 During initial development, do enable the SockJS client `devel` mode that prevents
 the browser from caching SockJS requests (like the iframe) that would otherwise
 be cached. For details on how to enable it see the
-https://github.com/sockjs/sockjs-client/tree/v0.3.4[SockJS client] page.
+https://github.com/sockjs/sockjs-client/[SockJS client] page.
 ====
 
 [[websocket-fallback-sockjs-heartbeat]]
