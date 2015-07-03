@@ -13,23 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.servlet.samples.standalone;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
-
+import java.io.StringWriter;
 import java.util.Collection;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -37,31 +32,32 @@ import org.springframework.ui.Model;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureTask;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
+
+import static org.junit.Assert.*;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
 /**
  * Tests with asynchronous request handling.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @author Sam Brannen
  */
 public class AsyncTests {
 
-	private MockMvc mockMvc;
+	private final AsyncController asyncController = new AsyncController();
 
-	private AsyncController asyncController;
-
-
-	@Before
-	public void setup() {
-		this.asyncController = new AsyncController();
-		this.mockMvc = standaloneSetup(this.asyncController).build();
-	}
+	private final MockMvc mockMvc = standaloneSetup(this.asyncController).build();
 
 
 	@Test
-	public void testCallable() throws Exception {
+	public void callable() throws Exception {
 		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("callable", "true"))
 				.andExpect(request().asyncStarted())
 				.andExpect(request().asyncResult(new Person("Joe")))
@@ -74,7 +70,7 @@ public class AsyncTests {
 	}
 
 	@Test
-	public void testDeferredResult() throws Exception {
+	public void deferredResult() throws Exception {
 		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("deferredResult", "true"))
 				.andExpect(request().asyncStarted())
 				.andReturn();
@@ -88,7 +84,7 @@ public class AsyncTests {
 	}
 
 	@Test
-	public void testDeferredResultWithSetValue() throws Exception {
+	public void deferredResultWithSetValue() throws Exception {
 		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("deferredResultWithSetValue", "true"))
 				.andExpect(request().asyncStarted())
 				.andExpect(request().asyncResult(new Person("Joe")))
@@ -101,7 +97,7 @@ public class AsyncTests {
 	}
 
 	@Test
-	public void testListenableFuture() throws Exception {
+	public void listenableFuture() throws Exception {
 		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("listenableFuture", "true"))
 				.andExpect(request().asyncStarted())
 				.andReturn();
@@ -115,7 +111,7 @@ public class AsyncTests {
 	}
 
 	@Test  // SPR-12597
-	public void testCompletableFuture() throws Exception {
+	public void completableFuture() throws Exception {
 		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("completableFuture", "true"))
 				.andExpect(request().asyncStarted())
 				.andReturn();
@@ -129,75 +125,67 @@ public class AsyncTests {
 	}
 
 	@Test  // SPR-12735
-	public void testPrintAsyncResult() throws Exception {
+	public void printAsyncResult() throws Exception {
+		StringWriter writer = new StringWriter();
+
 		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("deferredResult", "true"))
-				.andDo(print())
+				.andDo(print(writer))
 				.andExpect(request().asyncStarted())
 				.andReturn();
+
+		assertTrue(writer.toString().contains("Async started = true"));
+		writer = new StringWriter();
 
 		this.asyncController.onMessage("Joe");
 
 		this.mockMvc.perform(asyncDispatch(mvcResult))
-				.andDo(print())
+				.andDo(print(writer))
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
+
+		assertTrue(writer.toString().contains("Async started = false"));
 	}
 
 
-
-	@Controller
+	@RestController
+	@RequestMapping(path = "/{id}", produces = "application/json")
 	private static class AsyncController {
 
-		private Collection<DeferredResult<Person>> deferredResults =
+		private final Collection<DeferredResult<Person>> deferredResults =
 				new CopyOnWriteArrayList<DeferredResult<Person>>();
 
-		private Collection<ListenableFutureTask<Person>> futureTasks =
+		private final Collection<ListenableFutureTask<Person>> futureTasks =
 				new CopyOnWriteArrayList<ListenableFutureTask<Person>>();
 
 
-		@RequestMapping(value="/{id}", params="callable", produces="application/json")
-		@ResponseBody
+		@RequestMapping(params = "callable")
 		public Callable<Person> getCallable(final Model model) {
-			return new Callable<Person>() {
-				@Override
-				public Person call() throws Exception {
-					return new Person("Joe");
-				}
-			};
+			return () -> new Person("Joe");
 		}
 
-		@RequestMapping(value="/{id}", params="deferredResult", produces="application/json")
-		@ResponseBody
+		@RequestMapping(params = "deferredResult")
 		public DeferredResult<Person> getDeferredResult() {
 			DeferredResult<Person> deferredResult = new DeferredResult<Person>();
 			this.deferredResults.add(deferredResult);
 			return deferredResult;
 		}
 
-		@RequestMapping(value="/{id}", params="deferredResultWithSetValue", produces="application/json")
-		@ResponseBody
+		@RequestMapping(params = "deferredResultWithSetValue")
 		public DeferredResult<Person> getDeferredResultWithSetValue() {
 			DeferredResult<Person> deferredResult = new DeferredResult<Person>();
 			deferredResult.setResult(new Person("Joe"));
 			return deferredResult;
 		}
 
-		@RequestMapping(value="/{id}", params="listenableFuture", produces="application/json")
-		@ResponseBody
+		@RequestMapping(params = "listenableFuture")
 		public ListenableFuture<Person> getListenableFuture() {
-			ListenableFutureTask<Person> futureTask = new ListenableFutureTask<Person>(new Callable<Person>() {
-				@Override
-				public Person call() throws Exception {
-					return new Person("Joe");
-				}
-			});
+			ListenableFutureTask<Person> futureTask = new ListenableFutureTask<Person>(() -> new Person("Joe"));
 			this.futureTasks.add(futureTask);
 			return futureTask;
 		}
 
-		@RequestMapping(value="/{id}", params="completableFuture", produces="application/json")
-		@ResponseBody
+		@RequestMapping(params = "completableFuture")
 		public CompletableFuture<Person> getCompletableFuture() {
 			CompletableFuture<Person> future = new CompletableFuture<Person>();
 			future.complete(new Person("Joe"));
