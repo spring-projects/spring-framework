@@ -24,6 +24,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.junit.Test;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.servlet.MockMvc;
@@ -31,12 +32,13 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.ui.Model;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureTask;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import static org.junit.Assert.*;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -48,6 +50,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  * @author Sam Brannen
+ * @author Jacek Suchenia
  */
 public class AsyncTests {
 
@@ -84,8 +87,8 @@ public class AsyncTests {
 	}
 
 	@Test
-	public void deferredResultWithSetValue() throws Exception {
-		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("deferredResultWithSetValue", "true"))
+	public void deferredResultWithImmediateValue() throws Exception {
+		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("deferredResultWithImmediateValue", "true"))
 				.andExpect(request().asyncStarted())
 				.andExpect(request().asyncResult(new Person("Joe")))
 				.andReturn();
@@ -94,6 +97,20 @@ public class AsyncTests {
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
+	}
+
+	/**
+	 * SPR-13079
+	 */
+	@Test
+	public void deferredResultWithDelayedError() throws Exception {
+		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("deferredResultWithDelayedError", "true"))
+				.andExpect(request().asyncStarted())
+				.andReturn();
+
+		this.mockMvc.perform(asyncDispatch(mvcResult))
+				.andExpect(status().is5xxServerError())
+				.andExpect(content().string("Delayed Error"));
 	}
 
 	@Test
@@ -110,13 +127,14 @@ public class AsyncTests {
 				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
 	}
 
-	@Test  // SPR-12597
-	public void completableFuture() throws Exception {
-		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("completableFuture", "true"))
+	/**
+	 * SPR-12597
+	 */
+	@Test
+	public void completableFutureWithImmediateValue() throws Exception {
+		MvcResult mvcResult = this.mockMvc.perform(get("/1").param("completableFutureWithImmediateValue", "true"))
 				.andExpect(request().asyncStarted())
 				.andReturn();
-
-		this.asyncController.onMessage("Joe");
 
 		this.mockMvc.perform(asyncDispatch(mvcResult))
 				.andExpect(status().isOk())
@@ -124,7 +142,10 @@ public class AsyncTests {
 				.andExpect(content().string("{\"name\":\"Joe\",\"someDouble\":0.0,\"someBoolean\":false}"));
 	}
 
-	@Test  // SPR-12735
+	/**
+	 * SPR-12735
+	 */
+	@Test
 	public void printAsyncResult() throws Exception {
 		StringWriter writer = new StringWriter();
 
@@ -171,10 +192,27 @@ public class AsyncTests {
 			return deferredResult;
 		}
 
-		@RequestMapping(params = "deferredResultWithSetValue")
-		public DeferredResult<Person> getDeferredResultWithSetValue() {
+		@RequestMapping(params = "deferredResultWithImmediateValue")
+		public DeferredResult<Person> getDeferredResultWithImmediateValue() {
 			DeferredResult<Person> deferredResult = new DeferredResult<Person>();
 			deferredResult.setResult(new Person("Joe"));
+			return deferredResult;
+		}
+
+		@RequestMapping(params = "deferredResultWithDelayedError")
+		public DeferredResult<Person> getDeferredResultWithDelayedError() {
+			final DeferredResult<Person> deferredResult = new DeferredResult<Person>();
+			new Thread() {
+				public void run() {
+					try {
+						Thread.sleep(100);
+						deferredResult.setErrorResult(new RuntimeException("Delayed Error"));
+					}
+					catch (InterruptedException e) {
+						/* no-op */
+					}
+				}
+			}.start();
 			return deferredResult;
 		}
 
@@ -185,11 +223,17 @@ public class AsyncTests {
 			return futureTask;
 		}
 
-		@RequestMapping(params = "completableFuture")
-		public CompletableFuture<Person> getCompletableFuture() {
+		@RequestMapping(params = "completableFutureWithImmediateValue")
+		public CompletableFuture<Person> getCompletableFutureWithImmediateValue() {
 			CompletableFuture<Person> future = new CompletableFuture<Person>();
 			future.complete(new Person("Joe"));
 			return future;
+		}
+
+		@ExceptionHandler(Exception.class)
+		@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+		public String errorHandler(Exception e) {
+			return e.getMessage();
 		}
 
 		public void onMessage(String name) {
