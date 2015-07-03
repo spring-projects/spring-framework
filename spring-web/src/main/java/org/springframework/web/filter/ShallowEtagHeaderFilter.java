@@ -94,7 +94,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	private void updateResponse(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		ContentCachingResponseWrapper responseWrapper =
 				WebUtils.getNativeResponse(response, ContentCachingResponseWrapper.class);
-		Assert.notNull(responseWrapper, "ShallowEtagResponseWrapper not found");
+		Assert.notNull(responseWrapper, "ContentCachingResponseWrapper not found");
 		HttpServletResponse rawResponse = (HttpServletResponse) responseWrapper.getResponse();
 		int statusCode = responseWrapper.getStatusCode();
 
