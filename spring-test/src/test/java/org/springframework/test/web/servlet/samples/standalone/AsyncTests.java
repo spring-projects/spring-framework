@@ -29,7 +29,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.ui.Model;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureTask;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -181,7 +180,7 @@ public class AsyncTests {
 
 
 		@RequestMapping(params = "callable")
-		public Callable<Person> getCallable(final Model model) {
+		public Callable<Person> getCallable() {
 			return () -> new Person("Joe");
 		}
 
