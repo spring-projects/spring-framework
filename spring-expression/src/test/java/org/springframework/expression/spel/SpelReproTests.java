@@ -1886,6 +1886,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void SPR12522() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("T(java.util.Arrays).asList('')");
