@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+	<jdbc:embedded-database id="dataSource" type="HSQL">
+		<jdbc:properties>
+			<jdbc:url>jdbc:hsqldb:mem:test</jdbc:url>
+			<prop key="create">true</prop>
+		</jdbc:properties>
+		<jdbc:script location="classpath:org/springframework/jdbc/config/db-schema.sql" />
+		<jdbc:script location="classpath:org/springframework/jdbc/config/db-test-data.sql" />
+	</jdbc:embedded-database>
+
+	<jdbc:embedded-database id="h2DataSource" type="H2">
+		<jdbc:properties>
+			<jdbc:url>jdbc:h2:mem:testdb</jdbc:url>
+			<jdbc:username>user</jdbc:username>
+			<jdbc:password>pass123</jdbc:password>
+			<prop key="DB_CLOSE_DELAY">-1</prop>
+			<prop key="DB_CLOSE_ON_EXIT">false</prop>
+		</jdbc:properties>
+		<jdbc:script location="classpath:org/springframework/jdbc/config/db-schema.sql" />
+		<jdbc:script location="classpath:org/springframework/jdbc/config/db-test-data.sql" />
+	</jdbc:embedded-database>
+
+	<jdbc:embedded-database id="derbyDataSource" type="DERBY">
+		<jdbc:script location="classpath:org/springframework/jdbc/config/db-schema-derby.sql" />
+		<jdbc:script location="classpath:org/springframework/jdbc/config/db-test-data.sql" />
+	</jdbc:embedded-database>
+	
+	<bean id="configurer" class="org.springframework.jdbc.datasource.embedded.Configurer" 
+		factory-method="getDerbyConfigurer"/>
+		
+	<jdbc:embedded-database id="derbyDataSource" type="DERBY" configurer-ref="configurer">
+		<jdbc:script location="classpath:org/springframework/jdbc/config/db-schema-derby.sql" />
+		<jdbc:script location="classpath:org/springframework/jdbc/config/db-test-data.sql" />
+	</jdbc:embedded-database>
+
+</beans>

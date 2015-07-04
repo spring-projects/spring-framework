@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,14 +26,12 @@ import org.springframework.util.ClassUtils;
  *
  * @author Keith Donald
  * @author Oliver Gierke
+ * @author Aliaksei Kalotkin
  * @since 3.0
  */
 final class HsqlEmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigurer {
 
 	private static HsqlEmbeddedDatabaseConfigurer instance;
-
-	private final Class<? extends Driver> driverClass;
-
 
 	/**
 	 * Get the singleton {@link HsqlEmbeddedDatabaseConfigurer} instance.
@@ -51,15 +49,17 @@ final class HsqlEmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfi
 
 
 	private HsqlEmbeddedDatabaseConfigurer(Class<? extends Driver> driverClass) {
-		this.driverClass = driverClass;
+		super(driverClass);
 	}
-
+	
+	/* (non-Javadoc)
+	 * @see org.springframework.jdbc.datasource.embedded.AbstractEmbeddedDatabaseConfigurer#configureDefaultProperties(java.lang.String)
+	 */
 	@Override
-	public void configureConnectionProperties(ConnectionProperties properties, String databaseName) {
-		properties.setDriverClass(this.driverClass);
-		properties.setUrl("jdbc:hsqldb:mem:" + databaseName);
-		properties.setUsername("sa");
-		properties.setPassword("");
+	protected void configureDefaultProperties(String databaseName) {
+		defaultProperties.setDriverClass(driverClass);
+		defaultProperties.setUrl("jdbc:hsqldb:mem:" + databaseName);
+		defaultProperties.setUsername("sa");
+		defaultProperties.setPassword("");
 	}
-
 }

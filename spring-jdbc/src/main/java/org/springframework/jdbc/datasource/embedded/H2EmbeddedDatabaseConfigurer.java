@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,12 @@ import org.springframework.util.ClassUtils;
  * @author Oliver Gierke
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Aliaksei Kalotkin
  * @since 3.0
  */
 final class H2EmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigurer {
 
 	private static H2EmbeddedDatabaseConfigurer instance;
-
-	private final Class<? extends Driver> driverClass;
-
 
 	/**
 	 * Get the singleton {@code H2EmbeddedDatabaseConfigurer} instance.
@@ -52,15 +50,15 @@ final class H2EmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigu
 
 
 	private H2EmbeddedDatabaseConfigurer(Class<? extends Driver> driverClass) {
-		this.driverClass = driverClass;
+		super(driverClass);
 	}
-
+	
+	/* (non-Javadoc)
+	 * @see org.springframework.jdbc.datasource.embedded.AbstractEmbeddedDatabaseConfigurer#configureDefaultProperties()
+	 */
 	@Override
-	public void configureConnectionProperties(ConnectionProperties properties, String databaseName) {
-		properties.setDriverClass(this.driverClass);
-		properties.setUrl(String.format("jdbc:h2:mem:%s;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false", databaseName));
-		properties.setUsername("sa");
-		properties.setPassword("");
+	protected void configureDefaultProperties(String databaseName) {
+		defaultProperties.setDriverClass(driverClass);
+		defaultProperties.setUrl(String.format("jdbc:h2:mem:%s;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false", databaseName));
 	}
-
 }

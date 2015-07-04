@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType.
  *
  * @author Keith Donald
  * @author Sam Brannen
+ * @author Aliaksei Kalotkin
  */
 public class EmbeddedDatabaseBuilderTests {
 
@@ -200,6 +201,16 @@ public class EmbeddedDatabaseBuilderTests {
 		db1.shutdown();
 		db2.shutdown();
 	}
+	
+	@Test
+	public void createDbWithExplicitConfigurer() {
+		Configurer configurer = Configurer.getHsqldbConfigurer();
+		EmbeddedDatabase db = new EmbeddedDatabaseBuilder().
+				setDatabaseConfigurer(configurer).build();
+		assertTrue(configurer.isConfigureCalled());
+		db.shutdown();
+		assertTrue(configurer.isShutdownCalled());
+	}
 
 	private void doTwice(Runnable test) {
 		test.run();
@@ -218,5 +229,4 @@ public class EmbeddedDatabaseBuilderTests {
 		assertDatabaseCreated(db);
 		db.shutdown();
 	}
-
 }

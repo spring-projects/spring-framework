@@ -16,15 +16,20 @@
 
 package org.springframework.jdbc.config;
 
+import java.util.Properties;
+
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 import org.springframework.beans.factory.xml.AbstractBeanDefinitionParser;
+import org.springframework.beans.factory.xml.BeanDefinitionParserDelegate;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.jdbc.datasource.embedded.ConnectionProperties;
+import org.springframework.jdbc.datasource.embedded.DefaultConnectionProperties;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactoryBean;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.util.StringUtils;
-
+import org.springframework.util.xml.DomUtils;
 import org.w3c.dom.Element;
 
 /**
@@ -38,6 +43,7 @@ import org.w3c.dom.Element;
  * @author Oliver Gierke
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Aliaksei Kalotkin
  * @since 3.0
  * @see DatabasePopulatorConfigUtils
  */
@@ -52,6 +58,11 @@ class EmbeddedDatabaseBeanDefinitionParser extends AbstractBeanDefinitionParser 
 	 * Constant for the "generate-name" attribute.
 	 */
 	static final String GENERATE_NAME_ATTRIBUTE = "generate-name";
+	
+	/**
+	 * Constant for the configurer-ref attribute.
+	 */
+	static final String CONFIGURER_REF_ATTRIBUTE = "configurer-ref";
 
 
 	@Override
@@ -60,6 +71,8 @@ class EmbeddedDatabaseBeanDefinitionParser extends AbstractBeanDefinitionParser 
 		setGenerateUniqueDatabaseNameFlag(element, builder);
 		setDatabaseName(element, builder);
 		setDatabaseType(element, builder);
+		setConfigurer(element, builder);
+		builder.addPropertyValue("connectionProperties", createConnectionProperties(element, parserContext));
 		DatabasePopulatorConfigUtils.setDatabasePopulator(element, builder);
 		builder.getRawBeanDefinition().setSource(parserContext.extractSource(element));
 		return builder.getBeanDefinition();
@@ -68,6 +81,45 @@ class EmbeddedDatabaseBeanDefinitionParser extends AbstractBeanDefinitionParser 
 	@Override
 	protected boolean shouldGenerateIdAsFallback() {
 		return true;
+	}
+	
+	private void setConfigurer(Element element, BeanDefinitionBuilder builder) {
+		String configurerRef = element.getAttribute(CONFIGURER_REF_ATTRIBUTE);
+		if (!StringUtils.isEmpty(configurerRef)) {
+			builder.addPropertyReference("databaseConfigurer", configurerRef);
+		}
+	}
+	
+	private BeanDefinition createConnectionProperties(Element element, ParserContext context) {
+		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(DefaultConnectionProperties.class);
+		BeanDefinitionParserDelegate delegate = context.getDelegate();
+		Element propertiesElement = DomUtils.getChildElementByTagName(element, "properties");
+		if (propertiesElement != null) {
+			Properties properties = delegate.parsePropsElement(propertiesElement);
+			String url = getTextValue(propertiesElement, "url");
+			String username = getTextValue(propertiesElement, "username");
+			String password = getTextValue(propertiesElement, "password");
+			if (!StringUtils.isEmpty(url)) {
+				builder.addPropertyValue("url", url);
+			}
+			if (!StringUtils.isEmpty(username)) {
+				builder.addPropertyValue("username", username);
+			}
+			if (!StringUtils.isEmpty(password)) {
+				builder.addPropertyValue("password", password);
+			}
+			builder.addPropertyValue("properties", properties);
+		}
+		return builder.getBeanDefinition();
+	}
+	
+	private String getTextValue(Element parent, String elementTag) {
+		Element element = DomUtils.getChildElementByTagName(parent, elementTag);
+		String result = null;
+		if (element != null) {
+			result = DomUtils.getTextValue(element);
+		}
+		return result;
 	}
 
 	private void setGenerateUniqueDatabaseNameFlag(Element element, BeanDefinitionBuilder builder) {

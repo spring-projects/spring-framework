@@ -134,6 +134,17 @@ public class EmbeddedDatabaseBuilder {
 		this.databaseFactory.setDataSourceFactory(dataSourceFactory);
 		return this;
 	}
+	
+	/**
+	 * Set explicit database configurer to override default behavior.
+	 * @param configurer embedded database configurer
+	 * @return {@code this}, to facilitate method chaining
+	 * @since 4.3
+	 */
+	public EmbeddedDatabaseBuilder setDatabaseConfigurer(EmbeddedDatabaseConfigurer configurer) {
+		this.databaseFactory.setDatabaseConfigurer(configurer);
+		return this;
+	}
 
 	/**
 	 * Add default SQL scripts to execute to populate the database.

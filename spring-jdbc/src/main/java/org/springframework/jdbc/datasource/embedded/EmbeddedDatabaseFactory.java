@@ -58,6 +58,7 @@ import org.springframework.util.Assert;
  * @author Keith Donald
  * @author Juergen Hoeller
  * @author Sam Brannen
+ * @author Aliaksei Kalotkin
  * @since 3.0
  */
 public class EmbeddedDatabaseFactory {
@@ -80,6 +81,8 @@ public class EmbeddedDatabaseFactory {
 	private DatabasePopulator databasePopulator;
 
 	private DataSource dataSource;
+	
+	private ConfigurableConnectionProperties connectionProperties = new DefaultConnectionProperties();
 
 
 	/**
@@ -154,6 +157,25 @@ public class EmbeddedDatabaseFactory {
 		}
 		return new EmbeddedDataSourceProxy(this.dataSource);
 	}
+	
+	
+	/**
+	 * Set connection properties.
+	 * @return the connectionProperties
+	 * @since 4.3
+	 */
+	public ConfigurableConnectionProperties getConnectionProperties() {
+		return connectionProperties;
+	}
+	
+	
+	/**Get connection properties
+	 * @param connectionProperties the connectionProperties to set
+	 * @since 4.3
+	 */
+	public void setConnectionProperties(ConfigurableConnectionProperties connectionProperties) {
+		this.connectionProperties = connectionProperties;
+	}
 
 
 	/**
@@ -178,8 +200,9 @@ public class EmbeddedDatabaseFactory {
 		if (this.databaseConfigurer == null) {
 			this.databaseConfigurer = EmbeddedDatabaseConfigurerFactory.getConfigurer(EmbeddedDatabaseType.HSQL);
 		}
-		this.databaseConfigurer.configureConnectionProperties(
-				this.dataSourceFactory.getConnectionProperties(), this.databaseName);
+		ConnectionProperties datatSourceProperties = this.dataSourceFactory.getConnectionProperties();
+		ConnectionPropertiesWrapper wrapper = new ConnectionPropertiesWrapper(datatSourceProperties, connectionProperties);
+		this.databaseConfigurer.configureConnectionProperties(wrapper, this.databaseName);
 		this.dataSource = this.dataSourceFactory.getDataSource();
 
 		// Now populate the database

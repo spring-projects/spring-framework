@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@
 package org.springframework.jdbc.datasource.embedded;
 
 import java.sql.Connection;
+import java.sql.Driver;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -29,11 +31,39 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Oliver Gierke
  * @author Juergen Hoeller
+ * @author Aliaksei Kalotkin
  * @since 3.0
  */
 abstract class AbstractEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigurer {
 
 	protected final Log logger = LogFactory.getLog(getClass());
+	protected Class<? extends Driver> driverClass;
+	protected ConfigurableConnectionProperties defaultProperties = new DefaultConnectionProperties();
+	
+	
+	protected AbstractEmbeddedDatabaseConfigurer(Class<? extends Driver> driverClass) {
+		this.driverClass = driverClass;
+	}
+	
+	protected abstract void configureDefaultProperties(String databaseName);
+	
+	/* (non-Javadoc)
+	 * @see org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseConfigurer#configureConnectionProperties(org.springframework.jdbc.datasource.embedded.ConnectionProperties, java.lang.String)
+	 */
+	@Override
+	public void configureConnectionProperties(ConnectionProperties properties, String databaseName) {
+		configureDefaultProperties(databaseName);
+		if (properties != null) {
+			if (properties instanceof ConfigurableConnectionProperties) {
+				((ConfigurableConnectionProperties) properties).setDefaults(defaultProperties);
+			} else {
+				properties.setDriverClass(defaultProperties.getDriverClass());
+				properties.setPassword(defaultProperties.getPassword());
+				properties.setUrl(defaultProperties.getUrl());
+				properties.setUsername(defaultProperties.getUsername());
+			}
+		}
+	}
 
 	@Override
 	public void shutdown(DataSource dataSource, String databaseName) {

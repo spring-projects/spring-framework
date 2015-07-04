@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.jdbc.datasource.embedded;
 
 import java.sql.SQLException;
 import java.util.Properties;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.LogFactory;
@@ -29,13 +30,19 @@ import org.apache.derby.jdbc.EmbeddedDriver;
  *
  * @author Oliver Gierke
  * @author Juergen Hoeller
+ * @author Aliaksei Kalotkin
  * @since 3.0
  */
-final class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigurer {
+final class DerbyEmbeddedDatabaseConfigurer extends AbstractEmbeddedDatabaseConfigurer {
 
 	private static final String URL_TEMPLATE = "jdbc:derby:memory:%s;%s";
 
 	private static DerbyEmbeddedDatabaseConfigurer instance;
+	
+	/**
+	 * Database url.
+	 */
+	private String url;
 
 
 	/**
@@ -55,21 +62,36 @@ final class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigure
 
 
 	private DerbyEmbeddedDatabaseConfigurer() {
+		super(EmbeddedDriver.class);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.springframework.jdbc.datasource.embedded.AbstractEmbeddedDatabaseConfigurer#configureDefaultProperties(java.lang.String)
+	 */
+	@Override
+	protected void configureDefaultProperties(String databaseName) {
+		defaultProperties.setDriverClass(driverClass);
+		defaultProperties.setUrl(String.format(URL_TEMPLATE, databaseName, "create=true"));
+		defaultProperties.setUsername("sa");
+		defaultProperties.setPassword("");
 	}
 
 	@Override
 	public void configureConnectionProperties(ConnectionProperties properties, String databaseName) {
-		properties.setDriverClass(EmbeddedDriver.class);
-		properties.setUrl(String.format(URL_TEMPLATE, databaseName, "create=true"));
-		properties.setUsername("sa");
-		properties.setPassword("");
+		super.configureConnectionProperties(properties, databaseName);
+		if (properties instanceof ConfigurableConnectionProperties) {
+			this.url = ((ConfigurableConnectionProperties) properties).getUrl();
+		} else {
+			this.url = defaultProperties.getUrl();
+		}
 	}
 
 	@Override
 	public void shutdown(DataSource dataSource, String databaseName) {
 		try {
-			new EmbeddedDriver().connect(
-					String.format(URL_TEMPLATE, databaseName, "drop=true"), new Properties());
+			Properties shutdownProperties = new Properties();
+			shutdownProperties.put("shutdown", "true");
+			new EmbeddedDriver().connect(url, shutdownProperties);
 		}
 		catch (SQLException ex) {
 			// Error code that indicates successful shutdown
@@ -78,5 +100,4 @@ final class DerbyEmbeddedDatabaseConfigurer implements EmbeddedDatabaseConfigure
 			}
 		}
 	}
-
 }

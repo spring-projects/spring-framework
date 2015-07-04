@@ -16,6 +16,7 @@
 
 package org.springframework.jdbc.config;
 
+import java.util.Properties;
 import java.util.function.Predicate;
 
 import javax.sql.DataSource;
@@ -25,7 +26,9 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import org.springframework.beans.PropertyValue;
+import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.TypedStringValue;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -34,6 +37,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.AbstractDriverBasedDataSource;
+import org.springframework.jdbc.datasource.SimpleDriverDataSource;
+import org.springframework.jdbc.datasource.embedded.Configurer;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFactoryBean;
 import org.springframework.jdbc.datasource.init.DataSourceInitializer;
 import org.springframework.tests.Assume;
@@ -48,6 +53,7 @@ import static org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseFacto
  * @author Juergen Hoeller
  * @author Chris Beams
  * @author Sam Brannen
+ * @author Aliaksei Kalotkin
  */
 public class JdbcNamespaceIntegrationTests {
 
@@ -164,9 +170,95 @@ public class JdbcNamespaceIntegrationTests {
 		assertBeanPropertyValueOf("databaseName", "firstDataSource", factory);
 		assertBeanPropertyValueOf("databaseName", "secondDataSource", factory);
 	}
+	
+	@Test
+	public void connectionProperties() throws Exception {
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(new ClassPathResource(
+			"jdbc-config-properties.xml", getClass()));
+		Properties p1 = new Properties();
+		p1.put("create", "true");
+		assertConnectionProperties("dataSource", "jdbc:hsqldb:mem:test", null, null, p1, factory, false);
+		Properties p2 = new Properties();
+		p2.put("DB_CLOSE_DELAY", "-1");
+		p2.put("DB_CLOSE_ON_EXIT", "false");
+		String url = "jdbc:h2:mem:testdb";
+		assertConnectionProperties("h2DataSource", url, "user", "pass123", p2, factory, false);
+		assertConnectionProperties("derbyDataSource", null, null, null, new Properties(), factory, true);
+	}
+	
+	@Test
+	public void createAndDestroyDBWithProperties() throws Exception {
+		ClassPathXmlApplicationContext context = context("jdbc-config-properties.xml");
+		try {
+			SimpleDriverDataSource dataSource = context.getBean("dataSource", SimpleDriverDataSource.class);
+			String url = "jdbc:hsqldb:mem:test";
+			Properties p1 = new Properties();
+			p1.put("create", "true");
+			assertSimpleDriverDataSource(dataSource, url, "sa", "", p1);
+			Properties p2 = new Properties();
+			p2.put("DB_CLOSE_DELAY", "-1");
+			p2.put("DB_CLOSE_ON_EXIT", "false");
+			url = "jdbc:h2:mem:testdb";
+			SimpleDriverDataSource h2DataSource = context.getBean("h2DataSource", SimpleDriverDataSource.class);
+			assertSimpleDriverDataSource(h2DataSource, url, "user", "pass123", p2);
+			EmbeddedDatabaseFactoryBean factory = context.getBean("&derbyDataSource", EmbeddedDatabaseFactoryBean.class);
+			SimpleDriverDataSource derbyDataSource = context.getBean("derbyDataSource", SimpleDriverDataSource.class);
+			url = "jdbc:derby:memory:derbyDataSource;create=true";
+			assertSimpleDriverDataSource(derbyDataSource, url, "sa", "", new Properties());
+			Configurer configurer = context.getBean("configurer", Configurer.class);
+			assertTrue(configurer.isConfigureCalled());
+			factory.destroy();
+			assertTrue(configurer.isShutdownCalled());
+		} finally {
+			context.close();
+		}
+	}
 
 	private ClassPathXmlApplicationContext context(String file) {
 		return new ClassPathXmlApplicationContext(file, getClass());
+	}
+	
+	private void assertSimpleDriverDataSource(SimpleDriverDataSource dataSource, String url, String username,
+			String password, Properties properties) {
+		assertThat(dataSource.getUrl(), is(url));
+		assertThat(dataSource.getUsername(), is(username));
+		assertThat(dataSource.getPassword(), is(password));
+		assertThat(dataSource.getConnectionProperties(), is(properties));
+	}
+	private void assertConnectionProperties(String beanName, String url, String username, String password, 
+			Properties properties, DefaultListableBeanFactory factory, boolean configurerSet) {
+		BeanDefinition bean = factory.getBeanDefinition(beanName);
+		PropertyValues values = bean.getPropertyValues();
+		PropertyValue configurer = values.getPropertyValue("databaseConfigurer");
+		if (configurerSet) {
+			assertThat(configurer, is(notNullValue()));
+		} else {
+			assertThat(configurer, is(nullValue()));
+		}
+		BeanDefinition connectionProperties = (BeanDefinition) values.getPropertyValue("connectionProperties").getValue();
+		PropertyValues props = connectionProperties.getPropertyValues();
+		assertThat(connectionProperties, is(notNullValue()));
+		assertBeanProperty("url", url, props);
+		assertBeanProperty("username", username, props);
+		assertBeanProperty("password", password, props);
+		if (!properties.isEmpty()) {
+			Properties connProps = (Properties) props.getPropertyValue("properties").getValue();
+			for (String key : properties.stringPropertyNames()) {
+				TypedStringValue property = (TypedStringValue) connProps.get(new TypedStringValue(key));
+				assertThat(property.getValue(), is(properties.getProperty(key)));
+			}
+		}
+	}
+	
+	private void assertBeanProperty(String propertyName, Object expected, PropertyValues props) {
+		PropertyValue value = props.getPropertyValue(propertyName);
+		if (expected != null) {
+			assertThat(value, is(notNullValue()));
+			assertThat(value.getValue(), is(expected));
+		} else {
+			assertThat(value, is(nullValue()));
+		}
 	}
 
 	private void assertBeanPropertyValueOf(String propertyName, String expected, DefaultListableBeanFactory factory) {

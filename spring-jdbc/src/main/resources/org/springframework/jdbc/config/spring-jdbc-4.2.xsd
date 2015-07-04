@@ -26,6 +26,13 @@
 			<xsd:complexContent>
 				<xsd:extension base="beans:identifiedType">
 					<xsd:sequence>
+						<xsd:element name="properties" type="connectionProperties" minOccurs="0" maxOccurs="1">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+			Database connection properties
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:element>
 						<xsd:element name="script" type="scriptType" minOccurs="0" maxOccurs="unbounded">
 							<xsd:annotation>
 								<xsd:documentation><![CDATA[
@@ -59,6 +66,13 @@
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 			The type of embedded database to create, such as HSQL, H2 or Derby. Defaults to HSQL.
+							]]></xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
+					<xsd:attribute name="configurer-ref">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+			Reference to EmbeddedDatabaseConfigurer instance.
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
@@ -203,5 +217,37 @@
 			</xsd:enumeration>
 		</xsd:restriction>
 	</xsd:simpleType>
-
+	
+	<xsd:complexType name="connectionProperties">
+		<xsd:sequence>
+			<xsd:element name="url" type="xsd:string" minOccurs="0" maxOccurs="1">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+		Embedded database url.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="username" type="xsd:string" minOccurs="0" maxOccurs="1">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+		Embedded database username.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element name="password" type="xsd:string" minOccurs="0" maxOccurs="1">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+		Embedded database password.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+			<xsd:element ref="beans:prop" minOccurs="0" maxOccurs="unbounded">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+		Additional embedded database properties.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:element>
+		</xsd:sequence>
+	</xsd:complexType>
 </xsd:schema>
