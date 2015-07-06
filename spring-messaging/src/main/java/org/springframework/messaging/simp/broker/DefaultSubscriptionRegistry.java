@@ -16,8 +16,6 @@
 
 package org.springframework.messaging.simp.broker;
 
-import static org.springframework.messaging.support.MessageHeaderAccessor.getAccessor;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -45,6 +43,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.PathMatcher;
+
+import static org.springframework.messaging.support.MessageHeaderAccessor.getAccessor;
 
 
 /**
@@ -209,7 +209,13 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		for (String sessionId : allMatches.keySet()) {
 			for (String subId : allMatches.get(sessionId)) {
 				SessionSubscriptionInfo info = this.subscriptionRegistry.getSubscriptions(sessionId);
+				if (info == null) {
+					continue;
+				}
 				Subscription sub = info.getSubscription(subId);
+				if (sub == null) {
+					continue;
+				}
 				Expression expression = sub.getSelectorExpression();
 				if (expression == null) {
 					result.add(sessionId, subId);
