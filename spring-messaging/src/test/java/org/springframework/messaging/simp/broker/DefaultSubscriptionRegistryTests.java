@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -404,7 +405,6 @@ public class DefaultSubscriptionRegistryTests {
 	// SPR-12665
 
 	@Test
-	@SuppressWarnings("rawtypes")
 	public void findSubscriptionsReturnsMapSafeToIterate() throws Exception {
 
 		this.registry.registerSubscription(subscribeMessage("sess1", "1", "/foo"));
@@ -414,12 +414,31 @@ public class DefaultSubscriptionRegistryTests {
 		assertNotNull(subscriptions);
 		assertEquals(2, subscriptions.size());
 
-		Iterator iterator = subscriptions.entrySet().iterator();
+		Iterator<Map.Entry<String, List<String>>> iterator = subscriptions.entrySet().iterator();
 		iterator.next();
 
 		this.registry.registerSubscription(subscribeMessage("sess3", "1", "/foo"));
 
 		iterator.next();
+		// no ConcurrentModificationException
+	}
+
+	@Test
+	public void findSubscriptionsReturnsMapSafeToIterateIncludingValues() throws Exception {
+
+		this.registry.registerSubscription(subscribeMessage("sess1", "1", "/foo"));
+		this.registry.registerSubscription(subscribeMessage("sess1", "2", "/foo"));
+
+		MultiValueMap<String, String> allSubscriptions = this.registry.findSubscriptions(createMessage("/foo"));
+		assertNotNull(allSubscriptions);
+		assertEquals(1, allSubscriptions.size());
+
+		Iterator<String> iteratorValues = allSubscriptions.get("sess1").iterator();
+		iteratorValues.next();
+
+		this.registry.unregisterSubscription(unsubscribeMessage("sess1", "2"));
+
+		iteratorValues.next();
 		// no ConcurrentModificationException
 	}
 
