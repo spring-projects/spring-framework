@@ -348,6 +348,7 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	 * @since 4.0.1
 	 * @see com.fasterxml.jackson.databind.Module
 	 */
+	@SuppressWarnings("unchecked")
 	public void setModulesToInstall(Class<? extends Module>... modules) {
 		this.builder.modulesToInstall(modules);
 	}
@@ -391,7 +392,6 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void afterPropertiesSet() {
 		if (this.objectMapper != null) {
 			this.builder.configure(this.objectMapper);

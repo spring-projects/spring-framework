@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 import com.google.gson.Gson;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -172,6 +173,7 @@ public class GsonFactoryBeanTests {
 
 		private String name;
 
+		@SuppressWarnings("unused")
 		public String getName() {
 			return this.name;
 		}
@@ -186,6 +188,7 @@ public class GsonFactoryBeanTests {
 
 		private Date date;
 
+		@SuppressWarnings("unused")
 		public Date getDate() {
 			return this.date;
 		}
@@ -200,6 +203,7 @@ public class GsonFactoryBeanTests {
 
 		private byte[] bytes;
 
+		@SuppressWarnings("unused")
 		public byte[] getBytes() {
 			return this.bytes;
 		}

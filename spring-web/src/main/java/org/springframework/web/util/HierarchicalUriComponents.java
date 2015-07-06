@@ -872,7 +872,6 @@ final class HierarchicalUriComponents extends UriComponents {
 		@Override
 		public void copyToUriComponentsBuilder(UriComponentsBuilder builder) {
 		}
-		@SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
 		@Override
 		public boolean equals(Object obj) {
 			return (this == obj);

@@ -465,6 +465,7 @@ public class Jackson2ObjectMapperBuilder {
 	 * @see #modulesToInstall(Module...)
 	 * @see com.fasterxml.jackson.databind.Module
 	 */
+	@SuppressWarnings("unchecked")
 	public Jackson2ObjectMapperBuilder modulesToInstall(Class<? extends Module>... modules) {
 		this.moduleClasses = modules;
 		this.findWellKnownModules = true;
@@ -712,7 +713,6 @@ public class Jackson2ObjectMapperBuilder {
 	 * Obtain a {@link Jackson2ObjectMapperBuilder} instance in order to
 	 * build an {@link XmlMapper} instance.
 	 */
-	@SuppressWarnings("unchecked")
 	public static Jackson2ObjectMapperBuilder xml() {
 		return new Jackson2ObjectMapperBuilder().createXmlMapper(true);
 	}

@@ -222,7 +222,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 
 	@Test
 	public void setModules() {
-		NumberSerializer serializer1 = new NumberSerializer();
+		NumberSerializer serializer1 = new NumberSerializer(Integer.class);
 		SimpleModule module = new SimpleModule();
 		module.addSerializer(Integer.class, serializer1);
 
@@ -341,7 +341,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		deserializers.put(Date.class, new DateDeserializer());
 
 		JsonSerializer<Class<?>> serializer1 = new ClassSerializer();
-		JsonSerializer<Number> serializer2 = new NumberSerializer();
+		JsonSerializer<Number> serializer2 = new NumberSerializer(Integer.class);
 
 		factory.setModules(new ArrayList<>()); // Disable well-known modules detection
 		factory.setSerializers(serializer1);

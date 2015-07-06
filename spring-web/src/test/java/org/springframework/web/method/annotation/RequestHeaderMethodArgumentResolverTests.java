@@ -58,6 +58,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 
 
 	@Before
+	@SuppressWarnings("resource")
 	public void setUp() throws Exception {
 		GenericWebApplicationContext context = new GenericWebApplicationContext();
 		context.refresh();

@@ -195,7 +195,6 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 		HttpClient client = getHttpClient();
 		Assert.state(client != null, "Synchronous execution requires an HttpClient to be set");

@@ -33,9 +33,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.http.HttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -135,14 +132,12 @@ public abstract class WebUtils {
 	/** Key for the mutex session attribute */
 	public static final String SESSION_MUTEX_ATTRIBUTE = WebUtils.class.getName() + ".MUTEX";
 
-	private static final Log logger = LogFactory.getLog(WebUtils.class);
-
 
 	/**
 	 * Set a system property to the web application root directory.
 	 * The key of the system property can be defined with the "webAppRootKey"
 	 * context-param in {@code web.xml}. Default is "webapp.root".
-	 * <p>Can be used for tools that support substition with {@code System.getProperty}
+	 * <p>Can be used for tools that support substitution with {@code System.getProperty}
 	 * values, like log4j's "${key}" syntax within log file locations.
 	 * @param servletContext the servlet context of the web application
 	 * @throws IllegalStateException if the system property is already set,

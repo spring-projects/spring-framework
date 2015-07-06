@@ -53,7 +53,6 @@ import static org.junit.Assert.assertTrue;
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  */
-@SuppressWarnings("unused")
 public class Jaxb2RootElementHttpMessageConverterTests {
 
 	private Jaxb2RootElementHttpMessageConverter converter;

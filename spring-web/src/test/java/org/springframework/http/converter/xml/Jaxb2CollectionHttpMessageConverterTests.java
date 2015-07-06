@@ -45,7 +45,6 @@ import static org.junit.Assert.*;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
-@SuppressWarnings("unused")
 public class Jaxb2CollectionHttpMessageConverterTests {
 
 	private Jaxb2CollectionHttpMessageConverter<?> converter;

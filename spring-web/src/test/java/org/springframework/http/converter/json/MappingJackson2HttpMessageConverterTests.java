@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+
 import org.junit.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -395,6 +396,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	private interface MyJacksonView1 {};
 	private interface MyJacksonView2 {};
 
+	@SuppressWarnings("unused")
 	private static class JacksonViewBean {
 
 		@JsonView(MyJacksonView1.class)
@@ -431,6 +433,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@JsonFilter("myJacksonFilter")
+	@SuppressWarnings("unused")
 	private static class JacksonFilteredBean {
 
 		private String property1;
