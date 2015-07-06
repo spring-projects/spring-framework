@@ -38,14 +38,12 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.PathMatcher;
-
-import static org.springframework.messaging.support.MessageHeaderAccessor.getAccessor;
-
 
 /**
  * Implementation of {@link SubscriptionRegistry} that stores subscriptions
@@ -181,7 +179,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 	protected MultiValueMap<String, String> findSubscriptionsInternal(String destination,
 			Message<?> message) {
 
-		MultiValueMap<String, String> result = this.destinationCache.getSubscriptions(destination);
+		LinkedMultiValueMap<String, String> result = this.destinationCache.getSubscriptions(destination);
 		if (result != null) {
 			return filterSubscriptions(result, message);
 		}
@@ -258,39 +256,39 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 	private class DestinationCache {
 
 		/** Map from destination -> <sessionId, subscriptionId> for fast look-ups */
-		private final Map<String, MultiValueMap<String, String>> accessCache =
-				new ConcurrentHashMap<String, MultiValueMap<String, String>>(DEFAULT_CACHE_LIMIT);
+		private final Map<String, LinkedMultiValueMap<String, String>> accessCache =
+				new ConcurrentHashMap<String, LinkedMultiValueMap<String, String>>(DEFAULT_CACHE_LIMIT);
 
 		/** Map from destination -> <sessionId, subscriptionId> with locking */
 		@SuppressWarnings("serial")
-		private final Map<String, MultiValueMap<String, String>> updateCache =
-				new LinkedHashMap<String, MultiValueMap<String, String>>(DEFAULT_CACHE_LIMIT, 0.75f, true) {
+		private final Map<String, LinkedMultiValueMap<String, String>> updateCache =
+				new LinkedHashMap<String, LinkedMultiValueMap<String, String>>(DEFAULT_CACHE_LIMIT, 0.75f, true) {
 					@Override
-					protected boolean removeEldestEntry(Map.Entry<String, MultiValueMap<String, String>> eldest) {
+					protected boolean removeEldestEntry(Map.Entry<String, LinkedMultiValueMap<String, String>> eldest) {
 						return size() > getCacheLimit();
 					}
 				};
 
 
-		public MultiValueMap<String, String> getSubscriptions(String destination) {
+		public LinkedMultiValueMap<String, String> getSubscriptions(String destination) {
 			return this.accessCache.get(destination);
 		}
 
-		public void addSubscriptions(String destination, MultiValueMap<String, String> subscriptions) {
+		public void addSubscriptions(String destination, LinkedMultiValueMap<String, String> subscriptions) {
 			synchronized (this.updateCache) {
-				this.updateCache.put(destination, new LinkedMultiValueMap<String, String>(subscriptions));
+				this.updateCache.put(destination, subscriptions.deepCopy());
 				this.accessCache.put(destination, subscriptions);
 			}
 		}
 
 		public void updateAfterNewSubscription(String destination, String sessionId, String subsId) {
 			synchronized (this.updateCache) {
-				for (Map.Entry<String, MultiValueMap<String, String>> entry : this.updateCache.entrySet()) {
+				for (Map.Entry<String, LinkedMultiValueMap<String, String>> entry : this.updateCache.entrySet()) {
 					String cachedDestination = entry.getKey();
 					if (getPathMatcher().match(destination, cachedDestination)) {
-						MultiValueMap<String, String> subs = entry.getValue();
+						LinkedMultiValueMap<String, String> subs = entry.getValue();
 						subs.add(sessionId, subsId);
-						this.accessCache.put(cachedDestination, new LinkedMultiValueMap<String, String>(subs));
+						this.accessCache.put(cachedDestination, subs.deepCopy());
 					}
 				}
 			}
@@ -299,9 +297,9 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		public void updateAfterRemovedSubscription(String sessionId, String subsId) {
 			synchronized (this.updateCache) {
 				Set<String> destinationsToRemove = new HashSet<String>();
-				for (Map.Entry<String, MultiValueMap<String, String>> entry : this.updateCache.entrySet()) {
+				for (Map.Entry<String, LinkedMultiValueMap<String, String>> entry : this.updateCache.entrySet()) {
 					String destination = entry.getKey();
-					MultiValueMap<String, String> sessionMap = entry.getValue();
+					LinkedMultiValueMap<String, String> sessionMap = entry.getValue();
 					List<String> subscriptions = sessionMap.get(sessionId);
 					if (subscriptions != null) {
 						subscriptions.remove(subsId);
@@ -312,7 +310,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 							destinationsToRemove.add(destination);
 						}
 						else {
-							this.accessCache.put(destination, new LinkedMultiValueMap<String, String>(sessionMap));
+							this.accessCache.put(destination, sessionMap.deepCopy());
 						}
 					}
 				}
@@ -326,15 +324,15 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		public void updateAfterRemovedSession(SessionSubscriptionInfo info) {
 			synchronized (this.updateCache) {
 				Set<String> destinationsToRemove = new HashSet<String>();
-				for (Map.Entry<String, MultiValueMap<String, String>> entry : this.updateCache.entrySet()) {
+				for (Map.Entry<String, LinkedMultiValueMap<String, String>> entry : this.updateCache.entrySet()) {
 					String destination = entry.getKey();
-					MultiValueMap<String, String> sessionMap = entry.getValue();
+					LinkedMultiValueMap<String, String> sessionMap = entry.getValue();
 					if (sessionMap.remove(info.getSessionId()) != null) {
 						if (sessionMap.isEmpty()) {
 							destinationsToRemove.add(destination);
 						}
 						else {
-							this.accessCache.put(destination, new LinkedMultiValueMap<String, String>(sessionMap));
+							this.accessCache.put(destination, sessionMap.deepCopy());
 						}
 					}
 				}
@@ -351,6 +349,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		}
 	}
 
+
 	/**
 	 * Provide access to session subscriptions by sessionId.
 	 */
@@ -359,7 +358,6 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		// sessionId -> SessionSubscriptionInfo
 		private final ConcurrentMap<String, SessionSubscriptionInfo> sessions =
 				new ConcurrentHashMap<String, SessionSubscriptionInfo>();
-
 
 		public SessionSubscriptionInfo getSubscriptions(String sessionId) {
 			return this.sessions.get(sessionId);
@@ -394,6 +392,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		}
 	}
 
+
 	/**
 	 * Hold subscriptions for a session.
 	 */
@@ -406,7 +405,6 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 				new ConcurrentHashMap<String, Set<Subscription>>(4);
 
 		private final Object monitor = new Object();
-
 
 		public SessionSubscriptionInfo(String sessionId) {
 			Assert.notNull(sessionId, "sessionId must not be null");
@@ -473,18 +471,17 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		}
 	}
 
+
 	private static class Subscription {
 
 		private final String id;
 
 		private final Expression selectorExpression;
 
-
 		public Subscription(String id, Expression selector) {
 			this.id = id;
 			this.selectorExpression = selector;
 		}
-
 
 		public String getId() {
 			return this.id;
@@ -496,9 +493,10 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 		@Override
 		public String toString() {
-			return "Subscription id='" + this.id;
+			return "subscription(id=" + this.id + ")";
 		}
 	}
+
 
 	private static class SimpMessageHeaderPropertyAccessor implements PropertyAccessor {
 
@@ -515,7 +513,8 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		@Override
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 			MessageHeaders headers = (MessageHeaders) target;
-			SimpMessageHeaderAccessor accessor = getAccessor(headers, SimpMessageHeaderAccessor.class);
+			SimpMessageHeaderAccessor accessor =
+					MessageHeaderAccessor.getAccessor(headers, SimpMessageHeaderAccessor.class);
 			Object value;
 			if ("destination".equalsIgnoreCase(name)) {
 				value = accessor.getDestination();
