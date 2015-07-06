@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.springframework.core.io.InputStreamSource;
+
 /**
  * A representation of an uploaded file received in a multipart request.
  *
@@ -34,7 +36,7 @@ import java.io.InputStream;
  * @see org.springframework.web.multipart.MultipartHttpServletRequest
  * @see org.springframework.web.multipart.MultipartResolver
  */
-public interface MultipartFile {
+public interface MultipartFile extends InputStreamSource {
 
 	/**
 	 * Return the name of the parameter in the multipart form.
@@ -84,6 +86,7 @@ public interface MultipartFile {
 	 * @return the contents of the file as stream, or an empty stream if empty
 	 * @throws IOException in case of access errors (if the temporary store fails)
 	 */
+	@Override
 	InputStream getInputStream() throws IOException;
 
 	/**
