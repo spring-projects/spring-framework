@@ -40,6 +40,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Chris Beams
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 3.1.1
  * @see AnnotationUtils#getAnnotationAttributes
  * @see AnnotatedElementUtils

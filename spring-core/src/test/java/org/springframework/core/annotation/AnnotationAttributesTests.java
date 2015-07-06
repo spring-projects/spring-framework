@@ -31,6 +31,7 @@ import static org.junit.Assert.*;
  *
  * @author Chris Beams
  * @author Sam Brannen
+ * @author Juergen Hoeller
  * @since 3.1.1
  */
 public class AnnotationAttributesTests {
@@ -57,7 +58,6 @@ public class AnnotationAttributesTests {
 		attributes.put("number", 42);
 		attributes.put("anno", nestedAttributes);
 		attributes.put("annoArray", new AnnotationAttributes[] { nestedAttributes });
-		attributes.put("unresolvableClass", new ClassNotFoundException("myclass"));
 
 		assertThat(attributes.getString("name"), equalTo("dave"));
 		assertThat(attributes.getStringArray("names"), equalTo(new String[] { "dave", "frank", "hal" }));
@@ -70,14 +70,14 @@ public class AnnotationAttributesTests {
 		assertThat(attributes.getAnnotation("anno").<Integer>getNumber("value"), equalTo(10));
 		assertThat(attributes.getAnnotationArray("annoArray")[0].getString("name"), equalTo("algernon"));
 
-		try {
-			attributes.getClass("unresolvableClass");
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			assertTrue(ex.getCause() instanceof ClassNotFoundException);
-			assertTrue(ex.getMessage().contains("myclass"));
-		}
+	}
+
+	@Test
+	public void unresolvableClass() throws Exception {
+		attributes.put("unresolvableClass", new ClassNotFoundException("myclass"));
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(containsString("myclass"));
+		attributes.getClass("unresolvableClass");
 	}
 
 	@Test
