@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.MethodParameter;
@@ -37,6 +37,8 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -56,7 +58,6 @@ import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMeth
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 import static org.junit.Assert.*;
-import org.mockito.Mockito;
 
 /**
  * Test fixture for {@link ResponseEntityExceptionHandler}.
@@ -179,9 +180,16 @@ public class ResponseEntityExceptionHandlerTests {
 	}
 
 	@Test
-	public void methodArgumentNotValid() {
-		Exception ex = Mockito.mock(MethodArgumentNotValidException.class);
-		testException(ex);
+	public void methodArgumentNotValid() throws Exception {
+		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(new TestBean(), "testBean");
+		errors.rejectValue("name", "invalid");
+		MethodParameter parameter = new MethodParameter(this.getClass().getMethod("handle", String.class), 0);
+		MethodArgumentNotValidException ex = new MethodArgumentNotValidException(parameter, errors);
+		ResponseEntity<Object> entity = testException(ex);
+		Object body = entity.getBody();
+		assertNotNull("Empty entity body", body);
+		assertEquals("[Field error in object 'testBean' on field 'name': rejected value [null]; codes [invalid.testBean.name,invalid.name,invalid.java.lang.String,invalid]; arguments []; default message [null]]",
+				body.toString());
 	}
 
 	@Test
@@ -192,8 +200,14 @@ public class ResponseEntityExceptionHandlerTests {
 
 	@Test
 	public void bindException() {
-		Exception ex = new BindException(new Object(), "name");
-		testException(ex);
+		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(new TestBean(), "testBean");
+		errors.rejectValue("name", "invalid");
+		Exception ex = new BindException(errors);
+		ResponseEntity<Object> entity = testException(ex);
+		Object body = entity.getBody();
+		assertNotNull("Empty entity body", body);
+		assertEquals("[Field error in object 'testBean' on field 'name': rejected value [null]; codes [invalid.testBean.name,invalid.name,invalid.java.lang.String,invalid]; arguments []; default message [null]]",
+				body.toString());
 	}
 
 	@Test
@@ -255,8 +269,7 @@ public class ResponseEntityExceptionHandlerTests {
 		}
 	}
 
-	@SuppressWarnings("unused")
-	void handle(String arg) {
+	public void handle(String arg) {
 	}
 
 }

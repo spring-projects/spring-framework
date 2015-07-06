@@ -20,7 +20,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpHeaders;
@@ -33,6 +32,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.BindException;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -394,7 +394,12 @@ public abstract class ResponseEntityExceptionHandler {
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
 
-		return handleExceptionInternal(ex, null, headers, status, request);
+		Object body = null;
+		BindingResult bindingResult = ex.getBindingResult();
+		if (bindingResult !=null) {
+			body = bindingResult.getAllErrors();
+		}
+		return handleExceptionInternal(ex, body, headers, status, request);
 	}
 
 	/**
@@ -424,7 +429,7 @@ public abstract class ResponseEntityExceptionHandler {
 	protected ResponseEntity<Object> handleBindException(BindException ex, HttpHeaders headers,
 			HttpStatus status, WebRequest request) {
 
-		return handleExceptionInternal(ex, null, headers, status, request);
+		return handleExceptionInternal(ex, ex.getAllErrors(), headers, status, request);
 	}
 
 	/**
