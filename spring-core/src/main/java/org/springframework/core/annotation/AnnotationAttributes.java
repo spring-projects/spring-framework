@@ -98,6 +98,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 		this.displayName = "unknown";
 	}
 
+
 	/**
 	 * Get the type of annotation represented by this
 	 * {@code AnnotationAttributes} instance.
@@ -128,7 +129,6 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 * <p>If there is no value stored under the specified {@code attributeName}
 	 * but the attribute has an alias declared via {@code @AliasFor}, the
 	 * value of the alias will be returned.
-	 *
 	 * @param attributeName the name of the attribute to get; never
 	 * {@code null} or empty
 	 * @param annotationType the type of annotation represented by this
@@ -146,6 +146,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 */
 	public String getAliasedString(String attributeName, Class<? extends Annotation> annotationType,
 			Object annotationSource) {
+
 		return getRequiredAttributeWithAlias(attributeName, annotationType, annotationSource, String.class);
 	}
 
@@ -172,7 +173,6 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 * <p>If there is no value stored under the specified {@code attributeName}
 	 * but the attribute has an alias declared via {@code @AliasFor}, the
 	 * value of the alias will be returned.
-	 *
 	 * @param attributeName the name of the attribute to get; never
 	 * {@code null} or empty
 	 * @param annotationType the type of annotation represented by this
@@ -189,6 +189,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 */
 	public String[] getAliasedStringArray(String attributeName, Class<? extends Annotation> annotationType,
 			Object annotationSource) {
+
 		return getRequiredAttributeWithAlias(attributeName, annotationType, annotationSource, String[].class);
 	}
 
@@ -270,7 +271,6 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 * <p>If there is no value stored under the specified {@code attributeName}
 	 * but the attribute has an alias declared via {@code @AliasFor}, the
 	 * value of the alias will be returned.
-	 *
 	 * @param attributeName the name of the attribute to get; never
 	 * {@code null} or empty
 	 * @param annotationType the type of annotation represented by this
@@ -287,6 +287,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 */
 	public Class<?>[] getAliasedClassArray(String attributeName, Class<? extends Annotation> annotationType,
 			Object annotationSource) {
+
 		return getRequiredAttributeWithAlias(attributeName, annotationType, annotationSource, Class[].class);
 	}
 
@@ -378,8 +379,9 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 		Assert.hasText(attributeName, "attributeName must not be null or empty");
 		Object value = get(attributeName);
 		assertAttributePresence(attributeName, value);
-		if (!expectedType.isInstance(value) && expectedType.isArray()
-				&& expectedType.getComponentType().isInstance(value)) {
+		assertNotException(attributeName, value);
+		if (!expectedType.isInstance(value) && expectedType.isArray() &&
+				expectedType.getComponentType().isInstance(value)) {
 			Object array = Array.newInstance(expectedType.getComponentType(), 1);
 			Array.set(array, 0, value);
 			value = array;
@@ -395,7 +397,6 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	 * <p>If there is no value stored under the specified {@code attributeName}
 	 * but the attribute has an alias declared via {@code @AliasFor}, the
 	 * value of the alias will be returned.
-	 *
 	 * @param attributeName the name of the attribute to get; never
 	 * {@code null} or empty
 	 * @param annotationType the type of annotation represented by this
@@ -427,10 +428,10 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 
 		if (!ObjectUtils.nullSafeEquals(attributeValue, aliasValue) && attributeDeclared && aliasDeclared) {
 			String elementName = (annotationSource == null ? "unknown element" : annotationSource.toString());
-			String msg = String.format("In annotation [%s] declared on [%s], "
-					+ "attribute [%s] and its alias [%s] are present with values of [%s] and [%s], "
-					+ "but only one is permitted.", annotationType.getName(), elementName, attributeName, aliasName,
-				ObjectUtils.nullSafeToString(attributeValue), ObjectUtils.nullSafeToString(aliasValue));
+			String msg = String.format("In annotation [%s] declared on [%s], attribute [%s] and its alias [%s] " +
+					"are present with values of [%s] and [%s], but only one is permitted.",
+					annotationType.getName(), elementName, attributeName, aliasName,
+					ObjectUtils.nullSafeToString(attributeValue), ObjectUtils.nullSafeToString(aliasValue));
 			throw new AnnotationConfigurationException(msg);
 		}
 
@@ -458,6 +459,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	private <T> T getAttribute(String attributeName, Class<T> expectedType) {
 		Object value = get(attributeName);
 		if (value != null) {
+			assertNotException(attributeName, value);
 			assertAttributeType(attributeName, value, expectedType);
 		}
 		return (T) value;
@@ -466,24 +468,32 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 	private void assertAttributePresence(String attributeName, Object attributeValue) {
 		if (attributeValue == null) {
 			throw new IllegalArgumentException(String.format(
-				"Attribute '%s' not found in attributes for annotation [%s]", attributeName, this.displayName));
+					"Attribute '%s' not found in attributes for annotation [%s]", attributeName, this.displayName));
 		}
 	}
 
 	private void assertAttributePresence(String attributeName, String aliasName, Object attributeValue) {
 		if (attributeValue == null) {
 			throw new IllegalArgumentException(String.format(
-				"Neither attribute '%s' nor its alias '%s' was found in attributes for annotation [%s]", attributeName,
-				aliasName, this.displayName));
+					"Neither attribute '%s' nor its alias '%s' was found in attributes for annotation [%s]",
+					attributeName, aliasName, this.displayName));
+		}
+	}
+
+	private void assertNotException(String attributeName, Object attributeValue) {
+		if (attributeValue instanceof Exception) {
+			throw new IllegalArgumentException(String.format(
+					"Attribute '%s' for annotation [%s] was not resolvable due to exception [%s]",
+					attributeName, this.displayName, attributeValue), (Exception) attributeValue);
 		}
 	}
 
 	private void assertAttributeType(String attributeName, Object attributeValue, Class<?> expectedType) {
 		if (!expectedType.isInstance(attributeValue)) {
 			throw new IllegalArgumentException(String.format(
-				"Attribute '%s' is of type [%s], but [%s] was expected in attributes for annotation [%s]",
-				attributeName, attributeValue.getClass().getSimpleName(), expectedType.getSimpleName(),
-				this.displayName));
+					"Attribute '%s' is of type [%s], but [%s] was expected in attributes for annotation [%s]",
+					attributeName, attributeValue.getClass().getSimpleName(), expectedType.getSimpleName(),
+					this.displayName));
 		}
 	}
 
@@ -531,6 +541,7 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 		}
 		return String.valueOf(value);
 	}
+
 
 	/**
 	 * Return an {@link AnnotationAttributes} instance based on the given map.

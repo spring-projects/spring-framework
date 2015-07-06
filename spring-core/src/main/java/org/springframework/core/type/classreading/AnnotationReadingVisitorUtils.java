@@ -62,15 +62,15 @@ abstract class AnnotationReadingVisitorUtils {
 					}
 				}
 				else if (value instanceof Type) {
-					value = (classValuesAsString ? ((Type) value).getClassName()
-							: classLoader.loadClass(((Type) value).getClassName()));
+					value = (classValuesAsString ? ((Type) value).getClassName() :
+							classLoader.loadClass(((Type) value).getClassName()));
 				}
 				else if (value instanceof Type[]) {
 					Type[] array = (Type[]) value;
 					Object[] convArray = (classValuesAsString ? new String[array.length] : new Class<?>[array.length]);
 					for (int i = 0; i < array.length; i++) {
-						convArray[i] = (classValuesAsString ? array[i].getClassName()
-								: classLoader.loadClass(array[i].getClassName()));
+						convArray[i] = (classValuesAsString ? array[i].getClassName() :
+								classLoader.loadClass(array[i].getClassName()));
 					}
 					value = convArray;
 				}
@@ -90,8 +90,8 @@ abstract class AnnotationReadingVisitorUtils {
 				result.put(entry.getKey(), value);
 			}
 			catch (Exception ex) {
-				// Class not found - can't resolve class reference in annotation
-				// attribute.
+				// Class not found - can't resolve class reference in annotation attribute.
+				result.put(entry.getKey(), ex);
 			}
 		}
 		return result;
