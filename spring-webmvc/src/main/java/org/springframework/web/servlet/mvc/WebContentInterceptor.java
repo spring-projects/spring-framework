@@ -55,7 +55,9 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
-	private Map<String, CacheControl> cacheMappings = new HashMap<String, CacheControl>();
+	private Map<String, Integer> cacheMappings = new HashMap<String, Integer>();
+
+	private Map<String, CacheControl> cacheControlMappings = new HashMap<String, CacheControl>();
 
 	public WebContentInterceptor() {
 		// no restriction of HTTP methods by default,
@@ -124,15 +126,7 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 		while (propNames.hasMoreElements()) {
 			String path = (String) propNames.nextElement();
 			int cacheSeconds = Integer.valueOf(cacheMappings.getProperty(path));
-			if (cacheSeconds > 0) {
-				this.cacheMappings.put(path, CacheControl.maxAge(cacheSeconds, TimeUnit.SECONDS));
-			}
-			else if (cacheSeconds == 0) {
-				this.cacheMappings.put(path, CacheControl.noStore());
-			}
-			else {
-				this.cacheMappings.put(path, CacheControl.empty());
-			}
+			this.cacheMappings.put(path, cacheSeconds);
 		}
 	}
 
@@ -154,7 +148,7 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 */
 	public void addCacheMapping(CacheControl cacheControl, String... paths) {
 		for (String path : paths) {
-			this.cacheMappings.put(path, cacheControl);
+			this.cacheControlMappings.put(path, cacheControl);
 		}
 	}
 
@@ -182,12 +176,19 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 			logger.debug("Looking up cache seconds for [" + lookupPath + "]");
 		}
 
-		CacheControl cacheControl = lookupCacheSeconds(lookupPath);
+		CacheControl cacheControl = lookupCacheControl(lookupPath);
+		Integer cacheSeconds = lookupCacheSeconds(lookupPath);
 		if (cacheControl != null) {
 			if (logger.isDebugEnabled()) {
 				logger.debug("Applying CacheControl to [" + lookupPath + "]");
 			}
 			checkAndPrepare(request, response, cacheControl);
+		}
+		else if (cacheSeconds != null) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Applying CacheControl to [" + lookupPath + "]");
+			}
+			checkAndPrepare(request, response, cacheSeconds);
 		}
 		else {
 			if (logger.isDebugEnabled()) {
@@ -208,18 +209,41 @@ public class WebContentInterceptor extends WebContentGenerator implements Handle
 	 * @return the associated {@code CacheControl}, or {@code null} if not found
 	 * @see org.springframework.util.AntPathMatcher
 	 */
-	protected CacheControl lookupCacheSeconds(String urlPath) {
+	protected CacheControl lookupCacheControl(String urlPath) {
 		// direct match?
-		CacheControl cacheControl = this.cacheMappings.get(urlPath);
+		CacheControl cacheControl = this.cacheControlMappings.get(urlPath);
 		if (cacheControl == null) {
 			// pattern match?
-			for (String registeredPath : this.cacheMappings.keySet()) {
+			for (String registeredPath : this.cacheControlMappings.keySet()) {
 				if (this.pathMatcher.match(registeredPath, urlPath)) {
-					cacheControl = this.cacheMappings.get(registeredPath);
+					cacheControl = this.cacheControlMappings.get(registeredPath);
 				}
 			}
 		}
 		return cacheControl;
+	}
+
+	/**
+	 * Look up a cacheSeconds integer value for the given URL path.
+	 * <p>Supports direct matches, e.g. a registered "/test" matches "/test",
+	 * and various Ant-style pattern matches, e.g. a registered "/t*" matches
+	 * both "/test" and "/team". For details, see the AntPathMatcher class.
+	 * @param urlPath URL the bean is mapped to
+	 * @return the cacheSeconds integer value, or {@code null} if not found
+	 * @see org.springframework.util.AntPathMatcher
+	 */
+	protected Integer lookupCacheSeconds(String urlPath) {
+		// direct match?
+		Integer cacheSeconds = this.cacheMappings.get(urlPath);
+		if (cacheSeconds == null) {
+			// pattern match?
+			for (String registeredPath : this.cacheMappings.keySet()) {
+				if (this.pathMatcher.match(registeredPath, urlPath)) {
+					cacheSeconds = this.cacheMappings.get(registeredPath);
+				}
+			}
+		}
+		return cacheSeconds;
 	}
 
 

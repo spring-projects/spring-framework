@@ -347,7 +347,32 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		else {
 			cControl = CacheControl.empty();
 		}
-		checkAndPrepare(request, response, cControl);
+		checkRequest(request);
+		if (this.usePreviousHttpCachingBehavior) {
+			addHttp10CacheHeaders(cacheSeconds, response);
+		}
+		else {
+			String ccValue = cControl.getHeaderValue();
+			if (ccValue != null) {
+				response.setHeader(HEADER_CACHE_CONTROL, ccValue);
+			}
+		}
+	}
+
+	protected final void checkRequest(HttpServletRequest request) throws ServletException {
+		// Check whether we should support the request method.
+		String method = request.getMethod();
+		if (this.supportedMethods != null && !this.supportedMethods.contains(method)) {
+			throw new HttpRequestMethodNotSupportedException(
+					method, StringUtils.toStringArray(this.supportedMethods));
+		}
+
+		// Check whether a session is required.
+		if (this.requireSession) {
+			if (request.getSession(false) == null) {
+				throw new HttpSessionRequiredException("Pre-existing session required but none found");
+			}
+		}
 	}
 
 	/**
@@ -366,22 +391,10 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 			HttpServletRequest request, HttpServletResponse response, CacheControl cacheControl)
 			throws ServletException {
 
-		// Check whether we should support the request method.
-		String method = request.getMethod();
-		if (this.supportedMethods != null && !this.supportedMethods.contains(method)) {
-			throw new HttpRequestMethodNotSupportedException(
-					method, StringUtils.toStringArray(this.supportedMethods));
-		}
-
-		// Check whether a session is required.
-		if (this.requireSession) {
-			if (request.getSession(false) == null) {
-				throw new HttpSessionRequiredException("Pre-existing session required but none found");
-			}
-		}
+		checkRequest(request);
 
 		if (this.usePreviousHttpCachingBehavior) {
-			addHttp10CacheHeaders(response);
+			addHttp10CacheHeaders(this.cacheSeconds, response);
 		}
 		else if (cacheControl != null) {
 			String ccValue = cacheControl.getHeaderValue();
@@ -391,11 +404,11 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		}
 	}
 
-	protected void addHttp10CacheHeaders(HttpServletResponse response) {
-		if (this.cacheSeconds > 0) {
-			cacheForSeconds(response, this.cacheSeconds, this.alwaysMustRevalidate);
+	protected final void addHttp10CacheHeaders(int cacheSeconds, HttpServletResponse response) {
+		if (cacheSeconds > 0) {
+			cacheForSeconds(response, cacheSeconds, this.alwaysMustRevalidate);
 		}
-		else if (this.cacheSeconds == 0) {
+		else if (cacheSeconds == 0) {
 			preventCaching(response);
 		}
 	}
