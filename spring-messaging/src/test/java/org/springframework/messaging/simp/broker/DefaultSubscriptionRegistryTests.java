@@ -37,7 +37,6 @@ import org.springframework.util.PathMatcher;
 
 import static org.junit.Assert.*;
 
-
 /**
  * Test fixture for
  * {@link org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry}.
@@ -471,7 +470,7 @@ public class DefaultSubscriptionRegistryTests {
 
 
 	/**
-	 * An extension of AntPathMatcher with a pair of CountDownLatch's to pause
+	 * An extension of AntPathMatcher with a pair of CountDownLatches to pause
 	 * while matching, allowing another thread to something, and resume when the
 	 * other thread signals it's okay to do so.
 	 */
