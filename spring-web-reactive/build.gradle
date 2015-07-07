@@ -27,6 +27,15 @@ dependencies {
   provided "javax.servlet:javax.servlet-api:3.1.0"
 
   testCompile "junit:junit:4.12"
+  testCompile "org.springframework:spring-web:4.1.2.RELEASE"
+  testCompile 'org.apache.tomcat:tomcat-util:8.0.23'
+  testCompile 'org.apache.tomcat.embed:tomcat-embed-core:8.0.23'
+
+  testCompile 'org.eclipse.jetty:jetty-server:9.3.0.v20150612'
+  testCompile 'org.eclipse.jetty:jetty-servlet:9.3.0.v20150612'
+
+  testCompile("log4j:log4j:1.2.16")
+
 }
 
 

@@ -19,6 +19,10 @@ package org.springframework.rx.util;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
+
 import org.springframework.util.Assert;
 
 /**
@@ -34,6 +38,8 @@ import org.springframework.util.Assert;
  * @author Arjen Poutsma
  */
 public class BlockingSignalQueue<T> {
+
+	private static final int DEFAULT_REQUEST_SIZE_SUBSCRIBER = 1;
 
 	private final BlockingQueue<Signal<T>> queue = new LinkedBlockingQueue<Signal<T>>();
 
@@ -119,121 +125,151 @@ public class BlockingSignalQueue<T> {
 		return signal != null ? signal.error() : null;
 	}
 
-	private interface Signal<T> {
-
-		boolean isOnNext();
-
-		T next();
-
-		boolean isOnError();
-
-		Throwable error();
-
-		boolean isComplete();
+	/**
+	 * Returns a {@code Publisher} backed by this queue.
+	 */
+	public Publisher<T> publisher() {
+		return new BlockingSignalQueuePublisher();
 	}
 
-	private static class OnNext<T> implements Signal<T> {
+	/**
+	 * Returns a {@code Subscriber} backed by this queue.
+	 */
+	public Subscriber<T> subscriber() {
+		return subscriber(DEFAULT_REQUEST_SIZE_SUBSCRIBER);
+	}
 
-		private final T next;
+	/**
+	 * Returns a {@code Subscriber} backed by this queue, with the given request size.
+	 * @see Subscription#request(long)
+	 */
+	public Subscriber<T> subscriber(long requestSize) {
+		return new BlockingSignalQueueSubscriber(requestSize);
+	}
 
-		public OnNext(T next) {
-			Assert.notNull(next, "'next' must not be null");
-			this.next = next;
-		}
+	private class BlockingSignalQueuePublisher implements Publisher<T> {
 
-		@Override
-		public boolean isOnNext() {
-			return true;
-		}
+		private Subscriber<? super T> subscriber;
 
-		@Override
-		public T next() {
-			return next;
-		}
-
-		@Override
-		public boolean isOnError() {
-			return false;
-		}
+		private final Object subscriberMutex = new Object();
 
 		@Override
-		public Throwable error() {
-			throw new IllegalStateException();
+		public void subscribe(Subscriber<? super T> subscriber) {
+			synchronized (this.subscriberMutex) {
+				if (this.subscriber != null) {
+					subscriber.onError(
+							new IllegalStateException("Only one subscriber allowed"));
+				}
+				else {
+					this.subscriber = subscriber;
+					final SubscriptionThread thread = new SubscriptionThread();
+					this.subscriber.onSubscribe(new Subscription() {
+						@Override
+						public void request(long n) {
+							thread.request(n);
+						}
+
+						@Override
+						public void cancel() {
+							thread.cancel();
+						}
+					});
+					thread.start();
+				}
+			}
 		}
 
-		@Override
-		public boolean isComplete() {
-			return false;
+		private class SubscriptionThread extends Thread {
+
+			private volatile long demand = 0;
+
+			@Override
+			public void run() {
+				try {
+					while (!Thread.currentThread().isInterrupted()) {
+						if (demand > 0 && isHeadSignal()) {
+							subscriber.onNext(pollSignal());
+							if (demand != Long.MAX_VALUE) {
+								demand--;
+							}
+						}
+						else if (isHeadError()) {
+							subscriber.onError(pollError());
+							break;
+						}
+						else if (isComplete()) {
+							subscriber.onComplete();
+							break;
+						}
+					}
+				}
+				catch (InterruptedException ex) {
+					// Allow thread to exit
+				}
+			}
+
+			public void request(long n) {
+				if (n != Long.MAX_VALUE) {
+					this.demand += n;
+				}
+				else {
+					this.demand = Long.MAX_VALUE;
+				}
+			}
+
+			public void cancel() {
+				interrupt();
+			}
 		}
 	}
 
-	private static final class OnError<T> implements Signal<T> {
+	private class BlockingSignalQueueSubscriber implements Subscriber<T> {
 
-		private final Throwable error;
+		private final long requestSize;
 
-		public OnError(Throwable error) {
-			Assert.notNull(error, "'error' must not be null");
-			this.error = error;
+		private Subscription subscription;
+
+		public BlockingSignalQueueSubscriber(long requestSize) {
+			this.requestSize = requestSize;
 		}
 
 		@Override
-		public boolean isOnError() {
-			return true;
+		public void onSubscribe(Subscription subscription) {
+			this.subscription = subscription;
+
+			this.subscription.request(this.requestSize);
 		}
 
 		@Override
-		public Throwable error() {
-			return error;
+		public void onNext(T t) {
+			try {
+				putSignal(t);
+			}
+			catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
+			}
+			this.subscription.request(requestSize);
 		}
 
 		@Override
-		public boolean isOnNext() {
-			return false;
+		public void onError(Throwable t) {
+			try {
+				putError(t);
+			}
+			catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
+			}
+			this.subscription.request(requestSize);
 		}
 
 		@Override
-		public T next() {
-			throw new IllegalStateException();
-		}
-
-		@Override
-		public boolean isComplete() {
-			return false;
+		public void onComplete() {
+			try {
+				complete();
+			}
+			catch (InterruptedException ex) {
+				Thread.currentThread().interrupt();
+			}
 		}
 	}
-
-	private static class OnComplete<T> implements Signal<T> {
-
-		private static final OnComplete INSTANCE = new OnComplete();
-
-		private OnComplete() {
-		}
-
-		@Override
-		public boolean isComplete() {
-			return true;
-		}
-
-		@Override
-		public boolean isOnNext() {
-			return false;
-		}
-
-		@Override
-		public T next() {
-			throw new IllegalStateException();
-		}
-
-		@Override
-		public boolean isOnError() {
-			return false;
-		}
-
-		@Override
-		public Throwable error() {
-			throw new IllegalStateException();
-		}
-
-	}
-
 }

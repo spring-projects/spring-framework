@@ -21,7 +21,6 @@ import java.io.InputStream;
 import org.reactivestreams.Publisher;
 
 import org.springframework.rx.util.BlockingSignalQueue;
-import org.springframework.rx.util.BlockingSignalQueueSubscriber;
 import org.springframework.util.Assert;
 
 /**
@@ -44,7 +43,7 @@ public class ByteArrayPublisherInputStream extends InputStream {
 		Assert.notNull(publisher, "'publisher' must not be null");
 
 		this.queue = new BlockingSignalQueue<byte[]>();
-		publisher.subscribe(new BlockingSignalQueueSubscriber<byte[]>(this.queue));
+		publisher.subscribe(this.queue.subscriber());
 	}
 
 	ByteArrayPublisherInputStream(BlockingSignalQueue<byte[]> queue) {

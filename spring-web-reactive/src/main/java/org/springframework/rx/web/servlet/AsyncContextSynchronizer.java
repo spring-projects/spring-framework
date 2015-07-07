@@ -22,10 +22,15 @@ import javax.servlet.AsyncContext;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * @author Arjen Poutsma
  */
 class AsyncContextSynchronizer {
+
+	private static final Log logger = LogFactory.getLog(AsyncContextSynchronizer.class);
 
 	private static final int READ_COMPLETE = 1;
 
@@ -50,7 +55,9 @@ class AsyncContextSynchronizer {
 	}
 
 	public void readComplete() {
+		logger.debug("Read complete");
 		if (complete.compareAndSet(WRITE_COMPLETE, COMPLETE)) {
+			logger.debug("Complete");
 			this.asyncContext.complete();
 		}
 		else {
@@ -59,7 +66,9 @@ class AsyncContextSynchronizer {
 	}
 
 	public void writeComplete() {
+		logger.debug("Write complete");
 		if (complete.compareAndSet(READ_COMPLETE, COMPLETE)) {
+			logger.debug("Complete");
 			this.asyncContext.complete();
 		}
 		else {

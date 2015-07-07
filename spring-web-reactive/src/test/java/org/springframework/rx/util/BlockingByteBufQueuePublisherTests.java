@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
@@ -34,12 +35,12 @@ public class BlockingByteBufQueuePublisherTests {
 
 	private BlockingSignalQueue<byte[]> queue;
 
-	private BlockingSignalQueuePublisher<byte[]> publisher;
+	private Publisher<byte[]> publisher;
 
 	@Before
 	public void setUp() throws Exception {
 		queue = new BlockingSignalQueue<byte[]>();
-		publisher = new BlockingSignalQueuePublisher<byte[]>(queue);
+		publisher = queue.publisher();
 	}
 
 	@Test

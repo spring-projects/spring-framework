@@ -7,7 +7,6 @@ import java.util.Arrays;
 import org.reactivestreams.Publisher;
 
 import org.springframework.rx.util.BlockingSignalQueue;
-import org.springframework.rx.util.BlockingSignalQueuePublisher;
 
 /**
  * {@code OutputStream} implementation that stores all written bytes, to be retrieved
@@ -23,7 +22,7 @@ public class ByteArrayPublisherOutputStream extends OutputStream {
 	 * @return a publisher for the written bytes
 	 */
 	public Publisher<byte[]> toByteBufPublisher() {
-		return new BlockingSignalQueuePublisher<byte[]>(this.queue);
+		return this.queue.publisher();
 	}
 
 	@Override
