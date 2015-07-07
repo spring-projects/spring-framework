@@ -2849,7 +2849,7 @@ unnecessarily couples the code to Spring. Alternatively, use
 the <<beans-postconstruct-and-predestroy-annotations, `@PostConstruct`>> annotation or
 specify a POJO initialization method. In the case of XML-based configuration metadata,
 you use the `init-method` attribute to specify the name of the method that has a void
-no-argument signature. With Java config  you use the `initMethod` attribute of `@Bean`,
+no-argument signature. With Java config, you use the `initMethod` attribute of `@Bean`,
 see <<beans-java-lifecycle-callbacks>>. For example, the following:
 
 [source,xml,indent=0]
@@ -2909,8 +2909,8 @@ It is recommended that you do not use the `DisposableBean` callback interface be
 unnecessarily couples the code to Spring. Alternatively, use
 the <<beans-postconstruct-and-predestroy-annotations, `@PreDestroy`>> annotation or
 specify a generic method that is supported by bean definitions. With XML-based
-configuration metadata, you use the `destroy-method` attribute on the `<bean/>`. With
-Java config  you use the `destroyMethod` attribute of `@Bean`, see
+configuration metadata, you use the `destroy-method` attribute on the `<bean/>`.
+With Java config, you use the `destroyMethod` attribute of `@Bean`, see
 <<beans-java-lifecycle-callbacks>>. For example, the following definition:
 
 [source,xml,indent=0]
@@ -3122,6 +3122,10 @@ Note that the regular `org.springframework.context.Lifecycle` interface is just 
 contract for explicit start/stop notifications and does NOT imply auto-startup at context
 refresh time. Consider implementing `org.springframework.context.SmartLifecycle` instead
 for fine-grained control over auto-startup of a specific bean (including startup phases).
+Also, please note that stop notifications are not guaranteed to come before destruction:
+On regular shutdown, all `Lifecycle` beans will first receive a stop notification before
+the general destruction callbacks are being propagated; however, on hot refresh during a
+context's lifetime or on aborted refresh attempts, only destroy methods will be called.
 ====
 
 The order of startup and shutdown invocations can be important. If a "depends-on"
@@ -5128,8 +5132,8 @@ will in effect disable automatic detection of classes annotated with `@Component
 [[beans-factorybeans-annotations]]
 === Defining bean metadata within components
 Spring components can also contribute bean definition metadata to the container. You do
-this with the same `@Bean` annotation used to define bean metadata within
-`@Configuration` annotated classes. Here is a simple example:
+this with the same `@Bean` annotation used to define bean metadata within `@Configuration`
+annotated classes. Here is a simple example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -5219,9 +5223,39 @@ counterparts inside a Spring `@Configuration` class. The difference is that `@Co
 classes are not enhanced with CGLIB to intercept the invocation of methods and fields.
 CGLIB proxying is the means by which invoking methods or fields within `@Bean` methods 
 in `@Configuration` classes creates bean metadata references to collaborating objects;
-such methods are __not__ invoked with normal Java semantics. In contrast, invoking a
-method or field in an `@Bean` method within a `@Component` class __has__ standard Java
-semantics.
+such methods are __not__ invoked with normal Java semantics but rather go through the
+container in order to provide the usual lifecycle management and proxying of Spring
+beans even when referring to other beans via programmatic calls to `@Bean` methods.
+In contrast, invoking a method or field in an `@Bean` method within a plain `@Component`
+class __has__ standard Java semantics, with no special CGLIB processing or other
+constraints applying.
+
+[NOTE]
+====
+You may declare `@Bean` methods as `static`, allowing for them to be called without
+creating their containing configuration class as an instance. This makes particular
+sense when defining post-processor beans, e.g. of type `BeanFactoryPostProcessor` or
+`BeanPostProcessor`, since such beans will get initialized early in the container
+lifecycle and should avoid triggering other parts of the configuration at that point.
+
+Note that calls to static `@Bean` methods will never get intercepted by the container,
+not even within `@Configuration` classes (see above). This is due to technical
+limitations: CGLIB subclassing can only override non-static methods. As a consequence,
+a direct call to another `@Bean` method will have standard Java semantics, resulting
+in an independent instance being returned straight from the factory method itself.
+
+The Java language visibility of `@Bean` methods does not have an immediate impact on
+the resulting bean definition in Spring's container. You may freely declare your
+factory methods as you see fit in non-`@Configuration` classes and also for static
+methods anywhere. However, regular `@Bean` methods in `@Configuration` classes need
+to be overridable, i.e. they must not be declared as `private` or `final`.
+
+Finally, `@Bean` methods will also be discovered on base classes of a given component
+or configuration class, as well as on Java 8 default methods declared in interfaces
+implemented by the component or configuration class. This allows for a lot of
+flexibility in composing complex configuration arrangements, with even multiple
+inheritance being possible through Java 8 default methods as of Spring 4.2.
+====
 
 
 
