@@ -3698,6 +3698,15 @@ __Spring MVC Test__ also provides client-side support for testing code that uses
 the `RestTemplate`. Client-side tests mock the server responses and also do not
 require a running server.
 
+[TIP]
+====
+Spring Boot provides an option to write full, end-to-end integration tests that include
+a running server. If this is your goal please have a look at the
+http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-testing.html#boot-features-testing-spring-boot-applications[Spring Boot reference page].
+For more on the difference with end-to-end integration tests see
+<<spring-mvc-test-vs-end-to-end-integration-tests>>.
+====
+
 
 
 [[spring-mvc-test-server]]
@@ -3717,7 +3726,8 @@ __Spring MVC Test__ builds on the familiar "mock" implementations of the Servlet
 available in the `spring-test` module. This allows performing requests and generating
 responses without the need for running in a Servlet container. For the most part
 everything should work as it does at runtime with a few notable exceptions as
-explained further below. Here is an example of using Spring MVC Test:
+explained in <<spring-mvc-test-vs-end-to-end-integration-tests>>.
+Here is an example of using Spring MVC Test:
 
 [source,java,indent=0]
 ----
@@ -4073,6 +4083,52 @@ When setting up a `MockMvc`, you can register one or more `Filter` instances:
 
 Registered filters will be invoked through `MockFilterChain` from `spring-test` and the
 last filter will delegates to the `DispatcherServlet`.
+
+[[spring-mvc-test-vs-end-to-end-integration-tests]]
+===== Difference With End-to-End Integration Tests
+
+As mentioned earlier __Spring MVC Test__ is built on the Servlet API mock objects from
+the `spring-test` module and does not rely on a running Servlet container. Therefore
+there are some important differences compared to full end-to-end integration tests
+with an actual client and server running.
+
+The easiest way to think about this is starting with a blank `MockHttpServletRequest`.
+Whatever you add to it is what the request will be. The things that may catch you out are
+there is no context path by default, no jsessionid cookie, no forwarding, error, or async
+dispatches, and therefore no actual JSP rendering. Instead "forwarded" and "redirected"
+URLs are saved in the `MockHttpServletResponse` and can be asserted with expectations.
+
+This means if you are using JSPs you can verify the JSP page to which the request was
+forwarded but there won't be any HTML rendered. Note however that all other rendering
+technologies that don't rely on forwarding such as Thymeleaf, Freemarker, Velocity
+will render HTML to the response body as expected. The same is true for rendering JSON,
+XML and others via `@ResponseBody` methods.
+
+Alternatively you may consider the full end-to-end integration testing support from
+Spring Boot via `@WebIntegrationTest`. See the
+http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-testing.html#boot-features-testing-spring-boot-applications[Spring Boot reference].
+
+There are pros and cons for each. The options provided in __Spring MVC Test__
+are different stops on the scale from classic unit to full integration tests.
+To be sure none of the options in Spring MVC Test are classic unit tests but they are a
+little closer to it. For example you can isolate the service layer with mocks
+injected into controllers and then you're testing the web layer only through
+the `DispatcherServlet` and with actual Spring configuration, just like you might test
+the database layer in isolation of the layers above. Or you could be using the
+standalone setup focusing on one controller at a time and manually providing the
+configuration required to make it work.
+
+Another important distinction when using __Spring MVC Test__ is that conceptually such
+tests are on the inside of the server-side so you can check what handler was used,
+if an exception was handled with a HandlerExceptionResolver, what the content of the
+model is, what binding errors there were, etc. That means it's easier to write
+expectations since the server is not a black box as it is when testing it through
+an actual HTTP client. This is generally the advantage of classic unit testing that it's
+easier to write, reason about, and debug but does not replace the need for full
+integration tests. At the same time it's important not to lose sight of the fact
+the response is the most important thing to check. In short there is room here for
+multiple styles and strategies of testing even in the same project.
+
 
 [[spring-mvc-test-server-resources]]
 ===== Further Server-Side Test Examples
