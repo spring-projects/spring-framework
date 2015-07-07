@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import static org.junit.Assert.*;
 
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,6 +30,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -112,6 +114,7 @@ public class RequestPartIntegrationTests {
 
 		List<HttpMessageConverter<?>> converters = new ArrayList<>(3);
 		converters.add(emptyBodyConverter);
+		converters.add(new ByteArrayHttpMessageConverter());
 		converters.add(new ResourceHttpMessageConverter());
 		converters.add(new MappingJackson2HttpMessageConverter());
 
@@ -145,6 +148,10 @@ public class RequestPartIntegrationTests {
 		parts.add("json-data", new HttpEntity<TestData>(new TestData("Jason")));
 		parts.add("file-data", new ClassPathResource("logo.jpg", this.getClass()));
 		parts.add("empty-data", new HttpEntity<byte[]>(new byte[0])); // SPR-12860
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(new MediaType("application", "octet-stream", Charset.forName("ISO-8859-1")));
+		parts.add("iso-8859-1-data", new HttpEntity<byte[]>(new byte[] {(byte) 0xC4}, headers)); // SPR-13096
 
 		URI location = restTemplate.postForLocation(url, parts);
 		assertEquals("http://localhost:8080/test/Jason/logo.jpg", location.toString());
@@ -185,7 +192,10 @@ public class RequestPartIntegrationTests {
 		@RequestMapping(value = "/test", method = RequestMethod.POST, consumes = { "multipart/mixed", "multipart/form-data" })
 		public ResponseEntity<Object> create(@RequestPart(name = "json-data") TestData testData,
 				@RequestPart("file-data") MultipartFile file,
-				@RequestPart(name = "empty-data", required = false) TestData emptyData) {
+				@RequestPart(name = "empty-data", required = false) TestData emptyData,
+				@RequestPart(name = "iso-8859-1-data") byte[] iso88591Data) {
+
+			Assert.assertArrayEquals(new byte[]{(byte) 0xC4}, iso88591Data);
 
 			String url = "http://localhost:8080/test/" + testData.getName() + "/" + file.getOriginalFilename();
 			HttpHeaders headers = new HttpHeaders();
