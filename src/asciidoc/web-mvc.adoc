@@ -4567,10 +4567,34 @@ the classpath.
 === Customizing the Provided Configuration
 To customize the default configuration in Java you simply implement the
 `WebMvcConfigurer` interface or more likely extend the class `WebMvcConfigurerAdapter`
-and override the methods you need. Below is an example of some of the available methods
-to override. See
-{javadoc-baseurl}/org/springframework/web/servlet/config/annotation/WebMvcConfigurer.html[`WebMvcConfigurer`]
-for a list of all methods and the javadocs for further details:
+and override the methods you need:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebMvc
+	public class WebConfig extends WebMvcConfigurerAdapter {
+
+		// Override configuration methods...
+
+	}
+----
+
+To customize the default configuration of `<mvc:annotation-driven />` check what
+attributes and sub-elements it supports. You can view the
+http://schema.spring.io/mvc/spring-mvc.xsd[Spring MVC XML schema] or use the code
+completion feature of your IDE to discover what attributes and sub-elements are
+available.
+
+
+[[mvc-config-conversion]]
+=== Conversion and Formatting
+
+By default formatters for Numbers and Date types are installed, including support for the @NumberFormat
+and @DateTimeFormat annotations. Full support for the Joda Time formatting library is also installed
+if Joda Time is present on the classpath. To register custom formatters and converters override
+the `addFormatters` method:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4580,43 +4604,135 @@ for a list of all methods and the javadocs for further details:
 	public class WebConfig extends WebMvcConfigurerAdapter {
 
 		@Override
-		protected void addFormatters(FormatterRegistry registry) {
+		public void addFormatters(FormatterRegistry registry) {
 			// Add formatters and/or converters
-		}
-
-		@Override
-		public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-			// Configure the list of HttpMessageConverters to use
 		}
 
 	}
 ----
 
-To customize the default configuration of `<mvc:annotation-driven />` check what
-attributes and sub-elements it supports. You can view the
-http://schema.spring.io/mvc/spring-mvc.xsd[Spring MVC XML schema] or use the code
-completion feature of your IDE to discover what attributes and sub-elements are
-available. The sample below shows a subset of what is available:
+In the MVC namespace the same defaults apply when `<mvc:annotation-driven>` is added.
+To register custom formatters and converters simply supply a `ConversionService`:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<mvc:annotation-driven conversion-service="conversionService">
-		<mvc:message-converters>
-			<bean class="org.example.MyHttpMessageConverter"/>
-			<bean class="org.example.MyOtherHttpMessageConverter"/>
-		</mvc:message-converters>
-	</mvc:annotation-driven>
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:mvc="http://www.springframework.org/schema/mvc"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/mvc
+			http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
-	<bean id="conversionService" class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
-		<property name="formatters">
-			<list>
-				<bean class="org.example.MyFormatter"/>
-				<bean class="org.example.MyOtherFormatter"/>
-			</list>
-		</property>
-	</bean>
+		<mvc:annotation-driven conversion-service="conversionService"/>
+
+		<bean id="conversionService"
+				class="org.springframework.format.support.FormattingConversionServiceFactoryBean">
+			<property name="converters">
+				<set>
+					<bean class="org.example.MyConverter"/>
+				</set>
+			</property>
+			<property name="formatters">
+				<set>
+					<bean class="org.example.MyFormatter"/>
+					<bean class="org.example.MyAnnotationFormatterFactory"/>
+				</set>
+			</property>
+			<property name="formatterRegistrars">
+				<set>
+					<bean class="org.example.MyFormatterRegistrar"/>
+				</set>
+			</property>
+		</bean>
+
+	</beans>
 ----
+
+[NOTE]
+====
+See <<format-FormatterRegistrar-SPI>> and the `FormattingConversionServiceFactoryBean`
+for more information on when to use FormatterRegistrars.
+====
+
+[[mvc-config-validation]]
+=== Validation
+
+Spring provides a <<validator,Validator interface>> that can be used for validation in all layers
+of an application. In Spring MVC you can configure it for use as a global `Validator` instance, to be used
+whenever an `@Valid` or `@Validated` controller method argument is encountered, and/or as a local
+`Validator` within a controller through an `@InitBinder` method. Global and local validator
+instances can be combined to provide composite validation.
+
+Spring also <<validation-beanvalidation-overview,supports JSR-303/JSR-349>> Bean Validation
+via `LocalValidatorFactoryBean` which adapts the Spring `org.springframework.validation.Validator`
+interface to the Bean Validation `javax.validation.Validator` contract. This class can be
+plugged into Spring MVC as a global validator as described next.
+
+By default use of `@EnableWebMvc` or `<mvc:annotation-driven>` automatically registers Bean
+Validation support in Spring MVC through the `LocalValidatorFactoryBean` when a Bean Validation
+provider is such as Hibernate Validator is detected on the classpath.
+
+Alternatively you can configure your own global `Validator` instance:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	@EnableWebMvc
+	public class WebConfig extends WebMvcConfigurerAdapter {
+
+		@Override
+		public Validator getValidator(); {
+			// return "global" validator
+		}
+
+	}
+----
+
+and in XML:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:mvc="http://www.springframework.org/schema/mvc"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/mvc
+			http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+		<mvc:annotation-driven validator="globalValidator"/>
+
+	</beans>
+----
+
+To combine global with local validation, simply add one or more local validator(s):
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Controller
+	public class MyController {
+
+		@InitBinder
+		protected void initBinder(WebDataBinder binder) {
+			binder.addValidators(new FooValidator());
+		}
+
+	}
+----
+
+With this minimal configuration anytime an `@Valid` or `@Validated` method argument is encountered, it
+will be validated by the configured validators. Any validation violations will automatically
+be exposed as errors in the `BindingResult` accessible as a method argument and also renderable
+in Spring MVC HTML views.
 
 
 
