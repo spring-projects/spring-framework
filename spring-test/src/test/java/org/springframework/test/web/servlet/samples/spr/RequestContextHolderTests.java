@@ -16,6 +16,12 @@
 
 package org.springframework.test.web.servlet.samples.spr;
 
+import java.io.IOException;
+
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Before;
@@ -39,6 +45,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.filter.GenericFilterBean;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
@@ -47,10 +55,10 @@ import static org.junit.Assert.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
-import static org.springframework.web.context.request.RequestAttributes.*;
 
 /**
- * Test for SPR-10025 (access to request attributes via RequestContextHolder).
+ * Tests for SPR-10025 (access to request attributes via RequestContextHolder)
+ * and SPR-13211 (re-use of mock request from the TestContext framework).
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
@@ -61,12 +69,12 @@ import static org.springframework.web.context.request.RequestAttributes.*;
 @DirtiesContext
 public class RequestContextHolderTests {
 
-	private static final String FOO = "foo";
-	private static final String BAR = "bar";
-	private static final String BAZ = "baz";
-	private static final String QUUX = "quux";
-	private static final String ENIGMA = "enigma";
-	private static final String PUZZLE = "puzzle";
+	private static final String FROM_TCF_MOCK = "fromTestContextFrameworkMock";
+	private static final String FROM_MVC_TEST_DEFAULT = "fromSpringMvcTestDefault";
+	private static final String FROM_MVC_TEST_MOCK = "fromSpringMvcTestMock";
+	private static final String FROM_FILTER = "fromFilter";
+
+	private static final String ENIGMA = "puzzle";
 
 	@Autowired
 	private WebApplicationContext wac;
@@ -75,83 +83,188 @@ public class RequestContextHolderTests {
 	private MockHttpServletRequest mockRequest;
 
 	@Autowired
-	private MyScopedController myScopedController;
+	private RequestScopedController requestScopedController;
+
+	@Autowired
+	private RequestScopedService requestScopedService;
+
+	@Autowired
+	private SessionScopedService sessionScopedService;
 
 	private MockMvc mockMvc;
 
 
 	@Before
 	public void setup() {
-		this.mockRequest.setAttribute(FOO, BAR);
+		this.mockRequest.setAttribute(FROM_TCF_MOCK, ENIGMA);
 
 		this.mockMvc = webAppContextSetup(this.wac)
-				.defaultRequest(get("/").requestAttr(ENIGMA, PUZZLE))
+				.addFilter(new AbcFilter())
+				.defaultRequest(get("/").requestAttr(FROM_MVC_TEST_DEFAULT, ENIGMA))
 				.alwaysExpect(status().isOk())
 				.build();
 	}
 
 	@Test
 	public void singletonController() throws Exception {
-		this.mockMvc.perform(get("/singleton").requestAttr(BAZ, QUUX));
+		this.mockMvc.perform(get("/singletonController").requestAttr(FROM_MVC_TEST_MOCK, ENIGMA));
 	}
 
 	@Test
 	public void requestScopedController() throws Exception {
-		assertTrue("request-scoped controller must be a CGLIB proxy", AopUtils.isCglibProxy(this.myScopedController));
-		this.mockMvc.perform(get("/requestScoped").requestAttr(BAZ, QUUX));
+		assertTrue("request-scoped controller must be a CGLIB proxy", AopUtils.isCglibProxy(this.requestScopedController));
+		this.mockMvc.perform(get("/requestScopedController").requestAttr(FROM_MVC_TEST_MOCK, ENIGMA));
 	}
 
+	@Test
+	public void requestScopedService() throws Exception {
+		assertTrue("request-scoped service must be a CGLIB proxy", AopUtils.isCglibProxy(this.requestScopedService));
+		this.mockMvc.perform(get("/requestScopedService").requestAttr(FROM_MVC_TEST_MOCK, ENIGMA));
+	}
+
+	@Test
+	public void sessionScopedService() throws Exception {
+		assertTrue("session-scoped service must be a CGLIB proxy", AopUtils.isCglibProxy(this.sessionScopedService));
+		this.mockMvc.perform(get("/sessionScopedService").requestAttr(FROM_MVC_TEST_MOCK, ENIGMA));
+	}
+
+
+	// -------------------------------------------------------------------
 
 	@Configuration
 	@EnableWebMvc
 	static class WebConfig extends WebMvcConfigurerAdapter {
 
 		@Bean
-		public MyController myController() {
-			return new MyController();
+		public SingletonController singletonController() {
+			return new SingletonController();
 		}
 
 		@Bean
 		@Scope(name = "request", proxyMode = ScopedProxyMode.TARGET_CLASS)
-		public MyScopedController myScopedController() {
-			return new MyScopedController();
+		public RequestScopedController requestScopedController() {
+			return new RequestScopedController();
+		}
+
+		@Bean
+		@Scope(name = "request", proxyMode = ScopedProxyMode.TARGET_CLASS)
+		public RequestScopedService requestScopedService() {
+			return new RequestScopedService();
+		}
+
+		@Bean
+		public ControllerWithRequestScopedService controllerWithRequestScopedService() {
+			return new ControllerWithRequestScopedService();
+		}
+
+		@Bean
+		@Scope(name = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
+		public SessionScopedService sessionScopedService() {
+			return new SessionScopedService();
+		}
+
+		@Bean
+		public ControllerWithSessionScopedService controllerWithSessionScopedService() {
+			return new ControllerWithSessionScopedService();
 		}
 	}
 
-
-	private static void assertRequestAttributes() {
-		RequestAttributes attributes = RequestContextHolder.getRequestAttributes();
-		// TODO [SPR-13211] Assert that FOO is BAR, instead of NULL.
-		// assertThat(attributes.getAttribute(FOO, SCOPE_REQUEST), is(BAR));
-		assertThat(attributes.getAttribute(FOO, SCOPE_REQUEST), is(nullValue()));
-		assertThat(attributes.getAttribute(ENIGMA, SCOPE_REQUEST), is(PUZZLE));
-		assertThat(attributes.getAttribute(BAZ, SCOPE_REQUEST), is(QUUX));
-	}
-
-
 	@RestController
-	private static class MyController {
+	private static class SingletonController {
 
-		@RequestMapping("/singleton")
+		@RequestMapping("/singletonController")
 		public void handle() {
 			assertRequestAttributes();
 		}
 	}
 
 	@RestController
-	private static class MyScopedController {
+	private static class RequestScopedController {
 
 		@Autowired
 		private HttpServletRequest request;
 
 
-		@RequestMapping("/requestScoped")
+		@RequestMapping("/requestScopedController")
 		public void handle() {
-			// TODO [SPR-13211] Assert that FOO is BAR, instead of NULL.
-			// assertThat(this.request.getAttribute(FOO), is(BAR));
-			assertThat(this.request.getAttribute(FOO), is(nullValue()));
+			assertRequestAttributes(request);
 			assertRequestAttributes();
 		}
+	}
+
+	private static class RequestScopedService {
+
+		@Autowired
+		private HttpServletRequest request;
+
+
+		void process() {
+			assertRequestAttributes(request);
+		}
+	}
+
+	private static class SessionScopedService {
+
+		@Autowired
+		private HttpServletRequest request;
+
+
+		void process() {
+			assertRequestAttributes(this.request);
+		}
+	}
+
+	@RestController
+	private static class ControllerWithRequestScopedService {
+
+		@Autowired
+		private RequestScopedService service;
+
+
+		@RequestMapping("/requestScopedService")
+		public void handle() {
+			this.service.process();
+			assertRequestAttributes();
+		}
+	}
+
+	@RestController
+	private static class ControllerWithSessionScopedService {
+
+		@Autowired
+		private SessionScopedService service;
+
+
+		@RequestMapping("/sessionScopedService")
+		public void handle() {
+			this.service.process();
+			assertRequestAttributes();
+		}
+	}
+
+	private static class AbcFilter extends GenericFilterBean {
+
+		@Override
+		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+			request.setAttribute(FROM_FILTER, ENIGMA);
+			chain.doFilter(request, response);
+		}
+	}
+
+
+	private static void assertRequestAttributes() {
+		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+		assertThat(requestAttributes, instanceOf(ServletRequestAttributes.class));
+		assertRequestAttributes(((ServletRequestAttributes) requestAttributes).getRequest());
+	}
+
+	private static void assertRequestAttributes(HttpServletRequest request) {
+		// TODO [SPR-13211] Assert that FOO is ENIGMA, instead of NULL.
+		// assertThat(this.request.getAttribute(FOO), is(ENIGMA));
+		assertThat(request.getAttribute(FROM_TCF_MOCK), is(nullValue()));
+		assertThat(request.getAttribute(FROM_MVC_TEST_DEFAULT), is(ENIGMA));
+		assertThat(request.getAttribute(FROM_MVC_TEST_MOCK), is(ENIGMA));
+		assertThat(request.getAttribute(FROM_FILTER), is(ENIGMA));
 	}
 
 }
