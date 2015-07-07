@@ -21,7 +21,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.messaging.Message;
@@ -31,7 +30,6 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.MultiValueMap;
 
 import static org.junit.Assert.*;
-
 
 /**
  * Test fixture for
@@ -68,8 +66,8 @@ public class DefaultSubscriptionRegistryTests {
 		String dest = "/foo";
 
 		this.registry.registerSubscription(subscribeMessage(sessId, subsId, dest));
-		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message(dest));
 
+		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message(dest));
 		assertEquals("Expected one element " + actual, 1, actual.size());
 		assertEquals(Arrays.asList(subsId), actual.get(sessId));
 	}
