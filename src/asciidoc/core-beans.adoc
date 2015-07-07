@@ -4281,16 +4281,16 @@ any). These types must be 'wired up' explicitly via XML or using a Spring `@Bean
 
 
 [[beans-autowired-annotation-primary]]
-=== Fine-tuning annotation-based autowiring with primary
-Because autowiring by type may lead to multiple candidates, it is often necessary to
-have more control over the selection process. One way to accomplish this is with
-Spring's `@Primary` annotation. `@Primary` indicates that a bean should be given
-preference when multiple candidates are qualified to autowire a single-valued dependency.
-If exactly one 'primary' bean exists among the candidates, it will be the autowired
-value.
+=== Fine-tuning annotation-based autowiring with @Primary
+Because autowiring by type may lead to multiple candidates, it is often necessary to have
+more control over the selection process. One way to accomplish this is with Spring's
+`@Primary` annotation. `@Primary` indicates that a particular bean should be given
+preference when multiple beans are candidates to be autowired to a single-valued
+dependency. If exactly one 'primary' bean exists among the candidates, it will be the
+autowired value.
 
-Let's assume the following configuration that define `firstMovieCatalog` as the _primary_
-`MovieCatalog`
+Let's assume we have the following configuration that defines `firstMovieCatalog` as the
+_primary_ `MovieCatalog`.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4310,7 +4310,8 @@ Let's assume the following configuration that define `firstMovieCatalog` as the 
 	}
 ----
 
-With such configuration, `MovieRecommender` will use `firstMovieCatalog`
+With such configuration, the following `MovieRecommender` will be autowired with the
+`firstMovieCatalog`.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4444,14 +4445,14 @@ optional semantic qualifiers. This means that qualifier values, even with the be
 fallback, always have narrowing semantics within the set of type matches; they do not
 semantically express a reference to a unique bean id. Good qualifier values are "main"
 or "EMEA" or "persistent", expressing characteristics of a specific component that are
-independent from the bean id, which may be auto-generated in case of an anonymous bean
+independent from the bean `id`, which may be auto-generated in case of an anonymous bean
 definition like the one in the preceding example.
 
 Qualifiers also apply to typed collections, as discussed above, for example, to
 `Set<MovieCatalog>`. In this case, all matching beans according to the declared
 qualifiers are injected as a collection. This implies that qualifiers do not have to be
 unique; they rather simply constitute filtering criteria. For example, you can define
-multiple `MovieCatalog` beans with the same qualifier value "action"; all of which would
+multiple `MovieCatalog` beans with the same qualifier value "action", all of which would
 be injected into a `Set<MovieCatalog>` annotated with `@Qualifier("action")`.
 
 [TIP]

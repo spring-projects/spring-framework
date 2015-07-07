@@ -24,7 +24,7 @@ import org.springframework.validation.BindingResult;
 /**
  * Subclass of {@link org.springframework.ui.ExtendedModelMap} that automatically removes
  * a {@link org.springframework.validation.BindingResult} object if the corresponding
- * target attribute gets replaced through regulat {@link Map} operations.
+ * target attribute gets replaced through regular {@link Map} operations.
  *
  * <p>This is the class exposed to handler methods by Spring MVC, typically consumed through
  * a declaration of the {@link org.springframework.ui.Model} interface. There is no need to
