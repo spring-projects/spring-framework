@@ -39,6 +39,7 @@ import org.springframework.util.PathMatcher;
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @author Juergen Hoeller
  * @since 4.0
  */
 public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
@@ -258,7 +259,6 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		private final ConcurrentMap<String, SessionSubscriptionInfo> sessions =
 				new ConcurrentHashMap<String, SessionSubscriptionInfo>();
 
-
 		public SessionSubscriptionInfo getSubscriptions(String sessionId) {
 			return this.sessions.get(sessionId);
 		}
@@ -301,8 +301,6 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		// destination -> subscriptionIds
 		private final Map<String, Set<String>> subscriptions = new ConcurrentHashMap<String, Set<String>>(4);
 
-		private final Object monitor = new Object();
-
 		public SessionSubscriptionInfo(String sessionId) {
 			Assert.notNull(sessionId, "sessionId must not be null");
 			this.sessionId = sessionId;
@@ -323,7 +321,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		public void addSubscription(String destination, String subscriptionId) {
 			Set<String> subs = this.subscriptions.get(destination);
 			if (subs == null) {
-				synchronized (this.monitor) {
+				synchronized (this.subscriptions) {
 					subs = this.subscriptions.get(destination);
 					if (subs == null) {
 						subs = new CopyOnWriteArraySet<String>();
@@ -337,13 +335,15 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		public String removeSubscription(String subscriptionId) {
 			for (String destination : this.subscriptions.keySet()) {
 				Set<String> subscriptionIds = this.subscriptions.get(destination);
-				if (subscriptionIds.remove(subscriptionId)) {
-					synchronized (this.monitor) {
-						if (subscriptionIds.isEmpty()) {
-							this.subscriptions.remove(destination);
+				if (subscriptionIds != null) {
+					if (subscriptionIds.remove(subscriptionId)) {
+						synchronized (this.subscriptions) {
+							if (subscriptionIds.isEmpty()) {
+								this.subscriptions.remove(destination);
+							}
 						}
+						return destination;
 					}
-					return destination;
 				}
 			}
 			return null;
