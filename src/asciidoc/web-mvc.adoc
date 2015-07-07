@@ -4676,6 +4676,18 @@ By default use of `@EnableWebMvc` or `<mvc:annotation-driven>` automatically reg
 Validation support in Spring MVC through the `LocalValidatorFactoryBean` when a Bean Validation
 provider is such as Hibernate Validator is detected on the classpath.
 
+[NOTE]
+====
+Sometimes it's convenient to have a `LocalValidatorFactoryBean` injected into a controller
+or another class. The easiest way to do that is to declare your own `@Bean` and also mark it
+with `@Primary` in order to avoid a conflict with the one provided with the MVC Java config.
+
+If you prefer to use the one from the MVC Java config, you'll need to override the
+`mvcValidator` method from `WebMvcConfigurationSupport` and declare the method to explicitly
+return `LocalValidatorFactory` rather than `Validator`. See <<mvc-config-advanced-java>>
+for information on how to switch to extend the provided configuration.
+====
+
 Alternatively you can configure your own global `Validator` instance:
 
 [source,java,indent=0]
