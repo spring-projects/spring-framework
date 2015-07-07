@@ -55,7 +55,7 @@ public @interface CrossOrigin {
 	String[] value() default {};
 
 	/**
-	 * List of allowed origins.
+	 * List of allowed origins, e.g. {@code "http://domain1.com"}.
 	 * <p>These values are placed in the {@code Access-Control-Allow-Origin}
 	 * header of both the pre-flight response and the actual response.
 	 * {@code "*"} means that all origins are allowed.
@@ -83,7 +83,8 @@ public @interface CrossOrigin {
 	String[] exposedHeaders() default {};
 
 	/**
-	 * List of supported HTTP request methods.
+	 * List of supported HTTP request methods, e.g.
+	 * {@code "{RequestMethod.GET, RequestMethod.POST}"}.
 	 * <p>Methods specified here override those specified via {@code RequestMapping}.
 	 * <p>If undefined, methods defined by {@link RequestMapping} annotation
 	 * are used.
