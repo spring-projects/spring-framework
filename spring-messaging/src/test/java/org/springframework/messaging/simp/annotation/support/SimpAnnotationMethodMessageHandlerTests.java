@@ -39,6 +39,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.handler.HandlerMethod;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Headers;
@@ -205,6 +206,20 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		Message<?> message = MessageBuilder.withPayload(TEST_INVALID_VALUE.getBytes()).setHeaders(headers).build();
 		this.messageHandler.handleMessage(message);
 		assertEquals("handleValidationException", this.testController.method);
+	}
+
+	@Test
+	public void exceptionWithHandlerMethodArg() {
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
+		headers.setSessionId("session1");
+		headers.setSessionAttributes(new ConcurrentHashMap<>());
+		headers.setDestination("/pre/illegalState");
+		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		this.messageHandler.handleMessage(message);
+		assertEquals("handleExceptionWithHandlerMethodArg", this.testController.method);
+		HandlerMethod handlerMethod = (HandlerMethod) this.testController.arguments.get("handlerMethod");
+		assertNotNull(handlerMethod);
+		assertEquals("illegalState", handlerMethod.getMethod().getName());
 	}
 
 	@Test
@@ -405,9 +420,20 @@ public class SimpAnnotationMethodMessageHandlerTests {
 			this.arguments.put("message", payload);
 		}
 
+		@MessageMapping("/illegalState")
+		public void illegalState() {
+			throw new IllegalStateException();
+		}
+
 		@MessageExceptionHandler(MethodArgumentNotValidException.class)
 		public void handleValidationException() {
 			this.method = "handleValidationException";
+		}
+
+		@MessageExceptionHandler(IllegalStateException.class)
+		public void handleExceptionWithHandlerMethodArg(HandlerMethod handlerMethod) {
+			this.method = "handleExceptionWithHandlerMethodArg";
+			this.arguments.put("handlerMethod", handlerMethod);
 		}
 
 		@MessageMapping("/scope")

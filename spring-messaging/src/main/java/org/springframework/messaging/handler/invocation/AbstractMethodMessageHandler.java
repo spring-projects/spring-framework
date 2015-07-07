@@ -493,7 +493,7 @@ public abstract class AbstractMethodMessageHandler<T>
 			logger.debug("Invoking " + invocable.getShortLogMessage());
 		}
 		try {
-			Object returnValue = invocable.invoke(message, ex);
+			Object returnValue = invocable.invoke(message, ex, handlerMethod);
 			MethodParameter returnType = invocable.getReturnType();
 			if (void.class == returnType.getParameterType()) {
 				return;
