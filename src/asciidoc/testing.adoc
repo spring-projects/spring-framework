@@ -3685,67 +3685,39 @@ instrumenting your test class with a `TestContextManager`. See the source code o
 [[spring-mvc-test-framework]]
 === Spring MVC Test Framework
 
-.Standalone project
-****
-Before inclusion in Spring Framework 3.2, the Spring MVC Test framework had already
-existed as a separate project on GitHub where it grew and evolved through actual use,
-feedback, and the contribution of many.
+The __Spring MVC Test framework__ provides first class JUnit support for testing
+Spring MVC code using a fluent API. It's built on the
+http://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/mock/web/package-summary.html[Servlet API mock objects]
+from the `spring-test` module and hence does not require a running Servlet container,
+it uses the `DispatcherServlet` thus providing full Spring MVC support, and
+may optionally load actual Spring configuration with the __TestContext framework__
+in addition to a standalone mode in which controllers may be instantiated manually
+and tested one at a time.
 
-The standalone https://github.com/spring-projects/spring-test-mvc[spring-test-mvc project]
-is still available on GitHub and can be used in conjunction with Spring Framework 3.1.x.
-Applications upgrading to 3.2 or later should replace the `spring-test-mvc` dependency with a
-dependency on `spring-test`.
+__Spring MVC Test__ also provides client-side support for testing code that uses
+the `RestTemplate`. Client-side tests mock the server responses and also do not
+require a running server.
 
-The `spring-test` module uses a different package `org.springframework.test.web` but
-otherwise is nearly identical with two exceptions. One is support for features new in
-3.2 (e.g. asynchronous web requests). The other relates to the options for creating a
-`MockMvc` instance. In Spring Framework 3.2 and later, this can only be done through the
-TestContext framework, which provides caching benefits for the loaded configuration.
-****
-
-The __Spring MVC Test framework__ provides first class JUnit support for testing client
-and server-side Spring MVC code through a fluent API. Typically it loads the actual
-Spring configuration through the __TestContext framework__ and always uses the
-`DispatcherServlet` to process requests thus approximating full integration tests
-without requiring a running Servlet container.
-
-Client-side tests are `RestTemplate`-based and allow tests for code that relies on the
-`RestTemplate` without requiring a running server to respond to the requests.
 
 
 [[spring-mvc-test-server]]
 ==== Server-Side Tests
-Before Spring Framework 3.2, the most likely way to test a Spring MVC controller was to
-write a unit test that instantiates the controller, injects it with mock or stub
-dependencies, and then calls its methods directly, using a `MockHttpServletRequest` and
-`MockHttpServletResponse` where necessary.
+It's easy to write a plain JUnit test for a Spring MVC controller. Simply instantiate
+the controller, inject it with mock or stub dependencies, and call its methods
+passing `MockHttpServletRequest`, `MockHttpServletResponse`, etc. if necessary.
+However much remains untested, e.g. request mappings, data binding, type conversion,
+validation and much more. Furthermore other controller methods such as `@InitBinder`,
+`@ModelAttribute`, and `@ExceptionHandler` may also be invoked as part of the request
+processing lifecycle.
 
-Although this is pretty easy to do, controllers have many annotations, and much remains
-untested. Request mappings, data binding, type conversion, and validation are just a few
-examples of what isn't tested. Furthermore, there are other types of annotated methods
-such as `@InitBinder`, `@ModelAttribute`, and `@ExceptionHandler` that get invoked as
-part of request processing.
+The goal of __Spring MVC Test__ is to provide an effective way of testing controllers
+by performing requests and generating responses through the `DispatcherServlet`.
 
-The idea behind Spring MVC Test is to be able to re-write those controller tests by
-performing actual requests and generating responses, as they would be at runtime, along
-the way invoking controllers through the Spring MVC `DispatcherServlet`. Controllers can
-still be injected with mock dependencies, so tests can remain focused on the web layer.
-
-Spring MVC Test builds on the familiar "mock" implementations of the Servlet API
+__Spring MVC Test__ builds on the familiar "mock" implementations of the Servlet API
 available in the `spring-test` module. This allows performing requests and generating
 responses without the need for running in a Servlet container. For the most part
-everything should work as it does at runtime with the exception of JSP rendering, which
-is not available outside a Servlet container. Furthermore, if you are familiar with how
-the `MockHttpServletResponse` works, you'll know that forwards and redirects are not
-actually executed. Instead "forwarded" and "redirected" URLs are saved and can be
-asserted in tests. This means if you are using JSPs, you can verify the JSP page to
-which the request was forwarded.
-
-All other means of rendering including `@ResponseBody` methods and `View` types (besides
-JSPs) such as Freemarker, Velocity, Thymeleaf, and others for rendering HTML, JSON, XML,
-and so on should work as expected, and the response will contain the generated content.
-
-Below is an example of a test requesting account information in JSON format:
+everything should work as it does at runtime with a few notable exceptions as
+explained further below. Here is an example of using Spring MVC Test:
 
 [source,java,indent=0]
 ----
@@ -3778,17 +3750,17 @@ Below is an example of a test requesting account information in JSON format:
 	}
 ----
 
-The test relies on the `WebApplicationContext` support of the __TestContext framework__.
-It loads Spring configuration from an XML configuration file located in the same package
-as the test class (also supports JavaConfig) and injects the created
-`WebApplicationContext` into the test so a `MockMvc` instance can be created with it.
+The above test relies on the `WebApplicationContext` support of the __TestContext framework__
+to loads Spring configuration from an XML configuration file located in the same package
+as the test class but also supported is Java-based configuration. See these
+https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/servlet/samples/context[sample tests].
 
-The `MockMvc` is then used to perform a request to `"/accounts/1"` and verify the
-resulting response status is 200, the response content type is `"application/json"`, and
-response content has a JSON property called "name" with the value "Lee". JSON content is
-inspected with the help of Jayway's https://github.com/jayway/JsonPath[JsonPath
+The `MockMvc` instance is used to perform a request to `"/accounts/1"` and verify the
+resulting response has status 200, content type is `"application/json"`, and
+response body has a JSON property called "name" with the value "Lee". The jsonPath
+syntax is supported  through the Jayway https://github.com/jayway/JsonPath[JsonPath
 project]. There are lots of other options for verifying the result of the performed
-request and those will be discussed later.
+request that will be discussed below.
 
 [[spring-mvc-test-server-static-imports]]
 ===== Static Imports
@@ -3804,10 +3776,8 @@ completion on static members.
 
 [[spring-mvc-test-server-setup-options]]
 ===== Setup Options
-The goal of server-side test setup is to create an instance of `MockMvc` that can be
-used to perform requests. There are two main options.
-
-The first option is to point to Spring MVC configuration through the __TestContext
+There are two main options for creating an instance of `MockMvc`.
+The first is to load Spring MVC configuration through the __TestContext
 framework__, which loads the Spring configuration and injects a `WebApplicationContext`
 into the test to use to create a `MockMvc`:
 
@@ -3834,11 +3804,10 @@ into the test to use to create a `MockMvc`:
 	}
 ----
 
-The second option is to simply register a controller instance without loading any Spring
-configuration. Instead basic Spring MVC configuration suitable for testing annotated
-controllers is automatically created. The created configuration is comparable to that of
-the MVC JavaConfig (and the MVC namespace) and can be customized to a degree through
-builder-style methods:
+The second is to simply create a controller instance manually without loading Spring
+configuration. Instead basic default configuration, roughly comparable to that of
+the MVC JavaConfig or the MVC namespace, is automatically created and can be customized
+to a degree:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3857,7 +3826,7 @@ builder-style methods:
 	}
 ----
 
-Which option should you use?
+Which setup option should you use?
 
 The __"webAppContextSetup"__ loads the actual Spring MVC configuration resulting in a
 more complete integration test. Since the __TestContext framework__ caches the loaded
@@ -3913,8 +3882,7 @@ verify the Spring MVC configuration. Alternatively, you can decide to write all 
 
 [[spring-mvc-test-server-performing-requests]]
 ===== Performing Requests
-To perform requests, use the appropriate HTTP method and additional builder-style
-methods corresponding to properties of `MockHttpServletRequest`. For example:
+It's easy to perform requests using any HTTP method:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3922,8 +3890,9 @@ methods corresponding to properties of `MockHttpServletRequest`. For example:
 	mockMvc.perform(post("/hotels/{id}", 42).accept(MediaType.APPLICATION_JSON));
 ----
 
-In addition to all the HTTP methods, you can also perform file upload requests, which
-internally creates an instance of `MockMultipartHttpServletRequest`:
+You can also perform file upload requests that internally use
+`MockMultipartHttpServletRequest` so that there is no actual parsing of a multipart
+request but rather you have to set it up:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3931,7 +3900,7 @@ internally creates an instance of `MockMultipartHttpServletRequest`:
 	mockMvc.perform(fileUpload("/doc").file("a1", "ABC".getBytes("UTF-8")));
 ----
 
-Query string parameters can be specified in the URI template:
+You can specify query parameters in URI template style:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3939,7 +3908,7 @@ Query string parameters can be specified in the URI template:
 	mockMvc.perform(get("/hotels?foo={foo}", "bar"));
 ----
 
-Or by adding Servlet request parameters:
+Or you can add Servlet request parameters representing either query of form parameters:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3947,10 +3916,10 @@ Or by adding Servlet request parameters:
 	mockMvc.perform(get("/hotels").param("foo", "bar"));
 ----
 
-If application code relies on Servlet request parameters, and doesn't check the query
-string, as is most often the case, then it doesn't matter how parameters are added. Keep
-in mind though that parameters provided in the URI template will be decoded while
-parameters provided through the `param(...)` method are expected to be decoded.
+If application code relies on Servlet request parameters and doesn't check the query
+string explicitly (as is most often the case) then it doesn't matter which option you use.
+Keep in mind however that query params provided with the URI template will be decoded while
+request parameters provided through the `param(...)` method are expected to be decoded.
 
 In most cases it's preferable to leave out the context path and the Servlet path from
 the request URI. If you must test with the full request URI, be sure to set the
@@ -3963,8 +3932,8 @@ the request URI. If you must test with the full request URI, be sure to set the
 ----
 
 Looking at the above example, it would be cumbersome to set the contextPath and
-servletPath with every performed request. That's why you can define default request
-properties when building the `MockMvc`:
+servletPath with every performed request. Instead you can set up default request
+properties:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3982,15 +3951,15 @@ properties when building the `MockMvc`:
 		}
 ----
 
-The above properties will apply to every request performed through the `MockMvc`. If the
-same property is also specified on a given request, it will override the default value.
-That is why, the HTTP method and URI don't matter, when setting default request
-properties, since they must be specified on every request.
+The above properties will affect every request performed through the `MockMvc` instance.
+If the same property is also specified on a given request, it overrides the default value.
+That is why the HTTP method and URI in default request don't matter since they must be
+specified on every request.
 
 [[spring-mvc-test-server-defining-expectations]]
 ===== Defining Expectations
-Expectations can be defined by appending one or more `.andExpect(..)` after call to
-perform the request:
+Expectations can be defined by appending one or more `.andExpect(..)` calls after
+performing a request:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3998,18 +3967,18 @@ perform the request:
 	mockMvc.perform(get("/accounts/1")).andExpect(status().isOk());
 ----
 
-`MockMvcResultMatchers.*` defines a number of static members, some of which return types
-with additional methods, for asserting the result of the performed request. The
-assertions fall in two general categories.
+`MockMvcResultMatchers.*` provides a number of expectations some of which are further
+nested with more detailed expectations.
 
-The first category of assertions verify properties of the response, i.e the response
-status, headers, and content. Those are the most important things to test for.
+Expectations fall in two general categories. The first category of assertions verify
+properties of the response, i.e the response status, headers, and content. Those
+are the most important results to assert.
 
-The second category of assertions go beyond the response, and allow inspecting Spring
-MVC specific constructs such as which controller method processed the request, whether
+The second category of assertions go beyond the response. They allow inspecting Spring
+MVC specific things such as which controller method processed the request, whether
 an exception was raised and handled, what the content of the model is, what view was
-selected, what flash attributes were added, and so on. It is also possible to verify
-Servlet specific constructs such as request and session attributes. The following test
+selected, what flash attributes were added, and so on. They also allow inspecting
+Servlet specific things such as request and session attributes. The following test
 asserts that binding/validation failed:
 
 [source,java,indent=0]
@@ -4054,8 +4023,8 @@ after all expectations:
 	// ...
 ----
 
-When all tests repeat the same expectations, you can define the common expectations once
-when building the `MockMvc`:
+When all tests repeat the same expectations you can set up common expectations once
+when building the `MockMvc` instance:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
