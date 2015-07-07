@@ -19,11 +19,13 @@ package org.springframework.messaging.simp.broker;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 import org.springframework.messaging.Message;
 import org.springframework.util.AntPathMatcher;
@@ -31,7 +33,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.PathMatcher;
-
 
 /**
  * A default, simple in-memory implementation of {@link SubscriptionRegistry}.
@@ -166,7 +167,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 		public void addSubscriptions(String destination, MultiValueMap<String, String> subscriptions) {
 			synchronized (this.updateCache) {
-				this.updateCache.put(destination, new LinkedMultiValueMap<String, String>(subscriptions));
+				this.updateCache.put(destination, deepCopy(subscriptions));
 				this.accessCache.put(destination, subscriptions);
 			}
 		}
@@ -178,7 +179,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 					if (getPathMatcher().match(destination, cachedDestination)) {
 						MultiValueMap<String, String> subs = entry.getValue();
 						subs.add(sessionId, subsId);
-						this.accessCache.put(cachedDestination, new LinkedMultiValueMap<String, String>(subs));
+						this.accessCache.put(cachedDestination, deepCopy(subs));
 					}
 				}
 			}
@@ -200,7 +201,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 							destinationsToRemove.add(destination);
 						}
 						else {
-							this.accessCache.put(destination, new LinkedMultiValueMap<String, String>(sessionMap));
+							this.accessCache.put(destination, deepCopy(sessionMap));
 						}
 					}
 				}
@@ -222,7 +223,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 							destinationsToRemove.add(destination);
 						}
 						else {
-							this.accessCache.put(destination, new LinkedMultiValueMap<String, String>(sessionMap));
+							this.accessCache.put(destination, deepCopy(sessionMap));
 						}
 					}
 				}
@@ -233,11 +234,20 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 			}
 		}
 
+		private <K, V> LinkedMultiValueMap<K, V> deepCopy(Map<K, List<V>> map) {
+			LinkedMultiValueMap<K, V> copy = new LinkedMultiValueMap<K, V>();
+			for (Map.Entry<K, List<V>> entry : map.entrySet()) {
+				copy.put(entry.getKey(), new LinkedList<V>(entry.getValue()));
+			}
+			return copy;
+		}
+
 		@Override
 		public String toString() {
 			return "cache[" + this.accessCache.size() + " destination(s)]";
 		}
 	}
+
 
 	/**
 	 * Provide access to session subscriptions by sessionId.
@@ -276,9 +286,10 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 		@Override
 		public String toString() {
-			return "registry[" + sessions.size() + " sessions]";
+			return "registry[" + this.sessions.size() + " sessions]";
 		}
 	}
+
 
 	/**
 	 * Hold subscriptions for a session.
@@ -291,7 +302,6 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		private final Map<String, Set<String>> subscriptions = new ConcurrentHashMap<String, Set<String>>(4);
 
 		private final Object monitor = new Object();
-
 
 		public SessionSubscriptionInfo(String sessionId) {
 			Assert.notNull(sessionId, "sessionId must not be null");
@@ -316,7 +326,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 				synchronized (this.monitor) {
 					subs = this.subscriptions.get(destination);
 					if (subs == null) {
-						subs = new HashSet<String>(4);
+						subs = new CopyOnWriteArraySet<String>();
 						this.subscriptions.put(destination, subs);
 					}
 				}
