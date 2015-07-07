@@ -4280,14 +4280,89 @@ any). These types must be 'wired up' explicitly via XML or using a Spring `@Bean
 ====
 
 
+[[beans-autowired-annotation-primary]]
+=== Fine-tuning annotation-based autowiring with primary
+Because autowiring by type may lead to multiple candidates, it is often necessary to
+have more control over the selection process. One way to accomplish this is with
+Spring's `@Primary` annotation. `@Primary` indicates that a bean should be given
+preference when multiple candidates are qualified to autowire a single-valued dependency.
+If exactly one 'primary' bean exists among the candidates, it will be the autowired
+value.
+
+Let's assume the following configuration that define `firstMovieCatalog` as the _primary_
+`MovieCatalog`
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	public class MovieConfiguration {
+
+		@Bean
+		**@Primary**
+		public MovieCatalog firstMovieCatalog() { ... }
+
+		@Bean
+		public MovieCatalog secondMovieCatalog() { ... }
+
+		// ...
+
+	}
+----
+
+With such configuration, `MovieRecommender` will use `firstMovieCatalog`
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	public class MovieRecommender {
+
+		@Autowired
+		private MovieCatalog movieCatalog;
+
+		// ...
+
+	}
+----
+
+
+The corresponding bean definitions appear as follows.
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/context
+			http://www.springframework.org/schema/context/spring-context.xsd">
+
+		<context:annotation-config/>
+
+		<bean class="example.SimpleMovieCatalog" **primary=true**>
+			<!-- inject any dependencies required by this bean -->
+		</bean>
+
+		<bean class="example.SimpleMovieCatalog">
+			<!-- inject any dependencies required by this bean -->
+		</bean>
+
+		<bean id="movieRecommender" class="example.MovieRecommender"/>
+
+	</beans>
+----
+
 
 [[beans-autowired-annotation-qualifiers]]
 === Fine-tuning annotation-based autowiring with qualifiers
-Because autowiring by type may lead to multiple candidates, it is often necessary to
-have more control over the selection process. One way to accomplish this is with
-Spring's `@Qualifier` annotation. You can associate qualifier values with specific
-arguments, narrowing the set of type matches so that a specific bean is chosen for each
-argument. In the simplest case, this can be a plain descriptive value:
+`@Primary` is an effective way to use autowiring by type with several instances when one
+primary candidate can be determined. When more control over the selection process is
+required, Spring's `@Qualifier` annotation can be used. You can associate qualifier values
+with specific arguments, narrowing the set of type matches so that a specific bean is
+chosen for each argument. In the simplest case, this can be a plain descriptive value:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
