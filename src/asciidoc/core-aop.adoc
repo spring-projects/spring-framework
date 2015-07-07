@@ -3332,20 +3332,21 @@ environment (summarized in the following table).
 |===
 | Runtime Environment| `LoadTimeWeaver` implementation
 
-| Running in
-  http://www.bea.com/framework.jsp?CNT=index.htm&FP=/content/products/weblogic/server[BEA's
-  Weblogic 10]
+| Running in Oracle's
+  http://www.oracle.com/technetwork/middleware/weblogic/overview/index-085209.html[WebLogic]
 | `WebLogicLoadTimeWeaver`
 
-| Running in http://www-01.ibm.com/software/webservers/appserv/was/[IBM WebSphere
-  Application Server 7]
-| `WebSphereLoadTimeWeaver`
-
-| Running in http://glassfish.dev.java.net/[GlassFish]
+| Running in Oracle's http://glassfish.dev.java.net/[GlassFish]
 | `GlassFishLoadTimeWeaver`
 
-| Running in http://www.jboss.org/jbossas/[JBoss AS]
+| Running in http://tomcat.apache.org/[Apache Tomcat]
+| `TomcatLoadTimeWeaver`
+
+| Running in Red Hat's http://www.jboss.org/jbossas/[JBoss AS] or http://www.wildfly.org/[WildFly]
 | `JBossLoadTimeWeaver`
+
+| Running in IBM's http://www-01.ibm.com/software/webservers/appserv/was/[WebSphere]
+| `WebSphereLoadTimeWeaver`
 
 | JVM started with Spring `InstrumentationSavingAgent` __(java
   -javaagent:path/to/spring-instrument.jar)__
@@ -3443,12 +3444,22 @@ containers.
 
 [[aop-aj-ltw-environment-tomcat]]
 ===== Tomcat
-http://tomcat.apache.org/[Apache Tomcat]'s default class loader does not support class
-transformation which is why Spring provides an enhanced implementation that addresses
-this need. Named `TomcatInstrumentableClassLoader`, the loader works on Tomcat 5.0 and
-above and can be registered individually for __each__ web application as follows:
+Historically, http://tomcat.apache.org/[Apache Tomcat]'s default class loader did not
+support class transformation which is why Spring provides an enhanced implementation
+that addresses this need. Named `TomcatInstrumentableClassLoader`, the loader works on
+Tomcat 6.0 and above.
 
-* Tomcat 6.0.x or higher
+[TIP]
+====
+Do not define `TomcatInstrumentableClassLoader` anymore as of Tomcat 7.0.44+ / 8.0.
+Instead, let Spring automatically use Tomcat's new native `InstrumentableClassLoader`
+facility through the `TomcatLoadTimeWeaver` strategy, in particular on Tomcat 7.0.63+
+where `TomcatInstrumentableClassLoader` does not work at all anymore.
+====
+
+If you still need to use `TomcatInstrumentableClassLoader`, it can be registered
+individually for __each__ web application as follows:
+
 * Copy `org.springframework.instrument.tomcat.jar` into __$CATALINA_HOME__/lib, where
   __$CATALINA_HOME__ represents the root of the Tomcat installation)
 * Instruct Tomcat to use the custom class loader (instead of the default) by editing the
