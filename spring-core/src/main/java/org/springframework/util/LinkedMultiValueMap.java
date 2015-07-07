@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,8 +59,9 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 	}
 
 	/**
-	 * Copy constructor: Create a new LinkedMultiValueMap with the same mappings
-	 * as the specified Map.
+	 * Copy constructor: Create a new LinkedMultiValueMap with the same mappings as
+	 * the specified Map. Note that this will be a shallow copy; its value-holding
+	 * List entries will get reused and therefore cannot get modified independently.
 	 * @param otherMap the Map whose mappings are to be placed in this Map
 	 */
 	public LinkedMultiValueMap(Map<K, List<V>> otherMap) {
@@ -103,7 +104,7 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 	@Override
 	public Map<K, V> toSingleValueMap() {
 		LinkedHashMap<K, V> singleValueMap = new LinkedHashMap<K,V>(this.targetMap.size());
-		for (Entry<K, List<V>> entry : targetMap.entrySet()) {
+		for (Entry<K, List<V>> entry : this.targetMap.entrySet()) {
 			singleValueMap.put(entry.getKey(), entry.getValue().get(0));
 		}
 		return singleValueMap;
@@ -148,8 +149,8 @@ public class LinkedMultiValueMap<K, V> implements MultiValueMap<K, V>, Serializa
 	}
 
 	@Override
-	public void putAll(Map<? extends K, ? extends List<V>> m) {
-		this.targetMap.putAll(m);
+	public void putAll(Map<? extends K, ? extends List<V>> map) {
+		this.targetMap.putAll(map);
 	}
 
 	@Override
