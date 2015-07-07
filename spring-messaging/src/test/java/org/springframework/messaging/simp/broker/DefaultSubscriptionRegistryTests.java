@@ -25,7 +25,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.messaging.Message;
@@ -36,9 +35,7 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.PathMatcher;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 
 /**
@@ -82,8 +79,8 @@ public class DefaultSubscriptionRegistryTests {
 		String dest = "/foo";
 
 		this.registry.registerSubscription(subscribeMessage(sessId, subsId, dest));
-		MultiValueMap<String, String> actual = this.registry.findSubscriptions(createMessage(dest));
 
+		MultiValueMap<String, String> actual = this.registry.findSubscriptions(createMessage(dest));
 		assertNotNull(actual);
 		assertEquals("Expected one element " + actual, 1, actual.size());
 		assertEquals(Collections.singletonList(subsId), actual.get(sessId));
@@ -100,7 +97,6 @@ public class DefaultSubscriptionRegistryTests {
 		}
 
 		MultiValueMap<String, String> actual = this.registry.findSubscriptions(createMessage(dest));
-
 		assertNotNull(actual);
 		assertEquals(1, actual.size());
 		assertEquals(subscriptionIds, sort(actual.get(sessId)));
