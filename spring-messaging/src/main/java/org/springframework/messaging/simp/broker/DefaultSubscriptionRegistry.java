@@ -56,6 +56,7 @@ import org.springframework.util.PathMatcher;
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @author Juergen Hoeller
  * @since 4.0
  */
 public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
@@ -234,9 +235,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 					}
 				}
 				catch (Throwable ex) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Failed to evaluate selector.", ex);
-					}
+					logger.debug("Failed to evaluate selector", ex);
 				}
 			}
 		}
@@ -388,7 +387,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 		@Override
 		public String toString() {
-			return "registry[" + sessions.size() + " sessions]";
+			return "registry[" + this.sessions.size() + " sessions]";
 		}
 	}
 
@@ -403,8 +402,6 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		// destination -> subscriptions
 		private final Map<String, Set<Subscription>> destinationLookup =
 				new ConcurrentHashMap<String, Set<Subscription>>(4);
-
-		private final Object monitor = new Object();
 
 		public SessionSubscriptionInfo(String sessionId) {
 			Assert.notNull(sessionId, "sessionId must not be null");
@@ -425,9 +422,12 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 		public Subscription getSubscription(String subscriptionId) {
 			for (String destination : this.destinationLookup.keySet()) {
-				for (Subscription sub : this.destinationLookup.get(destination)) {
-					if (sub.getId().equalsIgnoreCase(subscriptionId)) {
-						return sub;
+				Set<Subscription> subs = this.destinationLookup.get(destination);
+				if (subs != null) {
+					for (Subscription sub : subs) {
+						if (sub.getId().equalsIgnoreCase(subscriptionId)) {
+							return sub;
+						}
 					}
 				}
 			}
@@ -437,7 +437,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		public void addSubscription(String destination, String subscriptionId, Expression selectorExpression) {
 			Set<Subscription> subs = this.destinationLookup.get(destination);
 			if (subs == null) {
-				synchronized (this.monitor) {
+				synchronized (this.destinationLookup) {
 					subs = this.destinationLookup.get(destination);
 					if (subs == null) {
 						subs = new CopyOnWriteArraySet<Subscription>();
@@ -450,15 +450,17 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 		public String removeSubscription(String subscriptionId) {
 			for (String destination : this.destinationLookup.keySet()) {
-				Set<Subscription> subscriptions = this.destinationLookup.get(destination);
-				for (Subscription sub : subscriptions) {
-					if (sub.getId().equals(subscriptionId) && subscriptions.remove(sub)) {
-						synchronized (this.monitor) {
-							if (subscriptions.isEmpty()) {
-								this.destinationLookup.remove(destination);
+				Set<Subscription> subs = this.destinationLookup.get(destination);
+				if (subs != null) {
+					for (Subscription sub : subs) {
+						if (sub.getId().equals(subscriptionId) && subs.remove(sub)) {
+							synchronized (this.destinationLookup) {
+								if (subs.isEmpty()) {
+									this.destinationLookup.remove(destination);
+								}
 							}
+							return destination;
 						}
-						return destination;
 					}
 				}
 			}
