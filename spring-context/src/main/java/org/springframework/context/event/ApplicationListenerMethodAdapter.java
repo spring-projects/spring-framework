@@ -131,7 +131,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		if (declaredEventType == null) {
 			return null;
 		}
-		if (this.method.getParameters().length == 0) {
+		if (this.method.getParameterTypes().length == 0) {
 			return new Object[0];
 		}
 		if (!ApplicationEvent.class.isAssignableFrom(declaredEventType.getRawClass())
