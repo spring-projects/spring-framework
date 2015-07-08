@@ -29,7 +29,7 @@ import org.springframework.core.annotation.AliasFor;
  * Annotation that marks a method to listen for application events. The
  * method may have one (and only one) parameter that reflects the event
  * type to listen to. Or this annotation may refer to the event type(s)
- * using the {@link #classes()} attribute. Events can be {@link ApplicationEvent}
+ * using the {@link #classes} attribute. Events can be {@link ApplicationEvent}
  * instances as well as arbitrary objects.
  *
  * <p>Processing of {@code @EventListener} annotations is performed via
@@ -57,16 +57,16 @@ import org.springframework.core.annotation.AliasFor;
 public @interface EventListener {
 
 	/**
-	 * Alias for {@link #classes()}.
+	 * Alias for {@link #classes}.
 	 */
 	@AliasFor(attribute = "classes")
 	Class<?>[] value() default {};
 
 	/**
-	 * The event classes that this listener handles. When this attribute is specified
-	 * with one value, the method parameter may or may not be specified. When this
-	 * attribute is specified with more than one value, the method must not have a
-	 * parameter.
+	 * The event classes that this listener handles.
+	 * <p>When this attribute is specified with one value, the method parameter
+	 * may or may not be specified. When this attribute is specified with more
+	 * than one value, the method must not have a parameter.
 	 */
 	@AliasFor(attribute = "value")
 	Class<?>[] classes() default {};

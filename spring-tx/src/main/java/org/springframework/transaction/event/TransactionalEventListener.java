@@ -29,7 +29,7 @@ import org.springframework.core.annotation.AliasFor;
  * An {@link EventListener} that is invoked according to a {@link TransactionPhase}.
  *
  * <p>If the event is not published within the boundaries of a managed transaction, the event
- * is discarded unless the {@link #fallbackExecution()} flag is explicitly set. If a
+ * is discarded unless the {@link #fallbackExecution} flag is explicitly set. If a
  * transaction is running, the event is processed according to its {@link TransactionPhase}.
  *
  * <p>Adding {@link org.springframework.core.annotation.Order @Order} on your annotated method
@@ -45,28 +45,28 @@ import org.springframework.core.annotation.AliasFor;
 public @interface TransactionalEventListener {
 
 	/**
-	 * Phase to bind the handling of an event to. If no transaction is in progress, the
-	 * event is not processed at all unless {@link #fallbackExecution} has been
-	 * enabled explicitly.
+	 * Phase to bind the handling of an event to.
+	 * <p>If no transaction is in progress, the event is not processed at
+	 * all unless {@link #fallbackExecution} has been enabled explicitly.
 	 */
 	TransactionPhase phase() default TransactionPhase.AFTER_COMMIT;
 
 	/**
-	 * Specify if the event should be processed if no transaction is running.
+	 * Whether the event should be processed if no transaction is running.
 	 */
 	boolean fallbackExecution() default false;
 
 	/**
-	 * Alias for {@link #classes()}.
+	 * Alias for {@link #classes}.
 	 */
 	@AliasFor(attribute = "classes")
 	Class<?>[] value() default {};
 
 	/**
-	 * The event classes that this listener handles. When this attribute is specified
-	 * with one value, the method parameter may or may not be specified. When this
-	 * attribute is specified with more than one value, the method must not have a
-	 * parameter.
+	 * The event classes that this listener handles.
+	 * <p>When this attribute is specified with one value, the method parameter
+	 * may or may not be specified. When this attribute is specified with more
+	 * than one value, the method must not have a parameter.
 	 */
 	@AliasFor(attribute = "value")
 	Class<?>[] classes() default {};
@@ -74,7 +74,7 @@ public @interface TransactionalEventListener {
 	/**
 	 * Spring Expression Language (SpEL) attribute used for making the event
 	 * handling conditional.
-	 * <p>Default is "", meaning the event is always handled.
+	 * <p>Default is {@code ""}, meaning the event is always handled.
 	 * @see EventListener#condition
 	 */
 	String condition() default "";
