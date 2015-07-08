@@ -52,9 +52,10 @@ import org.springframework.core.annotation.AliasFor;
  * {@link org.springframework.core.annotation.Order @Order} annotation
  * alongside this annotation.
  *
- * <p>While it is possible to define any arbitrary exception types, checked
- * exceptions will be wrapped in a {@link java.lang.reflect.UndeclaredThrowableException}
- * so that the caller only handles runtime exceptions.
+ * <p>While it is possible for an event listener to declare that it throws
+ * arbitrary exception types, any checked exceptions thrown from an event
+ * listener will be wrapped in a {@link java.lang.reflect.UndeclaredThrowableException}
+ * since the caller can only handle runtime exceptions.
  *
  * @author Stephane Nicoll
  * @since 4.2
