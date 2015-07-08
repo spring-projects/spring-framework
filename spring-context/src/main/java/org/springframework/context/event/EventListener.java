@@ -39,9 +39,12 @@ import org.springframework.core.annotation.AliasFor;
  * XML element.
  *
  * <p>Annotated methods may have a non-{@code void} return type. When they
- * do, the result of the method invocation is sent as a new event. It is
- * also possible to define the order in which listeners for a certain event
- * are invoked. To do so, add a regular
+ * do, the result of the method invocation is sent as a new event. If the
+ * return type is either an array or a collection, each element is sent as
+ * a new event.
+ *
+ * <p>It is also possible to define the order in which listeners for a
+ * certain event are invoked. To do so, add a regular
  * {@link org.springframework.core.annotation.Order @Order} annotation
  * alongside this annotation.
  *
