@@ -102,40 +102,10 @@ import java.lang.annotation.Target;
  * }</pre>
  *
  * <h3>Spring Annotations Supporting Attribute Aliases</h3>
- * <p>As of Spring Framework 4.2, the following annotations within core
- * Spring have been updated to use {@code @AliasFor} to configure their
- * internal attribute aliases.
- * <ul>
- * <li>{@link org.springframework.cache.annotation.Cacheable}</li>
- * <li>{@link org.springframework.cache.annotation.CacheEvict}</li>
- * <li>{@link org.springframework.cache.annotation.CachePut}</li>
- * <li>{@link org.springframework.context.annotation.ComponentScan}</li>
- * <li>{@link org.springframework.context.annotation.ComponentScan.Filter}</li>
- * <li>{@link org.springframework.context.annotation.ImportResource}</li>
- * <li>{@link org.springframework.context.annotation.Scope}</li>
- * <li>{@link org.springframework.jmx.export.annotation.ManagedResource}</li>
- * <li>{@link org.springframework.messaging.handler.annotation.Header}</li>
- * <li>{@link org.springframework.messaging.handler.annotation.Payload}</li>
- * <li>{@link org.springframework.messaging.simp.annotation.SendToUser}</li>
- * <li>{@link org.springframework.test.context.ActiveProfiles}</li>
- * <li>{@link org.springframework.test.context.ContextConfiguration}</li>
- * <li>{@link org.springframework.test.context.jdbc.Sql}</li>
- * <li>{@link org.springframework.test.context.TestExecutionListeners}</li>
- * <li>{@link org.springframework.test.context.TestPropertySource}</li>
- * <li>{@link org.springframework.transaction.annotation.Transactional}</li>
- * <li>{@link org.springframework.web.bind.annotation.ControllerAdvice}</li>
- * <li>{@link org.springframework.web.bind.annotation.CookieValue}</li>
- * <li>{@link org.springframework.web.bind.annotation.CrossOrigin}</li>
- * <li>{@link org.springframework.web.bind.annotation.MatrixVariable}</li>
- * <li>{@link org.springframework.web.bind.annotation.RequestHeader}</li>
- * <li>{@link org.springframework.web.bind.annotation.RequestMapping}</li>
- * <li>{@link org.springframework.web.bind.annotation.RequestParam}</li>
- * <li>{@link org.springframework.web.bind.annotation.RequestPart}</li>
- * <li>{@link org.springframework.web.bind.annotation.ResponseStatus}</li>
- * <li>{@link org.springframework.web.bind.annotation.SessionAttributes}</li>
- * <li>{@link org.springframework.web.portlet.bind.annotation.ActionMapping}</li>
- * <li>{@link org.springframework.web.portlet.bind.annotation.RenderMapping}</li>
- * </ul>
+ * <p>As of Spring Framework 4.2, several annotations within core Spring
+ * have been updated to use {@code @AliasFor} to configure their internal
+ * attribute aliases. Consult the Javadoc for individual annotations as well
+ * as the reference manual for details.
  *
  * @author Sam Brannen
  * @since 4.2
