@@ -23,6 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.AliasFor;
 
 /**
  * An {@link EventListener} that is invoked according to a {@link TransactionPhase}.
@@ -54,6 +55,21 @@ public @interface TransactionalEventListener {
 	 * Specify if the event should be processed if no transaction is running.
 	 */
 	boolean fallbackExecution() default false;
+
+	/**
+	 * Alias for {@link #classes()}.
+	 */
+	@AliasFor(attribute = "classes")
+	Class<?>[] value() default {};
+
+	/**
+	 * The event classes that this listener handles. When this attribute is specified
+	 * with one value, the method parameter may or may not be specified. When this
+	 * attribute is specified with more than one value, the method must not have a
+	 * parameter.
+	 */
+	@AliasFor(attribute = "value")
+	Class<?>[] classes() default {};
 
 	/**
 	 * Spring Expression Language (SpEL) attribute used for making the event

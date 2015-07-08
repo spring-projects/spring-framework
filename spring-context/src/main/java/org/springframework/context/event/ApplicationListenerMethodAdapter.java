@@ -20,7 +20,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.UndeclaredThrowableException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -66,7 +69,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 
 	private final Method bridgedMethod;
 
-	private final ResolvableType declaredEventType;
+	private final List<ResolvableType> declaredEventTypes;
 
 	private final AnnotatedElementKey methodKey;
 
@@ -76,12 +79,14 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 
 	private String condition;
 
+	private EventListener eventListener;
+
 	public ApplicationListenerMethodAdapter(String beanName, Class<?> targetClass, Method method) {
 		this.beanName = beanName;
 		this.method = method;
 		this.targetClass = targetClass;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
-		this.declaredEventType = resolveDeclaredEventType();
+		this.declaredEventTypes = resolveDeclaredEventTypes();
 		this.methodKey = new AnnotatedElementKey(this.method, this.targetClass);
 	}
 
@@ -122,19 +127,20 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	 * therefore the method should not be invoked at all for the specified event.
 	 */
 	protected Object[] resolveArguments(ApplicationEvent event) {
-		if (!ApplicationEvent.class.isAssignableFrom(this.declaredEventType.getRawClass())
+		ResolvableType declaredEventType = getResolvableType(event);
+		if (declaredEventType == null) {
+			return null;
+		}
+		if (this.method.getParameters().length == 0) {
+			return new Object[0];
+		}
+		if (!ApplicationEvent.class.isAssignableFrom(declaredEventType.getRawClass())
 				&& event instanceof PayloadApplicationEvent) {
-			PayloadApplicationEvent<?> payloadEvent = (PayloadApplicationEvent<?>) event;
-			ResolvableType payloadType =  payloadEvent.getResolvableType()
-					.as(PayloadApplicationEvent.class).getGeneric(0);
-			if (this.declaredEventType.isAssignableFrom(payloadType)) {
-				return new Object[] {payloadEvent.getPayload()};
-			}
+			return new Object[] {((PayloadApplicationEvent) event).getPayload()};
 		}
 		else {
 			return new Object[] {event};
 		}
-		return null;
 	}
 
 	protected void handleResult(Object result) {
@@ -178,14 +184,18 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 
 	@Override
 	public boolean supportsEventType(ResolvableType eventType) {
-		if (this.declaredEventType.isAssignableFrom(eventType)) {
-			return true;
+		for (ResolvableType declaredEventType : this.declaredEventTypes) {
+			if (declaredEventType.isAssignableFrom(eventType)) {
+				return true;
+			}
+			else if (PayloadApplicationEvent.class.isAssignableFrom(eventType.getRawClass())) {
+				ResolvableType payloadType = eventType.as(PayloadApplicationEvent.class).getGeneric();
+				if (declaredEventType.isAssignableFrom(payloadType)) {
+					return true;
+				}
+			}
 		}
-		else if (PayloadApplicationEvent.class.isAssignableFrom(eventType.getRawClass())) {
-			ResolvableType payloadType = eventType.as(PayloadApplicationEvent.class).getGeneric();
-			return eventType.hasUnresolvableGenerics() || this.declaredEventType.isAssignableFrom(payloadType);
-		}
-		return false;
+		return eventType.hasUnresolvableGenerics();
 	}
 
 	@Override
@@ -238,6 +248,13 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	protected Object getTargetBean() {
 		Assert.notNull(this.applicationContext, "ApplicationContext must no be null.");
 		return this.applicationContext.getBean(this.beanName);
+	}
+
+	protected EventListener getEventListener() {
+		if (this.eventListener == null) {
+			this.eventListener = AnnotatedElementUtils.findMergedAnnotation(this.method, EventListener.class);
+		}
+		return this.eventListener;
 	}
 
 	/**
@@ -305,13 +322,48 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	}
 
 
-	private ResolvableType resolveDeclaredEventType() {
+	private ResolvableType getResolvableType(ApplicationEvent event) {
+		ResolvableType payloadType = null;
+		if (event instanceof PayloadApplicationEvent) {
+			PayloadApplicationEvent<?> payloadEvent = (PayloadApplicationEvent<?>) event;
+			payloadType = payloadEvent.getResolvableType().as(
+					PayloadApplicationEvent.class).getGeneric(0);
+		}
+		for (ResolvableType declaredEventType : this.declaredEventTypes) {
+			if (!ApplicationEvent.class.isAssignableFrom(declaredEventType.getRawClass())
+					&& payloadType != null) {
+				if (declaredEventType.isAssignableFrom(payloadType)) {
+					return declaredEventType;
+				}
+			}
+			if (declaredEventType.getRawClass().isAssignableFrom(event.getClass())) {
+				return declaredEventType;
+			}
+		}
+		return null;
+	}
+
+	private List<ResolvableType> resolveDeclaredEventTypes() {
 		int count = this.method.getParameterTypes().length;
-		if (count != 1) {
-			throw new IllegalStateException("Only one parameter is allowed " +
+		if (count > 1) {
+			throw new IllegalStateException("Maximum one parameter is allowed " +
 					"for event listener method: " + method);
 		}
-		return ResolvableType.forMethodParameter(this.method, 0);
+		EventListener ann = getEventListener();
+		if (ann != null && ann.classes().length > 0) {
+			List<ResolvableType> types = new ArrayList<ResolvableType>();
+			for (Class<?> eventType : ann.classes()) {
+				types.add(ResolvableType.forClass(eventType));
+			}
+			return types;
+		}
+		else {
+			if (count == 0) {
+				throw new IllegalStateException("Event parameter is mandatory " +
+						"for event listener method: " + method);
+			}
+			return Collections.singletonList(ResolvableType.forMethodParameter(this.method, 0));
+		}
 	}
 
 	@Override

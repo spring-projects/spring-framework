@@ -114,6 +114,36 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 	}
 
 	@Test
+	public void listenerWithAnnotationValue() {
+		Method method = ReflectionUtils.findMethod(SampleEvents.class,
+				"handleStringAnnotationValue");
+		supportsEventType(true, method, createGenericEventType(String.class));
+	}
+
+	@Test
+	public void listenerWithAnnotationClasses() {
+		Method method = ReflectionUtils.findMethod(SampleEvents.class,
+				"handleStringAnnotationClasses");
+		supportsEventType(true, method, createGenericEventType(String.class));
+	}
+
+	@Test
+	public void listenerWithAnnotationValueAndParameter() {
+		Method method = ReflectionUtils.findMethod(SampleEvents.class,
+				"handleStringAnnotationValueAndParameter", String.class);
+		supportsEventType(true, method, createGenericEventType(String.class));
+	}
+
+	@Test
+	public void listenerWithSeveralTypes() {
+		Method method = ReflectionUtils.findMethod(SampleEvents.class,
+				"handleStringOrInteger");
+		supportsEventType(true, method, createGenericEventType(String.class));
+		supportsEventType(true, method, createGenericEventType(Integer.class));
+		supportsEventType(false, method, createGenericEventType(Double.class));
+	}
+
+	@Test
 	public void listenerWithTooManyParameters() {
 		Method method = ReflectionUtils.findMethod(SampleEvents.class,
 				"tooManyParameters", String.class, String.class);
@@ -126,6 +156,15 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 	public void listenerWithNoParameter() {
 		Method method = ReflectionUtils.findMethod(SampleEvents.class,
 				"noParameter");
+
+		thrown.expect(IllegalStateException.class);
+		createTestInstance(method);
+	}
+
+	@Test
+	public void listenerWithMoreThanOneParameter() {
+		Method method = ReflectionUtils.findMethod(SampleEvents.class,
+				"moreThanOneParameter", String.class, Integer.class);
 
 		thrown.expect(IllegalStateException.class);
 		createTestInstance(method);
@@ -250,6 +289,40 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 	}
 
 	@Test
+	public void invokeListenerWithAnnotationValue() {
+		Method method = ReflectionUtils.findMethod(SampleEvents.class,
+				"handleStringAnnotationClasses");
+		PayloadApplicationEvent<String> event = new PayloadApplicationEvent<>(this, "test");
+		invokeListener(method, event);
+		verify(this.sampleEvents, times(1)).handleStringAnnotationClasses();
+	}
+
+	@Test
+	public void invokeListenerWithAnnotationValueAndParameter() {
+		Method method = ReflectionUtils.findMethod(SampleEvents.class,
+				"handleStringAnnotationValueAndParameter", String.class);
+		PayloadApplicationEvent<String> event = new PayloadApplicationEvent<>(this, "test");
+		invokeListener(method, event);
+		verify(this.sampleEvents, times(1)).handleStringAnnotationValueAndParameter("test");
+	}
+
+	@Test
+	public void invokeListenerWithSeveralTypes() {
+		Method method = ReflectionUtils.findMethod(SampleEvents.class,
+				"handleStringOrInteger");
+		PayloadApplicationEvent<String> event = new PayloadApplicationEvent<>(this, "test");
+		invokeListener(method, event);
+		verify(this.sampleEvents, times(1)).handleStringOrInteger();
+		PayloadApplicationEvent<Integer> event2 = new PayloadApplicationEvent<>(this, 123);
+		invokeListener(method, event2);
+		verify(this.sampleEvents, times(2)).handleStringOrInteger();
+		PayloadApplicationEvent<Double> event3 = new PayloadApplicationEvent<>(this, 23.2);
+		invokeListener(method, event3);
+		verify(this.sampleEvents, times(2)).handleStringOrInteger();
+	}
+
+
+	@Test
 	public void beanInstanceRetrievedAtEveryInvocation() {
 		Method method = ReflectionUtils.findMethod(SampleEvents.class,
 				"handleGenericString", GenericTestEvent.class);
@@ -321,14 +394,32 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 		public void handleString(String payload) {
 		}
 
+		@EventListener(String.class)
+		public void handleStringAnnotationValue() {
+		}
+
+		@EventListener(classes = String.class)
+		public void handleStringAnnotationClasses() {
+		}
+
+		@EventListener(String.class)
+		public void handleStringAnnotationValueAndParameter(String payload) {
+		}
+
+		@EventListener({String.class, Integer.class})
+		public void handleStringOrInteger() {
+		}
+
+		@EventListener({String.class, Integer.class})
+		public void handleStringOrIntegerWithParam(String invalid) {
+		}
+
 		@EventListener
 		public void handleGenericStringPayload(EntityWrapper<String> event) {
-
 		}
 
 		@EventListener
 		public void handleGenericAnyPayload(EntityWrapper<?> event) {
-
 		}
 
 		@EventListener
@@ -337,6 +428,10 @@ public class ApplicationListenerMethodAdapterTests extends AbstractApplicationEv
 
 		@EventListener
 		public void noParameter() {
+		}
+
+		@EventListener
+		public void moreThanOneParameter(String foo, Integer bar) {
 		}
 
 		@EventListener

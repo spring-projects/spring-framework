@@ -25,7 +25,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.ApplicationListenerMethodAdapter;
 import org.springframework.context.event.EventListener;
 import org.springframework.context.event.GenericApplicationListener;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -80,8 +80,8 @@ class ApplicationListenerMethodTransactionalAdapter extends ApplicationListenerM
 	}
 
 	static TransactionalEventListener findAnnotation(Method method) {
-		TransactionalEventListener annotation = AnnotationUtils
-				.findAnnotation(method, TransactionalEventListener.class);
+		TransactionalEventListener annotation = AnnotatedElementUtils
+				.findMergedAnnotation(method, TransactionalEventListener.class);
 		if (annotation == null) {
 			throw new IllegalStateException("No TransactionalEventListener annotation found on '" + method + "'");
 		}

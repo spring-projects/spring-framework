@@ -7900,6 +7900,19 @@ As you can see above, the method signature actually _infer_ which even type it l
 also works for nested generics as long as the actual event resolves the generics parameter you
 would filter on.
 
+If your method should listen to several events or if you want to define it with no
+parameter at all, the event type(s) can also be specified on the annotation itself:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@EventListener({ContextStartedEvent.class, ContextRefreshedEvent.class})
+	public void handleContextStart() {
+
+	}
+----
+
+
 It is also possible to add additional runtime filtering via the `condition` attribute of the
 annotation that defines a <<expressions,`SpEL` expression>> that should match to actually invoke
 the method for a particular event.

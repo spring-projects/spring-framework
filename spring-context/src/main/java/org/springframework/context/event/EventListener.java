@@ -23,12 +23,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.context.ApplicationEvent;
+import org.springframework.core.annotation.AliasFor;
 
 /**
  * Annotation that marks a method to listen for application events. The
- * method should have one and only one parameter that reflects the event
- * type to listen to. Events can be {@link ApplicationEvent} instances
- * as well as arbitrary objects.
+ * method may have one (and only one) parameter that reflects the event
+ * type to listen to. Or this annotation may refer to the event type(s)
+ * using the {@link #classes()} attribute. Events can be {@link ApplicationEvent}
+ * instances as well as arbitrary objects.
  *
  * <p>Processing of {@code @EventListener} annotations is performed via
  * {@link EventListenerMethodProcessor} that is registered automatically
@@ -53,6 +55,21 @@ import org.springframework.context.ApplicationEvent;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface EventListener {
+
+	/**
+	 * Alias for {@link #classes()}.
+	 */
+	@AliasFor(attribute = "classes")
+	Class<?>[] value() default {};
+
+	/**
+	 * The event classes that this listener handles. When this attribute is specified
+	 * with one value, the method parameter may or may not be specified. When this
+	 * attribute is specified with more than one value, the method must not have a
+	 * parameter.
+	 */
+	@AliasFor(attribute = "value")
+	Class<?>[] classes() default {};
 
 	/**
 	 * Spring Expression Language (SpEL) attribute used for making the event
