@@ -28,15 +28,19 @@ import org.springframework.core.annotation.AliasFor;
 /**
  * Annotation that marks a method as a listener for application events.
  *
- * <p>The method must declare one (and only one) parameter that reflects the
- * event type to listen to. Alternatively, this annotation may refer to the
- * event type(s) using the {@link #classes} attribute. Events can be
- * {@link ApplicationEvent} instances as well as arbitrary objects.
+ * <p>If an annotated method supports a single event type, the method may
+ * declare a single parameter that reflects the event type to listen to. If
+ * an annotated method supports multiple event types, this annotation may
+ * refer to one or more supported event types using the {@code classes}
+ * attribute. See {@link #classes} for further details.
+ *
+ * <p>Events can be {@link ApplicationEvent} instances as well as arbitrary
+ * objects.
  *
  * <p>Processing of {@code @EventListener} annotations is performed via the
- * {@link EventListenerMethodProcessor} that is registered automatically
- * when using Java config or via the {@code <context:annotation-driven/>}
- * XML element.
+ * {@link EventListenerMethodProcessor} which is registered automatically
+ * when using Java config or manually via the {@code <context:annotation-driven/>}
+ * element when using XML config.
  *
  * <p>Annotated methods may have a non-{@code void} return type. When they
  * do, the result of the method invocation is sent as a new event. If the
@@ -69,9 +73,10 @@ public @interface EventListener {
 
 	/**
 	 * The event classes that this listener handles.
-	 * <p>When this attribute is specified with one value, the method parameter
-	 * may or may not be specified. When this attribute is specified with more
-	 * than one value, the method must not have a parameter.
+	 * <p>If this attribute is specified with a single value, the annotated
+	 * method may optionally accept a single parameter. However, if this
+	 * attribute is specified with multiple values, the annotated method
+	 * must <em>not</em> declare any parameters.
 	 */
 	@AliasFor(attribute = "value")
 	Class<?>[] classes() default {};
