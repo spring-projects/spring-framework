@@ -26,26 +26,28 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.core.annotation.AliasFor;
 
 /**
- * Annotation that marks a method to listen for application events. The
- * method may have one (and only one) parameter that reflects the event
- * type to listen to. Or this annotation may refer to the event type(s)
- * using the {@link #classes} attribute. Events can be {@link ApplicationEvent}
- * instances as well as arbitrary objects.
+ * Annotation that marks a method as a listener for application events.
  *
- * <p>Processing of {@code @EventListener} annotations is performed via
+ * <p>The method must declare one (and only one) parameter that reflects the
+ * event type to listen to. Alternatively, this annotation may refer to the
+ * event type(s) using the {@link #classes} attribute. Events can be
+ * {@link ApplicationEvent} instances as well as arbitrary objects.
+ *
+ * <p>Processing of {@code @EventListener} annotations is performed via the
  * {@link EventListenerMethodProcessor} that is registered automatically
  * when using Java config or via the {@code <context:annotation-driven/>}
  * XML element.
  *
  * <p>Annotated methods may have a non-{@code void} return type. When they
  * do, the result of the method invocation is sent as a new event. It is
- * also possible to defined the order in which listeners for a certain
- * event are invoked. To do so, add a regular {code @Order} annotation
+ * also possible to define the order in which listeners for a certain event
+ * are invoked. To do so, add a regular
+ * {@link org.springframework.core.annotation.Order @Order} annotation
  * alongside this annotation.
  *
  * <p>While it is possible to define any arbitrary exception types, checked
  * exceptions will be wrapped in a {@link java.lang.reflect.UndeclaredThrowableException}
- * as the caller only handles runtime exceptions.
+ * so that the caller only handles runtime exceptions.
  *
  * @author Stephane Nicoll
  * @since 4.2
