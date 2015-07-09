@@ -239,7 +239,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		handlerMapping.setOrder(0);
 		handlerMapping.setInterceptors(getInterceptors());
 		handlerMapping.setContentNegotiationManager(mvcContentNegotiationManager());
-		handlerMapping.setCorsConfiguration(getCorsConfigurations());
+		handlerMapping.setCorsConfigurations(getCorsConfigurations());
 
 		PathMatchConfigurer configurer = getPathMatchConfigurer();
 		if (configurer.isUseSuffixPatternMatch() != null) {
@@ -371,7 +371,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		handlerMapping.setPathMatcher(mvcPathMatcher());
 		handlerMapping.setUrlPathHelper(mvcUrlPathHelper());
 		handlerMapping.setInterceptors(getInterceptors());
-		handlerMapping.setCorsConfiguration(getCorsConfigurations());
+		handlerMapping.setCorsConfigurations(getCorsConfigurations());
 		return handlerMapping;
 	}
 
@@ -391,7 +391,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		BeanNameUrlHandlerMapping mapping = new BeanNameUrlHandlerMapping();
 		mapping.setOrder(2);
 		mapping.setInterceptors(getInterceptors());
-		mapping.setCorsConfiguration(getCorsConfigurations());
+		mapping.setCorsConfigurations(getCorsConfigurations());
 		return mapping;
 	}
 
@@ -411,7 +411,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			handlerMapping.setUrlPathHelper(mvcUrlPathHelper());
 			handlerMapping.setInterceptors(new HandlerInterceptor[] {
 					new ResourceUrlProviderExposingInterceptor(mvcResourceUrlProvider())});
-			handlerMapping.setCorsConfiguration(getCorsConfigurations());
+			handlerMapping.setCorsConfigurations(getCorsConfigurations());
 		}
 		else {
 			handlerMapping = new EmptyHandlerMapping();

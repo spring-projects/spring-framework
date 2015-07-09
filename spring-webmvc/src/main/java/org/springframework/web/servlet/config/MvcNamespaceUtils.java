@@ -119,8 +119,8 @@ abstract class MvcNamespaceUtils {
 			beanNameMappingDef.setSource(source);
 			beanNameMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			beanNameMappingDef.getPropertyValues().add("order", 2);	// consistent with WebMvcConfigurationSupport
-			RuntimeBeanReference corsConfigurationRef = MvcNamespaceUtils.registerCorsConfiguration(null, parserContext, source);
-			beanNameMappingDef.getPropertyValues().add("corsConfiguration", corsConfigurationRef);
+			RuntimeBeanReference corsConfigurationsRef = MvcNamespaceUtils.registerCorsConfigurations(null, parserContext, source);
+			beanNameMappingDef.getPropertyValues().add("corsConfigurations", corsConfigurationsRef);
 			parserContext.getRegistry().registerBeanDefinition(BEAN_NAME_URL_HANDLER_MAPPING_BEAN_NAME, beanNameMappingDef);
 			parserContext.registerComponent(new BeanComponentDefinition(beanNameMappingDef, BEAN_NAME_URL_HANDLER_MAPPING_BEAN_NAME));
 		}
@@ -160,20 +160,20 @@ abstract class MvcNamespaceUtils {
 	 * if a non-null CORS configuration is provided.
 	 * @return a RuntimeBeanReference to this {@code Map<String, CorsConfiguration>} instance
 	 */
-	public static RuntimeBeanReference registerCorsConfiguration(Map<String, CorsConfiguration> corsConfiguration, ParserContext parserContext, Object source) {
+	public static RuntimeBeanReference registerCorsConfigurations(Map<String, CorsConfiguration> corsConfigurations, ParserContext parserContext, Object source) {
 		if (!parserContext.getRegistry().containsBeanDefinition(CORS_CONFIGURATION_BEAN_NAME)) {
 			RootBeanDefinition corsConfigurationsDef = new RootBeanDefinition(LinkedHashMap.class);
 			corsConfigurationsDef.setSource(source);
 			corsConfigurationsDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-			if (corsConfiguration != null) {
-				corsConfigurationsDef.getConstructorArgumentValues().addIndexedArgumentValue(0, corsConfiguration);
+			if (corsConfigurations != null) {
+				corsConfigurationsDef.getConstructorArgumentValues().addIndexedArgumentValue(0, corsConfigurations);
 			}
 			parserContext.getReaderContext().getRegistry().registerBeanDefinition(CORS_CONFIGURATION_BEAN_NAME, corsConfigurationsDef);
 			parserContext.registerComponent(new BeanComponentDefinition(corsConfigurationsDef, CORS_CONFIGURATION_BEAN_NAME));
 		}
-		else if (corsConfiguration != null) {
+		else if (corsConfigurations != null) {
 			BeanDefinition corsConfigurationsDef = parserContext.getRegistry().getBeanDefinition(CORS_CONFIGURATION_BEAN_NAME);
-			corsConfigurationsDef.getConstructorArgumentValues().addIndexedArgumentValue(0, corsConfiguration);
+			corsConfigurationsDef.getConstructorArgumentValues().addIndexedArgumentValue(0, corsConfigurations);
 		}
 		return new RuntimeBeanReference(CORS_CONFIGURATION_BEAN_NAME);
 	}

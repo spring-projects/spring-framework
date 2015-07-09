@@ -113,7 +113,7 @@ public class CorsBeanDefinitionParser implements BeanDefinitionParser {
 			}
 		}
 
-		MvcNamespaceUtils.registerCorsConfiguration(corsConfigurations, parserContext, parserContext.extractSource(element));
+		MvcNamespaceUtils.registerCorsConfigurations(corsConfigurations, parserContext, parserContext.extractSource(element));
 		return null;
 	}
 

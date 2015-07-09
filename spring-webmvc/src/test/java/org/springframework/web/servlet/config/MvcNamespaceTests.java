@@ -875,7 +875,7 @@ public class MvcNamespaceTests {
 		for (String beanName : beanNames) {
 			AbstractHandlerMapping handlerMapping = (AbstractHandlerMapping)appContext.getBean(beanName);
 			assertNotNull(handlerMapping);
-			Map<String, CorsConfiguration> configs = handlerMapping.getCorsConfiguration();
+			Map<String, CorsConfiguration> configs = handlerMapping.getCorsConfigurations();
 			assertNotNull(configs);
 			assertEquals(1, configs.size());
 			CorsConfiguration config = configs.get("/**");
@@ -898,7 +898,7 @@ public class MvcNamespaceTests {
 		for (String beanName : beanNames) {
 			AbstractHandlerMapping handlerMapping = (AbstractHandlerMapping)appContext.getBean(beanName);
 			assertNotNull(handlerMapping);
-			Map<String, CorsConfiguration> configs = handlerMapping.getCorsConfiguration();
+			Map<String, CorsConfiguration> configs = handlerMapping.getCorsConfigurations();
 			assertNotNull(configs);
 			assertEquals(2, configs.size());
 			CorsConfiguration config = configs.get("/api/**");

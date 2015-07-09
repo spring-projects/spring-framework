@@ -127,8 +127,8 @@ class ViewControllerBeanDefinitionParser implements BeanDefinitionParser {
 		beanDef.getPropertyValues().add("order", "1");
 		beanDef.getPropertyValues().add("pathMatcher", MvcNamespaceUtils.registerPathMatcher(null, context, source));
 		beanDef.getPropertyValues().add("urlPathHelper", MvcNamespaceUtils.registerUrlPathHelper(null, context, source));
-		RuntimeBeanReference corsConfigurationRef = MvcNamespaceUtils.registerCorsConfiguration(null, context, source);
-		beanDef.getPropertyValues().add("corsConfiguration", corsConfigurationRef);
+		RuntimeBeanReference corsConfigurationsRef = MvcNamespaceUtils.registerCorsConfigurations(null, context, source);
+		beanDef.getPropertyValues().add("corsConfigurations", corsConfigurationsRef);
 
 		return beanDef;
 	}
