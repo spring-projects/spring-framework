@@ -1,4 +1,4 @@
-package org.springframework.rx.io;
+package org.springframework.reactive.io;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 import org.reactivestreams.Publisher;
 
-import org.springframework.rx.util.BlockingSignalQueue;
+import org.springframework.reactive.util.BlockingSignalQueue;
 
 /**
  * {@code OutputStream} implementation that stores all written bytes, to be retrieved

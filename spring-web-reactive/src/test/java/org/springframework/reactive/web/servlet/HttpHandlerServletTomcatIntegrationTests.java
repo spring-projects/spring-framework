@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.rx.web.servlet;
+package org.springframework.reactive.web.servlet;
 
 import java.io.File;
 
@@ -23,6 +23,8 @@ import org.apache.catalina.LifecycleException;
 import org.apache.catalina.startup.Tomcat;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+
+import org.springframework.reactive.web.EchoHandler;
 
 /**
  * @author Arjen Poutsma
@@ -50,6 +52,12 @@ public class HttpHandlerServletTomcatIntegrationTests extends AbstractHttpHandle
 	@AfterClass
 	public static void stopServer() throws LifecycleException {
 		tomcatServer.stop();
+	}
+
+	public static void main(String[] args) throws Exception {
+		startServer();
+		System.out.println("Tomcat running at: " + url());
+		tomcatServer.getServer().await();
 	}
 
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.rx.web.servlet;
+package org.springframework.reactive.web.servlet;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
@@ -23,7 +23,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
-import org.springframework.util.SocketUtils;
+import org.springframework.reactive.web.EchoHandler;
 
 /**
  * @author Arjen Poutsma
@@ -37,7 +37,6 @@ public class HttpHandlerServletJettyIntegrationTests
 	public static void startServer() throws Exception {
 		jettyServer = new Server();
 		ServerConnector connector = new ServerConnector(jettyServer);
-		port = SocketUtils.findAvailableTcpPort();
 		connector.setPort(port);
 		ServletContextHandler handler = new ServletContextHandler(jettyServer, "", false, false);
 		HttpHandlerServlet servlet = new HttpHandlerServlet();
@@ -51,6 +50,12 @@ public class HttpHandlerServletJettyIntegrationTests
 	@AfterClass
 	public static void stopServer() throws Exception {
 		jettyServer.stop();
+	}
+
+	public static void main(String[] args) throws Exception {
+		startServer();
+		System.out.println("Jetty running at: " + url());
+
 	}
 
 }

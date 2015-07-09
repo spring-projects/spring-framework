@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.rx.util;
+package org.springframework.reactive.util;
 
 import org.junit.Before;
 import org.junit.Test;

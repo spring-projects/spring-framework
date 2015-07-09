@@ -14,30 +14,31 @@
  * limitations under the License.
  */
 
-package org.springframework.rx.util;
-
-import org.springframework.util.Assert;
+package org.springframework.reactive.util;
 
 /**
  * @author Arjen Poutsma
  */
-class OnNext<T> implements Signal<T> {
+class OnComplete<T> implements Signal<T> {
 
-	private final T next;
+	public static final OnComplete INSTANCE = new OnComplete();
 
-	public OnNext(T next) {
-		Assert.notNull(next, "'next' must not be null");
-		this.next = next;
+	private OnComplete() {
 	}
 
 	@Override
-	public boolean isOnNext() {
+	public boolean isComplete() {
 		return true;
 	}
 
 	@Override
+	public boolean isOnNext() {
+		return false;
+	}
+
+	@Override
 	public T next() {
-		return next;
+		throw new IllegalStateException();
 	}
 
 	@Override
@@ -50,8 +51,4 @@ class OnNext<T> implements Signal<T> {
 		throw new IllegalStateException();
 	}
 
-	@Override
-	public boolean isComplete() {
-		return false;
-	}
 }

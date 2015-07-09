@@ -14,15 +14,17 @@
  * limitations under the License.
  */
 
-package org.springframework.rx.web.servlet;
+package org.springframework.reactive.web;
 
 import org.reactivestreams.Publisher;
 
 /**
  * @author Arjen Poutsma
  */
-public interface HttpHandler {
+public class EchoHandler implements HttpHandler {
 
-	Publisher<byte[]> handle(Publisher<byte[]> request);
-
+	@Override
+	public Publisher<byte[]> handle(Publisher<byte[]> request) {
+		return request;
+	}
 }

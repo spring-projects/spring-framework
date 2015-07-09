@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.rx.web.servlet;
+package org.springframework.reactive.web.servlet;
 
 import java.io.IOException;
 import java.nio.charset.Charset;

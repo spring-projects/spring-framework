@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package org.springframework.rx.web.servlet;
+package org.springframework.reactive.web.servlet;
 
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;
 
@@ -41,7 +40,7 @@ public class ResponseBodySubscriber implements WriteListener, Subscriber<byte[]>
 
 	private byte[] buffer;
 
-	private AtomicBoolean complete = new AtomicBoolean(false);
+	private volatile boolean subscriberComplete = false;
 
 	public ResponseBodySubscriber(AsyncContextSynchronizer synchronizer) {
 		this.synchronizer = synchronizer;
@@ -72,7 +71,9 @@ public class ResponseBodySubscriber implements WriteListener, Subscriber<byte[]>
 	public void onComplete() {
 		logger.debug("Complete buffer: " + (buffer == null));
 
-		if (complete.compareAndSet(false, true) && buffer == null) {
+		this.subscriberComplete = true;
+
+		if (buffer == null) {
 			this.synchronizer.writeComplete();
 		}
 	}
@@ -84,19 +85,21 @@ public class ResponseBodySubscriber implements WriteListener, Subscriber<byte[]>
 		boolean ready = output.isReady();
 		logger.debug("Output: " + ready + " buffer: " + (buffer == null));
 
-		if (this.buffer != null && ready) {
-			output.write(this.buffer);
-			this.buffer = null;
+		if (ready) {
+			if (this.buffer != null) {
+				output.write(this.buffer);
+				this.buffer = null;
 
-			if (!complete.get()) {
-				this.subscription.request(1);
+				if (!subscriberComplete) {
+					this.subscription.request(1);
+				}
+				else {
+					this.synchronizer.writeComplete();
+				}
 			}
 			else {
-				this.synchronizer.writeComplete();
+				this.subscription.request(1);
 			}
-		}
-		else if (this.buffer == null && ready) {
-			this.subscription.request(1);
 		}
 	}
 
@@ -105,7 +108,4 @@ public class ResponseBodySubscriber implements WriteListener, Subscriber<byte[]>
 		logger.error("ResponseBodySubscriber error", t);
 	}
 
-
-	private void complete() {
-	}
 }

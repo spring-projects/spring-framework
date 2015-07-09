@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.rx.web.servlet;
+package org.springframework.reactive.web;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,7 +51,6 @@ public class CountingHttpHandler implements HttpHandler {
 			@Override
 			public void onError(Throwable t) {
 				logger.error("CountingHttpHandler Error", t);
-				t.printStackTrace();
 			}
 
 			@Override

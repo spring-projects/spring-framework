@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.rx.web.servlet;
+package org.springframework.reactive.web.servlet;
 
 import java.io.IOException;
 import javax.servlet.AsyncContext;
@@ -25,6 +25,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.reactivestreams.Publisher;
+
+import org.springframework.reactive.web.HttpHandler;
 
 /**
  * @author Arjen Poutsma

@@ -14,41 +14,20 @@
  * limitations under the License.
  */
 
-package org.springframework.rx.util;
+package org.springframework.reactive.util;
 
 /**
  * @author Arjen Poutsma
  */
-class OnComplete<T> implements Signal<T> {
+interface Signal<T> {
 
-	public static final OnComplete INSTANCE = new OnComplete();
+	boolean isOnNext();
 
-	private OnComplete() {
-	}
+	T next();
 
-	@Override
-	public boolean isComplete() {
-		return true;
-	}
+	boolean isOnError();
 
-	@Override
-	public boolean isOnNext() {
-		return false;
-	}
+	Throwable error();
 
-	@Override
-	public T next() {
-		throw new IllegalStateException();
-	}
-
-	@Override
-	public boolean isOnError() {
-		return false;
-	}
-
-	@Override
-	public Throwable error() {
-		throw new IllegalStateException();
-	}
-
+	boolean isComplete();
 }

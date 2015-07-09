@@ -14,17 +14,44 @@
  * limitations under the License.
  */
 
-package org.springframework.rx.web.servlet;
+package org.springframework.reactive.util;
 
-import org.reactivestreams.Publisher;
+import org.springframework.util.Assert;
 
 /**
  * @author Arjen Poutsma
  */
-public class EchoHandler implements HttpHandler {
+class OnNext<T> implements Signal<T> {
+
+	private final T next;
+
+	public OnNext(T next) {
+		Assert.notNull(next, "'next' must not be null");
+		this.next = next;
+	}
 
 	@Override
-	public Publisher<byte[]> handle(Publisher<byte[]> request) {
-		return request;
+	public boolean isOnNext() {
+		return true;
+	}
+
+	@Override
+	public T next() {
+		return next;
+	}
+
+	@Override
+	public boolean isOnError() {
+		return false;
+	}
+
+	@Override
+	public Throwable error() {
+		throw new IllegalStateException();
+	}
+
+	@Override
+	public boolean isComplete() {
+		return false;
 	}
 }

@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-package org.springframework.rx.io;
+package org.springframework.reactive.io;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.rx.util.BlockingSignalQueue;
+import org.springframework.reactive.util.BlockingSignalQueue;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Arjen Poutsma

@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-package org.springframework.rx.util;
+package org.springframework.reactive.web;
+
+import org.reactivestreams.Publisher;
 
 /**
  * @author Arjen Poutsma
  */
-interface Signal<T> {
+public interface HttpHandler {
 
-	boolean isOnNext();
+	Publisher<byte[]> handle(Publisher<byte[]> request);
 
-	T next();
-
-	boolean isOnError();
-
-	Throwable error();
-
-	boolean isComplete();
 }

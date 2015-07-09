@@ -6,3 +6,5 @@ target
 /.idea/
 bin
 .gradle
+tomcat*
+build

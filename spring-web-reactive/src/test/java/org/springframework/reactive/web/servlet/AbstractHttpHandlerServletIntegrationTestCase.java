@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.rx.web.servlet;
+package org.springframework.reactive.web.servlet;
 
 import java.net.URI;
 import java.util.Random;
@@ -62,7 +62,7 @@ public abstract class AbstractHttpHandlerServletIntegrationTestCase {
 		assertEquals(body, response.getBody());
 	}
 
-	private static String url() {
+	protected static String url() {
 		return "http://localhost:" + port + "/rx";
 	}
 
