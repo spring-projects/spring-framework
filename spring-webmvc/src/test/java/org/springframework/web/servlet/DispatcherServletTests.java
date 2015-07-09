@@ -17,6 +17,7 @@
 package org.springframework.web.servlet;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Locale;
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
@@ -48,6 +49,7 @@ import org.springframework.web.context.ServletContextAwareBean;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.StandardServletEnvironment;
 import org.springframework.web.context.support.StaticWebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
@@ -114,6 +116,7 @@ public class DispatcherServletTests extends TestCase {
 				simpleDispatcherServlet.getServletContextAttributeName()));
 		assertTrue("Context published", simpleDispatcherServlet.getWebApplicationContext() ==
 				getServletContext().getAttribute(FrameworkServlet.SERVLET_CONTEXT_PREFIX + "simple"));
+		assertEquals("Context registered using WebApplicationUtils", Arrays.asList(simpleDispatcherServlet.getWebApplicationContext()), WebApplicationContextUtils.getRegisteredWebApplicationContexts(getServletContext()));
 
 		assertTrue("Correct namespace", "test".equals(complexDispatcherServlet.getNamespace()));
 		assertTrue("Correct attribute", (FrameworkServlet.SERVLET_CONTEXT_PREFIX + "complex").equals(

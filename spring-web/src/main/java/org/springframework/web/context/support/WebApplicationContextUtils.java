@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,12 @@
 package org.springframework.web.context.support;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
@@ -55,6 +58,7 @@ import org.springframework.web.context.request.WebRequest;
  * This helper class is just the most generic way to access the root context.
  *
  * @author Juergen Hoeller
+ * @author Rob Winch
  * @see org.springframework.web.context.ContextLoader
  * @see org.springframework.web.servlet.FrameworkServlet
  * @see org.springframework.web.servlet.DispatcherServlet
@@ -62,6 +66,13 @@ import org.springframework.web.context.request.WebRequest;
  * @see org.springframework.web.jsf.el.SpringBeanFacesELResolver
  */
 public abstract class WebApplicationContextUtils {
+
+	/**
+	 * The attribute that all attribute names for all registered WebApplicationContext is
+	 * stored. This only includes WebApplicationContext that are stored using
+	 * registerWebApplicationContext
+	 */
+	private static final String APPLICATION_CONTEXT_ATTRIBUTES_ATTRIBUTE = WebApplicationContextUtils.class.getName().concat(".APPLICATION_CONTEXT_ATTRIBUTES_ATTRIBUTE");
 
 	private static final boolean jsfPresent =
 			ClassUtils.isPresent("javax.faces.context.FacesContext", RequestContextHolder.class.getClassLoader());
@@ -125,6 +136,63 @@ public abstract class WebApplicationContextUtils {
 		return (WebApplicationContext) attr;
 	}
 
+	/**
+	 * Register a custom {@link WebApplicationContext} for this web app.
+	 * @param sc ServletContext to find the web application context for
+	 * @param attrName the name of the ServletContext attribute to use
+	 * @param context the desired WebApplicationContext to store
+	 * @since 4.2
+	 */
+	public static void registerWebApplicationContext(ServletContext sc, String attrName, WebApplicationContext context) {
+		Assert.notNull(sc, "ServletContext must not be null");
+		Assert.notNull(attrName, "attrName must not be null");
+		Assert.notNull(context, "WebApplicationContext must not be null");
+
+		sc.setAttribute(attrName, context);
+
+		@SuppressWarnings("unchecked")
+		LinkedHashSet<String> attrNames = (LinkedHashSet<String>) sc.getAttribute(APPLICATION_CONTEXT_ATTRIBUTES_ATTRIBUTE);
+		if (attrNames == null) {
+			attrNames = new LinkedHashSet<String>();
+		}
+
+		attrNames.add(attrName);
+		sc.setAttribute(APPLICATION_CONTEXT_ATTRIBUTES_ATTRIBUTE, attrNames);
+	}
+
+	/**
+	 * Gets all the known {@link WebApplicationContext} for this web app. The order is the
+	 * root context (if specified) followed by any context registered using
+	 * registerWebApplicationContext in the order they were registered.
+	 *
+	 * @param sc ServletContext to find the web application context for. Cannot be null.
+	 * @return the known {@link WebApplicationContext} for this web app. Cannot be null,
+	 * but may be empty.
+	 * @since 4.2
+	 */
+	public static List<WebApplicationContext> getRegisteredWebApplicationContexts(ServletContext sc) {
+		Assert.notNull(sc, "ServletContext must not be null");
+
+		List<WebApplicationContext> result = new ArrayList<WebApplicationContext>();
+
+		WebApplicationContext root = getWebApplicationContext(sc);
+		if (root != null) {
+			result.add(root);
+		}
+
+		@SuppressWarnings("unchecked")
+		LinkedHashSet<String> attrNames = (LinkedHashSet<String>) sc.getAttribute(APPLICATION_CONTEXT_ATTRIBUTES_ATTRIBUTE);
+		if (attrNames == null) {
+			return result;
+		}
+
+		for (String attrName : attrNames) {
+			WebApplicationContext context = getWebApplicationContext(sc, attrName);
+			result.add(context);
+		}
+
+		return result;
+	}
 
 	/**
 	 * Register web-specific scopes ("request", "session", "globalSession")
