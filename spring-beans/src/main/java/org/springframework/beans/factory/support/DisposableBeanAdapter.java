@@ -177,8 +177,8 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	/**
 	 * If the current value of the given beanDefinition's "destroyMethodName" property is
 	 * {@link AbstractBeanDefinition#INFER_METHOD}, then attempt to infer a destroy method.
-	 * Candidate methods are currently limited to public, no-arg methods named "close"
-	 * (whether declared locally or inherited). The given BeanDefinition's
+	 * Candidate methods are currently limited to public, no-arg methods named "close" or
+	 * "shutdown" (whether declared locally or inherited). The given BeanDefinition's
 	 * "destroyMethodName" is updated to be null if no such method is found, otherwise set
 	 * to the name of the inferred method. This constant serves as the default for the
 	 * {@code @Bean#destroyMethod} attribute and the value of the constant may also be
