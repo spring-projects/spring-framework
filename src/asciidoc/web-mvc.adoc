@@ -156,9 +156,8 @@ in the following diagram. The pattern-savvy reader will recognize that the
 `DispatcherServlet` is an expression of the "Front Controller" design pattern (this is a
 pattern that Spring Web MVC shares with many other leading web frameworks).
 
+.The request processing workflow in Spring Web MVC (high level)
 image::images/mvc.png[width=400]
-
-The request processing workflow in Spring Web MVC (high level)
 
 The `DispatcherServlet` is an actual `Servlet` (it inherits from the `HttpServlet` base
 class), and as such is declared in the `web.xml` of your web application. You need to
@@ -221,8 +220,8 @@ scoped. In the Web MVC framework, each `DispatcherServlet` has its own
 `WebApplicationContext`. These inherited beans can be overridden in the servlet-specific
 scope, and you can define new scope-specific beans local to a given Servlet instance.
 
-.Context hierarchy in Spring Web MVC
-image::images/mvc-contexts.gif[width=400]
+.Typical context hierarchy in Spring Web MVC
+image::images/mvc-context-hierarchy.png[width=400]
 
 Upon initialization of a `DispatcherServlet`, Spring MVC looks for a file named
 __[servlet-name]-servlet.xml__ in the `WEB-INF` directory of your web application and
@@ -252,8 +251,13 @@ With the above Servlet configuration in place, you will need to have a file call
 Spring Web MVC-specific components (beans). You can change the exact location of this
 configuration file through a Servlet initialization parameter (see below for details).
 
-It is also possible to have just one root context for single DispatcherServlet scenarios
-by setting an empty contextConfigLocation servlet init parameter, as shown below:
+It is also possible to have just one root context for single DispatcherServlet scenarios.
+
+.Single root context in Spring Web MVC
+image::images/mvc-root-context.png[width=400]
+
+This can be configured by setting an empty contextConfigLocation servlet init parameter,
+as shown below:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
