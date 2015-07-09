@@ -991,8 +991,15 @@ The following annotations are __only__ supported when used in conjunction with t
 
 Indicates that the annotated test is enabled for a specific testing environment. If the
 configured `ProfileValueSource` returns a matching `value` for the provided `name`, the
-test is enabled. This annotation can be applied to an entire class or to individual
-methods. Class-level usage overrides method-level usage.
+test is enabled. Otherwise, the test will be disabled and effectively _ignored_.
+
+`@IfProfileValue` can be applied at the class level, the method level, or both.
+Class-level usage of `@IfProfileValue` takes precedence over method-level usage for any
+methods within that class or its subclasses. Specifically, a test is enabled if it is
+enabled both at the class level _and_ at the method level; the absence of
+`@IfProfileValue` means the test is implicitly enabled. This is analogous to the
+semantics of JUnit's `@Ignore` annotation, except that the presence of `@Ignore` always
+disables a test.
 
 +
 
