@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.util.NumberUtils;
  * and converted into the specified target type.
  *
  * @author Juergen Hoeller
+ * @author Rob Winch
  * @since 1.2
  * @see JdbcTemplate#queryForList(String, Class)
  * @see JdbcTemplate#queryForObject(String, Class)
@@ -168,7 +169,7 @@ public class SingleColumnRowMapper<T> implements RowMapper<T> {
 		if (String.class == requiredType) {
 			return value.toString();
 		}
-		else if (Number.class.isAssignableFrom(requiredType)) {
+		else if (Number.class.isAssignableFrom(requiredType) || requiredType.isPrimitive()) {
 			if (value instanceof Number) {
 				// Convert original Number to target Number class.
 				return NumberUtils.convertNumberToTargetClass(((Number) value), (Class<Number>) requiredType);

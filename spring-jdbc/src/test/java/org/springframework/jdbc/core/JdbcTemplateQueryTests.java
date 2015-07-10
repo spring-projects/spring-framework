@@ -41,6 +41,7 @@ import static org.mockito.BDDMockito.*;
 /**
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author Rob Winch
  * @since 19.12.2004
  */
 public class JdbcTemplateQueryTests {
@@ -226,11 +227,33 @@ public class JdbcTemplateQueryTests {
 	}
 
 	@Test
+	public void testQueryForIntPrimitive() throws Exception {
+		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
+		given(this.resultSet.next()).willReturn(true, false);
+		given(this.resultSet.getInt(1)).willReturn(22);
+		int i = this.template.queryForObject(sql,int.class);
+		assertEquals("Return of an int", 22, i);
+		verify(this.resultSet).close();
+		verify(this.statement).close();
+	}
+
+	@Test
 	public void testQueryForLong() throws Exception {
 		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
 		given(this.resultSet.next()).willReturn(true, false);
 		given(this.resultSet.getLong(1)).willReturn(87L);
 		long l = this.template.queryForObject(sql, Long.class).longValue();
+		assertEquals("Return of a long", 87, l);
+		verify(this.resultSet).close();
+		verify(this.statement).close();
+	}
+
+	@Test
+	public void testQueryForLongPrimitive() throws Exception {
+		String sql = "SELECT AGE FROM CUSTMR WHERE ID = 3";
+		given(this.resultSet.next()).willReturn(true, false);
+		given(this.resultSet.getLong(1)).willReturn(87L);
+		long l = this.template.queryForObject(sql, long.class);
 		assertEquals("Return of a long", 87, l);
 		verify(this.resultSet).close();
 		verify(this.statement).close();
