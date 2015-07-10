@@ -39,7 +39,7 @@ import org.springframework.core.annotation.AliasFor;
 @Documented
 public @interface CrossOrigin {
 
-	String[] DEFAULT_ORIGIN = { "*" };
+	String[] DEFAULT_ORIGINS = { "*" };
 
 	String[] DEFAULT_ALLOWED_HEADERS = { "*" };
 

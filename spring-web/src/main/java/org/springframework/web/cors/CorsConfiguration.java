@@ -42,11 +42,6 @@ public class CorsConfiguration {
 	 */
 	public static final String ALL = "*";
 
-	/**
-	 * Default maximum age (30 minutes).
-	 */
-	public static final Long DEFAULT_MAX_AGE = Long.valueOf(1800);
-
 	private List<String> allowedOrigins;
 
 	private List<String> allowedMethods;
