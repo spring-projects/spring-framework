@@ -32,6 +32,7 @@ import java.util.Set;
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Rob Winch
  * @since 1.1.2
  */
 public abstract class NumberUtils {
@@ -66,7 +67,7 @@ public abstract class NumberUtils {
 	 * @param targetClass the target class to convert to
 	 * @return the converted number
 	 * @throws IllegalArgumentException if the target class is not supported
-	 * (i.e. not a standard Number subclass as included in the JDK)
+	 * (i.e. not a standard Number subclass or respective primitive as included in the JDK)
 	 * @see java.lang.Byte
 	 * @see java.lang.Short
 	 * @see java.lang.Integer
@@ -86,28 +87,28 @@ public abstract class NumberUtils {
 		if (targetClass.isInstance(number)) {
 			return (T) number;
 		}
-		else if (Byte.class == targetClass) {
+		else if (Byte.class == targetClass || byte.class == targetClass) {
 			long value = number.longValue();
 			if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) {
 				raiseOverflowException(number, targetClass);
 			}
 			return (T) new Byte(number.byteValue());
 		}
-		else if (Short.class == targetClass) {
+		else if (Short.class == targetClass || short.class == targetClass) {
 			long value = number.longValue();
 			if (value < Short.MIN_VALUE || value > Short.MAX_VALUE) {
 				raiseOverflowException(number, targetClass);
 			}
 			return (T) new Short(number.shortValue());
 		}
-		else if (Integer.class == targetClass) {
+		else if (Integer.class == targetClass || int.class == targetClass) {
 			long value = number.longValue();
 			if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
 				raiseOverflowException(number, targetClass);
 			}
 			return (T) new Integer(number.intValue());
 		}
-		else if (Long.class == targetClass) {
+		else if (Long.class == targetClass || long.class == targetClass) {
 			BigInteger bigInt = null;
 			if (number instanceof BigInteger) {
 				bigInt = (BigInteger) number;
@@ -131,10 +132,10 @@ public abstract class NumberUtils {
 				return (T) BigInteger.valueOf(number.longValue());
 			}
 		}
-		else if (Float.class == targetClass) {
+		else if (Float.class == targetClass || float.class == targetClass) {
 			return (T) new Float(number.floatValue());
 		}
-		else if (Double.class == targetClass) {
+		else if (Double.class == targetClass || double.class == targetClass) {
 			return (T) new Double(number.doubleValue());
 		}
 		else if (BigDecimal.class == targetClass) {

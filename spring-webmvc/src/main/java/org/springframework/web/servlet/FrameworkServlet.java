@@ -128,6 +128,7 @@ import org.springframework.web.util.WebUtils;
  * @author Chris Beams
  * @author Rossen Stoyanchev
  * @author Phillip Webb
+ * @author Rob Winch
  * @see #doService
  * @see #setContextClass
  * @see #setContextConfigLocation
@@ -562,7 +563,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		if (this.publishContext) {
 			// Publish the context as a servlet context attribute.
 			String attrName = getServletContextAttributeName();
-			getServletContext().setAttribute(attrName, wac);
+			WebApplicationContextUtils.registerWebApplicationContext(getServletContext(), attrName, wac);
 			if (this.logger.isDebugEnabled()) {
 				this.logger.debug("Published WebApplicationContext of servlet '" + getServletName() +
 						"' as ServletContext attribute with name [" + attrName + "]");

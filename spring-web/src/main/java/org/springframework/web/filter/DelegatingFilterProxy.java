@@ -17,6 +17,7 @@
 package org.springframework.web.filter;
 
 import java.io.IOException;
+import java.util.List;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -66,6 +67,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author Chris Beams
+ * @author Rob Winch
  * @since 1.2
  * @see #setTargetBeanName
  * @see #setTargetFilterLifecycle
@@ -275,7 +277,9 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 	 * Otherwise, attempt to retrieve a {@code WebApplicationContext} from the
 	 * {@code ServletContext} attribute with the {@linkplain #setContextAttribute
 	 * configured name} if set. Otherwise look up a {@code WebApplicationContext} under
-	 * the well-known "root" application context attribute. The
+	 * the well-known "root" application context attribute. If no "root" application
+	 * context exists or the bean name is undefined in the "root", then the first "registered"
+	 * application context that contains the bean name is used. The
 	 * {@code WebApplicationContext} must have already been loaded and stored in the
 	 * {@code ServletContext} before this filter gets initialized (or invoked).
 	 * <p>Subclasses may override this method to provide a different
@@ -301,9 +305,14 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 		if (attrName != null) {
 			return WebApplicationContextUtils.getWebApplicationContext(getServletContext(), attrName);
 		}
-		else {
-			return WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+
+		List<WebApplicationContext> registered = WebApplicationContextUtils.getRegisteredWebApplicationContexts(getServletContext());
+		for (WebApplicationContext context : registered) {
+			if (context.containsBean(targetBeanName)) {
+				return context;
+			}
 		}
+		return null;
 	}
 
 	/**

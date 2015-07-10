@@ -525,6 +525,8 @@ public @interface MyTestConfig {
 * When using GSON or Jackson 2.6+, the handler method return type is used to improve
   serialization of parameterized types like `List<Foo>`.
 * Default JSON prefix has been changed from "{} && " to the safer ")]}', " one.
+* `DelegatingFilterProxy` will (by default) try additional "registered" (i.e. DispatcherServlet)
+  `WebApplicationContext` if the bean name is not found in the "root" context.
 
 === WebSocket Messaging Improvements
 

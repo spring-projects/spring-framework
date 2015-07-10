@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import static org.junit.Assert.*;
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Rob Winch
  */
 public class NumberUtilsTests {
 
@@ -412,6 +413,59 @@ public class NumberUtilsTests {
 		assertEquals(Long.valueOf(Byte.MAX_VALUE), NumberUtils.convertNumberToTargetClass(Byte.valueOf((byte) (Byte.MIN_VALUE - 1)), Long.class));
 	}
 
+	@Test
+	public void testNumberToBytePrimitive() {
+		assertEquals((byte) Byte.valueOf((byte) 1), (byte) NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(1), byte.class));
+		assertEquals((byte) Byte.valueOf((byte) 1), (byte) NumberUtils.convertNumberToTargetClass(Long.valueOf(1L), byte.class));
+		assertEquals((byte) Byte.valueOf((byte) 1), (byte) NumberUtils.convertNumberToTargetClass(Integer.valueOf(1), byte.class));
+		assertEquals((byte) Byte.valueOf((byte) 1), (byte) NumberUtils.convertNumberToTargetClass(Short.valueOf((short) 1), byte.class));
+		assertEquals((byte) Byte.valueOf((byte) 1), (byte) NumberUtils.convertNumberToTargetClass(Byte.valueOf((byte) 1), byte.class));
+	}
+
+	@Test
+	public void testNumberToShortPrimitive() {
+		assertEquals((short) 1, (short) NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(1), short.class));
+		assertEquals((short) 1, (short) NumberUtils.convertNumberToTargetClass(Long.valueOf(1L), short.class));
+		assertEquals((short) 1, (short) NumberUtils.convertNumberToTargetClass(Integer.valueOf(1), short.class));
+		assertEquals((short) 1, (short) NumberUtils.convertNumberToTargetClass(Short.valueOf((short) 1), short.class));
+		assertEquals((short) 1, (short) NumberUtils.convertNumberToTargetClass(Byte.valueOf((byte) 1), short.class));
+	}
+
+	@Test
+	public void testNumberToIntPrimitive() {
+		assertEquals((int) 1, (int) NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(1), int.class));
+		assertEquals((int) 1, (int) NumberUtils.convertNumberToTargetClass(Long.valueOf(1L), int.class));
+		assertEquals((int) 1, (int) NumberUtils.convertNumberToTargetClass(Integer.valueOf(1), int.class));
+		assertEquals((int) 1, (int) NumberUtils.convertNumberToTargetClass(Short.valueOf((short) 1), int.class));
+		assertEquals((int) 1, (int) NumberUtils.convertNumberToTargetClass(Byte.valueOf((byte) 1), int.class));
+	}
+
+	@Test
+	public void testNumberToLongPrimitive() {
+		assertEquals(1L, (long) NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(1), long.class));
+		assertEquals(1L, (long) NumberUtils.convertNumberToTargetClass(Long.valueOf(1L), long.class));
+		assertEquals(1L, (long) NumberUtils.convertNumberToTargetClass(Integer.valueOf(1), long.class));
+		assertEquals(1L, (long) NumberUtils.convertNumberToTargetClass(Short.valueOf((short) 1), long.class));
+		assertEquals(1L, (long) NumberUtils.convertNumberToTargetClass(Byte.valueOf((byte) 1), long.class));
+	}
+
+	@Test
+	public void testNumberToFloatPrimitive() {
+		assertEquals((float) 1, (float) NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(1), float.class), 0);
+		assertEquals((float) 1, (float) NumberUtils.convertNumberToTargetClass(Long.valueOf(1L), float.class), 0);
+		assertEquals((float) 1, (float) NumberUtils.convertNumberToTargetClass(Integer.valueOf(1), float.class), 0);
+		assertEquals((float) 1, (float) NumberUtils.convertNumberToTargetClass(Short.valueOf((short) 1), float.class), 0);
+		assertEquals((float) 1, (float) NumberUtils.convertNumberToTargetClass(Byte.valueOf((byte) 1), float.class), 0);
+	}
+
+	@Test
+	public void testNumberToDoublePrimitive() {
+		assertEquals((double) 1, (double) NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(1), double.class), 0);
+		assertEquals((double) 1, (double) NumberUtils.convertNumberToTargetClass(Long.valueOf(1L), double.class), 0);
+		assertEquals((double) 1, (double) NumberUtils.convertNumberToTargetClass(Integer.valueOf(1), double.class), 0);
+		assertEquals((double) 1, (double) NumberUtils.convertNumberToTargetClass(Short.valueOf((short) 1), double.class), 0);
+		assertEquals((double) 1, (double) NumberUtils.convertNumberToTargetClass(Byte.valueOf((byte) 1), double.class), 0);
+	}
 
 	private void assertLongEquals(String aLong) {
 		assertEquals("Long did not parse", Long.MAX_VALUE, NumberUtils.parseNumber(aLong, Long.class).longValue());
