@@ -85,6 +85,19 @@ public class ScriptUtilsUnitTests {
 			statements.get(0));
 	}
 
+	@Test
+	public void splitScriptWithQuoteInsideDoubleQuote() throws Exception {
+		String statement1 = "select '1' as \"one'quote\" from dual";
+		String statement2 = "select '2' as \"one'quote\" from dual";
+		char delim = ';';
+		String script = statement1 + delim + statement2 + delim;
+		List<String> statements = new ArrayList<String>();
+		splitSqlScript(script, ';', statements);
+		assertEquals("wrong number of statements", 2, statements.size());
+		assertEquals("statement 1 not split correctly", statement1, statements.get(0));
+		assertEquals("statement 2 not split correctly", statement2, statements.get(1));
+	}
+
 	/**
 	 * See <a href="https://jira.spring.io/browse/SPR-11560">SPR-11560</a>
 	 */

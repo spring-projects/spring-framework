@@ -173,7 +173,8 @@ public abstract class ScriptUtils {
 		Assert.hasText(blockCommentEndDelimiter, "blockCommentEndDelimiter must not be null or empty");
 
 		StringBuilder sb = new StringBuilder();
-		boolean inLiteral = false;
+		boolean inQuote = false;
+		boolean inDoubleQuote = false;
 		boolean inEscape = false;
 		char[] content = script.toCharArray();
 		for (int i = 0; i < script.length(); i++) {
@@ -189,10 +190,12 @@ public abstract class ScriptUtils {
 				sb.append(c);
 				continue;
 			}
-			if (c == '\'') {
-				inLiteral = !inLiteral;
+			if (!inDoubleQuote && c == '\'') {
+				inQuote = !inQuote;
+			} else if (!inQuote && c == '"') {
+				inDoubleQuote = !inDoubleQuote;
 			}
-			if (!inLiteral) {
+			if (!inQuote && !inDoubleQuote) {
 				if (script.startsWith(separator, i)) {
 					// we've reached the end of the current statement
 					if (sb.length() > 0) {
