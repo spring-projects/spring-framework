@@ -789,13 +789,28 @@ public abstract class WebUtils {
 			return true;
 		}
 		else if (CollectionUtils.isEmpty(allowedOrigins)) {
-			UriComponents actualUrl = UriComponentsBuilder.fromHttpRequest(request).build();
-			UriComponents originUrl = UriComponentsBuilder.fromOriginHeader(origin).build();
-			return (actualUrl.getHost().equals(originUrl.getHost()) && getPort(actualUrl) == getPort(originUrl));
+			return isSameOrigin(request);
 		}
 		else {
 			return allowedOrigins.contains(origin);
 		}
+	}
+
+	/**
+	 * Check if the request is a same-origin one, based on {@code Origin}, {@code Host},
+	 * {@code Forwarded} and {@code X-Forwarded-Host} headers.
+	 * @return {@code true} if the request is a same-origin one, {@code false} in case
+	 * of cross-origin request.
+	 * @since 4.2
+	 */
+	public static boolean isSameOrigin(HttpRequest request) {
+		String origin = request.getHeaders().getOrigin();
+		if (origin == null) {
+			return true;
+		}
+		UriComponents actualUrl = UriComponentsBuilder.fromHttpRequest(request).build();
+		UriComponents originUrl = UriComponentsBuilder.fromOriginHeader(origin).build();
+		return (actualUrl.getHost().equals(originUrl.getHost()) && getPort(actualUrl) == getPort(originUrl));
 	}
 
 	private static int getPort(UriComponents component) {

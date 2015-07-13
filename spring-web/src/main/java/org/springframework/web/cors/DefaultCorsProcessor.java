@@ -35,6 +35,7 @@ import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Default implementation of {@link CorsProcessor}, as defined by the
@@ -42,7 +43,9 @@ import org.springframework.util.CollectionUtils;
  *
  * <p>Note that when input {@link CorsConfiguration} is {@code null}, this
  * implementation does not reject simple or actual requests outright but simply
- * avoid adding CORS headers to the response.
+ * avoid adding CORS headers to the response. CORS processing is also skipped
+ * if the response already contains CORS headers, or if the request is detected
+ * as a same-origin one.
  *
  * @author Sebastien Deleuze
  * @author Rossen Stoyanhcev
@@ -66,12 +69,16 @@ public class DefaultCorsProcessor implements CorsProcessor {
 		ServletServerHttpResponse serverResponse = new ServletServerHttpResponse(response);
 		ServletServerHttpRequest serverRequest = new ServletServerHttpRequest(request);
 
+		if (WebUtils.isSameOrigin(serverRequest)) {
+			logger.debug("Skip CORS processing, request is a same-origin one");
+			return true;
+		}
 		if (responseHasCors(serverResponse)) {
+			logger.debug("Skip CORS processing, response already contains \"Access-Control-Allow-Origin\" header");
 			return true;
 		}
 
 		boolean preFlightRequest = CorsUtils.isPreFlightRequest(request);
-
 		if (config == null) {
 			if (preFlightRequest) {
 				rejectRequest(serverResponse);
@@ -92,9 +99,6 @@ public class DefaultCorsProcessor implements CorsProcessor {
 		}
 		catch (NullPointerException npe) {
 			// SPR-11919 and https://issues.jboss.org/browse/WFLY-3474
-		}
-		if (hasAllowOrigin) {
-			logger.debug("Skip adding CORS headers, response already contains \"Access-Control-Allow-Origin\"");
 		}
 		return hasAllowOrigin;
 	}
