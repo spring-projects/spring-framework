@@ -92,7 +92,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 
 
 	/**
-	 * Create a new BeanPropertyRowMapper for bean-style configuration.
+	 * Create a new {@code BeanPropertyRowMapper} for bean-style configuration.
 	 * @see #setMappedClass
 	 * @see #setCheckFullyPopulated
 	 */
@@ -100,8 +100,8 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	}
 
 	/**
-	 * Create a new BeanPropertyRowMapper, accepting unpopulated properties
-	 * in the target bean.
+	 * Create a new {@code BeanPropertyRowMapper}, accepting unpopulated
+	 * properties in the target bean.
 	 * <p>Consider using the {@link #newInstance} factory method instead,
 	 * which allows for specifying the mapped type once only.
 	 * @param mappedClass the class that each row should be mapped to
@@ -111,7 +111,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	}
 
 	/**
-	 * Create a new BeanPropertyRowMapper.
+	 * Create a new {@code BeanPropertyRowMapper}.
 	 * @param mappedClass the class that each row should be mapped to
 	 * @param checkFullyPopulated whether we're strictly validating that
 	 * all bean properties have been mapped from corresponding database fields
@@ -326,14 +326,12 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 
 
 	/**
-	 * Static factory method to create a new BeanPropertyRowMapper
+	 * Static factory method to create a new {@code BeanPropertyRowMapper}
 	 * (with the mapped class specified only once).
 	 * @param mappedClass the class that each row should be mapped to
 	 */
 	public static <T> BeanPropertyRowMapper<T> newInstance(Class<T> mappedClass) {
-		BeanPropertyRowMapper<T> newInstance = new BeanPropertyRowMapper<T>();
-		newInstance.setMappedClass(mappedClass);
-		return newInstance;
+		return new BeanPropertyRowMapper<T>(mappedClass);
 	}
 
 }
