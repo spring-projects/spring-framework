@@ -17,8 +17,8 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.ArrayDeque;
+import java.util.Queue;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpResponse;
@@ -63,7 +63,7 @@ public class ResponseBodyEmitter {
 	private volatile Handler handler;
 
 	/* Cache for objects sent before handler is set. */
-	private final Map<Object, MediaType> initHandlerCache = new LinkedHashMap<Object, MediaType>(10);
+	private final Queue<PendingEvent> initHandlerCache = new ArrayDeque<>(10);
 
 	private volatile boolean complete;
 
@@ -113,11 +113,11 @@ public class ResponseBodyEmitter {
 	void initialize(Handler handler) throws IOException {
 		synchronized (this) {
 			this.handler = handler;
-			for (Map.Entry<Object, MediaType> entry : this.initHandlerCache.entrySet()) {
+			while (!initHandlerCache.isEmpty()) {
+				final PendingEvent event = initHandlerCache.remove();
 				try {
-					sendInternal(entry.getKey(), entry.getValue());
-				}
-				catch (Throwable ex) {
+					sendInternal(event.getObject(), event.getType());
+				} catch (Throwable ex) {
 					return;
 				}
 			}
@@ -171,7 +171,7 @@ public class ResponseBodyEmitter {
 		if (this.handler == null) {
 			synchronized (this) {
 				if (this.handler == null) {
-					this.initHandlerCache.put(object, mediaType);
+					this.initHandlerCache.add(new PendingEvent(object, mediaType));
 					return;
 				}
 			}
@@ -261,6 +261,25 @@ public class ResponseBodyEmitter {
 		void onTimeout(Runnable callback);
 
 		void onCompletion(Runnable callback);
+	}
+
+	private static class PendingEvent {
+
+		private final Object object;
+		private final MediaType type;
+
+		public PendingEvent(Object object, MediaType type) {
+			this.object = object;
+			this.type = type;
+		}
+
+		public Object getObject() {
+			return object;
+		}
+
+		public MediaType getType() {
+			return type;
+		}
 	}
 
 }
