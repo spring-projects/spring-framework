@@ -31,7 +31,9 @@ import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link ResponseBodyEmitter}.
+ *
  * @author Rossen Stoyanchev
+ * @author Tomasz Nurkiewicz
  */
 public class ResponseBodyEmitterTests {
 
@@ -58,6 +60,19 @@ public class ResponseBodyEmitterTests {
 		this.emitter.initialize(this.handler);
 		verify(this.handler).send("foo", MediaType.TEXT_PLAIN);
 		verify(this.handler).send("bar", MediaType.TEXT_PLAIN);
+		verify(this.handler).complete();
+		verifyNoMoreInteractions(this.handler);
+	}
+
+	@Test
+	public void sendDuplicateBeforeHandlerInitialized() throws Exception {
+		this.emitter.send("foo", MediaType.TEXT_PLAIN);
+		this.emitter.send("foo", MediaType.TEXT_PLAIN);
+		this.emitter.complete();
+		verifyNoMoreInteractions(this.handler);
+
+		this.emitter.initialize(this.handler);
+		verify(this.handler, times(2)).send("foo", MediaType.TEXT_PLAIN);
 		verify(this.handler).complete();
 		verifyNoMoreInteractions(this.handler);
 	}
