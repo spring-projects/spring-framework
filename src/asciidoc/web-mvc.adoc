@@ -205,7 +205,7 @@ based equivalent of the above `web.xml` example:
 
 `WebApplicationInitializer` is an interface provided by Spring MVC that ensures your
 code-based configuration is detected and automatically used to initialize any Servlet 3
-container. An abstract base class implementation of this interace named
+container. An abstract base class implementation of this interface named
 `AbstractDispatcherServletInitializer` makes it even easier to register the
 `DispatcherServlet` by simply specifying its servlet mapping.
 See <<mvc-container-config,Code-based Servlet container initialization>> for more details.
@@ -4461,6 +4461,9 @@ mapped to the `DispatcherServlet`.
 The `isAsyncSupported` protected method of `AbstractDispatcherServletInitializer`
 provides a single place to enable async support on the `DispatcherServlet` and all
 filters mapped to it. By default this flag is set to `true`.
+
+Finally, if you need to further customize the `DispatcherServlet` itself, you can
+override the `createDispatcherServlet` method.
 
 
 

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -53,6 +53,7 @@ import org.springframework.web.servlet.DispatcherServlet;
  * @author Chris Beams
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 3.2
  */
 public abstract class AbstractDispatcherServletInitializer extends AbstractContextLoaderInitializer {
@@ -76,7 +77,8 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	 * from {@link #createServletApplicationContext()}, and mapping it to the patterns
 	 * returned from {@link #getServletMappings()}.
 	 * <p>Further customization can be achieved by overriding {@link
-	 * #customizeRegistration(ServletRegistration.Dynamic)}.
+	 * #customizeRegistration(ServletRegistration.Dynamic)} or
+	 * {@link #createDispatcherServlet(WebApplicationContext)}.
 	 * @param servletContext the context to register the servlet against
 	 */
 	protected void registerDispatcherServlet(ServletContext servletContext) {
@@ -88,7 +90,7 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 				"createServletApplicationContext() did not return an application " +
 				"context for servlet [" + servletName + "]");
 
-		DispatcherServlet dispatcherServlet = new DispatcherServlet(servletAppContext);
+		DispatcherServlet dispatcherServlet = createDispatcherServlet(servletAppContext);
 		dispatcherServlet.setContextInitializers(getServletApplicationContextInitializers());
 
 		ServletRegistration.Dynamic registration = servletContext.addServlet(servletName, dispatcherServlet);
@@ -128,6 +130,13 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	 * @see #registerDispatcherServlet(ServletContext)
 	 */
 	protected abstract WebApplicationContext createServletApplicationContext();
+
+	/**
+	 * Create a {@link DispatcherServlet} with the specified {@link WebApplicationContext}.
+	 */
+	protected DispatcherServlet createDispatcherServlet(WebApplicationContext servletAppContext) {
+		return new DispatcherServlet(servletAppContext);
+	}
 
 	/**
 	 * Specify application context initializers to be applied to the servlet-specific
