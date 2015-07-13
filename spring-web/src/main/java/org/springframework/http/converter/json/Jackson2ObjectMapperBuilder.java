@@ -674,17 +674,27 @@ public class Jackson2ObjectMapperBuilder {
 				// jackson-datatype-jdk8 not available
 			}
 		}
+
 		// Java 8 java.time package present?
 		if (ClassUtils.isPresent("java.time.LocalDate", this.moduleClassLoader)) {
 			try {
-				Class<? extends Module> jsr310Module = (Class<? extends Module>)
-						ClassUtils.forName("com.fasterxml.jackson.datatype.jsr310.JSR310Module", this.moduleClassLoader);
-				objectMapper.registerModule(BeanUtils.instantiate(jsr310Module));
+				Class<? extends Module> javaTimeModule = (Class<? extends Module>)
+						ClassUtils.forName("com.fasterxml.jackson.datatype.jsr310.JavaTimeModule", this.moduleClassLoader);
+				objectMapper.registerModule(BeanUtils.instantiate(javaTimeModule));
 			}
 			catch (ClassNotFoundException ex) {
-				// jackson-datatype-jsr310 not available
+				// jackson-datatype-jsr310 not available or older than 2.6
+				try {
+					Class<? extends Module> jsr310Module = (Class<? extends Module>)
+							ClassUtils.forName("com.fasterxml.jackson.datatype.jsr310.JSR310Module", this.moduleClassLoader);
+					objectMapper.registerModule(BeanUtils.instantiate(jsr310Module));
+				}
+				catch (ClassNotFoundException ex2) {
+					// OK, jackson-datatype-jsr310 not available at all...
+				}
 			}
 		}
+
 		// Joda-Time present?
 		if (ClassUtils.isPresent("org.joda.time.LocalDate", this.moduleClassLoader)) {
 			try {
