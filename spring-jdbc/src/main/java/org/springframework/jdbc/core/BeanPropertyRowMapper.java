@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -137,52 +138,6 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	}
 
 	/**
-	 * Initialize the mapping metadata for the given class.
-	 * @param mappedClass the mapped class.
-	 */
-	protected void initialize(Class<T> mappedClass) {
-		this.mappedClass = mappedClass;
-		this.mappedFields = new HashMap<String, PropertyDescriptor>();
-		this.mappedProperties = new HashSet<String>();
-		PropertyDescriptor[] pds = BeanUtils.getPropertyDescriptors(mappedClass);
-		for (PropertyDescriptor pd : pds) {
-			if (pd.getWriteMethod() != null) {
-				this.mappedFields.put(pd.getName().toLowerCase(), pd);
-				String underscoredName = underscoreName(pd.getName());
-				if (!pd.getName().toLowerCase().equals(underscoredName)) {
-					this.mappedFields.put(underscoredName, pd);
-				}
-				this.mappedProperties.add(pd.getName());
-			}
-		}
-	}
-
-	/**
-	 * Convert a name in camelCase to an underscored name in lower case.
-	 * Any upper case letters are converted to lower case with a preceding underscore.
-	 * @param name the string containing original name
-	 * @return the converted name
-	 */
-	private String underscoreName(String name) {
-		if (!StringUtils.hasLength(name)) {
-			return "";
-		}
-		StringBuilder result = new StringBuilder();
-		result.append(name.substring(0, 1).toLowerCase());
-		for (int i = 1; i < name.length(); i++) {
-			String s = name.substring(i, i + 1);
-			String slc = s.toLowerCase();
-			if (!s.equals(slc)) {
-				result.append("_").append(slc);
-			}
-			else {
-				result.append(s);
-			}
-		}
-		return result.toString();
-	}
-
-	/**
 	 * Get the class that we are mapping to.
 	 */
 	public final Class<T> getMappedClass() {
@@ -190,10 +145,9 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	}
 
 	/**
-	 * Set whether we're strictly validating that all bean properties have been
-	 * mapped from corresponding database fields.
-	 * <p>Default is {@code false}, accepting unpopulated properties in the
-	 * target bean.
+	 * Set whether we're strictly validating that all bean properties have been mapped
+	 * from corresponding database fields.
+	 * <p>Default is {@code false}, accepting unpopulated properties in the target bean.
 	 */
 	public void setCheckFullyPopulated(boolean checkFullyPopulated) {
 		this.checkFullyPopulated = checkFullyPopulated;
@@ -221,7 +175,67 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 	 * from corresponding database fields.
 	 */
 	public boolean isPrimitivesDefaultedForNullValue() {
-		return primitivesDefaultedForNullValue;
+		return this.primitivesDefaultedForNullValue;
+	}
+
+
+	/**
+	 * Initialize the mapping metadata for the given class.
+	 * @param mappedClass the mapped class
+	 */
+	protected void initialize(Class<T> mappedClass) {
+		this.mappedClass = mappedClass;
+		this.mappedFields = new HashMap<String, PropertyDescriptor>();
+		this.mappedProperties = new HashSet<String>();
+		PropertyDescriptor[] pds = BeanUtils.getPropertyDescriptors(mappedClass);
+		for (PropertyDescriptor pd : pds) {
+			if (pd.getWriteMethod() != null) {
+				this.mappedFields.put(lowerCaseName(pd.getName()), pd);
+				String underscoredName = underscoreName(pd.getName());
+				if (!lowerCaseName(pd.getName()).equals(underscoredName)) {
+					this.mappedFields.put(underscoredName, pd);
+				}
+				this.mappedProperties.add(pd.getName());
+			}
+		}
+	}
+
+	/**
+	 * Convert a name in camelCase to an underscored name in lower case.
+	 * Any upper case letters are converted to lower case with a preceding underscore.
+	 * @param name the original name
+	 * @return the converted name
+	 * @since 4.2
+	 * @see #lowerCaseName
+	 */
+	protected String underscoreName(String name) {
+		if (!StringUtils.hasLength(name)) {
+			return "";
+		}
+		StringBuilder result = new StringBuilder();
+		result.append(lowerCaseName(name.substring(0, 1)));
+		for (int i = 1; i < name.length(); i++) {
+			String s = name.substring(i, i + 1);
+			String slc = lowerCaseName(s);
+			if (!s.equals(slc)) {
+				result.append("_").append(slc);
+			}
+			else {
+				result.append(s);
+			}
+		}
+		return result.toString();
+	}
+
+	/**
+	 * Convert the given name to lower case.
+	 * By default, conversions will happen within the US locale.
+	 * @param name the original name
+	 * @return the converted name
+	 * @since 4.2
+	 */
+	protected String lowerCaseName(String name) {
+		return name.toLowerCase(Locale.US);
 	}
 
 
@@ -243,7 +257,7 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 
 		for (int index = 1; index <= columnCount; index++) {
 			String column = JdbcUtils.lookupColumnName(rsmd, index);
-			PropertyDescriptor pd = this.mappedFields.get(column.replaceAll(" ", "").toLowerCase());
+			PropertyDescriptor pd = this.mappedFields.get(lowerCaseName(column.replaceAll(" ", "")));
 			if (pd != null) {
 				try {
 					Object value = getColumnValue(rs, index, pd);
@@ -254,15 +268,14 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 					try {
 						bw.setPropertyValue(pd.getName(), value);
 					}
-					catch (TypeMismatchException e) {
-						if (value == null && primitivesDefaultedForNullValue) {
-							logger.debug("Intercepted TypeMismatchException for row " + rowNumber +
-									" and column '" + column + "' with value " + value +
-									" when setting property '" + pd.getName() + "' of type " + pd.getPropertyType() +
-									" on object: " + mappedObject);
+					catch (TypeMismatchException ex) {
+						if (value == null && this.primitivesDefaultedForNullValue) {
+							logger.debug("Intercepted TypeMismatchException for row " + rowNumber + " and column '" +
+									column + "' with null value when setting property '" + pd.getName() +
+									"' of type " + pd.getPropertyType() + " on object: " + mappedObject);
 						}
 						else {
-							throw e;
+							throw ex;
 						}
 					}
 					if (populatedProperties != null) {
