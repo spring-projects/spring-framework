@@ -448,6 +448,10 @@ project("spring-instrument-tomcat") {
 	dependencies {
 		provided("org.apache.tomcat:catalina:6.0.16")
 	}
+
+	jar {
+		exclude("org/apache/**")  // exclude the mock used to bridge between pre-7.0.63 and 7.0.63+
+	}
 }
 
 project("spring-context") {

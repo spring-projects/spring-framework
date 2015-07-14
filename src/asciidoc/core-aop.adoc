@@ -3451,10 +3451,9 @@ Tomcat 6.0 and above.
 
 [TIP]
 ====
-Do not define `TomcatInstrumentableClassLoader` anymore as of Tomcat 7.0.44+ / 8.0.
+Do not define `TomcatInstrumentableClassLoader` anymore on Tomcat 8.0 and higher.
 Instead, let Spring automatically use Tomcat's new native `InstrumentableClassLoader`
-facility through the `TomcatLoadTimeWeaver` strategy, in particular on Tomcat 7.0.63+
-where `TomcatInstrumentableClassLoader` does not work at all anymore.
+facility through the `TomcatLoadTimeWeaver` strategy.
 ====
 
 If you still need to use `TomcatInstrumentableClassLoader`, it can be registered

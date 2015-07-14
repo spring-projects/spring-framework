@@ -44,7 +44,7 @@ import org.springframework.instrument.classloading.WeavingTransformer;
  * in the LoadTimeWeaver interface, as expected by ReflectiveLoadTimeWeaver.
  *
  * <p><b>NOTE:</b> Requires Apache Tomcat version 6.0 or higher, as of Spring 4.0.
- * This class does not work on Tomcat 7.0.63 and higher; please rely on Tomcat's own
+ * This class is not intended to work on Tomcat 8.0+; please rely on Tomcat's own
  * {@code InstrumentableClassLoader} facility instead, as autodetected by Spring's
  * {@link org.springframework.instrument.classloading.tomcat.TomcatLoadTimeWeaver}.
  *
@@ -109,7 +109,7 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 	}
 
 
-	@Override
+	@Override  // overriding the pre-7.0.63 variant of findResourceInternal
 	protected ResourceEntry findResourceInternal(String name, String path) {
 		ResourceEntry entry = super.findResourceInternal(name, path);
 		if (entry != null && entry.binaryContent != null && path.endsWith(CLASS_SUFFIX)) {
@@ -119,11 +119,19 @@ public class TomcatInstrumentableClassLoader extends WebappClassLoader {
 		return entry;
 	}
 
+	@Override  // overriding the 7.0.63+ variant of findResourceInternal
+	protected ResourceEntry findResourceInternal(String name, String path, boolean manifestRequired) {
+		ResourceEntry entry = super.findResourceInternal(name, path, manifestRequired);
+		if (entry != null && entry.binaryContent != null && path.endsWith(CLASS_SUFFIX)) {
+			String className = (name.endsWith(CLASS_SUFFIX) ? name.substring(0, name.length() - CLASS_SUFFIX.length()) : name);
+			entry.binaryContent = this.weavingTransformer.transformIfNecessary(className, entry.binaryContent);
+		}
+		return entry;
+	}
+
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder(getClass().getName());
-		sb.append("\r\n").append(super.toString());
-		return sb.toString();
+		return getClass().getName() + "\r\n" + super.toString();
 	}
 
 
