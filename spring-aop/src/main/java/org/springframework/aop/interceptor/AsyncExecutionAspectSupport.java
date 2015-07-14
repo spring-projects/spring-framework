@@ -36,7 +36,6 @@ import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.support.TaskExecutorAdapter;
 import org.springframework.lang.UsesJava8;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
@@ -137,8 +136,10 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 			Executor executorToUse = this.defaultExecutor;
 			String qualifier = getExecutorQualifier(method);
 			if (StringUtils.hasLength(qualifier)) {
-				Assert.notNull(this.beanFactory, "BeanFactory must be set on " + getClass().getSimpleName() +
-						" to access qualified executor '" + qualifier + "'");
+				if (this.beanFactory == null) {
+					throw new IllegalStateException("BeanFactory must be set on " + getClass().getSimpleName() +
+							" to access qualified executor '" + qualifier + "'");
+				}
 				executorToUse = BeanFactoryAnnotationUtils.qualifiedBeanOfType(
 						this.beanFactory, Executor.class, qualifier);
 			}

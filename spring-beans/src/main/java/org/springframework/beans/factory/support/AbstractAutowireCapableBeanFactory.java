@@ -685,7 +685,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 			if (Modifier.isStatic(factoryMethod.getModifiers()) == isStatic &&
 					factoryMethod.getName().equals(mbd.getFactoryMethodName()) &&
 					factoryMethod.getParameterTypes().length >= minNrOfArgs) {
-				// No declared type variables to inspect, so just process the standard return type.
+				// Declared type variables to inspect?
 				if (factoryMethod.getTypeParameters().length > 0) {
 					try {
 						// Fully resolve parameter names and argument values.
