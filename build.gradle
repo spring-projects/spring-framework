@@ -32,37 +32,37 @@ configure(allprojects) { project ->
 	ext.ehcacheVersion       = "2.10.0"
 	ext.ehcachejcacheVersion = "1.0.1"
 	ext.fileuploadVersion    = "1.3.1"
-	ext.freemarkerVersion    = "2.3.22"
+	ext.freemarkerVersion    = "2.3.23"
 	ext.groovyVersion        = "2.4.3"
 	ext.gsonVersion          = "2.3.1"
 	ext.hibernate3Version    = "3.6.10.Final"
 	ext.hibernate4Version    = "4.3.10.Final"
-	ext.hibernate5Version    = "5.0.0.CR1"  // to be upgraded to 5.0 final in time for Spring Framework 4.2 GA
+	ext.hibernate5Version    = "5.0.0.CR2"  // to be upgraded to 5.0 final in time for Spring Framework 4.2 GA
 	ext.hibval4Version       = "4.3.2.Final"
 	ext.hibval5Version       = "5.2.0.CR1"  // to be upgraded to 5.2 final in time for Spring Framework 4.2 GA
 	ext.hsqldbVersion        = "2.3.2"
 	ext.httpclientVersion    = "4.5"
 	ext.httpasyncVersion     = "4.1"
-	ext.jackson2Version      = "2.6.0-rc3"  // to be upgraded to 2.6 final in time for Spring Framework 4.2 GA
+	ext.jackson2Version      = "2.6.0-rc4"  // to be upgraded to 2.6 final in time for Spring Framework 4.2 GA
 	ext.jasperreportsVersion = "6.1.0"
 	ext.javamailVersion      = "1.5.4"
 	ext.jettyVersion         = "9.3.0.v20150612"
 	ext.jodaVersion          = "2.8.1"
-	ext.jrubyVersion         = "1.7.20.1"
+	ext.jrubyVersion         = "1.7.21"
 	ext.jtaVersion           = "1.2"
 	ext.junitVersion         = "4.12"
 	ext.nettyVersion         = "4.0.29.Final"
 	ext.openjpaVersion       = "2.4.0"
 	ext.poiVersion           = "3.12"
 	ext.protobufVersion      = "2.6.1"
-	ext.reactorVersion       = "2.0.3.RELEASE"
+	ext.reactorVersion       = "2.0.4.RELEASE"
 	ext.slf4jVersion         = "1.7.12"
 	ext.snakeyamlVersion     = "1.15"
 	ext.snifferVersion       = "1.14"
 	ext.testngVersion        = "6.9.4"
 	ext.tiles2Version        = "2.2.2"
 	ext.tiles3Version        = "3.0.5"
-	ext.tomcatVersion        = "8.0.23"
+	ext.tomcatVersion        = "8.0.24"
 	ext.tyrusVersion         = "1.3.5"  // constrained by WebLogic 12.1.3 support
 	ext.undertowVersion      = "1.2.8.Final"
 	ext.woodstoxVersion      = "5.0.1"
@@ -120,7 +120,7 @@ configure(allprojects) { project ->
 
 	repositories {
 		maven { url "https://repo.spring.io/libs-release" }
-		// maven { url "https://repo.spring.io/milestone" }
+		maven { url "https://repo.spring.io/milestone" }
 	}
 
 	dependencies {
@@ -614,7 +614,7 @@ project("spring-jdbc") {
 		compile(project(":spring-tx"))
 		optional(project(":spring-context"))  // for JndiDataSourceLookup
 		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
-		optional("com.mchange:c3p0:0.9.2.1")
+		optional("com.mchange:c3p0:0.9.5.1")
 		optional("org.hsqldb:hsqldb:${hsqldbVersion}")
 		optional("com.h2database:h2:1.4.187")
 		optional("org.apache.derby:derby:10.11.1.1")
@@ -701,7 +701,7 @@ project("spring-web") {
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jackson2Version}")
 		optional("com.google.code.gson:gson:${gsonVersion}")
-		optional("com.rometools:rome:1.5.0")
+		optional("com.rometools:rome:1.5.1")
 		optional("org.eclipse.jetty:jetty-servlet:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
 		}
@@ -1058,8 +1058,7 @@ project("spring-aspects") {
 
 	dependencies {
 		aspects(project(":spring-orm"))
-		// ajc("org.aspectj:aspectjtools:1.9.0.BETA-1")  // for the ability to build on JDK 9, not exposed in the POMs yet
-		ajc("org.aspectj:aspectjtools:${aspectjVersion}")  // alternative to the above while Gradle fails on JDK 9 anyway
+		ajc("org.aspectj:aspectjtools:1.9.0.BETA-1")  // for the ability to build on JDK 9, not exposed in the POMs yet
 		rt("org.aspectj:aspectjrt:${aspectjVersion}")  // regular AspectJ version here, to be exposed in the POMs
 		compile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		provided("org.eclipse.persistence:javax.persistence:2.0.0")
