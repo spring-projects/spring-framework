@@ -131,7 +131,8 @@ public class GsonFactoryBeanTests {
 		Date date = cal.getTime();
 		bean.setDate(date);
 		String result = gson.toJson(bean);
-		assertEquals("{\"date\":\"Jan 1, 2014 12:00:00 AM\"}", result);
+		assertTrue(result.startsWith("{\"date\":\"Jan 1, 2014"));
+		assertTrue(result.endsWith("12:00:00 AM\"}"));
 	}
 
 	@Test

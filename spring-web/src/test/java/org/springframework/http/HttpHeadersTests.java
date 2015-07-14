@@ -40,18 +40,13 @@ import org.junit.Test;
 
 /**
  * Unit tests for {@link org.springframework.http.HttpHeaders}.
+ *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  */
 public class HttpHeadersTests {
 
-	private HttpHeaders headers;
-
-
-	@Before
-	public void setUp() {
-		headers = new HttpHeaders();
-	}
+	private final HttpHeaders headers = new HttpHeaders();
 
 
 	@Test
@@ -67,7 +62,7 @@ public class HttpHeadersTests {
 	}
 
 	@Test  // SPR-9655
-	public void acceptiPlanet() {
+	public void acceptIPlanet() {
 		headers.add("Accept", "text/html");
 		headers.add("Accept", "text/plain");
 		List<MediaType> expected = Arrays.asList(new MediaType("text", "html"), new MediaType("text", "plain"));
@@ -171,7 +166,7 @@ public class HttpHeadersTests {
 		assertEquals("Invalid Date header", "Thu, 18 Dec 2008 10:20:00 GMT", headers.getFirst("date"));
 
 		// RFC 850
-		headers.set("Date", "Thursday, 18-Dec-08 11:20:00 CET");
+		headers.set("Date", "Thu, 18 Dec 2008 10:20:00 GMT");
 		assertEquals("Invalid Date header", date, headers.getDate());
 	}
 

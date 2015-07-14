@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,12 +35,12 @@ import org.springframework.format.FormatterRegistry;
 import org.springframework.format.Parser;
 import org.springframework.format.Printer;
 import org.springframework.format.annotation.NumberFormat;
-import org.springframework.format.annotation.NumberFormat.Style;
 
 import static org.junit.Assert.*;
 
 /**
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  */
 public class FormattingConversionServiceFactoryBeanTests {
 
@@ -49,11 +49,11 @@ public class FormattingConversionServiceFactoryBeanTests {
 		FormattingConversionServiceFactoryBean factory = new FormattingConversionServiceFactoryBean();
 		factory.afterPropertiesSet();
 		FormattingConversionService fcs = factory.getObject();
-		TypeDescriptor descriptor = new TypeDescriptor(TestBean.class.getDeclaredField("percent"));
-		Object value = fcs.convert("5%", TypeDescriptor.valueOf(String.class), descriptor);
-		assertEquals(.05, value);
-		value = fcs.convert(.05, descriptor, TypeDescriptor.valueOf(String.class));
-		assertEquals("5%", value);
+		TypeDescriptor descriptor = new TypeDescriptor(TestBean.class.getDeclaredField("pattern"));
+		Object value = fcs.convert("15,00", TypeDescriptor.valueOf(String.class), descriptor);
+		assertEquals(15.0, value);
+		value = fcs.convert(15.0, descriptor, TypeDescriptor.valueOf(String.class));
+		assertEquals("15", value);
 	}
 
 	@Test
@@ -62,9 +62,9 @@ public class FormattingConversionServiceFactoryBeanTests {
 		factory.setRegisterDefaultFormatters(false);
 		factory.afterPropertiesSet();
 		FormattingConversionService fcs = factory.getObject();
-		TypeDescriptor descriptor = new TypeDescriptor(TestBean.class.getDeclaredField("percent"));
+		TypeDescriptor descriptor = new TypeDescriptor(TestBean.class.getDeclaredField("pattern"));
 		try {
-			fcs.convert("5%", TypeDescriptor.valueOf(String.class), descriptor);
+			fcs.convert("15,00", TypeDescriptor.valueOf(String.class), descriptor);
 			fail("This format should not be parseable");
 		}
 		catch (ConversionFailedException ex) {
@@ -128,10 +128,11 @@ public class FormattingConversionServiceFactoryBeanTests {
 	private @interface SpecialInt {
 	}
 
+
 	private static class TestBean {
 
-		@NumberFormat(style = Style.PERCENT)
-		private double percent;
+		@NumberFormat(pattern = "##,00")
+		private double pattern;
 
 		@SpecialInt
 		private int specialInt;
@@ -143,8 +144,8 @@ public class FormattingConversionServiceFactoryBeanTests {
 		public void setSpecialInt(int field) {
 			this.specialInt = field;
 		}
-
 	}
+
 
 	private static class TestBeanFormatter implements Formatter<TestBean> {
 
@@ -159,8 +160,8 @@ public class FormattingConversionServiceFactoryBeanTests {
 			object.setSpecialInt(Integer.parseInt(text));
 			return object;
 		}
-
 	}
+
 
 	private static class SpecialIntAnnotationFormatterFactory implements AnnotationFormatterFactory<SpecialInt> {
 
@@ -196,13 +197,13 @@ public class FormattingConversionServiceFactoryBeanTests {
 		}
 	}
 
+
 	private static class TestFormatterRegistrar implements FormatterRegistrar {
 
 		@Override
 		public void registerFormatters(FormatterRegistry registry) {
 			registry.addFormatter(new TestBeanFormatter());
 		}
-
 	}
 
 }
