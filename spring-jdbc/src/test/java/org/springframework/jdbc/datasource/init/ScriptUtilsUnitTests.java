@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,9 @@ import static org.springframework.jdbc.datasource.init.ScriptUtils.*;
  * @author Sam Brannen
  * @author Phillip Webb
  * @author Chris Baldwin
- * @see ScriptUtilsIntegrationTests
+ * @author Nicolas Debeissat
  * @since 4.0.3
+ * @see ScriptUtilsIntegrationTests
  */
 public class ScriptUtilsUnitTests {
 
@@ -83,6 +84,22 @@ public class ScriptUtilsUnitTests {
 		assertEquals("wrong number of statements", 1, statements.size());
 		assertEquals("script should have been 'stripped' but not actually 'split'", script.replace('\n', ' '),
 			statements.get(0));
+	}
+
+	/**
+	 * See <a href="https://jira.spring.io/browse/SPR-13218">SPR-13218</a>
+	 */
+	@Test
+	public void splitScriptWithSingleQuotesNestedInsideDoubleQuotes() throws Exception {
+		String statement1 = "select '1' as \"Dogbert's owner's\" from dual";
+		String statement2 = "select '2' as \"Dilbert's\" from dual";
+		char delim = ';';
+		String script = statement1 + delim + statement2 + delim;
+		List<String> statements = new ArrayList<String>();
+		splitSqlScript(script, ';', statements);
+		assertEquals("wrong number of statements", 2, statements.size());
+		assertEquals("statement 1 not split correctly", statement1, statements.get(0));
+		assertEquals("statement 2 not split correctly", statement2, statements.get(1));
 	}
 
 	/**
