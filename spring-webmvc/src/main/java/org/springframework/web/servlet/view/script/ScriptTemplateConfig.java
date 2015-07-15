@@ -19,8 +19,6 @@ package org.springframework.web.servlet.view.script;
 import java.nio.charset.Charset;
 import javax.script.ScriptEngine;
 
-import org.springframework.core.io.ResourceLoader;
-
 /**
  * Interface to be implemented by objects that configure and manage a
  * {@link ScriptEngine} for automatic lookup in a web environment.
@@ -33,12 +31,18 @@ public interface ScriptTemplateConfig {
 
 	ScriptEngine getEngine();
 
+	String getEngineName();
+
+	String[] getScripts();
+
 	String getRenderObject();
 
 	String getRenderFunction();
 
 	Charset getCharset();
 
-	ResourceLoader getResourceLoader();
+	String getResourceLoaderPath();
+
+	Boolean isShareEngine();
 
 }

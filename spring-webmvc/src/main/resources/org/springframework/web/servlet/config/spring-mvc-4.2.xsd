@@ -1260,6 +1260,15 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
+			<xsd:attribute name="shared-engine" type="xsd:boolean">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	When set to false, use thread-local ScriptEngine instances instead of one single shared
+	instance. This flag should be set to false for those using non thread-safe script engines
+	and templating libraries, like Handlebars or React running on Nashorn for example.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
 

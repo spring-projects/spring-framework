@@ -807,6 +807,7 @@ public class MvcNamespaceTests {
 		assertEquals("render", scriptTemplateConfigurer.getRenderFunction());
 		assertEquals(StandardCharsets.ISO_8859_1, scriptTemplateConfigurer.getCharset());
 		assertEquals("classpath:", scriptTemplateConfigurer.getResourceLoaderPath());
+		assertFalse(scriptTemplateConfigurer.isShareEngine());
 		String[] scripts = { "org/springframework/web/servlet/view/script/nashorn/render.js" };
 		accessor = new DirectFieldAccessor(scriptTemplateConfigurer);
 		assertArrayEquals(scripts, (String[]) accessor.getPropertyValue("scripts"));

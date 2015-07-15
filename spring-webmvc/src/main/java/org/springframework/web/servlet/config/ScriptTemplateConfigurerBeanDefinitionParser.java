@@ -73,6 +73,9 @@ public class ScriptTemplateConfigurerBeanDefinitionParser extends AbstractSimple
 		if (element.hasAttribute("resource-loader-path")) {
 			builder.addPropertyValue("resourceLoaderPath", element.getAttribute("resource-loader-path"));
 		}
+		if (element.hasAttribute("shared-engine")) {
+			builder.addPropertyValue("sharedEngine", element.getAttribute("shared-engine"));
+		}
 	}
 
 	@Override

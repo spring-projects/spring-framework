@@ -16,28 +16,9 @@
 
 package org.springframework.web.servlet.view.script;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
 
-import javax.script.Invocable;
 import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.core.io.DefaultResourceLoader;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
 
 /**
  * An implementation of Spring MVC's {@link ScriptTemplateConfig} for creating
@@ -59,17 +40,19 @@ import org.springframework.util.StringUtils;
  * }
  * </pre>
  *
+ * <p>It is possible to use non thread-safe script engines and templating libraries, like
+ * Handlebars or React running on Nashorn, by setting the
+ * {@link #setSharedEngine(Boolean) sharedEngine} property to {@code false}.
+ *
  * @author Sebastien Deleuze
  * @since 4.2
  * @see ScriptTemplateView
  */
-public class ScriptTemplateConfigurer implements ScriptTemplateConfig, ApplicationContextAware, InitializingBean {
+public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 
 	private ScriptEngine engine;
 
 	private String engineName;
-
-	private ApplicationContext applicationContext;
 
 	private String[] scripts;
 
@@ -77,19 +60,24 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig, Applicati
 
 	private String renderFunction;
 
-	private Charset charset = Charset.forName("UTF-8");
+	private Charset charset;
 
-	private ResourceLoader resourceLoader;
+	private String resourceLoaderPath;
 
-	private String resourceLoaderPath = "classpath:";
+	private Boolean sharedEngine;
 
 	/**
 	 * Set the {@link ScriptEngine} to use by the view.
 	 * The script engine must implement {@code Invocable}.
 	 * You must define {@code engine} or {@code engineName}, not both.
+	 *
+	 * <p>When the {@code sharedEngine} flag is set to {@code false}, you should not specify
+	 * the script engine with this setter, but with the {@link #setEngineName(String)}
+	 * one (since it implies multiple lazy instanciations of the script engine).
+	 *
+	 * @see #setEngineName(String)
 	 */
 	public void setEngine(ScriptEngine engine) {
-		Assert.isInstanceOf(Invocable.class, engine);
 		this.engine = engine;
 	}
 
@@ -102,18 +90,15 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig, Applicati
 	 * Set the engine name that will be used to instantiate the {@link ScriptEngine}.
 	 * The script engine must implement {@code Invocable}.
 	 * You must define {@code engine} or {@code engineName}, not both.
+	 * @see #setEngine(ScriptEngine)
 	 */
 	public void setEngineName(String engineName) {
 		this.engineName = engineName;
 	}
 
 	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) {
-		this.applicationContext = applicationContext;
-	}
-
-	protected ApplicationContext getApplicationContext() {
-		return this.applicationContext;
+	public String getEngineName() {
+		return this.engineName;
 	}
 
 	/**
@@ -134,8 +119,8 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig, Applicati
 	}
 
 	@Override
-	public String getRenderObject() {
-		return renderObject;
+	public String[] getScripts() {
+		return this.scripts;
 	}
 
 	/**
@@ -148,8 +133,8 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig, Applicati
 	}
 
 	@Override
-	public String getRenderFunction() {
-		return renderFunction;
+	public String getRenderObject() {
+		return this.renderObject;
 	}
 
 	/**
@@ -162,6 +147,11 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig, Applicati
 	 */
 	public void setRenderFunction(String renderFunction) {
 		this.renderFunction = renderFunction;
+	}
+
+	@Override
+	public String getRenderFunction() {
+		return this.renderFunction;
 	}
 
 	/**
@@ -189,69 +179,30 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig, Applicati
 		this.resourceLoaderPath = resourceLoaderPath;
 	}
 
+	@Override
 	public String getResourceLoaderPath() {
-		return resourceLoaderPath;
+		return this.resourceLoaderPath;
+	}
+
+	/**
+	 * When set to {@code false}, use thread-local {@link ScriptEngine} instances instead
+	 * of one single shared instance. This flag should be set to {@code false} for those
+	 * using non thread-safe script engines and templating libraries, like Handlebars or
+	 * React running on Nashorn for example.
+	 *
+	 * <p>When this flag is set to {@code false}, the script engine must be specified using
+	 * {@link #setEngineName(String)}. Using {@link #setEngine(ScriptEngine)} is not
+	 * possible because multiple instances of the script engine need to be created lazily
+	 * (one per thread).
+	 * @see <a href="http://docs.oracle.com/javase/8/docs/api/javax/script/ScriptEngineFactory.html#getParameter-java.lang.String-">THREADING ScriptEngine parameter<a/>
+	 */
+	public void setSharedEngine(Boolean sharedEngine) {
+		this.sharedEngine = sharedEngine;
 	}
 
 	@Override
-	public ResourceLoader getResourceLoader() {
-		return resourceLoader;
-	}
-
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		if (this.engine == null) {
-			this.engine = createScriptEngine();
-		}
-		Assert.state(this.renderFunction != null, "renderFunction property must be defined.");
-		this.resourceLoader  = new DefaultResourceLoader(createClassLoader());
-		if (this.scripts != null) {
-			try {
-				for (String script : this.scripts) {
-					this.engine.eval(read(script));
-				}
-			}
-			catch (ScriptException e) {
-				throw new IllegalStateException("could not load script", e);
-			}
-		}
-	}
-
-	protected ClassLoader createClassLoader() throws IOException {
-		String[] paths = StringUtils.commaDelimitedListToStringArray(this.resourceLoaderPath);
-		List<URL> urls = new ArrayList<URL>();
-		for (String path : paths) {
-			Resource[] resources = getApplicationContext().getResources(path);
-			if (resources.length > 0) {
-				for (Resource resource : resources) {
-					if (resource.exists()) {
-						urls.add(resource.getURL());
-					}
-				}
-			}
-		}
-		ClassLoader classLoader = getApplicationContext().getClassLoader();
-		return (urls.size() > 0 ? new URLClassLoader(urls.toArray(new URL[urls.size()]), classLoader) : classLoader);
-	}
-
-	private Reader read(String path) throws IOException {
-		Resource resource = this.resourceLoader.getResource(path);
-		Assert.state(resource.exists(), "Resource " + path + " not found.");
-		return new InputStreamReader(resource.getInputStream());
-	}
-
-	protected ScriptEngine createScriptEngine() throws IOException {
-		if (this.engine != null && this.engineName != null) {
-			throw new IllegalStateException("You should define engine or engineName properties, not both.");
-		}
-		if (this.engineName != null) {
-			ScriptEngine scriptEngine = new ScriptEngineManager().getEngineByName(this.engineName);
-			Assert.state(scriptEngine != null, "No engine \"" + this.engineName + "\" found.");
-			Assert.state(scriptEngine instanceof Invocable, "Script engine should be instance of Invocable");
-			this.engine = scriptEngine;
-		}
-		Assert.state(this.engine != null, "No script engine found, please specify valid engine or engineName properties.");
-		return this.engine;
+	public Boolean isShareEngine() {
+		return this.sharedEngine;
 	}
 
 }
