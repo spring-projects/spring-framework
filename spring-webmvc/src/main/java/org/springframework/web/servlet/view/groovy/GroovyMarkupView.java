@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,7 @@ import org.springframework.web.servlet.view.AbstractTemplateView;
 import org.springframework.web.util.NestedServletException;
 
 /**
- * An {@link org.springframework.web.servlet.view.AbstractTemplateView AbstractTemplateView}
- * based on Groovy XML/XHTML markup templates.
+ * An {@link AbstractTemplateView} subclass based on Groovy XML/XHTML markup templates.
  *
  * <p>Spring's Groovy Markup Template support requires Groovy 2.3.1 and higher.
  *

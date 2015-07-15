@@ -28,18 +28,17 @@ import javax.script.Invocable;
 import javax.script.ScriptEngine;
 
 import org.hamcrest.Matchers;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 import org.junit.Before;
 import org.junit.Test;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 
 import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.support.StaticApplicationContext;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link ScriptTemplateView}.
@@ -149,11 +148,12 @@ public class ScriptTemplateViewTests {
 	public void nonInvocableScriptEngine() throws Exception {
 		try {
 			this.view.setEngine(mock(ScriptEngine.class));
-		} catch(IllegalArgumentException ex) {
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
 			assertThat(ex.getMessage(), containsString("instance"));
 			return;
 		}
-		fail();
 	}
 
 	@Test
@@ -161,11 +161,11 @@ public class ScriptTemplateViewTests {
 		this.view.setEngine(mock(InvocableScriptEngine.class));
 		try {
 			this.view.setApplicationContext(this.applicationContext);
-		} catch(IllegalStateException ex) {
-			assertThat(ex.getMessage(), containsString("renderFunction"));
-			return;
+			fail("Should have thrown IllegalArgumentException");
 		}
-		fail();
+		catch (IllegalArgumentException ex) {
+			assertThat(ex.getMessage(), containsString("renderFunction"));
+		}
 	}
 
 	@Test
@@ -175,11 +175,11 @@ public class ScriptTemplateViewTests {
 		this.view.setRenderFunction("render");
 		try {
 			this.view.setApplicationContext(this.applicationContext);
-		} catch(IllegalStateException ex) {
-			assertThat(ex.getMessage(), containsString("engine or engineName"));
-			return;
+			fail("Should have thrown IllegalArgumentException");
 		}
-		fail();
+		catch (IllegalArgumentException ex) {
+			assertThat(ex.getMessage(), containsString("'engine' or 'engineName'"));
+		}
 	}
 
 	@Test
@@ -189,7 +189,9 @@ public class ScriptTemplateViewTests {
 		this.view.setSharedEngine(false);
 		try {
 			this.view.setApplicationContext(this.applicationContext);
-		} catch(IllegalStateException ex) {
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
 			assertThat(ex.getMessage(), containsString("sharedEngine"));
 			return;
 		}
