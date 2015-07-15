@@ -19,7 +19,6 @@ package org.springframework.expression.spel.ast;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +37,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Andy Clement
  * @author Mark Fisher
+ * @author Juergen Hoeller
  * @since 3.0
  */
 public class Projection extends SpelNodeImpl {
@@ -86,9 +86,10 @@ public class Projection extends SpelNodeImpl {
 			return new ValueRef.TypedValueHolderValueRef(new TypedValue(result), this);  // TODO unable to build correct type descriptor
 		}
 
-		if (operand instanceof Collection || operandIsArray) {
-			Collection<?> data = (operand instanceof Collection ? (Collection<?>) operand :
-					Arrays.asList(ObjectUtils.toObjectArray(operand)));
+		if (operand instanceof Iterable || operandIsArray) {
+			Iterable<?> data = (operand instanceof Iterable ?
+					(Iterable<?>) operand : Arrays.asList(ObjectUtils.toObjectArray(operand)));
+
 			List<Object> result = new ArrayList<Object>();
 			int idx = 0;
 			Class<?> arrayElementType = null;
@@ -108,6 +109,7 @@ public class Projection extends SpelNodeImpl {
 				}
 				idx++;
 			}
+
 			if (operandIsArray) {
 				if (arrayElementType == null) {
 					arrayElementType = Object.class;
@@ -116,10 +118,11 @@ public class Projection extends SpelNodeImpl {
 				System.arraycopy(result.toArray(), 0, resultArray, 0, result.size());
 				return new ValueRef.TypedValueHolderValueRef(new TypedValue(resultArray),this);
 			}
+
 			return new ValueRef.TypedValueHolderValueRef(new TypedValue(result),this);
 		}
 
-		if (operand==null) {
+		if (operand == null) {
 			if (this.nullSafe) {
 				return ValueRef.NullValueRef.INSTANCE;
 			}
