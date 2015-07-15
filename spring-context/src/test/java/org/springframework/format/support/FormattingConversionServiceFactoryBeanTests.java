@@ -26,6 +26,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.format.AnnotationFormatterFactory;
@@ -50,10 +51,17 @@ public class FormattingConversionServiceFactoryBeanTests {
 		factory.afterPropertiesSet();
 		FormattingConversionService fcs = factory.getObject();
 		TypeDescriptor descriptor = new TypeDescriptor(TestBean.class.getDeclaredField("pattern"));
-		Object value = fcs.convert("15,00", TypeDescriptor.valueOf(String.class), descriptor);
-		assertEquals(15.0, value);
-		value = fcs.convert(15.0, descriptor, TypeDescriptor.valueOf(String.class));
-		assertEquals("15", value);
+
+		LocaleContextHolder.setLocale(Locale.GERMAN);
+		try {
+			Object value = fcs.convert("15,00", TypeDescriptor.valueOf(String.class), descriptor);
+			assertEquals(15.0, value);
+			value = fcs.convert(15.0, descriptor, TypeDescriptor.valueOf(String.class));
+			assertEquals("15", value);
+		}
+		finally {
+			LocaleContextHolder.resetLocaleContext();
+		}
 	}
 
 	@Test
@@ -63,6 +71,7 @@ public class FormattingConversionServiceFactoryBeanTests {
 		factory.afterPropertiesSet();
 		FormattingConversionService fcs = factory.getObject();
 		TypeDescriptor descriptor = new TypeDescriptor(TestBean.class.getDeclaredField("pattern"));
+
 		try {
 			fcs.convert("15,00", TypeDescriptor.valueOf(String.class), descriptor);
 			fail("This format should not be parseable");
