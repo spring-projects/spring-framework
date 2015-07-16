@@ -21,8 +21,8 @@ package org.springframework.test.web.servlet;
  * request.
  *
  * <p>See static factory methods in
- * {@code org.springframework.test.web.server.result.MockMvcResultMatchers}
- * {@code org.springframework.test.web.server.result.MockMvcResultHandlers}
+ * {@code org.springframework.test.web.servlet.result.MockMvcResultMatchers}
+ * {@code org.springframework.test.web.servlet.result.MockMvcResultHandlers}
  *
  * @author Rossen Stoyanchev
  * @since 3.2
