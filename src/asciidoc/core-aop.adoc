@@ -3551,7 +3551,7 @@ website].
 The book __Eclipse AspectJ__ by Adrian Colyer et. al. (Addison-Wesley, 2005) provides a
 comprehensive introduction and reference for the AspectJ language.
 
-The book __AspectJ in Action__ by Ramnivas Laddad (Manning, 2003) comes highly
+The book __AspectJ in Action, Second Edition__ by Ramnivas Laddad (Manning, 2009) comes highly
 recommended; the focus of the book is on AspectJ, but a lot of general AOP themes are
 explored (in some depth).
 
