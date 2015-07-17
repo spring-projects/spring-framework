@@ -59,6 +59,7 @@ public class AnnotationUtilsTests {
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
 
+
 	@Test
 	public void findMethodAnnotationOnLeaf() throws Exception {
 		Method m = Leaf.class.getMethod("annotatedOnLeaf");
@@ -264,22 +265,22 @@ public class AnnotationUtilsTests {
 
 		// inherited class-level annotation; note: @Transactional is inherited
 		assertEquals(InheritedAnnotationInterface.class,
-			findAnnotationDeclaringClass(Transactional.class, InheritedAnnotationInterface.class));
+				findAnnotationDeclaringClass(Transactional.class, InheritedAnnotationInterface.class));
 		assertNull(findAnnotationDeclaringClass(Transactional.class, SubInheritedAnnotationInterface.class));
 		assertEquals(InheritedAnnotationClass.class,
-			findAnnotationDeclaringClass(Transactional.class, InheritedAnnotationClass.class));
+				findAnnotationDeclaringClass(Transactional.class, InheritedAnnotationClass.class));
 		assertEquals(InheritedAnnotationClass.class,
-			findAnnotationDeclaringClass(Transactional.class, SubInheritedAnnotationClass.class));
+				findAnnotationDeclaringClass(Transactional.class, SubInheritedAnnotationClass.class));
 
 		// non-inherited class-level annotation; note: @Order is not inherited,
 		// but findAnnotationDeclaringClass() should still find it on classes.
 		assertEquals(NonInheritedAnnotationInterface.class,
-			findAnnotationDeclaringClass(Order.class, NonInheritedAnnotationInterface.class));
+				findAnnotationDeclaringClass(Order.class, NonInheritedAnnotationInterface.class));
 		assertNull(findAnnotationDeclaringClass(Order.class, SubNonInheritedAnnotationInterface.class));
 		assertEquals(NonInheritedAnnotationClass.class,
-			findAnnotationDeclaringClass(Order.class, NonInheritedAnnotationClass.class));
+				findAnnotationDeclaringClass(Order.class, NonInheritedAnnotationClass.class));
 		assertEquals(NonInheritedAnnotationClass.class,
-			findAnnotationDeclaringClass(Order.class, SubNonInheritedAnnotationClass.class));
+				findAnnotationDeclaringClass(Order.class, SubNonInheritedAnnotationClass.class));
 	}
 
 	@Test
@@ -291,23 +292,23 @@ public class AnnotationUtilsTests {
 
 		// inherited class-level annotation; note: @Transactional is inherited
 		assertEquals(InheritedAnnotationInterface.class,
-			findAnnotationDeclaringClassForTypes(transactionalCandidateList, InheritedAnnotationInterface.class));
+				findAnnotationDeclaringClassForTypes(transactionalCandidateList, InheritedAnnotationInterface.class));
 		assertNull(findAnnotationDeclaringClassForTypes(transactionalCandidateList, SubInheritedAnnotationInterface.class));
 		assertEquals(InheritedAnnotationClass.class,
-			findAnnotationDeclaringClassForTypes(transactionalCandidateList, InheritedAnnotationClass.class));
+				findAnnotationDeclaringClassForTypes(transactionalCandidateList, InheritedAnnotationClass.class));
 		assertEquals(InheritedAnnotationClass.class,
-			findAnnotationDeclaringClassForTypes(transactionalCandidateList, SubInheritedAnnotationClass.class));
+				findAnnotationDeclaringClassForTypes(transactionalCandidateList, SubInheritedAnnotationClass.class));
 
 		// non-inherited class-level annotation; note: @Order is not inherited,
 		// but findAnnotationDeclaringClassForTypes() should still find it on classes.
 		List<Class<? extends Annotation>> orderCandidateList = Arrays.<Class<? extends Annotation>> asList(Order.class);
 		assertEquals(NonInheritedAnnotationInterface.class,
-			findAnnotationDeclaringClassForTypes(orderCandidateList, NonInheritedAnnotationInterface.class));
+				findAnnotationDeclaringClassForTypes(orderCandidateList, NonInheritedAnnotationInterface.class));
 		assertNull(findAnnotationDeclaringClassForTypes(orderCandidateList, SubNonInheritedAnnotationInterface.class));
 		assertEquals(NonInheritedAnnotationClass.class,
-			findAnnotationDeclaringClassForTypes(orderCandidateList, NonInheritedAnnotationClass.class));
+				findAnnotationDeclaringClassForTypes(orderCandidateList, NonInheritedAnnotationClass.class));
 		assertEquals(NonInheritedAnnotationClass.class,
-			findAnnotationDeclaringClassForTypes(orderCandidateList, SubNonInheritedAnnotationClass.class));
+				findAnnotationDeclaringClassForTypes(orderCandidateList, SubNonInheritedAnnotationClass.class));
 	}
 
 	@Test
@@ -320,30 +321,30 @@ public class AnnotationUtilsTests {
 
 		// inherited class-level annotation; note: @Transactional is inherited
 		assertEquals(InheritedAnnotationInterface.class,
-			findAnnotationDeclaringClassForTypes(candidates, InheritedAnnotationInterface.class));
+				findAnnotationDeclaringClassForTypes(candidates, InheritedAnnotationInterface.class));
 		assertNull(findAnnotationDeclaringClassForTypes(candidates, SubInheritedAnnotationInterface.class));
 		assertEquals(InheritedAnnotationClass.class,
-			findAnnotationDeclaringClassForTypes(candidates, InheritedAnnotationClass.class));
+				findAnnotationDeclaringClassForTypes(candidates, InheritedAnnotationClass.class));
 		assertEquals(InheritedAnnotationClass.class,
-			findAnnotationDeclaringClassForTypes(candidates, SubInheritedAnnotationClass.class));
+				findAnnotationDeclaringClassForTypes(candidates, SubInheritedAnnotationClass.class));
 
 		// non-inherited class-level annotation; note: @Order is not inherited,
 		// but findAnnotationDeclaringClassForTypes() should still find it on classes.
 		assertEquals(NonInheritedAnnotationInterface.class,
-			findAnnotationDeclaringClassForTypes(candidates, NonInheritedAnnotationInterface.class));
+				findAnnotationDeclaringClassForTypes(candidates, NonInheritedAnnotationInterface.class));
 		assertNull(findAnnotationDeclaringClassForTypes(candidates, SubNonInheritedAnnotationInterface.class));
 		assertEquals(NonInheritedAnnotationClass.class,
-			findAnnotationDeclaringClassForTypes(candidates, NonInheritedAnnotationClass.class));
+				findAnnotationDeclaringClassForTypes(candidates, NonInheritedAnnotationClass.class));
 		assertEquals(NonInheritedAnnotationClass.class,
-			findAnnotationDeclaringClassForTypes(candidates, SubNonInheritedAnnotationClass.class));
+				findAnnotationDeclaringClassForTypes(candidates, SubNonInheritedAnnotationClass.class));
 
 		// class hierarchy mixed with @Transactional and @Order declarations
 		assertEquals(TransactionalClass.class,
-			findAnnotationDeclaringClassForTypes(candidates, TransactionalClass.class));
+				findAnnotationDeclaringClassForTypes(candidates, TransactionalClass.class));
 		assertEquals(TransactionalAndOrderedClass.class,
-			findAnnotationDeclaringClassForTypes(candidates, TransactionalAndOrderedClass.class));
+				findAnnotationDeclaringClassForTypes(candidates, TransactionalAndOrderedClass.class));
 		assertEquals(TransactionalAndOrderedClass.class,
-			findAnnotationDeclaringClassForTypes(candidates, SubTransactionalAndOrderedClass.class));
+				findAnnotationDeclaringClassForTypes(candidates, SubTransactionalAndOrderedClass.class));
 	}
 
 	@Test
@@ -373,9 +374,8 @@ public class AnnotationUtilsTests {
 
 		// inherited class-level annotation; note: @Transactional is inherited
 		assertFalse(isAnnotationInherited(Transactional.class, InheritedAnnotationInterface.class));
-		// isAnnotationInherited() does not currently traverse interface
-		// hierarchies. Thus the following, though perhaps counter intuitive,
-		// must be false:
+		// isAnnotationInherited() does not currently traverse interface hierarchies.
+		// Thus the following, though perhaps counter intuitive, must be false:
 		assertFalse(isAnnotationInherited(Transactional.class, SubInheritedAnnotationInterface.class));
 		assertFalse(isAnnotationInherited(Transactional.class, InheritedAnnotationClass.class));
 		assertTrue(isAnnotationInherited(Transactional.class, SubInheritedAnnotationClass.class));
@@ -437,7 +437,7 @@ public class AnnotationUtilsTests {
 		method = WebController.class.getMethod("handleMappedWithDifferentPathAndValueAttributes");
 		webMapping = method.getAnnotation(WebMapping.class);
 		exception.expect(AnnotationConfigurationException.class);
-		exception.expectMessage(containsString("attribute [value] and its alias [path]"));
+		exception.expectMessage(containsString("attribute 'value' and its alias 'path'"));
 		exception.expectMessage(containsString("values of [/enigma] and [/test]"));
 		exception.expectMessage(containsString("but only one is permitted"));
 		getAnnotationAttributes(webMapping);
@@ -716,7 +716,8 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void synthesizeAnnotationWithAttributeAliasForNonexistentAttribute() throws Exception {
-		AliasForNonexistentAttribute annotation = AliasForNonexistentAttributeClass.class.getAnnotation(AliasForNonexistentAttribute.class);
+		AliasForNonexistentAttribute annotation =
+				AliasForNonexistentAttributeClass.class.getAnnotation(AliasForNonexistentAttribute.class);
 		exception.expect(AnnotationConfigurationException.class);
 		exception.expectMessage(containsString("Attribute [foo] in"));
 		exception.expectMessage(containsString(AliasForNonexistentAttribute.class.getName()));
@@ -726,7 +727,8 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void synthesizeAnnotationWithAttributeAliasWithoutMirroredAliasFor() throws Exception {
-		AliasForWithoutMirroredAliasFor annotation = AliasForWithoutMirroredAliasForClass.class.getAnnotation(AliasForWithoutMirroredAliasFor.class);
+		AliasForWithoutMirroredAliasFor annotation =
+				AliasForWithoutMirroredAliasForClass.class.getAnnotation(AliasForWithoutMirroredAliasFor.class);
 		exception.expect(AnnotationConfigurationException.class);
 		exception.expectMessage(containsString("Attribute [bar] in"));
 		exception.expectMessage(containsString(AliasForWithoutMirroredAliasFor.class.getName()));
@@ -736,11 +738,11 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void synthesizeAnnotationWithAttributeAliasWithMirroredAliasForWrongAttribute() throws Exception {
-		AliasForWithMirroredAliasForWrongAttribute annotation = AliasForWithMirroredAliasForWrongAttributeClass.class.getAnnotation(AliasForWithMirroredAliasForWrongAttribute.class);
+		AliasForWithMirroredAliasForWrongAttribute annotation =
+				AliasForWithMirroredAliasForWrongAttributeClass.class.getAnnotation(AliasForWithMirroredAliasForWrongAttribute.class);
 
 		// Since JDK 7+ does not guarantee consistent ordering of methods returned using
 		// reflection, we cannot make the test dependent on any specific ordering.
-		//
 		// In other words, we can't be certain which type of exception message we'll get,
 		// so we allow for both possibilities.
 		exception.expect(AnnotationConfigurationException.class);
@@ -753,13 +755,14 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void synthesizeAnnotationWithAttributeAliasForAttributeOfDifferentType() throws Exception {
-		AliasForAttributeOfDifferentType annotation = AliasForAttributeOfDifferentTypeClass.class.getAnnotation(AliasForAttributeOfDifferentType.class);
+		AliasForAttributeOfDifferentType annotation =
+				AliasForAttributeOfDifferentTypeClass.class.getAnnotation(AliasForAttributeOfDifferentType.class);
 		exception.expect(AnnotationConfigurationException.class);
 		exception.expectMessage(startsWith("Misconfigured aliases"));
 		exception.expectMessage(containsString(AliasForAttributeOfDifferentType.class.getName()));
+
 		// Since JDK 7+ does not guarantee consistent ordering of methods returned using
 		// reflection, we cannot make the test dependent on any specific ordering.
-		//
 		// In other words, we don't know if "foo" or "bar" will come first.
 		exception.expectMessage(containsString("attribute [foo]"));
 		exception.expectMessage(containsString("attribute [bar]"));
@@ -769,12 +772,13 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void synthesizeAnnotationWithAttributeAliasForWithMissingDefaultValues() throws Exception {
-		AliasForWithMissingDefaultValues annotation = AliasForWithMissingDefaultValuesClass.class.getAnnotation(AliasForWithMissingDefaultValues.class);
+		AliasForWithMissingDefaultValues annotation =
+				AliasForWithMissingDefaultValuesClass.class.getAnnotation(AliasForWithMissingDefaultValues.class);
 		exception.expectMessage(startsWith("Misconfigured aliases"));
 		exception.expectMessage(containsString(AliasForWithMissingDefaultValues.class.getName()));
+
 		// Since JDK 7+ does not guarantee consistent ordering of methods returned using
 		// reflection, we cannot make the test dependent on any specific ordering.
-		//
 		// In other words, we don't know if "foo" or "bar" will come first.
 		exception.expectMessage(containsString("attribute [foo]"));
 		exception.expectMessage(containsString("attribute [bar]"));
@@ -784,12 +788,13 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void synthesizeAnnotationWithAttributeAliasForAttributeWithDifferentDefaultValue() throws Exception {
-		AliasForAttributeWithDifferentDefaultValue annotation = AliasForAttributeWithDifferentDefaultValueClass.class.getAnnotation(AliasForAttributeWithDifferentDefaultValue.class);
+		AliasForAttributeWithDifferentDefaultValue annotation =
+				AliasForAttributeWithDifferentDefaultValueClass.class.getAnnotation(AliasForAttributeWithDifferentDefaultValue.class);
 		exception.expectMessage(startsWith("Misconfigured aliases"));
 		exception.expectMessage(containsString(AliasForAttributeWithDifferentDefaultValue.class.getName()));
+
 		// Since JDK 7+ does not guarantee consistent ordering of methods returned using
 		// reflection, we cannot make the test dependent on any specific ordering.
-		//
 		// In other words, we don't know if "foo" or "bar" will come first.
 		exception.expectMessage(containsString("attribute [foo]"));
 		exception.expectMessage(containsString("attribute [bar]"));
@@ -1042,11 +1047,10 @@ public class AnnotationUtilsTests {
 	@Test
 	@SuppressWarnings("unchecked")
 	public void synthesizeNonPublicAnnotationWithAttributeAliasesFromDifferentPackage() throws Exception {
-
 		Class<?> clazz =
-			ClassUtils.forName("org.springframework.core.annotation.subpackage.NonPublicAliasedAnnotatedClass", null);
+				ClassUtils.forName("org.springframework.core.annotation.subpackage.NonPublicAliasedAnnotatedClass", null);
 		Class<? extends Annotation> annotationType = (Class<? extends Annotation>)
-			ClassUtils.forName("org.springframework.core.annotation.subpackage.NonPublicAliasedAnnotation", null);
+				ClassUtils.forName("org.springframework.core.annotation.subpackage.NonPublicAliasedAnnotation", null);
 
 		Annotation annotation = clazz.getAnnotation(annotationType);
 		assertNotNull(annotation);
@@ -1072,7 +1076,7 @@ public class AnnotationUtilsTests {
 		ContextConfig[] configs = synthesizedHierarchy.value();
 		assertNotNull(configs);
 		assertTrue("nested annotations must be synthesized",
-			Arrays.stream(configs).allMatch(c -> c instanceof SynthesizedAnnotation));
+				Arrays.stream(configs).allMatch(c -> c instanceof SynthesizedAnnotation));
 
 		List<String> locations = Arrays.stream(configs).map(ContextConfig::locations).collect(toList());
 		assertThat(locations, is(expectedLocations));
