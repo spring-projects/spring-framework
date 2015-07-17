@@ -46,7 +46,7 @@ configure(allprojects) { project ->
 	ext.jackson2Version      = "2.6.0-rc4"  // to be upgraded to 2.6 final in time for Spring Framework 4.2 GA
 	ext.jasperreportsVersion = "6.1.0"
 	ext.javamailVersion      = "1.5.4"
-	ext.jettyVersion         = "9.3.0.v20150612"
+	ext.jettyVersion         = "9.3.1.v20150714"
 	ext.jodaVersion          = "2.8.1"
 	ext.jrubyVersion         = "1.7.21"
 	ext.jtaVersion           = "1.2"
@@ -64,7 +64,7 @@ configure(allprojects) { project ->
 	ext.tiles3Version        = "3.0.5"
 	ext.tomcatVersion        = "8.0.24"
 	ext.tyrusVersion         = "1.3.5"  // constrained by WebLogic 12.1.3 support
-	ext.undertowVersion      = "1.2.8.Final"
+	ext.undertowVersion      = "1.2.9.Final"
 	ext.woodstoxVersion      = "5.0.1"
 	ext.xmlunitVersion       = "1.6"
 	ext.xstreamVersion       = "1.4.8"
