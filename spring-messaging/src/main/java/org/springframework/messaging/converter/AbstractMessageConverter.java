@@ -49,7 +49,6 @@ public abstract class AbstractMessageConverter implements MessageConverter {
 	 * ({@link MethodParameter} instance) about the origin of the payload (for
 	 * {@link #toMessage(Object, MessageHeaders)}) or about the target of the payload
 	 * ({@link #fromMessage(Message, Class)}).
-	 *
 	 * @since 4.2
 	 */
 	public static final String METHOD_PARAMETER_HINT_HEADER = "methodParameterHint";
@@ -221,12 +220,7 @@ public abstract class AbstractMessageConverter implements MessageConverter {
 		}
 		MimeType mimeType = getMimeType(headers);
 		if (mimeType == null) {
-			if (isStrictContentTypeMatch()) {
-				return false;
-			}
-			else {
-				return true;
-			}
+			return !isStrictContentTypeMatch();
 		}
 		for (MimeType current : getSupportedMimeTypes()) {
 			if (current.getType().equals(mimeType.getType()) && current.getSubtype().equals(mimeType.getSubtype())) {

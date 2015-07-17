@@ -156,12 +156,14 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			this.messageConverters.add(new AtomFeedHttpMessageConverter());
 			this.messageConverters.add(new RssChannelHttpMessageConverter());
 		}
+
 		if (jackson2XmlPresent) {
-			messageConverters.add(new MappingJackson2XmlHttpMessageConverter());
+			this.messageConverters.add(new MappingJackson2XmlHttpMessageConverter());
 		}
 		else if (jaxb2Present) {
 			this.messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
 		}
+
 		if (jackson2Present) {
 			this.messageConverters.add(new MappingJackson2HttpMessageConverter());
 		}

@@ -245,8 +245,8 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	}
 
 	private Class<?> getSerializationView(MessageHeaders headers) {
-		MethodParameter returnType = (headers == null ? null :
-				(MethodParameter)headers.get(METHOD_PARAMETER_HINT_HEADER));
+		MethodParameter returnType = (headers != null ?
+				(MethodParameter) headers.get(METHOD_PARAMETER_HINT_HEADER) : null);
 		if (returnType == null) {
 			return null;
 		}

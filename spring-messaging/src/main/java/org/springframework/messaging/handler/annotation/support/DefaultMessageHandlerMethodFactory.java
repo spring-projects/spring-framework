@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ import org.springframework.validation.Validator;
  * The default {@link MessageHandlerMethodFactory} implementation creating an
  * {@link InvocableHandlerMethod} with the necessary
  * {@link HandlerMethodArgumentResolver} instances to detect and process
- * most of  the use cases defined by
- * {@link org.springframework.messaging.handler.annotation.MessageMapping MessageMapping}
+ * most of the use cases defined by
+ * {@link org.springframework.messaging.handler.annotation.MessageMapping MessageMapping}.
  *
  * <p>Extra method argument resolvers can be added to customize the method
  * signature that can be handled.
