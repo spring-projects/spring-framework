@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,11 +138,11 @@ import org.springframework.core.Ordered;
 public @interface EnableAsync {
 
 	/**
-	 * Indicate the 'async' annotation type to be detected at either class
-	 * or method level. By default, both the {@link Async} annotation and
-	 * the EJB 3.1 {@code javax.ejb.Asynchronous} annotation will be
-	 * detected. <p>This setter property exists so that developers can provide
-	 * their own (non-Spring-specific) annotation type to indicate that a method
+	 * Indicate the 'async' annotation type to be detected at either class or
+	 * method level. By default, both the {@link Async} annotation and the
+	 * EJB 3.1 {@code javax.ejb.Asynchronous} annotation will be detected.
+	 * <p>This setter property exists so that developers can provide their
+	 * own (non-Spring-specific) annotation type to indicate that a method
 	 * (or all methods of a given class) should be invoked asynchronously.
 	 */
 	Class<? extends Annotation> annotation() default Annotation.class;
@@ -151,7 +151,6 @@ public @interface EnableAsync {
 	 * Indicate whether subclass-based (CGLIB) proxies are to be created as opposed
 	 * to standard Java interface-based proxies. The default is {@code false}. <strong>
 	 * Applicable only if {@link #mode()} is set to {@link AdviceMode#PROXY}</strong>.
-	 *
 	 * <p>Note that setting this attribute to {@code true} will affect <em>all</em>
 	 * Spring-managed beans requiring proxying, not just those marked with {@code @Async}.
 	 * For example, other beans marked with Spring's {@code @Transactional} annotation
@@ -176,4 +175,5 @@ public @interface EnableAsync {
 	 * existing proxies rather than double-proxy.
 	 */
 	int order() default Ordered.LOWEST_PRECEDENCE;
+
 }
