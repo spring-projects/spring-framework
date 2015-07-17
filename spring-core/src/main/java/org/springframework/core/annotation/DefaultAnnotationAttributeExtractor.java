@@ -46,20 +46,22 @@ class DefaultAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAt
 		super(annotation.annotationType(), annotatedElement, annotation);
 	}
 
+
+	@Override
+	public Annotation getSource() {
+		return (Annotation) super.getSource();
+	}
+
 	@Override
 	protected Object getRawAttributeValue(Method attributeMethod) {
 		ReflectionUtils.makeAccessible(attributeMethod);
-		return ReflectionUtils.invokeMethod(attributeMethod, getAnnotation());
+		return ReflectionUtils.invokeMethod(attributeMethod, getSource());
 	}
 
 	@Override
 	protected Object getRawAttributeValue(String attributeName) {
-		Method attributeMethod = ReflectionUtils.findMethod(getAnnotation().annotationType(), attributeName);
+		Method attributeMethod = ReflectionUtils.findMethod(getSource().annotationType(), attributeName);
 		return getRawAttributeValue(attributeMethod);
-	}
-
-	private Annotation getAnnotation() {
-		return (Annotation) getSource();
 	}
 
 }

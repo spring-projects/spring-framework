@@ -52,23 +52,26 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 	 */
 	MapAnnotationAttributeExtractor(Map<String, Object> attributes, Class<? extends Annotation> annotationType,
 			AnnotatedElement annotatedElement) {
-		super(annotationType, annotatedElement, enrichAndValidateAttributes(new HashMap<String, Object>(attributes), annotationType));
+
+		super(annotationType, annotatedElement, enrichAndValidateAttributes(attributes, annotationType));
+	}
+
+
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> getSource() {
+		return (Map<String, Object>) super.getSource();
 	}
 
 	@Override
 	protected Object getRawAttributeValue(Method attributeMethod) {
-		return getMap().get(attributeMethod.getName());
+		return getSource().get(attributeMethod.getName());
 	}
 
 	@Override
 	protected Object getRawAttributeValue(String attributeName) {
-		return getMap().get(attributeName);
+		return getSource().get(attributeName);
 	}
 
-	@SuppressWarnings("unchecked")
-	private Map<String, Object> getMap() {
-		return (Map<String, Object>) getSource();
-	}
 
 	/**
 	 * Enrich and validate the supplied {@code attributes} map by ensuring
@@ -81,9 +84,10 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 	 * an {@link IllegalArgumentException} will be thrown.
 	 * @see AliasFor
 	 */
-	private static Map<String, Object> enrichAndValidateAttributes(Map<String, Object> attributes,
-			Class<? extends Annotation> annotationType) {
+	private static Map<String, Object> enrichAndValidateAttributes(
+			Map<String, Object> original, Class<? extends Annotation> annotationType) {
 
+		Map<String, Object> attributes = new HashMap<String, Object>(original);
 		Map<String, String> attributeAliasMap = getAttributeAliasMap(annotationType);
 
 		for (Method attributeMethod : getAttributeMethods(annotationType)) {
