@@ -87,6 +87,14 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 		EmbeddedValueResolverAware, BeanFactoryAware, ApplicationContextAware,
 		SmartInitializingSingleton, ApplicationListener<ContextRefreshedEvent>, DisposableBean {
 
+	/**
+	 * The default name of the TaskScheduler bean to pick up: "taskScheduler".
+	 * <p>Note that the initial lookup happens by type; this is just the fallback
+	 * in case of multiple scheduler beans found in the context.
+	 */
+	public static final String DEFAULT_TASK_SCHEDULER_BEAN_NAME = "taskScheduler";
+
+
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private Object scheduler;
@@ -181,12 +189,19 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 			Assert.state(this.beanFactory != null, "BeanFactory must be set to find scheduler by type");
 			try {
 				// Search for TaskScheduler bean...
-				this.registrar.setScheduler(this.beanFactory.getBean(TaskScheduler.class));
+				this.registrar.setTaskScheduler(this.beanFactory.getBean(TaskScheduler.class));
 			}
 			catch (NoUniqueBeanDefinitionException ex) {
-				throw new IllegalStateException("More than one TaskScheduler exists within the context. " +
-						"Remove all but one of the beans; or implement the SchedulingConfigurer interface and call " +
-						"ScheduledTaskRegistrar#setScheduler explicitly within the configureTasks() callback.", ex);
+				try {
+					this.registrar.setTaskScheduler(
+							this.beanFactory.getBean(DEFAULT_TASK_SCHEDULER_BEAN_NAME, TaskScheduler.class));
+				}
+				catch (NoSuchBeanDefinitionException ex2) {
+					throw new IllegalStateException("More than one TaskScheduler bean exists within the context, and " +
+							"none is named 'taskScheduler'. Mark one of them as primary or name it 'taskScheduler' "+
+							"(possibly as an alias); or implement the SchedulingConfigurer interface and call " +
+							"ScheduledTaskRegistrar#setScheduler explicitly within the configureTasks() callback.", ex);
+				}
 			}
 			catch (NoSuchBeanDefinitionException ex) {
 				logger.debug("Could not find default TaskScheduler bean", ex);
@@ -195,9 +210,10 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 					this.registrar.setScheduler(this.beanFactory.getBean(ScheduledExecutorService.class));
 				}
 				catch (NoUniqueBeanDefinitionException ex2) {
-					throw new IllegalStateException("More than one ScheduledExecutorService exists within the context. " +
-							"Remove all but one of the beans; or implement the SchedulingConfigurer interface and call " +
-							"ScheduledTaskRegistrar#setScheduler explicitly within the configureTasks() callback.", ex);
+					throw new IllegalStateException("More than one ScheduledExecutorService bean exists within " +
+							"the context. Mark one of them as primary; or implement the SchedulingConfigurer " +
+							"interface and call ScheduledTaskRegistrar#setScheduler explicitly within the " +
+							"configureTasks() callback.", ex);
 				}
 				catch (NoSuchBeanDefinitionException ex2) {
 					logger.debug("Could not find default ScheduledExecutorService bean", ex);
