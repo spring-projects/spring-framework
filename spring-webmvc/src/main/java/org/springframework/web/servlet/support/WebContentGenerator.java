@@ -394,6 +394,9 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 			String ccValue = cacheControl.getHeaderValue();
 			if (ccValue != null) {
 				response.setHeader(HEADER_CACHE_CONTROL, ccValue);
+				if (response.containsHeader(HEADER_PRAGMA)) {
+					response.setHeader(HEADER_PRAGMA, "");
+				}
 			}
 		}
 	}
@@ -429,6 +432,9 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 				headerValue += ", must-revalidate";
 			}
 			response.setHeader(HEADER_CACHE_CONTROL, headerValue);
+		}
+		if (response.containsHeader(HEADER_PRAGMA)) {
+			response.setHeader(HEADER_PRAGMA, "");
 		}
 	}
 

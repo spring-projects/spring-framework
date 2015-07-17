@@ -105,6 +105,34 @@ public class WebContentInterceptorTests {
 		assertThat(cacheControlHeaders, Matchers.emptyIterable());
 	}
 
+	// SPR-13252
+	@Test
+	public void cachingConfigAndPragmaHeader() throws Exception {
+		WebContentInterceptor interceptor = new WebContentInterceptor();
+		interceptor.setCacheSeconds(10);
+		response.setHeader("Pragma", "no-cache");
+
+		interceptor.preHandle(request, response, null);
+
+		Iterable<String> pragmaHeaders = response.getHeaders("Pragma");
+		assertThat(pragmaHeaders, Matchers.contains(""));
+	}
+
+	// SPR-13252
+	@SuppressWarnings("deprecation")
+	@Test
+	public void http10CachingConfigAndPragmaHeader() throws Exception {
+		WebContentInterceptor interceptor = new WebContentInterceptor();
+		interceptor.setCacheSeconds(10);
+		interceptor.setAlwaysMustRevalidate(true);
+		response.setHeader("Pragma", "no-cache");
+
+		interceptor.preHandle(request, response, null);
+
+		Iterable<String> pragmaHeaders = response.getHeaders("Pragma");
+		assertThat(pragmaHeaders, Matchers.contains(""));
+	}
+
 	@SuppressWarnings("deprecation")
 	@Test
 	public void http10CachingConfigAndSpecificMapping() throws Exception {
