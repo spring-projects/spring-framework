@@ -787,7 +787,7 @@ public class ConfigurationClassPostProcessorTests {
 	public static class ScopedProxyRepositoryConfiguration {
 
 		@Bean
-		@Scope(name = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
+		@Scope(scopeName = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
 		public Repository<String> stringRepo() {
 			return new Repository<String>() {
 				@Override
@@ -798,7 +798,7 @@ public class ConfigurationClassPostProcessorTests {
 		}
 
 		@Bean
-		@Scope(name = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
+		@Scope(scopeName = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
 		public Repository<Integer> integerRepo() {
 			return new Repository<Integer>() {
 				@Override

@@ -143,13 +143,13 @@ public class RequestContextHolderTests {
 		}
 
 		@Bean
-		@Scope(name = "request", proxyMode = ScopedProxyMode.TARGET_CLASS)
+		@Scope(scopeName = "request", proxyMode = ScopedProxyMode.TARGET_CLASS)
 		public RequestScopedController requestScopedController() {
 			return new RequestScopedController();
 		}
 
 		@Bean
-		@Scope(name = "request", proxyMode = ScopedProxyMode.TARGET_CLASS)
+		@Scope(scopeName = "request", proxyMode = ScopedProxyMode.TARGET_CLASS)
 		public RequestScopedService requestScopedService() {
 			return new RequestScopedService();
 		}
@@ -160,7 +160,7 @@ public class RequestContextHolderTests {
 		}
 
 		@Bean
-		@Scope(name = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
+		@Scope(scopeName = "session", proxyMode = ScopedProxyMode.TARGET_CLASS)
 		public SessionScopedService sessionScopedService() {
 			return new SessionScopedService();
 		}

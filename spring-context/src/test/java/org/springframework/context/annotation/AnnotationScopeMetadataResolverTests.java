@@ -44,6 +44,7 @@ public class AnnotationScopeMetadataResolverTests {
 
 	private AnnotationScopeMetadataResolver scopeMetadataResolver = new AnnotationScopeMetadataResolver();
 
+
 	@Test
 	public void resolveScopeMetadataShouldNotApplyScopedProxyModeToSingleton() {
 		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(AnnotatedWithSingletonScope.class);
@@ -65,7 +66,6 @@ public class AnnotationScopeMetadataResolverTests {
 
 	@Test
 	public void resolveScopeMetadataShouldReadScopedProxyModeFromAnnotation() {
-		this.scopeMetadataResolver = new AnnotationScopeMetadataResolver();
 		AnnotatedBeanDefinition bd = new AnnotatedGenericBeanDefinition(AnnotatedWithScopedProxy.class);
 		ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(bd);
 		assertNotNull("resolveScopeMetadata(..) must *never* return null.", scopeMetadata);
@@ -133,6 +133,7 @@ public class AnnotationScopeMetadataResolverTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@Scope("request")
 	@interface CustomRequestScopeWithAttributeOverride {
+
 		ScopedProxyMode proxyMode();
 	}
 
@@ -144,7 +145,7 @@ public class AnnotationScopeMetadataResolverTests {
 	private static class AnnotatedWithPrototypeScope {
 	}
 
-	@Scope(name = "request", proxyMode = TARGET_CLASS)
+	@Scope(scopeName = "request", proxyMode = TARGET_CLASS)
 	private static class AnnotatedWithScopedProxy {
 	}
 

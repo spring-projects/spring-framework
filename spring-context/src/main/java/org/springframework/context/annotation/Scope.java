@@ -58,10 +58,10 @@ import org.springframework.core.annotation.AliasFor;
 public @interface Scope {
 
 	/**
-	 * Alias for {@link #name}.
-	 * @see #name
+	 * Alias for {@link #scopeName}.
+	 * @see #scopeName
 	 */
-	@AliasFor(attribute = "name")
+	@AliasFor(attribute = "scopeName")
 	String value() default "";
 
 	/**
@@ -76,7 +76,7 @@ public @interface Scope {
 	 * @see #value
 	 */
 	@AliasFor(attribute = "value")
-	String name() default "";
+	String scopeName() default "";
 
 	/**
 	 * Specifies whether a component should be configured as a scoped proxy
