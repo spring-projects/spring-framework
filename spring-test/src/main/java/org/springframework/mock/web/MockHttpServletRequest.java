@@ -53,6 +53,8 @@ import javax.servlet.http.Part;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
@@ -70,6 +72,7 @@ import org.springframework.util.StringUtils;
  * @author Mark Fisher
  * @author Chris Beams
  * @author Sam Brannen
+ * @author Brian Clozel
  * @since 1.0.2
  */
 public class MockHttpServletRequest implements HttpServletRequest {
@@ -209,7 +212,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private boolean requestedSessionIdFromURL = false;
 
-	private final Map<String, Part> parts = new LinkedHashMap<String, Part>();
+	private final MultiValueMap<String, Part> parts = new LinkedMultiValueMap<String, Part>();
 
 
 	// ---------------------------------------------------------------------
@@ -1044,8 +1047,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public StringBuffer getRequestURL() {
 		StringBuffer url = new StringBuffer(this.scheme).append("://").append(this.serverName);
 
-		if (this.serverPort > 0 && ((HTTP.equalsIgnoreCase(this.scheme) && this.serverPort != 80) ||
-				(HTTPS.equalsIgnoreCase(this.scheme) && this.serverPort != 443))) {
+		if (this.serverPort > 0
+				&& ((HTTP.equalsIgnoreCase(this.scheme) && this.serverPort != 80) || (HTTPS.equalsIgnoreCase(this.scheme) && this.serverPort != 443))) {
 			url.append(':').append(this.serverPort);
 		}
 
@@ -1157,17 +1160,21 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	public void addPart(Part part) {
-		this.parts.put(part.getName(), part);
+		this.parts.add(part.getName(), part);
 	}
 
 	@Override
 	public Part getPart(String name) throws IOException, IllegalStateException, ServletException {
-		return this.parts.get(name);
+		return this.parts.getFirst(name);
 	}
 
 	@Override
 	public Collection<Part> getParts() throws IOException, IllegalStateException, ServletException {
-		return this.parts.values();
+		List<Part> result = new LinkedList<Part>();
+		for(List<Part> list : this.parts.values()) {
+			result.addAll(list);
+		}
+		return result;
 	}
 
 }
