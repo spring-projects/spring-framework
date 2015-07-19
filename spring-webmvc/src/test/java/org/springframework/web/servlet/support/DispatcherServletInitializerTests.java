@@ -23,7 +23,6 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.mock.web.test.MockServletContext;
@@ -46,21 +45,15 @@ public class DispatcherServletInitializerTests {
 
 	private static final String SERVLET_MAPPING = "/myservlet";
 
-	private AbstractDispatcherServletInitializer initializer;
 
-	private MockServletContext servletContext;
+	private final MockServletContext servletContext = new MyMockServletContext();
 
-	private Map<String, Servlet> servlets;
+	private final AbstractDispatcherServletInitializer initializer = new MyDispatcherServletInitializer();
 
-	private Map<String, MockServletRegistration> registrations;
+	private final Map<String, Servlet> servlets = new LinkedHashMap<>(2);
 
-	@Before
-	public void setUp() throws Exception {
-		servletContext = new MyMockServletContext();
-		initializer = new MyDispatcherServletInitializer();
-		servlets = new LinkedHashMap<String, Servlet>(2);
-		registrations = new LinkedHashMap<String, MockServletRegistration>(2);
-	}
+	private final Map<String, MockServletRegistration> registrations = new LinkedHashMap<>(2);
+
 
 	@Test
 	public void register() throws ServletException {
@@ -89,8 +82,7 @@ public class DispatcherServletInitializerTests {
 	private class MyMockServletContext extends MockServletContext {
 
 		@Override
-		public ServletRegistration.Dynamic addServlet(String servletName,
-													  Servlet servlet) {
+		public ServletRegistration.Dynamic addServlet(String servletName, Servlet servlet) {
 			servlets.put(servletName, servlet);
 			MockServletRegistration registration = new MockServletRegistration();
 			registrations.put(servletName, registration);
@@ -98,8 +90,7 @@ public class DispatcherServletInitializerTests {
 		}
 	}
 
-	private static class MyDispatcherServletInitializer
-			extends AbstractDispatcherServletInitializer {
+	private static class MyDispatcherServletInitializer extends AbstractDispatcherServletInitializer {
 
 		@Override
 		protected String getServletName() {
@@ -113,15 +104,14 @@ public class DispatcherServletInitializerTests {
 
 		@Override
 		protected WebApplicationContext createServletApplicationContext() {
-			StaticWebApplicationContext servletContext =
-					new StaticWebApplicationContext();
+			StaticWebApplicationContext servletContext = new StaticWebApplicationContext();
 			servletContext.registerSingleton("bean", MyBean.class);
 			return servletContext;
 		}
 
 		@Override
 		protected String[] getServletMappings() {
-			return new String[]{"/myservlet"};
+			return new String[] { SERVLET_MAPPING };
 		}
 
 		@Override
