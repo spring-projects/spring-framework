@@ -245,6 +245,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 	}
 
 	@Test // SPR-12634
+	@SuppressWarnings("unchecked")
 	public void customizeDefaultModulesWithModuleClass() throws JsonProcessingException, UnsupportedEncodingException {
 		this.factory.setModulesToInstall(CustomIntegerModule.class);
 		this.factory.afterPropertiesSet();

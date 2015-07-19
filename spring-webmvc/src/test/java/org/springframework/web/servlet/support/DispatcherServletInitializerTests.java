@@ -138,6 +138,7 @@ public class DispatcherServletInitializerTests {
 	private static class MyBean {
 	}
 
+	@SuppressWarnings("serial")
 	private static class MyDispatcherServlet extends DispatcherServlet {
 		public MyDispatcherServlet(WebApplicationContext webApplicationContext) {
 			super(webApplicationContext);
