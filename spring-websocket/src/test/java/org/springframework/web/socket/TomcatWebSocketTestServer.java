@@ -27,6 +27,8 @@ import org.apache.catalina.LifecycleEvent;
 import org.apache.catalina.LifecycleListener;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.coyote.http11.Http11NioProtocol;
 import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
@@ -44,6 +46,8 @@ import org.springframework.web.servlet.DispatcherServlet;
  * @author Sam Brannen
  */
 public class TomcatWebSocketTestServer implements WebSocketTestServer {
+
+	private static final Log logger = LogFactory.getLog(TomcatWebSocketTestServer.class);
 
 	private Tomcat tomcatServer;
 
@@ -127,7 +131,9 @@ public class TomcatWebSocketTestServer implements WebSocketTestServer {
 		this.context.addLifecycleListener(new LifecycleListener() {
 			@Override
 			public void lifecycleEvent(LifecycleEvent event) {
-				System.out.println(event.getType());
+				if (logger.isDebugEnabled()) {
+					logger.debug("Event: " + event.getType());
+				}
 			}
 		});
 	}
