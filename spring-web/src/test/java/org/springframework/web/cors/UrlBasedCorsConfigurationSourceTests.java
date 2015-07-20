@@ -23,29 +23,29 @@ import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 
 /**
- * Unit tests for {@link CorsConfigurationMapping}.
+ * Unit tests for {@link UrlBasedCorsConfigurationSource}.
  * @author Sebastien Deleuze
  */
-public class CorsConfigurationMappingTests {
+public class UrlBasedCorsConfigurationSourceTests {
 
-	private final CorsConfigurationMapping mapping = new CorsConfigurationMapping();
+	private final UrlBasedCorsConfigurationSource configSource = new UrlBasedCorsConfigurationSource();
 
 	@Test
 	public void empty() {
-		assertNull(this.mapping.getCorsConfiguration(new MockHttpServletRequest(HttpMethod.GET.name(), "/bar/test.html")));
+		assertNull(this.configSource.getCorsConfiguration(new MockHttpServletRequest(HttpMethod.GET.name(), "/bar/test.html")));
 	}
 
 	@Test
 	public void registerAndMatch() {
 		CorsConfiguration config = new CorsConfiguration();
-		this.mapping.registerCorsConfiguration("/bar/**", config);
-		assertNull(this.mapping.getCorsConfiguration(new MockHttpServletRequest(HttpMethod.GET.name(), "/foo/test.html")));
-		assertEquals(config, this.mapping.getCorsConfiguration(new MockHttpServletRequest(HttpMethod.GET.name(), "/bar/test.html")));
+		this.configSource.registerCorsConfiguration("/bar/**", config);
+		assertNull(this.configSource.getCorsConfiguration(new MockHttpServletRequest(HttpMethod.GET.name(), "/foo/test.html")));
+		assertEquals(config, this.configSource.getCorsConfiguration(new MockHttpServletRequest(HttpMethod.GET.name(), "/bar/test.html")));
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void unmodifiableConfigurationsMap() {
-		this.mapping.getCorsConfigurations().put("/**", new CorsConfiguration());
+		this.configSource.getCorsConfigurations().put("/**", new CorsConfiguration());
 	}
 
 }

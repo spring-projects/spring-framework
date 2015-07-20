@@ -36,7 +36,7 @@ import org.springframework.web.util.UrlPathHelper;
  * @author Sebastien Deleuze
  * @since 4.2
  */
-public class CorsConfigurationMapping implements CorsConfigurationSource {
+public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource {
 
 	private final Map<String, CorsConfiguration> corsConfigurations =
 			new LinkedHashMap<String, CorsConfiguration>();
