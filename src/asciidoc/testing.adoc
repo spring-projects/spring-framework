@@ -3623,7 +3623,7 @@ by using `@RunWith(SpringJUnit4ClassRunner.class)`, `@ContextConfiguration`,
 [[testcontext-junit4-runner]]
 ===== Spring JUnit Runner
 The __Spring TestContext Framework__ offers full integration with JUnit 4.9+ through a
-custom runner (tested on JUnit 4.9 -- 4.11). By annotating test classes with
+custom runner (tested on JUnit 4.9 -- 4.12). By annotating test classes with
 `@RunWith(SpringJUnit4ClassRunner.class)`, developers can implement standard JUnit-based
 unit and integration tests and simultaneously reap the benefits of the TestContext
 framework such as support for loading application contexts, dependency injection of test
@@ -4306,16 +4306,16 @@ Consult the following resources for more information about testing:
   Used by the Spring Framework in its test suite.
 * http://testng.org/[TestNG]: A testing framework inspired by JUnit with added support
   for annotations, test groups, data-driven testing, distributed testing, etc.
+* http://en.wikipedia.org/wiki/Mock_Object[Mock Objects]: Article in Wikipedia.
 * http://www.mockobjects.com/[MockObjects.com]: Web site dedicated to mock objects, a
   technique for improving the design of code within test-driven development.
-* http://en.wikipedia.org/wiki/Mock_Object["Mock Objects"]: Article in Wikipedia.
-* http://www.easymock.org/[EasyMock]: Java library " __that provides Mock Objects for
-  interfaces (and objects through the class extension) by generating them on the fly
-  using Java's proxy mechanism.__ " Used by the Spring Framework in its test suite.
-* http://www.jmock.org/[JMock]: Library that supports test-driven development of Java
-  code with mock objects.
 * http://mockito.org/[Mockito]: Java mock library based on the
   http://xunitpatterns.com/Test%20Spy.html[test spy] pattern.
+* http://www.easymock.org/[EasyMock]: Java library "__that provides Mock Objects for
+  interfaces (and objects through the class extension) by generating them on the fly
+  using Java's proxy mechanism.__" Used by the Spring Framework in its test suite.
+* http://www.jmock.org/[JMock]: Library that supports test-driven development of Java
+  code with mock objects.
 * http://dbunit.sourceforge.net/[DbUnit]: JUnit extension (also usable with Ant and
   Maven) targeted for database-driven projects that, among other things, puts your
   database into a known state between test runs.
