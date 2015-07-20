@@ -56,8 +56,6 @@ import org.springframework.web.servlet.HandlerMapping;
  */
 public class ResourceHttpRequestHandlerTests {
 
-	private SimpleDateFormat dateFormat;
-
 	private ResourceHttpRequestHandler handler;
 
 	private MockHttpServletRequest request;
@@ -67,9 +65,6 @@ public class ResourceHttpRequestHandlerTests {
 
 	@Before
 	public void setUp() throws Exception {
-		dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
-		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-
 		List<Resource> paths = new ArrayList<>(2);
 		paths.add(new ClassPathResource("test/", getClass()));
 		paths.add(new ClassPathResource("testalternatepath/", getClass()));
@@ -136,7 +131,7 @@ public class ResourceHttpRequestHandlerTests {
 
 		assertEquals("no-cache", this.response.getHeader("Pragma"));
 		assertThat(this.response.getHeaderValues("Cache-Control"), Matchers.contains("no-cache", "no-store"));
-		assertEquals(this.response.getHeaderValue("Expires"), dateFormat.format(System.currentTimeMillis()));
+		assertTrue(headerAsLong("Expires") <= System.currentTimeMillis());
 		assertTrue(this.response.containsHeader("Last-Modified"));
 		assertEquals(headerAsLong("Last-Modified") / 1000, resourceLastModified("test/foo.css") / 1000);
 	}
@@ -477,7 +472,7 @@ public class ResourceHttpRequestHandlerTests {
 
 
 	private long headerAsLong(String responseHeaderName) throws Exception {
-		return dateFormat.parse(this.response.getHeader(responseHeaderName)).getTime();
+		return Long.valueOf(this.response.getHeader(responseHeaderName));
 	}
 
 	private long resourceLastModified(String resourceName) throws IOException {

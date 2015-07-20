@@ -54,10 +54,6 @@ public class HeaderAssertionTests {
 
 	private final long currentTime = System.currentTimeMillis();
 
-	private String currentDate;
-
-	private SimpleDateFormat dateFormat;
-
 	private MockMvc mockMvc;
 
 	private PersonController personController;
@@ -65,9 +61,6 @@ public class HeaderAssertionTests {
 
 	@Before
 	public void setup() {
-		this.dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
-		this.dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-		this.currentDate = dateFormat.format(currentTime);
 		this.personController = new PersonController();
 		this.personController.setStubTimestamp(currentTime);
 		this.mockMvc = standaloneSetup(this.personController).build();
@@ -76,19 +69,19 @@ public class HeaderAssertionTests {
 	@Test
 	public void stringWithCorrectResponseHeaderValue() throws Exception {
 		this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, currentTime - (1000 * 60)))//
-		.andExpect(header().string(LAST_MODIFIED, currentDate));
+		.andExpect(header().string(LAST_MODIFIED, String.valueOf(currentTime)));
 	}
 
 	@Test
 	public void stringWithMatcherAndCorrectResponseHeaderValue() throws Exception {
 		this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, currentTime - (1000 * 60)))//
-		.andExpect(header().string(LAST_MODIFIED, equalTo(currentDate)));
+		.andExpect(header().string(LAST_MODIFIED, equalTo(String.valueOf(currentTime))));
 	}
 
 	@Test
 	public void longValueWithCorrectResponseHeaderValue() throws Exception {
 		this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, currentTime - (1000 * 60)))//
-		.andExpect(header().string(LAST_MODIFIED, currentDate));
+		.andExpect(header().longValue(LAST_MODIFIED, currentTime));
 	}
 
 	@Test
@@ -141,20 +134,20 @@ public class HeaderAssertionTests {
 	@Test
 	public void stringWithIncorrectResponseHeaderValue() throws Exception {
 		long unexpected = currentTime + 1000;
-		assertIncorrectResponseHeaderValue(header().string(LAST_MODIFIED, dateFormat.format(unexpected)), unexpected);
+		assertIncorrectResponseHeaderValue(header().string(LAST_MODIFIED, String.valueOf(unexpected)), unexpected);
 	}
 
 	@Test
 	public void stringWithMatcherAndIncorrectResponseHeaderValue() throws Exception {
 		long unexpected = currentTime + 1000;
-		assertIncorrectResponseHeaderValue(header().string(LAST_MODIFIED, equalTo(dateFormat.format(unexpected))),
+		assertIncorrectResponseHeaderValue(header().string(LAST_MODIFIED, equalTo(String.valueOf(unexpected))),
 			unexpected);
 	}
 
 	@Test
 	public void longValueWithIncorrectResponseHeaderValue() throws Exception {
 		long unexpected = currentTime + 1000;
-		assertIncorrectResponseHeaderValue(header().string(LAST_MODIFIED, dateFormat.format(unexpected)), unexpected);
+		assertIncorrectResponseHeaderValue(header().longValue(LAST_MODIFIED, unexpected), unexpected);
 	}
 
 	private void assertIncorrectResponseHeaderValue(ResultMatcher resultMatcher, long unexpected) throws Exception {
@@ -173,8 +166,8 @@ public class HeaderAssertionTests {
 			// We don't use assertEquals() since we cannot control the formatting
 			// produced by JUnit or Hamcrest.
 			assertMessageContains(e, "Response header " + LAST_MODIFIED);
-			assertMessageContains(e, dateFormat.format(unexpected));
-			assertMessageContains(e, currentDate);
+			assertMessageContains(e, String.valueOf(unexpected));
+			assertMessageContains(e, String.valueOf(currentTime));
 		}
 	}
 

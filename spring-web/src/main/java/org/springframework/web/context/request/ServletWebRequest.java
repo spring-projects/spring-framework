@@ -22,7 +22,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -57,10 +56,6 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	private static final String METHOD_GET = "GET";
 
 	private static final String METHOD_HEAD = "HEAD";
-
-	private static final String DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
-
-	private static TimeZone GMT = TimeZone.getTimeZone("GMT");
 
 
 	private boolean notModified = false;
@@ -188,7 +183,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 						response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 					}
 					if(response.getHeader(HEADER_LAST_MODIFIED) == null) {
-						response.setHeader(HEADER_LAST_MODIFIED, formatDate(lastModifiedTimestamp));
+						response.setDateHeader(HEADER_LAST_MODIFIED, lastModifiedTimestamp);
 					}
 				}
 			}
@@ -284,18 +279,12 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 						response.setHeader(HEADER_ETAG, etag);
 					}
 					if(response.getHeader(HEADER_LAST_MODIFIED) == null) {
-						response.setHeader(HEADER_LAST_MODIFIED, formatDate(lastModifiedTimestamp));
+						response.setDateHeader(HEADER_LAST_MODIFIED, lastModifiedTimestamp);
 					}
 				}
 			}
 		}
 		return this.notModified;
-	}
-
-	private String formatDate(long date) {
-		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.US);
-		dateFormat.setTimeZone(GMT);
-		return dateFormat.format(new Date(date));
 	}
 
 	public boolean isNotModified() {

@@ -94,8 +94,6 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 	private boolean usePreviousHttpCachingBehavior = false;
 
-	private final SimpleDateFormat dateFormat;
-
 	private CacheControl cacheControl;
 
 
@@ -120,8 +118,6 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 			this.supportedMethods.add(METHOD_HEAD);
 			this.supportedMethods.add(METHOD_POST);
 		}
-		dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
-		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 	}
 
 	/**
@@ -130,8 +126,6 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 */
 	public WebContentGenerator(String... supportedMethods) {
 		this.supportedMethods = new HashSet<String>(Arrays.asList(supportedMethods));
-		dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
-		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 	}
 
 
@@ -426,7 +420,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	protected final void cacheForSeconds(HttpServletResponse response, int seconds, boolean mustRevalidate) {
 		if (this.useExpiresHeader) {
 			// HTTP 1.0 header
-			response.setHeader(HEADER_EXPIRES, dateFormat.format(System.currentTimeMillis() + seconds * 1000L));
+			response.setDateHeader(HEADER_EXPIRES, System.currentTimeMillis() + seconds * 1000L);
 		}
 		if (this.useCacheControlHeader) {
 			// HTTP 1.1 header
@@ -446,7 +440,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		response.setHeader(HEADER_PRAGMA, "no-cache");
 		if (this.useExpiresHeader) {
 			// HTTP 1.0 header
-			response.setHeader(HEADER_EXPIRES, dateFormat.format(System.currentTimeMillis()));
+			response.setDateHeader(HEADER_EXPIRES, System.currentTimeMillis());
 		}
 		if (this.useCacheControlHeader) {
 			// HTTP 1.1 header: "no-cache" is the standard value,
