@@ -31,8 +31,9 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.springframework.test.util.AssertionErrors.*;
 
 /**
- * Factory for assertions on the request. An instance of this class is
- * typically accessed via {@link MockMvcResultMatchers#request()}.
+ * Factory for assertions on the request.
+ * <p>An instance of this class is typically accessed via
+ * {@link MockMvcResultMatchers#request}.
  *
  * @author Rossen Stoyanchev
  * @since 3.2

@@ -28,10 +28,11 @@ import org.springframework.util.AntPathMatcher;
 import static org.springframework.test.util.AssertionErrors.*;
 
 /**
- * Static, factory methods for {@link ResultMatcher}-based result actions.
+ * Static factory methods for {@link ResultMatcher}-based result actions.
  *
- * <p><strong>Eclipse users:</strong> consider adding this class as a Java editor
- * favorite. To navigate, open the Preferences and type "favorites".
+ * <h3>Eclipse Users</h3>
+ * <p>Consider adding this class as a Java editor favorite. To navigate to
+ * this setting, open the Preferences and type "favorites".
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel

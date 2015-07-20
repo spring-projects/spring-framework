@@ -26,8 +26,9 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.springframework.test.util.AssertionErrors.*;
 
 /**
- * Factory for assertions on the response status. An instance of this class is
- * typically accessed via {@link MockMvcResultMatchers#status()}.
+ * Factory for assertions on the response status.
+ * <p>An instance of this class is typically accessed via
+ * {@link MockMvcResultMatchers#status}.
  *
  * @author Keesun Baik
  * @author Rossen Stoyanchev

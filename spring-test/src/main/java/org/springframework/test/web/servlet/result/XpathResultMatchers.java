@@ -28,8 +28,8 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 
 /**
- * Factory for response content {@code ResultMatcher}'s using an XPath
- * expression. An instance of this class is typically accessed via
+ * Factory for assertions on the response content using XPath expressions.
+ * <p>An instance of this class is typically accessed via
  * {@link MockMvcResultMatchers#xpath}.
  *
  * @author Rossen Stoyanchev

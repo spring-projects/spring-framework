@@ -29,10 +29,11 @@ import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Static, factory methods for {@link ResultHandler}-based result actions.
+ * Static factory methods for {@link ResultHandler}-based result actions.
  *
- * <p><strong>Eclipse users:</strong> consider adding this class as a Java editor
- * favorite. To navigate to this setting, open the Preferences and type "favorites".
+ * <h3>Eclipse Users</h3>
+ * <p>Consider adding this class as a Java editor favorite. To navigate to
+ * this setting, open the Preferences and type "favorites".
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
