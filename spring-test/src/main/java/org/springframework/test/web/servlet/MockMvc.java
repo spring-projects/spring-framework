@@ -26,6 +26,7 @@ import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.util.Assert;
+import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -145,12 +146,15 @@ public final class MockMvc {
 
 		// [SPR-13217] Simulate RequestContextFilter to ensure that RequestAttributes are
 		// populated before filters are invoked.
+		RequestAttributes previousAttributes = RequestContextHolder.getRequestAttributes();
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request, response));
 
 		MockFilterChain filterChain = new MockFilterChain(this.servlet, this.filters);
 		filterChain.doFilter(request, response);
 
 		applyDefaultResultActions(mvcResult);
+
+		RequestContextHolder.setRequestAttributes(previousAttributes);
 
 		return new ResultActions() {
 

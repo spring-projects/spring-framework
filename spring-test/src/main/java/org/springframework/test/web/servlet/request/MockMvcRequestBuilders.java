@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.servlet.request;
 
 import java.net.URI;
@@ -20,19 +21,31 @@ import javax.servlet.ServletContext;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockMultipartHttpServletRequest;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
 
 /**
- * Static factory methods for {@link RequestBuilder}s.
+ * Static factory methods for {@link RequestBuilder RequestBuilders}.
  *
- * <p><strong>Eclipse users:</strong> Consider adding this class as a Java
- * editor favorite. To navigate, open the Preferences and type "favorites".
+ * <h3>Integration with the Spring TestContext Framework</h3>
+ * <p>Methods in this class will reuse a
+ * {@link org.springframework.mock.web.MockServletContext MockServletContext}
+ * that was created by the Spring TestContext Framework.
+ *
+ * <p>Methods in this class that return a {@link MockHttpServletRequestBuilder}
+ * will reuse a {@link MockHttpServletRequest} that was created by the Spring
+ * TestContext Framework.
+ *
+ * <h3>Eclipse Users</h3>
+ * <p>Consider adding this class as a Java editor favorite. To navigate to
+ * this setting, open the Preferences and type "favorites".
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Greg Turnquist
  * @author Sebastien Deleuze
+ * @author Sam Brannen
  * @since 3.2
  */
 public abstract class MockMvcRequestBuilders {
@@ -185,7 +198,12 @@ public abstract class MockMvcRequestBuilders {
 	}
 
 	/**
-	 * Create a {@link MockHttpServletRequestBuilder} for a multipart request.
+	 * Create a {@link MockMultipartHttpServletRequestBuilder} for a multipart request.
+	 * <p>In contrast to methods in this class that return a
+	 * {@link MockHttpServletRequestBuilder}, the builder returned by this
+	 * method will always create a new {@link MockMultipartHttpServletRequest}
+	 * that is <em>not</em> associated with a mock request created by the
+	 * Spring TestContext Framework.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param urlVariables zero or more URL variables
 	 */
@@ -194,7 +212,12 @@ public abstract class MockMvcRequestBuilders {
 	}
 
 	/**
-	 * Create a {@link MockHttpServletRequestBuilder} for a multipart request.
+	 * Create a {@link MockMultipartHttpServletRequestBuilder} for a multipart request.
+	 * <p>In contrast to methods in this class that return a
+	 * {@link MockHttpServletRequestBuilder}, the builder returned by this
+	 * method will always create a new {@link MockMultipartHttpServletRequest}
+	 * that is <em>not</em> associated with a mock request created by the
+	 * Spring TestContext Framework.
 	 * @param uri the URL
 	 * @since 4.0.3
 	 */

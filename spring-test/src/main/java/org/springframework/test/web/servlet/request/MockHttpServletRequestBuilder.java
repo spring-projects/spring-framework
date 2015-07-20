@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.Map.Entry;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.Mergeable;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -38,6 +39,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
+import org.springframework.test.context.web.ServletTestExecutionListener;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
@@ -46,6 +48,9 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.FlashMap;
@@ -64,6 +69,7 @@ import org.springframework.web.util.UriUtils;
  *
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
+ * @author Sam Brannen
  * @since 3.2
  */
 public class MockHttpServletRequestBuilder
@@ -639,10 +645,31 @@ public class MockHttpServletRequestBuilder
 	}
 
 	/**
-	 * Create a new {@link MockHttpServletRequest} based on the given
-	 * {@link ServletContext}. Can be overridden in subclasses.
+	 * Create a {@link MockHttpServletRequest}.
+	 * <p>If an instance of {@code MockHttpServletRequest} that was created
+	 * by the <em>Spring TestContext Framework</em> is available via the
+	 * {@link RequestAttributes} bound to the current thread in
+	 * {@link RequestContextHolder}, this method simply returns that instance.
+	 * <p>Otherwise, this method creates a new {@code MockHttpServletRequest}
+	 * based on the supplied {@link ServletContext}.
+	 * <p>Can be overridden in subclasses.
+	 * @see RequestContextHolder#getRequestAttributes()
+	 * @see ServletRequestAttributes
+	 * @see ServletTestExecutionListener#CREATED_BY_THE_TESTCONTEXT_FRAMEWORK
 	 */
 	protected MockHttpServletRequest createServletRequest(ServletContext servletContext) {
+		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+		if (requestAttributes instanceof ServletRequestAttributes) {
+			HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
+			if (request instanceof MockHttpServletRequest) {
+				MockHttpServletRequest mockRequest = (MockHttpServletRequest) request;
+				Object createdByTcf = mockRequest.getAttribute(ServletTestExecutionListener.CREATED_BY_THE_TESTCONTEXT_FRAMEWORK);
+				if (Boolean.TRUE.equals(createdByTcf)) {
+					return mockRequest;
+				}
+			}
+		}
+
 		return new MockHttpServletRequest(servletContext);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletWebRequest;
 
@@ -84,6 +85,18 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 	 */
 	public static final String POPULATED_REQUEST_CONTEXT_HOLDER_ATTRIBUTE = Conventions.getQualifiedAttributeName(
 		ServletTestExecutionListener.class, "populatedRequestContextHolder");
+
+	/**
+	 * Attribute name for a request attribute which indicates that the
+	 * {@link MockHttpServletRequest} stored in the {@link RequestAttributes}
+	 * in Spring Web's {@link RequestContextHolder} was created by the TestContext
+	 * framework.
+	 *
+	 * <p>Permissible values include {@link Boolean#TRUE} and {@link Boolean#FALSE}.
+	 * @since 4.2
+	 */
+	public static final String CREATED_BY_THE_TESTCONTEXT_FRAMEWORK = Conventions.getQualifiedAttributeName(
+		ServletTestExecutionListener.class, "createdByTheTestContextFramework");
 
 	private static final Log logger = LogFactory.getLog(ServletTestExecutionListener.class);
 
@@ -184,6 +197,7 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 
 			MockServletContext mockServletContext = (MockServletContext) servletContext;
 			MockHttpServletRequest request = new MockHttpServletRequest(mockServletContext);
+			request.setAttribute(CREATED_BY_THE_TESTCONTEXT_FRAMEWORK, Boolean.TRUE);
 			MockHttpServletResponse response = new MockHttpServletResponse();
 			ServletWebRequest servletWebRequest = new ServletWebRequest(request, response);
 
