@@ -107,6 +107,12 @@ public abstract class FutureAdapter<T, S> implements Future<T> {
 						this.state = State.FAILURE;
 						throw ex;
 					}
+					catch (RuntimeException ex) {
+						ExecutionException execEx = new ExecutionException(ex);
+						this.result = execEx;
+						this.state = State.FAILURE;
+						throw execEx;
+					}
 				default:
 					throw new IllegalStateException();
 			}

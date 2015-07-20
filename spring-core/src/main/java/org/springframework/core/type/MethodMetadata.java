@@ -39,7 +39,13 @@ public interface MethodMetadata extends AnnotatedTypeMetadata {
 	/**
 	 * Return the fully-qualified name of the class that declares this method.
 	 */
-	public String getDeclaringClassName();
+	String getDeclaringClassName();
+
+	/**
+	 * Return the fully-qualified name of this method's declared return type.
+	 * @since 4.2
+	 */
+	String getReturnTypeName();
 
 	/**
 	 * Return whether the underlying method is effectively abstract:

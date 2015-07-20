@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.util.Assert;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
  * <strong>Main entry point for server-side Spring MVC test support.</strong>
@@ -48,6 +50,7 @@ import org.springframework.util.Assert;
  *
  * @author Rossen Stoyanchev
  * @author Rob Winch
+ * @author Sam Brannen
  * @since 3.2
  */
 public final class MockMvc {
@@ -139,6 +142,10 @@ public final class MockMvc {
 
 		final MvcResult mvcResult = new DefaultMvcResult(request, response);
 		request.setAttribute(MVC_RESULT_ATTRIBUTE, mvcResult);
+
+		// [SPR-13217] Simulate RequestContextFilter to ensure that RequestAttributes are
+		// populated before filters are invoked.
+		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request, response));
 
 		MockFilterChain filterChain = new MockFilterChain(this.servlet, this.filters);
 		filterChain.doFilter(request, response);

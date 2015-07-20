@@ -15,6 +15,10 @@
  */
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+import static org.springframework.web.servlet.mvc.method.annotation.SseEmitter.*;
+
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -37,13 +41,6 @@ import org.springframework.web.context.request.async.AsyncWebRequest;
 import org.springframework.web.context.request.async.StandardServletAsyncWebRequest;
 import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.method.support.ModelAndViewContainer;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.springframework.web.servlet.mvc.method.annotation.SseEmitter.event;
 
 
 /**
@@ -127,6 +124,25 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 	}
 
 	@Test
+	public void timeoutValueAndCallback() throws Exception {
+
+		AsyncWebRequest asyncWebRequest = mock(AsyncWebRequest.class);
+		WebAsyncUtils.getAsyncManager(this.request).setAsyncWebRequest(asyncWebRequest);
+
+		ResponseBodyEmitter emitter = new ResponseBodyEmitter(19000L);
+		emitter.onTimeout(mock(Runnable.class));
+		emitter.onCompletion(mock(Runnable.class));
+
+		MethodParameter returnType = returnType(TestController.class, "handle");
+		this.handler.handleReturnValue(emitter, returnType, this.mavContainer, this.webRequest);
+
+		verify(asyncWebRequest).setTimeout(19000L);
+		verify(asyncWebRequest).addTimeoutHandler(any(Runnable.class));
+		verify(asyncWebRequest, times(2)).addCompletionHandler(any(Runnable.class));
+		verify(asyncWebRequest).startAsync();
+	}
+
+	@Test
 	public void sseEmitter() throws Exception {
 		MethodParameter returnType = returnType(TestController.class, "handleSse");
 		SseEmitter emitter = new SseEmitter();
@@ -147,7 +163,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		emitter.send(event().comment("a test").name("update").id("1").reconnectTime(5000L).data(bean1).data(bean2));
 
 		assertEquals(":a test\n" +
-						"name:update\n" +
+						"event:update\n" +
 						"id:1\n" +
 						"retry:5000\n" +
 						"data:{\"id\":1,\"name\":\"Joe\"}\n" +

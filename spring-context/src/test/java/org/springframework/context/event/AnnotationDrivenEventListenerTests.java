@@ -636,9 +636,9 @@ public class AnnotationDrivenEventListenerTests {
 		}
 
 		@Override
-		@EventListener(condition = "'OK'.equals(#content)")
-		public void handleString(String content) {
-			super.handleString(content);
+		@EventListener(condition = "#payload.startsWith('OK')")
+		public void handleString(String payload) {
+			super.handleString(payload);
 		}
 
 		@EventListener(condition = "#root.event.timestamp > #p0")

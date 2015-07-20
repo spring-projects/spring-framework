@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -145,8 +145,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
 	/**
 	 * If this variable is set to true then execution of a CallableStatement will return
-	 * the results in a Map that uses case insensitive names for the parameters if
-	 * Commons Collections is available on the classpath.
+	 * the results in a Map that uses case insensitive names for the parameters.
 	 */
 	private boolean resultsMapCaseInsensitive = false;
 
@@ -1320,11 +1319,13 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	/**
-	 * Create a Map instance to be used as results map.
-	 * <p>If "isResultsMapCaseInsensitive" has been set to true,
-	 * a linked case-insensitive Map will be created.
+	 * Create a Map instance to be used as the results map.
+	 * <p>If {@link #resultsMapCaseInsensitive} has been set to true,
+	 * a {@link LinkedCaseInsensitiveMap} will be created; otherwise, a
+	 * {@link LinkedHashMap} will be created.
 	 * @return the results Map instance
 	 * @see #setResultsMapCaseInsensitive
+	 * @see #isResultsMapCaseInsensitive
 	 */
 	protected Map<String, Object> createResultsMap() {
 		if (isResultsMapCaseInsensitive()) {

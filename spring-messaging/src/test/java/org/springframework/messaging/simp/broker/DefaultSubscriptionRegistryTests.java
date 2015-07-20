@@ -20,70 +20,73 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.PathMatcher;
 
 import static org.junit.Assert.*;
 
-
 /**
- * Test fixture for {@link org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry}.
+ * Test fixture for
+ * {@link org.springframework.messaging.simp.broker.DefaultSubscriptionRegistry}.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  */
 public class DefaultSubscriptionRegistryTests {
 
-	private DefaultSubscriptionRegistry registry;
-
-
-	@Before
-	public void setup() {
-		this.registry = new DefaultSubscriptionRegistry();
-	}
+	private final DefaultSubscriptionRegistry registry = new DefaultSubscriptionRegistry();
 
 
 	@Test
 	public void registerSubscriptionInvalidInput() {
-
 		String sessId = "sess01";
 		String subsId = "subs01";
 		String dest = "/foo";
 
 		this.registry.registerSubscription(subscribeMessage(null, subsId, dest));
-		assertEquals(0, this.registry.findSubscriptions(message(dest)).size());
+		MultiValueMap<String, String> actual = this.registry.findSubscriptions(createMessage(dest));
+		assertNotNull(actual);
+		assertEquals(0, actual.size());
 
 		this.registry.registerSubscription(subscribeMessage(sessId, null, dest));
-		assertEquals(0, this.registry.findSubscriptions(message(dest)).size());
+		actual = this.registry.findSubscriptions(createMessage(dest));
+		assertNotNull(actual);
+		assertEquals(0, actual.size());
 
 		this.registry.registerSubscription(subscribeMessage(sessId, subsId, null));
-		assertEquals(0, this.registry.findSubscriptions(message(dest)).size());
+		actual = this.registry.findSubscriptions(createMessage(dest));
+		assertNotNull(actual);
+		assertEquals(0, actual.size());
 	}
 
 	@Test
 	public void registerSubscription() {
-
 		String sessId = "sess01";
 		String subsId = "subs01";
 		String dest = "/foo";
 
 		this.registry.registerSubscription(subscribeMessage(sessId, subsId, dest));
-		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message(dest));
 
+		MultiValueMap<String, String> actual = this.registry.findSubscriptions(createMessage(dest));
+		assertNotNull(actual);
 		assertEquals("Expected one element " + actual, 1, actual.size());
-		assertEquals(Arrays.asList(subsId), actual.get(sessId));
+		assertEquals(Collections.singletonList(subsId), actual.get(sessId));
 	}
 
 	@Test
 	public void registerSubscriptionOneSession() {
-
 		String sessId = "sess01";
 		List<String> subscriptionIds = Arrays.asList("subs01", "subs02", "subs03");
 		String dest = "/foo";
@@ -92,15 +95,14 @@ public class DefaultSubscriptionRegistryTests {
 			this.registry.registerSubscription(subscribeMessage(sessId, subId, dest));
 		}
 
-		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message(dest));
-
-		assertEquals("Expected one element " + actual, 1, actual.size());
+		MultiValueMap<String, String> actual = this.registry.findSubscriptions(createMessage(dest));
+		assertNotNull(actual);
+		assertEquals(1, actual.size());
 		assertEquals(subscriptionIds, sort(actual.get(sessId)));
 	}
 
 	@Test
 	public void registerSubscriptionMultipleSessions() {
-
 		List<String> sessIds = Arrays.asList("sess01", "sess02", "sess03");
 		List<String> subscriptionIds = Arrays.asList("subs01", "subs02", "subs03");
 		String dest = "/foo";
@@ -111,9 +113,9 @@ public class DefaultSubscriptionRegistryTests {
 			}
 		}
 
-		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message(dest));
-
-		assertEquals("Expected three elements " + actual, 3, actual.size());
+		MultiValueMap<String, String> actual = this.registry.findSubscriptions(createMessage(dest));
+		assertNotNull(actual);
+		assertEquals(3, actual.size());
 		assertEquals(subscriptionIds, sort(actual.get(sessIds.get(0))));
 		assertEquals(subscriptionIds, sort(actual.get(sessIds.get(1))));
 		assertEquals(subscriptionIds, sort(actual.get(sessIds.get(2))));
@@ -121,24 +123,20 @@ public class DefaultSubscriptionRegistryTests {
 
 	@Test
 	public void registerSubscriptionWithDestinationPattern() {
-
 		String sessId = "sess01";
 		String subsId = "subs01";
 		String destPattern = "/topic/PRICE.STOCK.*.IBM";
 		String dest = "/topic/PRICE.STOCK.NASDAQ.IBM";
-
 		this.registry.registerSubscription(subscribeMessage(sessId, subsId, destPattern));
-		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message(dest));
 
+		MultiValueMap<String, String> actual = this.registry.findSubscriptions(createMessage(dest));
+		assertNotNull(actual);
 		assertEquals("Expected one element " + actual, 1, actual.size());
-		assertEquals(Arrays.asList(subsId), actual.get(sessId));
+		assertEquals(Collections.singletonList(subsId), actual.get(sessId));
 	}
 
-	// SPR-11657
-
-	@Test
+	@Test  // SPR-11657
 	public void registerSubscriptionsWithSimpleAndPatternDestinations() {
-
 		String sess1 = "sess01";
 		String sess2 = "sess02";
 
@@ -146,53 +144,67 @@ public class DefaultSubscriptionRegistryTests {
 		String subs2 = "subs02";
 		String subs3 = "subs03";
 
-		this.registry.registerSubscription(subscribeMessage(sess1, subs2, "/topic/PRICE.STOCK.NASDAQ.IBM"));
+		String destNasdaqIbm = "/topic/PRICE.STOCK.NASDAQ.IBM";
+		Message<?> destNasdaqIbmMessage = createMessage(destNasdaqIbm);
+
+		this.registry.registerSubscription(subscribeMessage(sess1, subs2, destNasdaqIbm));
 		this.registry.registerSubscription(subscribeMessage(sess1, subs1, "/topic/PRICE.STOCK.*.IBM"));
-		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message("/topic/PRICE.STOCK.NASDAQ.IBM"));
+
+		MultiValueMap<String, String> actual = this.registry.findSubscriptions(destNasdaqIbmMessage);
+		assertNotNull(actual);
 		assertEquals(1, actual.size());
 		assertEquals(Arrays.asList(subs2, subs1), actual.get(sess1));
 
-		this.registry.registerSubscription(subscribeMessage(sess2, subs1, "/topic/PRICE.STOCK.NASDAQ.IBM"));
+		this.registry.registerSubscription(subscribeMessage(sess2, subs1, destNasdaqIbm));
 		this.registry.registerSubscription(subscribeMessage(sess2, subs2, "/topic/PRICE.STOCK.NYSE.IBM"));
 		this.registry.registerSubscription(subscribeMessage(sess2, subs3, "/topic/PRICE.STOCK.NASDAQ.GOOG"));
-		actual = this.registry.findSubscriptions(message("/topic/PRICE.STOCK.NASDAQ.IBM"));
+
+		actual = this.registry.findSubscriptions(destNasdaqIbmMessage);
+		assertNotNull(actual);
 		assertEquals(2, actual.size());
 		assertEquals(Arrays.asList(subs2, subs1), actual.get(sess1));
-		assertEquals(Arrays.asList(subs1), actual.get(sess2));
+		assertEquals(Collections.singletonList(subs1), actual.get(sess2));
 
 		this.registry.unregisterAllSubscriptions(sess1);
-		actual = this.registry.findSubscriptions(message("/topic/PRICE.STOCK.NASDAQ.IBM"));
+
+		actual = this.registry.findSubscriptions(destNasdaqIbmMessage);
+		assertNotNull(actual);
 		assertEquals(1, actual.size());
-		assertEquals(Arrays.asList(subs1), actual.get(sess2));
+		assertEquals(Collections.singletonList(subs1), actual.get(sess2));
 
 		this.registry.registerSubscription(subscribeMessage(sess1, subs1, "/topic/PRICE.STOCK.*.IBM"));
-		this.registry.registerSubscription(subscribeMessage(sess1, subs2, "/topic/PRICE.STOCK.NASDAQ.IBM"));
-		actual = this.registry.findSubscriptions(message("/topic/PRICE.STOCK.NASDAQ.IBM"));
+		this.registry.registerSubscription(subscribeMessage(sess1, subs2, destNasdaqIbm));
+
+		actual = this.registry.findSubscriptions(destNasdaqIbmMessage);
+		assertNotNull(actual);
 		assertEquals(2, actual.size());
 		assertEquals(Arrays.asList(subs1, subs2), actual.get(sess1));
-		assertEquals(Arrays.asList(subs1), actual.get(sess2));
+		assertEquals(Collections.singletonList(subs1), actual.get(sess2));
 
 		this.registry.unregisterSubscription(unsubscribeMessage(sess1, subs2));
-		actual = this.registry.findSubscriptions(message("/topic/PRICE.STOCK.NASDAQ.IBM"));
+
+		actual = this.registry.findSubscriptions(destNasdaqIbmMessage);
+		assertNotNull(actual);
 		assertEquals(2, actual.size());
-		assertEquals(Arrays.asList(subs1), actual.get(sess1));
-		assertEquals(Arrays.asList(subs1), actual.get(sess2));
+		assertEquals(Collections.singletonList(subs1), actual.get(sess1));
+		assertEquals(Collections.singletonList(subs1), actual.get(sess2));
 
 		this.registry.unregisterSubscription(unsubscribeMessage(sess1, subs1));
-		actual = this.registry.findSubscriptions(message("/topic/PRICE.STOCK.NASDAQ.IBM"));
+
+		actual = this.registry.findSubscriptions(destNasdaqIbmMessage);
+		assertNotNull(actual);
 		assertEquals(1, actual.size());
-		assertEquals(Arrays.asList(subs1), actual.get(sess2));
+		assertEquals(Collections.singletonList(subs1), actual.get(sess2));
 
 		this.registry.unregisterSubscription(unsubscribeMessage(sess2, subs1));
-		actual = this.registry.findSubscriptions(message("/topic/PRICE.STOCK.NASDAQ.IBM"));
+
+		actual = this.registry.findSubscriptions(destNasdaqIbmMessage);
+		assertNotNull(actual);
 		assertEquals(0, actual.size());
 	}
 
-	// SPR-11755
-
-	@Test
+	@Test  // SPR-11755
 	public void registerAndUnregisterMultipleDestinations() {
-
 		String sess1 = "sess01";
 		String sess2 = "sess02";
 
@@ -206,9 +218,9 @@ public class DefaultSubscriptionRegistryTests {
 		this.registry.registerSubscription(subscribeMessage(sess1, subs2, "/topic/PRICE.STOCK.NYSE.IBM"));
 		this.registry.registerSubscription(subscribeMessage(sess1, subs3, "/topic/PRICE.STOCK.NASDAQ.GOOG"));
 
-		this.registry.findSubscriptions(message("/topic/PRICE.STOCK.NYSE.IBM"));
-		this.registry.findSubscriptions(message("/topic/PRICE.STOCK.NASDAQ.GOOG"));
-		this.registry.findSubscriptions(message("/topic/PRICE.STOCK.NASDAQ.IBM"));
+		this.registry.findSubscriptions(createMessage("/topic/PRICE.STOCK.NYSE.IBM"));
+		this.registry.findSubscriptions(createMessage("/topic/PRICE.STOCK.NASDAQ.GOOG"));
+		this.registry.findSubscriptions(createMessage("/topic/PRICE.STOCK.NASDAQ.IBM"));
 
 		this.registry.unregisterSubscription(unsubscribeMessage(sess1, subs1));
 		this.registry.unregisterSubscription(unsubscribeMessage(sess1, subs2));
@@ -219,39 +231,86 @@ public class DefaultSubscriptionRegistryTests {
 		this.registry.registerSubscription(subscribeMessage(sess1, subs3, "/topic/PRICE.STOCK.NASDAQ.GOOG"));
 		this.registry.registerSubscription(subscribeMessage(sess1, subs4, "/topic/PRICE.STOCK.NYSE.IBM"));
 		this.registry.registerSubscription(subscribeMessage(sess2, subs5, "/topic/PRICE.STOCK.NASDAQ.GOOG"));
+
 		this.registry.unregisterAllSubscriptions(sess1);
 		this.registry.unregisterAllSubscriptions(sess2);
 	}
 
 	@Test
 	public void registerSubscriptionWithDestinationPatternRegex() {
-
 		String sessId = "sess01";
 		String subsId = "subs01";
 		String destPattern = "/topic/PRICE.STOCK.*.{ticker:(IBM|MSFT)}";
 
 		this.registry.registerSubscription(subscribeMessage(sessId, subsId, destPattern));
-		Message<?> message = message("/topic/PRICE.STOCK.NASDAQ.IBM");
+		Message<?> message = createMessage("/topic/PRICE.STOCK.NASDAQ.IBM");
 		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message);
-
+		assertNotNull(actual);
 		assertEquals("Expected one element " + actual, 1, actual.size());
-		assertEquals(Arrays.asList(subsId), actual.get(sessId));
+		assertEquals(Collections.singletonList(subsId), actual.get(sessId));
 
-		message = message("/topic/PRICE.STOCK.NASDAQ.MSFT");
+		message = createMessage("/topic/PRICE.STOCK.NASDAQ.MSFT");
 		actual = this.registry.findSubscriptions(message);
-
+		assertNotNull(actual);
 		assertEquals("Expected one element " + actual, 1, actual.size());
-		assertEquals(Arrays.asList(subsId), actual.get(sessId));
+		assertEquals(Collections.singletonList(subsId), actual.get(sessId));
 
-		message = message("/topic/PRICE.STOCK.NASDAQ.VMW");
+		message = createMessage("/topic/PRICE.STOCK.NASDAQ.VMW");
 		actual = this.registry.findSubscriptions(message);
-
+		assertNotNull(actual);
 		assertEquals("Expected no elements " + actual, 0, actual.size());
 	}
 
 	@Test
-	public void unregisterSubscription() {
+	public void registerSubscriptionWithSelector() throws Exception {
+		String sessionId = "sess01";
+		String subscriptionId = "subs01";
+		String destination = "/foo";
+		String selector = "headers.foo == 'bar'";
 
+		this.registry.registerSubscription(subscribeMessage(sessionId, subscriptionId, destination, selector));
+
+		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create();
+		accessor.setDestination(destination);
+		accessor.setNativeHeader("foo", "bar");
+		Message<?> message = MessageBuilder.createMessage("", accessor.getMessageHeaders());
+
+		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message);
+		assertNotNull(actual);
+		assertEquals(1, actual.size());
+		assertEquals(Collections.singletonList(subscriptionId), actual.get(sessionId));
+
+		actual = this.registry.findSubscriptions(createMessage(destination));
+		assertNotNull(actual);
+		assertEquals(0, actual.size());
+	}
+
+	@Test  // SPR-11931
+	public void registerSubscriptionTwiceAndUnregister() {
+		this.registry.registerSubscription(subscribeMessage("sess01", "subs01", "/foo"));
+		this.registry.registerSubscription(subscribeMessage("sess01", "subs02", "/foo"));
+
+		MultiValueMap<String, String> actual = this.registry.findSubscriptions(createMessage("/foo"));
+		assertNotNull(actual);
+		assertEquals("Expected 1 element", 1, actual.size());
+		assertEquals(Arrays.asList("subs01", "subs02"), actual.get("sess01"));
+
+		this.registry.unregisterSubscription(unsubscribeMessage("sess01", "subs01"));
+
+		actual = this.registry.findSubscriptions(createMessage("/foo"));
+		assertNotNull(actual);
+		assertEquals("Expected 1 element", 1, actual.size());
+		assertEquals(Collections.singletonList("subs02"), actual.get("sess01"));
+
+		this.registry.unregisterSubscription(unsubscribeMessage("sess01", "subs02"));
+
+		actual = this.registry.findSubscriptions(createMessage("/foo"));
+		assertNotNull(actual);
+		assertEquals("Expected no element", 0, actual.size());
+	}
+
+	@Test
+	public void unregisterSubscription() {
 		List<String> sessIds = Arrays.asList("sess01", "sess02", "sess03");
 		List<String> subscriptionIds = Arrays.asList("subs01", "subs02", "subs03");
 		String dest = "/foo";
@@ -266,37 +325,15 @@ public class DefaultSubscriptionRegistryTests {
 		this.registry.unregisterSubscription(unsubscribeMessage(sessIds.get(0), subscriptionIds.get(1)));
 		this.registry.unregisterSubscription(unsubscribeMessage(sessIds.get(0), subscriptionIds.get(2)));
 
-		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message(dest));
-
+		MultiValueMap<String, String> actual = this.registry.findSubscriptions(createMessage(dest));
+		assertNotNull(actual);
 		assertEquals("Expected two elements: " + actual, 2, actual.size());
 		assertEquals(subscriptionIds, sort(actual.get(sessIds.get(1))));
 		assertEquals(subscriptionIds, sort(actual.get(sessIds.get(2))));
 	}
 
-	// SPR-11931
-
-	@Test
-	public void registerTwiceAndUnregisterSubscriptions() {
-
-		this.registry.registerSubscription(subscribeMessage("sess01", "subs01", "/foo"));
-		this.registry.registerSubscription(subscribeMessage("sess01", "subs02", "/foo"));
-		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message("/foo"));
-		assertEquals("Expected 1 element", 1, actual.size());
-		assertEquals(Arrays.asList("subs01", "subs02"), actual.get("sess01"));
-
-		this.registry.unregisterSubscription(unsubscribeMessage("sess01", "subs01"));
-		actual = this.registry.findSubscriptions(message("/foo"));
-		assertEquals("Expected 1 element", 1, actual.size());
-		assertEquals(Arrays.asList("subs02"), actual.get("sess01"));
-
-		this.registry.unregisterSubscription(unsubscribeMessage("sess01", "subs02"));
-		actual = this.registry.findSubscriptions(message("/foo"));
-		assertEquals("Expected no element", 0, actual.size());
-	}
-
 	@Test
 	public void unregisterAllSubscriptions() {
-
 		List<String> sessIds = Arrays.asList("sess01", "sess02", "sess03");
 		List<String> subscriptionIds = Arrays.asList("subs01", "subs02", "subs03");
 		String dest = "/foo";
@@ -310,8 +347,8 @@ public class DefaultSubscriptionRegistryTests {
 		this.registry.unregisterAllSubscriptions(sessIds.get(0));
 		this.registry.unregisterAllSubscriptions(sessIds.get(1));
 
-		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message(dest));
-
+		MultiValueMap<String, String> actual = this.registry.findSubscriptions(createMessage(dest));
+		assertNotNull(actual);
 		assertEquals("Expected one element: " + actual, 1, actual.size());
 		assertEquals(subscriptionIds, sort(actual.get(sessIds.get(2))));
 	}
@@ -324,21 +361,21 @@ public class DefaultSubscriptionRegistryTests {
 
 	@Test
 	public void findSubscriptionsNoMatches() {
-		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message("/foo"));
+		MultiValueMap<String, String> actual = this.registry.findSubscriptions(createMessage("/foo"));
+		assertNotNull(actual);
 		assertEquals("Expected no elements " + actual, 0, actual.size());
 	}
 
-	// SPR-12665
-
-	@Test
-	@SuppressWarnings("rawtypes")
+	@Test  // SPR-12665
 	public void findSubscriptionsReturnsMapSafeToIterate() throws Exception {
 		this.registry.registerSubscription(subscribeMessage("sess1", "1", "/foo"));
 		this.registry.registerSubscription(subscribeMessage("sess2", "1", "/foo"));
-		MultiValueMap<String, String> subscriptions = this.registry.findSubscriptions(message("/foo"));
+
+		MultiValueMap<String, String> subscriptions = this.registry.findSubscriptions(createMessage("/foo"));
+		assertNotNull(subscriptions);
 		assertEquals(2, subscriptions.size());
 
-		Iterator iterator = subscriptions.entrySet().iterator();
+		Iterator<Map.Entry<String, List<String>>> iterator = subscriptions.entrySet().iterator();
 		iterator.next();
 
 		this.registry.registerSubscription(subscribeMessage("sess3", "1", "/foo"));
@@ -347,32 +384,119 @@ public class DefaultSubscriptionRegistryTests {
 		// no ConcurrentModificationException
 	}
 
+	@Test  // SPR-13185
+	public void findSubscriptionsReturnsMapSafeToIterateIncludingValues() throws Exception {
+		this.registry.registerSubscription(subscribeMessage("sess1", "1", "/foo"));
+		this.registry.registerSubscription(subscribeMessage("sess1", "2", "/foo"));
+
+		MultiValueMap<String, String> allSubscriptions = this.registry.findSubscriptions(createMessage("/foo"));
+		assertNotNull(allSubscriptions);
+		assertEquals(1, allSubscriptions.size());
+
+		Iterator<String> iteratorValues = allSubscriptions.get("sess1").iterator();
+		iteratorValues.next();
+
+		this.registry.unregisterSubscription(unsubscribeMessage("sess1", "2"));
+
+		iteratorValues.next();
+		// no ConcurrentModificationException
+	}
+
+	@Test  // SPR-13204
+	public void findSubscriptionsWithConcurrentUnregisterAllSubscriptions() throws Exception {
+		final CountDownLatch iterationPausedLatch = new CountDownLatch(1);
+		final CountDownLatch iterationResumeLatch = new CountDownLatch(1);
+		final CountDownLatch iterationDoneLatch = new CountDownLatch(1);
+
+		PathMatcher pathMatcher = new PausingPathMatcher(iterationPausedLatch, iterationResumeLatch);
+		this.registry.setPathMatcher(pathMatcher);
+		this.registry.registerSubscription(subscribeMessage("sess1", "1", "/foo"));
+		this.registry.registerSubscription(subscribeMessage("sess2", "1", "/foo"));
+
+		AtomicReference<MultiValueMap<String, String>> subscriptions = new AtomicReference<>();
+		new Thread(() -> {
+			subscriptions.set(registry.findSubscriptions(createMessage("/foo")));
+			iterationDoneLatch.countDown();
+		}).start();
+
+		assertTrue(iterationPausedLatch.await(10, TimeUnit.SECONDS));
+
+		this.registry.unregisterAllSubscriptions("sess1");
+		this.registry.unregisterAllSubscriptions("sess2");
+
+		iterationResumeLatch.countDown();
+		assertTrue(iterationDoneLatch.await(10, TimeUnit.SECONDS));
+
+		MultiValueMap<String, String> result = subscriptions.get();
+		assertNotNull(result);
+		assertEquals(0, result.size());
+	}
+
+
+	private Message<?> createMessage(String destination) {
+		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create();
+		accessor.setDestination(destination);
+		return MessageBuilder.createMessage("", accessor.getMessageHeaders());
+	}
+
 	private Message<?> subscribeMessage(String sessionId, String subscriptionId, String destination) {
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.SUBSCRIBE);
-		headers.setSessionId(sessionId);
-		headers.setSubscriptionId(subscriptionId);
-		if (destination != null) {
-			headers.setDestination(destination);
+		return subscribeMessage(sessionId, subscriptionId, destination, null);
+	}
+
+	private Message<?> subscribeMessage(String sessionId, String subscriptionId, String dest, String selector) {
+		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.SUBSCRIBE);
+		accessor.setSessionId(sessionId);
+		accessor.setSubscriptionId(subscriptionId);
+		if (dest != null) {
+			accessor.setDestination(dest);
 		}
-		return MessageBuilder.withPayload("").copyHeaders(headers.toMap()).build();
+		if (selector != null) {
+			accessor.setNativeHeader("selector", selector);
+		}
+		return MessageBuilder.createMessage("", accessor.getMessageHeaders());
 	}
 
 	private Message<?> unsubscribeMessage(String sessionId, String subscriptionId) {
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create(SimpMessageType.UNSUBSCRIBE);
-		headers.setSessionId(sessionId);
-		headers.setSubscriptionId(subscriptionId);
-		return MessageBuilder.withPayload("").copyHeaders(headers.toMap()).build();
-	}
-
-	private Message<?> message(String destination) {
-		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
-		headers.setDestination(destination);
-		return MessageBuilder.withPayload("").copyHeaders(headers.toMap()).build();
+		SimpMessageHeaderAccessor accessor = SimpMessageHeaderAccessor.create(SimpMessageType.UNSUBSCRIBE);
+		accessor.setSessionId(sessionId);
+		accessor.setSubscriptionId(subscriptionId);
+		return MessageBuilder.createMessage("", accessor.getMessageHeaders());
 	}
 
 	private List<String> sort(List<String> list) {
 		Collections.sort(list);
 		return list;
+	}
+
+
+	/**
+	 * An extension of AntPathMatcher with a pair of CountDownLatches to pause
+	 * while matching, allowing another thread to something, and resume when the
+	 * other thread signals it's okay to do so.
+	 */
+	private static class PausingPathMatcher extends AntPathMatcher {
+
+		private final CountDownLatch iterationPausedLatch;
+
+		private final CountDownLatch iterationResumeLatch;
+
+		public PausingPathMatcher(CountDownLatch iterationPausedLatch, CountDownLatch iterationResumeLatch) {
+			this.iterationPausedLatch = iterationPausedLatch;
+			this.iterationResumeLatch = iterationResumeLatch;
+		}
+
+		@Override
+		public boolean match(String pattern, String path) {
+			try {
+				this.iterationPausedLatch.countDown();
+				assertTrue(this.iterationResumeLatch.await(10, TimeUnit.SECONDS));
+				return super.match(pattern, path);
+			}
+			catch (InterruptedException ex) {
+				ex.printStackTrace();
+				return false;
+			}
+		}
 	}
 
 }

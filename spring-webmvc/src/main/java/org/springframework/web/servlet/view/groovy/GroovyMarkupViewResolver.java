@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,10 +21,9 @@ import java.util.Locale;
 import org.springframework.web.servlet.view.AbstractTemplateViewResolver;
 
 /**
- * Convenience subclass of
- * {@link org.springframework.web.servlet.view.AbstractTemplateViewResolver}
- * that supports {@link GroovyMarkupView} (i.e. Groovy XML/XHTML markup templates)
- * and custom subclasses of it.
+ * Convenience subclass of @link AbstractTemplateViewResolver} that supports
+ * {@link GroovyMarkupView} (i.e. Groovy XML/XHTML markup templates) and
+ * custom subclasses of it.
  *
  * <p>The view class for all views created by this resolver can be specified
  * via the {@link #setViewClass(Class)} property.

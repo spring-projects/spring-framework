@@ -89,10 +89,11 @@ public abstract class ReflectionUtils {
 		Assert.notNull(clazz, "Class must not be null");
 		Assert.isTrue(name != null || type != null, "Either name or type of the field must be specified");
 		Class<?> searchType = clazz;
-		while (!Object.class.equals(searchType) && searchType != null) {
+		while (Object.class != searchType && searchType != null) {
 			Field[] fields = getDeclaredFields(searchType);
 			for (Field field : fields) {
-				if ((name == null || name.equals(field.getName())) && (type == null || type.equals(field.getType()))) {
+				if ((name == null || name.equals(field.getName())) &&
+						(type == null || type.equals(field.getType()))) {
 					return field;
 				}
 			}
@@ -418,8 +419,7 @@ public abstract class ReflectionUtils {
 				i--;
 			}
 			return ((i > CGLIB_RENAMED_METHOD_PREFIX.length()) &&
-						(i < name.length() - 1) &&
-						(name.charAt(i) == '$'));
+						(i < name.length() - 1) && name.charAt(i) == '$');
 		}
 		return false;
 	}
@@ -433,7 +433,8 @@ public abstract class ReflectionUtils {
 	 * @see java.lang.reflect.Field#setAccessible
 	 */
 	public static void makeAccessible(Field field) {
-		if ((!Modifier.isPublic(field.getModifiers()) || !Modifier.isPublic(field.getDeclaringClass().getModifiers()) ||
+		if ((!Modifier.isPublic(field.getModifiers()) ||
+				!Modifier.isPublic(field.getDeclaringClass().getModifiers()) ||
 				Modifier.isFinal(field.getModifiers())) && !field.isAccessible()) {
 			field.setAccessible(true);
 		}

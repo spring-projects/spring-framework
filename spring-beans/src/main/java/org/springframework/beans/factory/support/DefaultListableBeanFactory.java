@@ -709,6 +709,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	}
 
 	@Override
+	public void clearMetadataCache() {
+		super.clearMetadataCache();
+		clearByTypeCache();
+	}
+
+	@Override
 	public void freezeConfiguration() {
 		this.configurationFrozen = true;
 		this.frozenBeanDefinitionNames = StringUtils.toStringArray(this.beanDefinitionNames);
@@ -949,10 +955,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (descriptor.getDependencyType().equals(javaUtilOptionalClass)) {
 			return new OptionalDependencyFactory().createOptionalDependency(descriptor, beanName);
 		}
-		else if (descriptor.getDependencyType().equals(ObjectFactory.class)) {
+		else if (ObjectFactory.class == descriptor.getDependencyType()) {
 			return new DependencyObjectFactory(descriptor, beanName);
 		}
-		else if (descriptor.getDependencyType().equals(javaxInjectProviderClass)) {
+		else if (javaxInjectProviderClass == descriptor.getDependencyType()) {
 			return new DependencyProviderFactory().createDependencyProvider(descriptor, beanName);
 		}
 		else {
@@ -1031,10 +1037,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 		else if (Map.class.isAssignableFrom(type) && type.isInterface()) {
 			Class<?> keyType = descriptor.getMapKeyType();
-			if (keyType == null || !String.class.isAssignableFrom(keyType)) {
+			if (String.class != keyType) {
 				if (descriptor.isRequired()) {
 					throw new FatalBeanException("Key type [" + keyType + "] of map [" + type.getName() +
-							"] must be assignable to [java.lang.String]");
+							"] must be [java.lang.String]");
 				}
 				return null;
 			}

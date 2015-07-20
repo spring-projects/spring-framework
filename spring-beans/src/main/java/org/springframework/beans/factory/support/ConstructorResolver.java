@@ -552,7 +552,7 @@ class ConstructorResolver {
 						"exists and that it is " +
 						(isStatic ? "static" : "non-static") + ".");
 			}
-			else if (void.class.equals(factoryMethodToUse.getReturnType())) {
+			else if (void.class == factoryMethodToUse.getReturnType()) {
 				throw new BeanCreationException(mbd.getResourceDescription(), beanName,
 						"Invalid factory method '" + mbd.getFactoryMethodName() +
 						"': needs to have a non-void return type!");

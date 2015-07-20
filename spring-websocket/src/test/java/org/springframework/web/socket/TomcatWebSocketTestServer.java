@@ -20,8 +20,11 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.servlet.Filter;
+import javax.servlet.ServletContext;
 
 import org.apache.catalina.Context;
+import org.apache.catalina.LifecycleEvent;
+import org.apache.catalina.LifecycleListener;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.coyote.http11.Http11NioProtocol;
@@ -38,6 +41,7 @@ import org.springframework.web.servlet.DispatcherServlet;
  * Tomcat based {@link WebSocketTestServer}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class TomcatWebSocketTestServer implements WebSocketTestServer {
 
@@ -105,6 +109,11 @@ public class TomcatWebSocketTestServer implements WebSocketTestServer {
 	}
 
 	@Override
+	public ServletContext getServletContext() {
+		return this.context.getServletContext();
+	}
+
+	@Override
 	public void undeployConfig() {
 		if (this.context != null) {
 			this.context.removeServletMapping("/");
@@ -115,6 +124,12 @@ public class TomcatWebSocketTestServer implements WebSocketTestServer {
 	@Override
 	public void start() throws Exception {
 		this.tomcatServer.start();
+		this.context.addLifecycleListener(new LifecycleListener() {
+			@Override
+			public void lifecycleEvent(LifecycleEvent event) {
+				System.out.println(event.getType());
+			}
+		});
 	}
 
 	@Override

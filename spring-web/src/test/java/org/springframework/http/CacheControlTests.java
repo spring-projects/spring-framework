@@ -28,8 +28,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class CacheControlTests {
 
-	private static final String CACHE_CONTROL_HEADER = "Cache-Control";
-
 	@Test
 	public void emptyCacheControl() throws Exception {
 		CacheControl cc = CacheControl.empty();

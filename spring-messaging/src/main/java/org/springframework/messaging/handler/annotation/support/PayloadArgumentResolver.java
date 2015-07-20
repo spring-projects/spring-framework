@@ -87,7 +87,7 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 	@Override
 	public Object resolveArgument(MethodParameter param, Message<?> message) throws Exception {
 		Payload ann = param.getParameterAnnotation(Payload.class);
-		if (ann != null && StringUtils.hasText(ann.value())) {
+		if (ann != null && StringUtils.hasText(ann.expression())) {
 			throw new IllegalStateException("@Payload SpEL expressions not supported by this resolver");
 		}
 

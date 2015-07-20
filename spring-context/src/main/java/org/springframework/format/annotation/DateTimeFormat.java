@@ -82,23 +82,23 @@ public @interface DateTimeFormat {
 	/**
 	 * Common ISO date time format patterns.
 	 */
-	public enum ISO {
+	enum ISO {
 
 		/**
 		 * The most common ISO Date Format {@code yyyy-MM-dd},
-		 * e.g. 2000-10-31.
+		 * e.g. "2000-10-31".
 		 */
 		DATE,
 
 		/**
 		 * The most common ISO Time Format {@code HH:mm:ss.SSSZ},
-		 * e.g. 01:30:00.000-05:00.
+		 * e.g. "01:30:00.000-05:00".
 		 */
 		TIME,
 
 		/**
 		 * The most common ISO DateTime Format {@code yyyy-MM-dd'T'HH:mm:ss.SSSZ},
-		 * e.g. 2000-10-31 01:30:00.000-05:00.
+		 * e.g. "2000-10-31 01:30:00.000-05:00".
 		 * <p>This is the default if no annotation value is specified.
 		 */
 		DATE_TIME,

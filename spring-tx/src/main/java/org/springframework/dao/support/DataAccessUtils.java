@@ -139,7 +139,7 @@ public abstract class DataAccessUtils {
 
 		Object result = requiredUniqueResult(results);
 		if (requiredType != null && !requiredType.isInstance(result)) {
-			if (String.class.equals(requiredType)) {
+			if (String.class == requiredType) {
 				result = result.toString();
 			}
 			else if (Number.class.isAssignableFrom(requiredType) && Number.class.isInstance(result)) {

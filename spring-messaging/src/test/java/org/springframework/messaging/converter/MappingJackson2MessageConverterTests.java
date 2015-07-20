@@ -17,14 +17,17 @@
 package org.springframework.messaging.converter;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import org.junit.Test;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
@@ -174,6 +177,23 @@ public class MappingJackson2MessageConverterTests {
 		assertEquals(contentType, message.getHeaders().get(MessageHeaders.CONTENT_TYPE));
 	}
 
+	@Test
+	public void jsonView() throws Exception {
+		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
+
+		Map<String, Object> map = new HashMap<>();
+		Method method = this.getClass().getDeclaredMethod("handle");
+		MethodParameter returnType = new MethodParameter(method, -1);
+		map.put(AbstractMessageConverter.METHOD_PARAMETER_HINT_HEADER, returnType);
+		MessageHeaders headers = new MessageHeaders(map);
+		Message<?> message = converter.toMessage(handle(), headers);
+		String actual = new String((byte[]) message.getPayload(), UTF_8);
+
+		assertThat(actual, containsString("\"withView1\":\"with\""));
+		assertThat(actual, not(containsString("\"withView2\":\"with\"")));
+		assertThat(actual, not(containsString("\"withoutView\":\"without\"")));
+	}
+
 
 	public static class MyBean {
 
@@ -236,6 +256,53 @@ public class MappingJackson2MessageConverterTests {
 		public void setArray(String[] array) {
 			this.array = array;
 		}
+	}
+
+	public interface MyJacksonView1 {};
+	public interface MyJacksonView2 {};
+
+	public static class JacksonViewBean {
+
+		@JsonView(MyJacksonView1.class)
+		private String withView1;
+
+		@JsonView(MyJacksonView2.class)
+		private String withView2;
+
+		private String withoutView;
+
+		public String getWithView1() {
+			return withView1;
+		}
+
+		public void setWithView1(String withView1) {
+			this.withView1 = withView1;
+		}
+
+		public String getWithView2() {
+			return withView2;
+		}
+
+		public void setWithView2(String withView2) {
+			this.withView2 = withView2;
+		}
+
+		public String getWithoutView() {
+			return withoutView;
+		}
+
+		public void setWithoutView(String withoutView) {
+			this.withoutView = withoutView;
+		}
+	}
+
+	@JsonView(MyJacksonView1.class)
+	public JacksonViewBean handle() {
+		JacksonViewBean bean = new JacksonViewBean();
+		bean.setWithView1("with");
+		bean.setWithView2("with");
+		bean.setWithoutView("without");
+		return bean;
 	}
 
 }

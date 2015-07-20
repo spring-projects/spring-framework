@@ -12,7 +12,7 @@
 			<aop:around pointcut-ref="anyOperation" method="increment"/>
 		</aop:aspect>
 	</aop:config>
-	
+
 	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean" />
 
 	<bean id="interfaceExtendingAspect"

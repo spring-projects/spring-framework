@@ -17,16 +17,19 @@
 package org.springframework.web.context.request;
 
 import java.security.Principal;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -54,6 +57,10 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	private static final String METHOD_GET = "GET";
 
 	private static final String METHOD_HEAD = "HEAD";
+
+	private static final String DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
+
+	private static TimeZone GMT = TimeZone.getTimeZone("GMT");
 
 
 	private boolean notModified = false;
@@ -174,13 +181,15 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	public boolean checkNotModified(long lastModifiedTimestamp) {
 		HttpServletResponse response = getResponse();
 		if (lastModifiedTimestamp >= 0 && !this.notModified) {
-			if (response == null || !response.containsHeader(HEADER_LAST_MODIFIED)) {
+			if (response == null || HttpStatus.valueOf(response.getStatus()).is2xxSuccessful()) {
 				this.notModified = isTimeStampNotModified(lastModifiedTimestamp);
 				if (response != null) {
 					if (this.notModified && supportsNotModifiedStatus()) {
 						response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 					}
-					response.setDateHeader(HEADER_LAST_MODIFIED, lastModifiedTimestamp);
+					if(response.getHeader(HEADER_LAST_MODIFIED) == null) {
+						response.setHeader(HEADER_LAST_MODIFIED, formatDate(lastModifiedTimestamp));
+					}
 				}
 			}
 		}
@@ -214,14 +223,16 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	public boolean checkNotModified(String etag) {
 		HttpServletResponse response = getResponse();
 		if (StringUtils.hasLength(etag) && !this.notModified) {
-			if (response == null || !response.containsHeader(HEADER_ETAG)) {
+			if (response == null || HttpStatus.valueOf(response.getStatus()).is2xxSuccessful()) {
 				etag = addEtagPadding(etag);
 				this.notModified = isETagNotModified(etag);
 				if (response != null) {
 					if (this.notModified && supportsNotModifiedStatus()) {
 						response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 					}
-					response.setHeader(HEADER_ETAG, etag);
+					if(response.getHeader(HEADER_ETAG) == null) {
+						response.setHeader(HEADER_ETAG, etag);
+					}
 				}
 			}
 		}
@@ -244,7 +255,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 					// compare weak/strong ETags as per https://tools.ietf.org/html/rfc7232#section-2.3
 					if (StringUtils.hasLength(clientETag) &&
 							(clientETag.replaceFirst("^W/", "").equals(etag.replaceFirst("^W/", ""))
-								|| clientETag.equals("*"))) {
+									|| clientETag.equals("*"))) {
 						return true;
 					}
 				}
@@ -262,20 +273,29 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	public boolean checkNotModified(String etag, long lastModifiedTimestamp) {
 		HttpServletResponse response = getResponse();
 		if (StringUtils.hasLength(etag) && !this.notModified) {
-			if (response == null ||
-					(!response.containsHeader(HEADER_ETAG) && !response.containsHeader(HEADER_LAST_MODIFIED))) {
+			if (response == null || HttpStatus.valueOf(response.getStatus()).is2xxSuccessful()) {
 				etag = addEtagPadding(etag);
 				this.notModified = isETagNotModified(etag) && isTimeStampNotModified(lastModifiedTimestamp);
 				if (response != null) {
 					if (this.notModified && supportsNotModifiedStatus()) {
 						response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 					}
-					response.setHeader(HEADER_ETAG, etag);
-					response.setDateHeader(HEADER_LAST_MODIFIED, lastModifiedTimestamp);
+					if(response.getHeader(HEADER_ETAG) == null) {
+						response.setHeader(HEADER_ETAG, etag);
+					}
+					if(response.getHeader(HEADER_LAST_MODIFIED) == null) {
+						response.setHeader(HEADER_LAST_MODIFIED, formatDate(lastModifiedTimestamp));
+					}
 				}
 			}
 		}
 		return this.notModified;
+	}
+
+	private String formatDate(long date) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.US);
+		dateFormat.setTimeZone(GMT);
+		return dateFormat.format(new Date(date));
 	}
 
 	public boolean isNotModified() {

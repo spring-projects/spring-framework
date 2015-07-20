@@ -45,7 +45,7 @@ public abstract class UriComponents implements Serializable {
 	private static final String DEFAULT_ENCODING = "UTF-8";
 
 	/** Captures URI template variable names. */
-	private static final Pattern NAMES_PATTERN = Pattern.compile("\\{(/?[^/]+?)\\}");
+	private static final Pattern NAMES_PATTERN = Pattern.compile("\\{([^/]+?)\\}");
 
 
 	private final String scheme;
@@ -237,9 +237,6 @@ public abstract class UriComponents implements Serializable {
 	}
 
 	private static String getVariableName(String match) {
-		if (match.length() > 0 && match.charAt(0) == '/') {
-			match = match.substring(1);
-		}
 		int colonIdx = match.indexOf(':');
 		return (colonIdx != -1 ? match.substring(0, colonIdx) : match);
 	}
@@ -255,7 +252,7 @@ public abstract class UriComponents implements Serializable {
 	 */
 	public interface UriTemplateVariables {
 
-		public static final Object SKIP_VALUE = UriTemplateVariables.class;
+		Object SKIP_VALUE = UriTemplateVariables.class;
 
 		/**
 		 * Get the value for the given URI variable name.

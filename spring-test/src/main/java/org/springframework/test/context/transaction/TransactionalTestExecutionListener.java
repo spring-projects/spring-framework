@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
@@ -134,11 +134,8 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 	private static final Log logger = LogFactory.getLog(TransactionalTestExecutionListener.class);
 
-	private static final String DEFAULT_TRANSACTION_MANAGER_NAME = (String) getDefaultValue(
-		TransactionConfiguration.class, "transactionManager");
-
-	private static final Boolean DEFAULT_DEFAULT_ROLLBACK = (Boolean) getDefaultValue(TransactionConfiguration.class,
-		"defaultRollback");
+	private static final TransactionConfiguration defaultTransactionConfiguration =
+			AnnotationUtils.synthesizeAnnotation(TransactionConfiguration.class);
 
 	protected final TransactionAttributeSource attributeSource = new AnnotationTransactionAttributeSource();
 
@@ -410,7 +407,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	private List<Class<?>> getSuperClasses(Class<?> clazz) {
 		List<Class<?>> results = new ArrayList<Class<?>>();
 		Class<?> current = clazz;
-		while (current != null && !current.equals(Object.class)) {
+		while (current != null && Object.class != current) {
 			results.add(current);
 			current = current.getSuperclass();
 		}
@@ -500,28 +497,21 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 		if (this.configurationAttributes == null) {
 			Class<?> clazz = testContext.getTestClass();
 
-			AnnotationAttributes annAttrs = AnnotatedElementUtils.getAnnotationAttributes(clazz,
-				TransactionConfiguration.class.getName());
+			TransactionConfiguration txConfig = AnnotatedElementUtils.findMergedAnnotation(clazz,
+				TransactionConfiguration.class);
 			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Retrieved @TransactionConfiguration attributes [%s] for test class [%s].",
-					annAttrs, clazz));
+				logger.debug(String.format("Retrieved @TransactionConfiguration [%s] for test class [%s].",
+					txConfig, clazz));
 			}
 
-			String transactionManagerName;
-			boolean defaultRollback;
-			if (annAttrs != null) {
-				transactionManagerName = annAttrs.getString("transactionManager");
-				defaultRollback = annAttrs.getBoolean("defaultRollback");
-			}
-			else {
-				transactionManagerName = DEFAULT_TRANSACTION_MANAGER_NAME;
-				defaultRollback = DEFAULT_DEFAULT_ROLLBACK;
+			if (txConfig == null) {
+				txConfig = defaultTransactionConfiguration;
 			}
 
 			TransactionConfigurationAttributes configAttributes = new TransactionConfigurationAttributes(
-				transactionManagerName, defaultRollback);
+				txConfig.transactionManager(), txConfig.defaultRollback());
 			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Retrieved TransactionConfigurationAttributes %s for class [%s].",
+				logger.debug(String.format("Using TransactionConfigurationAttributes %s for class [%s].",
 					configAttributes, clazz));
 			}
 			this.configurationAttributes = configAttributes;

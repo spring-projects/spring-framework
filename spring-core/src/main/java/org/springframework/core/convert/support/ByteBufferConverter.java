@@ -31,6 +31,7 @@ import org.springframework.core.convert.converter.ConditionalGenericConverter;
  * to any type that the {@link ConversionService} support via {@code byte[]}.
  *
  * @author Phillip Webb
+ * @author Juergen Hoeller
  * @since 4.0
  */
 final class ByteBufferConverter implements ConditionalGenericConverter {
@@ -40,8 +41,11 @@ final class ByteBufferConverter implements ConditionalGenericConverter {
 	private static final TypeDescriptor BYTE_ARRAY_TYPE = TypeDescriptor.valueOf(byte[].class);
 
 	private static final Set<ConvertiblePair> CONVERTIBLE_PAIRS;
+
 	static {
-		Set<ConvertiblePair> convertiblePairs = new HashSet<ConvertiblePair>();
+		Set<ConvertiblePair> convertiblePairs = new HashSet<ConvertiblePair>(4);
+		convertiblePairs.add(new ConvertiblePair(ByteBuffer.class, byte[].class));
+		convertiblePairs.add(new ConvertiblePair(byte[].class, ByteBuffer.class));
 		convertiblePairs.add(new ConvertiblePair(ByteBuffer.class, Object.class));
 		convertiblePairs.add(new ConvertiblePair(Object.class, ByteBuffer.class));
 		CONVERTIBLE_PAIRS = Collections.unmodifiableSet(convertiblePairs);
@@ -63,13 +67,11 @@ final class ByteBufferConverter implements ConditionalGenericConverter {
 
 	@Override
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
+		boolean byteBufferTarget = targetType.isAssignableTo(BYTE_BUFFER_TYPE);
 		if (sourceType.isAssignableTo(BYTE_BUFFER_TYPE)) {
-			return matchesFromByteBuffer(targetType);
+			return (byteBufferTarget || matchesFromByteBuffer(targetType));
 		}
-		if (targetType.isAssignableTo(BYTE_BUFFER_TYPE)) {
-			return matchesToByteBuffer(sourceType);
-		}
-		return false;
+		return (byteBufferTarget && matchesToByteBuffer(sourceType));
 	}
 
 	private boolean matchesFromByteBuffer(TypeDescriptor targetType) {
@@ -84,10 +86,12 @@ final class ByteBufferConverter implements ConditionalGenericConverter {
 
 	@Override
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-		if (sourceType.isAssignableTo(BYTE_BUFFER_TYPE)) {
-			return convertFromByteBuffer((ByteBuffer) source, targetType);
+		boolean byteBufferTarget = targetType.isAssignableTo(BYTE_BUFFER_TYPE);
+		if (source instanceof ByteBuffer) {
+			ByteBuffer buffer = (ByteBuffer) source;
+			return (byteBufferTarget ? buffer.duplicate() : convertFromByteBuffer(buffer, targetType));
 		}
-		if (targetType.isAssignableTo(BYTE_BUFFER_TYPE)) {
+		if (byteBufferTarget) {
 			return convertToByteBuffer(source, sourceType);
 		}
 		// Should not happen
@@ -97,6 +101,7 @@ final class ByteBufferConverter implements ConditionalGenericConverter {
 	private Object convertFromByteBuffer(ByteBuffer source, TypeDescriptor targetType) {
 		byte[] bytes = new byte[source.remaining()];
 		source.get(bytes);
+
 		if (targetType.isAssignableTo(BYTE_ARRAY_TYPE)) {
 			return bytes;
 		}
@@ -113,9 +118,7 @@ final class ByteBufferConverter implements ConditionalGenericConverter {
 		// Extra cast necessary for compiling on JDK 9 plus running on JDK 8, since
 		// otherwise the overridden ByteBuffer-returning rewind method would be chosen
 		// which isn't available on JDK 8.
-		((Buffer) byteBuffer).rewind();
-
-		return byteBuffer;
+		return ((Buffer) byteBuffer).rewind();
 	}
 
 }

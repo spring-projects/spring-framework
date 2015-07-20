@@ -117,12 +117,13 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		return this.statusCode;
 	}
 
+
 	@Override
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof ResponseEntity) || !super.equals(other)) {
+		if (!super.equals(other)) {
 			return false;
 		}
 		ResponseEntity<?> otherEntity = (ResponseEntity<?>) other;

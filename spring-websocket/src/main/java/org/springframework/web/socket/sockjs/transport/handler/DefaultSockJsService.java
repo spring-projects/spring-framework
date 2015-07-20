@@ -21,10 +21,13 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import javax.servlet.ServletContext;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
 import org.springframework.web.socket.sockjs.transport.TransportHandlingSockJsService;
@@ -37,7 +40,7 @@ import org.springframework.web.socket.sockjs.transport.TransportHandlingSockJsSe
  * @author Juergen Hoeller
  * @since 4.0
  */
-public class DefaultSockJsService extends TransportHandlingSockJsService {
+public class DefaultSockJsService extends TransportHandlingSockJsService implements ServletContextAware {
 
 	/**
 	 * Create a DefaultSockJsService with default {@link TransportHandler handler} types.
@@ -99,4 +102,12 @@ public class DefaultSockJsService extends TransportHandlingSockJsService {
 		return result;
 	}
 
+	@Override
+	public void setServletContext(ServletContext servletContext) {
+		for (TransportHandler handler : getTransportHandlers().values()) {
+			if (handler instanceof ServletContextAware) {
+				((ServletContextAware) handler).setServletContext(servletContext);
+			}
+		}
+	}
 }

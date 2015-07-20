@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,16 +21,25 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
+import org.mockito.ArgumentCaptor;
+import static org.mockito.BDDMockito.given;
+import org.mockito.Captor;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
+import org.mockito.Mock;
 
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.SubscribableChannel;
+import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.handler.HandlerMethod;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Headers;
@@ -48,12 +57,15 @@ import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.AntPathMatcher;
+import org.springframework.util.concurrent.ListenableFutureTask;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.verify;
+import org.mockito.MockitoAnnotations;
 
 /**
  * Test fixture for
@@ -61,6 +73,7 @@ import static org.junit.Assert.*;
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Sebastien Deleuze
  */
 public class SimpAnnotationMethodMessageHandlerTests {
 
@@ -70,13 +83,24 @@ public class SimpAnnotationMethodMessageHandlerTests {
 
 	private TestController testController;
 
+	@Mock
+	private SubscribableChannel channel;
+
+	@Mock
+	private MessageConverter converter;
+
+	@Captor
+	private ArgumentCaptor<Object> payloadCaptor;
+
 
 	@Before
 	public void setup() {
-		SubscribableChannel channel = Mockito.mock(SubscribableChannel.class);
-		SimpMessageSendingOperations brokerTemplate = new SimpMessagingTemplate(channel);
+		MockitoAnnotations.initMocks(this);
 
-		this.messageHandler = new TestSimpAnnotationMethodMessageHandler(brokerTemplate, channel, channel);
+		SimpMessagingTemplate brokerTemplate = new SimpMessagingTemplate(this.channel);
+		brokerTemplate.setMessageConverter(converter);
+
+		this.messageHandler = new TestSimpAnnotationMethodMessageHandler(brokerTemplate, this.channel, this.channel);
 		this.messageHandler.setApplicationContext(new StaticApplicationContext());
 		this.messageHandler.setValidator(new StringTestValidator(TEST_INVALID_VALUE));
 		this.messageHandler.afterPropertiesSet();
@@ -185,6 +209,20 @@ public class SimpAnnotationMethodMessageHandlerTests {
 	}
 
 	@Test
+	public void exceptionWithHandlerMethodArg() {
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
+		headers.setSessionId("session1");
+		headers.setSessionAttributes(new ConcurrentHashMap<>());
+		headers.setDestination("/pre/illegalState");
+		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		this.messageHandler.handleMessage(message);
+		assertEquals("handleExceptionWithHandlerMethodArg", this.testController.method);
+		HandlerMethod handlerMethod = (HandlerMethod) this.testController.arguments.get("handlerMethod");
+		assertNotNull(handlerMethod);
+		assertEquals("illegalState", handlerMethod.getMethod().getName());
+	}
+
+	@Test
 	public void simpScope() {
 		Map<String, Object> map = new ConcurrentHashMap<>();
 		map.put("name", "value");
@@ -225,6 +263,98 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		assertEquals("handleFoo", controller.method);
 	}
 
+	@Test
+	@SuppressWarnings("unchecked")
+	public void listenableFutureSuccess() {
+
+		given(this.channel.send(any(Message.class))).willReturn(true);
+		given(this.converter.toMessage(anyObject(), any(MessageHeaders.class)))
+				.willReturn((Message) MessageBuilder.withPayload(new byte[0]).build());
+
+
+		ListenableFutureController controller = new ListenableFutureController();
+		this.messageHandler.registerHandler(controller);
+		this.messageHandler.setDestinationPrefixes(Arrays.asList("/app1", "/app2/"));
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
+		headers.setSessionId("session1");
+		headers.setSessionAttributes(new HashMap<>());
+		headers.setDestination("/app1/listenable-future/success");
+		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		this.messageHandler.handleMessage(message);
+
+		assertNotNull(controller.future);
+		controller.future.run();
+		verify(this.converter).toMessage(this.payloadCaptor.capture(), any(MessageHeaders.class));
+		assertEquals("foo", this.payloadCaptor.getValue());
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void listenableFutureFailure() {
+
+		given(this.channel.send(any(Message.class))).willReturn(true);
+		given(this.converter.toMessage(anyObject(), any(MessageHeaders.class)))
+				.willReturn((Message) MessageBuilder.withPayload(new byte[0]).build());
+
+		ListenableFutureController controller = new ListenableFutureController();
+		this.messageHandler.registerHandler(controller);
+		this.messageHandler.setDestinationPrefixes(Arrays.asList("/app1", "/app2/"));
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
+		headers.setSessionId("session1");
+		headers.setSessionAttributes(new HashMap<>());
+		headers.setDestination("/app1/listenable-future/failure");
+		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		this.messageHandler.handleMessage(message);
+
+		controller.future.run();
+		assertTrue(controller.exceptionCatched);
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void completableFutureSuccess() {
+
+		given(this.channel.send(any(Message.class))).willReturn(true);
+		given(this.converter.toMessage(anyObject(), any(MessageHeaders.class)))
+				.willReturn((Message) MessageBuilder.withPayload(new byte[0]).build());
+
+		CompletableFutureController controller = new CompletableFutureController();
+		this.messageHandler.registerHandler(controller);
+		this.messageHandler.setDestinationPrefixes(Arrays.asList("/app1", "/app2/"));
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
+		headers.setSessionId("session1");
+		headers.setSessionAttributes(new HashMap<>());
+		headers.setDestination("/app1/completable-future");
+		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		this.messageHandler.handleMessage(message);
+
+		assertNotNull(controller.future);
+		controller.future.complete("foo");
+		verify(this.converter).toMessage(this.payloadCaptor.capture(), any(MessageHeaders.class));
+		assertEquals("foo", this.payloadCaptor.getValue());
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void completableFutureFailure() {
+
+		given(this.channel.send(any(Message.class))).willReturn(true);
+		given(this.converter.toMessage(anyObject(), any(MessageHeaders.class)))
+				.willReturn((Message) MessageBuilder.withPayload(new byte[0]).build());
+
+		CompletableFutureController controller = new CompletableFutureController();
+		this.messageHandler.registerHandler(controller);
+		this.messageHandler.setDestinationPrefixes(Arrays.asList("/app1", "/app2/"));
+		SimpMessageHeaderAccessor headers = SimpMessageHeaderAccessor.create();
+		headers.setSessionId("session1");
+		headers.setSessionAttributes(new HashMap<>());
+		headers.setDestination("/app1/completable-future");
+		Message<?> message = MessageBuilder.withPayload(new byte[0]).setHeaders(headers).build();
+		this.messageHandler.handleMessage(message);
+
+		controller.future.completeExceptionally(new IllegalStateException());
+		assertTrue(controller.exceptionCatched);
+	}
 
 	private static class TestSimpAnnotationMethodMessageHandler extends SimpAnnotationMethodMessageHandler {
 
@@ -256,7 +386,7 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		}
 
 		@MessageMapping("/optionalHeaders")
-		public void optionalHeaders(@Header(value="foo", required=false) String foo1, @Header(value="foo") Optional<String> foo2) {
+		public void optionalHeaders(@Header(name="foo", required=false) String foo1, @Header("foo") Optional<String> foo2) {
 			this.method = "optionalHeaders";
 			this.arguments.put("foo1", foo1);
 			this.arguments.put("foo2", (foo2.isPresent() ? foo2.get() : null));
@@ -290,9 +420,20 @@ public class SimpAnnotationMethodMessageHandlerTests {
 			this.arguments.put("message", payload);
 		}
 
+		@MessageMapping("/illegalState")
+		public void illegalState() {
+			throw new IllegalStateException();
+		}
+
 		@MessageExceptionHandler(MethodArgumentNotValidException.class)
 		public void handleValidationException() {
 			this.method = "handleValidationException";
+		}
+
+		@MessageExceptionHandler(IllegalStateException.class)
+		public void handleExceptionWithHandlerMethodArg(HandlerMethod handlerMethod) {
+			this.method = "handleExceptionWithHandlerMethodArg";
+			this.arguments.put("handlerMethod", handlerMethod);
 		}
 
 		@MessageMapping("/scope")
@@ -316,6 +457,52 @@ public class SimpAnnotationMethodMessageHandlerTests {
 		}
 	}
 
+	@Controller
+	@MessageMapping("listenable-future")
+	private static class ListenableFutureController {
+
+		private ListenableFutureTask<String> future;
+		private boolean exceptionCatched = false;
+
+		@MessageMapping("success")
+		public ListenableFutureTask<String> handleListenableFuture() {
+			this.future = new ListenableFutureTask<String>(() -> "foo");
+			return this.future;
+		}
+
+		@MessageMapping("failure")
+		public ListenableFutureTask<String> handleListenableFutureException() {
+			this.future = new ListenableFutureTask<String>(() -> {
+				throw new IllegalStateException();
+			});
+			return this.future;
+		}
+
+		@MessageExceptionHandler(IllegalStateException.class)
+		public void handleValidationException() {
+			this.exceptionCatched = true;
+		}
+
+	}
+
+	@Controller
+	private static class CompletableFutureController {
+
+		private CompletableFuture<String> future;
+		private boolean exceptionCatched = false;
+
+		@MessageMapping("completable-future")
+		public CompletableFuture<String> handleCompletableFuture() {
+			this.future = new CompletableFuture<>();
+			return this.future;
+		}
+
+		@MessageExceptionHandler(IllegalStateException.class)
+		public void handleValidationException() {
+			this.exceptionCatched = true;
+		}
+
+	}
 
 	private static class StringTestValidator implements Validator {
 

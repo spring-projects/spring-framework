@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ public class JmsMessageEndpointManagerTests {
 		config.setPubSubDomain(false);
 		endpoint.setActivationSpecConfig(config);
 		assertEquals(false, endpoint.isPubSubDomain());
+		assertEquals(false, endpoint.isReplyPubSubDomain());
 	}
 
 	@Test
@@ -46,6 +47,18 @@ public class JmsMessageEndpointManagerTests {
 		config.setPubSubDomain(true);
 		endpoint.setActivationSpecConfig(config);
 		assertEquals(true, endpoint.isPubSubDomain());
+		assertEquals(true, endpoint.isReplyPubSubDomain());
+	}
+
+	@Test
+	public void pubSubDomainCustomForReply() {
+		JmsMessageEndpointManager endpoint = new JmsMessageEndpointManager();
+		JmsActivationSpecConfig config = new JmsActivationSpecConfig();
+		config.setPubSubDomain(true);
+		config.setReplyPubSubDomain(false);
+		endpoint.setActivationSpecConfig(config);
+		assertEquals(true, endpoint.isPubSubDomain());
+		assertEquals(false, endpoint.isReplyPubSubDomain());
 	}
 
 	@Test
@@ -57,8 +70,22 @@ public class JmsMessageEndpointManagerTests {
 	}
 
 	@Test
+	public void isReplyPubSubDomainWithNoConfig() {
+		JmsMessageEndpointManager endpoint = new JmsMessageEndpointManager();
+
+		thrown.expect(IllegalStateException.class); // far from ideal
+		endpoint.isReplyPubSubDomain();
+	}
+
+	@Test
 	public void getMessageConverterNoConfig() {
 		JmsMessageEndpointManager endpoint = new JmsMessageEndpointManager();
 		assertNull(endpoint.getMessageConverter());
+	}
+
+	@Test
+	public void getDestinationResolverNoConfig() {
+		JmsMessageEndpointManager endpoint = new JmsMessageEndpointManager();
+		assertNull(endpoint.getDestinationResolver());
 	}
 }

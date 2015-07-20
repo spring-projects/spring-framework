@@ -134,6 +134,34 @@ public class ResolvableTypeTests {
 	}
 
 	@Test
+	public void forInstanceMustNotBeNull() {
+		this.thrown.expect(IllegalArgumentException.class);
+		this.thrown.expectMessage("Instance must not be null");
+		ResolvableType.forInstance(null);
+	}
+
+	@Test
+	public void forInstanceNoProvider() {
+		ResolvableType type = ResolvableType.forInstance(new Object());
+		assertThat(type.getType(), equalTo(Object.class));
+		assertThat(type.resolve(), equalTo(Object.class));
+	}
+
+	@Test
+	public void forInstanceProvider() {
+		ResolvableType type = ResolvableType.forInstance(new MyGenericInterfaceType<String>(String.class));
+		assertThat(type.getRawClass(), equalTo(MyGenericInterfaceType.class));
+		assertThat(type.getGeneric().resolve(), equalTo(String.class));
+	}
+
+	@Test
+	public void forInstanceProviderNull() {
+		ResolvableType type = ResolvableType.forInstance(new MyGenericInterfaceType<String>(null));
+		assertThat(type.getType(), equalTo(MyGenericInterfaceType.class));
+		assertThat(type.resolve(), equalTo(MyGenericInterfaceType.class));
+	}
+
+	@Test
 	public void forField() throws Exception {
 		Field field = Fields.class.getField("charSequenceList");
 		ResolvableType type = ResolvableType.forField(field);
@@ -1452,6 +1480,23 @@ public class ResolvableTypeTests {
 
 
 	public interface MyInterfaceType<T> {
+	}
+
+	public class MyGenericInterfaceType<T> implements MyInterfaceType<T>, ResolvableTypeProvider {
+
+		private final Class<T> type;
+
+		public MyGenericInterfaceType(Class<T> type) {
+			this.type = type;
+		}
+
+		@Override
+		public ResolvableType getResolvableType() {
+			if (this.type == null) {
+				return null;
+			}
+			return ResolvableType.forClassWithGenerics(getClass(), this.type);
+		}
 	}
 
 

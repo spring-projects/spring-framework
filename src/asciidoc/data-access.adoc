@@ -54,6 +54,8 @@ server integration, and solutions to common problems.)
   declarative transaction management.
 * <<transaction-programmatic,Programmatic transaction management>> covers support for
   programmatic (that is, explicitly coded) transaction management.
+* <<transaction-event,Transaction bound event>> describes how you could use application
+  events within a transaction.
 
 
 
@@ -306,7 +308,7 @@ infrastructure.
 [NOTE]
 ====
 The above definition of the `dataSource` bean uses the `<jndi-lookup/>` tag from the
-`jee` namespace. For more information on schema-based configuration, see <<xsd-config>>,
+`jee` namespace. For more information on schema-based configuration, see <<xsd-configuration>>,
 and for more information on the `<jee/>` tags see the section entitled
 <<xsd-config-body-schemas-jee>>.
 ====
@@ -1924,8 +1926,44 @@ management out of business logic, and is not difficult to configure. When using 
 Spring Framework, rather than EJB CMT, the configuration cost of declarative transaction
 management is greatly reduced.
 
+[[transaction-event]]
+=== Transaction bound event
 
+As of Spring 4.2, the listener of an event can be bound to a phase of the transaction. The
+typical example is to handle the event when the transaction has completed successfully: this
+allows events to be used with more flexibility when the outcome of the current transaction
+actually matters to the listener.
 
+Registering a regular event listener is done via the `@EventListener` annotation. If you need
+to bind it to the transaction use `@TransactionalEventListener`. When you do so, the listener
+will be bound to the commit phase of the transaction by default.
+
+Let's take an example to illustrate this concept. Assume that a component publish an order
+created event and we want to define a listener that should only handle that event once the
+transaction in which it has been published as committed successfully:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Component
+    public class MyComponent {
+
+    	@TransactionalEventListener
+    	public void handleOrderCreatedEvent(CreationEvent<Order> creationEvent) {
+      		...
+    	}
+
+    }
+----
+
+The `TransactionalEventListener` annotation exposes a `phase` attribute  that allows to customize
+to which phase of the transaction the listener should be bound to. The valid phases are `BEFORE_COMMIT`,
+`AFTER_COMMIT` (default), `AFTER_ROLLBACK` and `AFTER_COMPLETION` that aggregates the transaction
+completion (be it a commit or a rollback).
+
+If no transaction is running, the listener is not invoked at all since we can't honor the required
+semantics. It is however possible to override that behaviour by setting the `fallbackExecution` attribute
+of the annotation to `true`.
 
 [[transaction-application-server-integration]]
 === Application server-specific integration
@@ -3700,12 +3738,10 @@ data retrieved. Again, it is important to use the names of the `out` parameters 
 are declared in the stored procedure. Also, the case in the names of the `out`
 parameters stored in the results map matches that of the `out` parameter names in the
 database, which could vary between databases. To make your code more portable you should
-do a case-insensitive lookup or instruct Spring to use a `CaseInsensitiveMap` from the
-Jakarta Commons project. To do the latter, you create your own `JdbcTemplate` and set
-the `setResultsMapCaseInsensitive` property to `true`. Then you pass this customized
-`JdbcTemplate` instance into the constructor of your `SimpleJdbcCall`. You must include
-the `commons-collections.jar` in your classpath for this to work. Here is an example of
-this configuration:
+do a case-insensitive lookup or instruct Spring to use a `LinkedCaseInsensitiveMap`.
+To do the latter, you create your own `JdbcTemplate` and set the `setResultsMapCaseInsensitive`
+property to `true`. Then you pass this customized `JdbcTemplate` instance into
+the constructor of your `SimpleJdbcCall`. Here is an example of this configuration:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3916,7 +3952,7 @@ rows from the t_actor table. Here is the MySQL source for this procedure:
 ----
 
 To call this procedure you declare the `RowMapper`. Because the class you want to map to
-follows the JavaBean rules, you can use a `ParameterizedBeanPropertyRowMapper` that is
+follows the JavaBean rules, you can use a `BeanPropertyRowMapper` that is
 created by passing in the required class to map to in the `newInstance` method.
 
 [source,java,indent=0]
@@ -3932,7 +3968,7 @@ created by passing in the required class to map to in the `newInstance` method.
 			this.procReadAllActors = new SimpleJdbcCall(jdbcTemplate)
 					.withProcedureName("read_all_actors")
 					.returningResultSet("actors",
-					ParameterizedBeanPropertyRowMapper.newInstance(Actor.class));
+					BeanPropertyRowMapper.newInstance(Actor.class));
 		}
 
 		public List getActorsList() {
@@ -4357,33 +4393,34 @@ You can provide SQL type information in several ways:
 
 [[jdbc-lob]]
 ==== Handling BLOB and CLOB objects
-You can store images, other binary objects, and large chunks of text. These large object
-are called BLOB for binary data and CLOB for character data. In Spring you can handle
-these large objects by using the JdbcTemplate directly and also when using the higher
-abstractions provided by RDBMS Objects and the `SimpleJdbc` classes. All of these
-approaches use an implementation of the `LobHandler` interface for the actual management
-of the LOB data. The `LobHandler` provides access to a `LobCreator` class, through the
-`getLobCreator` method, used for creating new LOB objects to be inserted.
+You can store images, other binary data, and large chunks of text in the database. These
+large objects are called BLOBs (Binary Large OBject) for binary data and CLOBs (Character
+Large OBject) for character data. In Spring you can handle these large objects by using
+the `JdbcTemplate` directly and also when using the higher abstractions provided by RDBMS
+Objects and the `SimpleJdbc` classes. All of these approaches use an implementation of
+the `LobHandler` interface for the actual management of the LOB (Large OBject) data. The
+`LobHandler` provides access to a `LobCreator` class, through the `getLobCreator` method,
+used for creating new LOB objects to be inserted.
 
 The `LobCreator/LobHandler` provides the following support for LOB input and output:
 
 * BLOB
-* byte[] -- getBlobAsBytes and setBlobAsBytes
-* InputStream -- getBlobAsBinaryStream and setBlobAsBinaryStream
+** `byte[]` -- `getBlobAsBytes` and `setBlobAsBytes`
+** `InputStream` -- `getBlobAsBinaryStream` and `setBlobAsBinaryStream`
 * CLOB
-* String -- getClobAsString and setClobAsString
-* InputStream -- getClobAsAsciiStream and setClobAsAsciiStream
-* Reader -- getClobAsCharacterStream and setClobAsCharacterStream
+** `String` -- `getClobAsString` and `setClobAsString`
+** `InputStream` -- `getClobAsAsciiStream` and `setClobAsAsciiStream`
+** `Reader` -- `getClobAsCharacterStream` and `setClobAsCharacterStream`
 
 The next example shows how to create and insert a BLOB. Later you will see how to read
 it back from the database.
 
 This example uses a `JdbcTemplate` and an implementation of the
-`AbstractLobCreatingPreparedStatementCallbac` `k`. It implements one method,
+`AbstractLobCreatingPreparedStatementCallback`. It implements one method,
 `setValues`. This method provides a `LobCreator` that you use to set the values for the
 LOB columns in your SQL insert statement.
 
-For this example we assume that there is a variable, `lobHandle` `r`, that already is
+For this example we assume that there is a variable, `lobHandler`, that already is
 set to an instance of a `DefaultLobHandler`. You typically set this value through
 dependency injection.
 
@@ -4409,12 +4446,27 @@ dependency injection.
 	clobReader.close();
 ----
 
-<1> Pass in the lobHandler that in this example is a plain `DefaultLobHandler`
+<1> Pass in the `lobHandler` that in this example is a plain `DefaultLobHandler`.
 <2> Using the method `setClobAsCharacterStream`, pass in the contents of the CLOB.
 <3> Using the method `setBlobAsBinaryStream`, pass in the contents of the BLOB.
 
+
+[NOTE]
+====
+If you invoke the `setBlobAsBinaryStream`, `setClobAsAsciiStream`, or
+`setClobAsCharacterStream` method on the `LobCreator` returned from
+`DefaultLobHandler.getLobCreator()`, you can optionally specify a negative value for the
+`contentLength` argument. If the specified content length is negative, the
+`DefaultLobHandler` will use the JDBC 4.0 variants of the set-stream methods without a
+length parameter; otherwise, it will pass the specified length on to the driver.
+
+Consult the documentation for the JDBC driver in use to verify support for streaming a
+LOB without providing the content length.
+====
+
+
 Now it's time to read the LOB data from the database. Again, you use a `JdbcTemplate`
-with the same instance variable `l` `obHandler` and a reference to a `DefaultLobHandler`.
+with the same instance variable `lobHandler` and a reference to a `DefaultLobHandler`.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -5662,9 +5714,6 @@ example of a corresponding DAO implementation:
 	}
 ----
 
-Because the above DAO follows the dependency injection pattern, it fits nicely into a
-Spring container, just as it would if coded against Spring's `JdoTemplate`:
-
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5842,12 +5891,10 @@ JDO 2.0 implementations by default.
 [[orm-jdo-dialect]]
 ==== JdoDialect
 
-As an advanced feature, both `JdoTemplate` and `JdoTransactionManager` support a custom
-`JdoDialect` that can be passed into the `jdoDialect` bean property. In this scenario,
-the DAOs will not receive a `PersistenceManagerFactory` reference but rather a full
-`JdoTemplate` instance (for example, passed into the `jdoTemplate` property of
-`JdoDaoSupport`). Using a `JdoDialect` implementation, you can enable advanced features
-supported by Spring, usually in a vendor-specific manner:
+As an advanced feature, both `LocalPersistenceManagerFactoryBean` and `JdoTransactionManager`
+support a custom `JdoDialect` that can be passed into the `jdoDialect` bean property.
+Using a `JdoDialect` implementation, you can enable advanced features supported by Spring,
+usually in a vendor-specific manner:
 
 * Applying specific transaction semantics such as custom isolation level or transaction
   timeout
@@ -6325,21 +6372,18 @@ declarative transaction facilities. For example:
 Spring JPA allows a configured `JpaTransactionManager` to expose a JPA transaction to
 JDBC access code that accesses the same JDBC `DataSource`, provided that the registered
 `JpaDialect` supports retrieval of the underlying JDBC `Connection`. Out of the box,
-Spring provides dialects for the Toplink, Hibernate and OpenJPA JPA implementations. See
-the next section for details on the `JpaDialect` mechanism.
+Spring provides dialects for the EclipseLink, Hibernate and OpenJPA JPA implementations.
+See the next section for details on the `JpaDialect` mechanism.
 
 
 
 [[orm-jpa-dialect]]
 ==== JpaDialect
 
-As an advanced feature `JpaTemplate`, `JpaTransactionManager` and subclasses of
+As an advanced feature `JpaTransactionManager` and subclasses of
 `AbstractEntityManagerFactoryBean` support a custom `JpaDialect`, to be passed into the
-`jpaDialect` bean property. In such a scenario, the DAOs do not receive an
-`EntityManagerFactory` reference but rather a full `JpaTemplate` instance (for example,
-passed into the `jpaTemplate` property of `JpaDaoSupport`). A `JpaDialect`
-implementation can enable some advanced features supported by Spring, usually in a
-vendor-specific manner:
+`jpaDialect` bean property. A `JpaDialect` implementation can enable some advanced
+features supported by Spring, usually in a vendor-specific manner:
 
 * Applying specific transaction semantics such as custom isolation level or transaction
   timeout)
@@ -6514,6 +6558,7 @@ provide a distinction between marshalling and unmarshalling operations, even tho
 underlying O/X mapping tool does not do so.
 
 The O/X Mapping exception hierarchy is shown in the following figure:
+
 image::images/oxm-exceptions.png[width=400]
 
 O/X Mapping exception hierarchy
@@ -6771,7 +6816,7 @@ not require any further configuration, though a mapping file can be used to have
 control over the behavior of Castor.
 
 For more information on Castor, refer to the
-http://castor.codehaus.org/xml-framework.html[__Castor web site__]. The Spring
+http://castor-data-binding.github.io/castor[__Castor web site__]. The Spring
 integration classes reside in the `org.springframework.oxm.castor` package.
 
 
@@ -6796,7 +6841,7 @@ interface. It can be wired up as follows:
 ==== Mapping
 Although it is possible to rely on Castor's default marshalling behavior, it might be
 necessary to have more control over it. This can be accomplished using a Castor mapping
-file. For more information, refer to http://castor.codehaus.org/xml-mapping.html[Castor
+file. For more information, refer to http://castor-data-binding.github.io/castor/reference-guides/1.3.3/html-single/index.html#xml.mapping[Castor
 XML Mapping].
 
 The mapping can be set using the `mappingLocation` resource property, indicated below
@@ -7001,7 +7046,7 @@ Available attributes are:
 XStream is a simple library to serialize objects to XML and back again. It does not
 require any mapping, and generates clean XML.
 
-For more information on XStream, refer to the http://xstream.codehaus.org/[__XStream
+For more information on XStream, refer to the http://x-stream.github.io/[__XStream
 web site__]. The Spring integration classes reside in the
 `org.springframework.oxm.xstream` package.
 

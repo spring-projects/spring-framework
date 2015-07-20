@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -118,6 +119,10 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			else if (ex instanceof HttpMediaTypeNotAcceptableException) {
 				return handleHttpMediaTypeNotAcceptable((HttpMediaTypeNotAcceptableException) ex, request, response,
 						handler);
+			}
+			else if (ex instanceof MissingPathVariableException) {
+				return handleMissingPathVariable((MissingPathVariableException) ex, request,
+						response, handler);
 			}
 			else if (ex instanceof MissingServletRequestParameterException) {
 				return handleMissingServletRequestParameter((MissingServletRequestParameterException) ex, request,
@@ -244,6 +249,26 @@ public class DefaultHandlerExceptionResolver extends AbstractHandlerExceptionRes
 			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
 
 		response.sendError(HttpServletResponse.SC_NOT_ACCEPTABLE);
+		return new ModelAndView();
+	}
+
+	/**
+	 * Handle the case when a declared path variable does not match any extracted URI variable.
+	 * <p>The default implementation sends an HTTP 500 error, and returns an empty {@code ModelAndView}.
+	 * Alternatively, a fallback view could be chosen, or the MissingPathVariableException
+	 * could be rethrown as-is.
+	 * @param ex the MissingPathVariableException to be handled
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param handler the executed handler
+	 * @return an empty ModelAndView indicating the exception was handled
+	 * @throws IOException potentially thrown from response.sendError()
+	 * @since 4.2
+	 */
+	protected ModelAndView handleMissingPathVariable(MissingPathVariableException ex,
+			HttpServletRequest request, HttpServletResponse response, Object handler) throws IOException {
+
+		response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ex.getMessage());
 		return new ModelAndView();
 	}
 

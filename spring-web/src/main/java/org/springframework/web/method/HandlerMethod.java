@@ -26,6 +26,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -60,6 +61,8 @@ public class HandlerMethod {
 
 	private final MethodParameter[] parameters;
 
+	private final HandlerMethod resolvedFromHandlerMethod;
+
 
 	/**
 	 * Create an instance from a bean instance and a method.
@@ -73,6 +76,7 @@ public class HandlerMethod {
 		this.method = method;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
 		this.parameters = initMethodParameters();
+		this.resolvedFromHandlerMethod = null;
 	}
 
 	/**
@@ -88,6 +92,7 @@ public class HandlerMethod {
 		this.method = bean.getClass().getMethod(methodName, parameterTypes);
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(this.method);
 		this.parameters = initMethodParameters();
+		this.resolvedFromHandlerMethod = null;
 	}
 
 	/**
@@ -105,6 +110,7 @@ public class HandlerMethod {
 		this.method = method;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
 		this.parameters = initMethodParameters();
+		this.resolvedFromHandlerMethod = null;
 	}
 
 	/**
@@ -118,6 +124,7 @@ public class HandlerMethod {
 		this.method = handlerMethod.method;
 		this.bridgedMethod = handlerMethod.bridgedMethod;
 		this.parameters = handlerMethod.parameters;
+		this.resolvedFromHandlerMethod = handlerMethod.resolvedFromHandlerMethod;
 	}
 
 	/**
@@ -132,6 +139,7 @@ public class HandlerMethod {
 		this.method = handlerMethod.method;
 		this.bridgedMethod = handlerMethod.bridgedMethod;
 		this.parameters = handlerMethod.parameters;
+		this.resolvedFromHandlerMethod = handlerMethod;
 	}
 
 
@@ -180,6 +188,14 @@ public class HandlerMethod {
 	 */
 	public MethodParameter[] getMethodParameters() {
 		return this.parameters;
+	}
+
+	/**
+	 * Return the HandlerMethod from which this HandlerMethod instance was
+	 * resolved via {@link #createWithResolvedBean()}.
+	 */
+	public HandlerMethod getResolvedFromHandlerMethod() {
+		return this.resolvedFromHandlerMethod;
 	}
 
 	/**
@@ -253,7 +269,7 @@ public class HandlerMethod {
 	/**
 	 * A MethodParameter with HandlerMethod-specific behavior.
 	 */
-	protected class HandlerMethodParameter extends MethodParameter {
+	protected class HandlerMethodParameter extends SynthesizingMethodParameter {
 
 		public HandlerMethodParameter(int index) {
 			super(HandlerMethod.this.bridgedMethod, index);

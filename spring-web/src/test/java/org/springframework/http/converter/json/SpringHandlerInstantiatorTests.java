@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,13 +106,13 @@ public class SpringHandlerInstantiatorTests {
 
 	@Test
 	public void applicationContextAwaretypeResolverBuilder() throws JsonProcessingException {
-		this.objectMapper.writeValueAsString(new Group("authors"));
+		this.objectMapper.writeValueAsString(new Group());
 		assertTrue(CustomTypeResolverBuilder.isAutowiredFiledInitialized);
 	}
 
 	@Test
 	public void applicationContextAwareTypeIdResolver() throws JsonProcessingException {
-		this.objectMapper.writeValueAsString(new Group("authors"));
+		this.objectMapper.writeValueAsString(new Group());
 		assertTrue(CustomTypeIdResolver.isAutowiredFiledInitialized);
 	}
 
@@ -260,15 +260,6 @@ public class SpringHandlerInstantiatorTests {
 	@JsonTypeResolver(CustomTypeResolverBuilder.class)
 	@JsonTypeIdResolver(CustomTypeIdResolver.class)
 	public static class Group {
-
-		private String name;
-
-		public Group(String name) {
-			this.name = name;
-		}
-
-		public Group() {
-		}
 
 		public String getType() {
 			return Group.class.getName();

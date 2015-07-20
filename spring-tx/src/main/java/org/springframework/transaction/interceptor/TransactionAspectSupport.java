@@ -339,10 +339,11 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	}
 
 	/**
-	 * Clear the cached transaction managers.
+	 * Clear the cache.
 	 */
 	protected void clearTransactionManagerCache() {
 		this.transactionManagerCache.clear();
+		this.beanFactory = null;
 	}
 
 	/**

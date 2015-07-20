@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,9 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.RequestToViewNameTranslator;
 
 /**
- * Handles return values of types {@code void} and {@code String} interpreting
- * them as view name reference.
+ * Handles return values of types {@code void} and {@code String} interpreting them
+ * as view name reference. As of 4.2, it also handles general {@code CharSequence}
+ * types, e.g. {@code StringBuilder} or Groovy's {@code GString}, as view names.
  *
  * <p>A {@code null} return value, either due to a {@code void} return type or
  * as the actual return value is left as-is allowing the configured
@@ -37,6 +38,7 @@ import org.springframework.web.servlet.RequestToViewNameTranslator;
  * the handlers that support these annotations.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class ViewNameMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
@@ -68,24 +70,21 @@ public class ViewNameMethodReturnValueHandler implements HandlerMethodReturnValu
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
 		Class<?> paramType = returnType.getParameterType();
-		return (void.class.equals(paramType) || String.class.equals(paramType));
+		return (void.class == paramType || CharSequence.class.isAssignableFrom(paramType));
 	}
 
 	@Override
 	public void handleReturnValue(Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
 
-		if (returnValue == null) {
-			return;
-		}
-		else if (returnValue instanceof String) {
-			String viewName = (String) returnValue;
+		if (returnValue instanceof CharSequence) {
+			String viewName = returnValue.toString();
 			mavContainer.setViewName(viewName);
 			if (isRedirectViewName(viewName)) {
 				mavContainer.setRedirectModelScenario(true);
 			}
 		}
-		else {
+		else if (returnValue != null){
 			// should not happen
 			throw new UnsupportedOperationException("Unexpected return type: " +
 					returnType.getParameterType().getName() + " in method: " + returnType.getMethod());
@@ -101,10 +100,7 @@ public class ViewNameMethodReturnValueHandler implements HandlerMethodReturnValu
 	 * reference; "false" otherwise.
 	 */
 	protected boolean isRedirectViewName(String viewName) {
-		if (PatternMatchUtils.simpleMatch(this.redirectPatterns, viewName)) {
-			return true;
-		}
-		return viewName.startsWith("redirect:");
+		return (PatternMatchUtils.simpleMatch(this.redirectPatterns, viewName) || viewName.startsWith("redirect:"));
 	}
 
 }

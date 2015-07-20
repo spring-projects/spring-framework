@@ -63,12 +63,12 @@ public class ExceptionDepthComparator implements Comparator<Class<? extends Thro
 	}
 
 	private int getDepth(Class<?> declaredException, Class<?> exceptionToMatch, int depth) {
-		if (declaredException.equals(exceptionToMatch)) {
+		if (exceptionToMatch.equals(declaredException)) {
 			// Found it!
 			return depth;
 		}
 		// If we've gone as far as we can go and haven't found it...
-		if (Throwable.class.equals(exceptionToMatch)) {
+		if (exceptionToMatch == Throwable.class) {
 			return Integer.MAX_VALUE;
 		}
 		return getDepth(declaredException, exceptionToMatch.getSuperclass(), depth + 1);

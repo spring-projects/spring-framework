@@ -50,8 +50,10 @@ import org.springframework.messaging.handler.annotation.support.MessageMethodArg
 import org.springframework.messaging.handler.annotation.support.PayloadArgumentResolver;
 import org.springframework.messaging.handler.invocation.AbstractExceptionHandlerMethodResolver;
 import org.springframework.messaging.handler.invocation.AbstractMethodMessageHandler;
+import org.springframework.messaging.handler.invocation.CompletableFutureReturnValueHandler;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
+import org.springframework.messaging.handler.invocation.ListenableFutureReturnValueHandler;
 import org.springframework.messaging.simp.SimpAttributesContextHolder;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageMappingInfo;
@@ -81,6 +83,10 @@ import org.springframework.validation.Validator;
  */
 public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHandler<SimpMessageMappingInfo>
 		implements SmartLifecycle {
+
+	private static final boolean completableFuturePresent = ClassUtils.isPresent("java.util.concurrent.CompletableFuture",
+			SimpAnnotationMethodMessageHandler.class.getClassLoader());
+
 
 	private final SubscribableChannel clientInboundChannel;
 
@@ -312,7 +318,14 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 	@Override
 	protected List<? extends HandlerMethodReturnValueHandler> initReturnValueHandlers() {
+
 		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<HandlerMethodReturnValueHandler>();
+
+		// Single-purpose return value types
+		handlers.add(new ListenableFutureReturnValueHandler());
+		if (completableFuturePresent) {
+			handlers.add(new CompletableFutureReturnValueHandler());
+		}
 
 		// Annotation-based return value types
 		SendToMethodReturnValueHandler sth = new SendToMethodReturnValueHandler(this.brokerTemplate, true);

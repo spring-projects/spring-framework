@@ -56,7 +56,7 @@ import static org.junit.Assert.*;
 /**
  * Unit tests for the {@link GenericConversionService}.
  *
- * <p>For tests involving the {@link DefaultConversionService}, see 
+ * <p>For tests involving the {@link DefaultConversionService}, see
  * {@link DefaultConversionServiceTests}.
  *
  * @author Keith Donald

@@ -179,6 +179,10 @@ class PostProcessorRegistrationDelegate {
 			nonOrderedPostProcessors.add(beanFactory.getBean(postProcessorName, BeanFactoryPostProcessor.class));
 		}
 		invokeBeanFactoryPostProcessors(nonOrderedPostProcessors, beanFactory);
+
+		// Clear cached merged bean definitions since the post-processors might have
+		// modified the original metadata, e.g. replacing placeholders in values...
+		beanFactory.clearMetadataCache();
 	}
 
 	public static void registerBeanPostProcessors(

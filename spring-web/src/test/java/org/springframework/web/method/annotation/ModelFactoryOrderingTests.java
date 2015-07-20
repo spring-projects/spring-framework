@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -168,7 +168,6 @@ public class ModelFactoryOrderingTests {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	private static class StraightLineDependencyController extends AbstractController {
 
 		@ModelAttribute
@@ -208,7 +207,6 @@ public class ModelFactoryOrderingTests {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	private static class TreeDependencyController extends AbstractController {
 
 		@ModelAttribute
@@ -247,7 +245,6 @@ public class ModelFactoryOrderingTests {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	private static class InvertedTreeDependencyController extends AbstractController {
 
 		@ModelAttribute
@@ -287,7 +284,6 @@ public class ModelFactoryOrderingTests {
 
 	}
 
-	@SuppressWarnings("unused")
 	private static class UnresolvedDependencyController extends AbstractController {
 
 		@ModelAttribute

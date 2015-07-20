@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,6 +176,8 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	private volatile JAXBContext jaxbContext;
 
 	private Schema schema;
+
+	private boolean supportDtd = false;
 
 	private boolean processExternalEntities = false;
 
@@ -392,15 +394,35 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	}
 
 	/**
+	 * Indicates whether DTD parsing should be supported.
+	 * <p>Default is {@code false} meaning that DTD is disabled.
+	 */
+	public void setSupportDtd(boolean supportDtd) {
+		this.supportDtd = supportDtd;
+	}
+
+	/**
+	 * Whether DTD parsing is supported.
+	 */
+	public boolean isSupportDtd() {
+		return this.supportDtd;
+	}
+
+	/**
 	 * Indicates whether external XML entities are processed when unmarshalling.
 	 * <p>Default is {@code false}, meaning that external entities are not resolved.
 	 * Note that processing of external entities will only be enabled/disabled when the
 	 * {@code Source} passed to {@link #unmarshal(Source)} is a {@link SAXSource} or
 	 * {@link StreamSource}. It has no effect for {@link DOMSource} or {@link StAXSource}
 	 * instances.
+	 * <p><strong>Note:</strong> setting this option to {@code true} also
+	 * automatically sets {@link #setSupportDtd} to {@code true}.
 	 */
 	public void setProcessExternalEntities(boolean processExternalEntities) {
 		this.processExternalEntities = processExternalEntities;
+		if (processExternalEntities) {
+			setSupportDtd(true);
+		}
 	}
 
 	/**
@@ -409,6 +431,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	public boolean isProcessExternalEntities() {
 		return this.processExternalEntities;
 	}
+
 
 	@Override
 	public void setBeanClassLoader(ClassLoader classLoader) {
@@ -557,7 +580,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	public boolean supports(Type genericType) {
 		if (genericType instanceof ParameterizedType) {
 			ParameterizedType parameterizedType = (ParameterizedType) genericType;
-			if (JAXBElement.class.equals(parameterizedType.getRawType()) &&
+			if (JAXBElement.class == parameterizedType.getRawType() &&
 					parameterizedType.getActualTypeArguments().length == 1) {
 				Type typeArgument = parameterizedType.getActualTypeArguments()[0];
 				if (typeArgument instanceof Class) {
@@ -610,13 +633,13 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	 * Compare section 8.5.1 of the JAXB2 spec.
 	 */
 	private boolean isPrimitiveWrapper(Class<?> clazz) {
-		return Boolean.class.equals(clazz) ||
-				Byte.class.equals(clazz) ||
-				Short.class.equals(clazz) ||
-				Integer.class.equals(clazz) ||
-				Long.class.equals(clazz) ||
-				Float.class.equals(clazz) ||
-				Double.class.equals(clazz);
+		return Boolean.class == clazz ||
+				Byte.class == clazz ||
+				Short.class == clazz ||
+				Integer.class == clazz ||
+				Long.class == clazz ||
+				Float.class == clazz ||
+				Double.class == clazz;
 	}
 
 	/**
@@ -624,20 +647,20 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	 * Compare section 8.5.2 of the JAXB2 spec.
 	 */
 	private boolean isStandardClass(Class<?> clazz) {
-		return String.class.equals(clazz) ||
+		return String.class == clazz ||
 				BigInteger.class.isAssignableFrom(clazz) ||
 				BigDecimal.class.isAssignableFrom(clazz) ||
 				Calendar.class.isAssignableFrom(clazz) ||
 				Date.class.isAssignableFrom(clazz) ||
 				QName.class.isAssignableFrom(clazz) ||
-				URI.class.equals(clazz) ||
+				URI.class == clazz ||
 				XMLGregorianCalendar.class.isAssignableFrom(clazz) ||
 				Duration.class.isAssignableFrom(clazz) ||
-				Image.class.equals(clazz) ||
-				DataHandler.class.equals(clazz) ||
+				Image.class == clazz ||
+				DataHandler.class == clazz ||
 				// Source and subclasses should be supported according to the JAXB2 spec, but aren't in the RI
 				// Source.class.isAssignableFrom(clazz) ||
-				UUID.class.equals(clazz);
+				UUID.class == clazz;
 
 	}
 
@@ -754,6 +777,14 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 				return unmarshaller.unmarshal(source);
 			}
 		}
+		catch (NullPointerException ex) {
+			if (!isSupportDtd()) {
+				throw new UnmarshallingFailureException("NPE while unmarshalling. " +
+						"This can happen on JDK 1.6 due to the presence of DTD " +
+						"declarations, which are disabled.", ex);
+			}
+			throw ex;
+		}
 		catch (JAXBException ex) {
 			throw convertJaxbException(ex);
 		}
@@ -809,6 +840,7 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 			if (xmlReader == null) {
 				xmlReader = XMLReaderFactory.createXMLReader();
 			}
+			xmlReader.setFeature("http://apache.org/xml/features/disallow-doctype-decl", !isSupportDtd());
 			String name = "http://xml.org/sax/features/external-general-entities";
 			xmlReader.setFeature(name, isProcessExternalEntities());
 			if (!isProcessExternalEntities()) {

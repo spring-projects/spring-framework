@@ -69,7 +69,7 @@ import org.springframework.util.ReflectionUtils;
  * consider setting "sessionTransacted" to "true" instead.
  * <li>"sessionAcknowledgeMode" set to "CLIENT_ACKNOWLEDGE":
  * Automatic message acknowledgment <i>after</i> successful listener execution;
- * no redelivery in case of exception thrown.
+ * best-effort redelivery in case of exception thrown.
  * <li>"sessionAcknowledgeMode" set to "DUPS_OK_ACKNOWLEDGE":
  * <i>Lazy</i> message acknowledgment during or after listener execution;
  * <i>potential redelivery</i> in case of exception thrown.
@@ -134,9 +134,11 @@ import org.springframework.util.ReflectionUtils;
 public abstract class AbstractMessageListenerContainer extends AbstractJmsListeningContainer
 		implements MessageListenerContainer {
 
+	/** The JMS 2.0 Session.createSharedConsumer method, if available */
 	private static final Method createSharedConsumerMethod = ClassUtils.getMethodIfAvailable(
 			Session.class, "createSharedConsumer", Topic.class, String.class, String.class);
 
+	/** The JMS 2.0 Session.createSharedDurableConsumer method, if available */
 	private static final Method createSharedDurableConsumerMethod = ClassUtils.getMethodIfAvailable(
 			Session.class, "createSharedDurableConsumer", Topic.class, String.class, String.class);
 
@@ -152,6 +154,8 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	private boolean subscriptionShared = false;
 
 	private String subscriptionName;
+
+	private Boolean replyPubSubDomain;
 
 	private boolean pubSubNoLocal = false;
 
@@ -446,6 +450,36 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	}
 
 	/**
+	 * Configure the reply destination type. By default, the configured {@code pubSubDomain}
+	 * value is used (see {@link #isPubSubDomain()}.
+	 * <p>This setting primarily indicates what type of destination to resolve if dynamic
+	 * destinations are enabled.
+	 * @param replyPubSubDomain "true" for the Publish/Subscribe domain ({@link Topic Topics}),
+	 * "false" for the Point-to-Point domain ({@link Queue Queues})
+	 * @since 4.2
+	 * @see #setDestinationResolver
+	 */
+	public void setReplyPubSubDomain(boolean replyPubSubDomain) {
+		this.replyPubSubDomain = replyPubSubDomain;
+	}
+
+	/**
+	 * Return whether the Publish/Subscribe domain ({@link javax.jms.Topic Topics}) is used
+	 * for replies. Otherwise, the Point-to-Point domain ({@link javax.jms.Queue Queues})
+	 * is used.
+	 * @since 4.2
+	 */
+	@Override
+	public boolean isReplyPubSubDomain() {
+		if (this.replyPubSubDomain != null) {
+			return replyPubSubDomain;
+		}
+		else {
+			return isPubSubDomain();
+		}
+	}
+
+	/**
 	 * Set the {@link MessageConverter} strategy for converting JMS Messages.
 	 * @since 4.1
 	 */
@@ -601,6 +635,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 			rollbackIfNecessary(session);
 			throw new MessageRejectedWhileStoppingException();
 		}
+
 		try {
 			invokeListener(session, message);
 		}
@@ -630,6 +665,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	@SuppressWarnings("rawtypes")
 	protected void invokeListener(Session session, Message message) throws JMSException {
 		Object listener = getMessageListener();
+
 		if (listener instanceof SessionAwareMessageListener) {
 			doInvokeListener((SessionAwareMessageListener) listener, session, message);
 		}
@@ -731,7 +767,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 				JmsUtils.rollbackIfNecessary(session);
 			}
 		}
-		else {
+		else if (isClientAcknowledge(session)) {
 			session.recover();
 		}
 	}
@@ -753,7 +789,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 					JmsUtils.rollbackIfNecessary(session);
 				}
 			}
-			else {
+			else if (isClientAcknowledge(session)) {
 				session.recover();
 			}
 		}

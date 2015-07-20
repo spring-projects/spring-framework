@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,8 @@ import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.format.Formatter;
+import org.springframework.format.support.FormatterPropertyEditorAdapter;
 import org.springframework.lang.UsesJava8;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -553,6 +555,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 		return Collections.unmodifiableList(this.validators);
 	}
 
+
 	//---------------------------------------------------------------------
 	// Implementation of PropertyEditorRegistry/TypeConverter interface
 	//---------------------------------------------------------------------
@@ -574,6 +577,64 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 */
 	public ConversionService getConversionService() {
 		return this.conversionService;
+	}
+
+	/**
+	 * Add a custom formatter, applying it to all fields matching the
+	 * {@link Formatter}-declared type.
+	 * <p>Registers a corresponding {@link PropertyEditor} adapter underneath the covers.
+	 * @param formatter the formatter to add, generically declared for a specific type
+	 * @since 4.2
+	 * @see #registerCustomEditor(Class, PropertyEditor)
+	 */
+	public void addCustomFormatter(Formatter<?> formatter) {
+		FormatterPropertyEditorAdapter adapter = new FormatterPropertyEditorAdapter(formatter);
+		getPropertyEditorRegistry().registerCustomEditor(adapter.getFieldType(), adapter);
+	}
+
+	/**
+	 * Add a custom formatter for the field type specified in {@link Formatter} class,
+	 * applying it to the specified fields only, if any, or otherwise to all fields.
+	 * <p>Registers a corresponding {@link PropertyEditor} adapter underneath the covers.
+	 * @param formatter the formatter to add, generically declared for a specific type
+	 * @param fields the fields to apply the formatter to, or none if to be applied to all
+	 * @since 4.2
+	 * @see #registerCustomEditor(Class, String, PropertyEditor)
+	 */
+	public void addCustomFormatter(Formatter<?> formatter, String... fields) {
+		FormatterPropertyEditorAdapter adapter = new FormatterPropertyEditorAdapter(formatter);
+		Class<?> fieldType = adapter.getFieldType();
+		if (ObjectUtils.isEmpty(fields)) {
+			getPropertyEditorRegistry().registerCustomEditor(fieldType, adapter);
+		}
+		else {
+			for (String field : fields) {
+				getPropertyEditorRegistry().registerCustomEditor(fieldType, field, adapter);
+			}
+		}
+	}
+
+	/**
+	 * Add a custom formatter, applying it to the specified field types only, if any,
+	 * or otherwise to all fields matching the {@link Formatter}-declared type.
+	 * <p>Registers a corresponding {@link PropertyEditor} adapter underneath the covers.
+	 * @param formatter the formatter to add (does not need to generically declare a
+	 * field type if field types are explicitly specified as parameters)
+	 * @param fieldTypes the field types to apply the formatter to, or none if to be
+	 * derived from the given {@link Formatter} implementation class
+	 * @since 4.2
+	 * @see #registerCustomEditor(Class, PropertyEditor)
+	 */
+	public void addCustomFormatter(Formatter<?> formatter, Class<?>... fieldTypes) {
+		FormatterPropertyEditorAdapter adapter = new FormatterPropertyEditorAdapter(formatter);
+		if (ObjectUtils.isEmpty(fieldTypes)) {
+			getPropertyEditorRegistry().registerCustomEditor(adapter.getFieldType(), adapter);
+		}
+		else {
+			for (Class<?> fieldType : fieldTypes) {
+				getPropertyEditorRegistry().registerCustomEditor(fieldType, adapter);
+			}
+		}
 	}
 
 	@Override

@@ -37,6 +37,7 @@ public class BufferedSimpleAsyncHttpRequestFactoryTests extends AbstractAsyncHtt
 	@Override
 	@Test
 	public void httpMethods() throws Exception {
+		super.httpMethods();
 		try {
 			assertHttpMethod("patch", HttpMethod.PATCH);
 		}

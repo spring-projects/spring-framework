@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ public class RunBeforeTestClassCallbacks extends Statement {
 
 
 	/**
-	 * Constructs a new {@code RunBeforeTestClassCallbacks} statement.
+	 * Construct a new {@code RunBeforeTestClassCallbacks} statement.
 	 *
 	 * @param next the next {@code Statement} in the execution chain
 	 * @param testContextManager the TestContextManager upon which to call
@@ -51,9 +51,9 @@ public class RunBeforeTestClassCallbacks extends Statement {
 	}
 
 	/**
-	 * Calls {@link TestContextManager#beforeTestClass()} and then invokes the next
-	 * {@link Statement} in the execution chain (typically an instance of
-	 * {@link org.junit.internal.runners.statements.RunBefores RunBefores}).
+	 * Invoke {@link TestContextManager#beforeTestClass()} and then evaluate
+	 * the next {@link Statement} in the execution chain (typically an instance
+	 * of {@link org.junit.internal.runners.statements.RunBefores RunBefores}).
 	 */
 	@Override
 	public void evaluate() throws Throwable {

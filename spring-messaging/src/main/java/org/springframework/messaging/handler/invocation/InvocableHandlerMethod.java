@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,14 @@ package org.springframework.messaging.handler.invocation;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.core.ResolvableType;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.HandlerMethod;
 import org.springframework.util.ReflectionUtils;
@@ -128,8 +130,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 					continue;
 				}
 				catch (Exception ex) {
-					if (logger.isTraceEnabled()) {
-						logger.trace(getArgumentResolutionErrorMessage("Error resolving argument", i), ex);
+					if (logger.isDebugEnabled()) {
+						logger.debug(getArgumentResolutionErrorMessage("Error resolving argument", i), ex);
 					}
 					throw ex;
 				}
@@ -149,15 +151,15 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
-	 * Adds HandlerMethod details such as the controller type and method signature to the given error message.
+	 * Adds HandlerMethod details such as the controller type and method
+	 * signature to the given error message.
 	 * @param message error message to append the HandlerMethod details to
 	 */
 	protected String getDetailedErrorMessage(String message) {
-		StringBuilder sb = new StringBuilder(message).append("\n");
-		sb.append("HandlerMethod details: \n");
-		sb.append("Controller [").append(getBeanType().getName()).append("]\n");
-		sb.append("Method [").append(getBridgedMethod().toGenericString()).append("]\n");
-		return sb.toString();
+		return message + "\n" +
+				"HandlerMethod details: \n" +
+				"Controller [" + getBeanType().getName() + "]\n" +
+				"Method [" + getBridgedMethod().toGenericString() + "]\n";
 	}
 
 	/**
@@ -240,6 +242,40 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			}
 		}
 		return sb.toString();
+	}
+
+	MethodParameter getAsyncReturnValueType(Object returnValue) {
+		return new AsyncResultMethodParameter(returnValue);
+	}
+
+
+	private class AsyncResultMethodParameter extends HandlerMethodParameter {
+
+		private final Object returnValue;
+
+		private final ResolvableType returnType;
+
+		public AsyncResultMethodParameter(Object returnValue) {
+			super(-1);
+			this.returnValue = returnValue;
+			this.returnType = ResolvableType.forType(super.getGenericParameterType()).getGeneric(0);
+		}
+
+		@Override
+		public Class<?> getParameterType() {
+			if (this.returnValue != null) {
+				return this.returnValue.getClass();
+			}
+			if (ResolvableType.NONE.equals(this.returnType)) {
+				throw new IllegalArgumentException("Expected Future-like type with generic parameter");
+			}
+			return this.returnType.getRawClass();
+		}
+
+		@Override
+		public Type getGenericParameterType() {
+			return this.returnType.getType();
+		}
 	}
 
 }

@@ -16,9 +16,6 @@
 
 package org.springframework.web.socket;
 
-
-import static org.junit.Assert.*;
-
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,6 +26,8 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,6 +40,7 @@ import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
+import static org.junit.Assert.*;
 
 /**
  * Client and server-side WebSocket integration tests.
@@ -50,7 +50,7 @@ import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 @RunWith(Parameterized.class)
 public class WebSocketIntegrationTests extends  AbstractWebSocketIntegrationTests {
 
-	@Parameterized.Parameters
+	@Parameters(name = "server [{0}], client [{1}]")
 	public static Iterable<Object[]> arguments() {
 		return Arrays.asList(new Object[][] {
 				{new JettyWebSocketTestServer(), new JettyWebSocketClient()},
@@ -79,11 +79,13 @@ public class WebSocketIntegrationTests extends  AbstractWebSocketIntegrationTest
 
 	@Test
 	public void unsolicitedPongWithEmptyPayload() throws Exception {
-		TestWebSocketHandler serverHandler = this.wac.getBean(TestWebSocketHandler.class);
-		serverHandler.setWaitMessageCount(1);
 
 		String url = getWsBaseUrl() + "/ws";
 		WebSocketSession session = this.webSocketClient.doHandshake(new AbstractWebSocketHandler() {}, url).get();
+
+		TestWebSocketHandler serverHandler = this.wac.getBean(TestWebSocketHandler.class);
+		serverHandler.setWaitMessageCount(1);
+
 		session.sendMessage(new PongMessage());
 
 		serverHandler.await();

@@ -16,6 +16,8 @@
 
 package org.springframework.core.convert.support;
 
+import java.nio.charset.Charset;
+import java.util.Currency;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -75,7 +77,7 @@ public class DefaultConversionService extends GenericConversionService {
 
 		converterRegistry.addConverter(new ByteBufferConverter((ConversionService) converterRegistry));
 		if (jsr310Available) {
-			Jsr310ConverterRegistrar.registerZoneIdConverters(converterRegistry);
+			Jsr310ConverterRegistrar.registerJsr310Converters(converterRegistry);
 		}
 
 		converterRegistry.addConverter(new ObjectToObjectConverter());
@@ -109,6 +111,12 @@ public class DefaultConversionService extends GenericConversionService {
 
 		converterRegistry.addConverter(new StringToLocaleConverter());
 		converterRegistry.addConverter(Locale.class, String.class, new ObjectToStringConverter());
+
+		converterRegistry.addConverter(new StringToCharsetConverter());
+		converterRegistry.addConverter(Charset.class, String.class, new ObjectToStringConverter());
+
+		converterRegistry.addConverter(new StringToCurrencyConverter());
+		converterRegistry.addConverter(Currency.class, String.class, new ObjectToStringConverter());
 
 		converterRegistry.addConverter(new StringToPropertiesConverter());
 		converterRegistry.addConverter(new PropertiesToStringConverter());
@@ -150,7 +158,8 @@ public class DefaultConversionService extends GenericConversionService {
 	 */
 	private static final class Jsr310ConverterRegistrar {
 
-		public static void registerZoneIdConverters(ConverterRegistry converterRegistry) {
+		public static void registerJsr310Converters(ConverterRegistry converterRegistry) {
+			converterRegistry.addConverter(new StringToTimeZoneConverter());
 			converterRegistry.addConverter(new ZoneIdToTimeZoneConverter());
 			converterRegistry.addConverter(new ZonedDateTimeToCalendarConverter());
 		}

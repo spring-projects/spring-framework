@@ -19,7 +19,7 @@
 
 	<bean id="serviceInterceptor" class="org.springframework.aop.interceptor.DebugInterceptor"/>
 
-	<aop:config proxy-target-class="false"> 
+	<aop:config proxy-target-class="false">
 		<aop:pointcut id="servicePointcut" expression="target(org.springframework.tests.sample.beans.ITestBean)"/>
 		<aop:advisor advice-ref="serviceInterceptor" pointcut-ref="servicePointcut"/>
 	</aop:config>

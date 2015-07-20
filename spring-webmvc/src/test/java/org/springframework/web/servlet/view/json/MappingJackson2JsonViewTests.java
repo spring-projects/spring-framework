@@ -48,6 +48,7 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.ScriptableObject;
 
+import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -180,14 +181,14 @@ public class MappingJackson2JsonViewTests {
 	public void renderSimpleBeanPrefixed() throws Exception {
 		view.setPrefixJson(true);
 		renderSimpleBean();
-		assertTrue(response.getContentAsString().startsWith("{} && "));
+		assertTrue(response.getContentAsString().startsWith(")]}', "));
 	}
 
 	@Test
 	public void renderSimpleBeanNotPrefixed() throws Exception {
 		view.setPrefixJson(false);
 		renderSimpleBean();
-		assertFalse(response.getContentAsString().startsWith("{} && "));
+		assertFalse(response.getContentAsString().startsWith(")]}', "));
 	}
 
 	@Test
@@ -363,8 +364,14 @@ public class MappingJackson2JsonViewTests {
 	}
 
 	private void validateResult() throws Exception {
+		String json = response.getContentAsString();
+		DirectFieldAccessor viewAccessor = new DirectFieldAccessor(view);
+		String jsonPrefix = (String)viewAccessor.getPropertyValue("jsonPrefix");
+		if (jsonPrefix != null) {
+			json = json.substring(5);
+		}
 		Object jsResult =
-				jsContext.evaluateString(jsScope, "(" + response.getContentAsString() + ")", "JSON Stream", 1, null);
+				jsContext.evaluateString(jsScope, "(" + json + ")", "JSON Stream", 1, null);
 		assertNotNull("Json Result did not eval as valid JavaScript", jsResult);
 		assertEquals("application/json", response.getContentType());
 	}

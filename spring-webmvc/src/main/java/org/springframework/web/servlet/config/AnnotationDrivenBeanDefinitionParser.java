@@ -197,6 +197,9 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 		configurePathMatchingProperties(handlerMappingDef, element, parserContext);
 
+		RuntimeBeanReference corsConfigurationsRef = MvcNamespaceUtils.registerCorsConfigurations(null, parserContext, source);
+		handlerMappingDef.getPropertyValues().add("corsConfigurations", corsConfigurationsRef);
+
 		RuntimeBeanReference conversionService = getConversionService(element, source, parserContext);
 		RuntimeBeanReference validator = getValidator(element, source, parserContext);
 		RuntimeBeanReference messageCodesResolver = getMessageCodesResolver(element);

@@ -195,7 +195,6 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 
 
 	@Override
-	@SuppressWarnings("deprecation")
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 		HttpClient client = getHttpClient();
 		Assert.state(client != null, "Synchronous execution requires an HttpClient to be set");
@@ -245,7 +244,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		return this.requestConfig;
 	}
 
-	private RequestConfig mergeRequestConfig(RequestConfig defaultRequestConfig) {
+	protected RequestConfig mergeRequestConfig(RequestConfig defaultRequestConfig) {
 		if (this.requestConfig == null) { // nothing to merge
 			return defaultRequestConfig;
 		}
@@ -263,6 +262,10 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 			builder.setSocketTimeout(socketTimeout);
 		}
 		return builder.build();
+	}
+
+	protected final RequestConfig getInternalRequestConfig() {
+		return this.requestConfig;
 	}
 
 	/**

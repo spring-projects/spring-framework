@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.ServletException;
 
+import org.springframework.beans.ConversionNotSupportedException;
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -101,7 +103,18 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 
 		if (binderFactory != null) {
 			WebDataBinder binder = binderFactory.createBinder(webRequest, null, namedValueInfo.name);
-			arg = binder.convertIfNecessary(arg, paramType, parameter);
+			try {
+				arg = binder.convertIfNecessary(arg, paramType, parameter);
+			}
+			catch (ConversionNotSupportedException ex) {
+				throw new MethodArgumentConversionNotSupportedException(arg, ex.getRequiredType(),
+						ex.getCause(), namedValueInfo.name, parameter);
+			}
+			catch (TypeMismatchException ex) {
+				throw new MethodArgumentTypeMismatchException(arg, ex.getRequiredType(),
+						ex.getCause(), namedValueInfo.name, parameter);
+
+			}
 		}
 
 		handleResolvedValue(arg, namedValueInfo.name, parameter, mavContainer, webRequest);

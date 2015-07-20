@@ -2,7 +2,7 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
-	
+
 	<import resource="classpath:/org/springframework/orm/jpa/multi-jpa-emf.xml"/>
 
 	<bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
@@ -18,5 +18,5 @@
 			</props>
 		</property>
 	</bean>
-    
+   
 </beans>

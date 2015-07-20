@@ -16,9 +16,12 @@
 
 package org.springframework.web.servlet.support;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletException;
@@ -91,6 +94,8 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 	private boolean usePreviousHttpCachingBehavior = false;
 
+	private final SimpleDateFormat dateFormat;
+
 	private CacheControl cacheControl;
 
 
@@ -115,6 +120,8 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 			this.supportedMethods.add(METHOD_HEAD);
 			this.supportedMethods.add(METHOD_POST);
 		}
+		dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 	}
 
 	/**
@@ -123,6 +130,8 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 */
 	public WebContentGenerator(String... supportedMethods) {
 		this.supportedMethods = new HashSet<String>(Arrays.asList(supportedMethods));
+		dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
 	}
 
 
@@ -312,6 +321,19 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		checkAndPrepare(request, response, this.cacheControl);
 	}
 
+	@Deprecated
+	protected final void checkAndPrepare(
+			HttpServletRequest request, HttpServletResponse response, boolean lastModified)
+			throws ServletException {
+
+		if (lastModified) {
+			checkAndPrepare(request, response, this.cacheControl.mustRevalidate());
+		}
+		else {
+			checkAndPrepare(request, response);
+		}
+	}
+
 	protected final void checkAndPrepare(
 			HttpServletRequest request, HttpServletResponse response, int cacheSeconds) throws ServletException {
 
@@ -325,7 +347,32 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		else {
 			cControl = CacheControl.empty();
 		}
-		checkAndPrepare(request, response, cControl);
+		checkRequest(request);
+		if (this.usePreviousHttpCachingBehavior) {
+			addHttp10CacheHeaders(cacheSeconds, response);
+		}
+		else {
+			String ccValue = cControl.getHeaderValue();
+			if (ccValue != null) {
+				response.setHeader(HEADER_CACHE_CONTROL, ccValue);
+			}
+		}
+	}
+
+	protected final void checkRequest(HttpServletRequest request) throws ServletException {
+		// Check whether we should support the request method.
+		String method = request.getMethod();
+		if (this.supportedMethods != null && !this.supportedMethods.contains(method)) {
+			throw new HttpRequestMethodNotSupportedException(
+					method, StringUtils.toStringArray(this.supportedMethods));
+		}
+
+		// Check whether a session is required.
+		if (this.requireSession) {
+			if (request.getSession(false) == null) {
+				throw new HttpSessionRequiredException("Pre-existing session required but none found");
+			}
+		}
 	}
 
 	/**
@@ -344,22 +391,10 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 			HttpServletRequest request, HttpServletResponse response, CacheControl cacheControl)
 			throws ServletException {
 
-		// Check whether we should support the request method.
-		String method = request.getMethod();
-		if (this.supportedMethods != null && !this.supportedMethods.contains(method)) {
-			throw new HttpRequestMethodNotSupportedException(
-					method, StringUtils.toStringArray(this.supportedMethods));
-		}
-
-		// Check whether a session is required.
-		if (this.requireSession) {
-			if (request.getSession(false) == null) {
-				throw new HttpSessionRequiredException("Pre-existing session required but none found");
-			}
-		}
+		checkRequest(request);
 
 		if (this.usePreviousHttpCachingBehavior) {
-			addHttp10CacheHeaders(response);
+			addHttp10CacheHeaders(this.cacheSeconds, response);
 		}
 		else if (cacheControl != null) {
 			String ccValue = cacheControl.getHeaderValue();
@@ -369,11 +404,11 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		}
 	}
 
-	protected void addHttp10CacheHeaders(HttpServletResponse response) {
-		if (this.cacheSeconds > 0) {
-			cacheForSeconds(response, this.cacheSeconds, this.alwaysMustRevalidate);
+	protected final void addHttp10CacheHeaders(int cacheSeconds, HttpServletResponse response) {
+		if (cacheSeconds > 0) {
+			cacheForSeconds(response, cacheSeconds, this.alwaysMustRevalidate);
 		}
-		else if (this.cacheSeconds == 0) {
+		else if (cacheSeconds == 0) {
 			preventCaching(response);
 		}
 	}
@@ -391,7 +426,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	protected final void cacheForSeconds(HttpServletResponse response, int seconds, boolean mustRevalidate) {
 		if (this.useExpiresHeader) {
 			// HTTP 1.0 header
-			response.setDateHeader(HEADER_EXPIRES, System.currentTimeMillis() + seconds * 1000L);
+			response.setHeader(HEADER_EXPIRES, dateFormat.format(System.currentTimeMillis() + seconds * 1000L));
 		}
 		if (this.useCacheControlHeader) {
 			// HTTP 1.1 header
@@ -411,7 +446,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		response.setHeader(HEADER_PRAGMA, "no-cache");
 		if (this.useExpiresHeader) {
 			// HTTP 1.0 header
-			response.setDateHeader(HEADER_EXPIRES, 1L);
+			response.setHeader(HEADER_EXPIRES, dateFormat.format(System.currentTimeMillis()));
 		}
 		if (this.useCacheControlHeader) {
 			// HTTP 1.1 header: "no-cache" is the standard value,

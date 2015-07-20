@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -516,7 +517,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 
 			Class<?> classToMatch = typeToMatch.getRawClass();
-			Class<?>[] typesToMatch = (FactoryBean.class.equals(classToMatch) ?
+			Class<?>[] typesToMatch = (FactoryBean.class == classToMatch ?
 					new Class<?>[] {classToMatch} : new Class<?>[] {FactoryBean.class, classToMatch});
 
 			// Check decorated bean definition, if any: We assume it'll be easier
@@ -1262,7 +1263,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 				// Only cache the merged bean definition if we're already about to create an
 				// instance of the bean, or at least have already created an instance before.
-				if (containingBd == null && isCacheBeanMetadata() && isBeanEligibleForMetadataCaching(beanName)) {
+				if (containingBd == null && isCacheBeanMetadata()) {
 					this.mergedBeanDefinitions.put(beanName, mbd);
 				}
 			}
@@ -1294,6 +1295,23 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 */
 	protected void clearMergedBeanDefinition(String beanName) {
 		this.mergedBeanDefinitions.remove(beanName);
+	}
+
+	/**
+	 * Clear the merged bean definition cache, removing entries for beans
+	 * which are not considered eligible for full metadata caching yet.
+	 * <p>Typically triggered after changes to the original bean definitions,
+	 * e.g. after applying a {@code BeanFactoryPostProcessor}. Note that metadata
+	 * for beans which have already been created at this point will be kept around.
+	 * @since 4.2
+	 */
+	public void clearMetadataCache() {
+		Iterator<String> mergedBeans = this.mergedBeanDefinitions.keySet().iterator();
+		while (mergedBeans.hasNext()) {
+			if (!isBeanEligibleForMetadataCaching(mergedBeans.next())) {
+				mergedBeans.remove();
+			}
+		}
 	}
 
 	/**
@@ -1451,9 +1469,15 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			return getTypeForFactoryBean(factoryBean);
 		}
 		catch (BeanCreationException ex) {
-			// Can only happen when getting a FactoryBean.
-			if (logger.isWarnEnabled()) {
-				logger.warn("Bean creation exception on FactoryBean type check: " + ex);
+			if (ex instanceof BeanCurrentlyInCreationException) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Bean currently in creation on FactoryBean type check: " + ex);
+				}
+			}
+			else {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Bean creation exception on FactoryBean type check: " + ex);
+				}
 			}
 			onSuppressedException(ex);
 			return null;
@@ -1469,6 +1493,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	protected void markBeanAsCreated(String beanName) {
 		if (!this.alreadyCreated.contains(beanName)) {
 			this.alreadyCreated.add(beanName);
+
+			// Let the bean definition get re-merged now that we're actually creating
+			// the bean... just in case some of its metadata changed in the meantime.
+			clearMergedBeanDefinition(beanName);
 		}
 	}
 

@@ -408,7 +408,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 		if (getJdbcExceptionTranslator() != null && ex instanceof JDBCException) {
 			return convertJdbcAccessException((JDBCException) ex, getJdbcExceptionTranslator());
 		}
-		else if (GenericJDBCException.class.equals(ex.getClass())) {
+		else if (GenericJDBCException.class == ex.getClass()) {
 			return convertJdbcAccessException((GenericJDBCException) ex, getDefaultJdbcExceptionTranslator());
 		}
 		return SessionFactoryUtils.convertHibernateAccessException(ex);

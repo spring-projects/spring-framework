@@ -456,10 +456,10 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 			EventMapping eventMapping = AnnotationUtils.findAnnotation(method, EventMapping.class);
 			RequestMapping requestMapping = AnnotationUtils.findAnnotation(method, RequestMapping.class);
 			if (actionMapping != null) {
-				mappingInfo.initPhaseMapping(PortletRequest.ACTION_PHASE, actionMapping.value(), actionMapping.params());
+				mappingInfo.initPhaseMapping(PortletRequest.ACTION_PHASE, actionMapping.name(), actionMapping.params());
 			}
 			if (renderMapping != null) {
-				mappingInfo.initPhaseMapping(PortletRequest.RENDER_PHASE, renderMapping.value(), renderMapping.params());
+				mappingInfo.initPhaseMapping(PortletRequest.RENDER_PHASE, renderMapping.windowState(), renderMapping.params());
 			}
 			if (resourceMapping != null) {
 				mappingInfo.initPhaseMapping(PortletRequest.RESOURCE_PHASE, resourceMapping.value(), new String[0]);
@@ -520,7 +520,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 		}
 
 		private String determineDefaultPhase(Method handlerMethod) {
-			if (!void.class.equals(handlerMethod.getReturnType())) {
+			if (void.class != handlerMethod.getReturnType()) {
 				return PortletRequest.RENDER_PHASE;
 			}
 			for (Class<?> argType : handlerMethod.getParameterTypes()) {
@@ -650,7 +650,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 			else if (Principal.class.isAssignableFrom(parameterType)) {
 				return request.getUserPrincipal();
 			}
-			else if (Locale.class.equals(parameterType)) {
+			else if (Locale.class == parameterType) {
 				return request.getLocale();
 			}
 			else if (InputStream.class.isAssignableFrom(parameterType)) {
@@ -677,7 +677,7 @@ public class AnnotationMethodHandlerAdapter extends PortletContentGenerator
 				}
 				return ((MimeResponse) response).getWriter();
 			}
-			else if (Event.class.equals(parameterType)) {
+			else if (Event.class == parameterType) {
 				if (!(request instanceof EventRequest)) {
 					throw new IllegalStateException("Event can only get obtained from EventRequest");
 				}

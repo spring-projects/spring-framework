@@ -44,9 +44,11 @@ public class StreamConverter implements ConditionalGenericConverter {
 
 	private final ConversionService conversionService;
 
+
 	public StreamConverter(ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
+
 
 	@Override
 	public Set<ConvertiblePair> getConvertibleTypes() {
@@ -99,7 +101,7 @@ public class StreamConverter implements ConditionalGenericConverter {
 	}
 
 	private Object convertFromStream(Stream<?> source, TypeDescriptor streamType, TypeDescriptor targetType) {
-		List<Object> content = source.collect(Collectors.toList());
+		List<Object> content = source.collect(Collectors.<Object>toList());
 		TypeDescriptor listType = TypeDescriptor.collection(List.class, streamType.getElementTypeDescriptor());
 		return this.conversionService.convert(content, listType, targetType);
 	}

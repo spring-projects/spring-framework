@@ -18,7 +18,6 @@ package org.springframework.http.client;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URLConnection;
 import java.util.concurrent.TimeUnit;
 
 import io.netty.bootstrap.Bootstrap;

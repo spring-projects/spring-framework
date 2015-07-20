@@ -13,5 +13,5 @@
 		<!--<property name="assembler"><ref bean="assemblerOne"/></property>-->
 		<property name="assembler"><ref bean="${targetName}"/></property>
 	</bean>
-	
+
 </beans>

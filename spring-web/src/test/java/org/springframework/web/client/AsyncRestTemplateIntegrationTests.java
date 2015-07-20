@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,11 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.io.ClassPathResource;
@@ -47,13 +49,7 @@ import static org.junit.Assert.*;
  */
 public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 
-	private AsyncRestTemplate template;
-
-
-	@Before
-	public void createTemplate() {
-		template = new AsyncRestTemplate(new HttpComponentsAsyncClientHttpRequestFactory());
-	}
+	private final AsyncRestTemplate template = new AsyncRestTemplate(new HttpComponentsAsyncClientHttpRequestFactory());
 
 
 	@Test
@@ -317,16 +313,50 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 	}
 
 	@Test
-	public void notFound() throws Exception {
+	public void identicalExceptionThroughGetAndCallback() throws Exception {
+		final HttpClientErrorException[] callbackException = new HttpClientErrorException[1];
+
+		final CountDownLatch latch = new CountDownLatch(1);
+		ListenableFuture<?> future = template.execute(baseUrl + "/status/notfound", HttpMethod.GET, null, null);
+		future.addCallback(new ListenableFutureCallback<Object>() {
+			@Override
+			public void onSuccess(Object result) {
+				fail("onSuccess not expected");
+			}
+			@Override
+			public void onFailure(Throwable ex) {
+				assertTrue(ex instanceof HttpClientErrorException);
+				callbackException[0] = (HttpClientErrorException) ex;
+				latch.countDown();
+			}
+		});
+
+		try {
+			future.get();
+			fail("Exception expected");
+		}
+		catch (ExecutionException ex) {
+			Throwable cause = ex.getCause();
+			assertTrue(cause instanceof HttpClientErrorException);
+			latch.await(5, TimeUnit.SECONDS);
+			assertSame(callbackException[0], cause);
+		}
+	}
+
+	@Test
+	public void notFoundGet() throws Exception {
 		try {
 			Future<?> future = template.execute(baseUrl + "/status/notfound", HttpMethod.GET, null, null);
 			future.get();
 			fail("HttpClientErrorException expected");
 		}
-		catch (HttpClientErrorException ex) {
-			assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
-			assertNotNull(ex.getStatusText());
-			assertNotNull(ex.getResponseBodyAsString());
+		catch (ExecutionException ex) {
+			assertTrue(ex.getCause() instanceof HttpClientErrorException);
+			HttpClientErrorException cause = (HttpClientErrorException)ex.getCause();
+
+			assertEquals(HttpStatus.NOT_FOUND, cause.getStatusCode());
+			assertNotNull(cause.getStatusText());
+			assertNotNull(cause.getResponseBodyAsString());
 		}
 	}
 
@@ -372,10 +402,13 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 			future.get();
 			fail("HttpServerErrorException expected");
 		}
-		catch (HttpServerErrorException ex) {
-			assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, ex.getStatusCode());
-			assertNotNull(ex.getStatusText());
-			assertNotNull(ex.getResponseBodyAsString());
+		catch (ExecutionException ex) {
+			assertTrue(ex.getCause() instanceof HttpServerErrorException);
+			HttpServerErrorException cause = (HttpServerErrorException)ex.getCause();
+
+			assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, cause.getStatusCode());
+			assertNotNull(cause.getStatusText());
+			assertNotNull(cause.getResponseBodyAsString());
 		}
 	}
 

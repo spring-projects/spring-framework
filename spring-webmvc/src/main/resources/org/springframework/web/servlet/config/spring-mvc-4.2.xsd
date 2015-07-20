@@ -471,10 +471,39 @@
 			<xsd:element name="resolvers" type="resource-resolvers" minOccurs="0" maxOccurs="1"/>
 			<xsd:element name="transformers" type="resource-transformers" minOccurs="0" maxOccurs="1"/>
 		</xsd:sequence>
-		<xsd:attribute name="resource-cache" type="xsd:boolean" use="required"/>
-		<xsd:attribute name="auto-registration" type="xsd:boolean" default="true" use="optional"/>
-		<xsd:attribute name="cache-manager" type="xsd:string" use="optional"/>
-		<xsd:attribute name="cache-name" type="xsd:string" use="optional"/>
+		<xsd:attribute name="resource-cache" type="xsd:boolean" use="required">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Whether the resource chain should cache resource resolution.
+	Note that the resource content itself won't be cached, but rather Resource instances.
+					]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="auto-registration" type="xsd:boolean" default="true" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Whether to register automatically ResourceResolvers and ResourceTransformers.
+	Setting this property to "false" means that it gives developers full control over the registration process.
+					]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="cache-manager" type="xsd:string" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	The name of the Cache Manager to cache resource resolution. By default, a ConcurrentCacheMap will be used.
+	Since Resources aren't serializable and can be dependent on the application host, one should not use a
+	distributed cache but rather an in-memory cache.
+					]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="cache-name" type="xsd:string" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+    The cache name to use in the configured cache manager.
+    Will use "spring-resource-chain-cache" by default.
+					]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
 	</xsd:complexType>
 
 	<xsd:complexType name="cachecontrol">
@@ -973,7 +1002,7 @@
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
 	Register a TilesViewResolver based on Tiles 3.x.
-	To configure Tiles you must also add a top-level <mvc:tiles> element
+	To configure Tiles you must also add a top-level <mvc:tiles-configurer> element
 	or declare a TilesConfigurer bean.
 							]]></xsd:documentation>
 						</xsd:annotation>
@@ -983,7 +1012,7 @@
 							<xsd:documentation><![CDATA[
 	Register a FreeMarkerViewResolver.
 	By default, ".ftl" is configured as a view name suffix.
-	To configure FreeMarker you must also add a top-level <mvc:freemarker> element
+	To configure FreeMarker you must also add a top-level <mvc:freemarker-configurer> element
 	or declare a FreeMarkerConfigurer bean.
 							]]></xsd:documentation>
 						</xsd:annotation>
@@ -993,7 +1022,7 @@
 							<xsd:documentation><![CDATA[
 	Register a VelocityViewResolver.
 	By default, ".vm" is configured as a view name suffix.
-	To configure Velocity you must also add a top-level <mvc:velocity> element
+	To configure Velocity you must also add a top-level <mvc:velocity-configurer> element
 	or declare a VelocityConfigurer bean.
 							]]></xsd:documentation>
 						</xsd:annotation>
@@ -1003,8 +1032,17 @@
 							<xsd:documentation><![CDATA[
 	Register a GroovyMarkupViewResolver.
 	By default, ".tpl" is configured as a view name suffix.
-	To configure the Groovy markup template engine you must also add a top-level <mvc:groovy-markup> element
+	To configure the Groovy markup template engine you must also add a top-level <mvc:groovy-configurer> element
 	or declare a GroovyMarkupConfigurer bean.
+							]]></xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element name="script-template" type="urlViewResolverType">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+	Register a ScriptTemplateViewResolver.
+	To configure the Script engine you must also add a top-level <mvc:script-template-configurer> element
+	or declare a ScriptTemplateConfigurer bean.
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:element>
@@ -1160,6 +1198,158 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="script-template-configurer">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	Configure the script engine for view resolution by registering a ScriptTemplateConfigurer
+	bean. This is a shortcut alternative to declaring a ScriptTemplateConfigurer bean directly.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+			<xsd:element name="script" minOccurs="0" maxOccurs="unbounded">
+					<xsd:complexType>
+						<xsd:attribute name="location" type="xsd:string" use="required">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	The location of the script to be loaded by the script engine (library or user provided).
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+					</xsd:complexType>
+				</xsd:element>
+			</xsd:sequence>
+			<xsd:attribute name="engine-name" type="xsd:string" use="required">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The script engine name to use by the view.
+	The script engine must implement Invocable.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="render-object" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The object where belong the render function.
+	For example, in order to call Mustache.render(), renderObject
+	should be set to Mustache and renderFunction to render.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="render-function" type="xsd:string" use="required">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Set the render function name.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="charset" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Set the charset used to read script and template files (UTF-8 by default).
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="resource-loader-path" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The script engine resource loader path via a Spring resource location.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="shared-engine" type="xsd:boolean">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	When set to false, use thread-local ScriptEngine instances instead of one single shared
+	instance. This flag should be set to false for those using non thread-safe script engines
+	and templating libraries, like Handlebars or React running on Nashorn for example.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="cors">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	Configure cross origin requests processing.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="mapping" minOccurs="1" maxOccurs="unbounded">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+				Enable cross origin requests processing on the specified path pattern.
+				By default, all origins, GET HEAD POST methods, all headers and credentials
+				are allowed and max age is set to 30 minutes.
+						]]></xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:attribute name="path" type="xsd:string" use="required">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+				A path into the application that should handle CORS requests.
+				Exact path mapping URIs (such as "/admin") are supported as well as Ant-stype path patterns (such as /admin/**).
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="allowed-origins" type="xsd:string">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+				Comma-separated list of origins to allow, e.g. "http://domain1.com, http://domain2.com".
+				The special value "*" allows all domains (default).
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="allowed-methods" type="xsd:string">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+				Comma-separated list of HTTP methods to allow, e.g. "GET, POST".
+				The special value "*" allows all method.
+				By default GET, HEAD and POST methods are allowed.
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="allowed-headers" type="xsd:string">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+				Comma-separated list of headers that a pre-flight request can list as allowed for use during an actual request.
+				The special value of "*" allows actual requests to send any header (default).
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="exposed-headers" type="xsd:string">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+				Comma-separated list of response headers other than simple headers (i.e.
+				Cache-Control, Content-Language, Content-Type, Expires, Last-Modified, Pragma) that an
+				actual response might have and can be exposed.
+				Empty by default.
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="allow-credentials" type="xsd:boolean">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+				Whether user credentials are supported (true by default).
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="max-age" type="xsd:long">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+				How long, in seconds, the response from a pre-flight request can be cached by clients.
+				1800 seconds (30 minutes) by default.
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+					</xsd:complexType>
+				</xsd:element>
+			</xsd:sequence>
 		</xsd:complexType>
 	</xsd:element>
 

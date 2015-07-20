@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -43,6 +44,7 @@ import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
  * Base class for WebSocket integration tests.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public abstract class AbstractWebSocketIntegrationTests {
 
@@ -78,7 +80,6 @@ public abstract class AbstractWebSocketIntegrationTests {
 		this.wac = new AnnotationConfigWebApplicationContext();
 		this.wac.register(getAnnotatedConfigClasses());
 		this.wac.register(upgradeStrategyConfigTypes.get(this.server.getClass()));
-		this.wac.refresh();
 
 		if (this.webSocketClient instanceof Lifecycle) {
 			((Lifecycle) this.webSocketClient).start();
@@ -86,6 +87,10 @@ public abstract class AbstractWebSocketIntegrationTests {
 
 		this.server.setup();
 		this.server.deployConfig(this.wac);
+		// Set ServletContext in WebApplicationContext after deployment but before
+		// starting the server.
+		this.wac.setServletContext(this.server.getServletContext());
+		this.wac.refresh();
 		this.server.start();
 	}
 

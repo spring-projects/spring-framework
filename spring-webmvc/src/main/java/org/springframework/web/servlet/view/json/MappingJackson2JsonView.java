@@ -40,7 +40,7 @@ import org.springframework.web.servlet.View;
 
 /**
  * Spring MVC {@link View} that renders JSON content by serializing the model for the current request
- * using <a href="http://jackson.codehaus.org/">Jackson 2's</a> {@link ObjectMapper}.
+ * using <a href="http://wiki.fasterxml.com/JacksonHome">Jackson 2's</a> {@link ObjectMapper}.
  *
  * <p>By default, the entire contents of the model map (with the exception of framework-specific classes)
  * will be encoded as JSON. If the model contains only one key, you can have it extracted encoded as JSON
@@ -99,16 +99,15 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 	}
 
 	/**
-	 * Indicates whether the JSON output by this view should be prefixed with <tt>"{} && "</tt>.
+	 * Indicates whether the JSON output by this view should be prefixed with <tt>")]}', "</tt>.
 	 * Default is {@code false}.
 	 * <p>Prefixing the JSON string in this manner is used to help prevent JSON Hijacking.
 	 * The prefix renders the string syntactically invalid as a script so that it cannot be hijacked.
-	 * This prefix does not affect the evaluation of JSON, but if JSON validation is performed
-	 * on the string, the prefix would need to be ignored.
+	 * This prefix should be stripped before parsing the string as JSON.
 	 * @see #setJsonPrefix
 	 */
 	public void setPrefixJson(boolean prefixJson) {
-		this.jsonPrefix = (prefixJson ? "{} && " : null);
+		this.jsonPrefix = (prefixJson ? ")]}', " : null);
 	}
 
 	/**

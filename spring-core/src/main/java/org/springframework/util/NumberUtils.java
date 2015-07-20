@@ -86,28 +86,28 @@ public abstract class NumberUtils {
 		if (targetClass.isInstance(number)) {
 			return (T) number;
 		}
-		else if (targetClass.equals(Byte.class)) {
+		else if (Byte.class == targetClass) {
 			long value = number.longValue();
 			if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) {
 				raiseOverflowException(number, targetClass);
 			}
 			return (T) new Byte(number.byteValue());
 		}
-		else if (targetClass.equals(Short.class)) {
+		else if (Short.class == targetClass) {
 			long value = number.longValue();
 			if (value < Short.MIN_VALUE || value > Short.MAX_VALUE) {
 				raiseOverflowException(number, targetClass);
 			}
 			return (T) new Short(number.shortValue());
 		}
-		else if (targetClass.equals(Integer.class)) {
+		else if (Integer.class == targetClass) {
 			long value = number.longValue();
 			if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
 				raiseOverflowException(number, targetClass);
 			}
 			return (T) new Integer(number.intValue());
 		}
-		else if (targetClass.equals(Long.class)) {
+		else if (Long.class == targetClass) {
 			BigInteger bigInt = null;
 			if (number instanceof BigInteger) {
 				bigInt = (BigInteger) number;
@@ -121,7 +121,7 @@ public abstract class NumberUtils {
 			}
 			return (T) new Long(number.longValue());
 		}
-		else if (targetClass.equals(BigInteger.class)) {
+		else if (BigInteger.class == targetClass) {
 			if (number instanceof BigDecimal) {
 				// do not lose precision - use BigDecimal's own conversion
 				return (T) ((BigDecimal) number).toBigInteger();
@@ -131,13 +131,13 @@ public abstract class NumberUtils {
 				return (T) BigInteger.valueOf(number.longValue());
 			}
 		}
-		else if (targetClass.equals(Float.class)) {
+		else if (Float.class == targetClass) {
 			return (T) new Float(number.floatValue());
 		}
-		else if (targetClass.equals(Double.class)) {
+		else if (Double.class == targetClass) {
 			return (T) new Double(number.doubleValue());
 		}
-		else if (targetClass.equals(BigDecimal.class)) {
+		else if (BigDecimal.class == targetClass) {
 			// always use BigDecimal(String) here to avoid unpredictability of BigDecimal(double)
 			// (see BigDecimal javadoc for details)
 			return (T) new BigDecimal(number.toString());
@@ -183,28 +183,28 @@ public abstract class NumberUtils {
 		Assert.notNull(targetClass, "Target class must not be null");
 		String trimmed = StringUtils.trimAllWhitespace(text);
 
-		if (targetClass.equals(Byte.class)) {
+		if (Byte.class == targetClass) {
 			return (T) (isHexNumber(trimmed) ? Byte.decode(trimmed) : Byte.valueOf(trimmed));
 		}
-		else if (targetClass.equals(Short.class)) {
+		else if (Short.class == targetClass) {
 			return (T) (isHexNumber(trimmed) ? Short.decode(trimmed) : Short.valueOf(trimmed));
 		}
-		else if (targetClass.equals(Integer.class)) {
+		else if (Integer.class == targetClass) {
 			return (T) (isHexNumber(trimmed) ? Integer.decode(trimmed) : Integer.valueOf(trimmed));
 		}
-		else if (targetClass.equals(Long.class)) {
+		else if (Long.class == targetClass) {
 			return (T) (isHexNumber(trimmed) ? Long.decode(trimmed) : Long.valueOf(trimmed));
 		}
-		else if (targetClass.equals(BigInteger.class)) {
+		else if (BigInteger.class == targetClass) {
 			return (T) (isHexNumber(trimmed) ? decodeBigInteger(trimmed) : new BigInteger(trimmed));
 		}
-		else if (targetClass.equals(Float.class)) {
+		else if (Float.class == targetClass) {
 			return (T) Float.valueOf(trimmed);
 		}
-		else if (targetClass.equals(Double.class)) {
+		else if (Double.class == targetClass) {
 			return (T) Double.valueOf(trimmed);
 		}
-		else if (targetClass.equals(BigDecimal.class) || targetClass.equals(Number.class)) {
+		else if (BigDecimal.class == targetClass || Number.class == targetClass) {
 			return (T) new BigDecimal(trimmed);
 		}
 		else {
@@ -236,7 +236,7 @@ public abstract class NumberUtils {
 			boolean resetBigDecimal = false;
 			if (numberFormat instanceof DecimalFormat) {
 				decimalFormat = (DecimalFormat) numberFormat;
-				if (BigDecimal.class.equals(targetClass) && !decimalFormat.isParseBigDecimal()) {
+				if (BigDecimal.class == targetClass && !decimalFormat.isParseBigDecimal()) {
 					decimalFormat.setParseBigDecimal(true);
 					resetBigDecimal = true;
 				}

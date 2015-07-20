@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -152,6 +152,8 @@ public class JmsNamespaceHandlerTests {
 				context.getBean("testDestinationResolver"), container.getDestinationResolver());
 		assertEquals("explicit message converter not set",
 				context.getBean("testMessageConverter"), container.getMessageConverter());
+		assertEquals("Wrong pub/sub", true, container.isPubSubDomain());
+		assertEquals("Wrong durable flag", true, container.isSubscriptionDurable());
 		assertEquals("wrong cache", DefaultMessageListenerContainer.CACHE_CONNECTION, container.getCacheLevel());
 		assertEquals("wrong concurrency", 3, container.getConcurrentConsumers());
 		assertEquals("wrong concurrency", 5, container.getMaxConcurrentConsumers());
@@ -173,6 +175,7 @@ public class JmsNamespaceHandlerTests {
 				context.getBean("testResourceAdapter"),container.getResourceAdapter());
 		assertEquals("explicit message converter not set",
 				context.getBean("testMessageConverter"), container.getActivationSpecConfig().getMessageConverter());
+		assertEquals("Wrong pub/sub", true, container.isPubSubDomain());
 		assertEquals("wrong concurrency", 5, container.getActivationSpecConfig().getMaxConcurrency());
 		assertEquals("Wrong prefetch", 50, container.getActivationSpecConfig().getPrefetchSize());
 		assertEquals("Wrong phase", 77, container.getPhase());
@@ -247,6 +250,29 @@ public class JmsNamespaceHandlerTests {
 				listener3.getActivationSpecConfig().getMaxConcurrency());
 		assertEquals("Wrong custom concurrency on listener4", 7,
 				listener4.getActivationSpecConfig().getMaxConcurrency());
+	}
+
+	@Test
+	public void testResponseDestination() {
+		// JMS
+		DefaultMessageListenerContainer listener1 = this.context
+				.getBean("listener1", DefaultMessageListenerContainer.class);
+		DefaultMessageListenerContainer listener2 = this.context
+				.getBean("listener2", DefaultMessageListenerContainer.class);
+		assertEquals("Wrong destination type on listener1", true, listener1.isPubSubDomain());
+		assertEquals("Wrong destination type on listener2", true, listener2.isPubSubDomain());
+		assertEquals("Wrong response destination type on listener1", false, listener1.isReplyPubSubDomain());
+		assertEquals("Wrong response destination type on listener2", false, listener2.isReplyPubSubDomain());
+
+		// JCA
+		JmsMessageEndpointManager listener3 = this.context
+				.getBean("listener3", JmsMessageEndpointManager.class);
+		JmsMessageEndpointManager listener4 = this.context
+				.getBean("listener4", JmsMessageEndpointManager.class);
+		assertEquals("Wrong destination type on listener3", true, listener3.isPubSubDomain());
+		assertEquals("Wrong destination type on listener4", true, listener4.isPubSubDomain());
+		assertEquals("Wrong response destination type on listener3", false, listener3.isReplyPubSubDomain());
+		assertEquals("Wrong response destination type on listener4", false, listener4.isReplyPubSubDomain());
 	}
 
 	@Test

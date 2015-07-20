@@ -72,7 +72,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private boolean charset = false;
 
-	private final ByteArrayOutputStream content = new ByteArrayOutputStream();
+	private final ByteArrayOutputStream content = new ByteArrayOutputStream(1024);
 
 	private final ServletOutputStream outputStream = new ResponseServletOutputStream(this.content);
 
@@ -140,6 +140,14 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		return this.writerAccessAllowed;
 	}
 
+	/**
+	 * Return whether the character encoding has been set.
+	 * <p>If {@code false}, {@link #getCharacterEncoding()} will return a default encoding value.
+	 */
+	public boolean isCharset() {
+		return charset;
+	}
+
 	@Override
 	public void setCharacterEncoding(String characterEncoding) {
 		this.characterEncoding = characterEncoding;
@@ -190,8 +198,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	public String getContentAsString() throws UnsupportedEncodingException {
 		flushBuffer();
-		return (this.characterEncoding != null) ?
-				this.content.toString(this.characterEncoding) : this.content.toString();
+		return (this.characterEncoding != null ?
+				this.content.toString(this.characterEncoding) : this.content.toString());
 	}
 
 	@Override
@@ -426,11 +434,13 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	@Override
+	@Deprecated
 	public String encodeUrl(String url) {
 		return encodeURL(url);
 	}
 
 	@Override
+	@Deprecated
 	public String encodeRedirectUrl(String url) {
 		return encodeRedirectURL(url);
 	}
@@ -544,14 +554,15 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public void setStatus(int status) {
-		if(!this.isCommitted()) {
+		if (!this.isCommitted()) {
 			this.status = status;
 		}
 	}
 
 	@Override
+	@Deprecated
 	public void setStatus(int status, String errorMessage) {
-		if(!this.isCommitted()) {
+		if (!this.isCommitted()) {
 			this.status = status;
 			this.errorMessage = errorMessage;
 		}

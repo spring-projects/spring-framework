@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -196,6 +196,21 @@ public abstract class AbstractJdbcCall {
 	 */
 	public void setAccessCallParameterMetaData(boolean accessCallParameterMetaData) {
 		this.callMetaDataContext.setAccessCallParameterMetaData(accessCallParameterMetaData);
+	}
+
+	/**
+	 * Does parameters should be bound by name?
+	 */
+	public boolean isNamedBinding() {
+		return this.callMetaDataContext.isNamedBinding();
+	}
+
+	/**
+	 * Specify whether parameters should be bound by name.
+	 * The default is {@code false}.
+	 */
+	public void setNamedBinding(boolean namedBinding) {
+		this.callMetaDataContext.setNamedBinding(namedBinding);
 	}
 
 	/**

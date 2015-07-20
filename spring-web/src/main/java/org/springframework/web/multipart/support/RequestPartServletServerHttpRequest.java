@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,11 @@ package org.springframework.web.multipart.support;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.ClassUtils;
@@ -111,9 +113,21 @@ public class RequestPartServletServerHttpRequest extends ServletServerHttpReques
 			}
 			else {
 				String paramValue = this.multipartRequest.getParameter(this.partName);
-				return new ByteArrayInputStream(paramValue.getBytes(FORM_CHARSET));
+				return new ByteArrayInputStream(paramValue.getBytes(determineEncoding()));
 			}
 		}
+	}
+
+	private String determineEncoding() {
+		MediaType contentType = getHeaders().getContentType();
+		if (contentType != null) {
+			Charset charset = contentType.getCharSet();
+			if (charset != null) {
+				return charset.name();
+			}
+		}
+		String encoding = this.multipartRequest.getCharacterEncoding();
+		return (encoding != null ? encoding : FORM_CHARSET);
 	}
 
 }

@@ -60,7 +60,11 @@ import org.springframework.util.StringUtils;
 /**
  * Mock implementation of the {@link javax.servlet.http.HttpServletRequest} interface.
  *
- * <p>As of Spring 4.0, this set of mocks is designed on a Servlet 3.0 baseline.
+ * <p>The default, preferred {@link Locale} for the <em>server</em> mocked by this request
+ * is {@link Locale#ENGLISH}. This value can be changed via {@link #addPreferredLocale}
+ * or {@link #setPreferredLocales}.
+ *
+ * <p>As of Spring Framework 4.0, this set of mocks is designed on a Servlet 3.0 baseline.
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
@@ -73,10 +77,14 @@ import org.springframework.util.StringUtils;
  */
 public class MockHttpServletRequest implements HttpServletRequest {
 
+	private static final String HTTP = "http";
+
+	private static final String HTTPS = "https";
+
 	/**
 	 * The default protocol: 'http'.
 	 */
-	public static final String DEFAULT_PROTOCOL = "http";
+	public static final String DEFAULT_PROTOCOL = HTTP;
 
 	/**
 	 * The default server address: '127.0.0.1'.
@@ -104,6 +112,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	public static final String DEFAULT_REMOTE_HOST = "localhost";
 
 	private static final String CONTENT_TYPE_HEADER = "Content-Type";
+
+	private static final String HOST_HEADER = "Host";
 
 	private static final String CHARSET_PREFIX = "charset=";
 
@@ -551,6 +561,19 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public String getServerName() {
+		String host = getHeader(HOST_HEADER);
+		if (host != null) {
+			host = host.trim();
+			if (host.startsWith("[")) {
+				host = host.substring(1, host.indexOf(']'));
+			}
+			else if (host.contains(":")) {
+				host = host.substring(0, host.indexOf(':'));
+			}
+			return host;
+		}
+
+		// else
 		return this.serverName;
 	}
 
@@ -560,6 +583,22 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	@Override
 	public int getServerPort() {
+		String host = getHeader(HOST_HEADER);
+		if (host != null) {
+			host = host.trim();
+			int idx;
+			if (host.startsWith("[")) {
+				idx = host.indexOf(':', host.indexOf(']'));
+			}
+			else {
+				idx = host.indexOf(':');
+			}
+			if (idx != -1) {
+				return Integer.parseInt(host.substring(idx + 1));
+			}
+		}
+
+		// else
 		return this.serverPort;
 	}
 
@@ -641,23 +680,61 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		this.locales.addAll(locales);
 	}
 
+	/**
+	 * Returns the first preferred {@linkplain Locale locale} configured
+	 * in this mock request.
+	 * <p>If no locales have been explicitly configured, the default,
+	 * preferred {@link Locale} for the <em>server</em> mocked by this
+	 * request is {@link Locale#ENGLISH}.
+	 * <p>In contrast to the Servlet specification, this mock implementation
+	 * does <strong>not</strong> take into consideration any locales
+	 * specified via the {@code Accept-Language} header.
+	 * @see javax.servlet.ServletRequest#getLocale()
+	 * @see #addPreferredLocale(Locale)
+	 * @see #setPreferredLocales(List)
+	 */
 	@Override
 	public Locale getLocale() {
 		return this.locales.get(0);
 	}
 
+	/**
+	 * Returns an {@linkplain Enumeration enumeration} of the preferred
+	 * {@linkplain Locale locales} configured in this mock request.
+	 * <p>If no locales have been explicitly configured, the default,
+	 * preferred {@link Locale} for the <em>server</em> mocked by this
+	 * request is {@link Locale#ENGLISH}.
+	 * <p>In contrast to the Servlet specification, this mock implementation
+	 * does <strong>not</strong> take into consideration any locales
+	 * specified via the {@code Accept-Language} header.
+	 * @see javax.servlet.ServletRequest#getLocales()
+	 * @see #addPreferredLocale(Locale)
+	 * @see #setPreferredLocales(List)
+	 */
 	@Override
 	public Enumeration<Locale> getLocales() {
 		return Collections.enumeration(this.locales);
 	}
 
+	/**
+	 * Set the boolean {@code secure} flag indicating whether the mock request
+	 * was made using a secure channel, such as HTTPS.
+	 * @see #isSecure()
+	 * @see #getScheme()
+	 * @see #setScheme(String)
+	 */
 	public void setSecure(boolean secure) {
 		this.secure = secure;
 	}
 
+	/**
+	 * Returns {@code true} if the {@link #setSecure secure} flag has been set
+	 * to {@code true} or if the {@link #getScheme scheme} is {@code https}.
+	 * @see javax.servlet.ServletRequest#isSecure()
+	 */
 	@Override
 	public boolean isSecure() {
-		return this.secure;
+		return (this.secure || HTTPS.equalsIgnoreCase(this.scheme));
 	}
 
 	@Override
@@ -666,6 +743,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
+	@Deprecated
 	public String getRealPath(String path) {
 		return this.servletContext.getRealPath(path);
 	}
@@ -970,7 +1048,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		StringBuffer url = new StringBuffer(this.scheme).append("://").append(this.serverName);
 
 		if (this.serverPort > 0
-				&& (("http".equalsIgnoreCase(scheme) && this.serverPort != 80) || ("https".equalsIgnoreCase(scheme) && this.serverPort != 443))) {
+				&& ((HTTP.equalsIgnoreCase(this.scheme) && this.serverPort != 80) || (HTTPS.equalsIgnoreCase(this.scheme) && this.serverPort != 443))) {
 			url.append(':').append(this.serverPort);
 		}
 
@@ -1059,6 +1137,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	@Override
+	@Deprecated
 	public boolean isRequestedSessionIdFromUrl() {
 		return isRequestedSessionIdFromURL();
 	}

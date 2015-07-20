@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,6 +101,7 @@ public class JmsTemplate extends JmsDestinationAccessor implements JmsOperations
 	public static final long RECEIVE_TIMEOUT_INDEFINITE_WAIT = 0;
 
 
+	/** The JMS 2.0 MessageProducer.setDeliveryDelay method, if available */
 	private static final Method setDeliveryDelayMethod =
 			ClassUtils.getMethodIfAvailable(MessageProducer.class, "setDeliveryDelay", long.class);
 

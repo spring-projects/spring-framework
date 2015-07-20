@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,12 +38,15 @@ import java.lang.annotation.Target;
  * container to fill them in at runtime. In both cases, the container will generate
  * runtime subclasses of the method's containing class via CGLIB, which is why such
  * lookup methods can only work on beans that the container instantiates through
- * regular constructors (i.e. lookup methods cannot get replaced on beans returned
- * from factory methods where we can't dynamically provide a subclass for them).
+ * regular constructors: i.e. lookup methods cannot get replaced on beans returned
+ * from factory methods where we cannot dynamically provide a subclass for them.
  *
- * <p>Note: When used with component scanning or any other mechanism that filters
- * out abstract beans, provide stub implementations of your lookup methods to be
- * able to declare them as concrete classes.
+ * <p><b>Concrete limitations in typical Spring configuration scenarios:</b>
+ * When used with component scanning or any other mechanism that filters out abstract
+ * beans, provide stub implementations of your lookup methods to be able to declare
+ * them as concrete classes. And please remember that lookup methods won't work on
+ * beans returned from {@code @Bean} methods in configuration classes; you'll have
+ * to resort to {@code @Inject Provider&lt;TargetBean&gt;} or the like instead.
  *
  * @author Juergen Hoeller
  * @since 4.1

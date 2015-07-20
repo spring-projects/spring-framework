@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
@@ -42,6 +43,8 @@ public class LocaleChangeInterceptor extends HandlerInterceptorAdapter {
 
 	private String paramName = DEFAULT_PARAM_NAME;
 
+	private String[] httpMethods;
+
 
 	/**
 	 * Set the name of the parameter that contains a locale specification
@@ -59,6 +62,23 @@ public class LocaleChangeInterceptor extends HandlerInterceptorAdapter {
 		return this.paramName;
 	}
 
+	/**
+	 * Configure the HTTP method(s) over which the locale can be changed.
+	 * @param httpMethods the methods
+	 * @since 4.2
+	 */
+	public void setHttpMethods(String... httpMethods) {
+		this.httpMethods = httpMethods;
+	}
+
+	/**
+	 * Return the configured HTTP methods.
+	 * @since 4.2
+	 */
+	public String[] getHttpMethods() {
+		return this.httpMethods;
+	}
+
 
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
@@ -66,14 +86,29 @@ public class LocaleChangeInterceptor extends HandlerInterceptorAdapter {
 
 		String newLocale = request.getParameter(this.paramName);
 		if (newLocale != null) {
-			LocaleResolver localeResolver = RequestContextUtils.getLocaleResolver(request);
-			if (localeResolver == null) {
-				throw new IllegalStateException("No LocaleResolver found: not in a DispatcherServlet request?");
+			if (checkHttpMethod(request.getMethod())) {
+				LocaleResolver localeResolver = RequestContextUtils.getLocaleResolver(request);
+				if (localeResolver == null) {
+					throw new IllegalStateException(
+							"No LocaleResolver found: not in a DispatcherServlet request?");
+				}
+				localeResolver.setLocale(request, response, StringUtils.parseLocaleString(newLocale));
 			}
-			localeResolver.setLocale(request, response, StringUtils.parseLocaleString(newLocale));
 		}
 		// Proceed in any case.
 		return true;
+	}
+
+	private boolean checkHttpMethod(String currentMethod) {
+		if (ObjectUtils.isEmpty(getHttpMethods())) {
+			return true;
+		}
+		for (String httpMethod : getHttpMethods()) {
+			if (httpMethod.equalsIgnoreCase(currentMethod)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }

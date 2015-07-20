@@ -20,15 +20,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import reactor.core.composable.Promise;
-import reactor.function.Consumer;
-
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.FailureCallback;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.util.concurrent.ListenableFutureCallbackRegistry;
 import org.springframework.util.concurrent.SuccessCallback;
+import reactor.fn.Consumer;
+import reactor.rx.Promise;
 
 /**
  * Adapts a reactor {@link Promise} to {@link ListenableFuture} optionally converting
@@ -81,7 +80,7 @@ abstract class AbstractPromiseToListenableFutureAdapter<S, T> implements Listena
 	@Override
 	public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
 		S result = this.promise.await(timeout, unit);
-		if (result == null) {
+		if (!this.promise.isComplete()) {
 			throw new TimeoutException();
 		}
 		return adapt(result);

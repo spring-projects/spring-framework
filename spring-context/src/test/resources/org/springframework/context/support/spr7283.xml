@@ -12,5 +12,5 @@
 		<bean class="org.springframework.context.support.Spr7283Tests$A"/>
 		<bean class="org.springframework.context.support.Spr7283Tests$B"/>
 	</util:list>
-    
+   
 </beans>

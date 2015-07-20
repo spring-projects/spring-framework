@@ -29,6 +29,7 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.server.support.WebSocketHandlerMapping;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -101,7 +102,7 @@ public class ServletWebSocketHandlerRegistry implements WebSocketHandlerRegistry
 				}
 			}
 		}
-		SimpleUrlHandlerMapping hm = new SimpleUrlHandlerMapping();
+		WebSocketHandlerMapping hm = new WebSocketHandlerMapping();
 		hm.setUrlMap(urlMap);
 		hm.setOrder(this.order);
 		if (this.urlPathHelper != null) {

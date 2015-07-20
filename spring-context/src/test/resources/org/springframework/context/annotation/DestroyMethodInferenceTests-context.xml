@@ -11,6 +11,10 @@
 	      class="org.springframework.context.annotation.DestroyMethodInferenceTests$WithLocalCloseMethod"
 	      destroy-method="(inferred)"/>
 
+	<bean id="x8"
+		  class="org.springframework.context.annotation.DestroyMethodInferenceTests.WithInheritedCloseMethod"
+		  destroy-method=""/>
+
 	<beans default-destroy-method="(inferred)">
 		<bean id="x3"
 		      class="org.springframework.context.annotation.DestroyMethodInferenceTests$WithLocalCloseMethod"/>

@@ -18,7 +18,7 @@ package org.springframework.messaging.simp.stomp;
 import java.util.Arrays;
 
 import org.springframework.messaging.converter.MessageConverter;
-import org.springframework.messaging.converter.StringMessageConverter;
+import org.springframework.messaging.converter.SimpleMessageConverter;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 
@@ -41,7 +41,7 @@ import org.springframework.util.Assert;
  */
 public abstract class StompClientSupport {
 
-	private MessageConverter messageConverter = new StringMessageConverter();
+	private MessageConverter messageConverter = new SimpleMessageConverter();
 
 	private TaskScheduler taskScheduler;
 
@@ -54,7 +54,7 @@ public abstract class StompClientSupport {
 	 * Set the {@link MessageConverter} to use to convert the payload of incoming
 	 * and outgoing messages to and from {@code byte[]} based on object type
 	 * and the "content-type" header.
-	 * <p>By default, {@link StringMessageConverter} is configured.
+	 * <p>By default, {@link SimpleMessageConverter} is configured.
 	 * @param messageConverter the message converter to use
 	 */
 	public void setMessageConverter(MessageConverter messageConverter) {

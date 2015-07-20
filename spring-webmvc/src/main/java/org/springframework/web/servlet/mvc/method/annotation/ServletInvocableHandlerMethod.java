@@ -84,7 +84,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	private void initResponseStatus() {
 		ResponseStatus annotation = getMethodAnnotation(ResponseStatus.class);
 		if (annotation != null) {
-			this.responseStatus = annotation.value();
+			this.responseStatus = annotation.code();
 			this.responseReason = annotation.reason();
 		}
 	}

@@ -16,8 +16,6 @@
 
 package org.springframework.test.context.junit4;
 
-import org.junit.runner.RunWith;
-
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.ResourceUtils;
 
@@ -33,7 +31,6 @@ import org.springframework.util.ResourceUtils;
  * @see AbsolutePathSpringJUnit4ClassRunnerAppCtxTests
  * @see RelativePathSpringJUnit4ClassRunnerAppCtxTests
  */
-@RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { ClassPathResourceSpringJUnit4ClassRunnerAppCtxTests.CLASSPATH_CONTEXT_RESOURCE_PATH })
 public class ClassPathResourceSpringJUnit4ClassRunnerAppCtxTests extends SpringJUnit4ClassRunnerAppCtxTests {
 

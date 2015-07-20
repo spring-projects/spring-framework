@@ -52,7 +52,7 @@ public class JsonPathExpectationsHelper {
 		for (Method candidate : JsonPath.class.getMethods()) {
 			if (candidate.getName().equals("compile")) {
 				Class<?>[] paramTypes = candidate.getParameterTypes();
-				if (paramTypes.length == 2 && paramTypes[0].equals(String.class) && paramTypes[1].isArray()) {
+				if (paramTypes.length == 2 && String.class == paramTypes[0] && paramTypes[1].isArray()) {
 					compileMethod = candidate;
 					emptyFilters = Array.newInstance(paramTypes[1].getComponentType(), 0);
 					break;
@@ -89,7 +89,7 @@ public class JsonPathExpectationsHelper {
 	@SuppressWarnings("unchecked")
 	public <T> void assertValue(String content, Matcher<T> matcher) throws ParseException {
 		T value = (T) evaluateJsonPath(content);
-		assertThat("JSON path" + this.expression, value, matcher);
+		assertThat("JSON path " + this.expression, value, matcher);
 	}
 
 	private Object evaluateJsonPath(String content) throws ParseException  {

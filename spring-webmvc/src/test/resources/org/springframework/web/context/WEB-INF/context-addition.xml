@@ -38,7 +38,7 @@
 		class="org.springframework.tests.sample.beans.factory.DummyFactory">
 		<property name="singleton"><value>false</value></property>
 	</bean>
-	
+
 	<bean id="listenerVeto" class="org.springframework.tests.sample.beans.TestBean">
 		<!--	<listener property="age" beanRef="agistListener" /> -->
 		<property name="name"><value>listenerVeto</value></property>

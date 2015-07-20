@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.beans.factory.config;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.Reader;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Collection;
@@ -35,6 +35,7 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.parser.ParserException;
+import org.yaml.snakeyaml.reader.UnicodeReader;
 
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
@@ -155,9 +156,9 @@ public abstract class YamlProcessor {
 			if (this.logger.isDebugEnabled()) {
 				this.logger.debug("Loading from YAML: " + resource);
 			}
-			InputStream stream = resource.getInputStream();
+			Reader reader = new UnicodeReader(resource.getInputStream());
 			try {
-				for (Object object : yaml.loadAll(stream)) {
+				for (Object object : yaml.loadAll(reader)) {
 					if (object != null && process(asMap(object), callback)) {
 						count++;
 						if (this.resolutionMethod == ResolutionMethod.FIRST_FOUND) {
@@ -171,7 +172,7 @@ public abstract class YamlProcessor {
 				}
 			}
 			finally {
-				stream.close();
+				reader.close();
 			}
 		}
 		catch (IOException ex) {

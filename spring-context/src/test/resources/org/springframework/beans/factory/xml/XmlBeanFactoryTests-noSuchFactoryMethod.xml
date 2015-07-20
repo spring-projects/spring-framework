@@ -3,15 +3,15 @@
 
 <beans>
 
-	
+
 	<bean id="default" class="org.springframework.beans.factory.xml.FactoryMethods"
 			factory-method="defaultInstance">
 		<!-- No constructor-arg elements -->
 		<property name="stringValue"><value>setterString</value></property>
 	</bean>
-	
+
 	<bean id="defaultTestBean" factory-bean="default" factory-method="xgetTestBean"
 			init-method="haveBirthday" destroy-method="destroy"/>
-			
+		
 
 </beans>

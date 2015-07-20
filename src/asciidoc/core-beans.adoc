@@ -1591,7 +1591,7 @@ The above configuration is equivalent to the following Java code:
 The p-namespace enables you to use the `bean` element's attributes, instead of nested
 `<property/>` elements, to describe your property values and/or collaborating beans.
 
-Spring supports extensible configuration formats <<xsd-config,with namespaces>>, which are
+Spring supports extensible configuration formats <<xsd-configuration,with namespaces>>, which are
 based on an XML Schema definition. The `beans` configuration format discussed in this
 chapter is defined in an XML Schema document. However, the p-namespace is not defined in
 an XSD file and exists only in the core of Spring.
@@ -1858,7 +1858,7 @@ advantages:
 When using XML-based configuration metadata footnote:[See
 pass:specialcharacters,macros[<<beans-factory-collaborators>>]], you specify autowire
 mode for a bean definition with the `autowire` attribute of the `<bean/>` element. The
-autowiring functionality has five modes. You specify autowiring __per__ bean and thus
+autowiring functionality has four modes. You specify autowiring __per__ bean and thus
 can choose which ones to autowire.
 
 [[beans-factory-autowiring-modes-tbl]]
@@ -2032,15 +2032,17 @@ overrides the method.
 
 [NOTE]
 ====
-For this dynamic subclassing to work, the class that the Spring container will subclass
-cannot be `final`, and the method to be overridden cannot be `final` either. Also,
-testing a class that has an `abstract` method requires you to subclass the class
-yourself and to supply a stub implementation of the `abstract` method. Finally, objects
-that have been the target of method injection cannot be serialized. As of Spring 3.2 it
-is no longer necessary to add CGLIB to your classpath, because CGLIB classes are
-repackaged under org.springframework and distributed within the spring-core JAR. This is
-done both for convenience as well as to avoid potential conflicts with other projects
-that use differing versions of CGLIB.
+* For this dynamic subclassing to work, the class that the Spring bean container will
+  subclass cannot be `final`, and the method to be overridden cannot be `final` either.
+* Unit-testing a class that has an `abstract` method requires you to subclass the class
+  yourself and to supply a stub implementation of the `abstract` method.
+* Concrete methods are also necessary for component scanning which requires concrete
+  classes to pick up.
+* A further key limitation is that lookup methods won't work with factory methods and
+  in particular not with `@Bean` methods in configuration classes, since the container
+  is not in charge of creating the instance in that case and therefore cannot create
+  a runtime-generated subclass on the fly.
+* Finally, objects that have been the target of method injection cannot be serialized.
 ====
 
 Looking at the `CommandManager` class in the previous code snippet, you see that the
@@ -2116,7 +2118,7 @@ these classes for additional information.
 
 [[beans-factory-arbitrary-method-replacement]]
 ==== Arbitrary method replacement
-A less useful form of method injection than lookup method Injection is the ability to
+A less useful form of method injection than lookup method injection is the ability to
 replace arbitrary methods in a managed bean with another method implementation. Users
 may safely skip the rest of this section until the functionality is actually needed.
 
@@ -2549,7 +2551,7 @@ understand the "why" as well as the "how" behind it.
 
 To create such a proxy, you insert a child `<aop:scoped-proxy/>` element into a scoped
 bean definition. See <<beans-factory-scopes-other-injection-proxies>> and
-<<xsd-config>>.) Why do definitions of beans scoped at the `request`, `session`,
+<<xsd-configuration>>.) Why do definitions of beans scoped at the `request`, `session`,
 `globalSession` and custom-scope levels require the `<aop:scoped-proxy/>` element ?
 Let's examine the following singleton bean definition and contrast it with what you need
 to define for the aforementioned scopes. (The following `userPreferences` bean
@@ -2847,7 +2849,7 @@ unnecessarily couples the code to Spring. Alternatively, use
 the <<beans-postconstruct-and-predestroy-annotations, `@PostConstruct`>> annotation or
 specify a POJO initialization method. In the case of XML-based configuration metadata,
 you use the `init-method` attribute to specify the name of the method that has a void
-no-argument signature. With Java config  you use the `initMethod` attribute of `@Bean`,
+no-argument signature. With Java config, you use the `initMethod` attribute of `@Bean`,
 see <<beans-java-lifecycle-callbacks>>. For example, the following:
 
 [source,xml,indent=0]
@@ -2907,8 +2909,8 @@ It is recommended that you do not use the `DisposableBean` callback interface be
 unnecessarily couples the code to Spring. Alternatively, use
 the <<beans-postconstruct-and-predestroy-annotations, `@PreDestroy`>> annotation or
 specify a generic method that is supported by bean definitions. With XML-based
-configuration metadata, you use the `destroy-method` attribute on the `<bean/>`. With
-Java config  you use the `destroyMethod` attribute of `@Bean`, see
+configuration metadata, you use the `destroy-method` attribute on the `<bean/>`.
+With Java config, you use the `destroyMethod` attribute of `@Bean`, see
 <<beans-java-lifecycle-callbacks>>. For example, the following definition:
 
 [source,xml,indent=0]
@@ -2955,9 +2957,10 @@ but does not couple the code to Spring.
 ====
 The `destroy-method` attribute of a `<bean>` element can be assigned a special
 `(inferred)` value which instructs Spring to automatically detect a public `close` or
-`shutdown` method on the specific bean class. This special `(inferred)` value can also be
-set on the `default-destroy-method` attribute of a `<beans>` element to apply this
-behavior to an entire set of beans (see
+`shutdown` method on the specific bean class (any class that implements
+`java.lang.AutoCloseable` or `java.io.Closeable` would therefore match). This special
+`(inferred)` value can also be set on the `default-destroy-method` attribute of a
+`<beans>` element to apply this behavior to an entire set of beans (see
 <<beans-factory-lifecycle-default-init-destroy-methods>>). Note that this is the
 default behavior with Java config.
 ====
@@ -3119,6 +3122,10 @@ Note that the regular `org.springframework.context.Lifecycle` interface is just 
 contract for explicit start/stop notifications and does NOT imply auto-startup at context
 refresh time. Consider implementing `org.springframework.context.SmartLifecycle` instead
 for fine-grained control over auto-startup of a specific bean (including startup phases).
+Also, please note that stop notifications are not guaranteed to come before destruction:
+On regular shutdown, all `Lifecycle` beans will first receive a stop notification before
+the general destruction callbacks are being propagated; however, on hot refresh during a
+context's lifetime or on aborted refresh attempts, only destroy methods will be called.
 ====
 
 The order of startup and shutdown invocations can be important. If a "depends-on"
@@ -3212,19 +3219,19 @@ singleton beans so that all resources are released. Of course, you must still co
 and implement these destroy callbacks correctly.
 
 To register a shutdown hook, you call the `registerShutdownHook()` method that is
-declared on the `AbstractApplicationContext` class:
+declared on the `ConfigurableApplicationContext` interface:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	import org.springframework.context.support.AbstractApplicationContext;
+	import org.springframework.context.ConfigurableApplicationContext;
 	import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 	public final class Boot {
 
 		public static void main(final String[] args) throws Exception {
 
-			AbstractApplicationContext ctx = new ClassPathXmlApplicationContext(
+			ConfigurableApplicationContext ctx = new ClassPathXmlApplicationContext(
 					new String []{"beans.xml"});
 
 			// add a shutdown hook for the above context...
@@ -3493,7 +3500,7 @@ you write your own `BeanPostProcessor` you should consider implementing the `Ord
 interface too. For further details, consult the javadocs of the `BeanPostProcessor` and
 `Ordered` interfaces. See also the note below on
 <<beans-factory-programmatically-registering-beanpostprocessors, programmatic
-registration of `BeanPostProcessors`>>
+registration of `BeanPostProcessors`>>.
 
 [NOTE]
 ====
@@ -3537,11 +3544,11 @@ interface, clearly indicating the post-processor nature of that bean. Otherwise,
 Since a ++BeanPostProcessor++ needs to be instantiated early in order to apply to the
 initialization of other beans in the context, this early type detection is critical.
 
+
+[[beans-factory-programmatically-registering-beanpostprocessors]]
+.Programmatically registering BeanPostProcessors
 [NOTE]
 ====
-
-*Programmatically registering BeanPostProcessors*
-
 While the recommended approach for `BeanPostProcessor` registration is through
 `ApplicationContext` auto-detection (as described above), it is also possible to
 register them __programmatically__ against a `ConfigurableBeanFactory` using the
@@ -3554,11 +3561,9 @@ programmatically are always processed before those registered through auto-detec
 regardless of any explicit ordering.
 ====
 
+.BeanPostProcessors and AOP auto-proxying
 [NOTE]
 ====
-
-*BeanPostProcessors and AOP auto-proxying*
-
 Classes that implement the `BeanPostProcessor` interface are __special__ and are treated
 differently by the container. All `BeanPostProcessors` __and beans that they reference
 directly__ are instantiated on startup, as part of the special startup phase of the
@@ -4275,14 +4280,90 @@ any). These types must be 'wired up' explicitly via XML or using a Spring `@Bean
 ====
 
 
+[[beans-autowired-annotation-primary]]
+=== Fine-tuning annotation-based autowiring with @Primary
+Because autowiring by type may lead to multiple candidates, it is often necessary to have
+more control over the selection process. One way to accomplish this is with Spring's
+`@Primary` annotation. `@Primary` indicates that a particular bean should be given
+preference when multiple beans are candidates to be autowired to a single-valued
+dependency. If exactly one 'primary' bean exists among the candidates, it will be the
+autowired value.
+
+Let's assume we have the following configuration that defines `firstMovieCatalog` as the
+_primary_ `MovieCatalog`.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Configuration
+	public class MovieConfiguration {
+
+		@Bean
+		**@Primary**
+		public MovieCatalog firstMovieCatalog() { ... }
+
+		@Bean
+		public MovieCatalog secondMovieCatalog() { ... }
+
+		// ...
+
+	}
+----
+
+With such configuration, the following `MovieRecommender` will be autowired with the
+`firstMovieCatalog`.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	public class MovieRecommender {
+
+		@Autowired
+		private MovieCatalog movieCatalog;
+
+		// ...
+
+	}
+----
+
+
+The corresponding bean definitions appear as follows.
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<?xml version="1.0" encoding="UTF-8"?>
+	<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/context
+			http://www.springframework.org/schema/context/spring-context.xsd">
+
+		<context:annotation-config/>
+
+		<bean class="example.SimpleMovieCatalog" **primary=true**>
+			<!-- inject any dependencies required by this bean -->
+		</bean>
+
+		<bean class="example.SimpleMovieCatalog">
+			<!-- inject any dependencies required by this bean -->
+		</bean>
+
+		<bean id="movieRecommender" class="example.MovieRecommender"/>
+
+	</beans>
+----
+
 
 [[beans-autowired-annotation-qualifiers]]
 === Fine-tuning annotation-based autowiring with qualifiers
-Because autowiring by type may lead to multiple candidates, it is often necessary to
-have more control over the selection process. One way to accomplish this is with
-Spring's `@Qualifier` annotation. You can associate qualifier values with specific
-arguments, narrowing the set of type matches so that a specific bean is chosen for each
-argument. In the simplest case, this can be a plain descriptive value:
+`@Primary` is an effective way to use autowiring by type with several instances when one
+primary candidate can be determined. When more control over the selection process is
+required, Spring's `@Qualifier` annotation can be used. You can associate qualifier values
+with specific arguments, narrowing the set of type matches so that a specific bean is
+chosen for each argument. In the simplest case, this can be a plain descriptive value:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4364,14 +4445,14 @@ optional semantic qualifiers. This means that qualifier values, even with the be
 fallback, always have narrowing semantics within the set of type matches; they do not
 semantically express a reference to a unique bean id. Good qualifier values are "main"
 or "EMEA" or "persistent", expressing characteristics of a specific component that are
-independent from the bean id, which may be auto-generated in case of an anonymous bean
+independent from the bean `id`, which may be auto-generated in case of an anonymous bean
 definition like the one in the preceding example.
 
 Qualifiers also apply to typed collections, as discussed above, for example, to
 `Set<MovieCatalog>`. In this case, all matching beans according to the declared
 qualifiers are injected as a collection. This implies that qualifiers do not have to be
 unique; they rather simply constitute filtering criteria. For example, you can define
-multiple `MovieCatalog` beans with the same qualifier value "action"; all of which would
+multiple `MovieCatalog` beans with the same qualifier value "action", all of which would
 be injected into a `Set<MovieCatalog>` annotated with `@Qualifier("action")`.
 
 [TIP]
@@ -5127,8 +5208,8 @@ will in effect disable automatic detection of classes annotated with `@Component
 [[beans-factorybeans-annotations]]
 === Defining bean metadata within components
 Spring components can also contribute bean definition metadata to the container. You do
-this with the same `@Bean` annotation used to define bean metadata within
-`@Configuration` annotated classes. Here is a simple example:
+this with the same `@Bean` annotation used to define bean metadata within `@Configuration`
+annotated classes. Here is a simple example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -5218,9 +5299,39 @@ counterparts inside a Spring `@Configuration` class. The difference is that `@Co
 classes are not enhanced with CGLIB to intercept the invocation of methods and fields.
 CGLIB proxying is the means by which invoking methods or fields within `@Bean` methods 
 in `@Configuration` classes creates bean metadata references to collaborating objects;
-such methods are __not__ invoked with normal Java semantics. In contrast, invoking a
-method or field in an `@Bean` method within a `@Component` class __has__ standard Java
-semantics.
+such methods are __not__ invoked with normal Java semantics but rather go through the
+container in order to provide the usual lifecycle management and proxying of Spring
+beans even when referring to other beans via programmatic calls to `@Bean` methods.
+In contrast, invoking a method or field in an `@Bean` method within a plain `@Component`
+class __has__ standard Java semantics, with no special CGLIB processing or other
+constraints applying.
+
+[NOTE]
+====
+You may declare `@Bean` methods as `static`, allowing for them to be called without
+creating their containing configuration class as an instance. This makes particular
+sense when defining post-processor beans, e.g. of type `BeanFactoryPostProcessor` or
+`BeanPostProcessor`, since such beans will get initialized early in the container
+lifecycle and should avoid triggering other parts of the configuration at that point.
+
+Note that calls to static `@Bean` methods will never get intercepted by the container,
+not even within `@Configuration` classes (see above). This is due to technical
+limitations: CGLIB subclassing can only override non-static methods. As a consequence,
+a direct call to another `@Bean` method will have standard Java semantics, resulting
+in an independent instance being returned straight from the factory method itself.
+
+The Java language visibility of `@Bean` methods does not have an immediate impact on
+the resulting bean definition in Spring's container. You may freely declare your
+factory methods as you see fit in non-`@Configuration` classes and also for static
+methods anywhere. However, regular `@Bean` methods in `@Configuration` classes need
+to be overridable, i.e. they must not be declared as `private` or `final`.
+
+Finally, `@Bean` methods will also be discovered on base classes of a given component
+or configuration class, as well as on Java 8 default methods declared in interfaces
+implemented by the component or configuration class. This allows for a lot of
+flexibility in composing complex configuration arrangements, with even multiple
+inheritance being possible through Java 8 default methods as of Spring 4.2.
+====
 
 
 
@@ -7353,7 +7464,7 @@ package also provides the following functionality:
 
 * __Access to messages in i18n-style__, through the `MessageSource` interface.
 * __Access to resources__, such as URLs and files, through the `ResourceLoader` interface.
-* __Event publication__ to beans implementing the `ApplicationListener` interface,
+* __Event publication__ to namely beans implementing the `ApplicationListener` interface,
   through the use of the `ApplicationEventPublisher` interface.
 * __Loading of multiple (hierarchical) contexts__, allowing each to be focused on one
   particular layer, such as the web layer of an application, through the
@@ -7573,8 +7684,18 @@ Event handling in the `ApplicationContext` is provided through the `ApplicationE
 class and `ApplicationListener` interface. If a bean that implements the
 `ApplicationListener` interface is deployed into the context, every time an
 `ApplicationEvent` gets published to the `ApplicationContext`, that bean is notified.
-Essentially, this is the standard __Observer__ design pattern. Spring provides the
-following standard events:
+Essentially, this is the standard __Observer__ design pattern.
+
+[TIP]
+====
+As of Spring 4.2, the event infrastructure has been significantly improved and offer
+an <<context-functionality-events-annotation,annotation-based model>> as well as the
+ability to publish any arbitrary event, that is an object that does not necessarily
+extend from `ApplicationEvent`. When such an object is published we wrap it in a
+`PayloadApplicationEvent` for you.
+====
+
+Spring provides the following standard events:
 
 [[beans-ctx-events-tbl]]
 .Built-in Events
@@ -7747,6 +7868,175 @@ http://projects.spring.io/spring-integration/[Spring Integration] project provid
 complete support for building lightweight,
 http://www.enterpriseintegrationpatterns.com[pattern-oriented], event-driven
 architectures that build upon the well-known Spring programming model.
+====
+
+[[context-functionality-events-annotation]]
+==== Annotation-based Event Listeners
+
+As of Spring 4.2, an event listener can be registered on any public method of a managed
+bean via the `EventListener` annotation. The `BlackListNotifier` can be rewritten as
+follows:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	public class BlackListNotifier {
+
+		private String notificationAddress;
+
+		public void setNotificationAddress(String notificationAddress) {
+			this.notificationAddress = notificationAddress;
+		}
+
+		@EventListener
+		public void processBlackListEvent(BlackListEvent event) {
+			// notify appropriate parties via notificationAddress...
+		}
+
+	}
+----
+
+As you can see above, the method signature actually _infer_ which even type it listens to. This
+also works for nested generics as long as the actual event resolves the generics parameter you
+would filter on.
+
+If your method should listen to several events or if you want to define it with no
+parameter at all, the event type(s) can also be specified on the annotation itself:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@EventListener({ContextStartedEvent.class, ContextRefreshedEvent.class})
+	public void handleContextStart() {
+
+	}
+----
+
+
+It is also possible to add additional runtime filtering via the `condition` attribute of the
+annotation that defines a <<expressions,`SpEL` expression>> that should match to actually invoke
+the method for a particular event.
+
+For instance, our notifier can be rewritten to be only invoked if the `test` attribute of the
+event is equal to `foo`:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@EventListener(condition = "#event.test == 'foo'")
+	public void processBlackListEvent(BlackListEvent event) {
+		// notify appropriate parties via notificationAddress...
+	}
+----
+
+Each `SpEL` expression evaluates again a dedicated context. The next table lists the items made
+available to the context so one can use them for conditional event processing:
+
+[[context-functionality-events-annotation-tbl]]
+.Event SpEL available metadata
+|===
+| Name| Location| Description| Example
+
+| event
+| root object
+| The actual `ApplicationEvent`
+| `#root.event`
+
+| args
+| root object
+| The arguments (as array) used for invoking the target
+| `#root.args[0]`
+
+| __argument name__
+| evaluation context
+| Name of any of the method argument. If for some reason the names are not available
+  (ex: no debug information), the argument names are also available under the `a<#arg>`
+  where __#arg__ stands for the argument index (starting from 0).
+| `iban` or `a0` (one can also use `p0` or `p<#arg>` notation as an alias).
+|===
+
+Note that `#root.event` allows you to access to the underlying event, even if your method
+signature actually refers to an arbitrary object that was published.
+
+If you need to publish an event as the result of processing another, just change the
+method signature to return the event that should be published, something like:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@EventListener
+	public ListUpdateEvent handleBlackListEvent(BlackListEvent event) {
+		// notify appropriate parties via notificationAddress and
+		// then publish a ListUpdateEvent...
+	}
+----
+
+This new method will publish a new `ListUpdateEvent` for every `BlackListEvent` handled
+by the method above. If you need to publish several events, just return a `Collection` of
+events instead.
+
+Finally if you need the listener to be invoked before another one, just add the `@Order`
+annotation to the method declaration:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@EventListener
+	@Order(42)
+	public void processBlackListEvent(BlackListEvent event) {
+		// notify appropriate parties via notificationAddress...
+	}
+----
+
+[[context-functionality-events-generics]]
+==== Generic Events
+
+You may also use generics to further define the structure of your event. Consider an
+`EntityCreatedEvent<T>` where `T` is the type of the actual entity that got created. You
+can create the following listener definition to only receive `EntityCreatedEvent` for a
+`Person`:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@EventListener
+	public void onPersonCreated(EntityCreatedEvent<Person> event) {
+		...
+	}
+----
+
+
+Due to type erasure, this will only work if the event that is fired resolves the generic
+parameter(s) on which the event listener filters on (that is something like
+`class PersonCreatedEvent extends EntityCreatedEvent<Person> { ... }`).
+
+In certain circumstances, this may become quite tedious if all events follow the same
+structure (as it should be the case for the event above). In such a case, you can
+implement `ResolvableTypeProvider` to _guide_ the framework beyond what the runtime
+environment provides:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	public class EntityCreatedEvent<T>
+    		extends ApplicationEvent implements ResolvableTypeProvider {
+
+    	public EntityCreatedEvent(T entity) {
+    		super(entity);
+    	}
+
+    	@Override
+    	public ResolvableType getResolvableType() {
+    		return ResolvableType.forClassWithGenerics(getClass(),
+    				ResolvableType.forInstance(getSource()));
+    	}
+    }
+----
+
+[TIP]
+====
+This works not only for `ApplicationEvent` but any arbitrary object that you'd send as
+an event.
 ====
 
 

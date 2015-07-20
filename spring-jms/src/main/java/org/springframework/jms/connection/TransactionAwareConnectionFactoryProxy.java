@@ -234,14 +234,14 @@ public class TransactionAwareConnectionFactoryProxy
 				// Use hashCode of Connection proxy.
 				return System.identityHashCode(proxy);
 			}
-			else if (Session.class.equals(method.getReturnType())) {
+			else if (Session.class == method.getReturnType()) {
 				Session session = ConnectionFactoryUtils.getTransactionalSession(
 						getTargetConnectionFactory(), this.target, isSynchedLocalTransactionAllowed());
 				if (session != null) {
 					return getCloseSuppressingSessionProxy(session);
 				}
 			}
-			else if (QueueSession.class.equals(method.getReturnType())) {
+			else if (QueueSession.class == method.getReturnType()) {
 				QueueSession session = ConnectionFactoryUtils.getTransactionalQueueSession(
 						(QueueConnectionFactory) getTargetConnectionFactory(), (QueueConnection) this.target,
 						isSynchedLocalTransactionAllowed());
@@ -249,7 +249,7 @@ public class TransactionAwareConnectionFactoryProxy
 					return getCloseSuppressingSessionProxy(session);
 				}
 			}
-			else if (TopicSession.class.equals(method.getReturnType())) {
+			else if (TopicSession.class == method.getReturnType()) {
 				TopicSession session = ConnectionFactoryUtils.getTransactionalTopicSession(
 						(TopicConnectionFactory) getTargetConnectionFactory(), (TopicConnection) this.target,
 						isSynchedLocalTransactionAllowed());

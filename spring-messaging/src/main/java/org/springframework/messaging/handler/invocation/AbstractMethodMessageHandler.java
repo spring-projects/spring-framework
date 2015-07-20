@@ -41,7 +41,6 @@ import org.springframework.messaging.handler.DestinationPatternsMessageCondition
 import org.springframework.messaging.handler.HandlerMethod;
 import org.springframework.messaging.handler.HandlerMethodSelector;
 import org.springframework.messaging.handler.MessagingAdviceBean;
-import org.springframework.messaging.handler.annotation.support.AnnotationExceptionHandlerMethodResolver;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.util.ClassUtils;
@@ -49,6 +48,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 
 /**
  * Abstract base class for HandlerMethod-based message handling. Provides most of
@@ -333,18 +334,8 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * (e.g. to support "global" {@code @MessageExceptionHandler}).
 	 * @since 4.2
 	 */
-	protected void initMessagingAdviceCache(List<MessagingAdviceBean> beans) {
-		if (beans == null) {
-			return;
-		}
-		for (MessagingAdviceBean bean : beans) {
-			Class<?> beanType = bean.getBeanType();
-			AnnotationExceptionHandlerMethodResolver resolver = new AnnotationExceptionHandlerMethodResolver(beanType);
-			if (resolver.hasExceptionMappings()) {
-				this.exceptionHandlerAdviceCache.put(bean, resolver);
-				logger.info("Detected @MessageExceptionHandler methods in " + bean);
-			}
-		}
+	protected void registerExceptionHandlerAdvice(MessagingAdviceBean bean, AbstractExceptionHandlerMethodResolver resolver) {
+		this.exceptionHandlerAdviceCache.put(bean, resolver);
 	}
 
 
@@ -470,10 +461,18 @@ public abstract class AbstractMethodMessageHandler<T>
 		try {
 			Object returnValue = invocable.invoke(message);
 			MethodParameter returnType = handlerMethod.getReturnType();
-			if (void.class.equals(returnType.getParameterType())) {
+			if (void.class == returnType.getParameterType()) {
 				return;
 			}
-			this.returnValueHandlers.handleReturnValue(returnValue, returnType, message);
+			if (this.returnValueHandlers.isAsyncReturnValue(returnValue, returnType)) {
+				ListenableFuture<?> future = this.returnValueHandlers.toListenableFuture(returnValue, returnType);
+				if (future != null) {
+					future.addCallback(new ReturnValueListenableFutureCallback(invocable, message));
+				}
+			}
+			else {
+				this.returnValueHandlers.handleReturnValue(returnValue, returnType, message);
+			}
 		}
 		catch (Exception ex) {
 			processHandlerMethodException(handlerMethod, ex, message);
@@ -494,9 +493,9 @@ public abstract class AbstractMethodMessageHandler<T>
 			logger.debug("Invoking " + invocable.getShortLogMessage());
 		}
 		try {
-			Object returnValue = invocable.invoke(message, ex);
+			Object returnValue = invocable.invoke(message, ex, handlerMethod);
 			MethodParameter returnType = invocable.getReturnType();
-			if (void.class.equals(returnType.getParameterType())) {
+			if (void.class == returnType.getParameterType()) {
 				return;
 			}
 			this.returnValueHandlers.handleReturnValue(returnValue, returnType, message);
@@ -592,6 +591,40 @@ public abstract class AbstractMethodMessageHandler<T>
 		@Override
 		public int compare(Match match1, Match match2) {
 			return this.comparator.compare(match1.mapping, match2.mapping);
+		}
+	}
+
+	private class ReturnValueListenableFutureCallback implements ListenableFutureCallback<Object> {
+
+		private final InvocableHandlerMethod handlerMethod;
+
+		private final Message<?> message;
+
+
+		public ReturnValueListenableFutureCallback(InvocableHandlerMethod handlerMethod, Message<?> message) {
+			this.handlerMethod = handlerMethod;
+			this.message = message;
+		}
+
+		@Override
+		public void onSuccess(Object result) {
+			try {
+				MethodParameter returnType = this.handlerMethod.getAsyncReturnValueType(result);
+				returnValueHandlers.handleReturnValue(result, returnType, this.message);
+			}
+			catch (Throwable ex) {
+				handleFailure(ex);
+			}
+		}
+
+		@Override
+		public void onFailure(Throwable ex) {
+			handleFailure(ex);
+		}
+
+		private void handleFailure(Throwable ex) {
+			Exception cause = (ex instanceof Exception ? (Exception) ex : new RuntimeException(ex));
+			processHandlerMethodException(this.handlerMethod, cause, this.message);
 		}
 	}
 

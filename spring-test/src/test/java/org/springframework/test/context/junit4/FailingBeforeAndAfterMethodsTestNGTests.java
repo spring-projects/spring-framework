@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,10 +23,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
-import org.testng.ITestContext;
-import org.testng.ITestListener;
-import org.testng.ITestResult;
-import org.testng.TestNG;
 
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestContext;
@@ -35,8 +31,12 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
+import org.springframework.test.context.testng.TrackingTestNGTestListener;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
+import org.springframework.util.ClassUtils;
+
+import org.testng.TestNG;
 
 import static org.junit.Assert.*;
 
@@ -74,33 +74,32 @@ public class FailingBeforeAndAfterMethodsTestNGTests {
 	protected final int expectedFailedConfigurationsCount;
 
 
-	public FailingBeforeAndAfterMethodsTestNGTests(final Class<?> clazz, final int expectedTestStartCount,
-			final int expectedTestSuccessCount, final int expectedFailureCount,
-			final int expectedFailedConfigurationsCount) {
-		this.clazz = clazz;
+	@Parameters(name = "{0}")
+	public static Collection<Object[]> testData() {
+		return Arrays.asList(new Object[][] {//
+		//
+			{ AlwaysFailingBeforeTestClassTestCase.class.getSimpleName(), 1, 0, 0, 1 },//
+			{ AlwaysFailingAfterTestClassTestCase.class.getSimpleName(), 1, 1, 0, 1 },//
+			{ AlwaysFailingPrepareTestInstanceTestCase.class.getSimpleName(), 1, 0, 0, 1 },//
+			{ AlwaysFailingBeforeTestMethodTestCase.class.getSimpleName(), 1, 0, 0, 1 },//
+			{ AlwaysFailingAfterTestMethodTestCase.class.getSimpleName(), 1, 1, 0, 1 },//
+			{ FailingBeforeTransactionTestCase.class.getSimpleName(), 1, 0, 0, 1 },//
+			{ FailingAfterTransactionTestCase.class.getSimpleName(), 1, 1, 0, 1 } //
+		});
+	}
+
+	public FailingBeforeAndAfterMethodsTestNGTests(String testClassName, int expectedTestStartCount,
+			int expectedTestSuccessCount, int expectedFailureCount, int expectedFailedConfigurationsCount) throws Exception {
+		this.clazz = ClassUtils.forName(getClass().getName() + "." + testClassName, getClass().getClassLoader());
 		this.expectedTestStartCount = expectedTestStartCount;
 		this.expectedTestSuccessCount = expectedTestSuccessCount;
 		this.expectedFailureCount = expectedFailureCount;
 		this.expectedFailedConfigurationsCount = expectedFailedConfigurationsCount;
 	}
 
-	@Parameters
-	public static Collection<Object[]> testData() {
-		return Arrays.asList(new Object[][] {//
-		//
-			{ AlwaysFailingBeforeTestClassTestCase.class, 1, 0, 0, 1 },//
-			{ AlwaysFailingAfterTestClassTestCase.class, 1, 1, 0, 1 },//
-			{ AlwaysFailingPrepareTestInstanceTestCase.class, 1, 0, 0, 1 },//
-			{ AlwaysFailingBeforeTestMethodTestCase.class, 1, 0, 0, 1 },//
-			{ AlwaysFailingAfterTestMethodTestCase.class, 1, 1, 0, 1 },//
-			{ FailingBeforeTransactionTestCase.class, 1, 0, 0, 1 },//
-			{ FailingAfterTransactionTestCase.class, 1, 1, 0, 1 } //
-		});
-	}
-
 	@Test
 	public void runTestAndAssertCounters() throws Exception {
-		final FailureTrackingTestListener listener = new FailureTrackingTestListener();
+		final TrackingTestNGTestListener listener = new TrackingTestNGTestListener();
 		final TestNG testNG = new TestNG();
 		testNG.addListener(listener);
 		testNG.setTestClasses(new Class<?>[] { this.clazz });
@@ -115,48 +114,6 @@ public class FailingBeforeAndAfterMethodsTestNGTests {
 			listener.testFailureCount);
 		assertEquals("Verifying number of failed configurations for test class [" + this.clazz + "].",
 			this.expectedFailedConfigurationsCount, listener.failedConfigurationsCount);
-	}
-
-
-	static class FailureTrackingTestListener implements ITestListener {
-
-		int testStartCount = 0;
-		int testSuccessCount = 0;
-		int testFailureCount = 0;
-		int failedConfigurationsCount = 0;
-
-
-		@Override
-		public void onFinish(ITestContext testContext) {
-			this.failedConfigurationsCount += testContext.getFailedConfigurations().size();
-		}
-
-		@Override
-		public void onStart(ITestContext testContext) {
-		}
-
-		@Override
-		public void onTestFailedButWithinSuccessPercentage(ITestResult testResult) {
-		}
-
-		@Override
-		public void onTestFailure(ITestResult testResult) {
-			this.testFailureCount++;
-		}
-
-		@Override
-		public void onTestSkipped(ITestResult testResult) {
-		}
-
-		@Override
-		public void onTestStart(ITestResult testResult) {
-			this.testStartCount++;
-		}
-
-		@Override
-		public void onTestSuccess(ITestResult testResult) {
-			this.testSuccessCount++;
-		}
 	}
 
 	// -------------------------------------------------------------------

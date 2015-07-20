@@ -112,6 +112,20 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 		testJmsHandlerMethodFactoryConfiguration(context);
 	}
 
+	@Override
+	public void jmsListenerIsRepeatable() {
+		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
+				EnableJmsDefaultContainerFactoryConfig.class, JmsListenerRepeatableBean.class);
+		testJmsListenerRepeatable(context);
+	}
+
+	@Override
+	public void jmsListeners() {
+		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
+				EnableJmsDefaultContainerFactoryConfig.class, JmsListenersBean.class);
+		testJmsListenerRepeatable(context);
+	}
+
 	@Test
 	public void unknownFactory() {
 		thrown.expect(BeanCreationException.class);

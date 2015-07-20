@@ -410,7 +410,8 @@ public abstract class StatementCreatorUtils {
 				ps.setObject(paramIndex, inValue, Types.TIMESTAMP);
 			}
 		}
-		else if (sqlType == SqlTypeValue.TYPE_UNKNOWN || sqlType == Types.OTHER) {
+		else if (sqlType == SqlTypeValue.TYPE_UNKNOWN || (sqlType == Types.OTHER &&
+				"Oracle".equals(ps.getConnection().getMetaData().getDatabaseProductName()))) {
 			if (isStringValue(inValue.getClass())) {
 				ps.setString(paramIndex, inValue.toString());
 			}

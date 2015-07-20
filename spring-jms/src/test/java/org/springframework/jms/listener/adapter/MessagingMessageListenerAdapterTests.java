@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,15 @@
 package org.springframework.jms.listener.adapter;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import javax.jms.Destination;
 import javax.jms.JMSException;
+import javax.jms.MessageProducer;
+import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.TextMessage;
+import javax.jms.Topic;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +33,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.jms.StubTextMessage;
 import org.springframework.jms.support.JmsHeaders;
+import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.handler.annotation.support.DefaultMessageHandlerMethodFactory;
@@ -111,6 +117,129 @@ public class MessagingMessageListenerAdapterTests {
 		}
 	}
 
+	@Test
+	public void incomingMessageUsesMessageConverter() throws JMSException {
+		javax.jms.Message jmsMessage = mock(javax.jms.Message.class);
+		Session session = mock(Session.class);
+		MessageConverter messageConverter = mock(MessageConverter.class);
+		given(messageConverter.fromMessage(jmsMessage)).willReturn("FooBar");
+		MessagingMessageListenerAdapter listener = getSimpleInstance("simple", Message.class);
+		listener.setMessageConverter(messageConverter);
+		listener.onMessage(jmsMessage, session);
+		verify(messageConverter, times(1)).fromMessage(jmsMessage);
+		assertEquals(1, sample.simples.size());
+		assertEquals("FooBar", sample.simples.get(0).getPayload());
+	}
+
+	@Test
+	public void replyUsesMessageConverterForPayload() throws JMSException {
+		Session session = mock(Session.class);
+		MessageConverter messageConverter = mock(MessageConverter.class);
+		given(messageConverter.toMessage("Response", session)).willReturn(new StubTextMessage("Response"));
+
+		Message<String> result = MessageBuilder.withPayload("Response")
+				.build();
+
+		MessagingMessageListenerAdapter listener = getSimpleInstance("echo", Message.class);
+		listener.setMessageConverter(messageConverter);
+		javax.jms.Message replyMessage = listener.buildMessage(session, result);
+
+		verify(messageConverter, times(1)).toMessage("Response", session);
+		assertNotNull("reply should never be null", replyMessage);
+		assertEquals("Response", ((TextMessage) replyMessage).getText());
+	}
+
+	@Test
+	public void replyPayloadToQueue() throws JMSException {
+		Message<String> request = MessageBuilder.withPayload("Response").build();
+
+		Session session = mock(Session.class);
+		Queue replyDestination = mock(Queue.class);
+		given(session.createQueue("queueOut")).willReturn(replyDestination);
+
+
+		MessageProducer messageProducer = mock(MessageProducer.class);
+		TextMessage responseMessage = mock(TextMessage.class);
+		given(session.createTextMessage("Response")).willReturn(responseMessage);
+		given(session.createProducer(replyDestination)).willReturn(messageProducer);
+
+		MessagingMessageListenerAdapter listener = getPayloadInstance(request, "replyPayloadToQueue", Message.class);
+		listener.onMessage(mock(javax.jms.Message.class), session);
+
+
+		verify(session).createQueue("queueOut");
+		verify(session).createTextMessage("Response");
+		verify(messageProducer).send(responseMessage);
+		verify(messageProducer).close();
+	}
+
+	@Test
+	public void replyPayloadToTopic() throws JMSException {
+		Message<String> request = MessageBuilder.withPayload("Response").build();
+
+		Session session = mock(Session.class);
+		Topic replyDestination = mock(Topic.class);
+		given(session.createTopic("topicOut")).willReturn(replyDestination);
+
+
+		MessageProducer messageProducer = mock(MessageProducer.class);
+		TextMessage responseMessage = mock(TextMessage.class);
+		given(session.createTextMessage("Response")).willReturn(responseMessage);
+		given(session.createProducer(replyDestination)).willReturn(messageProducer);
+
+		MessagingMessageListenerAdapter listener = getPayloadInstance(request, "replyPayloadToTopic", Message.class);
+		listener.onMessage(mock(javax.jms.Message.class), session);
+
+
+		verify(session).createTopic("topicOut");
+		verify(session).createTextMessage("Response");
+		verify(messageProducer).send(responseMessage);
+		verify(messageProducer).close();
+	}
+
+	@Test
+	public void replyPayloadToDestination() throws JMSException {
+		Queue replyDestination = mock(Queue.class);
+		Message<String> request = MessageBuilder.withPayload("Response")
+				.setHeader("destination", replyDestination).build();
+
+		Session session = mock(Session.class);
+		MessageProducer messageProducer = mock(MessageProducer.class);
+		TextMessage responseMessage = mock(TextMessage.class);
+		given(session.createTextMessage("Response")).willReturn(responseMessage);
+		given(session.createProducer(replyDestination)).willReturn(messageProducer);
+
+		MessagingMessageListenerAdapter listener = getPayloadInstance(request, "replyPayloadToDestination", Message.class);
+		listener.onMessage(mock(javax.jms.Message.class), session);
+
+		verify(session, times(0)).createQueue(anyString());
+		verify(session).createTextMessage("Response");
+		verify(messageProducer).send(responseMessage);
+		verify(messageProducer).close();
+	}
+
+	@Test
+	public void replyPayloadNoDestination() throws JMSException {
+		Queue replyDestination = mock(Queue.class);
+		Message<String> request = MessageBuilder.withPayload("Response").build();
+
+		Session session = mock(Session.class);
+		MessageProducer messageProducer = mock(MessageProducer.class);
+		TextMessage responseMessage = mock(TextMessage.class);
+		given(session.createTextMessage("Response")).willReturn(responseMessage);
+		given(session.createProducer(replyDestination)).willReturn(messageProducer);
+
+		MessagingMessageListenerAdapter listener =
+				getPayloadInstance(request, "replyPayloadNoDestination", Message.class);
+		listener.setDefaultResponseDestination(replyDestination);
+		listener.onMessage(mock(javax.jms.Message.class), session);
+
+		verify(session, times(0)).createQueue(anyString());
+		verify(session).createTextMessage("Response");
+		verify(messageProducer).send(responseMessage);
+		verify(messageProducer).close();
+	}
+
 	protected MessagingMessageListenerAdapter getSimpleInstance(String methodName, Class... parameterTypes) {
 		Method m = ReflectionUtils.findMethod(SampleBean.class, methodName, parameterTypes);
 		return createInstance(m);
@@ -118,6 +247,19 @@ public class MessagingMessageListenerAdapterTests {
 
 	protected MessagingMessageListenerAdapter createInstance(Method m) {
 		MessagingMessageListenerAdapter adapter = new MessagingMessageListenerAdapter();
+		adapter.setHandlerMethod(factory.createInvocableHandlerMethod(sample, m));
+		return adapter;
+	}
+
+	protected MessagingMessageListenerAdapter getPayloadInstance(final Object payload,
+			String methodName, Class... parameterTypes) {
+		Method m = ReflectionUtils.findMethod(SampleBean.class, methodName, parameterTypes);
+		MessagingMessageListenerAdapter adapter = new MessagingMessageListenerAdapter() {
+			@Override
+			protected Object extractMessage(javax.jms.Message message) {
+				return payload;
+			}
+		};
 		adapter.setHandlerMethod(factory.createInvocableHandlerMethod(sample, m));
 		return adapter;
 	}
@@ -131,10 +273,33 @@ public class MessagingMessageListenerAdapterTests {
 	@SuppressWarnings("unused")
 	private static class SampleBean {
 
+		public final List<Message<String>> simples = new ArrayList<>();
+
+		public void simple(Message<String> input) {
+			simples.add(input);
+		}
+
 		public Message<String> echo(Message<String> input) {
 			return MessageBuilder.withPayload(input.getPayload())
 					.setHeader(JmsHeaders.TYPE, "reply")
 					.build();
+		}
+
+		public JmsResponse<String> replyPayloadToQueue(Message<String> input) {
+			return JmsResponse.forQueue(input.getPayload(), "queueOut");
+		}
+
+		public JmsResponse<String> replyPayloadToTopic(Message<String> input) {
+			return JmsResponse.forTopic(input.getPayload(), "topicOut");
+		}
+
+		public JmsResponse<String> replyPayloadToDestination(Message<String> input) {
+			return JmsResponse.forDestination(input.getPayload(),
+					input.getHeaders().get("destination", Destination.class));
+		}
+
+		public JmsResponse<String> replyPayloadNoDestination(Message<String> input) {
+			return new JmsResponse<>(input.getPayload(), null);
 		}
 
 		public void fail(String input) {

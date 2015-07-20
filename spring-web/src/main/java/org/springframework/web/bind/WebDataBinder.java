@@ -251,7 +251,7 @@ public class WebDataBinder extends DataBinder {
 	 * @return the empty value (for most fields: null)
 	 */
 	protected Object getEmptyValue(String field, Class<?> fieldType) {
-		if (fieldType != null && boolean.class.equals(fieldType) || Boolean.class.equals(fieldType)) {
+		if (fieldType != null && boolean.class == fieldType || Boolean.class == fieldType) {
 			// Special handling of boolean property.
 			return Boolean.FALSE;
 		}

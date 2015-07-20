@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.socket.messaging;
 
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.handler.MessagingAdviceBean;
+import org.springframework.messaging.handler.annotation.support.AnnotationExceptionHandlerMethodResolver;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler;
 import org.springframework.web.method.ControllerAdviceBean;
@@ -35,7 +37,6 @@ import org.springframework.web.method.ControllerAdviceBean;
  * @since 4.2
  */
 public class WebSocketAnnotationMethodMessageHandler extends SimpAnnotationMethodMessageHandler {
-
 
 	public WebSocketAnnotationMethodMessageHandler(SubscribableChannel clientInChannel, MessageChannel clientOutChannel,
 			SimpMessageSendingOperations brokerTemplate) {
@@ -62,6 +63,20 @@ public class WebSocketAnnotationMethodMessageHandler extends SimpAnnotationMetho
 		initMessagingAdviceCache(MessagingControllerAdviceBean.createFromList(controllerAdvice));
 	}
 
+	private void initMessagingAdviceCache(List<MessagingAdviceBean> beans) {
+		if (beans == null) {
+			return;
+		}
+		for (MessagingAdviceBean bean : beans) {
+			Class<?> beanType = bean.getBeanType();
+			AnnotationExceptionHandlerMethodResolver resolver = new AnnotationExceptionHandlerMethodResolver(beanType);
+			if (resolver.hasExceptionMappings()) {
+				registerExceptionHandlerAdvice(bean, resolver);
+				logger.info("Detected @MessageExceptionHandler methods in " + bean);
+			}
+		}
+	}
+
 
 	/**
 	 * Adapt ControllerAdviceBean to MessagingAdviceBean.
@@ -69,7 +84,6 @@ public class WebSocketAnnotationMethodMessageHandler extends SimpAnnotationMetho
 	private static class MessagingControllerAdviceBean implements MessagingAdviceBean {
 
 		private final ControllerAdviceBean adviceBean;
-
 
 		private MessagingControllerAdviceBean(ControllerAdviceBean adviceBean) {
 			this.adviceBean = adviceBean;

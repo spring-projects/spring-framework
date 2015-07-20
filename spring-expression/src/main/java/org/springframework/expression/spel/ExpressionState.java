@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.expression.spel;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,15 @@ public class ExpressionState {
 
 	private final TypedValue rootObject;
 
+	// When entering a new scope there is a new base object which should be used
+	// for '#this' references (or to act as a target for unqualified references).
+	// This stack captures those objects at each nested scope level.
+	// For example:
+	// #list1.?[#list2.contains(#this)]
+	// On entering the selection we enter a new scope, and #this is now the
+	// element from list1
+	private Stack<TypedValue> scopeRootObjects;
+
 	private final SpelParserConfiguration configuration;
 
 	private Stack<VariableScope> variableScopes;
@@ -86,6 +96,9 @@ public class ExpressionState {
 			// top level empty variable scope
 			this.variableScopes.add(new VariableScope());
 		}
+		if (this.scopeRootObjects == null) {
+			this.scopeRootObjects = new Stack<TypedValue>();
+		}
 	}
 
 	/**
@@ -114,6 +127,13 @@ public class ExpressionState {
 
 	public TypedValue getRootContextObject() {
 		return this.rootObject;
+	}
+
+	public TypedValue getScopeRootContextObject() {
+		if (this.scopeRootObjects == null || this.scopeRootObjects.isEmpty()) {
+			return this.rootObject;
+		}
+		return this.scopeRootObjects.peek();
 	}
 
 	public void setVariable(String name, Object value) {
@@ -158,16 +178,25 @@ public class ExpressionState {
 	public void enterScope(Map<String, Object> argMap) {
 		ensureVariableScopesInitialized();
 		this.variableScopes.push(new VariableScope(argMap));
+		this.scopeRootObjects.push(getActiveContextObject());
+	}
+
+	public void enterScope() {
+		ensureVariableScopesInitialized();
+		this.variableScopes.push(new VariableScope(Collections.<String,Object>emptyMap()));
+		this.scopeRootObjects.push(getActiveContextObject());
 	}
 
 	public void enterScope(String name, Object value) {
 		ensureVariableScopesInitialized();
 		this.variableScopes.push(new VariableScope(name, value));
+		this.scopeRootObjects.push(getActiveContextObject());
 	}
 
 	public void exitScope() {
 		ensureVariableScopesInitialized();
 		this.variableScopes.pop();
+		this.scopeRootObjects.pop();
 	}
 
 	public void setLocalVariable(String name, Object value) {

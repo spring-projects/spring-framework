@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -37,8 +39,10 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -47,6 +51,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.socket.TextMessage;
@@ -63,11 +69,12 @@ import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import static org.junit.Assert.*;
 
 /**
- * Integration tests using the
- * {@link org.springframework.web.socket.sockjs.client.SockJsClient}.
+ * Abstract base class for integration tests using the
+ * {@link org.springframework.web.socket.sockjs.client.SockJsClient SockJsClient}
  * against actual SockJS server endpoints.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public abstract class AbstractSockJsIntegrationTests {
 
@@ -88,16 +95,25 @@ public abstract class AbstractSockJsIntegrationTests {
 	private String baseUrl;
 
 
+	@BeforeClass
+	public static void performanceTestGroupAssumption() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+	}
+
+
 	@Before
 	public void setup() throws Exception {
 		logger.debug("Setting up '" + this.testName.getMethodName() + "'");
 		this.errorFilter = new ErrorFilter();
 		this.wac = new AnnotationConfigWebApplicationContext();
 		this.wac.register(TestConfig.class, upgradeStrategyConfigClass());
-		this.wac.refresh();
 		this.server = createWebSocketTestServer();
 		this.server.setup();
 		this.server.deployConfig(this.wac, this.errorFilter);
+		// Set ServletContext in WebApplicationContext after deployment but before
+		// starting the server.
+		this.wac.setServletContext(this.server.getServletContext());
+		this.wac.refresh();
 		this.server.start();
 		this.baseUrl = "http://localhost:" + this.server.getPort();
 	}
@@ -142,8 +158,6 @@ public abstract class AbstractSockJsIntegrationTests {
 		this.sockJsClient = new SockJsClient(Arrays.asList(transports));
 		this.sockJsClient.start();
 	}
-
-	// Temporarily @Ignore failures caused by suspected Jetty bug
 
 	@Test
 	public void echoWebSocket() throws Exception {
@@ -282,14 +296,11 @@ public abstract class AbstractSockJsIntegrationTests {
 		}
 	}
 
-	private static interface Condition {
-		boolean match();
-	}
 
-	private static void awaitEvent(Condition condition, long timeToWait, String description) {
+	private static void awaitEvent(Supplier<Boolean> condition, long timeToWait, String description) {
 		long timeToSleep = 200;
 		for (int i = 0 ; i < Math.floor(timeToWait / timeToSleep); i++) {
-			if (condition.match()) {
+			if (condition.get()) {
 				return;
 			}
 			try {

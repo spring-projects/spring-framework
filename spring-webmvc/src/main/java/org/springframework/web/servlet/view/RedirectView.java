@@ -591,8 +591,13 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 
 		String encodedRedirectURL = response.encodeRedirectURL(targetUrl);
 		if (http10Compatible) {
+			HttpStatus attributeStatusCode = (HttpStatus) request.getAttribute(View.RESPONSE_STATUS_ATTRIBUTE);
 			if (this.statusCode != null) {
 				response.setStatus(this.statusCode.value());
+				response.setHeader("Location", encodedRedirectURL);
+			}
+			else if (attributeStatusCode != null) {
+				response.setStatus(attributeStatusCode.value());
 				response.setHeader("Location", encodedRedirectURL);
 			}
 			else {

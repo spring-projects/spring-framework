@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -205,7 +206,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 		Set<MediaType> consumableMediaTypes;
 		Set<MediaType> producibleMediaTypes;
-		Set<String> paramConditions;
+		List<String[]> paramConditions;
 
 		if (patternAndMethodMatches.isEmpty()) {
 			consumableMediaTypes = getConsumableMediaTypes(request, patternMatches);
@@ -234,8 +235,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 			throw new HttpMediaTypeNotAcceptableException(new ArrayList<MediaType>(producibleMediaTypes));
 		}
 		else if (!CollectionUtils.isEmpty(paramConditions)) {
-			String[] params = paramConditions.toArray(new String[paramConditions.size()]);
-			throw new UnsatisfiedServletRequestParameterException(params, request.getParameterMap());
+			throw new UnsatisfiedServletRequestParameterException(paramConditions, request.getParameterMap());
 		}
 		else {
 			return null;
@@ -262,18 +262,21 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		return result;
 	}
 
-	private Set<String> getRequestParams(HttpServletRequest request, Set<RequestMappingInfo> partialMatches) {
+	private List<String[]> getRequestParams(HttpServletRequest request, Set<RequestMappingInfo> partialMatches) {
+		List<String[]> result = new ArrayList<String[]>();
 		for (RequestMappingInfo partialMatch : partialMatches) {
 			ParamsRequestCondition condition = partialMatch.getParamsCondition();
-			if (!CollectionUtils.isEmpty(condition.getExpressions()) && (condition.getMatchingCondition(request) == null)) {
-				Set<String> expressions = new HashSet<String>();
-				for (NameValueExpression<String> expr : condition.getExpressions()) {
-					expressions.add(expr.toString());
+			Set<NameValueExpression<String>> expressions = condition.getExpressions();
+			if (!CollectionUtils.isEmpty(expressions) && condition.getMatchingCondition(request) == null) {
+				int i = 0;
+				String[] array = new String[expressions.size()];
+				for (NameValueExpression<String> expression : expressions) {
+					array[i++] = expression.toString();
 				}
-				return expressions;
+				result.add(array);
 			}
 		}
-		return null;
+		return result;
 	}
 
 }

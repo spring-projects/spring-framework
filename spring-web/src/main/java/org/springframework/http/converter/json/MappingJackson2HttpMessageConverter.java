@@ -25,7 +25,7 @@ import org.springframework.http.MediaType;
 
 /**
  * Implementation of {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter} that
- * can read and write JSON using <a href="http://jackson.codehaus.org/">Jackson 2.x's</a> {@link ObjectMapper}.
+ * can read and write JSON using <a href="http://wiki.fasterxml.com/JacksonHome">Jackson 2.x's</a> {@link ObjectMapper}.
  *
  * <p>This converter can be used to bind to typed beans, or untyped {@link java.util.HashMap HashMap} instances.
  *
@@ -76,15 +76,14 @@ public class MappingJackson2HttpMessageConverter extends AbstractJackson2HttpMes
 	}
 
 	/**
-	 * Indicate whether the JSON output by this view should be prefixed with "{} &&". Default is false.
+	 * Indicate whether the JSON output by this view should be prefixed with ")]}', ". Default is false.
 	 * <p>Prefixing the JSON string in this manner is used to help prevent JSON Hijacking.
 	 * The prefix renders the string syntactically invalid as a script so that it cannot be hijacked.
-	 * This prefix does not affect the evaluation of JSON, but if JSON validation is performed on the
-	 * string, the prefix would need to be ignored.
+	 * This prefix should be stripped before parsing the string as JSON.
 	 * @see #setJsonPrefix
 	 */
 	public void setPrefixJson(boolean prefixJson) {
-		this.jsonPrefix = (prefixJson ? "{} && " : null);
+		this.jsonPrefix = (prefixJson ? ")]}', " : null);
 	}
 
 
