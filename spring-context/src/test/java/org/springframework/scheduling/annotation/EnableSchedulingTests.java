@@ -51,6 +51,7 @@ public class EnableSchedulingTests {
 		Assume.group(TestGroup.PERFORMANCE);
 	}
 
+
 	@Test
 	public void withFixedRateTask() throws InterruptedException {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
@@ -139,7 +140,8 @@ public class EnableSchedulingTests {
 		ctx.register(AmbiguousExplicitSchedulerConfig.class);
 		try {
 			ctx.refresh();
-		} catch (IllegalStateException ex) {
+		}
+		catch (IllegalStateException ex) {
 			assertThat(ex.getMessage(), startsWith("More than one TaskScheduler"));
 			throw ex;
 		}
@@ -147,6 +149,7 @@ public class EnableSchedulingTests {
 			ctx.close();
 		}
 	}
+
 
 	@EnableScheduling @Configuration
 	static class AmbiguousExplicitSchedulerConfig {
@@ -270,8 +273,9 @@ public class EnableSchedulingTests {
 		ctx.register(SchedulingEnabled_withAmbiguousTaskSchedulers_andSingleTask.class);
 		try {
 			ctx.refresh();
-		} catch (IllegalStateException ex) {
-			assertThat(ex.getMessage(), startsWith("More than one TaskScheduler exists within the context"));
+		}
+		catch (IllegalStateException ex) {
+			assertThat(ex.getMessage(), startsWith("More than one TaskScheduler"));
 			throw ex;
 		}
 		finally {
@@ -302,6 +306,7 @@ public class EnableSchedulingTests {
 			return scheduler;
 		}
 	}
+
 
 	@Test
 	public void withAmbiguousTaskSchedulers_andSingleTask_disambiguatedByScheduledTaskRegistrarBean() throws InterruptedException {
@@ -484,6 +489,7 @@ public class EnableSchedulingTests {
 		}
 	}
 
+
 	@Test
 	public void withInitiallyDelayedFixedRateTask() throws InterruptedException {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
@@ -494,8 +500,8 @@ public class EnableSchedulingTests {
 		AtomicInteger counter = ctx.getBean(AtomicInteger.class);
 		ctx.close();
 
-		assertThat(counter.get(), greaterThan(0)); // the @Scheduled method was called
-		assertThat(counter.get(), lessThanOrEqualTo(10)); // but not more than times the delay allows
+		assertThat(counter.get(), greaterThan(0));  // the @Scheduled method was called
+		assertThat(counter.get(), lessThanOrEqualTo(10));  // but not more than times the delay allows
 	}
 
 
