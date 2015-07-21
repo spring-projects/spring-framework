@@ -138,8 +138,7 @@ import org.springframework.web.util.WebUtils;
  * @see #setMethodNameResolver
  * @see #setWebBindingInitializer
  * @see #setSessionAttributeStore
- *
- * @deprecated in Spring 3.2 in favor of
+ * @deprecated as of Spring 3.2, in favor of
  * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter RequestMappingHandlerAdapter}
  */
 @Deprecated
@@ -411,13 +410,10 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		}
 
 		if (annotatedWithSessionAttributes) {
-			// Always prevent caching in case of session attribute management.
-			checkAndPrepare(request, response, this.cacheSecondsForSessionAttributeHandlers);
-			// Prepare cached set of session attributes names.
+			checkAndPrepare(request, response, this.cacheSecondsForSessionAttributeHandlers, true);
 		}
 		else {
-			// Uses configured default cacheSeconds setting.
-			checkAndPrepare(request, response);
+			checkAndPrepare(request, response, true);
 		}
 
 		// Execute invokeHandlerMethod in synchronized block if required.

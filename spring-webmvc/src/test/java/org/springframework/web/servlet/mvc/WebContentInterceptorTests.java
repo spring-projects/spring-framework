@@ -137,6 +137,7 @@ public class WebContentInterceptorTests {
 	public void http10CachingConfigAndSpecificMapping() throws Exception {
 		WebContentInterceptor interceptor = new WebContentInterceptor();
 		interceptor.setCacheSeconds(0);
+		interceptor.setUseExpiresHeader(true);
 		interceptor.setAlwaysMustRevalidate(true);
 		Properties mappings = new Properties();
 		mappings.setProperty("**/*.cache.html", "10");

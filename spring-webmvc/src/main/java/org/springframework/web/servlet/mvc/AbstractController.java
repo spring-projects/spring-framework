@@ -25,7 +25,7 @@ import org.springframework.web.servlet.support.WebContentGenerator;
 import org.springframework.web.util.WebUtils;
 
 /**
- * <p>Convenient superclass for controller implementations, using the Template Method
+ * Convenient superclass for controller implementations, using the Template Method
  * design pattern.
  *
  * <p><b><a name="workflow">Workflow
@@ -130,7 +130,8 @@ public abstract class AbstractController extends WebContentGenerator implements 
 			throws Exception {
 
 		// Delegate to WebContentGenerator for checking and preparing.
-		checkAndPrepare(request, response);
+		checkRequest(request);
+		prepareResponse(response);
 
 		// Execute handleRequestInternal in synchronized block if required.
 		if (this.synchronizeOnSession) {
@@ -152,6 +153,6 @@ public abstract class AbstractController extends WebContentGenerator implements 
 	 * @see #handleRequest
 	 */
 	protected abstract ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
-	    throws Exception;
+			throws Exception;
 
 }

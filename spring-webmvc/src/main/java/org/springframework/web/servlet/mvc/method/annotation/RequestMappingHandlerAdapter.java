@@ -705,13 +705,13 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	protected ModelAndView handleInternal(HttpServletRequest request,
 			HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
 
+		checkRequest(request);
+
 		if (getSessionAttributesHandler(handlerMethod).hasSessionAttributes()) {
-			// Always prevent caching in case of session attribute management.
-			checkAndPrepare(request, response, this.cacheSecondsForSessionAttributeHandlers);
+			applyCacheSeconds(response, this.cacheSecondsForSessionAttributeHandlers);
 		}
 		else {
-			// Uses configured default cacheSeconds setting.
-			checkAndPrepare(request, response);
+			prepareResponse(response);
 		}
 
 		// Execute invokeHandlerMethod in synchronized block if required.

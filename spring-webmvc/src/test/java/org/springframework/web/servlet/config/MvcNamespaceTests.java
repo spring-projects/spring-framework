@@ -392,8 +392,6 @@ public class MvcNamespaceTests {
 				ResourceHttpRequestHandler.class);
 		assertNotNull(handler);
 		assertEquals(3600, handler.getCacheSeconds());
-		assertThat(handler.getCacheControl().getHeaderValue(),
-				Matchers.equalTo(CacheControl.maxAge(1, TimeUnit.HOURS).getHeaderValue()));
 	}
 
 	@Test

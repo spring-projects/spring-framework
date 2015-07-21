@@ -90,8 +90,6 @@ public class ResourceHandlerRegistryTests {
 
 		this.registration.setCachePeriod(0);
 		assertEquals(0, getHandler("/resources/**").getCacheSeconds());
-		assertThat(getHandler("/resources/**").getCacheControl().getHeaderValue(),
-				Matchers.equalTo(CacheControl.noStore().getHeaderValue()));
 	}
 
 	@Test
