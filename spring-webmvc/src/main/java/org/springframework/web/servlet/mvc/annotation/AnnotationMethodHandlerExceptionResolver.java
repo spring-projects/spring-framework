@@ -81,7 +81,6 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 3.0
- *
  * @deprecated as of Spring 3.2, in favor of
  * {@link org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver ExceptionHandlerExceptionResolver}
  */

@@ -54,6 +54,7 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 		this.messageSource = messageSource;
 	}
 
+
 	@Override
 	protected ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse response,
 			Object handler, Exception ex) {
@@ -76,12 +77,10 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 
 	/**
 	 * Template method that handles {@link ResponseStatus @ResponseStatus} annotation.
-	 *
-	 * <p>Default implementation send a response error using
+	 * <p>The default implementation sends a response error using
 	 * {@link HttpServletResponse#sendError(int)} or
 	 * {@link HttpServletResponse#sendError(int, String)} if the annotation has a
 	 * {@linkplain ResponseStatus#reason() reason} and then returns an empty ModelAndView.
-	 *
 	 * @param responseStatus the annotation
 	 * @param request current HTTP request
 	 * @param response current HTTP response

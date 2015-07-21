@@ -172,7 +172,7 @@ public class EnableSchedulingTests {
 	@Test
 	public void withExplicitScheduledTaskRegistrar() throws InterruptedException {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
-			ExplicitScheduledTaskRegistrarConfig.class);
+				ExplicitScheduledTaskRegistrarConfig.class);
 
 		Thread.sleep(100);
 		assertThat(ctx.getBean(AtomicInteger.class).get(), greaterThanOrEqualTo(10));
@@ -287,7 +287,7 @@ public class EnableSchedulingTests {
 	@Test
 	public void withAmbiguousTaskSchedulers_andSingleTask_disambiguatedByScheduledTaskRegistrarBean() throws InterruptedException {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
-			SchedulingEnabled_withAmbiguousTaskSchedulers_andSingleTask_disambiguatedByScheduledTaskRegistrar.class);
+				SchedulingEnabled_withAmbiguousTaskSchedulers_andSingleTask_disambiguatedByScheduledTaskRegistrar.class);
 
 		Thread.sleep(20);
 		assertThat(ctx.getBean(ThreadAwareWorker.class).executedByThread, startsWith("explicitScheduler2-"));
@@ -296,8 +296,10 @@ public class EnableSchedulingTests {
 
 
 	static class ThreadAwareWorker {
+
 		String executedByThread;
 	}
+
 
 	@Configuration
 	@EnableScheduling
@@ -337,7 +339,7 @@ public class EnableSchedulingTests {
 	@Test
 	public void withAmbiguousTaskSchedulers_andSingleTask_disambiguatedBySchedulerNameAttribute() throws InterruptedException {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
-			SchedulingEnabled_withAmbiguousTaskSchedulers_andSingleTask_disambiguatedBySchedulerNameAttribute.class);
+				SchedulingEnabled_withAmbiguousTaskSchedulers_andSingleTask_disambiguatedBySchedulerNameAttribute.class);
 
 		Thread.sleep(20);
 		assertThat(ctx.getBean(ThreadAwareWorker.class).executedByThread, startsWith("explicitScheduler2-"));
@@ -383,7 +385,7 @@ public class EnableSchedulingTests {
 	@Test
 	public void withTaskAddedVia_configureTasks() throws InterruptedException {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
-			SchedulingEnabled_withTaskAddedVia_configureTasks.class);
+				SchedulingEnabled_withTaskAddedVia_configureTasks.class);
 
 		Thread.sleep(20);
 		assertThat(ctx.getBean(ThreadAwareWorker.class).executedByThread, startsWith("taskScheduler-"));
@@ -463,7 +465,7 @@ public class EnableSchedulingTests {
 	@Test
 	public void withInitiallyDelayedFixedRateTask() throws InterruptedException {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
-			FixedRateTaskConfig_withInitialDelay.class);
+				FixedRateTaskConfig_withInitialDelay.class);
 
 		Thread.sleep(1950);
 		AtomicInteger counter = ctx.getBean(AtomicInteger.class);
