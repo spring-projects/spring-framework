@@ -51,6 +51,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
+ * @author Brian Clozel
  * @since 1.0.2
  */
 public class MockHttpServletResponse implements HttpServletResponse {
@@ -65,7 +66,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private static final String DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
 
-	private static TimeZone GMT = TimeZone.getTimeZone("GMT");
+	private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
 
 
 	//---------------------------------------------------------------------
