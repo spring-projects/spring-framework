@@ -37,13 +37,13 @@ configure(allprojects) { project ->
 	ext.gsonVersion          = "2.3.1"
 	ext.hibernate3Version    = "3.6.10.Final"
 	ext.hibernate4Version    = "4.3.10.Final"
-	ext.hibernate5Version    = "5.0.0.CR2"  // to be upgraded to 5.0 final in time for Spring Framework 4.2 GA
+	ext.hibernate5Version    = "5.0.0.CR2"
 	ext.hibval4Version       = "4.3.2.Final"
-	ext.hibval5Version       = "5.2.0.CR1"  // to be upgraded to 5.2 final in time for Spring Framework 4.2 GA
+	ext.hibval5Version       = "5.2.0.Final"
 	ext.hsqldbVersion        = "2.3.2"
 	ext.httpclientVersion    = "4.5"
 	ext.httpasyncVersion     = "4.1"
-	ext.jackson2Version      = "2.6.0-rc4"  // to be upgraded to 2.6 final in time for Spring Framework 4.2 GA
+	ext.jackson2Version      = "2.6.0"
 	ext.jasperreportsVersion = "6.1.0"
 	ext.javamailVersion      = "1.5.4"
 	ext.jettyVersion         = "9.3.1.v20150714"
