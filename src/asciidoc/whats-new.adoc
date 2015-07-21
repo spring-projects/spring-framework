@@ -564,6 +564,7 @@ public @interface MyTestConfig {
 * `AopTestUtils` is a new testing utility that allows developers to
   obtain a reference to the underlying target object hidden behind one
   or more Spring proxies.
+** See <<unit-testing-utilities>> for details.
 * `ReflectionTestUtils` now supports setting and getting `static` fields,
   including constants.
 * The original ordering of bean definition profiles declared via 

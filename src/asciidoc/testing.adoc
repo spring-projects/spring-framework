@@ -90,10 +90,12 @@ objects, targeted at usage with Spring's Portlet MVC framework.
 
 
 [[unit-testing-utilities]]
-==== General utilities
-The `org.springframework.test.util` package contains `ReflectionTestUtils`, which is a
-collection of reflection-based utility methods. Developers use these methods in unit and
-integration testing scenarios in which they need to change the value of a constant, set
+==== General testing utilities
+The `org.springframework.test.util` package contains several general purpose utilities
+for use in unit and integration testing.
+
+`ReflectionTestUtils` is a collection of reflection-based utility methods. Developers use
+these methods in testing scenarios where they need to change the value of a constant, set
 a non-++public++ field, invoke a non-++public++ setter method, or invoke a non-++public++
 _configuration_ or _lifecycle_ callback method when testing application code involving
 use cases such as the following.
@@ -105,6 +107,13 @@ use cases such as the following.
   methods, and configuration methods.
 * Use of annotations such as `@PostConstruct` and `@PreDestroy` for lifecycle callback
   methods.
+
+`AopTestUtils` is a collection of AOP-related utility methods. These methods can be used
+to obtain a reference to the underlying target object hidden behind one or more Spring
+proxies. For example, if you have configured a bean as a dynamic mock using a library
+like EasyMock or Mockito and the mock is wrapped in a Spring proxy, you may need direct
+access to the underlying mock in order to configure expectations on it and perform
+verifications. For Spring's core AOP utilities, see `AopUtils` and `AopProxyUtils`.
 
 
 
