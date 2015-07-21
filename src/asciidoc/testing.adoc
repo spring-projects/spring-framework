@@ -96,7 +96,7 @@ for use in unit and integration testing.
 
 `ReflectionTestUtils` is a collection of reflection-based utility methods. Developers use
 these methods in testing scenarios where they need to change the value of a constant, set
-a non-++public++ field, invoke a non-++public++ setter method, or invoke a non-++public++
+a non-`public` field, invoke a non-`public` setter method, or invoke a non-`public`
 _configuration_ or _lifecycle_ callback method when testing application code involving
 use cases such as the following.
 
