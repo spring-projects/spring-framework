@@ -43,7 +43,6 @@ import static org.mockito.BDDMockito.*;
  * @author Juergen Hoeller
  * @since 4.1.2
  */
-@SuppressWarnings({ "rawtypes", "unchecked" })
 public class PersistenceContextTransactionTests {
 
 	private EntityManagerFactory factory;

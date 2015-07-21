@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.hibernate.Criteria;
 import org.hibernate.Filter;
 import org.hibernate.FlushMode;
@@ -863,7 +864,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	public List<?> find(final String queryString, final Object... values) throws DataAccessException {
 		return executeWithNativeSession(new HibernateCallback<List<?>>() {
 			@Override
-			@SuppressWarnings("unchecked")
 			public List<?> doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.createQuery(queryString);
 				prepareQuery(queryObject);
@@ -893,7 +893,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		}
 		return executeWithNativeSession(new HibernateCallback<List<?>>() {
 			@Override
-			@SuppressWarnings("unchecked")
 			public List<?> doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.createQuery(queryString);
 				prepareQuery(queryObject);
@@ -913,7 +912,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 
 		return executeWithNativeSession(new HibernateCallback<List<?>>() {
 			@Override
-			@SuppressWarnings("unchecked")
 			public List<?> doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.createQuery(queryString);
 				prepareQuery(queryObject);
@@ -932,7 +930,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	public List<?> findByNamedQuery(final String queryName, final Object... values) throws DataAccessException {
 		return executeWithNativeSession(new HibernateCallback<List<?>>() {
 			@Override
-			@SuppressWarnings("unchecked")
 			public List<?> doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.getNamedQuery(queryName);
 				prepareQuery(queryObject);
@@ -963,7 +960,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		}
 		return executeWithNativeSession(new HibernateCallback<List<?>>() {
 			@Override
-			@SuppressWarnings("unchecked")
 			public List<?> doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.getNamedQuery(queryName);
 				prepareQuery(queryObject);
@@ -983,7 +979,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 
 		return executeWithNativeSession(new HibernateCallback<List<?>>() {
 			@Override
-			@SuppressWarnings("unchecked")
 			public List<?> doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.getNamedQuery(queryName);
 				prepareQuery(queryObject);
@@ -1010,7 +1005,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 		Assert.notNull(criteria, "DetachedCriteria must not be null");
 		return executeWithNativeSession(new HibernateCallback<List<?>>() {
 			@Override
-			@SuppressWarnings("unchecked")
 			public List<?> doInHibernate(Session session) throws HibernateException {
 				Criteria executableCriteria = criteria.getExecutableCriteria(session);
 				prepareCriteria(executableCriteria);
@@ -1074,7 +1068,6 @@ public class HibernateTemplate implements HibernateOperations, InitializingBean 
 	public Iterator<?> iterate(final String queryString, final Object... values) throws DataAccessException {
 		return executeWithNativeSession(new HibernateCallback<Iterator<?>>() {
 			@Override
-			@SuppressWarnings("unchecked")
 			public Iterator<?> doInHibernate(Session session) throws HibernateException {
 				Query queryObject = session.createQuery(queryString);
 				prepareQuery(queryObject);

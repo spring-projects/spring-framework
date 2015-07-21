@@ -20,6 +20,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.hibernate.HibernateException;
 import org.hibernate.JDBCException;
 import org.hibernate.NonUniqueObjectException;
@@ -91,7 +92,6 @@ public abstract class SessionFactoryUtils {
 	 * @return the DataSource, or {@code null} if none found
 	 * @see ConnectionProvider
 	 */
-	@SuppressWarnings("deprecation")
 	public static DataSource getDataSource(SessionFactory sessionFactory) {
 		if (sessionFactory instanceof SessionFactoryImplementor) {
 			try {

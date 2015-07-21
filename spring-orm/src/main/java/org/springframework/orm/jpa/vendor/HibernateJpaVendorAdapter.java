@@ -70,7 +70,7 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	private final Class<? extends EntityManager> entityManagerInterface;
 
 
-	@SuppressWarnings({"deprecation", "unchecked"})
+	@SuppressWarnings("unchecked")
 	public HibernateJpaVendorAdapter() {
 		ClassLoader cl = HibernateJpaVendorAdapter.class.getClassLoader();
 		Class<? extends EntityManagerFactory> emfIfcToUse;

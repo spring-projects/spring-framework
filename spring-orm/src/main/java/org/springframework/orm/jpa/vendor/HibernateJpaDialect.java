@@ -76,7 +76,7 @@ import org.springframework.util.ReflectionUtils;
  * @author Costin Leau
  * @since 2.0
  */
-@SuppressWarnings({"serial", "deprecation"})
+@SuppressWarnings("serial")
 public class HibernateJpaDialect extends DefaultJpaDialect {
 
 	private static Class<?> optimisticLockExceptionClass;
