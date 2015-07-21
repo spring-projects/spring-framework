@@ -23,12 +23,16 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
@@ -58,6 +62,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	private static final String CONTENT_LENGTH_HEADER = "Content-Length";
 
 	private static final String LOCATION_HEADER = "Location";
+
+	private static final String DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
+
+	private static TimeZone GMT = TimeZone.getTimeZone("GMT");
 
 
 	//---------------------------------------------------------------------
@@ -481,12 +489,16 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public void setDateHeader(String name, long value) {
-		setHeaderValue(name, value);
+		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.US);
+		dateFormat.setTimeZone(GMT);
+		setHeaderValue(name, dateFormat.format(new Date(value)));
 	}
 
 	@Override
 	public void addDateHeader(String name, long value) {
-		addHeaderValue(name, value);
+		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.US);
+		dateFormat.setTimeZone(GMT);
+		setHeaderValue(name, dateFormat.format(new Date(value)));
 	}
 
 	@Override
