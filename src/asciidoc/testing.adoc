@@ -72,10 +72,16 @@ configuration in testing scenarios without modification.
 [[mock-objects-servlet]]
 ==== Servlet API
 The `org.springframework.mock.web` package contains a comprehensive set of Servlet API
-mock objects, targeted at usage with Spring's Web MVC framework, which are useful for
-testing web contexts and controllers. These mock objects are generally more convenient
-to use than dynamic mock objects such as http://www.easymock.org[EasyMock] or existing
-Servlet API mock objects such as http://www.mockobjects.com[MockObjects].
+mock objects, which are useful for testing web contexts, controllers, and filters. These
+mock objects are targeted at usage with Spring's Web MVC framework and are generally more
+convenient to use than dynamic mock objects such as http://www.easymock.org[EasyMock] or
+alternative Servlet API mock objects such as http://www.mockobjects.com[MockObjects]. As of
+Spring Framework 4.0, the set of mocks in the `org.springframework.mock.web` package is
+based on the Servlet 3.0 API.
+
+For thorough integration testing of your Spring MVC and REST ++Controller++s in
+conjunction with your `WebApplicationContext` configuration for Spring MVC, see the
+<<spring-mvc-test-framework,_Spring MVC Test Framework_>>.
 
 
 [[mock-objects-portlet]]
@@ -126,12 +132,12 @@ dealing with Spring MVC `ModelAndView` objects.
 .Unit testing Spring MVC Controllers
 [TIP]
 ====
-To test your Spring MVC ++Controller++s, use `ModelAndViewAssert` combined with
-`MockHttpServletRequest`, `MockHttpSession`, and so on from the <<mock-objects-servlet,
-`org.springframework.mock.web`>> package.
-
-Note: As of Spring 4.0, the set of mocks in the `org.springframework.mock.web` package
-is now based on the Servlet 3.0 API.
+To unit test your Spring MVC ++Controller++s as POJOs, use `ModelAndViewAssert` combined
+with `MockHttpServletRequest`, `MockHttpSession`, and so on from Spring's
+<<mock-objects-servlet, Servlet API mocks>>. For thorough integration testing of your
+Spring MVC and REST ++Controller++s in conjunction with your `WebApplicationContext`
+configuration for Spring MVC, use the <<spring-mvc-test-framework,_Spring MVC Test
+Framework_>> instead.
 ====
 
 
@@ -3743,12 +3749,12 @@ processing lifecycle.
 The goal of __Spring MVC Test__ is to provide an effective way of testing controllers
 by performing requests and generating responses through the `DispatcherServlet`.
 
-__Spring MVC Test__ builds on the familiar "mock" implementations of the Servlet API
-available in the `spring-test` module. This allows performing requests and generating
-responses without the need for running in a Servlet container. For the most part
-everything should work as it does at runtime with a few notable exceptions as
-explained in <<spring-mvc-test-vs-end-to-end-integration-tests>>.
-Here is an example of using Spring MVC Test:
+__Spring MVC Test__ builds on the familiar <<mock-objects-servlet,"mock" implementations
+of the Servlet API>> available in the `spring-test` module. This allows performing
+requests and generating responses without the need for running in a Servlet container.
+For the most part everything should work as it does at runtime with a few notable
+exceptions as explained in <<spring-mvc-test-vs-end-to-end-integration-tests>>. Here is
+an example of using Spring MVC Test:
 
 [source,java,indent=0]
 ----
