@@ -199,6 +199,8 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 	/**
 	 * Return whether the HTTP 1.0 expires header is used.
+	 *
+	 * @deprecated in favor of {@link #getCacheControl}.
 	 */
 	@Deprecated
 	public final boolean isUseExpiresHeader() {
@@ -220,6 +222,8 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 	/**
 	 * Return whether the HTTP 1.1 cache-control header is used.
+	 *
+	 * @deprecated in favor of {@link #getCacheControl}.
 	 */
 	@Deprecated
 	public final boolean isUseCacheControlHeader() {
@@ -240,6 +244,8 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 	/**
 	 * Return whether the HTTP 1.1 cache-control header value "no-store" is used.
+	 *
+	 * @deprecated in favor of {@link #getCacheControl}.
 	 */
 	@Deprecated
 	public final boolean isUseCacheControlNoStore() {
@@ -262,6 +268,8 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 	/**
 	 * Return whether 'must-revalidate' is added to every Cache-Control header.
+	 *
+	 * @deprecated in favor of {@link #getCacheControl}.
 	 */
 	@Deprecated
 	public boolean isAlwaysMustRevalidate() {
@@ -315,6 +323,17 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		checkAndPrepare(request, response, this.cacheControl);
 	}
 
+	/**
+	 * * Check and prepare the given request and response according to the settings
+	 * of this generator. Checks for supported methods and a required session,
+	 * and applies the number of cache seconds specified for this generator.
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param lastModified whether the underlying handler writes "Last-Modified" headers; in that case,
+	 * a "Cache-Control: must-revalidate" directive is set in the response.
+	 * @throws ServletException if the request cannot be handled because a check failed
+	 * @deprecated in favor of {@link #checkAndPrepare(HttpServletRequest, HttpServletResponse, CacheControl)}.
+	 */
 	@Deprecated
 	protected final void checkAndPrepare(
 			HttpServletRequest request, HttpServletResponse response, boolean lastModified)
@@ -362,10 +381,8 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		}
 
 		// Check whether a session is required.
-		if (this.requireSession) {
-			if (request.getSession(false) == null) {
-				throw new HttpSessionRequiredException("Pre-existing session required but none found");
-			}
+		if (this.requireSession && request.getSession(false) == null) {
+			throw new HttpSessionRequiredException("Pre-existing session required but none found");
 		}
 	}
 

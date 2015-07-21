@@ -59,9 +59,6 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  */
 public class RequestResponseBodyMethodProcessor extends AbstractMessageConverterMethodProcessor {
 
-	private static final List<HttpMethod> SUPPORTED_METHODS =
-			Arrays.asList(HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH);
-
 	/**
 	 * Basic constructor with converters only. Suitable for resolving
 	 * {@code @RequestBody}. For handling {@code @ResponseBody} consider also

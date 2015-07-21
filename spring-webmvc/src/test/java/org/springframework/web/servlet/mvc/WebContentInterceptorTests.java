@@ -18,7 +18,6 @@ package org.springframework.web.servlet.mvc;
 
 import static org.junit.Assert.*;
 
-import java.util.List;
 import java.util.Properties;
 
 import org.hamcrest.Matchers;
