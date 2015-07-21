@@ -59,11 +59,10 @@ import org.springframework.messaging.tcp.TcpOperations;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
 
-
 /**
  * An implementation of {@link org.springframework.messaging.tcp.TcpOperations}
  * based on the TCP client support of the Reactor project.
- * <p>
+ *
  * <p>This implementation wraps N (Reactor) clients for N {@link #connect} calls,
  * i.e. a separate (Reactor) client instance for each connection.
  *
@@ -76,12 +75,13 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 	@SuppressWarnings("rawtypes")
 	public static final Class<NettyTcpClient> REACTOR_TCP_CLIENT_TYPE = NettyTcpClient.class;
 
+
+	private final NioEventLoopGroup eventLoopGroup;
+
 	private final TcpClientFactory<Message<P>, Message<P>> tcpClientSpecFactory;
 
 	private final List<TcpClient<Message<P>, Message<P>>> tcpClients =
 			new ArrayList<TcpClient<Message<P>, Message<P>>>();
-
-	private final NioEventLoopGroup eventLoopGroup;
 
 	private boolean stopping;
 
@@ -94,17 +94,14 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 	 * threads will be shared amongst the active clients.
 	 * <p>Also see the constructor accepting a ready Reactor
 	 * {@link TcpClientSpec} {@link Function} factory.
-	 *
-	 * @param host  the host to connect to
-	 * @param port  the port to connect to
+	 * @param host the host to connect to
+	 * @param port the port to connect to
 	 * @param codec the codec to use for encoding and decoding the TCP stream
 	 */
 	public Reactor2TcpClient(final String host, final int port, final Codec<Buffer, Message<P>, Message<P>> codec) {
-
 		this.eventLoopGroup = initEventLoopGroup();
 
 		this.tcpClientSpecFactory = new TcpClientFactory<Message<P>, Message<P>>() {
-
 			@Override
 			public TcpClientSpec<Message<P>, Message<P>> apply(TcpClientSpec<Message<P>, Message<P>> spec) {
 				return spec
@@ -116,12 +113,28 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 		};
 	}
 
+	/**
+	 * A constructor with a pre-configured {@link TcpClientSpec} {@link Function}
+	 * factory. This might be used to add SSL or specific network parameters to
+	 * the generated client configuration.
+	 * <p><strong>NOTE:</strong> if the client is configured with a thread-creating
+	 * dispatcher, you are responsible for cleaning them, e.g. using
+	 * {@link reactor.core.Dispatcher#shutdown}.
+	 * @param tcpClientSpecFactory the TcpClientSpec {@link Function} to use for each client creation
+	 */
+	public Reactor2TcpClient(TcpClientFactory<Message<P>, Message<P>> tcpClientSpecFactory) {
+		Assert.notNull(tcpClientSpecFactory, "'tcpClientClientFactory' must not be null");
+		this.tcpClientSpecFactory = tcpClientSpecFactory;
+		this.eventLoopGroup = null;
+	}
+
+
 	private static NioEventLoopGroup initEventLoopGroup() {
 		int ioThreadCount;
 		try {
 			ioThreadCount = Integer.parseInt(System.getProperty("reactor.tcp.ioThreadCount"));
 		}
-		catch (Exception i) {
+		catch (Exception ex) {
 			ioThreadCount = -1;
 		}
 		if (ioThreadCount <= 0l) {
@@ -132,26 +145,10 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 				new NamedDaemonThreadFactory("reactor-tcp-io"));
 	}
 
-	/**
-	 * A constructor with a pre-configured {@link TcpClientSpec} {@link Function}
-	 * factory. This might be used to add SSL or specific network parameters to
-	 * the generated client configuration.
-	 * <p><strong>NOTE:</strong> if the client is configured with a thread-creating
-	 * dispatcher, you are responsible for cleaning them, e.g. using
-	 * {@link reactor.core.Dispatcher#shutdown}.
-	 *
-	 * @param tcpClientSpecFactory the TcpClientSpec {@link Function} to use for each client creation.
-	 */
-	public Reactor2TcpClient(TcpClientFactory<Message<P>, Message<P>> tcpClientSpecFactory) {
-		Assert.notNull(tcpClientSpecFactory, "'tcpClientClientFactory' must not be null");
-		this.tcpClientSpecFactory = tcpClientSpecFactory;
-		this.eventLoopGroup = null;
-	}
-
 
 	@Override
 	public ListenableFuture<Void> connect(final TcpConnectionHandler<P> connectionHandler) {
-		Assert.notNull(connectionHandler, "'connectionHandler' must not be null");
+		Assert.notNull(connectionHandler, "TcpConnectionHandler must not be null");
 
 		TcpClient<Message<P>, Message<P>> tcpClient;
 		synchronized (this.tcpClients) {
@@ -178,8 +175,8 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 
 	@Override
 	public ListenableFuture<Void> connect(TcpConnectionHandler<P> connectionHandler, ReconnectStrategy strategy) {
-		Assert.notNull(connectionHandler, "'connectionHandler' must not be null");
-		Assert.notNull(strategy, "'reconnectStrategy' must not be null");
+		Assert.notNull(connectionHandler, "TcpConnectionHandler must not be null");
+		Assert.notNull(strategy, "ReconnectStrategy must not be null");
 
 		TcpClient<Message<P>, Message<P>> tcpClient;
 		synchronized (this.tcpClients) {
@@ -204,6 +201,7 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 		synchronized (this.tcpClients) {
 			this.stopping = true;
 		}
+
 		Promise<Void> promise = Streams.from(this.tcpClients)
 				.flatMap(new Function<TcpClient<Message<P>, Message<P>>, Promise<Void>>() {
 					@Override
@@ -217,6 +215,7 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 					}
 				})
 				.next();
+
 		if (this.eventLoopGroup != null) {
 			final Promise<Void> eventLoopPromise = Promises.prepare();
 			promise.onComplete(new Consumer<Promise<Void>>() {
@@ -249,6 +248,7 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 		}
 	}
 
+
 	private static class MessageChannelStreamHandler<P>
 			implements ReactorChannelHandler<Message<P>, Message<P>, ChannelStream<Message<P>, Message<P>>> {
 
@@ -260,14 +260,10 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 
 		@Override
 		public Publisher<Void> apply(ChannelStream<Message<P>, Message<P>> channelStream) {
-
 			Promise<Void> closePromise = Promises.prepare();
-
 			this.connectionHandler.afterConnected(new Reactor2TcpConnection<P>(channelStream, closePromise));
-
 			channelStream
 					.finallyDo(new Consumer<Signal<Message<P>>>() {
-
 						@Override
 						public void accept(Signal<Message<P>> signal) {
 							if (signal.isOnError()) {
@@ -279,7 +275,6 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 						}
 					})
 					.consume(new Consumer<Message<P>>() {
-
 						@Override
 						public void accept(Message<P> message) {
 							connectionHandler.handleMessage(message);
@@ -289,6 +284,7 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 			return closePromise;
 		}
 	}
+
 
 	private static class ReactorReconnectAdapter implements Reconnect {
 
@@ -300,7 +296,7 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 
 		@Override
 		public Tuple2<InetSocketAddress, Long> reconnect(InetSocketAddress address, int attempt) {
-			return Tuple.of(address, strategy.getTimeToNextAttempt(attempt));
+			return Tuple.of(address, this.strategy.getTimeToNextAttempt(attempt));
 		}
 	}
 

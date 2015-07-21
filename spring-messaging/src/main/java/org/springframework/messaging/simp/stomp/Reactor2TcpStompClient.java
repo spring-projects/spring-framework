@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.simp.stomp;
 
-import org.springframework.messaging.Message;
-import org.springframework.messaging.tcp.TcpOperations;
-import org.springframework.messaging.tcp.reactor.Reactor2TcpClient;
-import org.springframework.util.concurrent.ListenableFuture;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
+
 import reactor.Environment;
 import reactor.core.config.ConfigurationReader;
 import reactor.core.config.DispatcherConfiguration;
@@ -27,9 +28,10 @@ import reactor.core.config.ReactorConfiguration;
 import reactor.io.net.NetStreams;
 import reactor.io.net.Spec.TcpClientSpec;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.tcp.TcpOperations;
+import org.springframework.messaging.tcp.reactor.Reactor2TcpClient;
+import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * A STOMP over TCP client that uses
@@ -73,8 +75,7 @@ public class Reactor2TcpStompClient extends StompClientSupport {
 
 	/**
 	 * Connect and notify the given {@link StompSessionHandler} when connected
-	 * on the STOMP level,
-	 *
+	 * on the STOMP level.
 	 * @param handler the handler for the STOMP session
 	 * @return ListenableFuture for access to the session when ready for use
 	 */
@@ -85,9 +86,8 @@ public class Reactor2TcpStompClient extends StompClientSupport {
 	/**
 	 * An overloaded version of {@link #connect(StompSessionHandler)} that
 	 * accepts headers to use for the STOMP CONNECT frame.
-	 *
 	 * @param connectHeaders headers to add to the CONNECT frame
-	 * @param handler        the handler for the STOMP session
+	 * @param handler the handler for the STOMP session
 	 * @return ListenableFuture for access to the session when ready for use
 	 */
 	public ListenableFuture<StompSession> connect(StompHeaders connectHeaders, StompSessionHandler handler) {
@@ -118,6 +118,7 @@ public class Reactor2TcpStompClient extends StompClientSupport {
 			return new ReactorConfiguration(configList, dispatcherName, new Properties());
 		}
 	}
+
 
 	private static class StompTcpClientSpecFactory
 			implements NetStreams.TcpClientFactory<Message<byte[]>, Message<byte[]>> {

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.simp.user;
 
 import java.net.InetAddress;
@@ -65,6 +66,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 				(SmartApplicationListener) this.localRegistry : new NoOpSmartApplicationListener());
 		this.id = generateId();
 	}
+
 
 	private static String generateId() {
 		String host;
@@ -171,7 +173,6 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		private long expirationTime;
 
-
 		public UserRegistryDto() {
 		}
 
@@ -233,13 +234,13 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		}
 	}
 
+
 	@SuppressWarnings("unused")
 	private static class SimpUserDto implements SimpUser {
 
 		private String name;
 
 		private Set<SimpSessionDto> sessions;
-
 
 		public SimpUserDto() {
 			this.sessions = new HashSet<SimpSessionDto>(1);
@@ -254,27 +255,18 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 			}
 		}
 
-		@Override
-		public String getName() {
-			return this.name;
-		}
-
 		public void setName(String name) {
 			this.name = name;
 		}
 
 		@Override
-		public boolean hasSessions() {
-			return !this.sessions.isEmpty();
+		public String getName() {
+			return this.name;
 		}
 
 		@Override
-		public Set<SimpSession> getSessions() {
-			return new HashSet<SimpSession>(this.sessions);
-		}
-
-		public void setSessions(Set<SimpSessionDto> sessions) {
-			this.sessions.addAll(sessions);
+		public boolean hasSessions() {
+			return !this.sessions.isEmpty();
 		}
 
 		@Override
@@ -287,6 +279,15 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 			return null;
 		}
 
+		public void setSessions(Set<SimpSessionDto> sessions) {
+			this.sessions.addAll(sessions);
+		}
+
+		@Override
+		public Set<SimpSession> getSessions() {
+			return new HashSet<SimpSession>(this.sessions);
+		}
+
 		private void restoreParentReferences() {
 			for (SimpSessionDto session : this.sessions) {
 				session.setUser(this);
@@ -296,13 +297,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		@Override
 		public boolean equals(Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (other == null || !(other instanceof SimpUser)) {
-				return false;
-			}
-			return this.name.equals(((SimpUser) other).getName());
+			return (this == other || (other instanceof SimpUser && this.name.equals(((SimpUser) other).getName())));
 		}
 
 		@Override
@@ -316,6 +311,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		}
 	}
 
+
 	@SuppressWarnings("unused")
 	private static class SimpSessionDto implements SimpSession {
 
@@ -323,8 +319,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		private SimpUserDto user;
 
-		private Set<SimpSubscriptionDto> subscriptions;
-
+		private final Set<SimpSubscriptionDto> subscriptions;
 
 		public SimpSessionDto() {
 			this.subscriptions = new HashSet<SimpSubscriptionDto>(4);
@@ -339,18 +334,13 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 			}
 		}
 
-		@Override
-		public String getId() {
-			return this.id;
-		}
-
 		public void setId(String id) {
 			this.id = id;
 		}
 
 		@Override
-		public SimpUserDto getUser() {
-			return this.user;
+		public String getId() {
+			return this.id;
 		}
 
 		public void setUser(SimpUserDto user) {
@@ -358,12 +348,17 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		}
 
 		@Override
-		public Set<SimpSubscription> getSubscriptions() {
-			return new HashSet<SimpSubscription>(this.subscriptions);
+		public SimpUserDto getUser() {
+			return this.user;
 		}
 
 		public void setSubscriptions(Set<SimpSubscriptionDto> subscriptions) {
 			this.subscriptions.addAll(subscriptions);
+		}
+
+		@Override
+		public Set<SimpSubscription> getSubscriptions() {
+			return new HashSet<SimpSubscription>(this.subscriptions);
 		}
 
 		private void restoreParentReferences() {
@@ -373,19 +368,13 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		}
 
 		@Override
-		public int hashCode() {
-			return this.id.hashCode();
+		public boolean equals(Object other) {
+			return (this == other || (other instanceof SimpSession && this.id.equals(((SimpSession) other).getId())));
 		}
 
 		@Override
-		public boolean equals(Object other) {
-			if (this == other) {
-				return true;
-			}
-			if (other == null || !(other instanceof SimpSession)) {
-				return false;
-			}
-			return this.id.equals(((SimpSession) other).getId());
+		public int hashCode() {
+			return this.id.hashCode();
 		}
 
 		@Override
@@ -393,6 +382,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 			return "id=" + this.id + ", subscriptions=" + this.subscriptions;
 		}
 	}
+
 
 	@SuppressWarnings("unused")
 	private static class SimpSubscriptionDto implements SimpSubscription {
@@ -403,7 +393,6 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		private String destination;
 
-
 		public SimpSubscriptionDto() {
 		}
 
@@ -412,18 +401,13 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 			this.destination = subscription.getDestination();
 		}
 
-		@Override
-		public String getId() {
-			return this.id;
-		}
-
 		public void setId(String id) {
 			this.id = id;
 		}
 
 		@Override
-		public SimpSessionDto getSession() {
-			return this.session;
+		public String getId() {
+			return this.id;
 		}
 
 		public void setSession(SimpSessionDto session) {
@@ -431,8 +415,8 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		}
 
 		@Override
-		public String getDestination() {
-			return this.destination;
+		public SimpSessionDto getSession() {
+			return this.session;
 		}
 
 		public void setDestination(String destination) {
@@ -440,8 +424,8 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		}
 
 		@Override
-		public int hashCode() {
-			return 31 * this.id.hashCode() + ObjectUtils.nullSafeHashCode(getSession());
+		public String getDestination() {
+			return this.destination;
 		}
 
 		@Override
@@ -449,7 +433,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 			if (this == other) {
 				return true;
 			}
-			if (other == null || !(other instanceof SimpSubscription)) {
+			if (!(other instanceof SimpSubscription)) {
 				return false;
 			}
 			SimpSubscription otherSubscription = (SimpSubscription) other;
@@ -458,10 +442,16 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		}
 
 		@Override
+		public int hashCode() {
+			return this.id.hashCode() * 31 + ObjectUtils.nullSafeHashCode(getSession());
+		}
+
+		@Override
 		public String toString() {
 			return "destination=" + this.destination;
 		}
 	}
+
 
 	private static class NoOpSmartApplicationListener implements SmartApplicationListener {
 

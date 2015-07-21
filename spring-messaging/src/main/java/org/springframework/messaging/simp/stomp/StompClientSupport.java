@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.simp.stomp;
 
 import java.util.Arrays;
@@ -22,11 +23,10 @@ import org.springframework.messaging.converter.SimpleMessageConverter;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.Assert;
 
-
 /**
  * Base class for STOMP client implementations.
  *
- * <p>Sub-classes can connect over WebSocket or TCP using any library.
+ * <p>Subclasses can connect over WebSocket or TCP using any library.
  * When creating a new connection a sub-class can create an instance of
  * {@link DefaultStompSession} which extends
  * {@link org.springframework.messaging.tcp.TcpConnectionHandler
@@ -71,12 +71,10 @@ public abstract class StompClientSupport {
 
 	/**
 	 * Configure a scheduler to use for heartbeats and for receipt tracking.
-	 *
 	 * <p><strong>Note:</strong> some transports have built-in support to work
 	 * with heartbeats and therefore do not require a TaskScheduler.
 	 * Receipts however, if needed, do require a TaskScheduler to be configured.
-	 *
-	 * <p>By default this is not set.
+	 * <p>By default, this is not set.
 	 */
 	public void setTaskScheduler(TaskScheduler taskScheduler) {
 		this.taskScheduler = taskScheduler;
@@ -99,7 +97,7 @@ public abstract class StompClientSupport {
 	 * TaskScheduler to be configured first.
 	 * @param heartbeat the value for the CONNECT "heart-beat" header
 	 * @see <a href="http://stomp.github.io/stomp-specification-1.2.html#Heart-beating">
-	 *     http://stomp.github.io/stomp-specification-1.2.html#Heart-beating</a>
+	 * http://stomp.github.io/stomp-specification-1.2.html#Heart-beating</a>
 	 */
 	public void setDefaultHeartbeat(long[] heartbeat) {
 		Assert.notNull(heartbeat);
@@ -136,7 +134,7 @@ public abstract class StompClientSupport {
 	 * Return the configured receipt time limit.
 	 */
 	public long getReceiptTimeLimit() {
-		return receiptTimeLimit;
+		return this.receiptTimeLimit;
 	}
 
 

@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.simp.user;
 
 /**
@@ -26,7 +27,7 @@ public interface SimpSubscriptionMatcher {
 	/**
 	 * Match the given subscription.
 	 * @param subscription the subscription to match
-	 * @return {@code true} in case of match, {@code false} otherwise.
+	 * @return {@code true} in case of a match, {@code false} otherwise
 	 */
 	boolean match(SimpSubscription subscription);
 

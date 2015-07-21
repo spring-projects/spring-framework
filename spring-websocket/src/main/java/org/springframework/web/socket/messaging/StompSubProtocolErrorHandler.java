@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.socket.messaging;
 
 import org.springframework.messaging.Message;
@@ -35,7 +36,6 @@ public class StompSubProtocolErrorHandler implements SubProtocolErrorHandler<byt
 
 	@Override
 	public Message<byte[]> handleClientMessageProcessingError(Message<byte[]> clientMessage, Throwable ex) {
-
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.ERROR);
 		accessor.setMessage(ex.getMessage());
 		accessor.setLeaveMutable(true);
@@ -54,14 +54,11 @@ public class StompSubProtocolErrorHandler implements SubProtocolErrorHandler<byt
 
 	@Override
 	public Message<byte[]> handleErrorMessageToClient(Message<byte[]> errorMessage) {
-
 		StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(errorMessage, StompHeaderAccessor.class);
-		Assert.notNull(accessor, "Expected STOMP headers.");
-
+		Assert.notNull(accessor, "Expected STOMP headers");
 		if (!accessor.isMutable()) {
 			accessor = StompHeaderAccessor.wrap(errorMessage);
 		}
-
 		return handleInternal(accessor, errorMessage.getPayload(), null, null);
 	}
 

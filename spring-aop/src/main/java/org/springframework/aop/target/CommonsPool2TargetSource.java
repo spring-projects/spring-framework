@@ -43,7 +43,7 @@ import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
  * meaningful validation. All exposed Commons Pool properties use the
  * corresponding Commons Pool defaults.
  *
- * <p>Compatible with Apache Commons Pool 2.4
+ * <p>Compatible with Apache Commons Pool 2.4, as of Spring 4.2.
  *
  * @author Rod Johnson
  * @author Rob Harrop
@@ -89,6 +89,7 @@ public class CommonsPool2TargetSource extends AbstractPoolingTargetSource implem
 	public CommonsPool2TargetSource() {
 		setMaxSize(GenericObjectPoolConfig.DEFAULT_MAX_TOTAL);
 	}
+
 
 	/**
 	 * Set the maximum number of idle objects in the pool.
@@ -185,8 +186,9 @@ public class CommonsPool2TargetSource extends AbstractPoolingTargetSource implem
 	 * Specify if the call should block when the pool is exhausted.
 	 */
 	public boolean isBlockWhenExhausted() {
-		return blockWhenExhausted;
+		return this.blockWhenExhausted;
 	}
+
 
 	/**
 	 * Creates and holds an ObjectPool instance.
@@ -220,7 +222,7 @@ public class CommonsPool2TargetSource extends AbstractPoolingTargetSource implem
 
 
 	/**
-	 * Borrow an object from the {@code ObjectPool}.
+	 * Borrows an object from the {@code ObjectPool}.
 	 */
 	@Override
 	public Object getTarget() throws Exception {

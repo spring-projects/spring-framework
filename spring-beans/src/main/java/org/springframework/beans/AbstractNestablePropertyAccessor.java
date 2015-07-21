@@ -101,6 +101,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 */
 	private Map<String, AbstractNestablePropertyAccessor> nestedPropertyAccessors;
 
+
 	/**
 	 * Create new empty accessor. Wrapped instance needs to be set afterwards.
 	 * Registers default editors.
@@ -167,6 +168,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		setAutoGrowCollectionLimit(parent.getAutoGrowCollectionLimit());
 		setConversionService(parent.getConversionService());
 	}
+
 
 	/**
 	 * Specify a limit for array and collection auto-growing.
@@ -758,7 +760,6 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 			for (int i = length; i < Array.getLength(newArray); i++) {
 				Array.set(newArray, i, newValue(componentType, null, name));
 			}
-			// TODO this is not efficient because conversion may create a copy ... set directly because we know it is assignable.
 			setPropertyValue(name, newArray);
 			return getPropertyValue(name);
 		}
@@ -802,7 +803,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 * @param propertyPath property property path, which may be nested
 	 * @return a property accessor for the target bean
 	 */
-	@SuppressWarnings("unchecked") // avoid nested generic
+	@SuppressWarnings("unchecked")  // avoid nested generic
 	protected AbstractNestablePropertyAccessor getPropertyAccessorForPropertyPath(String propertyPath) {
 		int pos = PropertyAccessorUtils.getFirstNestedPropertySeparatorIndex(propertyPath);
 		// Handle nested properties recursively.
@@ -1024,8 +1025,8 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		public abstract Object getValue() throws Exception;
 
 		public abstract void setValue(Object object, Object value) throws Exception;
-
 	}
+
 
 	protected static class PropertyTokenHolder {
 
@@ -1055,4 +1056,5 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 			return !((Optional<?>) optionalObject).isPresent();
 		}
 	}
+
 }

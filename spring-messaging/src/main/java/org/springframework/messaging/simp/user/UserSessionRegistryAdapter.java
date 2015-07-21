@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.simp.user;
 
 import java.util.Collections;
@@ -48,12 +49,12 @@ public class UserSessionRegistryAdapter implements SimpUserRegistry {
 
 	@Override
 	public Set<SimpUser> getUsers() {
-		throw new UnsupportedOperationException("UserSessionRegistry does not expose a listing of users.");
+		throw new UnsupportedOperationException("UserSessionRegistry does not expose a listing of users");
 	}
 
 	@Override
 	public Set<SimpSubscription> findSubscriptions(SimpSubscriptionMatcher matcher) {
-		throw new UnsupportedOperationException("UserSessionRegistry does not support operations across users.");
+		throw new UnsupportedOperationException("UserSessionRegistry does not support operations across users");
 	}
 
 
@@ -62,7 +63,6 @@ public class UserSessionRegistryAdapter implements SimpUserRegistry {
 		private final String name;
 
 		private final Map<String, SimpSession> sessions;
-
 
 		public SimpleSimpUser(String name, Set<String> sessionIds) {
 			this.name = name;
@@ -93,10 +93,10 @@ public class UserSessionRegistryAdapter implements SimpUserRegistry {
 		}
 	}
 
+
 	private static class SimpleSimpSession implements SimpSession {
 
 		private final String id;
-
 
 		public SimpleSimpSession(String id) {
 			this.id = id;

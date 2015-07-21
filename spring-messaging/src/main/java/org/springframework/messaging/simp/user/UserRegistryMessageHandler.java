@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.simp.user;
 
 import java.util.concurrent.ScheduledFuture;
@@ -63,7 +64,6 @@ public class UserRegistryMessageHandler implements MessageHandler, ApplicationLi
 		Assert.notNull(brokerTemplate, "'brokerTemplate' is required");
 		Assert.hasText(broadcastDestination, "'broadcastDestination' is required");
 		Assert.notNull(scheduler, "'scheduler' is required");
-
 
 		this.userRegistry = (MultiServerUserRegistry) userRegistry;
 		this.brokerTemplate = brokerTemplate;

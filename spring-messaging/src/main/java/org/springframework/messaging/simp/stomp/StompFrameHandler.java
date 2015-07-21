@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.simp.stomp;
 
 import java.lang.reflect.Type;
-
 
 /**
  * Contract to handle a STOMP frame.
@@ -36,7 +36,6 @@ public interface StompFrameHandler {
 	/**
 	 * Handle a STOMP frame with the payload converted to the target type returned
 	 * from {@link #getPayloadType(StompHeaders)}.
-	 *
 	 * @param headers the headers of the frame
 	 * @param payload the payload or {@code null} if there was no payload
 	 */
