@@ -172,7 +172,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 			resourceHandlerDef.getPropertyValues().add("cacheSeconds", cacheSeconds);
 		}
 
-		Element cacheControlElement = DomUtils.getChildElementByTagName(element, "cachecontrol");
+		Element cacheControlElement = DomUtils.getChildElementByTagName(element, "cache-control");
 		if (cacheControlElement != null) {
 			CacheControl cacheControl = parseCacheControl(cacheControlElement);
 			resourceHandlerDef.getPropertyValues().add("cacheControl", cacheControl);

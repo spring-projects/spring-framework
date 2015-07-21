@@ -4222,7 +4222,7 @@ And in XML:
 [subs="verbatim"]
 ----
 	<mvc:resources mapping="/resources/**" location="/public-resources/">
-		<mvc:cachecontrol max-age="3600" cache-public="true"/>
+		<mvc:cache-control max-age="3600" cache-public="true"/>
 	</mvc:resources>
 ----
 

@@ -506,7 +506,7 @@
 		</xsd:attribute>
 	</xsd:complexType>
 
-	<xsd:complexType name="cachecontrol">
+	<xsd:complexType name="cache-control">
 		<xsd:annotation>
 			<xsd:documentation source="org.springframework.web.cache.CacheControl"><![CDATA[
 	Generates "Cache-Control" HTTP response headers.
@@ -596,7 +596,7 @@
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:sequence>
-				<xsd:element name="cachecontrol" type="cachecontrol" minOccurs="0" maxOccurs="1"/>
+				<xsd:element name="cache-control" type="cache-control" minOccurs="0" maxOccurs="1"/>
 				<xsd:element name="resource-chain" type="resource-chain" minOccurs="0" maxOccurs="1"/>
 			</xsd:sequence>
 			<xsd:attribute name="mapping" use="required" type="xsd:string">
