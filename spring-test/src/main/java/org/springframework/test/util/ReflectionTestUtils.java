@@ -42,7 +42,8 @@ import org.springframework.util.StringUtils;
  * {@code private} or {@code protected} field access as opposed to
  * {@code public} setter methods for properties in a domain entity.</li>
  * <li>Spring's support for annotations such as
- * {@link org.springframework.beans.factory.annotation.Autowired @Autowired} and
+ * {@link org.springframework.beans.factory.annotation.Autowired @Autowired},
+ * {@link javax.inject.Inject @Inject}, and
  * {@link javax.annotation.Resource @Resource} which provides dependency
  * injection for {@code private} or {@code protected} fields, setter methods,
  * and configuration methods.</li>

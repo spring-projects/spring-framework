@@ -93,14 +93,19 @@ objects, targeted at usage with Spring's Portlet MVC framework.
 ==== General utilities
 The `org.springframework.test.util` package contains `ReflectionTestUtils`, which is a
 collection of reflection-based utility methods. Developers use these methods in unit and
-integration testing scenarios in which they need to set a non- `public` field or invoke
-a non- `public` setter method when testing application code involving, for example:
+integration testing scenarios in which they need to change the value of a constant, set
+a non-++public++ field, invoke a non-++public++ setter method, or invoke a non-++public++
+_configuration_ or _lifecycle_ callback method when testing application code involving
+use cases such as the following.
 
 * ORM frameworks such as JPA and Hibernate that condone `private` or `protected` field
   access as opposed to `public` setter methods for properties in a domain entity.
-* Spring's support for annotations such as `@Autowired`, `@Inject`, and `@Resource,`
+* Spring's support for annotations such as `@Autowired`, `@Inject`, and `@Resource`,
   which provides dependency injection for `private` or `protected` fields, setter
   methods, and configuration methods.
+* Use of annotations such as `@PostConstruct` and `@PreDestroy` for lifecycle callback
+  methods.
+
 
 
 [[unit-testing-spring-mvc]]
