@@ -183,7 +183,7 @@ public class UriComponentsBuilder implements Cloneable {
 	 * @return the new {@code UriComponentsBuilder}
 	 */
 	public static UriComponentsBuilder fromUriString(String uri) {
-		Assert.hasLength(uri, "'uri' must not be empty");
+		Assert.notNull(uri, "'uri' must not be null");
 		Matcher matcher = URI_PATTERN.matcher(uri);
 		if (matcher.matches()) {
 			UriComponentsBuilder builder = new UriComponentsBuilder();
