@@ -61,7 +61,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
  * <ul>
  * <li>SPR-10025: Access to request attributes via RequestContextHolder</li>
  * <li>SPR-13217: Populate RequestAttributes before invoking Filters in MockMvc</li>
- * <li>SPR-13211: Reuse of mock request from the TestContext framework</li>
+ * <li>SPR-13260: No reuse of mock requests</li>
  * </ul>
  *
  * @author Rossen Stoyanchev
@@ -137,7 +137,7 @@ public class RequestContextHolderTests {
 
 	@After
 	public void verifyRestoredRequestAttributes() {
-		assertRequestAttributes();
+		assertRequestAttributes(false);
 	}
 
 
@@ -294,17 +294,34 @@ public class RequestContextHolderTests {
 
 
 	private static void assertRequestAttributes() {
+		assertRequestAttributes(true);
+	}
+
+	private static void assertRequestAttributes(boolean withinMockMvc) {
 		RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
 		assertThat(requestAttributes, instanceOf(ServletRequestAttributes.class));
-		assertRequestAttributes(((ServletRequestAttributes) requestAttributes).getRequest());
+		assertRequestAttributes(((ServletRequestAttributes) requestAttributes).getRequest(), withinMockMvc);
 	}
 
 	private static void assertRequestAttributes(ServletRequest request) {
-		assertThat(request.getAttribute(FROM_TCF_MOCK), is(FROM_TCF_MOCK));
-		assertThat(request.getAttribute(FROM_MVC_TEST_DEFAULT), is(FROM_MVC_TEST_DEFAULT));
-		assertThat(request.getAttribute(FROM_MVC_TEST_MOCK), is(FROM_MVC_TEST_MOCK));
-		assertThat(request.getAttribute(FROM_REQUEST_FILTER), is(FROM_REQUEST_FILTER));
-		assertThat(request.getAttribute(FROM_REQUEST_ATTRIBUTES_FILTER), is(FROM_REQUEST_ATTRIBUTES_FILTER));
+		assertRequestAttributes(request, true);
+	}
+
+	private static void assertRequestAttributes(ServletRequest request, boolean withinMockMvc) {
+		if (withinMockMvc) {
+			assertThat(request.getAttribute(FROM_TCF_MOCK), is(nullValue()));
+			assertThat(request.getAttribute(FROM_MVC_TEST_DEFAULT), is(FROM_MVC_TEST_DEFAULT));
+			assertThat(request.getAttribute(FROM_MVC_TEST_MOCK), is(FROM_MVC_TEST_MOCK));
+			assertThat(request.getAttribute(FROM_REQUEST_FILTER), is(FROM_REQUEST_FILTER));
+			assertThat(request.getAttribute(FROM_REQUEST_ATTRIBUTES_FILTER), is(FROM_REQUEST_ATTRIBUTES_FILTER));
+		}
+		else {
+			assertThat(request.getAttribute(FROM_TCF_MOCK), is(FROM_TCF_MOCK));
+			assertThat(request.getAttribute(FROM_MVC_TEST_DEFAULT), is(nullValue()));
+			assertThat(request.getAttribute(FROM_MVC_TEST_MOCK), is(nullValue()));
+			assertThat(request.getAttribute(FROM_REQUEST_FILTER), is(nullValue()));
+			assertThat(request.getAttribute(FROM_REQUEST_ATTRIBUTES_FILTER), is(nullValue()));
+		}
 	}
 
 }

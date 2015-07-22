@@ -30,7 +30,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockServletContext;
-import org.springframework.test.context.web.ServletTestExecutionListener;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -50,8 +49,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
 /**
  * Integration tests for SPR-13211 which verify that a custom mock request
- * (i.e., one not created by {@link ServletTestExecutionListener}) is not
- * reused by MockMvc.
+ * is not reused by MockMvc.
  *
  * @author Sam Brannen
  * @since 4.2
