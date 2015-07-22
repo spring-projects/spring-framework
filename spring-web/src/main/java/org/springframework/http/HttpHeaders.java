@@ -362,6 +362,10 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
 
+	/**
+	 * Date formats as specified in the HTTP RFC
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
+	 */
 	private static final String[] DATE_FORMATS = new String[] {
 		"EEE, dd MMM yyyy HH:mm:ss zzz",
 		"EEE, dd-MMM-yy HH:mm:ss zzz",
