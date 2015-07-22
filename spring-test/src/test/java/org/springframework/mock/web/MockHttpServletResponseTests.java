@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.mock.web;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
@@ -236,6 +237,20 @@ public class MockHttpServletResponseTests {
 		String redirectUrl = "/redirect";
 		response.setHeader("Location", redirectUrl);
 		assertEquals(redirectUrl, response.getRedirectedUrl());
+	}
+
+	@Test
+	public void setDateHeader() {
+		response.setDateHeader("Last-Modified", 1437472800000L);
+		assertEquals("Tue, 21 Jul 2015 10:00:00 GMT", response.getHeader("Last-Modified"));
+	}
+
+	@Test
+	public void addDateHeader() {
+		response.addDateHeader("Last-Modified", 1437472800000L);
+		response.addDateHeader("Last-Modified", 1437472801000L);
+		assertEquals("Tue, 21 Jul 2015 10:00:00 GMT", response.getHeaders("Last-Modified").get(0));
+		assertEquals("Tue, 21 Jul 2015 10:00:01 GMT", response.getHeaders("Last-Modified").get(1));
 	}
 
 	/**

@@ -24,6 +24,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.security.Principal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -36,6 +38,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
+
 import javax.servlet.AsyncContext;
 import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
@@ -119,6 +123,18 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	private static final ServletInputStream EMPTY_SERVLET_INPUT_STREAM =
 			new DelegatingServletInputStream(new ByteArrayInputStream(new byte[0]));
+
+	/**
+	 * Date formats as specified in the HTTP RFC
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
+	 */
+	private static final String[] DATE_FORMATS = new String[] {
+			"EEE, dd MMM yyyy HH:mm:ss zzz",
+			"EEE, dd-MMM-yy HH:mm:ss zzz",
+			"EEE MMM dd HH:mm:ss yyyy"
+	};
+
+	private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
 
 
 	private boolean active = true;
@@ -681,7 +697,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	/**
-	 * Returns the first preferred {@linkplain Locale locale} configured
+	 * Return the first preferred {@linkplain Locale locale} configured
 	 * in this mock request.
 	 * <p>If no locales have been explicitly configured, the default,
 	 * preferred {@link Locale} for the <em>server</em> mocked by this
@@ -699,7 +715,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	/**
-	 * Returns an {@linkplain Enumeration enumeration} of the preferred
+	 * Return an {@linkplain Enumeration enumeration} of the preferred
 	 * {@linkplain Locale locales} configured in this mock request.
 	 * <p>If no locales have been explicitly configured, the default,
 	 * preferred {@link Locale} for the <em>server</em> mocked by this
@@ -728,7 +744,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	/**
-	 * Returns {@code true} if the {@link #setSecure secure} flag has been set
+	 * Return {@code true} if the {@link #setSecure secure} flag has been set
 	 * to {@code true} or if the {@link #getScheme scheme} is {@code https}.
 	 * @see javax.servlet.ServletRequest#isSecure()
 	 */
@@ -860,20 +876,16 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	/**
 	 * Add a header entry for the given name.
-	 * <p>If there was no entry for that header name before, the value will be used
-	 * as-is. In case of an existing entry, a String array will be created,
-	 * adding the given value (more specifically, its toString representation)
-	 * as further element.
-	 * <p>Multiple values can only be stored as list of Strings, following the
-	 * Servlet spec (see {@code getHeaders} accessor). As alternative to
-	 * repeated {@code addHeader} calls for individual elements, you can
-	 * use a single call with an entire array or Collection of values as
-	 * parameter.
+	 * <p>While this method can take any {@code Object} as a parameter,
+	 * it is recommended to use the following types:
+	 * <ul>
+	 *   <li>String or any Object to be converted using {@code toString}, see {@link #getHeader} </li>
+	 *   <li>String, Number or Date for date headers, see {@link #getDateHeader}</li>
+	 *   <li>String or Number for integer headers, see {@link #getIntHeader}</li>
+	 * 	 <li>{@code String[]} and {@code Collection<String>} for multiple values, see {@link #getHeaders}</li>
+	 * </ul>
 	 * @see #getHeaderNames
-	 * @see #getHeader
 	 * @see #getHeaders
-	 * @see #getDateHeader
-	 * @see #getIntHeader
 	 */
 	public void addHeader(String name, Object value) {
 		if (CONTENT_TYPE_HEADER.equalsIgnoreCase(name)) {
@@ -902,6 +914,18 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		}
 	}
 
+	/**
+	 * Return the long timestamp for the date header with the given {@code name}.
+	 * <p>If the internal value representation is a String, this method will try
+	 * to parse it as a date using the supported date formats:
+	 * <ul>
+	 *   <li>"EEE, dd MMM yyyy HH:mm:ss zzz"</li>
+	 *   <li>"EEE, dd-MMM-yy HH:mm:ss zzz"</li>
+	 *   <li>"EEE MMM dd HH:mm:ss yyyy"</li>
+	 * </ul>
+	 * @param name the header name
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
+	 */
 	@Override
 	public long getDateHeader(String name) {
 		HeaderValueHolder header = HeaderValueHolder.getByName(this.headers, name);
@@ -912,13 +936,30 @@ public class MockHttpServletRequest implements HttpServletRequest {
 		else if (value instanceof Number) {
 			return ((Number) value).longValue();
 		}
+		else if (value instanceof String) {
+			return parseDateHeader(name, (String) value);
+		}
 		else if (value != null) {
 			throw new IllegalArgumentException(
-					"Value for header '" + name + "' is neither a Date nor a Number: " + value);
+					"Value for header '" + name + "' is not a Date, Number, or String: " + value);
 		}
 		else {
 			return -1L;
 		}
+	}
+
+	private long parseDateHeader(String name, String value) {
+		for (String dateFormat : DATE_FORMATS) {
+			SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.US);
+			simpleDateFormat.setTimeZone(GMT);
+			try {
+				return simpleDateFormat.parse(value).getTime();
+			}
+			catch (ParseException ex) {
+				// ignore
+			}
+		}
+		throw new IllegalArgumentException("Cannot parse date value '" + value + "' for '" + name + "' header");
 	}
 
 	@Override
@@ -1171,7 +1212,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	@Override
 	public Collection<Part> getParts() throws IOException, IllegalStateException, ServletException {
 		List<Part> result = new LinkedList<Part>();
-		for(List<Part> list : this.parts.values()) {
+		for (List<Part> list : this.parts.values()) {
 			result.addAll(list);
 		}
 		return result;
