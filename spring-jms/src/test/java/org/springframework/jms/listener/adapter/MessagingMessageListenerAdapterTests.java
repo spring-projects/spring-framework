@@ -27,6 +27,7 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.jms.Topic;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -236,7 +237,21 @@ public class MessagingMessageListenerAdapterTests {
 		verify(reply).setObjectProperty("foo", "bar");
 	}
 
-	private TextMessage testReplyWithJackson(String methodName, String replyContent) throws JMSException {
+	@Test
+	public void replyJacksonMessageAndJsonView() throws JMSException {
+		TextMessage reply = testReplyWithJackson("replyJacksonMessageAndJsonView",
+				"{\"name\":\"Response\"}");
+		verify(reply).setObjectProperty("foo", "bar");
+	}
+
+	@Test
+	public void replyJacksonPojoAndJsonView() throws JMSException {
+		TextMessage reply = testReplyWithJackson("replyJacksonPojoAndJsonView",
+				"{\"name\":\"Response\"}");
+		verify(reply, never()).setObjectProperty("foo", "bar");
+	}
+
+	public TextMessage testReplyWithJackson(String methodName, String replyContent) throws JMSException {
 		Queue replyDestination = mock(Queue.class);
 
 		Session session = mock(Session.class);
@@ -327,6 +342,17 @@ public class MessagingMessageListenerAdapterTests {
 					.setHeader("foo", "bar").build();
 		}
 
+		@JsonView(Summary.class)
+		public Message<SampleResponse> replyJacksonMessageAndJsonView(Message<String> input) {
+			return MessageBuilder.withPayload(createSampleResponse(input.getPayload()))
+					.setHeader("foo", "bar").build();
+		}
+
+		@JsonView(Summary.class)
+		public SampleResponse replyJacksonPojoAndJsonView(Message<String> input) {
+			return createSampleResponse(input.getPayload());
+		}
+
 		private SampleResponse createSampleResponse(String name) {
 			return new SampleResponse(name, "lengthy description");
 		}
@@ -340,14 +366,21 @@ public class MessagingMessageListenerAdapterTests {
 		}
 	}
 
+	interface Summary {};
+	interface Full extends Summary {};
 
 	private static class SampleResponse {
 
 		private int counter = 42;
 
+		@JsonView(Summary.class)
 		private String name;
 
+		@JsonView(Full.class)
 		private String description;
+
+		SampleResponse() {
+		}
 
 		public SampleResponse(String name, String description) {
 			this.name = name;
