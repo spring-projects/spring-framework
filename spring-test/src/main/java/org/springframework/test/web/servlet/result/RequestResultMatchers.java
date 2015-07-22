@@ -125,7 +125,7 @@ public class RequestResultMatchers {
 			@SuppressWarnings("unchecked")
 			public void match(MvcResult result) {
 				T value = (T) result.getRequest().getAttribute(name);
-				assertThat("Request attribute", value, matcher);
+				assertThat("Request attribute '" + name + "'", value, matcher);
 			}
 		};
 	}
@@ -137,7 +137,7 @@ public class RequestResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) {
-				assertEquals("Request attribute", expectedValue, result.getRequest().getAttribute(name));
+				assertEquals("Request attribute '" + name + "'", expectedValue, result.getRequest().getAttribute(name));
 			}
 		};
 	}
@@ -151,7 +151,7 @@ public class RequestResultMatchers {
 			@SuppressWarnings("unchecked")
 			public void match(MvcResult result) {
 				T value = (T) result.getRequest().getSession().getAttribute(name);
-				assertThat("Session attribute", value, matcher);
+				assertThat("Session attribute '" + name + "'", value, matcher);
 			}
 		};
 	}
@@ -163,7 +163,7 @@ public class RequestResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) {
-				assertEquals("Session attribute", value, result.getRequest().getSession().getAttribute(name));
+				assertEquals("Session attribute '" + name + "'", value, result.getRequest().getSession().getAttribute(name));
 			}
 		};
 	}
