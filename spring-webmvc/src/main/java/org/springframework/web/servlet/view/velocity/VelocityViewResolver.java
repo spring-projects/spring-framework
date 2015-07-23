@@ -40,6 +40,7 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * @see #setDateToolAttribute
  * @see #setNumberToolAttribute
  * @see VelocityView
+ * @deprecated as of Spring 4.3, will be removed in a future release
  */
 public class VelocityViewResolver extends AbstractTemplateViewResolver {
 

@@ -26,6 +26,7 @@ import org.apache.velocity.app.VelocityEngine;
  * @author Rod Johnson
  * @see VelocityConfigurer
  * @see VelocityView
+ * @deprecated as of Spring 4.3, will be removed in a future release
  */
 public interface VelocityConfig {
 

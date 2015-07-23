@@ -16,15 +16,14 @@
 
 package org.springframework.web.servlet.view.velocity;
 
-import java.io.StringWriter;
-import java.util.Locale;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.velocity.Template;
 import org.apache.velocity.context.Context;
 import org.apache.velocity.exception.ResourceNotFoundException;
-
 import org.springframework.core.NestedIOException;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.StringWriter;
+import java.util.Locale;
 
 /**
  * VelocityLayoutView emulates the functionality offered by Velocity's
@@ -50,6 +49,7 @@ import org.springframework.core.NestedIOException;
  * @see #setLayoutUrl
  * @see #setLayoutKey
  * @see #setScreenContentKey
+ * @deprecated as of Spring 4.3, will be removed in a future release
  */
 public class VelocityLayoutView extends VelocityToolboxView {
 
