@@ -46,6 +46,7 @@ import org.springframework.context.ResourceLoaderAware;
  * @see #setVelocityProperties
  * @see #setResourceLoaderPath
  * @see org.springframework.web.servlet.view.velocity.VelocityConfigurer
+ * @deprecated as of Spring 4.3, will be removed in a future release
  */
 public class VelocityEngineFactoryBean extends VelocityEngineFactory
 		implements FactoryBean<VelocityEngine>, InitializingBean, ResourceLoaderAware {

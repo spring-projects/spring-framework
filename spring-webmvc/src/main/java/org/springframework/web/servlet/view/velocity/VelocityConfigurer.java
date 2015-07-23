@@ -16,17 +16,16 @@
 
 package org.springframework.web.servlet.view.velocity;
 
-import java.io.IOException;
-import javax.servlet.ServletContext;
-
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.VelocityException;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.ui.velocity.VelocityEngineFactory;
 import org.springframework.web.context.ServletContextAware;
+
+import javax.servlet.ServletContext;
+import java.io.IOException;
 
 /**
  * JavaBean to configure Velocity for web usage, via the "configLocation"
@@ -69,6 +68,7 @@ import org.springframework.web.context.ServletContextAware;
  * @see #setResourceLoaderPath
  * @see #setVelocityEngine
  * @see VelocityView
+ * @deprecated as of Spring 4.3, will be removed in a future release
  */
 public class VelocityConfigurer extends VelocityEngineFactory
 		implements VelocityConfig, InitializingBean, ResourceLoaderAware, ServletContextAware {

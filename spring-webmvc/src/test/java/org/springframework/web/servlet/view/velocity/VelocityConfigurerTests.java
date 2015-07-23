@@ -43,6 +43,7 @@ import static org.junit.Assert.*;
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @deprecated as of Spring 4.3, will be removed in a future release
  */
 public class VelocityConfigurerTests extends TestCase {
 

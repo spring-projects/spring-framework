@@ -69,6 +69,7 @@ import org.springframework.util.StringUtils;
  * @see VelocityEngineFactoryBean
  * @see org.springframework.web.servlet.view.velocity.VelocityConfigurer
  * @see org.apache.velocity.app.VelocityEngine
+ * @deprecated as of Spring 4.3, will be removed in a future release
  */
 public class VelocityEngineFactory {
 

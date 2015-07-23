@@ -16,16 +16,10 @@
 
 package org.springframework.web.servlet.view.velocity;
 
-import java.util.HashMap;
-import java.util.Map;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletResponse;
-
 import junit.framework.TestCase;
 import org.apache.velocity.Template;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.context.Context;
-
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
@@ -39,10 +33,16 @@ import org.springframework.web.servlet.support.RequestContext;
 import org.springframework.web.servlet.theme.FixedThemeResolver;
 import org.springframework.web.servlet.view.DummyMacroRequestContext;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author Darren Davison
  * @author Juergen Hoeller
  * @since 18.06.2004
+ * @deprecated as of Spring 4.3, will be removed in a future release
  */
 public class VelocityMacroTests extends TestCase {
 

@@ -31,6 +31,7 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * @see #setLayoutUrl
  * @see #setLayoutKey
  * @see #setScreenContentKey
+ * @deprecated as of Spring 4.3, will be removed in a future release
  */
 public class VelocityLayoutViewResolver extends VelocityViewResolver {
 

@@ -16,18 +16,17 @@
 
 package org.springframework.ui.velocity;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-
 import org.apache.commons.collections.ExtendedProperties;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.runtime.resource.Resource;
 import org.apache.velocity.runtime.resource.loader.ResourceLoader;
-
 import org.springframework.util.StringUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
 
 /**
  * Velocity ResourceLoader adapter that loads via a Spring ResourceLoader.
@@ -47,6 +46,7 @@ import org.springframework.util.StringUtils;
  * @see VelocityEngineFactory#setResourceLoaderPath
  * @see org.springframework.core.io.ResourceLoader
  * @see org.apache.velocity.runtime.resource.loader.FileResourceLoader
+ * @deprecated as of Spring 4.3, will be removed in a future release
  */
 public class SpringResourceLoader extends ResourceLoader {
 

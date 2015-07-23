@@ -1,10 +1,5 @@
 package org.springframework.web.servlet.view.velocity;
 
-import java.util.HashMap;
-import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.velocity.Template;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.context.Context;
@@ -13,11 +8,15 @@ import org.apache.velocity.tools.generic.MathTool;
 import org.apache.velocity.tools.view.context.ChainedContext;
 import org.apache.velocity.tools.view.tools.LinkTool;
 import org.junit.Test;
-
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -25,6 +24,7 @@ import static org.junit.Assert.*;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Dave Syer
+ * @deprecated as of Spring 4.3, will be removed in a future release
  */
 public class VelocityToolboxViewTests {
 
