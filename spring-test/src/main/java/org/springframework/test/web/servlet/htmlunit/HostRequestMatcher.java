@@ -5,7 +5,7 @@
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.springframework.test.web.servlet.htmlunit;
 
 import java.net.URL;
@@ -23,50 +24,45 @@ import java.util.Set;
 import com.gargoylesoftware.htmlunit.WebRequest;
 
 /**
- * <p>
- * An implementation of WebRequestMatcher that allows matching on the host and optionally
- * the port of WebRequest#getUrl(). For example, the following would match any request to
- * the host "code.jquery.com" without regard for the port:
- * </p>
+ * A {@link WebRequestMatcher} that allows matching on the host and optionally
+ * the port of {@code WebRequest#getUrl()}.
  *
- * <pre>
- * WebRequestMatcher cdnMatcher = new HostMatcher("code.jquery.com");
- * </pre>
+ * <p>For example, the following would match any request to the host
+ * {@code "code.jquery.com"} without regard for the port.
  *
- * Multiple hosts can also be passed in. For example, the following would match an request
- * to the host "code.jquery.com" or the host "cdn.com" without regard for the port:
+ * <pre class="code">WebRequestMatcher cdnMatcher = new HostMatcher("code.jquery.com");</pre>
  *
- * <pre>
- * WebRequestMatcher cdnMatcher = new HostMatcher("code.jquery.com", "cdn.com");
- * </pre>
+ * <p>Multiple hosts can also be passed in. For example, the following would
+ * match any request to the host {@code "code.jquery.com"} or the host
+ * {@code "cdn.com"} without regard for the port.
  *
- * <p>
- * Alternatively, one can also specify the port. For example, the following would match
- * any request to the host "code.jquery.com" with the port of 80.
- * </p>
+ * <pre class="code">WebRequestMatcher cdnMatcher = new HostMatcher("code.jquery.com", "cdn.com");</pre>
  *
- * <pre>
- * WebRequestMatcher cdnMatcher = new HostMatcher("code.jquery.com:80");
- * </pre>
+ * <p>Alternatively, one can also specify the port. For example, the following would match
+ * any request to the host {@code "code.jquery.com"} with the port of {@code 80}.
  *
- * <p>
- * The above cdnMatcher would match: "http://code.jquery.com/jquery.js" (default port of
- * 80) and "http://code.jquery.com:80/jquery.js". However, it would not match
- * "https://code.jquery.com/jquery.js" (default port of 443).
- * </p>
+ * <pre class="code">WebRequestMatcher cdnMatcher = new HostMatcher("code.jquery.com:80");</pre>
+ *
+ * <p>The above {@code cdnMatcher} would match {@code "http://code.jquery.com/jquery.js"}
+ * which has a default port of {@code 80} and {@code "http://code.jquery.com:80/jquery.js"}.
+ * However, it would not match {@code "https://code.jquery.com/jquery.js"}
+ * which has a default port of {@code 443}.
  *
  * @author Rob Winch
+ * @author Sam Brannen
  * @since 4.2
  * @see UrlRegexRequestMatcher
  * @see org.springframework.test.web.servlet.htmlunit.DelegatingWebConnection
  */
 public final class HostRequestMatcher implements WebRequestMatcher {
+
 	private final Set<String> hosts = new HashSet<String>();
 
+
 	/**
-	 * Creates a new instance
-	 *
-	 * @param hosts the hosts to match on (i.e. "localhost", "example.com:443")
+	 * Create a new {@code HostRequestMatcher} for the given hosts &mdash;
+	 * for example: {@code "localhost"}, {@code "example.com:443"}, etc.
+	 * @param hosts the hosts to match on
 	 */
 	public HostRequestMatcher(String... hosts) {
 		this.hosts.addAll(Arrays.asList(hosts));
@@ -77,16 +73,17 @@ public final class HostRequestMatcher implements WebRequestMatcher {
 		URL url = request.getUrl();
 		String host = url.getHost();
 
-		if(hosts.contains(host)) {
+		if (this.hosts.contains(host)) {
 			return true;
 		}
 
 		int port = url.getPort();
-		if(port == -1) {
+		if (port == -1) {
 			port = url.getDefaultPort();
 		}
 		String hostAndPort = host + ":" + port;
 
-		return hosts.contains(hostAndPort);
+		return this.hosts.contains(hostAndPort);
 	}
+
 }

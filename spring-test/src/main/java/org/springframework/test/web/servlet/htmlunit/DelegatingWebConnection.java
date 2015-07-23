@@ -5,7 +5,7 @@
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -13,23 +13,27 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.springframework.test.web.servlet.htmlunit;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.util.Assert;
+
 import com.gargoylesoftware.htmlunit.WebConnection;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 
-import org.springframework.util.Assert;
-
 /**
- * <p>
- * Implementation of WebConnection that allows delegating to various WebConnection implementations. For example, if
- * you host your JavaScript on the domain code.jquery.com, you might want to use the following:</p>
- * <pre>
+ * Implementation of {@link WebConnection} that allows delegating to various
+ * {@code WebConnection} implementations.
+ *
+ * <p>For example, if you host your JavaScript on the domain {@code code.jquery.com},
+ * you might want to use the following.
+ *
+ * <pre class="code">
  * WebClient webClient = new WebClient();
  *
  * MockMvc mockMvc = ...
@@ -45,37 +49,46 @@ import org.springframework.util.Assert;
  * WebClient webClient = new WebClient();
  * webClient.setWebConnection(webConnection);
  * </pre>
+ *
  * @author Rob Winch
+ * @author Sam Brannen
  * @since 4.2
  */
 public final class DelegatingWebConnection implements WebConnection {
+
 	private final List<DelegateWebConnection> connections;
+
 	private final WebConnection defaultConnection;
 
+
 	public DelegatingWebConnection(WebConnection defaultConnection, List<DelegateWebConnection> connections) {
-		Assert.notNull(defaultConnection, "defaultConnection cannot be null");
-		Assert.notEmpty(connections, "connections cannot be empty");
+		Assert.notNull(defaultConnection, "defaultConnection must not be null");
+		Assert.notEmpty(connections, "connections must not be empty");
 		this.connections = connections;
 		this.defaultConnection = defaultConnection;
 	}
 
-	public DelegatingWebConnection(WebConnection defaultConnection,DelegateWebConnection... connections) {
+	public DelegatingWebConnection(WebConnection defaultConnection, DelegateWebConnection... connections) {
 		this(defaultConnection, Arrays.asList(connections));
 	}
 
 	@Override
 	public WebResponse getResponse(WebRequest request) throws IOException {
-		for(DelegateWebConnection connection : connections) {
-			if(connection.getMatcher().matches(request)) {
+		for (DelegateWebConnection connection : this.connections) {
+			if (connection.getMatcher().matches(request)) {
 				return connection.getDelegate().getResponse(request);
 			}
 		}
-		return defaultConnection.getResponse(request);
+		return this.defaultConnection.getResponse(request);
 	}
 
-	public final static class DelegateWebConnection {
+
+	public static final class DelegateWebConnection {
+
 		private final WebRequestMatcher matcher;
+
 		private final WebConnection delegate;
+
 
 		public DelegateWebConnection(WebRequestMatcher matcher, WebConnection delegate) {
 			this.matcher = matcher;
@@ -90,4 +103,5 @@ public final class DelegatingWebConnection implements WebConnection {
 			return delegate;
 		}
 	}
+
 }

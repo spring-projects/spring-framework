@@ -5,7 +5,7 @@
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -13,10 +13,23 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.springframework.test.web.servlet.htmlunit;
 
 import java.net.URL;
 import java.util.Collections;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.htmlunit.DelegatingWebConnection.DelegateWebConnection;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.gargoylesoftware.htmlunit.HttpWebConnection;
 import com.gargoylesoftware.htmlunit.Page;
@@ -26,29 +39,20 @@ import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.WebResponseData;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
+
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.Matchers.isEmptyString;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import static org.mockito.Mockito.*;
-import org.mockito.runners.MockitoJUnitRunner;
-import static org.springframework.test.web.servlet.htmlunit.DelegatingWebConnection.DelegateWebConnection;
-
-import org.springframework.stereotype.Controller;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 /**
  * @author Rob Winch
+ * @since 4.2
  */
 @RunWith(MockitoJUnitRunner.class)
 public class DelegatingWebConnectionTests {
-	private DelegatingWebConnection webConnection;
 
 	@Mock
 	private WebRequestMatcher matcher1;
@@ -61,6 +65,7 @@ public class DelegatingWebConnectionTests {
 	@Mock
 	private WebConnection connection2;
 
+	private DelegatingWebConnection webConnection;
 	private WebRequest request;
 	private WebResponse expectedResponse;
 
@@ -134,4 +139,5 @@ public class DelegatingWebConnectionTests {
 
 	@Controller
 	static class TestController {}
+
 }

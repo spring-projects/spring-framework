@@ -5,7 +5,7 @@
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -13,24 +13,28 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.springframework.test.web.servlet.htmlunit;
 
 import java.io.IOException;
 
-import com.gargoylesoftware.htmlunit.Page;
-import com.gargoylesoftware.htmlunit.WebClient;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import com.gargoylesoftware.htmlunit.Page;
+import com.gargoylesoftware.htmlunit.WebClient;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
+
 /**
  * @author Rob Winch
+ * @since 4.2
  */
 public class MockMvcWebConnectionTests {
+
 	MockMvc mockMvc;
 
 	WebClient webClient;
@@ -89,4 +93,5 @@ public class MockMvcWebConnectionTests {
 	public void contextPathEndsWithSlash() throws IOException {
 		new MockMvcWebConnection(mockMvc, "/context/");
 	}
+
 }

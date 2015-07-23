@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.servlet.htmlunit;
 
 import java.net.MalformedURLException;
@@ -28,19 +29,10 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpSession;
 
-import com.gargoylesoftware.htmlunit.CookieManager;
-import com.gargoylesoftware.htmlunit.HttpMethod;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebRequest;
-import com.gargoylesoftware.htmlunit.util.NameValuePair;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
 import org.junit.Before;
 import org.junit.Test;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockServletContext;
@@ -48,12 +40,21 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import com.gargoylesoftware.htmlunit.HttpMethod;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebRequest;
+import com.gargoylesoftware.htmlunit.util.NameValuePair;
+
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+
 /**
- *
  * @author Rob Winch
- *
+ * @since 4.2
  */
 public class HtmlUnitRequestBuilderTests {
+
 	private WebRequest webRequest;
 
 	private ServletContext servletContext;
@@ -63,6 +64,7 @@ public class HtmlUnitRequestBuilderTests {
 	private WebClient webClient;
 
 	private HtmlUnitRequestBuilder requestBuilder;
+
 
 	@Before
 	public void setUp() throws Exception {
@@ -779,4 +781,5 @@ public class HtmlUnitRequestBuilderTests {
 	private String getContextPath() {
 		return (String) ReflectionTestUtils.getField(requestBuilder, "contextPath");
 	}
+
 }

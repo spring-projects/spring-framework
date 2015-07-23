@@ -5,7 +5,7 @@
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -13,31 +13,38 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.springframework.test.web.servlet.htmlunit.webdriver;
+
+import org.openqa.selenium.Capabilities;
+import org.openqa.selenium.htmlunit.HtmlUnitDriver;
+
+import org.springframework.test.web.servlet.htmlunit.MockMvcWebConnection;
+import org.springframework.util.Assert;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebConnection;
-import org.openqa.selenium.Capabilities;
-import org.openqa.selenium.htmlunit.HtmlUnitDriver;
-
-import org.springframework.util.Assert;
 
 /**
- * <p>
- * Allows configuring the WebConnection for an HtmlUnitDriver instance. This is useful
- * because it allows a MockMvcWebConnection to be injected.
- * </p>
+ * {@code WebConnectionHtmlUnitDriver} enables configuration of the
+ * {@link WebConnection} for an {@link HtmlUnitDriver} instance.
+ *
+ * <p>This is useful because it allows a {@link MockMvcWebConnection} to
+ * be injected.
  *
  * @author Rob Winch
+ * @author Sam Brannen
  * @since 4.2
  * @see MockMvcHtmlUnitDriverBuilder
  */
 public class WebConnectionHtmlUnitDriver extends HtmlUnitDriver {
+
 	private WebClient webClient;
 
-	public WebConnectionHtmlUnitDriver(BrowserVersion version) {
-		super(version);
+
+	public WebConnectionHtmlUnitDriver(BrowserVersion browserVersion) {
+		super(browserVersion);
 	}
 
 	public WebConnectionHtmlUnitDriver() {
@@ -52,45 +59,48 @@ public class WebConnectionHtmlUnitDriver extends HtmlUnitDriver {
 	}
 
 	/**
-	 * Captures the WebClient that is used so that its WebConnection is accessible.
-	 *
-	 * @param client The client to modify
-	 * @return The modified client
+	 * Modify the supplied {@link WebClient}, {@linkplain #configureWebClient
+	 * configure} it, and retain a reference to it so that its {@link WebConnection}
+	 * is {@linkplain #getWebConnection accessible} for later use.
+	 * @param client the client to modify
+	 * @return the modified client
+	 * @see org.openqa.selenium.htmlunit.HtmlUnitDriver#modifyWebClient(WebClient)
 	 */
 	@Override
-	protected final WebClient modifyWebClient(WebClient client) {
-		webClient = super.modifyWebClient(client);
-		webClient = configureWebClient(webClient);
-		return webClient;
+	protected final WebClient modifyWebClient(WebClient webClient) {
+		this.webClient = super.modifyWebClient(webClient);
+		this.webClient = configureWebClient(this.webClient);
+		return this.webClient;
 	}
 
 	/**
-	 * Subclasses can override this method to customise the WebClient that the HtmlUnit
-	 * driver uses.
-	 *
-	 * @param client The client to modify
-	 * @return The modified client
+	 * Configure the supplied {@link WebClient}.
+	 * <p>The default implementation simply returns the supplied client
+	 * unmodified.
+	 * <p>Subclasses can override this method to customize the {@code WebClient}
+	 * that the {@link HtmlUnitDriver} driver uses.
+	 * @param client the client to configure
+	 * @return the configured client
 	 */
 	protected WebClient configureWebClient(WebClient client) {
 		return client;
 	}
 
 	/**
-	 * Allows accessing the current WebConnection
-	 *
-	 * @return the current WebConnection
+	 * Access the current {@link WebConnection} for the {@link WebClient}.
+	 * @return the current {@code WebConnection}
 	 */
 	public WebConnection getWebConnection() {
-		return webClient.getWebConnection();
+		return this.webClient.getWebConnection();
 	}
 
 	/**
-	 * Sets the WebConnection to be used.
-	 *
-	 * @param webConnection the WebConnection to use. Cannot be null.
+	 * Set the {@link WebConnection} to be used with the {@link WebClient}.
+	 * @param webConnection the {@code WebConnection} to use; never {@code null}
 	 */
 	public void setWebConnection(WebConnection webConnection) {
-		Assert.notNull(webConnection, "webConnection cannot be null");
+		Assert.notNull(webConnection, "WebConnection must not be null");
 		this.webClient.setWebConnection(webConnection);
 	}
+
 }

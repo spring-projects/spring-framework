@@ -5,7 +5,7 @@
  * use this file except in compliance with the License. You may obtain a copy of
  * the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -13,18 +13,12 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
+
 package org.springframework.test.web.servlet.htmlunit;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-
-import com.gargoylesoftware.htmlunit.CookieManager;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebConnection;
-import com.gargoylesoftware.htmlunit.WebRequest;
-import com.gargoylesoftware.htmlunit.WebResponse;
 
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
@@ -34,31 +28,33 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.htmlunit.webdriver.WebConnectionHtmlUnitDriver;
 import org.springframework.util.Assert;
 
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebConnection;
+import com.gargoylesoftware.htmlunit.WebRequest;
+import com.gargoylesoftware.htmlunit.WebResponse;
+
 /**
- * <p>
- * Allows {@link MockMvc} to transform a {@link WebRequest} into a {@link WebResponse}. This is the core integration
- * with <a href="http://htmlunit.sourceforge.net/">HTML Unit</a>.
- * </p>
- * <p>
- * Example usage can be seen below:
- * </p>
+ * {@code MockMvcWebConnection} enables {@link MockMvc} to transform a
+ * {@link WebRequest} into a {@link WebResponse}.
+ * <p>This is the core integration with <a href="http://htmlunit.sourceforge.net/">HtmlUnit</a>.
+ * <p>Example usage can be seen below.
  *
- * <pre>
+ * <pre class="code">
  * WebClient webClient = new WebClient();
  * MockMvc mockMvc = ...
  * MockMvcWebConnection webConnection = new MockMvcWebConnection(mockMvc);
  * mockConnection.setWebClient(webClient);
  * webClient.setWebConnection(webConnection);
  *
- * ... use webClient as normal ...
+ * // Use webClient as normal ...
  * </pre>
  *
  * @author Rob Winch
+ * @author Sam Brannen
  * @since 4.2
  * @see WebConnectionHtmlUnitDriver
  */
 public final class MockMvcWebConnection implements WebConnection {
-	private WebClient webClient;
 
 	private final Map<String, MockHttpSession> sessions = new HashMap<String, MockHttpSession>();
 
@@ -66,26 +62,32 @@ public final class MockMvcWebConnection implements WebConnection {
 
 	private final String contextPath;
 
+	private WebClient webClient;
+
+
 	/**
-	 * Creates a new instance that assumes the context root of the application is "". For example,
-	 * the URL http://localhost/test/this would use "" as the context root.
-	 *
-	 * @param mockMvc the MockMvc instance to use
+	 * Create a new instance that assumes the context path of the application
+	 * is {@code ""} (i.e., the root context).
+	 * <p>For example, the URL {@code http://localhost/test/this} would use
+	 * {@code ""} as the context path.
+	 * @param mockMvc the {@code MockMvc} instance to use; never {@code null}
 	 */
 	public MockMvcWebConnection(MockMvc mockMvc) {
 		this(mockMvc, "");
 	}
 
 	/**
-	 * Creates a new instance with a specified context root.
-	 *
-	 * @param mockMvc the MockMvc instance to use
-	 * @param contextPath the contextPath to use. The value may be null in which case the first path segment of the URL is turned
-	 * into the contextPath. Otherwise it must conform to {@link HttpServletRequest#getContextPath()} which states it
-	 * can be empty string or it must start with a "/" and not end in a "/".
+	 * Create a new instance with the specified context path.
+	 * <p>The path may be {@code null} in which case the first path segment
+	 * of the URL is turned into the contextPath. Otherwise it must conform
+	 * to {@link javax.servlet.http.HttpServletRequest#getContextPath()}
+	 * which states that it can be an empty string and otherwise must start
+	 * with a "/" character and not end with a "/" character.
+	 * @param mockMvc the {@code MockMvc} instance to use; never {@code null}
+	 * @param contextPath the contextPath to use
 	 */
 	public MockMvcWebConnection(MockMvc mockMvc, String contextPath) {
-		Assert.notNull(mockMvc, "mockMvc cannot be null");
+		Assert.notNull(mockMvc, "mockMvc must not be null");
 		validateContextPath(contextPath);
 
 		this.webClient = new WebClient();
@@ -95,13 +97,13 @@ public final class MockMvcWebConnection implements WebConnection {
 
 	public WebResponse getResponse(WebRequest webRequest) throws IOException {
 		long startTime = System.currentTimeMillis();
-		HtmlUnitRequestBuilder requestBuilder = new HtmlUnitRequestBuilder(sessions, webClient, webRequest);
-		requestBuilder.setContextPath(contextPath);
+		HtmlUnitRequestBuilder requestBuilder = new HtmlUnitRequestBuilder(this.sessions, this.webClient, webRequest);
+		requestBuilder.setContextPath(this.contextPath);
 
 		MockHttpServletResponse httpServletResponse = getResponse(requestBuilder);
 
 		String forwardedUrl = httpServletResponse.getForwardedUrl();
-		while(forwardedUrl != null) {
+		while (forwardedUrl != null) {
 			requestBuilder.setForwardPostProcessor(new ForwardRequestPostProcessor(forwardedUrl));
 			httpServletResponse = getResponse(requestBuilder);
 			forwardedUrl = httpServletResponse.getForwardedUrl();
@@ -111,18 +113,14 @@ public final class MockMvcWebConnection implements WebConnection {
 	}
 
 	public void setWebClient(WebClient webClient) {
-		Assert.notNull(webClient, "webClient cannot be null");
+		Assert.notNull(webClient, "webClient must not be null");
 		this.webClient = webClient;
-	}
-
-	private CookieManager getCookieManager() {
-		return webClient.getCookieManager();
 	}
 
 	private MockHttpServletResponse getResponse(RequestBuilder requestBuilder) throws IOException {
 		ResultActions resultActions;
 		try {
-			resultActions = mockMvc.perform(requestBuilder);
+			resultActions = this.mockMvc.perform(requestBuilder);
 		}
 		catch (Exception e) {
 			throw (IOException) new IOException(e.getMessage()).initCause(e);
@@ -132,19 +130,23 @@ public final class MockMvcWebConnection implements WebConnection {
 	}
 
 	/**
-	 * Performs validation on the contextPath
-	 *
-	 * @param contextPath the contextPath to validate
+	 * Validate the supplied {@code contextPath}.
+	 * <p>If the value is not {@code null}, it must conform to
+	 * {@link javax.servlet.http.HttpServletRequest#getContextPath()} which
+	 * states that it can be an empty string and otherwise must start with
+	 * a "/" character and not end with a "/" character.
+	 * @param contextPath the path to validate
 	 */
-	private static void validateContextPath(String contextPath) {
+	static void validateContextPath(String contextPath) {
 		if (contextPath == null || "".equals(contextPath)) {
 			return;
 		}
-		if (contextPath.endsWith("/")) {
-			throw new IllegalArgumentException("contextPath cannot end with /. Got '" + contextPath + "'");
-		}
 		if (!contextPath.startsWith("/")) {
-			throw new IllegalArgumentException("contextPath must start with /. Got '" + contextPath + "'");
+			throw new IllegalArgumentException("contextPath '" + contextPath + "' must start with '/'.");
+		}
+		if (contextPath.endsWith("/")) {
+			throw new IllegalArgumentException("contextPath '" + contextPath + "' must not end with '/'.");
 		}
 	}
+
 }
