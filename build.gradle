@@ -1027,7 +1027,7 @@ project("spring-test") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
-		testCompile "org.slf4j:slf4j-jcl:${slf4jVersion}"
+		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 	}
 
 	task testNG(type: Test) {
