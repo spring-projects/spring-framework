@@ -1032,6 +1032,7 @@ project("spring-test") {
 		}
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
+		testCompile("org.apache.httpcomponents:httpclient:$httpclientVersion")
 	}
 
 	task testNG(type: Test) {
