@@ -562,6 +562,10 @@ public @interface MyTestConfig {
     @Rule
     public final SpringMethodRule springMethodRule = new SpringMethodRule();
 ----
+* The Spring MVC Test framework now provides first-class support for HtmlUnit,
+  including integration with Selenium's WebDriver, allowing for page-based
+  web application testing without the need to deploy to a Servlet container.
+** See <<spring-mvc-test-server-htmlunit>> for details.
 * `AopTestUtils` is a new testing utility that allows developers to
   obtain a reference to the underlying target object hidden behind one
   or more Spring proxies.
