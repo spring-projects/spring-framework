@@ -16,19 +16,18 @@
 
 package org.springframework.web.servlet.view.velocity;
 
-import java.lang.reflect.Method;
-import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.context.Context;
 import org.apache.velocity.tools.view.ToolboxManager;
 import org.apache.velocity.tools.view.context.ChainedContext;
 import org.apache.velocity.tools.view.servlet.ServletToolboxManager;
-
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.lang.reflect.Method;
+import java.util.Map;
 
 /**
  * {@link VelocityView} subclass which adds support for Velocity Tools toolboxes
@@ -62,6 +61,7 @@ import org.springframework.util.ReflectionUtils;
  * @see #initTool
  * @see org.apache.velocity.tools.view.context.ViewContext
  * @see org.apache.velocity.tools.view.context.ChainedContext
+ * @deprecated as of Spring 4.3, will be removed in a future release
  */
 public class VelocityToolboxView extends VelocityView {
 

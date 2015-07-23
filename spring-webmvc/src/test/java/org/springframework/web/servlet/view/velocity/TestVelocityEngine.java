@@ -16,16 +16,17 @@
 
 package org.springframework.web.servlet.view.velocity;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.velocity.Template;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.ResourceNotFoundException;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author Juergen Hoeller
  * @since 09.10.2004
+ * @deprecated as of Spring 4.3, will be removed in a future release
  */
 public class TestVelocityEngine extends VelocityEngine {
 

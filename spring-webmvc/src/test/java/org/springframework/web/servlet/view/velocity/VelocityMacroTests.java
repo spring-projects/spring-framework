@@ -43,6 +43,7 @@ import org.springframework.web.servlet.view.DummyMacroRequestContext;
  * @author Darren Davison
  * @author Juergen Hoeller
  * @since 18.06.2004
+ * @deprecated as of Spring 4.3, will be removed in a future release
  */
 public class VelocityMacroTests extends TestCase {
 

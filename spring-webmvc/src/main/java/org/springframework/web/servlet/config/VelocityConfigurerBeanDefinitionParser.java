@@ -30,6 +30,7 @@ import org.springframework.beans.factory.xml.ParserContext;
  *
  * @author Rossen Stoyanchev
  * @since 4.1
+ * @deprecated as of Spring 4.3, will be removed in a future release
  */
 public class VelocityConfigurerBeanDefinitionParser extends AbstractSimpleBeanDefinitionParser {
 

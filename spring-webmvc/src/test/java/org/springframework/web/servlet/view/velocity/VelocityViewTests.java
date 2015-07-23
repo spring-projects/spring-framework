@@ -51,6 +51,7 @@ import static org.mockito.BDDMockito.*;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Dave Syer
+ * @deprecated as of Spring 4.3, will be removed in a future release
  */
 public class VelocityViewTests {
 

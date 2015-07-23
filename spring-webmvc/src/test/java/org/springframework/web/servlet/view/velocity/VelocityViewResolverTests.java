@@ -1,22 +1,23 @@
 package org.springframework.web.servlet.view.velocity;
 
-import java.util.Locale;
-
 import org.apache.velocity.Template;
 import org.apache.velocity.app.VelocityEngine;
 import org.junit.Test;
-
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.View;
 import org.springframework.web.servlet.view.InternalResourceView;
 import org.springframework.web.servlet.view.RedirectView;
 
-import static org.junit.Assert.*;
+import java.util.Locale;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Dave Syer
+ * @deprecated as of Spring 4.3, will be removed in a future release
  */
 public class VelocityViewResolverTests {
 

@@ -16,6 +16,13 @@
 
 package org.springframework.web.servlet.view.velocity;
 
+import junit.framework.TestCase;
+import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.exception.VelocityException;
+import org.springframework.core.io.*;
+import org.springframework.ui.velocity.VelocityEngineFactoryBean;
+import org.springframework.ui.velocity.VelocityEngineUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -24,25 +31,13 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
 
-import junit.framework.TestCase;
-import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.exception.VelocityException;
-
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.DescriptiveResource;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.ResourceLoader;
-import org.springframework.core.io.UrlResource;
-import org.springframework.ui.velocity.VelocityEngineFactoryBean;
-import org.springframework.ui.velocity.VelocityEngineUtils;
-
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.Assert.assertThat;
 
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @deprecated as of Spring 4.3, will be removed in a future release
  */
 public class VelocityConfigurerTests extends TestCase {
 

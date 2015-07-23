@@ -16,13 +16,13 @@
 
 package org.springframework.ui.velocity;
 
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.Map;
-
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.VelocityException;
+
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.Map;
 
 /**
  * Utility class for working with a VelocityEngine.
@@ -30,6 +30,7 @@ import org.apache.velocity.exception.VelocityException;
  *
  * @author Juergen Hoeller
  * @since 22.01.2004
+ * @deprecated as of Spring 4.3, will be removed in a future release
  */
 public abstract class VelocityEngineUtils {
 
