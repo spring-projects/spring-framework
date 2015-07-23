@@ -1265,7 +1265,9 @@
 					<xsd:documentation><![CDATA[
 	When set to false, use thread-local ScriptEngine instances instead of one single shared
 	instance. This flag should be set to false for those using non thread-safe script engines
-	and templating libraries, like Handlebars or React running on Nashorn for example.
+	with templating libraries not designed for concurrency, like Handlebars or React
+	running on Nashorn for example. In this case, Java 8u60 or greater is required due to
+	this bug: https://bugs.openjdk.java.net/browse/JDK-8076099.
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>

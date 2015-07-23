@@ -26,10 +26,8 @@ import javax.script.ScriptEngine;
  * <pre class="code">
  *
  * // Add the following to an &#64;Configuration class
- *
  * &#64;Bean
  * public ScriptTemplateConfigurer mustacheConfigurer() {
- *
  *    ScriptTemplateConfigurer configurer = new ScriptTemplateConfigurer();
  *    configurer.setEngineName("nashorn");
  *    configurer.setScripts("mustache.js");
@@ -39,9 +37,9 @@ import javax.script.ScriptEngine;
  * }
  * </pre>
  *
- * <p><b>NOTE:</b> It is possible to use non thread-safe script engines and
- * templating libraries, like Handlebars or React running on Nashorn, by setting
- * the {@link #setSharedEngine sharedEngine} property to {@code false}.
+ * <p><b>NOTE:</b> It is possible to use non thread-safe script engines with
+ * templating libraries not designed for concurrency, like Handlebars or React running on
+ * Nashorn, by setting the {@link #setSharedEngine sharedEngine} property to {@code false}.
  *
  * @author Sebastien Deleuze
  * @since 4.2
@@ -102,8 +100,10 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 	/**
 	 * When set to {@code false}, use thread-local {@link ScriptEngine} instances instead
 	 * of one single shared instance. This flag should be set to {@code false} for those
-	 * using non thread-safe script engines and templating libraries, like Handlebars or
-	 * React running on Nashorn for example.
+	 * using non thread-safe script engines with templating libraries not designed for
+	 * concurrency, like Handlebars or React running on Nashorn for example.
+	 * In this case, Java 8u60 or greater is required due to
+	 * <a href="https://bugs.openjdk.java.net/browse/JDK-8076099">this bug</a>.
 	 * <p>When this flag is set to {@code false}, the script engine must be specified using
 	 * {@link #setEngineName(String)}. Using {@link #setEngine(ScriptEngine)} is not
 	 * possible because multiple instances of the script engine need to be created lazily

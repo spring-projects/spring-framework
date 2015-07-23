@@ -1489,7 +1489,8 @@ It has been tested with:
 To be able to use script templates integration, you need to have available in your classpath
 the script engine:
 
-* http://openjdk.java.net/projects/nashorn/[Nashorn] Javascript engine is provided builtin with Java 8+
+* http://openjdk.java.net/projects/nashorn/[Nashorn] Javascript engine is provided builtin with Java 8+.
+   Using the latest update release available is highly recommended.
 * http://docs.oracle.com/javase/7/docs/technotes/guides/scripting/programmer_guide/#jsengine[Rhino]
    Javascript engine is provided builtin with Java 6 and Java 7.
    Please notice that using Rhino is not recommended since it does not
@@ -1617,10 +1618,19 @@ browser facilities not available in the server-side script engine.
 			configurer.setEngineName("nashorn");
 			configurer.setScripts("polyfill.js", "handlebars.js", "render.js");
 			configurer.setRenderFunction("render");
+			configurer.setSharedEngine(false);
 			return configurer;
 		}
 	}
 ----
+
+[NOTE]
+====
+Setting the `sharedEngine` property to `false` is required when using non thread-safe
+script engines with templating libraries not designed for concurrency, like Handlebars or
+React running on Nashorn for example. In that case, Java 8u60 or greater is required due
+to https://bugs.openjdk.java.net/browse/JDK-8076099[this bug].
+====
 
 `polyfill.js` only defines the `window` object needed by Handlebars to run properly:
 
