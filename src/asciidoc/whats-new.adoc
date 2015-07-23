@@ -420,7 +420,8 @@ method has been added.
    `@TestPropertySource`, `@Transactional`, `@ControllerAdvice`,
    `@CookieValue`, `@CrossOrigin`, `@MatrixVariable`, `@RequestHeader`,
    `@RequestMapping`, `@RequestParam`, `@RequestPart`, `@ResponseStatus`,
-   `@SessionAttributes`, `@ActionMapping`, `@RenderMapping`.
+   `@SessionAttributes`, `@ActionMapping`, `@RenderMapping`,
+   `@EventListener`, `@TransactionalEventListener`.
 ** For example, `@ContextConfiguration` from the `spring-test` module
    is now declared as follows:
 [source,java,indent=0]
