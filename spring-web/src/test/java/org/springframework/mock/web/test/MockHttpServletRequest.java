@@ -134,7 +134,8 @@ public class MockHttpServletRequest implements HttpServletRequest {
 			"EEE MMM dd HH:mm:ss yyyy"
 	};
 
-	private static TimeZone GMT = TimeZone.getTimeZone("GMT");
+	private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
+
 
 	private boolean active = true;
 
@@ -696,7 +697,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	/**
-	 * Returns the first preferred {@linkplain Locale locale} configured
+	 * Return the first preferred {@linkplain Locale locale} configured
 	 * in this mock request.
 	 * <p>If no locales have been explicitly configured, the default,
 	 * preferred {@link Locale} for the <em>server</em> mocked by this
@@ -714,7 +715,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	/**
-	 * Returns an {@linkplain Enumeration enumeration} of the preferred
+	 * Return an {@linkplain Enumeration enumeration} of the preferred
 	 * {@linkplain Locale locales} configured in this mock request.
 	 * <p>If no locales have been explicitly configured, the default,
 	 * preferred {@link Locale} for the <em>server</em> mocked by this
@@ -743,7 +744,7 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	}
 
 	/**
-	 * Returns {@code true} if the {@link #setSecure secure} flag has been set
+	 * Return {@code true} if the {@link #setSecure secure} flag has been set
 	 * to {@code true} or if the {@link #getScheme scheme} is {@code https}.
 	 * @see javax.servlet.ServletRequest#isSecure()
 	 */
@@ -875,16 +876,18 @@ public class MockHttpServletRequest implements HttpServletRequest {
 
 	/**
 	 * Add a header entry for the given name.
-	 * <p>While this method can take any {@code Object} as a parameter,
-	 * it is recommended to use the following types:
+	 * <p>While this method can take any {@code Object} as a parameter, it
+	 * is recommended to use the following types:
 	 * <ul>
-	 *   <li>String or any Object to be converted using {@code toString}, see {@link #getHeader}</li>
-	 *   <li>String, Number or Date for date headers, see {@link #getDateHeader}</li>
-	 *   <li>String or Number for integer headers, see {@link #getIntHeader}</li>
-	 * 	 <li>{@code String[]} and {@code Collection<String>} for multiple values, see {@link #getHeaders}</li>
+	 * <li>String or any Object to be converted using {@code toString()}; see {@link #getHeader}.</li>
+	 * <li>String, Number, or Date for date headers; see {@link #getDateHeader}.</li>
+	 * <li>String or Number for integer headers; see {@link #getIntHeader}.</li>
+	 * <li>{@code String[]} or {@code Collection<String>} for multiple values; see {@link #getHeaders}.</li>
 	 * </ul>
 	 * @see #getHeaderNames
 	 * @see #getHeaders
+	 * @see #getHeader
+	 * @see #getDateHeader
 	 */
 	public void addHeader(String name, Object value) {
 		if (CONTENT_TYPE_HEADER.equalsIgnoreCase(name)) {
@@ -918,9 +921,9 @@ public class MockHttpServletRequest implements HttpServletRequest {
 	 * <p>If the internal value representation is a String, this method will try
 	 * to parse it as a date using the supported date formats:
 	 * <ul>
-	 *   <li>"EEE, dd MMM yyyy HH:mm:ss zzz"</li>
-	 *   <li>"EEE, dd-MMM-yy HH:mm:ss zzz"</li>
-	 *   <li>"EEE MMM dd HH:mm:ss yyyy"</li>
+	 * <li>"EEE, dd MMM yyyy HH:mm:ss zzz"</li>
+	 * <li>"EEE, dd-MMM-yy HH:mm:ss zzz"</li>
+	 * <li>"EEE MMM dd HH:mm:ss yyyy"</li>
 	 * </ul>
 	 * @param name the header name
 	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
