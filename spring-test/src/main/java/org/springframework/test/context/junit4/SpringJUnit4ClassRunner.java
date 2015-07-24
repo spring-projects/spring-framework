@@ -85,7 +85,6 @@ import org.springframework.util.ReflectionUtils;
  * @see org.springframework.test.context.junit4.rules.SpringClassRule
  * @see org.springframework.test.context.junit4.rules.SpringMethodRule
  */
-@SuppressWarnings("deprecation")
 public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 
 	private static final Log logger = LogFactory.getLog(SpringJUnit4ClassRunner.class);
@@ -351,6 +350,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 * @see #getJUnitTimeout(FrameworkMethod)
 	 */
 	@Override
+	@SuppressWarnings("deprecation")
 	protected Statement withPotentialTimeout(FrameworkMethod frameworkMethod, Object testInstance, Statement next) {
 		Statement statement = null;
 		long springTimeout = getSpringTimeout(frameworkMethod);
