@@ -545,7 +545,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * Return the primary Validator to apply after each binding step, if any.
 	 */
 	public Validator getValidator() {
-		return this.validators.size() > 0 ? this.validators.get(0) : null;
+		return (this.validators.size() > 0 ? this.validators.get(0) : null);
 	}
 
 	/**

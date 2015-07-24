@@ -214,8 +214,8 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			if (inputMessage instanceof MappingJacksonInputMessage) {
 				Class<?> deserializationView = ((MappingJacksonInputMessage) inputMessage).getDeserializationView();
 				if (deserializationView != null) {
-					return this.objectMapper.readerWithView(deserializationView)
-							.withType(javaType).readValue(inputMessage.getBody());
+					return this.objectMapper.readerWithView(deserializationView).withType(javaType).
+							readValue(inputMessage.getBody());
 				}
 			}
 			return this.objectMapper.readValue(inputMessage.getBody(), javaType);
@@ -245,8 +245,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 				serializationView = container.getSerializationView();
 				filters = container.getFilters();
 			}
-			if (jackson26Available && type != null && value != null
-					&& TypeUtils.isAssignable(type, value.getClass())) {
+			if (jackson26Available && type != null && value != null && TypeUtils.isAssignable(type, value.getClass())) {
 				javaType = getJavaType(type, null);
 			}
 			ObjectWriter objectWriter;

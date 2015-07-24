@@ -177,7 +177,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		HttpServletResponse response = getResponse();
 		if (lastModifiedTimestamp >= 0 && !this.notModified) {
 			if (response == null || HttpStatus.valueOf(response.getStatus()).is2xxSuccessful()) {
-				this.notModified = isTimeStampNotModified(lastModifiedTimestamp);
+				this.notModified = isTimestampNotModified(lastModifiedTimestamp);
 				if (response != null) {
 					if (this.notModified && supportsNotModifiedStatus()) {
 						response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
@@ -192,7 +192,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	}
 
 	@SuppressWarnings("deprecation")
-	private boolean isTimeStampNotModified(long lastModifiedTimestamp) {
+	private boolean isTimestampNotModified(long lastModifiedTimestamp) {
 		long ifModifiedSince = -1;
 		try {
 			ifModifiedSince = getRequest().getDateHeader(HEADER_IF_MODIFIED_SINCE);
@@ -270,7 +270,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		if (StringUtils.hasLength(etag) && !this.notModified) {
 			if (response == null || HttpStatus.valueOf(response.getStatus()).is2xxSuccessful()) {
 				etag = addEtagPadding(etag);
-				this.notModified = isETagNotModified(etag) && isTimeStampNotModified(lastModifiedTimestamp);
+				this.notModified = isETagNotModified(etag) && isTimestampNotModified(lastModifiedTimestamp);
 				if (response != null) {
 					if (this.notModified && supportsNotModifiedStatus()) {
 						response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);

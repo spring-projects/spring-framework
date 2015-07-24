@@ -21,7 +21,6 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.internal.runners.model.ReflectiveCallable;
@@ -92,8 +91,8 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	private static final Method withRulesMethod;
 
 	static {
-		withRulesMethod = ReflectionUtils.findMethod(SpringJUnit4ClassRunner.class, "withRules", FrameworkMethod.class,
-			Object.class, Statement.class);
+		withRulesMethod = ReflectionUtils.findMethod(SpringJUnit4ClassRunner.class, "withRules",
+				FrameworkMethod.class, Object.class, Statement.class);
 		if (withRulesMethod == null) {
 			throw new IllegalStateException(
 				"Failed to find withRules() method: SpringJUnit4ClassRunner requires JUnit 4.9 or higher.");
@@ -107,12 +106,12 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	private static void ensureSpringRulesAreNotPresent(Class<?> testClass) {
 		for (Field field : testClass.getFields()) {
 			if (SpringClassRule.class.isAssignableFrom(field.getType())) {
-				throw new IllegalStateException(String.format("Detected SpringClassRule field in test class [%s], but "
-						+ "SpringClassRule cannot be used with the SpringJUnit4ClassRunner.", testClass.getName()));
+				throw new IllegalStateException(String.format("Detected SpringClassRule field in test class [%s], " +
+						"but SpringClassRule cannot be used with the SpringJUnit4ClassRunner.", testClass.getName()));
 			}
 			if (SpringMethodRule.class.isAssignableFrom(field.getType())) {
-				throw new IllegalStateException(String.format("Detected SpringMethodRule field in test class [%s], "
-						+ "but SpringMethodRule cannot be used with the SpringJUnit4ClassRunner.", testClass.getName()));
+				throw new IllegalStateException(String.format("Detected SpringMethodRule field in test class [%s], " +
+						"but SpringMethodRule cannot be used with the SpringJUnit4ClassRunner.", testClass.getName()));
 			}
 		}
 	}
@@ -127,7 +126,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	public SpringJUnit4ClassRunner(Class<?> clazz) throws InitializationError {
 		super(clazz);
 		if (logger.isDebugEnabled()) {
-			logger.debug("SpringJUnit4ClassRunner constructor called with [" + clazz + "].");
+			logger.debug("SpringJUnit4ClassRunner constructor called with [" + clazz + "]");
 		}
 		ensureSpringRulesAreNotPresent(clazz);
 		this.testContextManager = createTestContextManager(clazz);
@@ -272,7 +271,6 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 		Object testInstance;
 		try {
 			testInstance = new ReflectiveCallable() {
-
 				@Override
 				protected Object runReflectiveCall() throws Throwable {
 					return createTest();
@@ -290,7 +288,6 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 		statement = withRulesReflectively(frameworkMethod, testInstance, statement);
 		statement = withPotentialRepeat(frameworkMethod, testInstance, statement);
 		statement = withPotentialTimeout(frameworkMethod, testInstance, statement);
-
 		return statement;
 	}
 
@@ -309,8 +306,8 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 */
 	protected boolean isTestMethodIgnored(FrameworkMethod frameworkMethod) {
 		Method method = frameworkMethod.getMethod();
-		return (method.isAnnotationPresent(Ignore.class) || !ProfileValueUtils.isTestEnabledInThisEnvironment(method,
-			getTestClass().getJavaClass()));
+		return (method.isAnnotationPresent(Ignore.class) ||
+				!ProfileValueUtils.isTestEnabledInThisEnvironment(method, getTestClass().getJavaClass()));
 	}
 
 	/**
@@ -334,7 +331,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 */
 	protected Class<? extends Throwable> getExpectedException(FrameworkMethod frameworkMethod) {
 		Test test = frameworkMethod.getAnnotation(Test.class);
-		return ((test != null) && (test.expected() != Test.None.class) ? test.expected() : null);
+		return (test != null && test.expected() != Test.None.class ? test.expected() : null);
 	}
 
 	/**
@@ -356,11 +353,9 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 		long springTimeout = getSpringTimeout(frameworkMethod);
 		long junitTimeout = getJUnitTimeout(frameworkMethod);
 		if (springTimeout > 0 && junitTimeout > 0) {
-			String msg = String.format(
-				"Test method [%s] has been configured with Spring's @Timed(millis=%s) and "
-					+ "JUnit's @Test(timeout=%s) annotations, but only one declaration of "
-					+ "a 'timeout' is permitted per test method.",
-				frameworkMethod.getMethod(), springTimeout, junitTimeout);
+			String msg = String.format("Test method [%s] has been configured with Spring's @Timed(millis=%s) and " +
+							"JUnit's @Test(timeout=%s) annotations, but only one declaration of a 'timeout' is " +
+							"permitted per test method.", frameworkMethod.getMethod(), springTimeout, junitTimeout);
 			logger.error(msg);
 			throw new IllegalStateException(msg);
 		}
@@ -385,7 +380,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	 */
 	protected long getJUnitTimeout(FrameworkMethod frameworkMethod) {
 		Test test = frameworkMethod.getAnnotation(Test.class);
-		return ((test != null) && (test.timeout() > 0) ? test.timeout() : 0);
+		return (test != null && test.timeout() > 0 ? test.timeout() : 0);
 	}
 
 	/**
@@ -410,7 +405,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	protected Statement withBefores(FrameworkMethod frameworkMethod, Object testInstance, Statement statement) {
 		Statement junitBefores = super.withBefores(frameworkMethod, testInstance, statement);
 		return new RunBeforeTestMethodCallbacks(junitBefores, testInstance, frameworkMethod.getMethod(),
-			getTestContextManager());
+				getTestContextManager());
 	}
 
 	/**
@@ -424,7 +419,7 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 	protected Statement withAfters(FrameworkMethod frameworkMethod, Object testInstance, Statement statement) {
 		Statement junitAfters = super.withAfters(frameworkMethod, testInstance, statement);
 		return new RunAfterTestMethodCallbacks(junitAfters, testInstance, frameworkMethod.getMethod(),
-			getTestContextManager());
+				getTestContextManager());
 	}
 
 	/**
