@@ -74,8 +74,7 @@ public class MappingJackson2MessageConverterTests {
 	@Test
 	public void fromMessage() throws Exception {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
-		String payload = "{\"bytes\":\"AQI=\",\"array\":[\"Foo\",\"Bar\"],"
-				+ "\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}";
+		String payload = "{\"bytes\":\"AQI=\",\"array\":[\"Foo\",\"Bar\"],\"number\":42,\"string\":\"Foo\",\"bool\":true,\"fraction\":42.0}";
 		Message<?> message = MessageBuilder.withPayload(payload.getBytes(UTF_8)).build();
 		MyBean actual = (MyBean) converter.fromMessage(message, MyBean.class);
 
@@ -178,20 +177,25 @@ public class MappingJackson2MessageConverterTests {
 	}
 
 	@Test
-	public void jsonView() throws Exception {
+	public void toMessageJsonView() throws Exception {
 		MappingJackson2MessageConverter converter = new MappingJackson2MessageConverter();
 
 		Map<String, Object> map = new HashMap<>();
-		Method method = this.getClass().getDeclaredMethod("handle");
+		Method method = getClass().getDeclaredMethod("jsonViewResponse");
 		MethodParameter returnType = new MethodParameter(method, -1);
-		map.put(AbstractMessageConverter.METHOD_PARAMETER_HINT_HEADER, returnType);
-		MessageHeaders headers = new MessageHeaders(map);
-		Message<?> message = converter.toMessage(handle(), headers);
+		Message<?> message = converter.toMessage(jsonViewResponse(), new MessageHeaders(map), returnType);
 		String actual = new String((byte[]) message.getPayload(), UTF_8);
 
 		assertThat(actual, containsString("\"withView1\":\"with\""));
-		assertThat(actual, not(containsString("\"withView2\":\"with\"")));
-		assertThat(actual, not(containsString("\"withoutView\":\"without\"")));
+		assertThat(actual, containsString("\"withView2\":\"with\""));
+		assertThat(actual, not(containsString("\"withoutView\":\"with\"")));
+
+		method = getClass().getDeclaredMethod("jsonViewPayload", JacksonViewBean.class);
+		MethodParameter param = new MethodParameter(method, 0);
+		JacksonViewBean back = (JacksonViewBean) converter.fromMessage(message, JacksonViewBean.class, param);
+		assertNull(back.getWithView1());
+		assertEquals("with", back.getWithView2());
+		assertNull(back.getWithoutView());
 	}
 
 
@@ -266,7 +270,7 @@ public class MappingJackson2MessageConverterTests {
 		@JsonView(MyJacksonView1.class)
 		private String withView1;
 
-		@JsonView(MyJacksonView2.class)
+		@JsonView({MyJacksonView1.class, MyJacksonView2.class})
 		private String withView2;
 
 		private String withoutView;
@@ -297,12 +301,15 @@ public class MappingJackson2MessageConverterTests {
 	}
 
 	@JsonView(MyJacksonView1.class)
-	public JacksonViewBean handle() {
+	public JacksonViewBean jsonViewResponse() {
 		JacksonViewBean bean = new JacksonViewBean();
 		bean.setWithView1("with");
 		bean.setWithView2("with");
-		bean.setWithoutView("without");
+		bean.setWithoutView("with");
 		return bean;
+	}
+
+	public void jsonViewPayload(@JsonView(MyJacksonView2.class) JacksonViewBean payload) {
 	}
 
 }

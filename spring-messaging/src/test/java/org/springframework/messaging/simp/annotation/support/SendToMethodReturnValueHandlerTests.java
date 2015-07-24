@@ -38,7 +38,6 @@ import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.converter.AbstractMessageConverter;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
@@ -143,7 +142,6 @@ public class SendToMethodReturnValueHandlerTests {
 
 	@Test
 	public void sendToNoAnnotations() throws Exception {
-
 		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		Message<?> inputMessage = createInputMessage("sess1", "sub1", "/app", "/dest", null);
@@ -156,12 +154,11 @@ public class SendToMethodReturnValueHandlerTests {
 		assertEquals("/topic/dest", accessor.getDestination());
 		assertEquals(MIME_TYPE, accessor.getContentType());
 		assertNull("Subscription id should not be copied", accessor.getSubscriptionId());
-		assertEquals(this.noAnnotationsReturnType, accessor.getHeader(AbstractMessageConverter.METHOD_PARAMETER_HINT_HEADER));
+		assertEquals(this.noAnnotationsReturnType, accessor.getHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER));
 	}
 
 	@Test
 	public void sendTo() throws Exception {
-
 		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
@@ -175,19 +172,18 @@ public class SendToMethodReturnValueHandlerTests {
 		assertEquals("/dest1", accessor.getDestination());
 		assertEquals(MIME_TYPE, accessor.getContentType());
 		assertNull("Subscription id should not be copied", accessor.getSubscriptionId());
-		assertEquals(this.sendToReturnType, accessor.getHeader(AbstractMessageConverter.METHOD_PARAMETER_HINT_HEADER));
+		assertEquals(this.sendToReturnType, accessor.getHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER));
 
 		accessor = getCapturedAccessor(1);
 		assertEquals(sessionId, accessor.getSessionId());
 		assertEquals("/dest2", accessor.getDestination());
 		assertEquals(MIME_TYPE, accessor.getContentType());
 		assertNull("Subscription id should not be copied", accessor.getSubscriptionId());
-		assertEquals(this.sendToReturnType, accessor.getHeader(AbstractMessageConverter.METHOD_PARAMETER_HINT_HEADER));
+		assertEquals(this.sendToReturnType, accessor.getHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER));
 	}
 
 	@Test
 	public void sendToDefaultDestination() throws Exception {
-
 		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
@@ -201,12 +197,11 @@ public class SendToMethodReturnValueHandlerTests {
 		assertEquals("/topic/dest", accessor.getDestination());
 		assertEquals(MIME_TYPE, accessor.getContentType());
 		assertNull("Subscription id should not be copied", accessor.getSubscriptionId());
-		assertEquals(this.sendToDefaultDestReturnType, accessor.getHeader(AbstractMessageConverter.METHOD_PARAMETER_HINT_HEADER));
+		assertEquals(this.sendToDefaultDestReturnType, accessor.getHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER));
 	}
 
 	@Test
 	public void sendToDefaultDestinationWhenUsingDotPathSeparator() throws Exception {
-
 		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		Message<?> inputMessage = createInputMessage("sess1", "sub1", "/app/", "dest.foo.bar", null);
@@ -220,7 +215,6 @@ public class SendToMethodReturnValueHandlerTests {
 
 	@Test
 	public void testHeadersToSend() throws Exception {
-
 		Message<?> inputMessage = createInputMessage("sess1", "sub1", "/app", "/dest", null);
 
 		SimpMessageSendingOperations messagingTemplate = Mockito.mock(SimpMessageSendingOperations.class);
@@ -237,12 +231,11 @@ public class SendToMethodReturnValueHandlerTests {
 		assertTrue(accessor.isMutable());
 		assertEquals("sess1", accessor.getSessionId());
 		assertNull("Subscription id should not be copied", accessor.getSubscriptionId());
-		assertEquals(this.noAnnotationsReturnType, accessor.getHeader(AbstractMessageConverter.METHOD_PARAMETER_HINT_HEADER));
+		assertEquals(this.noAnnotationsReturnType, accessor.getHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER));
 	}
 
 	@Test
 	public void sendToUser() throws Exception {
-
 		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
@@ -263,11 +256,8 @@ public class SendToMethodReturnValueHandlerTests {
 		assertEquals("/user/" + user.getName() + "/dest2", accessor.getDestination());
 	}
 
-	// SPR-12170
-
-	@Test
+	@Test  // SPR-12170
 	public void sendToWithDestinationPlaceholders() throws Exception {
-
 		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		Map<String, String> vars = new LinkedHashMap<>(1);
@@ -290,7 +280,6 @@ public class SendToMethodReturnValueHandlerTests {
 
 	@Test
 	public void sendToUserSingleSession() throws Exception {
-
 		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
@@ -305,19 +294,18 @@ public class SendToMethodReturnValueHandlerTests {
 		assertEquals(MIME_TYPE, accessor.getContentType());
 		assertEquals("/user/" + user.getName() + "/dest1", accessor.getDestination());
 		assertNull("Subscription id should not be copied", accessor.getSubscriptionId());
-		assertEquals(this.sendToUserSingleSessionReturnType, accessor.getHeader(AbstractMessageConverter.METHOD_PARAMETER_HINT_HEADER));
+		assertEquals(this.sendToUserSingleSessionReturnType, accessor.getHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER));
 
 		accessor = getCapturedAccessor(1);
 		assertEquals(sessionId, accessor.getSessionId());
 		assertEquals("/user/" + user.getName() + "/dest2", accessor.getDestination());
 		assertEquals(MIME_TYPE, accessor.getContentType());
 		assertNull("Subscription id should not be copied", accessor.getSubscriptionId());
-		assertEquals(this.sendToUserSingleSessionReturnType, accessor.getHeader(AbstractMessageConverter.METHOD_PARAMETER_HINT_HEADER));
+		assertEquals(this.sendToUserSingleSessionReturnType, accessor.getHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER));
 	}
 
 	@Test
 	public void sendToUserWithUserNameProvider() throws Exception {
-
 		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
@@ -336,7 +324,6 @@ public class SendToMethodReturnValueHandlerTests {
 
 	@Test
 	public void sendToUserDefaultDestination() throws Exception {
-
 		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
@@ -354,7 +341,6 @@ public class SendToMethodReturnValueHandlerTests {
 
 	@Test
 	public void sendToUserDefaultDestinationWhenUsingDotPathSeparator() throws Exception {
-
 		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		TestUser user = new TestUser();
@@ -369,7 +355,6 @@ public class SendToMethodReturnValueHandlerTests {
 
 	@Test
 	public void sendToUserDefaultDestinationSingleSession() throws Exception {
-
 		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
@@ -384,12 +369,11 @@ public class SendToMethodReturnValueHandlerTests {
 		assertEquals("/user/" + user.getName() + "/queue/dest", accessor.getDestination());
 		assertEquals(MIME_TYPE, accessor.getContentType());
 		assertNull("Subscription id should not be copied", accessor.getSubscriptionId());
-		assertEquals(this.sendToUserSingleSessionDefaultDestReturnType, accessor.getHeader(AbstractMessageConverter.METHOD_PARAMETER_HINT_HEADER));
+		assertEquals(this.sendToUserSingleSessionDefaultDestReturnType, accessor.getHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER));
 	}
 
 	@Test
 	public void sendToUserSessionWithoutUserName() throws Exception {
-
 		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
@@ -409,7 +393,6 @@ public class SendToMethodReturnValueHandlerTests {
 
 	@Test
 	public void jsonView() throws Exception {
-
 		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
@@ -420,7 +403,7 @@ public class SendToMethodReturnValueHandlerTests {
 		Message<?> message = this.messageCaptor.getValue();
 		assertNotNull(message);
 
-		assertEquals("{\"withView1\":\"with\"}", new String((byte[])message.getPayload(), StandardCharsets.UTF_8));
+		assertEquals("{\"withView1\":\"with\"}", new String((byte[]) message.getPayload(), StandardCharsets.UTF_8));
 	}
 
 
@@ -515,8 +498,8 @@ public class SendToMethodReturnValueHandlerTests {
 	}
 
 
-	private interface MyJacksonView1 {};
-	private interface MyJacksonView2 {};
+	private interface MyJacksonView1 {}
+	private interface MyJacksonView2 {}
 
 	@SuppressWarnings("unused")
 	private static class JacksonViewBean {

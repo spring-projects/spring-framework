@@ -34,7 +34,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.converter.AbstractMessageConverter;
 import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.converter.StringMessageConverter;
 import org.springframework.messaging.core.MessageSendingOperations;
@@ -82,7 +81,6 @@ public class SubscriptionMethodReturnValueHandlerTests {
 
 	@Before
 	public void setup() throws Exception {
-
 		MockitoAnnotations.initMocks(this);
 
 		SimpMessagingTemplate messagingTemplate = new SimpMessagingTemplate(this.messageChannel);
@@ -116,7 +114,6 @@ public class SubscriptionMethodReturnValueHandlerTests {
 
 	@Test
 	public void testMessageSentToChannel() throws Exception {
-
 		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
@@ -138,13 +135,12 @@ public class SubscriptionMethodReturnValueHandlerTests {
 		assertEquals(subscriptionId, headerAccessor.getSubscriptionId());
 		assertEquals(destination, headerAccessor.getDestination());
 		assertEquals(MIME_TYPE, headerAccessor.getContentType());
-		assertEquals(this.subscribeEventReturnType, headerAccessor.getHeader(AbstractMessageConverter.METHOD_PARAMETER_HINT_HEADER));
+		assertEquals(this.subscribeEventReturnType, headerAccessor.getHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER));
 	}
 
 	@Test
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testHeadersPassedToMessagingTemplate() throws Exception {
-
 		String sessionId = "sess1";
 		String subscriptionId = "subs1";
 		String destination = "/dest";
@@ -165,12 +161,11 @@ public class SubscriptionMethodReturnValueHandlerTests {
 		assertTrue(headerAccessor.isMutable());
 		assertEquals(sessionId, headerAccessor.getSessionId());
 		assertEquals(subscriptionId, headerAccessor.getSubscriptionId());
-		assertEquals(this.subscribeEventReturnType, headerAccessor.getHeader(AbstractMessageConverter.METHOD_PARAMETER_HINT_HEADER));
+		assertEquals(this.subscribeEventReturnType, headerAccessor.getHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER));
 	}
 
 	@Test
 	public void testJsonView() throws Exception {
-
 		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
 		String sessionId = "sess1";
@@ -184,7 +179,7 @@ public class SubscriptionMethodReturnValueHandlerTests {
 		Message<?> message = this.messageCaptor.getValue();
 		assertNotNull(message);
 
-		assertEquals("{\"withView1\":\"with\"}", new String((byte[])message.getPayload(), StandardCharsets.UTF_8));
+		assertEquals("{\"withView1\":\"with\"}", new String((byte[]) message.getPayload(), StandardCharsets.UTF_8));
 	}
 
 

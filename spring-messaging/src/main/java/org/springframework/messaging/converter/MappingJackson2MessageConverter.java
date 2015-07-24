@@ -195,15 +195,28 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	}
 
 	@Override
-	public Object convertFromInternal(Message<?> message, Class<?> targetClass) {
+	@SuppressWarnings("deprecation")
+	protected Object convertFromInternal(Message<?> message, Class<?> targetClass, Object conversionHint) {
 		JavaType javaType = this.objectMapper.constructType(targetClass);
 		Object payload = message.getPayload();
+		Class<?> view = getSerializationView(conversionHint);
+		// Note: in the view case, calling withType instead of forType for compatibility with Jackson <2.5
 		try {
 			if (payload instanceof byte[]) {
-				return this.objectMapper.readValue((byte[]) payload, javaType);
+				if (view != null) {
+					return this.objectMapper.readerWithView(view).withType(javaType).readValue((byte[]) payload);
+				}
+				else {
+					return this.objectMapper.readValue((byte[]) payload, javaType);
+				}
 			}
 			else {
-				return this.objectMapper.readValue((String) payload, javaType);
+				if (view != null) {
+					return this.objectMapper.readerWithView(view).withType(javaType).readValue(payload.toString());
+				}
+				else {
+					return this.objectMapper.readValue(payload.toString(), javaType);
+				}
 			}
 		}
 		catch (IOException ex) {
@@ -212,15 +225,15 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	}
 
 	@Override
-	public Object convertToInternal(Object payload, MessageHeaders headers) {
+	protected Object convertToInternal(Object payload, MessageHeaders headers, Object conversionHint) {
 		try {
-			Class<?> serializationView = getSerializationView(headers);
+			Class<?> view = getSerializationView(conversionHint);
 			if (byte[].class == getSerializedPayloadClass()) {
 				ByteArrayOutputStream out = new ByteArrayOutputStream(1024);
 				JsonEncoding encoding = getJsonEncoding(getMimeType(headers));
 				JsonGenerator generator = this.objectMapper.getFactory().createGenerator(out, encoding);
-				if (serializationView != null) {
-					this.objectMapper.writerWithView(serializationView).writeValue(generator, payload);
+				if (view != null) {
+					this.objectMapper.writerWithView(view).writeValue(generator, payload);
 				}
 				else {
 					this.objectMapper.writeValue(generator, payload);
@@ -229,8 +242,8 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 			}
 			else {
 				Writer writer = new StringWriter();
-				if (serializationView != null) {
-					this.objectMapper.writerWithView(serializationView).writeValue(writer, payload);
+				if (view != null) {
+					this.objectMapper.writerWithView(view).writeValue(writer, payload);
 				}
 				else {
 					this.objectMapper.writeValue(writer, payload);
@@ -244,20 +257,40 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 		return payload;
 	}
 
-	private Class<?> getSerializationView(MessageHeaders headers) {
-		MethodParameter returnType = (headers != null ?
-				(MethodParameter) headers.get(METHOD_PARAMETER_HINT_HEADER) : null);
-		if (returnType == null) {
+	/**
+	 * Determine a Jackson serialization view based on the given conversion hint.
+	 * @param conversionHint the conversion hint Object as passed into the
+	 * converter for the current conversion attempt
+	 * @return the serialization view class, or {@code null} if none
+	 */
+	protected Class<?> getSerializationView(Object conversionHint) {
+		if (conversionHint instanceof MethodParameter) {
+			MethodParameter methodParam = (MethodParameter) conversionHint;
+			JsonView annotation = methodParam.getParameterAnnotation(JsonView.class);
+			if (annotation == null) {
+				annotation = methodParam.getMethodAnnotation(JsonView.class);
+				if (annotation == null) {
+					return null;
+				}
+			}
+			return extractViewClass(annotation, conversionHint);
+		}
+		else if (conversionHint instanceof JsonView) {
+			return extractViewClass((JsonView) conversionHint, conversionHint);
+		}
+		else if (conversionHint instanceof Class) {
+			return (Class) conversionHint;
+		}
+		else {
 			return null;
 		}
-		JsonView annotation = returnType.getMethodAnnotation(JsonView.class);
-		if (annotation == null) {
-			return null;
-		}
+	}
+
+	private Class<?> extractViewClass(JsonView annotation, Object conversionHint) {
 		Class<?>[] classes = annotation.value();
 		if (classes.length != 1) {
 			throw new IllegalArgumentException(
-					"@JsonView only supported for handler methods with exactly 1 class argument: " + returnType);
+					"@JsonView only supported for handler methods with exactly 1 class argument: " + conversionHint);
 		}
 		return classes[0];
 	}

@@ -134,7 +134,7 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 	}
 
 	@Override
-	public Object convertFromInternal(Message<?> message, Class<?> targetClass) {
+	protected Object convertFromInternal(Message<?> message, Class<?> targetClass, Object conversionHint) {
 		Assert.notNull(this.unmarshaller, "Property 'unmarshaller' is required");
 		try {
 			Source source = getSource(message.getPayload());
@@ -159,7 +159,7 @@ public class MarshallingMessageConverter extends AbstractMessageConverter {
 	}
 
 	@Override
-	public Object convertToInternal(Object payload, MessageHeaders headers) {
+	protected Object convertToInternal(Object payload, MessageHeaders headers, Object conversionHint) {
 		Assert.notNull(this.marshaller, "Property 'marshaller' is required");
 		try {
 			if (byte[].class == getSerializedPayloadClass()) {
