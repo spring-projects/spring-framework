@@ -962,7 +962,7 @@ public class DispatcherServlet extends FrameworkServlet {
 					return;
 				}
 
-				applyDefaultViewName(request, mv);
+				applyDefaultViewName(processedRequest, mv);
 				mappedHandler.applyPostHandle(processedRequest, response, mv);
 			}
 			catch (Exception ex) {
