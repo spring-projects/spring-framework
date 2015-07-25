@@ -243,7 +243,7 @@ class ConfigurationClassBeanDefinitionReader {
 
 		// Consider scoping
 		ScopedProxyMode proxyMode = ScopedProxyMode.NO;
-		// TODO Determine why type is hard coded to org.springframework.context.annotation.Scope,
+		// TODO [SPR-13280] Determine why type is hard coded to org.springframework.context.annotation.Scope,
 		// since AnnotationScopeMetadataResolver supports a custom scope annotation type.
 		AnnotationAttributes attributes = AnnotationConfigUtils.attributesFor(metadata, Scope.class);
 		if (attributes != null) {
