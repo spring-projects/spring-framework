@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.transaction.TransactionConfiguration;
@@ -33,32 +32,26 @@ import static org.junit.Assert.*;
 import static org.springframework.test.transaction.TransactionTestUtils.*;
 
 /**
- * <p>
  * JUnit 4 based integration test which verifies proper transactional behavior when the
  * {@link TransactionConfiguration#defaultRollback() defaultRollback} attribute
  * of the {@link TransactionConfiguration} annotation is set to <strong>{@code false}</strong>.
- * Also tests configuration of the
+ * <p>Also tests configuration of the
  * {@link TransactionConfiguration#transactionManager() transaction manager name}.
- * </p>
  *
  * @author Sam Brannen
  * @since 2.5
  * @see TransactionConfiguration
+ * @see DefaultRollbackFalseRollbackAnnotationTransactionalTests
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @TransactionConfiguration(transactionManager = "txMgr", defaultRollback = false)
 @Transactional
-public class DefaultRollbackFalseTransactionalSpringRunnerTests extends AbstractTransactionalSpringRunnerTests {
+@SuppressWarnings("deprecation")
+public class DefaultRollbackFalseTransactionalTests extends AbstractTransactionalSpringRunnerTests {
 
-	protected static JdbcTemplate jdbcTemplate;
+	private static JdbcTemplate jdbcTemplate;
 
-
-	@AfterClass
-	public static void verifyFinalTestData() {
-		assertEquals("Verifying the final number of rows in the person table after all tests.", 2,
-			countRowsInPersonTable(jdbcTemplate));
-	}
 
 	@Before
 	public void verifyInitialTestData() {
@@ -75,6 +68,12 @@ public class DefaultRollbackFalseTransactionalSpringRunnerTests extends Abstract
 		assertEquals("Adding jane", 1, addPerson(jdbcTemplate, JANE));
 		assertEquals("Adding sue", 1, addPerson(jdbcTemplate, SUE));
 		assertEquals("Verifying the number of rows in the person table within a transaction.", 2,
+			countRowsInPersonTable(jdbcTemplate));
+	}
+
+	@AfterClass
+	public static void verifyFinalTestData() {
+		assertEquals("Verifying the final number of rows in the person table after all tests.", 2,
 			countRowsInPersonTable(jdbcTemplate));
 	}
 

@@ -55,7 +55,7 @@ import org.springframework.test.context.transaction.programmatic.ProgrammaticTxM
  *
  * <p>Note that tests included in this suite will be executed at least twice if
  * run from an automated build process, test runner, etc. that is not configured
- * to exclude tests based on a &quot;*TestSuite.class&quot; pattern match.
+ * to exclude tests based on a {@code "*TestSuite.class"} pattern match.
  *
  * @author Sam Brannen
  * @since 2.5
@@ -104,10 +104,10 @@ StandardJUnit4FeaturesTests.class,//
 	ConcreteTransactionalJUnit4SpringContextTests.class,//
 	ClassLevelTransactionalSpringRunnerTests.class,//
 	MethodLevelTransactionalSpringRunnerTests.class,//
-	DefaultRollbackTrueTransactionalSpringRunnerTests.class,//
-	DefaultRollbackFalseTransactionalSpringRunnerTests.class,//
-	RollbackOverrideDefaultRollbackTrueTransactionalSpringRunnerTests.class,//
-	RollbackOverrideDefaultRollbackFalseTransactionalSpringRunnerTests.class,//
+	DefaultRollbackTrueTransactionalTests.class,//
+	DefaultRollbackFalseTransactionalTests.class,//
+	RollbackOverrideDefaultRollbackTrueTransactionalTests.class,//
+	RollbackOverrideDefaultRollbackFalseTransactionalTests.class,//
 	BeforeAndAfterTransactionAnnotationTests.class,//
 	TimedTransactionalSpringRunnerTests.class,//
 	ProgrammaticTxMgmtTests.class,//

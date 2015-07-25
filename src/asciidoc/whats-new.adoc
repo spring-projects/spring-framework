@@ -577,6 +577,9 @@ public @interface MyTestConfig {
   _before_ a test -- for example, if some rogue (i.e., yet to be
   determined) test within a large test suite has corrupted the original
   configuration for the `ApplicationContext`.
+* `@Rollback` may now be used to configure class-level _default rollback_ semantics.
+** Consequently, `@TransactionConfiguration` is now deprecated and will be removed in a
+   subsequent release.
 * `@Sql` now supports execution of _inlined SQL statements_ via a new
   `statements` attribute.
 * The `ContextCache` that is used for caching ++ApplicationContext++s

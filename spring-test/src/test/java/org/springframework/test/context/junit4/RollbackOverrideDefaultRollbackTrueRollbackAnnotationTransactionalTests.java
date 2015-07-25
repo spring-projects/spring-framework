@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,57 +16,53 @@
 
 package org.springframework.test.context.junit4;
 
-import javax.annotation.Resource;
 import javax.sql.DataSource;
 
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.transaction.TransactionConfiguration;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.annotation.Rollback;
 
 import static org.junit.Assert.*;
 import static org.springframework.test.transaction.TransactionTestUtils.*;
 
 /**
- * JUnit 4 based integration test which verifies proper transactional behavior when the
- * {@link TransactionConfiguration#defaultRollback() defaultRollback} attribute
- * of the {@link TransactionConfiguration} annotation is set to <strong>{@code true}</strong>.
+ * Extension of {@link DefaultRollbackTrueRollbackAnnotationTransactionalTests}
+ * which tests method-level <em>rollback override</em> behavior via the
+ * {@link Rollback @Rollback} annotation.
  *
  * @author Sam Brannen
- * @since 2.5
- * @see TransactionConfiguration
+ * @since 4.2
+ * @see Rollback
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
-@TransactionConfiguration(defaultRollback = true)
-public class DefaultRollbackTrueTransactionalSpringRunnerTests extends AbstractTransactionalSpringRunnerTests {
+public class RollbackOverrideDefaultRollbackTrueRollbackAnnotationTransactionalTests extends
+		DefaultRollbackTrueRollbackAnnotationTransactionalTests {
 
-	protected static int originalNumRows;
-
-	protected static JdbcTemplate jdbcTemplate;
+	private static JdbcTemplate jdbcTemplate;
 
 
-	@AfterClass
-	public static void verifyFinalTestData() {
-		assertEquals("Verifying the final number of rows in the person table after all tests.", originalNumRows,
-			countRowsInPersonTable(jdbcTemplate));
+	@Autowired
+	@Override
+	public void setDataSource(DataSource dataSource) {
+		jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
+
 	@Before
+	@Override
 	public void verifyInitialTestData() {
-		originalNumRows = clearPersonTable(jdbcTemplate);
+		clearPersonTable(jdbcTemplate);
 		assertEquals("Adding bob", 1, addPerson(jdbcTemplate, BOB));
 		assertEquals("Verifying the initial number of rows in the person table.", 1,
 			countRowsInPersonTable(jdbcTemplate));
 	}
 
-	@Test(timeout = 1000)
-	@Transactional
+	@Test
+	@Rollback(false)
+	@Override
 	public void modifyTestDataWithinTransaction() {
 		assertInTransaction(true);
 		assertEquals("Adding jane", 1, addPerson(jdbcTemplate, JANE));
@@ -75,14 +71,10 @@ public class DefaultRollbackTrueTransactionalSpringRunnerTests extends AbstractT
 			countRowsInPersonTable(jdbcTemplate));
 	}
 
-
-	public static class DatabaseSetup {
-
-		@Resource
-		public void setDataSource(DataSource dataSource) {
-			jdbcTemplate = new JdbcTemplate(dataSource);
-			createPersonTable(jdbcTemplate);
-		}
+	@AfterClass
+	public static void verifyFinalTestData() {
+		assertEquals("Verifying the final number of rows in the person table after all tests.", 3,
+			countRowsInPersonTable(jdbcTemplate));
 	}
 
 }

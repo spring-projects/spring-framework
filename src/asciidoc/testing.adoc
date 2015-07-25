@@ -264,8 +264,7 @@ application context.
 If you want a transaction to commit -- unusual, but occasionally useful when you want a
 particular test to populate or modify the database -- the TestContext framework can be
 instructed to cause the transaction to commit instead of roll back via the
-<<integration-testing-annotations, `@TransactionConfiguration`>> and
-<<integration-testing-annotations, `@Rollback`>> annotations.
+<<integration-testing-annotations, `@Rollback`>> annotation.
 
 See transaction management with the <<testcontext-tx,TestContext framework>>.
 
@@ -798,53 +797,22 @@ in conjunction with `@ContextConfiguration`.
 `@TestExecutionListeners` supports __inherited__ listeners by default. See the javadocs
 for an example and further details.
 
-* `@TransactionConfiguration`
-
-+
-
-Defines class-level metadata for configuring transactional tests. Specifically, the bean
-name of the `PlatformTransactionManager` that should be used to drive transactions can
-be explicitly specified if there are multiple beans of type `PlatformTransactionManager`
-in the test's `ApplicationContext` and if the bean name of the desired
-`PlatformTransactionManager` is not "transactionManager". In addition, you can change
-the `defaultRollback` flag to `false`. Typically, `@TransactionConfiguration` is used in
-conjunction with `@ContextConfiguration`.
-
-+
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	@ContextConfiguration
-	**@TransactionConfiguration**(**transactionManager** = "txMgr", **defaultRollback** = false)
-	public class CustomConfiguredTransactionalTests {
-		// class body...
-	}
-----
-
-+
-
-[NOTE]
-====
-If the default conventions are sufficient for your test configuration, you can avoid
-using `@TransactionConfiguration` altogether. In other words, if you have only one
-transaction manager -- or if you have multiple transaction managers but the transaction
-manager for tests is named "transactionManager" or specified via a
-`TransactionManagementConfigurer` -- and if you want transactions to roll back
-automatically, then there is no need to annotate your test class with
-`@TransactionConfiguration`.
-====
-
 +
 
 * `@Rollback`
 
 +
 
-Indicates whether the transaction for the annotated test method should be __rolled
+Indicates whether the transaction for a transactional test method should be __rolled
 back__ after the test method has completed. If `true`, the transaction is rolled back;
-otherwise, the transaction is committed. Use `@Rollback` to override the default
-rollback flag configured at the class level.
+otherwise, the transaction is committed.
+
++
+
+When declared as a class-level annotation, `@Rollback` defines the default rollback
+semantics for all test methods within the test class hierarchy. When declared as a
+method-level annotation, `@Rollback` defines rollback semantics for the specific test
+method, potentially overriding class-level default rollback semantics.
 
 +
 
@@ -1150,7 +1118,6 @@ Each of the following may be used as meta-annotations in conjunction with the
 * `@Transactional`
 * `@BeforeTransaction`
 * `@AfterTransaction`
-* `@TransactionConfiguration`
 * `@Rollback`
 * `@Sql`
 * `@SqlConfig`
@@ -2398,12 +2365,12 @@ need to override this default, simply provide an alternate path to the
 you wish to reference a base resource path from the classpath instead of the file
 system, just use Spring's __classpath:__ prefix.
 
-Please note that Spring's testing support for `WebApplicationContexts` is on par with
-its support for standard `ApplicationContexts`. When testing with a
-`WebApplicationContext` you are free to declare either XML configuration files or
-`@Configuration` classes via `@ContextConfiguration`. You are of course also free to use
-any other test annotations such as `@TestExecutionListeners`,
-`@TransactionConfiguration`, `@ActiveProfiles`, etc.
+Please note that Spring's testing support for `WebApplicationContexts` is on par with its
+support for standard `ApplicationContexts`. When testing with a `WebApplicationContext`
+you are free to declare XML configuration files, Groovy scripts, or `@Configuration`
+classes via `@ContextConfiguration`. You are of course also free to use any other test
+annotations such as `@ActiveProfiles`, `@TestExecutionListeners`, `@Sql`, `@Rollback`,
+etc.
 
 The following examples demonstrate some of the various configuration options for loading
 a `WebApplicationContext`.
@@ -3150,9 +3117,8 @@ See <<testing-examples-petclinic>> for an additional example.
 
 By default, test transactions will be automatically rolled back after completion of the
 test; however, transactional commit and rollback behavior can be configured declaratively
-via the class-level `@TransactionConfiguration` and method-level `@Rollback` annotations.
-See the corresponding entries in the <<integration-testing-annotations,annotation
-support>> section for further details.
+via the `@Rollback` annotation. See the corresponding entry in the
+<<integration-testing-annotations,annotation support>> section for further details.
 
 [[testcontext-tx-programmatic-tx-mgt]]
 ===== Programmatic transaction management
@@ -3224,14 +3190,12 @@ to run within a transaction.
 
 `TransactionalTestExecutionListener` expects a `PlatformTransactionManager` bean to be
 defined in the Spring `ApplicationContext` for the test. In case there are multiple
-instances of `PlatformTransactionManager` within the test's `ApplicationContext`,
-`@TransactionConfiguration` supports configuring the bean name of the
-`PlatformTransactionManager` that should be used to drive transactions. Alternatively, a
-_qualifier_ may be declared via `@Transactional("myQualifier")`, or
-`TransactionManagementConfigurer` can be implemented by an `@Configuration` class.
-Consult the javadocs for `TestContextTransactionUtils.retrieveTransactionManager()` for
-details on the algorithm used to look up a transaction manager in the test's
-`ApplicationContext`.
+instances of `PlatformTransactionManager` within the test's `ApplicationContext`, a
+_qualifier_ may be declared via `@Transactional("myTxMgr")` or
+`@Transactional(transactionManager = "myTxMgr")`, or `TransactionManagementConfigurer`
+can be implemented by an `@Configuration` class. Consult the javadocs for
+`TestContextTransactionUtils.retrieveTransactionManager()` for details on the algorithm
+used to look up a transaction manager in the test's `ApplicationContext`.
 
 [[testcontext-tx-annotation-demo]]
 ===== Demonstration of all transaction-related annotations
@@ -3249,8 +3213,8 @@ declarative SQL script execution with default transaction rollback semantics.
 ----
 	@RunWith(SpringJUnit4ClassRunner.class)
 	@ContextConfiguration
-	**@TransactionConfiguration(transactionManager="txMgr", defaultRollback=false)
-	@Transactional**
+	@Transactional(transactionManager = "txMgr")
+	**@Rollback(false)**
 	public class FictitiousTransactionalTest {
 
 		**@BeforeTransaction**
@@ -3264,7 +3228,7 @@ declarative SQL script execution with default transaction rollback semantics.
 		}
 
 		@Test
-		// overrides the class-level defaultRollback setting
+		// overrides the class-level default rollback setting
 		**@Rollback(true)**
 		public void modifyDatabaseWithinTransaction() {
 			// logic which uses the test data and modifies database state

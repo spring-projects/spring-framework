@@ -3,6 +3,6 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
 
 	<bean id="databaseSetup"
-		class="org.springframework.test.context.junit4.DefaultRollbackTrueTransactionalSpringRunnerTests$DatabaseSetup" />
+		class="org.springframework.test.context.junit4.DefaultRollbackTrueTransactionalTests$DatabaseSetup" />
 
 </beans>

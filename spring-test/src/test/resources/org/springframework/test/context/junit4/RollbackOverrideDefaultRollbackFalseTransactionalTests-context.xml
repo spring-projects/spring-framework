@@ -10,6 +10,6 @@
 		p:data-source-ref="dataSource" />
 
 	<bean id="databaseSetup"
-		class="org.springframework.test.context.junit4.RollbackOverrideDefaultRollbackFalseTransactionalSpringRunnerTests$DatabaseSetup" />
+		class="org.springframework.test.context.junit4.RollbackOverrideDefaultRollbackFalseTransactionalTests$DatabaseSetup" />
 
 </beans>

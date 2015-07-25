@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,25 +24,36 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 
 /**
- * Test annotation used to indicate whether or not the transaction for the
- * annotated test method should be <em>rolled back</em> after the test method
- * has completed. If {@code true}, the transaction will be rolled back;
- * otherwise, the transaction will be committed.
+ * Test annotation used to indicate whether a <em>test-managed transaction</em>
+ * should be <em>rolled back</em> after the test method has completed.
+ *
+ * <p>Consult the class-level Javadoc for
+ * {@link org.springframework.test.context.transaction.TransactionalTestExecutionListener}
+ * for an explanation of <em>test-managed transactions</em>.
+ *
+ * <p>When declared as a class-level annotation, {@code @Rollback} defines
+ * the default rollback semantics for all test methods within the test class
+ * hierarchy. When declared as a method-level annotation, {@code @Rollback}
+ * defines rollback semantics for the specific test method, potentially
+ * overriding class-level default rollback semantics.
  *
  * <p>As of Spring Framework 4.0, this annotation may be used as a
  * <em>meta-annotation</em> to create custom <em>composed annotations</em>.
  *
  * @author Sam Brannen
  * @since 2.5
+ * @see org.springframework.test.context.transaction.TransactionalTestExecutionListener
  */
 @Documented
 @Retention(RUNTIME)
-@Target({ METHOD, ANNOTATION_TYPE })
+@Target({ TYPE, METHOD, ANNOTATION_TYPE })
 public @interface Rollback {
 
 	/**
-	 * Whether or not the transaction for the annotated method should be rolled
-	 * back after the method has completed.
+	 * Whether the <em>test-managed transaction</em> should be rolled back
+	 * after the test method has completed.
+	 * <p>If {@code true}, the transaction will be rolled back; otherwise,
+	 * the transaction will be committed.
 	 */
 	boolean value() default true;
 

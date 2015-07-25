@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,13 +26,12 @@ import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.Assert.*;
 import static org.springframework.test.transaction.TransactionTestUtils.*;
 
 /**
- * Extension of {@link DefaultRollbackTrueTransactionalSpringRunnerTests} which
+ * Extension of {@link DefaultRollbackFalseTransactionalTests} which
  * tests method-level <em>rollback override</em> behavior via the
  * {@link Rollback @Rollback} annotation.
  *
@@ -41,36 +40,38 @@ import static org.springframework.test.transaction.TransactionTestUtils.*;
  * @see Rollback
  */
 @ContextConfiguration
-public class RollbackOverrideDefaultRollbackTrueTransactionalSpringRunnerTests extends
-		DefaultRollbackTrueTransactionalSpringRunnerTests {
+public class RollbackOverrideDefaultRollbackFalseTransactionalTests extends
+		DefaultRollbackFalseTransactionalTests {
 
-	protected static JdbcTemplate jdbcTemplate;
+	private static int originalNumRows;
+
+	private static JdbcTemplate jdbcTemplate;
 
 
-	@AfterClass
-	public static void verifyFinalTestData() {
-		assertEquals("Verifying the final number of rows in the person table after all tests.", 3,
-			countRowsInPersonTable(jdbcTemplate));
-	}
-
-	@Override
 	@Before
+	@Override
 	public void verifyInitialTestData() {
-		clearPersonTable(jdbcTemplate);
+		originalNumRows = clearPersonTable(jdbcTemplate);
 		assertEquals("Adding bob", 1, addPerson(jdbcTemplate, BOB));
 		assertEquals("Verifying the initial number of rows in the person table.", 1,
 			countRowsInPersonTable(jdbcTemplate));
 	}
 
-	@Override
 	@Test
-	@Transactional
-	@Rollback(false)
+	@Rollback(true)
+	@Override
 	public void modifyTestDataWithinTransaction() {
 		assertInTransaction(true);
+		assertEquals("Deleting bob", 1, deletePerson(jdbcTemplate, BOB));
 		assertEquals("Adding jane", 1, addPerson(jdbcTemplate, JANE));
 		assertEquals("Adding sue", 1, addPerson(jdbcTemplate, SUE));
-		assertEquals("Verifying the number of rows in the person table within a transaction.", 3,
+		assertEquals("Verifying the number of rows in the person table within a transaction.", 2,
+			countRowsInPersonTable(jdbcTemplate));
+	}
+
+	@AfterClass
+	public static void verifyFinalTestData() {
+		assertEquals("Verifying the final number of rows in the person table after all tests.", originalNumRows,
 			countRowsInPersonTable(jdbcTemplate));
 	}
 
