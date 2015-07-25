@@ -27,7 +27,10 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 2.5
  * @see TransactionConfiguration
+ * @deprecated As of Spring Framework 4.2, this class is officially deprecated
+ * and will be removed when {@code @TransactionConfiguration} is removed.
  */
+@Deprecated
 public class TransactionConfigurationAttributes {
 
 	private final String transactionManagerName;

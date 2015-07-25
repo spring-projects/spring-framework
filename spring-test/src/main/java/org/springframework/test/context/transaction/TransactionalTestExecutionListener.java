@@ -130,10 +130,12 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 	private static final Log logger = LogFactory.getLog(TransactionalTestExecutionListener.class);
 
+	@SuppressWarnings("deprecation")
 	private static final TransactionConfigurationAttributes defaultTxConfigAttributes = new TransactionConfigurationAttributes();
 
 	protected final TransactionAttributeSource attributeSource = new AnnotationTransactionAttributeSource();
 
+	@SuppressWarnings("deprecation")
 	private TransactionConfigurationAttributes configurationAttributes;
 
 
@@ -343,6 +345,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * @see #getTransactionManager(TestContext, String)
 	 */
 	protected PlatformTransactionManager getTransactionManager(TestContext testContext) {
+		@SuppressWarnings("deprecation")
 		String tmName = retrieveConfigurationAttributes(testContext).getTransactionManagerName();
 		return TestContextTransactionUtils.retrieveTransactionManager(testContext, tmName);
 	}
@@ -358,6 +361,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * @return the <em>default rollback</em> flag for the supplied test context
 	 * @throws Exception if an error occurs while determining the default rollback flag
 	 */
+	@SuppressWarnings("deprecation")
 	protected final boolean isDefaultRollback(TestContext testContext) throws Exception {
 		Class<?> testClass = testContext.getTestClass();
 		Rollback rollback = findAnnotation(testClass, Rollback.class);
