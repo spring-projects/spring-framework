@@ -799,13 +799,36 @@ for an example and further details.
 
 +
 
+* `@Commit`
+
++
+
+Indicates that the transaction for a transactional test method should be __committed__
+after the test method has completed. `@Commit` can be used as a direct replacement for
+`@Rollback(false)` in order to more explicitly convey the intent of the code. Analogous to
+`@Rollback`, `@Commit` may also be declared as a class-level or method-level annotation.
+
++
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	**@Commit**
+	@Test
+	public void testProcessWithoutRollback() {
+		// ...
+	}
+----
+
 * `@Rollback`
 
 +
 
 Indicates whether the transaction for a transactional test method should be __rolled
 back__ after the test method has completed. If `true`, the transaction is rolled back;
-otherwise, the transaction is committed.
+otherwise, the transaction is committed. Rollback semantics for integration tests in the
+Spring TestContext Framework default to `true` even if `@Rollback` is not explicitly
+declared.
 
 +
 

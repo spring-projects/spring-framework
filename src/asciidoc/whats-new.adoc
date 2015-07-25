@@ -577,6 +577,8 @@ public @interface MyTestConfig {
   _before_ a test -- for example, if some rogue (i.e., yet to be
   determined) test within a large test suite has corrupted the original
   configuration for the `ApplicationContext`.
+* `@Commit` is a new annotation that may be used as a direct replacement for
+  `@Rollback(false)`.
 * `@Rollback` may now be used to configure class-level _default rollback_ semantics.
 ** Consequently, `@TransactionConfiguration` is now deprecated and will be removed in a
    subsequent release.

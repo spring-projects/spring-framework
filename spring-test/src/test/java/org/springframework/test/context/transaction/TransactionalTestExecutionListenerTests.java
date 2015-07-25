@@ -27,6 +27,7 @@ import org.junit.rules.ExpectedException;
 import org.mockito.BDDMockito;
 
 import org.springframework.core.annotation.AliasFor;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.TestContext;
 import org.springframework.transaction.PlatformTransactionManager;

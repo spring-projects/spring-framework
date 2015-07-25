@@ -34,6 +34,7 @@ import java.lang.annotation.Target;
  * @since 2.5
  * @see TransactionalTestExecutionListener
  * @see org.springframework.transaction.annotation.Transactional
+ * @see org.springframework.test.annotation.Commit
  * @see org.springframework.test.annotation.Rollback
  * @see org.springframework.test.context.jdbc.Sql
  * @see org.springframework.test.context.jdbc.SqlConfig

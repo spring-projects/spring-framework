@@ -120,6 +120,7 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
  * @since 2.5
  * @see org.springframework.transaction.annotation.TransactionManagementConfigurer
  * @see org.springframework.transaction.annotation.Transactional
+ * @see org.springframework.test.annotation.Commit
  * @see org.springframework.test.annotation.Rollback
  * @see BeforeTransaction
  * @see AfterTransaction
