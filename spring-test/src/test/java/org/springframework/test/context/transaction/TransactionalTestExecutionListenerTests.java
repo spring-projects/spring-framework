@@ -355,11 +355,6 @@ public class TransactionalTestExecutionListenerTests {
 		String transactionManager() default "metaTxMgr";
 	}
 
-	@Rollback(false)
-	@Retention(RetentionPolicy.RUNTIME)
-	private static @interface Commit {
-	}
-
 	private static abstract class Invocable {
 
 		boolean invoked = false;
