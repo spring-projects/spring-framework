@@ -46,7 +46,7 @@ import static java.lang.annotation.RetentionPolicy.*;
  */
 @Documented
 @Retention(RUNTIME)
-@Target({ TYPE, METHOD, ANNOTATION_TYPE })
+@Target({ TYPE, METHOD })
 public @interface Rollback {
 
 	/**
