@@ -16,16 +16,16 @@
 
 package org.springframework.test.context.junit4;
 
-import javax.annotation.Resource;
 import javax.sql.DataSource;
 
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.Rollback;
-import org.springframework.test.context.ContextConfiguration;
 
 import static org.junit.Assert.*;
 import static org.springframework.test.transaction.TransactionTestUtils.*;
@@ -39,14 +39,18 @@ import static org.springframework.test.transaction.TransactionTestUtils.*;
  * @since 2.5
  * @see Rollback
  */
-@ContextConfiguration
-public class RollbackOverrideDefaultRollbackFalseTransactionalTests extends
-		DefaultRollbackFalseTransactionalTests {
+public class RollbackOverrideDefaultRollbackFalseTransactionalTests extends DefaultRollbackFalseTransactionalTests {
 
 	private static int originalNumRows;
 
 	private static JdbcTemplate jdbcTemplate;
 
+
+	@Autowired
+	@Qualifier("dataSource2")
+	public void setDataSource(DataSource dataSource) {
+		jdbcTemplate = new JdbcTemplate(dataSource);
+	}
 
 	@Before
 	@Override
@@ -73,16 +77,6 @@ public class RollbackOverrideDefaultRollbackFalseTransactionalTests extends
 	public static void verifyFinalTestData() {
 		assertEquals("Verifying the final number of rows in the person table after all tests.", originalNumRows,
 			countRowsInPersonTable(jdbcTemplate));
-	}
-
-
-	public static class DatabaseSetup {
-
-		@Resource
-		public void setDataSource(DataSource dataSource) {
-			jdbcTemplate = new JdbcTemplate(dataSource);
-			createPersonTable(jdbcTemplate);
-		}
 	}
 
 }

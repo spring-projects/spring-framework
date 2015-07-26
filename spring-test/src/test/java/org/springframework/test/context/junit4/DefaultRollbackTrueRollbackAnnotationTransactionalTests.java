@@ -24,14 +24,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.Assert.*;
@@ -51,7 +46,7 @@ import static org.springframework.test.transaction.TransactionTestUtils.*;
  * @see DefaultRollbackTrueTransactionalTests
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(inheritLocations = false)
+@ContextConfiguration(classes = EmbeddedPersonDatabaseTestsConfig.class, inheritLocations = false)
 @Transactional("txMgr")
 @Rollback(true)
 public class DefaultRollbackTrueRollbackAnnotationTransactionalTests extends AbstractTransactionalSpringRunnerTests {
@@ -88,24 +83,6 @@ public class DefaultRollbackTrueRollbackAnnotationTransactionalTests extends Abs
 	public static void verifyFinalTestData() {
 		assertEquals("Verifying the final number of rows in the person table after all tests.", originalNumRows,
 			countRowsInPersonTable(jdbcTemplate));
-	}
-
-
-	@Configuration
-	static class Config {
-
-		@Bean
-		public PlatformTransactionManager txMgr() {
-			return new DataSourceTransactionManager(dataSource());
-		}
-
-		@Bean
-		public DataSource dataSource() {
-			return new EmbeddedDatabaseBuilder()//
-			.generateUniqueName(true)//
-			.addScript("classpath:/org/springframework/test/context/junit4/person-schema.sql") //
-			.build();
-		}
 	}
 
 }

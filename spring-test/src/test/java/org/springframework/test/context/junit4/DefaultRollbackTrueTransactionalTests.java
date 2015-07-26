@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,14 @@
 
 package org.springframework.test.context.junit4;
 
-import javax.annotation.Resource;
 import javax.sql.DataSource;
 
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,8 +39,6 @@ import static org.springframework.test.transaction.TransactionTestUtils.*;
  * @since 2.5
  * @see TransactionConfiguration
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration
 @Transactional
 @TransactionConfiguration(defaultRollback = true)
 @SuppressWarnings("deprecation")
@@ -51,6 +48,11 @@ public class DefaultRollbackTrueTransactionalTests extends AbstractTransactional
 
 	private static JdbcTemplate jdbcTemplate;
 
+
+	@Autowired
+	public void setDataSource(DataSource dataSource) {
+		jdbcTemplate = new JdbcTemplate(dataSource);
+	}
 
 	@Before
 	public void verifyInitialTestData() {
@@ -73,16 +75,6 @@ public class DefaultRollbackTrueTransactionalTests extends AbstractTransactional
 	public static void verifyFinalTestData() {
 		assertEquals("Verifying the final number of rows in the person table after all tests.", originalNumRows,
 			countRowsInPersonTable(jdbcTemplate));
-	}
-
-
-	public static class DatabaseSetup {
-
-		@Resource
-		public void setDataSource(DataSource dataSource) {
-			jdbcTemplate = new JdbcTemplate(dataSource);
-			createPersonTable(jdbcTemplate);
-		}
 	}
 
 }
