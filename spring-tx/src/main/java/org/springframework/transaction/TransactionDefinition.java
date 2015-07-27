@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,8 +86,8 @@ public interface TransactionDefinition {
 	 * <p><b>NOTE:</b> Actual transaction suspension will not work out-of-the-box
 	 * on all transaction managers. This in particular applies to
 	 * {@link org.springframework.transaction.jta.JtaTransactionManager},
-	 * which requires the {@code javax.transaction.TransactionManager}
-	 * to be made available it to it (which is server-specific in standard J2EE).
+	 * which requires the {@code javax.transaction.TransactionManager} to be
+	 * made available it to it (which is server-specific in standard Java EE).
 	 * <p>A {@code PROPAGATION_REQUIRES_NEW} scope always defines its own
 	 * transaction synchronizations. Existing synchronizations will be suspended
 	 * and resumed appropriately.
@@ -101,8 +101,8 @@ public interface TransactionDefinition {
 	 * <p><b>NOTE:</b> Actual transaction suspension will not work out-of-the-box
 	 * on all transaction managers. This in particular applies to
 	 * {@link org.springframework.transaction.jta.JtaTransactionManager},
-	 * which requires the {@code javax.transaction.TransactionManager}
-	 * to be made available it to it (which is server-specific in standard J2EE).
+	 * which requires the {@code javax.transaction.TransactionManager} to be
+	 * made available it to it (which is server-specific in standard Java EE).
 	 * <p>Note that transaction synchronization is <i>not</i> available within a
 	 * {@code PROPAGATION_NOT_SUPPORTED} scope. Existing synchronizations
 	 * will be suspended and resumed appropriately.

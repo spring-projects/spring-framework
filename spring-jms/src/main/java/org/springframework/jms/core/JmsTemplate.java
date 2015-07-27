@@ -51,7 +51,7 @@ import org.springframework.util.ReflectionUtils;
  * domain.
  *
  * <p>Default settings for JMS Sessions are "not transacted" and "auto-acknowledge".
- * As defined by the J2EE specification, the transaction and acknowledgement
+ * As defined by the Java EE specification, the transaction and acknowledgement
  * parameters are ignored when a JMS Session is created inside an active
  * transaction, no matter if a JTA transaction or a Spring-managed transaction.
  * To configure them for native JMS usage, specify appropriate values for
@@ -71,7 +71,7 @@ import org.springframework.util.ReflectionUtils;
  * {@link org.springframework.jms.connection.SingleConnectionFactory} as a
  * decorator for your target {@code ConnectionFactory}, reusing a single
  * JMS Connection in a thread-safe fashion; this is often good enough for the
- * purpose of sending messages via this template. In a J2EE environment,
+ * purpose of sending messages via this template. In a Java EE environment,
  * make sure that the {@code ConnectionFactory} is obtained from the
  * application's environment naming context via JNDI; application servers
  * typically expose pooled, transaction-aware factories there.
