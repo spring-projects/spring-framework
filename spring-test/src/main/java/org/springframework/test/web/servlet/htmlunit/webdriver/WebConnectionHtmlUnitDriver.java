@@ -62,7 +62,7 @@ public class WebConnectionHtmlUnitDriver extends HtmlUnitDriver {
 	 * Modify the supplied {@link WebClient}, {@linkplain #configureWebClient
 	 * configure} it, and retain a reference to it so that its {@link WebConnection}
 	 * is {@linkplain #getWebConnection accessible} for later use.
-	 * @param client the client to modify
+	 * @param webClient the client to modify
 	 * @return the modified client
 	 * @see org.openqa.selenium.htmlunit.HtmlUnitDriver#modifyWebClient(WebClient)
 	 */
