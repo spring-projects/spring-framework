@@ -45,6 +45,8 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 
 /**
+ * Integration tests for {@link MockMvcWebClientBuilder}.
+ *
  * @author Rob Winch
  * @since 4.2
  */
@@ -53,17 +55,17 @@ import static org.junit.Assert.assertThat;
 @WebAppConfiguration
 public class MockMvcWebClientBuilderTests {
 
+	private WebClient webClient = new WebClient();
+
 	@Autowired
-	WebApplicationContext context;
+	private WebApplicationContext wac;
 
-	MockMvc mockMvc;
+	private MockMvc mockMvc;
 
-	WebClient webClient;
 
 	@Before
 	public void setup() {
-		mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
-		webClient = new WebClient();
+		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -77,19 +79,19 @@ public class MockMvcWebClientBuilderTests {
 	}
 
 	@Test
-	public void mockMvcSetupconfigureWebClient() throws Exception {
-		webClient = MockMvcWebClientBuilder
-				.mockMvcSetup(mockMvc)
-				.configureWebClient(webClient);
+	public void mockMvcSetupAndConfigureWebClient() throws Exception {
+		this.webClient = MockMvcWebClientBuilder
+				.mockMvcSetup(this.mockMvc)
+				.configureWebClient(this.webClient);
 
 		assertMvcProcessed("http://localhost/test");
 		assertDelegateProcessed("http://example.com/");
 	}
 
 	@Test
-	public void mockMvcSetupCreateWebClient() throws Exception {
-		webClient = MockMvcWebClientBuilder
-				.mockMvcSetup(mockMvc)
+	public void mockMvcSetupAndCreateWebClient() throws Exception {
+		this.webClient = MockMvcWebClientBuilder
+				.mockMvcSetup(this.mockMvc)
 				.createWebClient();
 
 		assertMvcProcessed("http://localhost/test");
@@ -97,7 +99,7 @@ public class MockMvcWebClientBuilderTests {
 	}
 
 	private void assertMvcProcessed(String url) throws Exception {
-		assertThat(getWebResponse(url).getContentAsString(), equalTo("mvc"));;
+		assertThat(getWebResponse(url).getContentAsString(), equalTo("mvc"));
 	}
 
 	private void assertDelegateProcessed(String url) throws Exception {
@@ -105,14 +107,17 @@ public class MockMvcWebClientBuilderTests {
 	}
 
 	private WebResponse getWebResponse(String url) throws IOException {
-		return webClient.getWebConnection().getResponse(new WebRequest(new URL(url)));
+		return this.webClient.getWebConnection().getResponse(new WebRequest(new URL(url)));
 	}
+
 
 	@Configuration
 	@EnableWebMvc
 	static class Config {
+
 		@RestController
 		static class ContextPathController {
+
 			@RequestMapping
 			public String contextPath(HttpServletRequest request) {
 				return "mvc";

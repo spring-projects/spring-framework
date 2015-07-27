@@ -69,12 +69,14 @@ public class DelegatingWebConnectionTests {
 	private WebRequest request;
 	private WebResponse expectedResponse;
 
+
 	@Before
 	public void setUp() throws Exception {
 		request = new WebRequest(new URL("http://localhost/"));
-		WebResponseData data = new WebResponseData("".getBytes("UTF-8"),200, "", Collections.<NameValuePair>emptyList());
+		WebResponseData data = new WebResponseData("".getBytes("UTF-8"), 200, "", Collections.<NameValuePair> emptyList());
 		expectedResponse = new WebResponse(data, request, 100L);
-		webConnection = new DelegatingWebConnection(defaultConnection, new DelegateWebConnection(matcher1,connection1), new DelegateWebConnection(matcher2,connection2));
+		webConnection = new DelegatingWebConnection(defaultConnection,
+			new DelegateWebConnection(matcher1, connection1), new DelegateWebConnection(matcher2, connection2));
 	}
 
 	@Test
@@ -86,7 +88,7 @@ public class DelegatingWebConnectionTests {
 		assertThat(response, sameInstance(expectedResponse));
 		verify(matcher1).matches(request);
 		verify(matcher2).matches(request);
-		verifyNoMoreInteractions(connection1,connection2);
+		verifyNoMoreInteractions(connection1, connection2);
 		verify(defaultConnection).getResponse(request);
 	}
 
@@ -100,7 +102,7 @@ public class DelegatingWebConnectionTests {
 
 		assertThat(response, sameInstance(expectedResponse));
 		verify(matcher1).matches(request);
-		verifyNoMoreInteractions(matcher2,connection2,defaultConnection);
+		verifyNoMoreInteractions(matcher2, connection2, defaultConnection);
 		verify(connection1).getResponse(request);
 	}
 
@@ -114,12 +116,12 @@ public class DelegatingWebConnectionTests {
 		assertThat(response, sameInstance(expectedResponse));
 		verify(matcher1).matches(request);
 		verify(matcher2).matches(request);
-		verifyNoMoreInteractions(connection1,defaultConnection);
+		verifyNoMoreInteractions(connection1, defaultConnection);
 		verify(connection2).getResponse(request);
 	}
 
 	@Test
-	public void classlevelJavadoc() throws Exception {
+	public void verifyExampleInClassLevelJavadoc() throws Exception {
 		WebClient webClient = new WebClient();
 
 		MockMvc mockMvc = MockMvcBuilders.standaloneSetup(TestController.class).build();
@@ -136,6 +138,7 @@ public class DelegatingWebConnectionTests {
 		assertThat(page.getWebResponse().getStatusCode(), equalTo(200));
 		assertThat(page.getWebResponse().getContentAsString(), not(isEmptyString()));
 	}
+
 
 	@Controller
 	static class TestController {}

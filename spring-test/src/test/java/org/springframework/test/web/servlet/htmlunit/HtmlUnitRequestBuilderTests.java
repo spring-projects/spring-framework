@@ -31,8 +31,10 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.auth.UsernamePasswordCredentials;
+
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockServletContext;
@@ -50,31 +52,30 @@ import static org.junit.Assert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 /**
+ * Unit tests for {@link HtmlUnitRequestBuilder}.
+ *
  * @author Rob Winch
  * @since 4.2
  */
 public class HtmlUnitRequestBuilderTests {
 
+	private final WebClient webClient = new WebClient();
+
+	private final ServletContext servletContext = new MockServletContext();
+
+	private final Map<String, MockHttpSession> sessions = new HashMap<>();
+
 	private WebRequest webRequest;
-
-	private ServletContext servletContext;
-
-	private Map<String, MockHttpSession> sessions;
-
-	private WebClient webClient;
 
 	private HtmlUnitRequestBuilder requestBuilder;
 
 
 	@Before
 	public void setUp() throws Exception {
-		sessions = new HashMap<>();
 		webRequest = new WebRequest(new URL("http://example.com:80/test/this/here"));
 		webRequest.setHttpMethod(HttpMethod.GET);
 		webRequest.setRequestParameters(new ArrayList<>());
-		webClient = new WebClient();
 		requestBuilder = new HtmlUnitRequestBuilder(sessions, webClient, webRequest);
-		servletContext = new MockServletContext();
 	}
 
 	// --- constructor
@@ -740,7 +741,7 @@ public class HtmlUnitRequestBuilderTests {
 		String cookieName = "PARENT";
 		String cookieValue = "VALUE";
 		MockMvc mockMvc = MockMvcBuilders.standaloneSetup(new HelloController())
-				.defaultRequest(get("/").cookie(new Cookie(cookieName,cookieValue)))
+				.defaultRequest(get("/").cookie(new Cookie(cookieName, cookieValue)))
 				.build();
 
 		Cookie[] cookies = mockMvc.perform(requestBuilder).andReturn().getRequest().getCookies();
@@ -756,7 +757,7 @@ public class HtmlUnitRequestBuilderTests {
 		String attrName = "PARENT";
 		String attrValue = "VALUE";
 		MockMvc mockMvc = MockMvcBuilders.standaloneSetup(new HelloController())
-				.defaultRequest(get("/").requestAttr(attrName,attrValue))
+				.defaultRequest(get("/").requestAttr(attrName, attrValue))
 				.build();
 
 		assertThat(mockMvc.perform(requestBuilder).andReturn().getRequest().getAttribute(attrName), equalTo(attrValue));
@@ -770,8 +771,7 @@ public class HtmlUnitRequestBuilderTests {
 			return;
 		}
 		String actual = jsessionidCookie.getValue();
-		assertThat("JSESSIONID=" + actual +
-				"; Path=/test; Domain=example.com", equalTo(expected));
+		assertThat("JSESSIONID=" + actual + "; Path=/test; Domain=example.com", equalTo(expected));
 	}
 
 	private void setParameter(String name, String value) {

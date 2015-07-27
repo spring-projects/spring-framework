@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -30,68 +31,67 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
 
 /**
+ * Integration tests for {@link MockMvcWebConnection}.
+ *
  * @author Rob Winch
  * @since 4.2
  */
 public class MockMvcWebConnectionTests {
 
-	MockMvc mockMvc;
+	private final WebClient webClient = new WebClient();
 
-	WebClient webClient;
+	private MockMvc mockMvc;
+
 
 	@Before
 	public void setup() {
-		mockMvc = MockMvcBuilders
-							.standaloneSetup(new HelloController(), new ForwardController())
-							.build();
-
-		webClient = new WebClient();
+		this.mockMvc = MockMvcBuilders.standaloneSetup(new HelloController(), new ForwardController()).build();
 	}
 
 	@Test
 	public void contextPathNull() throws IOException {
-		webClient.setWebConnection(new MockMvcWebConnection(mockMvc, null));
+		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, null));
 
-		Page page = webClient.getPage("http://localhost/context/a");
+		Page page = this.webClient.getPage("http://localhost/context/a");
 
-		assertThat(page.getWebResponse().getStatusCode(), equalTo(200));;
+		assertThat(page.getWebResponse().getStatusCode(), equalTo(200));
 	}
 
 	@Test
 	public void contextPathExplicit() throws IOException {
-		webClient.setWebConnection(new MockMvcWebConnection(mockMvc, "/context"));
+		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, "/context"));
 
-		Page page = webClient.getPage("http://localhost/context/a");
+		Page page = this.webClient.getPage("http://localhost/context/a");
 
-		assertThat(page.getWebResponse().getStatusCode(), equalTo(200));;
+		assertThat(page.getWebResponse().getStatusCode(), equalTo(200));
 	}
 
 	@Test
 	public void contextPathEmpty() throws IOException {
-		webClient.setWebConnection(new MockMvcWebConnection(mockMvc, ""));
+		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, ""));
 
-		Page page = webClient.getPage("http://localhost/context/a");
+		Page page = this.webClient.getPage("http://localhost/context/a");
 
-		assertThat(page.getWebResponse().getStatusCode(), equalTo(200));;
+		assertThat(page.getWebResponse().getStatusCode(), equalTo(200));
 	}
 
 	@Test
 	public void forward() throws IOException {
-		webClient.setWebConnection(new MockMvcWebConnection(mockMvc, ""));
+		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, ""));
 
-		Page page = webClient.getPage("http://localhost/forward");
+		Page page = this.webClient.getPage("http://localhost/forward");
 
-		assertThat(page.getWebResponse().getContentAsString(), equalTo("hello"));;
+		assertThat(page.getWebResponse().getContentAsString(), equalTo("hello"));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void contextPathDoesNotStartWithSlash() throws IOException {
-		new MockMvcWebConnection(mockMvc, "context");
+		new MockMvcWebConnection(this.mockMvc, "context");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void contextPathEndsWithSlash() throws IOException {
-		new MockMvcWebConnection(mockMvc, "/context/");
+		new MockMvcWebConnection(this.mockMvc, "/context/");
 	}
 
 }

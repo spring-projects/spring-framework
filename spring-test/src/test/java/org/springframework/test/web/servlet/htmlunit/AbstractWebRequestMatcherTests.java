@@ -16,22 +16,27 @@
 
 package org.springframework.test.web.servlet.htmlunit;
 
-import org.junit.Test;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import com.gargoylesoftware.htmlunit.WebRequest;
+
+import static org.junit.Assert.*;
 
 /**
- * Unit tests for {@link UrlRegexRequestMatcher}.
+ * Abstract base class for testing {@link WebRequestMatcher} implementations.
  *
- * @author Rob Winch
  * @author Sam Brannen
  * @since 4.2
  */
-public class UrlRegexRequestMatcherTests extends AbstractWebRequestMatcherTests {
+public class AbstractWebRequestMatcherTests {
 
-	@Test
-	public void verifyExampleInClassLevelJavadoc() throws Exception {
-		WebRequestMatcher cdnMatcher = new UrlRegexRequestMatcher(".*?//code.jquery.com/.*");
-		assertMatches(cdnMatcher, "http://code.jquery.com/jquery-1.11.0.min.js");
-		assertDoesNotMatch(cdnMatcher, "http://localhost/jquery-1.11.0.min.js");
+	protected void assertMatches(WebRequestMatcher matcher, String url) throws MalformedURLException {
+		assertTrue(matcher.matches(new WebRequest(new URL(url))));
+	}
+
+	protected void assertDoesNotMatch(WebRequestMatcher matcher, String url) throws MalformedURLException {
+		assertFalse(matcher.matches(new WebRequest(new URL(url))));
 	}
 
 }

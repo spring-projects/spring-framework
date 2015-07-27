@@ -18,12 +18,12 @@ package org.springframework.test.web.servlet.htmlunit;
 
 import java.io.IOException;
 import java.net.URL;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -47,6 +47,8 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
+ * Integration tests for {@link MockMvcWebConnectionBuilderSupport}.
+ *
  * @author Rob Winch
  * @since 4.2
  */
@@ -56,19 +58,18 @@ import static org.mockito.Mockito.mock;
 @SuppressWarnings("rawtypes")
 public class MockMvcConnectionBuilderSupportTests {
 
+	private final WebConnection delegateConnection = mock(WebConnection.class);
+
 	@Autowired
-	WebApplicationContext context;
+	private WebApplicationContext wac;
 
-	MockMvc mockMvc;
+	private MockMvc mockMvc;
 
-	WebConnection delegateConnection;
-
-	WebConnection connection;
+	private WebConnection connection;
 
 	@Before
 	public void setup() {
-		delegateConnection = mock(WebConnection.class);
-		mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
+		mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
 
 		connection = new MockMvcWebConnectionBuilderSupport(mockMvc){}
 				.createConnection(delegateConnection);
@@ -86,7 +87,7 @@ public class MockMvcConnectionBuilderSupportTests {
 
 	@Test
 	public void context() throws Exception {
-		connection = new MockMvcWebConnectionBuilderSupport(context){}
+		connection = new MockMvcWebConnectionBuilderSupport(wac) {}
 				.createConnection(delegateConnection);
 
 		assertMvcProcessed("http://localhost/");
@@ -101,7 +102,7 @@ public class MockMvcConnectionBuilderSupportTests {
 
 	@Test
 	public void mockMvcExampleDotCom() throws Exception {
-		connection = new MockMvcWebConnectionBuilderSupport(context){}
+		connection = new MockMvcWebConnectionBuilderSupport(wac) {}
 				.useMockMvcForHosts("example.com")
 				.createConnection(delegateConnection);
 
@@ -112,7 +113,7 @@ public class MockMvcConnectionBuilderSupportTests {
 
 	@Test
 	public void mockMvcAlwaysUseMockMvc() throws Exception {
-		connection = new MockMvcWebConnectionBuilderSupport(context){}
+		connection = new MockMvcWebConnectionBuilderSupport(wac) {}
 				.alwaysUseMockMvc()
 				.createConnection(delegateConnection);
 
@@ -121,18 +122,18 @@ public class MockMvcConnectionBuilderSupportTests {
 
 	@Test
 	public void defaultContextPathEmpty() throws Exception {
-		connection = new MockMvcWebConnectionBuilderSupport(context){}
+		connection = new MockMvcWebConnectionBuilderSupport(wac) {}
 				.createConnection(delegateConnection);
 
-		assertThat(getWebResponse("http://localhost/abc").getContentAsString(), equalTo(""));;
+		assertThat(getWebResponse("http://localhost/abc").getContentAsString(), equalTo(""));
 	}
 
 	@Test
 	public void defaultContextPathCustom() throws Exception {
-		connection = new MockMvcWebConnectionBuilderSupport(context) {
-		}.contextPath("/abc").createConnection(delegateConnection);
+		connection = new MockMvcWebConnectionBuilderSupport(wac) {}
+				.contextPath("/abc").createConnection(delegateConnection);
 
-		assertThat(getWebResponse("http://localhost/abc/def").getContentAsString(), equalTo("/abc"));;
+		assertThat(getWebResponse("http://localhost/abc/def").getContentAsString(), equalTo("/abc"));
 	}
 
 	private void assertMvcProcessed(String url) throws Exception {
@@ -147,11 +148,14 @@ public class MockMvcConnectionBuilderSupportTests {
 		return connection.getResponse(new WebRequest(new URL(url)));
 	}
 
+
 	@Configuration
 	@EnableWebMvc
 	static class Config {
+
 		@RestController
 		static class ContextPathController {
+
 			@RequestMapping
 			public String contextPath(HttpServletRequest request) {
 				return request.getContextPath();

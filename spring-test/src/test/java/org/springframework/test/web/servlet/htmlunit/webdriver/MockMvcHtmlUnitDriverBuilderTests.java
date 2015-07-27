@@ -17,13 +17,13 @@
 package org.springframework.test.web.servlet.htmlunit.webdriver;
 
 import java.io.IOException;
+
 import javax.servlet.http.HttpServletRequest;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.MatcherAssert.assertThat;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,8 +38,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+
 /**
+ * Integration tests for {@link MockMvcHtmlUnitDriverBuilder}.
+ *
  * @author Rob Winch
+ * @author Sam Brannen
  * @since 4.2
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -47,18 +53,18 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @WebAppConfiguration
 public class MockMvcHtmlUnitDriverBuilderTests {
 
-	public static final String EXPECTED_BODY = "MockMvcHtmlUnitDriverBuilderTests mvc";
+	private static final String EXPECTED_BODY = "MockMvcHtmlUnitDriverBuilderTests mvc";
 
 	@Autowired
-	WebApplicationContext context;
+	private WebApplicationContext wac;
 
-	MockMvc mockMvc;
+	private MockMvc mockMvc;
 
-	HtmlUnitDriver driver;
+	private HtmlUnitDriver driver;
 
 	@Before
 	public void setup() {
-		mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
+		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -72,9 +78,9 @@ public class MockMvcHtmlUnitDriverBuilderTests {
 	}
 
 	@Test
-	public void mockMvcSetupConfigureDriver() throws Exception {
-		driver = MockMvcHtmlUnitDriverBuilder
-				.mockMvcSetup(mockMvc)
+	public void mockMvcSetupAndConfigureDriver() throws Exception {
+		this.driver = MockMvcHtmlUnitDriverBuilder
+				.mockMvcSetup(this.mockMvc)
 				.configureDriver(new WebConnectionHtmlUnitDriver());
 
 		assertMvcProcessed("http://localhost/test");
@@ -82,9 +88,9 @@ public class MockMvcHtmlUnitDriverBuilderTests {
 	}
 
 	@Test
-	public void mockMvcSetupCreateDriver() throws Exception {
-		driver = MockMvcHtmlUnitDriverBuilder
-				.mockMvcSetup(mockMvc)
+	public void mockMvcSetupAndCreateDriver() throws Exception {
+		this.driver = MockMvcHtmlUnitDriverBuilder
+				.mockMvcSetup(this.mockMvc)
 				.createDriver();
 
 		assertMvcProcessed("http://localhost/test");
@@ -92,22 +98,22 @@ public class MockMvcHtmlUnitDriverBuilderTests {
 	}
 
 	@Test
-	public void javascriptEnabledDefaultEnabled() {
-		driver = MockMvcHtmlUnitDriverBuilder
-				.mockMvcSetup(mockMvc)
+	public void javaScriptEnabledByDefault() {
+		this.driver = MockMvcHtmlUnitDriverBuilder
+				.mockMvcSetup(this.mockMvc)
 				.createDriver();
 
-		assertThat(driver.isJavascriptEnabled(), equalTo(true));
+		assertTrue(this.driver.isJavascriptEnabled());
 	}
 
 	@Test
-	public void javascriptEnabledDisabled() {
-		driver = MockMvcHtmlUnitDriverBuilder
-				.mockMvcSetup(mockMvc)
+	public void javaScriptDisabled() {
+		this.driver = MockMvcHtmlUnitDriverBuilder
+				.mockMvcSetup(this.mockMvc)
 				.javascriptEnabled(false)
 				.createDriver();
 
-		assertThat(driver.isJavascriptEnabled(), equalTo(false));
+		assertFalse(this.driver.isJavascriptEnabled());
 	}
 
 	private void assertMvcProcessed(String url) throws Exception {
@@ -119,15 +125,18 @@ public class MockMvcHtmlUnitDriverBuilderTests {
 	}
 
 	private String get(String url) throws IOException {
-		driver.get(url);
-		return driver.getPageSource();
+		this.driver.get(url);
+		return this.driver.getPageSource();
 	}
+
 
 	@Configuration
 	@EnableWebMvc
 	static class Config {
+
 		@RestController
 		static class ContextPathController {
+
 			@RequestMapping
 			public String contextPath(HttpServletRequest request) {
 				return EXPECTED_BODY;
