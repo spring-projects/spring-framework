@@ -18,6 +18,7 @@ package org.springframework.test.web.servlet.htmlunit;
 
 import java.io.IOException;
 import java.net.URL;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Before;
@@ -42,14 +43,15 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.not;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+import static org.springframework.test.web.servlet.htmlunit.MockMvcWebClientBuilder.*;
 
 /**
  * Integration tests for {@link MockMvcWebClientBuilder}.
  *
  * @author Rob Winch
+ * @author Sam Brannen
  * @since 4.2
  */
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -57,7 +59,7 @@ import static org.junit.Assert.assertThat;
 @WebAppConfiguration
 public class MockMvcWebClientBuilderTests {
 
-	private WebClient webClient = new WebClient();
+	private WebClient webClient;
 
 	@Autowired
 	private WebApplicationContext wac;
@@ -81,27 +83,20 @@ public class MockMvcWebClientBuilderTests {
 	}
 
 	@Test
-	public void mockMvcSetupAndConfigureWebClient() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
-		this.webClient = MockMvcWebClientBuilder
-				.mockMvcSetup(this.mockMvc)
-				.configureWebClient(this.webClient);
+	public void mockMvcSetupWithDefaultWebClientDelegate() throws Exception {
+		this.webClient = mockMvcSetup(this.mockMvc).build();
 
 		assertMvcProcessed("http://localhost/test");
-		assertDelegateProcessed("http://example.com/");
+		Assume.group(TestGroup.PERFORMANCE, () -> assertDelegateProcessed("http://example.com/"));
 	}
 
 	@Test
-	public void mockMvcSetupAndCreateWebClient() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
-		this.webClient = MockMvcWebClientBuilder
-				.mockMvcSetup(this.mockMvc)
-				.createWebClient();
+	public void mockMvcSetupWithCustomWebClientDelegate() throws Exception {
+		WebClient preconfiguredWebClient = new WebClient();
+		this.webClient = mockMvcSetup(this.mockMvc).withDelegate(preconfiguredWebClient).build();
 
 		assertMvcProcessed("http://localhost/test");
-		assertDelegateProcessed("http://example.com/");
+		Assume.group(TestGroup.PERFORMANCE, () -> assertDelegateProcessed("http://example.com/"));
 	}
 
 	private void assertMvcProcessed(String url) throws Exception {

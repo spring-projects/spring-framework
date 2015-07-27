@@ -24,14 +24,26 @@ import org.springframework.web.context.WebApplicationContext;
 import com.gargoylesoftware.htmlunit.WebClient;
 
 /**
- * {@code MockMvcWebClientBuilder} simplifies the creation of a {@link WebClient}
- * that delegates to a {@link MockMvc} instance.
+ * {@code MockMvcWebClientBuilder} simplifies the creation of an HtmlUnit
+ * {@link WebClient} that delegates to a {@link MockMvc} instance.
+ *
+ * <p>The {@code MockMvc} instance used by the builder may be
+ * {@linkplain #mockMvcSetup supplied directly} or created transparently
+ * from a {@link #webAppContextSetup WebApplicationContext}.
  *
  * @author Rob Winch
  * @author Sam Brannen
  * @since 4.2
+ * @see #mockMvcSetup(MockMvc)
+ * @see #webAppContextSetup(WebApplicationContext)
+ * @see #webAppContextSetup(WebApplicationContext, MockMvcConfigurer)
+ * @see #withDelegate(WebClient)
+ * @see #build()
  */
 public class MockMvcWebClientBuilder extends MockMvcWebConnectionBuilderSupport<MockMvcWebClientBuilder> {
+
+	private WebClient webClient;
+
 
 	protected MockMvcWebClientBuilder(MockMvc mockMvc) {
 		super(mockMvc);
@@ -46,7 +58,19 @@ public class MockMvcWebClientBuilder extends MockMvcWebConnectionBuilderSupport<
 	}
 
 	/**
-	 * Create a new instance with the supplied {@link WebApplicationContext}.
+	 * Create a new {@code MockMvcWebClientBuilder} based on the supplied
+	 * {@link MockMvc} instance.
+	 * @param mockMvc the {@code MockMvc} instance to use; never {@code null}
+	 * @return the MockMvcWebClientBuilder to customize
+	 */
+	public static MockMvcWebClientBuilder mockMvcSetup(MockMvc mockMvc) {
+		Assert.notNull(mockMvc, "MockMvc must not be null");
+		return new MockMvcWebClientBuilder(mockMvc);
+	}
+
+	/**
+	 * Create a new {@code MockMvcWebClientBuilder} based on the supplied
+	 * {@link WebApplicationContext}.
 	 * @param context the {@code WebApplicationContext} to create a {@link MockMvc}
 	 * instance from; never {@code null}
 	 * @return the MockMvcWebClientBuilder to customize
@@ -57,8 +81,8 @@ public class MockMvcWebClientBuilder extends MockMvcWebConnectionBuilderSupport<
 	}
 
 	/**
-	 * Create a new instance with the supplied {@link WebApplicationContext}
-	 * and {@link MockMvcConfigurer}.
+	 * Create a new {@code MockMvcWebClientBuilder} based on the supplied
+	 * {@link WebApplicationContext} and {@link MockMvcConfigurer}.
 	 * @param context the {@code WebApplicationContext} to create a {@link MockMvc}
 	 * instance from; never {@code null}
 	 * @param configurer the MockMvcConfigurer to apply; never {@code null}
@@ -71,38 +95,34 @@ public class MockMvcWebClientBuilder extends MockMvcWebConnectionBuilderSupport<
 	}
 
 	/**
-	 * Create a new instance with the supplied {@link MockMvc} instance.
-	 * @param mockMvc the {@code MockMvc} instance to use; never {@code null}
-	 * @return the MockMvcWebClientBuilder to customize
+	 * Supply the {@code WebClient} that the client {@linkplain #build built}
+	 * by this builder should delegate to when processing
+	 * non-{@linkplain WebRequestMatcher matching} requests.
+	 * @param webClient the {@code WebClient} to delegate to for requests
+	 * that do not match; never {@code null}
+	 * @return this builder for further customization
+	 * @see #build()
 	 */
-	public static MockMvcWebClientBuilder mockMvcSetup(MockMvc mockMvc) {
-		Assert.notNull(mockMvc, "MockMvc must not be null");
-		return new MockMvcWebClientBuilder(mockMvc);
-	}
-
-	/**
-	 * Create a {@link WebClient} that uses the configured {@link MockMvc}
-	 * instance for any matching requests and a {@code WebClient} with all
-	 * the default settings for any other requests.
-	 * @return the {@code WebClient} to use
-	 * @see #configureWebClient(WebClient)
-	 */
-	public WebClient createWebClient() {
-		return configureWebClient(new WebClient());
-	}
-
-	/**
-	 * Configure the supplied {@link WebClient} to use the configured
-	 * {@link MockMvc} instance for any matching requests and the supplied
-	 * {@code WebClient} for any other requests.
-	 * @param webClient the WebClient to delegate to for requests that do not
-	 * match; never {@code null}
-	 * @return the WebClient to use
-	 */
-	public WebClient configureWebClient(WebClient webClient) {
+	public MockMvcWebClientBuilder withDelegate(WebClient webClient) {
 		Assert.notNull(webClient, "webClient must not be null");
 		webClient.setWebConnection(createConnection(webClient.getWebConnection()));
-		return webClient;
+		this.webClient = webClient;
+		return this;
+	}
+
+	/**
+	 * Build the {@link WebClient} configured via this builder.
+	 * <p>The returned client will use the configured {@link MockMvc} instance
+	 * for processing any {@linkplain WebRequestMatcher matching} requests
+	 * and a delegate {@code WebClient} for all other requests.
+	 * <p>If a {@linkplain #withDelegate delegate} has been explicitly configured,
+	 * it will be used; otherwise, a default {@code WebClient} will be configured
+	 * as the delegate.
+	 * @return the {@code WebClient} to use
+	 * @see #withDelegate(WebClient)
+	 */
+	public WebClient build() {
+		return (this.webClient != null ? this.webClient : withDelegate(new WebClient()).build());
 	}
 
 }

@@ -4344,7 +4344,7 @@ WebClient webClient;
 public void setup() {
 	webClient = MockMvcWebClientBuilder
 		.webAppContextSetup(context)
-		.createWebClient();
+		.build();
 }
 ----
 
@@ -4371,8 +4371,8 @@ HtmlPage createMsgFormPage = webClient.getPage("http://localhost/messages/form")
 
 [NOTE]
 ====
-The the context path is "". Alternatively, we could have specified the context path as
-illustrated in <<Advanced MockMvcWebClientBuilder>>.
+The default context path is `""`. Alternatively, we could have specified the context
+path as illustrated in <<Advanced MockMvcWebClientBuilder>>.
 ====
 
 We can then fill out the form and submit it to create a message.
@@ -4430,7 +4430,7 @@ WebClient webClient;
 public void setup() {
 	webClient = MockMvcWebClientBuilder
 		.webAppContextSetup(context)
-		.createWebClient();
+		.build();
 }
 ----
 
@@ -4445,10 +4445,10 @@ public void setup() {
 		.webAppContextSetup(context, springSecurity())
 		// for illustration only - defaults to ""
 		.contextPath("")
-		// By default MockMvc is used for localhost only
+		// By default MockMvc is used for localhost only;
 		// the following will use MockMvc for example.com and example.org too
 		.useMockMvcForHosts("example.com","example.org")
-		.createWebClient();
+		.build();
 }
 ----
 
@@ -4465,15 +4465,14 @@ webClient = MockMvcWebClientBuilder
 		.mockMvcSetup(mockMvc)
 		// for illustration only - defaults to ""
 		.contextPath("")
-		// By default MockMvc is used for localhost only
+		// By default MockMvc is used for localhost only;
 		// the following will use MockMvc for example.com and example.org too
 		.useMockMvcForHosts("example.com","example.org")
-		.createWebClient();
+		.build();
 ----
 
 This is more verbose, but by building the `WebClient` with a `MockMvc` instance we have
-the full power of `MockMvc` at our finger tips. Ultimately, this is simply performing the
-following:
+the full power of `MockMvc` at our finger tips.
 
 [TIP]
 ====
@@ -4738,7 +4737,7 @@ WebClient webClient;
 public void setup() {
 	webClient = MockMvcWebClientBuilder
 		.webAppContextSetup(context)
-		.createWebClient();
+		.build();
 }
 ----
 
@@ -4759,7 +4758,7 @@ public void setup() {
 		// By default MockMvc is used for localhost only
 		// the following will use MockMvc for example.com and example.org too
 		.useMockMvcForHosts("example.com","example.org")
-		.createWebClient();
+		.build();
 }
 ----
 
@@ -4779,7 +4778,7 @@ webClient = MockMvcWebClientBuilder
 		// By default MockMvc is used for localhost only
 		// the following will use MockMvc for example.com and example.org too
 		.useMockMvcForHosts("example.com","example.org")
-		.createWebClient();
+		.build();
 ----
 
 This is more verbose, but by building the `WebDriver` with a `MockMvc` instance we have
