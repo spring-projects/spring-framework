@@ -23,6 +23,8 @@ import com.gargoylesoftware.htmlunit.WebRequest;
  *
  * @author Rob Winch
  * @since 4.2
+ * @see org.springframework.test.web.servlet.htmlunit.HostRequestMatcher
+ * @see org.springframework.test.web.servlet.htmlunit.UrlRegexRequestMatcher
  */
 public interface WebRequestMatcher {
 
