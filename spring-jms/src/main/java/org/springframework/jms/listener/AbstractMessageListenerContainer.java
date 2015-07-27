@@ -37,19 +37,19 @@ import org.springframework.util.ErrorHandler;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Abstract base class for message listener containers. Can either host
- * a standard JMS {@link javax.jms.MessageListener} or a Spring-specific
- * {@link SessionAwareMessageListener}.
+ * Abstract base class for Spring message listener container implementations.
+ * Can either host a standard JMS {@link javax.jms.MessageListener} or Spring's
+ * {@link SessionAwareMessageListener} for actual message processing.
  *
- * <p>Usually holds a single JMS {@link Connection} that all listeners are
- * supposed to be registered on, which is the standard JMS way of managing
- * listeners. Can alternatively also be used with a fresh Connection per
- * listener, for J2EE-style XA-aware JMS messaging. The actual registration
- * process is up to concrete subclasses.
+ * <p>Usually holds a single JMS {@link Connection} that all listeners are supposed
+ * to be registered on, which is the standard JMS way of managing listener sessions.
+ * Can alternatively also be used with a fresh Connection per listener, for Java EE
+ * style XA-aware JMS messaging. The actual registration process is up to concrete
+ * subclasses.
  *
- * <p><b>NOTE:</b> The default behavior of this message listener container
- * is to <b>never</b> propagate an exception thrown by a message listener up to
- * the JMS provider. Instead, it will log any such exception at the error level.
+ * <p><b>NOTE:</b> The default behavior of this message listener container is to
+ * <b>never</b> propagate an exception thrown by a message listener up to the JMS
+ * provider. Instead, it will log any such exception at the error level.
  * This means that from the perspective of the attendant JMS provider no such
  * listener will ever fail. However, if error handling is necessary, then
  * any implementation of the {@link ErrorHandler} strategy may be provided to
@@ -62,37 +62,48 @@ import org.springframework.util.ReflectionUtils;
  * <li>"sessionAcknowledgeMode" set to "AUTO_ACKNOWLEDGE" (default):
  * This mode is container-dependent: For {@link DefaultMessageListenerContainer},
  * it means automatic message acknowledgment <i>before</i> listener execution, with
- * no redelivery in case of an exception. For {@link SimpleMessageListenerContainer},
+ * no redelivery in case of an exception and no redelivery in case of other listener
+ * execution interruptions either. For {@link SimpleMessageListenerContainer},
  * it means automatic message acknowledgment <i>after</i> listener execution, with
- * redelivery in case of an exception thrown, as defined by the JMS specification.
- * In order to consistently achieve the latter behavior with any container variant,
- * consider setting "sessionTransacted" to "true" instead.
+ * no redelivery in case of a user exception thrown but potential redelivery in case
+ * of the JVM dying during listener execution. In order to consistently arrange for
+ * redelivery with any container variant, consider "CLIENT_ACKNOWLEDGE" mode or -
+ * preferably - setting "sessionTransacted" to "true" instead.
+ * <li>"sessionAcknowledgeMode" set to "DUPS_OK_ACKNOWLEDGE":
+ * <i>Lazy</i> message acknowledgment during ({@link DefaultMessageListenerContainer})
+ * or shortly after ({@link SimpleMessageListenerContainer}) listener execution;
+ * no redelivery in case of a user exception thrown but potential redelivery in case
+ * of the JVM dying during listener execution. In order to consistently arrange for
+ * redelivery with any container variant, consider "CLIENT_ACKNOWLEDGE" mode or -
+ * preferably - setting "sessionTransacted" to "true" instead.
  * <li>"sessionAcknowledgeMode" set to "CLIENT_ACKNOWLEDGE":
  * Automatic message acknowledgment <i>after</i> successful listener execution;
- * best-effort redelivery in case of exception thrown.
- * <li>"sessionAcknowledgeMode" set to "DUPS_OK_ACKNOWLEDGE":
- * <i>Lazy</i> message acknowledgment during or after listener execution;
- * <i>potential redelivery</i> in case of exception thrown.
+ * best-effort redelivery in case of a user exception thrown as well as in case
+ * of other listener execution interruptions (such as the JVM dying).
  * <li>"sessionTransacted" set to "true":
  * Transactional acknowledgment after successful listener execution;
- * <i>guaranteed redelivery</i> in case of exception thrown.
+ * <i>guaranteed redelivery</i> in case of a user exception thrown as well as
+ * in case of other listener execution interruptions (such as the JVM dying).
  * </ul>
- * The exact behavior might vary according to the concrete listener container
- * and JMS provider used.
  *
- * <p>There are two solutions to the duplicate processing problem:
+ * <p>There are two solutions to the duplicate message processing problem:
  * <ul>
  * <li>Either add <i>duplicate message detection</i> to your listener, in the
  * form of a business entity existence check or a protocol table check. This
  * usually just needs to be done in case of the JMSRedelivered flag being
- * set on the incoming message (else just process straightforwardly).
- * <li>Or wrap the <i>entire processing with an XA transaction</i>, covering the
- * reception of the message as well as the execution of the message listener.
- * This is only supported by {@link DefaultMessageListenerContainer}, through
- * specifying a "transactionManager" (typically a
+ * set on the incoming message (otherwise just process straightforwardly).
+ * Note that with "sessionTransacted" set to "true", duplicate messages will
+ * only appear in case of the JVM dying at the most unfortunate point possible
+ * (i.e. after your business logic executed but before the JMS part got committed),
+ * so duplicate message detection is just there to cover a corner case.
+ * <li>Or wrap your <i>entire processing with an XA transaction</i>, covering the
+ * reception of the JMS message as well as the execution of the business logic in
+ * your message listener (including database operations etc). This is only
+ * supported by {@link DefaultMessageListenerContainer}, through specifying
+ * an external "transactionManager" (typically a
  * {@link org.springframework.transaction.jta.JtaTransactionManager}, with
- * a corresponding XA-aware JMS {@link javax.jms.ConnectionFactory} passed in as
- * "connectionFactory").
+ * a corresponding XA-aware JMS {@link javax.jms.ConnectionFactory} passed in
+ * as "connectionFactory").
  * </ul>
  * Note that XA transaction coordination adds significant runtime overhead,
  * so it might be feasible to avoid it unless absolutely necessary.
@@ -108,7 +119,7 @@ import org.springframework.util.ReflectionUtils;
  * <li>Alternatively, specify a
  * {@link org.springframework.transaction.jta.JtaTransactionManager} as
  * "transactionManager" for a fully XA-aware JMS provider - typically when
- * running on a J2EE server, but also for other environments with a JTA
+ * running on a Java EE server, but also for other environments with a JTA
  * transaction manager present. This will give full "exactly-once" guarantees
  * without custom duplicate message checks, at the price of additional
  * runtime processing overhead.
@@ -921,7 +932,7 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 		if (errorHandler != null) {
 			errorHandler.handleError(ex);
 		}
-		else if (logger.isWarnEnabled()) {
+		else {
 			logger.warn("Execution of JMS message listener failed, and no ErrorHandler has been set.", ex);
 		}
 	}
@@ -933,7 +944,6 @@ public abstract class AbstractMessageListenerContainer extends AbstractJmsListen
 	 */
 	@SuppressWarnings("serial")
 	private static class MessageRejectedWhileStoppingException extends RuntimeException {
-
 	}
 
 }

@@ -1854,11 +1854,11 @@ takes a reference to a standard `ConnectionFactory` that would typically come fr
 ===== CachingConnectionFactory
 The `CachingConnectionFactory` extends the functionality of `SingleConnectionFactory`
 and adds the caching of Sessions, MessageProducers, and MessageConsumers. The initial
-cache size is set to 1, use the property `SessionCacheSize` to increase the number of
+cache size is set to 1, use the property `sessionCacheSize` to increase the number of
 cached sessions. Note that the number of actual cached sessions will be more than that
 number as sessions are cached based on their acknowledgment mode, so there can be up to
-4 cached session instances when `SessionCacheSize` is set to one, one for each
-`AcknowledgementMode`. MessageProducers and MessageConsumers are cached within their
+4 cached session instances when `sessionCacheSize` is set to one, one for each
+acknowledgment mode. MessageProducers and MessageConsumers are cached within their
 owning session and also take into account the unique properties of the producers and
 consumers when caching. MessageProducers are cached based on their destination.
 MessageConsumers are cached based on a key composed of the destination, selector,
@@ -1944,17 +1944,29 @@ to runtime demands or for participation in externally managed transactions.
 Compatibility-wise, it stays very close to the spirit of the standalone JMS
 specification - but is generally not compatible with Java EE's JMS restrictions.
 
+[NOTE]
+====
+While `SimpleMessageListenerContainer` does not allow for the participation in externally
+managed transactions, it does support native JMS transactions: simply switch the
+'sessionTransacted' flag to 'true' or, in the namespace, set the 'acknowledge' attribute
+to 'transacted': Exceptions thrown from your listener will lead to a rollback then, with
+the message getting redelivered. Alternatively, consider using 'CLIENT_ACKNOWLEDGE' mode
+which provides redelivery in case of an exception as well but does not use transacted
+Sessions and therefore does not include any other Session operations (such as sending
+response messages) in the transaction protocol.
+====
+
 
 [[jms-mdp-default]]
 ===== DefaultMessageListenerContainer
 This message listener container is the one used in most cases. In contrast to
-`SimpleMessageListenerContainer`, this container variant does allow for dynamic adaption
+`SimpleMessageListenerContainer`, this container variant allows for dynamic adaptation
 to runtime demands and is able to participate in externally managed transactions. Each
 received message is registered with an XA transaction when configured with a
 `JtaTransactionManager`; so processing may take advantage of XA transaction semantics.
 This listener container strikes a good balance between low requirements on the JMS
-provider, advanced functionality such as transaction participation, and compatibility
-with Java EE environments.
+provider, advanced functionality such as the participation in externally managed
+transactions, and compatibility with Java EE environments.
 
 The cache level of the container can be customized. Note that when no caching is enabled,
 a new connection and a new session is created for each message reception. Combining this
@@ -1965,6 +1977,21 @@ This container also has recoverable capabilities when the broker goes down. By d
 a simple `BackOff` implementation retries every 5 seconds. It is possible to specify
 a custom `BackOff` implementation for more fine-grained recovery options, see
 `ExponentialBackOff` for an example.
+
+[NOTE]
+====
+Like its sibling `SimpleMessageListenerContainer`, `DefaultMessageListenerContainer`
+supports native JMS transactions and also allows for customizing the acknowledgment mode.
+This is strongly recommended over externally managed transactions if feasible for your
+scenario: that is, if you can live with occasional duplicate messages in case of the
+JVM dying. Custom duplicate message detection steps in your business logic may cover
+such situations, e.g. in the form of a business entity existence check or a protocol
+table check. Any such arrangements will be significantly more efficient than the
+alternative: wrapping your entire processing with an XA transaction (through configuring
+your `DefaultMessageListenerContainer` with an `JtaTransactionManager`), covering the
+reception of the JMS message as well as the execution of the business logic in your
+message listener (including database operations etc).
+====
 
 
 [[jms-tx]]
@@ -1991,7 +2018,7 @@ use of a JTA transaction manager as well as a properly XA-configured ConnectionF
 Reusing code across a managed and unmanaged transactional environment can be confusing
 when using the JMS API to create a `Session` from a `Connection`. This is because the
 JMS API has only one factory method to create a `Session` and it requires values for the
-transaction and acknowledgement modes. In a managed environment, setting these values is
+transaction and acknowledgment modes. In a managed environment, setting these values is
 the responsibility of the environment's transactional infrastructure, so these values
 are ignored by the vendor's wrapper to the JMS Connection. When using the `JmsTemplate`
 in an unmanaged environment you can specify these values through the use of the
