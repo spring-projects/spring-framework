@@ -59,31 +59,35 @@ public class WebConnectionHtmlUnitDriver extends HtmlUnitDriver {
 	}
 
 	/**
-	 * Modify the supplied {@link WebClient}, {@linkplain #configureWebClient
-	 * configure} it, and retain a reference to it so that its {@link WebConnection}
-	 * is {@linkplain #getWebConnection accessible} for later use.
+	 * Modify the supplied {@link WebClient} and retain a reference to it
+	 * so that its {@link WebConnection} is {@linkplain #getWebConnection
+	 * accessible} for later use.
+	 * <p>Delegates to {@link HtmlUnitDriver#modifyWebClient(WebClient)}
+	 * for default behavior and to {@link #modifyWebClientInternal(WebClient)}
+	 * for further customization.
 	 * @param webClient the client to modify
 	 * @return the modified client
-	 * @see org.openqa.selenium.htmlunit.HtmlUnitDriver#modifyWebClient(WebClient)
+	 * @see HtmlUnitDriver#modifyWebClient(WebClient)
+	 * @see #modifyWebClientInternal(WebClient)
 	 */
 	@Override
 	protected final WebClient modifyWebClient(WebClient webClient) {
 		this.webClient = super.modifyWebClient(webClient);
-		this.webClient = configureWebClient(this.webClient);
+		this.webClient = modifyWebClientInternal(this.webClient);
 		return this.webClient;
 	}
 
 	/**
-	 * Configure the supplied {@link WebClient}.
+	 * Modify the supplied {@link WebClient}.
 	 * <p>The default implementation simply returns the supplied client
 	 * unmodified.
 	 * <p>Subclasses can override this method to customize the {@code WebClient}
-	 * that the {@link HtmlUnitDriver} driver uses.
-	 * @param client the client to configure
-	 * @return the configured client
+	 * that the {@link HtmlUnitDriver} uses.
+	 * @param webClient the client to modify
+	 * @return the modified client
 	 */
-	protected WebClient configureWebClient(WebClient client) {
-		return client;
+	protected WebClient modifyWebClientInternal(WebClient webClient) {
+		return webClient;
 	}
 
 	/**
