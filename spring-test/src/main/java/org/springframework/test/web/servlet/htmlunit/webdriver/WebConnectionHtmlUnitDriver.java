@@ -19,7 +19,6 @@ package org.springframework.test.web.servlet.htmlunit.webdriver;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
-import org.springframework.test.web.servlet.htmlunit.MockMvcWebConnection;
 import org.springframework.util.Assert;
 
 import com.gargoylesoftware.htmlunit.BrowserVersion;
@@ -30,8 +29,9 @@ import com.gargoylesoftware.htmlunit.WebConnection;
  * {@code WebConnectionHtmlUnitDriver} enables configuration of the
  * {@link WebConnection} for an {@link HtmlUnitDriver} instance.
  *
- * <p>This is useful because it allows a {@link MockMvcWebConnection} to
- * be injected.
+ * <p>This is useful because it allows a
+ * {@link org.springframework.test.web.servlet.htmlunit.MockMvcWebConnection
+ * MockMvcWebConnection} to be injected.
  *
  * @author Rob Winch
  * @author Sam Brannen

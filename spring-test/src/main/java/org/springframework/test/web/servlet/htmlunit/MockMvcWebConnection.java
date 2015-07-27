@@ -25,7 +25,6 @@ import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.htmlunit.webdriver.WebConnectionHtmlUnitDriver;
 import org.springframework.util.Assert;
 
 import com.gargoylesoftware.htmlunit.WebClient;
@@ -52,7 +51,7 @@ import com.gargoylesoftware.htmlunit.WebResponse;
  * @author Rob Winch
  * @author Sam Brannen
  * @since 4.2
- * @see WebConnectionHtmlUnitDriver
+ * @see org.springframework.test.web.servlet.htmlunit.webdriver.WebConnectionHtmlUnitDriver
  */
 public final class MockMvcWebConnection implements WebConnection {
 
