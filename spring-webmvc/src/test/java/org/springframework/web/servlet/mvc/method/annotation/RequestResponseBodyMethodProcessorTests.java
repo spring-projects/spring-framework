@@ -781,7 +781,7 @@ public class RequestResponseBodyMethodProcessorTests {
 			return list;
 		}
 	}
-	
+
 	private static class EmptyRequestBodyAdvice implements RequestBodyAdvice {
 
 		@Override
