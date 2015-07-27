@@ -4452,13 +4452,13 @@ public void setup() {
 }
 ----
 
-
 We could also perform the exact same setup using the following:
 
 [source,java]
 ----
 MockMvc mockMvc = MockMvcBuilders
 		.webAppContextSetup(context)
+		.apply(springSecurity())
 		.build();
 
 webClient = MockMvcWebClientBuilder
@@ -4472,7 +4472,7 @@ webClient = MockMvcWebClientBuilder
 ----
 
 This is more verbose, but by building the `WebClient` with a `MockMvc` instance we have
-the full power of `MockMvc` at our finger tips.
+the full power of `MockMvc` at our fingertips.
 
 [TIP]
 ====
@@ -4715,7 +4715,7 @@ Last, don't forget to close the `WebDriver` instance when we are done.
 ----
 @After
 public void destroy() {
-	if(driver != null) {
+	if (driver != null) {
 		driver.close();
 	}
 }
@@ -4731,11 +4731,14 @@ In our example above we used `MockMvcHtmlUnitDriverBuilder` in the simplest way 
 
 [source,java]
 ----
-WebClient webClient;
+@Autowired
+WebApplicationContext context;
+
+WebDriver driver;
 
 @Before
 public void setup() {
-	webClient = MockMvcWebClientBuilder
+	driver = MockMvcHtmlUnitDriverBuilder
 		.webAppContextSetup(context)
 		.build();
 }
@@ -4743,19 +4746,18 @@ public void setup() {
 
 We could also specify some optional arguments:
 
-
 [source,java]
 ----
-WebClient webClient;
+WebDriver driver;
 
 @Before
 public void setup() {
-	webClient = MockMvcWebClientBuilder
+	driver = MockMvcHtmlUnitDriverBuilder
 		// demonstrates applying a MockMvcConfigurer (Spring Security)
 		.webAppContextSetup(context, springSecurity())
 		// for illustration only - defaults to ""
 		.contextPath("")
-		// By default MockMvc is used for localhost only
+		// By default MockMvc is used for localhost only;
 		// the following will use MockMvc for example.com and example.org too
 		.useMockMvcForHosts("example.com","example.org")
 		.build();
@@ -4771,26 +4773,24 @@ MockMvc mockMvc = MockMvcBuilders
 		.apply(springSecurity())
 		.build();
 
-webClient = MockMvcWebClientBuilder
+driver = MockMvcHtmlUnitDriverBuilder
 		.mockMvcSetup(mockMvc)
 		// for illustration only - defaults to ""
 		.contextPath("")
-		// By default MockMvc is used for localhost only
+		// By default MockMvc is used for localhost only;
 		// the following will use MockMvc for example.com and example.org too
 		.useMockMvcForHosts("example.com","example.org")
 		.build();
 ----
 
 This is more verbose, but by building the `WebDriver` with a `MockMvc` instance we have
-the full power of `MockMvc` at our finger tips. Ultimately, this is simply performing the
-following:
+the full power of `MockMvc` at our fingertips.
 
 [TIP]
 ====
 For additional information on creating a `MockMvc` instance refer to
 <<spring-mvc-test-server-setup-options>>.
 ====
-
 
 [[spring-mvc-test-server-htmlunit-geb]]
 ===== MockMvc and Geb
