@@ -74,12 +74,12 @@ public class MockMvcWebClientBuilderTests {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void mockMvcSetupNull() {
-		MockMvcWebClientBuilder.mockMvcSetup(null);
+		mockMvcSetup(null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void webAppContextSetupNull() {
-		MockMvcWebClientBuilder.webAppContextSetup(null);
+		webAppContextSetup(null);
 	}
 
 	@Test
