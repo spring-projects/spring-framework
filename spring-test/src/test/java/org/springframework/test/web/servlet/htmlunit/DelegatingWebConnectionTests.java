@@ -30,6 +30,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.htmlunit.DelegatingWebConnection.DelegateWebConnection;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 
 import com.gargoylesoftware.htmlunit.HttpWebConnection;
 import com.gargoylesoftware.htmlunit.Page;
@@ -122,6 +124,8 @@ public class DelegatingWebConnectionTests {
 
 	@Test
 	public void verifyExampleInClassLevelJavadoc() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		WebClient webClient = new WebClient();
 
 		MockMvc mockMvc = MockMvcBuilders.standaloneSetup(TestController.class).build();

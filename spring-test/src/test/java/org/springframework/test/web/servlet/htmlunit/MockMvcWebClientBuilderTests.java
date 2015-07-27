@@ -31,6 +31,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.tests.Assume;
+import org.springframework.tests.TestGroup;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
@@ -80,6 +82,8 @@ public class MockMvcWebClientBuilderTests {
 
 	@Test
 	public void mockMvcSetupAndConfigureWebClient() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		this.webClient = MockMvcWebClientBuilder
 				.mockMvcSetup(this.mockMvc)
 				.configureWebClient(this.webClient);
@@ -90,6 +94,8 @@ public class MockMvcWebClientBuilderTests {
 
 	@Test
 	public void mockMvcSetupAndCreateWebClient() throws Exception {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		this.webClient = MockMvcWebClientBuilder
 				.mockMvcSetup(this.mockMvc)
 				.createWebClient();
