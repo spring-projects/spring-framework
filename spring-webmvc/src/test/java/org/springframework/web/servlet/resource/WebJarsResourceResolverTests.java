@@ -107,6 +107,7 @@ public class WebJarsResourceResolverTests {
 
 		assertNull(actual);
 		verify(this.chain, times(1)).resolveUrlPath(file, this.locations);
+		verify(this.chain, never()).resolveUrlPath(null, this.locations);
 	}
 
 	@Test
