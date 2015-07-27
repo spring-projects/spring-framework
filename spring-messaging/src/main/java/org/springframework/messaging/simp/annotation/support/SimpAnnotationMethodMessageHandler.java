@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.convert.ConversionService;
@@ -69,6 +70,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.PathMatcher;
+import org.springframework.util.StringValueResolver;
 import org.springframework.validation.Validator;
 
 /**
@@ -82,7 +84,7 @@ import org.springframework.validation.Validator;
  * @since 4.0
  */
 public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHandler<SimpMessageMappingInfo>
-		implements SmartLifecycle {
+		implements EmbeddedValueResolverAware, SmartLifecycle {
 
 	private static final boolean completableFuturePresent = ClassUtils.isPresent("java.util.concurrent.CompletableFuture",
 			SimpAnnotationMethodMessageHandler.class.getClassLoader());
@@ -103,6 +105,8 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	private boolean slashPathSeparator = true;
 
 	private Validator validator;
+
+	private StringValueResolver valueResolver;
 
 	private MessageHeaderInitializer headerInitializer;
 
@@ -232,6 +236,11 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	 */
 	public void setValidator(Validator validator) {
 		this.validator = validator;
+	}
+
+	@Override
+	public void setEmbeddedValueResolver(StringValueResolver resolver) {
+		this.valueResolver = resolver;
 	}
 
 	/**
@@ -376,13 +385,30 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 	private SimpMessageMappingInfo createMessageMappingCondition(MessageMapping annotation) {
+		String[] destinations = resolveEmbeddedValuesInDestinations(annotation.value());
 		return new SimpMessageMappingInfo(SimpMessageTypeMessageCondition.MESSAGE,
-				new DestinationPatternsMessageCondition(annotation.value(), this.pathMatcher));
+				new DestinationPatternsMessageCondition(destinations, this.pathMatcher));
 	}
 
 	private SimpMessageMappingInfo createSubscribeCondition(SubscribeMapping annotation) {
+		String[] destinations = resolveEmbeddedValuesInDestinations(annotation.value());
 		return new SimpMessageMappingInfo(SimpMessageTypeMessageCondition.SUBSCRIBE,
-				new DestinationPatternsMessageCondition(annotation.value(), this.pathMatcher));
+				new DestinationPatternsMessageCondition(destinations, this.pathMatcher));
+	}
+
+	/**
+	 * Resolve placeholder values in the given array of destinations.
+	 * @return a new array with updated destinations
+	 */
+	protected String[] resolveEmbeddedValuesInDestinations(String[] destinations) {
+		if (this.valueResolver == null) {
+			return destinations;
+		}
+		String[] result = new String[destinations.length];
+		for (int i = 0; i < destinations.length; i++) {
+			result[i] = this.valueResolver.resolveStringValue(destinations[i]);
+		}
+		return result;
 	}
 
 	@Override
