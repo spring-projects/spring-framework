@@ -4594,7 +4594,7 @@ WebDriver driver;
 public void setup() {
 	driver = MockMvcHtmlUnitDriverBuilder
 		.webAppContextSetup(context)
-		.createDriver();
+		.build();
 }
 ----
 
@@ -4818,7 +4818,7 @@ following:
 def setup() {
 	browser.driver = MockMvcHtmlUnitDriverBuilder
 		.webAppContextSetup(context, springSecurity())
-		.createDriver()
+		.build()
 }
 ----
 

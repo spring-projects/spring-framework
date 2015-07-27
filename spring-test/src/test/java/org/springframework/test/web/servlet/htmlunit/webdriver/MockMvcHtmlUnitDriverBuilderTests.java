@@ -42,6 +42,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
+import static org.springframework.test.web.servlet.htmlunit.webdriver.MockMvcHtmlUnitDriverBuilder.*;
 
 /**
  * Integration tests for {@link MockMvcHtmlUnitDriverBuilder}.
@@ -70,54 +71,42 @@ public class MockMvcHtmlUnitDriverBuilderTests {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void mockMvcSetupNull() {
-		MockMvcHtmlUnitDriverBuilder.mockMvcSetup(null);
+	public void webAppContextSetupNull() {
+		webAppContextSetup(null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void webAppContextSetupNull() {
-		MockMvcHtmlUnitDriverBuilder.webAppContextSetup(null);
+	public void mockMvcSetupNull() {
+		mockMvcSetup(null);
 	}
 
 	@Test
-	public void mockMvcSetupAndConfigureDriver() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
-		this.driver = MockMvcHtmlUnitDriverBuilder
-				.mockMvcSetup(this.mockMvc)
-				.configureDriver(new WebConnectionHtmlUnitDriver());
+	public void mockMvcSetupWithCustomDriverDelegate() throws Exception {
+		WebConnectionHtmlUnitDriver preconfiguredDriver = new WebConnectionHtmlUnitDriver();
+		this.driver = mockMvcSetup(this.mockMvc).withDelegate(preconfiguredDriver).build();
 
 		assertMvcProcessed("http://localhost/test");
-		assertDelegateProcessed("http://example.com/");
+		Assume.group(TestGroup.PERFORMANCE, () -> assertDelegateProcessed("http://example.com/"));
 	}
 
 	@Test
-	public void mockMvcSetupAndCreateDriver() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
-
-		this.driver = MockMvcHtmlUnitDriverBuilder
-				.mockMvcSetup(this.mockMvc)
-				.createDriver();
+	public void mockMvcSetupWithDefaultDriverDelegate() throws Exception {
+		this.driver = mockMvcSetup(this.mockMvc).build();
 
 		assertMvcProcessed("http://localhost/test");
-		assertDelegateProcessed("http://example.com/");
+		Assume.group(TestGroup.PERFORMANCE, () -> assertDelegateProcessed("http://example.com/"));
 	}
 
 	@Test
 	public void javaScriptEnabledByDefault() {
-		this.driver = MockMvcHtmlUnitDriverBuilder
-				.mockMvcSetup(this.mockMvc)
-				.createDriver();
+		this.driver = mockMvcSetup(this.mockMvc).build();
 
 		assertTrue(this.driver.isJavascriptEnabled());
 	}
 
 	@Test
 	public void javaScriptDisabled() {
-		this.driver = MockMvcHtmlUnitDriverBuilder
-				.mockMvcSetup(this.mockMvc)
-				.javascriptEnabled(false)
-				.createDriver();
+		this.driver = mockMvcSetup(this.mockMvc).javascriptEnabled(false).build();
 
 		assertFalse(this.driver.isJavascriptEnabled());
 	}

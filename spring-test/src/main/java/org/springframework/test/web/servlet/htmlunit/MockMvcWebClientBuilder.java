@@ -85,7 +85,7 @@ public class MockMvcWebClientBuilder extends MockMvcWebConnectionBuilderSupport<
 	 * {@link WebApplicationContext} and {@link MockMvcConfigurer}.
 	 * @param context the {@code WebApplicationContext} to create a {@link MockMvc}
 	 * instance from; never {@code null}
-	 * @param configurer the MockMvcConfigurer to apply; never {@code null}
+	 * @param configurer the {@code MockMvcConfigurer} to apply; never {@code null}
 	 * @return the MockMvcWebClientBuilder to customize
 	 */
 	public static MockMvcWebClientBuilder webAppContextSetup(WebApplicationContext context, MockMvcConfigurer configurer) {
