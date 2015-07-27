@@ -63,7 +63,9 @@ public class WebJarsResourceResolver extends AbstractResourceResolver {
 		Resource resolved = chain.resolveResource(request, requestPath, locations);
 		if (resolved == null) {
 			String webJarResourcePath = findWebJarResourcePath(requestPath);
-			return chain.resolveResource(request, webJarResourcePath, locations);
+			if(webJarResourcePath != null) {
+				return chain.resolveResource(request, webJarResourcePath, locations);
+			}
 		}
 		return resolved;
 	}
