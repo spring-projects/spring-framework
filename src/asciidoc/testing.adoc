@@ -4154,6 +4154,778 @@ https://github.com/spring-projects/spring-mvc-showcase[spring-mvc-showcase] has 
 coverage based on Spring MVC Test.
 
 
+[[spring-mvc-test-server-htmlunit]]
+==== HtmlUnit Integration
+
+Spring provides integration between <<spring-mvc-test-server,MockMvc>> and
+http://htmlunit.sourceforge.net/[HtmlUnit]. This simplifies performing end to end testing
+when using HTML based views. This integration enables developers to:
+
+* Easily test pages using tools (i.e. http://htmlunit.sourceforge.net/[HtmlUnit],
+http://seleniumhq.org/projects/webdriver/[WebDriver], &
+http://www.gebish.org/manual/current/testing.html#spock_junit__testng[Geb]) that we
+already use for integration testing without starting an application server
+* Support testing of JavaScript
+* Optionally test using mock services to speed up testing.
+* Share logic between end-to-end tests and integration tests
+
+
+[NOTE]
+====
+MockMvc will work with templating technologies that do not rely on a Servlet Container
+(i.e. Thymeleaf, Freemarker, Velocity, etc). It does not work with JSPs since they rely on
+the Servlet Container.
+====
+
+[[spring-mvc-test-server-htmlunit-why]]
+===== Why HtmlUnit Integration?
+
+The most obvious question that comes to mind is "Why do I need this?" The answer is best
+found by exploring a very basic sample application. Assume you have a Spring MVC web
+application that allows CRUD operations on a `Message` object. The application also allows
+paging through all messages. How would you go about testing it?
+
+With Spring MVC Test, we can easily test if we are able to create a `Message`.
+
+[source,java]
+----
+MockHttpServletRequestBuilder createMessage = post("/messages/")
+	.param("summary", "Spring Rocks")
+	.param("text", "In case you didn't know, Spring Rocks!");
+
+mockMvc.perform(createMessage)
+	.andExpect(status().is3xxRedirection())
+	.andExpect(redirectedUrl("/messages/123"));
+----
+
+What if we want to test our form view that allows us to create the message? For example,
+assume our form looks like the following snippet:
+
+[source,xml]
+----
+<form id="messageForm" action="/messages/" method="post">
+  <div class="pull-right"><a href="/messages/">Messages</a></div>
+
+  <label for="summary">Summary</label>
+  <input type="text" class="required" id="summary" name="summary" value="" />
+
+  <label for="text">Message</label>
+  <textarea id="text" name="text"></textarea>
+
+  <div class="form-actions">
+	<input type="submit" value="Create" />
+  </div>
+</form>
+----
+
+How do we ensure that our form will produce the correct request to create a new message? A
+naive attempt would look like this:
+
+[source,java]
+----
+mockMvc.perform(get("/messages/form"))
+	.andExpect(xpath("//input[@name='summary']").exists())
+	.andExpect(xpath("//textarea[@name='text']").exists());
+----
+
+This test has some obvious problems. If we updated our controller to use the parameter
+"message" instead of "text", our test would would incorrectly pass. To resolve this we
+could combine our two tests:
+
+[[spring-mvc-test-server-htmlunit-mock-mvc-test]]
+[source,java]
+----
+String summaryParamName = "summary";
+String textParamName = "text";
+mockMvc.perform(get("/messages/form"))
+		.andExpect(xpath("//input[@name='" + summaryParamName + "']").exists())
+		.andExpect(xpath("//textarea[@name='" + textParamName + "']").exists());
+
+MockHttpServletRequestBuilder createMessage = post("/messages/")
+		.param(summaryParamName, "Spring Rocks")
+		.param(textParamName, "In case you didn't know, Spring Rocks!");
+
+mockMvc.perform(createMessage)
+		.andExpect(status().is3xxRedirection())
+		.andExpect(redirectedUrl("/messages/123"));
+----
+
+This would reduce the risk of our test incorrectly passing, but there are still some
+problems:
+
+* What if we had multiple forms on our page? Admittedly we could update our xpath
+expressions, but they get more complicated the more factors we take into account (are the
+fields the correct type, are the fields enabled, etc).
+* Another issue is that we are doing double the work we would expect.
+We must first verify the view and then we submit the view with the same parameters we just
+verified.
+Ideally this could be done all at once.
+* Last, there are some things that we still cannot account for. For example, what if the
+form has JavaScript validation that we wish to validate too?
+
+The overall problem is that testing a web page is not a single interaction. Instead, it is
+a combination of how the user interacts with a web page and how that web page interacts
+with other resources. For example, the result of form view is used as an input to a user
+for creating a message. Another example is that our form view utilizes additional
+resources, like JavaScript validation, that impact the behavior of the page.
+
+[[spring-mvc-test-server-htmlunit-why-integration]]
+====== Integration testing to the rescue?
+
+To resolve the issues above we could perform integration testing, but this has some
+obvious drawbacks. Consider testing the view that allows us to page through the messages.
+We might need the following tests:
+
+* Does our page display a message to the user indicating that no results are available
+when the messages are empty?
+* Does our page properly display a single message?
+* Does our page properly support paging?
+
+To set these tests up we would need to ensure our database contained the proper messages
+in it. This leads to a number of problems:
+
+* Ensuring the proper messages are in the database can be tedious (think possible foreign
+keys).
+* Testing would be slow since each test would require ensuring the database was in the
+correct state.
+* Since our database needs to be in a specific state, we cannot run the test in parallel.
+* Assertions on things like auto generated ids, timestamps, etc can be challenging.
+
+These problems do not mean that we should abandon integration testing all together.
+Instead, we can reduce the number of integration tests by moving our detailed tests to use
+mock services which will perform much faster. We can then use fewer integration tests that
+validate simple workflows to ensure that everything works together properly.
+
+[[spring-mvc-test-server-htmlunit-why-mockmvc]]
+====== Enter HtmlUnit Integration
+
+So how can we provide a balance between testing the interactions of our pages and still
+get performance? I'm sure you already guessed it...integrating with HtmlUnit
+will allow us to:
+
+* Easily test our pages using tools (i.e. HtmlUnit, WebDriver, & Geb) that we already use
+for integration testing without starting an application server
+* Support testing of JavaScript
+* Optionally test using mock services to speed up testing.
+* Share logic between end-to-end tests and integration tests
+
+
+[[spring-mvc-test-server-htmlunit-options]]
+====== HtmlUnit Integration Options
+
+There are a number of ways to integrate with HtmlUnit. You can find a summary below:
+
+* <<spring-mvc-test-server-htmlunit-mah,MockMvc and HtmlUnit>> - Use this option if you want the raw libraries
+* <<spring-mvc-test-server-htmlunit-webdriver,MockMvc and WebDriver>> - Use this option to ease development and be able to reuse code
+between integration and end-to-end testing.
+* <<spring-mvc-test-server-htmlunit-geb,MockMvc and Geb>> - Use this option if you like using Groovy for testing, would like to
+ease development, and be able to reuse code between integration and end-to-end testing.
+
+[[spring-mvc-test-server-htmlunit-mah]]
+===== MockMvc and HtmlUnit
+
+This section describes how to integrate `MockMvc` and HtmlUnit. Use this option if you
+want to use the raw HtmlUnit libraries.
+
+[[spring-mvc-test-server-htmlunit-mah-setup]]
+====== MockMvc and HtmlUnit Setup
+
+We can easily create an HtmlUnit `WebClient` that integrates with `MockMvc` using the
+following:
+
+[source,java]
+----
+@Autowired
+WebApplicationContext context;
+
+WebClient webClient;
+
+@Before
+public void setup() {
+	webClient = MockMvcWebClientBuilder
+		.webAppContextSetup(context)
+		.createWebClient();
+}
+----
+
+[NOTE]
+====
+This is a simple example of using `MockMvcWebClientBuilder`. For advanced usage see
+<<Advanced MockMvcWebClientBuilder>>
+====
+
+This will ensure any URL that has a host of "localhost" will be directed at our MockMvc
+instance without the need for HTTP. Any other URL will be requested as normal. This allows
+for easily testing with the use of CDNs.
+
+[[spring-mvc-test-server-htmlunit-mah-usage]]
+====== MockMvc and HtmlUnit Usage
+
+Now we can use HtmlUnit as we normally would, but without the need to deploy our
+application. For example, we can request the view to create a message with the following:
+
+[source,java]
+----
+HtmlPage createMsgFormPage = webClient.getPage("http://localhost/messages/form");
+----
+
+[NOTE]
+====
+The the context path is "". Alternatively, we could have specified the context path as
+illustrated in <<Advanced MockMvcWebClientBuilder>>.
+====
+
+We can then fill out the form and submit it to create a message.
+
+[source,java]
+----
+HtmlForm form = createMsgFormPage.getHtmlElementById("messageForm");
+HtmlTextInput summaryInput = createMsgFormPage.getHtmlElementById("summary");
+summaryInput.setValueAttribute("Spring Rocks");
+HtmlTextArea textInput = createMsgFormPage.getHtmlElementById("text");
+textInput.setText("In case you didn't know, Spring Rocks!");
+HtmlSubmitInput submit = form.getOneHtmlElementByAttribute("input", "type", "submit");
+HtmlPage newMessagePage = submit.click();
+----
+
+Finally, we can verify that a new message was created successfully
+
+[source,java]
+----
+assertThat(newMessagePage.getUrl().toString()).endsWith("/messages/123");
+String id = newMessagePage.getHtmlElementById("id").getTextContent();
+assertThat(id).isEqualTo("123");
+String summary = newMessagePage.getHtmlElementById("summary").getTextContent();
+assertThat(summary).isEqualTo("Spring Rocks");
+String text = newMessagePage.getHtmlElementById("text").getTextContent();
+assertThat(text).isEqualTo("In case you didn't know, Spring Rocks!");
+----
+
+This improves on our <<spring-mvc-test-server-htmlunit-mock-mvc-test,MockMvc test>> in a
+number of ways. First we no longer have to explicitly verify our form and then create a
+request that looks like the form. Instead, we request the form, fill it out, and submit
+it. This reduces the overhead significantly.
+
+Another important factor is that
+http://htmlunit.sourceforge.net/javascript.html[HtmlUnit uses Mozilla Rhino engine] to
+evaluate JavaScript on your pages. This means, that we can verify our JavaScript methods
+as well!
+
+Refer to the http://htmlunit.sourceforge.net/gettingStarted.html[HtmlUnit documentation]
+for additional information about using HtmlUnit.
+
+[[spring-mvc-test-server-htmlunit-mah-advanced-builder]]
+====== Advanced MockMvcWebClientBuilder
+
+In our example above we used `MockMvcWebClientBuilder` in the simplest way possible.
+
+[source,java]
+----
+@Autowired
+WebApplicationContext context;
+
+WebClient webClient;
+
+@Before
+public void setup() {
+	webClient = MockMvcWebClientBuilder
+		.webAppContextSetup(context)
+		.createWebClient();
+}
+----
+
+We could also specify some optional arguments:
+
+[source,java]
+----
+@Before
+public void setup() {
+	webClient = MockMvcWebClientBuilder
+		// demonstrates applying a MockMvcConfigurer (Spring Security)
+		.webAppContextSetup(context, springSecurity())
+		// for illustration only - defaults to ""
+		.contextPath("")
+		// By default MockMvc is used for localhost only
+		// the following will use MockMvc for example.com and example.org too
+		.useMockMvcForHosts("example.com","example.org")
+		.createWebClient();
+}
+----
+
+
+We could also perform the exact same setup using the following:
+
+[source,java]
+----
+MockMvc mockMvc = MockMvcBuilders
+		.webAppContextSetup(context)
+		.build();
+
+webClient = MockMvcWebClientBuilder
+		.mockMvcSetup(mockMvc)
+		// for illustration only - defaults to ""
+		.contextPath("")
+		// By default MockMvc is used for localhost only
+		// the following will use MockMvc for example.com and example.org too
+		.useMockMvcForHosts("example.com","example.org")
+		.createWebClient();
+----
+
+This is more verbose, but by building the `WebClient` with a `MockMvc` instance we have
+the full power of `MockMvc` at our finger tips. Ultimately, this is simply performing the
+following:
+
+[TIP]
+====
+For additional information on creating a `MockMvc` instance refer to
+<<spring-mvc-test-server-setup-options>>.
+====
+
+[[spring-mvc-test-server-htmlunit-webdriver]]
+===== MockMvc and WebDriver
+
+In the previous section, we have already seen how to use MockMvc with HtmlUnit.
+In this section, we will leverage additional abstractions within
+http://docs.seleniumhq.org/projects/webdriver/[WebDriver] to make things even easier.
+
+[[spring-mvc-test-server-htmlunit-webdriver-why]]
+====== Why WebDriver and MockMvc?
+
+We can already use HtmlUnit and MockMvc, so why would we want to use WebDriver? WebDriver
+provides a very elegant API and allows us to easily organize our code. To better
+understand, let's explore an example.
+
+[NOTE]
+====
+Despite being a part of http://docs.seleniumhq.org/[Selenium], WebDriver does not require
+a Selenium Server to run your tests.
+====
+
+Suppose we need to ensure that a message is created properly. The tests involve finding
+the html inputs, filling them out, and making various assertions.
+
+There are many tests because we want to test error conditions as well. For example, we
+want to ensure that if we fill out only part of the form we get an error. If we fill out
+the entire form, the newly created message is displayed afterwards.
+
+If one of the fields was named "summary", then we might have something like the following
+repeated everywhere within our tests:
+
+[source,java]
+----
+HtmlTextInput summaryInput = currentPage.getHtmlElementById("summary");
+summaryInput.setValueAttribute(summary);
+----
+
+So what happens if we change the id to be "smmry".
+This means we would have to update all of our tests! Instead we would hope that we wrote a
+bit more elegant code where filling out the form was in its own method:
+
+[source,java]
+----
+public HtmlPage createMessage(HtmlPage currentPage, String summary, String text) {
+	setSummary(currentPage, summary);
+	...
+}
+
+public void setSummary(HtmlPage currentPage, String summary) {
+	HtmlTextInput summaryInput = currentPage.getHtmlElementById("summary");
+	summaryInput.setValueAttribute(summary);
+}
+----
+
+This ensures that if we change the UI we do not have to update all of our tests.
+
+We might take it a step further and place this logic within an Object that represents the
+`HtmlPage` we are currently on.
+
+[source,java]
+----
+public class CreateMessagePage {
+	HtmlPage currentPage;
+
+	HtmlTextInput summaryInput;
+
+	HtmlSubmitInput submit;
+
+	public CreateMessagePage(HtmlPage currentPage) {
+		this.currentPage = currentPage;
+		this.summaryInput = currentPage.getHtmlElementById("summary");
+		this.submit = currentPage.getHtmlElementById("submit");
+	}
+
+	public <T> T createMessage(String summary, String text) throws Exception {
+		setSummary(summary);
+
+		HtmlPage result = submit.click();
+		boolean error = CreateMessagePage.at(result);
+
+		return (T) (error ? new CreateMessagePage(result) : new ViewMessagePage(result));
+	}
+
+	public void setSummary(String summary) throws Exception {
+		summaryInput.setValueAttribute(summary);
+	}
+
+	public static boolean at(HtmlPage page) {
+		return "Create Message".equals(page.getTitleText());
+	}
+}
+----
+
+Formerly, this pattern is known as the
+https://code.google.com/p/selenium/wiki/PageObjects[Page Object Pattern]. While we can
+certainly do this with HtmlUnit, WebDriver provides some tools that we will explore in the
+following sections make this pattern much easier.
+
+[[spring-mvc-test-server-htmlunit-webdriver-setup]]
+====== MockMvc and WebDriver Setup
+
+We can easily create a WebDriver implementation that integrates with MockMvc using the
+following:
+
+[source,java]
+----
+@Autowired
+WebApplicationContext context;
+
+WebDriver driver;
+
+@Before
+public void setup() {
+	driver = MockMvcHtmlUnitDriverBuilder
+		.webAppContextSetup(context)
+		.createDriver();
+}
+----
+
+[NOTE]
+====
+This is a simple example of using `MockMvcHtmlUnitDriverBuilder`.
+For more advanced usage, refer to <<Advanced MockMvcHtmlUnitDriverBuilder>>
+====
+
+This will ensure any URL that has a host of "localhost" will be directed at our MockMvc
+instance without the need for HTTP. Any other URL will be requested as normal. This allows
+for easily testing with the use of CDNs.
+
+[[spring-mvc-test-server-htmlunit-webdriver-usage]]
+====== MockMvc and WebDriver Usage
+
+Now we can use WebDriver as we normally would, but without the need to deploy our
+application. For example, we can request the view to create a message with the following:
+
+[source,java]
+----
+CreateMessagePage page = CreateMessagePage.to(driver);
+----
+
+We can then fill out the form and submit it to create a message.
+
+[source,java]
+----
+ViewMessagePage viewMessagePage =
+	page.createMessage(ViewMessagePage.class, expectedSummary, expectedText);
+----
+
+This improves on the design of our
+<<spring-mvc-test-server-htmlunit-mah-usage,HtmlUnit test>> by leveraging the Page Object
+Pattern. As we mentioned in <<spring-mvc-test-server-htmlunit-webdriver-why>>, we could
+use the Page Object Pattern with HtmlUnit, but it is much easier now. Let's take a look at
+our `CreateMessagePage`.
+
+[source,java]
+----
+public class CreateMessagePage
+		extends AbstractPage { // <1>
+
+	// <2>
+	private WebElement summary;
+	private WebElement text;
+
+	// <3>
+	@FindBy(css = "input[type=submit]")
+	private WebElement submit;
+
+	public CreateMessagePage(WebDriver driver) {
+		super(driver);
+	}
+
+	public <T> T createMessage(Class<T> resultPage, String summary, String details) {
+		this.summary.sendKeys(summary);
+		this.text.sendKeys(details);
+		this.submit.click();
+		return PageFactory.initElements(driver, resultPage);
+	}
+
+	public static CreateMessagePage to(WebDriver driver) {
+		driver.get("http://localhost:9990/mail/messages/form");
+		return PageFactory.initElements(driver, CreateMessagePage.class);
+	}
+}
+----
+
+<1> The first thing you will notice is that our `CreateMessagePage` extends the
+`AbstractPage`. We won't go over the details of `AbstractPage`, but in summary it contains
+all the common functionality of all our pages. For example, if your application has a
+navigational bar, global error messages, etc. This logic can be placed in a shared
+location.
+
+<2> The next thing you will find is that we have a member variable for each of the parts
+of the HTML, `WebElement`, we are interested in. ``WebDriver``'s
+https://code.google.com/p/selenium/wiki/PageFactory[PageFactory] allows us to remove a lot
+of code from HtmlUnit version of `CreateMessagePage` by automatically resolving each
+`WebElement`. The
+http://selenium.googlecode.com/git/docs/api/java/org/openqa/selenium/support/PageFactory.html#initElements-org.openqa.selenium.WebDriver-java.lang.Class-[PageFactory#initElements(WebDriver,Class<T>)]
+method will automatically resolve each `WebElement` by using the field name and trying to
+look it up by id or name of the element on the HTML page.
+
+<3> We can use the
+https://code.google.com/p/selenium/wiki/PageFactory#Making_the_Example_Work_Using_Annotations[@FindBy annotation]
+to override the default. Our example demonstrates how we can use the `@FindBy` annotation
+to lookup our submit button using the css selector of *input[type=submit]*.
+
+Finally, we can verify that a new message was created successfully
+
+[source,java]
+----
+assertThat(viewMessagePage.getMessage()).isEqualTo(expectedMessage);
+assertThat(viewMessagePage.getSuccess()).isEqualTo("Successfully created a new message");
+----
+
+We can see that our `ViewMessagePage` can allow us to interact with our custom domain
+model. For example, it exposes a method that returns a `Message` object.
+
+[source,java]
+----
+public Message getMessage() throws ParseException {
+	Message message = new Message();
+	message.setId(getId());
+	message.setCreated(getCreated());
+	message.setSummary(getSummary());
+	message.setText(getText());
+	return message;
+}
+----
+
+We can then leverage the rich domain objects in our assertions.
+
+Last, don't forget to close the `WebDriver` instance when we are done.
+
+[source,java]
+----
+@After
+public void destroy() {
+	if(driver != null) {
+		driver.close();
+	}
+}
+----
+
+For additional information on using WebDriver, refer to the
+https://code.google.com/p/selenium/wiki/GettingStarted[WebDriver documentation].
+
+[[spring-mvc-test-server-htmlunit-webdriver-advanced-builder]]
+====== Advanced MockMvcHtmlUnitDriverBuilder
+
+In our example above we used `MockMvcHtmlUnitDriverBuilder` in the simplest way possible.
+
+[source,java]
+----
+WebClient webClient;
+
+@Before
+public void setup() {
+	webClient = MockMvcWebClientBuilder
+		.webAppContextSetup(context)
+		.createWebClient();
+}
+----
+
+We could also specify some optional arguments:
+
+
+[source,java]
+----
+WebClient webClient;
+
+@Before
+public void setup() {
+	webClient = MockMvcWebClientBuilder
+		// demonstrates applying a MockMvcConfigurer (Spring Security)
+		.webAppContextSetup(context, springSecurity())
+		// for illustration only - defaults to ""
+		.contextPath("")
+		// By default MockMvc is used for localhost only
+		// the following will use MockMvc for example.com and example.org too
+		.useMockMvcForHosts("example.com","example.org")
+		.createWebClient();
+}
+----
+
+We could also perform the exact same setup using the following:
+
+[source,java]
+----
+MockMvc mockMvc = MockMvcBuilders
+		.webAppContextSetup(context)
+		.apply(springSecurity())
+		.build();
+
+webClient = MockMvcWebClientBuilder
+		.mockMvcSetup(mockMvc)
+		// for illustration only - defaults to ""
+		.contextPath("")
+		// By default MockMvc is used for localhost only
+		// the following will use MockMvc for example.com and example.org too
+		.useMockMvcForHosts("example.com","example.org")
+		.createWebClient();
+----
+
+This is more verbose, but by building the `WebDriver` with a `MockMvc` instance we have
+the full power of `MockMvc` at our finger tips. Ultimately, this is simply performing the
+following:
+
+[TIP]
+====
+For additional information on creating a `MockMvc` instance refer to
+<<spring-mvc-test-server-setup-options>>.
+====
+
+
+[[spring-mvc-test-server-htmlunit-geb]]
+===== MockMvc and Geb
+
+In the previous section, we saw how to use MockMvc with WebDriver.
+In this section, we will use http://www.gebish.org/[Geb] to make our tests more Groovy.
+
+
+[[spring-mvc-test-server-htmlunit-geb-why]]
+====== Why Geb and MockMvc?
+
+Geb is backed by WebDriver, so it offers many of the
+<<spring-mvc-test-server-htmlunit-webdriver-why,same benefits>> we got from WebDriver.
+However, Geb makes things even easier by taking care of some of the boiler plate code for
+us.
+
+[[spring-mvc-test-server-htmlunit-geb-setup]]
+====== MockMvc and Geb Setup
+
+We can easily initialize Geb with a WebDriver implementation that uses `MockMvc` with the
+following:
+
+[source,groovy]
+----
+def setup() {
+	browser.driver = MockMvcHtmlUnitDriverBuilder
+		.webAppContextSetup(context, springSecurity())
+		.createDriver()
+}
+----
+
+[NOTE]
+====
+This is a simple example of using `MockMvcHtmlUnitDriverBuilder`.
+For more advanced usage, refer to <<Advanced MockMvcHtmlUnitDriverBuilder>>
+====
+
+This will ensure any URL that has a host of "localhost" will be directed at our MockMvc
+instance without the need for HTTP. Any other URL will be requested as normal. This allows
+for easily testing with the use of CDNs.
+
+[[spring-mvc-test-server-htmlunit-geb-usage]]
+====== MockMvc and Geb Usage
+
+Now we can use Geb as we normally would, but without the need to deploy our application.
+For example, we can request the view to create a message with the following:
+
+[source,groovy]
+----
+to CreateMessagePage
+----
+
+We can then fill out the form and submit it to create a message.
+
+[source,groovy]
+----
+when:
+form.summary = expectedSummary
+form.text = expectedMessage
+submit.click(ViewMessagePage)
+----
+
+Any unrecognized method calls or property accesses/references that are not found will be
+forwarded to the current page object. This removes a lot of the boilerplate code we needed
+when using WebDriver directly.
+
+Additionally, this improves on the design of our
+<<spring-mvc-test-server-htmlunit-mah-usage,HtmlUnit test>>. The most obvious change is
+that we are now using the Page Object Pattern. As we mentioned in
+<<spring-mvc-test-server-htmlunit-webdriver-why>>, we could use the Page Object Pattern
+with HtmlUnit, but it is much easier now.
+
+Let's take a look at our `CreateMessagePage`.
+
+[source,groovy]
+----
+class CreateMessagePage extends Page {
+	static at = { assert title == 'Messages : Create'; true }
+	static url = 'messages/form'
+	static content =  {
+		submit { $('input[type=submit]') }
+		form { $('form') }
+		errors(required:false) { $('label.error, .alert-error')?.text() }
+	}
+}
+----
+
+The first thing you will notice is that our `CreateMessagePage` extends the `Page`.
+We won't go over the details of `Page`, but in summary it contains base functionality for all our pages.
+
+The next thing you will notice is that we define a URL in which this page can be found.
+This allows us to navigate to the page with:
+
+[source,groovy]
+----
+to CreateMessagePage
+----
+
+We also have a closure that determines if we are at the specified page.
+It should return true if we are on the correct page.
+This is why we can assert that we are on the correct page with:
+
+[source,groovy]
+----
+then:
+at CreateMessagePage
+errors.contains('This field is required.')
+----
+
+[NOTE]
+====
+We use an assertion in the closure, so we can determine where things went wrong if we were
+at the wrong page.
+====
+
+We last create a content closure that specifies all the areas of interest within the page.
+We can use a
+http://www.gebish.org/manual/current/intro.html#the_jquery_ish_navigator_api[jQuery-ish Navigator API]
+to select the content we are interested in.
+
+Finally, we can verify that a new message was created successfully
+
+[source,groovy]
+----
+then:
+at ViewMessagePage
+success == 'Successfully created a new message'
+id
+date
+summary == expectedSummary
+message == expectedMessage
+----
+
+
 [[spring-mvc-test-client]]
 ==== Client-Side REST Tests
 Client-side tests are for code using the `RestTemplate`. The goal is to define expected
