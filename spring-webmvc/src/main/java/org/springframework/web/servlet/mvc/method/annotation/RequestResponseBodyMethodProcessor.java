@@ -18,17 +18,15 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.util.Arrays;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
@@ -141,7 +139,7 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 
 	@Override
 	protected <T> Object readWithMessageConverters(NativeWebRequest webRequest, MethodParameter methodParam,
-			Type paramType) throws IOException, HttpMediaTypeNotSupportedException {
+			Type paramType) throws IOException, HttpMediaTypeNotSupportedException, HttpMessageNotReadableException {
 
 		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
 		ServletServerHttpRequest inputMessage = new ServletServerHttpRequest(servletRequest);
@@ -160,7 +158,7 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 	@Override
 	public void handleReturnValue(Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)
-			throws IOException, HttpMediaTypeNotAcceptableException {
+			throws IOException, HttpMediaTypeNotAcceptableException, HttpMessageNotWritableException {
 
 		mavContainer.setRequestHandled(true);
 

@@ -49,7 +49,7 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 	 * @see ScopedProxyMode#NO
 	 */
 	public AnnotationScopeMetadataResolver() {
-		this(ScopedProxyMode.NO);
+		this.defaultProxyMode = ScopedProxyMode.NO;
 	}
 
 	/**
@@ -62,6 +62,7 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 		this.defaultProxyMode = defaultProxyMode;
 	}
 
+
 	/**
 	 * Set the type of annotation that is checked for by this
 	 * {@code AnnotationScopeMetadataResolver}.
@@ -72,6 +73,7 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 		this.scopeAnnotationType = scopeAnnotationType;
 	}
 
+
 	@Override
 	public ScopeMetadata resolveScopeMetadata(BeanDefinition definition) {
 		ScopeMetadata metadata = new ScopeMetadata();
@@ -81,7 +83,7 @@ public class AnnotationScopeMetadataResolver implements ScopeMetadataResolver {
 			if (attributes != null) {
 				metadata.setScopeName(attributes.getAliasedString("value", this.scopeAnnotationType, definition.getSource()));
 				ScopedProxyMode proxyMode = attributes.getEnum("proxyMode");
-				if ((proxyMode == null) || (proxyMode == ScopedProxyMode.DEFAULT)) {
+				if (proxyMode == null || proxyMode == ScopedProxyMode.DEFAULT) {
 					proxyMode = this.defaultProxyMode;
 				}
 				metadata.setScopedProxyMode(proxyMode);
