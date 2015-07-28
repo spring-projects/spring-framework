@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -94,18 +94,6 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport implements Xh
 
 
 	@Override
-	public ResponseEntity<String> executeInfoRequestInternal(URI infoUrl) {
-		RequestCallback requestCallback = new XhrRequestCallback(getRequestHeaders());
-		return this.restTemplate.execute(infoUrl, HttpMethod.GET, requestCallback, textExtractor);
-	}
-
-	@Override
-	public ResponseEntity<String> executeSendRequestInternal(URI url, HttpHeaders headers, TextMessage message) {
-		RequestCallback requestCallback = new XhrRequestCallback(headers, message.getPayload());
-		return this.restTemplate.execute(url, HttpMethod.POST, requestCallback, textExtractor);
-	}
-
-	@Override
 	protected void connectInternal(final TransportRequest request, final WebSocketHandler handler,
 			final URI receiveUrl, final HttpHeaders handshakeHeaders, final XhrClientSockJsSession session,
 			final SettableListenableFuture<WebSocketSession> connectFuture) {
@@ -143,11 +131,23 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport implements Xh
 		});
 	}
 
+	@Override
+	public ResponseEntity<String> executeInfoRequestInternal(URI infoUrl) {
+		RequestCallback requestCallback = new XhrRequestCallback(getRequestHeaders());
+		return this.restTemplate.execute(infoUrl, HttpMethod.GET, requestCallback, textResponseExtractor);
+	}
+
+	@Override
+	public ResponseEntity<String> executeSendRequestInternal(URI url, HttpHeaders headers, TextMessage message) {
+		RequestCallback requestCallback = new XhrRequestCallback(headers, message.getPayload());
+		return this.restTemplate.execute(url, HttpMethod.POST, requestCallback, textResponseExtractor);
+	}
+
 
 	/**
 	 * A simple ResponseExtractor that reads the body into a String.
 	 */
-	private final static ResponseExtractor<ResponseEntity<String>> textExtractor =
+	private final static ResponseExtractor<ResponseEntity<String>> textResponseExtractor =
 			new ResponseExtractor<ResponseEntity<String>>() {
 				@Override
 				public ResponseEntity<String> extractData(ClientHttpResponse response) throws IOException {
@@ -160,7 +160,6 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport implements Xh
 					}
 				}
 			};
-
 
 	/**
 	 * A RequestCallback to add the headers and (optionally) String content.
@@ -190,7 +189,6 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport implements Xh
 			}
 		}
 	}
-
 
 	/**
 	 * Splits the body of an HTTP response into SockJS frames and delegates those
