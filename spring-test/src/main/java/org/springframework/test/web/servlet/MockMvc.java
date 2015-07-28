@@ -33,11 +33,14 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 /**
  * <strong>Main entry point for server-side Spring MVC test support.</strong>
  *
- * <p>Below is an example:
+ * <h3>Example</h3>
  *
  * <pre class="code">
- * static imports:
- * MockMvcBuilders.*, MockMvcRequestBuilders.*, MockMvcResultMatchers.*
+ * import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+ * import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+ * import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
+ *
+ * // ...
  *
  * WebApplicationContext wac = ...;
  *

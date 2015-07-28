@@ -21,7 +21,6 @@ import javax.servlet.ServletContext;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletRequest;
-import org.springframework.mock.web.MockMultipartHttpServletRequest;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
 
@@ -32,10 +31,6 @@ import org.springframework.test.web.servlet.RequestBuilder;
  * <p>Methods in this class will reuse a
  * {@link org.springframework.mock.web.MockServletContext MockServletContext}
  * that was created by the Spring TestContext Framework.
- *
- * <p>Methods in this class that return a {@link MockHttpServletRequestBuilder}
- * will reuse a {@link MockHttpServletRequest} that was created by the Spring
- * TestContext Framework.
  *
  * <h3>Eclipse Users</h3>
  * <p>Consider adding this class as a Java editor favorite. To navigate to
@@ -199,11 +194,6 @@ public abstract class MockMvcRequestBuilders {
 
 	/**
 	 * Create a {@link MockMultipartHttpServletRequestBuilder} for a multipart request.
-	 * <p>In contrast to methods in this class that return a
-	 * {@link MockHttpServletRequestBuilder}, the builder returned by this
-	 * method will always create a new {@link MockMultipartHttpServletRequest}
-	 * that is <em>not</em> associated with a mock request created by the
-	 * Spring TestContext Framework.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param urlVariables zero or more URL variables
 	 */
@@ -213,11 +203,6 @@ public abstract class MockMvcRequestBuilders {
 
 	/**
 	 * Create a {@link MockMultipartHttpServletRequestBuilder} for a multipart request.
-	 * <p>In contrast to methods in this class that return a
-	 * {@link MockHttpServletRequestBuilder}, the builder returned by this
-	 * method will always create a new {@link MockMultipartHttpServletRequest}
-	 * that is <em>not</em> associated with a mock request created by the
-	 * Spring TestContext Framework.
 	 * @param uri the URL
 	 * @since 4.0.3
 	 */
@@ -228,7 +213,7 @@ public abstract class MockMvcRequestBuilders {
 	/**
 	 * Create a {@link RequestBuilder} for an async dispatch from the
 	 * {@link MvcResult} of the request that started async processing.
-	 * <p>Usage involves performing one request first that starts async processing:
+	 * <p>Usage involves performing a request that starts async processing first:
 	 * <pre class="code">
 	 * MvcResult mvcResult = this.mockMvc.perform(get("/1"))
 	 *	.andExpect(request().asyncStarted())
