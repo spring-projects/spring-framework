@@ -44,21 +44,6 @@
 		</xsd:complexType>
 	</xsd:element>
 
-	<xsd:element name="jruby">
-		<xsd:annotation>
-			<xsd:documentation><![CDATA[
-	A Spring bean backed by a JRuby class definition.
-			]]></xsd:documentation>
-		</xsd:annotation>
-		<xsd:complexType>
-			<xsd:complexContent>
-				<xsd:extension base="dynamicScriptType">
-					<xsd:attributeGroup ref="vanillaScriptAttributes"/>
-				</xsd:extension>
-			</xsd:complexContent>
-		</xsd:complexType>
-	</xsd:element>
-
 	<xsd:element name="bsh">
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
