@@ -49,6 +49,8 @@ import org.junit.rules.TestName;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
@@ -100,7 +102,7 @@ public abstract class AbstractSockJsIntegrationTests {
 
 	@BeforeClass
 	public static void performanceTestGroupAssumption() throws Exception {
-		Assume.group(TestGroup.PERFORMANCE);
+//		Assume.group(TestGroup.PERFORMANCE);
 	}
 
 
@@ -164,19 +166,36 @@ public abstract class AbstractSockJsIntegrationTests {
 
 	@Test
 	public void echoWebSocket() throws Exception {
-		testEcho(100, createWebSocketTransport());
+		testEcho(100, createWebSocketTransport(), null);
 	}
 
 	@Test
 	public void echoXhrStreaming() throws Exception {
-		testEcho(100, createXhrTransport());
+		testEcho(100, createXhrTransport(), null);
 	}
 
 	@Test
 	public void echoXhr() throws Exception {
 		AbstractXhrTransport xhrTransport = createXhrTransport();
 		xhrTransport.setXhrStreamingDisabled(true);
-		testEcho(100, xhrTransport);
+		testEcho(100, xhrTransport, null);
+	}
+
+	// SPR-13254
+
+	@Test
+	public void echoXhrWithHeaders() throws Exception {
+		AbstractXhrTransport xhrTransport = createXhrTransport();
+		xhrTransport.setXhrStreamingDisabled(true);
+
+		WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
+		headers.add("auth", "123");
+		testEcho(10, xhrTransport, headers);
+
+		for (Map.Entry<String, HttpHeaders> entry : this.testFilter.requests.entrySet()) {
+			HttpHeaders httpHeaders = entry.getValue();
+			assertEquals("No auth header for: " + entry.getKey(), "123", httpHeaders.getFirst("auth"));
+		}
 	}
 
 	@Test
@@ -246,14 +265,15 @@ public abstract class AbstractSockJsIntegrationTests {
 	}
 
 
-	private void testEcho(int messageCount, Transport transport) throws Exception {
+	private void testEcho(int messageCount, Transport transport, WebSocketHttpHeaders headers) throws Exception {
 		List<TextMessage> messages = new ArrayList<>();
 		for (int i = 0; i < messageCount; i++) {
 			messages.add(new TextMessage("m" + i));
 		}
 		TestClientHandler handler = new TestClientHandler();
 		initSockJsClient(transport);
-		WebSocketSession session = this.sockJsClient.doHandshake(handler, this.baseUrl + "/echo").get();
+		URI url = new URI(this.baseUrl + "/echo");
+		WebSocketSession session = this.sockJsClient.doHandshake(handler, headers, url).get();
 		for (TextMessage message : messages) {
 			session.sendMessage(message);
 		}
@@ -386,7 +406,7 @@ public abstract class AbstractSockJsIntegrationTests {
 
 	private static class TestFilter implements Filter {
 
-		private final List<ServletRequest> requests = new ArrayList<>();
+		private final Map<String, HttpHeaders> requests = new HashMap<>();
 
 		private final Map<String, Long> sleepDelayMap = new HashMap<>();
 
@@ -397,10 +417,13 @@ public abstract class AbstractSockJsIntegrationTests {
 		public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 				throws IOException, ServletException {
 
-			this.requests.add(request);
+			HttpServletRequest httpRequest = (HttpServletRequest) request;
+			String uri = httpRequest.getRequestURI();
+			HttpHeaders headers = new ServletServerHttpRequest(httpRequest).getHeaders();
+			this.requests.put(uri, headers);
 
 			for (String suffix : this.sleepDelayMap.keySet()) {
-				if (((HttpServletRequest) request).getRequestURI().endsWith(suffix)) {
+				if ((httpRequest).getRequestURI().endsWith(suffix)) {
 					try {
 						Thread.sleep(this.sleepDelayMap.get(suffix));
 						break;
@@ -411,7 +434,7 @@ public abstract class AbstractSockJsIntegrationTests {
 				}
 			}
 			for (String suffix : this.sendErrorMap.keySet()) {
-				if (((HttpServletRequest) request).getRequestURI().endsWith(suffix)) {
+				if ((httpRequest).getRequestURI().endsWith(suffix)) {
 					((HttpServletResponse) response).sendError(this.sendErrorMap.get(suffix));
 					return;
 				}

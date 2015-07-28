@@ -78,6 +78,8 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 
 	private final List<Transport> transports;
 
+	private String[] httpHeaderNames;
+
 	private InfoReceiver infoReceiver;
 
 	private SockJsMessageCodec messageCodec;
@@ -115,6 +117,30 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 		return new RestTemplateXhrTransport();
 	}
 
+
+	/**
+	 * The names of HTTP headers that should be copied from the handshake headers
+	 * of each call to {@link SockJsClient#doHandshake(WebSocketHandler, WebSocketHttpHeaders, URI)}
+	 * and also used with other HTTP requests issued as part of that SockJS
+	 * connection, e.g. the initial info request, XHR send or receive requests.
+	 *
+	 * <p>By default if this property is not set, all handshake headers are also
+	 * used for other HTTP requests. Set it if you want only a subset of handshake
+	 * headers (e.g. auth headers) to be used for other HTTP requests.
+	 *
+	 * @param httpHeaderNames HTTP header names
+	 */
+	public void setHttpHeaderNames(String... httpHeaderNames) {
+		this.httpHeaderNames = httpHeaderNames;
+	}
+
+	/**
+	 * The configured HTTP header names to be copied from the handshake
+	 * headers and also included in other HTTP requests.
+	 */
+	public String[] getHttpHeaderNames() {
+		return this.httpHeaderNames;
+	}
 
 	/**
 	 * Configure the {@code InfoReceiver} to use to perform the SockJS "Info"
@@ -225,7 +251,7 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 		SettableListenableFuture<WebSocketSession> connectFuture = new SettableListenableFuture<WebSocketSession>();
 		try {
 			SockJsUrlInfo sockJsUrlInfo = new SockJsUrlInfo(url);
-			ServerInfo serverInfo = getServerInfo(sockJsUrlInfo);
+			ServerInfo serverInfo = getServerInfo(sockJsUrlInfo, getHttpRequestHeaders(headers));
 			createRequest(sockJsUrlInfo, headers, serverInfo).connect(handler, connectFuture);
 		}
 		catch (Throwable exception) {
@@ -237,12 +263,27 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 		return connectFuture;
 	}
 
-	private ServerInfo getServerInfo(SockJsUrlInfo sockJsUrlInfo) {
+	private HttpHeaders getHttpRequestHeaders(HttpHeaders webSocketHttpHeaders) {
+		if (getHttpHeaderNames() == null) {
+			return webSocketHttpHeaders;
+		}
+		else {
+			HttpHeaders httpHeaders = new HttpHeaders();
+			for (String name : getHttpHeaderNames()) {
+				if (webSocketHttpHeaders.containsKey(name)) {
+					httpHeaders.put(name, webSocketHttpHeaders.get(name));
+				}
+			}
+			return httpHeaders;
+		}
+	}
+
+	private ServerInfo getServerInfo(SockJsUrlInfo sockJsUrlInfo, HttpHeaders headers) {
 		URI infoUrl = sockJsUrlInfo.getInfoUrl();
 		ServerInfo info = this.serverInfoCache.get(infoUrl);
 		if (info == null) {
 			long start = System.currentTimeMillis();
-			String response = this.infoReceiver.executeInfoRequest(infoUrl);
+			String response = this.infoReceiver.executeInfoRequest(infoUrl, headers);
 			long infoRequestTime = System.currentTimeMillis() - start;
 			info = new ServerInfo(response, infoRequestTime);
 			this.serverInfoCache.put(infoUrl, info);
@@ -255,7 +296,8 @@ public class SockJsClient implements WebSocketClient, Lifecycle {
 		for (Transport transport : this.transports) {
 			for (TransportType type : transport.getTransportTypes()) {
 				if (serverInfo.isWebSocketEnabled() || !TransportType.WEBSOCKET.equals(type)) {
-					requests.add(new DefaultTransportRequest(urlInfo, headers, transport, type, getMessageCodec()));
+					requests.add(new DefaultTransportRequest(urlInfo, headers, getHttpRequestHeaders(headers),
+							transport, type, getMessageCodec()));
 				}
 			}
 		}

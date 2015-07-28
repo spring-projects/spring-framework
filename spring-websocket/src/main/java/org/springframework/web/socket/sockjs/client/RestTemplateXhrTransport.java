@@ -94,15 +94,16 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport implements Xh
 
 
 	@Override
-	protected void connectInternal(final TransportRequest request, final WebSocketHandler handler,
+	protected void connectInternal(final TransportRequest transportRequest, final WebSocketHandler handler,
 			final URI receiveUrl, final HttpHeaders handshakeHeaders, final XhrClientSockJsSession session,
 			final SettableListenableFuture<WebSocketSession> connectFuture) {
 
 		getTaskExecutor().execute(new Runnable() {
 			@Override
 			public void run() {
+				HttpHeaders httpHeaders = transportRequest.getHttpRequestHeaders();
 				XhrRequestCallback requestCallback = new XhrRequestCallback(handshakeHeaders);
-				XhrRequestCallback requestCallbackAfterHandshake = new XhrRequestCallback(getRequestHeaders());
+				XhrRequestCallback requestCallbackAfterHandshake = new XhrRequestCallback(httpHeaders);
 				XhrReceiveExtractor responseExtractor = new XhrReceiveExtractor(session);
 				while (true) {
 					if (session.isDisconnected()) {
@@ -132,8 +133,8 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport implements Xh
 	}
 
 	@Override
-	public ResponseEntity<String> executeInfoRequestInternal(URI infoUrl) {
-		RequestCallback requestCallback = new XhrRequestCallback(getRequestHeaders());
+	protected ResponseEntity<String> executeInfoRequestInternal(URI infoUrl, HttpHeaders headers) {
+		RequestCallback requestCallback = new XhrRequestCallback(headers);
 		return this.restTemplate.execute(infoUrl, HttpMethod.GET, requestCallback, textResponseExtractor);
 	}
 

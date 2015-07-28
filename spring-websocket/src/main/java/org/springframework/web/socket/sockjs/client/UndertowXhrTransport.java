@@ -134,11 +134,11 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 			HttpHeaders handshakeHeaders, XhrClientSockJsSession session,
 			SettableListenableFuture<WebSocketSession> connectFuture) {
 
-		executeReceiveRequest(receiveUrl, handshakeHeaders, session, connectFuture);
+		executeReceiveRequest(request, receiveUrl, handshakeHeaders, session, connectFuture);
 	}
 
-	private void executeReceiveRequest(final URI url, final HttpHeaders headers,
-			final XhrClientSockJsSession session,
+	private void executeReceiveRequest(final TransportRequest transportRequest,
+			final URI url, final HttpHeaders headers, final XhrClientSockJsSession session,
 			final SettableListenableFuture<WebSocketSession> connectFuture) {
 
 		if (logger.isTraceEnabled()) {
@@ -154,8 +154,9 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 						HttpString headerName = HttpString.tryFromString(HttpHeaders.HOST);
 						request.getRequestHeaders().add(headerName, url.getHost());
 						addHttpHeaders(request, headers);
-						connection.sendRequest(request, createReceiveCallback(url,
-								getRequestHeaders(), session, connectFuture));
+						HttpHeaders httpHeaders = transportRequest.getHttpRequestHeaders();
+						connection.sendRequest(request, createReceiveCallback(transportRequest,
+								url, httpHeaders, session, connectFuture));
 					}
 
 					@Override
@@ -175,8 +176,8 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 		}
 	}
 
-	private ClientCallback<ClientExchange> createReceiveCallback(final URI url, final HttpHeaders headers,
-			final XhrClientSockJsSession sockJsSession,
+	private ClientCallback<ClientExchange> createReceiveCallback(final TransportRequest transportRequest,
+			final URI url, final HttpHeaders headers, final XhrClientSockJsSession sockJsSession,
 			final SettableListenableFuture<WebSocketSession> connectFuture) {
 
 		return new ClientCallback<ClientExchange>() {
@@ -194,8 +195,9 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 							onFailure(new HttpServerErrorException(status, "Unexpected XHR receive status"));
 						}
 						else {
-							SockJsResponseListener listener = new SockJsResponseListener(result.getConnection(),
-									url, headers, sockJsSession, connectFuture);
+							SockJsResponseListener listener = new SockJsResponseListener(
+									transportRequest, result.getConnection(), url, headers,
+									sockJsSession, connectFuture);
 							listener.setup(result.getResponseChannel());
 						}
 						if (logger.isTraceEnabled()) {
@@ -254,8 +256,8 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 	}
 
 	@Override
-	protected ResponseEntity<String> executeInfoRequestInternal(URI infoUrl) {
-		return executeRequest(infoUrl, Methods.GET, getRequestHeaders(), null);
+	protected ResponseEntity<String> executeInfoRequestInternal(URI infoUrl, HttpHeaders headers) {
+		return executeRequest(infoUrl, Methods.GET, headers, null);
 	}
 
 	@Override
@@ -360,6 +362,8 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 
 	private class SockJsResponseListener implements ChannelListener<StreamSourceChannel> {
 
+		private final TransportRequest request;
+
 		private final ClientConnection connection;
 
 		private final URI url;
@@ -372,10 +376,12 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 
 		private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
-		public SockJsResponseListener(ClientConnection connection, URI url,
+
+		public SockJsResponseListener(TransportRequest request, ClientConnection connection, URI url,
 				HttpHeaders headers, XhrClientSockJsSession sockJsSession,
 				SettableListenableFuture<WebSocketSession> connectFuture) {
 
+			this.request = request;
 			this.connection = connection;
 			this.url = url;
 			this.headers = headers;
@@ -455,7 +461,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 				logger.trace("XHR receive request completed.");
 			}
 			IoUtils.safeClose(this.connection);
-			executeReceiveRequest(this.url, this.headers, this.session, this.connectFuture);
+			executeReceiveRequest(this.request, this.url, this.headers, this.session, this.connectFuture);
 		}
 
 		public void onFailure(Throwable failure) {

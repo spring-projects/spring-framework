@@ -52,6 +52,8 @@ class DefaultTransportRequest implements TransportRequest {
 
 	private final HttpHeaders handshakeHeaders;
 
+	private final HttpHeaders httpRequestHeaders;
+
 	private final Transport transport;
 
 	private final TransportType serverTransportType;
@@ -69,7 +71,8 @@ class DefaultTransportRequest implements TransportRequest {
 	private DefaultTransportRequest fallbackRequest;
 
 
-	public DefaultTransportRequest(SockJsUrlInfo sockJsUrlInfo, HttpHeaders handshakeHeaders,
+	public DefaultTransportRequest(SockJsUrlInfo sockJsUrlInfo,
+			HttpHeaders handshakeHeaders, HttpHeaders httpRequestHeaders,
 			Transport transport, TransportType serverTransportType, SockJsMessageCodec codec) {
 
 		Assert.notNull(sockJsUrlInfo, "'sockJsUrlInfo' is required");
@@ -78,6 +81,7 @@ class DefaultTransportRequest implements TransportRequest {
 		Assert.notNull(codec, "'codec' is required");
 		this.sockJsUrlInfo = sockJsUrlInfo;
 		this.handshakeHeaders = (handshakeHeaders != null ? handshakeHeaders : new HttpHeaders());
+		this.httpRequestHeaders = (httpRequestHeaders != null ? httpRequestHeaders : new HttpHeaders());
 		this.transport = transport;
 		this.serverTransportType = serverTransportType;
 		this.codec = codec;
@@ -92,6 +96,11 @@ class DefaultTransportRequest implements TransportRequest {
 	@Override
 	public HttpHeaders getHandshakeHeaders() {
 		return this.handshakeHeaders;
+	}
+
+	@Override
+	public HttpHeaders getHttpRequestHeaders() {
+		return this.httpRequestHeaders;
 	}
 
 	@Override

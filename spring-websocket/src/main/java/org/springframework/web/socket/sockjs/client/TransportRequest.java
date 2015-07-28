@@ -48,6 +48,13 @@ public interface TransportRequest {
 	HttpHeaders getHandshakeHeaders();
 
 	/**
+	 * Return the headers to add to all other HTTP requests besides the handshake
+	 * request such XHR receive and send requests.
+	 * @since 4.2
+	 */
+	HttpHeaders getHttpRequestHeaders();
+
+	/**
 	 * Return the transport URL for the given transport.
 	 * For an {@link XhrTransport} this is the URL for receiving messages.
 	 */

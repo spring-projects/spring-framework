@@ -106,11 +106,12 @@ public class JettyXhrTransport extends AbstractXhrTransport implements XhrTransp
 
 
 	@Override
-	protected void connectInternal(TransportRequest request, WebSocketHandler handler,
+	protected void connectInternal(TransportRequest transportRequest, WebSocketHandler handler,
 			URI url, HttpHeaders handshakeHeaders, XhrClientSockJsSession session,
 			SettableListenableFuture<WebSocketSession> connectFuture) {
 
-		SockJsResponseListener listener = new SockJsResponseListener(url, getRequestHeaders(), session, connectFuture);
+		HttpHeaders httpHeaders = transportRequest.getHttpRequestHeaders();
+		SockJsResponseListener listener = new SockJsResponseListener(url, httpHeaders, session, connectFuture);
 		executeReceiveRequest(url, handshakeHeaders, listener);
 	}
 
@@ -124,8 +125,8 @@ public class JettyXhrTransport extends AbstractXhrTransport implements XhrTransp
 	}
 
 	@Override
-	protected ResponseEntity<String> executeInfoRequestInternal(URI infoUrl) {
-		return executeRequest(infoUrl, HttpMethod.GET, getRequestHeaders(), null);
+	protected ResponseEntity<String> executeInfoRequestInternal(URI infoUrl, HttpHeaders headers) {
+		return executeRequest(infoUrl, HttpMethod.GET, headers, null);
 	}
 
 	@Override
