@@ -262,18 +262,16 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	 * @param conversionHint the conversion hint Object as passed into the
 	 * converter for the current conversion attempt
 	 * @return the serialization view class, or {@code null} if none
+	 * @since 4.2
 	 */
 	protected Class<?> getSerializationView(Object conversionHint) {
 		if (conversionHint instanceof MethodParameter) {
-			MethodParameter methodParam = (MethodParameter) conversionHint;
-			JsonView annotation = methodParam.getParameterAnnotation(JsonView.class);
-			if (annotation == null) {
-				annotation = methodParam.getMethodAnnotation(JsonView.class);
-				if (annotation == null) {
-					return null;
-				}
+			MethodParameter param = (MethodParameter) conversionHint;
+			JsonView annotation = (param.getParameterIndex() >= 0 ?
+					param.getParameterAnnotation(JsonView.class) : param.getMethodAnnotation(JsonView.class));
+			if (annotation != null) {
+				return extractViewClass(annotation, conversionHint);
 			}
-			return extractViewClass(annotation, conversionHint);
 		}
 		else if (conversionHint instanceof JsonView) {
 			return extractViewClass((JsonView) conversionHint, conversionHint);
@@ -281,9 +279,9 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 		else if (conversionHint instanceof Class) {
 			return (Class) conversionHint;
 		}
-		else {
-			return null;
-		}
+
+		// No JSON view specified...
+		return null;
 	}
 
 	private Class<?> extractViewClass(JsonView annotation, Object conversionHint) {
