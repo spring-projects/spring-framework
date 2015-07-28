@@ -26,8 +26,9 @@ import org.springframework.core.Ordered;
 /**
  * Annotation that defines ordering. The value is optional, and represents order value
  * as defined in the {@link Ordered} interface. Lower values have higher priority.
- * The default value is {@code Ordered.LOWEST_PRECEDENCE}, indicating
- * lowest priority (losing to any other specified order value).
+ * The annotation's default value, which is also applied to elements without a specified,
+ * order, is {@code Ordered.LOWEST_PRECEDENCE}, indicating lowest priority (losing to
+ * any other specified order value).
  *
  * <p>Since Spring 4.1, the standard {@link javax.annotation.Priority} can be used as
  * a drop-in replacement of this annotation.
