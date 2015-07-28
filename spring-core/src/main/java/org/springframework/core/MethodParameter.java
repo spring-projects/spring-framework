@@ -207,7 +207,7 @@ public class MethodParameter {
 
 	/**
 	 * Return the index of the method/constructor parameter.
-	 * @return the parameter index (never negative)
+	 * @return the parameter index (-1 in case of the return type)
 	 */
 	public int getParameterIndex() {
 		return this.parameterIndex;

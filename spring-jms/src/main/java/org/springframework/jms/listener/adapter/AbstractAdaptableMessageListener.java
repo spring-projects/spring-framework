@@ -40,8 +40,8 @@ import org.springframework.jms.support.destination.DynamicDestinationResolver;
 import org.springframework.util.Assert;
 
 /**
- * An abstract {@link MessageListener} adapter providing the necessary infrastructure
- * to extract the payload of a {@link Message}
+ * An abstract JMS {@link MessageListener} adapter providing the necessary
+ * infrastructure to extract the payload of a JMS {@link Message}.
  *
  * @author Juergen Hoeller
  * @author Stephane Nicoll
@@ -217,7 +217,7 @@ public abstract class AbstractAdaptableMessageListener
 			return message;
 		}
 		catch (JMSException ex) {
-			throw new MessageConversionException("Could not unmarshal message", ex);
+			throw new MessageConversionException("Could not convert JMS message", ex);
 		}
 	}
 
@@ -246,10 +246,12 @@ public abstract class AbstractAdaptableMessageListener
 				sendResponse(session, destination, response);
 			}
 			catch (Exception ex) {
-				throw new ReplyFailureException("Failed to send reply with payload '" + result + "'", ex);
+				throw new ReplyFailureException("Failed to send reply with payload [" + result + "]", ex);
 			}
 		}
+
 		else {
+			// No JMS Session available
 			if (logger.isWarnEnabled()) {
 				logger.warn("Listener method returned result [" + result +
 						"]: not generating response message for it because of no JMS Session given");
@@ -266,25 +268,21 @@ public abstract class AbstractAdaptableMessageListener
 	 * @see #setMessageConverter
 	 */
 	protected Message buildMessage(Session session, Object result) throws JMSException {
-		Object content = (result instanceof JmsResponse
-				? ((JmsResponse<?>) result).getResponse() : result);
+		Object content = (result instanceof JmsResponse ? ((JmsResponse<?>) result).getResponse() : result);
+		if (content instanceof org.springframework.messaging.Message) {
+			return this.messagingMessageConverter.toMessage(content, session);
+		}
 
 		MessageConverter converter = getMessageConverter();
 		if (converter != null) {
-			if (content instanceof org.springframework.messaging.Message) {
-				return this.messagingMessageConverter.toMessage(content, session);
-			}
-			else {
-				return converter.toMessage(content, session);
-			}
+			return converter.toMessage(content, session);
 		}
-		else {
-			if (!(content instanceof Message)) {
-				throw new MessageConversionException(
-						"No MessageConverter specified - cannot handle message [" + content + "]");
-			}
-			return (Message) content;
+
+		if (!(content instanceof Message)) {
+			throw new MessageConversionException(
+					"No MessageConverter specified - cannot handle message [" + content + "]");
 		}
+		return (Message) content;
 	}
 
 	/**
@@ -307,6 +305,7 @@ public abstract class AbstractAdaptableMessageListener
 
 	private Destination getResponseDestination(Message request, Message response, Session session, Object result)
 			throws JMSException {
+
 		if (result instanceof JmsResponse) {
 			JmsResponse<?> jmsResponse = (JmsResponse) result;
 			Destination destination = jmsResponse.resolveDestination(getDestinationResolver(), session);
@@ -418,7 +417,7 @@ public abstract class AbstractAdaptableMessageListener
 			if (converter != null) {
 				return converter.toMessage(payload, session);
 			}
-			throw new IllegalStateException("No message converter, cannot handle '" + payload + "'");
+			throw new IllegalStateException("No message converter - cannot handle [" + payload + "]");
 		}
 	}
 
