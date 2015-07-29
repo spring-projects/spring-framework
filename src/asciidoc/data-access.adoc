@@ -3779,7 +3779,7 @@ as input. See the next section for details on how to define an `SqlParameter`.
 Explicit declarations are necessary if the database you use is not a Spring-supported
 database. Currently Spring supports metadata lookup of stored procedure calls for the
 following databases: Apache Derby, DB2, MySQL, Microsoft SQL Server, Oracle, and Sybase.
-We also support metadata lookup of stored functions for: MySQL, Microsoft SQL Server,
+We also support metadata lookup of stored functions for MySQL, Microsoft SQL Server,
 and Oracle.
 ====
 
@@ -4615,9 +4615,10 @@ testability, and the ability to rapidly evolve SQL during development.
 
 
 [[jdbc-embedded-database-xml]]
-==== Creating an embedded database instance using Spring XML
+==== Creating an embedded database using Spring XML
+
 If you want to expose an embedded database instance as a bean in a Spring
-ApplicationContext, use the embedded-database tag in the spring-jdbc namespace:
+`ApplicationContext`, use the `embedded-database` tag in the `spring-jdbc` namespace:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -4629,37 +4630,66 @@ ApplicationContext, use the embedded-database tag in the spring-jdbc namespace:
 ----
 
 The preceding configuration creates an embedded HSQL database populated with SQL from
-schema.sql and testdata.sql resources in the classpath. The database instance is made
-available to the Spring container as a bean of type `javax.sql.DataSource`. This bean
-can then be injected into data access objects as needed.
+`schema.sql` and `test-data.sql` resources in the root of the root of the classpath. The
+database instance is made available to the Spring container as a bean of type
+`javax.sql.DataSource`. This bean can then be injected into data access objects as needed.
 
 
 
 [[jdbc-embedded-database-java]]
-==== Creating an embedded database instance programmatically
+==== Creating an embedded database programmatically
+
 The `EmbeddedDatabaseBuilder` class provides a fluent API for constructing an embedded
-database programmatically. Use this when you need to create an embedded database
-instance in a standalone environment, such as a data access object unit test:
+database programmatically. Use this when you need to create an embedded database in a
+standalone environment or in a standalone integration test:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
-	EmbeddedDatabase db = builder.setType(H2).addScript("my-schema.sql").addScript("my-test-data.sql").build();
-	// do stuff against the db (EmbeddedDatabase extends javax.sql.DataSource)
-	db.shutdown()
+EmbeddedDatabase db = new EmbeddedDatabaseBuilder()
+    .setType(H2)
+    .setScriptEncoding("UTF-8")
+    .ignoreFailedDrops(true)
+    .addScript("schema.sql")
+    .addScripts("user_data.sql", "country_data.sql")
+    .build();
+
+// do stuff against the db (EmbeddedDatabase extends javax.sql.DataSource)
+
+db.shutdown()
 ----
 
+The `EmbeddedDatabaseBuilder` can also be used to create an embedded database using Java
+Config like in the following example.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Configuration
+public class DataSourceConfig {
+
+    @Bean
+    public DataSource dataSource() {
+        return new EmbeddedDatabaseBuilder()
+            .setType(H2)
+            .setScriptEncoding("UTF-8")
+            .ignoreFailedDrops(true)
+            .addScript("schema.sql")
+            .addScripts("user_data.sql", "country_data.sql")
+            .build();
+    }
+}
+----
 
 
 [[jdbc-embedded-database-extension]]
 ==== Extending the embedded database support
+
 Spring JDBC embedded database support can be extended in two ways:
 
-* Implement `EmbeddedDatabaseConfigurer` to support a new embedded database type, such
-  as Apache Derby.
-* Implement `DataSourceFactory` to support a new DataSource implementation, such as a
-  connection pool, to manage embedded database connections.
+* Implement `EmbeddedDatabaseConfigurer` to support a new embedded database type.
+* Implement `DataSourceFactory` to support a new `DataSource` implementation, such as a
+  connection pool to manage embedded database connections.
 
 You are encouraged to contribute back extensions to the Spring community at
 https://jira.spring.io/browse/SPR[jira.spring.io].
@@ -4668,8 +4698,8 @@ https://jira.spring.io/browse/SPR[jira.spring.io].
 
 [[jdbc-embedded-database-using-HSQL]]
 ==== Using HSQL
-Spring supports HSQL 1.8.0 and above. HSQL is the default embedded database if no type
-is specified explicitly. To specify HSQL explicitly, set the `type` attribute of the
+Spring supports HSQL 1.8.0 and above. HSQL is the default embedded database if no type is
+specified explicitly. To specify HSQL explicitly, set the `type` attribute of the
 `embedded-database` tag to `HSQL`. If you are using the builder API, call the
 `setType(EmbeddedDatabaseType)` method with `EmbeddedDatabaseType.HSQL`.
 
@@ -4686,20 +4716,27 @@ Spring supports the H2 database as well. To enable H2, set the `type` attribute 
 [[jdbc-embedded-database-using-Derby]]
 ==== Using Derby
 Spring also supports Apache Derby 10.5 and above. To enable Derby, set the `type`
-attribute of the `embedded-database` tag to `Derby`. If using the builder API, call the
-`setType(EmbeddedDatabaseType)` method with `EmbeddedDatabaseType.Derby`.
+attribute of the `embedded-database` tag to `DERBY`. If you are using the builder API,
+call the `setType(EmbeddedDatabaseType)` method with `EmbeddedDatabaseType.DERBY`.
 
 
 
 [[jdbc-embedded-database-dao-testing]]
 ==== Testing data access logic with an embedded database
-Embedded databases provide a lightweight way to test data access code. The following is
-a data access unit test template that uses an embedded database:
+
+Embedded databases provide a lightweight way to test data access code. The following is a
+data access integration test template that uses an embedded database. Using a template
+like this can be useful for _one-offs_ when the embedded database does not need to be
+reused across test classes. However, if you wish to create an embedded database that is
+shared within a test suite, consider using the <<testcontext-framework,Spring TestContext
+Framework>> and configuring the embedded database as a bean in the Spring
+`ApplicationContext` as described in <<jdbc-embedded-database-xml>> and
+<<jdbc-embedded-database-java>>.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	public class DataAccessUnitTestTemplate {
+	public class DataAccessIntegrationTestTemplate {
 
 		private EmbeddedDatabase db;
 
@@ -4713,7 +4750,7 @@ a data access unit test template that uses an embedded database:
 		@Test
 		public void testDataAccess() {
 			JdbcTemplate template = new JdbcTemplate(db);
-			template.query(...);
+			template.query( /* ... */ );
 		}
 
 		@After
@@ -4723,7 +4760,6 @@ a data access unit test template that uses an embedded database:
 
 	}
 ----
-
 
 
 
@@ -4737,8 +4773,8 @@ an instance running on a server somewhere.
 
 
 [[jdbc-initializing-datasource-xml]]
-==== Initializing a database instance using Spring XML
-If you want to initialize a database and you can provide a reference to a DataSource
+==== Initializing a database using Spring XML
+If you want to initialize a database and you can provide a reference to a `DataSource`
 bean, use the `initialize-database` tag in the `spring-jdbc` namespace:
 
 [source,xml,indent=0]
@@ -4750,23 +4786,24 @@ bean, use the `initialize-database` tag in the `spring-jdbc` namespace:
 	</jdbc:initialize-database>
 ----
 
-The example above runs the two scripts specified against the database: the first script
-is a schema creation, and the second is a test data set insert. The script locations can
-also be patterns with wildcards in the usual ant style used for resources in Spring
-(e.g. `classpath{asterisk}:/com/foo/{asterisk}{asterisk}/sql/{asterisk}-data.sql`).
-If a pattern is used the scripts are executed in lexical order of their URL or filename.
+The example above executes the two scripts specified against the database: the first
+script creates a schema, and the second populates tables with a test data set. The script
+locations can also be patterns with wildcards in the usual ant style used for resources
+in Spring (e.g.
+`classpath{asterisk}:/com/foo/{asterisk}{asterisk}/sql/{asterisk}-data.sql`). If a
+pattern is used, the scripts are executed in lexical order of their URL or filename.
 
 The default behavior of the database initializer is to unconditionally execute the
-scripts provided. This will not always be what you want, for instance if running against
-an existing database that already has test data in it. The likelihood of accidentally
-deleting data is reduced by the commonest pattern (as shown above) that creates the
-tables first and then inserts the data - the first step will fail if the tables already
-exist.
+scripts provided. This will not always be what you want, for instance, if you are
+executing the scripts against a database that already has test data in it. The likelihood
+of accidentally deleting data is reduced by following the common pattern (as shown above)
+of creating the tables first and then inserting the data -- the first step will fail if
+the tables already exist.
 
-However, to get more control over the creation and deletion of existing data, the XML
-namespace provides a couple more options. The first is flag to switch the initialization
-on and off. This can be set according to the environment (e.g. to pull a boolean value
-from system properties or an environment bean), e.g.
+However, to gain more control over the creation and deletion of existing data, the XML
+namespace provides a few additional options. The first is a flag to switch the
+initialization on and off. This can be set according to the environment (e.g. to pull a
+boolean value from system properties or an environment bean), for example:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -4779,7 +4816,7 @@ from system properties or an environment bean), e.g.
 
 The second option to control what happens with existing data is to be more tolerant of
 failures. To this end you can control the ability of the initializer to ignore certain
-errors in the SQL it executes from the scripts, e.g.
+errors in the SQL it executes from the scripts, for example:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -4789,62 +4826,68 @@ errors in the SQL it executes from the scripts, e.g.
 	</jdbc:initialize-database>
 ----
 
-In this example we are saying we expect that sometimes the scripts will be run against
-an empty database and there are some DROP statements in the scripts which would
-therefore fail. So failed SQL `DROP` statements will be ignored, but other failures will
-cause an exception. This is useful if your SQL dialect doesn't support `DROP ... IF
+In this example we are saying we expect that sometimes the scripts will be executed
+against an empty database, and there are some `DROP` statements in the scripts which
+would therefore fail. So failed SQL `DROP` statements will be ignored, but other failures
+will cause an exception. This is useful if your SQL dialect doesn't support `DROP ... IF
 EXISTS` (or similar) but you want to unconditionally remove all test data before
-re-creating it. In that case the first script is usually a set of drops, followed by a
-set of `CREATE` statements.
+re-creating it. In that case the first script is usually a set of `DROP` statements,
+followed by a set of `CREATE` statements.
 
 The `ignore-failures` option can be set to `NONE` (the default), `DROPS` (ignore failed
-drops) or `ALL` (ignore all failures).
+drops), or `ALL` (ignore all failures).
 
 If you need more control than you get from the XML namespace, you can simply use the
-`DataSourceInitializer` directly, and define it as a component in your application.
+`DataSourceInitializer` directly and define it as a component in your application.
 
 
 [[jdbc-client-component-initialization]]
-===== Initialization of Other Components that Depend on the Database
+===== Initialization of other components that depend on the database
+
 A large class of applications can just use the database initializer with no further
 complications: those that do not use the database until after the Spring context has
-started. If your application is __not__ one of those then you might need to read the
-rest of this section.
+started. If your application is __not__ one of those then you might need to read the rest
+of this section.
 
-The database initializer depends on a data source instance and runs the scripts provided
-in its initialization callback (c.f. `init-method` in an XML bean definition or
-`InitializingBean`). If other beans depend on the same data source and also use the data
-source in an initialization callback then there might be a problem because the data has
-not yet been initialized. A common example of this is a cache that initializes eagerly
-and loads up data from the database on application startup.
+The database initializer depends on a `DataSource` instance and executes the scripts
+provided in its initialization callback (analogous to an `init-method` in an XML bean
+definition, a `@PostConstruct` method in a component, or the `afterPropertiesSet()`
+method in a component that implements `InitializingBean`). If other beans depend on the
+same data source and also use the data source in an initialization callback, then there
+might be a problem because the data has not yet been initialized. A common example of
+this is a cache that initializes eagerly and loads data from the database on application
+startup.
 
-To get round this issue you two options: change your cache initialization strategy to a
-later phase, or ensure that the database initializer is initialized first.
+To get around this issue you have two options: change your cache initialization strategy
+to a later phase, or ensure that the database initializer is initialized first.
 
 The first option might be easy if the application is in your control, and not otherwise.
-Some suggestions for how to implement this are
+Some suggestions for how to implement this include:
 
-* Make the cache initialize lazily on first usage, which improves application startup time
+* Make the cache initialize lazily on first usage, which improves application startup
+  time.
 * Have your cache or a separate component that initializes the cache implement
   `Lifecycle` or `SmartLifecycle`. When the application context starts up a
   `SmartLifecycle` can be automatically started if its `autoStartup` flag is set, and a
-  `Lifecycle` can be started manually by calling
-  `ConfigurableApplicationContext.start()` on the enclosing context.
+  `Lifecycle` can be started manually by calling `ConfigurableApplicationContext.start()`
+  on the enclosing context.
 * Use a Spring `ApplicationEvent` or similar custom observer mechanism to trigger the
   cache initialization. `ContextRefreshedEvent` is always published by the context when
   it is ready for use (after all beans have been initialized), so that is often a useful
   hook (this is how the `SmartLifecycle` works by default).
 
-The second option can also be easy. Some suggestions on how to implement this are
+The second option can also be easy. Some suggestions on how to implement this include:
 
-* Rely on Spring BeanFactory default behavior, which is that beans are initialized in
-  registration order. You can easily arrange that by adopting the common practice of a
-  set of <import/> elements that order your application modules, and ensure that the
-  database and database initialization are listed first
-* Separate the datasource and the business components that use it and control their
-  startup order by putting them in separate ApplicationContext instances (e.g. parent
-  has the datasource and child has the business components). This structure is common in
-  Spring web applications, but can be more generally applied.
+* Rely on the default behavior of the Spring `BeanFactory`, which is that beans are
+  initialized in registration order. You can easily arrange that by adopting the common
+  practice of a set of `<import/>` elements in XML configuration that order your
+  application modules, and ensure that the database and database initialization are
+  listed first.
+* Separate the `DataSource` and the business components that use it, and control their
+  startup order by putting them in separate `ApplicationContext` instances (e.g. the
+  parent context contains the `DataSource`, and child context contains the business
+  components). This structure is common in Spring web applications but can be more
+  generally applied.
 
 
 
