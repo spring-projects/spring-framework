@@ -16,9 +16,6 @@
 
 package org.springframework.web.util;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -35,12 +32,16 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
 /**
  * Unit tests for {@link org.springframework.web.util.UriComponentsBuilder}.
  *
  * @author Arjen Poutsma
  * @author Phillip Webb
  * @author Oliver Gierke
+ * @author David Eckel
  */
 public class UriComponentsBuilderTests {
 
@@ -650,6 +651,12 @@ public class UriComponentsBuilderTests {
 		assertThat(components.toString(), equalTo("/example"));
 	}
 
+	@Test  // SPR-13257
+	public void parsesEmptyUri() {
+		UriComponents components = UriComponentsBuilder.fromUriString("").build();
+		assertThat(components.toString(), equalTo(""));
+	}
+
 	@Test
 	public void testClone() throws URISyntaxException {
 		UriComponentsBuilder builder1 = UriComponentsBuilder.newInstance();
@@ -739,6 +746,5 @@ public class UriComponentsBuilderTests {
 		assertEquals("84.198.58.199", result.getHost());
 		assertEquals("/rest/mobile/users/1", result.getPath());
 	}
-
 
 }

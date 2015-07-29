@@ -183,7 +183,7 @@ public class UriComponentsBuilder implements Cloneable {
 	 * @return the new {@code UriComponentsBuilder}
 	 */
 	public static UriComponentsBuilder fromUriString(String uri) {
-		Assert.notNull(uri, "'uri' must not be null");
+		Assert.notNull(uri, "URI must not be null");
 		Matcher matcher = URI_PATTERN.matcher(uri);
 		if (matcher.matches()) {
 			UriComponentsBuilder builder = new UriComponentsBuilder();
@@ -243,7 +243,7 @@ public class UriComponentsBuilder implements Cloneable {
 	 * @return the URI components of the URI
 	 */
 	public static UriComponentsBuilder fromHttpUrl(String httpUrl) {
-		Assert.notNull(httpUrl, "'httpUrl' must not be null");
+		Assert.notNull(httpUrl, "HTTP URL must not be null");
 		Matcher matcher = HTTP_URL_PATTERN.matcher(httpUrl);
 		if (matcher.matches()) {
 			UriComponentsBuilder builder = new UriComponentsBuilder();
@@ -429,7 +429,7 @@ public class UriComponentsBuilder implements Cloneable {
 	 * @return this UriComponentsBuilder
 	 */
 	public UriComponentsBuilder uri(URI uri) {
-		Assert.notNull(uri, "'uri' must not be null");
+		Assert.notNull(uri, "URI must not be null");
 		this.scheme = uri.getScheme();
 		if (uri.isOpaque()) {
 			this.ssp = uri.getRawSchemeSpecificPart();
@@ -489,7 +489,7 @@ public class UriComponentsBuilder implements Cloneable {
 	 * @return this UriComponentsBuilder
 	 */
 	public UriComponentsBuilder uriComponents(UriComponents uriComponents) {
-		Assert.notNull(uriComponents, "'uriComponents' must not be null");
+		Assert.notNull(uriComponents, "UriComponents must not be null");
 		uriComponents.copyToUriComponentsBuilder(this);
 		return this;
 	}
@@ -538,7 +538,7 @@ public class UriComponentsBuilder implements Cloneable {
 	 * @return this UriComponentsBuilder
 	 */
 	public UriComponentsBuilder port(int port) {
-		Assert.isTrue(port >= -1, "'port' must not be < -1");
+		Assert.isTrue(port >= -1, "Port must be >= -1");
 		this.port = String.valueOf(port);
 		resetSchemeSpecificPart();
 		return this;
@@ -587,7 +587,6 @@ public class UriComponentsBuilder implements Cloneable {
 	 * @return this UriComponentsBuilder
 	 */
 	public UriComponentsBuilder pathSegment(String... pathSegments) throws IllegalArgumentException {
-		Assert.notNull(pathSegments, "'segments' must not be null");
 		this.pathBuilder.addPathSegments(pathSegments);
 		resetSchemeSpecificPart();
 		return this;
@@ -647,7 +646,7 @@ public class UriComponentsBuilder implements Cloneable {
 	 * @return this UriComponentsBuilder
 	 */
 	public UriComponentsBuilder queryParam(String name, Object... values) {
-		Assert.notNull(name, "'name' must not be null");
+		Assert.notNull(name, "Name must not be null");
 		if (!ObjectUtils.isEmpty(values)) {
 			for (Object value : values) {
 				String valueAsString = (value != null ? value.toString() : null);
@@ -667,8 +666,9 @@ public class UriComponentsBuilder implements Cloneable {
 	 * @return this UriComponentsBuilder
 	 */
 	public UriComponentsBuilder queryParams(MultiValueMap<String, String> params) {
-		Assert.notNull(params, "'params' must not be null");
-		this.queryParams.putAll(params);
+		if (params != null) {
+			this.queryParams.putAll(params);
+		}
 		return this;
 	}
 
@@ -680,7 +680,7 @@ public class UriComponentsBuilder implements Cloneable {
 	 * @return this UriComponentsBuilder
 	 */
 	public UriComponentsBuilder replaceQueryParam(String name, Object... values) {
-		Assert.notNull(name, "'name' must not be null");
+		Assert.notNull(name, "Name must not be null");
 		this.queryParams.remove(name);
 		if (!ObjectUtils.isEmpty(values)) {
 			queryParam(name, values);
@@ -695,9 +695,10 @@ public class UriComponentsBuilder implements Cloneable {
 	 * @return this UriComponentsBuilder
 	 */
 	public UriComponentsBuilder replaceQueryParams(MultiValueMap<String, String> params) {
-		Assert.notNull(params, "'params' must not be null");
 		this.queryParams.clear();
-		this.queryParams.putAll(params);
+		if (params != null) {
+			this.queryParams.putAll(params);
+		}
 		return this;
 	}
 
@@ -709,7 +710,7 @@ public class UriComponentsBuilder implements Cloneable {
 	 */
 	public UriComponentsBuilder fragment(String fragment) {
 		if (fragment != null) {
-			Assert.hasLength(fragment, "'fragment' must not be empty");
+			Assert.hasLength(fragment, "Fragment must not be empty");
 			this.fragment = fragment;
 		}
 		else {
