@@ -122,7 +122,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	@Override
 	public void afterPropertiesSet() {
-
 		this.config = new RequestMappingInfo.BuilderConfiguration();
 		this.config.setPathHelper(getUrlPathHelper());
 		this.config.setPathMatcher(getPathMatcher());
@@ -204,15 +203,13 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * Delegates to {@link #createRequestMappingInfo(RequestMapping, RequestCondition)},
 	 * supplying the appropriate custom {@link RequestCondition} depending on whether
 	 * the supplied {@code annotatedElement} is a class or method.
-	 *
 	 * @see #getCustomTypeCondition(Class)
 	 * @see #getCustomMethodCondition(Method)
 	 */
 	private RequestMappingInfo createRequestMappingInfo(AnnotatedElement element) {
 		RequestMapping requestMapping = AnnotatedElementUtils.findMergedAnnotation(element, RequestMapping.class);
 		RequestCondition<?> condition = (element instanceof Class<?> ?
-				getCustomTypeCondition((Class<?>) element) :
-				getCustomMethodCondition((Method) element));
+				getCustomTypeCondition((Class<?>) element) : getCustomMethodCondition((Method) element));
 		return (requestMapping != null ? createRequestMappingInfo(requestMapping, condition) : null);
 	}
 
@@ -252,8 +249,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * a directly declared annotation, a meta-annotation, or the synthesized
 	 * result of merging annotation attributes within an annotation hierarchy.
 	 */
-	protected RequestMappingInfo createRequestMappingInfo(RequestMapping requestMapping,
-			RequestCondition<?> customCondition) {
+	protected RequestMappingInfo createRequestMappingInfo(
+			RequestMapping requestMapping, RequestCondition<?> customCondition) {
 
 		return RequestMappingInfo
 				.paths(resolveEmbeddedValuesInPatterns(requestMapping.path()))
@@ -348,7 +345,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 					+ "or an empty string (\"\"); current value is [" + allowCredentials + "].");
 		}
 
-		if ((annotation.maxAge() >= 0) && (config.getMaxAge() == null)) {
+		if (annotation.maxAge() >= 0 && config.getMaxAge() == null) {
 			config.setMaxAge(annotation.maxAge());
 		}
 	}
