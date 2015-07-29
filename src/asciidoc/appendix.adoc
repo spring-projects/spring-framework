@@ -1,18 +1,17 @@
 [[spring-appendices]]
 = Appendices
 
-[[migration-4.0]]
-== Migrating to Spring Framework 4.0
-Migration guides for upgrading from previous releases of the Spring Framework are now
-provided as a Wiki page. For details please refer to
-https://github.com/spring-projects/spring-framework/wiki/Migrating-from-earlier-versions-of-the-spring-framework
+[[migration-4.x]]
+== Migrating to Spring Framework 4.x
+Migration guides for upgrading from previous releases of the Spring Framework are now provided as a
+https://github.com/spring-projects/spring-framework/wiki/Migrating-from-earlier-versions-of-the-spring-framework[Wiki page].
 
 
 [[classic-spring]]
 == Classic Spring Usage
 This appendix discusses some classic Spring usage patterns as a reference for developers
 maintaining legacy Spring applications. These usage patterns no longer reflect the
-recommended way of using these features and the current recommended usage is covered in
+recommended way of using these features, and the current recommended usage is covered in
 the respective sections of the reference manual.
 
 
@@ -21,13 +20,13 @@ the respective sections of the reference manual.
 === Classic ORM usage
 This section documents the classic usage patterns that you might encounter in a legacy
 Spring application. For the currently recommended usage patterns, please refer to the
-<<orm>> chapter.
+<<orm,ORM>> chapter.
 
 
 
 [[classic-spring-hibernate]]
 ==== Hibernate
-For the currently recommended usage patterns for Hibernate see <<orm-hibernate>>
+For the currently recommended usage patterns for Hibernate see <<orm-hibernate>>.
 
 
 [[orm-hibernate-template]]

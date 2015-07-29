@@ -1,5 +1,5 @@
 [[spring-form-tld]]
-= spring-form.tld
+= spring-form JSP Tag Library
 
 
 [[spring-form.tld-intro]]
@@ -34,7 +34,7 @@ This appendix describes the `spring-form.tld` tag library.
 
 
 [[spring-form.tld.checkbox]]
-== the checkbox tag
+== The checkbox tag
 
 Renders an HTML 'input' tag with type 'checkbox'.
 
@@ -185,7 +185,7 @@ Renders an HTML 'input' tag with type 'checkbox'.
 
 
 [[spring-form.tld.checkboxes]]
-== the checkboxes tag
+== The checkboxes tag
 
 Renders multiple HTML 'input' tags with type 'checkbox'.
 
@@ -355,7 +355,7 @@ Renders multiple HTML 'input' tags with type 'checkbox'.
 
 
 [[spring-form.tld.errors]]
-== the errors tag
+== The errors tag
 
 Renders field errors in an HTML 'span' tag.
 
@@ -475,7 +475,7 @@ Renders field errors in an HTML 'span' tag.
 
 
 [[spring-form.tld.form]]
-== the form tag
+== The form tag
 
 Renders an HTML 'form' tag and exposes a binding path to inner tags for binding.
 
@@ -630,7 +630,7 @@ Renders an HTML 'form' tag and exposes a binding path to inner tags for binding.
 
 
 [[spring-form.tld.hidden]]
-== the hidden tag
+== The hidden tag
 
 Renders an HTML 'input' tag with type 'hidden' using the bound value.
 
@@ -660,7 +660,7 @@ Renders an HTML 'input' tag with type 'hidden' using the bound value.
 
 
 [[spring-form.tld.input]]
-== the input tag
+== The input tag
 
 Renders an HTML 'input' tag with type 'text' using the bound value.
 
@@ -832,7 +832,7 @@ Renders an HTML 'input' tag with type 'text' using the bound value.
 
 
 [[spring-form.tld.label]]
-== the label tag
+== The label tag
 
 Renders a form field label in an HTML 'label' tag.
 
@@ -952,7 +952,7 @@ Renders a form field label in an HTML 'label' tag.
 
 
 [[spring-form.tld.option]]
-== the option tag
+== The option tag
 
 Renders a single HTML 'option'. Sets 'selected' as appropriate based on bound value.
 
@@ -1078,7 +1078,7 @@ Renders a single HTML 'option'. Sets 'selected' as appropriate based on bound va
 
 
 [[spring-form.tld.options]]
-== the options tag
+== The options tag
 
 Renders a list of HTML 'option' tags. Sets 'selected' as appropriate based on bound value.
 
@@ -1209,7 +1209,7 @@ Renders a list of HTML 'option' tags. Sets 'selected' as appropriate based on bo
 
 
 [[spring-form.tld.password]]
-== the password tag
+== The password tag
 
 Renders an HTML 'input' tag with type 'password' using the bound value.
 
@@ -1386,7 +1386,7 @@ Renders an HTML 'input' tag with type 'password' using the bound value.
 
 
 [[spring-form.tld.radiobutton]]
-== the radiobutton tag
+== The radiobutton tag
 
 Renders an HTML 'input' tag with type 'radio'.
 
@@ -1537,7 +1537,7 @@ Renders an HTML 'input' tag with type 'radio'.
 
 
 [[spring-form.tld.radiobuttons]]
-== the radiobuttons tag
+== The radiobuttons tag
 
 Renders multiple HTML 'input' tags with type 'radio'.
 
@@ -1706,7 +1706,7 @@ Renders multiple HTML 'input' tags with type 'radio'.
 
 
 [[spring-form.tld.select]]
-== the select tag
+== The select tag
 
 Renders an HTML 'select' element. Supports databinding to the selected option.
 
@@ -1872,7 +1872,7 @@ Renders an HTML 'select' element. Supports databinding to the selected option.
 
 
 [[spring-form.tld.textarea]]
-== the textarea tag
+== The textarea tag
 
 Renders an HTML 'textarea'.
 
