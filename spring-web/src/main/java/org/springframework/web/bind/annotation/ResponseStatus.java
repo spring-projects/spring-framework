@@ -45,7 +45,7 @@ public @interface ResponseStatus {
 	/**
 	 * Alias for {@link #code}.
 	 */
-	@AliasFor(attribute = "code")
+	@AliasFor("code")
 	HttpStatus value() default HttpStatus.INTERNAL_SERVER_ERROR;
 
 	/**
@@ -55,7 +55,7 @@ public @interface ResponseStatus {
 	 * @since 4.2
 	 * @see javax.servlet.http.HttpServletResponse#setStatus(int)
 	 */
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	HttpStatus code() default HttpStatus.INTERNAL_SERVER_ERROR;
 
 	/**

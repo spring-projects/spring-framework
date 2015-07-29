@@ -46,7 +46,7 @@ public @interface SendToUser {
 	 * Alias for {@link #destinations}.
 	 * @see #destinations
 	 */
-	@AliasFor(attribute = "destinations")
+	@AliasFor("destinations")
 	String[] value() default {};
 
 	/**
@@ -57,7 +57,7 @@ public @interface SendToUser {
 	 * @see #value
 	 * @see org.springframework.messaging.simp.annotation.support.SendToMethodReturnValueHandler
 	 */
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	String[] destinations() default {};
 
 	/**

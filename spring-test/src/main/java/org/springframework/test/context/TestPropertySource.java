@@ -96,7 +96,7 @@ public @interface TestPropertySource {
 	 *
 	 * @see #locations
 	 */
-	@AliasFor(attribute = "locations")
+	@AliasFor("locations")
 	String[] value() default {};
 
 	/**
@@ -144,7 +144,7 @@ public @interface TestPropertySource {
 	 * @see #properties
 	 * @see org.springframework.core.env.PropertySource
 	 */
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	String[] locations() default {};
 
 	/**

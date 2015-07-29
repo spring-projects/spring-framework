@@ -98,7 +98,7 @@ public @interface Sql {
 	 * @see #scripts
 	 * @see #statements
 	 */
-	@AliasFor(attribute = "scripts")
+	@AliasFor("scripts")
 	String[] value() default {};
 
 	/**
@@ -139,7 +139,7 @@ public @interface Sql {
 	 * @see #value
 	 * @see #statements
 	 */
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	String[] scripts() default {};
 
 	/**

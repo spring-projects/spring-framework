@@ -98,7 +98,7 @@ public @interface ContextConfiguration {
 	 * @since 3.0
 	 * @see #inheritLocations
 	 */
-	@AliasFor(attribute = "locations")
+	@AliasFor("locations")
 	String[] value() default {};
 
 	/**
@@ -129,7 +129,7 @@ public @interface ContextConfiguration {
 	 * @since 2.5
 	 * @see #inheritLocations
 	 */
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	String[] locations() default {};
 
 	/**

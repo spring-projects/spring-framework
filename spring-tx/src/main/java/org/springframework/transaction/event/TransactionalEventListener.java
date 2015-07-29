@@ -59,7 +59,7 @@ public @interface TransactionalEventListener {
 	/**
 	 * Alias for {@link #classes}.
 	 */
-	@AliasFor(attribute = "classes")
+	@AliasFor("classes")
 	Class<?>[] value() default {};
 
 	/**
@@ -68,7 +68,7 @@ public @interface TransactionalEventListener {
 	 * may or may not be specified. When this attribute is specified with more
 	 * than one value, the method must not have a parameter.
 	 */
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	Class<?>[] classes() default {};
 
 	/**

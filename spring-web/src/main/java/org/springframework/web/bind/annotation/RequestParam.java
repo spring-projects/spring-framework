@@ -59,14 +59,14 @@ public @interface RequestParam {
 	/**
 	 * Alias for {@link #name}.
 	 */
-	@AliasFor(attribute = "name")
+	@AliasFor("name")
 	String value() default "";
 
 	/**
 	 * The name of the request parameter to bind to.
 	 * @since 4.2
 	 */
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	String name() default "";
 
 	/**

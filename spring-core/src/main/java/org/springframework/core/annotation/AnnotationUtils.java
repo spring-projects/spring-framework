@@ -1427,7 +1427,7 @@ public abstract class AnnotationUtils {
 	 * @see #getAliasedAttributeName(Method, Class)
 	 */
 	static String getAliasedAttributeName(Method attribute) {
-		return getAliasedAttributeName(attribute, null);
+		return getAliasedAttributeName(attribute, (Class<? extends Annotation>) null);
 	}
 
 	/**
@@ -1471,7 +1471,7 @@ public abstract class AnnotationUtils {
 		}
 
 		String attributeName = attribute.getName();
-		String aliasedAttributeName = aliasFor.attribute();
+		String aliasedAttributeName = getAliasedAttributeName(aliasFor, attribute);
 
 		if (!StringUtils.hasText(aliasedAttributeName)) {
 			String msg = String.format(
@@ -1503,7 +1503,7 @@ public abstract class AnnotationUtils {
 				throw new AnnotationConfigurationException(msg);
 			}
 
-			String mirrorAliasedAttributeName = mirrorAliasFor.attribute();
+			String mirrorAliasedAttributeName = getAliasedAttributeName(mirrorAliasFor, aliasedAttribute);
 			if (!attributeName.equals(mirrorAliasedAttributeName)) {
 				String msg = String.format(
 						"Attribute [%s] in annotation [%s] must be declared as an @AliasFor [%s], not [%s].",
@@ -1541,6 +1541,38 @@ public abstract class AnnotationUtils {
 		}
 
 		return aliasedAttributeName;
+	}
+
+	/**
+	 * Get the name of the aliased attribute configured via the supplied
+	 * {@link AliasFor @AliasFor} annotation on the supplied {@code attribute}.
+	 * <p>This method returns the value of either the {@code attribute}
+	 * or {@code value} attribute of {@code @AliasFor}, ensuring that only
+	 * one of the attributes has been declared.
+	 * @param aliasFor the {@code @AliasFor} annotation from which to retrieve
+	 * the aliased attribute name
+	 * @param attribute the attribute that is annotated with {@code @AliasFor},
+	 * used solely for building an exception message
+	 * @return the name of the aliased attribute, potentially an empty string
+	 * @throws AnnotationConfigurationException if invalid configuration of
+	 * {@code @AliasFor} is detected
+	 * @since 4.2
+	 * @see #getAliasedAttributeName(Method, Class)
+	 */
+	private static String getAliasedAttributeName(AliasFor aliasFor, Method attribute) {
+		String attributeName = aliasFor.attribute();
+		String value = aliasFor.value();
+		boolean attributeDeclared = StringUtils.hasText(attributeName);
+		boolean valueDeclared = StringUtils.hasText(value);
+
+		if (attributeDeclared && valueDeclared) {
+			throw new AnnotationConfigurationException(String.format(
+				"In @AliasFor declared on attribute [%s] in annotation [%s], attribute 'attribute' and its alias 'value' "
+				+ "are present with values of [%s] and [%s], but only one is permitted.",
+				attribute.getName(), attribute.getDeclaringClass().getName(), attributeName, value));
+		}
+
+		return (attributeDeclared ? attributeName : value);
 	}
 
 	/**

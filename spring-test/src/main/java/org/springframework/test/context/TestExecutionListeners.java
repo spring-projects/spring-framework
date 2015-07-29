@@ -87,7 +87,7 @@ public @interface TestExecutionListeners {
 	 * <p>This attribute may <strong>not</strong> be used in conjunction with
 	 * {@link #listeners}, but it may be used instead of {@link #listeners}.
 	 */
-	@AliasFor(attribute = "listeners")
+	@AliasFor("listeners")
 	Class<? extends TestExecutionListener>[] value() default {};
 
 	/**
@@ -103,7 +103,7 @@ public @interface TestExecutionListeners {
 	 * @see org.springframework.test.context.transaction.TransactionalTestExecutionListener
 	 * @see org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener
 	 */
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	Class<? extends TestExecutionListener>[] listeners() default {};
 
 	/**

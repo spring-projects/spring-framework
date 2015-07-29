@@ -62,7 +62,7 @@ public @interface ComponentScan {
 	 * are needed &mdash; for example, {@code @ComponentScan("org.my.pkg")}
 	 * instead of {@code @ComponentScan(basePackages = "org.my.pkg")}.
 	 */
-	@AliasFor(attribute = "basePackages")
+	@AliasFor("basePackages")
 	String[] value() default {};
 
 	/**
@@ -72,7 +72,7 @@ public @interface ComponentScan {
 	 * <p>Use {@link #basePackageClasses} for a type-safe alternative to
 	 * String-based package names.
 	 */
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	String[] basePackages() default {};
 
 	/**
@@ -166,7 +166,7 @@ public @interface ComponentScan {
 		 * Alias for {@link #classes}.
 		 * @see #classes
 		 */
-		@AliasFor(attribute = "classes")
+		@AliasFor("classes")
 		Class<?>[] value() default {};
 
 		/**
@@ -190,7 +190,7 @@ public @interface ComponentScan {
 		 * @see #value
 		 * @see #type
 		 */
-		@AliasFor(attribute = "value")
+		@AliasFor("value")
 		Class<?>[] classes() default {};
 
 		/**

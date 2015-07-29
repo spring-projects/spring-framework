@@ -51,7 +51,7 @@ public @interface CrossOrigin {
 	/**
 	 * Alias for {@link #origins}.
 	 */
-	@AliasFor(attribute = "origins")
+	@AliasFor("origins")
 	String[] value() default {};
 
 	/**
@@ -62,7 +62,7 @@ public @interface CrossOrigin {
 	 * <p>If undefined, all origins are allowed.
 	 * @see #value
 	 */
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	String[] origins() default {};
 
 	/**

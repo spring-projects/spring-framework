@@ -69,7 +69,7 @@ public @interface EventListener {
 	/**
 	 * Alias for {@link #classes}.
 	 */
-	@AliasFor(attribute = "classes")
+	@AliasFor("classes")
 	Class<?>[] value() default {};
 
 	/**
@@ -79,7 +79,7 @@ public @interface EventListener {
 	 * attribute is specified with multiple values, the annotated method
 	 * must <em>not</em> declare any parameters.
 	 */
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	Class<?>[] classes() default {};
 
 	/**

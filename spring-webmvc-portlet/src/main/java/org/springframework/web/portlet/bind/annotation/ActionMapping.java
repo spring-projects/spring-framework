@@ -42,7 +42,7 @@ public @interface ActionMapping {
 	/**
 	 * Alias for {@link #name}.
 	 */
-	@AliasFor(attribute = "name")
+	@AliasFor("name")
 	String value() default "";
 
 	/**
@@ -57,7 +57,7 @@ public @interface ActionMapping {
 	 * @see javax.portlet.ActionRequest#ACTION_NAME
 	 * @see #value
 	 */
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	String name() default "";
 
 	/**

@@ -44,7 +44,7 @@ public @interface CacheEvict {
 	/**
 	 * Alias for {@link #cacheNames}.
 	 */
-	@AliasFor(attribute = "cacheNames")
+	@AliasFor("cacheNames")
 	String[] value() default {};
 
 	/**
@@ -55,7 +55,7 @@ public @interface CacheEvict {
 	 * @see #value
 	 * @see CacheConfig#cacheNames
 	 */
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	String[] cacheNames() default {};
 
 	/**

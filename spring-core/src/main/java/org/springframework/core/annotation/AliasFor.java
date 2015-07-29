@@ -120,9 +120,21 @@ import java.lang.annotation.Target;
 public @interface AliasFor {
 
 	/**
-	 * The name of the attribute that <em>this</em> attribute is an alias for.
+	 * Alias for {@link #attribute}.
+	 * <p>Intended to be used instead of {@link #attribute} when {@link #annotation}
+	 * is not declared &mdash; for example: {@code @AliasFor("value")} instead of
+	 * {@code @AliasFor(attribute = "value")}.
 	 */
-	String attribute();
+	@AliasFor("attribute")
+	String value() default "";
+
+	/**
+	 * The name of the attribute that <em>this</em> attribute is an alias for.
+	 * @see #value
+	 */
+	@AliasFor("value")
+	String attribute() default "";
+
 
 	/**
 	 * The type of annotation in which the aliased {@link #attribute} is declared.

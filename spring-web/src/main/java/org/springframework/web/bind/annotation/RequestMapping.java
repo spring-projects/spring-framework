@@ -309,7 +309,7 @@ public @interface RequestMapping {
 	 * When used at the type level, all method-level mappings inherit
 	 * this primary mapping, narrowing it for a specific handler method.
 	 */
-	@AliasFor(attribute = "path")
+	@AliasFor("path")
 	String[] value() default {};
 
 	/**
@@ -324,7 +324,7 @@ public @interface RequestMapping {
 	 * @see org.springframework.web.bind.annotation.ValueConstants#DEFAULT_NONE
 	 * @since 4.2
 	 */
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	String[] path() default {};
 
 	/**

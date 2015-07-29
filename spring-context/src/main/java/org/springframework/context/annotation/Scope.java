@@ -61,7 +61,7 @@ public @interface Scope {
 	 * Alias for {@link #scopeName}.
 	 * @see #scopeName
 	 */
-	@AliasFor(attribute = "scopeName")
+	@AliasFor("scopeName")
 	String value() default "";
 
 	/**
@@ -75,7 +75,7 @@ public @interface Scope {
 	 * @see org.springframework.web.context.WebApplicationContext#SCOPE_SESSION
 	 * @see #value
 	 */
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	String scopeName() default "";
 
 	/**

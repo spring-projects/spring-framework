@@ -32,9 +32,9 @@ import org.springframework.core.annotation.AliasFor;
 
 	String name();
 
-	@AliasFor(attribute = "path")
+	@AliasFor("path")
 	String value() default "";
 
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	String path() default "";
 }

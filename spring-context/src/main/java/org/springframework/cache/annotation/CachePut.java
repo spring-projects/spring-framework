@@ -50,7 +50,7 @@ public @interface CachePut {
 	/**
 	 * Alias for {@link #cacheNames}.
 	 */
-	@AliasFor(attribute = "cacheNames")
+	@AliasFor("cacheNames")
 	String[] value() default {};
 
 	/**
@@ -61,7 +61,7 @@ public @interface CachePut {
 	 * @see #value
 	 * @see CacheConfig#cacheNames
 	 */
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	String[] cacheNames() default {};
 
 	/**

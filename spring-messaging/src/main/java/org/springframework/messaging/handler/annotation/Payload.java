@@ -43,7 +43,7 @@ public @interface Payload {
 	/**
 	 * Alias for {@link #expression}.
 	 */
-	@AliasFor(attribute = "expression")
+	@AliasFor("expression")
 	String value() default "";
 
 	/**
@@ -54,7 +54,7 @@ public @interface Payload {
 	 * <p>When processing STOMP over WebSocket messages this attribute is not supported.
 	 * @since 4.2
 	 */
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	String expression() default "";
 
 	/**

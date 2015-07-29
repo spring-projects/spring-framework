@@ -715,9 +715,29 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
+	public void synthesizeAnnotationWhereAliasForIsMissingAttributeDeclaration() throws Exception {
+		AliasForWithMissingAttributeDeclaration annotation = AliasForWithMissingAttributeDeclarationClass.class.getAnnotation(AliasForWithMissingAttributeDeclaration.class);
+		exception.expect(AnnotationConfigurationException.class);
+		exception.expectMessage(containsString("@AliasFor declaration on attribute [foo] in annotation"));
+		exception.expectMessage(containsString(AliasForWithMissingAttributeDeclaration.class.getName()));
+		exception.expectMessage(containsString("is missing required 'attribute' value"));
+		synthesizeAnnotation(annotation);
+	}
+
+	@Test
+	public void synthesizeAnnotationWhereAliasForHasDuplicateAttributeDeclaration() throws Exception {
+		AliasForWithDuplicateAttributeDeclaration annotation = AliasForWithDuplicateAttributeDeclarationClass.class.getAnnotation(AliasForWithDuplicateAttributeDeclaration.class);
+		exception.expect(AnnotationConfigurationException.class);
+		exception.expectMessage(containsString("In @AliasFor declared on attribute [foo] in annotation"));
+		exception.expectMessage(containsString(AliasForWithDuplicateAttributeDeclaration.class.getName()));
+		exception.expectMessage(containsString("attribute 'attribute' and its alias 'value' are present with values of [baz] and [bar]"));
+		exception.expectMessage(containsString("but only one is permitted"));
+		synthesizeAnnotation(annotation);
+	}
+
+	@Test
 	public void synthesizeAnnotationWithAttributeAliasForNonexistentAttribute() throws Exception {
-		AliasForNonexistentAttribute annotation =
-				AliasForNonexistentAttributeClass.class.getAnnotation(AliasForNonexistentAttribute.class);
+		AliasForNonexistentAttribute annotation = AliasForNonexistentAttributeClass.class.getAnnotation(AliasForNonexistentAttribute.class);
 		exception.expect(AnnotationConfigurationException.class);
 		exception.expectMessage(containsString("Attribute [foo] in"));
 		exception.expectMessage(containsString(AliasForNonexistentAttribute.class.getName()));
@@ -1434,7 +1454,7 @@ public class AnnotationUtilsTests {
 
 		String name();
 
-		@AliasFor(attribute = "path")
+		@AliasFor("path")
 		String value() default "";
 
 		@AliasFor(attribute = "value")
@@ -1472,10 +1492,10 @@ public class AnnotationUtilsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ContextConfig {
 
-		@AliasFor(attribute = "locations")
+		@AliasFor("locations")
 		String value() default "";
 
-		@AliasFor(attribute = "value")
+		@AliasFor("value")
 		String locations() default "";
 	}
 
@@ -1483,10 +1503,10 @@ public class AnnotationUtilsTests {
 	@interface BrokenContextConfig {
 
 		// Intentionally missing:
-		// @AliasFor(attribute = "locations")
+		// @AliasFor("locations")
 		String value() default "";
 
-		@AliasFor(attribute = "value")
+		@AliasFor("value")
 		String locations() default "";
 	}
 
@@ -1531,9 +1551,31 @@ public class AnnotationUtilsTests {
 
 
 	@Retention(RetentionPolicy.RUNTIME)
+	@interface AliasForWithMissingAttributeDeclaration {
+
+		@AliasFor
+		String foo() default "";
+	}
+
+	@AliasForWithMissingAttributeDeclaration
+	static class AliasForWithMissingAttributeDeclarationClass {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface AliasForWithDuplicateAttributeDeclaration {
+
+		@AliasFor(value = "bar", attribute = "baz")
+		String foo() default "";
+	}
+
+	@AliasForWithDuplicateAttributeDeclaration
+	static class AliasForWithDuplicateAttributeDeclarationClass {
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
 	@interface AliasForNonexistentAttribute {
 
-		@AliasFor(attribute = "bar")
+		@AliasFor("bar")
 		String foo() default "";
 	}
 
@@ -1544,7 +1586,7 @@ public class AnnotationUtilsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface AliasForWithoutMirroredAliasFor {
 
-		@AliasFor(attribute = "bar")
+		@AliasFor("bar")
 		String foo() default "";
 
 		String bar() default "";
@@ -1571,10 +1613,10 @@ public class AnnotationUtilsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface AliasForAttributeOfDifferentType {
 
-		@AliasFor(attribute = "bar")
+		@AliasFor("bar")
 		String[] foo() default "";
 
-		@AliasFor(attribute = "foo")
+		@AliasFor("foo")
 		boolean bar() default true;
 	}
 
@@ -1599,10 +1641,10 @@ public class AnnotationUtilsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface AliasForAttributeWithDifferentDefaultValue {
 
-		@AliasFor(attribute = "bar")
+		@AliasFor("bar")
 		String foo() default "X";
 
-		@AliasFor(attribute = "foo")
+		@AliasFor("foo")
 		String bar() default "Z";
 	}
 

@@ -429,10 +429,10 @@ method has been added.
 ----
 public @interface ContextConfiguration {
 
-    @AliasFor(attribute = "locations")
+    @AliasFor("locations")
     String[] value() default {};
 
-    @AliasFor(attribute = "value")
+    @AliasFor("value")
     String[] locations() default {};
 
     // ...

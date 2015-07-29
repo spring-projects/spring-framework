@@ -42,7 +42,7 @@ public @interface RenderMapping {
 	/**
 	 * Alias for {@link #windowState}.
 	 */
-	@AliasFor(attribute = "windowState")
+	@AliasFor("windowState")
 	String value() default "";
 
 	/**
@@ -56,7 +56,7 @@ public @interface RenderMapping {
 	 * @see #value
 	 * @see javax.portlet.PortletRequest#getWindowState()
 	 */
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	String windowState() default "";
 
 	/**

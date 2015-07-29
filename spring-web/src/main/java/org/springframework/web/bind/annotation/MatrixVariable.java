@@ -50,7 +50,7 @@ public @interface MatrixVariable {
 	/**
 	 * Alias for {@link #name}.
 	 */
-	@AliasFor(attribute = "name")
+	@AliasFor("name")
 	String value() default "";
 
 	/**
@@ -58,7 +58,7 @@ public @interface MatrixVariable {
 	 * @since 4.2
 	 * @see #value
 	 */
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	String name() default "";
 
 	/**

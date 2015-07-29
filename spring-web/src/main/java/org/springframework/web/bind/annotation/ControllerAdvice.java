@@ -68,7 +68,7 @@ public @interface ControllerAdvice {
 	 * @since 4.0
 	 * @see #basePackages()
 	 */
-	@AliasFor(attribute = "basePackages")
+	@AliasFor("basePackages")
 	String[] value() default {};
 
 	/**
@@ -82,7 +82,7 @@ public @interface ControllerAdvice {
 	 * alternative to String-based package names.
 	 * @since 4.0
 	 */
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	String[] basePackages() default {};
 
 	/**

@@ -60,7 +60,7 @@ public @interface Transactional {
 	 * Alias for {@link #transactionManager}.
 	 * @see #transactionManager
 	 */
-	@AliasFor(attribute = "transactionManager")
+	@AliasFor("transactionManager")
 	String value() default "";
 
 	/**
@@ -72,7 +72,7 @@ public @interface Transactional {
 	 * @since 4.2
 	 * @see #value
 	 */
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	String transactionManager() default "";
 
 	/**

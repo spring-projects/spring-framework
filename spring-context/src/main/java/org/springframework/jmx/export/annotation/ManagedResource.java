@@ -49,10 +49,10 @@ public @interface ManagedResource {
 	/**
 	 * Alias for the {@link #objectName} attribute, for simple default usage.
 	 */
-	@AliasFor(attribute = "objectName")
+	@AliasFor("objectName")
 	String value() default "";
 
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	String objectName() default "";
 
 	String description() default "";

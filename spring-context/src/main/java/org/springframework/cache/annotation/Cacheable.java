@@ -55,7 +55,7 @@ public @interface Cacheable {
 	/**
 	 * Alias for {@link #cacheNames}.
 	 */
-	@AliasFor(attribute = "cacheNames")
+	@AliasFor("cacheNames")
 	String[] value() default {};
 
 	/**
@@ -66,7 +66,7 @@ public @interface Cacheable {
 	 * @see #value
 	 * @see CacheConfig#cacheNames
 	 */
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	String[] cacheNames() default {};
 
 	/**

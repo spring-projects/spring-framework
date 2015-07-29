@@ -55,7 +55,7 @@ public @interface ActiveProfiles {
 	 * <p>This attribute may <strong>not</strong> be used in conjunction with
 	 * {@link #profiles}, but it may be used <em>instead</em> of {@link #profiles}.
 	 */
-	@AliasFor(attribute = "profiles")
+	@AliasFor("profiles")
 	String[] value() default {};
 
 	/**
@@ -64,7 +64,7 @@ public @interface ActiveProfiles {
 	 * <p>This attribute may <strong>not</strong> be used in conjunction with
 	 * {@link #value}, but it may be used <em>instead</em> of {@link #value}.
 	 */
-	@AliasFor(attribute = "value")
+	@AliasFor("value")
 	String[] profiles() default {};
 
 	/**
