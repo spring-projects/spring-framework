@@ -384,6 +384,16 @@ supports this registration through the methods `registerSingleton(..)` and
 `registerBeanDefinition(..)`. However, typical applications work solely with beans
 defined through metadata bean definitions.
 
+[NOTE]
+====
+Bean metadata and manually supplied singleton instances need to be registered as early
+as possible, in order for the container to properly reason about them during autowiring
+and other introspection steps. While overriding of existing metadata and existing
+singleton instances is supported to some degree, the registration of new beans at
+runtime (concurrently with live access to factory) is not officially supported and may
+lead to concurrent access exceptions and/or inconsistent state in the bean container.
+====
+
 
 
 [[beans-beanname]]
@@ -6557,15 +6567,20 @@ classes, each depending on beans declared in the others:
 ----
 
 There is another way to achieve the same result. Remember that `@Configuration` classes are
-ultimately just another bean in the container - this means that they can take advantage
-of `@Autowired` injection metadata just like any other bean!
+ultimately just another bean in the container: This means that they can take advantage of
+`@Autowired` and `@Value` injection etc just like any other bean!
 
 [WARNING]
 ====
 Make sure that the dependencies you inject that way are of the simplest kind only. `@Configuration`
-classes are processed quite early during the initialization of the context and forcing a
-dependency to be injected this way may lead to unexpected early initialization. Whenever possible,
-resort to parameter-based injection as in the example above.
+classes are processed quite early during the initialization of the context and forcing a dependency
+to be injected this way may lead to unexpected early initialization. Whenever possible, resort to
+parameter-based injection as in the example above.
+
+Also, be particularly careful with `BeanPostProcessor` and `BeanFactoryPostProcessor` definitions
+via `@Bean`. Those should usually be declared as `static @Bean` methods, not triggering the
+instantiation of their containing configuration class. Otherwise, `@Autowired` and `@Value` won't
+work on the configuration class itself since it is being created as a bean instance too early.
 ====
 
 [source,java,indent=0]
