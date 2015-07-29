@@ -4681,40 +4681,27 @@ public class DataSourceConfig {
 }
 ----
 
-
-[[jdbc-embedded-database-extension]]
-==== Extending the embedded database support
-
-Spring JDBC embedded database support can be extended in two ways:
-
-* Implement `EmbeddedDatabaseConfigurer` to support a new embedded database type.
-* Implement `DataSourceFactory` to support a new `DataSource` implementation, such as a
-  connection pool to manage embedded database connections.
-
-You are encouraged to contribute back extensions to the Spring community at
-https://jira.spring.io/browse/SPR[jira.spring.io].
-
+[[jdbc-embedded-database-types]]
+==== Selecting the embedded database type
 
 
 [[jdbc-embedded-database-using-HSQL]]
-==== Using HSQL
+===== Using HSQL
 Spring supports HSQL 1.8.0 and above. HSQL is the default embedded database if no type is
 specified explicitly. To specify HSQL explicitly, set the `type` attribute of the
 `embedded-database` tag to `HSQL`. If you are using the builder API, call the
 `setType(EmbeddedDatabaseType)` method with `EmbeddedDatabaseType.HSQL`.
 
 
-
 [[jdbc-embedded-database-using-H2]]
-==== Using H2
+===== Using H2
 Spring supports the H2 database as well. To enable H2, set the `type` attribute of the
 `embedded-database` tag to `H2`. If you are using the builder API, call the
 `setType(EmbeddedDatabaseType)` method with `EmbeddedDatabaseType.H2`.
 
 
-
 [[jdbc-embedded-database-using-Derby]]
-==== Using Derby
+===== Using Derby
 Spring also supports Apache Derby 10.5 and above. To enable Derby, set the `type`
 attribute of the `embedded-database` tag to `DERBY`. If you are using the builder API,
 call the `setType(EmbeddedDatabaseType)` method with `EmbeddedDatabaseType.DERBY`.
@@ -4760,6 +4747,20 @@ Framework>> and configuring the embedded database as a bean in the Spring
 
 	}
 ----
+
+
+
+[[jdbc-embedded-database-extension]]
+==== Extending the embedded database support
+
+Spring JDBC embedded database support can be extended in two ways:
+
+* Implement `EmbeddedDatabaseConfigurer` to support a new embedded database type.
+* Implement `DataSourceFactory` to support a new `DataSource` implementation, such as a
+  connection pool to manage embedded database connections.
+
+You are encouraged to contribute back extensions to the Spring community at
+https://jira.spring.io/browse/SPR[jira.spring.io].
 
 
 
