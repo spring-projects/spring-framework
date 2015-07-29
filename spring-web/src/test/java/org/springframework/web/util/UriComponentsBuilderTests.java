@@ -649,6 +649,12 @@ public class UriComponentsBuilderTests {
 		assertThat(components.getFragment(), is(nullValue()));
 		assertThat(components.toString(), equalTo("/example"));
 	}
+	
+	@Test
+	public void parsesEmptyUri() {
+		UriComponents components = UriComponentsBuilder.fromUriString("").build();
+		assertThat(components.toString(), equalTo(""));
+	}
 
 	@Test
 	public void testClone() throws URISyntaxException {
