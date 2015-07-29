@@ -79,6 +79,8 @@ public class AntPathMatcher implements PathMatcher {
 
 	private PathSeparatorPatternCache pathSeparatorPatternCache;
 
+	private boolean caseSensitive = true;
+
 	private boolean trimTokens = true;
 
 	private volatile Boolean cachePatterns;
@@ -118,6 +120,15 @@ public class AntPathMatcher implements PathMatcher {
 	}
 
 	/**
+	 * Specify whether to perform pattern matching in a case-sensitive fashion.
+	 * <p>Default is {@code true}. Switch this to {@code false} for case-insensitive matching.
+	 * @since 4.2
+	 */
+	public void setCaseSensitive(boolean caseSensitive) {
+		this.caseSensitive = caseSensitive;
+	}
+
+	/**
 	 * Specify whether to trim tokenized paths and patterns.
 	 * <p>Default is {@code true}.
 	 */
@@ -134,6 +145,7 @@ public class AntPathMatcher implements PathMatcher {
 	 * turn it off when encountering too many patterns to cache at runtime
 	 * (the threshold is 65536), assuming that arbitrary permutations of patterns
 	 * are coming in, with little chance for encountering a recurring pattern.
+	 * @since 4.0.1
 	 * @see #getStringMatcher(String)
 	 */
 	public void setCachePatterns(boolean cachePatterns) {
@@ -363,7 +375,7 @@ public class AntPathMatcher implements PathMatcher {
 			matcher = this.stringMatcherCache.get(pattern);
 		}
 		if (matcher == null) {
-			matcher = new AntPathStringMatcher(pattern);
+			matcher = new AntPathStringMatcher(pattern, this.caseSensitive);
 			if (cachePatterns == null && this.stringMatcherCache.size() >= CACHE_TURNOFF_THRESHOLD) {
 				// Try to adapt to the runtime situation that we're encountering:
 				// There are obviously too many different patterns coming in here...
@@ -418,7 +430,9 @@ public class AntPathMatcher implements PathMatcher {
 	public Map<String, String> extractUriTemplateVariables(String pattern, String path) {
 		Map<String, String> variables = new LinkedHashMap<String, String>();
 		boolean result = doMatch(pattern, path, true, variables);
-		Assert.state(result, "Pattern \"" + pattern + "\" is not a match for \"" + path + "\"");
+		if (!result) {
+			throw new IllegalStateException("Pattern \"" + pattern + "\" is not a match for \"" + path + "\"");
+		}
 		return variables;
 	}
 
@@ -553,12 +567,16 @@ public class AntPathMatcher implements PathMatcher {
 		private final List<String> variableNames = new LinkedList<String>();
 
 		public AntPathStringMatcher(String pattern) {
+			this(pattern, true);
+		}
+
+		public AntPathStringMatcher(String pattern, boolean caseSensitive) {
 			StringBuilder patternBuilder = new StringBuilder();
-			Matcher m = GLOB_PATTERN.matcher(pattern);
+			Matcher matcher = GLOB_PATTERN.matcher(pattern);
 			int end = 0;
-			while (m.find()) {
-				patternBuilder.append(quote(pattern, end, m.start()));
-				String match = m.group();
+			while (matcher.find()) {
+				patternBuilder.append(quote(pattern, end, matcher.start()));
+				String match = matcher.group();
 				if ("?".equals(match)) {
 					patternBuilder.append('.');
 				}
@@ -569,7 +587,7 @@ public class AntPathMatcher implements PathMatcher {
 					int colonIdx = match.indexOf(':');
 					if (colonIdx == -1) {
 						patternBuilder.append(DEFAULT_VARIABLE_PATTERN);
-						this.variableNames.add(m.group(1));
+						this.variableNames.add(matcher.group(1));
 					}
 					else {
 						String variablePattern = match.substring(colonIdx + 1, match.length() - 1);
@@ -580,10 +598,11 @@ public class AntPathMatcher implements PathMatcher {
 						this.variableNames.add(variableName);
 					}
 				}
-				end = m.end();
+				end = matcher.end();
 			}
 			patternBuilder.append(quote(pattern, end, pattern.length()));
-			this.pattern = Pattern.compile(patternBuilder.toString());
+			this.pattern = (caseSensitive ? Pattern.compile(patternBuilder.toString()) :
+					Pattern.compile(patternBuilder.toString(), Pattern.CASE_INSENSITIVE));
 		}
 
 		private String quote(String s, int start, int end) {
@@ -602,10 +621,12 @@ public class AntPathMatcher implements PathMatcher {
 			if (matcher.matches()) {
 				if (uriTemplateVariables != null) {
 					// SPR-8455
-					Assert.isTrue(this.variableNames.size() == matcher.groupCount(),
-							"The number of capturing groups in the pattern segment " + this.pattern +
-							" does not match the number of URI template variables it defines, which can occur if " +
-							" capturing groups are used in a URI template regex. Use non-capturing groups instead.");
+					if (this.variableNames.size() != matcher.groupCount()) {
+						throw new IllegalArgumentException("The number of capturing groups in the pattern segment " +
+								this.pattern + " does not match the number of URI template variables it defines, " +
+								"which can occur if capturing groups are used in a URI template regex. " +
+								"Use non-capturing groups instead.");
+					}
 					for (int i = 1; i <= matcher.groupCount(); i++) {
 						String name = this.variableNames.get(i - 1);
 						String value = matcher.group(i);

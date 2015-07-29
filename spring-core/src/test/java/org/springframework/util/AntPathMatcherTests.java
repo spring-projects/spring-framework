@@ -298,7 +298,7 @@ public class AntPathMatcherTests {
 		assertEquals("/docs/commit.html", pathMatcher.extractPathWithinPattern("*.html", "/docs/commit.html"));
 		assertEquals("/docs/commit.html", pathMatcher.extractPathWithinPattern("**/*.*", "/docs/commit.html"));
 		assertEquals("/docs/commit.html", pathMatcher.extractPathWithinPattern("*", "/docs/commit.html"));
-		//SPR-10515
+		// SPR-10515
 		assertEquals("/docs/cvs/other/commit.html", pathMatcher.extractPathWithinPattern("**/commit.html", "/docs/cvs/other/commit.html"));
 		assertEquals("cvs/other/commit.html", pathMatcher.extractPathWithinPattern("/docs/**/commit.html", "/docs/cvs/other/commit.html"));
 		assertEquals("cvs/other/commit.html", pathMatcher.extractPathWithinPattern("/docs/**/**/**/**", "/docs/cvs/other/commit.html"));
@@ -452,7 +452,7 @@ public class AntPathMatcherTests {
 		assertEquals(-1, comparator.compare("/hotels/{hotel}/booking", "/hotels/{hotel}/bookings/{booking}"));
 		assertEquals(1, comparator.compare("/hotels/{hotel}/bookings/{booking}", "/hotels/{hotel}/booking"));
 
-		//SPR-10550
+		// SPR-10550
 		assertEquals(-1, comparator.compare("/hotels/{hotel}/bookings/{booking}/cutomers/{customer}", "/**"));
 		assertEquals(1, comparator.compare("/**","/hotels/{hotel}/bookings/{booking}/cutomers/{customer}"));
 		assertEquals(0, comparator.compare("/**","/**"));
@@ -466,7 +466,7 @@ public class AntPathMatcherTests {
 		assertEquals(-1, comparator.compare("/hotels/new", "/hotels/new.*"));
 		assertEquals(2, comparator.compare("/hotels/{hotel}", "/hotels/{hotel}.*"));
 
-		//SPR-6741
+		// SPR-6741
 		assertEquals(-1, comparator.compare("/hotels/{hotel}/bookings/{booking}/cutomers/{customer}", "/hotels/**"));
 		assertEquals(1, comparator.compare("/hotels/**", "/hotels/{hotel}/bookings/{booking}/cutomers/{customer}"));
 		assertEquals(1, comparator.compare("/hotels/foo/bar/**", "/hotels/{hotel}"));
@@ -474,13 +474,13 @@ public class AntPathMatcherTests {
 		assertEquals(2, comparator.compare("/hotels/**/bookings/**", "/hotels/**"));
 		assertEquals(-2, comparator.compare("/hotels/**", "/hotels/**/bookings/**"));
 
-		//SPR-8683
+		// SPR-8683
 		assertEquals(1, comparator.compare("/**", "/hotels/{hotel}"));
 
 		// longer is better
 		assertEquals(1, comparator.compare("/hotels", "/hotels2"));
 
-		//SPR-13139
+		// SPR-13139
 		assertEquals(-1, comparator.compare("*", "*/**"));
 		assertEquals(1, comparator.compare("*/**", "*"));
 	}
@@ -581,15 +581,22 @@ public class AntPathMatcherTests {
 		paths.clear();
 	}
 
-	/**
-	 * SPR-8687
-	 */
-	@Test
+	@Test  // SPR-8687
 	public void trimTokensOff() {
 		pathMatcher.setTrimTokens(false);
 
 		assertTrue(pathMatcher.match("/group/{groupName}/members", "/group/sales/members"));
 		assertTrue(pathMatcher.match("/group/{groupName}/members", "/group/  sales/members"));
+		assertFalse(pathMatcher.match("/group/{groupName}/members", "/Group/  Sales/Members"));
+	}
+
+	@Test  // SPR-13286
+	public void caseInsensitive() {
+		pathMatcher.setCaseSensitive(false);
+
+		assertTrue(pathMatcher.match("/group/{groupName}/members", "/group/sales/members"));
+		assertTrue(pathMatcher.match("/group/{groupName}/members", "/Group/Sales/Members"));
+		assertTrue(pathMatcher.match("/Group/{groupName}/Members", "/group/Sales/members"));
 	}
 
 	@Test
