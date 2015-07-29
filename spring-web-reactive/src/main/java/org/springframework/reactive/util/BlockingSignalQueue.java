@@ -181,17 +181,15 @@ public class BlockingSignalQueue<T> {
 
 		private class SubscriptionThread extends Thread {
 
-			private volatile long demand = 0;
+			private final DemandCounter demand = new DemandCounter();
 
 			@Override
 			public void run() {
 				try {
 					while (!Thread.currentThread().isInterrupted()) {
-						if (demand > 0 && isHeadSignal()) {
+						if (this.demand.hasDemand() && isHeadSignal()) {
 							subscriber.onNext(pollSignal());
-							if (demand != Long.MAX_VALUE) {
-								demand--;
-							}
+							this.demand.decrement();
 						}
 						else if (isHeadError()) {
 							subscriber.onError(pollError());
@@ -209,12 +207,7 @@ public class BlockingSignalQueue<T> {
 			}
 
 			public void request(long n) {
-				if (n != Long.MAX_VALUE) {
-					this.demand += n;
-				}
-				else {
-					this.demand = Long.MAX_VALUE;
-				}
+				this.demand.increase(n);
 			}
 
 			public void cancel() {

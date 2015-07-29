@@ -22,15 +22,17 @@ import javax.servlet.AsyncContext;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 /**
+ * Utility class for synchronizing between the reading and writing side of an
+ * {@link AsyncContext}. This class will simply call {@link AsyncContext#complete()} when
+ * both {@link #readComplete()} and {@link #writeComplete()} have been called.
+ *
  * @author Arjen Poutsma
+ * @see AsyncContext
  */
-class AsyncContextSynchronizer {
+final class AsyncContextSynchronizer {
 
-	private static final Log logger = LogFactory.getLog(AsyncContextSynchronizer.class);
+	private static final int NONE_COMPLETE = 0;
 
 	private static final int READ_COMPLETE = 1;
 
@@ -40,39 +42,59 @@ class AsyncContextSynchronizer {
 
 	private final AsyncContext asyncContext;
 
-	private final AtomicInteger complete = new AtomicInteger(0);
+	private final AtomicInteger complete = new AtomicInteger(NONE_COMPLETE);
 
+	/**
+	 * Creates a new {@code AsyncContextSynchronizer} based on the given context.
+	 * @param asyncContext the context to base this synchronizer on
+	 */
 	public AsyncContextSynchronizer(AsyncContext asyncContext) {
 		this.asyncContext = asyncContext;
 	}
 
+	/**
+	 * Returns the input stream of this synchronizer.
+	 * @return the input stream
+	 * @throws IOException if an input or output exception occurred
+	 */
 	public ServletInputStream getInputStream() throws IOException {
 		return this.asyncContext.getRequest().getInputStream();
 	}
 
+	/**
+	 * Returns the output stream of this synchronizer.
+	 * @return the output stream
+	 * @throws IOException if an input or output exception occurred
+	 */
 	public ServletOutputStream getOutputStream() throws IOException {
 		return this.asyncContext.getResponse().getOutputStream();
 	}
 
+	/**
+	 * Completes the reading side of the asynchronous operation. When both this method and
+	 * {@link #writeComplete()} have been called, the {@code AsyncContext} will be
+	 * {@linkplain AsyncContext#complete() fully completed}.
+	 */
 	public void readComplete() {
-		logger.debug("Read complete");
 		if (complete.compareAndSet(WRITE_COMPLETE, COMPLETE)) {
-			logger.debug("Complete");
 			this.asyncContext.complete();
 		}
 		else {
-			this.complete.compareAndSet(0, READ_COMPLETE);
+			this.complete.compareAndSet(NONE_COMPLETE, READ_COMPLETE);
 		}
 	}
 
+	/**
+	 * Completes the writing side of the asynchronous operation. When both this method and
+	 * {@link #readComplete()} have been called, the {@code AsyncContext} will be
+	 * {@linkplain AsyncContext#complete() fully completed}.
+	 */
 	public void writeComplete() {
-		logger.debug("Write complete");
 		if (complete.compareAndSet(READ_COMPLETE, COMPLETE)) {
-			logger.debug("Complete");
 			this.asyncContext.complete();
 		}
 		else {
-			this.complete.compareAndSet(0, WRITE_COMPLETE);
+			this.complete.compareAndSet(NONE_COMPLETE, WRITE_COMPLETE);
 		}
 	}
 }

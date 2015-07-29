@@ -28,6 +28,8 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import org.springframework.reactive.util.DemandCounter;
+
 /**
  * @author Arjen Poutsma
  */
@@ -41,7 +43,7 @@ public class RequestBodyPublisher implements ReadListener, Publisher<byte[]> {
 
 	private final byte[] buffer;
 
-	private long demand;
+	private final DemandCounter demand = new DemandCounter();
 
 	private Subscriber<? super byte[]> subscriber;
 
@@ -64,7 +66,7 @@ public class RequestBodyPublisher implements ReadListener, Publisher<byte[]> {
 		while (true) {
 			logger.debug("Demand: " + this.demand);
 
-			if (demand <= 0) {
+			if (!demand.hasDemand()) {
 				break;
 			}
 
@@ -82,9 +84,7 @@ public class RequestBodyPublisher implements ReadListener, Publisher<byte[]> {
 				break;
 			}
 			else if (read > 0) {
-				if (demand != Long.MAX_VALUE) {
-					demand--;
-				}
+				this.demand.decrement();
 				byte[] copy = Arrays.copyOf(this.buffer, read);
 
 //				logger.debug("Next: " + new String(copy, UTF_8));
@@ -114,14 +114,9 @@ public class RequestBodyPublisher implements ReadListener, Publisher<byte[]> {
 		public void request(long n) {
 			logger.debug("Updating demand " + demand + " by " + n);
 
-			boolean stalled = demand <= 0;
+			boolean stalled = !demand.hasDemand();
 
-			if (n != Long.MAX_VALUE && demand != Long.MAX_VALUE) {
-				demand += n;
-			}
-			else {
-				demand = Long.MAX_VALUE;
-			}
+			demand.increase(n);
 
 			if (stalled) {
 				try {
@@ -136,7 +131,7 @@ public class RequestBodyPublisher implements ReadListener, Publisher<byte[]> {
 		@Override
 		public void cancel() {
 			synchronizer.readComplete();
-			demand = 0;
+			demand.reset();
 		}
 	}
 }
