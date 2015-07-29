@@ -2292,19 +2292,19 @@ various callback interfaces, plus a variety of related classes. A subpackage nam
 `SimpleJdbcCall` classes. Another subpackage named
 `org.springframework.jdbc.core.namedparam` contains the `NamedParameterJdbcTemplate`
 class and the related support classes. See <<jdbc-core>>, <<jdbc-advanced-jdbc>>, and
-<<jdbc-simple-jdbc>>
+<<jdbc-simple-jdbc>>.
 
 The `org.springframework.jdbc.datasource` package contains a utility class for easy
-`DataSource` access, and various simple `DataSource` implementations that can be used
-for testing and running unmodified JDBC code outside of a Java EE container. A
-subpackage named `org.springfamework.jdbc.datasource.embedded` provides support for
-creating in-memory database instances using Java database engines such as HSQL and H2.
-See <<jdbc-connections>> and <<jdbc-embedded-database-support>>
+`DataSource` access, and various simple `DataSource` implementations that can be used for
+testing and running unmodified JDBC code outside of a Java EE container. A subpackage
+named `org.springfamework.jdbc.datasource.embedded` provides support for creating
+embedded databases using Java database engines such as HSQL, H2, and Derby. See
+<<jdbc-connections>> and <<jdbc-embedded-database-support>>.
 
 The `org.springframework.jdbc.object` package contains classes that represent RDBMS
-queries, updates, and stored procedures as thread safe, reusable objects. See
-<<jdbc-object>>.This approach is modeled by JDO, although of course objects returned by
-queries are "disconnected" from the database. This higher level of JDBC abstraction
+queries, updates, and stored procedures as thread-safe, reusable objects. See
+<<jdbc-object>>. This approach is modeled by JDO, although objects returned by queries
+are naturally _disconnected_ from the database. This higher level of JDBC abstraction
 depends on the lower-level abstraction in the `org.springframework.jdbc.core` package.
 
 The `org.springframework.jdbc.support` package provides `SQLException` translation
