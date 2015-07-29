@@ -104,14 +104,16 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 		String subscriptionId = SimpMessageHeaderAccessor.getSubscriptionId(headers);
 
-		Assert.state(subscriptionId != null,
-				"No subscriptionId in message=" + message + ", method=" + returnType.getMethod());
+		if (subscriptionId == null) {
+			throw new IllegalStateException(
+					"No subscriptionId in " + message + " returned by: " + returnType.getMethod());
+		}
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Reply to @SubscribeMapping: " + returnValue);
 		}
-
-		this.messagingTemplate.convertAndSend(destination, returnValue, createHeaders(sessionId, subscriptionId, returnType));
+		this.messagingTemplate.convertAndSend(
+				destination, returnValue, createHeaders(sessionId, subscriptionId, returnType));
 	}
 
 	private MessageHeaders createHeaders(String sessionId, String subscriptionId, MethodParameter returnType) {

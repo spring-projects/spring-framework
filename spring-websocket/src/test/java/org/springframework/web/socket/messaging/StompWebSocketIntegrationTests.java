@@ -83,13 +83,12 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 
 	@Override
 	protected Class<?>[] getAnnotatedConfigClasses() {
-		return new Class<?>[] { TestMessageBrokerConfiguration.class, TestMessageBrokerConfigurer.class };
+		return new Class<?>[] {TestMessageBrokerConfiguration.class, TestMessageBrokerConfigurer.class};
 	}
 
 
 	@Test
 	public void sendMessageToController() throws Exception {
-
 		TextMessage message = create(StompCommand.SEND).headers("destination:/app/simple").build();
 		WebSocketSession session = doHandshake(new TestClientWebSocketHandler(0, message), "/ws").get();
 
@@ -104,10 +103,8 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 
 	@Test
 	public void sendMessageToControllerAndReceiveReplyViaTopic() throws Exception {
-
 		TextMessage message1 = create(StompCommand.SUBSCRIBE)
 				.headers("id:subs1", "destination:/topic/increment").build();
-
 		TextMessage message2 = create(StompCommand.SEND)
 				.headers("destination:/app/increment").body("5").build();
 
@@ -126,7 +123,6 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 
 	@Test
 	public void sendMessageToBrokerAndReceiveReplyViaTopic() throws Exception {
-
 		TextMessage m1 = create(StompCommand.SUBSCRIBE).headers("id:subs1", "destination:/topic/foo").build();
 		TextMessage m2 = create(StompCommand.SEND).headers("destination:/topic/foo").body("5").build();
 
@@ -148,7 +144,6 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 
 	@Test
 	public void sendSubscribeToControllerAndReceiveReply() throws Exception {
-
 		String destHeader = "destination:/app/number";
 		TextMessage message = create(StompCommand.SUBSCRIBE).headers("id:subs1", destHeader).build();
 
@@ -168,7 +163,6 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 
 	@Test
 	public void handleExceptionAndSendToUser() throws Exception {
-
 		String destHeader = "destination:/user/queue/error";
 		TextMessage m1 = create(StompCommand.SUBSCRIBE).headers("id:subs1", destHeader).build();
 		TextMessage m2 = create(StompCommand.SEND).headers("destination:/app/exception").build();
@@ -178,7 +172,6 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 
 		try {
 			assertTrue(clientHandler.latch.await(2, TimeUnit.SECONDS));
-
 			String payload = clientHandler.actual.get(0).getPayload();
 			assertTrue(payload.startsWith("MESSAGE\n"));
 			assertTrue(payload.contains("destination:/user/queue/error\n"));
@@ -191,10 +184,8 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 
 	@Test
 	public void webSocketScope() throws Exception {
-
 		TextMessage message1 = create(StompCommand.SUBSCRIBE)
 				.headers("id:subs1", "destination:/topic/scopedBeanValue").build();
-
 		TextMessage message2 = create(StompCommand.SEND)
 				.headers("destination:/app/scopedBeanValue").build();
 
@@ -203,7 +194,6 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 
 		try {
 			assertTrue(clientHandler.latch.await(2, TimeUnit.SECONDS));
-
 			String payload = clientHandler.actual.get(0).getPayload();
 			assertTrue(payload.startsWith("MESSAGE\n"));
 			assertTrue(payload.contains("destination:/topic/scopedBeanValue\n"));
@@ -220,6 +210,7 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 	@Controller
 	private @interface IntegrationTestController {
 	}
+
 
 	@IntegrationTestController
 	static class SimpleController {
@@ -243,6 +234,7 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 		}
 	}
 
+
 	@IntegrationTestController
 	static class IncrementController {
 
@@ -256,6 +248,7 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 			return 42;
 		}
 	}
+
 
 	@IntegrationTestController
 	static class ScopedBeanController {
@@ -278,6 +271,7 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 
 		String getValue();
 	}
+
 
 	static class ScopedBeanImpl implements ScopedBean {
 
@@ -304,7 +298,6 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 
 		private final CountDownLatch latch;
 
-
 		public TestClientWebSocketHandler(int expectedNumberOfMessages, TextMessage... messagesToSend) {
 			this.messagesToSend = messagesToSend;
 			this.expected = expectedNumberOfMessages;
@@ -325,6 +318,7 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 		}
 	}
 
+
 	@Configuration
 	@ComponentScan(
 			basePackageClasses=StompWebSocketIntegrationTests.class,
@@ -333,7 +327,7 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 	static class TestMessageBrokerConfigurer extends AbstractWebSocketMessageBrokerConfigurer {
 
 		@Autowired
-		private HandshakeHandler handshakeHandler; // can't rely on classpath for server detection
+		private HandshakeHandler handshakeHandler;  // can't rely on classpath for server detection
 
 		@Override
 		public void registerStompEndpoints(StompEndpointRegistry registry) {
@@ -353,19 +347,20 @@ public class StompWebSocketIntegrationTests extends AbstractWebSocketIntegration
 		}
 	}
 
+
 	@Configuration
 	static class TestMessageBrokerConfiguration extends DelegatingWebSocketMessageBrokerConfiguration {
 
 		@Override
 		@Bean
 		public AbstractSubscribableChannel clientInboundChannel() {
-			return new ExecutorSubscribableChannel(); // synchronous
+			return new ExecutorSubscribableChannel();  // synchronous
 		}
 
 		@Override
 		@Bean
 		public AbstractSubscribableChannel clientOutboundChannel() {
-			return new ExecutorSubscribableChannel(); // synchronous
+			return new ExecutorSubscribableChannel();  // synchronous
 		}
 	}
 
