@@ -60,8 +60,8 @@ import java.lang.annotation.Target;
  * <li><strong>Aliases within an annotation</strong>:
  * <ol>
  * <li>Each attribute that makes up an aliased pair must be annotated with
- * {@code @AliasFor}, and the {@link #attribute} must reference the
- * <em>other</em> attribute in the pair.</li>
+ * {@code @AliasFor}, and either the {@link #attribute} or the {@link #value}
+ * attribute must reference the <em>other</em> attribute in the pair.</li>
  * <li>Aliased attributes must declare the same return type.</li>
  * <li>Aliased attributes must declare a default value.</li>
  * <li>Aliased attributes must declare the same default value.</li>
@@ -84,10 +84,10 @@ import java.lang.annotation.Target;
  * <h3>Example: Aliases within an Annotation</h3>
  * <pre class="code"> public &#064;interface ContextConfiguration {
  *
- *    &#064;AliasFor(attribute = "locations")
+ *    &#064;AliasFor("locations")
  *    String[] value() default {};
  *
- *    &#064;AliasFor(attribute = "value")
+ *    &#064;AliasFor("value")
  *    String[] locations() default {};
  *
  *    // ...
