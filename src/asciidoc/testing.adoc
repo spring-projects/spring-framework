@@ -993,8 +993,9 @@ instead of `@PostConstruct` and `@PreDestroy`.
 [[integration-testing-annotations-junit]]
 ==== Spring JUnit Testing Annotations
 The following annotations are __only__ supported when used in conjunction with the
-<<testcontext-junit4-runner,SpringJUnit4ClassRunner>> or the
-<<testcontext-support-classes-junit4,JUnit>> support classes.
+<<testcontext-junit4-runner,SpringJUnit4ClassRunner>>,
+<<testcontext-junit4-rules,Spring's JUnit rules>>, or
+<<testcontext-support-classes-junit4,Spring's JUnit support classes>>.
 
 * `@IfProfileValue`
 
@@ -3589,8 +3590,87 @@ be automatically rolled back by the `TransactionalTestExecutionListener` (see
 [[testcontext-support-classes]]
 ==== TestContext Framework support classes
 
+
+[[testcontext-junit4-runner]]
+===== Spring JUnit Runner
+
+The __Spring TestContext Framework__ offers full integration with JUnit 4.9+ through a
+custom runner (supported on JUnit 4.9 through 4.12). By annotating test classes with
+`@RunWith(SpringJUnit4ClassRunner.class)`, developers can implement standard JUnit-based
+unit and integration tests and simultaneously reap the benefits of the TestContext
+framework such as support for loading application contexts, dependency injection of test
+instances, transactional test method execution, and so on. If you would like to use the
+Spring TestContext Framework with an alternative runner such as JUnit's `Parameterized`
+or third-party runners such as the `MockitoJUnitRunner`, you may optionally use
+<<testcontext-junit4-rules,Spring's support for JUnit rules>> instead.
+
+The following code listing displays the minimal requirements for configuring a test class
+to run with the custom Spring `Runner`. `@TestExecutionListeners` is configured with an
+empty list in order to disable the default listeners, which otherwise would require an
+`ApplicationContext` to be configured through `@ContextConfiguration`.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@RunWith(SpringJUnit4ClassRunner.class)
+@TestExecutionListeners({})
+public class SimpleTest {
+
+   @Test
+   public void testMethod() {
+      // execute test logic...
+   }
+}
+----
+
+
+[[testcontext-junit4-rules]]
+===== Spring JUnit Rules
+
+The `org.springframework.test.context.junit4.rules` package provides the following JUnit
+rules.
+
+* `SpringClassRule`
+* `SpringMethodRule`
+
+`SpringClassRule` is a JUnit `TestRule` that supports _class-level_ features of the
+_Spring TestContext Framework_; whereas, `SpringMethodRule` is a JUnit `MethodRule` that
+supports instance-level and method-level features of the _Spring TestContext Framework_.
+
+In contrast to the `SpringJUnit4ClassRunner`, Spring's rule-based JUnit support has the
+advantage that it is independent of any `org.junit.runner.Runner` implementation and can
+therefore be combined with existing alternative runners like JUnit's `Parameterized` or
+third-party runners such as the `MockitoJUnitRunner`.
+
+In order to support the full functionality of the TestContext framework, a
+`SpringClassRule` must be combined with a `SpringMethodRule`. The following example
+demonstrates the proper way to declare these rules in an integration test.
+
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+// Optionally specify a non-Spring Runner via @RunWith(...)
+@ContextConfiguration
+public class IntegrationTest {
+
+   @ClassRule
+   public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
+
+   @Rule
+   public final SpringMethodRule springMethodRule = new SpringMethodRule();
+
+   @Test
+   public void testMethod() {
+      // execute test logic...
+   }
+}
+----
+
+
 [[testcontext-support-classes-junit4]]
 ===== JUnit support classes
+
 The `org.springframework.test.context.junit4` package provides the following support
 classes for JUnit-based test cases.
 
@@ -3623,39 +3703,14 @@ provides an `executeSqlScript(..)` method for executing SQL scripts against the 
 ====
 These classes are a convenience for extension. If you do not want your test classes to be
 tied to a Spring-specific class hierarchy, you can configure your own custom test classes
-by using `@RunWith(SpringJUnit4ClassRunner.class)`, `@ContextConfiguration`,
-`@TestExecutionListeners`, and so on.
+by using `@RunWith(SpringJUnit4ClassRunner.class)` or <<testcontext-junit4-rules,Spring's
+JUnit rules>>.
 ====
 
-[[testcontext-junit4-runner]]
-===== Spring JUnit Runner
-The __Spring TestContext Framework__ offers full integration with JUnit 4.9+ through a
-custom runner (tested on JUnit 4.9 -- 4.12). By annotating test classes with
-`@RunWith(SpringJUnit4ClassRunner.class)`, developers can implement standard JUnit-based
-unit and integration tests and simultaneously reap the benefits of the TestContext
-framework such as support for loading application contexts, dependency injection of test
-instances, transactional test method execution, and so on. The following code listing
-displays the minimal requirements for configuring a test class to run with the custom
-Spring Runner. `@TestExecutionListeners` is configured with an empty list in order to
-disable the default listeners, which otherwise would require an ApplicationContext to be
-configured through `@ContextConfiguration`.
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	@RunWith(SpringJUnit4ClassRunner.class)
-	@TestExecutionListeners({})
-	public class SimpleTest {
-
-		@Test
-		public void testMethod() {
-			// execute test logic...
-		}
-	}
-----
 
 [[testcontext-support-classes-testng]]
 ===== TestNG support classes
+
 The `org.springframework.test.context.testng` package provides the following support
 classes for TestNG based test cases.
 

@@ -547,21 +547,11 @@ public @interface MyTestConfig {
 
 === Testing Improvements
 
-* JUnit-based integration tests can now be executed with JUnit rules
-  instead of the `SpringJUnit4ClassRunner`. This allows Spring-based
-  integration tests to be run with alternative runners like JUnit's
-  `Parameterized` or third-party runners such as the 
+* JUnit-based integration tests can now be executed with JUnit rules instead of the
+  `SpringJUnit4ClassRunner`. This allows Spring-based integration tests to be run with
+  alternative runners like JUnit's `Parameterized` or third-party runners such as the
   `MockitoJUnitRunner`.
-** Spring JUnit rule configuration requires the following two rules.
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-    @ClassRule
-    public static final SpringClassRule SPRING_CLASS_RULE = new SpringClassRule();
-
-    @Rule
-    public final SpringMethodRule springMethodRule = new SpringMethodRule();
-----
+** See <<testcontext-junit4-rules>> for details.
 * The Spring MVC Test framework now provides first-class support for HtmlUnit,
   including integration with Selenium's WebDriver, allowing for page-based
   web application testing without the need to deploy to a Servlet container.
