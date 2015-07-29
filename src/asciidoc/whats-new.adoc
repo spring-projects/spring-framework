@@ -607,8 +607,6 @@ public @interface MyTestConfig {
   definition profiles.
 * Embedded databases can now be automatically assigned a unique name,
   allowing common test database configuration to be reused in different
-  ++ApplicationContext++s within a test suite. This support can be enabled
-  via:
-** `EmbeddedDatabaseFactory.setGenerateUniqueDatabaseName()`
-** `EmbeddedDatabaseBuilder.generateUniqueName()`
-** `<jdbc:embedded-database generate-name="true" ... >`
+  ++ApplicationContext++s within a test suite.
+** See <<jdbc-embedded-database-unique-names>> for details.
+

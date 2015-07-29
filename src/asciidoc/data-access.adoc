@@ -4623,16 +4623,17 @@ If you want to expose an embedded database instance as a bean in a Spring
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<jdbc:embedded-database id="dataSource">
+	<jdbc:embedded-database id="dataSource" generate-name="true">
 		<jdbc:script location="classpath:schema.sql"/>
 		<jdbc:script location="classpath:test-data.sql"/>
 	</jdbc:embedded-database>
 ----
 
 The preceding configuration creates an embedded HSQL database populated with SQL from
-`schema.sql` and `test-data.sql` resources in the root of the root of the classpath. The
-database instance is made available to the Spring container as a bean of type
-`javax.sql.DataSource`. This bean can then be injected into data access objects as needed.
+`schema.sql` and `test-data.sql` resources in the root of the classpath. In addition, as
+a best practice, the embedded database will be assigned a uniquely generated name. The
+embedded database is made available to the Spring container as a bean of type
+`javax.sql.DataSource` which can then be injected into data access objects as needed.
 
 
 
@@ -4641,12 +4642,13 @@ database instance is made available to the Spring container as a bean of type
 
 The `EmbeddedDatabaseBuilder` class provides a fluent API for constructing an embedded
 database programmatically. Use this when you need to create an embedded database in a
-standalone environment or in a standalone integration test:
+standalone environment or in a standalone integration test like in the following example.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 EmbeddedDatabase db = new EmbeddedDatabaseBuilder()
+    .generateUniqueName(true)
     .setType(H2)
     .setScriptEncoding("UTF-8")
     .ignoreFailedDrops(true)
@@ -4654,10 +4656,13 @@ EmbeddedDatabase db = new EmbeddedDatabaseBuilder()
     .addScripts("user_data.sql", "country_data.sql")
     .build();
 
-// do stuff against the db (EmbeddedDatabase extends javax.sql.DataSource)
+// perform actions against the db (EmbeddedDatabase extends javax.sql.DataSource)
 
 db.shutdown()
 ----
+
+Consult the Javadoc for `EmbeddedDatabaseBuilder` for further details on all supported
+options.
 
 The `EmbeddedDatabaseBuilder` can also be used to create an embedded database using Java
 Config like in the following example.
@@ -4671,6 +4676,7 @@ public class DataSourceConfig {
     @Bean
     public DataSource dataSource() {
         return new EmbeddedDatabaseBuilder()
+            .generateUniqueName(true)
             .setType(H2)
             .setScriptEncoding("UTF-8")
             .ignoreFailedDrops(true)
@@ -4731,7 +4737,10 @@ Framework>> and configuring the embedded database as a bean in the Spring
 		public void setUp() {
 			// creates an HSQL in-memory database populated from default scripts
 			// classpath:schema.sql and classpath:data.sql
-			db = new EmbeddedDatabaseBuilder().addDefaultScripts().build();
+			db = new EmbeddedDatabaseBuilder()
+					.generateUniqueName(true)
+					.addDefaultScripts()
+					.build();
 		}
 
 		@Test
@@ -4747,6 +4756,37 @@ Framework>> and configuring the embedded database as a bean in the Spring
 
 	}
 ----
+
+
+[[jdbc-embedded-database-unique-names]]
+==== Generating unique names for embedded databases
+
+Development teams often encounter errors with embedded databases if their test suite
+inadvertently attempts to recreate additional instances of the same database. This can
+happen quite easily if an XML configuration file or `@Configuration` class is responsible
+for creating an embedded database and the corresponding configuration is then reused
+across multiple testing scenarios within the same test suite (i.e., within the same JVM
+process) –- for example, integration tests against embedded databases whose
+`ApplicationContext` configuration only differs with regard to which bean definition
+profiles are active.
+
+The root cause of such errors is the fact that Spring's `EmbeddedDatabaseFactory` (used
+internally by both the `<jdbc:embedded-database>` XML namespace element and the
+`EmbeddedDatabaseBuilder` for Java Config) will set the name of the embedded database to
+`"testdb"` if not otherwise specified. For the case of `<jdbc:embedded-database>`, the
+embedded database is typically assigned a name equal to the bean's `id` (i.e., often
+something like `"dataSource"`). Thus, subsequent attempts to create an embedded database
+will not result in a new database. Instead, the same JDBC connection URL will be reused,
+and attempts to create a new embedded database will actually point to an existing
+embedded database created from the same configuration.
+
+To address this common issue Spring Framework 4.2 provides support for generating
+_unique_ names for embedded databases. To enable the use of generated names, use one of
+the following options.
+
+* `EmbeddedDatabaseFactory.setGenerateUniqueDatabaseName()`
+* `EmbeddedDatabaseBuilder.generateUniqueName()`
+* `<jdbc:embedded-database generate-name="true" ... >`
 
 
 
