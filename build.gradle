@@ -37,7 +37,7 @@ configure(allprojects) { project ->
 	ext.gsonVersion          = "2.3.1"
 	ext.hibernate3Version    = "3.6.10.Final"
 	ext.hibernate4Version    = "4.3.10.Final"
-	ext.hibernate5Version    = "5.0.0.CR2"
+	ext.hibernate5Version    = "5.0.0.CR3"
 	ext.hibval4Version       = "4.3.2.Final"
 	ext.hibval5Version       = "5.2.0.Final"
 	ext.hsqldbVersion        = "2.3.2"
@@ -52,7 +52,7 @@ configure(allprojects) { project ->
 	ext.jrubyVersion         = "1.7.21"  // JRuby 9.0.0.0 only supported through JSR-223 (StandardScriptFactory)
 	ext.jtaVersion           = "1.2"
 	ext.junitVersion         = "4.12"
-	ext.nettyVersion         = "4.0.29.Final"
+	ext.nettyVersion         = "4.0.30.Final"
 	ext.openjpaVersion       = "2.4.0"
 	ext.poiVersion           = "3.12"
 	ext.protobufVersion      = "2.6.1"
@@ -343,7 +343,7 @@ project("spring-core") {
 		compile("commons-logging:commons-logging:1.2")
 		optional("commons-codec:commons-codec:1.10")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
-		optional("net.sf.jopt-simple:jopt-simple:4.8")
+		optional("net.sf.jopt-simple:jopt-simple:4.9")
 		optional("log4j:log4j:1.2.17")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("xmlunit:xmlunit:${xmlunitVersion}")
