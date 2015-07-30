@@ -457,6 +457,7 @@ public @interface MyTestConfig {
     // ...
 }
 ----
+** See <<annotation-programming-model,Spring Annotation Programming Model>>.
 * Numerous improvements to Spring's search algorithms used for finding
   meta-annotations. For example, locally declared _composed annotations_
   are now favored over inherited annotations.
