@@ -40,10 +40,10 @@ configure(allprojects) { project ->
 	ext.hsqldbVersion        = "2.3.2"
 	ext.jackson2Version      = "2.4.6"
 	ext.jasperReportsVersion = "6.0.4"
-	ext.jettyVersion         = "9.2.11.v20150529"
+	ext.jettyVersion         = "9.2.12.v20150709"
 	ext.jodaVersion          = "2.8.1"
 	ext.junitVersion         = "4.12"
-	ext.nettyVersion         = "4.0.29.Final"
+	ext.nettyVersion         = "4.0.30.Final"
 	ext.openJpaVersion       = "2.2.2"  // 2.3.0 not Java 8 compatible (based on ASM 4)
 	ext.protobufVersion      = "2.6.1"
 	ext.reactorVersion       = "1.1.6.RELEASE"
@@ -52,9 +52,9 @@ configure(allprojects) { project ->
 	ext.snifferVersion       = "1.11"
 	ext.tiles2Version        = "2.2.2"
 	ext.tiles3Version        = "3.0.5"
-	ext.tomcatVersion        = "8.0.23"
+	ext.tomcatVersion        = "8.0.24"
 	ext.tyrusVersion         = "1.3.5"  // constrained by WebLogic 12.1.3 support
-	ext.undertowVersion      = "1.1.7.Final"
+	ext.undertowVersion      = "1.1.8.Final"
 	ext.woodstoxVersion      = "4.4.1"
 	ext.xstreamVersion       = "1.4.7"
 
