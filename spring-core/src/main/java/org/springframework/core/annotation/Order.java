@@ -25,18 +25,24 @@ import java.lang.annotation.Target;
 import org.springframework.core.Ordered;
 
 /**
- * Annotation that defines ordering. The value is optional, and represents order value
- * as defined in the {@link Ordered} interface. Lower values have higher priority.
- * The default value is {@code Ordered.LOWEST_PRECEDENCE}, indicating
+ * {@code @Order} defines the sort order for an annotated component.
+ *
+ * <p>The {@link #value} is optional and represents an order value as defined
+ * in the {@link Ordered} interface. Lower values have higher priority. The
+ * default value is {@code Ordered.LOWEST_PRECEDENCE}, indicating
  * lowest priority (losing to any other specified order value).
  *
- * <p>Since Spring 4.1, the standard {@link javax.annotation.Priority} can be used as
- * a drop-in replacement of this annotation.
+ * <p>Since Spring 4.1, the standard {@link javax.annotation.Priority}
+ * annotation can be used as a drop-in replacement for this annotation.
  *
- * <p><b>NOTE:</b> Annotation-based ordering is supported for specific kinds of
- * components only, e.g. for annotation-based AspectJ aspects. Spring container
- * strategies, on the other hand, are typically based on the {@link Ordered}
- * interface in order to allow for configurable ordering of each <i>instance</i>.
+ * <p><b>NOTE</b>: Annotation-based ordering is supported for specific kinds
+ * of components only &mdash; for example, for annotation-based AspectJ
+ * aspects. Ordering strategies within the Spring container, on the other
+ * hand, are typically based on the {@link Ordered} interface in order to
+ * allow for programmatically configurable ordering of each <i>instance</i>.
+ *
+ * <p>Consult the Javadoc for {@link org.springframework.core.OrderComparator
+ * OrderComparator} for details on the sort semantics for non-ordered objects.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -52,7 +58,8 @@ import org.springframework.core.Ordered;
 public @interface Order {
 
 	/**
-	 * The order value. Default is {@link Ordered#LOWEST_PRECEDENCE}.
+	 * The order value.
+	 * <p>Default is {@link Ordered#LOWEST_PRECEDENCE}.
 	 * @see Ordered#getOrder()
 	 */
 	int value() default Ordered.LOWEST_PRECEDENCE;

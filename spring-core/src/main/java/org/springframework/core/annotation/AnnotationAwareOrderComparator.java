@@ -25,11 +25,15 @@ import java.util.List;
 import org.springframework.core.OrderComparator;
 
 /**
- * {@link java.util.Comparator} implementation that checks Spring's
+ * {@code AnnotationAwareOrderComparator} is an extension of
+ * {@link OrderComparator} that supports Spring's
  * {@link org.springframework.core.Ordered} interface as well as the
  * {@link Order @Order} and {@link javax.annotation.Priority @Priority}
  * annotations, with an order value provided by an {@code Ordered}
  * instance overriding a statically defined annotation value (if any).
+ *
+ * <p>Consult the Javadoc for {@link OrderComparator} for details on the
+ * sort semantics for non-ordered objects.
  *
  * @author Juergen Hoeller
  * @author Oliver Gierke
@@ -42,15 +46,16 @@ import org.springframework.core.OrderComparator;
 public class AnnotationAwareOrderComparator extends OrderComparator {
 
 	/**
-	 * Shared default instance of AnnotationAwareOrderComparator.
+	 * Shared default instance of {@code AnnotationAwareOrderComparator}.
 	 */
 	public static final AnnotationAwareOrderComparator INSTANCE = new AnnotationAwareOrderComparator();
 
 
 	/**
-	 * This implementation checks for the {@link Order} annotation
-	 * on various kinds of elements, in addition to the
-	 * {@link org.springframework.core.Ordered} check in the superclass.
+	 * This implementation checks for {@link Order @Order} or
+	 * {@link javax.annotation.Priority @Priority} on various kinds of
+	 * elements, in addition to the {@link org.springframework.core.Ordered}
+	 * check in the superclass.
 	 */
 	protected Integer findOrder(Object obj) {
 		// Check for regular Ordered interface
@@ -59,7 +64,7 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 			return order;
 		}
 
-		// Check for @Order annotation on various kinds of elements
+		// Check for @Order and @Priority on various kinds of elements
 		if (obj instanceof Class) {
 			return OrderUtils.getOrder((Class<?>) obj);
 		}
