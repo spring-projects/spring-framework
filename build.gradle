@@ -39,7 +39,7 @@ configure(allprojects) { project ->
 	ext.hibernate4Version    = "4.3.10.Final"
 	ext.hibernate5Version    = "5.0.0.CR3"
 	ext.hibval4Version       = "4.3.2.Final"
-	ext.hibval5Version       = "5.2.0.Final"
+	ext.hibval5Version       = "5.2.1.Final"
 	ext.hsqldbVersion        = "2.3.2"
 	ext.httpclientVersion    = "4.5"
 	ext.httpasyncVersion     = "4.1"
