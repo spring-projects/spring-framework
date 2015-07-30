@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import static org.junit.Assert.*;
  * Tests use of @EnableScheduling on @Configuration classes.
  *
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 3.1
  */
 public class EnableSchedulingTests {
@@ -49,6 +50,7 @@ public class EnableSchedulingTests {
 	public void setUp() {
 		Assume.group(TestGroup.PERFORMANCE);
 	}
+
 
 	@Test
 	public void withFixedRateTask() throws InterruptedException {
@@ -138,11 +140,16 @@ public class EnableSchedulingTests {
 		ctx.register(AmbiguousExplicitSchedulerConfig.class);
 		try {
 			ctx.refresh();
-		} catch (IllegalStateException ex) {
+		}
+		catch (IllegalStateException ex) {
 			assertThat(ex.getMessage(), startsWith("More than one TaskScheduler"));
 			throw ex;
 		}
+		finally {
+			ctx.close();
+		}
 	}
+
 
 	@EnableScheduling @Configuration
 	static class AmbiguousExplicitSchedulerConfig {
@@ -236,6 +243,7 @@ public class EnableSchedulingTests {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
 		ctx.register(SchedulingEnabled_withAmbiguousTaskSchedulers_butNoActualTasks.class);
 		ctx.refresh();
+		ctx.close();
 	}
 
 
@@ -265,9 +273,13 @@ public class EnableSchedulingTests {
 		ctx.register(SchedulingEnabled_withAmbiguousTaskSchedulers_andSingleTask.class);
 		try {
 			ctx.refresh();
-		} catch (IllegalStateException ex) {
-			assertThat(ex.getMessage(), startsWith("More than one TaskScheduler and/or"));
+		}
+		catch (IllegalStateException ex) {
+			assertThat(ex.getMessage(), startsWith("More than one TaskScheduler"));
 			throw ex;
+		}
+		finally {
+			ctx.close();
 		}
 	}
 
@@ -294,6 +306,7 @@ public class EnableSchedulingTests {
 			return scheduler;
 		}
 	}
+
 
 	@Test
 	public void withAmbiguousTaskSchedulers_andSingleTask_disambiguatedByScheduledTaskRegistrarBean() throws InterruptedException {
@@ -476,6 +489,7 @@ public class EnableSchedulingTests {
 		}
 	}
 
+
 	@Test
 	public void withInitiallyDelayedFixedRateTask() throws InterruptedException {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
@@ -486,8 +500,8 @@ public class EnableSchedulingTests {
 		AtomicInteger counter = ctx.getBean(AtomicInteger.class);
 		ctx.close();
 
-		assertThat(counter.get(), greaterThan(0)); // the @Scheduled method was called
-		assertThat(counter.get(), lessThanOrEqualTo(10)); // but not more than times the delay allows
+		assertThat(counter.get(), greaterThan(0));  // the @Scheduled method was called
+		assertThat(counter.get(), lessThanOrEqualTo(10));  // but not more than times the delay allows
 	}
 
 

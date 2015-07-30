@@ -455,7 +455,9 @@ public abstract class AbstractMethodMessageHandler<T>
 			processHandlerMethodException(handlerMethod, ex, message);
 		}
 		catch (Throwable ex) {
-			logger.error("Error while processing message " + message, ex);
+			if (logger.isErrorEnabled()) {
+				logger.error("Error while processing message " + message, ex);
+			}
 		}
 	}
 
@@ -495,9 +497,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	protected abstract AbstractExceptionHandlerMethodResolver createExceptionHandlerMethodResolverFor(Class<?> beanType);
 
 	protected void handleNoMatch(Set<T> ts, String lookupDestination, Message<?> message) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("No matching methods.");
-		}
+		logger.debug("No matching methods.");
 	}
 
 	@Override

@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -785,7 +785,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 			try {
 				return simpleDateFormat.parse(headerValue).getTime();
 			}
-			catch (ParseException e) {
+			catch (ParseException ex) {
 				// ignore
 			}
 		}
@@ -811,8 +811,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	@Override
 	public String getFirst(String headerName) {
-		List<String> headerValues = headers.get(headerName);
-		return headerValues != null ? headerValues.get(0) : null;
+		List<String> headerValues = this.headers.get(headerName);
+		return (headerValues != null ? headerValues.get(0) : null);
 	}
 
 	/**
@@ -825,7 +825,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	@Override
 	public void add(String headerName, String headerValue) {
-		List<String> headerValues = headers.get(headerName);
+		List<String> headerValues = this.headers.get(headerName);
 		if (headerValues == null) {
 			headerValues = new LinkedList<String>();
 			this.headers.put(headerName, headerValues);
@@ -845,7 +845,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	public void set(String headerName, String headerValue) {
 		List<String> headerValues = new LinkedList<String>();
 		headerValues.add(headerValue);
-		headers.put(headerName, headerValues);
+		this.headers.put(headerName, headerValues);
 	}
 
 	@Override
@@ -858,7 +858,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	@Override
 	public Map<String, String> toSingleValueMap() {
 		LinkedHashMap<String, String> singleValueMap = new LinkedHashMap<String,String>(this.headers.size());
-		for (Entry<String, List<String>> entry : headers.entrySet()) {
+		for (Entry<String, List<String>> entry : this.headers.entrySet()) {
 			singleValueMap.put(entry.getKey(), entry.getValue().get(0));
 		}
 		return singleValueMap;

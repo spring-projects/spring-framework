@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,13 +31,13 @@ import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondit
 /**
  * Encapsulates the following request mapping conditions:
  * <ol>
- * 	<li>{@link PatternsRequestCondition}
- * 	<li>{@link RequestMethodsRequestCondition}
- * 	<li>{@link ParamsRequestCondition}
- * 	<li>{@link HeadersRequestCondition}
- * 	<li>{@link ConsumesRequestCondition}
- * 	<li>{@link ProducesRequestCondition}
- * 	<li>{@code RequestCondition} (optional, custom request condition)
+ * <li>{@link PatternsRequestCondition}
+ * <li>{@link RequestMethodsRequestCondition}
+ * <li>{@link ParamsRequestCondition}
+ * <li>{@link HeadersRequestCondition}
+ * <li>{@link ConsumesRequestCondition}
+ * <li>{@link ProducesRequestCondition}
+ * <li>{@code RequestCondition} (optional, custom request condition)
  * </ol>
  *
  * @author Arjen Poutsma
@@ -266,21 +266,21 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj != null && obj instanceof RequestMappingInfo) {
-			RequestMappingInfo other = (RequestMappingInfo) obj;
-			return (this.patternsCondition.equals(other.patternsCondition) &&
-					this.methodsCondition.equals(other.methodsCondition) &&
-					this.paramsCondition.equals(other.paramsCondition) &&
-					this.headersCondition.equals(other.headersCondition) &&
-					this.consumesCondition.equals(other.consumesCondition) &&
-					this.producesCondition.equals(other.producesCondition) &&
-					this.customConditionHolder.equals(other.customConditionHolder));
+		if (!(other instanceof RequestMappingInfo)) {
+			return false;
 		}
-		return false;
+		RequestMappingInfo otherInfo = (RequestMappingInfo) other;
+		return (this.patternsCondition.equals(otherInfo.patternsCondition) &&
+				this.methodsCondition.equals(otherInfo.methodsCondition) &&
+				this.paramsCondition.equals(otherInfo.paramsCondition) &&
+				this.headersCondition.equals(otherInfo.headersCondition) &&
+				this.consumesCondition.equals(otherInfo.consumesCondition) &&
+				this.producesCondition.equals(otherInfo.producesCondition) &&
+				this.customConditionHolder.equals(otherInfo.customConditionHolder));
 	}
 
 	@Override

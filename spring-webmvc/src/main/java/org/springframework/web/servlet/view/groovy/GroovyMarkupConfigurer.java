@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,7 +46,6 @@ import org.springframework.util.StringUtils;
  *
  * &#64;Bean
  * public GroovyMarkupConfig groovyMarkupConfigurer() {
- *
  *     GroovyMarkupConfigurer configurer = new GroovyMarkupConfigurer();
  *     configurer.setResourceLoaderPath("classpath:/WEB-INF/groovymarkup/");
  *     return configurer;
@@ -79,7 +78,7 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @since 4.1
  * @see GroovyMarkupView
- * @see <a href="http://beta.groovy-lang.org/docs/groovy-2.3.2/html/documentation/markup-template-engine.html">
+ * @see <a href="http://groovy-lang.org/templating.html#_the_markuptemplateengine">
  *     Groovy Markup Template engine documentation</a>
  */
 public class GroovyMarkupConfigurer extends TemplateConfiguration

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,16 +35,16 @@ import org.springframework.messaging.simp.user.DestinationUserNameProvider;
 import org.springframework.messaging.support.MessageHeaderInitializer;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * A {@link HandlerMethodReturnValueHandler} for sending to destinations specified in a
  * {@link SendTo} or {@link SendToUser} method-level annotations.
  *
  * <p>The value returned from the method is converted, and turned to a {@link Message} and
- * sent through the provided {@link MessageChannel}. The
- * message is then enriched with the sessionId of the input message as well as the
- * destination from the annotation(s). If multiple destinations are specified, a copy of
- * the message is sent to each destination.
+ * sent through the provided {@link MessageChannel}. The message is then enriched with the
+ * session id of the input message as well as the destination from the annotation(s).
+ * If multiple destinations are specified, a copy of the message is sent to each destination.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
@@ -108,7 +108,6 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 	/**
 	 * Configure a {@link MessageHeaderInitializer} to apply to the headers of all
 	 * messages sent to the client outbound channel.
-	 *
 	 * <p>By default this property is not set.
 	 */
 	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
@@ -125,8 +124,8 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		if ((returnType.getMethodAnnotation(SendTo.class) != null) ||
-				(returnType.getMethodAnnotation(SendToUser.class) != null)) {
+		if (returnType.getMethodAnnotation(SendTo.class) != null ||
+				returnType.getMethodAnnotation(SendToUser.class) != null) {
 			return true;
 		}
 		return (!this.annotationRequired);
@@ -137,10 +136,11 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 		if (returnValue == null) {
 			return;
 		}
+
 		MessageHeaders headers = message.getHeaders();
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
-
 		SendToUser sendToUser = returnType.getMethodAnnotation(SendToUser.class);
+
 		if (sendToUser != null) {
 			boolean broadcast = sendToUser.broadcast();
 			String user = getUserName(message, headers);
@@ -188,7 +188,9 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 		}
 		String name = DestinationPatternsMessageCondition.LOOKUP_DESTINATION_HEADER;
 		String destination = (String) message.getHeaders().get(name);
-		Assert.hasText(destination, "No lookup destination header in " + message);
+		if (!StringUtils.hasText(destination)) {
+			throw new IllegalStateException("No lookup destination header in " + message);
+		}
 
 		return (destination.startsWith("/") ?
 				new String[] {defaultPrefix + destination} : new String[] {defaultPrefix + "/" + destination});

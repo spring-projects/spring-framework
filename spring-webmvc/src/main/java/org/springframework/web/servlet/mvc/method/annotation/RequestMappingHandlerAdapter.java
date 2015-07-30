@@ -99,13 +99,13 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * An {@link AbstractHandlerMethodAdapter} that supports {@link HandlerMethod}s
- * with the signature -- method argument and return types, defined in
+ * with their method argument and return type signature, as defined via
  * {@code @RequestMapping}.
  *
  * <p>Support for custom argument and return value types can be added via
  * {@link #setCustomArgumentResolvers} and {@link #setCustomReturnValueHandlers}.
- * Or alternatively to re-configure all argument and return value types use
- * {@link #setArgumentResolvers} and {@link #setReturnValueHandlers(List)}.
+ * Or alternatively, to re-configure all argument and return value types,
+ * use {@link #setArgumentResolvers} and {@link #setReturnValueHandlers}.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -697,12 +697,12 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			if (session != null) {
 				Object mutex = WebUtils.getSessionMutex(session);
 				synchronized (mutex) {
-					return invokeHandleMethod(request, response, handlerMethod);
+					return invokeHandlerMethod(request, response, handlerMethod);
 				}
 			}
 		}
 
-		return invokeHandleMethod(request, response, handlerMethod);
+		return invokeHandlerMethod(request, response, handlerMethod);
 	}
 
 	/**
@@ -739,8 +739,8 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * Invoke the {@link RequestMapping} handler method preparing a {@link ModelAndView}
 	 * if view resolution is required.
 	 */
-	private ModelAndView invokeHandleMethod(HttpServletRequest request,
-			HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
+	private ModelAndView invokeHandlerMethod(HttpServletRequest request, HttpServletResponse response,
+			HandlerMethod handlerMethod) throws Exception {
 
 		ServletWebRequest webRequest = new ServletWebRequest(request, response);
 
@@ -756,7 +756,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		AsyncWebRequest asyncWebRequest = WebAsyncUtils.createAsyncWebRequest(request, response);
 		asyncWebRequest.setTimeout(this.asyncRequestTimeout);
 
-		final WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 		asyncManager.setTaskExecutor(this.taskExecutor);
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
 		asyncManager.registerCallableInterceptors(this.callableInterceptors);
@@ -766,7 +766,6 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			Object result = asyncManager.getConcurrentResult();
 			mavContainer = (ModelAndViewContainer) asyncManager.getConcurrentResultContext()[0];
 			asyncManager.clearConcurrentResult();
-
 			if (logger.isDebugEnabled()) {
 				logger.debug("Found concurrent result value [" + result + "]");
 			}
@@ -774,7 +773,6 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		}
 
 		requestMappingMethod.invokeAndHandle(webRequest, mavContainer);
-
 		if (asyncManager.isConcurrentHandlingStarted()) {
 			return null;
 		}

@@ -129,6 +129,7 @@ public class AntPathMatcher implements PathMatcher {
 	 * turn it off when encountering too many patterns to cache at runtime
 	 * (the threshold is 65536), assuming that arbitrary permutations of patterns
 	 * are coming in, with little chance for encountering a recurring pattern.
+	 * @since 4.0.1
 	 * @see #getStringMatcher(String)
 	 */
 	public void setCachePatterns(boolean cachePatterns) {
@@ -413,18 +414,18 @@ public class AntPathMatcher implements PathMatcher {
 	public Map<String, String> extractUriTemplateVariables(String pattern, String path) {
 		Map<String, String> variables = new LinkedHashMap<String, String>();
 		boolean result = doMatch(pattern, path, true, variables);
-		Assert.state(result, "Pattern \"" + pattern + "\" is not a match for \"" + path + "\"");
+		if (!result) {
+			throw new IllegalStateException("Pattern \"" + pattern + "\" is not a match for \"" + path + "\"");
+		}
 		return variables;
 	}
 
 	/**
 	 * Combine two patterns into a new pattern.
-	 *
 	 * <p>This implementation simply concatenates the two patterns, unless
 	 * the first pattern contains a file extension match (e.g., {@code *.html}).
 	 * In that case, the second pattern will be merged into the first. Otherwise,
 	 * an {@code IllegalArgumentException} will be thrown.
-	 *
 	 * <h3>Examples</h3>
 	 * <table border="1">
 	 * <tr><th>Pattern 1</th><th>Pattern 2</th><th>Result</th></tr>
@@ -442,7 +443,6 @@ public class AntPathMatcher implements PathMatcher {
 	 * <tr><td>/*.html</td><td>/hotels</td><td>/hotels.html</td></tr>
 	 * <tr><td>/*.html</td><td>/*.txt</td><td>{@code IllegalArgumentException}</td></tr>
 	 * </table>
-	 *
 	 * @param pattern1 the first pattern
 	 * @param pattern2 the second pattern
 	 * @return the combination of the two patterns
@@ -484,6 +484,7 @@ public class AntPathMatcher implements PathMatcher {
 			// simply concatenate the two patterns
 			return concat(pattern1, pattern2);
 		}
+
 		String extension1 = pattern1.substring(starDotPos1 + 1);
 		int dotPos2 = pattern2.indexOf('.');
 		String fileName2 = (dotPos2 == -1 ? pattern2 : pattern2.substring(0, dotPos2));
@@ -508,14 +509,18 @@ public class AntPathMatcher implements PathMatcher {
 	}
 
 	/**
-	 * Given a full path, returns a {@link Comparator} suitable for sorting patterns in order of explicitness.
-	 * <p>The returned {@code Comparator} will {@linkplain java.util.Collections#sort(java.util.List,
-	 * java.util.Comparator) sort} a list so that more specific patterns (without uri templates or wild cards) come before
-	 * generic patterns. So given a list with the following patterns: <ol> <li>{@code /hotels/new}</li>
-	 * <li>{@code /hotels/{hotel}}</li> <li>{@code /hotels/*}</li> </ol> the returned comparator will sort this
-	 * list so that the order will be as indicated.
-	 * <p>The full path given as parameter is used to test for exact matches. So when the given path is {@code /hotels/2},
-	 * the pattern {@code /hotels/2} will be sorted before {@code /hotels/1}.
+	 * Given a full path, returns a {@link Comparator} suitable for sorting patterns in order of
+	 * explicitness.
+	 * <p>This{@code Comparator} will {@linkplain java.util.Collections#sort(List, Comparator) sort}
+	 * a list so that more specific patterns (without uri templates or wild cards) come before
+	 * generic patterns. So given a list with the following patterns:
+	 * <ol>
+	 * <li>{@code /hotels/new}</li>
+	 * <li>{@code /hotels/{hotel}}</li> <li>{@code /hotels/*}</li>
+	 * </ol>
+	 * the returned comparator will sort this list so that the order will be as indicated.
+	 * <p>The full path given as parameter is used to test for exact matches. So when the given path
+	 * is {@code /hotels/2}, the pattern {@code /hotels/2} will be sorted before {@code /hotels/1}.
 	 * @param path the full path to use for comparison
 	 * @return a comparator capable of sorting patterns in order of explicitness
 	 */
@@ -542,11 +547,11 @@ public class AntPathMatcher implements PathMatcher {
 
 		public AntPathStringMatcher(String pattern) {
 			StringBuilder patternBuilder = new StringBuilder();
-			Matcher m = GLOB_PATTERN.matcher(pattern);
+			Matcher matcher = GLOB_PATTERN.matcher(pattern);
 			int end = 0;
-			while (m.find()) {
-				patternBuilder.append(quote(pattern, end, m.start()));
-				String match = m.group();
+			while (matcher.find()) {
+				patternBuilder.append(quote(pattern, end, matcher.start()));
+				String match = matcher.group();
 				if ("?".equals(match)) {
 					patternBuilder.append('.');
 				}
@@ -557,7 +562,7 @@ public class AntPathMatcher implements PathMatcher {
 					int colonIdx = match.indexOf(':');
 					if (colonIdx == -1) {
 						patternBuilder.append(DEFAULT_VARIABLE_PATTERN);
-						this.variableNames.add(m.group(1));
+						this.variableNames.add(matcher.group(1));
 					}
 					else {
 						String variablePattern = match.substring(colonIdx + 1, match.length() - 1);
@@ -568,7 +573,7 @@ public class AntPathMatcher implements PathMatcher {
 						this.variableNames.add(variableName);
 					}
 				}
-				end = m.end();
+				end = matcher.end();
 			}
 			patternBuilder.append(quote(pattern, end, pattern.length()));
 			this.pattern = Pattern.compile(patternBuilder.toString());
@@ -590,10 +595,12 @@ public class AntPathMatcher implements PathMatcher {
 			if (matcher.matches()) {
 				if (uriTemplateVariables != null) {
 					// SPR-8455
-					Assert.isTrue(this.variableNames.size() == matcher.groupCount(),
-							"The number of capturing groups in the pattern segment " + this.pattern +
-							" does not match the number of URI template variables it defines, which can occur if " +
-							" capturing groups are used in a URI template regex. Use non-capturing groups instead.");
+					if (this.variableNames.size() != matcher.groupCount()) {
+						throw new IllegalArgumentException("The number of capturing groups in the pattern segment " +
+								this.pattern + " does not match the number of URI template variables it defines, " +
+								"which can occur if capturing groups are used in a URI template regex. " +
+								"Use non-capturing groups instead.");
+					}
 					for (int i = 1; i <= matcher.groupCount(); i++) {
 						String name = this.variableNames.get(i - 1);
 						String value = matcher.group(i);

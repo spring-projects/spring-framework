@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,8 @@ import org.springframework.jms.support.destination.DynamicDestinationResolver;
 import org.springframework.util.Assert;
 
 /**
- * An abstract {@link MessageListener} adapter providing the necessary infrastructure
- * to extract the payload of a {@link Message}
+ * An abstract JMS {@link MessageListener} adapter providing the necessary
+ * infrastructure to extract the payload of a JMS {@link Message}.
  *
  * @author Juergen Hoeller
  * @author Stephane Nicoll
@@ -217,7 +217,7 @@ public abstract class AbstractAdaptableMessageListener
 			return message;
 		}
 		catch (JMSException ex) {
-			throw new MessageConversionException("Could not unmarshal message", ex);
+			throw new MessageConversionException("Could not convert JMS message", ex);
 		}
 	}
 
@@ -246,10 +246,12 @@ public abstract class AbstractAdaptableMessageListener
 				sendResponse(session, destination, response);
 			}
 			catch (Exception ex) {
-				throw new ReplyFailureException("Failed to send reply with payload '" + result + "'", ex);
+				throw new ReplyFailureException("Failed to send reply with payload [" + result + "]", ex);
 			}
 		}
+
 		else {
+			// No JMS Session available
 			if (logger.isWarnEnabled()) {
 				logger.warn("Listener method returned result [" + result +
 						"]: not generating response message for it because of no JMS Session given");

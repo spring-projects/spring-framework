@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -127,7 +127,6 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 
-
 	/**
 	 * Whether to use suffix pattern matching.
 	 */
@@ -229,7 +228,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
-	 * Created a RequestMappingInfo from a RequestMapping annotation.
+	 * Create a {@link RequestMappingInfo} from the supplied
+	 * {@link RequestMapping @RequestMapping} annotation.
 	 */
 	protected RequestMappingInfo createRequestMappingInfo(RequestMapping annotation, RequestCondition<?> customCondition) {
 		String[] patterns = resolveEmbeddedValuesInPatterns(annotation.value());
