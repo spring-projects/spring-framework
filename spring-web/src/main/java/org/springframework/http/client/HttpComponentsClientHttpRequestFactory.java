@@ -53,6 +53,7 @@ import org.springframework.util.Assert;
  * @author Oleg Kalnichevski
  * @author Arjen Poutsma
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 3.1
  */
 public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequestFactory, DisposableBean {
@@ -109,8 +110,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 */
 	public void setConnectTimeout(int timeout) {
 		Assert.isTrue(timeout >= 0, "Timeout must be a non-negative value");
-		this.requestConfig = cloneRequestConfig()
-				.setConnectTimeout(timeout).build();
+		this.requestConfig = requestConfigBuilder().setConnectTimeout(timeout).build();
 		setLegacyConnectionTimeout(getHttpClient(), timeout);
 	}
 
@@ -131,8 +131,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	@SuppressWarnings("deprecation")
 	private void setLegacyConnectionTimeout(HttpClient client, int timeout) {
 		if (org.apache.http.impl.client.AbstractHttpClient.class.isInstance(client)) {
-			client.getParams().setIntParameter(
-					org.apache.http.params.CoreConnectionPNames.CONNECTION_TIMEOUT, timeout);
+			client.getParams().setIntParameter(org.apache.http.params.CoreConnectionPNames.CONNECTION_TIMEOUT, timeout);
 		}
 	}
 
@@ -146,8 +145,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * @see RequestConfig#getConnectionRequestTimeout()
 	 */
 	public void setConnectionRequestTimeout(int connectionRequestTimeout) {
-		this.requestConfig = cloneRequestConfig()
-				.setConnectionRequestTimeout(connectionRequestTimeout).build();
+		this.requestConfig = requestConfigBuilder().setConnectionRequestTimeout(connectionRequestTimeout).build();
 	}
 
 	/**
@@ -160,8 +158,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 */
 	public void setReadTimeout(int timeout) {
 		Assert.isTrue(timeout >= 0, "Timeout must be a non-negative value");
-		this.requestConfig = cloneRequestConfig()
-				.setSocketTimeout(timeout).build();
+		this.requestConfig = requestConfigBuilder().setSocketTimeout(timeout).build();
 		setLegacySocketTimeout(getHttpClient(), timeout);
 	}
 
@@ -175,13 +172,8 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	@SuppressWarnings("deprecation")
 	private void setLegacySocketTimeout(HttpClient client, int timeout) {
 		if (org.apache.http.impl.client.AbstractHttpClient.class.isInstance(client)) {
-			client.getParams().setIntParameter(
-					org.apache.http.params.CoreConnectionPNames.SO_TIMEOUT, timeout);
+			client.getParams().setIntParameter(org.apache.http.params.CoreConnectionPNames.SO_TIMEOUT, timeout);
 		}
-	}
-
-	private RequestConfig.Builder cloneRequestConfig() {
-		return this.requestConfig != null ? RequestConfig.copy(this.requestConfig) : RequestConfig.custom();
 	}
 
 	/**
@@ -226,17 +218,27 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		}
 	}
 
+
+	/**
+	 * Return a builder for modifying the factory-level {@link RequestConfig}.
+	 * @since 4.2
+	 */
+	private RequestConfig.Builder requestConfigBuilder() {
+		return (this.requestConfig != null ? RequestConfig.copy(this.requestConfig) : RequestConfig.custom());
+	}
+
 	/**
 	 * Create a default {@link RequestConfig} to use with the given client.
 	 * Can return {@code null} to indicate that no custom request config should
 	 * be set and the defaults of the {@link HttpClient} should be used.
 	 * <p>The default implementation tries to merge the defaults of the client
-	 * with the local customizations of this instance, if any.
-	 * @param client the client
-	 * @return the RequestConfig to use
+	 * with the local customizations of this factory instance, if any.
+	 * @param client the {@link HttpClient} (or {@code HttpAsyncClient}) to check
+	 * @return the actual RequestConfig to use (may be {@code null})
 	 * @since 4.2
+	 * @see #mergeRequestConfig(RequestConfig)
 	 */
-	protected RequestConfig createRequestConfig(HttpClient client) {
+	protected RequestConfig createRequestConfig(Object client) {
 		if (client instanceof Configurable) {
 			RequestConfig clientRequestConfig = ((Configurable) client).getConfig();
 			return mergeRequestConfig(clientRequestConfig);
@@ -244,11 +246,20 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		return this.requestConfig;
 	}
 
-	protected RequestConfig mergeRequestConfig(RequestConfig defaultRequestConfig) {
-		if (this.requestConfig == null) { // nothing to merge
-			return defaultRequestConfig;
+	/**
+	 * Merge the given {@link HttpClient}-level {@link RequestConfig} with
+	 * the factory-level {@link RequestConfig}, if necessary.
+	 * @param clientConfig the config held by the current
+	 * @return the merged request config
+	 * (may be {@code null} if the given client config is {@code null})
+	 * @since 4.2
+	 */
+	protected RequestConfig mergeRequestConfig(RequestConfig clientConfig) {
+		if (this.requestConfig == null) {  // nothing to merge
+			return clientConfig;
 		}
-		RequestConfig.Builder builder = RequestConfig.copy(defaultRequestConfig);
+
+		RequestConfig.Builder builder = RequestConfig.copy(clientConfig);
 		int connectTimeout = this.requestConfig.getConnectTimeout();
 		if (connectTimeout >= 0) {
 			builder.setConnectTimeout(connectTimeout);
@@ -262,10 +273,6 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 			builder.setSocketTimeout(socketTimeout);
 		}
 		return builder.build();
-	}
-
-	protected final RequestConfig getInternalRequestConfig() {
-		return this.requestConfig;
 	}
 
 	/**

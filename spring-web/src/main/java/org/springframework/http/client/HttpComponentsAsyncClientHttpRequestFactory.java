@@ -65,7 +65,7 @@ public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsC
 	 */
 	public HttpComponentsAsyncClientHttpRequestFactory(CloseableHttpAsyncClient httpAsyncClient) {
 		super();
-		Assert.notNull(httpAsyncClient, "'httpAsyncClient' must not be null");
+		Assert.notNull(httpAsyncClient, "HttpAsyncClient must not be null");
 		this.httpAsyncClient = httpAsyncClient;
 	}
 
@@ -79,7 +79,7 @@ public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsC
 			CloseableHttpClient httpClient, CloseableHttpAsyncClient httpAsyncClient) {
 
 		super(httpClient);
-		Assert.notNull(httpAsyncClient, "'httpAsyncClient' must not be null");
+		Assert.notNull(httpAsyncClient, "HttpAsyncClient must not be null");
 		this.httpAsyncClient = httpAsyncClient;
 	}
 
@@ -138,24 +138,6 @@ public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsC
 			}
 		}
 		return new HttpComponentsAsyncClientHttpRequest(asyncClient, httpRequest, context);
-	}
-
-	/**
-	 * Create a default {@link RequestConfig} to use with the given client.
-	 * Can return {@code null} to indicate that no custom request config should
-	 * be set and the defaults of the {@link HttpAsyncClient} should be used.
-	 * <p>The default implementation tries to merge the defaults of the client
-	 * with the local customizations of this instance, if any.
-	 * @param client the client
-	 * @return the RequestConfig to use
-	 * @since 4.2
-	 */
-	protected RequestConfig createRequestConfig(HttpAsyncClient client) {
-		if (client instanceof Configurable) {
-			RequestConfig clientRequestConfig = ((Configurable) client).getConfig();
-			return mergeRequestConfig(clientRequestConfig);
-		}
-		return getInternalRequestConfig();
 	}
 
 	@Override
