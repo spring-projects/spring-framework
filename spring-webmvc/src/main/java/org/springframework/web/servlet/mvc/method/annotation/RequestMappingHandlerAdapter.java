@@ -109,6 +109,7 @@ import org.springframework.web.util.WebUtils;
  * {@link #setArgumentResolvers} and {@link #setReturnValueHandlers(List)}.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.1
  * @see HandlerMethodArgumentResolver
  * @see HandlerMethodReturnValueHandler
@@ -720,12 +721,12 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			if (session != null) {
 				Object mutex = WebUtils.getSessionMutex(session);
 				synchronized (mutex) {
-					return invokeHandleMethod(request, response, handlerMethod);
+					return invokeHandlerMethod(request, response, handlerMethod);
 				}
 			}
 		}
 
-		return invokeHandleMethod(request, response, handlerMethod);
+		return invokeHandlerMethod(request, response, handlerMethod);
 	}
 
 	/**
@@ -761,25 +762,32 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	/**
 	 * Invoke the {@link RequestMapping} handler method preparing a {@link ModelAndView}
 	 * if view resolution is required.
+	 * @since 4.2
+	 * @see #createInvocableHandlerMethod(HandlerMethod)
 	 */
-	private ModelAndView invokeHandleMethod(HttpServletRequest request,
+	protected ModelAndView invokeHandlerMethod(HttpServletRequest request,
 			HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
 
 		ServletWebRequest webRequest = new ServletWebRequest(request, response);
 
 		WebDataBinderFactory binderFactory = getDataBinderFactory(handlerMethod);
 		ModelFactory modelFactory = getModelFactory(handlerMethod, binderFactory);
-		ServletInvocableHandlerMethod requestMappingMethod = createRequestMappingMethod(handlerMethod, binderFactory);
+
+		ServletInvocableHandlerMethod invocableMethod = createInvocableHandlerMethod(handlerMethod);
+		invocableMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
+		invocableMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
+		invocableMethod.setDataBinderFactory(binderFactory);
+		invocableMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
 
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 		mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));
-		modelFactory.initModel(webRequest, mavContainer, requestMappingMethod);
+		modelFactory.initModel(webRequest, mavContainer, invocableMethod);
 		mavContainer.setIgnoreDefaultModelOnRedirect(this.ignoreDefaultModelOnRedirect);
 
 		AsyncWebRequest asyncWebRequest = WebAsyncUtils.createAsyncWebRequest(request, response);
 		asyncWebRequest.setTimeout(this.asyncRequestTimeout);
 
-		final WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
+		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
 		asyncManager.setTaskExecutor(this.taskExecutor);
 		asyncManager.setAsyncWebRequest(asyncWebRequest);
 		asyncManager.registerCallableInterceptors(this.callableInterceptors);
@@ -789,15 +797,13 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			Object result = asyncManager.getConcurrentResult();
 			mavContainer = (ModelAndViewContainer) asyncManager.getConcurrentResultContext()[0];
 			asyncManager.clearConcurrentResult();
-
 			if (logger.isDebugEnabled()) {
 				logger.debug("Found concurrent result value [" + result + "]");
 			}
-			requestMappingMethod = requestMappingMethod.wrapConcurrentResult(result);
+			invocableMethod = invocableMethod.wrapConcurrentResult(result);
 		}
 
-		requestMappingMethod.invokeAndHandle(webRequest, mavContainer);
-
+		invocableMethod.invokeAndHandle(webRequest, mavContainer);
 		if (asyncManager.isConcurrentHandlingStarted()) {
 			return null;
 		}
@@ -805,16 +811,14 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		return getModelAndView(mavContainer, modelFactory, webRequest);
 	}
 
-	private ServletInvocableHandlerMethod createRequestMappingMethod(
-			HandlerMethod handlerMethod, WebDataBinderFactory binderFactory) {
-
-		ServletInvocableHandlerMethod requestMethod;
-		requestMethod = new ServletInvocableHandlerMethod(handlerMethod);
-		requestMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
-		requestMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
-		requestMethod.setDataBinderFactory(binderFactory);
-		requestMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
-		return requestMethod;
+	/**
+	 * Create a {@link ServletInvocableHandlerMethod} from the given {@link HandlerMethod} definition.
+	 * @param handlerMethod the {@link HandlerMethod} definition
+	 * @return the corresponding {@link ServletInvocableHandlerMethod} (or custom subclass thereof)
+	 * @since 4.2
+	 */
+	protected ServletInvocableHandlerMethod createInvocableHandlerMethod(HandlerMethod handlerMethod) {
+		return new ServletInvocableHandlerMethod(handlerMethod);
 	}
 
 	private ModelFactory getModelFactory(HandlerMethod handlerMethod, WebDataBinderFactory binderFactory) {
