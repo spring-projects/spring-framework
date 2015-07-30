@@ -30,11 +30,23 @@ import org.springframework.http.HttpStatus;
  * {@link #reason} that should be returned.
  *
  * <p>The status code is applied to the HTTP response when the handler
- * method is invoked, or whenever said exception is thrown.
+ * method is invoked.
+ *
+ * <p><strong>Note:</strong> when using this annotation on an exception class,
+ * or when setting the {@code reason} attribute of the annotation,
+ * the {@code HttpServletResponse.sendError} method will be used.
+ *
+ * With {@code HttpServletResponse.sendError}, the response is considered
+ * complete and should not be written to any further.
+ * Furthermore servlet container will typically write an HTML error page
+ * therefore making the use of a reason unsuitable for REST APIs.
+ * For such cases prefer the use of {@link org.springframework.http.ResponseEntity}
+ * as a return type and avoid {@code ResponseStatus} altogether.
  *
  * @author Arjen Poutsma
  * @author Sam Brannen
  * @see org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver
+ * @see javax.servlet.http.HttpServletResponse#sendError(int, String)
  * @since 3.0
  */
 @Target({ElementType.TYPE, ElementType.METHOD})
@@ -54,18 +66,13 @@ public @interface ResponseStatus {
 	 * typically be changed to something more appropriate.
 	 * @since 4.2
 	 * @see javax.servlet.http.HttpServletResponse#setStatus(int)
+	 * @see javax.servlet.http.HttpServletResponse#sendError(int)
 	 */
 	@AliasFor("value")
 	HttpStatus code() default HttpStatus.INTERNAL_SERVER_ERROR;
 
 	/**
 	 * The <em>reason</em> to be used for the response.
-	 * <p><strong>Note:</strong> due to the use of
-	 * {@code HttpServletResponse.sendError(int, String)}, the response will be
-	 * considered complete and should not be written to any further. Furthermore
-	 * servlet container will typically write an HTML error page therefore making
-	 * the use of a reason unsuitable for REST APIs. For such cases prefer
-	 * sending error details in the body of the response.
 	 * @see javax.servlet.http.HttpServletResponse#sendError(int, String)
 	 */
 	String reason() default "";

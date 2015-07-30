@@ -57,6 +57,7 @@ public class ResponseStatusExceptionResolverTests {
 		assertNotNull("No ModelAndView returned", mav);
 		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
 		assertEquals("Invalid status code", 400, response.getStatus());
+		assertTrue("Response has not been committed", response.isCommitted());
 	}
 
 	@Test
@@ -67,6 +68,7 @@ public class ResponseStatusExceptionResolverTests {
 		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
 		assertEquals("Invalid status code", 410, response.getStatus());
 		assertEquals("Invalid status reason", "You suck!", response.getErrorMessage());
+		assertTrue("Response has not been committed", response.isCommitted());
 	}
 
 	@Test
