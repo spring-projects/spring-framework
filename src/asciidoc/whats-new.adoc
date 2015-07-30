@@ -478,7 +478,10 @@ public @interface MyTestConfig {
 * `@NumberFormat` can now be used as a meta-annotation.
 * `JavaMailSenderImpl` has a new `testConnection()` method for checking connectivity to the server.
 * `ScheduledTaskRegistrar` exposes scheduled tasks.
-* Apache `commons-pool2` is now supported.
+* Apache `commons-pool2` is now supported for a pooling AOP `CommonsPool2TargetSource`.
+* Introduced `StandardScriptFactory` as a JSR-223 based mechanism for scripted beans,
+  exposed through the `lang:std` element in XML. Supports e.g. JavaScript and JRuby.
+  (Note: JRubyScriptFactory and `lang:jruby` are deprecated now, in favor of using JSR-223.)
 
 === Data Access Improvements
 
@@ -505,13 +508,14 @@ public @interface MyTestConfig {
 * Built-in support for CORS including global (MVC Java config and XML namespace) and
   local (e.g. `@CrossOrigin`) configuration. See <<cors>> for details.
 * HTTP caching updates:
-** new `CacheControl` builder; plug into `WebContentGenerator`, `ResourceHttpRequestHandler`, `ResponseEntity`.
+** new `CacheControl` builder; plugged into `ResponseEntity`, `WebContentGenerator`,
+   `ResourceHttpRequestHandler`.
 ** improved ETag/Last-Modified support in `WebRequest`.
-* JavaScript view templating built on Nashorn and JDK 1.8, see `ScriptTemplateViewResolver`.
-* Custom `@RequestMapping` annotations.
-* Public methods in `AbstractHandlerMethodMapping` to register and unregister request mappings at runtime.
-* New `RequestBodyAdvice` extension point and a built-in implementation to support Jackson's `@JsonView`
-  on `@RequestBody` method arguments.
+* Custom mapping annotations, using `@RequestMapping` as a meta-annotation.
+* Public methods in `AbstractHandlerMethodMapping` to register and unregister request
+  mappings at runtime.
+* Protected `createDispatcherServlet` method in `AbstractDispatcherServletInitializer` to
+  further customize the `DispatcherServlet` instance to use.
 * `HandlerMethod` as a method argument on `@ExceptionHandler` methods, especially
   handy in `@ControllerAdvice` components.
 * `java.util.concurrent.CompletableFuture` as an `@Controller` method return value type.
@@ -523,11 +527,13 @@ public @interface MyTestConfig {
 * http://square.github.io/okhttp/[OkHTTP] integration with the `RestTemplate`.
 * Custom `baseUrl` alternative for methods in `MvcUriComponentsBuilder`.
 * Serialization/deserialization exception messages are now logged at WARN level.
+* Default JSON prefix has been changed from "{} && " to the safer ")]}', " one.
+* New `RequestBodyAdvice` extension point and built-in implementation to support Jackson's
+  `@JsonView` on `@RequestBody` method arguments.
 * When using GSON or Jackson 2.6+, the handler method return type is used to improve
   serialization of parameterized types like `List<Foo>`.
-* Default JSON prefix has been changed from "{} && " to the safer ")]}', " one.
-* Protected `createDispatcherServlet` method in `AbstractDispatcherServletInitializer` to further
-  customize the `DispatcherServlet` instance to use.
+* Introduced `ScriptTemplateView` as a JSR-223 based mechanism for scripted web views,
+  with a focus on JavaScript view templating on Nashorn (JDK 8).
 
 === WebSocket Messaging Improvements
 
