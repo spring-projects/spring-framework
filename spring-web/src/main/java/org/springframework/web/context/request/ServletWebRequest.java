@@ -17,12 +17,10 @@
 package org.springframework.web.context.request;
 
 import java.security.Principal;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -40,7 +38,6 @@ import org.springframework.web.util.WebUtils;
  * @author Juergen Hoeller
  * @author Brian Clozel
  * @author Markus Malkusch
- *
  * @since 2.0
  */
 public class ServletWebRequest extends ServletRequestAttributes implements NativeWebRequest {

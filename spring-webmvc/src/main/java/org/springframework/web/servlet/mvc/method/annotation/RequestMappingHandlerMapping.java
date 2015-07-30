@@ -133,6 +133,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		super.afterPropertiesSet();
 	}
 
+
 	/**
 	 * Whether to use suffix pattern matching.
 	 */

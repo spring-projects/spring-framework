@@ -239,6 +239,7 @@ public class EnableAsyncTests {
 	@Configuration
 	@EnableAsync(mode = AdviceMode.ASPECTJ)
 	static class AspectJAsyncAnnotationConfig {
+
 		@Bean
 		public AsyncBean asyncBean() {
 			return new AsyncBean();
@@ -276,7 +277,7 @@ public class EnableAsyncTests {
 
 		@Override
 		public AsyncUncaughtExceptionHandler getAsyncUncaughtExceptionHandler() {
-			 return exceptionHandler();
+			return exceptionHandler();
 		}
 
 		@Bean

@@ -144,6 +144,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 		if (returnValue == null) {
 			return;
 		}
+
 		MessageHeaders headers = message.getHeaders();
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 		PlaceholderResolver varResolver = initVarResolver(headers);
