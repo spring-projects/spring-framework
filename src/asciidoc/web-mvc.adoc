@@ -627,7 +627,7 @@ to narrow the mapping.
 
 
 [[mvc-ann-requestmapping-proxying]]
-==== ++@Controller++'s and AOP Proxying
+==== @Controller and AOP Proxying
 
 In some cases a controller may need to be decorated with an AOP proxy at runtime.
 One example is if you choose to have `@Transactional` annotations directly on the
@@ -1910,7 +1910,8 @@ which case they apply to matching controllers. This provides an alternative to u
 
 
 [[mvc-ann-controller-advice]]
-==== Advising controllers with the `@ControllerAdvice` annotation
+==== Advising controllers with @ControllerAdvice
+
 The `@ControllerAdvice` annotation is a component annotation allowing implementation
 classes to be auto-detected through classpath scanning. It is automatically enabled when
 using the MVC namespace or the MVC Java config.
@@ -2515,11 +2516,6 @@ writes to and commits the response before `postHandle` is called which makes it 
 to change the response, for example to add a header. Instead an application can implement
 `ResponseBodyAdvice` and either declare it as an `@ControllerAdvice` bean or configure it
 directly on `RequestMappingHandlerAdapter`.
-
-
-
-
-
 
 
 

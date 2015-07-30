@@ -1554,7 +1554,7 @@ the TCP connection is established is different from the host providing the
 cloud-based STOMP service.
 
 [[websocket-stomp-destination-separator]]
-=== Using Dot as Separator in `@MessageMapping` Destinations
+=== Using Dot as Separator in @MessageMapping Destinations
 
 Although slash-separated path patterns are familiar to web developers, in messaging
 it is common to use a "." as the separator, for example in the names of topics, queues,

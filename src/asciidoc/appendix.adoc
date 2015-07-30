@@ -30,7 +30,7 @@ For the currently recommended usage patterns for Hibernate see <<orm-hibernate>>
 
 
 [[orm-hibernate-template]]
-===== the HibernateTemplate
+===== The HibernateTemplate
 
 The basic programming model for templating looks as follows, for methods that can be
 part of any custom data access object or business service. There are no restrictions on

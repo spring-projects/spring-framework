@@ -96,7 +96,7 @@ then combine attributes from both annotations to create merged CORS configuratio
 @RequestMapping("/account")
 public class AccountController {
 
-	@CrossOrigin(origins = "http://domain2.com")
+	@CrossOrigin("http://domain2.com")
 	@RequestMapping("/{id}")
 	public Account retrieve(@PathVariable Long id) {
 		// ...
