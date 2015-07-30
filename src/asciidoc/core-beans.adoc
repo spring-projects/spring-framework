@@ -5048,10 +5048,10 @@ supported as a marker for automatic exception translation in your persistence la
 [[beans-meta-annotations]]
 === Meta-annotations
 
-Many of the annotations provided by Spring can be used as "meta-annotations" in
-your own code. A meta-annotation is simply an annotation that can be applied to another
+Many of the annotations provided by Spring can be used as __meta-annotations__ in your
+own code. A meta-annotation is simply an annotation that can be applied to another
 annotation. For example, the `@Service` annotation mentioned above is meta-annotated with
-with `@Component`:
+`@Component`:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -5063,36 +5063,56 @@ with `@Component`:
 	public @interface Service {
 
 		// ....
-
 	}
 ----
 
-Meta-annotations can also be combined together to create __composed annotations__. For
-example, the `@RestController` annotation from Spring MVC is __composed__ of
-`@Controller` and `@ResponseBody`.
+Meta-annotations can also be combined to create __composed annotations__. For example,
+the `@RestController` annotation from Spring MVC is __composed__ of `@Controller` and
+`@ResponseBody`.
 
-With the exception of the `value` attribute, composed annotations may redeclare
-attributes from meta-annotations to allow user customization. This can be particularly
-useful when you want to only expose a subset of the meta-annotation's attributes. For
-example, here is a custom `@Scope` annotation that hardcodes the scope name to `session`
-but still allows customization of the `proxyMode`.
-
+In addition, composed annotations may optionally redeclare attributes from
+meta-annotations to allow user customization. This can be particularly useful when you
+want to only expose a subset of the meta-annotation's attributes. For example, the
+following is a custom `@Scope` annotation that hardcodes the scope name to `session` but
+still allows customization of the `proxyMode`.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Target({ElementType.TYPE})
+	@Target(ElementType.TYPE)
 	@Retention(RetentionPolicy.RUNTIME)
-	@Documented
 	**@Scope("session")**
 	public @interface SessionScope {
 
-		ScopedProxyMode proxyMode() default ScopedProxyMode.DEFAULT
-
+		ScopedProxyMode proxyMode() default ScopedProxyMode.DEFAULT;
 	}
 ----
 
+`@SessionScope` can then be used without declaring the `proxyMode` as follows:
 
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Service
+	**@SessionScope**
+	public class SessionScopedUserService implements UserService {
+		// ...
+	}
+----
+
+Or with an overridden value for the `proxyMode` as follows:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Service
+	**@SessionScope(proxyMode = ScopedProxyMode.TARGET_CLASS)**
+	public class SessionScopedService {
+		// ...
+	}
+----
+
+For further details, consult the <<annotation-programming-model,Spring Annotation Programming Model>>.
 
 
 [[beans-scanning-autodetection]]

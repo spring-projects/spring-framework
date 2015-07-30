@@ -7,6 +7,12 @@ Migration guides for upgrading from previous releases of the Spring Framework ar
 https://github.com/spring-projects/spring-framework/wiki/Migrating-from-earlier-versions-of-the-spring-framework[Wiki page].
 
 
+[[annotation-programming-model]]
+== Spring Annotation Programming Model
+Spring's annotation programming model is documented in the
+https://github.com/spring-projects/spring-framework/wiki/Spring-Annotation-Programming-Model[Spring Framework Wiki].
+
+
 [[classic-spring]]
 == Classic Spring Usage
 This appendix discusses some classic Spring usage patterns as a reference for developers

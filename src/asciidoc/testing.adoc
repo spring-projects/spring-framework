@@ -1199,6 +1199,7 @@ configuration of individual test classes as follows:
 	public class UserRepositoryTests { }
 ----
 
+For further details, consult the <<annotation-programming-model,Spring Annotation Programming Model>>.
 
 
 [[testcontext-framework]]
