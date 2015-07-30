@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.util;
 
 import java.net.URI;
@@ -41,12 +42,10 @@ public class DefaultUriTemplateHandler implements UriTemplateHandler {
 	 * have a scheme and host but may also contain a port and a partial path.
 	 * Individual URI templates then may provide the remaining part of the URL
 	 * including additional path, query and fragment.
-	 *
 	 * <p><strong>Note: </strong>Individual URI templates are expanded and
 	 * encoded before being appended to the base URL. Therefore the base URL is
 	 * expected to be fully expanded and encoded, which can be done with the help
 	 * of {@link UriComponentsBuilder}.
-	 *
 	 * @param baseUrl the base URL.
 	 */
 	public void setBaseUrl(String baseUrl) {

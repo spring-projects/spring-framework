@@ -112,4 +112,5 @@ public class OkHttpClientHttpRequestFactory
 			this.client.getDispatcher().getExecutorService().shutdown();
 		}
 	}
+
 }

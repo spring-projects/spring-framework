@@ -19,7 +19,6 @@ package org.springframework.web.filter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
-
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -144,8 +143,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	protected boolean isEligibleForEtag(HttpServletRequest request, HttpServletResponse response,
 			int responseStatusCode, InputStream inputStream) {
 
-		if (responseStatusCode >= 200 && responseStatusCode < 300 &&
-				HttpMethod.GET.name().equals(request.getMethod())) {
+		if (responseStatusCode >= 200 && responseStatusCode < 300 && HttpMethod.GET.name().equals(request.getMethod())) {
 			String cacheControl = (responseGetHeaderAvailable ? response.getHeader(HEADER_CACHE_CONTROL) : null);
 			if (cacheControl == null || !cacheControl.contains(DIRECTIVE_NO_STORE)) {
 				return true;
@@ -173,6 +171,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 		return builder.toString();
 	}
 
+
 	/**
 	 * This method can be used to disable the content caching response wrapper
 	 * of the ShallowEtagHeaderFilter. This can be done before the start of HTTP
@@ -194,10 +193,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 
 		private final HttpServletRequest request;
 
-
-		public HttpStreamingAwareContentCachingResponseWrapper(HttpServletResponse response,
-				HttpServletRequest request) {
-
+		public HttpStreamingAwareContentCachingResponseWrapper(HttpServletResponse response, HttpServletRequest request) {
 			super(response);
 			this.request = request;
 		}

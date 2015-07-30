@@ -360,6 +360,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			String handlerName = (String) handler;
 			handler = getApplicationContext().getBean(handlerName);
 		}
+
 		HandlerExecutionChain executionChain = getHandlerExecutionChain(handler, request);
 		if (CorsUtils.isCorsRequest(request)) {
 			CorsConfiguration globalConfig = this.corsConfigSource.getCorsConfiguration(request);
@@ -374,17 +375,14 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * Look up a handler for the given request, returning {@code null} if no
 	 * specific one is found. This method is called by {@link #getHandler};
 	 * a {@code null} return value will lead to the default handler, if one is set.
-	 *
 	 * <p>On CORS pre-flight requests this method should return a match not for
 	 * the pre-flight request but for the expected actual request based on the URL
 	 * path, the HTTP methods from the "Access-Control-Request-Method" header, and
 	 * the headers from the "Access-Control-Request-Headers" header thus allowing
 	 * the CORS configuration to be obtained via {@link #getCorsConfigurations},
-	 *
 	 * <p>Note: This method may also return a pre-built {@link HandlerExecutionChain},
 	 * combining a handler object with dynamically determined interceptors.
 	 * Statically specified interceptors will get merged into such an existing chain.
-	 *
 	 * @param request current HTTP request
 	 * @return the corresponding handler instance, or {@code null} if none found
 	 * @throws Exception if there is an internal error
@@ -488,6 +486,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			corsProcessor.processRequest(this.config, request, response);
 		}
 	}
+
 
 	private class CorsInterceptor extends HandlerInterceptorAdapter {
 

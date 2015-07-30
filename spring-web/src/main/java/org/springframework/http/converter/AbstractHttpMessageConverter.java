@@ -201,9 +201,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	 * type was not provided, calls {@link #getContentLength}, and sets the corresponding headers
 	 * @since 4.2
 	 */
-	protected void addDefaultHeaders(final HttpHeaders headers, final T t, MediaType contentType)
-			throws IOException{
-
+	protected void addDefaultHeaders(HttpHeaders headers, T t, MediaType contentType) throws IOException{
 		if (headers.getContentType() == null) {
 			MediaType contentTypeToUse = contentType;
 			if (contentType == null || contentType.isWildcardType() || contentType.isWildcardSubtype()) {

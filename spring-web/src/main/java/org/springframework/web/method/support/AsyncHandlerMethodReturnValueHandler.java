@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.method.support;
 
 import org.springframework.core.MethodParameter;
@@ -21,7 +22,7 @@ import org.springframework.core.MethodParameter;
  * A {@link HandlerMethodReturnValueHandler} that handles return values that
  * represent asynchronous computation. Such handlers need to be invoked with
  * precedence over other handlers that might otherwise match the return value
- * type -- e.g. a method that returns a Promise type that is also annotated with
+ * type: e.g. a method that returns a Promise type that is also annotated with
  * {@code @ResponseBody}.
  *
  * <p>In {@link #handleReturnValue}, implementations of this class should create
@@ -32,7 +33,6 @@ import org.springframework.core.MethodParameter;
  * DeferredResult<?> deferredResult = (DeferredResult<?>) returnValue;
  * WebAsyncUtils.getAsyncManager(webRequest).startDeferredResultProcessing(deferredResult, mavContainer);
  * </pre>
- * the return value to a DeferredResult
  *
  * @author Rossen Stoyanchev
  * @since 4.2

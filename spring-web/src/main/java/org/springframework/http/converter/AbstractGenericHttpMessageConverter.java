@@ -57,6 +57,7 @@ public abstract class AbstractGenericHttpMessageConverter<T> extends AbstractHtt
 		super(supportedMediaTypes);
 	}
 
+
 	@Override
 	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
 		return canRead(contextClass, mediaType);
@@ -78,8 +79,7 @@ public abstract class AbstractGenericHttpMessageConverter<T> extends AbstractHtt
 		addDefaultHeaders(headers, t, contentType);
 
 		if (outputMessage instanceof StreamingHttpOutputMessage) {
-			StreamingHttpOutputMessage streamingOutputMessage =
-					(StreamingHttpOutputMessage) outputMessage;
+			StreamingHttpOutputMessage streamingOutputMessage = (StreamingHttpOutputMessage) outputMessage;
 			streamingOutputMessage.setBody(new StreamingHttpOutputMessage.Body() {
 				@Override
 				public void writeTo(final OutputStream outputStream) throws IOException {
@@ -106,6 +106,7 @@ public abstract class AbstractGenericHttpMessageConverter<T> extends AbstractHtt
 	@Override
 	protected void writeInternal(T t, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
+
 		writeInternal(t, null, outputMessage);
 	}
 

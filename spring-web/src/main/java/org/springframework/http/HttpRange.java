@@ -244,7 +244,6 @@ public abstract class HttpRange {
 			this.suffixLength = suffixLength;
 		}
 
-
 		@Override
 		public long getRangeStart(long length) {
 			if (this.suffixLength < length) {

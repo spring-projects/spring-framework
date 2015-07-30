@@ -266,7 +266,8 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 	protected ScriptTemplateConfig autodetectViewConfig() throws BeansException {
 		try {
-			return BeanFactoryUtils.beanOfTypeIncludingAncestors(getApplicationContext(), ScriptTemplateConfig.class, true, false);
+			return BeanFactoryUtils.beanOfTypeIncludingAncestors(
+					getApplicationContext(), ScriptTemplateConfig.class, true, false);
 		}
 		catch (NoSuchBeanDefinitionException ex) {
 			throw new ApplicationContextException("Expected a single ScriptTemplateConfig bean in the current " +

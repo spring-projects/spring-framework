@@ -117,6 +117,7 @@ class OkHttpClientHttpRequest extends AbstractBufferingAsyncClientHttpRequest
 		}
 	}
 
+
 	private static class OkHttpListenableFuture extends SettableListenableFuture<ClientHttpResponse> {
 
 	    private final Call call;
@@ -124,12 +125,10 @@ class OkHttpClientHttpRequest extends AbstractBufferingAsyncClientHttpRequest
 	    public OkHttpListenableFuture(Call call) {
 	        this.call = call;
 	        this.call.enqueue(new Callback() {
-
 				@Override
 		        public void onResponse(Response response) {
 			        set(new OkHttpClientHttpResponse(response));
 		        }
-
 		        @Override
 		        public void onFailure(Request request, IOException ex) {
 			        setException(ex);

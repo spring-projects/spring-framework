@@ -41,8 +41,8 @@ public class CorsUtils {
 	 * Returns {@code true} if the request is a valid CORS pre-flight one.
 	 */
 	public static boolean isPreFlightRequest(HttpServletRequest request) {
-		return (isCorsRequest(request) && request.getMethod().equals(HttpMethod.OPTIONS.name())
-				&& request.getHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD) != null);
+		return (isCorsRequest(request) && request.getMethod().equals(HttpMethod.OPTIONS.name()) &&
+				request.getHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD) != null);
 	}
 
 }

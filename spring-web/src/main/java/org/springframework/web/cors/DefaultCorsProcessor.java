@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -59,8 +58,8 @@ public class DefaultCorsProcessor implements CorsProcessor {
 
 
 	@Override
-	public boolean processRequest(CorsConfiguration config, HttpServletRequest request,
-			HttpServletResponse response) throws IOException {
+	public boolean processRequest(CorsConfiguration config, HttpServletRequest request, HttpServletResponse response)
+			throws IOException {
 
 		if (!CorsUtils.isCorsRequest(request)) {
 			return true;

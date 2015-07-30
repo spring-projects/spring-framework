@@ -68,7 +68,7 @@ public class ResponseStatusExceptionResolver extends AbstractHandlerExceptionRes
 				logger.warn("Handling of @ResponseStatus resulted in Exception", resolveEx);
 			}
 		}
-		else if (ex.getCause() != null && ex.getCause() instanceof Exception) {
+		else if (ex.getCause() instanceof Exception) {
 			ex = (Exception) ex.getCause();
 			return doResolveException(request, response, handler, ex);
 		}

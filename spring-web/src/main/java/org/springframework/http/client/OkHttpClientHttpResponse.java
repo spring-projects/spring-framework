@@ -25,8 +25,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
 
 /**
- * {@link org.springframework.http.client.ClientHttpResponse} implementation that uses
- * OkHttp.
+ * {@link ClientHttpResponse} implementation based on OkHttp.
  *
  * @author Luciano Leggieri
  * @author Arjen Poutsma
@@ -80,7 +79,8 @@ class OkHttpClientHttpResponse extends AbstractClientHttpResponse {
 			this.response.body().close();
 		}
 		catch (IOException ex) {
-			// Ignore
+			// ignore
 		}
 	}
+
 }

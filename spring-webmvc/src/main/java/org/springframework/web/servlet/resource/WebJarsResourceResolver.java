@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.resource;
 
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.webjars.MultipleMatchesException;
@@ -52,9 +51,11 @@ public class WebJarsResourceResolver extends AbstractResourceResolver {
 
 	private final WebJarAssetLocator webJarAssetLocator;
 
+
 	public WebJarsResourceResolver() {
 		this.webJarAssetLocator = new WebJarAssetLocator();
 	}
+
 
 	@Override
 	protected Resource resolveResourceInternal(HttpServletRequest request, String requestPath,
@@ -86,7 +87,7 @@ public class WebJarsResourceResolver extends AbstractResourceResolver {
 
 	protected String findWebJarResourcePath(String path) {
 		try {
-			int startOffset = path.startsWith("/") ? 1 : 0;
+			int startOffset = (path.startsWith("/") ? 1 : 0);
 			int endOffset = path.indexOf("/", 1);
 			if (endOffset != -1) {
 				String webjar = path.substring(startOffset, endOffset);
@@ -94,8 +95,11 @@ public class WebJarsResourceResolver extends AbstractResourceResolver {
 				String webJarPath = webJarAssetLocator.getFullPath(webjar, partialPath);
 				return webJarPath.substring(WEBJARS_LOCATION_LENGTH);
 			}
-		} catch (MultipleMatchesException ex) {
-			logger.warn("WebJar version conflict for \"" + path + "\"", ex);
+		}
+		catch (MultipleMatchesException ex) {
+			if (logger.isWarnEnabled()) {
+				logger.warn("WebJar version conflict for \"" + path + "\"", ex);
+			}
 		}
 		catch (IllegalArgumentException ex) {
 			if (logger.isTraceEnabled()) {

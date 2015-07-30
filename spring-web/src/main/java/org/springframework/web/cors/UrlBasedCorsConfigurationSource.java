@@ -27,19 +27,18 @@ import org.springframework.util.PathMatcher;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * Provide a per request {@link CorsConfiguration} instance based on a collection of
- * {@link CorsConfiguration} mapped on path patterns.
+ * Provide a per request {@link CorsConfiguration} instance based on a
+ * collection of {@link CorsConfiguration} mapped on path patterns.
  *
- * <p>Exact path mapping URIs (such as {@code "/admin"}) are supported as
- * well as Ant-style path patterns (such as {@code "/admin/**"}).
+ * <p>Exact path mapping URIs (such as {@code "/admin"}) are supported
+ * as well as Ant-style path patterns (such as {@code "/admin/**"}).
  *
  * @author Sebastien Deleuze
  * @since 4.2
  */
 public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource {
 
-	private final Map<String, CorsConfiguration> corsConfigurations =
-			new LinkedHashMap<String, CorsConfiguration>();
+	private final Map<String, CorsConfiguration> corsConfigurations = new LinkedHashMap<String, CorsConfiguration>();
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
@@ -119,6 +118,7 @@ public class UrlBasedCorsConfigurationSource implements CorsConfigurationSource 
 	public void registerCorsConfiguration(String path, CorsConfiguration config) {
 		this.corsConfigurations.put(path, config);
 	}
+
 
 	@Override
 	public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {

@@ -190,7 +190,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * @since 3.2.7
 	 */
 	public RestTemplate(List<HttpMessageConverter<?>> messageConverters) {
-		Assert.notEmpty(messageConverters, "'messageConverters' must not be empty");
+		Assert.notEmpty(messageConverters, "At least one HttpMessageConverter required");
 		this.messageConverters.addAll(messageConverters);
 	}
 
@@ -200,7 +200,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * <p>These converters are used to convert from and to HTTP requests and responses.
 	 */
 	public void setMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
-		Assert.notEmpty(messageConverters, "'messageConverters' must not be empty");
+		Assert.notEmpty(messageConverters, "At least one HttpMessageConverter required");
 		// Take getMessageConverters() List as-is when passed in here
 		if (this.messageConverters != messageConverters) {
 			this.messageConverters.clear();
@@ -220,7 +220,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * <p>By default, RestTemplate uses a {@link DefaultResponseErrorHandler}.
 	 */
 	public void setErrorHandler(ResponseErrorHandler errorHandler) {
-		Assert.notNull(errorHandler, "'errorHandler' must not be null");
+		Assert.notNull(errorHandler, "ResponseErrorHandler must not be null");
 		this.errorHandler = errorHandler;
 	}
 
@@ -237,7 +237,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * @param handler the URI template handler to use
 	 */
 	public void setUriTemplateHandler(UriTemplateHandler handler) {
-		Assert.notNull(handler, "'uriTemplateHandler' is required.");
+		Assert.notNull(handler, "UriTemplateHandler must not be null");
 		this.uriTemplateHandler = handler;
 	}
 

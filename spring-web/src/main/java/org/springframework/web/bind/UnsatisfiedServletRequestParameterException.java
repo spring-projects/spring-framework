@@ -88,18 +88,6 @@ public class UnsatisfiedServletRequestParameterException extends ServletRequestB
 		return sb.toString();
 	}
 
-	private static String requestParameterMapToString(Map<String, String[]> actualParams) {
-		StringBuilder result = new StringBuilder();
-		for (Iterator<Map.Entry<String, String[]>> it = actualParams.entrySet().iterator(); it.hasNext();) {
-			Map.Entry<String, String[]> entry = it.next();
-			result.append(entry.getKey()).append('=').append(ObjectUtils.nullSafeToString(entry.getValue()));
-			if (it.hasNext()) {
-				result.append(", ");
-			}
-		}
-		return result.toString();
-	}
-
 	/**
 	 * Return the parameter conditions that have been violated or the first group
 	 * in case of multiple groups.
@@ -124,6 +112,19 @@ public class UnsatisfiedServletRequestParameterException extends ServletRequestB
 	 */
 	public final Map<String, String[]> getActualParams() {
 		return this.actualParams;
+	}
+
+
+	private static String requestParameterMapToString(Map<String, String[]> actualParams) {
+		StringBuilder result = new StringBuilder();
+		for (Iterator<Map.Entry<String, String[]>> it = actualParams.entrySet().iterator(); it.hasNext();) {
+			Map.Entry<String, String[]> entry = it.next();
+			result.append(entry.getKey()).append('=').append(ObjectUtils.nullSafeToString(entry.getValue()));
+			if (it.hasNext()) {
+				result.append(", ");
+			}
+		}
+		return result.toString();
 	}
 
 }
