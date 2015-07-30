@@ -134,6 +134,7 @@ public class StandardServletAsyncWebRequest extends ServletWebRequest implements
 
 	@Override
 	public void onError(AsyncEvent event) throws IOException {
+		onComplete(event);
 	}
 
 	@Override

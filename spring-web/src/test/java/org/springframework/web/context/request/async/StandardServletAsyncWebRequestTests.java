@@ -121,7 +121,7 @@ public class StandardServletAsyncWebRequestTests {
 	}
 
 	@Test
-	public void onTimeoutTimeoutHandler() throws Exception {
+	public void onTimeoutHandler() throws Exception {
 		Runnable timeoutHandler = mock(Runnable.class);
 		this.asyncRequest.addTimeoutHandler(timeoutHandler);
 		this.asyncRequest.onTimeout(new AsyncEvent(null));
@@ -134,4 +134,29 @@ public class StandardServletAsyncWebRequestTests {
 		this.asyncRequest.setTimeout(25L);
 	}
 
+	@Test
+	public void onCompletionHandler() throws Exception {
+		Runnable handler = mock(Runnable.class);
+		this.asyncRequest.addCompletionHandler(handler);
+
+		this.asyncRequest.startAsync();
+		this.asyncRequest.onComplete(new AsyncEvent(null));
+
+		verify(handler).run();
+		assertTrue(this.asyncRequest.isAsyncComplete());
+	}
+
+	// SPR-13292
+	
+	@Test
+	public void onCompletionHandlerAfterOnErrorEvent() throws Exception {
+		Runnable handler = mock(Runnable.class);
+		this.asyncRequest.addCompletionHandler(handler);
+
+		this.asyncRequest.startAsync();
+		this.asyncRequest.onError(new AsyncEvent(null));
+
+		verify(handler).run();
+		assertTrue(this.asyncRequest.isAsyncComplete());
+	}
 }
