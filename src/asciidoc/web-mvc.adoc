@@ -2196,8 +2196,8 @@ Here is an example of that:
 [subs="verbatim,quotes"]
 ----
 	@RequestMapping("/events")
-	public ResponseBodyEmitter<String> handle() {
-		ResponseBodyEmitter<String> emitter = new ResponseBodyEmitter<String>();
+	public ResponseBodyEmitter handle() {
+		ResponseBodyEmitter emitter = new ResponseBodyEmitter();
 		// Save the emitter somewhere..
 		return emitter;
 	}
