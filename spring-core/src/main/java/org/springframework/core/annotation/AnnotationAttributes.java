@@ -21,6 +21,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Array;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.util.Assert;
@@ -422,25 +423,37 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 		Assert.notNull(expectedType, "expectedType must not be null");
 
 		T attributeValue = getAttribute(attributeName, expectedType);
-		String aliasName = AnnotationUtils.getAttributeAliasMap(annotationType).get(attributeName);
-		T aliasValue = getAttribute(aliasName, expectedType);
-		boolean attributeDeclared = !ObjectUtils.isEmpty(attributeValue);
-		boolean aliasDeclared = !ObjectUtils.isEmpty(aliasValue);
 
-		if (!ObjectUtils.nullSafeEquals(attributeValue, aliasValue) && attributeDeclared && aliasDeclared) {
-			String elementName = (annotationSource == null ? "unknown element" : annotationSource.toString());
-			String msg = String.format("In annotation [%s] declared on [%s], attribute [%s] and its alias [%s] " +
-					"are present with values of [%s] and [%s], but only one is permitted.",
-					annotationType.getName(), elementName, attributeName, aliasName,
-					ObjectUtils.nullSafeToString(attributeValue), ObjectUtils.nullSafeToString(aliasValue));
-			throw new AnnotationConfigurationException(msg);
+		List<String> aliasNames = AnnotationUtils.getAttributeAliasMap(annotationType).get(attributeName);
+		if (aliasNames != null) {
+			for (String aliasName : aliasNames) {
+				T aliasValue = getAttribute(aliasName, expectedType);
+				boolean attributeEmpty = ObjectUtils.isEmpty(attributeValue);
+				boolean aliasEmpty = ObjectUtils.isEmpty(aliasValue);
+
+				if (!attributeEmpty && !aliasEmpty && !ObjectUtils.nullSafeEquals(attributeValue, aliasValue)) {
+					String elementName = (annotationSource == null ? "unknown element" : annotationSource.toString());
+					String msg = String.format("In annotation [%s] declared on [%s], attribute [%s] and its alias [%s] " +
+							"are present with values of [%s] and [%s], but only one is permitted.",
+							annotationType.getName(), elementName, attributeName, aliasName,
+							ObjectUtils.nullSafeToString(attributeValue), ObjectUtils.nullSafeToString(aliasValue));
+					throw new AnnotationConfigurationException(msg);
+				}
+
+				// If we expect an array and the current tracked value is null but the
+				// current alias value is non-null, then replace the current null value
+				// with the non-null value (which may be an empty array).
+				if (expectedType.isArray() && attributeValue == null && aliasValue != null) {
+					attributeValue = aliasValue;
+				}
+				// Else: if we're not expecting an array, we can rely on the behavior of
+				// ObjectUtils.isEmpty().
+				else if (attributeEmpty && !aliasEmpty) {
+					attributeValue = aliasValue;
+				}
+			}
+			assertAttributePresence(attributeName, aliasNames, attributeValue);
 		}
-
-		if (!attributeDeclared) {
-			attributeValue = aliasValue;
-		}
-
-		assertAttributePresence(attributeName, aliasName, attributeValue);
 
 		return attributeValue;
 	}
@@ -473,11 +486,11 @@ public class AnnotationAttributes extends LinkedHashMap<String, Object> {
 		}
 	}
 
-	private void assertAttributePresence(String attributeName, String aliasName, Object attributeValue) {
+	private void assertAttributePresence(String attributeName, List<String> aliases, Object attributeValue) {
 		if (attributeValue == null) {
 			throw new IllegalArgumentException(String.format(
-					"Neither attribute '%s' nor its alias '%s' was found in attributes for annotation [%s]",
-					attributeName, aliasName, this.displayName));
+					"Neither attribute '%s' nor one of its aliases %s was found in attributes for annotation [%s]",
+					attributeName, aliases, this.displayName));
 		}
 	}
 

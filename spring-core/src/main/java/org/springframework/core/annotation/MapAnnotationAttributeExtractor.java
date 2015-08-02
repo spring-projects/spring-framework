@@ -20,6 +20,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.util.ClassUtils;
@@ -87,25 +88,30 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 			Map<String, Object> originalAttributes, Class<? extends Annotation> annotationType) {
 
 		Map<String, Object> attributes = new HashMap<String, Object>(originalAttributes);
-		Map<String, String> attributeAliasMap = getAttributeAliasMap(annotationType);
+		Map<String, List<String>> attributeAliasMap = getAttributeAliasMap(annotationType);
 
 		for (Method attributeMethod : getAttributeMethods(annotationType)) {
 			String attributeName = attributeMethod.getName();
 			Object attributeValue = attributes.get(attributeName);
 
-			// if attribute not present, check alias
+			// if attribute not present, check aliases
 			if (attributeValue == null) {
-				String aliasName = attributeAliasMap.get(attributeName);
-				if (aliasName != null) {
-					Object aliasValue = attributes.get(aliasName);
-					if (aliasValue != null) {
-						attributeValue = aliasValue;
-						attributes.put(attributeName, attributeValue);
+				List<String> aliasNames = attributeAliasMap.get(attributeName);
+				if (aliasNames != null) {
+					for (String aliasName : aliasNames) {
+						if (aliasName != null) {
+							Object aliasValue = attributes.get(aliasName);
+							if (aliasValue != null) {
+								attributeValue = aliasValue;
+								attributes.put(attributeName, attributeValue);
+								break;
+							}
+						}
 					}
 				}
 			}
 
-			// if alias not present, check default
+			// if aliases not present, check default
 			if (attributeValue == null) {
 				Object defaultValue = getDefaultValue(annotationType, attributeName);
 				if (defaultValue != null) {

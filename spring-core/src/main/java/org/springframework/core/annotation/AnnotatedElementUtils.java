@@ -31,7 +31,6 @@ import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.StringUtils;
 
 /**
  * General utility methods for finding annotations and meta-annotations on
@@ -957,13 +956,21 @@ public class AnnotatedElementUtils {
 
 			for (Method attributeMethod : AnnotationUtils.getAttributeMethods(annotation.annotationType())) {
 				String attributeName = attributeMethod.getName();
-				String aliasedAttributeName = AnnotationUtils.getAliasedAttributeName(attributeMethod,
-					targetAnnotationType);
+				List<String> aliases = AnnotationUtils.getAliasedAttributeNames(attributeMethod, targetAnnotationType);
 
 				// Explicit annotation attribute override declared via @AliasFor
-				if (StringUtils.hasText(aliasedAttributeName) && attributes.containsKey(aliasedAttributeName)) {
-					overrideAttribute(element, annotation, attributes, attributeName, aliasedAttributeName);
+				if (!aliases.isEmpty()) {
+					if (aliases.size() != 1) {
+						throw new IllegalStateException(String.format(
+							"Alias list for annotation attribute [%s] must contain at most one element: %s",
+							attributeMethod, aliases));
+					}
+					String aliasedAttributeName = aliases.get(0);
+					if (attributes.containsKey(aliasedAttributeName)) {
+						overrideAttribute(element, annotation, attributes, attributeName, aliasedAttributeName);
+					}
 				}
+
 				// Implicit annotation attribute override based on convention
 				else if (!AnnotationUtils.VALUE.equals(attributeName) && attributes.containsKey(attributeName)) {
 					overrideAttribute(element, annotation, attributes, attributeName, attributeName);
