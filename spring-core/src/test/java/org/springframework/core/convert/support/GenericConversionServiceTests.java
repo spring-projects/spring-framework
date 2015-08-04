@@ -540,6 +540,14 @@ public class GenericConversionServiceTests {
 		conversionService.addConverterFactory(new StringToMyEnumBaseInterfaceConverterFactory());
 		assertEquals(MyEnum.A, conversionService.convert("base1", MyEnum.class));
 	}
+	
+	@Test
+	public void testEnumToEnum() throws Exception {
+		conversionService.addConverter(new EnumToEnumConverter());
+		assertEquals(MyShadowEnum.A, conversionService.convert(MyOriginEnum.A, MyShadowEnum.class));
+		assertEquals(MyShadowEnum.B, conversionService.convert(MyOriginEnum.B, MyShadowEnum.class));
+		assertEquals(null, conversionService.convert(null, MyShadowEnum.class));
+	}
 
 	@Test
 	public void convertNullAnnotatedStringToString() throws Exception {
@@ -803,6 +811,14 @@ public class GenericConversionServiceTests {
 				return "1st";
 			}
 		}
+	}
+	
+	private static enum MyOriginEnum {
+		A, B
+	}
+	
+	private static enum MyShadowEnum {
+		A, B
 	}
 
 	@SuppressWarnings("rawtypes")
