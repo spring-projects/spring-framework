@@ -104,9 +104,9 @@ public abstract class JdkVersion {
 	 * {@code if (getMajorJavaVersion() >= JAVA_17)}.
 	 * @return a code comparable to the {@code JAVA_XX} codes in this class
 	 * @see #JAVA_16
-     * @see #JAVA_17
-     * @see #JAVA_18
-     * @see #JAVA_19
+	 * @see #JAVA_17
+	 * @see #JAVA_18
+	 * @see #JAVA_19
 	 */
 	public static int getMajorJavaVersion() {
 		return majorJavaVersion;
