@@ -16,10 +16,14 @@
 
 package org.springframework.test.util;
 
+import java.lang.Boolean;
+import java.lang.Number;
+import java.lang.String;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Map;
 
 import com.jayway.jsonpath.InvalidPathException;
 import com.jayway.jsonpath.JsonPath;
@@ -28,6 +32,7 @@ import org.hamcrest.Matcher;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 
+import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.hamcrest.MatcherAssert.*;
 import static org.springframework.test.util.AssertionErrors.*;
 
@@ -138,7 +143,47 @@ public class JsonPathExpectationsHelper {
 		Object actualValue = evaluateJsonPath(responseContent);
 		assertTrue("No value for JSON path \"" + this.expression + "\"", actualValue != null);
 		String reason = "Expected array at JSON path " + this.expression + " but found " + actualValue;
-		assertTrue(reason, actualValue instanceof List);
+		assertThat(reason, actualValue, instanceOf(List.class));
+	}
+
+	/**
+	 * Apply the JSON path and assert the resulting value is a boolean.
+	 */
+	public void assertValueIsBoolean(String responseContent) throws ParseException {
+		Object actualValue = evaluateJsonPath(responseContent);
+		assertTrue("No value for JSON path \"" + this.expression + "\"", actualValue != null);
+		String reason = "Expected array at JSON path " + this.expression + " but found " + actualValue;
+		assertThat(reason, actualValue, instanceOf(Boolean.class));
+	}
+
+	/**
+	 * Apply the JSON path and assert the resulting value is a number.
+	 */
+	public void assertValueIsNumber(String responseContent) throws ParseException {
+		Object actualValue = evaluateJsonPath(responseContent);
+		assertTrue("No value for JSON path \"" + this.expression + "\"", actualValue != null);
+		String reason = "Expected array at JSON path " + this.expression + " but found " + actualValue;
+		assertThat(reason, actualValue, instanceOf(Number.class));
+	}
+
+	/**
+	 * Apply the JSON path and assert the resulting value is a map.
+	 */
+	public void assertValueIsMap(String responseContent) throws ParseException {
+		Object actualValue = evaluateJsonPath(responseContent);
+		assertTrue("No value for JSON path \"" + this.expression + "\"", actualValue != null);
+		String reason = "Expected array at JSON path " + this.expression + " but found " + actualValue;
+		assertThat(reason, actualValue, instanceOf(Map.class));
+	}
+
+	/**
+	 * Apply the JSON path and assert the resulting value is a string.
+	 */
+	public void assertValueIsString(String responseContent) throws ParseException {
+		Object actualValue = evaluateJsonPath(responseContent);
+		assertTrue("No value for JSON path \"" + this.expression + "\"", actualValue != null);
+		String reason = "Expected array at JSON path " + this.expression + " but found " + actualValue;
+		assertThat(reason, actualValue, instanceOf(String.class));
 	}
 
 	/**
