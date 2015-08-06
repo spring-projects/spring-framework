@@ -79,8 +79,47 @@ public class JsonPathResultMatchersTests {
 		new JsonPathResultMatchers("$.bar").isArray().match(getStubMvcResult());
 	}
 
+	@Test
+	public void isBooleanMatch() throws Exception {
+		new JsonPathResultMatchers("$.icanhaz").isBoolean().match(getStubMvcResult());
+	}
 
-	private static final String RESPONSE_CONTENT = "{\"foo\":\"bar\", \"qux\":[\"baz1\",\"baz2\"]}";
+	@Test(expected=AssertionError.class)
+	public void isBooleanNoMatch() throws Exception {
+		new JsonPathResultMatchers("$.foo").isBoolean().match(getStubMvcResult());
+	}
+
+	@Test
+	public void isNumberMatch() throws Exception {
+		new JsonPathResultMatchers("$.howmanies").isNumber().match(getStubMvcResult());
+	}
+
+	@Test(expected=AssertionError.class)
+	public void isNumberNoMatch() throws Exception {
+		new JsonPathResultMatchers("$.foo").isNumber().match(getStubMvcResult());
+	}
+
+	@Test
+	public void isMapMatch() throws Exception {
+		new JsonPathResultMatchers("$.cheeseburger").isMap().match(getStubMvcResult());
+	}
+
+	@Test(expected=AssertionError.class)
+	public void isMapNoMatch() throws Exception {
+		new JsonPathResultMatchers("$.foo").isMap().match(getStubMvcResult());
+	}
+
+	@Test
+	public void isStringMatch() throws Exception {
+		new JsonPathResultMatchers("$.foo").isString().match(getStubMvcResult());
+	}
+
+	@Test(expected=AssertionError.class)
+	public void isStringNoMatch() throws Exception {
+		new JsonPathResultMatchers("$.qux").isString().match(getStubMvcResult());
+	}
+
+	private static final String RESPONSE_CONTENT = "{\"foo\":\"bar\", \"qux\":[\"baz1\",\"baz2\"], \"icanhaz\":true, \"howmanies\": 5, \"cheeseburger\": {\"pickles\": true} }";
 
 	private StubMvcResult getStubMvcResult() throws Exception {
 		MockHttpServletResponse response = new MockHttpServletResponse();

@@ -99,7 +99,7 @@ public class JsonPathResultMatchers {
 	}
 
 	/**
-	 * Evluate the JSON path and assert the content found is an array.
+	 * Evaluate the JSON path and assert the content found is an array.
 	 */
 	public ResultMatcher isArray() {
 		return new ResultMatcher() {
@@ -107,6 +107,58 @@ public class JsonPathResultMatchers {
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
 				jsonPathHelper.assertValueIsArray(content);
+			}
+		};
+	}
+
+	/**
+	 * Evaluate the JSON path and assert the content found is a boolean.
+	 */
+	public ResultMatcher isBoolean() {
+		return new ResultMatcher() {
+			@Override
+			public void match(MvcResult result) throws Exception {
+				String content = result.getResponse().getContentAsString();
+				jsonPathHelper.assertValueIsBoolean(content);
+			}
+		};
+	}
+
+	/**
+	 * Evaluate the JSON path and assert the content found is a number.
+	 */
+	public ResultMatcher isNumber() {
+		return new ResultMatcher() {
+			@Override
+			public void match(MvcResult result) throws Exception {
+				String content = result.getResponse().getContentAsString();
+				jsonPathHelper.assertValueIsNumber(content);
+			}
+		};
+	}
+
+	/**
+	 * Evaluate the JSON path and assert the content found is a map.
+	 */
+	public ResultMatcher isMap() {
+		return new ResultMatcher() {
+			@Override
+			public void match(MvcResult result) throws Exception {
+				String content = result.getResponse().getContentAsString();
+				jsonPathHelper.assertValueIsMap(content);
+			}
+		};
+	}
+
+	/**
+	 * Evaluate the JSON path and assert the content found is a string.
+	 */
+	public ResultMatcher isString() {
+		return new ResultMatcher() {
+			@Override
+			public void match(MvcResult result) throws Exception {
+				String content = result.getResponse().getContentAsString();
+				jsonPathHelper.assertValueIsString(content);
 			}
 		};
 	}
