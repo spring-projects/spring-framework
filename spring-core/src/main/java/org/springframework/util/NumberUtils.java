@@ -27,8 +27,8 @@ import java.util.Set;
 
 /**
  * Miscellaneous utility methods for number conversion and parsing.
- * Mainly for internal use within the framework; consider Apache's
- * Commons Lang for a more comprehensive suite of string utilities.
+ * <p>Mainly for internal use within the framework; consider Apache's
+ * Commons Lang for a more comprehensive suite of number utilities.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -144,14 +144,15 @@ public abstract class NumberUtils {
 		}
 		else {
 			throw new IllegalArgumentException("Could not convert number [" + number + "] of type [" +
-					number.getClass().getName() + "] to unknown target class [" + targetClass.getName() + "]");
+					number.getClass().getName() + "] to unsupported target class [" + targetClass.getName() + "]");
 		}
 	}
 
 	/**
-	 * Raise an overflow exception for the given number and target class.
+	 * Raise an <em>overflow</em> exception for the given number and target class.
 	 * @param number the number we tried to convert
 	 * @param targetClass the target class we tried to convert to
+	 * @throws IllegalArgumentException
 	 */
 	private static void raiseOverflowException(Number number, Class<?> targetClass) {
 		throw new IllegalArgumentException("Could not convert number [" + number + "] of type [" +
@@ -159,10 +160,10 @@ public abstract class NumberUtils {
 	}
 
 	/**
-	 * Parse the given text into a number instance of the given target class,
-	 * using the corresponding {@code decode} / {@code valueOf} methods.
+	 * Parse the given {@code text} into a {@link Number} instance of the given
+	 * target class, using the corresponding {@code decode} / {@code valueOf} method.
 	 * <p>Trims the input {@code String} before attempting to parse the number.
-	 * Supports numbers in hex format (with leading "0x", "0X" or "#") as well.
+	 * <p>Supports numbers in hex format (with leading "0x", "0X", or "#") as well.
 	 * @param text the text to convert
 	 * @param targetClass the target class to parse into
 	 * @return the parsed number
@@ -214,13 +215,13 @@ public abstract class NumberUtils {
 	}
 
 	/**
-	 * Parse the given text into a number instance of the given target class,
-	 * using the given NumberFormat. Trims the input {@code String}
-	 * before attempting to parse the number.
+	 * Parse the given {@code text} into a {@link Number} instance of the
+	 * given target class, using the supplied {@link NumberFormat}.
+	 * <p>Trims the input {@code String} before attempting to parse the number.
 	 * @param text the text to convert
 	 * @param targetClass the target class to parse into
-	 * @param numberFormat the NumberFormat to use for parsing (if {@code null},
-	 * this method falls back to {@code parseNumber(String, Class)})
+	 * @param numberFormat the {@code NumberFormat} to use for parsing (if
+	 * {@code null}, this method falls back to {@link #parseNumber(String, Class)})
 	 * @return the parsed number
 	 * @throws IllegalArgumentException if the target class is not supported
 	 * (i.e. not a standard Number subclass as included in the JDK)
@@ -260,8 +261,9 @@ public abstract class NumberUtils {
 	}
 
 	/**
-	 * Determine whether the given value String indicates a hex number, i.e. needs to be
-	 * passed into {@code Integer.decode} instead of {@code Integer.valueOf} (etc).
+	 * Determine whether the given {@code value} String indicates a hex number,
+	 * i.e. needs to be passed into {@code Integer.decode} instead of
+	 * {@code Integer.valueOf}, etc.
 	 */
 	private static boolean isHexNumber(String value) {
 		int index = (value.startsWith("-") ? 1 : 0);
@@ -269,8 +271,8 @@ public abstract class NumberUtils {
 	}
 
 	/**
-	 * Decode a {@link java.math.BigInteger} from a {@link String} value.
-	 * Supports decimal, hex and octal notation.
+	 * Decode a {@link java.math.BigInteger} from the supplied {@link String} value.
+	 * <p>Supports decimal, hex, and octal notation.
 	 * @see BigInteger#BigInteger(String, int)
 	 */
 	private static BigInteger decodeBigInteger(String value) {
