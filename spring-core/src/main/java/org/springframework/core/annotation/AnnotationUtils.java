@@ -1465,6 +1465,11 @@ public abstract class AnnotationUtils {
 		boolean sameTargetDeclared =
 				(sourceAnnotationType.equals(aliasedAnnotationType) || Annotation.class.equals(aliasedAnnotationType));
 
+		// Explicit alias for a different target meta-annotation?
+		if (!searchWithinSameAnnotation && !targetAnnotationType.equals(aliasedAnnotationType)) {
+			return null;
+		}
+
 		// Wrong search scope?
 		if (searchWithinSameAnnotation && !sameTargetDeclared) {
 			return null;

@@ -492,6 +492,30 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	@Test
+	public void findMergedAnnotationForMultipleMetaAnnotationsWithClashingAttributeNames() {
+		final String[] xmlLocations = new String[] { "test.xml" };
+		final String[] propFiles = new String[] { "test.properties" };
+
+		Class<?> element = AliasedComposedContextConfigAndTestPropSourceClass.class;
+
+		ContextConfig contextConfig = findMergedAnnotation(element, ContextConfig.class);
+		assertNotNull("@ContextConfig on " + element, contextConfig);
+		assertArrayEquals("locations", xmlLocations, contextConfig.locations());
+		assertArrayEquals("value", xmlLocations, contextConfig.value());
+
+		// Synthesized annotation
+		TestPropSource testPropSource = AnnotationUtils.findAnnotation(element, TestPropSource.class);
+		assertArrayEquals("locations", propFiles, testPropSource.locations());
+		assertArrayEquals("value", propFiles, testPropSource.value());
+
+		// Merged annotation
+		testPropSource = findMergedAnnotation(element, TestPropSource.class);
+		assertNotNull("@TestPropSource on " + element, testPropSource);
+		assertArrayEquals("locations", propFiles, testPropSource.locations());
+		assertArrayEquals("value", propFiles, testPropSource.value());
+	}
+
+	@Test
 	public void findMergedAnnotationAttributesOnClassWithAttributeAliasInComposedAnnotationAndNestedAnnotationsInTargetAnnotation() {
 		Class<?> element = TestComponentScanClass.class;
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(element, ComponentScan.class);
@@ -623,6 +647,19 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	/**
+	 * Mock of {@code org.springframework.test.context.TestPropertySource}.
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface TestPropSource {
+
+		@AliasFor("locations")
+		String[] value() default {};
+
+		@AliasFor("value")
+		String[] locations() default {};
+	}
+
+	/**
 	 * Mock of {@code org.springframework.test.context.ContextConfiguration}.
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
@@ -677,6 +714,15 @@ public class AnnotatedElementUtilsTests {
 
 		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
 		String[] xmlConfigFiles();
+	}
+
+	@ContextConfig(locations = "shadowed.xml")
+	@TestPropSource(locations = "test.properties")
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface AliasedComposedContextConfigAndTestPropSource {
+
+		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
+		String[] xmlConfigFiles() default "default.xml";
 	}
 
 	/**
@@ -853,6 +899,10 @@ public class AnnotatedElementUtilsTests {
 
 	@InvalidAliasedComposedContextConfig(xmlConfigFiles = "test.xml")
 	static class InvalidAliasedComposedContextConfigClass {
+	}
+
+	@AliasedComposedContextConfigAndTestPropSource(xmlConfigFiles = "test.xml")
+	static class AliasedComposedContextConfigAndTestPropSourceClass {
 	}
 
 	@TestComponentScan(packages = "com.example.app.test")
