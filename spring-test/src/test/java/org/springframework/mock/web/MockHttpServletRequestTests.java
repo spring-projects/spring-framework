@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.servlet.http.Cookie;
+
 import org.junit.Test;
 
 import org.springframework.util.StreamUtils;
@@ -198,6 +200,26 @@ public class MockHttpServletRequestTests {
 		assertEquals(3, request.getParameterMap().size());
 		request.removeAllParameters();
 		assertEquals(0, request.getParameterMap().size());
+	}
+
+	@Test
+	public void cookies() {
+		Cookie cookie1 = new Cookie("foo", "bar");
+		Cookie cookie2 = new Cookie("baz", "qux");
+		request.setCookies(cookie1, cookie2);
+
+		Cookie[] cookies = request.getCookies();
+
+		assertEquals(2, cookies.length);
+		assertEquals("foo", cookies[0].getName());
+		assertEquals("bar", cookies[0].getValue());
+		assertEquals("baz", cookies[1].getName());
+		assertEquals("qux", cookies[1].getValue());
+	}
+
+	@Test
+	public void noCookies() {
+		assertNull(request.getCookies());
 	}
 
 	@Test
