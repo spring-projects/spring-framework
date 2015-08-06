@@ -24,11 +24,13 @@ import org.springframework.test.web.servlet.ResultMatcher;
 
 /**
  * Factory for assertions on the response content using
- * <a href="http://goessner.net/articles/JsonPath/">JSONPath</a> expressions.
+ * <a href="https://github.com/jayway/JsonPath">JsonPath</a> expressions.
  * <p>An instance of this class is typically accessed via
  * {@link MockMvcResultMatchers#jsonPath}.
  *
  * @author Rossen Stoyanchev
+ * @author Craig Andrews
+ * @author Sam Brannen
  * @since 3.2
  */
 public class JsonPathResultMatchers {
@@ -37,8 +39,8 @@ public class JsonPathResultMatchers {
 
 
 	/**
-	 * Protected constructor. Use
-	 * {@link MockMvcResultMatchers#jsonPath(String, Object...)} or
+	 * Protected constructor.
+	 * <p>Use {@link MockMvcResultMatchers#jsonPath(String, Object...)} or
 	 * {@link MockMvcResultMatchers#jsonPath(String, Matcher)}.
 	 */
 	protected JsonPathResultMatchers(String expression, Object ... args) {
@@ -47,66 +49,133 @@ public class JsonPathResultMatchers {
 
 
 	/**
-	 * Evaluate the JSONPath and assert the value of the content found with the
-	 * given Hamcrest {@code Matcher}.
+	 * Evaluate the JSON path expression against the response content and
+	 * assert the resulting value with the given Hamcrest {@link Matcher}.
 	 */
 	public <T> ResultMatcher value(final Matcher<T> matcher) {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
-				jsonPathHelper.assertValue(content, matcher);
+				JsonPathResultMatchers.this.jsonPathHelper.assertValue(content, matcher);
 			}
 		};
 	}
 
 	/**
-	 * Evaluate the JSONPath and assert the value of the content found.
+	 * Evaluate the JSON path expression against the response content and
+	 * assert that the result is equal to the supplied value.
 	 */
 	public ResultMatcher value(final Object expectedValue) {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
-				jsonPathHelper.assertValue(result.getResponse().getContentAsString(), expectedValue);
+				JsonPathResultMatchers.this.jsonPathHelper.assertValue(result.getResponse().getContentAsString(),
+					expectedValue);
 			}
 		};
 	}
 
 	/**
-	 * Evaluate the JSONPath and assert that content exists.
+	 * Evaluate the JSON path expression against the response content and
+	 * assert that the result is not empty (i.e., that a match for the JSON
+	 * path expression exists in the response content).
 	 */
 	public ResultMatcher exists() {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
-				jsonPathHelper.exists(content);
+				JsonPathResultMatchers.this.jsonPathHelper.exists(content);
 			}
 		};
 	}
 
 	/**
-	 * Evaluate the JSON path and assert not content was found.
+	 * Evaluate the JSON path expression against the response content and
+	 * assert that the result is empty (i.e., that a match for the JSON
+	 * path expression does not exist in the response content).
 	 */
 	public ResultMatcher doesNotExist() {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
-				jsonPathHelper.doesNotExist(content);
+				JsonPathResultMatchers.this.jsonPathHelper.doesNotExist(content);
 			}
 		};
 	}
 
 	/**
-	 * Evluate the JSON path and assert the content found is an array.
+	 * Evaluate the JSON path expression against the response content and
+	 * assert that the result is a {@link String}.
+	 * @since 4.2.1
+	 */
+	public ResultMatcher isString() {
+		return new ResultMatcher() {
+			@Override
+			public void match(MvcResult result) throws Exception {
+				String content = result.getResponse().getContentAsString();
+				JsonPathResultMatchers.this.jsonPathHelper.assertValueIsString(content);
+			}
+		};
+	}
+
+	/**
+	 * Evaluate the JSON path expression against the response content and
+	 * assert that the result is a {@link Boolean}.
+	 * @since 4.2.1
+	 */
+	public ResultMatcher isBoolean() {
+		return new ResultMatcher() {
+			@Override
+			public void match(MvcResult result) throws Exception {
+				String content = result.getResponse().getContentAsString();
+				JsonPathResultMatchers.this.jsonPathHelper.assertValueIsBoolean(content);
+			}
+		};
+	}
+
+	/**
+	 * Evaluate the JSON path expression against the response content and
+	 * assert that the result is a {@link Number}.
+	 * @since 4.2.1
+	 */
+	public ResultMatcher isNumber() {
+		return new ResultMatcher() {
+			@Override
+			public void match(MvcResult result) throws Exception {
+				String content = result.getResponse().getContentAsString();
+				JsonPathResultMatchers.this.jsonPathHelper.assertValueIsNumber(content);
+			}
+		};
+	}
+
+	/**
+	 * Evaluate the JSON path expression against the response content and
+	 * assert that the result is an array.
 	 */
 	public ResultMatcher isArray() {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
-				jsonPathHelper.assertValueIsArray(content);
+				JsonPathResultMatchers.this.jsonPathHelper.assertValueIsArray(content);
+			}
+		};
+	}
+
+	/**
+	 * Evaluate the JSON path expression against the response content and
+	 * assert that the result is a {@link java.util.Map}.
+	 * @since 4.2.1
+	 */
+	public ResultMatcher isMap() {
+		return new ResultMatcher() {
+			@Override
+			public void match(MvcResult result) throws Exception {
+				String content = result.getResponse().getContentAsString();
+				JsonPathResultMatchers.this.jsonPathHelper.assertValueIsMap(content);
 			}
 		};
 	}

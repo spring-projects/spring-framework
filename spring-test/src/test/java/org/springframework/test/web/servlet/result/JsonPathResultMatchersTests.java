@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.test.web.servlet.result;
 
 import org.hamcrest.Matchers;
+
 import org.junit.Test;
 
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -26,6 +27,7 @@ import org.springframework.test.web.servlet.StubMvcResult;
  * Tests for {@link JsonPathResultMatchers}.
  *
  * @author Rossen Stoyanchev
+ * @author Craig Andrews
  */
 public class JsonPathResultMatchersTests {
 
@@ -34,7 +36,7 @@ public class JsonPathResultMatchersTests {
 		new JsonPathResultMatchers("$.foo").value("bar").match(getStubMvcResult());
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void valueNoMatch() throws Exception {
 		new JsonPathResultMatchers("$.foo").value("bogus").match(getStubMvcResult());
 	}
@@ -44,7 +46,7 @@ public class JsonPathResultMatchersTests {
 		new JsonPathResultMatchers("$.foo").value(Matchers.equalTo("bar")).match(getStubMvcResult());
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void valueMatcherNoMatch() throws Exception {
 		new JsonPathResultMatchers("$.foo").value(Matchers.equalTo("bogus")).match(getStubMvcResult());
 	}
@@ -54,7 +56,7 @@ public class JsonPathResultMatchersTests {
 		new JsonPathResultMatchers("$.foo").exists().match(getStubMvcResult());
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void existsNoMatch() throws Exception {
 		new JsonPathResultMatchers("$.bogus").exists().match(getStubMvcResult());
 	}
@@ -64,7 +66,7 @@ public class JsonPathResultMatchersTests {
 		new JsonPathResultMatchers("$.bogus").doesNotExist().match(getStubMvcResult());
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void doesNotExistNoMatch() throws Exception {
 		new JsonPathResultMatchers("$.foo").doesNotExist().match(getStubMvcResult());
 	}
@@ -74,13 +76,54 @@ public class JsonPathResultMatchersTests {
 		new JsonPathResultMatchers("$.qux").isArray().match(getStubMvcResult());
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void isArrayNoMatch() throws Exception {
 		new JsonPathResultMatchers("$.bar").isArray().match(getStubMvcResult());
 	}
 
+	@Test
+	public void isBooleanMatch() throws Exception {
+		new JsonPathResultMatchers("$.icanhaz").isBoolean().match(getStubMvcResult());
+	}
 
-	private static final String RESPONSE_CONTENT = "{\"foo\":\"bar\", \"qux\":[\"baz1\",\"baz2\"]}";
+	@Test(expected = AssertionError.class)
+	public void isBooleanNoMatch() throws Exception {
+		new JsonPathResultMatchers("$.foo").isBoolean().match(getStubMvcResult());
+	}
+
+	@Test
+	public void isNumberMatch() throws Exception {
+		new JsonPathResultMatchers("$.howmanies").isNumber().match(getStubMvcResult());
+	}
+
+	@Test(expected = AssertionError.class)
+	public void isNumberNoMatch() throws Exception {
+		new JsonPathResultMatchers("$.foo").isNumber().match(getStubMvcResult());
+	}
+
+	@Test
+	public void isMapMatch() throws Exception {
+		new JsonPathResultMatchers("$.cheeseburger").isMap().match(getStubMvcResult());
+	}
+
+	@Test(expected = AssertionError.class)
+	public void isMapNoMatch() throws Exception {
+		new JsonPathResultMatchers("$.foo").isMap().match(getStubMvcResult());
+	}
+
+	@Test
+	public void isStringMatch() throws Exception {
+		new JsonPathResultMatchers("$.foo").isString().match(getStubMvcResult());
+	}
+
+	@Test(expected = AssertionError.class)
+	public void isStringNoMatch() throws Exception {
+		new JsonPathResultMatchers("$.qux").isString().match(getStubMvcResult());
+	}
+
+
+	private static final String RESPONSE_CONTENT = "{\"foo\":\"bar\", \"qux\":[\"baz1\",\"baz2\"], \"icanhaz\":true, \"howmanies\": 5, \"cheeseburger\": {\"pickles\": true} }";
+
 
 	private StubMvcResult getStubMvcResult() throws Exception {
 		MockHttpServletResponse response = new MockHttpServletResponse();
