@@ -91,21 +91,21 @@ public abstract class NumberUtils {
 			if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) {
 				raiseOverflowException(number, targetClass);
 			}
-			return (T) new Byte(number.byteValue());
+			return (T) Byte.valueOf(number.byteValue());
 		}
 		else if (Short.class == targetClass) {
 			long value = number.longValue();
 			if (value < Short.MIN_VALUE || value > Short.MAX_VALUE) {
 				raiseOverflowException(number, targetClass);
 			}
-			return (T) new Short(number.shortValue());
+			return (T) Short.valueOf(number.shortValue());
 		}
 		else if (Integer.class == targetClass) {
 			long value = number.longValue();
 			if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
 				raiseOverflowException(number, targetClass);
 			}
-			return (T) new Integer(number.intValue());
+			return (T) Integer.valueOf(number.intValue());
 		}
 		else if (Long.class == targetClass) {
 			BigInteger bigInt = null;
@@ -119,7 +119,7 @@ public abstract class NumberUtils {
 			if (bigInt != null && (bigInt.compareTo(LONG_MIN) < 0 || bigInt.compareTo(LONG_MAX) > 0)) {
 				raiseOverflowException(number, targetClass);
 			}
-			return (T) new Long(number.longValue());
+			return (T) Long.valueOf(number.longValue());
 		}
 		else if (BigInteger.class == targetClass) {
 			if (number instanceof BigDecimal) {
@@ -132,10 +132,10 @@ public abstract class NumberUtils {
 			}
 		}
 		else if (Float.class == targetClass) {
-			return (T) new Float(number.floatValue());
+			return (T) Float.valueOf(number.floatValue());
 		}
 		else if (Double.class == targetClass) {
-			return (T) new Double(number.doubleValue());
+			return (T) Double.valueOf(number.doubleValue());
 		}
 		else if (BigDecimal.class == targetClass) {
 			// always use BigDecimal(String) here to avoid unpredictability of BigDecimal(double)
