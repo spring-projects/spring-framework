@@ -21,7 +21,6 @@ import java.util.Random;
 
 import org.junit.Test;
 
-import org.springframework.http.HttpMethod;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.SocketUtils;
@@ -44,8 +43,7 @@ public abstract class AbstractHttpHandlerServletIntegrationTestCase {
 		RestTemplate restTemplate = new RestTemplate();
 
 		byte[] body = randomBytes();
-		RequestEntity<byte[]>
-				request = new RequestEntity<byte[]>(body, HttpMethod.POST, new URI(url()));
+		RequestEntity<byte[]> request = RequestEntity.post(new URI(url())).body(body);
 		ResponseEntity<byte[]> response = restTemplate.exchange(request, byte[].class);
 
 		assertArrayEquals(body, response.getBody());
@@ -56,7 +54,7 @@ public abstract class AbstractHttpHandlerServletIntegrationTestCase {
 		RestTemplate restTemplate = new RestTemplate();
 
 		String body = randomString();
-		RequestEntity<String> request = new RequestEntity<String>(body, HttpMethod.POST, new URI(url()));
+		RequestEntity<String> request = RequestEntity.post(new URI(url())).body(body);
 		ResponseEntity<String> response = restTemplate.exchange(request, String.class);
 
 		assertEquals(body, response.getBody());

@@ -33,6 +33,7 @@ public class HttpHandlerServletTomcatIntegrationTests extends AbstractHttpHandle
 
 	private static Tomcat tomcatServer;
 
+
 	@BeforeClass
 	public static void startServer() throws LifecycleException, InterruptedException {
 		tomcatServer = new Tomcat();
@@ -43,15 +44,16 @@ public class HttpHandlerServletTomcatIntegrationTests extends AbstractHttpHandle
 		HttpHandlerServlet servlet = new HttpHandlerServlet();
 		servlet.setHandler(new EchoHandler());
 
-		tomcatServer.addServlet(rootCtx, "handlerServlet", servlet);
+		Tomcat.addServlet(rootCtx, "handlerServlet", servlet);
 		rootCtx.addServletMapping("/rx", "handlerServlet");
 
 		tomcatServer.start();
 	}
 
 	@AfterClass
-	public static void stopServer() throws LifecycleException {
+	public static void stopServer() throws Exception {
 		tomcatServer.stop();
+		tomcatServer.destroy();
 	}
 
 	public static void main(String[] args) throws Exception {

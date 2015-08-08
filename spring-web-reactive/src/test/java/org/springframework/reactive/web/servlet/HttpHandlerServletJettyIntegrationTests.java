@@ -50,6 +50,7 @@ public class HttpHandlerServletJettyIntegrationTests
 	@AfterClass
 	public static void stopServer() throws Exception {
 		jettyServer.stop();
+		jettyServer.destroy();
 	}
 
 	public static void main(String[] args) throws Exception {
