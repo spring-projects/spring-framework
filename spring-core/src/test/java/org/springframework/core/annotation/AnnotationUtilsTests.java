@@ -801,6 +801,7 @@ public class AnnotationUtilsTests {
 	public void synthesizeAnnotationWithAttributeAliasForWithMissingDefaultValues() throws Exception {
 		AliasForWithMissingDefaultValues annotation =
 				AliasForWithMissingDefaultValuesClass.class.getAnnotation(AliasForWithMissingDefaultValues.class);
+		exception.expect(AnnotationConfigurationException.class);
 		exception.expectMessage(startsWith("Misconfigured aliases"));
 		exception.expectMessage(containsString(AliasForWithMissingDefaultValues.class.getName()));
 
@@ -817,6 +818,7 @@ public class AnnotationUtilsTests {
 	public void synthesizeAnnotationWithAttributeAliasForAttributeWithDifferentDefaultValue() throws Exception {
 		AliasForAttributeWithDifferentDefaultValue annotation =
 				AliasForAttributeWithDifferentDefaultValueClass.class.getAnnotation(AliasForAttributeWithDifferentDefaultValue.class);
+		exception.expect(AnnotationConfigurationException.class);
 		exception.expectMessage(startsWith("Misconfigured aliases"));
 		exception.expectMessage(containsString(AliasForAttributeWithDifferentDefaultValue.class.getName()));
 
