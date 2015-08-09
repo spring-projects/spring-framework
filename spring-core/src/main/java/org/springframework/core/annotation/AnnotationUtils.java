@@ -1451,6 +1451,7 @@ public abstract class AnnotationUtils {
 		Assert.isTrue(!Annotation.class.equals(targetAnnotationType),
 			"targetAnnotationType must not be java.lang.annotation.Annotation");
 
+		String attributeName = attribute.getName();
 		AliasFor aliasFor = attribute.getAnnotation(AliasFor.class);
 
 		// Nothing to check
@@ -1470,12 +1471,6 @@ public abstract class AnnotationUtils {
 			return null;
 		}
 
-		// Wrong search scope?
-		if (searchWithinSameAnnotation && !sameTargetDeclared) {
-			return null;
-		}
-
-		String attributeName = attribute.getName();
 		String aliasedAttributeName = getAliasedAttributeName(aliasFor, attribute);
 
 		if (!StringUtils.hasText(aliasedAttributeName)) {
@@ -1485,8 +1480,23 @@ public abstract class AnnotationUtils {
 			throw new AnnotationConfigurationException(msg);
 		}
 
-		if (sameTargetDeclared) {
+		if (!sameTargetDeclared) {
+			// Target annotation is not meta-present?
+			if (findAnnotation(sourceAnnotationType, aliasedAnnotationType) == null) {
+				String msg = String.format("@AliasFor declaration on attribute [%s] in annotation [%s] declares "
+						+ "an alias for attribute [%s] in meta-annotation [%s] which is not meta-present.",
+						attributeName, sourceAnnotationType.getName(), aliasedAttributeName,
+						aliasedAnnotationType.getName());
+				throw new AnnotationConfigurationException(msg);
+			}
+		}
+		else {
 			aliasedAnnotationType = sourceAnnotationType;
+		}
+
+		// Wrong search scope?
+		if (searchWithinSameAnnotation && !sameTargetDeclared) {
+			return null;
 		}
 
 		Method aliasedAttribute;

@@ -65,18 +65,18 @@ import java.lang.annotation.Target;
  * <li>Aliased attributes must declare the same return type.</li>
  * <li>Aliased attributes must declare a default value.</li>
  * <li>Aliased attributes must declare the same default value.</li>
- * <li>The {@link #annotation} attribute may remain set to the default,
- * although setting it to the declaring class for both attributes in the
- * pair is also valid.</li>
+ * <li>The {@link #annotation} attribute should remain set to the default.</li>
  * </ol>
  * </li>
  * <li><strong>Alias for attribute in meta-annotation</strong>:
  * <ol>
  * <li>The attribute that is an alias for an attribute in a meta-annotation
- * must be annotated with {@code @AliasFor}; the {@link #attribute} must
- * reference the aliased attribute in the meta-annotation; and the
- * {@link #annotation} must reference the meta-annotation.</li>
+ * must be annotated with {@code @AliasFor}, and the {@link #attribute} must
+ * reference the aliased attribute in the meta-annotation.</li>
  * <li>Aliased attributes must declare the same return type.</li>
+ * <li>The {@link #annotation} must reference the meta-annotation.</li>
+ * <li>The referenced meta-annotation must be <em>meta-present</em> on the
+ * annotation class that declares {@code @AliasFor}.</li>
  * </ol>
  * </li>
  * </ul>

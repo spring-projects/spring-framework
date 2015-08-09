@@ -832,6 +832,18 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
+	public void synthesizeAnnotationWithAttributeAliasForMetaAnnotationThatIsNotMetaPresent() throws Exception {
+		AliasedComposedContextConfigNotMetaPresent annotation = AliasedComposedContextConfigNotMetaPresentClass.class.getAnnotation(AliasedComposedContextConfigNotMetaPresent.class);
+		exception.expect(AnnotationConfigurationException.class);
+		exception.expectMessage(startsWith("@AliasFor declaration on attribute [xmlConfigFile] in annotation"));
+		exception.expectMessage(containsString(AliasedComposedContextConfigNotMetaPresent.class.getName()));
+		exception.expectMessage(containsString("declares an alias for attribute [locations] in meta-annotation"));
+		exception.expectMessage(containsString(ContextConfig.class.getName()));
+		exception.expectMessage(endsWith("which is not meta-present."));
+		synthesizeAnnotation(annotation);
+	}
+
+	@Test
 	public void synthesizeAnnotationWithAttributeAliases() throws Exception {
 		Method method = WebController.class.getMethod("handleMappedWithValueAttribute");
 		WebMapping webMapping = method.getAnnotation(WebMapping.class);
@@ -1659,6 +1671,18 @@ public class AnnotationUtilsTests {
 
 	@AliasForAttributeWithDifferentDefaultValue
 	static class AliasForAttributeWithDifferentDefaultValueClass {
+	}
+
+	// @ContextConfig --> Intentionally NOT meta-present
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface AliasedComposedContextConfigNotMetaPresent {
+
+		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
+		String xmlConfigFile();
+	}
+
+	@AliasedComposedContextConfigNotMetaPresent(xmlConfigFile = "test.xml")
+	static class AliasedComposedContextConfigNotMetaPresentClass {
 	}
 
 	@ContextConfig
