@@ -884,6 +884,64 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
+	public void synthesizeAnnotationFromMapWithNestedMap() throws Exception {
+		ComponentScanSingleFilter componentScan = ComponentScanSingleFilterClass.class.getAnnotation(ComponentScanSingleFilter.class);
+		assertNotNull(componentScan);
+		assertEquals("value from ComponentScan: ", "*Foo", componentScan.value().pattern());
+
+		AnnotationAttributes attributes = getAnnotationAttributes(ComponentScanSingleFilterClass.class, componentScan,
+			false, true);
+		assertNotNull(attributes);
+		assertEquals(ComponentScanSingleFilter.class, attributes.annotationType());
+
+		Map<String, Object> filterMap = (Map<String, Object>) attributes.get("value");
+		assertNotNull(filterMap);
+		assertEquals("*Foo", filterMap.get("pattern"));
+
+		// Modify nested map
+		filterMap.put("pattern", "newFoo");
+		filterMap.put("enigma", 42);
+
+		ComponentScanSingleFilter synthesizedComponentScan = synthesizeAnnotation(attributes,
+			ComponentScanSingleFilter.class, ComponentScanSingleFilterClass.class);
+		assertNotNull(synthesizedComponentScan);
+
+		assertNotSame(componentScan, synthesizedComponentScan);
+		assertEquals("value from synthesized ComponentScan: ", "newFoo", synthesizedComponentScan.value().pattern());
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
+	public void synthesizeAnnotationFromMapWithNestedArrayOfMaps() throws Exception {
+		ComponentScan componentScan = ComponentScanClass.class.getAnnotation(ComponentScan.class);
+		assertNotNull(componentScan);
+
+		AnnotationAttributes attributes = getAnnotationAttributes(ComponentScanClass.class, componentScan, false, true);
+		assertNotNull(attributes);
+		assertEquals(ComponentScan.class, attributes.annotationType());
+
+		Map<String, Object>[] filters = (Map[]) attributes.get("excludeFilters");
+		assertNotNull(filters);
+
+		List<String> patterns = stream(filters).map(m -> (String) m.get("pattern")).collect(toList());
+		assertEquals(asList("*Foo", "*Bar"), patterns);
+
+		// Modify nested maps
+		filters[0].put("pattern", "newFoo");
+		filters[0].put("enigma", 42);
+		filters[1].put("pattern", "newBar");
+		filters[1].put("enigma", 42);
+
+		ComponentScan synthesizedComponentScan = synthesizeAnnotation(attributes, ComponentScan.class, ComponentScanClass.class);
+		assertNotNull(synthesizedComponentScan);
+
+		assertNotSame(componentScan, synthesizedComponentScan);
+		patterns = stream(synthesizedComponentScan.excludeFilters()).map(Filter::pattern).collect(toList());
+		assertEquals(asList("newFoo", "newBar"), patterns);
+	}
+
+	@Test
 	public void synthesizeAnnotationFromDefaultsWithoutAttributeAliases() throws Exception {
 		AnnotationWithDefaults annotationWithDefaults = synthesizeAnnotation(AnnotationWithDefaults.class);
 		assertNotNull(annotationWithDefaults);
@@ -1709,6 +1767,18 @@ public class AnnotationUtilsTests {
 
 	@ComponentScan(excludeFilters = { @Filter(pattern = "*Foo"), @Filter(pattern = "*Bar") })
 	static class ComponentScanClass {
+	}
+
+	/**
+	 * Mock of {@code org.springframework.context.annotation.ComponentScan}
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface ComponentScanSingleFilter {
+		Filter value();
+	}
+
+	@ComponentScanSingleFilter(@Filter(pattern = "*Foo"))
+	static class ComponentScanSingleFilterClass {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)

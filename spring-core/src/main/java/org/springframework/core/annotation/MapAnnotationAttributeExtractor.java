@@ -74,20 +74,24 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 
 
 	/**
-	 * Enrich and validate the supplied {@code attributes} map by ensuring
+	 * Enrich and validate the supplied <em>attributes</em> map by ensuring
 	 * that it contains a non-null entry for each annotation attribute in
 	 * the specified {@code annotationType} and that the type of the entry
 	 * matches the return type for the corresponding annotation attribute.
+	 * <p>If an entry is a map (presumably of annotation attributes), an
+	 * attempt will be made to synthesize an annotation from it. Similarly,
+	 * if an entry is an array of maps, an attempt will be made to synthesize
+	 * an array of annotations from those maps.
 	 * <p>If an attribute is missing in the supplied map, it will be set
-	 * either to value of its alias (if an alias value exists) or to the
+	 * either to the value of its alias (if an alias exists) or to the
 	 * value of the attribute's default value (if defined), and otherwise
 	 * an {@link IllegalArgumentException} will be thrown.
-	 * @see AliasFor
 	 */
+	@SuppressWarnings("unchecked")
 	private static Map<String, Object> enrichAndValidateAttributes(
-			Map<String, Object> original, Class<? extends Annotation> annotationType) {
+			Map<String, Object> originalAttributes, Class<? extends Annotation> annotationType) {
 
-		Map<String, Object> attributes = new HashMap<String, Object>(original);
+		Map<String, Object> attributes = new HashMap<String, Object>(originalAttributes);
 		Map<String, String> attributeAliasMap = getAttributeAliasMap(annotationType);
 
 		for (Method attributeMethod : getAttributeMethods(annotationType)) {
@@ -122,13 +126,41 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 					attributes, attributeName, annotationType.getName()));
 			}
 
-			// else, ensure correct type
-			Class<?> returnType = attributeMethod.getReturnType();
-			if (!ClassUtils.isAssignable(returnType, attributeValue.getClass())) {
-				throw new IllegalArgumentException(String.format(
-					"Attributes map [%s] returned a value of type [%s] for attribute [%s], "
-							+ "but a value of type [%s] is required as defined by annotation type [%s].", attributes,
-					attributeValue.getClass().getName(), attributeName, returnType.getName(), annotationType.getName()));
+			// finally, ensure correct type
+			Class<?> requiredReturnType = attributeMethod.getReturnType();
+			Class<? extends Object> actualReturnType = attributeValue.getClass();
+			if (!ClassUtils.isAssignable(requiredReturnType, actualReturnType)) {
+				boolean converted = false;
+
+				// Nested map representing a single annotation?
+				if (Annotation.class.isAssignableFrom(requiredReturnType)
+						&& Map.class.isAssignableFrom(actualReturnType)) {
+
+					Class<? extends Annotation> nestedAnnotationType = (Class<? extends Annotation>) requiredReturnType;
+					Map<String, Object> map = (Map<String, Object>) attributeValue;
+					attributes.put(attributeName, synthesizeAnnotation(map, nestedAnnotationType, null));
+					converted = true;
+				}
+
+				// Nested array of maps representing an array of annotations?
+				else if (requiredReturnType.isArray()
+						&& Annotation.class.isAssignableFrom(requiredReturnType.getComponentType())
+						&& actualReturnType.isArray()
+						&& Map.class.isAssignableFrom(actualReturnType.getComponentType())) {
+
+					Class<? extends Annotation> nestedAnnotationType = (Class<? extends Annotation>) requiredReturnType.getComponentType();
+					Map<String, Object>[] maps = (Map<String, Object>[]) attributeValue;
+					attributes.put(attributeName, synthesizeAnnotationArray(maps, nestedAnnotationType));
+					converted = true;
+				}
+
+				if (!converted) {
+					throw new IllegalArgumentException(String.format(
+							"Attributes map [%s] returned a value of type [%s] for attribute [%s], "
+							+ "but a value of type [%s] is required as defined by annotation type [%s].",
+							attributes, actualReturnType.getName(), attributeName, requiredReturnType.getName(),
+							annotationType.getName()));
+				}
 			}
 		}
 

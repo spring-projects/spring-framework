@@ -1242,7 +1242,9 @@ public abstract class AnnotationUtils {
 	 * that are annotated with {@link AliasFor @AliasFor}.
 	 * <p>The supplied map must contain a key-value pair for every attribute
 	 * defined in the supplied {@code annotationType} that is not aliased or
-	 * does not have a default value.
+	 * does not have a default value. Nested maps and nested arrays of maps
+	 * will be recursively synthesized into nested annotations or nested
+	 * arrays of annotations, respectively.
 	 * <p>Note that {@link AnnotationAttributes} is a specialized type of
 	 * {@link Map} that is an ideal candidate for this method's
 	 * {@code attributes} argument.
@@ -1259,6 +1261,8 @@ public abstract class AnnotationUtils {
 	 * @since 4.2
 	 * @see #synthesizeAnnotation(Annotation, AnnotatedElement)
 	 * @see #synthesizeAnnotation(Class)
+	 * @see #getAnnotationAttributes(AnnotatedElement, Annotation)
+	 * @see #getAnnotationAttributes(AnnotatedElement, Annotation, boolean, boolean)
 	 */
 	@SuppressWarnings("unchecked")
 	public static <A extends Annotation> A synthesizeAnnotation(Map<String, Object> attributes,
@@ -1298,10 +1302,10 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * <em>Synthesize</em> the supplied array of {@code annotations} by
-	 * creating a new array of the same size and type and populating it
-	 * with {@linkplain #synthesizeAnnotation(Annotation) synthesized}
-	 * versions of the annotations from the input array.
+	 * <em>Synthesize</em> an array of annotations from the supplied array
+	 * of {@code annotations} by creating a new array of the same size and
+	 * type and populating it with {@linkplain #synthesizeAnnotation(Annotation)
+	 * synthesized} versions of the annotations from the input array.
 	 * @param annotations the array of annotations to synthesize
 	 * @param annotatedElement the element that is annotated with the supplied
 	 * array of annotations; may be {@code null} if unknown
@@ -1322,6 +1326,38 @@ public abstract class AnnotationUtils {
 				annotations.getClass().getComponentType(), annotations.length);
 		for (int i = 0; i < annotations.length; i++) {
 			synthesized[i] = synthesizeAnnotation(annotations[i], annotatedElement);
+		}
+		return synthesized;
+	}
+
+	/**
+	 * <em>Synthesize</em> an array of annotations from the supplied array
+	 * of {@code maps} of annotation attributes by creating a new array of
+	 * {@code annotationType} with the same size and populating it with
+	 * {@linkplain #synthesizeAnnotation(Map, Class, AnnotatedElement)
+	 * synthesized} versions of the maps from the input array.
+	 * @param maps the array of maps of annotation attributes to synthesize
+	 * @param annotationType the type of annotations to synthesize; never
+	 * {@code null}
+	 * @return a new array of synthesized annotations, or {@code null} if
+	 * the supplied array is {@code null}
+	 * @throws AnnotationConfigurationException if invalid configuration of
+	 * {@code @AliasFor} is detected
+	 * @since 4.2.1
+	 * @see #synthesizeAnnotation(Map, Class, AnnotatedElement)
+	 * @see #synthesizeAnnotationArray(Annotation[], AnnotatedElement)
+	 */
+	@SuppressWarnings("unchecked")
+	static <A extends Annotation> A[] synthesizeAnnotationArray(Map<String, Object>[] maps, Class<A> annotationType) {
+		Assert.notNull(annotationType, "annotationType must not be null");
+
+		if (maps == null) {
+			return null;
+		}
+
+		A[] synthesized = (A[]) Array.newInstance(annotationType, maps.length);
+		for (int i = 0; i < maps.length; i++) {
+			synthesized[i] = synthesizeAnnotation(maps[i], annotationType, null);
 		}
 		return synthesized;
 	}
