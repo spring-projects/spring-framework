@@ -38,7 +38,7 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
  * @see DefaultAnnotationAttributeExtractor
  * @see AnnotationUtils#synthesizeAnnotation(Map, Class, AnnotatedElement)
  */
-class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttributeExtractor {
+class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttributeExtractor<Map<String, Object>> {
 
 	/**
 	 * Construct a new {@code MapAnnotationAttributeExtractor}.
@@ -57,14 +57,9 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 	}
 
 
-	@SuppressWarnings("unchecked")
-	public Map<String, Object> getSource() {
-		return (Map<String, Object>) super.getSource();
-	}
-
 	@Override
 	protected Object getRawAttributeValue(Method attributeMethod) {
-		return getSource().get(attributeMethod.getName());
+		return getRawAttributeValue(attributeMethod.getName());
 	}
 
 	@Override

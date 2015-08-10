@@ -31,17 +31,18 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Sam Brannen
  * @since 4.2
+ * @param <S> the type of source supported by this extractor
  * @see Annotation
  * @see AliasFor
  * @see AnnotationUtils#synthesizeAnnotation(Annotation, AnnotatedElement)
  */
-abstract class AbstractAliasAwareAnnotationAttributeExtractor implements AnnotationAttributeExtractor {
+abstract class AbstractAliasAwareAnnotationAttributeExtractor<S> implements AnnotationAttributeExtractor<S> {
 
 	private final Class<? extends Annotation> annotationType;
 
 	private final AnnotatedElement annotatedElement;
 
-	private final Object source;
+	private final S source;
 
 	private final Map<String, String> attributeAliasMap;
 
@@ -54,7 +55,7 @@ abstract class AbstractAliasAwareAnnotationAttributeExtractor implements Annotat
 	 * @param source the underlying source of annotation attributes; never {@code null}
 	 */
 	AbstractAliasAwareAnnotationAttributeExtractor(Class<? extends Annotation> annotationType,
-			AnnotatedElement annotatedElement, Object source) {
+			AnnotatedElement annotatedElement, S source) {
 
 		Assert.notNull(annotationType, "annotationType must not be null");
 		Assert.notNull(source, "source must not be null");
@@ -76,7 +77,7 @@ abstract class AbstractAliasAwareAnnotationAttributeExtractor implements Annotat
 	}
 
 	@Override
-	public Object getSource() {
+	public final S getSource() {
 		return this.source;
 	}
 

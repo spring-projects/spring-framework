@@ -34,7 +34,7 @@ import org.springframework.util.ReflectionUtils;
  * @see MapAnnotationAttributeExtractor
  * @see AnnotationUtils#synthesizeAnnotation(Annotation, AnnotatedElement)
  */
-class DefaultAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttributeExtractor {
+class DefaultAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttributeExtractor<Annotation> {
 
 	/**
 	 * Construct a new {@code DefaultAnnotationAttributeExtractor}.
@@ -48,11 +48,6 @@ class DefaultAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAt
 
 
 	@Override
-	public Annotation getSource() {
-		return (Annotation) super.getSource();
-	}
-
-	@Override
 	protected Object getRawAttributeValue(Method attributeMethod) {
 		ReflectionUtils.makeAccessible(attributeMethod);
 		return ReflectionUtils.invokeMethod(attributeMethod, getSource());
@@ -60,7 +55,7 @@ class DefaultAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAt
 
 	@Override
 	protected Object getRawAttributeValue(String attributeName) {
-		Method attributeMethod = ReflectionUtils.findMethod(getSource().annotationType(), attributeName);
+		Method attributeMethod = ReflectionUtils.findMethod(getAnnotationType(), attributeName);
 		return getRawAttributeValue(attributeMethod);
 	}
 

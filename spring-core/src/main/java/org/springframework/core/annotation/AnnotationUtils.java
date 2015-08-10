@@ -1225,7 +1225,7 @@ public abstract class AnnotationUtils {
 			return annotation;
 		}
 
-		AnnotationAttributeExtractor attributeExtractor =
+		DefaultAnnotationAttributeExtractor attributeExtractor =
 				new DefaultAnnotationAttributeExtractor(annotation, annotatedElement);
 		InvocationHandler handler = new SynthesizedAnnotationInvocationHandler(attributeExtractor);
 		A synthesizedAnnotation = (A) Proxy.newProxyInstance(ClassUtils.getDefaultClassLoader(),
@@ -1273,7 +1273,7 @@ public abstract class AnnotationUtils {
 			return null;
 		}
 
-		AnnotationAttributeExtractor attributeExtractor =
+		MapAnnotationAttributeExtractor attributeExtractor =
 				new MapAnnotationAttributeExtractor(attributes, annotationType, annotatedElement);
 		InvocationHandler handler = new SynthesizedAnnotationInvocationHandler(attributeExtractor);
 		A synthesizedAnnotation = (A) Proxy.newProxyInstance(ClassUtils.getDefaultClassLoader(),

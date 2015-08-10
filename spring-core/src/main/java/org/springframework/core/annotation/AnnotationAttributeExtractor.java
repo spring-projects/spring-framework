@@ -28,9 +28,10 @@ import java.lang.reflect.Method;
  *
  * @author Sam Brannen
  * @since 4.2
+ * @param <S> the type of source supported by this extractor
  * @see SynthesizedAnnotationInvocationHandler
  */
-interface AnnotationAttributeExtractor {
+interface AnnotationAttributeExtractor<S> {
 
 	/**
 	 * Get the type of annotation that this extractor extracts attribute
@@ -48,7 +49,7 @@ interface AnnotationAttributeExtractor {
 	/**
 	 * Get the underlying source of annotation attributes.
 	 */
-	Object getSource();
+	S getSource();
 
 	/**
 	 * Get the attribute value from the underlying {@linkplain #getSource source}

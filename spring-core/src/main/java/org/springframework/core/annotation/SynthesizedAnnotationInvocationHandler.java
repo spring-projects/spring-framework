@@ -45,7 +45,7 @@ import static org.springframework.util.ReflectionUtils.*;
  */
 class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 
-	private final AnnotationAttributeExtractor attributeExtractor;
+	private final AnnotationAttributeExtractor<?> attributeExtractor;
 
 	private final Map<String, Object> valueCache = new ConcurrentHashMap<String, Object>(8);
 
@@ -55,7 +55,7 @@ class SynthesizedAnnotationInvocationHandler implements InvocationHandler {
 	 * the supplied {@link AnnotationAttributeExtractor}.
 	 * @param attributeExtractor the extractor to delegate to
 	 */
-	SynthesizedAnnotationInvocationHandler(AnnotationAttributeExtractor attributeExtractor) {
+	SynthesizedAnnotationInvocationHandler(AnnotationAttributeExtractor<?> attributeExtractor) {
 		Assert.notNull(attributeExtractor, "AnnotationAttributeExtractor must not be null");
 		this.attributeExtractor = attributeExtractor;
 	}
