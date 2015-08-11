@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
@@ -242,7 +241,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @param mapping the mapping conditions associated with the handler method
 	 * @throws IllegalStateException if another method was already registered
 	 * under the same mapping
-	 * @deprecated as of 4.2 you can invoke the public methods
+	 * @deprecated as of 4.2. You can now invoke the public methods
 	 * {@link #registerMapping(Object, Object, Method)} and
 	 * {@link #unregisterMapping(Object)} during initialization or at runtime,
 	 * i.e. after initialization is complete.

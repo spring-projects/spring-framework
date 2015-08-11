@@ -114,7 +114,6 @@ public class MvcUriComponentsBuilder {
 
 	/**
 	 * Default constructor. Protected to prevent direct instantiation.
-	 *
 	 * @see #fromController(Class)
 	 * @see #fromMethodName(Class, String, Object...)
 	 * @see #fromMethodCall(Object)
@@ -271,7 +270,6 @@ public class MvcUriComponentsBuilder {
 
 	/**
 	 * Create a URL from the name of a Spring MVC controller method's request mapping.
-	 *
 	 * <p>The configured
 	 * {@link org.springframework.web.servlet.handler.HandlerMethodMappingNamingStrategy
 	 * HandlerMethodMappingNamingStrategy} determines the names of controller
@@ -282,11 +280,9 @@ public class MvcUriComponentsBuilder {
 	 * naming convention does not produce unique results, an explicit name may
 	 * be assigned through the name attribute of the {@code @RequestMapping}
 	 * annotation.
-	 *
 	 * <p>This is aimed primarily for use in view rendering technologies and EL
 	 * expressions. The Spring URL tag library registers this method as a function
 	 * called "mvcUrl".
-	 *
 	 * <p>For example, given this controller:
 	 * <pre class="code">
 	 * &#064;RequestMapping("/people")
@@ -305,10 +301,8 @@ public class MvcUriComponentsBuilder {
 	 *
 	 * &lt;a href="${s:mvcUrl('PC#getPerson').arg(0,"123").build()}"&gt;Get Person&lt;/a&gt;
 	 * </pre>
-	 *
 	 * <p>Note that it's not necessary to specify all arguments. Only the ones
 	 * required to prepare the URL, mainly {@code @RequestParam} and {@code @PathVariable}).
-	 *
 	 * @param mappingName the mapping name
 	 * @return a builder to to prepare the URI String
 	 * @throws IllegalArgumentException if the mapping name is not found or
@@ -360,6 +354,7 @@ public class MvcUriComponentsBuilder {
 	 * @param method the controller method
 	 * @param args argument values for the controller method
 	 * @return a UriComponentsBuilder instance, never {@code null}
+	 * @since 4.2
 	 */
 	public static UriComponentsBuilder fromMethod(Class<?> controllerType, Method method, Object... args) {
 		return fromMethodInternal(null, controllerType, method, args);
@@ -376,18 +371,21 @@ public class MvcUriComponentsBuilder {
 	 * @param controllerType the controller type
 	 * @param method the controller method
 	 * @param args argument values for the controller method
-	 * @return a UriComponentsBuilder instance, never {@code null}
+	 * @return a UriComponentsBuilder instance (never {@code null})
+	 * @since 4.2
 	 */
 	public static UriComponentsBuilder fromMethod(UriComponentsBuilder baseUrl,
 			Class<?> controllerType, Method method, Object... args) {
 
-		return fromMethodInternal(baseUrl, method.getDeclaringClass(), method, args);
+		return fromMethodInternal(baseUrl,
+				(controllerType != null ? controllerType : method.getDeclaringClass()), method, args);
 	}
 
 	/**
-	 * See {@link #fromMethod(Class, Method, Object...)}.
-	 * @deprecated as of 4.2 this is deprecated in favor of the overloaded
-	 * method that also accepts a controllerType.
+	 * @see #fromMethod(Class, Method, Object...)
+	 * @see #fromMethod(UriComponentsBuilder, Class, Method, Object...)
+	 * @deprecated as of 4.2, this is deprecated in favor of the overloaded
+	 * method that also accepts a controllerType argument
 	 */
 	@Deprecated
 	public static UriComponentsBuilder fromMethod(Method method, Object... args) {
@@ -643,6 +641,7 @@ public class MvcUriComponentsBuilder {
 	/**
 	 * An alternative to {@link #fromController(Class)} for use with an instance
 	 * of this class created via a call to {@link #relativeTo}.
+	 * @since 4.2
 	 */
 	public UriComponentsBuilder withController(Class<?> controllerType) {
 		return fromController(this.baseUrl, controllerType);
@@ -651,6 +650,7 @@ public class MvcUriComponentsBuilder {
 	/**
 	 * An alternative to {@link #fromMethodName(Class, String, Object...)}} for
 	 * use with an instance of this class created via {@link #relativeTo}.
+	 * @since 4.2
 	 */
 	public UriComponentsBuilder withMethodName(Class<?> controllerType, String methodName, Object... args) {
 		return fromMethodName(this.baseUrl, controllerType, methodName, args);
@@ -659,6 +659,7 @@ public class MvcUriComponentsBuilder {
 	/**
 	 * An alternative to {@link #fromMethodCall(Object)} for use with an instance
 	 * of this class created via {@link #relativeTo}.
+	 * @since 4.2
 	 */
 	public UriComponentsBuilder withMethodCall(Object invocationInfo) {
 		return fromMethodCall(this.baseUrl, invocationInfo);
@@ -667,6 +668,7 @@ public class MvcUriComponentsBuilder {
 	/**
 	 * An alternative to {@link #fromMappingName(String)} for use with an instance
 	 * of this class created via {@link #relativeTo}.
+	 * @since 4.2
 	 */
 	public MethodArgumentBuilder withMappingName(String mappingName) {
 		return fromMappingName(this.baseUrl, mappingName);
@@ -675,6 +677,7 @@ public class MvcUriComponentsBuilder {
 	/**
 	 * An alternative to {@link #fromMethod(Class, Method, Object...)}
 	 * for use with an instance of this class created via {@link #relativeTo}.
+	 * @since 4.2
 	 */
 	public UriComponentsBuilder withMethod(Class<?> controllerType, Method method, Object... args) {
 		return fromMethod(this.baseUrl, controllerType, method, args);
@@ -752,11 +755,16 @@ public class MvcUriComponentsBuilder {
 
 		private final UriComponentsBuilder baseUrl;
 
-
+		/**
+		 * @since 4.2
+		 */
 		public MethodArgumentBuilder(Class<?> controllerType, Method method) {
 			this(null, controllerType, method);
 		}
 
+		/**
+		 * @since 4.2
+		 */
 		public MethodArgumentBuilder(UriComponentsBuilder baseUrl, Class<?> controllerType, Method method) {
 			Assert.notNull(controllerType, "'controllerType' is required");
 			Assert.notNull(method, "'method' is required");
@@ -769,20 +777,20 @@ public class MvcUriComponentsBuilder {
 			}
 		}
 
-		private static UriComponentsBuilder initBaseUrl() {
-			UriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentServletMapping();
-			return UriComponentsBuilder.fromPath(builder.build().getPath());
-		}
-
 		/**
-		 * @deprecated as of 4.2 deprecated in favor of alternative constructors
-		 * that accept the controllerType.
+		 * @see #MethodArgumentBuilder(Class, Method)
+		 * @deprecated as of 4.2, this is deprecated in favor of alternative constructors
+		 * that accept a controllerType argument
 		 */
 		@Deprecated
 		public MethodArgumentBuilder(Method method) {
 			this(method.getDeclaringClass(), method);
 		}
 
+		private static UriComponentsBuilder initBaseUrl() {
+			UriComponentsBuilder builder = ServletUriComponentsBuilder.fromCurrentServletMapping();
+			return UriComponentsBuilder.fromPath(builder.build().getPath());
+		}
 
 		public MethodArgumentBuilder arg(int index, Object value) {
 			this.argumentValues[index] = value;

@@ -31,7 +31,7 @@ import org.springframework.web.util.WebUtils;
  * @author Juergen Hoeller
  * @author Arjen Poutsma
  * @since 2.5.2
- * @deprecated as of 3.2, together with {@link DefaultAnnotationHandlerMapping},
+ * @deprecated as of Spring 3.2, together with {@link DefaultAnnotationHandlerMapping},
  * {@link AnnotationMethodHandlerAdapter}, and {@link AnnotationMethodHandlerExceptionResolver}.
  */
 @Deprecated
@@ -153,7 +153,7 @@ abstract class ServletAnnotationMappingUtils {
 	}
 
 	private static boolean isMediaTypeHeader(String headerName) {
-		return "Accept".equalsIgnoreCase(headerName) || "Content-Type".equalsIgnoreCase(headerName);
+		return ("Accept".equalsIgnoreCase(headerName) || "Content-Type".equalsIgnoreCase(headerName));
 	}
 
 }
