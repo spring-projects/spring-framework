@@ -15,6 +15,7 @@ apply plugin: 'propdeps-maven'
 
 repositories {
 	mavenCentral()
+	maven { url 'https://oss.jfrog.org/libs-snapshot' }  // RxNetty 0.5.x snapshots
 }
 
 dependencies {
@@ -23,6 +24,9 @@ dependencies {
 	compile "org.reactivestreams:reactive-streams:1.0.0"
 	compile "org.slf4j:slf4j-api:1.7.6"
 	compile "ch.qos.logback:logback-classic:1.1.2"
+
+	optional "io.reactivex:rxnetty:0.5.0-SNAPSHOT"
+	optional "io.reactivex:rxjava-reactive-streams:1.0.1"
 
 	provided "javax.servlet:javax.servlet-api:3.1.0"
 
