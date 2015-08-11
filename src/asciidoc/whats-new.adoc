@@ -424,6 +424,9 @@ method has been added.
    `@EventListener`, `@TransactionalEventListener`.
 ** For example, `@ContextConfiguration` from the `spring-test` module
    is now declared as follows:
+
++
+
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -438,6 +441,9 @@ public @interface ContextConfiguration {
     // ...
 }
 ----
+
++
+
 ** Similarly, _composed annotations_ that override attributes from
    meta-annotations can now use `@AliasFor` for fine-grained control
    over exactly which attributes are overridden within an annotation
@@ -445,6 +451,9 @@ public @interface ContextConfiguration {
    `value` attribute of a meta-annotation.
 ** For example, one can now develop a composed annotation with a custom
    attribute override as follows.
+
++
+
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -457,6 +466,9 @@ public @interface MyTestConfig {
     // ...
 }
 ----
+
++
+
 ** See <<annotation-programming-model,Spring Annotation Programming Model>>.
 * Numerous improvements to Spring's search algorithms used for finding
   meta-annotations. For example, locally declared _composed annotations_
