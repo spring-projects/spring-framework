@@ -24,12 +24,13 @@ import org.apache.catalina.startup.Tomcat;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
+import org.springframework.reactive.web.AbstractHttpHandlerIntegrationTestCase;
 import org.springframework.reactive.web.EchoHandler;
 
 /**
  * @author Arjen Poutsma
  */
-public class HttpHandlerServletTomcatIntegrationTests extends AbstractHttpHandlerServletIntegrationTestCase {
+public class HttpHandlerTomcatIntegrationTests extends AbstractHttpHandlerIntegrationTestCase {
 
 	private static Tomcat tomcatServer;
 

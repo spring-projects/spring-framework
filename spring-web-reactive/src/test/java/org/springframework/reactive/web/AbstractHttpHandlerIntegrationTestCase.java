@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.reactive.web.servlet;
+package org.springframework.reactive.web;
 
 import java.net.URI;
 import java.util.Random;
@@ -29,7 +29,7 @@ import org.springframework.web.client.RestTemplate;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-public abstract class AbstractHttpHandlerServletIntegrationTestCase {
+public abstract class AbstractHttpHandlerIntegrationTestCase {
 
 	private static final int REQUEST_SIZE = 4096 * 3;
 

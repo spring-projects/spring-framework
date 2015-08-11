@@ -30,8 +30,8 @@ public class CountingHttpHandler implements HttpHandler {
 	private static final Log logger = LogFactory.getLog(CountingHttpHandler.class);
 
 	@Override
-	public Publisher<byte[]> handle(Publisher<byte[]> request) {
-		request.subscribe(new Subscriber<byte[]>() {
+	public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
+		request.getBody().subscribe(new Subscriber<byte[]>() {
 			private Subscription subscription;
 
 			private int byteCount = 0;

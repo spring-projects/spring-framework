@@ -24,41 +24,82 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.reactivestreams.Publisher;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 
 import org.springframework.reactive.web.HttpHandler;
 
 /**
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  */
 @WebServlet(asyncSupported = true )
 public class HttpHandlerServlet extends HttpServlet {
 
 	private static final int BUFFER_SIZE = 8192;
 
+	private static Log logger = LogFactory.getLog(HttpHandlerServlet.class);
+
+
 	private HttpHandler handler;
+
 
 	public void setHandler(HttpHandler handler) {
 		this.handler = handler;
 	}
+
 
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
 		AsyncContext context = request.startAsync();
-		final AsyncContextSynchronizer contextSynchronizer =
-				new AsyncContextSynchronizer(context);
+		AsyncContextSynchronizer contextSynchronizer = new AsyncContextSynchronizer(context);
 
 		RequestBodyPublisher requestPublisher = new RequestBodyPublisher(contextSynchronizer, BUFFER_SIZE);
 		request.getInputStream().setReadListener(requestPublisher);
+		ServletServerHttpRequest httpRequest = new ServletServerHttpRequest(request, requestPublisher);
 
 		ResponseBodySubscriber responseSubscriber = new ResponseBodySubscriber(contextSynchronizer);
 		response.getOutputStream().setWriteListener(responseSubscriber);
+		ServletServerHttpResponse httpResponse = new ServletServerHttpResponse(response, responseSubscriber);
 
-		Publisher<byte[]> responsePublisher = this.handler.handle(requestPublisher);
-
-		responsePublisher.subscribe(responseSubscriber);
+		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber(contextSynchronizer);
+		this.handler.handle(httpRequest, httpResponse).subscribe(resultSubscriber);
 	}
 
+
+	private static class HandlerResultSubscriber implements Subscriber<Void> {
+
+		private final AsyncContextSynchronizer synchronizer;
+
+
+		public HandlerResultSubscriber(AsyncContextSynchronizer synchronizer) {
+			this.synchronizer = synchronizer;
+		}
+
+
+		@Override
+		public void onSubscribe(Subscription subscription) {
+			subscription.request(Long.MAX_VALUE);
+		}
+
+		@Override
+		public void onNext(Void aVoid) {
+			// no op
+		}
+
+		@Override
+		public void onError(Throwable ex) {
+			logger.error("Error from request handling. Completing the request.", ex);
+			this.synchronizer.complete();
+		}
+
+		@Override
+		public void onComplete() {
+			this.synchronizer.complete();
+		}
+	}
 }

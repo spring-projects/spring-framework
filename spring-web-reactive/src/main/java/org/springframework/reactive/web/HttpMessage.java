@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.reactive.web;
 
-import org.reactivestreams.Publisher;
+import java.net.URI;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 
 /**
- * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
-public interface HttpHandler {
+public interface HttpMessage {
 
-	Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response);
+	HttpHeaders getHeaders();
 
 }

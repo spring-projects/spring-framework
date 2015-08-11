@@ -97,4 +97,9 @@ final class AsyncContextSynchronizer {
 			this.complete.compareAndSet(NONE_COMPLETE, WRITE_COMPLETE);
 		}
 	}
+
+	public void complete() {
+		readComplete();
+		writeComplete();
+	}
 }

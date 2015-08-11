@@ -19,6 +19,7 @@ repositories {
 
 dependencies {
 	compile "org.springframework:spring-core:4.2.0.RELEASE"
+	compile "org.springframework:spring-web:4.2.0.RELEASE"
 	compile "org.reactivestreams:reactive-streams:1.0.0"
 	compile "org.slf4j:slf4j-api:1.7.6"
 	compile "ch.qos.logback:logback-classic:1.1.2"
@@ -26,7 +27,6 @@ dependencies {
 	provided "javax.servlet:javax.servlet-api:3.1.0"
 
 	testCompile "junit:junit:4.12"
-	testCompile "org.springframework:spring-web:4.2.0.RELEASE"
 	testCompile "org.springframework:spring-test:4.2.0.RELEASE"
 
 	testCompile 'org.apache.tomcat:tomcat-util:8.0.24'

@@ -13,17 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.reactive.web;
 
 import org.reactivestreams.Publisher;
 
+import org.springframework.http.HttpStatus;
+
 /**
- * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
-public interface HttpHandler {
+public interface ServerHttpResponse extends HttpMessage {
 
-	Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response);
+	void setStatusCode(HttpStatus status);
+
+	Publisher<Void> writeWith(Publisher<byte[]> contentPublisher);
 
 }

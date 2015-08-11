@@ -23,13 +23,14 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
+import org.springframework.reactive.web.AbstractHttpHandlerIntegrationTestCase;
 import org.springframework.reactive.web.EchoHandler;
 
 /**
  * @author Arjen Poutsma
  */
-public class HttpHandlerServletJettyIntegrationTests
-		extends AbstractHttpHandlerServletIntegrationTestCase {
+public class HttpHandlerJettyIntegrationTests
+		extends AbstractHttpHandlerIntegrationTestCase {
 
 	private static Server jettyServer;
 

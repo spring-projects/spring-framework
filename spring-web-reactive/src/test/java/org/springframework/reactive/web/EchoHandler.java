@@ -24,7 +24,7 @@ import org.reactivestreams.Publisher;
 public class EchoHandler implements HttpHandler {
 
 	@Override
-	public Publisher<byte[]> handle(Publisher<byte[]> request) {
-		return request;
+	public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
+		return response.writeWith(request.getBody());
 	}
 }
