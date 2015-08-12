@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,10 @@ package org.springframework.core;
  * @author Juergen Hoeller
  * @author Rick Evans
  * @author Sam Brannen
+ * @deprecated as of Spring 4.2.1, in favor of direct checks for the desired
+ * JDK API variants via reflection
  */
+@Deprecated
 public abstract class JdkVersion {
 
 	/**

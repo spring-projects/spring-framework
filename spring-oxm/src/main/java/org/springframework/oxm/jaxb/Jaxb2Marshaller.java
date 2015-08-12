@@ -80,7 +80,6 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.JdkVersion;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.oxm.GenericMarshaller;
@@ -577,27 +576,28 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public boolean supports(Type genericType) {
 		if (genericType instanceof ParameterizedType) {
 			ParameterizedType parameterizedType = (ParameterizedType) genericType;
 			if (JAXBElement.class == parameterizedType.getRawType() &&
 					parameterizedType.getActualTypeArguments().length == 1) {
+				boolean isJdk6 = (org.springframework.core.JdkVersion.getMajorJavaVersion() <= org.springframework.core.JdkVersion.JAVA_16);
 				Type typeArgument = parameterizedType.getActualTypeArguments()[0];
 				if (typeArgument instanceof Class) {
 					Class<?> classArgument = (Class<?>) typeArgument;
-					if (JdkVersion.getMajorJavaVersion() >= JdkVersion.JAVA_17 && classArgument.isArray()) {
-						return classArgument.getComponentType().equals(Byte.TYPE);
-					}
-					else {
+					if (isJdk6 && classArgument.isArray()) {
 						return (isPrimitiveWrapper(classArgument) || isStandardClass(classArgument) ||
 								supportsInternal(classArgument, false));
 					}
+					else {
+						return (classArgument.getComponentType() == Byte.TYPE);
+					}
 				}
-				else if (JdkVersion.getMajorJavaVersion() <= JdkVersion.JAVA_16 &&
-						typeArgument instanceof GenericArrayType) {
+				else if (isJdk6 && typeArgument instanceof GenericArrayType) {
 					// see http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=5041784
 					GenericArrayType arrayType = (GenericArrayType) typeArgument;
-					return arrayType.getGenericComponentType().equals(Byte.TYPE);
+					return (arrayType.getGenericComponentType() == Byte.TYPE);
 				}
 			}
 		}
