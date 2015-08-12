@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,12 @@
 package org.springframework.util;
 
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.util.Random;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
 import javax.net.ServerSocketFactory;
 
 /**
@@ -34,6 +36,7 @@ import javax.net.ServerSocketFactory;
  * @author Ben Hale
  * @author Arjen Poutsma
  * @author Gunnar Hillert
+ * @author Gary Russell
  * @since 4.0
  */
 public class SocketUtils {
@@ -196,7 +199,8 @@ public class SocketUtils {
 			@Override
 			protected boolean isPortAvailable(int port) {
 				try {
-					ServerSocket serverSocket = ServerSocketFactory.getDefault().createServerSocket(port);
+					ServerSocket serverSocket = ServerSocketFactory.getDefault().createServerSocket(
+							port, 1, InetAddress.getByName("localhost"));
 					serverSocket.close();
 					return true;
 				}
@@ -210,7 +214,7 @@ public class SocketUtils {
 			@Override
 			protected boolean isPortAvailable(int port) {
 				try {
-					DatagramSocket socket = new DatagramSocket(port);
+					DatagramSocket socket = new DatagramSocket(port, InetAddress.getByName("localhost"));
 					socket.close();
 					return true;
 				}
