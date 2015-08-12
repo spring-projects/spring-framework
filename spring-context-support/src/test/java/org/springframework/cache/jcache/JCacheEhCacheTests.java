@@ -55,7 +55,9 @@ public class JCacheEhCacheTests extends AbstractAnnotationTests {
 
 	@After
 	public void shutdown() {
-		jCacheManager.close();
+		if (jCacheManager != null) {
+			jCacheManager.close();
+		}
 	}
 
 
