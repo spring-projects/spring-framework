@@ -24,10 +24,10 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.converter.AbstractMessageConverter;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.messaging.converter.SimpleMessageConverter;
+import org.springframework.messaging.converter.SmartMessageConverter;
 import org.springframework.util.Assert;
 
 /**
@@ -167,8 +167,8 @@ public abstract class AbstractMessageSendingTemplate<D> implements MessageSendin
 		}
 
 		MessageConverter converter = getMessageConverter();
-		Message<?> message = (converter instanceof AbstractMessageConverter ?
-				((AbstractMessageConverter) converter).toMessage(payload, messageHeaders, conversionHint) :
+		Message<?> message = (converter instanceof SmartMessageConverter ?
+				((SmartMessageConverter) converter).toMessage(payload, messageHeaders, conversionHint) :
 				converter.toMessage(payload, messageHeaders));
 		if (message == null) {
 			String payloadType = (payload != null ? payload.getClass().getName() : null);

@@ -21,9 +21,9 @@ import java.lang.annotation.Annotation;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.messaging.Message;
-import org.springframework.messaging.converter.AbstractMessageConverter;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.converter.SmartMessageConverter;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.util.Assert;
@@ -111,8 +111,8 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 			return payload;
 		}
 		else {
-			payload = (this.converter instanceof AbstractMessageConverter ?
-					((AbstractMessageConverter) this.converter).fromMessage(message, targetClass, parameter) :
+			payload = (this.converter instanceof SmartMessageConverter ?
+					((SmartMessageConverter) this.converter).fromMessage(message, targetClass, parameter) :
 					this.converter.fromMessage(message, targetClass));
 			if (payload == null) {
 				throw new MessageConversionException(message,
