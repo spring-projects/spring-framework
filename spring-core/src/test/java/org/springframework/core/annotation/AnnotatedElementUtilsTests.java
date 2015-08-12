@@ -530,6 +530,18 @@ public class AnnotatedElementUtilsTests {
 		assertEquals(asList("*Test", "*Tests"), patterns);
 	}
 
+	@Test
+	public void findMergedAnnotationWithLocalAliasesThatConflictWithAttributesInMetaAnnotationByConvention() {
+		final String[] EMPTY = new String[] {};
+		Class<?> element = SpringAppConfigClass.class;
+		ContextConfig contextConfig = findMergedAnnotation(element, ContextConfig.class);
+		assertNotNull("Should find @ContextConfig on " + element, contextConfig);
+		assertArrayEquals("locations for " + element, EMPTY, contextConfig.locations());
+		// 'value' in @SpringAppConfig should not override 'value' in @ContextConfig
+		assertArrayEquals("value for " + element, EMPTY, contextConfig.value());
+		assertArrayEquals("classes for " + element, new Class<?>[] { Number.class }, contextConfig.classes());
+	}
+
 	private Set<String> names(Class<?>... classes) {
 		return stream(classes).map(Class::getName).collect(toSet());
 	}
@@ -670,6 +682,8 @@ public class AnnotatedElementUtilsTests {
 
 		@AliasFor(attribute = "value")
 		String[] locations() default {};
+
+		Class<?>[] classes() default {};
 	}
 
 	@ContextConfig
@@ -723,6 +737,23 @@ public class AnnotatedElementUtilsTests {
 
 		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
 		String[] xmlConfigFiles() default "default.xml";
+	}
+
+	/**
+	 * Mock of {@code org.springframework.boot.test.SpringApplicationConfiguration}.
+	 */
+	@ContextConfig
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface SpringAppConfig {
+
+		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
+		String[] locations() default {};
+
+		@AliasFor("value")
+		Class<?>[] classes() default {};
+
+		@AliasFor("classes")
+		Class<?>[] value() default {};
 	}
 
 	/**
@@ -907,6 +938,10 @@ public class AnnotatedElementUtilsTests {
 
 	@TestComponentScan(packages = "com.example.app.test")
 	static class TestComponentScanClass {
+	}
+
+	@SpringAppConfig(Number.class)
+	static class SpringAppConfigClass {
 	}
 
 }
