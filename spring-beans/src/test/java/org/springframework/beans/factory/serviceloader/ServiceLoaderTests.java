@@ -26,6 +26,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.*;
 
 /**
  * @author Juergen Hoeller
@@ -35,9 +36,7 @@ public class ServiceLoaderTests {
 
 	@Test
 	public void testServiceLoaderFactoryBean() {
-		if (!ServiceLoader.load(DocumentBuilderFactory.class).iterator().hasNext()){
-			return;
-		}
+		assumeTrue(ServiceLoader.load(DocumentBuilderFactory.class).iterator().hasNext());
 
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(ServiceLoaderFactoryBean.class);
@@ -49,9 +48,7 @@ public class ServiceLoaderTests {
 
 	@Test
 	public void testServiceFactoryBean() {
-		if (!ServiceLoader.load(DocumentBuilderFactory.class).iterator().hasNext()){
-			return;
-		}
+		assumeTrue(ServiceLoader.load(DocumentBuilderFactory.class).iterator().hasNext());
 
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(ServiceFactoryBean.class);
@@ -62,9 +59,7 @@ public class ServiceLoaderTests {
 
 	@Test
 	public void testServiceListFactoryBean() {
-		if (!ServiceLoader.load(DocumentBuilderFactory.class).iterator().hasNext()){
-			return;
-		}
+		assumeTrue(ServiceLoader.load(DocumentBuilderFactory.class).iterator().hasNext());
 
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(ServiceListFactoryBean.class);

@@ -30,24 +30,20 @@ import static org.junit.Assert.*;
 public class JmxUtilsAnnotationTests {
 
 	@Test
-	public void testNotMXBean() throws Exception {
-		FooNotX foo = new FooNotX();
-		assertFalse("MXBean annotation not detected correctly", JmxUtils.isMBean(foo.getClass()));
+	public void notMXBean() throws Exception {
+		assertFalse("MXBean annotation not detected correctly", JmxUtils.isMBean(FooNotX.class));
 	}
 
-		@Test
-	public void testAnnotatedMXBean() throws Exception {
-		FooX foo = new FooX();
-		assertTrue("MXBean annotation not detected correctly", JmxUtils.isMBean(foo.getClass()));
+	@Test
+	public void annotatedMXBean() throws Exception {
+		assertTrue("MXBean annotation not detected correctly", JmxUtils.isMBean(FooX.class));
 	}
 
 
 	@MXBean(false)
 	public interface FooNotMXBean {
-
 		String getName();
 	}
-
 
 	public static class FooNotX implements FooNotMXBean {
 
@@ -57,13 +53,10 @@ public class JmxUtilsAnnotationTests {
 		}
 	}
 
-
 	@MXBean(true)
 	public interface FooIfc {
-
 		String getName();
 	}
-
 
 	public static class FooX implements FooIfc {
 

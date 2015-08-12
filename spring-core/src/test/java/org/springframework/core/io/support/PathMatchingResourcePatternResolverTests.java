@@ -19,6 +19,7 @@ package org.springframework.core.io.support;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Ignore;
@@ -30,12 +31,13 @@ import org.springframework.util.StringUtils;
 import static org.junit.Assert.*;
 
 /**
- * If this test case fails, uncomment diagnostics in
- * {@code assertProtocolAndFilenames} method.
+ * If this test case fails, uncomment diagnostics in the
+ * {@link #assertProtocolAndFilenames} method.
  *
  * @author Oliver Hutchison
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Sam Brannen
  * @since 17.11.2004
  */
 public class PathMatchingResourcePatternResolverTests {
@@ -57,19 +59,13 @@ public class PathMatchingResourcePatternResolverTests {
 	private PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
 
-	@Test
-	public void testInvalidPrefixWithPatternElementInIt() throws IOException {
-		try {
-			resolver.getResources("xx**:**/*.xy");
-			fail("Should have thrown FileNotFoundException");
-		}
-		catch (FileNotFoundException ex) {
-			// expected
-		}
+	@Test(expected = FileNotFoundException.class)
+	public void invalidPrefixWithPatternElementInIt() throws IOException {
+		resolver.getResources("xx**:**/*.xy");
 	}
 
 	@Test
-	public void testSingleResourceOnFileSystem() throws IOException {
+	public void singleResourceOnFileSystem() throws IOException {
 		Resource[] resources =
 				resolver.getResources("org/springframework/core/io/support/PathMatchingResourcePatternResolverTests.class");
 		assertEquals(1, resources.length);
@@ -77,7 +73,7 @@ public class PathMatchingResourcePatternResolverTests {
 	}
 
 	@Test
-	public void testSingleResourceInJar() throws IOException {
+	public void singleResourceInJar() throws IOException {
 		Resource[] resources = resolver.getResources("java/net/URL.class");
 		assertEquals(1, resources.length);
 		assertProtocolAndFilenames(resources, "jar", "URL.class");
@@ -85,7 +81,7 @@ public class PathMatchingResourcePatternResolverTests {
 
 	@Ignore  // passes under Eclipse, fails under Ant
 	@Test
-	public void testClasspathStarWithPatternOnFileSystem() throws IOException {
+	public void classpathStarWithPatternOnFileSystem() throws IOException {
 		Resource[] resources = resolver.getResources("classpath*:org/springframework/core/io/sup*/*.class");
 		// Have to exclude Clover-generated class files here,
 		// as we might be running as part of a Clover test run.
@@ -101,19 +97,19 @@ public class PathMatchingResourcePatternResolverTests {
 	}
 
 	@Test
-	public void testClasspathWithPatternInJar() throws IOException {
+	public void classpathWithPatternInJar() throws IOException {
 		Resource[] resources = resolver.getResources("classpath:org/apache/commons/logging/*.class");
 		assertProtocolAndFilenames(resources, "jar", CLASSES_IN_COMMONSLOGGING);
 	}
 
 	@Test
-	public void testClasspathStartWithPatternInJar() throws IOException {
+	public void classpathStartWithPatternInJar() throws IOException {
 		Resource[] resources = resolver.getResources("classpath*:org/apache/commons/logging/*.class");
 		assertProtocolAndFilenames(resources, "jar", CLASSES_IN_COMMONSLOGGING);
 	}
 
 	@Test
-	public void testRootPatternRetrievalInJarFiles() throws IOException {
+	public void rootPatternRetrievalInJarFiles() throws IOException {
 		Resource[] resources = resolver.getResources("classpath*:*.dtd");
 		boolean found = false;
 		for (Resource resource : resources) {
@@ -156,12 +152,9 @@ public class PathMatchingResourcePatternResolverTests {
 	}
 
 	private void assertFilenameIn(Resource resource, String... filenames) {
-		for (String filename : filenames) {
-			if (resource.getFilename().endsWith(filename)) {
-				return;
-			}
-		}
-		fail(resource + " does not have a filename that matches any of the specified names");
+		String filename = resource.getFilename();
+		assertTrue(resource + " does not have a filename that matches any of the specified names",
+			Arrays.stream(filenames).anyMatch(filename::endsWith));
 	}
 
 }
