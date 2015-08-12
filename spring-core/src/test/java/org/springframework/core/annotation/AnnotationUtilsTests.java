@@ -510,7 +510,7 @@ public class AnnotationUtilsTests {
 		exception.expect(AnnotationConfigurationException.class);
 		exception.expectMessage(containsString("Attribute [value] in"));
 		exception.expectMessage(containsString(BrokenContextConfig.class.getName()));
-		exception.expectMessage(containsString("must be declared as an @AliasFor [locations]"));
+		exception.expectMessage(containsString("must be declared as an @AliasFor [location]"));
 		getRepeatableAnnotations(BrokenConfigHierarchyTestCase.class, BrokenContextConfig.class, BrokenHierarchy.class);
 	}
 
@@ -525,7 +525,7 @@ public class AnnotationUtilsTests {
 		annotations = getRepeatableAnnotations(ConfigHierarchyTestCase.class, ContextConfig.class, Hierarchy.class);
 		assertNotNull(annotations);
 
-		List<String> locations = annotations.stream().map(ContextConfig::locations).collect(toList());
+		List<String> locations = annotations.stream().map(ContextConfig::location).collect(toList());
 		assertThat(locations, is(expectedLocations));
 
 		List<String> values = annotations.stream().map(ContextConfig::value).collect(toList());
@@ -685,7 +685,7 @@ public class AnnotationUtilsTests {
 	@Test
 	public void getAliasedAttributeNameFromAliasedComposedAnnotation() throws Exception {
 		Method attribute = AliasedComposedContextConfig.class.getDeclaredMethod("xmlConfigFile");
-		assertEquals("locations", getAliasedAttributeName(attribute, ContextConfig.class));
+		assertEquals("location", getAliasedAttributeName(attribute, ContextConfig.class));
 	}
 
 	@Test
@@ -712,10 +712,9 @@ public class AnnotationUtilsTests {
 		WebMapping synthesizedWebMapping = synthesizeAnnotation(webMapping);
 		assertNotSame(webMapping, synthesizedWebMapping);
 		WebMapping synthesizedAgainWebMapping = synthesizeAnnotation(synthesizedWebMapping);
-		assertSame(synthesizedWebMapping, synthesizedAgainWebMapping);
 		assertThat(synthesizedAgainWebMapping, instanceOf(SynthesizedAnnotation.class));
+		assertSame(synthesizedWebMapping, synthesizedAgainWebMapping);
 
-		assertNotNull(synthesizedAgainWebMapping);
 		assertEquals("name attribute: ", "foo", synthesizedAgainWebMapping.name());
 		assertEquals("aliased path attribute: ", "/test", synthesizedAgainWebMapping.path());
 		assertEquals("actual value attribute: ", "/test", synthesizedAgainWebMapping.value());
@@ -837,7 +836,7 @@ public class AnnotationUtilsTests {
 		exception.expect(AnnotationConfigurationException.class);
 		exception.expectMessage(startsWith("@AliasFor declaration on attribute [xmlConfigFile] in annotation"));
 		exception.expectMessage(containsString(AliasedComposedContextConfigNotMetaPresent.class.getName()));
-		exception.expectMessage(containsString("declares an alias for attribute [locations] in meta-annotation"));
+		exception.expectMessage(containsString("declares an alias for attribute [location] in meta-annotation"));
 		exception.expectMessage(containsString(ContextConfig.class.getName()));
 		exception.expectMessage(endsWith("which is not meta-present."));
 		synthesizeAnnotation(annotation);
@@ -850,18 +849,16 @@ public class AnnotationUtilsTests {
 		assertNotNull(webMapping);
 
 		WebMapping synthesizedWebMapping1 = synthesizeAnnotation(webMapping);
-		assertNotNull(synthesizedWebMapping1);
-		assertNotSame(webMapping, synthesizedWebMapping1);
 		assertThat(synthesizedWebMapping1, instanceOf(SynthesizedAnnotation.class));
+		assertNotSame(webMapping, synthesizedWebMapping1);
 
 		assertEquals("name attribute: ", "foo", synthesizedWebMapping1.name());
 		assertEquals("aliased path attribute: ", "/test", synthesizedWebMapping1.path());
 		assertEquals("actual value attribute: ", "/test", synthesizedWebMapping1.value());
 
 		WebMapping synthesizedWebMapping2 = synthesizeAnnotation(webMapping);
-		assertNotNull(synthesizedWebMapping2);
-		assertNotSame(webMapping, synthesizedWebMapping2);
 		assertThat(synthesizedWebMapping2, instanceOf(SynthesizedAnnotation.class));
+		assertNotSame(webMapping, synthesizedWebMapping2);
 
 		assertEquals("name attribute: ", "foo", synthesizedWebMapping2.name());
 		assertEquals("aliased path attribute: ", "/test", synthesizedWebMapping2.path());
@@ -955,17 +952,17 @@ public class AnnotationUtilsTests {
 		ContextConfig contextConfig = synthesizeAnnotation(ContextConfig.class);
 		assertNotNull(contextConfig);
 		assertEquals("value: ", "", contextConfig.value());
-		assertEquals("locations: ", "", contextConfig.locations());
+		assertEquals("location: ", "", contextConfig.location());
 	}
 
 	@Test
 	public void synthesizeAnnotationFromMapWithMinimalAttributesWithAttributeAliases() throws Exception {
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put("locations", "test.xml");
+		map.put("location", "test.xml");
 		ContextConfig contextConfig = synthesizeAnnotation(map, ContextConfig.class, null);
 		assertNotNull(contextConfig);
 		assertEquals("value: ", "test.xml", contextConfig.value());
-		assertEquals("locations: ", "test.xml", contextConfig.locations());
+		assertEquals("location: ", "test.xml", contextConfig.location());
 	}
 
 	@Test
@@ -1177,7 +1174,7 @@ public class AnnotationUtilsTests {
 		assertTrue("nested annotations must be synthesized",
 				Arrays.stream(configs).allMatch(c -> c instanceof SynthesizedAnnotation));
 
-		List<String> locations = Arrays.stream(configs).map(ContextConfig::locations).collect(toList());
+		List<String> locations = Arrays.stream(configs).map(ContextConfig::location).collect(toList());
 		assertThat(locations, is(expectedLocations));
 
 		List<String> values = Arrays.stream(configs).map(ContextConfig::value).collect(toList());
@@ -1197,7 +1194,7 @@ public class AnnotationUtilsTests {
 		assertNotNull(contextConfig);
 
 		ContextConfig[] configs = synthesizedHierarchy.value();
-		List<String> locations = Arrays.stream(configs).map(ContextConfig::locations).collect(toList());
+		List<String> locations = Arrays.stream(configs).map(ContextConfig::location).collect(toList());
 		assertThat(locations, is(expectedLocations));
 
 		// Alter array returned from synthesized annotation
@@ -1571,22 +1568,22 @@ public class AnnotationUtilsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ContextConfig {
 
-		@AliasFor("locations")
+		@AliasFor("location")
 		String value() default "";
 
 		@AliasFor("value")
-		String locations() default "";
+		String location() default "";
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface BrokenContextConfig {
 
 		// Intentionally missing:
-		// @AliasFor("locations")
+		// @AliasFor("location")
 		String value() default "";
 
 		@AliasFor("value")
-		String locations() default "";
+		String location() default "";
 	}
 
 	/**
@@ -1602,7 +1599,7 @@ public class AnnotationUtilsTests {
 		BrokenContextConfig[] value();
 	}
 
-	@Hierarchy({ @ContextConfig("A"), @ContextConfig(locations = "B") })
+	@Hierarchy({ @ContextConfig("A"), @ContextConfig(location = "B") })
 	static class ConfigHierarchyTestCase {
 	}
 
@@ -1735,7 +1732,7 @@ public class AnnotationUtilsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface AliasedComposedContextConfigNotMetaPresent {
 
-		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
+		@AliasFor(annotation = ContextConfig.class, attribute = "location")
 		String xmlConfigFile();
 	}
 
@@ -1747,7 +1744,7 @@ public class AnnotationUtilsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface AliasedComposedContextConfig {
 
-		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
+		@AliasFor(annotation = ContextConfig.class, attribute = "location")
 		String xmlConfigFile();
 	}
 
@@ -1758,7 +1755,7 @@ public class AnnotationUtilsTests {
 	}
 
 	/**
-	 * Mock of {@code org.springframework.context.annotation.ComponentScan}
+	 * Mock of {@code org.springframework.context.annotation.ComponentScan}.
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ComponentScan {
@@ -1770,7 +1767,7 @@ public class AnnotationUtilsTests {
 	}
 
 	/**
-	 * Mock of {@code org.springframework.context.annotation.ComponentScan}
+	 * Mock of {@code org.springframework.context.annotation.ComponentScan}.
 	 */
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ComponentScanSingleFilter {
