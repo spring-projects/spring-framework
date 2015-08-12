@@ -16,9 +16,11 @@
 
 package org.springframework.cache.jcache;
 
+import javax.annotation.Resource;
 import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.configuration.MutableConfiguration;
+import javax.cache.spi.CachingProvider;
 
 import org.junit.After;
 import org.junit.Ignore;
@@ -48,7 +50,10 @@ public class JCacheEhCacheTests extends AbstractAnnotationTests {
 
 	@Override
 	protected ConfigurableApplicationContext getApplicationContext() {
-		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(EnableCachingConfig.class);
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		context.getBeanFactory().registerSingleton("cachingProvider", getCachingProvider());
+		context.register(EnableCachingConfig.class);
+		context.refresh();
 		jCacheManager = context.getBean("jCacheManager", CacheManager.class);
 		return context;
 	}
@@ -68,9 +73,17 @@ public class JCacheEhCacheTests extends AbstractAnnotationTests {
 	}
 
 
+	protected CachingProvider getCachingProvider() {
+		return Caching.getCachingProvider();
+	}
+
+
 	@Configuration
 	@EnableCaching
 	static class EnableCachingConfig extends CachingConfigurerSupport {
+
+		@Resource
+		CachingProvider cachingProvider;
 
 		@Override
 		@Bean
@@ -80,7 +93,7 @@ public class JCacheEhCacheTests extends AbstractAnnotationTests {
 
 		@Bean
 		public CacheManager jCacheManager() {
-			CacheManager cacheManager = Caching.getCachingProvider().getCacheManager();
+			CacheManager cacheManager = this.cachingProvider.getCacheManager();
 			MutableConfiguration<Object, Object> mutableConfiguration = new MutableConfiguration<Object, Object>();
 			mutableConfiguration.setStoreByValue(false);  // otherwise value has to be Serializable
 			cacheManager.createCache("testCache", mutableConfiguration);
