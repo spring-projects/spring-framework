@@ -583,15 +583,16 @@ public class Jaxb2Marshaller implements MimeMarshaller, MimeUnmarshaller, Generi
 			if (JAXBElement.class == parameterizedType.getRawType() &&
 					parameterizedType.getActualTypeArguments().length == 1) {
 				boolean isJdk6 = (org.springframework.core.JdkVersion.getMajorJavaVersion() <= org.springframework.core.JdkVersion.JAVA_16);
+				boolean isJdk7 = (org.springframework.core.JdkVersion.getMajorJavaVersion() >= org.springframework.core.JdkVersion.JAVA_17);
 				Type typeArgument = parameterizedType.getActualTypeArguments()[0];
 				if (typeArgument instanceof Class) {
 					Class<?> classArgument = (Class<?>) typeArgument;
-					if (isJdk6 && classArgument.isArray()) {
-						return (isPrimitiveWrapper(classArgument) || isStandardClass(classArgument) ||
-								supportsInternal(classArgument, false));
+					if (isJdk7 && classArgument.isArray()) {
+						return (classArgument.getComponentType() == Byte.TYPE);
 					}
 					else {
-						return (classArgument.getComponentType() == Byte.TYPE);
+						return (isPrimitiveWrapper(classArgument) || isStandardClass(classArgument) ||
+								supportsInternal(classArgument, false));
 					}
 				}
 				else if (isJdk6 && typeArgument instanceof GenericArrayType) {
