@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.sql.SQLException;
 
 import junit.framework.TestCase;
 
-import org.springframework.core.JdkVersion;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -39,15 +38,11 @@ public class SQLExceptionSubclassTranslatorTests extends TestCase {
 	private static SQLErrorCodes ERROR_CODES = new SQLErrorCodes();
 
 	static {
-		ERROR_CODES.setBadSqlGrammarCodes(new String[] { "1" });
+		ERROR_CODES.setBadSqlGrammarCodes("1");
 	}
 
 
 	public void testErrorCodeTranslation() {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16) {
-			return;
-		}
-
 		SQLExceptionTranslator sext = new SQLErrorCodeSQLExceptionTranslator(ERROR_CODES);
 
 		SQLException dataIntegrityViolationEx = SQLExceptionSubclassFactory.newSQLDataException("", "", 0);

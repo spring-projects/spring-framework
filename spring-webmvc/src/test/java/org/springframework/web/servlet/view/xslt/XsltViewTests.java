@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.core.JdkVersion;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -184,11 +183,6 @@ public class XsltViewTests {
 	}
 
 	private void assertHtmlOutput(String output) throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
-			// TODO: find out why the SAXReader.read call fails on JDK 1.4 and 1.3
-			return;
-		}
-
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		List nodes = document.getRootElement().selectNodes("/html/body/table/tr");

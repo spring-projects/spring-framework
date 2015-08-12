@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.junit.Test;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
-import org.springframework.core.JdkVersion;
 
 import static org.junit.Assert.*;
 
@@ -36,8 +35,7 @@ public class ServiceLoaderTests {
 
 	@Test
 	public void testServiceLoaderFactoryBean() {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16 ||
-				!ServiceLoader.load(DocumentBuilderFactory.class).iterator().hasNext()){
+		if (!ServiceLoader.load(DocumentBuilderFactory.class).iterator().hasNext()){
 			return;
 		}
 
@@ -51,8 +49,7 @@ public class ServiceLoaderTests {
 
 	@Test
 	public void testServiceFactoryBean() {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16 ||
-				!ServiceLoader.load(DocumentBuilderFactory.class).iterator().hasNext()){
+		if (!ServiceLoader.load(DocumentBuilderFactory.class).iterator().hasNext()){
 			return;
 		}
 
@@ -65,8 +62,7 @@ public class ServiceLoaderTests {
 
 	@Test
 	public void testServiceListFactoryBean() {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16 ||
-				!ServiceLoader.load(DocumentBuilderFactory.class).iterator().hasNext()){
+		if (!ServiceLoader.load(DocumentBuilderFactory.class).iterator().hasNext()){
 			return;
 		}
 

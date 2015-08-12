@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,35 +18,32 @@ package org.springframework.jmx.export.annotation;
 
 import javax.management.MXBean;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
-import org.springframework.core.JdkVersion;
 import org.springframework.jmx.support.JmxUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
  */
-public class JmxUtilsAnnotationTests extends TestCase {
+public class JmxUtilsAnnotationTests {
 
+	@Test
 	public void testNotMXBean() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16) {
-			return;
-		}
 		FooNotX foo = new FooNotX();
 		assertFalse("MXBean annotation not detected correctly", JmxUtils.isMBean(foo.getClass()));
 	}
 
+		@Test
 	public void testAnnotatedMXBean() throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16) {
-			return;
-		}
 		FooX foo = new FooX();
 		assertTrue("MXBean annotation not detected correctly", JmxUtils.isMBean(foo.getClass()));
 	}
 
 
 	@MXBean(false)
-	public static interface FooNotMXBean {
+	public interface FooNotMXBean {
 
 		String getName();
 	}
@@ -62,7 +59,7 @@ public class JmxUtilsAnnotationTests extends TestCase {
 
 
 	@MXBean(true)
-	public static interface FooIfc {
+	public interface FooIfc {
 
 		String getName();
 	}
