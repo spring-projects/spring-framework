@@ -25,7 +25,6 @@ import java.util.List;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import org.springframework.core.JdkVersion;
 import org.springframework.core.io.Resource;
 
 import static org.junit.Assert.*;
@@ -83,7 +82,8 @@ public class PathMatchingResourcePatternResolverTests {
 	public void testSingleResourceInJar() throws IOException {
 		Resource[] resources = resolver.getResources("java/net/URL.class");
 		assertEquals(1, resources.length);
-		String expectedProtocol = (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_19 ? "jar" : "jrt");
+		@SuppressWarnings("deprecation")
+		String expectedProtocol = (org.springframework.core.JdkVersion.getMajorJavaVersion() < org.springframework.core.JdkVersion.JAVA_19 ? "jar" : "jrt");
 		assertProtocolAndFilename(resources[0], expectedProtocol, "URL.class");
 	}
 
