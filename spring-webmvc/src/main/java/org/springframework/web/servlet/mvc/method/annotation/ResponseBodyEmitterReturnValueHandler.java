@@ -121,6 +121,7 @@ public class ResponseBodyEmitterReturnValueHandler implements AsyncHandlerMethod
 
 		// Commit the response and wrap to ignore further header changes
 		outputMessage.getBody();
+		outputMessage.flush();
 		outputMessage = new StreamingServletServerHttpResponse(outputMessage);
 
 		DeferredResult<?> deferredResult = new DeferredResult<Object>(emitter.getTimeout());
