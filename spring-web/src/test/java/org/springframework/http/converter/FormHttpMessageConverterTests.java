@@ -22,8 +22,7 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.List;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
@@ -32,6 +31,7 @@ import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUpload;
 import org.apache.commons.fileupload.RequestContext;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -46,10 +46,12 @@ import org.springframework.http.converter.support.AllEncompassingFormHttpMessage
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.never;
 import static org.mockito.BDDMockito.verify;
@@ -237,9 +239,13 @@ public class FormHttpMessageConverterTests {
 		item = items.get(1);
 		assertTrue(item.isFormField());
 		assertEquals("part2", item.getFieldName());
-		assertEquals("<MyBean><string>foo</string></MyBean>", item.getString());
-	}
 
+		// With developer builds we get: <MyBean><string>foo</string></MyBean>
+		// But on CI server we get: <MyBean xmlns=""><string>foo</string></MyBean>
+		// So... we make a compromise:
+		assertThat(item.getString(),
+				allOf(startsWith("<MyBean"), endsWith("><string>foo</string></MyBean>")));
+	}
 
 
 	private static class MockHttpOutputMessageRequestContext implements RequestContext {
