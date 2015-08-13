@@ -47,6 +47,7 @@ import com.fasterxml.jackson.databind.jsontype.TypeIdResolver;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.jsontype.impl.StdTypeResolverBuilder;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -86,7 +87,6 @@ public class SpringHandlerInstantiatorTests {
 		User user = new User("bob");
 		String json = this.objectMapper.writeValueAsString(user);
 		assertEquals("{\"username\":\"BOB\"}", json);
-
 	}
 
 	@Test
@@ -198,6 +198,7 @@ public class SpringHandlerInstantiatorTests {
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public JavaType typeFromId(String s) {
 			return TypeFactory.defaultInstance().constructFromCanonical(s);
 		}

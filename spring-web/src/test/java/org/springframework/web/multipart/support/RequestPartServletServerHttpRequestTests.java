@@ -19,7 +19,6 @@ package org.springframework.web.multipart.support;
 import java.net.URI;
 import java.nio.charset.Charset;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.http.HttpHeaders;
