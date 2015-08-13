@@ -22,6 +22,8 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.List;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 
@@ -198,6 +200,47 @@ public class FormHttpMessageConverterTests {
 		verify(outputMessage.getBody(), never()).close();
 	}
 
+	// SPR-13309
+
+	@Test
+	public void writeMultipartOrder() throws Exception {
+		MyBean myBean = new MyBean();
+		myBean.setString("foo");
+
+		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
+		parts.add("part1", myBean);
+
+		HttpHeaders entityHeaders = new HttpHeaders();
+		entityHeaders.setContentType(MediaType.TEXT_XML);
+		HttpEntity<MyBean> entity = new HttpEntity<MyBean>(myBean, entityHeaders);
+		parts.add("part2", entity);
+
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		this.converter.setMultipartCharset(UTF_8);
+		this.converter.write(parts, new MediaType("multipart", "form-data", UTF_8), outputMessage);
+
+		final MediaType contentType = outputMessage.getHeaders().getContentType();
+		assertNotNull("No boundary found", contentType.getParameter("boundary"));
+
+		// see if Commons FileUpload can read what we wrote
+		FileItemFactory fileItemFactory = new DiskFileItemFactory();
+		FileUpload fileUpload = new FileUpload(fileItemFactory);
+		RequestContext requestContext = new MockHttpOutputMessageRequestContext(outputMessage);
+		List<FileItem> items = fileUpload.parseRequest(requestContext);
+		assertEquals(2, items.size());
+
+		FileItem item = items.get(0);
+		assertTrue(item.isFormField());
+		assertEquals("part1", item.getFieldName());
+		assertEquals("{\"string\":\"foo\"}", item.getString());
+
+		item = items.get(1);
+		assertTrue(item.isFormField());
+		assertEquals("part2", item.getFieldName());
+		assertEquals("<MyBean><string>foo</string></MyBean>", item.getString());
+	}
+
+
 
 	private static class MockHttpOutputMessageRequestContext implements RequestContext {
 
@@ -230,6 +273,19 @@ public class FormHttpMessageConverterTests {
 		@Override
 		public InputStream getInputStream() throws IOException {
 			return new ByteArrayInputStream(this.outputMessage.getBodyAsBytes());
+		}
+	}
+
+	public static class MyBean {
+
+		private String string;
+
+		public String getString() {
+			return this.string;
+		}
+
+		public void setString(String string) {
+			this.string = string;
 		}
 	}
 

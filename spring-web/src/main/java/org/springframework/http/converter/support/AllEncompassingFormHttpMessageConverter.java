@@ -53,10 +53,7 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 	public AllEncompassingFormHttpMessageConverter() {
 		addPartConverter(new SourceHttpMessageConverter<Source>());
 
-		if (jackson2XmlPresent) {
-			addPartConverter(new MappingJackson2XmlHttpMessageConverter());
-		}
-		else if (jaxb2Present) {
+		if (jaxb2Present && !jackson2Present) {
 			addPartConverter(new Jaxb2RootElementHttpMessageConverter());
 		}
 
@@ -65,6 +62,10 @@ public class AllEncompassingFormHttpMessageConverter extends FormHttpMessageConv
 		}
 		else if (gsonPresent) {
 			addPartConverter(new GsonHttpMessageConverter());
+		}
+
+		if (jackson2XmlPresent) {
+			addPartConverter(new MappingJackson2XmlHttpMessageConverter());
 		}
 	}
 
