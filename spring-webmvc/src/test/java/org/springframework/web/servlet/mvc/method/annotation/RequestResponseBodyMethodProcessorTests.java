@@ -24,6 +24,7 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -543,7 +544,7 @@ public class RequestResponseBodyMethodProcessorTests {
 
 	@Test  // SPR-12811
 	public void jacksonTypeInfoList() throws Exception {
-		Method method = JacksonController.class.getMethod("handleList");
+		Method method = JacksonController.class.getMethod("handleTypeInfoList");
 		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
 		MethodParameter methodReturnType = handlerMethod.getReturnType();
 
@@ -551,12 +552,50 @@ public class RequestResponseBodyMethodProcessorTests {
 		converters.add(new MappingJackson2HttpMessageConverter());
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 
-		Object returnValue = new JacksonController().handleList();
+		Object returnValue = new JacksonController().handleTypeInfoList();
 		processor.handleReturnValue(returnValue, methodReturnType, this.mavContainer, this.webRequest);
 
 		String content = this.servletResponse.getContentAsString();
 		assertTrue(content.contains("\"type\":\"foo\""));
 		assertTrue(content.contains("\"type\":\"bar\""));
+	}
+
+	@Test  // SPR-13318
+	public void jacksonSubType() throws Exception {
+		Method method = JacksonController.class.getMethod("handleSubType");
+		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
+		MethodParameter methodReturnType = handlerMethod.getReturnType();
+
+		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		converters.add(new MappingJackson2HttpMessageConverter());
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
+
+		Object returnValue = new JacksonController().handleSubType();
+		processor.handleReturnValue(returnValue, methodReturnType, this.mavContainer, this.webRequest);
+
+		String content = this.servletResponse.getContentAsString();
+		assertTrue(content.contains("\"id\":123"));
+		assertTrue(content.contains("\"name\":\"foo\""));
+	}
+
+	@Test  // SPR-13318
+	public void jacksonSubTypeList() throws Exception {
+		Method method = JacksonController.class.getMethod("handleSubTypeList");
+		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
+		MethodParameter methodReturnType = handlerMethod.getReturnType();
+
+		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		converters.add(new MappingJackson2HttpMessageConverter());
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
+
+		Object returnValue = new JacksonController().handleSubTypeList();
+		processor.handleReturnValue(returnValue, methodReturnType, this.mavContainer, this.webRequest);
+
+		String content = this.servletResponse.getContentAsString();
+		assertTrue(content.contains("\"id\":123"));
+		assertTrue(content.contains("\"name\":\"foo\""));
+		assertTrue(content.contains("\"id\":456"));
+		assertTrue(content.contains("\"name\":\"bar\""));
 	}
 
 
@@ -774,11 +813,32 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		@RequestMapping
 		@ResponseBody
-		public List<ParentClass> handleList() {
+		public List<ParentClass> handleTypeInfoList() {
 			List<ParentClass> list = new ArrayList<>();
 			list.add(new Foo("foo"));
 			list.add(new Bar("bar"));
 			return list;
+		}
+
+		@RequestMapping
+		@ResponseBody
+		public Identifiable handleSubType() {
+			SimpleBean foo = new SimpleBean();
+			foo.setId(123L);
+			foo.setName("foo");
+			return foo;
+		}
+
+		@RequestMapping
+		@ResponseBody
+		public List<Identifiable> handleSubTypeList() {
+			SimpleBean foo = new SimpleBean();
+			foo.setId(123L);
+			foo.setName("foo");
+			SimpleBean bar = new SimpleBean();
+			bar.setId(456L);
+			bar.setName("bar");
+			return Arrays.asList(foo, bar);
 		}
 	}
 

@@ -258,7 +258,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			else {
 				objectWriter = this.objectMapper.writer();
 			}
-			if (javaType != null) {
+			if (javaType != null && javaType.isContainerType()) {
 				objectWriter = objectWriter.withType(javaType);
 			}
 			objectWriter.writeValue(generator, value);
