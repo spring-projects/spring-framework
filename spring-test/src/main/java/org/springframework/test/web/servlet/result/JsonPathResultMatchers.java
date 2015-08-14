@@ -78,8 +78,10 @@ public class JsonPathResultMatchers {
 
 	/**
 	 * Evaluate the JSON path expression against the response content and
-	 * assert that the result is not empty (i.e., that a match for the JSON
-	 * path expression exists in the response content).
+	 * assert that a non-null value exists at the given path.
+	 * <p>If the JSON path expression is not
+	 * {@linkplain com.jayway.jsonpath.JsonPath#isDefinite definite},
+	 * this method asserts that the value at the given path is not <em>empty</em>.
 	 */
 	public ResultMatcher exists() {
 		return new ResultMatcher() {
@@ -93,8 +95,10 @@ public class JsonPathResultMatchers {
 
 	/**
 	 * Evaluate the JSON path expression against the response content and
-	 * assert that the result is empty (i.e., that a match for the JSON
-	 * path expression does not exist in the response content).
+	 * assert that a value does not exist at the given path.
+	 * <p>If the JSON path expression is not
+	 * {@linkplain com.jayway.jsonpath.JsonPath#isDefinite definite}, this
+	 * method asserts that the value at the given path is <em>empty</em>.
 	 */
 	public ResultMatcher doesNotExist() {
 		return new ResultMatcher() {

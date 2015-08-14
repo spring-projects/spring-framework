@@ -74,6 +74,16 @@ public class JsonPathResultMatchersTests {
 		new JsonPathResultMatchers("$.foo").exists().match(stubMvcResult);
 	}
 
+	@Test
+	public void existsForAnEmptyArray() throws Exception {
+		new JsonPathResultMatchers("$.emptyArray").exists().match(stubMvcResult);
+	}
+
+	@Test
+	public void existsForAnEmptyMap() throws Exception {
+		new JsonPathResultMatchers("$.emptyMap").exists().match(stubMvcResult);
+	}
+
 	@Test(expected = AssertionError.class)
 	public void existsNoMatch() throws Exception {
 		new JsonPathResultMatchers("$.bogus").exists().match(stubMvcResult);
@@ -87,6 +97,16 @@ public class JsonPathResultMatchersTests {
 	@Test(expected = AssertionError.class)
 	public void doesNotExistNoMatch() throws Exception {
 		new JsonPathResultMatchers("$.foo").doesNotExist().match(stubMvcResult);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void doesNotExistForAnEmptyArray() throws Exception {
+		new JsonPathResultMatchers("$.emptyArray").doesNotExist().match(stubMvcResult);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void doesNotExistForAnEmptyMap() throws Exception {
+		new JsonPathResultMatchers("$.emptyMap").doesNotExist().match(stubMvcResult);
 	}
 
 	@Test

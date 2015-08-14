@@ -171,7 +171,7 @@ public class JsonPathExpectationsHelper {
 	public void assertValueIsArray(String content) throws ParseException {
 		Object value = assertExistsAndReturn(content);
 		String reason = "Expected an array at JSON path \"" + this.expression + "\" but found: " + value;
-		assertTrue(reason, value instanceof List);
+		assertThat(reason, value, instanceOf(List.class));
 	}
 
 	/**
@@ -188,7 +188,10 @@ public class JsonPathExpectationsHelper {
 
 	/**
 	 * Evaluate the JSON path expression against the supplied {@code content}
-	 * and assert that the resulting value exists.
+	 * and assert that a non-null value exists at the given path.
+	 * <p>If the JSON path expression is not
+	 * {@linkplain JsonPath#isDefinite() definite}, this method asserts
+	 * that the value at the given path is not <em>empty</em>.
 	 * @param content the JSON content
 	 */
 	public void exists(String content) throws ParseException {
@@ -197,8 +200,10 @@ public class JsonPathExpectationsHelper {
 
 	/**
 	 * Evaluate the JSON path expression against the supplied {@code content}
-	 * and assert that the resulting value is empty (i.e., that a match for
-	 * the JSON path expression does not exist in the supplied content).
+	 * and assert that a value does not exist at the given path.
+	 * <p>If the JSON path expression is not
+	 * {@linkplain JsonPath#isDefinite() definite}, this method asserts
+	 * that the value at the given path is <em>empty</em>.
 	 * @param content the JSON content
 	 */
 	public void doesNotExist(String content) throws ParseException {
@@ -210,7 +215,7 @@ public class JsonPathExpectationsHelper {
 			return;
 		}
 		String reason = "Expected no value at JSON path \"" + this.expression + "\" but found: " + value;
-		if (List.class.isInstance(value)) {
+		if (pathIsIndefinite() && value instanceof List) {
 			assertTrue(reason, ((List<?>) value).isEmpty());
 		}
 		else {
@@ -238,7 +243,14 @@ public class JsonPathExpectationsHelper {
 		Object value = evaluateJsonPath(content);
 		String reason = "No value at JSON path \"" + this.expression + "\"";
 		assertTrue(reason, value != null);
+		if (pathIsIndefinite() && value instanceof List) {
+			assertTrue(reason, !((List<?>) value).isEmpty());
+		}
 		return value;
+	}
+
+	private boolean pathIsIndefinite() {
+		return !this.jsonPath.isDefinite();
 	}
 
 }

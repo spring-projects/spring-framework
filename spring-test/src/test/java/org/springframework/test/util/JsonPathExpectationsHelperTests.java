@@ -31,16 +31,23 @@ import static org.hamcrest.CoreMatchers.*;
  */
 public class JsonPathExpectationsHelperTests {
 
-	private static final String CONTENT = "{"         + //
-			"\"str\":           \"foo\","             + //
-			"\"nr\":            5,"                   + //
-			"\"bool\":          true,"                + //
-			"\"arr\":           [\"bar\"],"           + //
-			"\"emptyArray\":    [],"                  + //
-			"\"colorMap\":      {\"red\": \"rojo\"}," + //
-			"\"emptyMap\":      {},"                  + //
+	private static final String CONTENT = "{" + //
+			"\"str\":           \"foo\",             " + //
+			"\"num\":           5,                   " + //
+			"\"bool\":          true,                " + //
+			"\"arr\":           [\"bar\"],           " + //
+			"\"emptyArray\":    [],                  " + //
+			"\"colorMap\":      {\"red\": \"rojo\"}, " + //
+			"\"emptyMap\":      {}                   " + //
 	"}";
 
+	private static final String SIMPSONS = "{ \"familyMembers\": [ " + //
+			"{\"name\": \"Homer\" },  " + //
+			"{\"name\": \"Marge\" },  " + //
+			"{\"name\": \"Bart\"  },  " + //
+			"{\"name\": \"Lisa\"  },  " + //
+			"{\"name\": \"Maggie\"}   " + //
+	" ] }";
 
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
@@ -52,20 +59,74 @@ public class JsonPathExpectationsHelperTests {
 	}
 
 	@Test
+	public void existsForAnEmptyArray() throws Exception {
+		new JsonPathExpectationsHelper("$.emptyArray").exists(CONTENT);
+	}
+
+	@Test
+	public void existsForAnEmptyMap() throws Exception {
+		new JsonPathExpectationsHelper("$.emptyMap").exists(CONTENT);
+	}
+
+	@Test
+	public void existsForIndefinatePathWithResults() throws Exception {
+		new JsonPathExpectationsHelper("$.familyMembers[?(@.name == 'Bart')]").exists(SIMPSONS);
+	}
+
+	@Test
+	public void existsForIndefinatePathWithEmptyResults() throws Exception {
+		String expression = "$.familyMembers[?(@.name == 'Dilbert')]";
+		exception.expect(AssertionError.class);
+		exception.expectMessage("No value at JSON path \"" + expression + "\"");
+		new JsonPathExpectationsHelper(expression).exists(SIMPSONS);
+	}
+
+	@Test
 	public void doesNotExist() throws Exception {
 		new JsonPathExpectationsHelper("$.bogus").doesNotExist(CONTENT);
 	}
 
 	@Test
+	public void doesNotExistForAnEmptyArray() throws Exception {
+		String expression = "$.emptyArray";
+		exception.expect(AssertionError.class);
+		exception.expectMessage("Expected no value at JSON path \"" + expression + "\" but found: []");
+		new JsonPathExpectationsHelper(expression).doesNotExist(CONTENT);
+	}
+
+	@Test
+	public void doesNotExistForAnEmptyMap() throws Exception {
+		String expression = "$.emptyMap";
+		exception.expect(AssertionError.class);
+		exception.expectMessage("Expected no value at JSON path \"" + expression + "\" but found: {}");
+		new JsonPathExpectationsHelper(expression).doesNotExist(CONTENT);
+	}
+
+	@Test
+	public void doesNotExistForIndefinatePathWithResults() throws Exception {
+		String expression = "$.familyMembers[?(@.name == 'Bart')]";
+		exception.expect(AssertionError.class);
+		exception.expectMessage("Expected no value at JSON path \"" + expression
+				+ "\" but found: [{\"name\":\"Bart\"}]");
+		new JsonPathExpectationsHelper(expression).doesNotExist(SIMPSONS);
+	}
+
+	@Test
+	public void doesNotExistForIndefinatePathWithEmptyResults() throws Exception {
+		String expression = "$.familyMembers[?(@.name == 'Dilbert')]";
+		new JsonPathExpectationsHelper(expression).doesNotExist(SIMPSONS);
+	}
+
+	@Test
 	public void assertValue() throws Exception {
-		new JsonPathExpectationsHelper("$.nr").assertValue(CONTENT, 5);
+		new JsonPathExpectationsHelper("$.num").assertValue(CONTENT, 5);
 	}
 
 	@Test
 	public void assertValueWithDifferentExpectedType() throws Exception {
 		exception.expect(AssertionError.class);
-		exception.expectMessage(equalTo("At JSON path \"$.nr\", type of value expected:<java.lang.String> but was:<java.lang.Integer>"));
-		new JsonPathExpectationsHelper("$.nr").assertValue(CONTENT, "5");
+		exception.expectMessage(equalTo("At JSON path \"$.num\", type of value expected:<java.lang.String> but was:<java.lang.Integer>"));
+		new JsonPathExpectationsHelper("$.num").assertValue(CONTENT, "5");
 	}
 
 	@Test
@@ -81,7 +142,7 @@ public class JsonPathExpectationsHelperTests {
 
 	@Test
 	public void assertValueIsNumber() throws Exception {
-		new JsonPathExpectationsHelper("$.nr").assertValueIsNumber(CONTENT);
+		new JsonPathExpectationsHelper("$.num").assertValueIsNumber(CONTENT);
 	}
 
 	@Test
@@ -98,7 +159,7 @@ public class JsonPathExpectationsHelperTests {
 	@Test
 	public void assertValueIsBooleanForNonBoolean() throws Exception {
 		exception.expect(AssertionError.class);
-		new JsonPathExpectationsHelper("$.nr").assertValueIsBoolean(CONTENT);
+		new JsonPathExpectationsHelper("$.num").assertValueIsBoolean(CONTENT);
 	}
 
 	@Test
