@@ -64,7 +64,7 @@ public class JsonPathExpectationsHelperTests {
 	@Test
 	public void assertValueWithDifferentExpectedType() throws Exception {
 		exception.expect(AssertionError.class);
-		exception.expectMessage(equalTo("For JSON path \"$.nr\", type of value expected:<java.lang.String> but was:<java.lang.Integer>"));
+		exception.expectMessage(equalTo("At JSON path \"$.nr\", type of value expected:<java.lang.String> but was:<java.lang.Integer>"));
 		new JsonPathExpectationsHelper("$.nr").assertValue(CONTENT, "5");
 	}
 

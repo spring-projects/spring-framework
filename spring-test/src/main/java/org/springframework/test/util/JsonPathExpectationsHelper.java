@@ -113,7 +113,7 @@ public class JsonPathExpectationsHelper {
 			@SuppressWarnings("rawtypes")
 			List actualValueList = (List) actualValue;
 			if (actualValueList.isEmpty()) {
-				fail("No matching value for JSON path \"" + this.expression + "\"");
+				fail("No matching value at JSON path \"" + this.expression + "\"");
 			}
 			if (actualValueList.size() != 1) {
 				fail("Got a list of values " + actualValue + " instead of the expected single value " + expectedValue);
@@ -121,7 +121,7 @@ public class JsonPathExpectationsHelper {
 			actualValue = actualValueList.get(0);
 		}
 		else if (actualValue != null && expectedValue != null) {
-			assertEquals("For JSON path \"" + this.expression + "\", type of value",
+			assertEquals("At JSON path \"" + this.expression + "\", type of value",
 					expectedValue.getClass().getName(), actualValue.getClass().getName());
 		}
 		assertEquals("JSON path \"" + this.expression + "\"", expectedValue, actualValue);
@@ -135,7 +135,7 @@ public class JsonPathExpectationsHelper {
 	 */
 	public void assertValueIsString(String content) throws ParseException {
 		Object value = assertExistsAndReturn(content);
-		String reason = "Expected string at JSON path \"" + this.expression + "\" but found " + value;
+		String reason = "Expected a string at JSON path \"" + this.expression + "\" but found: " + value;
 		assertThat(reason, value, instanceOf(String.class));
 	}
 
@@ -147,7 +147,7 @@ public class JsonPathExpectationsHelper {
 	 */
 	public void assertValueIsBoolean(String content) throws ParseException {
 		Object value = assertExistsAndReturn(content);
-		String reason = "Expected boolean at JSON path \"" + this.expression + "\" but found " + value;
+		String reason = "Expected a boolean at JSON path \"" + this.expression + "\" but found: " + value;
 		assertThat(reason, value, instanceOf(Boolean.class));
 	}
 
@@ -159,7 +159,7 @@ public class JsonPathExpectationsHelper {
 	 */
 	public void assertValueIsNumber(String content) throws ParseException {
 		Object value = assertExistsAndReturn(content);
-		String reason = "Expected number at JSON path \"" + this.expression + "\" but found " + value;
+		String reason = "Expected a number at JSON path \"" + this.expression + "\" but found: " + value;
 		assertThat(reason, value, instanceOf(Number.class));
 	}
 
@@ -170,7 +170,7 @@ public class JsonPathExpectationsHelper {
 	 */
 	public void assertValueIsArray(String content) throws ParseException {
 		Object value = assertExistsAndReturn(content);
-		String reason = "Expected array for JSON path \"" + this.expression + "\" but found " + value;
+		String reason = "Expected an array at JSON path \"" + this.expression + "\" but found: " + value;
 		assertTrue(reason, value instanceof List);
 	}
 
@@ -182,7 +182,7 @@ public class JsonPathExpectationsHelper {
 	 */
 	public void assertValueIsMap(String content) throws ParseException {
 		Object value = assertExistsAndReturn(content);
-		String reason = "Expected map at JSON path \"" + this.expression + "\" but found " + value;
+		String reason = "Expected a map at JSON path \"" + this.expression + "\" but found: " + value;
 		assertThat(reason, value, instanceOf(Map.class));
 	}
 
@@ -209,7 +209,7 @@ public class JsonPathExpectationsHelper {
 		catch (AssertionError ex) {
 			return;
 		}
-		String reason = String.format("Expected no value for JSON path: %s but found: %s", this.expression, value);
+		String reason = "Expected no value at JSON path \"" + this.expression + "\" but found: " + value;
 		if (List.class.isInstance(value)) {
 			assertTrue(reason, ((List<?>) value).isEmpty());
 		}
@@ -219,7 +219,7 @@ public class JsonPathExpectationsHelper {
 	}
 
 	private Object evaluateJsonPath(String content) throws ParseException {
-		String message = "No value for JSON path \"" + this.expression + "\", exception: ";
+		String message = "No value at JSON path \"" + this.expression + "\", exception: ";
 		try {
 			return this.jsonPath.read(content);
 		}
@@ -236,7 +236,7 @@ public class JsonPathExpectationsHelper {
 
 	private Object assertExistsAndReturn(String content) throws ParseException {
 		Object value = evaluateJsonPath(content);
-		String reason = "No value for JSON path \"" + this.expression + "\"";
+		String reason = "No value at JSON path \"" + this.expression + "\"";
 		assertTrue(reason, value != null);
 		return value;
 	}
