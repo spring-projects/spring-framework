@@ -107,6 +107,11 @@ public class JsonPathExpectationsHelperTests {
 	}
 
 	@Test
+	public void assertValueIsArrayForAnEmptyArray() throws Exception {
+		new JsonPathExpectationsHelper("$.emptyArray").assertValueIsArray(CONTENT);
+	}
+
+	@Test
 	public void assertValueIsArrayForNonArray() throws Exception {
 		exception.expect(AssertionError.class);
 		new JsonPathExpectationsHelper("$.str").assertValueIsArray(CONTENT);
@@ -115,6 +120,11 @@ public class JsonPathExpectationsHelperTests {
 	@Test
 	public void assertValueIsMap() throws Exception {
 		new JsonPathExpectationsHelper("$.colorMap").assertValueIsMap(CONTENT);
+	}
+
+	@Test
+	public void assertValueIsMapForAnEmptyMap() throws Exception {
+		new JsonPathExpectationsHelper("$.emptyMap").assertValueIsMap(CONTENT);
 	}
 
 	@Test

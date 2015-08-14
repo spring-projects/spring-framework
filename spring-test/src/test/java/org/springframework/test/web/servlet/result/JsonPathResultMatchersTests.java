@@ -32,7 +32,7 @@ import org.springframework.test.web.servlet.StubMvcResult;
  */
 public class JsonPathResultMatchersTests {
 
-	private static final String RESPONSE_CONTENT = "{\"foo\": \"bar\", \"qux\": [\"baz\"], \"emptyArray\": [], \"icanhaz\": true, \"howmanies\": 5, \"cheeseburger\": {\"pickles\": true} }";
+	private static final String RESPONSE_CONTENT = "{\"foo\": \"bar\", \"qux\": [\"baz\"], \"emptyArray\": [], \"icanhaz\": true, \"howmanies\": 5, \"cheeseburger\": {\"pickles\": true}, \"emptyMap\": {} }";
 
 	private static final StubMvcResult stubMvcResult;
 
@@ -93,11 +93,30 @@ public class JsonPathResultMatchersTests {
 	public void isArray() throws Exception {
 		new JsonPathResultMatchers("$.qux").isArray().match(stubMvcResult);
 	}
+
+	@Test
+	public void isArrayForAnEmptyArray() throws Exception {
+		new JsonPathResultMatchers("$.emptyArray").isArray().match(stubMvcResult);
 	}
 
 	@Test(expected = AssertionError.class)
 	public void isArrayNoMatch() throws Exception {
 		new JsonPathResultMatchers("$.bar").isArray().match(stubMvcResult);
+	}
+
+	@Test
+	public void isMap() throws Exception {
+		new JsonPathResultMatchers("$.cheeseburger").isMap().match(stubMvcResult);
+	}
+
+	@Test
+	public void isMapForAnEmptyMap() throws Exception {
+		new JsonPathResultMatchers("$.emptyMap").isMap().match(stubMvcResult);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void isMapNoMatch() throws Exception {
+		new JsonPathResultMatchers("$.foo").isMap().match(stubMvcResult);
 	}
 
 	@Test
@@ -118,16 +137,6 @@ public class JsonPathResultMatchersTests {
 	@Test(expected = AssertionError.class)
 	public void isNumberNoMatch() throws Exception {
 		new JsonPathResultMatchers("$.foo").isNumber().match(stubMvcResult);
-	}
-
-	@Test
-	public void isMap() throws Exception {
-		new JsonPathResultMatchers("$.cheeseburger").isMap().match(stubMvcResult);
-	}
-
-	@Test(expected = AssertionError.class)
-	public void isMapNoMatch() throws Exception {
-		new JsonPathResultMatchers("$.foo").isMap().match(stubMvcResult);
 	}
 
 	@Test

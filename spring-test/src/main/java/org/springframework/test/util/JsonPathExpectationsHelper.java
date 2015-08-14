@@ -238,9 +238,6 @@ public class JsonPathExpectationsHelper {
 		Object value = evaluateJsonPath(content);
 		String reason = "No value for JSON path \"" + this.expression + "\"";
 		assertTrue(reason, value != null);
-		if (List.class.isInstance(value)) {
-			assertTrue(reason, !((List<?>) value).isEmpty());
-		}
 		return value;
 	}
 
