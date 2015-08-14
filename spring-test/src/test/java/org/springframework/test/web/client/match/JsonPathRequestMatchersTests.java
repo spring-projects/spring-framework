@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.client.match;
 
 import java.io.IOException;
@@ -24,20 +25,20 @@ import org.junit.Test;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 
 /**
- * Tests for {@link JsonPathRequestMatchers}.
+ * Unit tests for {@link JsonPathRequestMatchers}.
  *
  * @author Rossen Stoyanchev
  */
 public class JsonPathRequestMatchersTests {
 
-	private static final String RESPONSE_CONTENT = "{\"foo\":\"bar\", \"qux\":[\"baz1\",\"baz2\"]}";
+	private static final String REQUEST_CONTENT = "{ 'foo': 'bar', 'qux': ['baz1', 'baz2'] }";
 
 	private MockClientHttpRequest request;
 
 	@Before
 	public void setUp() throws IOException {
 		this.request = new MockClientHttpRequest();
-		this.request.getBody().write(RESPONSE_CONTENT.getBytes());
+		this.request.getBody().write(REQUEST_CONTENT.getBytes());
 	}
 
 	@Test
@@ -45,7 +46,7 @@ public class JsonPathRequestMatchersTests {
 		new JsonPathRequestMatchers("$.foo").value("bar").match(this.request);
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void valueNoMatch() throws Exception {
 		new JsonPathRequestMatchers("$.foo").value("bogus").match(this.request);
 	}
@@ -55,7 +56,7 @@ public class JsonPathRequestMatchersTests {
 		new JsonPathRequestMatchers("$.foo").value(Matchers.equalTo("bar")).match(this.request);
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void valueMatcherNoMatch() throws Exception {
 		new JsonPathRequestMatchers("$.foo").value(Matchers.equalTo("bogus")).match(this.request);
 	}
@@ -65,7 +66,7 @@ public class JsonPathRequestMatchersTests {
 		new JsonPathRequestMatchers("$.foo").exists().match(this.request);
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void existsNoMatch() throws Exception {
 		new JsonPathRequestMatchers("$.bogus").exists().match(this.request);
 	}
@@ -75,7 +76,7 @@ public class JsonPathRequestMatchersTests {
 		new JsonPathRequestMatchers("$.bogus").doesNotExist().match(this.request);
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void doesNotExistNoMatch() throws Exception {
 		new JsonPathRequestMatchers("$.foo").doesNotExist().match(this.request);
 	}
@@ -85,7 +86,7 @@ public class JsonPathRequestMatchersTests {
 		new JsonPathRequestMatchers("$.qux").isArray().match(this.request);
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void isArrayNoMatch() throws Exception {
 		new JsonPathRequestMatchers("$.bar").isArray().match(this.request);
 	}

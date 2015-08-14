@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,13 +22,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Controller;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -37,10 +36,9 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
 /**
  * Examples of defining expectations on JSON response content with
- * <a href="http://goessner.net/articles/JsonPath/">JSONPath</a> expressions.
+ * <a href="https://github.com/jayway/JsonPath">JsonPath</a> expressions.
  *
  * @author Rossen Stoyanchev
- *
  * @see ContentAssertionTests
  */
 public class JsonPathAssertionTests {
@@ -73,7 +71,6 @@ public class JsonPathAssertionTests {
 			.andExpect(jsonPath("$.composers[1]").exists())
 			.andExpect(jsonPath("$.composers[2]").exists())
 			.andExpect(jsonPath("$.composers[3]").exists());
-
 	}
 
 	@Test
@@ -120,11 +117,11 @@ public class JsonPathAssertionTests {
 	}
 
 
-	@Controller
+	@RestController
 	private class MusicController {
 
-		@RequestMapping(value="/music/people")
-		public @ResponseBody MultiValueMap<String, Person> get() {
+		@RequestMapping("/music/people")
+		public MultiValueMap<String, Person> get() {
 			MultiValueMap<String, Person> map = new LinkedMultiValueMap<String, Person>();
 
 			map.add("composers", new Person("Johann Sebastian Bach"));

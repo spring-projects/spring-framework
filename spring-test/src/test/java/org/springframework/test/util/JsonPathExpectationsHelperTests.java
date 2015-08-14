@@ -32,21 +32,21 @@ import static org.hamcrest.CoreMatchers.*;
 public class JsonPathExpectationsHelperTests {
 
 	private static final String CONTENT = "{" + //
-			"\"str\":           \"foo\",             " + //
-			"\"num\":           5,                   " + //
-			"\"bool\":          true,                " + //
-			"\"arr\":           [\"bar\"],           " + //
-			"\"emptyArray\":    [],                  " + //
-			"\"colorMap\":      {\"red\": \"rojo\"}, " + //
-			"\"emptyMap\":      {}                   " + //
+			"'str':        'foo',           " + //
+			"'num':        5,               " + //
+			"'bool':       true,            " + //
+			"'arr':        [42],            " + //
+			"'emptyArray': [],              " + //
+			"'colorMap':   {'red': 'rojo'}, " + //
+			"'emptyMap':   {}               " + //
 	"}";
 
-	private static final String SIMPSONS = "{ \"familyMembers\": [ " + //
-			"{\"name\": \"Homer\" },  " + //
-			"{\"name\": \"Marge\" },  " + //
-			"{\"name\": \"Bart\"  },  " + //
-			"{\"name\": \"Lisa\"  },  " + //
-			"{\"name\": \"Maggie\"}   " + //
+	private static final String SIMPSONS = "{ 'familyMembers': [ " + //
+			"{'name': 'Homer' }, " + //
+			"{'name': 'Marge' }, " + //
+			"{'name': 'Bart'  }, " + //
+			"{'name': 'Lisa'  }, " + //
+			"{'name': 'Maggie'}  " + //
 	" ] }";
 
 	@Rule

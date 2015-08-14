@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.client.samples.matchers;
 
 import java.net.URI;
@@ -37,9 +38,10 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 /**
  * Examples of defining expectations on JSON request content with
- * <a href="http://goessner.net/articles/JsonPath/">JSONPath</a> expressions.
+ * <a href="https://github.com/jayway/JsonPath">JsonPath</a> expressions.
  *
  * @author Rossen Stoyanchev
+ * @see org.springframework.test.web.client.match.JsonPathRequestMatchers
  */
 public class JsonPathRequestMatcherTests {
 

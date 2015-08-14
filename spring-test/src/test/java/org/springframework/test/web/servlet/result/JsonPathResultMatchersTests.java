@@ -24,7 +24,7 @@ import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.StubMvcResult;
 
 /**
- * Tests for {@link JsonPathResultMatchers}.
+ * Unit tests for {@link JsonPathResultMatchers}.
  *
  * @author Rossen Stoyanchev
  * @author Craig Andrews
@@ -32,7 +32,7 @@ import org.springframework.test.web.servlet.StubMvcResult;
  */
 public class JsonPathResultMatchersTests {
 
-	private static final String RESPONSE_CONTENT = "{\"foo\": \"bar\", \"qux\": [\"baz\"], \"emptyArray\": [], \"icanhaz\": true, \"howmanies\": 5, \"cheeseburger\": {\"pickles\": true}, \"emptyMap\": {} }";
+	private static final String RESPONSE_CONTENT = "{'foo': 'bar', 'qux': ['baz'], 'emptyArray': [], 'icanhaz': true, 'howmanies': 5, 'cheeseburger': {'pickles': true}, 'emptyMap': {} }";
 
 	private static final StubMvcResult stubMvcResult;
 
