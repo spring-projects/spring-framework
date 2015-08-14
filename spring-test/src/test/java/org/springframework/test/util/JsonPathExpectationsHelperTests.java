@@ -31,15 +31,96 @@ import static org.hamcrest.CoreMatchers.*;
  */
 public class JsonPathExpectationsHelperTests {
 
+	private static final String CONTENT = "{"         + //
+			"\"str\":           \"foo\","             + //
+			"\"nr\":            5,"                   + //
+			"\"bool\":          true,"                + //
+			"\"arr\":           [\"bar\"],"           + //
+			"\"emptyArray\":    [],"                  + //
+			"\"colorMap\":      {\"red\": \"rojo\"}," + //
+			"\"emptyMap\":      {},"                  + //
+	"}";
+
+
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
 
 
 	@Test
+	public void exists() throws Exception {
+		new JsonPathExpectationsHelper("$.str").exists(CONTENT);
+	}
+
+	@Test
+	public void doesNotExist() throws Exception {
+		new JsonPathExpectationsHelper("$.bogus").doesNotExist(CONTENT);
+	}
+
+	@Test
+	public void assertValue() throws Exception {
+		new JsonPathExpectationsHelper("$.nr").assertValue(CONTENT, 5);
+	}
+
+	@Test
 	public void assertValueWithDifferentExpectedType() throws Exception {
 		exception.expect(AssertionError.class);
 		exception.expectMessage(equalTo("For JSON path \"$.nr\", type of value expected:<java.lang.String> but was:<java.lang.Integer>"));
-		new JsonPathExpectationsHelper("$.nr").assertValue("{ \"nr\" : 5 }", "5");
+		new JsonPathExpectationsHelper("$.nr").assertValue(CONTENT, "5");
+	}
+
+	@Test
+	public void assertValueIsString() throws Exception {
+		new JsonPathExpectationsHelper("$.str").assertValueIsString(CONTENT);
+	}
+
+	@Test
+	public void assertValueIsStringForNonString() throws Exception {
+		exception.expect(AssertionError.class);
+		new JsonPathExpectationsHelper("$.bool").assertValueIsString(CONTENT);
+	}
+
+	@Test
+	public void assertValueIsNumber() throws Exception {
+		new JsonPathExpectationsHelper("$.nr").assertValueIsNumber(CONTENT);
+	}
+
+	@Test
+	public void assertValueIsNumberForNonNumber() throws Exception {
+		exception.expect(AssertionError.class);
+		new JsonPathExpectationsHelper("$.bool").assertValueIsNumber(CONTENT);
+	}
+
+	@Test
+	public void assertValueIsBoolean() throws Exception {
+		new JsonPathExpectationsHelper("$.bool").assertValueIsBoolean(CONTENT);
+	}
+
+	@Test
+	public void assertValueIsBooleanForNonBoolean() throws Exception {
+		exception.expect(AssertionError.class);
+		new JsonPathExpectationsHelper("$.nr").assertValueIsBoolean(CONTENT);
+	}
+
+	@Test
+	public void assertValueIsArray() throws Exception {
+		new JsonPathExpectationsHelper("$.arr").assertValueIsArray(CONTENT);
+	}
+
+	@Test
+	public void assertValueIsArrayForNonArray() throws Exception {
+		exception.expect(AssertionError.class);
+		new JsonPathExpectationsHelper("$.str").assertValueIsArray(CONTENT);
+	}
+
+	@Test
+	public void assertValueIsMap() throws Exception {
+		new JsonPathExpectationsHelper("$.colorMap").assertValueIsMap(CONTENT);
+	}
+
+	@Test
+	public void assertValueIsMapForNonMap() throws Exception {
+		exception.expect(AssertionError.class);
+		new JsonPathExpectationsHelper("$.str").assertValueIsMap(CONTENT);
 	}
 
 }
