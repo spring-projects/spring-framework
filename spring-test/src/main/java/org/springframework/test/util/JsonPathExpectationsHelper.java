@@ -92,7 +92,7 @@ public class JsonPathExpectationsHelper {
 	/**
 	 * Evaluate the JSON path expression against the supplied {@code content}
 	 * and assert the resulting value with the given {@code Matcher}.
-	 * @param content the JSON response content
+	 * @param content the JSON content
 	 * @param matcher the matcher with which to assert the result
 	 */
 	@SuppressWarnings("unchecked")
@@ -104,7 +104,7 @@ public class JsonPathExpectationsHelper {
 	/**
 	 * Evaluate the JSON path expression against the supplied {@code content}
 	 * and assert that the result is equal to the expected value.
-	 * @param content the JSON response content
+	 * @param content the JSON content
 	 * @param expectedValue the expected value
 	 */
 	public void assertValue(String content, Object expectedValue) throws ParseException {
@@ -130,7 +130,7 @@ public class JsonPathExpectationsHelper {
 	/**
 	 * Evaluate the JSON path expression against the supplied {@code content}
 	 * and assert that the resulting value is a {@link String}.
-	 * @param content the JSON response content
+	 * @param content the JSON content
 	 * @since 4.2.1
 	 */
 	public void assertValueIsString(String content) throws ParseException {
@@ -142,7 +142,7 @@ public class JsonPathExpectationsHelper {
 	/**
 	 * Evaluate the JSON path expression against the supplied {@code content}
 	 * and assert that the resulting value is a {@link Boolean}.
-	 * @param content the JSON response content
+	 * @param content the JSON content
 	 * @since 4.2.1
 	 */
 	public void assertValueIsBoolean(String content) throws ParseException {
@@ -154,7 +154,7 @@ public class JsonPathExpectationsHelper {
 	/**
 	 * Evaluate the JSON path expression against the supplied {@code content}
 	 * and assert that the resulting value is a {@link Number}.
-	 * @param content the JSON response content
+	 * @param content the JSON content
 	 * @since 4.2.1
 	 */
 	public void assertValueIsNumber(String content) throws ParseException {
@@ -166,7 +166,7 @@ public class JsonPathExpectationsHelper {
 	/**
 	 * Evaluate the JSON path expression against the supplied {@code content}
 	 * and assert that the resulting value is an array.
-	 * @param content the JSON response content
+	 * @param content the JSON content
 	 */
 	public void assertValueIsArray(String content) throws ParseException {
 		Object value = assertExistsAndReturn(content);
@@ -177,7 +177,7 @@ public class JsonPathExpectationsHelper {
 	/**
 	 * Evaluate the JSON path expression against the supplied {@code content}
 	 * and assert that the resulting value is a {@link Map}.
-	 * @param content the JSON response content
+	 * @param content the JSON content
 	 * @since 4.2.1
 	 */
 	public void assertValueIsMap(String content) throws ParseException {
@@ -189,7 +189,7 @@ public class JsonPathExpectationsHelper {
 	/**
 	 * Evaluate the JSON path expression against the supplied {@code content}
 	 * and assert that the resulting value exists.
-	 * @param content the JSON response content
+	 * @param content the JSON content
 	 */
 	public void exists(String content) throws ParseException {
 		assertExistsAndReturn(content);
@@ -199,7 +199,7 @@ public class JsonPathExpectationsHelper {
 	 * Evaluate the JSON path expression against the supplied {@code content}
 	 * and assert that the resulting value is empty (i.e., that a match for
 	 * the JSON path expression does not exist in the supplied content).
-	 * @param content the JSON response content
+	 * @param content the JSON content
 	 */
 	public void doesNotExist(String content) throws ParseException {
 		Object value;
