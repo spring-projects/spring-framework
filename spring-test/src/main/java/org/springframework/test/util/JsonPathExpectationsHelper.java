@@ -135,7 +135,7 @@ public class JsonPathExpectationsHelper {
 	 */
 	public void assertValueIsString(String content) throws ParseException {
 		Object value = assertExistsAndReturn(content);
-		String reason = "Expected string at JSON path " + this.expression + " but found " + value;
+		String reason = "Expected string at JSON path \"" + this.expression + "\" but found " + value;
 		assertThat(reason, value, instanceOf(String.class));
 	}
 
@@ -147,7 +147,7 @@ public class JsonPathExpectationsHelper {
 	 */
 	public void assertValueIsBoolean(String content) throws ParseException {
 		Object value = assertExistsAndReturn(content);
-		String reason = "Expected boolean at JSON path " + this.expression + " but found " + value;
+		String reason = "Expected boolean at JSON path \"" + this.expression + "\" but found " + value;
 		assertThat(reason, value, instanceOf(Boolean.class));
 	}
 
@@ -159,7 +159,7 @@ public class JsonPathExpectationsHelper {
 	 */
 	public void assertValueIsNumber(String content) throws ParseException {
 		Object value = assertExistsAndReturn(content);
-		String reason = "Expected number at JSON path " + this.expression + " but found " + value;
+		String reason = "Expected number at JSON path \"" + this.expression + "\" but found " + value;
 		assertThat(reason, value, instanceOf(Number.class));
 	}
 
@@ -182,7 +182,7 @@ public class JsonPathExpectationsHelper {
 	 */
 	public void assertValueIsMap(String content) throws ParseException {
 		Object value = assertExistsAndReturn(content);
-		String reason = "Expected map at JSON path " + this.expression + " but found " + value;
+		String reason = "Expected map at JSON path \"" + this.expression + "\" but found " + value;
 		assertThat(reason, value, instanceOf(Map.class));
 	}
 
