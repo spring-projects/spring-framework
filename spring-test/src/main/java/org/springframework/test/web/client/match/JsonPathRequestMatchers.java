@@ -117,6 +117,44 @@ public class JsonPathRequestMatchers {
 
 	/**
 	 * Evaluate the JSON path expression against the request content and
+	 * assert that an empty value exists at the given path.
+	 * <p>For the semantics of <em>empty</em>, consult the Javadoc for
+	 * {@link org.springframework.util.ObjectUtils#isEmpty(Object)}.
+	 * @since 4.2.1
+	 * @see #isNotEmpty()
+	 * @see #exists()
+	 * @see #doesNotExist()
+	 */
+	public RequestMatcher isEmpty() {
+		return new AbstractJsonPathRequestMatcher() {
+			@Override
+			public void matchInternal(MockClientHttpRequest request) throws IOException, ParseException {
+				JsonPathRequestMatchers.this.jsonPathHelper.assertValueIsEmpty(request.getBodyAsString());
+			}
+		};
+	}
+
+	/**
+	 * Evaluate the JSON path expression against the request content and
+	 * assert that a non-empty value exists at the given path.
+	 * <p>For the semantics of <em>empty</em>, consult the Javadoc for
+	 * {@link org.springframework.util.ObjectUtils#isEmpty(Object)}.
+	 * @since 4.2.1
+	 * @see #isEmpty()
+	 * @see #exists()
+	 * @see #doesNotExist()
+	 */
+	public RequestMatcher isNotEmpty() {
+		return new AbstractJsonPathRequestMatcher() {
+			@Override
+			public void matchInternal(MockClientHttpRequest request) throws IOException, ParseException {
+				JsonPathRequestMatchers.this.jsonPathHelper.assertValueIsNotEmpty(request.getBodyAsString());
+			}
+		};
+	}
+
+	/**
+	 * Evaluate the JSON path expression against the request content and
 	 * assert that the result is a {@link String}.
 	 * @since 4.2.1
 	 */

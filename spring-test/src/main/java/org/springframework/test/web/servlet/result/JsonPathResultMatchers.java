@@ -118,6 +118,46 @@ public class JsonPathResultMatchers {
 
 	/**
 	 * Evaluate the JSON path expression against the response content and
+	 * assert that an empty value exists at the given path.
+	 * <p>For the semantics of <em>empty</em>, consult the Javadoc for
+	 * {@link org.springframework.util.ObjectUtils#isEmpty(Object)}.
+	 * @since 4.2.1
+	 * @see #isNotEmpty()
+	 * @see #exists()
+	 * @see #doesNotExist()
+	 */
+	public ResultMatcher isEmpty() {
+		return new ResultMatcher() {
+			@Override
+			public void match(MvcResult result) throws Exception {
+				String content = result.getResponse().getContentAsString();
+				JsonPathResultMatchers.this.jsonPathHelper.assertValueIsEmpty(content);
+			}
+		};
+	}
+
+	/**
+	 * Evaluate the JSON path expression against the response content and
+	 * assert that a non-empty value exists at the given path.
+	 * <p>For the semantics of <em>empty</em>, consult the Javadoc for
+	 * {@link org.springframework.util.ObjectUtils#isEmpty(Object)}.
+	 * @since 4.2.1
+	 * @see #isEmpty()
+	 * @see #exists()
+	 * @see #doesNotExist()
+	 */
+	public ResultMatcher isNotEmpty() {
+		return new ResultMatcher() {
+			@Override
+			public void match(MvcResult result) throws Exception {
+				String content = result.getResponse().getContentAsString();
+				JsonPathResultMatchers.this.jsonPathHelper.assertValueIsNotEmpty(content);
+			}
+		};
+	}
+
+	/**
+	 * Evaluate the JSON path expression against the response content and
 	 * assert that the result is a {@link String}.
 	 * @since 4.2.1
 	 */

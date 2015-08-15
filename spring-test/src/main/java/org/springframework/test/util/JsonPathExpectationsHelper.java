@@ -25,7 +25,9 @@ import java.util.Map;
 import org.hamcrest.Matcher;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 import com.jayway.jsonpath.InvalidPathException;
 import com.jayway.jsonpath.JsonPath;
@@ -135,8 +137,7 @@ public class JsonPathExpectationsHelper {
 	 */
 	public void assertValueIsString(String content) throws ParseException {
 		Object value = assertExistsAndReturn(content);
-		String reason = "Expected a string at JSON path \"" + this.expression + "\" but found: " + value;
-		assertThat(reason, value, instanceOf(String.class));
+		assertThat(failureReason("a string", value), value, instanceOf(String.class));
 	}
 
 	/**
@@ -147,8 +148,7 @@ public class JsonPathExpectationsHelper {
 	 */
 	public void assertValueIsBoolean(String content) throws ParseException {
 		Object value = assertExistsAndReturn(content);
-		String reason = "Expected a boolean at JSON path \"" + this.expression + "\" but found: " + value;
-		assertThat(reason, value, instanceOf(Boolean.class));
+		assertThat(failureReason("a boolean", value), value, instanceOf(Boolean.class));
 	}
 
 	/**
@@ -159,8 +159,7 @@ public class JsonPathExpectationsHelper {
 	 */
 	public void assertValueIsNumber(String content) throws ParseException {
 		Object value = assertExistsAndReturn(content);
-		String reason = "Expected a number at JSON path \"" + this.expression + "\" but found: " + value;
-		assertThat(reason, value, instanceOf(Number.class));
+		assertThat(failureReason("a number", value), value, instanceOf(Number.class));
 	}
 
 	/**
@@ -170,8 +169,7 @@ public class JsonPathExpectationsHelper {
 	 */
 	public void assertValueIsArray(String content) throws ParseException {
 		Object value = assertExistsAndReturn(content);
-		String reason = "Expected an array at JSON path \"" + this.expression + "\" but found: " + value;
-		assertThat(reason, value, instanceOf(List.class));
+		assertThat(failureReason("an array", value), value, instanceOf(List.class));
 	}
 
 	/**
@@ -182,8 +180,7 @@ public class JsonPathExpectationsHelper {
 	 */
 	public void assertValueIsMap(String content) throws ParseException {
 		Object value = assertExistsAndReturn(content);
-		String reason = "Expected a map at JSON path \"" + this.expression + "\" but found: " + value;
-		assertThat(reason, value, instanceOf(Map.class));
+		assertThat(failureReason("a map", value), value, instanceOf(Map.class));
 	}
 
 	/**
@@ -214,13 +211,42 @@ public class JsonPathExpectationsHelper {
 		catch (AssertionError ex) {
 			return;
 		}
-		String reason = "Expected no value at JSON path \"" + this.expression + "\" but found: " + value;
+		String reason = failureReason("no value", value);
 		if (pathIsIndefinite() && value instanceof List) {
 			assertTrue(reason, ((List<?>) value).isEmpty());
 		}
 		else {
 			assertTrue(reason, value == null);
 		}
+	}
+
+	/**
+	 * Evaluate the JSON path expression against the supplied {@code content}
+	 * and assert that an empty value exists at the given path.
+	 * <p>For the semantics of <em>empty</em>, consult the Javadoc for
+	 * {@link ObjectUtils#isEmpty(Object)}.
+	 * @param content the JSON content
+	 */
+	public void assertValueIsEmpty(String content) throws ParseException {
+		Object value = evaluateJsonPath(content);
+		assertTrue(failureReason("an empty value", value), ObjectUtils.isEmpty(value));
+	}
+
+	/**
+	 * Evaluate the JSON path expression against the supplied {@code content}
+	 * and assert that a non-empty value exists at the given path.
+	 * <p>For the semantics of <em>empty</em>, consult the Javadoc for
+	 * {@link ObjectUtils#isEmpty(Object)}.
+	 * @param content the JSON content
+	 */
+	public void assertValueIsNotEmpty(String content) throws ParseException {
+		Object value = evaluateJsonPath(content);
+		assertTrue(failureReason("a non-empty value", value), !ObjectUtils.isEmpty(value));
+	}
+
+	private String failureReason(String expectedDescription, Object value) {
+		return String.format("Expected %s at JSON path \"%s\" but found: %s", expectedDescription, this.expression,
+			ObjectUtils.nullSafeToString(StringUtils.quoteIfString(value)));
 	}
 
 	private Object evaluateJsonPath(String content) throws ParseException {

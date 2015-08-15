@@ -33,13 +33,14 @@ import static org.hamcrest.CoreMatchers.*;
 public class JsonPathRequestMatchersTests {
 
 	private static final String REQUEST_CONTENT = "{" + //
-			"'str':        'foo',           " + //
-			"'num':        5,               " + //
-			"'bool':       true,            " + //
-			"'arr':        [42],            " + //
-			"'emptyArray': [],              " + //
-			"'colorMap':   {'red': 'rojo'}, " + //
-			"'emptyMap':   {}               " + //
+			"'str':         'foo',           " + //
+			"'num':         5,               " + //
+			"'bool':        true,            " + //
+			"'arr':         [42],            " + //
+			"'colorMap':    {'red': 'rojo'}, " + //
+			"'emptyString': '',              " + //
+			"'emptyArray':  [],              " + //
+			"'emptyMap':    {}               " + //
 	"}";
 
 	private static final MockClientHttpRequest request = new MockClientHttpRequest();
@@ -112,6 +113,61 @@ public class JsonPathRequestMatchersTests {
 	@Test(expected = AssertionError.class)
 	public void doesNotExistForAnEmptyMap() throws Exception {
 		new JsonPathRequestMatchers("$.emptyMap").doesNotExist().match(request);
+	}
+
+	@Test
+	public void isEmptyForAnEmptyString() throws Exception {
+		new JsonPathRequestMatchers("$.emptyString").isEmpty().match(request);
+	}
+
+	@Test
+	public void isEmptyForAnEmptyArray() throws Exception {
+		new JsonPathRequestMatchers("$.emptyArray").isEmpty().match(request);
+	}
+
+	@Test
+	public void isEmptyForAnEmptyMap() throws Exception {
+		new JsonPathRequestMatchers("$.emptyMap").isEmpty().match(request);
+	}
+
+	@Test
+	public void isNotEmptyForString() throws Exception {
+		new JsonPathRequestMatchers("$.str").isNotEmpty().match(request);
+	}
+
+	@Test
+	public void isNotEmptyForNumber() throws Exception {
+		new JsonPathRequestMatchers("$.num").isNotEmpty().match(request);
+	}
+
+	@Test
+	public void isNotEmptyForBoolean() throws Exception {
+		new JsonPathRequestMatchers("$.bool").isNotEmpty().match(request);
+	}
+
+	@Test
+	public void isNotEmptyForArray() throws Exception {
+		new JsonPathRequestMatchers("$.arr").isNotEmpty().match(request);
+	}
+
+	@Test
+	public void isNotEmptyForMap() throws Exception {
+		new JsonPathRequestMatchers("$.colorMap").isNotEmpty().match(request);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void isNotEmptyForAnEmptyString() throws Exception {
+		new JsonPathRequestMatchers("$.emptyString").isNotEmpty().match(request);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void isNotEmptyForAnEmptyArray() throws Exception {
+		new JsonPathRequestMatchers("$.emptyArray").isNotEmpty().match(request);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void isNotEmptyForAnEmptyMap() throws Exception {
+		new JsonPathRequestMatchers("$.emptyMap").isNotEmpty().match(request);
 	}
 
 	@Test

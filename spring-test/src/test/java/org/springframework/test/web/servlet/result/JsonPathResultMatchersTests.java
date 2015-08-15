@@ -33,13 +33,14 @@ import org.springframework.test.web.servlet.StubMvcResult;
 public class JsonPathResultMatchersTests {
 
 	private static final String RESPONSE_CONTENT = "{" + //
-			"'str':        'foo',           " + //
-			"'num':        5,               " + //
-			"'bool':       true,            " + //
-			"'arr':        [42],            " + //
-			"'emptyArray': [],              " + //
-			"'colorMap':   {'red': 'rojo'}, " + //
-			"'emptyMap':   {}               " + //
+			"'str':         'foo',           " + //
+			"'num':         5,               " + //
+			"'bool':        true,            " + //
+			"'arr':         [42],            " + //
+			"'colorMap':    {'red': 'rojo'}, " + //
+			"'emptyString': '',              " + //
+			"'emptyArray':  [],              " + //
+			"'emptyMap':    {}               " + //
 	"}";
 
 	private static final StubMvcResult stubMvcResult;
@@ -115,6 +116,61 @@ public class JsonPathResultMatchersTests {
 	@Test(expected = AssertionError.class)
 	public void doesNotExistForAnEmptyMap() throws Exception {
 		new JsonPathResultMatchers("$.emptyMap").doesNotExist().match(stubMvcResult);
+	}
+
+	@Test
+	public void isEmptyForAnEmptyString() throws Exception {
+		new JsonPathResultMatchers("$.emptyString").isEmpty().match(stubMvcResult);
+	}
+
+	@Test
+	public void isEmptyForAnEmptyArray() throws Exception {
+		new JsonPathResultMatchers("$.emptyArray").isEmpty().match(stubMvcResult);
+	}
+
+	@Test
+	public void isEmptyForAnEmptyMap() throws Exception {
+		new JsonPathResultMatchers("$.emptyMap").isEmpty().match(stubMvcResult);
+	}
+
+	@Test
+	public void isNotEmptyForString() throws Exception {
+		new JsonPathResultMatchers("$.str").isNotEmpty().match(stubMvcResult);
+	}
+
+	@Test
+	public void isNotEmptyForNumber() throws Exception {
+		new JsonPathResultMatchers("$.num").isNotEmpty().match(stubMvcResult);
+	}
+
+	@Test
+	public void isNotEmptyForBoolean() throws Exception {
+		new JsonPathResultMatchers("$.bool").isNotEmpty().match(stubMvcResult);
+	}
+
+	@Test
+	public void isNotEmptyForArray() throws Exception {
+		new JsonPathResultMatchers("$.arr").isNotEmpty().match(stubMvcResult);
+	}
+
+	@Test
+	public void isNotEmptyForMap() throws Exception {
+		new JsonPathResultMatchers("$.colorMap").isNotEmpty().match(stubMvcResult);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void isNotEmptyForAnEmptyString() throws Exception {
+		new JsonPathResultMatchers("$.emptyString").isNotEmpty().match(stubMvcResult);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void isNotEmptyForAnEmptyArray() throws Exception {
+		new JsonPathResultMatchers("$.emptyArray").isNotEmpty().match(stubMvcResult);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void isNotEmptyForAnEmptyMap() throws Exception {
+		new JsonPathResultMatchers("$.emptyMap").isNotEmpty().match(stubMvcResult);
 	}
 
 	@Test
