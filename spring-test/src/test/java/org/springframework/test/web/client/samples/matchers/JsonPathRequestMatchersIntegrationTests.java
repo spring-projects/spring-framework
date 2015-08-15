@@ -17,14 +17,12 @@
 package org.springframework.test.web.client.samples.matchers;
 
 import java.net.URI;
-import java.util.ArrayList;
+import java.net.URISyntaxException;
 import java.util.Arrays;
-import java.util.List;
 
-import org.junit.Before;
+import org.junit.After;
 import org.junit.Test;
 
-import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.client.MockRestServiceServer;
@@ -41,38 +39,30 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  * <a href="https://github.com/jayway/JsonPath">JsonPath</a> expressions.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @see org.springframework.test.web.client.match.JsonPathRequestMatchers
+ * @see org.springframework.test.web.client.match.JsonPathRequestMatchersTests
  */
 public class JsonPathRequestMatchersIntegrationTests {
 
-	private MockRestServiceServer mockServer;
+	private static final MultiValueMap<String, Person> people = new LinkedMultiValueMap<String, Person>();
 
-	private RestTemplate restTemplate;
-
-	private MultiValueMap<String, Person> people;
-
-
-	@Before
-	public void setup() {
-		this.people = new LinkedMultiValueMap<String, Person>();
-		this.people.add("composers", new Person("Johann Sebastian Bach"));
-		this.people.add("composers", new Person("Johannes Brahms"));
-		this.people.add("composers", new Person("Edvard Grieg"));
-		this.people.add("composers", new Person("Robert Schumann"));
-		this.people.add("performers", new Person("Vladimir Ashkenazy"));
-		this.people.add("performers", new Person("Yehudi Menuhin"));
-
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
-		converters.add(new MappingJackson2HttpMessageConverter());
-
-		this.restTemplate = new RestTemplate();
-		this.restTemplate.setMessageConverters(converters);
-
-		this.mockServer = MockRestServiceServer.createServer(this.restTemplate);
+	static {
+		people.add("composers", new Person("Johann Sebastian Bach"));
+		people.add("composers", new Person("Johannes Brahms"));
+		people.add("composers", new Person("Edvard Grieg"));
+		people.add("composers", new Person("Robert Schumann"));
+		people.add("performers", new Person("Vladimir Ashkenazy"));
+		people.add("performers", new Person("Yehudi Menuhin"));
 	}
 
+	private final RestTemplate restTemplate = new RestTemplate(Arrays.asList(new MappingJackson2HttpMessageConverter()));
+
+	private final MockRestServiceServer mockServer = MockRestServiceServer.createServer(this.restTemplate);
+
+
 	@Test
-	public void testExists() throws Exception {
+	public void exists() throws Exception {
 		this.mockServer.expect(requestTo("/composers"))
 			.andExpect(content().contentType("application/json;charset=UTF-8"))
 			.andExpect(jsonPath("$.composers[0]").exists())
@@ -80,13 +70,10 @@ public class JsonPathRequestMatchersIntegrationTests {
 			.andExpect(jsonPath("$.composers[2]").exists())
 			.andExpect(jsonPath("$.composers[3]").exists())
 			.andRespond(withSuccess());
-
-		this.restTemplate.put(new URI("/composers"), this.people);
-		this.mockServer.verify();
 	}
 
 	@Test
-	public void testDoesNotExist() throws Exception {
+	public void doesNotExist() throws Exception {
 		this.mockServer.expect(requestTo("/composers"))
 			.andExpect(content().contentType("application/json;charset=UTF-8"))
 			.andExpect(jsonPath("$.composers[?(@.name == 'Edvard Grieeeeeeg')]").doesNotExist())
@@ -94,42 +81,33 @@ public class JsonPathRequestMatchersIntegrationTests {
 			.andExpect(jsonPath("$.composers[-1]").doesNotExist())
 			.andExpect(jsonPath("$.composers[4]").doesNotExist())
 			.andRespond(withSuccess());
-
-		this.restTemplate.put(new URI("/composers"), this.people);
-		this.mockServer.verify();
 	}
 
 	@Test
-	public void testEqualTo() throws Exception {
+	public void value() throws Exception {
 		this.mockServer.expect(requestTo("/composers"))
 			.andExpect(content().contentType("application/json;charset=UTF-8"))
 			.andExpect(jsonPath("$.composers[0].name").value("Johann Sebastian Bach"))
 			.andExpect(jsonPath("$.performers[1].name").value("Yehudi Menuhin"))
-			.andExpect(jsonPath("$.composers[0].name").value(equalTo("Johann Sebastian Bach"))) // Hamcrest
-			.andExpect(jsonPath("$.performers[1].name").value(equalTo("Yehudi Menuhin"))) // Hamcrest
 			.andRespond(withSuccess());
-
-		this.restTemplate.put(new URI("/composers"), this.people);
-		this.mockServer.verify();
 	}
 
 	@Test
-	public void testHamcrestMatcher() throws Exception {
+	public void hamcrestMatchers() throws Exception {
 		this.mockServer.expect(requestTo("/composers"))
 			.andExpect(content().contentType("application/json;charset=UTF-8"))
+			.andExpect(jsonPath("$.composers[0].name").value(equalTo("Johann Sebastian Bach")))
+			.andExpect(jsonPath("$.performers[1].name").value(equalTo("Yehudi Menuhin")))
 			.andExpect(jsonPath("$.composers[0].name", startsWith("Johann")))
 			.andExpect(jsonPath("$.performers[0].name", endsWith("Ashkenazy")))
 			.andExpect(jsonPath("$.performers[1].name", containsString("di Me")))
 			.andExpect(jsonPath("$.composers[1].name", isIn(Arrays.asList("Johann Sebastian Bach", "Johannes Brahms"))))
 			.andExpect(jsonPath("$.composers[:3].name", hasItem("Johannes Brahms")))
 			.andRespond(withSuccess());
-
-		this.restTemplate.put(new URI("/composers"), this.people);
-		this.mockServer.verify();
 	}
 
 	@Test
-	public void testHamcrestMatcherWithParameterizedJsonPath() throws Exception {
+	public void hamcrestMatchersWithParameterizedJsonPaths() throws Exception {
 		String composerName = "$.composers[%s].name";
 		String performerName = "$.performers[%s].name";
 
@@ -140,8 +118,43 @@ public class JsonPathRequestMatchersIntegrationTests {
 			.andExpect(jsonPath(performerName, 1).value(containsString("di Me")))
 			.andExpect(jsonPath(composerName, 1).value(isIn(Arrays.asList("Johann Sebastian Bach", "Johannes Brahms"))))
 			.andRespond(withSuccess());
+	}
 
-		this.restTemplate.put(new URI("/composers"), this.people);
+	@Test
+	public void isArray() throws Exception {
+		this.mockServer.expect(requestTo("/composers"))
+			.andExpect(content().contentType("application/json;charset=UTF-8"))
+			.andExpect(jsonPath("$.composers").isArray())
+			.andRespond(withSuccess());
+	}
+
+	@Test
+	public void isString() throws Exception {
+		this.mockServer.expect(requestTo("/composers"))
+			.andExpect(content().contentType("application/json;charset=UTF-8"))
+			.andExpect(jsonPath("$.composers[0].name").isString())
+			.andRespond(withSuccess());
+	}
+
+	@Test
+	public void isNumber() throws Exception {
+		this.mockServer.expect(requestTo("/composers"))
+			.andExpect(content().contentType("application/json;charset=UTF-8"))
+			.andExpect(jsonPath("$.composers[0].someDouble").isNumber())
+			.andRespond(withSuccess());
+	}
+
+	@Test
+	public void isBoolean() throws Exception {
+		this.mockServer.expect(requestTo("/composers"))
+			.andExpect(content().contentType("application/json;charset=UTF-8"))
+			.andExpect(jsonPath("$.composers[0].someBoolean").isBoolean())
+			.andRespond(withSuccess());
+	}
+
+	@After
+	public void performRequestAndVerify() throws URISyntaxException {
+		this.restTemplate.put(new URI("/composers"), people);
 		this.mockServer.verify();
 	}
 

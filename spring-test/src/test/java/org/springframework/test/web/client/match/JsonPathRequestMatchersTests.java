@@ -129,4 +129,49 @@ public class JsonPathRequestMatchersTests {
 		new JsonPathRequestMatchers("$.str").isArray().match(request);
 	}
 
+	@Test
+	public void isMap() throws Exception {
+		new JsonPathRequestMatchers("$.colorMap").isMap().match(request);
+	}
+
+	@Test
+	public void isMapForAnEmptyMap() throws Exception {
+		new JsonPathRequestMatchers("$.emptyMap").isMap().match(request);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void isMapNoMatch() throws Exception {
+		new JsonPathRequestMatchers("$.str").isMap().match(request);
+	}
+
+	@Test
+	public void isBoolean() throws Exception {
+		new JsonPathRequestMatchers("$.bool").isBoolean().match(request);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void isBooleanNoMatch() throws Exception {
+		new JsonPathRequestMatchers("$.str").isBoolean().match(request);
+	}
+
+	@Test
+	public void isNumber() throws Exception {
+		new JsonPathRequestMatchers("$.num").isNumber().match(request);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void isNumberNoMatch() throws Exception {
+		new JsonPathRequestMatchers("$.str").isNumber().match(request);
+	}
+
+	@Test
+	public void isString() throws Exception {
+		new JsonPathRequestMatchers("$.str").isString().match(request);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void isStringNoMatch() throws Exception {
+		new JsonPathRequestMatchers("$.arr").isString().match(request);
+	}
+
 }

@@ -117,6 +117,48 @@ public class JsonPathRequestMatchers {
 
 	/**
 	 * Evaluate the JSON path expression against the request content and
+	 * assert that the result is a {@link String}.
+	 * @since 4.2.1
+	 */
+	public RequestMatcher isString() {
+		return new AbstractJsonPathRequestMatcher() {
+			@Override
+			public void matchInternal(MockClientHttpRequest request) throws IOException, ParseException {
+				JsonPathRequestMatchers.this.jsonPathHelper.assertValueIsString(request.getBodyAsString());
+			}
+		};
+	}
+
+	/**
+	 * Evaluate the JSON path expression against the request content and
+	 * assert that the result is a {@link Boolean}.
+	 * @since 4.2.1
+	 */
+	public RequestMatcher isBoolean() {
+		return new AbstractJsonPathRequestMatcher() {
+			@Override
+			public void matchInternal(MockClientHttpRequest request) throws IOException, ParseException {
+				JsonPathRequestMatchers.this.jsonPathHelper.assertValueIsBoolean(request.getBodyAsString());
+			}
+		};
+	}
+
+	/**
+	 * Evaluate the JSON path expression against the request content and
+	 * assert that the result is a {@link Number}.
+	 * @since 4.2.1
+	 */
+	public RequestMatcher isNumber() {
+		return new AbstractJsonPathRequestMatcher() {
+			@Override
+			public void matchInternal(MockClientHttpRequest request) throws IOException, ParseException {
+				JsonPathRequestMatchers.this.jsonPathHelper.assertValueIsNumber(request.getBodyAsString());
+			}
+		};
+	}
+
+	/**
+	 * Evaluate the JSON path expression against the request content and
 	 * assert that the result is an array.
 	 */
 	public RequestMatcher isArray() {
@@ -124,6 +166,20 @@ public class JsonPathRequestMatchers {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws IOException, ParseException {
 				JsonPathRequestMatchers.this.jsonPathHelper.assertValueIsArray(request.getBodyAsString());
+			}
+		};
+	}
+
+	/**
+	 * Evaluate the JSON path expression against the request content and
+	 * assert that the result is a {@link java.util.Map}.
+	 * @since 4.2.1
+	 */
+	public RequestMatcher isMap() {
+		return new AbstractJsonPathRequestMatcher() {
+			@Override
+			public void matchInternal(MockClientHttpRequest request) throws IOException, ParseException {
+				JsonPathRequestMatchers.this.jsonPathHelper.assertValueIsMap(request.getBodyAsString());
 			}
 		};
 	}
