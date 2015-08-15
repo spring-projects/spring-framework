@@ -19,7 +19,7 @@ package org.springframework.util;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.ServerSocket;
-import java.util.Random;
+import java.security.SecureRandom;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import javax.net.ServerSocketFactory;
@@ -51,9 +51,6 @@ public class SocketUtils {
 	 * socket port.
 	 */
 	public static final int PORT_RANGE_MAX = 65535;
-
-
-	private static final Random random = new Random(System.currentTimeMillis());
 
 
 	/**
@@ -238,7 +235,7 @@ public class SocketUtils {
 		 */
 		private int findRandomPort(int minPort, int maxPort) {
 			int portRange = maxPort - minPort;
-			return minPort + random.nextInt(portRange);
+			return minPort + new SecureRandom().nextInt(portRange);
 		}
 
 		/**
