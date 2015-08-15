@@ -32,7 +32,15 @@ import org.springframework.test.web.servlet.StubMvcResult;
  */
 public class JsonPathResultMatchersTests {
 
-	private static final String RESPONSE_CONTENT = "{'foo': 'bar', 'qux': ['baz'], 'emptyArray': [], 'icanhaz': true, 'howmanies': 5, 'cheeseburger': {'pickles': true}, 'emptyMap': {} }";
+	private static final String RESPONSE_CONTENT = "{" + //
+			"'str':        'foo',           " + //
+			"'num':        5,               " + //
+			"'bool':       true,            " + //
+			"'arr':        [42],            " + //
+			"'emptyArray': [],              " + //
+			"'colorMap':   {'red': 'rojo'}, " + //
+			"'emptyMap':   {}               " + //
+	"}";
 
 	private static final StubMvcResult stubMvcResult;
 
@@ -51,27 +59,27 @@ public class JsonPathResultMatchersTests {
 
 	@Test
 	public void value() throws Exception {
-		new JsonPathResultMatchers("$.foo").value("bar").match(stubMvcResult);
+		new JsonPathResultMatchers("$.str").value("foo").match(stubMvcResult);
 	}
 
 	@Test(expected = AssertionError.class)
 	public void valueNoMatch() throws Exception {
-		new JsonPathResultMatchers("$.foo").value("bogus").match(stubMvcResult);
+		new JsonPathResultMatchers("$.str").value("bogus").match(stubMvcResult);
 	}
 
 	@Test
 	public void valueWithMatcher() throws Exception {
-		new JsonPathResultMatchers("$.foo").value(Matchers.equalTo("bar")).match(stubMvcResult);
+		new JsonPathResultMatchers("$.str").value(Matchers.equalTo("foo")).match(stubMvcResult);
 	}
 
 	@Test(expected = AssertionError.class)
 	public void valueWithMatcherNoMatch() throws Exception {
-		new JsonPathResultMatchers("$.foo").value(Matchers.equalTo("bogus")).match(stubMvcResult);
+		new JsonPathResultMatchers("$.str").value(Matchers.equalTo("bogus")).match(stubMvcResult);
 	}
 
 	@Test
 	public void exists() throws Exception {
-		new JsonPathResultMatchers("$.foo").exists().match(stubMvcResult);
+		new JsonPathResultMatchers("$.str").exists().match(stubMvcResult);
 	}
 
 	@Test
@@ -96,7 +104,7 @@ public class JsonPathResultMatchersTests {
 
 	@Test(expected = AssertionError.class)
 	public void doesNotExistNoMatch() throws Exception {
-		new JsonPathResultMatchers("$.foo").doesNotExist().match(stubMvcResult);
+		new JsonPathResultMatchers("$.str").doesNotExist().match(stubMvcResult);
 	}
 
 	@Test(expected = AssertionError.class)
@@ -111,7 +119,7 @@ public class JsonPathResultMatchersTests {
 
 	@Test
 	public void isArray() throws Exception {
-		new JsonPathResultMatchers("$.qux").isArray().match(stubMvcResult);
+		new JsonPathResultMatchers("$.arr").isArray().match(stubMvcResult);
 	}
 
 	@Test
@@ -126,7 +134,7 @@ public class JsonPathResultMatchersTests {
 
 	@Test
 	public void isMap() throws Exception {
-		new JsonPathResultMatchers("$.cheeseburger").isMap().match(stubMvcResult);
+		new JsonPathResultMatchers("$.colorMap").isMap().match(stubMvcResult);
 	}
 
 	@Test
@@ -136,37 +144,37 @@ public class JsonPathResultMatchersTests {
 
 	@Test(expected = AssertionError.class)
 	public void isMapNoMatch() throws Exception {
-		new JsonPathResultMatchers("$.foo").isMap().match(stubMvcResult);
+		new JsonPathResultMatchers("$.str").isMap().match(stubMvcResult);
 	}
 
 	@Test
 	public void isBoolean() throws Exception {
-		new JsonPathResultMatchers("$.icanhaz").isBoolean().match(stubMvcResult);
+		new JsonPathResultMatchers("$.bool").isBoolean().match(stubMvcResult);
 	}
 
 	@Test(expected = AssertionError.class)
 	public void isBooleanNoMatch() throws Exception {
-		new JsonPathResultMatchers("$.foo").isBoolean().match(stubMvcResult);
+		new JsonPathResultMatchers("$.str").isBoolean().match(stubMvcResult);
 	}
 
 	@Test
 	public void isNumber() throws Exception {
-		new JsonPathResultMatchers("$.howmanies").isNumber().match(stubMvcResult);
+		new JsonPathResultMatchers("$.num").isNumber().match(stubMvcResult);
 	}
 
 	@Test(expected = AssertionError.class)
 	public void isNumberNoMatch() throws Exception {
-		new JsonPathResultMatchers("$.foo").isNumber().match(stubMvcResult);
+		new JsonPathResultMatchers("$.str").isNumber().match(stubMvcResult);
 	}
 
 	@Test
 	public void isString() throws Exception {
-		new JsonPathResultMatchers("$.foo").isString().match(stubMvcResult);
+		new JsonPathResultMatchers("$.str").isString().match(stubMvcResult);
 	}
 
 	@Test(expected = AssertionError.class)
 	public void isStringNoMatch() throws Exception {
-		new JsonPathResultMatchers("$.qux").isString().match(stubMvcResult);
+		new JsonPathResultMatchers("$.arr").isString().match(stubMvcResult);
 	}
 
 }
