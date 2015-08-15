@@ -78,8 +78,8 @@ public class JsonPathExpectationsHelper {
 	/**
 	 * Construct a new {@code JsonPathExpectationsHelper}.
 	 * @param expression the {@link JsonPath} expression; never {@code null} or empty
-	 * @param args arguments to parameterize the {@code JsonPath} expression, with
-	 * formatting specifiers defined in {@link String#format(String, Object...)}
+	 * @param args arguments to parameterize the {@code JsonPath} expression with,
+	 * using formatting specifiers defined in {@link String#format(String, Object...)}
 	 */
 	public JsonPathExpectationsHelper(String expression, Object... args) {
 		Assert.hasText(expression, "expression must not be null or empty");

@@ -22,11 +22,14 @@ import org.springframework.test.util.JsonPathExpectationsHelper;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 
+import com.jayway.jsonpath.JsonPath;
+
 /**
  * Factory for assertions on the response content using
  * <a href="https://github.com/jayway/JsonPath">JsonPath</a> expressions.
  * <p>An instance of this class is typically accessed via
- * {@link MockMvcResultMatchers#jsonPath}.
+ * {@link MockMvcResultMatchers#jsonPath(String, Matcher)} or
+ * {@link MockMvcResultMatchers#jsonPath(String, Object...)}.
  *
  * @author Rossen Stoyanchev
  * @author Craig Andrews
@@ -42,6 +45,9 @@ public class JsonPathResultMatchers {
 	 * Protected constructor.
 	 * <p>Use {@link MockMvcResultMatchers#jsonPath(String, Object...)} or
 	 * {@link MockMvcResultMatchers#jsonPath(String, Matcher)}.
+	 * @param expression the {@link JsonPath} expression; never {@code null} or empty
+	 * @param args arguments to parameterize the {@code JsonPath} expression with,
+	 * using formatting specifiers defined in {@link String#format(String, Object...)}
 	 */
 	protected JsonPathResultMatchers(String expression, Object ... args) {
 		this.jsonPathHelper = new JsonPathExpectationsHelper(expression, args);
@@ -79,9 +85,9 @@ public class JsonPathResultMatchers {
 	/**
 	 * Evaluate the JSON path expression against the response content and
 	 * assert that a non-null value exists at the given path.
-	 * <p>If the JSON path expression is not
-	 * {@linkplain com.jayway.jsonpath.JsonPath#isDefinite definite},
-	 * this method asserts that the value at the given path is not <em>empty</em>.
+	 * <p>If the JSON path expression is not {@linkplain JsonPath#isDefinite
+	 * definite}, this method asserts that the value at the given path is not
+	 * <em>empty</em>.
 	 */
 	public ResultMatcher exists() {
 		return new ResultMatcher() {
@@ -96,9 +102,9 @@ public class JsonPathResultMatchers {
 	/**
 	 * Evaluate the JSON path expression against the response content and
 	 * assert that a value does not exist at the given path.
-	 * <p>If the JSON path expression is not
-	 * {@linkplain com.jayway.jsonpath.JsonPath#isDefinite definite}, this
-	 * method asserts that the value at the given path is <em>empty</em>.
+	 * <p>If the JSON path expression is not {@linkplain JsonPath#isDefinite
+	 * definite}, this method asserts that the value at the given path is
+	 * <em>empty</em>.
 	 */
 	public ResultMatcher doesNotExist() {
 		return new ResultMatcher() {

@@ -26,97 +26,112 @@ import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.test.util.JsonPathExpectationsHelper;
 import org.springframework.test.web.client.RequestMatcher;
 
+import com.jayway.jsonpath.JsonPath;
+
 /**
- * Factory methods for request content {@code RequestMatcher}s using a
- * <a href="https://github.com/jayway/JsonPath">JsonPath</a> expression.
+ * Factory for assertions on the request content using
+ * <a href="https://github.com/jayway/JsonPath">JsonPath</a> expressions.
  * <p>An instance of this class is typically accessed via
- * {@link MockRestRequestMatchers#jsonPath}.
+ * {@link MockRestRequestMatchers#jsonPath(String, Matcher)} or
+ * {@link MockRestRequestMatchers#jsonPath(String, Object...)}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 3.2
  */
 public class JsonPathRequestMatchers {
 
-	private JsonPathExpectationsHelper jsonPathHelper;
+	private final JsonPathExpectationsHelper jsonPathHelper;
 
 
 	/**
-	 * Class constructor, not for direct instantiation. Use
-	 * {@link MockRestRequestMatchers#jsonPath(String, Matcher)} or
+	 * Protected constructor.
+	 * <p>Use {@link MockRestRequestMatchers#jsonPath(String, Matcher)} or
 	 * {@link MockRestRequestMatchers#jsonPath(String, Object...)}.
-	 *
-	 * @param expression the JSONPath expression
-	 * @param args arguments to parameterize the JSONPath expression with using
-	 * the formatting specifiers defined in
-	 * {@link String#format(String, Object...)}
+	 * @param expression the {@link JsonPath} expression; never {@code null} or empty
+	 * @param args arguments to parameterize the {@code JsonPath} expression with,
+	 * using formatting specifiers defined in {@link String#format(String, Object...)}
 	 */
 	protected JsonPathRequestMatchers(String expression, Object ... args) {
 		this.jsonPathHelper = new JsonPathExpectationsHelper(expression, args);
 	}
 
+
 	/**
-	 * Evaluate the JSONPath and assert the resulting value with the given {@code Matcher}.
+	 * Evaluate the JSON path expression against the request content and
+	 * assert the resulting value with the given Hamcrest {@link Matcher}.
 	 */
 	public <T> RequestMatcher value(final Matcher<T> matcher) {
 		return new AbstractJsonPathRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws IOException, ParseException {
-				jsonPathHelper.assertValue(request.getBodyAsString(), matcher);
+				JsonPathRequestMatchers.this.jsonPathHelper.assertValue(request.getBodyAsString(), matcher);
 			}
 		};
 	}
 
 	/**
-	 * Apply the JSONPath and assert the resulting value.
+	 * Evaluate the JSON path expression against the request content and
+	 * assert that the result is equal to the supplied value.
 	 */
 	public RequestMatcher value(final Object expectedValue) {
 		return new AbstractJsonPathRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws IOException, ParseException {
-				jsonPathHelper.assertValue(request.getBodyAsString(), expectedValue);
+				JsonPathRequestMatchers.this.jsonPathHelper.assertValue(request.getBodyAsString(), expectedValue);
 			}
 		};
 	}
 
 	/**
-	 * Apply the JSONPath and assert the resulting value.
+	 * Evaluate the JSON path expression against the request content and
+	 * assert that a non-null value exists at the given path.
+	 * <p>If the JSON path expression is not {@linkplain JsonPath#isDefinite
+	 * definite}, this method asserts that the value at the given path is not
+	 * <em>empty</em>.
 	 */
 	public RequestMatcher exists() {
 		return new AbstractJsonPathRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws IOException, ParseException {
-				jsonPathHelper.exists(request.getBodyAsString());
+				JsonPathRequestMatchers.this.jsonPathHelper.exists(request.getBodyAsString());
 			}
 		};
 	}
 
 	/**
-	 * Evaluate the JSON path and assert the resulting content exists.
+	 * Evaluate the JSON path expression against the request content and
+	 * assert that a value does not exist at the given path.
+	 * <p>If the JSON path expression is not {@linkplain JsonPath#isDefinite
+	 * definite}, this method asserts that the value at the given path is
+	 * <em>empty</em>.
 	 */
 	public RequestMatcher doesNotExist() {
 		return new AbstractJsonPathRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws IOException, ParseException {
-				jsonPathHelper.doesNotExist(request.getBodyAsString());
+				JsonPathRequestMatchers.this.jsonPathHelper.doesNotExist(request.getBodyAsString());
 			}
 		};
 	}
 
 	/**
-	 * Assert the content at the given JSONPath is an array.
+	 * Evaluate the JSON path expression against the request content and
+	 * assert that the result is an array.
 	 */
 	public RequestMatcher isArray() {
 		return new AbstractJsonPathRequestMatcher() {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws IOException, ParseException {
-				jsonPathHelper.assertValueIsArray(request.getBodyAsString());
+				JsonPathRequestMatchers.this.jsonPathHelper.assertValueIsArray(request.getBodyAsString());
 			}
 		};
 	}
 
 
 	/**
-	 * Abstract base class for JSONPath {@link RequestMatcher}s.
+	 * Abstract base class for {@code JsonPath}-based {@link RequestMatcher}s.
+	 * @see #matchInternal
 	 */
 	private abstract static class AbstractJsonPathRequestMatcher implements RequestMatcher {
 
@@ -131,7 +146,7 @@ public class JsonPathRequestMatchers {
 			}
 		}
 
-		protected abstract void matchInternal(MockClientHttpRequest request) throws IOException, ParseException;
-
+		abstract void matchInternal(MockClientHttpRequest request) throws IOException, ParseException;
 	}
+
 }
