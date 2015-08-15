@@ -32,7 +32,7 @@ import static org.hamcrest.Matchers.*;
  * @author Craig Walls
  * @author Rossen Stoyanchev
  */
-public class RequestMatchersTests {
+public class MockRestRequestMatchersTests {
 
 	private final MockClientHttpRequest request = new MockClientHttpRequest();
 

@@ -43,7 +43,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  * @author Rossen Stoyanchev
  * @see org.springframework.test.web.client.match.JsonPathRequestMatchers
  */
-public class JsonPathRequestMatcherTests {
+public class JsonPathRequestMatchersIntegrationTests {
 
 	private MockRestServiceServer mockServer;
 

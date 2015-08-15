@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.client.samples.matchers;
 
 import java.net.URI;
@@ -22,7 +23,6 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -31,17 +31,20 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
 
 /**
- * Examples of defining expectations on request headers.
+ * Examples of defining expectations on request content and content type.
  *
  * @author Rossen Stoyanchev
+ *
+ * @see JsonPathRequestMatchersIntegrationTests
+ * @see XmlContentRequestMatchersIntegrationTests
+ * @see XpathRequestMatchersIntegrationTests
  */
-public class HeaderRequestMatcherTests {
-
-	private static final String RESPONSE_BODY = "{\"name\" : \"Ludwig van Beethoven\", \"someDouble\" : \"1.6035\"}";
+public class ContentRequestMatchersIntegrationTests {
 
 	private MockRestServiceServer mockServer;
 
@@ -60,25 +63,42 @@ public class HeaderRequestMatcherTests {
 	}
 
 	@Test
-	public void testString() throws Exception {
-
-		this.mockServer.expect(requestTo("/person/1"))
-			.andExpect(header("Accept", "application/json, application/*+json"))
-			.andRespond(withSuccess(RESPONSE_BODY, MediaType.APPLICATION_JSON));
-
-		this.restTemplate.getForObject(new URI("/person/1"), Person.class);
+	public void contentType() throws Exception {
+		this.mockServer.expect(content().contentType("application/json;charset=UTF-8")).andRespond(withSuccess());
+		this.restTemplate.put(new URI("/foo"), new Person());
 		this.mockServer.verify();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
-	public void testStringContains() throws Exception {
+	public void contentTypeNoMatch() throws Exception {
+		this.mockServer.expect(content().contentType("application/json;charset=UTF-8")).andRespond(withSuccess());
+		try {
+			this.restTemplate.put(new URI("/foo"), "foo");
+		}
+		catch (AssertionError error) {
+			String message = error.getMessage();
+			assertTrue(message, message.startsWith("Content type expected:<application/json;charset=UTF-8>"));
+		}
+	}
 
-		this.mockServer.expect(requestTo("/person/1"))
-			.andExpect(header("Accept", containsString("json")))
-			.andRespond(withSuccess(RESPONSE_BODY, MediaType.APPLICATION_JSON));
+	@Test
+	public void contentAsString() throws Exception {
+		this.mockServer.expect(content().string("foo")).andRespond(withSuccess());
+		this.restTemplate.put(new URI("/foo"), "foo");
+		this.mockServer.verify();
+	}
 
-		this.restTemplate.getForObject(new URI("/person/1"), Person.class);
+	@Test
+	public void contentStringStartsWith() throws Exception {
+		this.mockServer.expect(content().string(startsWith("foo"))).andRespond(withSuccess());
+		this.restTemplate.put(new URI("/foo"), "foo123");
+		this.mockServer.verify();
+	}
+
+	@Test
+	public void contentAsBytes() throws Exception {
+		this.mockServer.expect(content().bytes("foo".getBytes())).andRespond(withSuccess());
+		this.restTemplate.put(new URI("/foo"), "foo");
 		this.mockServer.verify();
 	}
 
