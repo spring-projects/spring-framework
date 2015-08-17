@@ -61,7 +61,7 @@ configure(allprojects) { project ->
 	ext.openjpaVersion       = "2.4.0"
 	ext.poiVersion           = "3.12"
 	ext.protobufVersion      = "2.6.1"
-	ext.reactorVersion       = "2.0.4.RELEASE"
+	ext.reactorVersion       = "2.0.5.RELEASE"
 	ext.romeVersion          = "1.5.1"
 	ext.seleniumVersion      = "2.47.1"
 	ext.slf4jVersion         = "1.7.12"
