@@ -54,6 +54,7 @@ import org.springframework.beans.FatalBeanException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -704,6 +705,35 @@ public class Jackson2ObjectMapperBuilder {
 			}
 			catch (ClassNotFoundException ex) {
 				// jackson-datatype-joda not available
+			}
+		}
+
+		// Hibernate present?
+		if (ClassUtils.isPresent("org.hibernate.Version", this.moduleClassLoader)) {
+			try {
+				Class<?> hibernateVersionClass = (Class<?>) ClassUtils.forName("org.hibernate.Version", this.moduleClassLoader);
+				String hibernateVersion = (String) ReflectionUtils.invokeMethod(ReflectionUtils.findMethod(hibernateVersionClass, "getVersionString"), null);
+				if(hibernateVersion.startsWith("4.")) {
+					try {
+						Class<? extends Module> hibernate4Module = (Class<? extends Module>)
+								ClassUtils.forName("com.fasterxml.jackson.datatype.hibernate4.Hibernate4Module", this.moduleClassLoader);
+						objectMapper.registerModule(BeanUtils.instantiate(hibernate4Module));
+					}
+					catch (ClassNotFoundException ex) {
+						// jackson-datatype-hibernate4 not available
+					}
+				}else if(hibernateVersion.startsWith("5.")) {
+					try {
+						Class<? extends Module> hibernate5Module = (Class<? extends Module>)
+								ClassUtils.forName("com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module", this.moduleClassLoader);
+						objectMapper.registerModule(BeanUtils.instantiate(hibernate5Module));
+					}
+					catch (ClassNotFoundException ex) {
+						// jackson-datatype-hibernate5 not available
+					}
+				}
+			} catch (ClassNotFoundException ex) {
+				throw new RuntimeException(ex); // this should never happen
 			}
 		}
 	}
