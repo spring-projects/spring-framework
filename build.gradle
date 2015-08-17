@@ -730,6 +730,7 @@ project("spring-web") {
 			exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"
 		}
 		testCompile("com.fasterxml.jackson.datatype:jackson-datatype-joda:${jackson2Version}")
+		testCompile("com.fasterxml.jackson.datatype:jackson-datatype-jdk7:${jackson2Version}")
 		testCompile("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jackson2Version}")
 		testRuntime("com.sun.mail:javax.mail:${javamailVersion}")
 	}

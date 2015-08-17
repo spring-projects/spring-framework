@@ -663,6 +663,18 @@ public class Jackson2ObjectMapperBuilder {
 
 	@SuppressWarnings("unchecked")
 	private void registerWellKnownModulesIfAvailable(ObjectMapper objectMapper) {
+		// Java 7 java.nio.file.Path class present?
+		if (ClassUtils.isPresent("java.nio.file.Path", this.moduleClassLoader)) {
+			try {
+				Class<? extends Module> jdk7Module = (Class<? extends Module>)
+						ClassUtils.forName("com.fasterxml.jackson.datatype.jdk7.Jdk7Module", this.moduleClassLoader);
+				objectMapper.registerModule(BeanUtils.instantiate(jdk7Module));
+			}
+			catch (ClassNotFoundException ex) {
+				// jackson-datatype-jdk7 not available
+			}
+		}
+
 		// Java 8 java.util.Optional class present?
 		if (ClassUtils.isPresent("java.util.Optional", this.moduleClassLoader)) {
 			try {

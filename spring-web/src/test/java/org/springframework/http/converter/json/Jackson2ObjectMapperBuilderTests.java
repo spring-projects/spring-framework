@@ -18,6 +18,8 @@ package org.springframework.http.converter.json;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -243,6 +245,9 @@ public class Jackson2ObjectMapperBuilderTests {
 		Long timestamp = 1322903730000L;
 		DateTime dateTime = new DateTime(timestamp, DateTimeZone.UTC);
 		assertEquals(timestamp.toString(), new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8"));
+
+		Path file = Paths.get("foo");
+		assertEquals("\"foo\"", new String(objectMapper.writeValueAsBytes(file), "UTF-8"));
 
 		Optional<String> optional = Optional.of("test");
 		assertEquals("\"test\"", new String(objectMapper.writeValueAsBytes(optional), "UTF-8"));
