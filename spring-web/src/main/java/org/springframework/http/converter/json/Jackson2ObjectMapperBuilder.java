@@ -706,6 +706,18 @@ public class Jackson2ObjectMapperBuilder {
 				// jackson-datatype-joda not available
 			}
 		}
+
+		// JDK 7 present?
+		if (ClassUtils.isPresent("java.nio.file.Path", this.moduleClassLoader)) {
+			try {
+				Class<? extends Module> jdk7Module = (Class<? extends Module>)
+						ClassUtils.forName("com.fasterxml.jackson.datatype.jdk7.Jdk7Module", this.moduleClassLoader);
+				objectMapper.registerModule(BeanUtils.instantiate(jdk7Module));
+			}
+			catch (ClassNotFoundException ex) {
+				// jackson-datatype-jdk7 not available
+			}
+		}
 	}
 
 
