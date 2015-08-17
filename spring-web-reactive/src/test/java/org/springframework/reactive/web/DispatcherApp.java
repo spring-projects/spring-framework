@@ -24,6 +24,7 @@ import io.reactivex.netty.protocol.http.server.HttpServer;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import reactor.core.reactivestreams.PublisherFactory;
 
 import org.springframework.http.MediaType;
 import org.springframework.reactive.web.rxnetty.RequestHandlerAdapter;
@@ -80,21 +81,10 @@ public class DispatcherApp {
 
 		@Override
 		public Publisher<String> handle(ServerHttpRequest request, ServerHttpResponse response) {
-
-			return new Publisher<String>() {
-
-				@Override
-				public void subscribe(Subscriber<? super String> subscriber) {
-					subscriber.onSubscribe(new AbstractSubscription<String>(subscriber) {
-
-						@Override
-						protected void requestInternal(long n) {
-							invokeOnNext("Hello world.");
-							invokeOnComplete();
-						}
-					});
-				}
-			};
+			return PublisherFactory.forEach((subscriber) -> {
+				subscriber.onNext("Hello world.");
+				subscriber.onComplete();
+			});
 		}
 
 	}
@@ -113,40 +103,30 @@ public class DispatcherApp {
 			PlainTextHandler textHandler = (PlainTextHandler) handler;
 			final Publisher<String> resultPublisher = textHandler.handle(request, response);
 
-			return new Publisher<HandlerResult>() {
+			return PublisherFactory.forEach((subscriber) -> {
+				resultPublisher.subscribe(new Subscriber<Object>() {
 
-				@Override
-				public void subscribe(Subscriber<? super HandlerResult> handlerResultSubscriber) {
-					handlerResultSubscriber.onSubscribe(new AbstractSubscription<HandlerResult>(handlerResultSubscriber) {
+					@Override
+					public void onSubscribe(Subscription subscription) {
+						subscription.request(Long.MAX_VALUE);
+					}
 
-						@Override
-						protected void requestInternal(long n) {
-							resultPublisher.subscribe(new Subscriber<Object>() {
+					@Override
+					public void onNext(Object result) {
+						subscriber.onNext(new HandlerResult(result));
+					}
 
-								@Override
-								public void onSubscribe(Subscription subscription) {
-									subscription.request(Long.MAX_VALUE);
-								}
+					@Override
+					public void onError(Throwable error) {
+						subscriber.onError(error);
+					}
 
-								@Override
-								public void onNext(Object result) {
-									invokeOnNext(new HandlerResult(result));
-								}
-
-								@Override
-								public void onError(Throwable error) {
-									invokeOnError(error);
-								}
-
-								@Override
-								public void onComplete() {
-									invokeOnComplete();
-								}
-							});
-						}
-					});
-				}
-			};
+					@Override
+					public void onComplete() {
+						subscriber.onComplete();
+					}
+				});
+			});
 		}
 	}
 
@@ -159,74 +139,13 @@ public class DispatcherApp {
 		}
 
 		@Override
-		public Publisher<Void> handleResult(ServerHttpRequest request, ServerHttpResponse response,
-				HandlerResult result) {
-
+		public Publisher<Void> handleResult(ServerHttpRequest request, ServerHttpResponse response, HandlerResult result) {
 			response.getHeaders().setContentType(MediaType.TEXT_PLAIN);
-
-			return response.writeWith(new Publisher<byte[]>() {
-
-				@Override
-				public void subscribe(Subscriber<? super byte[]> writeSubscriber) {
-					writeSubscriber.onSubscribe(new AbstractSubscription<byte[]>(writeSubscriber) {
-
-						@Override
-						protected void requestInternal(long n) {
-							Charset charset = Charset.forName("UTF-8");
-							invokeOnNext(((String) result.getReturnValue()).getBytes(charset));
-							invokeOnComplete();
-						}
-					});
-				}
-			});
-		}
-	}
-
-
-	private static abstract class AbstractSubscription<T> implements Subscription {
-
-		private final Subscriber<? super T> subscriber;
-
-		private volatile boolean terminated;
-
-
-		public AbstractSubscription(Subscriber<? super T> subscriber) {
-			this.subscriber = subscriber;
-		}
-
-		protected boolean isTerminated() {
-			return this.terminated;
-		}
-
-		@Override
-		public void request(long n) {
-			if (isTerminated()) {
-				return;
-			}
-			if (n > 0) {
-				requestInternal(n);
-			}
-		}
-
-		protected abstract void requestInternal(long n);
-
-		@Override
-		public void cancel() {
-			this.terminated = true;
-		}
-
-		protected void invokeOnNext(T data) {
-			this.subscriber.onNext(data);
-		}
-
-		protected void invokeOnError(Throwable error) {
-			this.terminated = true;
-			this.subscriber.onError(error);
-		}
-
-		protected void invokeOnComplete() {
-			this.terminated = true;
-			this.subscriber.onComplete();
+			return response.writeWith(PublisherFactory.forEach((writeSubscriber) -> {
+				Charset charset = Charset.forName("UTF-8");
+				writeSubscriber.onNext(((String) result.getReturnValue()).getBytes(charset));
+				writeSubscriber.onComplete();
+			}));
 		}
 	}
 

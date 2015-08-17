@@ -21,6 +21,8 @@ import java.util.List;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import reactor.core.reactivestreams.PublisherFactory;
+import reactor.core.reactivestreams.SubscriberWithContext;
 
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
@@ -58,7 +60,7 @@ public class DispatcherHttpHandler implements HttpHandler {
 		if (handler == null) {
 			// No exception handling mechanism yet
 			response.setStatusCode(HttpStatus.NOT_FOUND);
-			return Publishers.complete();
+			return PublisherFactory.forEach(SubscriberWithContext::onComplete);
 		}
 
 		HandlerAdapter handlerAdapter = getHandlerAdapter(handler);
@@ -141,29 +143,6 @@ public class DispatcherHttpHandler implements HttpHandler {
 		}
 		// more specific exception
 		throw new IllegalStateException("No HandlerAdapter for " + handler);
-	}
-
-
-	private static class Publishers {
-
-
-		public static Publisher<Void> complete() {
-			return subscriber -> {
-				subscriber.onSubscribe(new NoopSubscription());
-				subscriber.onComplete();
-			};
-		}
-	}
-
-	private static class NoopSubscription implements Subscription {
-
-		@Override
-		public void request(long n) {
-		}
-
-		@Override
-		public void cancel() {
-		}
 	}
 
 }
