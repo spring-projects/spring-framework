@@ -119,7 +119,7 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 	 * does not convert collections to XML.
 	 */
 	@Override
-	public boolean canWrite(Type type, Class<?> contextClass, MediaType mediaType) {
+	public boolean canWrite(Type type, Class<?> clazz, MediaType mediaType) {
 		return false;
 	}
 

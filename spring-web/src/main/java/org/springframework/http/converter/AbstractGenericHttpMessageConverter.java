@@ -64,8 +64,8 @@ public abstract class AbstractGenericHttpMessageConverter<T> extends AbstractHtt
 	}
 
 	@Override
-	public boolean canWrite(Type type, Class<?> contextClass, MediaType mediaType) {
-		return canWrite(contextClass, mediaType);
+	public boolean canWrite(Type type, Class<?> clazz, MediaType mediaType) {
+		return canWrite(clazz, mediaType);
 	}
 
 	/**
