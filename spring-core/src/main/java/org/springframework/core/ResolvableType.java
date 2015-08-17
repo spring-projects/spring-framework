@@ -994,6 +994,7 @@ public class ResolvableType implements Serializable {
 	 * the {@link #forClass(Class) Class instance}.
 	 * @param instance the instance
 	 * @return a {@link ResolvableType} for the specified instance
+	 * @since 4.2
 	 * @see ResolvableTypeProvider
 	 */
 	public static ResolvableType forInstance(Object instance) {
