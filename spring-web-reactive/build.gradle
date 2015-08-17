@@ -23,6 +23,7 @@ dependencies {
 	compile "org.springframework:spring-web:4.2.0.RELEASE"
 	compile "org.reactivestreams:reactive-streams:1.0.0"
 	compile "io.projectreactor:reactor-core:2.0.5.RELEASE"
+	compile "io.projectreactor:reactor-net:2.0.5.RELEASE"
 	compile "org.slf4j:slf4j-api:1.7.6"
 	compile "ch.qos.logback:logback-classic:1.1.2"
 

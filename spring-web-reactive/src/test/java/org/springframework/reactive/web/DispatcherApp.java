@@ -22,9 +22,8 @@ import java.util.Map;
 import io.netty.buffer.ByteBuf;
 import io.reactivex.netty.protocol.http.server.HttpServer;
 import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-import reactor.core.reactivestreams.PublisherFactory;
+import reactor.rx.Stream;
+import reactor.rx.Streams;
 
 import org.springframework.http.MediaType;
 import org.springframework.reactive.web.rxnetty.RequestHandlerAdapter;
@@ -81,12 +80,8 @@ public class DispatcherApp {
 
 		@Override
 		public Publisher<String> handle(ServerHttpRequest request, ServerHttpResponse response) {
-			return PublisherFactory.forEach((subscriber) -> {
-				subscriber.onNext("Hello world.");
-				subscriber.onComplete();
-			});
+			return Streams.just("Hello world.");
 		}
-
 	}
 
 	private static class PlainTextHandlerAdapter implements HandlerAdapter {
@@ -97,36 +92,10 @@ public class DispatcherApp {
 		}
 
 		@Override
-		public Publisher<HandlerResult> handle(ServerHttpRequest request, ServerHttpResponse response,
-				Object handler) {
-
-			PlainTextHandler textHandler = (PlainTextHandler) handler;
-			final Publisher<String> resultPublisher = textHandler.handle(request, response);
-
-			return PublisherFactory.forEach((subscriber) -> {
-				resultPublisher.subscribe(new Subscriber<Object>() {
-
-					@Override
-					public void onSubscribe(Subscription subscription) {
-						subscription.request(Long.MAX_VALUE);
-					}
-
-					@Override
-					public void onNext(Object result) {
-						subscriber.onNext(new HandlerResult(result));
-					}
-
-					@Override
-					public void onError(Throwable error) {
-						subscriber.onError(error);
-					}
-
-					@Override
-					public void onComplete() {
-						subscriber.onComplete();
-					}
-				});
-			});
+		public Publisher<HandlerResult> handle(ServerHttpRequest request, ServerHttpResponse response, Object handler) {
+			Publisher<String> resultPublisher = ((PlainTextHandler) handler).handle(request, response);
+			Stream<String> stream = Streams.wrap(resultPublisher);
+			return stream.concatMap((returnValue) -> Streams.just(new HandlerResult(returnValue)));
 		}
 	}
 
@@ -141,11 +110,8 @@ public class DispatcherApp {
 		@Override
 		public Publisher<Void> handleResult(ServerHttpRequest request, ServerHttpResponse response, HandlerResult result) {
 			response.getHeaders().setContentType(MediaType.TEXT_PLAIN);
-			return response.writeWith(PublisherFactory.forEach((writeSubscriber) -> {
-				Charset charset = Charset.forName("UTF-8");
-				writeSubscriber.onNext(((String) result.getReturnValue()).getBytes(charset));
-				writeSubscriber.onComplete();
-			}));
+			byte[] bytes = ((String) result.getReturnValue()).getBytes(Charset.forName("UTF-8"));
+			return response.writeWith(Streams.just(bytes));
 		}
 	}
 

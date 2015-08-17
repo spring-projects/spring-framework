@@ -19,10 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 import reactor.core.reactivestreams.PublisherFactory;
 import reactor.core.reactivestreams.SubscriberWithContext;
+import reactor.rx.Promises;
+import reactor.rx.Streams;
 
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
@@ -64,64 +64,17 @@ public class DispatcherHttpHandler implements HttpHandler {
 		}
 
 		HandlerAdapter handlerAdapter = getHandlerAdapter(handler);
-		final Publisher<HandlerResult> resultPublisher = handlerAdapter.handle(request, response, handler);
+		Publisher<HandlerResult> resultPublisher = handlerAdapter.handle(request, response, handler);
 
-		return new Publisher<Void>() {
-
-			@Override
-			public void subscribe(final Subscriber<? super Void> subscriber) {
-
-				resultPublisher.subscribe(new Subscriber<HandlerResult>() {
-
-					@Override
-					public void onSubscribe(Subscription subscription) {
-						subscription.request(Long.MAX_VALUE);
-					}
-
-					@Override
-					public void onNext(HandlerResult result) {
-						for (HandlerResultHandler resultHandler : resultHandlers) {
-							if (resultHandler.supports(result)) {
-								Publisher<Void> publisher = resultHandler.handleResult(request, response, result);
-								publisher.subscribe(new Subscriber<Void>() {
-									@Override
-									public void onSubscribe(Subscription subscription) {
-										subscription.request(Long.MAX_VALUE);
-									}
-
-									@Override
-									public void onNext(Void aVoid) {
-										// no op
-									}
-
-									@Override
-									public void onError(Throwable error) {
-										// Result handling error (no exception handling mechanism yet)
-										subscriber.onError(error);
-									}
-
-									@Override
-									public void onComplete() {
-										subscriber.onComplete();
-									}
-								});
-							}
-						}
-					}
-
-					@Override
-					public void onError(Throwable error) {
-						// Application handler error (no exception handling mechanism yet)
-						subscriber.onError(error);
-					}
-
-					@Override
-					public void onComplete() {
-						// do nothing
-					}
-				});
+		return Streams.wrap(resultPublisher).concatMap((HandlerResult result) -> {
+			for (HandlerResultHandler resultHandler : resultHandlers) {
+				if (resultHandler.supports(result)) {
+					return resultHandler.handleResult(request, response, result);
+				}
 			}
-		};
+			String error = "No HandlerResultHandler for " + result.getReturnValue();
+			return Promises.error(new IllegalStateException(error));
+		});
 	}
 
 	protected Object getHandler(ServerHttpRequest request) {
