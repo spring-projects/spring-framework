@@ -239,7 +239,7 @@ public class Jackson2ObjectMapperBuilderTests {
 	}
 
 	@Test
-	public void defaultModules() throws JsonProcessingException, UnsupportedEncodingException {
+	public void wellKnownModules() throws JsonProcessingException, UnsupportedEncodingException {
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().build();
 
 		Long timestamp = 1322903730000L;
@@ -254,7 +254,7 @@ public class Jackson2ObjectMapperBuilderTests {
 	}
 
 	@Test // SPR-12634
-	public void customizeDefaultModulesWithModule() throws JsonProcessingException, UnsupportedEncodingException {
+	public void customizeWellKnownModulesWithModule() throws JsonProcessingException, UnsupportedEncodingException {
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
 				.modulesToInstall(new CustomIntegerModule()).build();
 		DateTime dateTime = new DateTime(1322903730000L, DateTimeZone.UTC);
@@ -264,7 +264,7 @@ public class Jackson2ObjectMapperBuilderTests {
 
 	@Test // SPR-12634
 	@SuppressWarnings("unchecked")
-	public void customizeDefaultModulesWithModuleClass() throws JsonProcessingException, UnsupportedEncodingException {
+	public void customizeWellKnownModulesWithModuleClass() throws JsonProcessingException, UnsupportedEncodingException {
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json().modulesToInstall(CustomIntegerModule.class).build();
 		DateTime dateTime = new DateTime(1322903730000L, DateTimeZone.UTC);
 		assertEquals("1322903730000", new String(objectMapper.writeValueAsBytes(dateTime), "UTF-8"));
@@ -272,7 +272,7 @@ public class Jackson2ObjectMapperBuilderTests {
 	}
 
 	@Test // SPR-12634
-	public void customizeDefaultModulesWithSerializer() throws JsonProcessingException, UnsupportedEncodingException {
+	public void customizeWellKnownModulesWithSerializer() throws JsonProcessingException, UnsupportedEncodingException {
 		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.json()
 				.serializerByType(Integer.class, new CustomIntegerSerializer()).build();
 		DateTime dateTime = new DateTime(1322903730000L, DateTimeZone.UTC);
