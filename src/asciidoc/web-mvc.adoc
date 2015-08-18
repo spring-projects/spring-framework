@@ -1194,7 +1194,7 @@ multiple requests are allowed to access a session concurrently.
   part of the servlet mapping.
 
 The `Errors` or `BindingResult` parameters have to follow the model object that is being
-bound immediately as the method signature might have more that one model object and
+bound immediately as the method signature might have more than one model object and
 Spring will create a separate `BindingResult` instance for each of them so the following
 sample won't work:
 
@@ -2223,7 +2223,7 @@ the response.
 http://www.w3.org/TR/eventsource/[Server-Sent Events].
 Server-sent events is a just another variation on the same "HTTP Streaming"
 technique except events pushed from the server are formatted according to
-the W3C Servet-Sent Events specification.
+the W3C Server-Sent Events specification.
 
 Server-Sent Events can be used for their intended purpose, that is to push
 events from the server to clients. It is quite easy to do in Spring MVC and
