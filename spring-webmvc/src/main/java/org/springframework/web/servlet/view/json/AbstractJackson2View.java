@@ -61,7 +61,7 @@ public abstract class AbstractJackson2View extends AbstractView {
 
 
 	protected AbstractJackson2View(ObjectMapper objectMapper, String contentType) {
-		this.objectMapper = objectMapper;
+		setObjectMapper(objectMapper);
 		setContentType(contentType);
 		setExposePathVariables(false);
 	}

@@ -58,6 +58,14 @@ public class MappingJackson2XmlView extends AbstractJackson2View {
 		super(Jackson2ObjectMapperBuilder.xml().build(), DEFAULT_CONTENT_TYPE);
 	}
 
+	/**
+	 * Construct a new {@code MappingJackson2XmlView} using the provided {@link XmlMapper}
+	 * and setting the content type to {@code application/xml}.
+	 * @since 4.2.1
+	 */
+	public MappingJackson2XmlView(XmlMapper xmlMapper) {
+		super(xmlMapper, DEFAULT_CONTENT_TYPE);
+	}
 
 	/**
 	 * {@inheritDoc}
