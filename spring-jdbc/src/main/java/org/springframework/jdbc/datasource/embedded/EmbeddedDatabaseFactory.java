@@ -44,7 +44,7 @@ import org.springframework.util.Assert;
  * <li>Call {@link #setDatabaseName} to set an explicit name for the database.
  * <li>Call {@link #setDatabaseType} to set the database type if you wish to
  * use one of the supported types.
- * <li>Call {@link #setDatabaseConfigurer} to configure support for your own
+ * <li>Call {@link #setDatabaseConfigurer} to configure support for a custom
  * embedded database type.
  * <li>Call {@link #setDatabasePopulator} to change the algorithm used to
  * populate the database.

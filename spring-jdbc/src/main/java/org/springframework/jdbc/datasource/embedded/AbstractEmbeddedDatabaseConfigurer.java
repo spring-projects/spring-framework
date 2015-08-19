@@ -44,7 +44,7 @@ abstract class AbstractEmbeddedDatabaseConfigurer implements EmbeddedDatabaseCon
 		}
 		catch (SQLException ex) {
 			if (logger.isWarnEnabled()) {
-				logger.warn("Could not shutdown embedded database", ex);
+				logger.warn("Could not shut down embedded database", ex);
 			}
 		}
 	}
