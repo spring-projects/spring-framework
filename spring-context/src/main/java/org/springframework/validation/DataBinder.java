@@ -98,6 +98,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Stephane Nicoll
  * @see #setAllowedFields
  * @see #setRequiredFields
  * @see #registerCustomEditor
@@ -250,29 +251,50 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * Initialize standard JavaBean property access for this DataBinder.
 	 * <p>This is the default; an explicit call just leads to eager initialization.
 	 * @see #initDirectFieldAccess()
+	 * @see #createBeanPropertyBindingResult()
 	 */
 	public void initBeanPropertyAccess() {
 		Assert.state(this.bindingResult == null,
 				"DataBinder is already initialized - call initBeanPropertyAccess before other configuration methods");
-		this.bindingResult = new BeanPropertyBindingResult(
-				getTarget(), getObjectName(), isAutoGrowNestedPaths(), getAutoGrowCollectionLimit());
+		this.bindingResult = createBeanPropertyBindingResult();
+	}
+
+	/**
+	 * Create the {@link AbstractPropertyBindingResult} instance using standard JavaBean
+	 * property access.
+	 */
+	protected AbstractPropertyBindingResult createBeanPropertyBindingResult() {
+		BeanPropertyBindingResult result = new BeanPropertyBindingResult(getTarget(),
+				getObjectName(), isAutoGrowNestedPaths(), getAutoGrowCollectionLimit());
 		if (this.conversionService != null) {
-			this.bindingResult.initConversion(this.conversionService);
+			result.initConversion(this.conversionService);
 		}
+		return result;
 	}
 
 	/**
 	 * Initialize direct field access for this DataBinder,
 	 * as alternative to the default bean property access.
 	 * @see #initBeanPropertyAccess()
+	 * @see #createDirectFieldBindingResult()
 	 */
 	public void initDirectFieldAccess() {
 		Assert.state(this.bindingResult == null,
 				"DataBinder is already initialized - call initDirectFieldAccess before other configuration methods");
-		this.bindingResult = new DirectFieldBindingResult(getTarget(), getObjectName(), isAutoGrowNestedPaths());
+		this.bindingResult = createDirectFieldBindingResult();
+	}
+
+	/**
+	 * Create the {@link AbstractPropertyBindingResult} instance using direct field
+	 * access.
+	 */
+	protected AbstractPropertyBindingResult createDirectFieldBindingResult() {
+		DirectFieldBindingResult result = new DirectFieldBindingResult(getTarget(),
+				getObjectName(), isAutoGrowNestedPaths());
 		if (this.conversionService != null) {
-			this.bindingResult.initConversion(this.conversionService);
+			result.initConversion(this.conversionService);
 		}
+		return result;
 	}
 
 	/**
