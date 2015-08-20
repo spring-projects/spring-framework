@@ -114,7 +114,11 @@ public abstract class SpringFactoriesLoader {
 				URL url = urls.nextElement();
 				Properties properties = PropertiesLoaderUtils.loadProperties(new UrlResource(url));
 				String factoryClassNames = properties.getProperty(factoryClassName);
-				result.addAll(Arrays.asList(StringUtils.commaDelimitedListToStringArray(factoryClassNames)));
+				for (String name : StringUtils.commaDelimitedListToStringArray(factoryClassNames)) {
+						if(StringUtils.hasText(name)){
+								result.add(name);
+						}
+				}
 			}
 			return result;
 		}
