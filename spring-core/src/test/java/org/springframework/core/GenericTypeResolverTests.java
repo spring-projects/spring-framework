@@ -36,6 +36,7 @@ import static org.springframework.util.ReflectionUtils.*;
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class GenericTypeResolverTests {
 
 	@Test
@@ -160,7 +161,7 @@ public class GenericTypeResolverTests {
 		MethodParameter methodParameter = MethodParameter.forMethodOrConstructor(
 				WithArrayBase.class.getDeclaredMethod("array", Object[].class), 0);
 		Class<?> resolved = GenericTypeResolver.resolveParameterType(methodParameter, WithArray.class);
-		assertThat(resolved, equalTo((Class) Object[].class));
+		assertThat(resolved, equalTo((Class<?>) Object[].class));
 	}
 
 	@Test
@@ -168,7 +169,7 @@ public class GenericTypeResolverTests {
 		// SPR-11044
 		Class<?> resolved = GenericTypeResolver.resolveReturnType(
 				WithArrayBase.class.getDeclaredMethod("array", Object[].class), WithArray.class);
-		assertThat(resolved, equalTo((Class) Object[].class));
+		assertThat(resolved, equalTo((Class<?>) Object[].class));
 	}
 
 	@Test
@@ -214,7 +215,6 @@ public class GenericTypeResolverTests {
 			return null;
 		}
 
-		@SuppressWarnings("rawtypes")
 		public MyInterfaceType raw() {
 			return null;
 		}
