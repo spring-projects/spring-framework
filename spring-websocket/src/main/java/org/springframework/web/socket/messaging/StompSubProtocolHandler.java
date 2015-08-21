@@ -277,7 +277,9 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 
 				try {
 					SimpAttributesContextHolder.setAttributesFromMessage(message);
-					if (this.eventPublisher != null) {
+					boolean sent = outputChannel.send(message);
+
+					if (sent && this.eventPublisher != null) {
 						if (StompCommand.CONNECT.equals(headerAccessor.getCommand())) {
 							publishEvent(new SessionConnectEvent(this, message, user));
 						}
@@ -288,7 +290,6 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 							publishEvent(new SessionUnsubscribeEvent(this, message, user));
 						}
 					}
-					outputChannel.send(message);
 				}
 				finally {
 					SimpAttributesContextHolder.resetAttributes();
