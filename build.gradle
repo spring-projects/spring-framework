@@ -701,6 +701,7 @@ project("spring-web") {
 		optional("javax.portlet:portlet-api:2.0")
 		optional("javax.el:javax.el-api:2.2.5")
 		optional("javax.faces:javax.faces-api:2.2")
+		optional("javax.validation:validation-api:1.0.0.GA")
 		optional("aopalliance:aopalliance:1.0")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("com.caucho:hessian:4.0.38")
