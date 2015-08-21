@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,13 +30,16 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 
 	private final WebBindingInitializer initializer;
 
+
 	/**
-	 * Create new instance.
-	 * @param initializer for global data binder intialization, or {@code null}
+	 * Create a new {@code DefaultDataBinderFactory} instance.
+	 * @param initializer for global data binder initialization
+	 * (or {@code null} if none)
 	 */
 	public DefaultDataBinderFactory(WebBindingInitializer initializer) {
 		this.initializer = initializer;
 	}
+
 
 	/**
 	 * Create a new {@link WebDataBinder} for the given target object and
@@ -46,6 +49,7 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 	@Override
 	public final WebDataBinder createBinder(NativeWebRequest webRequest, Object target, String objectName)
 			throws Exception {
+
 		WebDataBinder dataBinder = createBinderInstance(target, objectName, webRequest);
 		if (this.initializer != null) {
 			this.initializer.initBinder(dataBinder, webRequest);
@@ -64,6 +68,7 @@ public class DefaultDataBinderFactory implements WebDataBinderFactory {
 	 */
 	protected WebDataBinder createBinderInstance(Object target, String objectName, NativeWebRequest webRequest)
 			throws Exception {
+
 		return new WebRequestDataBinder(target, objectName);
 	}
 

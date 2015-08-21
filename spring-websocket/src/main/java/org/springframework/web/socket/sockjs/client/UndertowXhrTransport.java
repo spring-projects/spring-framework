@@ -104,7 +104,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 	}
 
 	public UndertowXhrTransport(OptionMap optionMap) throws IOException {
-		Assert.notNull(optionMap, "'optionMap' is required");
+		Assert.notNull(optionMap, "OptionMap is required");
 		this.httpClient = UndertowClient.getInstance();
 		this.optionMap = optionMap;
 		this.worker = Xnio.getInstance().createWorker(optionMap);
@@ -142,12 +142,11 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 			final SettableListenableFuture<WebSocketSession> connectFuture) {
 
 		if (logger.isTraceEnabled()) {
-			logger.trace("Starting XHR receive request, url=" + url);
+			logger.trace("Starting XHR receive request for " + url);
 		}
 
 		this.httpClient.connect(
 				new ClientCallback<ClientConnection>() {
-
 					@Override
 					public void completed(ClientConnection connection) {
 						ClientRequest request = new ClientRequest().setMethod(Methods.POST).setPath(url.getPath());
@@ -158,7 +157,6 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 						connection.sendRequest(request, createReceiveCallback(transportRequest,
 								url, httpHeaders, session, connectFuture));
 					}
-
 					@Override
 					public void failed(IOException ex) {
 						throw new SockJsTransportFailureException("Failed to execute request to " + url, ex);
@@ -181,11 +179,9 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 			final SettableListenableFuture<WebSocketSession> connectFuture) {
 
 		return new ClientCallback<ClientExchange>() {
-
 			@Override
 			public void completed(final ClientExchange exchange) {
 				exchange.setResponseListener(new ClientCallback<ClientExchange>() {
-
 					@Override
 					public void completed(ClientExchange result) {
 						ClientResponse response = result.getResponse();
@@ -216,7 +212,6 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 							onFailure(exc);
 						}
 					}
-
 					@Override
 					public void failed(IOException exc) {
 						IoUtils.safeClose(exchange.getConnection());
@@ -307,7 +302,6 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 			final List<ClientResponse> responses, final CountDownLatch latch) {
 
 		return new ClientCallback<ClientExchange>() {
-
 			@Override
 			public void completed(ClientExchange result) {
 				result.setResponseListener(new ClientCallback<ClientExchange>() {

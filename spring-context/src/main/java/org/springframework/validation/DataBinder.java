@@ -260,8 +260,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	}
 
 	/**
-	 * Create the {@link AbstractPropertyBindingResult} instance using standard JavaBean
-	 * property access.
+	 * Create the {@link AbstractPropertyBindingResult} instance using standard
+	 * JavaBean property access.
+	 * @since 4.2.1
 	 */
 	protected AbstractPropertyBindingResult createBeanPropertyBindingResult() {
 		BeanPropertyBindingResult result = new BeanPropertyBindingResult(getTarget(),
@@ -285,8 +286,9 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	}
 
 	/**
-	 * Create the {@link AbstractPropertyBindingResult} instance using direct field
-	 * access.
+	 * Create the {@link AbstractPropertyBindingResult} instance using direct
+	 * field access.
+	 * @since 4.2.1
 	 */
 	protected AbstractPropertyBindingResult createDirectFieldBindingResult() {
 		DirectFieldBindingResult result = new DirectFieldBindingResult(getTarget(),
@@ -299,7 +301,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	/**
 	 * Return the internal BindingResult held by this DataBinder,
-	 * as AbstractPropertyBindingResult.
+	 * as an AbstractPropertyBindingResult.
 	 */
 	protected AbstractPropertyBindingResult getInternalBindingResult() {
 		if (this.bindingResult == null) {
