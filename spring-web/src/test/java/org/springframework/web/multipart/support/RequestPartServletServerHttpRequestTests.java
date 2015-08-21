@@ -19,6 +19,9 @@ package org.springframework.web.multipart.support;
 import java.net.URI;
 import java.nio.charset.Charset;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+
 import org.junit.Test;
 
 import org.springframework.http.HttpHeaders;
@@ -81,6 +84,20 @@ public class RequestPartServletServerHttpRequestTests {
 		MultipartFile part = new MockMultipartFile("part", "", "application/json", bytes);
 		this.mockRequest.addFile(part);
 		ServerHttpRequest request = new RequestPartServletServerHttpRequest(this.mockRequest, "part");
+
+		byte[] result = FileCopyUtils.copyToByteArray(request.getBody());
+		assertArrayEquals(bytes, result);
+	}
+
+	// SPR-13317
+
+	@Test
+	public void getBodyWithWrappedRequest() throws Exception {
+		byte[] bytes = "content".getBytes("UTF-8");
+		MultipartFile part = new MockMultipartFile("part", "", "application/json", bytes);
+		this.mockRequest.addFile(part);
+		HttpServletRequest wrapped = new HttpServletRequestWrapper(this.mockRequest);
+		ServerHttpRequest request = new RequestPartServletServerHttpRequest(wrapped, "part");
 
 		byte[] result = FileCopyUtils.copyToByteArray(request.getBody());
 		assertArrayEquals(bytes, result);

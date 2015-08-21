@@ -31,6 +31,8 @@ import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.util.WebUtils;
+
 
 /**
  * {@link ServerHttpRequest} implementation that accesses one part of a multipart
@@ -81,8 +83,9 @@ public class RequestPartServletServerHttpRequest extends ServletServerHttpReques
 	}
 
 	private static MultipartHttpServletRequest asMultipartRequest(HttpServletRequest request) {
-		if (request instanceof MultipartHttpServletRequest) {
-			return (MultipartHttpServletRequest) request;
+		MultipartHttpServletRequest unwrapped = WebUtils.getNativeRequest(request, MultipartHttpServletRequest.class);
+		if (unwrapped != null) {
+			return unwrapped;
 		}
 		else if (ClassUtils.hasMethod(HttpServletRequest.class, "getParts")) {
 			// Servlet 3.0 available ..
@@ -91,10 +94,12 @@ public class RequestPartServletServerHttpRequest extends ServletServerHttpReques
 		throw new IllegalArgumentException("Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
 	}
 
+
 	@Override
 	public HttpHeaders getHeaders() {
 		return this.headers;
 	}
+
 
 	@Override
 	public InputStream getBody() throws IOException {
