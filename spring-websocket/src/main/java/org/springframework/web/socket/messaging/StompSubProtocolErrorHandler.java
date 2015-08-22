@@ -62,7 +62,6 @@ public class StompSubProtocolErrorHandler implements SubProtocolErrorHandler<byt
 		return handleInternal(accessor, errorMessage.getPayload(), null, null);
 	}
 
-	@SuppressWarnings("unused")
 	protected Message<byte[]> handleInternal(StompHeaderAccessor errorHeaderAccessor,
 			byte[] errorPayload, Throwable cause, StompHeaderAccessor clientHeaderAccessor) {
 

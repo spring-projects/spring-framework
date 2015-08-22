@@ -112,8 +112,8 @@ public abstract class AbstractXhrTransport implements XhrTransport {
 
 	// Transport methods
 
-	@SuppressWarnings("deprecation")
 	@Override
+	@SuppressWarnings("deprecation")
 	public ListenableFuture<WebSocketSession> connect(TransportRequest request, WebSocketHandler handler) {
 		SettableListenableFuture<WebSocketSession> connectFuture = new SettableListenableFuture<WebSocketSession>();
 		XhrClientSockJsSession session = new XhrClientSockJsSession(request, handler, this, connectFuture);

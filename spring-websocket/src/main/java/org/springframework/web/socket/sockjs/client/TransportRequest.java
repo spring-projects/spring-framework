@@ -13,14 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.socket.sockjs.client;
 
 import java.net.URI;
 import java.security.Principal;
 
 import org.springframework.http.HttpHeaders;
-import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.WebSocketHttpHeaders;
 import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
 
 /**
@@ -38,7 +37,7 @@ import org.springframework.web.socket.sockjs.frame.SockJsMessageCodec;
 public interface TransportRequest {
 
 	/**
-	 * Return information about the SockJS URL including server and session id..
+	 * Return information about the SockJS URL including server and session ID.
 	 */
 	SockJsUrlInfo getSockJsUrlInfo();
 
@@ -49,14 +48,14 @@ public interface TransportRequest {
 
 	/**
 	 * Return the headers to add to all other HTTP requests besides the handshake
-	 * request such XHR receive and send requests.
+	 * request such as XHR receive and send requests.
 	 * @since 4.2
 	 */
 	HttpHeaders getHttpRequestHeaders();
 
 	/**
 	 * Return the transport URL for the given transport.
-	 * For an {@link XhrTransport} this is the URL for receiving messages.
+	 * <p>For an {@link XhrTransport} this is the URL for receiving messages.
 	 */
 	URI getTransportUrl();
 
