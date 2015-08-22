@@ -17,18 +17,17 @@
 package org.springframework.web.socket;
 
 import java.util.EnumSet;
-
 import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.ServletContext;
 
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.NetworkConnector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.FilterHolder;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
-import org.springframework.util.Assert;
-import org.springframework.util.SocketUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
@@ -49,8 +48,8 @@ public class JettyWebSocketTestServer implements WebSocketTestServer {
 
 	@Override
 	public void setup() {
-		this.port = SocketUtils.findAvailableTcpPort();
-		this.jettyServer = new Server(this.port);
+		// Let server pick its own random, available port.
+		this.jettyServer = new Server(0);
 	}
 
 	@Override
@@ -60,7 +59,6 @@ public class JettyWebSocketTestServer implements WebSocketTestServer {
 
 	@Override
 	public void deployConfig(WebApplicationContext wac, Filter... filters) {
-		Assert.state(this.port != -1, "setup() was never called.");
 		ServletHolder servletHolder = new ServletHolder(new DispatcherServlet(wac));
 		this.contextHandler = new ServletContextHandler();
 		this.contextHandler.addServlet(servletHolder, "/");
@@ -87,6 +85,10 @@ public class JettyWebSocketTestServer implements WebSocketTestServer {
 	@Override
 	public void start() throws Exception {
 		this.jettyServer.start();
+
+		Connector[] connectors = jettyServer.getConnectors();
+		NetworkConnector connector = (NetworkConnector) connectors[0];
+		this.port = connector.getLocalPort();
 	}
 
 	@Override

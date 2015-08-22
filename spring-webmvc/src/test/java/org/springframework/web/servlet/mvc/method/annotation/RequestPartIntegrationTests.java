@@ -16,8 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import static org.junit.Assert.*;
-
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -26,9 +24,12 @@ import java.util.List;
 
 import javax.servlet.MultipartConfigElement;
 
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.NetworkConnector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -52,7 +53,6 @@ import org.springframework.http.converter.support.AllEncompassingFormHttpMessage
 import org.springframework.stereotype.Controller;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.SocketUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -66,11 +66,14 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+import static org.junit.Assert.*;
+
 /**
  * Test access to parts of a multipart request with {@link RequestPart}.
  *
  * @author Rossen Stoyanchev
  * @author Brian Clozel
+ * @author Sam Brannen
  */
 public class RequestPartIntegrationTests {
 
@@ -83,10 +86,10 @@ public class RequestPartIntegrationTests {
 
 	@BeforeClass
 	public static void startServer() throws Exception {
-		int port = SocketUtils.findAvailableTcpPort();
-		baseUrl = "http://localhost:" + port;
 
-		server = new Server(port);
+		// Let server pick its own random, available port.
+		server = new Server(0);
+
 		ServletContextHandler handler = new ServletContextHandler();
 		handler.setContextPath("/");
 
@@ -105,6 +108,10 @@ public class RequestPartIntegrationTests {
 
 		server.setHandler(handler);
 		server.start();
+
+		Connector[] connectors = server.getConnectors();
+		NetworkConnector connector = (NetworkConnector) connectors[0];
+		baseUrl = "http://localhost:" + connector.getLocalPort();
 	}
 
 	@Before
