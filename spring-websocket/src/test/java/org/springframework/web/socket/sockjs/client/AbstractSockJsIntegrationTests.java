@@ -27,7 +27,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -39,6 +39,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -102,7 +103,7 @@ public abstract class AbstractSockJsIntegrationTests {
 
 	@BeforeClass
 	public static void performanceTestGroupAssumption() throws Exception {
-//		Assume.group(TestGroup.PERFORMANCE);
+		Assume.group(TestGroup.PERFORMANCE);
 	}
 
 
@@ -301,10 +302,10 @@ public abstract class AbstractSockJsIntegrationTests {
 		clientHandler.awaitMessage(message, 5000);
 	}
 
-	private static void awaitEvent(Supplier<Boolean> condition, long timeToWait, String description) {
+	private static void awaitEvent(BooleanSupplier condition, long timeToWait, String description) {
 		long timeToSleep = 200;
 		for (int i = 0 ; i < Math.floor(timeToWait / timeToSleep); i++) {
-			if (condition.get()) {
+			if (condition.getAsBoolean()) {
 				return;
 			}
 			try {
