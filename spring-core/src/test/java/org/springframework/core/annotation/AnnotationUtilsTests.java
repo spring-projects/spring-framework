@@ -131,15 +131,37 @@ public class AnnotationUtilsTests {
 
 	@Test
 	public void findMethodAnnotationOnBridgeMethod() throws Exception {
-		Method m = SimpleFoo.class.getMethod("something", Object.class);
-		assertTrue(m.isBridge());
-		assertNull(m.getAnnotation(Order.class));
-		assertNull(getAnnotation(m, Order.class));
-		assertNotNull(findAnnotation(m, Order.class));
-		// TODO: getAnnotation() on bridge method actually found on OpenJDK 8 b99 and higher!
-		// assertNull(m.getAnnotation(Transactional.class));
-		assertNotNull(getAnnotation(m, Transactional.class));
-		assertNotNull(findAnnotation(m, Transactional.class));
+		Method bridgeMethod = SimpleFoo.class.getMethod("something", Object.class);
+		assertTrue(bridgeMethod.isBridge());
+
+		assertNull(bridgeMethod.getAnnotation(Order.class));
+		assertNull(getAnnotation(bridgeMethod, Order.class));
+		assertNotNull(findAnnotation(bridgeMethod, Order.class));
+
+		// As of OpenJDK 8 b99, invoking getAnnotation() on a bridge method actually finds
+		// an annotation on its 'bridged' method. This differs from the previous behavior
+		// of JDK 5 through 7 and from the current behavior of the Eclipse compiler;
+		// however, we need to ensure that the tests pass in the Gradle build. So we
+		// comment out the following assertion.
+		// assertNull(bridgeMethod.getAnnotation(Transactional.class));
+		assertNotNull(getAnnotation(bridgeMethod, Transactional.class));
+		assertNotNull(findAnnotation(bridgeMethod, Transactional.class));
+	}
+
+	@Test
+	public void findMethodAnnotationOnBridgedMethod() throws Exception {
+		Method bridgedMethod = SimpleFoo.class.getMethod("something", String.class);
+		assertFalse(bridgedMethod.isBridge());
+
+		assertNull(bridgedMethod.getAnnotation(Order.class));
+		assertNull(getAnnotation(bridgedMethod, Order.class));
+		// AnnotationUtils.findAnnotation(Method, Class<A>) will not find an annotation on
+		// the bridge method for a bridged method.
+		assertNull(findAnnotation(bridgedMethod, Order.class));
+
+		assertNotNull(bridgedMethod.getAnnotation(Transactional.class));
+		assertNotNull(getAnnotation(bridgedMethod, Transactional.class));
+		assertNotNull(findAnnotation(bridgedMethod, Transactional.class));
 	}
 
 	@Test
