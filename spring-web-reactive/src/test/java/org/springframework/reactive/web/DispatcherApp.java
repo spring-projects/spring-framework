@@ -22,7 +22,6 @@ import java.util.Map;
 import io.netty.buffer.ByteBuf;
 import io.reactivex.netty.protocol.http.server.HttpServer;
 import org.reactivestreams.Publisher;
-import reactor.rx.Stream;
 import reactor.rx.Streams;
 
 import org.springframework.http.MediaType;
@@ -93,9 +92,8 @@ public class DispatcherApp {
 
 		@Override
 		public Publisher<HandlerResult> handle(ServerHttpRequest request, ServerHttpResponse response, Object handler) {
-			Publisher<String> resultPublisher = ((PlainTextHandler) handler).handle(request, response);
-			Stream<String> stream = Streams.wrap(resultPublisher);
-			return stream.concatMap((returnValue) -> Streams.just(new HandlerResult(returnValue)));
+			Publisher<String> publisher = ((PlainTextHandler) handler).handle(request, response);
+			return Streams.wrap(publisher).map(HandlerResult::new);
 		}
 	}
 

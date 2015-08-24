@@ -21,7 +21,6 @@ import java.util.List;
 import org.reactivestreams.Publisher;
 import reactor.core.reactivestreams.PublisherFactory;
 import reactor.core.reactivestreams.SubscriberWithContext;
-import reactor.rx.Promises;
 import reactor.rx.Streams;
 
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -72,8 +71,8 @@ public class DispatcherHttpHandler implements HttpHandler {
 					return resultHandler.handleResult(request, response, result);
 				}
 			}
-			String error = "No HandlerResultHandler for " + result.getReturnValue();
-			return Promises.error(new IllegalStateException(error));
+			return Streams.fail(new IllegalStateException(
+					"No HandlerResultHandler for " + result.getReturnValue()));
 		});
 	}
 
