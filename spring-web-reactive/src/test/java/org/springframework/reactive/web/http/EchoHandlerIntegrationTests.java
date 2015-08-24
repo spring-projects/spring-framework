@@ -19,7 +19,11 @@ package org.springframework.reactive.web.http;
 import java.net.URI;
 import java.util.Random;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -29,39 +33,65 @@ import org.springframework.web.client.RestTemplate;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-public abstract class AbstractHttpHandlerIntegrationTestCase {
+
+@RunWith(Parameterized.class)
+public class EchoHandlerIntegrationTests {
 
 	private static final int REQUEST_SIZE = 4096 * 3;
 
-	protected static int port = SocketUtils.findAvailableTcpPort();
+	private static int port = SocketUtils.findAvailableTcpPort();
+
+
+	@Parameterized.Parameter(0)
+	public HttpServer server;
 
 	private Random rnd = new Random();
 
 
+	@Parameterized.Parameters(name = "server [{0}]")
+	public static Object[][] arguments() {
+		return new Object[][] {
+				{new JettyHttpServer()},
+				{new TomcatHttpServer()},
+				{new RxNettyHttpServer()}
+		};
+	}
+
+
+	@Before
+	public void setup() throws Exception {
+		this.server.setPort(port);
+		this.server.setHandler(new EchoHandler());
+		this.server.afterPropertiesSet();
+		this.server.start();
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		this.server.stop();
+	}
+
+
 	@Test
-	public void bytes() throws Exception {
+	public void echoBytes() throws Exception {
 		RestTemplate restTemplate = new RestTemplate();
 
 		byte[] body = randomBytes();
-		RequestEntity<byte[]> request = RequestEntity.post(new URI(url())).body(body);
+		RequestEntity<byte[]> request = RequestEntity.post(new URI("http://localhost:" + port)).body(body);
 		ResponseEntity<byte[]> response = restTemplate.exchange(request, byte[].class);
 
 		assertArrayEquals(body, response.getBody());
 	}
 
 	@Test
-	public void string() throws Exception {
+	public void echoString() throws Exception {
 		RestTemplate restTemplate = new RestTemplate();
 
 		String body = randomString();
-		RequestEntity<String> request = RequestEntity.post(new URI(url())).body(body);
+		RequestEntity<String> request = RequestEntity.post(new URI("http://localhost:" + port)).body(body);
 		ResponseEntity<String> response = restTemplate.exchange(request, String.class);
 
 		assertEquals(body, response.getBody());
-	}
-
-	protected static String url() {
-		return "http://localhost:" + port + "/rx";
 	}
 
 	private String randomString() {
@@ -89,6 +119,5 @@ public abstract class AbstractHttpHandlerIntegrationTestCase {
 		rnd.nextBytes(buffer);
 		return buffer;
 	}
-
 
 }
