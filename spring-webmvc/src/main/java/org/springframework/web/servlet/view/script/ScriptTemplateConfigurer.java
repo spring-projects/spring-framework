@@ -59,6 +59,8 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 
 	private String renderFunction;
 
+	private String contentType;
+
 	private Charset charset;
 
 	private String resourceLoaderPath;
@@ -168,6 +170,24 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 	@Override
 	public String getRenderFunction() {
 		return this.renderFunction;
+	}
+
+	/**
+	 * Set the content type to use for the response.
+	 * ({@code text/html} by default).
+	 * @since 4.2.1
+	 */
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
+
+	/**
+	 * Return the content type to use for the response.
+	 * @since 4.2.1
+	 */
+	@Override
+	public String getContentType() {
+		return this.contentType;
 	}
 
 	/**

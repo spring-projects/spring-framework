@@ -63,6 +63,8 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  */
 public class ScriptTemplateView extends AbstractUrlBasedView {
 
+	public static final String DEFAULT_CONTENT_TYPE = "text/html";
+
 	private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
 	private static final String DEFAULT_RESOURCE_LOADER_PATH = "classpath:";
@@ -87,6 +89,24 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 	private ResourceLoader resourceLoader;
 
 	private String resourceLoaderPath;
+
+
+	/**
+	 * Constructor for use as a bean.
+	 * @see #setUrl
+	 */
+	public ScriptTemplateView() {
+		setContentType(null);
+	}
+
+	/**
+	 * Create a new ScriptTemplateView with the given URL.
+	 * @since 4.2.1
+	 */
+	public ScriptTemplateView(String url) {
+		super(url);
+		setContentType(null);
+	}
 
 
 	/**
@@ -133,6 +153,15 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 	}
 
 	/**
+	 * See {@link ScriptTemplateConfigurer#setContentType(String)}} documentation.
+	 * @since 4.2.1
+	 */
+	@Override
+	public void setContentType(String contentType) {
+		super.setContentType(contentType);
+	}
+
+	/**
 	 * See {@link ScriptTemplateConfigurer#setCharset(Charset)} documentation.
 	 */
 	public void setCharset(Charset charset) {
@@ -166,6 +195,9 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		}
 		if (this.renderFunction == null && viewConfig.getRenderFunction() != null) {
 			this.renderFunction = viewConfig.getRenderFunction();
+		}
+		if (this.getContentType() == null) {
+			setContentType(viewConfig.getContentType() != null ? viewConfig.getContentType() : DEFAULT_CONTENT_TYPE);
 		}
 		if (this.charset == null) {
 			this.charset = (viewConfig.getCharset() != null ? viewConfig.getCharset() : DEFAULT_CHARSET);
@@ -276,10 +308,17 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		}
 	}
 
+	@Override
+	protected void prepareResponse(HttpServletRequest request, HttpServletResponse response) {
+		super.prepareResponse(request, response);
+
+		setResponseContentType(request, response);
+		response.setCharacterEncoding(this.charset.name());
+	}
 
 	@Override
-	protected void renderMergedOutputModel(
-			Map<String, Object> model, HttpServletRequest request, HttpServletResponse response) throws Exception {
+	protected void renderMergedOutputModel(Map<String, Object> model, HttpServletRequest request,
+			HttpServletResponse response) throws Exception {
 
 		try {
 			ScriptEngine engine = getEngine();

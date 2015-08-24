@@ -799,6 +799,7 @@ public class MvcNamespaceTests {
 		ScriptTemplateConfigurer scriptTemplateConfigurer = appContext.getBean(ScriptTemplateConfigurer.class);
 		assertNotNull(scriptTemplateConfigurer);
 		assertEquals("render", scriptTemplateConfigurer.getRenderFunction());
+		assertEquals(MediaType.TEXT_PLAIN_VALUE, scriptTemplateConfigurer.getContentType());
 		assertEquals(StandardCharsets.ISO_8859_1, scriptTemplateConfigurer.getCharset());
 		assertEquals("classpath:", scriptTemplateConfigurer.getResourceLoaderPath());
 		assertFalse(scriptTemplateConfigurer.isSharedEngine());

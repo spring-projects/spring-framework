@@ -61,6 +61,12 @@ public interface ScriptTemplateConfig {
 	String getRenderFunction();
 
 	/**
+	 * Return the content type to use for the response.
+	 * @since 4.2.1
+	 */
+	String getContentType();
+
+	/**
 	 * Return the charset used to read script and template files.
 	 */
 	Charset getCharset();

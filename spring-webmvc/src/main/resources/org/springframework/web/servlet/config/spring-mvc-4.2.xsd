@@ -1252,6 +1252,13 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
+			<xsd:attribute name="content-type" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Set the content type to use for the response (text/html by default).
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 			<xsd:attribute name="charset" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
