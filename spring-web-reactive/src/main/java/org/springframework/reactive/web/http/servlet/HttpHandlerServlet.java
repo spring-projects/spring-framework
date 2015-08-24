@@ -29,7 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-import org.springframework.reactive.web.http.ServerHttpHandler;
+import org.springframework.reactive.web.http.HttpHandler;
 
 /**
  * @author Arjen Poutsma
@@ -43,10 +43,10 @@ public class HttpHandlerServlet extends HttpServlet {
 	private static Log logger = LogFactory.getLog(HttpHandlerServlet.class);
 
 
-	private ServerHttpHandler handler;
+	private HttpHandler handler;
 
 
-	public void setHandler(ServerHttpHandler handler) {
+	public void setHandler(HttpHandler handler) {
 		this.handler = handler;
 	}
 

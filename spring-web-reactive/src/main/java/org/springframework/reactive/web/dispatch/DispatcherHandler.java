@@ -19,21 +19,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.reactivestreams.Publisher;
-import reactor.core.reactivestreams.PublisherFactory;
-import reactor.core.reactivestreams.SubscriberWithContext;
 import reactor.rx.Streams;
 
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
-import org.springframework.reactive.web.http.ServerHttpHandler;
+import org.springframework.reactive.web.http.HttpHandler;
 import org.springframework.reactive.web.http.ServerHttpRequest;
 import org.springframework.reactive.web.http.ServerHttpResponse;
 
 /**
  * @author Rossen Stoyanchev
  */
-public class DispatcherHandler implements ServerHttpHandler {
+public class DispatcherHandler implements HttpHandler {
 
 	private List<HandlerMapping> handlerMappings;
 
@@ -62,7 +60,7 @@ public class DispatcherHandler implements ServerHttpHandler {
 		if (handler == null) {
 			// No exception handling mechanism yet
 			response.setStatusCode(HttpStatus.NOT_FOUND);
-			return PublisherFactory.forEach(SubscriberWithContext::onComplete);
+			return Streams.empty();
 		}
 
 		HandlerAdapter handlerAdapter = getHandlerAdapter(handler);

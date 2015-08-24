@@ -19,56 +19,26 @@ package org.springframework.reactive.web.http;
 import java.net.URI;
 import java.util.Random;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.SocketUtils;
 import org.springframework.web.client.RestTemplate;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 
-@RunWith(Parameterized.class)
-public class EchoHandlerIntegrationTests {
+public class EchoHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	private static final int REQUEST_SIZE = 4096 * 3;
-
-	private static int port = SocketUtils.findAvailableTcpPort();
-
-
-	@Parameterized.Parameter(0)
-	public HttpServer server;
 
 	private Random rnd = new Random();
 
 
-	@Parameterized.Parameters(name = "server [{0}]")
-	public static Object[][] arguments() {
-		return new Object[][] {
-				{new JettyHttpServer()},
-				{new TomcatHttpServer()},
-				{new RxNettyHttpServer()}
-		};
-	}
-
-
-	@Before
-	public void setup() throws Exception {
-		this.server.setPort(port);
-		this.server.setHandler(new EchoHandler());
-		this.server.afterPropertiesSet();
-		this.server.start();
-	}
-
-	@After
-	public void tearDown() throws Exception {
-		this.server.stop();
+	@Override
+	protected EchoHandler createHttpHandler() {
+		return new EchoHandler();
 	}
 
 

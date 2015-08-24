@@ -55,7 +55,6 @@ public class RequestBodyPublisher implements ReadListener, Publisher<byte[]> {
 	@Override
 	public void subscribe(Subscriber<? super byte[]> s) {
 		this.subscriber = s;
-
 		this.subscriber.onSubscribe(new RequestBodySubscription());
 	}
 
@@ -99,13 +98,17 @@ public class RequestBodyPublisher implements ReadListener, Publisher<byte[]> {
 	public void onAllDataRead() throws IOException {
 		logger.debug("All data read");
 		this.synchronizer.readComplete();
-		this.subscriber.onComplete();
+		if (this.subscriber != null) {
+			this.subscriber.onComplete();
+		}
 	}
 
 	@Override
 	public void onError(Throwable t) {
 		logger.error("RequestBodyPublisher Error", t);
-		this.subscriber.onError(t);
+		if (this.subscriber != null) {
+			this.subscriber.onError(t);
+		}
 	}
 
 	private class RequestBodySubscription implements Subscription {

@@ -23,7 +23,7 @@ import org.reactivestreams.Publisher;
 import rx.Observable;
 import rx.RxReactiveStreams;
 
-import org.springframework.reactive.web.http.ServerHttpHandler;
+import org.springframework.reactive.web.http.HttpHandler;
 import org.springframework.util.Assert;
 
 /**
@@ -31,10 +31,10 @@ import org.springframework.util.Assert;
  */
 public class RequestHandlerAdapter implements RequestHandler<ByteBuf, ByteBuf> {
 
-	private final ServerHttpHandler httpHandler;
+	private final HttpHandler httpHandler;
 
 
-	public RequestHandlerAdapter(ServerHttpHandler httpHandler) {
+	public RequestHandlerAdapter(HttpHandler httpHandler) {
 		Assert.notNull(httpHandler, "'httpHandler' is required.");
 		this.httpHandler = httpHandler;
 	}

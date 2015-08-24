@@ -13,19 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.reactive.web.http;
 
+import org.reactivestreams.Publisher;
 
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.Lifecycle;
 
 /**
+ * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
-public interface HttpServer extends InitializingBean, Lifecycle {
+public interface HttpHandler {
 
-	void setPort(int port);
-
-	void setHandler(HttpHandler handler);
+	Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response);
 
 }

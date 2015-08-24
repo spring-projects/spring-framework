@@ -15,10 +15,7 @@
  */
 package org.springframework.reactive.web.http;
 
-import java.net.URI;
-
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 
 /**
  * @author Rossen Stoyanchev

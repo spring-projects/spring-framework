@@ -23,7 +23,7 @@ public class HttpServerSupport {
 
 	private int port = -1;
 
-	private ServerHttpHandler httpHandler;
+	private HttpHandler httpHandler;
 
 
 	public void setPort(int port) {
@@ -34,11 +34,11 @@ public class HttpServerSupport {
 		return this.port;
 	}
 
-	public void setHandler(ServerHttpHandler handler) {
+	public void setHandler(HttpHandler handler) {
 		this.httpHandler = handler;
 	}
 
-	public ServerHttpHandler getHttpHandler() {
+	public HttpHandler getHttpHandler() {
 		return this.httpHandler;
 	}
 

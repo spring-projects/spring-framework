@@ -22,6 +22,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.reactive.web.http.servlet.HttpHandlerServlet;
+import org.springframework.util.Assert;
 import org.springframework.util.SocketUtils;
 
 /**
@@ -48,8 +49,9 @@ public class JettyHttpServer extends HttpServerSupport implements InitializingBe
 
 		this.jettyServer = new Server();
 
+		Assert.notNull(getHttpHandler());
 		HttpHandlerServlet servlet = new HttpHandlerServlet();
-		servlet.setHandler(new EchoHandler());
+		servlet.setHandler(getHttpHandler());
 		ServletHolder servletHolder = new ServletHolder(servlet);
 
 		ServletContextHandler contextHandler = new ServletContextHandler(this.jettyServer, "", false, false);

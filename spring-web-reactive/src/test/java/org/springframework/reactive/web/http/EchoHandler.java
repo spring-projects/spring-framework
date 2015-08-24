@@ -18,14 +18,10 @@ package org.springframework.reactive.web.http;
 
 import org.reactivestreams.Publisher;
 
-import org.springframework.reactive.web.http.ServerHttpHandler;
-import org.springframework.reactive.web.http.ServerHttpRequest;
-import org.springframework.reactive.web.http.ServerHttpResponse;
-
 /**
  * @author Arjen Poutsma
  */
-public class EchoHandler implements ServerHttpHandler {
+public class EchoHandler implements HttpHandler {
 
 	@Override
 	public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
