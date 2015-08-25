@@ -1128,6 +1128,22 @@
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
+			<xsd:attribute name="definitions-factory" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The Tiles DefinitionsFactory class to use. Default is Tiles' default.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="preparer-factory" type="xsd:string">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The Tiles PreparerFactory class to use. Default is Tiles' default.
+	Consider "org.springframework.web.servlet.view.tiles3.SimpleSpringPreparerFactory" or
+	"org.springframework.web.servlet.view.tiles3.SpringBeanPreparerFactory" (see javadoc).
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
 
