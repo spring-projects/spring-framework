@@ -29,6 +29,7 @@ import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.reactive.web.http.HttpHandler;
 
 /**
@@ -66,7 +67,7 @@ public class HttpHandlerServlet extends HttpServlet {
 		response.getOutputStream().setWriteListener(responseSubscriber);
 		ServletServerHttpResponse httpResponse = new ServletServerHttpResponse(response, responseSubscriber);
 
-		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber(contextSynchronizer);
+		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber(contextSynchronizer, httpResponse);
 		this.handler.handle(httpRequest, httpResponse).subscribe(resultSubscriber);
 	}
 
@@ -75,9 +76,12 @@ public class HttpHandlerServlet extends HttpServlet {
 
 		private final AsyncContextSynchronizer synchronizer;
 
+		private final ServletServerHttpResponse response;
 
-		public HandlerResultSubscriber(AsyncContextSynchronizer synchronizer) {
+
+		public HandlerResultSubscriber(AsyncContextSynchronizer synchronizer, ServletServerHttpResponse response) {
 			this.synchronizer = synchronizer;
+			this.response = response;
 		}
 
 
@@ -94,6 +98,7 @@ public class HttpHandlerServlet extends HttpServlet {
 		@Override
 		public void onError(Throwable ex) {
 			logger.error("Error from request handling. Completing the request.", ex);
+			this.response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			this.synchronizer.complete();
 		}
 

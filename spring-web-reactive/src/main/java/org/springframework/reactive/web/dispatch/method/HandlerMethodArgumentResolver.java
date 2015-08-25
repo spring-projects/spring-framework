@@ -13,31 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.reactive.web.dispatch;
+package org.springframework.reactive.web.dispatch.method;
+
+
+import org.springframework.core.MethodParameter;
+import org.springframework.reactive.web.http.ServerHttpRequest;
 
 
 /**
  * @author Rossen Stoyanchev
  */
-public class HandlerResult {
+public interface HandlerMethodArgumentResolver {
 
-	private final Object handler;
+	boolean supportsParameter(MethodParameter parameter);
 
-	private final Object value;
-
-
-	public HandlerResult(Object handler, Object value) {
-		this.handler = handler;
-		this.value = value;
-	}
-
-
-	public Object getHandler() {
-		return this.handler;
-	}
-
-	public Object getValue() {
-		return this.value;
-	}
+	Object resolveArgument(MethodParameter parameter, ServerHttpRequest request);
 
 }

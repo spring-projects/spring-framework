@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.reactive.web.dispatch;
+package org.springframework.reactive.web.dispatch.handler;
 
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -26,8 +26,7 @@ import reactor.rx.Streams;
 
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.reactive.web.dispatch.handler.HttpHandlerAdapter;
-import org.springframework.reactive.web.dispatch.handler.SimpleUrlHandlerMapping;
+import org.springframework.reactive.web.dispatch.DispatcherHandler;
 import org.springframework.reactive.web.http.AbstractHttpHandlerIntegrationTests;
 import org.springframework.reactive.web.http.HttpHandler;
 import org.springframework.reactive.web.http.ServerHttpRequest;
@@ -43,7 +42,7 @@ import static org.junit.Assert.assertArrayEquals;
  */
 public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
-	private static final Charset CHARSET = Charset.forName("UTF-8");
+	private static final Charset UTF_8 = Charset.forName("UTF-8");
 
 
 	@Override
@@ -55,7 +54,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 		wac.refresh();
 
 		DispatcherHandler dispatcherHandler = new DispatcherHandler();
-		dispatcherHandler.initStrategies(wac);
+		dispatcherHandler.setApplicationContext(wac);
 		return dispatcherHandler;
 	}
 
@@ -68,7 +67,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 		RequestEntity<Void> request = RequestEntity.get(url).build();
 		ResponseEntity<byte[]> response = restTemplate.exchange(request, byte[].class);
 
-		assertArrayEquals("foo".getBytes(CHARSET), response.getBody());
+		assertArrayEquals("foo".getBytes(UTF_8), response.getBody());
 	}
 
 	@Test
@@ -80,7 +79,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 		RequestEntity<Void> request = RequestEntity.get(url).build();
 		ResponseEntity<byte[]> response = restTemplate.exchange(request, byte[].class);
 
-		assertArrayEquals("bar".getBytes(CHARSET), response.getBody());
+		assertArrayEquals("bar".getBytes(UTF_8), response.getBody());
 	}
 
 
@@ -98,7 +97,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 
 		@Override
 		public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-			return response.writeWith(Streams.just("foo".getBytes(CHARSET)));
+			return response.writeWith(Streams.just("foo".getBytes(UTF_8)));
 		}
 	}
 
@@ -106,7 +105,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 
 		@Override
 		public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-			return response.writeWith(Streams.just("bar".getBytes(CHARSET)));
+			return response.writeWith(Streams.just("bar".getBytes(UTF_8)));
 		}
 	}
 

@@ -17,12 +17,18 @@ package org.springframework.reactive.web.dispatch;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.rx.Streams;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.HttpStatus;
 import org.springframework.reactive.web.http.HttpHandler;
 import org.springframework.reactive.web.http.ServerHttpRequest;
@@ -31,7 +37,10 @@ import org.springframework.reactive.web.http.ServerHttpResponse;
 /**
  * @author Rossen Stoyanchev
  */
-public class DispatcherHandler implements HttpHandler {
+public class DispatcherHandler implements HttpHandler, ApplicationContextAware {
+
+	private static final Log logger = LogFactory.getLog(DispatcherHandler.class);
+
 
 	private List<HandlerMapping> handlerMappings;
 
@@ -40,21 +49,39 @@ public class DispatcherHandler implements HttpHandler {
 	private List<HandlerResultHandler> resultHandlers;
 
 
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		initStrategies(applicationContext);
+	}
+
 	protected void initStrategies(ApplicationContext context) {
 
-		this.handlerMappings = new ArrayList<>(BeanFactoryUtils.beansOfTypeIncludingAncestors(
-				context, HandlerMapping.class, true, false).values());
+		Map<String, HandlerMapping> mappingBeans =
+				BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerMapping.class, true, false);
 
-		this.handlerAdapters = new ArrayList<>(BeanFactoryUtils.beansOfTypeIncludingAncestors(
-				context, HandlerAdapter.class, true, false).values());
+		this.handlerMappings = new ArrayList<>(mappingBeans.values());
+		AnnotationAwareOrderComparator.sort(this.handlerMappings);
 
-		this.resultHandlers = new ArrayList<>(BeanFactoryUtils.beansOfTypeIncludingAncestors(
-				context, HandlerResultHandler.class, true, false).values());
+		Map<String, HandlerAdapter> adapterBeans =
+				BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerAdapter.class, true, false);
+
+		this.handlerAdapters = new ArrayList<>(adapterBeans.values());
+		AnnotationAwareOrderComparator.sort(this.handlerAdapters);
+
+		Map<String, HandlerResultHandler> beans =
+				BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerResultHandler.class, true, false);
+
+		this.resultHandlers = new ArrayList<>(beans.values());
+		AnnotationAwareOrderComparator.sort(this.resultHandlers);
 	}
 
 
 	@Override
 	public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Processing " + request.getMethod() + " request for [" + request.getURI() + "]");
+		}
 
 		Object handler = getHandler(request);
 		if (handler == null) {
@@ -73,7 +100,7 @@ public class DispatcherHandler implements HttpHandler {
 				}
 			}
 			return Streams.fail(new IllegalStateException(
-					"No HandlerResultHandler for " + result.getReturnValue()));
+					"No HandlerResultHandler for " + result.getValue()));
 		});
 	}
 

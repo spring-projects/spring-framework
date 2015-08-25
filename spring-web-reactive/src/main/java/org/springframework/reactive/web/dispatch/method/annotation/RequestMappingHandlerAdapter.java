@@ -1,0 +1,79 @@
+/*
+ * Copyright 2002-2015 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package org.springframework.reactive.web.dispatch.method.annotation;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.reactivestreams.Publisher;
+import reactor.rx.Streams;
+
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.reactive.web.dispatch.HandlerAdapter;
+import org.springframework.reactive.web.dispatch.HandlerResult;
+import org.springframework.reactive.web.dispatch.method.HandlerMethodArgumentResolver;
+import org.springframework.reactive.web.dispatch.method.InvocableHandlerMethod;
+import org.springframework.reactive.web.http.ServerHttpRequest;
+import org.springframework.reactive.web.http.ServerHttpResponse;
+import org.springframework.web.method.HandlerMethod;
+
+
+/**
+ * @author Rossen Stoyanchev
+ */
+public class RequestMappingHandlerAdapter implements HandlerAdapter, InitializingBean {
+
+	private List<HandlerMethodArgumentResolver> argumentResolvers;
+
+
+	public void setHandlerMethodArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+		this.argumentResolvers.clear();
+		this.argumentResolvers.addAll(resolvers);
+	}
+
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		if (this.argumentResolvers == null) {
+			this.argumentResolvers = new ArrayList<>();
+			this.argumentResolvers.add(new RequestParamArgumentResolver());
+		}
+	}
+
+	@Override
+	public boolean supports(Object handler) {
+		return HandlerMethod.class.equals(handler.getClass());
+	}
+
+	@Override
+	public Publisher<HandlerResult> handle(ServerHttpRequest request, ServerHttpResponse response,
+			Object handler) {
+
+		final InvocableHandlerMethod invocable = new InvocableHandlerMethod((HandlerMethod) handler);
+		invocable.setHandlerMethodArgumentResolvers(this.argumentResolvers);
+
+		Object result;
+		try {
+			result = invocable.invokeForRequest(request);
+		}
+		catch (Exception ex) {
+			return Streams.fail(ex);
+		}
+
+		return Streams.just(new HandlerResult(invocable, result));
+	}
+
+}

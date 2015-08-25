@@ -23,8 +23,7 @@ dependencies {
 	compile "org.springframework:spring-web:4.2.0.RELEASE"
 	compile "org.reactivestreams:reactive-streams:1.0.0"
 	compile "io.projectreactor:reactor-stream:2.0.5.RELEASE"
-	compile "org.slf4j:slf4j-api:1.7.6"
-	compile "ch.qos.logback:logback-classic:1.1.2"
+	compile "commons-logging:commons-logging:1.2"
 
 	optional "io.reactivex:rxnetty:0.5.0-SNAPSHOT"
 	optional "io.reactivex:rxjava-reactive-streams:1.0.1"
@@ -40,7 +39,10 @@ dependencies {
 	testCompile 'org.eclipse.jetty:jetty-server:9.3.2.v20150730'
 	testCompile 'org.eclipse.jetty:jetty-servlet:9.3.2.v20150730'
 
+	testCompile "org.slf4j:slf4j-jcl:1.7.12"
+	testCompile "org.slf4j:jul-to-slf4j:1.7.12"
 	testCompile("log4j:log4j:1.2.16")
+
 	testCompile("org.mockito:mockito-core:1.10.19") {
 		exclude group: 'org.hamcrest', module: 'hamcrest-core'
 	}

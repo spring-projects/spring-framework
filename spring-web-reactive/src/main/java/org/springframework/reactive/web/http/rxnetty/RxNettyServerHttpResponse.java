@@ -65,7 +65,9 @@ public class RxNettyServerHttpResponse implements ServerHttpResponse {
 	private void writeHeaders() {
 		if (!this.headersWritten) {
 			for (String name : this.headers.keySet()) {
-				this.response.setHeader(name, this.headers.get(name));
+				for (String value : this.headers.get(name)) {
+					this.response.addHeader(name, value);
+				}
 			}
 		}
 	}
