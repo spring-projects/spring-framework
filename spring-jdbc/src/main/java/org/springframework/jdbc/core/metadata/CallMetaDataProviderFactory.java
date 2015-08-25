@@ -47,7 +47,8 @@ public class CallMetaDataProviderFactory {
 			"Microsoft SQL Server",
 			"Oracle",
 			"PostgreSQL",
-			"Sybase"
+			"Sybase",
+			"HDB"
 		);
 
 	/** List of supported database products for function calls */
@@ -117,6 +118,9 @@ public class CallMetaDataProviderFactory {
 					}
 					else if ("Microsoft SQL Server".equals(databaseProductName)) {
 						provider = new SqlServerCallMetaDataProvider((databaseMetaData));
+					}
+					else if ("HDB".equals(databaseProductName)) {
+						provider = new HDBCallMetaDataProvider((databaseMetaData));
 					}
 					else {
 						provider = new GenericCallMetaDataProvider(databaseMetaData);
