@@ -1,6 +1,6 @@
 buildscript {
 	repositories {
-		maven { url 'http://repo.springsource.org/plugins-release' }
+		maven { url 'https://repo.spring.io/plugins-release' }
 	}
 	dependencies {
 		classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.7'
@@ -22,8 +22,7 @@ dependencies {
 	compile "org.springframework:spring-core:4.2.0.RELEASE"
 	compile "org.springframework:spring-web:4.2.0.RELEASE"
 	compile "org.reactivestreams:reactive-streams:1.0.0"
-	compile "io.projectreactor:reactor-core:2.0.5.RELEASE"
-	compile "io.projectreactor:reactor-net:2.0.5.RELEASE"
+	compile "io.projectreactor:reactor-stream:2.0.5.RELEASE"
 	compile "org.slf4j:slf4j-api:1.7.6"
 	compile "ch.qos.logback:logback-classic:1.1.2"
 
