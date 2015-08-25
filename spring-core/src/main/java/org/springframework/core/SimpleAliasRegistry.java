@@ -145,6 +145,22 @@ public class SimpleAliasRegistry implements AliasRegistry {
 	}
 
 	/**
+	 * Check whether the given name points back to the given alias as an alias
+	 * in the other direction already, catching a circular reference upfront
+	 * and throwing a corresponding IllegalStateException.
+	 * @param name the candidate name
+	 * @param alias the candidate alias
+	 * @see #registerAlias
+	 */
+	protected void checkForAliasCircle(String name, String alias) {
+		if (alias.equals(canonicalName(name))) {
+			throw new IllegalStateException("Cannot register alias '" + alias +
+					"' for name '" + name + "': Circular reference - '" +
+					name + "' is a direct or indirect alias for '" + alias + "' already");
+		}
+	}
+
+	/**
 	 * Determine the raw name, resolving aliases to canonical names.
 	 * @param name the user-specified name
 	 * @return the transformed name
@@ -161,22 +177,6 @@ public class SimpleAliasRegistry implements AliasRegistry {
 		}
 		while (resolvedName != null);
 		return canonicalName;
-	}
-
-	/**
-	 * Check whether the given name points back to given alias as an alias
-	 * in the other direction, catching a circular reference upfront and
-	 * throwing a corresponding IllegalStateException.
-	 * @param name the candidate name
-	 * @param alias the candidate alias
-	 * @see #registerAlias
-	 */
-	protected void checkForAliasCircle(String name, String alias) {
-		if (alias.equals(canonicalName(name))) {
-			throw new IllegalStateException("Cannot register alias '" + alias +
-					"' for name '" + name + "': Circular reference - '" +
-					name + "' is a direct or indirect alias for '" + alias + "' already");
-		}
 	}
 
 }

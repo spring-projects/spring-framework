@@ -275,7 +275,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 
 	/**
 	 * Return the internal BindingResult held by this DataBinder,
-	 * as AbstractPropertyBindingResult.
+	 * as an AbstractPropertyBindingResult.
 	 */
 	protected AbstractPropertyBindingResult getInternalBindingResult() {
 		if (this.bindingResult == null) {

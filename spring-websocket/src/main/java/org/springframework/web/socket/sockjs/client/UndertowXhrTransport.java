@@ -90,9 +90,9 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 	private static final AttachmentKey<String> RESPONSE_BODY = AttachmentKey.create(String.class);
 
 
-	private final UndertowClient httpClient;
-
 	private final OptionMap optionMap;
+
+	private final UndertowClient httpClient;
 
 	private final XnioWorker worker;
 
@@ -104,9 +104,9 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 	}
 
 	public UndertowXhrTransport(OptionMap optionMap) throws IOException {
-		Assert.notNull(optionMap, "'optionMap' is required");
-		this.httpClient = UndertowClient.getInstance();
+		Assert.notNull(optionMap, "OptionMap is required");
 		this.optionMap = optionMap;
+		this.httpClient = UndertowClient.getInstance();
 		this.worker = Xnio.getInstance().createWorker(optionMap);
 		this.bufferPool = new ByteBufferSlicePool(1048, 1048);
 	}
@@ -153,107 +153,6 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 
 
 	@Override
-	protected ResponseEntity<String> executeInfoRequestInternal(URI infoUrl) {
-		return executeRequest(infoUrl, Methods.GET, getRequestHeaders(), null);
-	}
-
-	@Override
-	protected ResponseEntity<String> executeSendRequestInternal(URI url, HttpHeaders headers, TextMessage message) {
-		return executeRequest(url, Methods.POST, headers, message.getPayload());
-	}
-
-	protected ResponseEntity<String> executeRequest(URI url, HttpString method, HttpHeaders headers, String body) {
-		CountDownLatch latch = new CountDownLatch(1);
-		List<ClientResponse> responses = new CopyOnWriteArrayList<ClientResponse>();
-
-		try {
-			ClientConnection connection = this.httpClient.connect(
-					url, this.worker, this.bufferPool, this.optionMap).get();
-			try {
-				ClientRequest request = new ClientRequest().setMethod(method).setPath(url.getPath());
-				request.getRequestHeaders().add(HttpString.tryFromString(HttpHeaders.HOST), url.getHost());
-				if (body != null && !body.isEmpty()) {
-					request.getRequestHeaders().add(HttpString.tryFromString(HttpHeaders.CONTENT_LENGTH), body.length());
-				}
-				addHttpHeaders(request, headers);
-				connection.sendRequest(request, createRequestCallback(body, responses, latch));
-
-				latch.await();
-				ClientResponse response = responses.iterator().next();
-				HttpStatus status = HttpStatus.valueOf(response.getResponseCode());
-				HttpHeaders responseHeaders = toHttpHeaders(response.getResponseHeaders());
-				String responseBody = response.getAttachment(RESPONSE_BODY);
-				return (responseBody != null ?
-						new ResponseEntity<String>(responseBody, responseHeaders, status) :
-						new ResponseEntity<String>(responseHeaders, status));
-			}
-			finally {
-				IoUtils.safeClose(connection);
-			}
-		}
-		catch (IOException ex) {
-			throw new SockJsTransportFailureException("Failed to execute request to " + url, ex);
-		}
-		catch (InterruptedException ex) {
-			throw new SockJsTransportFailureException("Interrupted while processing request to " + url, ex);
-		}
-
-	}
-
-	private ClientCallback<ClientExchange> createRequestCallback(final String body,
-			final List<ClientResponse> responses, final CountDownLatch latch) {
-
-		return new ClientCallback<ClientExchange>() {
-			@Override
-			public void completed(ClientExchange result) {
-				result.setResponseListener(new ClientCallback<ClientExchange>() {
-					@Override
-					public void completed(final ClientExchange result) {
-						responses.add(result.getResponse());
-						new StringReadChannelListener(result.getConnection().getBufferPool()) {
-							@Override
-							protected void stringDone(String string) {
-								result.getResponse().putAttachment(RESPONSE_BODY, string);
-								latch.countDown();
-							}
-							@Override
-							protected void error(IOException ex) {
-								onFailure(latch, ex);
-							}
-						}.setup(result.getResponseChannel());
-					}
-					@Override
-					public void failed(IOException ex) {
-						onFailure(latch, ex);
-					}
-				});
-				try {
-					if (body != null) {
-						result.getRequestChannel().write(ByteBuffer.wrap(body.getBytes()));
-					}
-					result.getRequestChannel().shutdownWrites();
-					if (!result.getRequestChannel().flush()) {
-						result.getRequestChannel().getWriteSetter()
-								.set(ChannelListeners.<StreamSinkChannel>flushingChannelListener(null, null));
-						result.getRequestChannel().resumeWrites();
-					}
-				}
-				catch (IOException ex) {
-					onFailure(latch, ex);
-				}
-			}
-			@Override
-			public void failed(IOException ex) {
-				onFailure(latch, ex);
-			}
-			private void onFailure(CountDownLatch latch, IOException ex) {
-				latch.countDown();
-				throw new SockJsTransportFailureException("Failed to execute request", ex);
-			}
-		};
-	}
-
-	@Override
 	protected void connectInternal(TransportRequest request, WebSocketHandler handler, URI receiveUrl,
 			HttpHeaders handshakeHeaders, XhrClientSockJsSession session,
 			SettableListenableFuture<WebSocketSession> connectFuture) {
@@ -265,24 +164,24 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 			final SettableListenableFuture<WebSocketSession> connectFuture) {
 
 		if (logger.isTraceEnabled()) {
-			logger.trace("Starting XHR receive request, url=" + url);
+			logger.trace("Starting XHR receive request for " + url);
 		}
 
 		this.httpClient.connect(
-			new ClientCallback<ClientConnection>() {
-				@Override
-				public void completed(ClientConnection result) {
-					final ClientRequest httpRequest = new ClientRequest().setMethod(Methods.POST).setPath(url.getPath());
-					httpRequest.getRequestHeaders().add(HttpString.tryFromString(HttpHeaders.HOST), url.getHost());
-					addHttpHeaders(httpRequest, headers);
-					result.sendRequest(httpRequest, createConnectCallback(url, getRequestHeaders(), session, connectFuture));
-				}
-				@Override
-				public void failed(IOException ex) {
-					throw new SockJsTransportFailureException("Failed to execute request to " + url, ex);
-				}
-			},
-			url, this.worker, this.bufferPool, this.optionMap);
+				new ClientCallback<ClientConnection>() {
+					@Override
+					public void completed(ClientConnection result) {
+						final ClientRequest httpRequest = new ClientRequest().setMethod(Methods.POST).setPath(url.getPath());
+						httpRequest.getRequestHeaders().add(HttpString.tryFromString(HttpHeaders.HOST), url.getHost());
+						addHttpHeaders(httpRequest, headers);
+						result.sendRequest(httpRequest, createConnectCallback(url, getRequestHeaders(), session, connectFuture));
+					}
+					@Override
+					public void failed(IOException ex) {
+						throw new SockJsTransportFailureException("Failed to execute request to " + url, ex);
+					}
+				},
+				url, this.worker, this.bufferPool, this.optionMap);
 
 	}
 
@@ -329,10 +228,12 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 					}
 				});
 			}
+
 			@Override
 			public void failed(IOException exc) {
 				onFailure(exc);
 			}
+
 			private void onFailure(Throwable failure) {
 				if (connectFuture.setException(failure)) {
 					return;
@@ -344,6 +245,108 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 					sockJsSession.handleTransportError(failure);
 					sockJsSession.afterTransportClosed(new CloseStatus(1006, failure.getMessage()));
 				}
+			}
+		};
+	}
+
+	@Override
+	protected ResponseEntity<String> executeInfoRequestInternal(URI infoUrl) {
+		return executeRequest(infoUrl, Methods.GET, getRequestHeaders(), null);
+	}
+
+	@Override
+	protected ResponseEntity<String> executeSendRequestInternal(URI url, HttpHeaders headers, TextMessage message) {
+		return executeRequest(url, Methods.POST, headers, message.getPayload());
+	}
+
+	protected ResponseEntity<String> executeRequest(URI url, HttpString method, HttpHeaders headers, String body) {
+		CountDownLatch latch = new CountDownLatch(1);
+		List<ClientResponse> responses = new CopyOnWriteArrayList<ClientResponse>();
+
+		try {
+			ClientConnection connection = this.httpClient.connect(url, this.worker,
+					this.bufferPool, this.optionMap).get();
+			try {
+				ClientRequest request = new ClientRequest().setMethod(method).setPath(url.getPath());
+				request.getRequestHeaders().add(HttpString.tryFromString(HttpHeaders.HOST), url.getHost());
+				if (body != null && !body.isEmpty()) {
+					request.getRequestHeaders().add(HttpString.tryFromString(HttpHeaders.CONTENT_LENGTH), body.length());
+				}
+				addHttpHeaders(request, headers);
+				connection.sendRequest(request, createRequestCallback(body, responses, latch));
+
+				latch.await();
+				ClientResponse response = responses.iterator().next();
+				HttpStatus status = HttpStatus.valueOf(response.getResponseCode());
+				HttpHeaders responseHeaders = toHttpHeaders(response.getResponseHeaders());
+				String responseBody = response.getAttachment(RESPONSE_BODY);
+				return (responseBody != null ?
+						new ResponseEntity<String>(responseBody, responseHeaders, status) :
+						new ResponseEntity<String>(responseHeaders, status));
+			}
+			finally {
+				IoUtils.safeClose(connection);
+			}
+		}
+		catch (IOException ex) {
+			throw new SockJsTransportFailureException("Failed to execute request to " + url, ex);
+		}
+		catch (InterruptedException ex) {
+			throw new SockJsTransportFailureException("Interrupted while processing request to " + url, ex);
+		}
+	}
+
+	private ClientCallback<ClientExchange> createRequestCallback(final String body,
+			final List<ClientResponse> responses, final CountDownLatch latch) {
+
+		return new ClientCallback<ClientExchange>() {
+			@Override
+			public void completed(ClientExchange result) {
+				result.setResponseListener(new ClientCallback<ClientExchange>() {
+					@Override
+					public void completed(final ClientExchange result) {
+						responses.add(result.getResponse());
+						new StringReadChannelListener(result.getConnection().getBufferPool()) {
+							@Override
+							protected void stringDone(String string) {
+								result.getResponse().putAttachment(RESPONSE_BODY, string);
+								latch.countDown();
+							}
+							@Override
+							protected void error(IOException ex) {
+								onFailure(latch, ex);
+							}
+						}.setup(result.getResponseChannel());
+					}
+					@Override
+					public void failed(IOException ex) {
+						onFailure(latch, ex);
+					}
+				});
+				try {
+					if (body != null) {
+						result.getRequestChannel().write(ByteBuffer.wrap(body.getBytes()));
+					}
+					result.getRequestChannel().shutdownWrites();
+					if (!result.getRequestChannel().flush()) {
+						result.getRequestChannel().getWriteSetter()
+								.set(ChannelListeners.<StreamSinkChannel>flushingChannelListener(null, null));
+						result.getRequestChannel().resumeWrites();
+					}
+				}
+				catch (IOException ex) {
+					onFailure(latch, ex);
+				}
+			}
+
+			@Override
+			public void failed(IOException ex) {
+				onFailure(latch, ex);
+			}
+
+			private void onFailure(CountDownLatch latch, IOException ex) {
+				latch.countDown();
+				throw new SockJsTransportFailureException("Failed to execute request", ex);
 			}
 		};
 	}
