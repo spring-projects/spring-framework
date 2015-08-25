@@ -38,6 +38,7 @@ import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -257,22 +258,27 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 
 		for (int index = 1; index <= columnCount; index++) {
 			String column = JdbcUtils.lookupColumnName(rsmd, index);
-			PropertyDescriptor pd = this.mappedFields.get(lowerCaseName(column.replaceAll(" ", "")));
+			String field = lowerCaseName(column.replaceAll(" ", ""));
+			PropertyDescriptor pd = this.mappedFields.get(field);
 			if (pd != null) {
 				try {
 					Object value = getColumnValue(rs, index, pd);
-					if (logger.isDebugEnabled() && rowNumber == 0) {
-						logger.debug("Mapping column '" + column + "' to property '" +
-								pd.getName() + "' of type " + pd.getPropertyType());
+					if (rowNumber == 0 && logger.isDebugEnabled()) {
+						logger.debug("Mapping column '" + column + "' to property '" + pd.getName() +
+								"' of type [" + ClassUtils.getQualifiedName(pd.getPropertyType()) + "]");
 					}
 					try {
 						bw.setPropertyValue(pd.getName(), value);
 					}
 					catch (TypeMismatchException ex) {
 						if (value == null && this.primitivesDefaultedForNullValue) {
-							logger.debug("Intercepted TypeMismatchException for row " + rowNumber + " and column '" +
-									column + "' with null value when setting property '" + pd.getName() +
-									"' of type " + pd.getPropertyType() + " on object: " + mappedObject);
+							if (logger.isDebugEnabled()) {
+								logger.debug("Intercepted TypeMismatchException for row " + rowNumber +
+										" and column '" + column + "' with null value when setting property '" +
+										pd.getName() + "' of type [" +
+										ClassUtils.getQualifiedName(pd.getPropertyType()) +
+										"] on object: " + mappedObject, ex);
+							}
 						}
 						else {
 							throw ex;
@@ -284,14 +290,21 @@ public class BeanPropertyRowMapper<T> implements RowMapper<T> {
 				}
 				catch (NotWritablePropertyException ex) {
 					throw new DataRetrievalFailureException(
-							"Unable to map column " + column + " to property " + pd.getName(), ex);
+							"Unable to map column '" + column + "' to property '" + pd.getName() + "'", ex);
+				}
+			}
+			else {
+				// No PropertyDescriptor found
+				if (rowNumber == 0 && logger.isDebugEnabled()) {
+					logger.debug("No property found for column '" + column + "' mapped to field '" + field + "'");
 				}
 			}
 		}
 
 		if (populatedProperties != null && !populatedProperties.equals(this.mappedProperties)) {
 			throw new InvalidDataAccessApiUsageException("Given ResultSet does not contain all fields " +
-					"necessary to populate object of class [" + this.mappedClass + "]: " + this.mappedProperties);
+					"necessary to populate object of class [" + this.mappedClass.getName() + "]: " +
+					this.mappedProperties);
 		}
 
 		return mappedObject;
