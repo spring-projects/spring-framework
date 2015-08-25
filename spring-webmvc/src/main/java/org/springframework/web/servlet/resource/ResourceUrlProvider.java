@@ -172,17 +172,24 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		if (logger.isTraceEnabled()) {
 			logger.trace("Getting resource URL for requestURL=" + requestUrl);
 		}
-		int index = getLookupPathIndex(request);
-		String prefix = requestUrl.substring(0, index);
-		String lookupPath = requestUrl.substring(index);
+		int prefixIndex = getLookupPathIndex(request);
+		int suffixIndex = getQueryParamsIndex(requestUrl);
+		String prefix = requestUrl.substring(0, prefixIndex);
+		String suffix = requestUrl.substring(suffixIndex);
+		String lookupPath = requestUrl.substring(prefixIndex, suffixIndex);
 		String resolvedLookupPath = getForLookupPath(lookupPath);
-		return (resolvedLookupPath != null) ? prefix + resolvedLookupPath : null;
+		return (resolvedLookupPath != null) ? prefix + resolvedLookupPath + suffix : null;
 	}
 
 	private int getLookupPathIndex(HttpServletRequest request) {
 		String requestUri = getPathHelper().getRequestUri(request);
 		String lookupPath = getPathHelper().getLookupPathForRequest(request);
 		return requestUri.indexOf(lookupPath);
+	}
+
+	private int getQueryParamsIndex(String lookupPath) {
+		int index = lookupPath.indexOf("?");
+		return index > 0 ? index : lookupPath.length();
 	}
 
 	/**

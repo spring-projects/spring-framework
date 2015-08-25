@@ -29,6 +29,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
@@ -72,6 +73,18 @@ public class ResourceUrlProviderTests {
 
 		String url = this.translator.getForLookupPath("/resources/foo.css");
 		assertEquals("/resources/foo.css", url);
+	}
+
+	// SPR-13374
+	@Test
+	public void getStaticResourceUrlRequestWithRequestParams() {
+		initTranslator();
+		MockHttpServletRequest request = new MockHttpServletRequest();
+		request.setContextPath("/");
+		request.setRequestURI("/");
+
+		String url = this.translator.getForRequestUrl(request, "/resources/foo.css?foo=bar&url=http://example.org");
+		assertEquals("/resources/foo.css?foo=bar&url=http://example.org", url);
 	}
 
 	@Test

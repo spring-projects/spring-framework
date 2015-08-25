@@ -74,10 +74,12 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 			initIndexLookupPath(resourceUrlProvider);
 			if (url.length() >= this.indexLookupPath) {
 				String prefix = url.substring(0, this.indexLookupPath);
-				String lookupPath = url.substring(this.indexLookupPath);
+				int suffixIndex = getQueryParamsIndex(url);
+				String suffix = url.substring(suffixIndex);
+				String lookupPath = url.substring(this.indexLookupPath, suffixIndex);
 				lookupPath = resourceUrlProvider.getForLookupPath(lookupPath);
 				if (lookupPath != null) {
-					return super.encodeURL(prefix + lookupPath);
+					return super.encodeURL(prefix + lookupPath + suffix);
 				}
 			}
 			return super.encodeURL(url);
@@ -94,6 +96,11 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 				String lookupPath = urlProvider.getPathHelper().getLookupPathForRequest(this.request);
 				this.indexLookupPath = requestUri.lastIndexOf(lookupPath);
 			}
+		}
+
+		private int getQueryParamsIndex(String url) {
+			int index = url.indexOf("?");
+			return index > 0 ? index : url.length();
 		}
 	}
 
