@@ -111,7 +111,7 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	@Override
 	public Map<String, Object> getAnnotationAttributes(String annotationName, boolean classValuesAsString) {
 		return AnnotatedElementUtils.getMergedAnnotationAttributes(getIntrospectedClass(),
-			annotationName, classValuesAsString, this.nestedAnnotationsAsMap);
+				annotationName, classValuesAsString, this.nestedAnnotationsAsMap);
 	}
 
 	@Override
@@ -122,7 +122,7 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 	@Override
 	public MultiValueMap<String, Object> getAllAnnotationAttributes(String annotationName, boolean classValuesAsString) {
 		return AnnotatedElementUtils.getAllAnnotationAttributes(getIntrospectedClass(),
-			annotationName, classValuesAsString, this.nestedAnnotationsAsMap);
+				annotationName, classValuesAsString, this.nestedAnnotationsAsMap);
 	}
 
 	@Override

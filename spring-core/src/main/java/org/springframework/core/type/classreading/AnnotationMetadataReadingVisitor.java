@@ -59,7 +59,8 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 	 * to ensure that the hierarchical ordering of the entries is preserved.
 	 * @see AnnotationReadingVisitorUtils#getMergedAnnotationAttributes
 	 */
-	protected final LinkedMultiValueMap<String, AnnotationAttributes> attributesMap = new LinkedMultiValueMap<String, AnnotationAttributes>(4);
+	protected final LinkedMultiValueMap<String, AnnotationAttributes> attributesMap =
+			new LinkedMultiValueMap<String, AnnotationAttributes>(4);
 
 	protected final Set<MethodMetadata> methodMetadataSet = new LinkedHashSet<MethodMetadata>(4);
 
@@ -84,7 +85,8 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
 		String className = Type.getType(desc).getClassName();
 		this.annotationSet.add(className);
-		return new AnnotationAttributesReadingVisitor(className, this.attributesMap, this.metaAnnotationMap, this.classLoader);
+		return new AnnotationAttributesReadingVisitor(
+				className, this.attributesMap, this.metaAnnotationMap, this.classLoader);
 	}
 
 
@@ -116,7 +118,8 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 
 	@Override
 	public boolean isAnnotated(String annotationName) {
-		return (!AnnotationUtils.isInJavaLangAnnotationPackage(annotationName) && this.attributesMap.containsKey(annotationName));
+		return (!AnnotationUtils.isInJavaLangAnnotationPackage(annotationName) &&
+				this.attributesMap.containsKey(annotationName));
 	}
 
 	@Override
@@ -127,8 +130,7 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 	@Override
 	public AnnotationAttributes getAnnotationAttributes(String annotationName, boolean classValuesAsString) {
 		AnnotationAttributes raw = AnnotationReadingVisitorUtils.getMergedAnnotationAttributes(
-this.attributesMap,
-			this.metaAnnotationMap, annotationName);
+				this.attributesMap, this.metaAnnotationMap, annotationName);
 		return AnnotationReadingVisitorUtils.convertClassValues(this.classLoader, raw, classValuesAsString);
 	}
 
@@ -145,8 +147,8 @@ this.attributesMap,
 			return null;
 		}
 		for (AnnotationAttributes raw : attributes) {
-			for (Map.Entry<String, Object> entry :
-					AnnotationReadingVisitorUtils.convertClassValues(this.classLoader, raw, classValuesAsString).entrySet()) {
+			for (Map.Entry<String, Object> entry : AnnotationReadingVisitorUtils.convertClassValues(
+					this.classLoader, raw, classValuesAsString).entrySet()) {
 				allAttributes.add(entry.getKey(), entry.getValue());
 			}
 		}
