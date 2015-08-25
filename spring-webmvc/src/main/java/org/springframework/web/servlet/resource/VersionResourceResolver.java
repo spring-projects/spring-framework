@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,8 @@ import org.springframework.util.StringUtils;
  * @see VersionStrategy
  */
 public class VersionResourceResolver extends AbstractResourceResolver {
+
+	public static final String RESOURCE_VERSION_ATTRIBUTE = VersionResourceResolver.class.getName() + ".resourceVersion";
 
 	private AntPathMatcher pathMatcher = new AntPathMatcher();
 
@@ -164,6 +166,9 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		if (candidateVersion.equals(actualVersion)) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("resource matches extracted version");
+			}
+			if(request != null) {
+				request.setAttribute(VersionResourceResolver.RESOURCE_VERSION_ATTRIBUTE, candidateVersion);
 			}
 			return baseResource;
 		}

@@ -4133,6 +4133,7 @@ responsible for this, along with conditional headers such as `'Last-Modified'` a
 The `'Cache-Control'` HTTP response header advises private caches (e.g. browsers) and
 public caches (e.g. proxies) on how they can cache HTTP responses for further reuse.
 
+mvc-config-static-resources
 An http://en.wikipedia.org/wiki/HTTP_ETag[ETag] (entity tag) is an HTTP response header
 returned by an HTTP/1.1 compliant web server used to determine change in content at a
 given URL. It can be considered to be the more sophisticated successor to the
@@ -4310,6 +4311,7 @@ bandwidth, as the rendered response is not sent back over the wire.
 Note that this strategy saves network bandwidth but not CPU, as the full response must be
 computed for each request. Other strategies at the controller level (described above) can
 save network bandwidth and avoid computation.
+mvc-config-static-resources
 
 You configure the `ShallowEtagHeaderFilter` in `web.xml`:
 
@@ -5104,7 +5106,8 @@ can provide arbitrary resolution and transformation of resources.
 The built-in `VersionResourceResolver` can be configured with different strategies.
 For example a `FixedVersionStrategy` can use a property, a date, or other as the version.
 A `ContentVersionStrategy` uses an MD5 hash computed from the content of the resource
-(known as "fingerprinting" URLs).
+(known as "fingerprinting" URLs). Note that the `VersionResourceResolver` will automatically
+use the resolved version strings as HTTP ETag header values when serving resources.
 
 `ContentVersionStrategy` is a good default choice to use except in cases where
 it cannot be used (e.g. with JavaScript module loaders). You can configure

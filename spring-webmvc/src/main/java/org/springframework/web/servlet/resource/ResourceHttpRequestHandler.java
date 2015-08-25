@@ -89,12 +89,11 @@ import org.springframework.web.servlet.support.WebContentGenerator;
  * @author Jeremy Grelle
  * @author Juergen Hoeller
  * @author Arjen Poutsma
+ * @author Brian Clozel
  * @since 3.0.4
  */
 public class ResourceHttpRequestHandler extends WebContentGenerator
 		implements HttpRequestHandler, InitializingBean, CorsConfigurationSource {
-
-	private static final String CONTENT_ENCODING = "Content-Encoding";
 
 	private static final Log logger = LogFactory.getLog(ResourceHttpRequestHandler.class);
 
@@ -267,6 +266,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		}
 
 		if (request.getHeader(HttpHeaders.RANGE) == null) {
+			setETagHeader(request, response);
 			setHeaders(response, resource, mediaType);
 			writeContent(response, resource);
 		}
@@ -407,6 +407,21 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	}
 
 	/**
+	 * Set the ETag header if the version string of the served resource is present.
+	 * Version strings can be resolved by {@link VersionStrategy} implementations and then
+	 * set as a request attribute by {@link VersionResourceResolver}.
+	 * @param request current servlet request
+	 * @param response current servlet response
+	 * @see VersionResourceResolver
+	 */
+	protected void setETagHeader(HttpServletRequest request, HttpServletResponse response) {
+		String versionString = (String) request.getAttribute(VersionResourceResolver.RESOURCE_VERSION_ATTRIBUTE);
+		if(versionString != null) {
+			response.setHeader(HttpHeaders.ETAG, "\"" + versionString + "\"");
+		}
+	}
+
+	/**
 	 * Set headers on the given servlet response.
 	 * Called for GET requests as well as HEAD requests.
 	 * @param response current servlet response
@@ -426,7 +441,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		}
 
 		if (resource instanceof EncodedResource) {
-			response.setHeader(CONTENT_ENCODING, ((EncodedResource) resource).getContentEncoding());
+			response.setHeader(HttpHeaders.CONTENT_ENCODING, ((EncodedResource) resource).getContentEncoding());
 		}
 
 		response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
