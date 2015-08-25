@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.junit.Test;
 
 import org.springframework.aop.scope.ScopedObject;
 import org.springframework.aop.scope.ScopedProxyUtils;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -280,6 +281,7 @@ public class ConfigurationClassPostProcessorTests {
 		beanFactory.registerBeanDefinition("consumer", new RootBeanDefinition(ScopedProxyConsumer.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.postProcessBeanFactory(beanFactory);
+
 		ITestBean injected = beanFactory.getBean("consumer", ScopedProxyConsumer.class).testBean;
 		assertTrue(injected instanceof ScopedObject);
 		assertSame(beanFactory.getBean("scopedClass"), injected);
@@ -357,6 +359,28 @@ public class ConfigurationClassPostProcessorTests {
 		RepositoryInjectionBean bean = (RepositoryInjectionBean) beanFactory.getBean("annotatedBean");
 		assertEquals("Repository<String>", bean.stringRepository.toString());
 		assertEquals("Repository<Integer>", bean.integerRepository.toString());
+		assertTrue(AopUtils.isCglibProxy(bean.stringRepository));
+		assertTrue(AopUtils.isCglibProxy(bean.integerRepository));
+	}
+
+	@Test
+	public void genericsBasedInjectionWithScopedProxyUsingAsm() {
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(RepositoryInjectionBean.class.getName());
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		beanFactory.registerBeanDefinition("annotatedBean", bd);
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(ScopedProxyRepositoryConfiguration.class.getName()));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+		beanFactory.freezeConfiguration();
+
+		RepositoryInjectionBean bean = (RepositoryInjectionBean) beanFactory.getBean("annotatedBean");
+		assertEquals("Repository<String>", bean.stringRepository.toString());
+		assertEquals("Repository<Integer>", bean.integerRepository.toString());
+		assertTrue(AopUtils.isCglibProxy(bean.stringRepository));
+		assertTrue(AopUtils.isCglibProxy(bean.integerRepository));
 	}
 
 	@Test
@@ -487,13 +511,11 @@ public class ConfigurationClassPostProcessorTests {
 	@Configuration
 	static class SingletonBeanConfig {
 
-		public @Bean
-		Foo foo() {
+		public @Bean Foo foo() {
 			return new Foo();
 		}
 
-		public @Bean
-		Bar bar() {
+		public @Bean Bar bar() {
 			return new Bar(foo());
 		}
 	}
@@ -650,6 +672,13 @@ public class ConfigurationClassPostProcessorTests {
 		}
 	}
 
+	@Retention(RetentionPolicy.RUNTIME)
+	@Scope(value = "prototype")
+	public @interface PrototypeScoped {
+
+		ScopedProxyMode proxyMode() default ScopedProxyMode.TARGET_CLASS;
+	}
+
 	@Configuration
 	public static class ScopedProxyRepositoryConfiguration {
 
@@ -665,7 +694,7 @@ public class ConfigurationClassPostProcessorTests {
 		}
 
 		@Bean
-		@Scope(value = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
+		@PrototypeScoped
 		public Repository<Integer> integerRepo() {
 			return new Repository<Integer>() {
 				@Override

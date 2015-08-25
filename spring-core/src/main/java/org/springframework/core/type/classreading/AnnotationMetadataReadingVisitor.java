@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,8 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 	 * to ensure that the hierarchical ordering of the entries is preserved.
 	 * @see AnnotationReadingVisitorUtils#getMergedAnnotationAttributes
 	 */
-	protected final LinkedMultiValueMap<String, AnnotationAttributes> attributesMap = new LinkedMultiValueMap<String, AnnotationAttributes>(4);
+	protected final LinkedMultiValueMap<String, AnnotationAttributes> attributesMap =
+			new LinkedMultiValueMap<String, AnnotationAttributes>(4);
 
 	protected final Set<MethodMetadata> methodMetadataSet = new LinkedHashSet<MethodMetadata>(4);
 
@@ -75,14 +76,16 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 		if ((access & Opcodes.ACC_BRIDGE) != 0) {
 			return super.visitMethod(access, name, desc, signature, exceptions);
 		}
-		return new MethodMetadataReadingVisitor(name, access, getClassName(), this.classLoader, this.methodMetadataSet);
+		return new MethodMetadataReadingVisitor(
+				name, access, getClassName(), this.classLoader, this.methodMetadataSet);
 	}
 
 	@Override
 	public AnnotationVisitor visitAnnotation(final String desc, boolean visible) {
 		String className = Type.getType(desc).getClassName();
 		this.annotationSet.add(className);
-		return new AnnotationAttributesReadingVisitor(className, this.attributesMap, this.metaAnnotationMap, this.classLoader);
+		return new AnnotationAttributesReadingVisitor(
+				className, this.attributesMap, this.metaAnnotationMap, this.classLoader);
 	}
 
 
@@ -142,8 +145,8 @@ public class AnnotationMetadataReadingVisitor extends ClassMetadataReadingVisito
 			return null;
 		}
 		for (AnnotationAttributes raw : attributes) {
-			for (Map.Entry<String, Object> entry :
-					AnnotationReadingVisitorUtils.convertClassValues(this.classLoader, raw, classValuesAsString).entrySet()) {
+			for (Map.Entry<String, Object> entry : AnnotationReadingVisitorUtils.convertClassValues(
+					this.classLoader, raw, classValuesAsString).entrySet()) {
 				allAttributes.add(entry.getKey(), entry.getValue());
 			}
 		}
