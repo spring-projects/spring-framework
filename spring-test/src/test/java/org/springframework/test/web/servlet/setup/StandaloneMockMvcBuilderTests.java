@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.ser.impl.UnknownSerializer;
 import org.junit.Test;
 
+import org.springframework.http.converter.json.SpringHandlerInstantiator;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,7 +49,7 @@ import static org.junit.Assert.*;
  */
 public class StandaloneMockMvcBuilderTests {
 
-	@Test // SPR-10825
+	@Test  // SPR-10825
 	public void placeHoldersInRequestMapping() throws Exception {
 
 		TestStandaloneMockMvcBuilder builder = new TestStandaloneMockMvcBuilder(new PlaceholderController());
@@ -62,7 +65,7 @@ public class StandaloneMockMvcBuilderTests {
 		assertEquals("handleWithPlaceholders", ((HandlerMethod) chain.getHandler()).getMethod().getName());
 	}
 
-	@Test // SPR-12553
+	@Test  // SPR-12553
 	public void applicationContextAttribute() {
 		TestStandaloneMockMvcBuilder builder = new TestStandaloneMockMvcBuilder(new PlaceholderController());
 		builder.addPlaceHolderValue("sys.login.ajax", "/foo");
@@ -94,6 +97,15 @@ public class StandaloneMockMvcBuilderTests {
 	public void addFilterPatternContainsNull() {
 		StandaloneMockMvcBuilder builder = MockMvcBuilders.standaloneSetup(new PersonController());
 		builder.addFilter(new ContinueFilter(), (String) null);
+	}
+
+	@Test  // SPR-13375
+	public void springHandlerInstantiator() {
+		TestStandaloneMockMvcBuilder builder = new TestStandaloneMockMvcBuilder(new PersonController());
+		builder.build();
+		SpringHandlerInstantiator instantiator = new SpringHandlerInstantiator(builder.wac.getAutowireCapableBeanFactory());
+		JsonSerializer serializer = instantiator.serializerInstance(null, null, UnknownSerializer.class);
+		assertNotNull(serializer);
 	}
 
 
