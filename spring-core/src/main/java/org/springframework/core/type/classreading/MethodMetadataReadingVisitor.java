@@ -122,7 +122,7 @@ public class MethodMetadataReadingVisitor extends MethodVisitor implements Metho
 	public AnnotationAttributes getAnnotationAttributes(String annotationName, boolean classValuesAsString) {
 		AnnotationAttributes raw = AnnotationReadingVisitorUtils.getMergedAnnotationAttributes(
 				this.attributesMap, this.metaAnnotationMap, annotationName);
-		return (AnnotationReadingVisitorUtils.convertClassValues(this.classLoader, raw, classValuesAsString));
+		return AnnotationReadingVisitorUtils.convertClassValues(this.classLoader, raw, classValuesAsString);
 	}
 
 	@Override

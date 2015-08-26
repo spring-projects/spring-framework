@@ -105,8 +105,8 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 
 	public UndertowXhrTransport(OptionMap optionMap) throws IOException {
 		Assert.notNull(optionMap, "OptionMap is required");
-		this.httpClient = UndertowClient.getInstance();
 		this.optionMap = optionMap;
+		this.httpClient = UndertowClient.getInstance();
 		this.worker = Xnio.getInstance().createWorker(optionMap);
 		this.bufferPool = new ByteBufferSlicePool(1048, 1048);
 	}
@@ -369,7 +369,6 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 		private final SettableListenableFuture<WebSocketSession> connectFuture;
 
 		private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
 
 		public SockJsResponseListener(TransportRequest request, ClientConnection connection, URI url,
 				HttpHeaders headers, XhrClientSockJsSession sockJsSession,
