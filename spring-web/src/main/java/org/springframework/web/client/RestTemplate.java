@@ -60,6 +60,11 @@ import org.springframework.web.util.UriTemplateHandler;
  * It handles HTTP connections, leaving application code to provide URLs
  * (with possible template variables) and extract results.
  *
+ * <p><strong>Note:</strong> by default the RestTemplate relies on standard JDK
+ * facilities to establish HTTP connections. You can switch to use a different
+ * HTTP library such as Apache HttpComponents, Netty, and OkHttp through the
+ * {@link #setRequestFactory} property.
+ *
  * <p>The main entry points of this template are the methods named after the six main HTTP methods:
  * <table>
  * <tr><th>HTTP method</th><th>RestTemplate methods</th></tr>

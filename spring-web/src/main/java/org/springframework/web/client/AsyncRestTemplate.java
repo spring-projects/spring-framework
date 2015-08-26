@@ -63,6 +63,11 @@ import org.springframework.web.util.UriTemplateHandler;
  * {@linkplain #setMessageConverters(List) message converters} with this
  * {@code RestTemplate}.
  *
+ * <p><strong>Note:</strong> by default {@code AsyncRestTemplate} relies on
+ * standard JDK facilities to establish HTTP connections. You can switch to use
+ * a different HTTP library such as Apache HttpComponents, Netty, and OkHttp by
+ * using a constructor accepting an {@link AsyncClientHttpRequestFactory}.
+ *
  * <p>For more information, please refer to the {@link RestTemplate} API documentation.
  *
  * @author Arjen Poutsma
