@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 */
 	private final static Collection<CacheOperation> NULL_CACHING_ATTRIBUTE = Collections.emptyList();
 
+
 	/**
 	 * Logger available to subclasses.
 	 * <p>As this base class is not marked Serializable, the logger will be recreated
@@ -71,8 +72,9 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 * <p>As this base class is not marked Serializable, the cache will be recreated
 	 * after serialization - provided that the concrete subclass is Serializable.
 	 */
-	final Map<Object, Collection<CacheOperation>> attributeCache =
+	private final Map<Object, Collection<CacheOperation>> attributeCache =
 			new ConcurrentHashMap<Object, Collection<CacheOperation>>(1024);
+
 
 	/**
 	 * Determine the caching attribute for this method invocation.
@@ -84,29 +86,22 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	 */
 	@Override
 	public Collection<CacheOperation> getCacheOperations(Method method, Class<?> targetClass) {
-		// First, see if we have a cached value.
 		Object cacheKey = getCacheKey(method, targetClass);
 		Collection<CacheOperation> cached = this.attributeCache.get(cacheKey);
+
 		if (cached != null) {
-			if (cached == NULL_CACHING_ATTRIBUTE) {
-				return null;
-			}
-			// Value will either be canonical value indicating there is no caching attribute,
-			// or an actual caching attribute.
-			return cached;
+			return (cached != NULL_CACHING_ATTRIBUTE ? cached : null);
 		}
 		else {
-			// We need to work it out.
 			Collection<CacheOperation> cacheOps = computeCacheOperations(method, targetClass);
-			// Put it in the cache.
-			if (cacheOps == null) {
-				this.attributeCache.put(cacheKey, NULL_CACHING_ATTRIBUTE);
-			}
-			else {
+			if (cacheOps != null) {
 				if (logger.isDebugEnabled()) {
 					logger.debug("Adding cacheable method '" + method.getName() + "' with attribute: " + cacheOps);
 				}
 				this.attributeCache.put(cacheKey, cacheOps);
+			}
+			else {
+				this.attributeCache.put(cacheKey, NULL_CACHING_ATTRIBUTE);
 			}
 			return cacheOps;
 		}
@@ -186,4 +181,5 @@ public abstract class AbstractFallbackCacheOperationSource implements CacheOpera
 	protected boolean allowPublicMethodsOnly() {
 		return false;
 	}
+
 }
