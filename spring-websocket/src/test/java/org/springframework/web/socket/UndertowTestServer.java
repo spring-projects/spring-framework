@@ -38,7 +38,6 @@ import org.springframework.util.SocketUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
 
-import org.xnio.ByteBufferSlicePool;
 import org.xnio.OptionMap;
 import org.xnio.Xnio;
 
@@ -70,6 +69,7 @@ public class UndertowTestServer implements WebSocketTestServer {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void deployConfig(WebApplicationContext wac, Filter... filters) {
 		Assert.state(this.port != -1, "setup() was never called");
 		DispatcherServletInstanceFactory servletFactory = new DispatcherServletInstanceFactory(wac);
@@ -78,7 +78,7 @@ public class UndertowTestServer implements WebSocketTestServer {
 		WebSocketDeploymentInfo info = new WebSocketDeploymentInfo();
 		try {
 			info.setWorker(Xnio.getInstance().createWorker(OptionMap.EMPTY));
-			info.setBuffers(new ByteBufferSlicePool(1024,1024));
+			info.setBuffers(new org.xnio.ByteBufferSlicePool(1024,1024));
 		}
 		catch (IOException ex) {
 			throw new IllegalStateException(ex);

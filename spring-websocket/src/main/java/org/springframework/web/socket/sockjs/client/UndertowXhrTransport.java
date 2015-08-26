@@ -35,14 +35,11 @@ import io.undertow.util.HeaderMap;
 import io.undertow.util.HttpString;
 import io.undertow.util.Methods;
 import io.undertow.util.StringReadChannelListener;
-import org.xnio.ByteBufferSlicePool;
 import org.xnio.ChannelListener;
 import org.xnio.ChannelListeners;
 import org.xnio.IoUtils;
 import org.xnio.OptionMap;
 import org.xnio.Options;
-import org.xnio.Pool;
-import org.xnio.Pooled;
 import org.xnio.Xnio;
 import org.xnio.XnioWorker;
 import org.xnio.channels.StreamSinkChannel;
@@ -96,19 +93,21 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 
 	private final XnioWorker worker;
 
-	private final Pool<ByteBuffer> bufferPool;
+	@SuppressWarnings("deprecation")
+	private final org.xnio.Pool<ByteBuffer> bufferPool;
 
 
 	public UndertowXhrTransport() throws IOException {
 		this(OptionMap.builder().parse(Options.WORKER_NAME, "SockJSClient").getMap());
 	}
 
+	@SuppressWarnings("deprecation")
 	public UndertowXhrTransport(OptionMap optionMap) throws IOException {
 		Assert.notNull(optionMap, "OptionMap is required");
 		this.optionMap = optionMap;
 		this.httpClient = UndertowClient.getInstance();
 		this.worker = Xnio.getInstance().createWorker(optionMap);
-		this.bufferPool = new ByteBufferSlicePool(1048, 1048);
+		this.bufferPool = new org.xnio.ByteBufferSlicePool(1048, 1048);
 	}
 
 
@@ -306,6 +305,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 			public void completed(ClientExchange result) {
 				result.setResponseListener(new ClientCallback<ClientExchange>() {
 					@Override
+					@SuppressWarnings("deprecation")
 					public void completed(final ClientExchange result) {
 						responses.add(result.getResponse());
 						new StringReadChannelListener(result.getConnection().getBufferPool()) {
@@ -389,6 +389,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 		}
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public void handleEvent(StreamSourceChannel channel) {
 			if (this.session.isDisconnected()) {
 				if (logger.isDebugEnabled()) {
@@ -398,7 +399,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTra
 				throw new SockJsException("Session closed.", this.session.getId(), null);
 			}
 
-			Pooled<ByteBuffer> pooled = this.connection.getBufferPool().allocate();
+			org.xnio.Pooled<ByteBuffer> pooled = this.connection.getBufferPool().allocate();
 			try {
 				int r;
 				do {
