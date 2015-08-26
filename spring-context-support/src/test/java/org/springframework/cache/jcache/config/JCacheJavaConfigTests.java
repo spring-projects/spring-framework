@@ -61,10 +61,12 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 		return new AnnotationConfigApplicationContext(EnableCachingConfig.class);
 	}
 
+
 	@Test
 	public void fullCachingConfig() throws Exception {
 		AnnotationConfigApplicationContext context =
 				new AnnotationConfigApplicationContext(FullCachingConfig.class);
+
 		DefaultJCacheOperationSource cos = context.getBean(DefaultJCacheOperationSource.class);
 		assertSame(context.getBean(KeyGenerator.class), cos.getKeyGenerator());
 		assertSame(context.getBean("cacheResolver", CacheResolver.class),
@@ -102,16 +104,15 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 	}
 
 	@Test
-	public void exceptionCacheResolverFallbacksToMainOne() {
-		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
-				NoExceptionCacheResolverConfig.class);
+	public void exceptionCacheResolverLazilyRequired() {
+		ConfigurableApplicationContext context =
+				new AnnotationConfigApplicationContext(NoExceptionCacheResolverConfig.class);
+
 		try {
 			DefaultJCacheOperationSource cos = context.getBean(DefaultJCacheOperationSource.class);
 			assertSame(context.getBean("cacheResolver"), cos.getCacheResolver());
-			assertNull(cos.getExceptionCacheResolver());
 
 			JCacheableService<?> service = context.getBean(JCacheableService.class);
-
 			service.cache("id");
 
 			// This call requires the cache manager to be set
@@ -150,10 +151,10 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 		}
 	}
 
+
 	@Configuration
 	@EnableCaching
 	public static class FullCachingConfig implements JCacheConfigurer {
-
 
 		@Override
 		@Bean
@@ -186,6 +187,7 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 		}
 	}
 
+
 	@Configuration
 	@EnableCaching
 	public static class EmptyConfigSupportConfig extends JCacheConfigurerSupport {
@@ -194,6 +196,7 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 			return new NoOpCacheManager();
 		}
 	}
+
 
 	@Configuration
 	@EnableCaching
@@ -223,6 +226,7 @@ public class JCacheJavaConfigTests extends AbstractJCacheAnnotationTests {
 			return new NamedCacheResolver(cacheManager(), "exception");
 		}
 	}
+
 
 	@Configuration
 	@EnableCaching
