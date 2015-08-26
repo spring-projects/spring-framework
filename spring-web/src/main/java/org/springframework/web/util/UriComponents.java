@@ -219,6 +219,9 @@ public abstract class UriComponents implements Serializable {
 		if (source.indexOf('{') == -1) {
 			return source;
 		}
+		if (source.indexOf(':') != -1) {
+			source = sanitizeSource(source);
+		}
 		Matcher matcher = NAMES_PATTERN.matcher(source);
 		StringBuffer sb = new StringBuffer();
 		while (matcher.find()) {
@@ -233,6 +236,27 @@ public abstract class UriComponents implements Serializable {
 			matcher.appendReplacement(sb, replacement);
 		}
 		matcher.appendTail(sb);
+		return sb.toString();
+	}
+
+	/**
+	 * Remove nested "{}" such as in URI vars with regular expressions.
+	 */
+	private static String sanitizeSource(String source) {
+		int level = 0;
+		StringBuilder sb = new StringBuilder();
+		for (char c : source.toCharArray()) {
+			if (c == '{') {
+				level++;
+			}
+			if (c == '}') {
+				level--;
+			}
+			if (level > 1 || (level == 1 && c == '}')) {
+				continue;
+			}
+			sb.append(c);
+		}
 		return sb.toString();
 	}
 

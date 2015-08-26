@@ -16,10 +16,6 @@
 
 package org.springframework.web.util;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.web.util.UriComponentsBuilder.*;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
@@ -27,8 +23,16 @@ import java.io.ObjectOutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.Test;
+
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 /**
  * @author Arjen Poutsma
@@ -80,6 +84,16 @@ public class UriComponentsTests {
 		uriComponents = uriComponents.expand("1 2", "3 4");
 		assertEquals("/1 2 3 4", uriComponents.getPath());
 		assertEquals("http://example.com/1 2 3 4", uriComponents.toUriString());
+	}
+
+	// SPR-13311
+
+	@Test
+	public void expandWithRegexVar() {
+		String template = "/myurl/{name:[a-z]{1,5}}/show";
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(template).build();
+		uriComponents = uriComponents.expand(Collections.singletonMap("name", "test"));
+		assertEquals("/myurl/test/show", uriComponents.getPath());
 	}
 
 	// SPR-12123
