@@ -1374,6 +1374,19 @@ Or alternatively an `@SubscribeMapping` method can be annotated with `@SendTo`
 in which case the resulting message is sent to the `"brokerChannel"` using
 the specified target destination.
 
+[NOTE]
+====
+In some cases a controller may need to be decorated with an AOP proxy at runtime.
+One example is if you choose to have `@Transactional` annotations directly on the
+controller. When this is the case, for controllers specifically, we recommend
+using class-based proxying. This is typically the default choice with controllers.
+However if a controller must implement an interface that is not a Spring Context
+callback (e.g. `InitializingBean`, `*Aware`, etc), you may need to explicitly
+configure class-based proxying. For example with `<tx:annotation-driven />`,
+change to `<tx:annotation-driven proxy-target-class="true" />`.
+====
+
+
 
 [[websocket-stomp-handle-send]]
 === Sending Messages

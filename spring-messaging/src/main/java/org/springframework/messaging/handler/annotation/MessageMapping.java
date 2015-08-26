@@ -77,6 +77,11 @@ import org.springframework.messaging.Message;
  * have the message directed to a specific user if connected. The return value is
  * converted with a {@link org.springframework.messaging.converter.MessageConverter}.
  *
+ * <p><b>NOTE:</b> When using controller interfaces (e.g. for AOP proxying),
+ * make sure to consistently put <i>all</i> your mapping annotations - such as
+ * {@code @MessageMapping} and {@code @SubscribeMapping} - on
+ * the controller <i>interface</i> rather than on the implementation class.
+ *
  * @author Rossen Stoyanchev
  * @since 4.0
  * @see org.springframework.messaging.simp.annotation.support.SimpAnnotationMethodMessageHandler
