@@ -3908,12 +3908,12 @@ to a degree:
 
 Which setup option should you use?
 
-The __"webAppContextSetup"__ loads the actual Spring MVC configuration resulting in a
+The __"webAppContextSetup"__ loads your actual Spring MVC configuration resulting in a
 more complete integration test. Since the __TestContext framework__ caches the loaded
-Spring configuration, it helps to keep tests running fast even as more tests get added.
-Furthermore, you can inject mock services into controllers through Spring configuration,
-in order to remain focused on testing the web layer. Here is an example of declaring a
-mock service with Mockito:
+Spring configuration, it helps keep tests running fast, even as you introduce more tests
+in your test suite. Furthermore, you can inject mock services into controllers through
+Spring configuration in order to remain focused on testing the web layer. Here is an
+example of declaring a mock service with Mockito:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -3923,7 +3923,7 @@ mock service with Mockito:
 	</bean>
 ----
 
-Then you can inject the mock service into the test in order set up and verify
+You can then inject the mock service into the test in order set up and verify
 expectations:
 
 [source,java,indent=0]
@@ -3948,17 +3948,17 @@ expectations:
 ----
 
 The __"standaloneSetup"__ on the other hand is a little closer to a unit test. It tests
-one controller at a time, the controller can be injected with mock dependencies
-manually, and it doesn't involve loading Spring configuration. Such tests are more
-focused in style and make it easier to see which controller is being tested, whether any
-specific Spring MVC configuration is required to work, and so on. The "standaloneSetup"
-is also a very convenient way to write ad-hoc tests to verify some behavior or to debug
-an issue.
+one controller at a time: the controller can be injected with mock dependencies manually,
+and it doesn't involve loading Spring configuration. Such tests are more focused on style
+and make it easier to see which controller is being tested, whether any specific Spring
+MVC configuration is required to work, and so on. The "standaloneSetup" is also a very
+convenient way to write ad-hoc tests to verify specific behavior or to debug an issue.
 
-Just like with integration vs unit testing, there is no right or wrong answer. Using the
-"standaloneSetup" does imply the need for some additional "webAppContextSetup" tests to
-verify the Spring MVC configuration. Alternatively, you can decide to write all tests with
-"webAppContextSetup" and always test against actual Spring MVC configuration.
+Just like with any "integration vs. unit testing" debate, there is no right or wrong
+answer. However, using the "standaloneSetup" does imply the need for additional
+"webAppContextSetup" tests in order to verify your Spring MVC configuration.
+Alternatively, you may choose to write all tests with "webAppContextSetup" in order to
+always test against your actual Spring MVC configuration.
 
 [[spring-mvc-test-server-performing-requests]]
 ===== Performing Requests
@@ -4033,7 +4033,7 @@ properties:
 
 The above properties will affect every request performed through the `MockMvc` instance.
 If the same property is also specified on a given request, it overrides the default value.
-That is why the HTTP method and URI in default request don't matter since they must be
+That is why the HTTP method and URI in the default request don't matter since they must be
 specified on every request.
 
 [[spring-mvc-test-server-defining-expectations]]
