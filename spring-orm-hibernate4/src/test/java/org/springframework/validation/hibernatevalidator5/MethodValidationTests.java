@@ -43,6 +43,7 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @since 4.1
  */
+@SuppressWarnings("rawtypes")
 public class MethodValidationTests {
 
 	@Test
@@ -68,6 +69,7 @@ public class MethodValidationTests {
 	}
 
 
+	@SuppressWarnings("unchecked")
 	private void doTestProxyValidation(MyValidInterface proxy) {
 		assertNotNull(proxy.myValidMethod("value", 5));
 		try {
