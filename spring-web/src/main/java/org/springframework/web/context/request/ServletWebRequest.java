@@ -27,6 +27,7 @@ import javax.servlet.http.HttpSession;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -53,6 +54,10 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	private static final String METHOD_GET = "GET";
 
 	private static final String METHOD_HEAD = "HEAD";
+
+	/** Checking for Servlet 3.0+ HttpServletResponse.getStatus() */
+	private static final boolean responseGetStatusAvailable =
+			ClassUtils.hasMethod(HttpServletResponse.class, "getStatus");
 
 
 	private boolean notModified = false;
@@ -173,7 +178,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	public boolean checkNotModified(long lastModifiedTimestamp) {
 		HttpServletResponse response = getResponse();
 		if (lastModifiedTimestamp >= 0 && !this.notModified) {
-			if (response == null || HttpStatus.valueOf(response.getStatus()).is2xxSuccessful()) {
+			if (isCompatibleWithConditionalRequests(response)) {
 				this.notModified = isTimestampNotModified(lastModifiedTimestamp);
 				if (response != null) {
 					if (this.notModified && supportsNotModifiedStatus()) {
@@ -186,6 +191,12 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 			}
 		}
 		return this.notModified;
+	}
+
+	private boolean isCompatibleWithConditionalRequests(HttpServletResponse response) {
+		return response == null
+				|| !responseGetStatusAvailable
+				|| HttpStatus.valueOf(response.getStatus()).is2xxSuccessful();
 	}
 
 	@SuppressWarnings("deprecation")
@@ -215,7 +226,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	public boolean checkNotModified(String etag) {
 		HttpServletResponse response = getResponse();
 		if (StringUtils.hasLength(etag) && !this.notModified) {
-			if (response == null || HttpStatus.valueOf(response.getStatus()).is2xxSuccessful()) {
+			if (isCompatibleWithConditionalRequests(response)) {
 				etag = addEtagPadding(etag);
 				this.notModified = isETagNotModified(etag);
 				if (response != null) {
@@ -265,7 +276,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	public boolean checkNotModified(String etag, long lastModifiedTimestamp) {
 		HttpServletResponse response = getResponse();
 		if (StringUtils.hasLength(etag) && !this.notModified) {
-			if (response == null || HttpStatus.valueOf(response.getStatus()).is2xxSuccessful()) {
+			if (isCompatibleWithConditionalRequests(response)) {
 				etag = addEtagPadding(etag);
 				this.notModified = isETagNotModified(etag) && isTimestampNotModified(lastModifiedTimestamp);
 				if (response != null) {
