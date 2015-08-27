@@ -46,7 +46,9 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Juergen Hoeller
  * @since 25.08.2003
+ * @deprecated as of Spring 4.2, in favor of Commons DBCP 2.x and JDBC 4.x
  */
+@Deprecated
 public class CommonsDbcpNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
 	private static final String GET_INNERMOST_DELEGATE_METHOD_NAME = "getInnermostDelegate";
