@@ -30,6 +30,7 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Sam Brannen
  */
+@SuppressWarnings("deprecation")
 public class Log4jConfigurerTests {
 
 	@Test
