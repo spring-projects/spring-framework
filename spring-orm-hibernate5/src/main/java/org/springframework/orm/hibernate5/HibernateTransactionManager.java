@@ -641,7 +641,7 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 		}
 
 		Session session = txObject.getSessionHolder().getSession();
-		if (this.prepareConnection && session.isConnected() && isSameConnectionForEntireSession(session)) {
+		if (this.prepareConnection && isPhysicallyConnected(session)) {
 			// We're running with connection release mode "on_close": We're able to reset
 			// the isolation level and/or read-only flag of the JDBC Connection here.
 			// Else, we need to rely on the connection pool to perform proper cleanup.
@@ -704,8 +704,27 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	 * @see ConnectionReleaseMode#ON_CLOSE
 	 */
 	protected boolean isSameConnectionForEntireSession(Session session) {
-		// TODO: The best we can do is to assume we're safe.
-		return true;
+		if (!(session instanceof SessionImplementor)) {
+			// The best we can do is to assume we're safe.
+			return true;
+		}
+		ConnectionReleaseMode releaseMode =
+				((SessionImplementor) session).getJdbcCoordinator().getConnectionReleaseMode();
+		return ConnectionReleaseMode.ON_CLOSE.equals(releaseMode);
+	}
+
+	/**
+	 * Determine whether the given Session is (still) physically connected
+	 * to the database, that is, holds an active JDBC Connection internally.
+	 * @param session the Hibernate Session to check
+	 * @see #isSameConnectionForEntireSession(Session)
+	 */
+	protected boolean isPhysicallyConnected(Session session) {
+		if (!(session instanceof SessionImplementor)) {
+			// The best we can do is to check whether we're logically connected.
+			return session.isConnected();
+		}
+		return ((SessionImplementor) session).getJdbcCoordinator().getLogicalConnection().isPhysicallyConnected();
 	}
 
 
