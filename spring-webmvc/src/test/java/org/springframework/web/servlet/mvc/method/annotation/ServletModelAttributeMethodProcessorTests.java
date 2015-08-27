@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.tests.sample.beans.TestBean;
@@ -43,6 +44,7 @@ import static org.junit.Assert.*;
  * Also see org.springframework.web.method.annotation.support.ModelAttributeMethodProcessorTests
  *
  * @author Rossen Stoyanchev
+ * @author Kazuki Shimizu
  */
 public class ServletModelAttributeMethodProcessorTests {
 
@@ -70,9 +72,9 @@ public class ServletModelAttributeMethodProcessorTests {
 		Method method = getClass().getDeclaredMethod("modelAttribute",
 				TestBean.class, TestBeanWithoutStringConstructor.class, Optional.class);
 
-		this.testBeanModelAttr = new MethodParameter(method, 0);
-		this.testBeanWithoutStringConstructorModelAttr = new MethodParameter(method, 1);
-		this.testBeanWithOptionalModelAttr = new MethodParameter(method, 2);
+		this.testBeanModelAttr = new SynthesizingMethodParameter(method, 0);
+		this.testBeanWithoutStringConstructorModelAttr = new SynthesizingMethodParameter(method, 1);
+		this.testBeanWithOptionalModelAttr = new SynthesizingMethodParameter(method, 2);
 
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(new DefaultConversionService());

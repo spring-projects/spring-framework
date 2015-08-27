@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.validation.BindException;
@@ -42,12 +43,14 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 import static org.junit.Assert.*;
+import static org.hamcrest.core.Is.*;
 import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture with {@link ModelAttributeMethodProcessor}.
  *
  * @author Rossen Stoyanchev
+ * @author Kazuki Shimizu
  */
 public class ModelAttributeMethodProcessorTests {
 
@@ -63,11 +66,15 @@ public class ModelAttributeMethodProcessorTests {
 
 	private MethodParameter paramNonSimpleType;
 
+	private MethodParameter paramPreventBindingAttr;
+
 	private MethodParameter returnParamNamedModelAttr;
 
 	private MethodParameter returnParamNonSimpleType;
 
 	private ModelAndViewContainer mavContainer;
+
+	private MockHttpServletRequest mockHttpServletRequest;
 
 	private NativeWebRequest webRequest;
 
@@ -76,20 +83,22 @@ public class ModelAttributeMethodProcessorTests {
 		processor = new ModelAttributeMethodProcessor(false);
 
 		Method method = ModelAttributeHandler.class.getDeclaredMethod("modelAttribute",
-				TestBean.class, Errors.class, int.class, TestBean.class, TestBean.class);
+				TestBean.class, Errors.class, int.class, TestBean.class, TestBean.class, TestBean.class);
 
-		paramNamedValidModelAttr = new MethodParameter(method, 0);
-		paramErrors = new MethodParameter(method, 1);
-		paramInt = new MethodParameter(method, 2);
-		paramModelAttr = new MethodParameter(method, 3);
-		paramNonSimpleType = new MethodParameter(method, 4);
+		paramNamedValidModelAttr = new SynthesizingMethodParameter(method, 0);
+		paramErrors = new SynthesizingMethodParameter(method, 1);
+		paramInt = new SynthesizingMethodParameter(method, 2);
+		paramModelAttr = new SynthesizingMethodParameter(method, 3);
+		paramNonSimpleType = new SynthesizingMethodParameter(method, 4);
+		paramPreventBindingAttr = new SynthesizingMethodParameter(method, 5);
 
-		returnParamNamedModelAttr = new MethodParameter(getClass().getDeclaredMethod("annotatedReturnValue"), -1);
-		returnParamNonSimpleType = new MethodParameter(getClass().getDeclaredMethod("notAnnotatedReturnValue"), -1);
+		returnParamNamedModelAttr = new SynthesizingMethodParameter(getClass().getDeclaredMethod("annotatedReturnValue"), -1);
+		returnParamNonSimpleType = new SynthesizingMethodParameter(getClass().getDeclaredMethod("notAnnotatedReturnValue"), -1);
 
 		mavContainer = new ModelAndViewContainer();
 
-		webRequest = new ServletWebRequest(new MockHttpServletRequest());
+		mockHttpServletRequest = new MockHttpServletRequest();
+		webRequest = new ServletWebRequest(mockHttpServletRequest);
 	}
 
 	@Test
@@ -227,6 +236,44 @@ public class ModelAttributeMethodProcessorTests {
 				dataBinder.getBindingResult(), mavContainer.getModel().values().toArray()[2]);
 	}
 
+	// SPR-13402
+	@Test
+	public void resolveArgumentWithBinding() throws Exception {
+
+		TestBean target = new TestBean();
+		target.setAge(30);
+		mavContainer.addAttribute("testBean", target);
+
+		WebDataBinderFactory factory = new InitBinderDataBinderFactory(null, null);
+		mockHttpServletRequest.addParameter("age", "40");
+
+		Object resolvedObject = processor.resolveArgument(paramModelAttr, mavContainer, webRequest, factory);
+
+		TestBean resolvedTestBean = TestBean.class.cast(resolvedObject);
+
+		assertThat(resolvedTestBean.getAge(), is(40));
+
+	}
+
+	// SPR-13402
+	@Test
+	public void resolveArgumentWithPreventBinding() throws Exception {
+
+		TestBean target = new TestBean();
+		target.setAge(30);
+		mavContainer.addAttribute("preventBindingAttr", target);
+
+		WebDataBinderFactory factory = new InitBinderDataBinderFactory(null, null);
+		mockHttpServletRequest.addParameter("age", "40");
+
+		Object resolvedObject = processor.resolveArgument(paramPreventBindingAttr, mavContainer, webRequest, factory);
+
+		TestBean resolvedTestBean = TestBean.class.cast(resolvedObject);
+
+		assertThat(resolvedTestBean.getAge(), is(30));
+
+	}
+
 	@Test
 	public void handleAnnotatedReturnValue() throws Exception {
 		processor.handleReturnValue("expected", returnParamNamedModelAttr, mavContainer, webRequest);
@@ -289,7 +336,8 @@ public class ModelAttributeMethodProcessorTests {
 								   Errors errors,
 								   int intArg,
 								   @ModelAttribute TestBean defaultNameAttr,
-								   TestBean notAnnotatedAttr) {
+								   TestBean notAnnotatedAttr,
+								   @ModelAttribute(name = "preventBindingAttr", preventBinding = true) TestBean preventBindingAttr) {
 		}
 	}
 
