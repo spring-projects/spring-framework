@@ -72,21 +72,21 @@ public class MethodValidationTests {
 		assertNotNull(proxy.myValidMethod("value", 5));
 		try {
 			assertNotNull(proxy.myValidMethod("value", 15));
-			fail("Should have thrown MethodConstraintViolationException");
+			fail("Should have thrown ValidationException");
 		}
 		catch (javax.validation.ValidationException ex) {
 			// expected
 		}
 		try {
 			assertNotNull(proxy.myValidMethod(null, 5));
-			fail("Should have thrown MethodConstraintViolationException");
+			fail("Should have thrown ValidationException");
 		}
 		catch (javax.validation.ValidationException ex) {
 			// expected
 		}
 		try {
 			assertNotNull(proxy.myValidMethod("value", 0));
-			fail("Should have thrown MethodConstraintViolationException");
+			fail("Should have thrown ValidationException");
 		}
 		catch (javax.validation.ValidationException ex) {
 			// expected
@@ -95,14 +95,23 @@ public class MethodValidationTests {
 		proxy.myValidAsyncMethod("value", 5);
 		try {
 			proxy.myValidAsyncMethod("value", 15);
-			fail("Should have thrown MethodConstraintViolationException");
+			fail("Should have thrown ValidationException");
 		}
 		catch (javax.validation.ValidationException ex) {
 			// expected
 		}
 		try {
 			proxy.myValidAsyncMethod(null, 5);
-			fail("Should have thrown MethodConstraintViolationException");
+			fail("Should have thrown ValidationException");
+		}
+		catch (javax.validation.ValidationException ex) {
+			// expected
+		}
+
+		assertEquals("myValue", proxy.myGenericMethod("myValue"));
+		try {
+			proxy.myGenericMethod(null);
+			fail("Should have thrown ValidationException");
 		}
 		catch (javax.validation.ValidationException ex) {
 			// expected
@@ -111,7 +120,7 @@ public class MethodValidationTests {
 
 
 	@MyStereotype
-	public static class MyValidBean implements MyValidInterface {
+	public static class MyValidBean implements MyValidInterface<String> {
 
 		@Override
 		public Object myValidMethod(String arg1, int arg2) {
@@ -121,14 +130,22 @@ public class MethodValidationTests {
 		@Override
 		public void myValidAsyncMethod(String arg1, int arg2) {
 		}
+
+		@Override
+		public String myGenericMethod(String value) {
+			return value;
+		}
 	}
 
 
-	public interface MyValidInterface {
+	public interface MyValidInterface<T> {
 
 		@NotNull Object myValidMethod(@NotNull(groups = MyGroup.class) String arg1, @Max(10) int arg2);
 
-		@Async void myValidAsyncMethod(@NotNull(groups = MyGroup.class) String arg1, @Max(10) int arg2);
+		@MyValid
+		@Async void myValidAsyncMethod(@NotNull(groups = OtherGroup.class) String arg1, @Max(10) int arg2);
+
+		T myGenericMethod(@NotNull T value);
 	}
 
 
@@ -136,9 +153,19 @@ public class MethodValidationTests {
 	}
 
 
+	public interface OtherGroup {
+	}
+
+
 	@Validated({MyGroup.class, Default.class})
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface MyStereotype {
+	}
+
+
+	@Validated({OtherGroup.class, Default.class})
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface MyValid {
 	}
 
 }
