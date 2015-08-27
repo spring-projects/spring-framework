@@ -75,7 +75,9 @@ import org.springframework.util.xml.StaxUtils;
  * @see #setValidating
  * @see #setXmlOptions
  * @see XmlOptionsFactoryBean
+ * @deprecated as of Spring 4.2, following the XMLBeans retirement at Apache
  */
+@Deprecated
 public class XmlBeansMarshaller extends AbstractMarshaller {
 
 	private XmlOptions xmlOptions;
