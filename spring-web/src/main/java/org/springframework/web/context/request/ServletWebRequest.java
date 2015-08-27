@@ -55,10 +55,10 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 	private static final String METHOD_HEAD = "HEAD";
 
+
 	/** Checking for Servlet 3.0+ HttpServletResponse.getStatus() */
 	private static final boolean responseGetStatusAvailable =
 			ClassUtils.hasMethod(HttpServletResponse.class, "getStatus");
-
 
 	private boolean notModified = false;
 
@@ -184,19 +184,13 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 					if (this.notModified && supportsNotModifiedStatus()) {
 						response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 					}
-					if(response.getHeader(HEADER_LAST_MODIFIED) == null) {
+					if (response.getHeader(HEADER_LAST_MODIFIED) == null) {
 						response.setDateHeader(HEADER_LAST_MODIFIED, lastModifiedTimestamp);
 					}
 				}
 			}
 		}
 		return this.notModified;
-	}
-
-	private boolean isCompatibleWithConditionalRequests(HttpServletResponse response) {
-		return response == null
-				|| !responseGetStatusAvailable
-				|| HttpStatus.valueOf(response.getStatus()).is2xxSuccessful();
 	}
 
 	@SuppressWarnings("deprecation")
@@ -233,13 +227,21 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 					if (this.notModified && supportsNotModifiedStatus()) {
 						response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 					}
-					if(response.getHeader(HEADER_ETAG) == null) {
+					if (response.getHeader(HEADER_ETAG) == null) {
 						response.setHeader(HEADER_ETAG, etag);
 					}
 				}
 			}
 		}
 		return this.notModified;
+	}
+
+	private boolean isCompatibleWithConditionalRequests(HttpServletResponse response) {
+		if (response == null || !responseGetStatusAvailable) {
+			// Can't check response.getStatus() - let's assume we're good
+			return true;
+		}
+		return HttpStatus.valueOf(response.getStatus()).is2xxSuccessful();
 	}
 
 	private String addEtagPadding(String etag) {
@@ -283,10 +285,10 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 					if (this.notModified && supportsNotModifiedStatus()) {
 						response.setStatus(HttpServletResponse.SC_NOT_MODIFIED);
 					}
-					if(response.getHeader(HEADER_ETAG) == null) {
+					if (response.getHeader(HEADER_ETAG) == null) {
 						response.setHeader(HEADER_ETAG, etag);
 					}
-					if(response.getHeader(HEADER_LAST_MODIFIED) == null) {
+					if (response.getHeader(HEADER_LAST_MODIFIED) == null) {
 						response.setDateHeader(HEADER_LAST_MODIFIED, lastModifiedTimestamp);
 					}
 				}

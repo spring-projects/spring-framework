@@ -76,13 +76,13 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	private static final boolean undertowWsPresent = ClassUtils.isPresent(
 			"io.undertow.websockets.jsr.ServerWebSocketContainer", classLoader);
 
-	private static final boolean glassFishWsPresent = ClassUtils.isPresent(
+	private static final boolean glassfishWsPresent = ClassUtils.isPresent(
 			"org.glassfish.tyrus.servlet.TyrusHttpUpgradeHandler", classLoader);
 
-	private static final boolean webLogicWsPresent = ClassUtils.isPresent(
+	private static final boolean weblogicWsPresent = ClassUtils.isPresent(
 			"weblogic.websocket.tyrus.TyrusServletWriter", classLoader);
 
-	private static final boolean webSphereWsPresent = ClassUtils.isPresent(
+	private static final boolean websphereWsPresent = ClassUtils.isPresent(
 			"com.ibm.websphere.wsoc.WsWsocServerContainer", classLoader);
 
 
@@ -125,13 +125,13 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 		else if (undertowWsPresent) {
 			className = "org.springframework.web.socket.server.standard.UndertowRequestUpgradeStrategy";
 		}
-		else if (glassFishWsPresent) {
+		else if (glassfishWsPresent) {
 			className = "org.springframework.web.socket.server.standard.GlassFishRequestUpgradeStrategy";
 		}
-		else if (webLogicWsPresent) {
+		else if (weblogicWsPresent) {
 			className = "org.springframework.web.socket.server.standard.WebLogicRequestUpgradeStrategy";
 		}
-		else if (webSphereWsPresent) {
+		else if (websphereWsPresent) {
 			className = "org.springframework.web.socket.server.standard.WebSphereRequestUpgradeStrategy";
 		}
 		else {
@@ -368,7 +368,7 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 
 	/**
 	 * Filter the list of requested WebSocket extensions.
-	 * <p>As of 4.1 the default implementation of this method filters the list to
+	 * <p>As of 4.1, the default implementation of this method filters the list to
 	 * leave only extensions that are both requested and supported.
 	 * @param request the current request
 	 * @param requestedExtensions the list of extensions requested by the client

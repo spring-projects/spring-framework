@@ -38,7 +38,6 @@ import org.springframework.web.socket.server.RequestUpgradeStrategy;
  */
 public class DefaultHandshakeHandler extends AbstractHandshakeHandler implements ServletContextAware {
 
-
 	public DefaultHandshakeHandler() {
 	}
 
