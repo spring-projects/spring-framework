@@ -2614,9 +2614,8 @@ name(s) could be customized through the `jsonpParameterNames` property.
 The `MappingJackson2XmlView` uses the
 https://github.com/FasterXML/jackson-dataformat-xml[Jackson XML extension]'s `XmlMapper`
 to render the response content as XML. If the model contains multiples entries, the
-object to be serialized should be set explicitly using `MappingJackson2XmlView`'s
-`modelKey` bean property. If the model contains a single entry, it will be serialized
-automatically.
+object to be serialized should be set explicitly using the `modelKey` bean property.
+If the model contains a single entry, it will be serialized automatically.
 
 XML mapping can be customized as needed through the use of JAXB or Jackson's provided
 annotations. When further control is needed, a custom `XmlMapper` can be injected
