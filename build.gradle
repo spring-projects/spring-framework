@@ -423,7 +423,7 @@ project("spring-aop") {
 		compile("aopalliance:aopalliance:1.0")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("commons-pool:commons-pool:1.6")
-		optional("org.apache.commons:commons-pool2:2.4.1")
+		optional("org.apache.commons:commons-pool2:2.4.2")
 		optional("com.jamonapi:jamon:2.81")
 	}
 }
@@ -488,7 +488,7 @@ project("spring-context") {
 		testCompile("javax.inject:javax.inject-tck:1")
 		testCompile("org.javamoney:moneta:1.0")
 		testCompile("commons-dbcp:commons-dbcp:1.4")
-		testCompile("org.apache.commons:commons-pool2:2.4.1")
+		testCompile("org.apache.commons:commons-pool2:2.4.2")
 		testCompile("org.slf4j:slf4j-api:${slf4jVersion}")
 	}
 }
@@ -709,7 +709,7 @@ project("spring-web") {
 		optional("org.apache.httpcomponents:httpclient:${httpclientVersion}")
 		optional("org.apache.httpcomponents:httpasyncclient:${httpasyncVersion}")
 		optional("io.netty:netty-all:${nettyVersion}")
-		optional("com.squareup.okhttp:okhttp:2.4.0")
+		optional("com.squareup.okhttp:okhttp:2.5.0")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jackson2Version}")
 		optional("com.google.code.gson:gson:${gsonVersion}")
