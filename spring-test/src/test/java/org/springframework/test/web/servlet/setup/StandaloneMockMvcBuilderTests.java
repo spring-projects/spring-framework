@@ -23,8 +23,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.ser.impl.UnknownSerializer;
 import org.junit.Test;
 
 import org.springframework.http.converter.json.SpringHandlerInstantiator;
@@ -37,6 +35,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.ser.impl.UnknownSerializer;
 
 import static org.junit.Assert.*;
 
@@ -100,6 +101,7 @@ public class StandaloneMockMvcBuilderTests {
 	}
 
 	@Test  // SPR-13375
+	@SuppressWarnings("rawtypes")
 	public void springHandlerInstantiator() {
 		TestStandaloneMockMvcBuilder builder = new TestStandaloneMockMvcBuilder(new PersonController());
 		builder.build();

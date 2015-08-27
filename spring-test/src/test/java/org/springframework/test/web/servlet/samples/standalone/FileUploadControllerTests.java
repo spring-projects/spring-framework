@@ -83,7 +83,6 @@ public class FileUploadControllerTests {
 	}
 
 
-	@SuppressWarnings("unused")
 	@Controller
 	private static class MultipartController {
 

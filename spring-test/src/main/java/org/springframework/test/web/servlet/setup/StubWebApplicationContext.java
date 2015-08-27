@@ -370,13 +370,11 @@ class StubWebApplicationContext implements WebApplicationContext {
 		}
 
 		@Override
-		@SuppressWarnings("rawtypes")
 		public Object createBean(Class<?> beanClass, int autowireMode, boolean dependencyCheck) {
 			return BeanUtils.instantiate(beanClass);
 		}
 
 		@Override
-		@SuppressWarnings("rawtypes")
 		public Object autowire(Class<?> beanClass, int autowireMode, boolean dependencyCheck) {
 			return BeanUtils.instantiate(beanClass);
 		}
