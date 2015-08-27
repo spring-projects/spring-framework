@@ -26,7 +26,7 @@ import org.reactivestreams.Subscription;
 import org.springframework.util.Assert;
 
 /**
- * A {@link BlockingQueue} aimed at working with {@code Publisher<ByteBuf>} instances.
+ * A {@link BlockingQueue} aimed at working with {@code Publisher<byte[]>} instances.
  * Mainly meant to bridge between reactive and non-reactive APIs, such as blocking
  * streams.
  *

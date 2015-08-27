@@ -10,18 +10,18 @@ import org.springframework.reactive.util.BlockingSignalQueue;
 
 /**
  * {@code OutputStream} implementation that stores all written bytes, to be retrieved
- * using {@link #toByteBufPublisher()}.
+ * using {@link #toByteArrayPublisher()}.
  * @author Arjen Poutsma
  */
 public class ByteArrayPublisherOutputStream extends OutputStream {
 
-	private final BlockingSignalQueue<byte[]> queue = new BlockingSignalQueue<byte[]>();
+	private final BlockingSignalQueue<byte[]> queue = new BlockingSignalQueue<>();
 
 	/**
 	 * Returns the written data as a {@code Publisher}.
 	 * @return a publisher for the written bytes
 	 */
-	public Publisher<byte[]> toByteBufPublisher() {
+	public Publisher<byte[]> toByteArrayPublisher() {
 		return this.queue.publisher();
 	}
 
