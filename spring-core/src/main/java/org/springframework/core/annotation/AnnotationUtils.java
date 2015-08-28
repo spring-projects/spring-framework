@@ -67,7 +67,9 @@ import org.springframework.util.StringUtils;
  *
  * <p>An annotation is <em>meta-present</em> on an element if the annotation
  * is declared as a meta-annotation on some other annotation which is
- * <em>present</em> on the element.
+ * <em>present</em> on the element. Annotation {@code A} is <em>meta-present</em>
+ * on another annotation if {@code A} is either <em>directly present</em> or
+ * <em>meta-present</em> on the other annotation.
  *
  * <h3>Meta-annotation Support</h3>
  * <p>Most {@code find*()} methods and some {@code get*()} methods in this
@@ -123,11 +125,14 @@ public abstract class AnnotationUtils {
 	private static final Map<Class<?>, Boolean> annotatedInterfaceCache =
 			new ConcurrentReferenceHashMap<Class<?>, Boolean>(256);
 
+	private static final Map<AnnotationCacheKey, Boolean> metaPresentCache =
+			new ConcurrentReferenceHashMap<AnnotationCacheKey, Boolean>(256);
+
 	private static final Map<Class<? extends Annotation>, Boolean> synthesizableCache =
 			new ConcurrentReferenceHashMap<Class<? extends Annotation>, Boolean>(256);
 
-	private static final Map<Class<? extends Annotation>, Map<String, String>> attributeAliasesCache =
-			new ConcurrentReferenceHashMap<Class<? extends Annotation>, Map<String, String>>(256);
+	private static final Map<Class<? extends Annotation>, Map<String, List<String>>> attributeAliasesCache =
+			new ConcurrentReferenceHashMap<Class<? extends Annotation>, Map<String, List<String>>>(256);
 
 	private static final Map<Class<? extends Annotation>, List<Method>> attributeMethodsCache =
 			new ConcurrentReferenceHashMap<Class<? extends Annotation>, List<Method>>(256);
@@ -643,8 +648,22 @@ public abstract class AnnotationUtils {
 	 * @param annotationType the type of annotation to look for
 	 * @return the first matching annotation, or {@code null} if not found
 	 */
-	@SuppressWarnings("unchecked")
 	public static <A extends Annotation> A findAnnotation(Class<?> clazz, Class<A> annotationType) {
+		return findAnnotation(clazz, annotationType, true);
+	}
+
+	/**
+	 * Perform the actual work for {@link #findAnnotation(AnnotatedElement, Class)},
+	 * honoring the {@code synthesize} flag.
+	 * @param clazz the class to look for annotations on; never {@code null}
+	 * @param annotationType the type of annotation to look for
+	 * @param synthesize {@code true} if the result should be
+	 * {@linkplain #synthesizeAnnotation(Annotation) synthesized}
+	 * @return the first matching annotation, or {@code null} if not found
+	 * @since 4.2.1
+	 */
+	@SuppressWarnings("unchecked")
+	private static <A extends Annotation> A findAnnotation(Class<?> clazz, Class<A> annotationType, boolean synthesize) {
 		AnnotationCacheKey cacheKey = new AnnotationCacheKey(clazz, annotationType);
 		A result = (A) findAnnotationCache.get(cacheKey);
 		if (result == null) {
@@ -653,7 +672,7 @@ public abstract class AnnotationUtils {
 				findAnnotationCache.put(cacheKey, result);
 			}
 		}
-		return synthesizeAnnotation(result, clazz);
+		return (synthesize ? synthesizeAnnotation(result, clazz) : result);
 	}
 
 	/**
@@ -831,6 +850,30 @@ public abstract class AnnotationUtils {
 		Assert.notNull(annotationType, "Annotation type must not be null");
 		Assert.notNull(clazz, "Class must not be null");
 		return (clazz.isAnnotationPresent(annotationType) && !isAnnotationDeclaredLocally(annotationType, clazz));
+	}
+
+	/**
+	 * Determine if an annotation of type {@code metaAnnotationType} is
+	 * <em>meta-present</em> on the supplied {@code annotationType}.
+	 * @param annotationType the annotation type to search on; never {@code null}
+	 * @param metaAnnotationType the type of meta-annotation to search for
+	 * @return {@code true} if such an annotation is meta-present
+	 * @since 4.2.1
+	 */
+	public static boolean isAnnotationMetaPresent(Class<? extends Annotation> annotationType,
+			Class<? extends Annotation> metaAnnotationType) {
+
+		AnnotationCacheKey cacheKey = new AnnotationCacheKey(annotationType, metaAnnotationType);
+		Boolean metaPresent = metaPresentCache.get(cacheKey);
+		if (metaPresent != null) {
+			return metaPresent.booleanValue();
+		}
+		metaPresent = Boolean.FALSE;
+		if (findAnnotation(annotationType, metaAnnotationType, false) != null) {
+			metaPresent = Boolean.TRUE;
+		}
+		metaPresentCache.put(cacheKey, metaPresent);
+		return metaPresent.booleanValue();
 	}
 
 	/**
@@ -1363,33 +1406,39 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * Get a map of all attribute alias pairs, declared via {@code @AliasFor}
+	 * Get a map of all attribute aliases declared via {@code @AliasFor}
 	 * in the supplied annotation type.
 	 * <p>The map is keyed by attribute name with each value representing
-	 * the name of the aliased attribute. For each entry {@code [x, y]} in
-	 * the map there will be a corresponding {@code [y, x]} entry in the map.
+	 * a list of names of aliased attributes.
+	 * <p>For <em>explicit</em> alias pairs such as x and y (i.e., where x
+	 * is an {@code @AliasFor("y")} and y is an {@code @AliasFor("x")}, there
+	 * will be two entries in the map: {@code x -> (y)} and {@code y -> (x)}.
+	 * <p>For <em>implicit</em> aliases (i.e., attributes that are declared
+	 * as attribute overrides for the same attribute in the same meta-annotation),
+	 * there will be n entries in the map. For example, if x, y, and z are
+	 * implicit aliases, the map will contain the following entries:
+	 * {@code x -> (y, z)}, {@code y -> (x, z)}, {@code z -> (x, y)}.
 	 * <p>An empty return value implies that the annotation does not declare
 	 * any attribute aliases.
 	 * @param annotationType the annotation type to find attribute aliases in
-	 * @return a map containing attribute alias pairs; never {@code null}
+	 * @return a map containing attribute aliases; never {@code null}
 	 * @since 4.2
 	 */
-	static Map<String, String> getAttributeAliasMap(Class<? extends Annotation> annotationType) {
+	static Map<String, List<String>> getAttributeAliasMap(Class<? extends Annotation> annotationType) {
 		if (annotationType == null) {
 			return Collections.emptyMap();
 		}
 
-		Map<String, String> map = attributeAliasesCache.get(annotationType);
+		Map<String, List<String>> map = attributeAliasesCache.get(annotationType);
 		if (map != null) {
 			return map;
 		}
 
-		map = new HashMap<String, String>();
+		map = new HashMap<String, List<String>>();
 		for (Method attribute : getAttributeMethods(annotationType)) {
-			String attributeName = attribute.getName();
-			String aliasedAttributeName = getAliasedAttributeName(attribute);
-			if (aliasedAttributeName != null) {
-				map.put(attributeName, aliasedAttributeName);
+			List<String> aliasNames = getAliasedAttributeNames(attribute);
+			if (!aliasNames.isEmpty()) {
+				map.put(attribute.getName(), aliasNames);
 			}
 		}
 
@@ -1420,7 +1469,7 @@ public abstract class AnnotationUtils {
 
 		synthesizable = Boolean.FALSE;
 		for (Method attribute : getAttributeMethods(annotationType)) {
-			if (getAliasedAttributeName(attribute) != null) {
+			if (!getAliasedAttributeNames(attribute).isEmpty()) {
 				synthesizable = Boolean.TRUE;
 				break;
 			}
@@ -1446,184 +1495,85 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
-	 * Get the name of the aliased attribute configured via
-	 * {@link AliasFor @AliasFor} on the supplied annotation {@code attribute}.
-	 * <p>This method does not resolve aliases in other annotations. In
-	 * other words, if {@code @AliasFor} is present on the supplied
-	 * {@code attribute} but {@linkplain AliasFor#annotation references an
-	 * annotation} other than {@link Annotation}, this method will return
-	 * {@code null} immediately.
-	 * @param attribute the attribute to find an alias for
-	 * @return the name of the aliased attribute, or {@code null} if not found
+	 * Get the names of the aliased attributes configured via
+	 * {@link AliasFor @AliasFor} for the supplied annotation {@code attribute}.
+	 * <p>This method does not resolve meta-annotation attribute overrides.
+	 * @param attribute the attribute to find aliases for; never {@code null}
+	 * @return the names of the aliased attributes; never {@code null}, though
+	 * potentially <em>empty</em>
 	 * @throws IllegalArgumentException if the supplied attribute method is
-	 * not from an annotation, or if the supplied target type is {@link Annotation}
+	 * {@code null} or not from an annotation
 	 * @throws AnnotationConfigurationException if invalid configuration of
 	 * {@code @AliasFor} is detected
 	 * @since 4.2
-	 * @see #getAliasedAttributeName(Method, Class)
+	 * @see #getAliasedAttributeNames(Method, Class)
 	 */
-	static String getAliasedAttributeName(Method attribute) {
-		return getAliasedAttributeName(attribute, (Class<? extends Annotation>) null);
+	static List<String> getAliasedAttributeNames(Method attribute) {
+		return getAliasedAttributeNames(attribute, (Class<? extends Annotation>) null);
 	}
 
 	/**
-	 * Get the name of the aliased attribute configured via
-	 * {@link AliasFor @AliasFor} on the supplied annotation {@code attribute}.
-	 * @param attribute the attribute to find an alias for
-	 * @param targetAnnotationType the type of annotation in which the
+	 * Get the names of the aliased attributes configured via
+	 * {@link AliasFor @AliasFor} for the supplied annotation {@code attribute}.
+	 * <p>If the supplied {@code metaAnnotationType} is non-null, the
+	 * returned list will contain at most one element.
+	 * @param attribute the attribute to find aliases for; never {@code null}
+	 * @param metaAnnotationType the type of meta-annotation in which an
 	 * aliased attribute is allowed to be declared; {@code null} implies
-	 * <em>within the same annotation</em>
-	 * @return the name of the aliased attribute, or {@code null} if not found
+	 * <em>within the same annotation</em> as the supplied attribute
+	 * @return the names of the aliased attributes; never {@code null}, though
+	 * potentially <em>empty</em>
 	 * @throws IllegalArgumentException if the supplied attribute method is
-	 * not from an annotation, or if the supplied target type is {@link Annotation}
+	 * {@code null} or not from an annotation, or if the supplied meta-annotation
+	 * type is {@link Annotation}
 	 * @throws AnnotationConfigurationException if invalid configuration of
 	 * {@code @AliasFor} is detected
 	 * @since 4.2
 	 */
-	@SuppressWarnings("unchecked")
-	static String getAliasedAttributeName(Method attribute, Class<? extends Annotation> targetAnnotationType) {
-		Class<?> declaringClass = attribute.getDeclaringClass();
-		Assert.isTrue(declaringClass.isAnnotation(), "attribute method must be from an annotation");
-		Assert.isTrue(!Annotation.class.equals(targetAnnotationType),
-			"targetAnnotationType must not be java.lang.annotation.Annotation");
+	static List<String> getAliasedAttributeNames(Method attribute, Class<? extends Annotation> metaAnnotationType) {
+		Assert.notNull(attribute, "attribute method must not be null");
+		Assert.isTrue(!Annotation.class.equals(metaAnnotationType),
+			"metaAnnotationType must not be java.lang.annotation.Annotation");
 
-		String attributeName = attribute.getName();
-		AliasFor aliasFor = attribute.getAnnotation(AliasFor.class);
+		AliasDescriptor descriptor = AliasDescriptor.from(attribute);
 
-		// Nothing to check
-		if (aliasFor == null) {
-			return null;
+		// No alias declared via @AliasFor?
+		if (descriptor == null) {
+			return Collections.emptyList();
 		}
 
-		Class<? extends Annotation> sourceAnnotationType = (Class<? extends Annotation>) declaringClass;
-		Class<? extends Annotation> aliasedAnnotationType = aliasFor.annotation();
-
-		boolean searchWithinSameAnnotation = (targetAnnotationType == null);
-		boolean sameTargetDeclared =
-				(sourceAnnotationType.equals(aliasedAnnotationType) || Annotation.class.equals(aliasedAnnotationType));
-
-		// Explicit alias for a different target meta-annotation?
-		if (!searchWithinSameAnnotation && !targetAnnotationType.equals(aliasedAnnotationType)) {
-			return null;
-		}
-
-		String aliasedAttributeName = getAliasedAttributeName(aliasFor, attribute);
-
-		if (!StringUtils.hasText(aliasedAttributeName)) {
-			String msg = String.format(
-				"@AliasFor declaration on attribute [%s] in annotation [%s] is missing required 'attribute' value.",
-				attributeName, sourceAnnotationType.getName());
-			throw new AnnotationConfigurationException(msg);
-		}
-
-		if (!sameTargetDeclared) {
-			// Target annotation is not meta-present?
-			if (findAnnotation(sourceAnnotationType, aliasedAnnotationType) == null) {
-				String msg = String.format("@AliasFor declaration on attribute [%s] in annotation [%s] declares "
-						+ "an alias for attribute [%s] in meta-annotation [%s] which is not meta-present.",
-						attributeName, sourceAnnotationType.getName(), aliasedAttributeName,
-						aliasedAnnotationType.getName());
-				throw new AnnotationConfigurationException(msg);
+		// Searching for explicit meta-annotation attribute override?
+		if (metaAnnotationType != null) {
+			if (descriptor.isAliasFor(metaAnnotationType)) {
+				return Collections.singletonList(descriptor.aliasedAttributeName);
 			}
-		}
-		else {
-			aliasedAnnotationType = sourceAnnotationType;
-		}
-
-		// Wrong search scope?
-		if (searchWithinSameAnnotation && !sameTargetDeclared) {
-			return null;
+			// Else: explicit attribute override for a different meta-annotation
+			return Collections.emptyList();
 		}
 
-		Method aliasedAttribute;
-		try {
-			aliasedAttribute = aliasedAnnotationType.getDeclaredMethod(aliasedAttributeName);
-		}
-		catch (NoSuchMethodException ex) {
-			String msg = String.format(
-					"Attribute [%s] in annotation [%s] is declared as an @AliasFor nonexistent attribute [%s] in annotation [%s].",
-					attributeName, sourceAnnotationType.getName(), aliasedAttributeName, aliasedAnnotationType.getName());
-			throw new AnnotationConfigurationException(msg, ex);
+		// Explicit alias pair?
+		if (descriptor.isAliasPair) {
+			return Collections.singletonList(descriptor.aliasedAttributeName);
 		}
 
-		if (sameTargetDeclared) {
-			AliasFor mirrorAliasFor = aliasedAttribute.getAnnotation(AliasFor.class);
-			if (mirrorAliasFor == null) {
-				String msg = String.format("Attribute [%s] in annotation [%s] must be declared as an @AliasFor [%s].",
-						aliasedAttributeName, sourceAnnotationType.getName(), attributeName);
-				throw new AnnotationConfigurationException(msg);
+		// Else: search for implicit aliases
+		List<String> aliases = new ArrayList<String>();
+		for (Method currentAttribute : getAttributeMethods(descriptor.sourceAnnotationType)) {
+
+			// An attribute cannot alias itself
+			if (attribute.equals(currentAttribute)) {
+				continue;
 			}
 
-			String mirrorAliasedAttributeName = getAliasedAttributeName(mirrorAliasFor, aliasedAttribute);
-			if (!attributeName.equals(mirrorAliasedAttributeName)) {
-				String msg = String.format(
-						"Attribute [%s] in annotation [%s] must be declared as an @AliasFor [%s], not [%s].",
-						aliasedAttributeName, sourceAnnotationType.getName(), attributeName, mirrorAliasedAttributeName);
-				throw new AnnotationConfigurationException(msg);
+			// If two attributes override the same attribute in the same meta-annotation,
+			// they are "implicit" aliases for each other.
+			AliasDescriptor otherDescriptor = AliasDescriptor.from(currentAttribute);
+			if (descriptor.equals(otherDescriptor)) {
+				descriptor.validateAgainst(otherDescriptor);
+				aliases.add(otherDescriptor.sourceAttributeName);
 			}
 		}
-
-		Class<?> returnType = attribute.getReturnType();
-		Class<?> aliasedReturnType = aliasedAttribute.getReturnType();
-		if (!returnType.equals(aliasedReturnType)) {
-			String msg = String.format("Misconfigured aliases: attribute [%s] in annotation [%s] " +
-					"and attribute [%s] in annotation [%s] must declare the same return type.", attributeName,
-					sourceAnnotationType.getName(), aliasedAttributeName, aliasedAnnotationType.getName());
-			throw new AnnotationConfigurationException(msg);
-		}
-
-		if (sameTargetDeclared) {
-			Object defaultValue = attribute.getDefaultValue();
-			Object aliasedDefaultValue = aliasedAttribute.getDefaultValue();
-
-			if ((defaultValue == null) || (aliasedDefaultValue == null)) {
-				String msg = String.format("Misconfigured aliases: attribute [%s] in annotation [%s] " +
-						"and attribute [%s] in annotation [%s] must declare default values.", attributeName,
-						sourceAnnotationType.getName(), aliasedAttributeName, aliasedAnnotationType.getName());
-				throw new AnnotationConfigurationException(msg);
-			}
-
-			if (!ObjectUtils.nullSafeEquals(defaultValue, aliasedDefaultValue)) {
-				String msg = String.format("Misconfigured aliases: attribute [%s] in annotation [%s] " +
-						"and attribute [%s] in annotation [%s] must declare the same default value.", attributeName,
-						sourceAnnotationType.getName(), aliasedAttributeName, aliasedAnnotationType.getName());
-				throw new AnnotationConfigurationException(msg);
-			}
-		}
-
-		return aliasedAttributeName;
-	}
-
-	/**
-	 * Get the name of the aliased attribute configured via the supplied
-	 * {@link AliasFor @AliasFor} annotation on the supplied {@code attribute}.
-	 * <p>This method returns the value of either the {@code attribute}
-	 * or {@code value} attribute of {@code @AliasFor}, ensuring that only
-	 * one of the attributes has been declared.
-	 * @param aliasFor the {@code @AliasFor} annotation from which to retrieve
-	 * the aliased attribute name
-	 * @param attribute the attribute that is annotated with {@code @AliasFor},
-	 * used solely for building an exception message
-	 * @return the name of the aliased attribute, potentially an empty string
-	 * @throws AnnotationConfigurationException if invalid configuration of
-	 * {@code @AliasFor} is detected
-	 * @since 4.2
-	 * @see #getAliasedAttributeName(Method, Class)
-	 */
-	private static String getAliasedAttributeName(AliasFor aliasFor, Method attribute) {
-		String attributeName = aliasFor.attribute();
-		String value = aliasFor.value();
-		boolean attributeDeclared = StringUtils.hasText(attributeName);
-		boolean valueDeclared = StringUtils.hasText(value);
-
-		if (attributeDeclared && valueDeclared) {
-			throw new AnnotationConfigurationException(String.format(
-				"In @AliasFor declared on attribute [%s] in annotation [%s], attribute 'attribute' and its alias 'value' "
-				+ "are present with values of [%s] and [%s], but only one is permitted.",
-				attribute.getName(), attribute.getDeclaringClass().getName(), attributeName, value));
-		}
-
-		return (attributeDeclared ? attributeName : value);
+		return aliases;
 	}
 
 	/**
@@ -1677,6 +1627,7 @@ public abstract class AnnotationUtils {
 	 * Determine if the supplied {@code method} is an annotation attribute method.
 	 * @param method the method to check
 	 * @return {@code true} if the method is an attribute method
+	 * @since 4.2
 	 */
 	static boolean isAttributeMethod(Method method) {
 		return (method != null && method.getParameterTypes().length == 0 && method.getReturnType() != void.class);
@@ -1686,6 +1637,7 @@ public abstract class AnnotationUtils {
 	 * Determine if the supplied method is an "annotationType" method.
 	 * @return {@code true} if the method is an "annotationType" method
 	 * @see Annotation#annotationType()
+	 * @since 4.2
 	 */
 	static boolean isAnnotationTypeMethod(Method method) {
 		return (method != null && method.getName().equals("annotationType") && method.getParameterTypes().length == 0);
@@ -1723,40 +1675,62 @@ public abstract class AnnotationUtils {
 
 		Class<? extends Annotation> annotationType = attributes.annotationType();
 
+		// Track which attribute values have already been replaced so that we can short
+		// circuit the search algorithms.
+		Set<String> valuesAlreadyReplaced = new HashSet<String>();
+
 		// Validate @AliasFor configuration
-		Map<String, String> aliasMap = getAttributeAliasMap(annotationType);
-		Set<String> validated = new HashSet<String>();
+		Map<String, List<String>> aliasMap = getAttributeAliasMap(annotationType);
 		for (String attributeName : aliasMap.keySet()) {
-			String aliasedAttributeName = aliasMap.get(attributeName);
+			if (valuesAlreadyReplaced.contains(attributeName)) {
+				continue;
+			}
+			Object value = attributes.get(attributeName);
+			boolean valuePresent = (value != null && value != DEFAULT_VALUE_PLACEHOLDER);
 
-			if (validated.add(attributeName) && validated.add(aliasedAttributeName)) {
-				Object value = attributes.get(attributeName);
+			for (String aliasedAttributeName : aliasMap.get(attributeName)) {
+				if (valuesAlreadyReplaced.contains(aliasedAttributeName)) {
+					continue;
+				}
+
 				Object aliasedValue = attributes.get(aliasedAttributeName);
+				boolean aliasPresent = (aliasedValue != null && aliasedValue != DEFAULT_VALUE_PLACEHOLDER);
 
-				if (!ObjectUtils.nullSafeEquals(value, aliasedValue) && (value != DEFAULT_VALUE_PLACEHOLDER)
-						&& (aliasedValue != DEFAULT_VALUE_PLACEHOLDER)) {
-					String elementAsString = (element == null ? "unknown element" : element.toString());
-					String msg = String.format(
-						"In AnnotationAttributes for annotation [%s] declared on [%s], attribute [%s] and its alias [%s] are "
-								+ "declared with values of [%s] and [%s], but only one declaration is permitted.",
-						annotationType.getName(), elementAsString, attributeName, aliasedAttributeName,
-						ObjectUtils.nullSafeToString(value), ObjectUtils.nullSafeToString(aliasedValue));
-					throw new AnnotationConfigurationException(msg);
-				}
-
-				// Replace default values with aliased values...
-				if (value == DEFAULT_VALUE_PLACEHOLDER) {
-					attributes.put(attributeName,
-						adaptValue(element, aliasedValue, classValuesAsString, nestedAnnotationsAsMap));
-				}
-				if (aliasedValue == DEFAULT_VALUE_PLACEHOLDER) {
-					attributes.put(aliasedAttributeName,
-						adaptValue(element, value, classValuesAsString, nestedAnnotationsAsMap));
+				// Something to validate or replace with an alias?
+				if (valuePresent || aliasPresent) {
+					if (valuePresent && aliasPresent) {
+						// Since annotation attributes can be arrays, we must use ObjectUtils.nullSafeEquals().
+						if (!ObjectUtils.nullSafeEquals(value, aliasedValue)) {
+							String elementAsString = (element == null ? "unknown element" : element.toString());
+							String msg = String.format("In AnnotationAttributes for annotation [%s] declared on [%s], "
+									+ "attribute [%s] and its alias [%s] are declared with values of [%s] and [%s], "
+									+ "but only one declaration is permitted.", annotationType.getName(),
+									elementAsString, attributeName, aliasedAttributeName,
+									ObjectUtils.nullSafeToString(value), ObjectUtils.nullSafeToString(aliasedValue));
+							throw new AnnotationConfigurationException(msg);
+						}
+					}
+					else if (aliasPresent) {
+						// Replace value with aliasedValue
+						attributes.put(attributeName,
+							adaptValue(element, aliasedValue, classValuesAsString, nestedAnnotationsAsMap));
+						valuesAlreadyReplaced.add(attributeName);
+					}
+					else {
+						// Replace aliasedValue with value
+						attributes.put(aliasedAttributeName,
+							adaptValue(element, value, classValuesAsString, nestedAnnotationsAsMap));
+						valuesAlreadyReplaced.add(aliasedAttributeName);
+					}
 				}
 			}
 		}
 
+		// Replace any remaining placeholders with actual default values
 		for (String attributeName : attributes.keySet()) {
+			if (valuesAlreadyReplaced.contains(attributeName)) {
+				continue;
+			}
 			Object value = attributes.get(attributeName);
 			if (value == DEFAULT_VALUE_PLACEHOLDER) {
 				attributes.put(attributeName,
@@ -1930,6 +1904,250 @@ public abstract class AnnotationUtils {
 			}
 			// Unable to read value from repeating annotation container -> ignore it.
 			return Collections.emptyList();
+		}
+	}
+
+	/**
+	 * {@code AliasDescriptor} encapsulates the declaration of {@code @AliasFor}
+	 * on a given annotation attribute and includes support for validating
+	 * the configuration of aliases (both explicit and implicit).
+	 * @since 4.2.1
+	 */
+	private static class AliasDescriptor {
+
+		private final Method sourceAttribute;
+
+		private final Class<? extends Annotation> sourceAnnotationType;
+
+		private final String sourceAttributeName;
+
+		private final Class<? extends Annotation> aliasedAnnotationType;
+
+		private final String aliasedAttributeName;
+
+		private final boolean isAliasPair;
+
+
+		/**
+		 * Create a new {@code AliasDescriptor} <em>from</em> the declaration
+		 * of {@code @AliasFor} on the supplied annotation attribute and
+		 * validate the configuration of {@code @AliasFor}.
+		 * @param attribute the annotation attribute that is annotated with
+		 * {@code @AliasFor}
+		 * @return a new alias descriptor, or {@code null} if the attribute
+		 * is not annotated with {@code @AliasFor}
+		 * @see #validateAgainst(AliasDescriptor)
+		 */
+		public static AliasDescriptor from(Method attribute) {
+			AliasFor aliasFor = attribute.getAnnotation(AliasFor.class);
+			if (aliasFor == null) {
+				return null;
+			}
+
+			AliasDescriptor descriptor = new AliasDescriptor(attribute, aliasFor);
+			descriptor.validate();
+			return descriptor;
+		}
+
+		@SuppressWarnings("unchecked")
+		private AliasDescriptor(Method sourceAttribute, AliasFor aliasFor) {
+			Class<?> declaringClass = sourceAttribute.getDeclaringClass();
+			Assert.isTrue(declaringClass.isAnnotation(), "attribute method must be from an annotation");
+
+			this.sourceAttribute = sourceAttribute;
+			this.sourceAnnotationType = (Class<? extends Annotation>) declaringClass;
+			this.sourceAttributeName = this.sourceAttribute.getName();
+			this.aliasedAnnotationType = (Annotation.class.equals(aliasFor.annotation()) ? this.sourceAnnotationType
+					: aliasFor.annotation());
+			this.aliasedAttributeName = getAliasedAttributeName(aliasFor, this.sourceAttribute);
+			this.isAliasPair = this.sourceAnnotationType.equals(this.aliasedAnnotationType);
+		}
+
+		private void validate() {
+
+			// Target annotation is not meta-present?
+			if (!this.isAliasPair && !isAnnotationMetaPresent(this.sourceAnnotationType, this.aliasedAnnotationType)) {
+				String msg = String.format("@AliasFor declaration on attribute [%s] in annotation [%s] declares "
+					+ "an alias for attribute [%s] in meta-annotation [%s] which is not meta-present.",
+					this.sourceAttributeName, this.sourceAnnotationType.getName(), this.aliasedAttributeName,
+					this.aliasedAnnotationType.getName());
+				throw new AnnotationConfigurationException(msg);
+			}
+
+			Method aliasedAttribute;
+			try {
+				aliasedAttribute = this.aliasedAnnotationType.getDeclaredMethod(this.aliasedAttributeName);
+			}
+			catch (NoSuchMethodException ex) {
+				String msg = String.format(
+					"Attribute [%s] in annotation [%s] is declared as an @AliasFor nonexistent attribute [%s] in annotation [%s].",
+					this.sourceAttributeName, this.sourceAnnotationType.getName(), this.aliasedAttributeName,
+					this.aliasedAnnotationType.getName());
+				throw new AnnotationConfigurationException(msg, ex);
+			}
+
+			if (this.isAliasPair) {
+				AliasFor mirrorAliasFor = aliasedAttribute.getAnnotation(AliasFor.class);
+				if (mirrorAliasFor == null) {
+					String msg = String.format(
+						"Attribute [%s] in annotation [%s] must be declared as an @AliasFor [%s].",
+						this.aliasedAttributeName, this.sourceAnnotationType.getName(), this.sourceAttributeName);
+					throw new AnnotationConfigurationException(msg);
+				}
+
+				String mirrorAliasedAttributeName = getAliasedAttributeName(mirrorAliasFor,
+					aliasedAttribute);
+				if (!this.sourceAttributeName.equals(mirrorAliasedAttributeName)) {
+					String msg = String.format(
+						"Attribute [%s] in annotation [%s] must be declared as an @AliasFor [%s], not [%s].",
+						this.aliasedAttributeName, this.sourceAnnotationType.getName(), this.sourceAttributeName,
+						mirrorAliasedAttributeName);
+					throw new AnnotationConfigurationException(msg);
+				}
+			}
+
+			Class<?> returnType = this.sourceAttribute.getReturnType();
+			Class<?> aliasedReturnType = aliasedAttribute.getReturnType();
+			if (!returnType.equals(aliasedReturnType)) {
+				String msg = String.format("Misconfigured aliases: attribute [%s] in annotation [%s] "
+					+ "and attribute [%s] in annotation [%s] must declare the same return type.",
+					this.sourceAttributeName, this.sourceAnnotationType.getName(), this.aliasedAttributeName,
+					this.aliasedAnnotationType.getName());
+				throw new AnnotationConfigurationException(msg);
+			}
+
+			if (this.isAliasPair) {
+				validateDefaultValueConfiguration(aliasedAttribute);
+			}
+		}
+
+		private void validateDefaultValueConfiguration(Method aliasedAttribute) {
+			Assert.notNull(aliasedAttribute, "aliasedAttribute must not be null");
+			Object defaultValue = this.sourceAttribute.getDefaultValue();
+			Object aliasedDefaultValue = aliasedAttribute.getDefaultValue();
+
+			if ((defaultValue == null) || (aliasedDefaultValue == null)) {
+				String msg = String.format("Misconfigured aliases: attribute [%s] in annotation [%s] "
+					+ "and attribute [%s] in annotation [%s] must declare default values.",
+					this.sourceAttributeName, this.sourceAnnotationType.getName(), aliasedAttribute.getName(),
+					aliasedAttribute.getDeclaringClass().getName());
+				throw new AnnotationConfigurationException(msg);
+			}
+
+			if (!ObjectUtils.nullSafeEquals(defaultValue, aliasedDefaultValue)) {
+				String msg = String.format("Misconfigured aliases: attribute [%s] in annotation [%s] "
+					+ "and attribute [%s] in annotation [%s] must declare the same default value.",
+					this.sourceAttributeName, this.sourceAnnotationType.getName(), aliasedAttribute.getName(),
+					aliasedAttribute.getDeclaringClass().getName());
+				throw new AnnotationConfigurationException(msg);
+			}
+		}
+
+		/**
+		 * Validate this descriptor against the supplied descriptor.
+		 * <p>This method only validates the configuration of default values
+		 * for the two descriptors, since other aspects of the descriptors
+		 * were validated when the descriptors were created.
+		 */
+		public void validateAgainst(AliasDescriptor otherDescriptor) {
+			validateDefaultValueConfiguration(otherDescriptor.sourceAttribute);
+		}
+
+		/**
+		 * Does this descriptor represent an alias for an attribute in the
+		 * supplied {@code targetAnnotationType}?
+		 */
+		public boolean isAliasFor(Class<? extends Annotation> targetAnnotationType) {
+			return targetAnnotationType.equals(this.aliasedAnnotationType);
+		}
+
+		/**
+		 * Determine if this descriptor is logically equal to the supplied
+		 * object.
+		 * <p>Two descriptors are considered equal if the aliases they
+		 * represent are from attributes in one annotation that alias the
+		 * same attribute in a given target annotation.
+		 */
+		public boolean equals(Object other) {
+			if (this == other) {
+				return true;
+			}
+			if (!(other instanceof AliasDescriptor)) {
+				return false;
+			}
+
+			AliasDescriptor that = (AliasDescriptor) other;
+
+			if (!this.sourceAnnotationType.equals(that.sourceAnnotationType)) {
+				return false;
+			}
+			if (!this.aliasedAnnotationType.equals(that.aliasedAnnotationType)) {
+				return false;
+			}
+			if (!this.aliasedAttributeName.equals(that.aliasedAttributeName)) {
+				return false;
+			}
+
+			return true;
+		}
+
+		@Override
+		public int hashCode() {
+			int result = this.sourceAnnotationType.hashCode();
+			result = 31 * result + this.aliasedAnnotationType.hashCode();
+			result = 31 * result + this.aliasedAttributeName.hashCode();
+			return result;
+		}
+
+		@Override
+		public String toString() {
+			return String.format("%s: '%s' in @%s is an alias for '%s' in @%s", getClass().getSimpleName(),
+				this.sourceAttributeName, this.sourceAnnotationType.getName(), this.aliasedAttributeName,
+				(this.aliasedAnnotationType != null ? this.aliasedAnnotationType.getName() : null));
+		}
+
+		/**
+		 * Get the name of the aliased attribute configured via the supplied
+		 * {@link AliasFor @AliasFor} annotation on the supplied {@code attribute}.
+		 * <p>This method returns the value of either the {@code attribute}
+		 * or {@code value} attribute of {@code @AliasFor}, ensuring that only
+		 * one of the attributes has been declared while simultaneously ensuring
+		 * that at least one of the attributes has been declared.
+		 * @param aliasFor the {@code @AliasFor} annotation from which to retrieve
+		 * the aliased attribute name; never {@code null}
+		 * @param attribute the attribute that is annotated with {@code @AliasFor},
+		 * used solely for building an exception message; never {@code null}
+		 * @return the name of the aliased attribute, never {@code null} or empty
+		 * @throws AnnotationConfigurationException if invalid configuration of
+		 * {@code @AliasFor} is detected
+		 * @since 4.2
+		 * @see AnnotationUtils#getAliasedAttributeNames(Method, Class)
+		 */
+		private static String getAliasedAttributeName(AliasFor aliasFor, Method attribute) {
+			String attributeName = aliasFor.attribute();
+			String value = aliasFor.value();
+			boolean attributeDeclared = StringUtils.hasText(attributeName);
+			boolean valueDeclared = StringUtils.hasText(value);
+
+			// Ensure user did not declare both 'value' and 'attribute' in @AliasFor
+			if (attributeDeclared && valueDeclared) {
+				throw new AnnotationConfigurationException(String.format(
+					"In @AliasFor declared on attribute [%s] in annotation [%s], attribute 'attribute' and its alias 'value' "
+							+ "are present with values of [%s] and [%s], but only one is permitted.",
+					attribute.getName(), attribute.getDeclaringClass().getName(), attributeName, value));
+			}
+
+			attributeName = (attributeDeclared ? attributeName : value);
+
+			// Ensure user declared either 'value' or 'attribute' in @AliasFor
+			if (!StringUtils.hasText(attributeName)) {
+				String msg = String.format(
+					"@AliasFor declaration on attribute [%s] in annotation [%s] is missing required 'attribute' value.",
+					attribute.getName(), attribute.getDeclaringClass().getName());
+				throw new AnnotationConfigurationException(msg);
+			}
+
+			return attributeName.trim();
 		}
 	}
 

@@ -19,6 +19,7 @@ package org.springframework.core.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.util.Assert;
@@ -44,7 +45,7 @@ abstract class AbstractAliasAwareAnnotationAttributeExtractor<S> implements Anno
 
 	private final S source;
 
-	private final Map<String, String> attributeAliasMap;
+	private final Map<String, List<String>> attributeAliasMap;
 
 
 	/**
@@ -83,29 +84,33 @@ abstract class AbstractAliasAwareAnnotationAttributeExtractor<S> implements Anno
 
 	@Override
 	public final Object getAttributeValue(Method attributeMethod) {
-		String attributeName = attributeMethod.getName();
+		final String attributeName = attributeMethod.getName();
 		Object attributeValue = getRawAttributeValue(attributeMethod);
 
-		String aliasName = this.attributeAliasMap.get(attributeName);
-		if (aliasName != null) {
-			Object aliasValue = getRawAttributeValue(aliasName);
-			Object defaultValue = AnnotationUtils.getDefaultValue(getAnnotationType(), attributeName);
+		List<String> aliasNames = this.attributeAliasMap.get(attributeName);
+		if (aliasNames != null) {
+			final Object defaultValue = AnnotationUtils.getDefaultValue(getAnnotationType(), attributeName);
+			for (String aliasName : aliasNames) {
+				if (aliasName != null) {
+					Object aliasValue = getRawAttributeValue(aliasName);
 
-			if (!ObjectUtils.nullSafeEquals(attributeValue, aliasValue) &&
-					!ObjectUtils.nullSafeEquals(attributeValue, defaultValue) &&
-					!ObjectUtils.nullSafeEquals(aliasValue, defaultValue)) {
-				String elementName = (getAnnotatedElement() != null ? getAnnotatedElement().toString() : "unknown element");
-				throw new AnnotationConfigurationException(String.format(
-						"In annotation [%s] declared on %s and synthesized from [%s], attribute '%s' and its " +
-						"alias '%s' are present with values of [%s] and [%s], but only one is permitted.",
-						getAnnotationType().getName(), elementName, getSource(), attributeName, aliasName,
-						ObjectUtils.nullSafeToString(attributeValue), ObjectUtils.nullSafeToString(aliasValue)));
-			}
+					if (!ObjectUtils.nullSafeEquals(attributeValue, aliasValue) &&
+							!ObjectUtils.nullSafeEquals(attributeValue, defaultValue) &&
+							!ObjectUtils.nullSafeEquals(aliasValue, defaultValue)) {
+						String elementName = (getAnnotatedElement() != null ? getAnnotatedElement().toString() : "unknown element");
+						throw new AnnotationConfigurationException(String.format(
+								"In annotation [%s] declared on %s and synthesized from [%s], attribute '%s' and its " +
+								"alias '%s' are present with values of [%s] and [%s], but only one is permitted.",
+								getAnnotationType().getName(), elementName, getSource(), attributeName, aliasName,
+								ObjectUtils.nullSafeToString(attributeValue), ObjectUtils.nullSafeToString(aliasValue)));
+					}
 
-			// If the user didn't declare the annotation with an explicit value,
-			// return the value of the alias.
-			if (ObjectUtils.nullSafeEquals(attributeValue, defaultValue)) {
-				attributeValue = aliasValue;
+					// If the user didn't declare the annotation with an explicit value,
+					// use the value of the alias instead.
+					if (ObjectUtils.nullSafeEquals(attributeValue, defaultValue)) {
+						attributeValue = aliasValue;
+					}
+				}
 			}
 		}
 

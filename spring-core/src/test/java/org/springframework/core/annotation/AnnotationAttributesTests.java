@@ -18,10 +18,15 @@ package org.springframework.core.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import org.springframework.core.annotation.AnnotationUtilsTests.ContextConfig;
+import org.springframework.core.annotation.AnnotationUtilsTests.ImplicitAliasesContextConfig;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -36,7 +41,7 @@ import static org.junit.Assert.*;
  */
 public class AnnotationAttributesTests {
 
-	private final AnnotationAttributes attributes = new AnnotationAttributes();
+	private AnnotationAttributes attributes = new AnnotationAttributes();
 
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
@@ -156,21 +161,56 @@ public class AnnotationAttributesTests {
 
 	@Test
 	public void getAliasedString() {
-		attributes.clear();
-		attributes.put("name", "metaverse");
-		assertEquals("metaverse", getAliasedString("name"));
-		assertEquals("metaverse", getAliasedString("value"));
+		final String value = "metaverse";
 
 		attributes.clear();
-		attributes.put("value", "metaverse");
-		assertEquals("metaverse", getAliasedString("name"));
-		assertEquals("metaverse", getAliasedString("value"));
+		attributes.put("name", value);
+		assertEquals(value, getAliasedString("name"));
+		assertEquals(value, getAliasedString("value"));
 
 		attributes.clear();
-		attributes.put("name", "metaverse");
-		attributes.put("value", "metaverse");
-		assertEquals("metaverse", getAliasedString("name"));
-		assertEquals("metaverse", getAliasedString("value"));
+		attributes.put("value", value);
+		assertEquals(value, getAliasedString("name"));
+		assertEquals(value, getAliasedString("value"));
+
+		attributes.clear();
+		attributes.put("name", value);
+		attributes.put("value", value);
+		assertEquals(value, getAliasedString("name"));
+		assertEquals(value, getAliasedString("value"));
+	}
+
+	@Test
+	public void getAliasedStringWithImplicitAliases() {
+		final String value = "metaverse";
+		final List<String> aliases = Arrays.asList("value", "location1", "location2", "location3", "xmlFile", "groovyScript");
+
+		attributes = new AnnotationAttributes(ImplicitAliasesContextConfig.class);
+		attributes.put("value", value);
+		aliases.stream().forEach(alias -> assertEquals(value, getAliasedStringWithImplicitAliases(alias)));
+
+		attributes.clear();
+		attributes.put("location1", value);
+		aliases.stream().forEach(alias -> assertEquals(value, getAliasedStringWithImplicitAliases(alias)));
+
+		attributes.clear();
+		attributes.put("value", value);
+		attributes.put("location1", value);
+		attributes.put("xmlFile", value);
+		attributes.put("groovyScript", value);
+		aliases.stream().forEach(alias -> assertEquals(value, getAliasedStringWithImplicitAliases(alias)));
+	}
+
+	@Test
+	public void getAliasedStringWithImplicitAliasesWithMissingAliasedAttributes() {
+		final List<String> aliases = Arrays.asList("value", "location1", "location2", "location3", "xmlFile", "groovyScript");
+		attributes = new AnnotationAttributes(ImplicitAliasesContextConfig.class);
+
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(startsWith("Neither attribute 'value' nor one of its aliases ["));
+		aliases.stream().forEach(alias -> exception.expectMessage(containsString(alias)));
+		exception.expectMessage(endsWith("] was found in attributes for annotation [" + ImplicitAliasesContextConfig.class.getName() + "]"));
+		getAliasedStringWithImplicitAliases("value");
 	}
 
 	@Test
@@ -185,7 +225,7 @@ public class AnnotationAttributesTests {
 	@Test
 	public void getAliasedStringWithMissingAliasedAttributes() {
 		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(equalTo("Neither attribute 'name' nor its alias 'value' was found in attributes for annotation [unknown]"));
+		exception.expectMessage(equalTo("Neither attribute 'name' nor one of its aliases [value] was found in attributes for annotation [unknown]"));
 		getAliasedString("name");
 	}
 
@@ -211,69 +251,133 @@ public class AnnotationAttributesTests {
 		return attrs.getAliasedString(attributeName, Scope.class, null);
 	}
 
+	private String getAliasedStringWithImplicitAliases(String attributeName) {
+		return this.attributes.getAliasedString(attributeName, ImplicitAliasesContextConfig.class, null);
+	}
+
 	@Test
 	public void getAliasedStringArray() {
 		final String[] INPUT = new String[] { "test.xml" };
 		final String[] EMPTY = new String[0];
 
 		attributes.clear();
-		attributes.put("locations", INPUT);
-		assertArrayEquals(INPUT, getAliasedStringArray("locations"));
+		attributes.put("location", INPUT);
+		assertArrayEquals(INPUT, getAliasedStringArray("location"));
 		assertArrayEquals(INPUT, getAliasedStringArray("value"));
 
 		attributes.clear();
 		attributes.put("value", INPUT);
-		assertArrayEquals(INPUT, getAliasedStringArray("locations"));
+		assertArrayEquals(INPUT, getAliasedStringArray("location"));
 		assertArrayEquals(INPUT, getAliasedStringArray("value"));
 
 		attributes.clear();
-		attributes.put("locations", INPUT);
+		attributes.put("location", INPUT);
 		attributes.put("value", INPUT);
-		assertArrayEquals(INPUT, getAliasedStringArray("locations"));
+		assertArrayEquals(INPUT, getAliasedStringArray("location"));
 		assertArrayEquals(INPUT, getAliasedStringArray("value"));
 
 		attributes.clear();
-		attributes.put("locations", INPUT);
+		attributes.put("location", INPUT);
 		attributes.put("value", EMPTY);
-		assertArrayEquals(INPUT, getAliasedStringArray("locations"));
+		assertArrayEquals(INPUT, getAliasedStringArray("location"));
 		assertArrayEquals(INPUT, getAliasedStringArray("value"));
 
 		attributes.clear();
-		attributes.put("locations", EMPTY);
+		attributes.put("location", EMPTY);
 		attributes.put("value", INPUT);
-		assertArrayEquals(INPUT, getAliasedStringArray("locations"));
+		assertArrayEquals(INPUT, getAliasedStringArray("location"));
 		assertArrayEquals(INPUT, getAliasedStringArray("value"));
 
 		attributes.clear();
-		attributes.put("locations", EMPTY);
+		attributes.put("location", EMPTY);
 		attributes.put("value", EMPTY);
-		assertArrayEquals(EMPTY, getAliasedStringArray("locations"));
+		assertArrayEquals(EMPTY, getAliasedStringArray("location"));
 		assertArrayEquals(EMPTY, getAliasedStringArray("value"));
+	}
+
+	@Test
+	public void getAliasedStringArrayWithImplicitAliases() {
+		final String[] INPUT = new String[] { "test.xml" };
+		final String[] EMPTY = new String[0];
+		final List<String> aliases = Arrays.asList("value", "location1", "location2", "location3", "xmlFile", "groovyScript");
+
+		attributes = new AnnotationAttributes(ImplicitAliasesContextConfig.class);
+
+		attributes.put("location1", INPUT);
+		aliases.stream().forEach(alias -> assertArrayEquals(INPUT, getAliasedStringArrayWithImplicitAliases(alias)));
+
+		attributes.clear();
+		attributes.put("value", INPUT);
+		aliases.stream().forEach(alias -> assertArrayEquals(INPUT, getAliasedStringArrayWithImplicitAliases(alias)));
+
+		attributes.clear();
+		attributes.put("location1", INPUT);
+		attributes.put("value", INPUT);
+		aliases.stream().forEach(alias -> assertArrayEquals(INPUT, getAliasedStringArrayWithImplicitAliases(alias)));
+
+		attributes.clear();
+		attributes.put("location1", INPUT);
+		attributes.put("value", EMPTY);
+		aliases.stream().forEach(alias -> assertArrayEquals(INPUT, getAliasedStringArrayWithImplicitAliases(alias)));
+
+		attributes.clear();
+		attributes.put("location1", EMPTY);
+		attributes.put("value", INPUT);
+		aliases.stream().forEach(alias -> assertArrayEquals(INPUT, getAliasedStringArrayWithImplicitAliases(alias)));
+
+		attributes.clear();
+		attributes.put("location1", EMPTY);
+		attributes.put("value", EMPTY);
+		aliases.stream().forEach(alias -> assertArrayEquals(EMPTY, getAliasedStringArrayWithImplicitAliases(alias)));
+	}
+
+	@Test
+	public void getAliasedStringArrayWithImplicitAliasesWithMissingAliasedAttributes() {
+		final List<String> aliases = Arrays.asList("value", "location1", "location2", "location3", "xmlFile", "groovyScript");
+		attributes = new AnnotationAttributes(ImplicitAliasesContextConfig.class);
+
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(startsWith("Neither attribute 'value' nor one of its aliases ["));
+		aliases.stream().forEach(alias -> exception.expectMessage(containsString(alias)));
+		exception.expectMessage(endsWith("] was found in attributes for annotation [" + ImplicitAliasesContextConfig.class.getName() + "]"));
+		getAliasedStringArrayWithImplicitAliases("value");
 	}
 
 	@Test
 	public void getAliasedStringArrayWithMissingAliasedAttributes() {
 		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(equalTo("Neither attribute 'locations' nor its alias 'value' was found in attributes for annotation [unknown]"));
-		getAliasedStringArray("locations");
+		exception.expectMessage(equalTo("Neither attribute 'location' nor one of its aliases [value] was found in attributes for annotation [unknown]"));
+		getAliasedStringArray("location");
 	}
 
 	@Test
 	public void getAliasedStringArrayWithDifferentAliasedValues() {
-		attributes.put("locations", new String[] { "1.xml" });
+		attributes.put("location", new String[] { "1.xml" });
 		attributes.put("value", new String[] { "2.xml" });
 
 		exception.expect(AnnotationConfigurationException.class);
 		exception.expectMessage(containsString("In annotation [" + ContextConfig.class.getName() + "]"));
-		exception.expectMessage(containsString("attribute [locations] and its alias [value]"));
+		exception.expectMessage(containsString("attribute [location] and its alias [value]"));
 		exception.expectMessage(containsString("[{1.xml}] and [{2.xml}]"));
 		exception.expectMessage(containsString("but only one is permitted"));
 
-		getAliasedStringArray("locations");
+		getAliasedStringArray("location");
 	}
 
 	private String[] getAliasedStringArray(String attributeName) {
+		// Note: even though the attributes we test against here are of type
+		// String instead of String[], it doesn't matter... since
+		// AnnotationAttributes does not validate the actual return type of
+		// attributes in the annotation.
 		return attributes.getAliasedStringArray(attributeName, ContextConfig.class, null);
+	}
+
+	private String[] getAliasedStringArrayWithImplicitAliases(String attributeName) {
+		// Note: even though the attributes we test against here are of type
+		// String instead of String[], it doesn't matter... since
+		// AnnotationAttributes does not validate the actual return type of
+		// attributes in the annotation.
+		return this.attributes.getAliasedStringArray(attributeName, ImplicitAliasesContextConfig.class, null);
 	}
 
 	@Test
@@ -317,9 +421,45 @@ public class AnnotationAttributesTests {
 	}
 
 	@Test
+	public void getAliasedClassArrayWithImplicitAliases() {
+		final Class<?>[] INPUT = new Class<?>[] { String.class };
+		final Class<?>[] EMPTY = new Class<?>[0];
+		final List<String> aliases = Arrays.asList("value", "location1", "location2", "location3", "xmlFile", "groovyScript");
+
+		attributes = new AnnotationAttributes(ImplicitAliasesContextConfig.class);
+
+		attributes.put("location1", INPUT);
+		aliases.stream().forEach(alias -> assertArrayEquals(INPUT, getAliasedClassArrayWithImplicitAliases(alias)));
+
+		attributes.clear();
+		attributes.put("value", INPUT);
+		aliases.stream().forEach(alias -> assertArrayEquals(INPUT, getAliasedClassArrayWithImplicitAliases(alias)));
+
+		attributes.clear();
+		attributes.put("location1", INPUT);
+		attributes.put("value", INPUT);
+		aliases.stream().forEach(alias -> assertArrayEquals(INPUT, getAliasedClassArrayWithImplicitAliases(alias)));
+
+		attributes.clear();
+		attributes.put("location1", INPUT);
+		attributes.put("value", EMPTY);
+		aliases.stream().forEach(alias -> assertArrayEquals(INPUT, getAliasedClassArrayWithImplicitAliases(alias)));
+
+		attributes.clear();
+		attributes.put("location1", EMPTY);
+		attributes.put("value", INPUT);
+		aliases.stream().forEach(alias -> assertArrayEquals(INPUT, getAliasedClassArrayWithImplicitAliases(alias)));
+
+		attributes.clear();
+		attributes.put("location1", EMPTY);
+		attributes.put("value", EMPTY);
+		aliases.stream().forEach(alias -> assertArrayEquals(EMPTY, getAliasedClassArrayWithImplicitAliases(alias)));
+	}
+
+	@Test
 	public void getAliasedClassArrayWithMissingAliasedAttributes() {
 		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(equalTo("Neither attribute 'classes' nor its alias 'value' was found in attributes for annotation [unknown]"));
+		exception.expectMessage(equalTo("Neither attribute 'classes' nor one of its aliases [value] was found in attributes for annotation [unknown]"));
 		getAliasedClassArray("classes");
 	}
 
@@ -341,6 +481,14 @@ public class AnnotationAttributesTests {
 		return attributes.getAliasedClassArray(attributeName, Filter.class, null);
 	}
 
+	private Class<?>[] getAliasedClassArrayWithImplicitAliases(String attributeName) {
+		// Note: even though the attributes we test against here are of type
+		// String instead of Class<?>[], it doesn't matter... since
+		// AnnotationAttributes does not validate the actual return type of
+		// attributes in the annotation.
+		return this.attributes.getAliasedClassArray(attributeName, ImplicitAliasesContextConfig.class, null);
+	}
+
 
 	enum Color {
 		RED, WHITE, BLUE
@@ -360,19 +508,6 @@ public class AnnotationAttributesTests {
 
 	@Filter(pattern = "foo")
 	static class FilteredClass {
-	}
-
-	/**
-	 * Mock of {@code org.springframework.test.context.ContextConfiguration}.
-	 */
-	@Retention(RetentionPolicy.RUNTIME)
-	@interface ContextConfig {
-
-		@AliasFor(attribute = "locations")
-		String value() default "";
-
-		@AliasFor(attribute = "value")
-		String locations() default "";
 	}
 
 	/**

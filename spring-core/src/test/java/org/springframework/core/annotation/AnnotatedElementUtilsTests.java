@@ -323,16 +323,62 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	@Test
-	public void getMergeAndSynthesizeAnnotationWithAliasedValueComposedAnnotation() {
-		Class<?> element = AliasedValueComposedContextConfigClass.class;
+	public void getMergedAnnotationAttributesWithImplicitAliasesInMetaAnnotationOnComposedAnnotation() {
+		Class<?> element = ComposedImplicitAliasesContextConfigClass.class;
+		String name = ImplicitAliasesContextConfig.class.getName();
+		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, name);
+		String[] expected = new String[] { "A.xml", "B.xml" };
+
+		assertNotNull("Should find @ImplicitAliasesContextConfig on " + element.getSimpleName(), attributes);
+		assertArrayEquals("groovyScripts", expected, attributes.getStringArray("groovyScripts"));
+		assertArrayEquals("xmlFiles", expected, attributes.getStringArray("xmlFiles"));
+		assertArrayEquals("locations", expected, attributes.getStringArray("locations"));
+		assertArrayEquals("value", expected, attributes.getStringArray("value"));
+
+		// Verify contracts between utility methods:
+		assertTrue(isAnnotated(element, name));
+	}
+
+	@Test
+	public void getMergedAnnotationWithAliasedValueComposedAnnotation() {
+		assertGetMergedAnnotation(AliasedValueComposedContextConfigClass.class, "test.xml");
+	}
+
+	@Test
+	public void getMergedAnnotationWithImplicitAliasesForSameAttributeInComposedAnnotation() {
+		assertGetMergedAnnotation(ImplicitAliasesContextConfigClass1.class, "foo.xml");
+		assertGetMergedAnnotation(ImplicitAliasesContextConfigClass2.class, "bar.xml");
+		assertGetMergedAnnotation(ImplicitAliasesContextConfigClass3.class, "baz.xml");
+	}
+
+	private void assertGetMergedAnnotation(Class<?> element, String expected) {
+		String name = ContextConfig.class.getName();
 		ContextConfig contextConfig = getMergedAnnotation(element, ContextConfig.class);
 
 		assertNotNull("Should find @ContextConfig on " + element.getSimpleName(), contextConfig);
-		assertArrayEquals("locations", new String[] { "test.xml" }, contextConfig.locations());
-		assertArrayEquals("value", new String[] { "test.xml" }, contextConfig.value());
+		assertArrayEquals("locations", new String[] { expected }, contextConfig.locations());
+		assertArrayEquals("value", new String[] { expected }, contextConfig.value());
+		assertArrayEquals("classes", new Class<?>[0], contextConfig.classes());
 
 		// Verify contracts between utility methods:
-		assertTrue(isAnnotated(element, ContextConfig.class.getName()));
+		assertTrue(isAnnotated(element, name));
+	}
+
+	@Test
+	public void getMergedAnnotationWithImplicitAliasesInMetaAnnotationOnComposedAnnotation() {
+		Class<?> element = ComposedImplicitAliasesContextConfigClass.class;
+		String name = ImplicitAliasesContextConfig.class.getName();
+		ImplicitAliasesContextConfig config = getMergedAnnotation(element, ImplicitAliasesContextConfig.class);
+		String[] expected = new String[] { "A.xml", "B.xml" };
+
+		assertNotNull("Should find @ImplicitAliasesContextConfig on " + element.getSimpleName(), config);
+		assertArrayEquals("groovyScripts", expected, config.groovyScripts());
+		assertArrayEquals("xmlFiles", expected, config.xmlFiles());
+		assertArrayEquals("locations", expected, config.locations());
+		assertArrayEquals("value", expected, config.value());
+
+		// Verify contracts between utility methods:
+		assertTrue(isAnnotated(element, name));
 	}
 
 	@Test
@@ -517,17 +563,33 @@ public class AnnotatedElementUtilsTests {
 
 	@Test
 	public void findMergedAnnotationAttributesOnClassWithAttributeAliasInComposedAnnotationAndNestedAnnotationsInTargetAnnotation() {
+		String[] expected = new String[] { "com.example.app.test" };
 		Class<?> element = TestComponentScanClass.class;
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(element, ComponentScan.class);
 		assertNotNull("Should find @ComponentScan on " + element, attributes);
-		assertArrayEquals("basePackages for " + element, new String[] { "com.example.app.test" },
-			attributes.getStringArray("basePackages"));
+		assertArrayEquals("basePackages for " + element, expected, attributes.getStringArray("basePackages"));
 
 		Filter[] excludeFilters = attributes.getAnnotationArray("excludeFilters", Filter.class);
 		assertNotNull(excludeFilters);
 
 		List<String> patterns = stream(excludeFilters).map(Filter::pattern).collect(toList());
 		assertEquals(asList("*Test", "*Tests"), patterns);
+	}
+
+	/**
+	 * This test ensures that {@link AnnotationUtils#postProcessAnnotationAttributes}
+	 * uses {@code ObjectUtils.nullSafeEquals()} to check for equality between annotation
+	 * attributes since attributes may be arrays.
+	 */
+	@Test
+	public void findMergedAnnotationAttributesOnClassWithBothAttributesOfAnAliasPairDeclared() {
+		String[] expected = new String[] { "com.example.app.test" };
+		Class<?> element = ComponentScanWithBasePackagesAndValueAliasClass.class;
+		AnnotationAttributes attributes = findMergedAnnotationAttributes(element, ComponentScan.class);
+
+		assertNotNull("Should find @ComponentScan on " + element, attributes);
+		assertArrayEquals("value: ", expected, attributes.getStringArray("value"));
+		assertArrayEquals("basePackages: ", expected, attributes.getStringArray("basePackages"));
 	}
 
 	@Test
@@ -716,6 +778,28 @@ public class AnnotatedElementUtilsTests {
 		String[] locations();
 	}
 
+	@ContextConfig
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface ImplicitAliasesContextConfig {
+
+		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
+		String[] groovyScripts() default {};
+
+		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
+		String[] xmlFiles() default {};
+
+		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
+		String[] locations() default {};
+
+		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
+		String[] value() default {};
+	}
+
+	@ImplicitAliasesContextConfig(xmlFiles = { "A.xml", "B.xml" })
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface ComposedImplicitAliasesContextConfig {
+	}
+
 	/**
 	 * Invalid because the configuration declares a value for 'value' and
 	 * requires a value for the aliased 'locations'. So we likely end up with
@@ -762,6 +846,10 @@ public class AnnotatedElementUtilsTests {
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ComponentScan {
 
+		@AliasFor("basePackages")
+		String[] value() default {};
+
+		@AliasFor("value")
 		String[] basePackages() default {};
 
 		Filter[] excludeFilters() default {};
@@ -928,12 +1016,32 @@ public class AnnotatedElementUtilsTests {
 	static class AliasedValueComposedContextConfigClass {
 	}
 
+	@ImplicitAliasesContextConfig("foo.xml")
+	static class ImplicitAliasesContextConfigClass1 {
+	}
+
+	@ImplicitAliasesContextConfig(locations = "bar.xml")
+	static class ImplicitAliasesContextConfigClass2 {
+	}
+
+	@ImplicitAliasesContextConfig(xmlFiles = "baz.xml")
+	static class ImplicitAliasesContextConfigClass3 {
+	}
+
+	@ComposedImplicitAliasesContextConfig
+	static class ComposedImplicitAliasesContextConfigClass {
+	}
+
 	@InvalidAliasedComposedContextConfig(xmlConfigFiles = "test.xml")
 	static class InvalidAliasedComposedContextConfigClass {
 	}
 
 	@AliasedComposedContextConfigAndTestPropSource(xmlConfigFiles = "test.xml")
 	static class AliasedComposedContextConfigAndTestPropSourceClass {
+	}
+
+	@ComponentScan(value = "com.example.app.test", basePackages = "com.example.app.test")
+	static class ComponentScanWithBasePackagesAndValueAliasClass {
 	}
 
 	@TestComponentScan(packages = "com.example.app.test")
