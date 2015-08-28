@@ -30,12 +30,13 @@ import org.springframework.core.annotation.AliasFor;
  *
  * <p>If the event is not published within the boundaries of a managed transaction, the event
  * is discarded unless the {@link #fallbackExecution} flag is explicitly set. If a
- * transaction is running, the event is processed according to its {@link TransactionPhase}.
+ * transaction is running, the event is processed according to its {@code TransactionPhase}.
  *
  * <p>Adding {@link org.springframework.core.annotation.Order @Order} on your annotated method
  * allows you to prioritize that listener amongst other listeners running in the same phase.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 4.2
  */
 @EventListener
@@ -59,16 +60,17 @@ public @interface TransactionalEventListener {
 	/**
 	 * Alias for {@link #classes}.
 	 */
-	@AliasFor("classes")
+	@AliasFor(annotation = EventListener.class, attribute = "classes")
 	Class<?>[] value() default {};
 
 	/**
 	 * The event classes that this listener handles.
-	 * <p>When this attribute is specified with one value, the method parameter
-	 * may or may not be specified. When this attribute is specified with more
-	 * than one value, the method must not have a parameter.
+	 * <p>If this attribute is specified with a single value, the annotated
+	 * method may optionally accept a single parameter. However, if this
+	 * attribute is specified with multiple values, the annotated method
+	 * must <em>not</em> declare any parameters.
 	 */
-	@AliasFor("value")
+	@AliasFor(annotation = EventListener.class, attribute = "classes")
 	Class<?>[] classes() default {};
 
 	/**
