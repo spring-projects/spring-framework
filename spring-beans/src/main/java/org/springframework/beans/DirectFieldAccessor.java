@@ -48,13 +48,26 @@ public class DirectFieldAccessor extends AbstractNestablePropertyAccessor {
 
 	private final Map<String, FieldPropertyHandler> fieldMap = new HashMap<String, FieldPropertyHandler>();
 
+
+	/**
+	 * Create a new DirectFieldAccessor for the given object.
+	 * @param object object wrapped by this DirectFieldAccessor
+	 */
 	public DirectFieldAccessor(Object object) {
 		super(object);
 	}
 
-	protected DirectFieldAccessor(Object object, String nestedPath, DirectFieldAccessor superBw) {
-		super(object, nestedPath, superBw);
+	/**
+	 * Create a new DirectFieldAccessor for the given object,
+	 * registering a nested path that the object is in.
+	 * @param object object wrapped by this DirectFieldAccessor
+	 * @param nestedPath the nested path of the object
+	 * @param parent the containing DirectFieldAccessor (must not be {@code null})
+	 */
+	protected DirectFieldAccessor(Object object, String nestedPath, DirectFieldAccessor parent) {
+		super(object, nestedPath, parent);
 	}
+
 
 	@Override
 	protected FieldPropertyHandler getLocalPropertyHandler(String propertyName) {

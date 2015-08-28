@@ -103,7 +103,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 
 
 	/**
-	 * Create new empty accessor. Wrapped instance needs to be set afterwards.
+	 * Create a new empty accessor. Wrapped instance needs to be set afterwards.
 	 * Registers default editors.
 	 * @see #setWrappedInstance
 	 */
@@ -112,7 +112,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	}
 
 	/**
-	 * Create new empty accessor. Wrapped instance needs to be set afterwards.
+	 * Create a new empty accessor. Wrapped instance needs to be set afterwards.
 	 * @param registerDefaultEditors whether to register default editors
 	 * (can be suppressed if the accessor won't need any type conversion)
 	 * @see #setWrappedInstance
@@ -125,7 +125,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	}
 
 	/**
-	 * Create new accessor for the given object.
+	 * Create a new accessor for the given object.
 	 * @param object object wrapped by this accessor
 	 */
 	protected AbstractNestablePropertyAccessor(Object object) {
@@ -134,7 +134,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	}
 
 	/**
-	 * Create new accessor, wrapping a new instance of the specified class.
+	 * Create a new accessor, wrapping a new instance of the specified class.
 	 * @param clazz class to instantiate and wrap
 	 */
 	protected AbstractNestablePropertyAccessor(Class<?> clazz) {
@@ -143,7 +143,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	}
 
 	/**
-	 * Create new accessor for the given object,
+	 * Create a new accessor for the given object,
 	 * registering a nested path that the object is in.
 	 * @param object object wrapped by this accessor
 	 * @param nestedPath the nested path of the object
@@ -155,7 +155,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	}
 
 	/**
-	 * Create new accessor for the given object,
+	 * Create a new accessor for the given object,
 	 * registering a nested path that the object is in.
 	 * @param object object wrapped by this accessor
 	 * @param nestedPath the nested path of the object
@@ -202,7 +202,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 * @param rootObject the root object at the top of the path
 	 */
 	public void setWrappedInstance(Object object, String nestedPath, Object rootObject) {
-		Assert.notNull(object, "Bean object must not be null");
+		Assert.notNull(object, "Target object must not be null");
 		if (object.getClass().equals(javaUtilOptionalClass)) {
 			this.object = OptionalUnwrapper.unwrap(object);
 		}
@@ -791,7 +791,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 * @param nestedPath property path we know is nested
 	 * @return last component of the path (the property on the target bean)
 	 */
-	private String getFinalPath(AbstractNestablePropertyAccessor pa, String nestedPath) {
+	protected String getFinalPath(AbstractNestablePropertyAccessor pa, String nestedPath) {
 		if (pa == this) {
 			return nestedPath;
 		}

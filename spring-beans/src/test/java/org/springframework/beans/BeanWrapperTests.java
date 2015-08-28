@@ -36,15 +36,16 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  * @author Dave Syer
  */
-public final class BeanWrapperTests extends AbstractPropertyAccessorTests {
+public class BeanWrapperTests extends AbstractPropertyAccessorTests {
 
 	@Override
 	protected BeanWrapperImpl createAccessor(Object target) {
 		return new BeanWrapperImpl(target);
 	}
 
+
 	@Test
-	public void setterDoestNotCallGetter() {
+	public void setterDoesNotCallGetter() {
 		GetterBean target = new GetterBean();
 		BeanWrapper accessor = createAccessor(target);
 		accessor.setPropertyValue("name", "tom");
@@ -133,7 +134,7 @@ public final class BeanWrapperTests extends AbstractPropertyAccessorTests {
 		}
 	}
 
-	@Test  // Can't be shared: no type mismatch with a field")
+	@Test  // Can't be shared: no type mismatch with a field
 	public void setPropertyTypeMismatch() {
 		PropertyTypeMismatch target = new PropertyTypeMismatch();
 		BeanWrapper accessor = createAccessor(target);
@@ -141,6 +142,21 @@ public final class BeanWrapperTests extends AbstractPropertyAccessorTests {
 		assertEquals("a String", target.value);
 		assertTrue(target.getObject() == 8);
 		assertEquals(8, accessor.getPropertyValue("object"));
+	}
+
+	@Test
+	public void propertyDescriptors() {
+		TestBean target = new TestBean();
+		target.setSpouse(new TestBean());
+		BeanWrapper accessor = createAccessor(target);
+		accessor.setPropertyValue("name", "a");
+		accessor.setPropertyValue("spouse.name", "b");
+		assertEquals("a", target.getName());
+		assertEquals("b", target.getSpouse().getName());
+		assertEquals("a", accessor.getPropertyValue("name"));
+		assertEquals("b", accessor.getPropertyValue("spouse.name"));
+		assertEquals(String.class, accessor.getPropertyDescriptor("name").getPropertyType());
+		assertEquals(String.class, accessor.getPropertyDescriptor("spouse.name").getPropertyType());
 	}
 
 	@Test

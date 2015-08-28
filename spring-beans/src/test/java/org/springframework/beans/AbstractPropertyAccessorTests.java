@@ -214,7 +214,6 @@ public abstract class AbstractPropertyAccessorTests {
 	public void getNestedDeepProperty() {
 		Person target = createPerson("John", "London", "UK");
 		AbstractPropertyAccessor accessor = createAccessor(target);
-
 		assertThat(accessor.getPropertyValue("address.country.name"), is("UK"));
 	}
 

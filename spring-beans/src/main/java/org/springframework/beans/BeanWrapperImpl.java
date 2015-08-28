@@ -73,8 +73,9 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	 */
 	private AccessControlContext acc;
 
+
 	/**
-	 * Create new empty BeanWrapperImpl. Wrapped instance needs to be set afterwards.
+	 * Create a new empty BeanWrapperImpl. Wrapped instance needs to be set afterwards.
 	 * Registers default editors.
 	 * @see #setWrappedInstance
 	 */
@@ -83,7 +84,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	}
 
 	/**
-	 * Create new empty BeanWrapperImpl. Wrapped instance needs to be set afterwards.
+	 * Create a new empty BeanWrapperImpl. Wrapped instance needs to be set afterwards.
 	 * @param registerDefaultEditors whether to register default editors
 	 * (can be suppressed if the BeanWrapper won't need any type conversion)
 	 * @see #setWrappedInstance
@@ -93,7 +94,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	}
 
 	/**
-	 * Create new BeanWrapperImpl for the given object.
+	 * Create a new BeanWrapperImpl for the given object.
 	 * @param object object wrapped by this BeanWrapper
 	 */
 	public BeanWrapperImpl(Object object) {
@@ -101,7 +102,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	}
 
 	/**
-	 * Create new BeanWrapperImpl, wrapping a new instance of the specified class.
+	 * Create a new BeanWrapperImpl, wrapping a new instance of the specified class.
 	 * @param clazz class to instantiate and wrap
 	 */
 	public BeanWrapperImpl(Class<?> clazz) {
@@ -109,7 +110,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	}
 
 	/**
-	 * Create new BeanWrapperImpl for the given object,
+	 * Create a new BeanWrapperImpl for the given object,
 	 * registering a nested path that the object is in.
 	 * @param object object wrapped by this BeanWrapper
 	 * @param nestedPath the nested path of the object
@@ -120,16 +121,17 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	}
 
 	/**
-	 * Create new BeanWrapperImpl for the given object,
+	 * Create a new BeanWrapperImpl for the given object,
 	 * registering a nested path that the object is in.
 	 * @param object object wrapped by this BeanWrapper
 	 * @param nestedPath the nested path of the object
-	 * @param superBw the containing BeanWrapper (must not be {@code null})
+	 * @param parent the containing BeanWrapper (must not be {@code null})
 	 */
-	private BeanWrapperImpl(Object object, String nestedPath, BeanWrapperImpl superBw) {
-		super(object, nestedPath, superBw);
-		setSecurityContext(superBw.acc);
+	private BeanWrapperImpl(Object object, String nestedPath, BeanWrapperImpl parent) {
+		super(object, nestedPath, parent);
+		setSecurityContext(parent.acc);
 	}
+
 
 	@Override
 	public void setWrappedInstance(Object object, String nestedPath, Object rootObject) {
@@ -177,6 +179,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 		return this.cachedIntrospectionResults;
 	}
 
+
 	/**
 	 * Convert the given value for the specified property to the latter's type.
 	 * <p>This method is only intended for optimizations in a BeanFactory.
@@ -202,10 +205,9 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	}
 
 	private Property property(PropertyDescriptor pd) {
-		GenericTypeAwarePropertyDescriptor typeAware = (GenericTypeAwarePropertyDescriptor) pd;
-		return new Property(typeAware.getBeanClass(), typeAware.getReadMethod(), typeAware.getWriteMethod(), typeAware.getName());
+		GenericTypeAwarePropertyDescriptor gpd = (GenericTypeAwarePropertyDescriptor) pd;
+		return new Property(gpd.getBeanClass(), gpd.getReadMethod(), gpd.getWriteMethod(), gpd.getName());
 	}
-
 
 	@Override
 	protected BeanPropertyHandler getLocalPropertyHandler(String propertyName) {
@@ -236,12 +238,14 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 
 	@Override
 	public PropertyDescriptor getPropertyDescriptor(String propertyName) throws InvalidPropertyException {
-		BeanPropertyHandler propertyHandler = getLocalPropertyHandler(propertyName);
-		if (propertyHandler == null) {
+		BeanWrapperImpl nestedBw = (BeanWrapperImpl) getPropertyAccessorForPropertyPath(propertyName);
+		String finalPath = getFinalPath(nestedBw, propertyName);
+		PropertyDescriptor pd = nestedBw.getCachedIntrospectionResults().getPropertyDescriptor(finalPath);
+		if (pd == null) {
 			throw new InvalidPropertyException(getRootClass(), getNestedPath() + propertyName,
 					"No property '" + propertyName + "' found");
 		}
-		return propertyHandler.pd;
+		return pd;
 	}
 
 
@@ -250,8 +254,7 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 		private final PropertyDescriptor pd;
 
 		public BeanPropertyHandler(PropertyDescriptor pd) {
-			super(pd.getPropertyType(),
-					pd.getReadMethod() != null, pd.getWriteMethod() != null);
+			super(pd.getPropertyType(), pd.getReadMethod() != null, pd.getWriteMethod() != null);
 			this.pd = pd;
 		}
 
@@ -287,7 +290,6 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 					readMethod.setAccessible(true);
 				}
 			}
-
 			if (System.getSecurityManager() != null) {
 				try {
 					return AccessController.doPrivileged(new PrivilegedExceptionAction<Object>() {
