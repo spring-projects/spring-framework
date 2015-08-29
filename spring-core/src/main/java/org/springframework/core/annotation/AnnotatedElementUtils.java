@@ -956,21 +956,14 @@ public class AnnotatedElementUtils {
 
 			for (Method attributeMethod : AnnotationUtils.getAttributeMethods(annotation.annotationType())) {
 				String attributeName = attributeMethod.getName();
-				List<String> aliases = AnnotationUtils.getAliasedAttributeNames(attributeMethod, targetAnnotationType);
+				String attributeOverrideName = AnnotationUtils.getAttributeOverrideName(attributeMethod, targetAnnotationType);
 
 				// Explicit annotation attribute override declared via @AliasFor
-				if (!aliases.isEmpty()) {
-					if (aliases.size() != 1) {
-						throw new IllegalStateException(String.format(
-							"Alias list for annotation attribute [%s] must contain at most one element: %s",
-							attributeMethod, aliases));
-					}
-					String aliasedAttributeName = aliases.get(0);
-					if (attributes.containsKey(aliasedAttributeName)) {
-						overrideAttribute(element, annotation, attributes, attributeName, aliasedAttributeName);
+				if (attributeOverrideName != null) {
+					if (attributes.containsKey(attributeOverrideName)) {
+						overrideAttribute(element, annotation, attributes, attributeName, attributeOverrideName);
 					}
 				}
-
 				// Implicit annotation attribute override based on convention
 				else if (!AnnotationUtils.VALUE.equals(attributeName) && attributes.containsKey(attributeName)) {
 					overrideAttribute(element, annotation, attributes, attributeName, attributeName);

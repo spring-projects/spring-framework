@@ -59,7 +59,7 @@ public class AnnotationUtilsTests {
 
 	static void clearCaches() {
 		clearCache("findAnnotationCache", "annotatedInterfaceCache", "metaPresentCache", "synthesizableCache",
-			"attributeAliasesCache", "attributeMethodsCache");
+			"attributeAliasesCache", "attributeMethodsCache", "aliasDescriptorCache");
 	}
 
 	static void clearCache(String... cacheNames) {
@@ -720,26 +720,26 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
-	public void getAliasedAttributeNamesFromWrongTargetAnnotation() throws Exception {
+	public void getAttributeOverrideNameFromWrongTargetAnnotation() throws Exception {
 		Method attribute = AliasedComposedContextConfig.class.getDeclaredMethod("xmlConfigFile");
 		assertThat("xmlConfigFile is not an alias for @Component.",
-			getAliasedAttributeNames(attribute, Component.class), is(empty()));
+			getAttributeOverrideName(attribute, Component.class), is(nullValue()));
 	}
 
 	@Test
-	public void getAliasedAttributeNamesForNonAliasedAttribute() throws Exception {
+	public void getAttributeOverrideNameForNonAliasedAttribute() throws Exception {
 		Method nonAliasedAttribute = ImplicitAliasesContextConfig.class.getDeclaredMethod("nonAliasedAttribute");
-		assertThat(getAliasedAttributeNames(nonAliasedAttribute, ContextConfig.class), is(empty()));
+		assertThat(getAttributeOverrideName(nonAliasedAttribute, ContextConfig.class), is(nullValue()));
 	}
 
 	@Test
-	public void getAliasedAttributeNamesFromAliasedComposedAnnotation() throws Exception {
+	public void getAttributeOverrideNameFromAliasedComposedAnnotation() throws Exception {
 		Method attribute = AliasedComposedContextConfig.class.getDeclaredMethod("xmlConfigFile");
-		assertEquals(asList("location"), getAliasedAttributeNames(attribute, ContextConfig.class));
+		assertEquals("location", getAttributeOverrideName(attribute, ContextConfig.class));
 	}
 
 	@Test
-	public void getAliasedAttributeNamesFromComposedAnnotationWithImplicitAliases() throws Exception {
+	public void getAttributeAliasNamesFromComposedAnnotationWithImplicitAliases() throws Exception {
 		Method xmlFile = ImplicitAliasesContextConfig.class.getDeclaredMethod("xmlFile");
 		Method groovyScript = ImplicitAliasesContextConfig.class.getDeclaredMethod("groovyScript");
 		Method value = ImplicitAliasesContextConfig.class.getDeclaredMethod("value");
@@ -748,17 +748,63 @@ public class AnnotationUtilsTests {
 		Method location3 = ImplicitAliasesContextConfig.class.getDeclaredMethod("location3");
 
 		// Meta-annotation attribute overrides
-		assertEquals(asList("location"), getAliasedAttributeNames(xmlFile, ContextConfig.class));
-		assertEquals(asList("location"), getAliasedAttributeNames(groovyScript, ContextConfig.class));
-		assertEquals(asList("location"), getAliasedAttributeNames(value, ContextConfig.class));
+		assertEquals("location", getAttributeOverrideName(xmlFile, ContextConfig.class));
+		assertEquals("location", getAttributeOverrideName(groovyScript, ContextConfig.class));
+		assertEquals("location", getAttributeOverrideName(value, ContextConfig.class));
 
-		// Implicit Aliases
-		assertThat(getAliasedAttributeNames(xmlFile), containsInAnyOrder("value", "groovyScript", "location1", "location2", "location3"));
-		assertThat(getAliasedAttributeNames(groovyScript), containsInAnyOrder("value", "xmlFile", "location1", "location2", "location3"));
-		assertThat(getAliasedAttributeNames(value), containsInAnyOrder("xmlFile", "groovyScript", "location1", "location2", "location3"));
-		assertThat(getAliasedAttributeNames(location1), containsInAnyOrder("xmlFile", "groovyScript", "value", "location2", "location3"));
-		assertThat(getAliasedAttributeNames(location2), containsInAnyOrder("xmlFile", "groovyScript", "value", "location1", "location3"));
-		assertThat(getAliasedAttributeNames(location3), containsInAnyOrder("xmlFile", "groovyScript", "value", "location1", "location2"));
+		// Implicit aliases
+		assertThat(getAttributeAliasNames(xmlFile), containsInAnyOrder("value", "groovyScript", "location1", "location2", "location3"));
+		assertThat(getAttributeAliasNames(groovyScript), containsInAnyOrder("value", "xmlFile", "location1", "location2", "location3"));
+		assertThat(getAttributeAliasNames(value), containsInAnyOrder("xmlFile", "groovyScript", "location1", "location2", "location3"));
+		assertThat(getAttributeAliasNames(location1), containsInAnyOrder("xmlFile", "groovyScript", "value", "location2", "location3"));
+		assertThat(getAttributeAliasNames(location2), containsInAnyOrder("xmlFile", "groovyScript", "value", "location1", "location3"));
+		assertThat(getAttributeAliasNames(location3), containsInAnyOrder("xmlFile", "groovyScript", "value", "location1", "location2"));
+	}
+
+	@Test
+	public void getAttributeAliasNamesFromComposedAnnotationWithImplicitAliasesForAliasPair() throws Exception {
+		Method xmlFile = ImplicitAliasesForAliasPairContextConfig.class.getDeclaredMethod("xmlFile");
+		Method groovyScript = ImplicitAliasesForAliasPairContextConfig.class.getDeclaredMethod("groovyScript");
+
+		// Meta-annotation attribute overrides
+		assertEquals("location", getAttributeOverrideName(xmlFile, ContextConfig.class));
+		assertEquals("value", getAttributeOverrideName(groovyScript, ContextConfig.class));
+
+		// Implicit aliases
+		assertThat(getAttributeAliasNames(xmlFile), containsInAnyOrder("groovyScript"));
+		assertThat(getAttributeAliasNames(groovyScript), containsInAnyOrder("xmlFile"));
+	}
+
+	@Test
+	public void getAttributeAliasNamesFromComposedAnnotationWithTransitiveImplicitAliases() throws Exception {
+		Method xml = TransitiveImplicitAliasesContextConfig.class.getDeclaredMethod("xml");
+		Method groovy = TransitiveImplicitAliasesContextConfig.class.getDeclaredMethod("groovy");
+
+		// Explicit meta-annotation attribute overrides
+		assertEquals("xmlFile", getAttributeOverrideName(xml, ImplicitAliasesContextConfig.class));
+		assertEquals("groovyScript", getAttributeOverrideName(groovy, ImplicitAliasesContextConfig.class));
+
+		// Transitive meta-annotation attribute overrides
+		assertEquals("location", getAttributeOverrideName(xml, ContextConfig.class));
+		assertEquals("location", getAttributeOverrideName(groovy, ContextConfig.class));
+
+		// Transitive implicit aliases
+		assertThat(getAttributeAliasNames(xml), containsInAnyOrder("groovy"));
+		assertThat(getAttributeAliasNames(groovy), containsInAnyOrder("xml"));
+	}
+
+	@Test
+	public void getAttributeAliasNamesFromComposedAnnotationWithTransitiveImplicitAliasesForAliasPair() throws Exception {
+		Method xml = TransitiveImplicitAliasesForAliasPairContextConfig.class.getDeclaredMethod("xml");
+		Method groovy = TransitiveImplicitAliasesForAliasPairContextConfig.class.getDeclaredMethod("groovy");
+
+		// Explicit meta-annotation attribute overrides
+		assertEquals("xmlFile", getAttributeOverrideName(xml, ImplicitAliasesForAliasPairContextConfig.class));
+		assertEquals("groovyScript", getAttributeOverrideName(groovy, ImplicitAliasesForAliasPairContextConfig.class));
+
+		// Transitive implicit aliases
+		assertThat(getAttributeAliasNames(xml), containsInAnyOrder("groovy"));
+		assertThat(getAttributeAliasNames(groovy), containsInAnyOrder("xml"));
 	}
 
 	@Test
@@ -936,12 +982,50 @@ public class AnnotationUtilsTests {
 
 		ImplicitAliasesContextConfig synthesizedConfig = synthesizeAnnotation(config);
 		assertThat(synthesizedConfig, instanceOf(SynthesizedAnnotation.class));
-		assertNotSame(config, synthesizedConfig);
 
 		assertEquals("value: ", expected, synthesizedConfig.value());
 		assertEquals("location1: ", expected, synthesizedConfig.location1());
 		assertEquals("xmlFile: ", expected, synthesizedConfig.xmlFile());
 		assertEquals("groovyScript: ", expected, synthesizedConfig.groovyScript());
+	}
+
+	@Test
+	public void synthesizeAnnotationWithImplicitAliasesForAliasPair() throws Exception {
+		Class<?> clazz = ImplicitAliasesForAliasPairContextConfigClass.class;
+		ImplicitAliasesForAliasPairContextConfig config = clazz.getAnnotation(ImplicitAliasesForAliasPairContextConfig.class);
+		assertNotNull(config);
+
+		ImplicitAliasesForAliasPairContextConfig synthesizedConfig = synthesizeAnnotation(config);
+		assertThat(synthesizedConfig, instanceOf(SynthesizedAnnotation.class));
+
+		assertEquals("xmlFile: ", "test.xml", synthesizedConfig.xmlFile());
+		assertEquals("groovyScript: ", "test.xml", synthesizedConfig.groovyScript());
+	}
+
+	@Test
+	public void synthesizeAnnotationWithTransitiveImplicitAliases() throws Exception {
+		Class<?> clazz = TransitiveImplicitAliasesContextConfigClass.class;
+		TransitiveImplicitAliasesContextConfig config = clazz.getAnnotation(TransitiveImplicitAliasesContextConfig.class);
+		assertNotNull(config);
+
+		TransitiveImplicitAliasesContextConfig synthesizedConfig = synthesizeAnnotation(config);
+		assertThat(synthesizedConfig, instanceOf(SynthesizedAnnotation.class));
+
+		assertEquals("xml: ", "test.xml", synthesizedConfig.xml());
+		assertEquals("groovy: ", "test.xml", synthesizedConfig.groovy());
+	}
+
+	@Test
+	public void synthesizeAnnotationWithTransitiveImplicitAliasesForAliasPair() throws Exception {
+		Class<?> clazz = TransitiveImplicitAliasesForAliasPairContextConfigClass.class;
+		TransitiveImplicitAliasesForAliasPairContextConfig config = clazz.getAnnotation(TransitiveImplicitAliasesForAliasPairContextConfig.class);
+		assertNotNull(config);
+
+		TransitiveImplicitAliasesForAliasPairContextConfig synthesizedConfig = synthesizeAnnotation(config);
+		assertThat(synthesizedConfig, instanceOf(SynthesizedAnnotation.class));
+
+		assertEquals("xml: ", "test.xml", synthesizedConfig.xml());
+		assertEquals("groovy: ", "test.xml", synthesizedConfig.groovy());
 	}
 
 	@Test
@@ -2005,6 +2089,51 @@ public class AnnotationUtilsTests {
 
 	@ImplicitAliasesWithDuplicateValuesContextConfig(location1 = "1", location2 = "2")
 	static class ImplicitAliasesWithDuplicateValuesContextConfigClass {
+	}
+
+	@ContextConfig
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface ImplicitAliasesForAliasPairContextConfig {
+
+		@AliasFor(annotation = ContextConfig.class, attribute = "location")
+		String xmlFile() default "";
+
+		@AliasFor(annotation = ContextConfig.class, value = "value")
+		String groovyScript() default "";
+	}
+
+	@ImplicitAliasesForAliasPairContextConfig(xmlFile = "test.xml")
+	static class ImplicitAliasesForAliasPairContextConfigClass {
+	}
+
+	@ImplicitAliasesContextConfig
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface TransitiveImplicitAliasesContextConfig {
+
+		@AliasFor(annotation = ImplicitAliasesContextConfig.class, attribute = "xmlFile")
+		String xml() default "";
+
+		@AliasFor(annotation = ImplicitAliasesContextConfig.class, attribute = "groovyScript")
+		String groovy() default "";
+	}
+
+	@TransitiveImplicitAliasesContextConfig(xml = "test.xml")
+	static class TransitiveImplicitAliasesContextConfigClass {
+	}
+
+	@ImplicitAliasesForAliasPairContextConfig
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface TransitiveImplicitAliasesForAliasPairContextConfig {
+
+		@AliasFor(annotation = ImplicitAliasesForAliasPairContextConfig.class, attribute = "xmlFile")
+		String xml() default "";
+
+		@AliasFor(annotation = ImplicitAliasesForAliasPairContextConfig.class, attribute = "groovyScript")
+		String groovy() default "";
+	}
+
+	@TransitiveImplicitAliasesForAliasPairContextConfig(xml = "test.xml")
+	static class TransitiveImplicitAliasesForAliasPairContextConfigClass {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
