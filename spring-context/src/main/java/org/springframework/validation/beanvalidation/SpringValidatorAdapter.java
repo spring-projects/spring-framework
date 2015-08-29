@@ -45,6 +45,7 @@ import org.springframework.validation.SmartValidator;
  * {@link CustomValidatorBean} and {@link LocalValidatorFactoryBean}.
  *
  * @author Juergen Hoeller
+ * @author Kazuki Shimizu
  * @since 3.0
  */
 public class SpringValidatorAdapter implements SmartValidator, javax.validation.Validator {
@@ -212,11 +213,39 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 			String attributeName = entry.getKey();
 			Object attributeValue = entry.getValue();
 			if (!internalAnnotationAttributes.contains(attributeName)) {
-				attributesToExpose.put(attributeName, attributeValue);
+				if (shouldApplyingMessageSourceResolvableToArgumentValue(
+						objectName, field, attributeName, attributeValue)) {
+					String attributeString = attributeValue.toString();
+					attributesToExpose.put(attributeName,
+							new DefaultMessageSourceResolvable(new String[] {attributeString}, attributeString));
+				} else {
+					attributesToExpose.put(attributeName, attributeValue);
+				}
 			}
 		}
 		arguments.addAll(attributesToExpose.values());
 		return arguments.toArray(new Object[arguments.size()]);
+	}
+
+	/**
+	 * Should be applied {@link DefaultMessageSourceResolvable} to specified message argument value ?
+	 *
+	 * <p>If following case is matched, the default implementation return {@code true}.
+	 * <ul>
+	 *     <li>{@code attributeValue} is String</li>
+	 * </ul>
+	 * @param objectName the name of the target object
+	 * @param field the field that caused the binding error
+	 * @param attributeName the constraint annotation attribute name
+	 * @param attributeValue the constraint annotation attribute value
+	 * @return if return {@code true}, attribute value convert to the String
+	 *         and apply the {@link DefaultMessageSourceResolvable}.
+	 * @since 4.2.1
+	 */
+	protected boolean shouldApplyingMessageSourceResolvableToArgumentValue(
+			String objectName, String field, String attributeName, Object attributeValue) {
+		// objectName, field and attributeName define for extendability.
+		return (attributeValue instanceof String);
 	}
 
 	/**
