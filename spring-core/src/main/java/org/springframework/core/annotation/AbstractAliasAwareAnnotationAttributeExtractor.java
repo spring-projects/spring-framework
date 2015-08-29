@@ -91,25 +91,23 @@ abstract class AbstractAliasAwareAnnotationAttributeExtractor<S> implements Anno
 		if (aliasNames != null) {
 			final Object defaultValue = AnnotationUtils.getDefaultValue(getAnnotationType(), attributeName);
 			for (String aliasName : aliasNames) {
-				if (aliasName != null) {
-					Object aliasValue = getRawAttributeValue(aliasName);
+				Object aliasValue = getRawAttributeValue(aliasName);
 
-					if (!ObjectUtils.nullSafeEquals(attributeValue, aliasValue) &&
-							!ObjectUtils.nullSafeEquals(attributeValue, defaultValue) &&
-							!ObjectUtils.nullSafeEquals(aliasValue, defaultValue)) {
-						String elementName = (getAnnotatedElement() != null ? getAnnotatedElement().toString() : "unknown element");
-						throw new AnnotationConfigurationException(String.format(
-								"In annotation [%s] declared on %s and synthesized from [%s], attribute '%s' and its " +
-								"alias '%s' are present with values of [%s] and [%s], but only one is permitted.",
-								getAnnotationType().getName(), elementName, getSource(), attributeName, aliasName,
-								ObjectUtils.nullSafeToString(attributeValue), ObjectUtils.nullSafeToString(aliasValue)));
-					}
+				if (!ObjectUtils.nullSafeEquals(attributeValue, aliasValue) &&
+						!ObjectUtils.nullSafeEquals(attributeValue, defaultValue) &&
+						!ObjectUtils.nullSafeEquals(aliasValue, defaultValue)) {
+					String elementName = (getAnnotatedElement() != null ? getAnnotatedElement().toString() : "unknown element");
+					throw new AnnotationConfigurationException(String.format(
+							"In annotation [%s] declared on %s and synthesized from [%s], attribute '%s' and its " +
+							"alias '%s' are present with values of [%s] and [%s], but only one is permitted.",
+							getAnnotationType().getName(), elementName, getSource(), attributeName, aliasName,
+							ObjectUtils.nullSafeToString(attributeValue), ObjectUtils.nullSafeToString(aliasValue)));
+				}
 
-					// If the user didn't declare the annotation with an explicit value,
-					// use the value of the alias instead.
-					if (ObjectUtils.nullSafeEquals(attributeValue, defaultValue)) {
-						attributeValue = aliasValue;
-					}
+				// If the user didn't declare the annotation with an explicit value,
+				// use the value of the alias instead.
+				if (ObjectUtils.nullSafeEquals(attributeValue, defaultValue)) {
+					attributeValue = aliasValue;
 				}
 			}
 		}

@@ -99,13 +99,11 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 				List<String> aliasNames = attributeAliasMap.get(attributeName);
 				if (aliasNames != null) {
 					for (String aliasName : aliasNames) {
-						if (aliasName != null) {
-							Object aliasValue = attributes.get(aliasName);
-							if (aliasValue != null) {
-								attributeValue = aliasValue;
-								attributes.put(attributeName, attributeValue);
-								break;
-							}
+						Object aliasValue = attributes.get(aliasName);
+						if (aliasValue != null) {
+							attributeValue = aliasValue;
+							attributes.put(attributeName, attributeValue);
+							break;
 						}
 					}
 				}
