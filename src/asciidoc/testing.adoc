@@ -1422,7 +1422,7 @@ be replaced with the following.
 	@ContextConfiguration
 	@TestExecutionListeners(
 		listeners = MyCustomTestExecutionListener.class,
-		mergeMode = MERGE_WITH_DEFAULTS,
+		mergeMode = MERGE_WITH_DEFAULTS
 	)
 	public class MyTest {
 		// class body...
