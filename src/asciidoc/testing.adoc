@@ -4382,6 +4382,10 @@ want to use the raw HtmlUnit libraries.
 [[spring-mvc-test-server-htmlunit-mah-setup]]
 ====== MockMvc and HtmlUnit Setup
 
+First, make sure that you have included a test dependency on `net.sourceforge.htmlunit:htmlunit`.
+In order to use HtmlUnit with Apache HttpComponents 4.5+, you will need to use HtmlUnit
+2.18 or higher.
+
 We can easily create an HtmlUnit `WebClient` that integrates with `MockMvc` using the
 `MockMvcWebClientBuilder` as follows.
 
@@ -4641,6 +4645,9 @@ following sections to make this pattern much easier to implement.
 
 [[spring-mvc-test-server-htmlunit-webdriver-setup]]
 ====== MockMvc and WebDriver Setup
+
+To use Selenium WebDriver with the Spring MVC Test framework, make sure that your project
+includes a test dependency on `org.seleniumhq.selenium:selenium-htmlunit-driver`.
 
 We can easily create a Selenium `WebDriver` that integrates with `MockMvc` using the
 `MockMvcHtmlUnitDriverBuilder` as follows.
