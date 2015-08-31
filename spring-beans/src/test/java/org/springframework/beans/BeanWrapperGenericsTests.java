@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 import org.junit.Test;
@@ -180,6 +181,18 @@ public class BeanWrapperGenericsTests {
 		value1.add(new Integer(1));
 		bw.setPropertyValue("collectionMap[1]", value1);
 		assertTrue(gb.getCollectionMap().get(new Integer(1)) instanceof HashSet);
+	}
+
+	@Test
+	public void testGenericMapFromProperties() {
+		GenericBean<?> gb = new GenericBean<Object>();
+		BeanWrapper bw = new BeanWrapperImpl(gb);
+		Properties input = new Properties();
+		input.setProperty("4", "5");
+		input.setProperty("6", "7");
+		bw.setPropertyValue("shortMap", input);
+		assertEquals(new Integer(5), gb.getShortMap().get(new Short("4")));
+		assertEquals(new Integer(7), gb.getShortMap().get(new Short("6")));
 	}
 
 	@Test

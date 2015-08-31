@@ -521,7 +521,6 @@ class TypeConverterDelegate {
 		}
 
 		boolean originalAllowed = requiredType.isInstance(original);
-		typeDescriptor = typeDescriptor.narrow(original);
 		TypeDescriptor elementType = typeDescriptor.getElementTypeDescriptor();
 		if (elementType == null && originalAllowed &&
 				!this.propertyEditorRegistry.hasCustomEditorForElement(null, propertyName)) {
@@ -603,7 +602,6 @@ class TypeConverterDelegate {
 		}
 
 		boolean originalAllowed = requiredType.isInstance(original);
-		typeDescriptor = typeDescriptor.narrow(original);
 		TypeDescriptor keyType = typeDescriptor.getMapKeyTypeDescriptor();
 		TypeDescriptor valueType = typeDescriptor.getMapValueTypeDescriptor();
 		if (keyType == null && valueType == null && originalAllowed &&
