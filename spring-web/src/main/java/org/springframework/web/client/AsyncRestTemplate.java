@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -115,7 +115,9 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	 * @param asyncRequestFactory the asynchronous request factory
 	 * @param syncRequestFactory the synchronous request factory
 	 */
-	public AsyncRestTemplate(AsyncClientHttpRequestFactory asyncRequestFactory, ClientHttpRequestFactory syncRequestFactory) {
+	public AsyncRestTemplate(
+			AsyncClientHttpRequestFactory asyncRequestFactory, ClientHttpRequestFactory syncRequestFactory) {
+
 		this(asyncRequestFactory, new RestTemplate(syncRequestFactory));
 	}
 
@@ -126,7 +128,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	 * @param restTemplate the synchronous template to use
 	 */
 	public AsyncRestTemplate(AsyncClientHttpRequestFactory requestFactory, RestTemplate restTemplate) {
-		Assert.notNull(restTemplate, "'restTemplate' must not be null");
+		Assert.notNull(restTemplate, "RestTemplate must not be null");
 		this.syncTemplate = restTemplate;
 		setAsyncRequestFactory(requestFactory);
 	}
@@ -141,7 +143,9 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 		this.syncTemplate.setErrorHandler(errorHandler);
 	}
 
-	/** Return the error handler. */
+	/**
+	 * Return the error handler.
+	 */
 	public ResponseErrorHandler getErrorHandler() {
 		return this.syncTemplate.getErrorHandler();
 	}
@@ -163,7 +167,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	 * Return the message body converters.
 	 */
 	public List<HttpMessageConverter<?>> getMessageConverters() {
-		return syncTemplate.getMessageConverters();
+		return this.syncTemplate.getMessageConverters();
 	}
 
 
@@ -214,6 +218,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 		ResponseExtractor<HttpHeaders> headersExtractor = headersExtractor();
 		return execute(url, HttpMethod.HEAD, null, headersExtractor);
 	}
+
 
 	// POST
 
@@ -639,7 +644,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 				}
 				return convertResponse(response);
 			}
-			catch (IOException ex) {
+			catch (Throwable ex) {
 				throw new ExecutionException(ex);
 			}
 			finally {
