@@ -351,13 +351,23 @@ public class AnnotatedElementUtilsTests {
 		assertGetMergedAnnotation(ImplicitAliasesContextConfigClass3.class, "baz.xml");
 	}
 
-	private void assertGetMergedAnnotation(Class<?> element, String expected) {
+	@Test
+	public void getMergedAnnotationWithTransitiveImplicitAliases() {
+		assertGetMergedAnnotation(TransitiveImplicitAliasesContextConfigClass.class, "test.groovy");
+	}
+
+	@Test
+	public void getMergedAnnotationWithTransitiveImplicitAliasesWithSkippedLevel() {
+		assertGetMergedAnnotation(TransitiveImplicitAliasesWithSkippedLevelContextConfigClass.class, "test.xml");
+	}
+
+	private void assertGetMergedAnnotation(Class<?> element, String... expected) {
 		String name = ContextConfig.class.getName();
 		ContextConfig contextConfig = getMergedAnnotation(element, ContextConfig.class);
 
 		assertNotNull("Should find @ContextConfig on " + element.getSimpleName(), contextConfig);
-		assertArrayEquals("locations", new String[] { expected }, contextConfig.locations());
-		assertArrayEquals("value", new String[] { expected }, contextConfig.value());
+		assertArrayEquals("locations", expected, contextConfig.locations());
+		assertArrayEquals("value", expected, contextConfig.value());
 		assertArrayEquals("classes", new Class<?>[0], contextConfig.classes());
 
 		// Verify contracts between utility methods:
@@ -800,6 +810,28 @@ public class AnnotatedElementUtilsTests {
 	@interface ComposedImplicitAliasesContextConfig {
 	}
 
+	@ImplicitAliasesContextConfig
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface TransitiveImplicitAliasesContextConfig {
+
+		@AliasFor(annotation = ImplicitAliasesContextConfig.class, attribute = "xmlFiles")
+		String[] xml() default {};
+
+		@AliasFor(annotation = ImplicitAliasesContextConfig.class, attribute = "groovyScripts")
+		String[] groovy() default {};
+	}
+
+	@ImplicitAliasesContextConfig
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface TransitiveImplicitAliasesWithSkippedLevelContextConfig {
+
+		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
+		String[] xml() default {};
+
+		@AliasFor(annotation = ImplicitAliasesContextConfig.class, attribute = "groovyScripts")
+		String[] groovy() default {};
+	}
+
 	/**
 	 * Invalid because the configuration declares a value for 'value' and
 	 * requires a value for the aliased 'locations'. So we likely end up with
@@ -1026,6 +1058,14 @@ public class AnnotatedElementUtilsTests {
 
 	@ImplicitAliasesContextConfig(xmlFiles = "baz.xml")
 	static class ImplicitAliasesContextConfigClass3 {
+	}
+
+	@TransitiveImplicitAliasesContextConfig(groovy = "test.groovy")
+	static class TransitiveImplicitAliasesContextConfigClass {
+	}
+
+	@TransitiveImplicitAliasesWithSkippedLevelContextConfig(xml = "test.xml")
+	static class TransitiveImplicitAliasesWithSkippedLevelContextConfigClass {
 	}
 
 	@ComposedImplicitAliasesContextConfig
