@@ -644,7 +644,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 				}
 				return convertResponse(response);
 			}
-			catch (Throwable ex) {
+			catch (IOException ex) {
 				throw new ExecutionException(ex);
 			}
 			finally {
