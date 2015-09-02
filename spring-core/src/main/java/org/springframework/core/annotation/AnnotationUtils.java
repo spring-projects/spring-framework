@@ -1516,7 +1516,7 @@ public abstract class AnnotationUtils {
 	static List<String> getAttributeAliasNames(Method attribute) {
 		Assert.notNull(attribute, "attribute must not be null");
 		AliasDescriptor descriptor = AliasDescriptor.from(attribute);
-		return (descriptor == null ? Collections.<String> emptyList() : descriptor.getAttributeAliasNames());
+		return (descriptor != null ? descriptor.getAttributeAliasNames() : Collections.<String> emptyList());
 	}
 
 	/**
