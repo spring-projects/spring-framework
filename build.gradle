@@ -52,12 +52,12 @@ configure(allprojects) { project ->
 	ext.htmlunitVersion      = "2.18"
 	ext.jasperreportsVersion = "6.1.0"
 	ext.javamailVersion      = "1.5.4"
-	ext.jettyVersion         = "9.3.2.v20150730"
+	ext.jettyVersion         = "9.3.3.v20150827"
 	ext.jodaVersion          = "2.8.1"
 	ext.jrubyVersion         = "1.7.22"  // JRuby 9.0.0.0 only supported through JSR-223 (StandardScriptFactory)
 	ext.jtaVersion           = "1.2"
 	ext.junitVersion         = "4.12"
-	ext.nettyVersion         = "4.0.30.Final"
+	ext.nettyVersion         = "4.0.31.Final"
 	ext.openjpaVersion       = "2.4.0"
 	ext.poiVersion           = "3.12"
 	ext.protobufVersion      = "2.6.1"
@@ -72,7 +72,7 @@ configure(allprojects) { project ->
 	ext.tiles3Version        = "3.0.5"
 	ext.tomcatVersion        = "8.0.26"
 	ext.tyrusVersion         = "1.3.5"  // constrained by WebLogic 12.1.3 support
-	ext.undertowVersion      = "1.2.10.Final"
+	ext.undertowVersion      = "1.2.11.Final"
 	ext.woodstoxVersion      = "5.0.1"
 	ext.xmlunitVersion       = "1.6"
 	ext.xstreamVersion       = "1.4.8"
