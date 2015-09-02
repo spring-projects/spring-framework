@@ -57,7 +57,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 
 
 	/** Checking for Servlet 3.0+ HttpServletResponse.getHeader(String) */
-	private static final boolean responseGetHeaderAvailable =
+	private static final boolean servlet3Present =
 			ClassUtils.hasMethod(HttpServletResponse.class, "getHeader", String.class);
 
 
@@ -149,9 +149,11 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	protected boolean isEligibleForEtag(HttpServletRequest request, HttpServletResponse response,
 			int responseStatusCode, byte[] responseBody) {
 
-		if (responseStatusCode >= 200 && responseStatusCode < 300 &&
-				HttpMethod.GET.name().equals(request.getMethod())) {
-			String cacheControl = (responseGetHeaderAvailable ? response.getHeader(HEADER_CACHE_CONTROL) : null);
+		if (responseStatusCode >= 200 && responseStatusCode < 300 && HttpMethod.GET.name().equals(request.getMethod())) {
+			String cacheControl = null;
+			if (servlet3Present) {
+				cacheControl = response.getHeader(HEADER_CACHE_CONTROL);
+			}
 			if (cacheControl == null || !cacheControl.contains(DIRECTIVE_NO_STORE)) {
 				return true;
 			}
