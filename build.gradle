@@ -43,7 +43,7 @@ configure(allprojects) { project ->
 	ext.jettyVersion         = "9.2.13.v20150730"
 	ext.jodaVersion          = "2.8.1"
 	ext.junitVersion         = "4.12"
-	ext.nettyVersion         = "4.0.30.Final"
+	ext.nettyVersion         = "4.0.31.Final"
 	ext.openJpaVersion       = "2.2.2"  // 2.3.0 not Java 8 compatible (based on ASM 4)
 	ext.protobufVersion      = "2.6.1"
 	ext.reactorVersion       = "1.1.6.RELEASE"
@@ -680,7 +680,7 @@ project("spring-web") {
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jackson2Version}")
 		optional("com.google.code.gson:gson:${gsonVersion}")
-		optional("com.rometools:rome:1.5.0")
+		optional("com.rometools:rome:1.5.1")
 		optional("org.eclipse.jetty:jetty-servlet:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
 		}
@@ -843,7 +843,7 @@ project("spring-webmvc") {
 		}
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jackson2Version}")
-		optional("com.rometools:rome:1.5.0")
+		optional("com.rometools:rome:1.5.1")
 		optional("javax.el:javax.el-api:2.2.5")
 		optional("org.apache.tiles:tiles-api:${tiles3Version}")
 		optional("org.apache.tiles:tiles-core:${tiles3Version}") {
@@ -981,7 +981,7 @@ project("spring-test") {
 		testCompile("org.hibernate:hibernate-validator:${hibVal5Version}")
 		testCompile("com.thoughtworks.xstream:xstream:${xstreamVersion}")
 		testCompile("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
-		testCompile("com.rometools:rome:1.5.0")
+		testCompile("com.rometools:rome:1.5.1")
 		testCompile("org.apache.tiles:tiles-api:${tiles3Version}")
 		testCompile("org.apache.tiles:tiles-core:${tiles3Version}") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
