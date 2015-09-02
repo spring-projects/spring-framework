@@ -58,10 +58,12 @@ public class DefaultDeserializer implements Deserializer<Object> {
 
 
 	/**
-	 * Reads the input stream and deserializes into an object.
+	 * Read from the supplied {@code InputStream} and deserialize the contents
+	 * into an object.
 	 * @see ObjectInputStream#readObject()
 	 */
 	@Override
+	@SuppressWarnings("resource")
 	public Object deserialize(InputStream inputStream) throws IOException {
 		ObjectInputStream objectInputStream = new ConfigurableObjectInputStream(inputStream, this.classLoader);
 		try {
