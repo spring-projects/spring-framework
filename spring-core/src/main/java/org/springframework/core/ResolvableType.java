@@ -186,7 +186,7 @@ public final class ResolvableType implements Serializable {
 	 * whether both the {@link #resolve() resolved} {@code Class} is
 	 * {@link Class#isAssignableFrom(Class) assignable from} the given type
 	 * as well as whether all {@link #getGenerics() generics} are assignable.
-	 * @param other the type to be checked against
+	 * @param other the type to be checked against (as a {@code ResolvableType})
 	 * @return {@code true} if the specified other type can be assigned to this
 	 * {@code ResolvableType}; {@code false} otherwise
 	 */
@@ -349,7 +349,7 @@ public final class ResolvableType implements Serializable {
 	 * implement or extend the specified class.
 	 * @param type the required class type
 	 * @return a {@link ResolvableType} representing this object as the specified
-	 * type or {@link #NONE}
+	 * type, or {@link #NONE} if not resolvable as that type
 	 * @see #asCollection()
 	 * @see #asMap()
 	 * @see #getSuperType()

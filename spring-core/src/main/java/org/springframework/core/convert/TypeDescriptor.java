@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,7 +111,7 @@ public class TypeDescriptor implements Serializable {
 	 * constructor is used internally and may also be used by subclasses that support
 	 * non-Java languages with extended type systems.
 	 * @param resolvableType the resolvable type
-	 * @param type the backing type or {@code null} if should be resolved
+	 * @param type the backing type (or {@code null} if it should get resolved)
 	 * @param annotations the type annotations
 	 */
 	protected TypeDescriptor(ResolvableType resolvableType, Class<?> type, Annotation[] annotations) {
@@ -194,7 +194,7 @@ public class TypeDescriptor implements Serializable {
 	/**
 	 * Cast this {@link TypeDescriptor} to a superclass or implemented interface
 	 * preserving annotations and nested type context.
-	 * @param superType the super type to cast to (can be {@code null}
+	 * @param superType the super type to cast to (can be {@code null})
 	 * @return a new TypeDescriptor for the up-cast type
 	 * @throws IllegalArgumentException if this type is not assignable to the super-type
 	 * @since 3.2
