@@ -194,6 +194,7 @@ public class HttpEntityMethodProcessorMockTests {
 
 	@Test(expected = HttpMediaTypeNotSupportedException.class)
 	public void resolveArgumentNoContentType() throws Exception {
+		servletRequest.setContent("some content".getBytes(Charset.forName("UTF-8")));
 		processor.resolveArgument(paramHttpEntity, mavContainer, webRequest, null);
 		fail("Expected exception");
 	}

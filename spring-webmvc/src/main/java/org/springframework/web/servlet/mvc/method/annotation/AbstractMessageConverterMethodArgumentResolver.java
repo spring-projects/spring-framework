@@ -158,6 +158,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 			Type targetType) throws IOException, HttpMediaTypeNotSupportedException, HttpMessageNotReadableException {
 
 		MediaType contentType;
+		boolean noContentType = false;
 		try {
 			contentType = inputMessage.getHeaders().getContentType();
 		}
@@ -165,6 +166,7 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 			throw new HttpMediaTypeNotSupportedException(ex.getMessage());
 		}
 		if (contentType == null) {
+			noContentType = true;
 			contentType = MediaType.APPLICATION_OCTET_STREAM;
 		}
 
@@ -220,7 +222,8 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 		}
 
 		if (body == NO_VALUE) {
-			if (!SUPPORTED_METHODS.contains(httpMethod)) {
+			if (!SUPPORTED_METHODS.contains(httpMethod)
+					|| (noContentType && inputMessage.getBody() == null)) {
 				return null;
 			}
 			throw new HttpMediaTypeNotSupportedException(contentType, this.allSupportedMediaTypes);

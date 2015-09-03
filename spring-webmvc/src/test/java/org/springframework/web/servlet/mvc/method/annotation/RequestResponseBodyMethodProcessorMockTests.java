@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -209,6 +209,15 @@ public class RequestResponseBodyMethodProcessorMockTests {
 		servletRequest.setContentType("text/plain");
 		servletRequest.setContent(new byte[0]);
 		given(messageConverter.canRead(String.class, MediaType.TEXT_PLAIN)).willReturn(true);
+		assertNull(processor.resolveArgument(paramStringNotRequired, mavContainer, webRequest, new ValidatingBinderFactory()));
+	}
+
+	// SPR-13417
+	@Test
+	public void resolveArgumentNotRequiredNoContentNoContentType() throws Exception {
+		servletRequest.setContent(new byte[0]);
+		given(messageConverter.canRead(String.class, MediaType.TEXT_PLAIN)).willReturn(true);
+		given(messageConverter.canRead(String.class, MediaType.APPLICATION_OCTET_STREAM)).willReturn(false);
 		assertNull(processor.resolveArgument(paramStringNotRequired, mavContainer, webRequest, new ValidatingBinderFactory()));
 	}
 
