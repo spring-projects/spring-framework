@@ -202,7 +202,6 @@ public @interface AliasFor {
 	@AliasFor("value")
 	String attribute() default "";
 
-
 	/**
 	 * The type of annotation in which the aliased {@link #attribute} is declared.
 	 * <p>Defaults to {@link Annotation}, implying that the aliased attribute is
