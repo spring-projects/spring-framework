@@ -36,6 +36,7 @@ import static org.junit.Assert.*;
  * @author Rossen Stoyanchev
  * @author Rob Winch
  * @author Sam Brannen
+ * @author Brian Clozel
  * @since 19.02.2006
  */
 public class MockHttpServletResponseTests {
@@ -251,6 +252,21 @@ public class MockHttpServletResponseTests {
 		response.addDateHeader("Last-Modified", 1437472801000L);
 		assertEquals("Tue, 21 Jul 2015 10:00:00 GMT", response.getHeaders("Last-Modified").get(0));
 		assertEquals("Tue, 21 Jul 2015 10:00:01 GMT", response.getHeaders("Last-Modified").get(1));
+	}
+
+	@Test
+	public void getDateHeader() {
+		long time = 1437472800000L;
+		response.setDateHeader("Last-Modified", time);
+		assertEquals("Tue, 21 Jul 2015 10:00:00 GMT", response.getHeader("Last-Modified"));
+		assertEquals(time, response.getDateHeader("Last-Modified"));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void getInvalidDateHeader() {
+		response.setHeader("Last-Modified", "invalid");
+		assertEquals("invalid", response.getHeader("Last-Modified"));
+		response.getDateHeader("Last-Modified");
 	}
 
 	/**

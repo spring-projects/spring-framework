@@ -618,4 +618,6 @@ public @interface MyTestConfig {
   allowing common test database configuration to be reused in different
   ++ApplicationContext++s within a test suite.
 ** See <<jdbc-embedded-database-unique-names>> for details.
+* `MockHttpServletRequest` and `MockHttpServletResponse` now better supports
+  date header formatting `getDateHeader` and `setDateHeader` methods.
 

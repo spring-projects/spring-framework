@@ -23,6 +23,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -491,6 +492,17 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	@Override
 	public void setDateHeader(String name, long value) {
 		setHeaderValue(name, formatDate(value));
+	}
+
+	public long getDateHeader(String name) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.US);
+		dateFormat.setTimeZone(GMT);
+		try {
+			return dateFormat.parse(getHeader(name)).getTime();
+		} catch (ParseException exception) {
+			throw new IllegalArgumentException(
+					"Value for header '" + name + "' is not a valid Date: " + getHeader(name));
+		}
 	}
 
 	@Override
