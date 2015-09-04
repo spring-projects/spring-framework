@@ -47,6 +47,8 @@ public class RequestBodyPublisher implements ReadListener, Publisher<byte[]> {
 
 	private Subscriber<? super byte[]> subscriber;
 
+	private boolean stalled;
+
 	public RequestBodyPublisher(AsyncContextSynchronizer synchronizer, int bufferSize) {
 		this.synchronizer = synchronizer;
 		this.buffer = new byte[bufferSize];
@@ -61,16 +63,18 @@ public class RequestBodyPublisher implements ReadListener, Publisher<byte[]> {
 	@Override
 	public void onDataAvailable() throws IOException {
 		ServletInputStream input = this.synchronizer.getInputStream();
+		logger.debug("onDataAvailable: " + input);
 
 		while (true) {
 			logger.debug("Demand: " + this.demand);
 
 			if (!demand.hasDemand()) {
+				stalled = true;
 				break;
 			}
 
 			boolean ready = input.isReady();
-			logger.debug("Input " + ready + "/" + input.isFinished());
+			logger.debug("Input ready: " + ready + " finished: " + input.isFinished());
 
 			if (!ready) {
 				break;
@@ -117,11 +121,12 @@ public class RequestBodyPublisher implements ReadListener, Publisher<byte[]> {
 		public void request(long n) {
 			logger.debug("Updating demand " + demand + " by " + n);
 
-			boolean stalled = !demand.hasDemand();
-
 			demand.increase(n);
 
+			logger.debug("Stalled: " + stalled);
+
 			if (stalled) {
+				stalled = false;
 				try {
 					onDataAvailable();
 				}

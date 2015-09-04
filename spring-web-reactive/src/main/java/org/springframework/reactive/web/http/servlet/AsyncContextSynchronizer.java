@@ -98,6 +98,9 @@ final class AsyncContextSynchronizer {
 		}
 	}
 
+	/**
+	 * Completes both the reading and writing side of the asynchronous operation.
+	 */
 	public void complete() {
 		readComplete();
 		writeComplete();
