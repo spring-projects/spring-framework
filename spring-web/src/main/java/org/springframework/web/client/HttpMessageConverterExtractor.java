@@ -80,7 +80,7 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 	public T extractData(ClientHttpResponse response) throws IOException {
 
 		MessageBodyClientHttpResponseWrapper responseWrapper = new MessageBodyClientHttpResponseWrapper(response);
-		if(!responseWrapper.hasMessageBody() || responseWrapper.hasEmptyMessageBody()) {
+		if (!responseWrapper.hasMessageBody() || responseWrapper.hasEmptyMessageBody()) {
 			return null;
 		}
 		MediaType contentType = getContentType(responseWrapper);

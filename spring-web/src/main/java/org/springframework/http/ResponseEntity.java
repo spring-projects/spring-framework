@@ -422,10 +422,10 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		@Override
 		public BodyBuilder eTag(String eTag) {
 			if (eTag != null) {
-				if(!eTag.startsWith("\"") && !eTag.startsWith("W/\"")) {
+				if (!eTag.startsWith("\"") && !eTag.startsWith("W/\"")) {
 					eTag = "\"" + eTag;
 				}
-				if(!eTag.endsWith("\"")) {
+				if (!eTag.endsWith("\"")) {
 					eTag = eTag + "\"";
 				}
 			}

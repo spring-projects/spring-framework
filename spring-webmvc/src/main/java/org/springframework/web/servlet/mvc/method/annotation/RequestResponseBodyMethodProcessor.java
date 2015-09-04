@@ -144,8 +144,7 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
 		ServletServerHttpRequest inputMessage = new ServletServerHttpRequest(servletRequest);
 
-		Object arg = null;
-		arg = readWithMessageConverters(inputMessage, methodParam, paramType);
+		Object arg = readWithMessageConverters(inputMessage, methodParam, paramType);
 		if (arg == null) {
 			if (methodParam.getParameterAnnotation(RequestBody.class).required()) {
 				throw new HttpMessageNotReadableException("Required request body is missing: " +

@@ -35,7 +35,6 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.accept.ContentNegotiationManager;
@@ -121,8 +120,9 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		List<MediaType> requestedMediaTypes = getAcceptableMediaTypes(servletRequest);
 		List<MediaType> producibleMediaTypes = getProducibleMediaTypes(servletRequest, returnValueClass, returnValueType);
 
-		Assert.isTrue(returnValue == null || !producibleMediaTypes.isEmpty(),
-				"No converter found for return value of type: " + returnValueClass);
+		if (returnValue != null && producibleMediaTypes.isEmpty()) {
+			throw new IllegalArgumentException("No converter found for return value of type: " + returnValueClass);
+		}
 
 		Set<MediaType> compatibleMediaTypes = new LinkedHashSet<MediaType>();
 		for (MediaType requestedType : requestedMediaTypes) {

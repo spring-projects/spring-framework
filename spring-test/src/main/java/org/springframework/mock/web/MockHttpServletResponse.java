@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
-
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
@@ -499,7 +498,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		dateFormat.setTimeZone(GMT);
 		try {
 			return dateFormat.parse(getHeader(name)).getTime();
-		} catch (ParseException exception) {
+		}
+		catch (ParseException ex) {
 			throw new IllegalArgumentException(
 					"Value for header '" + name + "' is not a valid Date: " + getHeader(name));
 		}
