@@ -567,6 +567,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void prepareRefresh() {
 		this.startupDate = System.currentTimeMillis();
+		this.closed.set(false);
 		this.active.set(true);
 
 		if (logger.isInfoEnabled()) {
