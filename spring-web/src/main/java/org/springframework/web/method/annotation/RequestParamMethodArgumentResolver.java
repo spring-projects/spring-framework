@@ -163,35 +163,26 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 				WebUtils.getNativeRequest(servletRequest, MultipartHttpServletRequest.class);
 		Object arg;
 
-		if (MultipartFile.class == parameter.getParameterType()) {
-			assertIsMultipartRequest(servletRequest);
+	        if(!isMultipartRequest(servletRequest)){
+	            return null;
+	        }
+	        if (MultipartFile.class.equals(parameter.getParameterType())) {
 			Assert.notNull(multipartRequest, "Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
-			arg = multipartRequest.getFile(name);
-		}
-		else if (isMultipartFileCollection(parameter)) {
-			assertIsMultipartRequest(servletRequest);
+	            	arg = multipartRequest.getFile(name);
+		} else if (isMultipartFileCollection(parameter)) {
 			Assert.notNull(multipartRequest, "Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
-			arg = multipartRequest.getFiles(name);
-		}
-		else if (isMultipartFileArray(parameter)) {
-			assertIsMultipartRequest(servletRequest);
-			Assert.notNull(multipartRequest, "Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
+	            	arg = multipartRequest.getFiles(name);
+	        } else if (isMultipartFileArray(parameter)) {
+	            	Assert.notNull(multipartRequest, "Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
 			List<MultipartFile> multipartFiles = multipartRequest.getFiles(name);
-			arg = multipartFiles.toArray(new MultipartFile[multipartFiles.size()]);
-		}
-		else if ("javax.servlet.http.Part".equals(parameter.getParameterType().getName())) {
-			assertIsMultipartRequest(servletRequest);
+	            	arg = multipartFiles.toArray(new MultipartFile[multipartFiles.size()]);
+		} else if ("javax.servlet.http.Part".equals(parameter.getParameterType().getName())) {
 			arg = servletRequest.getPart(name);
-		}
-		else if (isPartCollection(parameter)) {
-			assertIsMultipartRequest(servletRequest);
+	        } else if (isPartCollection(parameter)) {
 			arg = new ArrayList<Object>(servletRequest.getParts());
-		}
-		else if (isPartArray(parameter)) {
-			assertIsMultipartRequest(servletRequest);
+		} else if (isPartArray(parameter)) {
 			arg = RequestPartResolver.resolvePart(servletRequest);
-		}
-		else {
+		} else {
 			arg = null;
 			if (multipartRequest != null) {
 				List<MultipartFile> files = multipartRequest.getFiles(name);
@@ -202,13 +193,21 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 			if (arg == null) {
 				String[] paramValues = webRequest.getParameterValues(name);
 				if (paramValues != null) {
-					arg = (paramValues.length == 1 ? paramValues[0] : paramValues);
+					arg = paramValues.length == 1 ? paramValues[0] : paramValues;
 				}
 			}
 		}
 
 		return arg;
 	}
+
+    	private boolean isMultipartRequest(HttpServletRequest request){
+        	String contentType = request.getContentType();
+        	if (contentType == null || !contentType.toLowerCase().startsWith("multipart/")) {
+            		return false;
+        	}
+        	return true;
+    	}
 
 	private void assertIsMultipartRequest(HttpServletRequest request) {
 		String contentType = request.getContentType();
