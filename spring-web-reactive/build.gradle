@@ -25,7 +25,7 @@ dependencies {
 	compile "io.projectreactor:reactor-stream:2.0.5.RELEASE"
 	compile "commons-logging:commons-logging:1.2"
 
-	optional "io.reactivex:rxnetty:0.5.0-SNAPSHOT"
+	optional "io.reactivex:rxnetty-http:0.5.0-SNAPSHOT"
 	optional "io.reactivex:rxjava-reactive-streams:1.0.1"
 
 	provided "javax.servlet:javax.servlet-api:3.1.0"
