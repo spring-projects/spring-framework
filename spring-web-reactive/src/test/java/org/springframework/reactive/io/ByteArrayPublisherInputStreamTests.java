@@ -27,7 +27,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Arjen Poutsma
  */
-public class ByteBufPublisherInputStreamTests {
+public class ByteArrayPublisherInputStreamTests {
 
 	private BlockingSignalQueue<byte[]> queue;
 
