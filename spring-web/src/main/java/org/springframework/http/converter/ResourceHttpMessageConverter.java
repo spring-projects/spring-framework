@@ -40,6 +40,8 @@ import org.springframework.util.StringUtils;
  * If JAF is not available, {@code application/octet-stream} is used.
  *
  * @author Arjen Poutsma
+ * @author Juergen Hoeller
+ * @author Kazuki Shimizu
  * @since 3.0.2
  */
 public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<Resource> {
@@ -62,8 +64,16 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 	protected Resource readInternal(Class<? extends Resource> clazz, HttpInputMessage inputMessage)
 			throws IOException, HttpMessageNotReadableException {
 
-		byte[] body = StreamUtils.copyToByteArray(inputMessage.getBody());
-		return new ByteArrayResource(body);
+		if (InputStreamResource.class == clazz){
+			return new InputStreamResource(inputMessage.getBody());
+		}
+		else if (clazz.isAssignableFrom(ByteArrayResource.class)) {
+			byte[] body = StreamUtils.copyToByteArray(inputMessage.getBody());
+			return new ByteArrayResource(body);
+		}
+		else {
+			throw new IllegalStateException("Unsupported resource class: " + clazz);
+		}
 	}
 
 	@Override
