@@ -416,7 +416,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 */
 	protected void setETagHeader(HttpServletRequest request, HttpServletResponse response) {
 		String versionString = (String) request.getAttribute(VersionResourceResolver.RESOURCE_VERSION_ATTRIBUTE);
-		if(versionString != null) {
+		if (versionString != null) {
 			response.setHeader(HttpHeaders.ETAG, "\"" + versionString + "\"");
 		}
 	}

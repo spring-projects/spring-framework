@@ -16,13 +16,9 @@
 
 package org.springframework.test.util;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.springframework.test.util.AssertionErrors.*;
-
 import java.io.ByteArrayInputStream;
 import java.util.Collections;
 import java.util.Map;
-
 import javax.xml.namespace.QName;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -41,6 +37,9 @@ import org.xml.sax.InputSource;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.SimpleNamespaceContext;
+
+import static org.hamcrest.MatcherAssert.*;
+import static org.springframework.test.util.AssertionErrors.*;
 
 /**
  * A helper class for applying assertions via XPath expressions.
@@ -113,7 +112,7 @@ public class XpathExpectationsHelper {
 		factory.setNamespaceAware(this.hasNamespaces);
 		DocumentBuilder documentBuilder = factory.newDocumentBuilder();
 		InputSource inputSource = new InputSource(new ByteArrayInputStream(xml));
-		if(StringUtils.hasText(encoding)) {
+		if (StringUtils.hasText(encoding)) {
 			inputSource.setEncoding(encoding);
 		}
 		return documentBuilder.parse(inputSource);

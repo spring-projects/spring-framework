@@ -25,18 +25,18 @@ import org.webjars.WebJarAssetLocator;
 import org.springframework.core.io.Resource;
 
 /**
- * A {@code ResourceResolver} that delegates to the chain to locate a resource
- * and then attempts to find a matching versioned resource contained in a WebJar JAR file.
+ * A {@code ResourceResolver} that delegates to the chain to locate a resource and then
+ * attempts to find a matching versioned resource contained in a WebJar JAR file.
  *
  * <p>This allows WebJars.org users to write version agnostic paths in their templates,
  * like {@code <script src="/jquery/jquery.min.js"/>}.
  * This path will be resolved to the unique version {@code <script src="/jquery/1.2.0/jquery.min.js"/>},
  * which is a better fit for HTTP caching and version management in applications.
  *
- * <p>This also resolves Resources for version agnostic HTTP requests {@code "GET /jquery/jquery.min.js"}.
+ * <p>This also resolves resources for version agnostic HTTP requests {@code "GET /jquery/jquery.min.js"}.
  *
- * <p>This resolver requires the "org.webjars:webjars-locator" library on classpath, and is automatically
- * registered if that library is present.
+ * <p>This resolver requires the "org.webjars:webjars-locator" library on classpath,
+ * and is automatically registered if that library is present.
  *
  * @author Brian Clozel
  * @since 4.2
@@ -49,12 +49,7 @@ public class WebJarsResourceResolver extends AbstractResourceResolver {
 
 	private final static int WEBJARS_LOCATION_LENGTH = WEBJARS_LOCATION.length();
 
-	private final WebJarAssetLocator webJarAssetLocator;
-
-
-	public WebJarsResourceResolver() {
-		this.webJarAssetLocator = new WebJarAssetLocator();
-	}
+	private final WebJarAssetLocator webJarAssetLocator = new WebJarAssetLocator();
 
 
 	@Override
@@ -64,7 +59,7 @@ public class WebJarsResourceResolver extends AbstractResourceResolver {
 		Resource resolved = chain.resolveResource(request, requestPath, locations);
 		if (resolved == null) {
 			String webJarResourcePath = findWebJarResourcePath(requestPath);
-			if(webJarResourcePath != null) {
+			if (webJarResourcePath != null) {
 				return chain.resolveResource(request, webJarResourcePath, locations);
 			}
 		}
@@ -78,7 +73,7 @@ public class WebJarsResourceResolver extends AbstractResourceResolver {
 		String path = chain.resolveUrlPath(resourceUrlPath, locations);
 		if (path == null) {
 			String webJarResourcePath = findWebJarResourcePath(resourceUrlPath);
-			if(webJarResourcePath != null) {
+			if (webJarResourcePath != null) {
 				return chain.resolveUrlPath(webJarResourcePath, locations);
 			}
 		}

@@ -208,7 +208,7 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 				url.append(request.getContextPath());
 			}
 			else {
-				if(this.context.endsWith("/")) {
+				if (this.context.endsWith("/")) {
 					url.append(this.context.substring(0, this.context.length() - 1));
 				}
 				else {
@@ -315,10 +315,12 @@ public class UrlTag extends HtmlEscapingAwareTag implements ParamAware {
 		return uri;
 	}
 
+
 	/**
 	 * Internal enum that classifies URLs by type.
 	 */
 	private enum UrlType {
+
 		CONTEXT_RELATIVE, RELATIVE, ABSOLUTE
 	}
 

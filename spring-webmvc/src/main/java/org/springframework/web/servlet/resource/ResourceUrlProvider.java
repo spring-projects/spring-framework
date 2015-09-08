@@ -36,7 +36,6 @@ import org.springframework.util.PathMatcher;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.util.UrlPathHelper;
 
-
 /**
  * A central component to use to obtain the public URL path that clients should
  * use to access a static resource.
@@ -130,7 +129,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 			if (this.handlerMap.isEmpty() && logger.isDebugEnabled()) {
 				logger.debug("No resource handling mappings found");
 			}
-			if(!this.handlerMap.isEmpty()) {
+			if (!this.handlerMap.isEmpty()) {
 				this.autodetect = false;
 			}
 		}

@@ -45,6 +45,7 @@ public class ResourceChainRegistration {
 	private static final boolean isWebJarsAssetLocatorPresent = ClassUtils.isPresent(
 			"org.webjars.WebJarAssetLocator", ResourceChainRegistration.class.getClassLoader());
 
+
 	private final List<ResourceResolver> resolvers = new ArrayList<ResourceResolver>(4);
 
 	private final List<ResourceTransformer> transformers = new ArrayList<ResourceTransformer>(4);
@@ -103,7 +104,7 @@ public class ResourceChainRegistration {
 	protected List<ResourceResolver> getResourceResolvers() {
 		if (!this.hasPathResolver) {
 			List<ResourceResolver> result = new ArrayList<ResourceResolver>(this.resolvers);
-			if(isWebJarsAssetLocatorPresent) {
+			if (isWebJarsAssetLocatorPresent) {
 				result.add(new WebJarsResourceResolver());
 			}
 			result.add(new PathResourceResolver());
