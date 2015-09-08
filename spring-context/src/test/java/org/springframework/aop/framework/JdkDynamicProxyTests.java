@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.Serializable;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+import org.junit.Test;
 
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
 import org.springframework.aop.support.AopUtils;
@@ -28,7 +29,6 @@ import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
 
 /**
  * @since 13.03.2003
@@ -37,7 +37,7 @@ import static org.mockito.BDDMockito.*;
  * @author Chris Beams
  */
 @SuppressWarnings("serial")
-public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements Serializable {
+public class JdkDynamicProxyTests extends AbstractAopProxyTests implements Serializable {
 
 	@Override
 	protected Object createProxy(ProxyCreatorSupport as) {
@@ -52,6 +52,8 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 		return new JdkDynamicAopProxy(as);
 	}
 
+
+	@Test
 	public void testNullConfig() {
 		try {
 			new JdkDynamicAopProxy(null);
@@ -62,6 +64,7 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 		}
 	}
 
+	@Test
 	public void testProxyIsJustInterface() throws Throwable {
 		TestBean raw = new TestBean();
 		raw.setAge(32);
@@ -74,32 +77,32 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 		assertTrue(!(proxy instanceof TestBean));
 	}
 
+	@Test
 	public void testInterceptorIsInvokedWithNoTarget() throws Throwable {
 		// Test return value
-		int age = 25;
-		MethodInterceptor mi = mock(MethodInterceptor.class);
+		final Integer age = 25;
+		MethodInterceptor mi = (invocation -> age);
 
-		AdvisedSupport pc = new AdvisedSupport(new Class<?>[] { ITestBean.class });
+		AdvisedSupport pc = new AdvisedSupport(new Class<?>[] {ITestBean.class});
 		pc.addAdvice(mi);
 		AopProxy aop = createAopProxy(pc);
-
-		given(mi.invoke(null)).willReturn(age);
 
 		ITestBean tb = (ITestBean) aop.getProxy();
 		assertTrue("correct return value", tb.getAge() == age);
 	}
 
+	@Test
 	public void testTargetCanGetInvocationWithPrivateClass() throws Throwable {
 		final ExposedInvocationTestBean expectedTarget = new ExposedInvocationTestBean() {
 			@Override
 			protected void assertions(MethodInvocation invocation) {
 				assertTrue(invocation.getThis() == this);
 				assertTrue("Invocation should be on ITestBean: " + invocation.getMethod(),
-					invocation.getMethod().getDeclaringClass() == ITestBean.class);
+						invocation.getMethod().getDeclaringClass() == ITestBean.class);
 			}
 		};
 
-		AdvisedSupport pc = new AdvisedSupport(new Class<?>[] { ITestBean.class, IOther.class });
+		AdvisedSupport pc = new AdvisedSupport(new Class<?>[] {ITestBean.class, IOther.class});
 		pc.addAdvice(ExposeInvocationInterceptor.INSTANCE);
 		TrapTargetInterceptor tii = new TrapTargetInterceptor() {
 			@Override
@@ -126,10 +129,11 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 		//assertTrue(target.invocation == tii.invocation);
 	}
 
+	@Test
 	public void testProxyNotWrappedIfIncompatible() {
 		FooBar bean = new FooBar();
 		ProxyCreatorSupport as = new ProxyCreatorSupport();
-		as.setInterfaces(new Class<?>[] {Foo.class});
+		as.setInterfaces(Foo.class);
 		as.setTarget(bean);
 
 		Foo proxy = (Foo) createProxy(as);
@@ -138,6 +142,7 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 
 	}
 
+	@Test
 	public void testEqualsAndHashCodeDefined() throws Exception {
 		AdvisedSupport as = new AdvisedSupport(new Class<?>[]{Named.class});
 		as.setTarget(new Person());
@@ -149,7 +154,7 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 	}
 
 
-	public static interface Foo {
+	public interface Foo {
 
 		Bar getBarThis();
 
@@ -157,8 +162,7 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 	}
 
 
-	public static interface Bar {
-
+	public interface Bar {
 	}
 
 
@@ -176,7 +180,7 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 	}
 
 
-	public static interface Named {
+	public interface Named {
 
 		String getName();
 
@@ -201,11 +205,8 @@ public final class JdkDynamicProxyTests extends AbstractAopProxyTests implements
 		public boolean equals(Object o) {
 			if (this == o) return true;
 			if (o == null || getClass() != o.getClass()) return false;
-
-			final Person person = (Person) o;
-
+			Person person = (Person) o;
 			if (!name.equals(person.name)) return false;
-
 			return true;
 		}
 

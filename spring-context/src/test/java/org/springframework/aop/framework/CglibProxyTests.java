@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  */
 @SuppressWarnings("serial")
-public final class CglibProxyTests extends AbstractAopProxyTests implements Serializable {
+public class CglibProxyTests extends AbstractAopProxyTests implements Serializable {
 
 	private static final String DEPENDENCY_CHECK_CONTEXT =
 			CglibProxyTests.class.getSimpleName() + "-with-dependency-checking.xml";
@@ -73,6 +73,7 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 	protected boolean requiresTarget() {
 		return true;
 	}
+
 
 	@Test
 	public void testNullConfig() {
@@ -402,6 +403,13 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		assertEquals(4, proxy.add(1, 3));
 	}
 
+	@Test  // SPR-13328
+	public void testVarargsWithEnumArray() throws Exception {
+		ProxyFactory proxyFactory = new ProxyFactory(new MyBean());
+		MyBean proxy = (MyBean) proxyFactory.getProxy();
+		assertTrue(proxy.doWithVarargs(MyEnum.A, MyEnum.B));
+	}
+
 
 	public static class MyBean {
 
@@ -418,6 +426,20 @@ public final class CglibProxyTests extends AbstractAopProxyTests implements Seri
 		protected int add(int x, int y) {
 			return x + y;
 		}
+
+		public <V extends MyInterface> boolean doWithVarargs(V... args) {
+			return true;
+		}
+	}
+
+
+	public interface MyInterface {
+	}
+
+
+	public enum MyEnum implements MyInterface {
+
+		A, B;
 	}
 
 
