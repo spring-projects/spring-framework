@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,9 +58,8 @@ public class StompDecoder {
 
 
 	/**
-	 * Configure a
-	 * {@link org.springframework.messaging.support.MessageHeaderInitializer MessageHeaderInitializer}
-	 * to apply to the headers of {@link Message}s from decoded STOMP frames.
+	 * Configure a {@link MessageHeaderInitializer} to apply to the headers of
+	 * {@link Message}s from decoded STOMP frames.
 	 */
 	public void setHeaderInitializer(MessageHeaderInitializer headerInitializer) {
 		this.headerInitializer = headerInitializer;

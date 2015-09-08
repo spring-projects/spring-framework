@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,9 +32,9 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class AspectProxyFactoryTests {
+public class AspectProxyFactoryTests {
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testWithNonAspect() {
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
 		proxyFactory.addAspect(TestBean.class);
@@ -70,7 +70,7 @@ public final class AspectProxyFactoryTests {
 		assertEquals(2, proxy1.getAge());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testWithInstanceWithNonAspect() throws Exception {
 		AspectJProxyFactory pf = new AspectJProxyFactory();
 		pf.addAspect(new TestBean());
@@ -96,14 +96,14 @@ public final class AspectProxyFactoryTests {
 		assertEquals(target.getAge() * multiple, serializedProxy.getAge());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testWithNonSingletonAspectInstance() throws Exception {
 		AspectJProxyFactory pf = new AspectJProxyFactory();
 		pf.addAspect(new PerThisAspect());
 	}
 
 
-	public static interface ITestBean {
+	public interface ITestBean {
 
 		int getAge();
 	}

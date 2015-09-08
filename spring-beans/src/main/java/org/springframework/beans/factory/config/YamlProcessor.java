@@ -393,17 +393,14 @@ public abstract class YamlProcessor {
 	 */
 	protected static class StrictMapAppenderConstructor extends Constructor {
 
-		public 	StrictMapAppenderConstructor() {
-			super();
-		}
-
 		@Override
 		protected Map<Object, Object> constructMapping(MappingNode node) {
 			try {
 				return super.constructMapping(node);
-			} catch (IllegalStateException e) {
+			}
+			catch (IllegalStateException ex) {
 				throw new ParserException("while parsing MappingNode",
-						node.getStartMark(), e.getMessage(), node.getEndMark());
+						node.getStartMark(), ex.getMessage(), node.getEndMark());
 			}
 		}
 
@@ -414,7 +411,7 @@ public abstract class YamlProcessor {
 				@Override
 				public Object put(Object key, Object value) {
 					if (delegate.containsKey(key)) {
-						throw new IllegalStateException("duplicate key: " + key);
+						throw new IllegalStateException("Duplicate key: " + key);
 					}
 					return delegate.put(key, value);
 				}
