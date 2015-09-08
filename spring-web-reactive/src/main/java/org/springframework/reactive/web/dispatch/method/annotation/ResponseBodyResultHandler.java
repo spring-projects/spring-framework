@@ -16,16 +16,25 @@
 package org.springframework.reactive.web.dispatch.method.annotation;
 
 import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.reactivestreams.Publisher;
+import reactor.io.buffer.Buffer;
 import reactor.rx.Streams;
+import rx.Observable;
+import rx.RxReactiveStreams;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.reactive.codec.encoder.MessageToByteEncoder;
 import org.springframework.reactive.web.dispatch.HandlerResult;
 import org.springframework.reactive.web.dispatch.HandlerResultHandler;
 import org.springframework.reactive.web.http.ServerHttpRequest;
@@ -35,8 +44,7 @@ import org.springframework.web.method.HandlerMethod;
 
 
 /**
- * For now a simple {@code String} or {@code Publisher<String>} to
- * "text/plain;charset=UTF-8" conversion.
+ * First version using {@link MessageToByteEncoder}s
  *
  * @author Rossen Stoyanchev
  */
@@ -45,8 +53,20 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 	private static final Charset UTF_8 = Charset.forName("UTF-8");
 
 
+	private final List<MessageToByteEncoder<?>> serializers;
+	private final List<MessageToByteEncoder<ByteBuffer>> postProcessors;
+
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
+
+	public ResponseBodyResultHandler(List<MessageToByteEncoder<?>> serializers) {
+		this(serializers, Collections.EMPTY_LIST);
+	}
+
+	public ResponseBodyResultHandler(List<MessageToByteEncoder<?>> serializers, List<MessageToByteEncoder<ByteBuffer>> postProcessors) {
+		this.serializers = serializers;
+		this.postProcessors = postProcessors;
+	}
 
 	public void setOrder(int order) {
 		this.order = order;
@@ -80,20 +100,61 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 			return Streams.empty();
 		}
 
-		if (value instanceof String) {
-			response.getHeaders().setContentType(new MediaType("text", "plain", UTF_8));
-			return response.writeWith(Streams.just(((String) value).getBytes(UTF_8)));
+		MediaType mediaType = resolveMediaType(request);
+		ResolvableType type = ResolvableType.forMethodParameter(returnType);
+		List<Object> hints = new ArrayList<>();
+		hints.add(UTF_8);
+		MessageToByteEncoder<Object> serializer = (MessageToByteEncoder<Object>)resolveSerializer(request, type, mediaType, hints.toArray());
+		if (serializer != null) {
+			Publisher<Object> elementStream;
+
+			// TODO: Refactor type conversion
+			if (Observable.class.isAssignableFrom(type.getRawClass())) {
+				elementStream = RxReactiveStreams.toPublisher((Observable) value);
+			}
+			else if (Publisher.class.isAssignableFrom(type.getRawClass())) {
+				elementStream = (Publisher)value;
+			}
+			else {
+				elementStream = Streams.just(value);
+			}
+
+			Publisher<ByteBuffer> outputStream = serializer.encode(elementStream, type, mediaType, hints.toArray());
+			List<MessageToByteEncoder<ByteBuffer>> postProcessors = resolvePostProcessors(request, type, mediaType, hints.toArray());
+			for (MessageToByteEncoder<ByteBuffer> postProcessor : postProcessors) {
+				outputStream = postProcessor.encode(outputStream, type, mediaType, hints.toArray());
+			}
+			response.getHeaders().setContentType(mediaType);
+			return response.writeWith(Streams.wrap(outputStream).map(buffer -> new Buffer(buffer).asBytes()));
 		}
-		else if (value instanceof Publisher) {
-			Class<?> type = ResolvableType.forMethodParameter(returnType).resolveGeneric(0);
-			if (String.class.equals(type)) {
-				@SuppressWarnings("unchecked")
-				Publisher<String> content = (Publisher<String>) value;
-				return response.writeWith(Streams.wrap(content).map(value1 -> value1.getBytes(UTF_8)));
+		return Streams.fail(new IllegalStateException(
+				"Return value type not supported: " + returnType));
+	}
+
+	private MediaType resolveMediaType(ServerHttpRequest request) {
+		String acceptHeader = request.getHeaders().getFirst(HttpHeaders.ACCEPT);
+		List<MediaType> mediaTypes = MediaType.parseMediaTypes(acceptHeader);
+		MediaType.sortBySpecificityAndQuality(mediaTypes);
+		return ( mediaTypes.size() > 0 ? mediaTypes.get(0) : MediaType.TEXT_PLAIN);
+	}
+
+	private MessageToByteEncoder<?> resolveSerializer(ServerHttpRequest request, ResolvableType type, MediaType mediaType, Object[] hints) {
+		for (MessageToByteEncoder<?> codec : this.serializers) {
+			if (codec.canEncode(type, mediaType, hints)) {
+				return codec;
 			}
 		}
+		return null;
+	}
 
-		return Streams.fail(new IllegalStateException("Return value type not supported: " + returnType));
+	private List<MessageToByteEncoder<ByteBuffer>> resolvePostProcessors(ServerHttpRequest request, ResolvableType type, MediaType mediaType, Object[] hints) {
+		List<MessageToByteEncoder<ByteBuffer>> postProcessors = new ArrayList<>();
+		for (MessageToByteEncoder<ByteBuffer> postProcessor : this.postProcessors) {
+			if (postProcessor.canEncode(type, mediaType, hints)) {
+				postProcessors.add(postProcessor);
+			}
+		}
+		return postProcessors;
 	}
 
 }
