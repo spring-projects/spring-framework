@@ -48,6 +48,7 @@ public class RollbackOverrideDefaultRollbackFalseTransactionalTests extends Defa
 
 	@Autowired
 	@Qualifier("dataSource2")
+	@Override
 	public void setDataSource(DataSource dataSource) {
 		jdbcTemplate = new JdbcTemplate(dataSource);
 	}
@@ -62,7 +63,7 @@ public class RollbackOverrideDefaultRollbackFalseTransactionalTests extends Defa
 	}
 
 	@Test
-	@Rollback(true)
+	@Rollback
 	@Override
 	public void modifyTestDataWithinTransaction() {
 		assertInTransaction(true);
