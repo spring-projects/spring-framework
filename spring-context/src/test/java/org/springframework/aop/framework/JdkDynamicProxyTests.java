@@ -20,6 +20,7 @@ import java.io.Serializable;
 
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+
 import org.junit.Test;
 
 import org.springframework.aop.interceptor.ExposeInvocationInterceptor;
@@ -53,15 +54,9 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests implements Seria
 	}
 
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testNullConfig() {
-		try {
-			new JdkDynamicAopProxy(null);
-			fail("Shouldn't allow null interceptors");
-		}
-		catch (IllegalArgumentException ex) {
-			// Ok
-		}
+		new JdkDynamicAopProxy(null);
 	}
 
 	@Test
@@ -74,13 +69,13 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests implements Seria
 
 		Object proxy = aop.getProxy();
 		assertTrue(proxy instanceof ITestBean);
-		assertTrue(!(proxy instanceof TestBean));
+		assertFalse(proxy instanceof TestBean);
 	}
 
 	@Test
 	public void testInterceptorIsInvokedWithNoTarget() throws Throwable {
 		// Test return value
-		final Integer age = 25;
+		final int age = 25;
 		MethodInterceptor mi = (invocation -> age);
 
 		AdvisedSupport pc = new AdvisedSupport(new Class<?>[] {ITestBean.class});
@@ -88,7 +83,7 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests implements Seria
 		AopProxy aop = createAopProxy(pc);
 
 		ITestBean tb = (ITestBean) aop.getProxy();
-		assertTrue("correct return value", tb.getAge() == age);
+		assertEquals("correct return value", age, tb.getAge());
 	}
 
 	@Test
@@ -96,9 +91,9 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests implements Seria
 		final ExposedInvocationTestBean expectedTarget = new ExposedInvocationTestBean() {
 			@Override
 			protected void assertions(MethodInvocation invocation) {
-				assertTrue(invocation.getThis() == this);
-				assertTrue("Invocation should be on ITestBean: " + invocation.getMethod(),
-						invocation.getMethod().getDeclaringClass() == ITestBean.class);
+				assertEquals(this, invocation.getThis());
+				assertEquals("Invocation should be on ITestBean: " + invocation.getMethod(),
+						ITestBean.class, invocation.getMethod().getDeclaringClass());
 			}
 		};
 
@@ -118,15 +113,6 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests implements Seria
 
 		ITestBean tb = (ITestBean) aop.getProxy();
 		tb.getName();
-		// Not safe to trap invocation
-		//assertTrue(tii.invocation == target.invocation);
-
-		//assertTrue(target.invocation.getProxy() == tb);
-
-		//	((IOther) tb).absquatulate();
-		//MethodInvocation minv =  tii.invocation;
-		//assertTrue("invoked on iother, not " + minv.getMethod().getDeclaringClass(), minv.getMethod().getDeclaringClass() == IOther.class);
-		//assertTrue(target.invocation == tii.invocation);
 	}
 
 	@Test
@@ -139,7 +125,6 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests implements Seria
 		Foo proxy = (Foo) createProxy(as);
 		assertSame("Target should be returned when return types are incompatible", bean, proxy.getBarThis());
 		assertSame("Proxy should be returned when return types are compatible", proxy, proxy.getFooThis());
-
 	}
 
 	@Test
@@ -149,8 +134,8 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests implements Seria
 		JdkDynamicAopProxy aopProxy = new JdkDynamicAopProxy(as);
 		Named proxy = (Named) aopProxy.getProxy();
 		Named named = new Person();
-		assertEquals("equals() returned false", proxy, named);
-		assertEquals("hashCode() not equal", proxy.hashCode(), named.hashCode());
+		assertEquals("equals()", proxy, named);
+		assertEquals("hashCode()", proxy.hashCode(), named.hashCode());
 	}
 
 

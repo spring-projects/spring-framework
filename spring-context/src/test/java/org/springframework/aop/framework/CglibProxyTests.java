@@ -21,6 +21,7 @@ import java.io.Serializable;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
+
 import test.mixin.LockMixinAdvisor;
 
 import org.springframework.aop.ClassFilter;
@@ -74,30 +75,17 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 		return true;
 	}
 
-
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testNullConfig() {
-		try {
-			new CglibAopProxy(null);
-			fail("Shouldn't allow null interceptors");
-		}
-		catch (IllegalArgumentException ex) {
-			// Ok
-		}
+		new CglibAopProxy(null);
 	}
 
-	@Test
+	@Test(expected = AopConfigException.class)
 	public void testNoTarget() {
-		AdvisedSupport pc = new AdvisedSupport(new Class<?>[]{ITestBean.class});
+		AdvisedSupport pc = new AdvisedSupport(new Class<?>[] { ITestBean.class });
 		pc.addAdvice(new NopInterceptor());
-		try {
-			AopProxy aop = createAopProxy(pc);
-			aop.getProxy();
-			fail("Shouldn't allow no target with CGLIB proxy");
-		}
-		catch (AopConfigException ex) {
-			// Ok
-		}
+		AopProxy aop = createAopProxy(pc);
+		aop.getProxy();
 	}
 
 	@Test
@@ -210,7 +198,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 
 		ITestBean proxy1 = getAdvisedProxy(target);
 		ITestBean proxy2 = getAdvisedProxy(target2);
-		assertTrue(proxy1.getClass() == proxy2.getClass());
+		assertSame(proxy1.getClass(), proxy2.getClass());
 		assertEquals(target.getAge(), proxy1.getAge());
 		assertEquals(target2.getAge(), proxy2.getAge());
 	}
@@ -256,7 +244,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 
 		ITestBean proxy1 = getIntroductionAdvisorProxy(target);
 		ITestBean proxy2 = getIntroductionAdvisorProxy(target2);
-		assertTrue("Incorrect duplicate creation of proxy classes", proxy1.getClass() == proxy2.getClass());
+		assertSame("Incorrect duplicate creation of proxy classes", proxy1.getClass(), proxy2.getClass());
 	}
 
 	private ITestBean getIntroductionAdvisorProxy(TestBean target) {
@@ -427,6 +415,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 			return x + y;
 		}
 
+		@SuppressWarnings("unchecked")
 		public <V extends MyInterface> boolean doWithVarargs(V... args) {
 			return true;
 		}
