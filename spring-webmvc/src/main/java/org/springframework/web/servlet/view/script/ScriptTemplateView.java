@@ -40,7 +40,7 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.Assert;
-import org.springframework.util.StreamUtils;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
 
@@ -341,7 +341,8 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 	protected String getTemplate(String path) throws IOException {
 		Resource resource = this.resourceLoader.getResource(path);
-		return StreamUtils.copyToString(resource.getInputStream(), this.charset);
+		InputStreamReader reader = new InputStreamReader(resource.getInputStream(), this.charset);
+		return FileCopyUtils.copyToString(reader);
 	}
 
 }
