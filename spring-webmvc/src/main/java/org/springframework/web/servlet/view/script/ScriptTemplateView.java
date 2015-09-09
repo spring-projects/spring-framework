@@ -323,14 +323,15 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		try {
 			ScriptEngine engine = getEngine();
 			Invocable invocable = (Invocable) engine;
-			String template = getTemplate(getUrl());
+			String url = getUrl();
+			String template = getTemplate(url);
 			Object html;
 			if (this.renderObject != null) {
 				Object thiz = engine.eval(this.renderObject);
-				html = invocable.invokeMethod(thiz, this.renderFunction, template, model);
+				html = invocable.invokeMethod(thiz, this.renderFunction, template, model, url);
 			}
 			else {
-				html = invocable.invokeFunction(this.renderFunction, template, model);
+				html = invocable.invokeFunction(this.renderFunction, template, model, url);
 			}
 			response.getWriter().write(String.valueOf(html));
 		}

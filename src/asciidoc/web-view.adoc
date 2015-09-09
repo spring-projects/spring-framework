@@ -1589,8 +1589,9 @@ And the Mustache template is:
 
 The render function is called with the following parameters:
 
-* template: the view template content (String)
-* model: the view model (Map)
+* `String template`: the template content
+* `Map model`: the view model
+* `String url`: the template url (since 4.2.2)
 
 `Mustache.render()` is natively compatible with this signature, so you can call it directly.
 

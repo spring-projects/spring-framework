@@ -157,10 +157,12 @@ public class ScriptTemplateConfigurer implements ScriptTemplateConfig {
 
 	/**
 	 * Set the render function name (mandatory).
-	 * This function will be called with the following parameters:
+	 *
+	 * <p>This function will be called with the following parameters:
 	 * <ol>
-	 * <li>{@code template}: the view template content (String)</li>
-	 * <li>{@code model}: the view model (Map)</li>
+	 * <li>{@code String template}: the template content</li>
+	 * <li>{@code Map model}: the view model</li>
+	 * <li>{@code String url}: the template url (since 4.2.2)</li>
 	 * </ol>
 	 */
 	public void setRenderFunction(String renderFunction) {
