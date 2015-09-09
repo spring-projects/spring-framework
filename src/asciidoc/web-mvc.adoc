@@ -2861,24 +2861,15 @@ representation of the current resource regardless of the logical view name. The 
 header may include wild cards, for example `text/{asterisk}`, in which case a `View` whose
 Content-Type was `text/xml` is a compatible match.
 
-To support the resolution of a view based on a file extension, use the
-`ContentNegotiatingViewResolver` bean property `mediaTypes` to specify a mapping of file
-extensions to media types. For more information on the algorithm used to determine the
-request media type, refer to the API documentation for `ContentNegotiatingViewResolver`.
+To support custom resolution of a view based on a file extension, use a
+`ContentNegotiationManager`: see <<mvc-config-content-negotiation>>.
 
-Here is an example configuration of a `ContentNegotiatingViewResolver:`
+Here is an example configuration of a `ContentNegotiatingViewResolver`:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
 	<bean class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
-		<property name="mediaTypes">
-			<map>
-				<entry key="atom" value="application/atom+xml"/>
-				<entry key="html" value="text/html"/>
-				<entry key="json" value="application/json"/>
-			</map>
-		</property>
 		<property name="viewResolvers">
 			<list>
 				<bean class="org.springframework.web.servlet.view.BeanNameViewResolver"/>
@@ -2890,7 +2881,7 @@ Here is an example configuration of a `ContentNegotiatingViewResolver:`
 		</property>
 		<property name="defaultViews">
 			<list>
-				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" />
+				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView"/>
 			</list>
 		</property>
 	</bean>
@@ -4867,9 +4858,9 @@ that in turn can be created with a `ContentNegotiationManagerFactoryBean`:
 	<mvc:annotation-driven content-negotiation-manager="contentNegotiationManager" />
 
 	<bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
-		<property name="favorPathExtension" value="false" />
-		<property name="favorParameter" value="true" />
-		<property name="mediaTypes" >
+		<property name="favorPathExtension" value="false"/>
+		<property name="favorParameter" value="true"/>
+		<property name="mediaTypes">
 			<value>
 				json=application/json
 				xml=application/xml
@@ -4884,7 +4875,7 @@ for request mapping purposes, and `RequestMappingHandlerAdapter` and
 `ExceptionHandlerExceptionResolver` for content negotiation purposes.
 
 Note that `ContentNegotiatingViewResolver` now can also be configured with a
-`ContentNegotiatingViewResolver`, so you can use one instance throughout Spring MVC.
+`ContentNegotiationManager`, so you can use one shared instance throughout Spring MVC.
 
 In more advanced cases, it may be useful to configure multiple
 `ContentNegotiationManager` instances that in turn may contain custom
