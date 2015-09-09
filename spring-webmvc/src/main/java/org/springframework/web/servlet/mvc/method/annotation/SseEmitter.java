@@ -39,6 +39,26 @@ public class SseEmitter extends ResponseBodyEmitter {
 	static final MediaType TEXT_PLAIN = new MediaType("text", "plain", Charset.forName("UTF-8"));
 
 
+	/**
+	 * Create a new SseEmitter instance.
+	 */
+	public SseEmitter() {
+		super();
+	}
+
+	/**
+	 * Create a SseEmitter with a custom timeout value.
+	 * <p>By default not set in which case the default configured in the MVC
+	 * Java Config or the MVC namespace is used, or if that's not set, then the
+	 * timeout depends on the default of the underlying server.
+	 * @param timeout timeout value in milliseconds
+	 * @since 4.2.2
+	 */
+	public SseEmitter(Long timeout) {
+		super(timeout);
+	}
+
+
 	@Override
 	protected void extendResponse(ServerHttpResponse outputMessage) {
 		super.extendResponse(outputMessage);
