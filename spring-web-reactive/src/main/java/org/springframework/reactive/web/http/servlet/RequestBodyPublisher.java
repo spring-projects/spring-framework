@@ -49,19 +49,30 @@ public class RequestBodyPublisher implements ReadListener, Publisher<byte[]> {
 
 	private boolean stalled;
 
+	private boolean cancelled;
+
 	public RequestBodyPublisher(AsyncContextSynchronizer synchronizer, int bufferSize) {
 		this.synchronizer = synchronizer;
 		this.buffer = new byte[bufferSize];
 	}
 
 	@Override
-	public void subscribe(Subscriber<? super byte[]> s) {
-		this.subscriber = s;
+	public void subscribe(Subscriber<? super byte[]> subscriber) {
+		if (subscriber == null) {
+			throw new NullPointerException();
+		}
+		else if (this.subscriber != null) {
+			subscriber.onError(new IllegalStateException("Only one subscriber allowed"));
+		}
+		this.subscriber = subscriber;
 		this.subscriber.onSubscribe(new RequestBodySubscription());
 	}
 
 	@Override
 	public void onDataAvailable() throws IOException {
+		if (cancelled) {
+			return;
+		}
 		ServletInputStream input = this.synchronizer.getInputStream();
 		logger.debug("onDataAvailable: " + input);
 
@@ -100,6 +111,9 @@ public class RequestBodyPublisher implements ReadListener, Publisher<byte[]> {
 
 	@Override
 	public void onAllDataRead() throws IOException {
+		if (cancelled) {
+			return;
+		}
 		logger.debug("All data read");
 		this.synchronizer.readComplete();
 		if (this.subscriber != null) {
@@ -109,7 +123,11 @@ public class RequestBodyPublisher implements ReadListener, Publisher<byte[]> {
 
 	@Override
 	public void onError(Throwable t) {
+		if (cancelled) {
+			return;
+		}
 		logger.error("RequestBodyPublisher Error", t);
+		this.synchronizer.readComplete();
 		if (this.subscriber != null) {
 			this.subscriber.onError(t);
 		}
@@ -119,6 +137,9 @@ public class RequestBodyPublisher implements ReadListener, Publisher<byte[]> {
 
 		@Override
 		public void request(long n) {
+			if (cancelled) {
+				return;
+			}
 			logger.debug("Updating demand " + demand + " by " + n);
 
 			demand.increase(n);
@@ -138,6 +159,10 @@ public class RequestBodyPublisher implements ReadListener, Publisher<byte[]> {
 
 		@Override
 		public void cancel() {
+			if (cancelled) {
+				return;
+			}
+			cancelled = true;
 			synchronizer.readComplete();
 			demand.reset();
 		}
