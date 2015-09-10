@@ -91,8 +91,8 @@ public class XpathExpectationsHelper {
 	}
 
 	/**
-	 * Parse the content, evaluate the XPath expression as a {@link Node}, and
-	 * assert it with the given {@code Matcher<Node>}.
+	 * Parse the content, evaluate the XPath expression as a {@link Node},
+	 * and assert it with the given {@code Matcher<Node>}.
 	 */
 	public void assertNode(byte[] content, String encoding, final Matcher<? super Node> matcher) throws Exception {
 		Document document = parseXmlByteArray(content, encoding);
@@ -105,7 +105,6 @@ public class XpathExpectationsHelper {
 	 * @param xml the content to parse
 	 * @param encoding optional content encoding, if provided as metadata (e.g. in HTTP headers)
 	 * @return the parsed document
-	 * @throws Exception
 	 */
 	protected Document parseXmlByteArray(byte[] xml, String encoding) throws Exception {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
