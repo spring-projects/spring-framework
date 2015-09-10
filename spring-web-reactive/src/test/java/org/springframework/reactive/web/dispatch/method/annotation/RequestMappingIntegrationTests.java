@@ -150,10 +150,10 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 	}
 
 	@Test
-	public void echo() throws Exception {
+	public void capitalize() throws Exception {
 		RestTemplate restTemplate = new RestTemplate();
 
-		URI url = new URI("http://localhost:" + port + "/echo");
+		URI url = new URI("http://localhost:" + port + "/capitalize");
 		List<Person> persons = Arrays.asList(new Person("Robert"), new Person("Marie"));
 		RequestEntity<List<Person>> request = RequestEntity
 				.post(url)
@@ -163,8 +163,8 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		List<Person> results = restTemplate.exchange(request, new ParameterizedTypeReference<List<Person>>(){}).getBody();
 
 		assertEquals(2, results.size());
-		assertEquals("Robert", results.get(0).getName());
-		assertEquals("Marie", results.get(1).getName());
+		assertEquals("ROBERT", results.get(0).getName());
+		assertEquals("MARIE", results.get(1).getName());
 	}
 
 
@@ -208,10 +208,13 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 			return Streams.just(new Person("Robert"), new Person("Marie"));
 		}
 
-		@RequestMapping("/echo")
+		@RequestMapping("/capitalize")
 		@ResponseBody
-		public Publisher<Person> echo(@RequestBody Publisher<Person> persons) {
-			return persons;
+		public Observable<Person> capitalize(@RequestBody Observable<Person> persons) {
+			return persons.map(person -> {
+				person.setName(person.getName().toUpperCase());
+				return person;
+			});
 		}
 
 	}
