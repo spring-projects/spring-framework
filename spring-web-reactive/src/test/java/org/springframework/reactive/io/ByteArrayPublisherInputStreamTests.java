@@ -18,6 +18,7 @@ package org.springframework.reactive.io;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -77,9 +78,10 @@ public class ByteArrayPublisherInputStreamTests {
 		FileCopyUtils.copy(is, os);
 
 		Publisher<byte[]> publisher = os.toByteArrayPublisher();
+		List<byte[]> result = new ArrayList<>();
+		AtomicBoolean complete = new AtomicBoolean();
 
 		publisher.subscribe(new Subscriber<byte[]>() {
-			List<byte[]> result = new ArrayList<>();
 
 			@Override
 			public void onSubscribe(Subscription s) {
@@ -98,10 +100,15 @@ public class ByteArrayPublisherInputStreamTests {
 
 			@Override
 			public void onComplete() {
-				assertArrayEquals(result.get(0), new byte[]{'a', 'b', 'c'});
-				assertArrayEquals(result.get(0), new byte[]{'d', 'e'});
+				complete.set(true);
 			}
 		});
+
+		while (!complete.get()) {
+
+		}
+		assertArrayEquals(result.get(0), new byte[]{'a', 'b', 'c'});
+		assertArrayEquals(result.get(1), new byte[]{'d', 'e'});
 
 	}
 
