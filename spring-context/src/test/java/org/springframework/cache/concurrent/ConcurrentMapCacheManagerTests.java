@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,18 @@ public class ConcurrentMapCacheManagerTests {
 		cache1.put("key2", 2);
 		assertEquals(2, cache1.get("key2").get());
 		cache1.put("key3", null);
+		assertNull(cache1.get("key3").get());
+		cache1.put("key3", null);
+		assertNull(cache1.get("key3").get());
+		cache1.evict("key3");
+		assertNull(cache1.get("key3"));
+
+		assertEquals("value1", cache1.putIfAbsent("key1", "value1x").get());
+		assertEquals("value1", cache1.get("key1").get());
+		assertEquals(2, cache1.putIfAbsent("key2", 2.1).get());
+		assertNull(cache1.putIfAbsent("key3", null));
+		assertNull(cache1.get("key3").get());
+		assertNull(cache1.putIfAbsent("key3", null).get());
 		assertNull(cache1.get("key3").get());
 		cache1.evict("key3");
 		assertNull(cache1.get("key3"));
