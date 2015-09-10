@@ -29,7 +29,7 @@ import reactor.rx.Streams;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
-import org.springframework.reactive.converter.Pojo;
+import org.springframework.reactive.codec.Pojo;
 
 /**
  * @author Sebastien Deleuze

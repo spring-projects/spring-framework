@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.reactive.converter;
+package org.springframework.reactive.codec;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
