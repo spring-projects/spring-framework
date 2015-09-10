@@ -264,7 +264,7 @@ application context.
 If you want a transaction to commit -- unusual, but occasionally useful when you want a
 particular test to populate or modify the database -- the TestContext framework can be
 instructed to cause the transaction to commit instead of roll back via the
-<<integration-testing-annotations, `@Rollback`>> annotation.
+<<integration-testing-annotations, `@Commit`>> annotation.
 
 See transaction management with the <<testcontext-tx,TestContext framework>>.
 
@@ -3142,7 +3142,7 @@ See <<testing-examples-petclinic>> for an additional example.
 
 By default, test transactions will be automatically rolled back after completion of the
 test; however, transactional commit and rollback behavior can be configured declaratively
-via the `@Rollback` annotation. See the corresponding entry in the
+via the `@Commit` and `@Rollback` annotations. See the corresponding entries in the
 <<integration-testing-annotations,annotation support>> section for further details.
 
 [[testcontext-tx-programmatic-tx-mgt]]
@@ -3239,7 +3239,7 @@ declarative SQL script execution with default transaction rollback semantics.
 	@RunWith(SpringJUnit4ClassRunner.class)
 	@ContextConfiguration
 	@Transactional(transactionManager = "txMgr")
-	**@Rollback(false)**
+	**@Commit**
 	public class FictitiousTransactionalTest {
 
 		**@BeforeTransaction**
@@ -3254,7 +3254,7 @@ declarative SQL script execution with default transaction rollback semantics.
 
 		@Test
 		// overrides the class-level default rollback setting
-		**@Rollback(true)**
+		**@Rollback**
 		public void modifyDatabaseWithinTransaction() {
 			// logic which uses the test data and modifies database state
 		}
