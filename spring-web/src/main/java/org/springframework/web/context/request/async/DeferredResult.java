@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.context.request.async;
 
 import java.util.PriorityQueue;
@@ -64,9 +65,9 @@ public class DeferredResult<T> {
 
 	private DeferredResultHandler resultHandler;
 
-	private Object result = RESULT_NONE;
+	private volatile Object result = RESULT_NONE;
 
-	private boolean expired;
+	private volatile boolean expired;
 
 
 	/**
@@ -98,33 +99,34 @@ public class DeferredResult<T> {
 		this.timeout = timeout;
 	}
 
+
 	/**
 	 * Return {@code true} if this DeferredResult is no longer usable either
 	 * because it was previously set or because the underlying request expired.
-	 * <p>
-	 * The result may have been set with a call to {@link #setResult(Object)},
+	 * <p>The result may have been set with a call to {@link #setResult(Object)},
 	 * or {@link #setErrorResult(Object)}, or as a result of a timeout, if a
 	 * timeout result was provided to the constructor. The request may also
 	 * expire due to a timeout or network error.
 	 */
 	public final boolean isSetOrExpired() {
-		return ((this.result != RESULT_NONE) || this.expired);
+		return (this.result != RESULT_NONE || this.expired);
 	}
 
 	/**
-	 * @return {@code true} if the DeferredResult has been set.
+	 * Return {@code true} if the DeferredResult has been set.
 	 */
 	public boolean hasResult() {
-		return this.result != RESULT_NONE;
+		return (this.result != RESULT_NONE);
 	}
 
 	/**
-	 * @return the result or {@code null} if the result wasn't set; since the result can
-	 *         also be {@code null}, it is recommended to use {@link #hasResult()} first
-	 *         to check if there is a result prior to calling this method.
+	 * Return the result, or {@code null} if the result wasn't set. Since the result
+	 * can also be {@code null}, it is recommended to use {@link #hasResult()} first
+	 * to check if there is a result prior to calling this method.
 	 */
 	public Object getResult() {
-		return hasResult() ? this.result : null;
+		Object resultToCheck = this.result;
+		return (resultToCheck != RESULT_NONE ? resultToCheck : null);
 	}
 
 	/**
@@ -165,12 +167,12 @@ public class DeferredResult<T> {
 		Assert.notNull(resultHandler, "DeferredResultHandler is required");
 		synchronized (this) {
 			this.resultHandler = resultHandler;
-			if ((this.result != RESULT_NONE) && (!this.expired)) {
+			if (this.result != RESULT_NONE && !this.expired) {
 				try {
 					this.resultHandler.handleResult(this.result);
 				}
-				catch (Throwable t) {
-					logger.trace("DeferredResult not handled", t);
+				catch (Throwable ex) {
+					logger.trace("DeferredResult not handled", ex);
 				}
 			}
 		}
@@ -214,9 +216,9 @@ public class DeferredResult<T> {
 		return setResultInternal(result);
 	}
 
+
 	final DeferredResultProcessingInterceptor getInterceptor() {
 		return new DeferredResultProcessingInterceptorAdapter() {
-
 			@Override
 			public <S> boolean handleTimeout(NativeWebRequest request, DeferredResult<S> deferredResult) {
 				if (timeoutCallback != null) {
@@ -227,7 +229,6 @@ public class DeferredResult<T> {
 				}
 				return true;
 			}
-
 			@Override
 			public <S> void afterCompletion(NativeWebRequest request, DeferredResult<S> deferredResult) {
 				synchronized (DeferredResult.this) {
