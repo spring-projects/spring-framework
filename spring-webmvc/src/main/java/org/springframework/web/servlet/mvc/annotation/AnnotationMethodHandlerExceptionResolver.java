@@ -43,6 +43,7 @@ import javax.xml.transform.Source;
 import org.springframework.core.ExceptionDepthComparator;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.HttpInputMessage;
@@ -377,15 +378,15 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	private ModelAndView getModelAndView(Method handlerMethod, Object returnValue, ServletWebRequest webRequest)
 			throws Exception {
 
-		ResponseStatus responseStatusAnn = AnnotationUtils.findAnnotation(handlerMethod, ResponseStatus.class);
-		if (responseStatusAnn != null) {
-			HttpStatus responseStatus = responseStatusAnn.code();
-			String reason = responseStatusAnn.reason();
+		ResponseStatus responseStatus = AnnotatedElementUtils.findMergedAnnotation(handlerMethod, ResponseStatus.class);
+		if (responseStatus != null) {
+			HttpStatus statusCode = responseStatus.code();
+			String reason = responseStatus.reason();
 			if (!StringUtils.hasText(reason)) {
-				webRequest.getResponse().setStatus(responseStatus.value());
+				webRequest.getResponse().setStatus(statusCode.value());
 			}
 			else {
-				webRequest.getResponse().sendError(responseStatus.value(), reason);
+				webRequest.getResponse().sendError(statusCode.value(), reason);
 			}
 		}
 

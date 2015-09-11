@@ -25,7 +25,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -33,15 +33,17 @@ import org.springframework.util.ClassUtils;
 /**
  * Encapsulates information about a handler method consisting of a
  * {@linkplain #getMethod() method} and a {@linkplain #getBean() bean}.
- * Provides convenient access to method parameters, method return value, method annotations.
+ * Provides convenient access to method parameters, the method return value,
+ * method annotations, etc.
  *
  * <p>The class may be created with a bean instance or with a bean name (e.g. lazy-init bean,
- * prototype bean). Use {@link #createWithResolvedBean()} to obtain a {@link HandlerMethod}
+ * prototype bean). Use {@link #createWithResolvedBean()} to obtain a {@code HandlerMethod}
  * instance with a bean instance resolved through the associated {@link BeanFactory}.
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.1
  */
 public class HandlerMethod {
@@ -98,7 +100,7 @@ public class HandlerMethod {
 	/**
 	 * Create an instance from a bean name, a method, and a {@code BeanFactory}.
 	 * The method {@link #createWithResolvedBean()} may be used later to
-	 * re-create the {@code HandlerMethod} with an initialized the bean.
+	 * re-create the {@code HandlerMethod} with an initialized bean.
 	 */
 	public HandlerMethod(String beanName, BeanFactory beanFactory, Method method) {
 		Assert.hasText(beanName, "Bean name is required");
@@ -222,11 +224,14 @@ public class HandlerMethod {
 	/**
 	 * Returns a single annotation on the underlying method traversing its super methods
 	 * if no annotation can be found on the given method itself.
+	 * <p>Also supports <em>merged</em> composed annotations with attribute
+	 * overrides as of Spring Framework 4.2.2.
 	 * @param annotationType the type of annotation to introspect the method for.
 	 * @return the annotation, or {@code null} if none found
+	 * @see AnnotatedElementUtils#findMergedAnnotation
 	 */
 	public <A extends Annotation> A getMethodAnnotation(Class<A> annotationType) {
-		return AnnotationUtils.findAnnotation(this.method, annotationType);
+		return AnnotatedElementUtils.findMergedAnnotation(this.method, annotationType);
 	}
 
 	/**

@@ -16,16 +16,16 @@
 
 package org.springframework.web.servlet.mvc.annotation;
 
-import static org.junit.Assert.*;
-
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Locale;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.StaticMessageSource;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -33,26 +33,35 @@ import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.ModelAndView;
 
-/** @author Arjen Poutsma */
+import static org.junit.Assert.*;
+
+/**
+ * Integration tests for {@link ResponseStatusExceptionResolver}.
+ *
+ * @author Arjen Poutsma
+ * @author Sam Brannen
+ */
 public class ResponseStatusExceptionResolverTests {
 
-	private ResponseStatusExceptionResolver exceptionResolver;
+	private final ResponseStatusExceptionResolver exceptionResolver = new ResponseStatusExceptionResolver();
 
-	private MockHttpServletRequest request;
+	private final MockHttpServletRequest request = new MockHttpServletRequest("GET", "");
 
-	private MockHttpServletResponse response;
-
-	@Before
-	public void setUp() {
-		exceptionResolver = new ResponseStatusExceptionResolver();
-		request = new MockHttpServletRequest();
-		response = new MockHttpServletResponse();
-		request.setMethod("GET");
-	}
+	private final MockHttpServletResponse response = new MockHttpServletResponse();
 
 	@Test
 	public void statusCode() {
 		StatusCodeException ex = new StatusCodeException();
+		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
+		assertNotNull("No ModelAndView returned", mav);
+		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
+		assertEquals("Invalid status code", 400, response.getStatus());
+		assertTrue("Response has not been committed", response.isCommitted());
+	}
+
+	@Test
+	public void statusCodeFromComposedResponseStatus() {
+		StatusCodeFromComposedResponseStatusException ex = new StatusCodeFromComposedResponseStatusException();
 		ModelAndView mav = exceptionResolver.resolveException(request, response, null, ex);
 		assertNotNull("No ModelAndView returned", mav);
 		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
@@ -109,6 +118,7 @@ public class ResponseStatusExceptionResolverTests {
 		assertEquals("Invalid status code", 410, response.getStatus());
 	}
 
+
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@SuppressWarnings("serial")
 	private static class StatusCodeException extends Exception {
@@ -122,6 +132,19 @@ public class ResponseStatusExceptionResolverTests {
 	@ResponseStatus(code = HttpStatus.GONE, reason = "gone.reason")
 	@SuppressWarnings("serial")
 	private static class StatusCodeAndReasonMessageException extends Exception {
+	}
+
+	@ResponseStatus
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface ComposedResponseStatus {
+
+		@AliasFor(annotation = ResponseStatus.class, attribute = "code")
+		HttpStatus responseStatus() default HttpStatus.INTERNAL_SERVER_ERROR;
+	}
+
+	@ComposedResponseStatus(responseStatus = HttpStatus.BAD_REQUEST)
+	@SuppressWarnings("serial")
+	private static class StatusCodeFromComposedResponseStatusException extends Exception {
 	}
 
 }

@@ -56,6 +56,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.Ordered;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -119,7 +120,7 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * Implementation of the {@link org.springframework.web.servlet.HandlerAdapter} interface
- * that maps handler methods based on HTTP paths, HTTP methods and request parameters
+ * that maps handler methods based on HTTP paths, HTTP methods, and request parameters
  * expressed through the {@link RequestMapping} annotation.
  *
  * <p>Supports request parameter binding through the {@link RequestParam} annotation.
@@ -133,6 +134,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Juergen Hoeller
  * @author Arjen Poutsma
+ * @author Sam Brannen
  * @since 2.5
  * @see #setPathMatcher
  * @see #setMethodNameResolver
@@ -911,19 +913,19 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		public ModelAndView getModelAndView(Method handlerMethod, Class<?> handlerType, Object returnValue,
 				ExtendedModelMap implicitModel, ServletWebRequest webRequest) throws Exception {
 
-			ResponseStatus responseStatusAnn = AnnotationUtils.findAnnotation(handlerMethod, ResponseStatus.class);
-			if (responseStatusAnn != null) {
-				HttpStatus responseStatus = responseStatusAnn.code();
-				String reason = responseStatusAnn.reason();
+			ResponseStatus responseStatus = AnnotatedElementUtils.findMergedAnnotation(handlerMethod, ResponseStatus.class);
+			if (responseStatus != null) {
+				HttpStatus statusCode = responseStatus.code();
+				String reason = responseStatus.reason();
 				if (!StringUtils.hasText(reason)) {
-					webRequest.getResponse().setStatus(responseStatus.value());
+					webRequest.getResponse().setStatus(statusCode.value());
 				}
 				else {
-					webRequest.getResponse().sendError(responseStatus.value(), reason);
+					webRequest.getResponse().sendError(statusCode.value(), reason);
 				}
 
 				// to be picked up by the RedirectView
-				webRequest.getRequest().setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, responseStatus);
+				webRequest.getRequest().setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, statusCode);
 
 				this.responseArgumentUsed = true;
 			}
