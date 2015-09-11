@@ -32,16 +32,16 @@ import org.springframework.http.HttpStatus;
  * <p>The status code is applied to the HTTP response when the handler
  * method is invoked.
  *
- * <p><strong>Note:</strong> when using this annotation on an exception class,
- * or when setting the {@code reason} attribute of the annotation,
+ * <p><strong>Warning</strong>: when using this annotation on an exception
+ * class, or when setting the {@code reason} attribute of this annotation,
  * the {@code HttpServletResponse.sendError} method will be used.
  *
- * With {@code HttpServletResponse.sendError}, the response is considered
- * complete and should not be written to any further.
- * Furthermore servlet container will typically write an HTML error page
- * therefore making the use of a reason unsuitable for REST APIs.
- * For such cases prefer the use of {@link org.springframework.http.ResponseEntity}
- * as a return type and avoid {@code ResponseStatus} altogether.
+ * <p>With {@code HttpServletResponse.sendError}, the response is considered
+ * complete and should not be written to any further. Furthermore, the Servlet
+ * container will typically write an HTML error page therefore making the
+ * use of a {@code reason} unsuitable for REST APIs. For such cases it is
+ * preferable to use a {@link org.springframework.http.ResponseEntity} as
+ * a return type and avoid the use of {@code @ResponseStatus} altogether.
  *
  * @author Arjen Poutsma
  * @author Sam Brannen
