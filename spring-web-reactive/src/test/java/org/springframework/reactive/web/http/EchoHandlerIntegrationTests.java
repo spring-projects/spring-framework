@@ -19,6 +19,7 @@ package org.springframework.reactive.web.http;
 import java.net.URI;
 import java.util.Random;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.http.RequestEntity;
@@ -43,6 +44,7 @@ public class EchoHandlerIntegrationTests extends AbstractHttpHandlerIntegrationT
 
 
 	@Test
+	@Ignore
 	public void echoBytes() throws Exception {
 		RestTemplate restTemplate = new RestTemplate();
 
