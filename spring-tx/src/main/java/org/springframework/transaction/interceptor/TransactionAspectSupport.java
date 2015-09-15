@@ -417,9 +417,11 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	}
 
 	/**
+	 * 根据给定的事务属性创建事务对象
 	 * Create a transaction if necessary based on the given TransactionAttribute.
 	 * <p>Allows callers to perform custom TransactionAttribute lookups through
 	 * the TransactionAttributeSource.
+	 * @param tm 事务管理器
 	 * @param txAttr the TransactionAttribute (may be {@code null})
 	 * @param joinpointIdentification the fully qualified method name
 	 * (used for monitoring and logging purposes)
@@ -433,18 +435,23 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 			PlatformTransactionManager tm, TransactionAttribute txAttr, final String joinpointIdentification) {
 
 		// If no name specified, apply method identification as transaction name.
+		// 读取事务方法调用的事务配置属性
 		if (txAttr != null && txAttr.getName() == null) {
+			//如果事务名称为null，则使用方法的名称(事务连接点标识)作为事务名称，
+			//调用一个实现DelegatingTransactionAttribute接口的匿名内部类
 			txAttr = new DelegatingTransactionAttribute(txAttr) {
+				//使用方法名称作为事务名称
 				@Override
 				public String getName() {
 					return joinpointIdentification;
 				}
 			};
 		}
-
+		//事务状态封装了事务执行的状态信息
 		TransactionStatus status = null;
 		if (txAttr != null) {
 			if (tm != null) {
+				//事务处理器创建事务，并且返回当前事务的状态信息
 				status = tm.getTransaction(txAttr);
 			}
 			else {
@@ -454,10 +461,12 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 				}
 			}
 		}
+		//准备事务信息，事务信息TransactionInfo封装了事务配置和状态信息
 		return prepareTransactionInfo(tm, txAttr, joinpointIdentification, status);
 	}
 
 	/**
+	 * 准备事务信息
 	 * Prepare a TransactionInfo for the given attribute and status object.
 	 * @param txAttr the TransactionAttribute (may be {@code null})
 	 * @param joinpointIdentification the fully qualified method name
@@ -467,16 +476,19 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 	 */
 	protected TransactionInfo prepareTransactionInfo(PlatformTransactionManager tm,
 			TransactionAttribute txAttr, String joinpointIdentification, TransactionStatus status) {
-
+//创建事务信息对象
 		TransactionInfo txInfo = new TransactionInfo(tm, txAttr, joinpointIdentification);
+		//如果事务属性不为null，需要为方法使用事务
 		if (txAttr != null) {
 			// We need a transaction for this method
 			if (logger.isTraceEnabled()) {
 				logger.trace("Getting transaction for [" + txInfo.getJoinpointIdentification() + "]");
 			}
+			//为事务信息对象设置事务状态
 			// The transaction manager will flag an error if an incompatible tx already exists
 			txInfo.newTransactionStatus(status);
 		}
+		//如果事务属性为null，不需要为方法使用事务
 		else {
 			// The TransactionInfo.hasTransaction() method will return
 			// false. We created it only to preserve the integrity of
@@ -489,6 +501,7 @@ public abstract class TransactionAspectSupport implements BeanFactoryAware, Init
 		// We always bind the TransactionInfo to the thread, even if we didn't create
 		// a new transaction here. This guarantees that the TransactionInfo stack
 		// will be managed correctly even if no transaction was created by this aspect.
+		//把当前创建的事务信息对象和线程绑定
 		txInfo.bindToThread();
 		return txInfo;
 	}
