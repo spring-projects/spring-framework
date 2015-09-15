@@ -28,6 +28,9 @@ import org.springframework.transaction.PlatformTransactionManager;
 import java.util.Properties;
 
 /**
+ * spring管理事务的IOC容器，它通过Spring的AOP功能完成事务管理器的配置，该类的职责：
+ * TransactionProxyFactoryBean为Spring的事务处理的实现做准备工作，
+ * 包括配置AOP的拦截器、通知器；同时向TransactionProxyFactoryBean注入事务处理器和事务处理属性等
  * Proxy factory bean for simplified declarative transaction handling.
  * This is a convenient alternative to a standard AOP
  * {@link org.springframework.aop.framework.ProxyFactoryBean}

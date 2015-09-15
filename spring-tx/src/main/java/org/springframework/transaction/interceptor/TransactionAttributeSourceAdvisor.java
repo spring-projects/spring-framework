@@ -17,12 +17,13 @@
 package org.springframework.transaction.interceptor;
 
 import org.aopalliance.aop.Advice;
-
 import org.springframework.aop.ClassFilter;
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.AbstractPointcutAdvisor;
 
 /**
+ * 读取Spring事务处理配置
+ * 事务属性源通知器的核心功能是为Spring的事务IoC容器设置事务属性源切入点和事务拦截器。
  * Advisor driven by a {@link TransactionAttributeSource}, used to include
  * a {@link TransactionInterceptor} only for methods that are transactional.
  *
@@ -37,12 +38,19 @@ import org.springframework.aop.support.AbstractPointcutAdvisor;
  */
 @SuppressWarnings("serial")
 public class TransactionAttributeSourceAdvisor extends AbstractPointcutAdvisor {
-
+	/**
+	 * 事务拦截器
+	 */
 	private TransactionInterceptor transactionInterceptor;
 
+	/**
+	 * 事务属性源切入点，一个实现事务属性源切入点接口的匿名内部类
+	 */
 	private final TransactionAttributeSourcePointcut pointcut = new TransactionAttributeSourcePointcut() {
+		// 实现事务属性源切入点接口的获取事务属性源方法
 		@Override
 		protected TransactionAttributeSource getTransactionAttributeSource() {
+			//通过事务拦截器获取事务的配置属性
 			return (transactionInterceptor != null ? transactionInterceptor.getTransactionAttributeSource() : null);
 		}
 	};
@@ -55,6 +63,7 @@ public class TransactionAttributeSourceAdvisor extends AbstractPointcutAdvisor {
 	}
 
 	/**
+	 * 事务属性源通知器构造方法
 	 * Create a new TransactionAttributeSourceAdvisor.
 	 * @param interceptor the transaction interceptor to use for this advisor
 	 */
@@ -64,6 +73,7 @@ public class TransactionAttributeSourceAdvisor extends AbstractPointcutAdvisor {
 
 
 	/**
+	 * 设置事务拦截器
 	 * Set the transaction interceptor to use for this advisor.
 	 */
 	public void setTransactionInterceptor(TransactionInterceptor interceptor) {

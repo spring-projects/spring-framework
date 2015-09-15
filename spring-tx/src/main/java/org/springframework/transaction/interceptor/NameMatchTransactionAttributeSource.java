@@ -16,6 +16,12 @@
 
 package org.springframework.transaction.interceptor;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.PatternMatchUtils;
+
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
@@ -23,14 +29,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.PatternMatchUtils;
-
 /**
+ * 读取和匹配事务属性
  * Simple {@link TransactionAttributeSource} implementation that
  * allows attributes to be matched by registered name.
  *
@@ -66,6 +66,7 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 	}
 
 	/**
+	 * 设置方法事务属性
 	 * Parses the given properties into a name/attribute map.
 	 * Expects method names as keys and String attributes definitions as values,
 	 * parsable into TransactionAttribute instances via TransactionAttributeEditor.
@@ -73,18 +74,27 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 	 * @see TransactionAttributeEditor
 	 */
 	public void setProperties(Properties transactionAttributes) {
+		// 创建事务属性解析器
 		TransactionAttributeEditor tae = new TransactionAttributeEditor();
+		//获取事务属性配置中所有属性名称
 		Enumeration<?> propNames = transactionAttributes.propertyNames();
+		//遍历所有的事务属性
 		while (propNames.hasMoreElements()) {
+			//获取事务属性配置的方法名
 			String methodName = (String) propNames.nextElement();
+			//获取方法配置的事务属性值
 			String value = transactionAttributes.getProperty(methodName);
+			//解析和格式化事务属性值
 			tae.setAsText(value);
+			//获取解析和格式化之后的事务属性
 			TransactionAttribute attr = (TransactionAttribute) tae.getValue();
+			//将方法名和其对应的事务属性添加到集合中
 			addTransactionalMethod(methodName, attr);
 		}
 	}
 
 	/**
+	 * 将方法名称和该方法配置的事务属性添加到Map集合中
 	 * Add an attribute for a transactional method.
 	 * <p>Method names can be exact matches, or of the pattern "xxx*",
 	 * "*xxx" or "*xxx*" for matching multiple methods.
@@ -98,23 +108,34 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 		this.nameMap.put(methodName, attr);
 	}
 
-
+	/**
+	 * 获取给定类给定方法中配置的事务属性
+	 *
+	 * @param method      the method to introspect
+	 * @param targetClass the target class. May be {@code null},
+	 *                    in which case the declaring class of the method must be used.
+	 * @return
+	 */
 	@Override
 	public TransactionAttribute getTransactionAttribute(Method method, Class<?> targetClass) {
 		if (!ClassUtils.isUserLevelMethod(method)) {
 			return null;
 		}
 
-		// Look for direct name match.
+		// Look for direct name match. 获取方法名
 		String methodName = method.getName();
+		//从方法名—>事务属性Map集合中获取给定方法名的事务属性
 		TransactionAttribute attr = this.nameMap.get(methodName);
-
+		//如果在方法名—>事务属性Map集合中没有给定方法名的事务属性
 		if (attr == null) {
 			// Look for most specific name match.
 			String bestNameMatch = null;
+			//判断给定方法名称是否在方法名—>事务属性Map集合的key中
 			for (String mappedName : this.nameMap.keySet()) {
+				//如果给定的方法名在Map集合的key中匹配
 				if (isMatch(methodName, mappedName) &&
 						(bestNameMatch == null || bestNameMatch.length() <= mappedName.length())) {
+					//获取匹配方法的事务属性
 					attr = this.nameMap.get(mappedName);
 					bestNameMatch = mappedName;
 				}
@@ -125,6 +146,7 @@ public class NameMatchTransactionAttributeSource implements TransactionAttribute
 	}
 
 	/**
+	 * 判断给定的方法名是否匹配，默认实现了"xxx*"，"*xxx"和"*xxx*"匹配检查
 	 * Return if the given method name matches the mapped name.
 	 * <p>The default implementation checks for "xxx*", "*xxx" and "*xxx*" matches,
 	 * as well as direct equality. Can be overridden in subclasses.
