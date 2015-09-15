@@ -16,8 +16,6 @@
 
 package org.springframework.transaction.interceptor;
 
-import java.util.Properties;
-
 import org.springframework.aop.Pointcut;
 import org.springframework.aop.framework.AbstractSingletonProxyFactoryBean;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
@@ -26,6 +24,8 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.transaction.PlatformTransactionManager;
+
+import java.util.Properties;
 
 /**
  * Proxy factory bean for simplified declarative transaction handling.
@@ -113,13 +113,19 @@ import org.springframework.transaction.PlatformTransactionManager;
 @SuppressWarnings("serial")
 public class TransactionProxyFactoryBean extends AbstractSingletonProxyFactoryBean
 		implements BeanFactoryAware {
-
+	/**
+	 * 通过AOP发挥作用的事务拦截器
+	 */
 	private final TransactionInterceptor transactionInterceptor = new TransactionInterceptor();
 
+	/**
+	 * 事务的AOP切入点
+	 */
 	private Pointcut pointcut;
 
 
 	/**
+	 * 通过SpringIOC容器依赖注入PlatformTransactionManager（事务管理器）
 	 * Set the default transaction manager. This will perform actual
 	 * transaction management: This class is just a way of invoking it.
 	 * @see TransactionInterceptor#setTransactionManager
@@ -129,6 +135,7 @@ public class TransactionProxyFactoryBean extends AbstractSingletonProxyFactoryBe
 	}
 
 	/**
+	 * 通过依赖注入的事务属性，以properties形式存放的事务属性，key为方法名，value为事务属性的描述
 	 * Set properties with method names as keys and transaction attribute
 	 * descriptors (parsed via TransactionAttributeEditor) as values:
 	 * e.g. key = "myMethod", value = "PROPAGATION_REQUIRED,readOnly".
@@ -146,6 +153,7 @@ public class TransactionProxyFactoryBean extends AbstractSingletonProxyFactoryBe
 	}
 
 	/**
+	 * 通过依赖注入设置事务属性源，通过事务属性源可以找到需要的使用事务属性
 	 * Set the transaction attribute source which is used to find transaction
 	 * attributes. If specifying a String property value, a PropertyEditor
 	 * will create a MethodMapTransactionAttributeSource from the value.
@@ -161,6 +169,7 @@ public class TransactionProxyFactoryBean extends AbstractSingletonProxyFactoryBe
 	}
 
 	/**
+	 * 通过依赖注入设置事务切入点，事务切点根据触发的条件调用事务拦截器
 	 * Set a pointcut, i.e a bean that can cause conditional invocation
 	 * of the TransactionInterceptor depending on method and attributes passed.
 	 * Note: Additional interceptors are always invoked.
@@ -172,6 +181,7 @@ public class TransactionProxyFactoryBean extends AbstractSingletonProxyFactoryBe
 	}
 
 	/**
+	 * 设置事务拦截器的事务容器
 	 * This callback is optional: If running in a BeanFactory and no transaction
 	 * manager has been set explicitly, a single matching bean of type
 	 * {@link PlatformTransactionManager} will be fetched from the BeanFactory.
@@ -185,16 +195,21 @@ public class TransactionProxyFactoryBean extends AbstractSingletonProxyFactoryBe
 
 
 	/**
+	 * 创建Spring AOP事务处理的通知器的Advisor
 	 * Creates an advisor for this FactoryBean's TransactionInterceptor.
 	 */
 	@Override
 	protected Object createMainInterceptor() {
+		// 调用事务拦截器的方法，检查必要的属性是否设置
 		this.transactionInterceptor.afterPropertiesSet();
+		// 配置了事务事务缺点和事务拦截器
 		if (this.pointcut != null) {
+			// 返回默认的通知器封装事务切入点和事务拦截器
 			return new DefaultPointcutAdvisor(this.pointcut, this.transactionInterceptor);
 		}
 		else {
 			// Rely on default pointcut.
+			// 使用TransactionAttributeSourceAdvisor 封装默认的事务切入点
 			return new TransactionAttributeSourceAdvisor(this.transactionInterceptor);
 		}
 	}

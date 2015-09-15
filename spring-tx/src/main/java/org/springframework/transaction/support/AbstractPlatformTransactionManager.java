@@ -16,14 +16,8 @@
 
 package org.springframework.transaction.support;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.Serializable;
-import java.util.List;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.core.Constants;
 import org.springframework.transaction.IllegalTransactionStateException;
 import org.springframework.transaction.InvalidTimeoutException;
@@ -35,7 +29,13 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.TransactionSuspensionNotSupportedException;
 import org.springframework.transaction.UnexpectedRollbackException;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
+import java.util.List;
+
 /**
+ * 通用的事务处理流程框架，采用模版方式
  * Abstract base class that implements Spring's standard transaction workflow,
  * serving as basis for concrete platform transaction managers like
  * {@link org.springframework.transaction.jta.JtaTransactionManager}.
@@ -138,186 +138,186 @@ public abstract class AbstractPlatformTransactionManager implements PlatformTran
 	}
 
 	/**
-	 * Set when this transaction manager should activate the thread-bound
-	 * transaction synchronization support. Default is "always".
-	 * <p>Note that transaction synchronization isn't supported for
-	 * multiple concurrent transactions by different transaction managers.
-	 * Only one transaction manager is allowed to activate it at any time.
-	 * @see #SYNCHRONIZATION_ALWAYS
-	 * @see #SYNCHRONIZATION_ON_ACTUAL_TRANSACTION
-	 * @see #SYNCHRONIZATION_NEVER
-	 * @see TransactionSynchronizationManager
-	 * @see TransactionSynchronization
-	 */
-	public final void setTransactionSynchronization(int transactionSynchronization) {
-		this.transactionSynchronization = transactionSynchronization;
-	}
+     * Return if this transaction manager should activate the thread-bound
+     * transaction synchronization support.
+     */
+    public final int getTransactionSynchronization() {
+        return this.transactionSynchronization;
+    }
 
 	/**
-	 * Return if this transaction manager should activate the thread-bound
-	 * transaction synchronization support.
-	 */
-	public final int getTransactionSynchronization() {
-		return this.transactionSynchronization;
-	}
+     * Set when this transaction manager should activate the thread-bound
+     * transaction synchronization support. Default is "always".
+     * <p>Note that transaction synchronization isn't supported for
+     * multiple concurrent transactions by different transaction managers.
+     * Only one transaction manager is allowed to activate it at any time.
+     * @see #SYNCHRONIZATION_ALWAYS
+     * @see #SYNCHRONIZATION_ON_ACTUAL_TRANSACTION
+     * @see #SYNCHRONIZATION_NEVER
+     * @see TransactionSynchronizationManager
+     * @see TransactionSynchronization
+     */
+    public final void setTransactionSynchronization(int transactionSynchronization) {
+        this.transactionSynchronization = transactionSynchronization;
+    }
 
 	/**
-	 * Specify the default timeout that this transaction manager should apply
-	 * if there is no timeout specified at the transaction level, in seconds.
-	 * <p>Default is the underlying transaction infrastructure's default timeout,
-	 * e.g. typically 30 seconds in case of a JTA provider, indicated by the
-	 * {@code TransactionDefinition.TIMEOUT_DEFAULT} value.
-	 * @see org.springframework.transaction.TransactionDefinition#TIMEOUT_DEFAULT
-	 */
-	public final void setDefaultTimeout(int defaultTimeout) {
-		if (defaultTimeout < TransactionDefinition.TIMEOUT_DEFAULT) {
-			throw new InvalidTimeoutException("Invalid default timeout", defaultTimeout);
-		}
-		this.defaultTimeout = defaultTimeout;
-	}
+     * Return the default timeout that this transaction manager should apply
+     * if there is no timeout specified at the transaction level, in seconds.
+     * <p>Returns {@code TransactionDefinition.TIMEOUT_DEFAULT} to indicate
+     * the underlying transaction infrastructure's default timeout.
+     */
+    public final int getDefaultTimeout() {
+        return this.defaultTimeout;
+    }
 
 	/**
-	 * Return the default timeout that this transaction manager should apply
-	 * if there is no timeout specified at the transaction level, in seconds.
-	 * <p>Returns {@code TransactionDefinition.TIMEOUT_DEFAULT} to indicate
-	 * the underlying transaction infrastructure's default timeout.
-	 */
-	public final int getDefaultTimeout() {
-		return this.defaultTimeout;
-	}
+     * Specify the default timeout that this transaction manager should apply
+     * if there is no timeout specified at the transaction level, in seconds.
+     * <p>Default is the underlying transaction infrastructure's default timeout,
+     * e.g. typically 30 seconds in case of a JTA provider, indicated by the
+     * {@code TransactionDefinition.TIMEOUT_DEFAULT} value.
+     * @see org.springframework.transaction.TransactionDefinition#TIMEOUT_DEFAULT
+     */
+    public final void setDefaultTimeout(int defaultTimeout) {
+        if (defaultTimeout < TransactionDefinition.TIMEOUT_DEFAULT) {
+            throw new InvalidTimeoutException("Invalid default timeout", defaultTimeout);
+        }
+        this.defaultTimeout = defaultTimeout;
+    }
 
 	/**
-	 * Set whether nested transactions are allowed. Default is "false".
-	 * <p>Typically initialized with an appropriate default by the
-	 * concrete transaction manager subclass.
-	 */
-	public final void setNestedTransactionAllowed(boolean nestedTransactionAllowed) {
-		this.nestedTransactionAllowed = nestedTransactionAllowed;
-	}
+     * Return whether nested transactions are allowed.
+     */
+    public final boolean isNestedTransactionAllowed() {
+        return this.nestedTransactionAllowed;
+    }
 
 	/**
-	 * Return whether nested transactions are allowed.
-	 */
-	public final boolean isNestedTransactionAllowed() {
-		return this.nestedTransactionAllowed;
-	}
+     * Set whether nested transactions are allowed. Default is "false".
+     * <p>Typically initialized with an appropriate default by the
+     * concrete transaction manager subclass.
+     */
+    public final void setNestedTransactionAllowed(boolean nestedTransactionAllowed) {
+        this.nestedTransactionAllowed = nestedTransactionAllowed;
+    }
 
 	/**
-	 * Set whether existing transactions should be validated before participating
-	 * in them.
-	 * <p>When participating in an existing transaction (e.g. with
-	 * PROPAGATION_REQUIRES or PROPAGATION_SUPPORTS encountering an existing
-	 * transaction), this outer transaction's characteristics will apply even
-	 * to the inner transaction scope. Validation will detect incompatible
-	 * isolation level and read-only settings on the inner transaction definition
-	 * and reject participation accordingly through throwing a corresponding exception.
-	 * <p>Default is "false", leniently ignoring inner transaction settings,
-	 * simply overriding them with the outer transaction's characteristics.
-	 * Switch this flag to "true" in order to enforce strict validation.
+     * Return whether existing transactions should be validated before participating
+     * in them.
 	 */
-	public final void setValidateExistingTransaction(boolean validateExistingTransaction) {
-		this.validateExistingTransaction = validateExistingTransaction;
-	}
+    public final boolean isValidateExistingTransaction() {
+        return this.validateExistingTransaction;
+    }
 
 	/**
-	 * Return whether existing transactions should be validated before participating
-	 * in them.
-	 */
-	public final boolean isValidateExistingTransaction() {
-		return this.validateExistingTransaction;
-	}
+     * Set whether existing transactions should be validated before participating
+     * in them.
+     * <p>When participating in an existing transaction (e.g. with
+     * PROPAGATION_REQUIRES or PROPAGATION_SUPPORTS encountering an existing
+     * transaction), this outer transaction's characteristics will apply even
+     * to the inner transaction scope. Validation will detect incompatible
+     * isolation level and read-only settings on the inner transaction definition
+     * and reject participation accordingly through throwing a corresponding exception.
+     * <p>Default is "false", leniently ignoring inner transaction settings,
+     * simply overriding them with the outer transaction's characteristics.
+     * Switch this flag to "true" in order to enforce strict validation.
+     */
+    public final void setValidateExistingTransaction(boolean validateExistingTransaction) {
+        this.validateExistingTransaction = validateExistingTransaction;
+    }
 
 	/**
-	 * Set whether to globally mark an existing transaction as rollback-only
-	 * after a participating transaction failed.
-	 * <p>Default is "true": If a participating transaction (e.g. with
-	 * PROPAGATION_REQUIRES or PROPAGATION_SUPPORTS encountering an existing
-	 * transaction) fails, the transaction will be globally marked as rollback-only.
-	 * The only possible outcome of such a transaction is a rollback: The
-	 * transaction originator <i>cannot</i> make the transaction commit anymore.
-	 * <p>Switch this to "false" to let the transaction originator make the rollback
-	 * decision. If a participating transaction fails with an exception, the caller
-	 * can still decide to continue with a different path within the transaction.
-	 * However, note that this will only work as long as all participating resources
-	 * are capable of continuing towards a transaction commit even after a data access
-	 * failure: This is generally not the case for a Hibernate Session, for example;
-	 * neither is it for a sequence of JDBC insert/update/delete operations.
-	 * <p><b>Note:</b>This flag only applies to an explicit rollback attempt for a
-	 * subtransaction, typically caused by an exception thrown by a data access operation
-	 * (where TransactionInterceptor will trigger a {@code PlatformTransactionManager.rollback()}
-	 * call according to a rollback rule). If the flag is off, the caller can handle the exception
-	 * and decide on a rollback, independent of the rollback rules of the subtransaction.
-	 * This flag does, however, <i>not</i> apply to explicit {@code setRollbackOnly}
-	 * calls on a {@code TransactionStatus}, which will always cause an eventual
-	 * global rollback (as it might not throw an exception after the rollback-only call).
-	 * <p>The recommended solution for handling failure of a subtransaction
-	 * is a "nested transaction", where the global transaction can be rolled
-	 * back to a savepoint taken at the beginning of the subtransaction.
-	 * PROPAGATION_NESTED provides exactly those semantics; however, it will
-	 * only work when nested transaction support is available. This is the case
-	 * with DataSourceTransactionManager, but not with JtaTransactionManager.
-	 * @see #setNestedTransactionAllowed
-	 * @see org.springframework.transaction.jta.JtaTransactionManager
+     * Return whether to globally mark an existing transaction as rollback-only
+     * after a participating transaction failed.
 	 */
-	public final void setGlobalRollbackOnParticipationFailure(boolean globalRollbackOnParticipationFailure) {
-		this.globalRollbackOnParticipationFailure = globalRollbackOnParticipationFailure;
-	}
+    public final boolean isGlobalRollbackOnParticipationFailure() {
+        return this.globalRollbackOnParticipationFailure;
+    }
 
 	/**
-	 * Return whether to globally mark an existing transaction as rollback-only
-	 * after a participating transaction failed.
-	 */
-	public final boolean isGlobalRollbackOnParticipationFailure() {
-		return this.globalRollbackOnParticipationFailure;
-	}
+     * Set whether to globally mark an existing transaction as rollback-only
+     * after a participating transaction failed.
+     * <p>Default is "true": If a participating transaction (e.g. with
+     * PROPAGATION_REQUIRES or PROPAGATION_SUPPORTS encountering an existing
+     * transaction) fails, the transaction will be globally marked as rollback-only.
+     * The only possible outcome of such a transaction is a rollback: The
+     * transaction originator <i>cannot</i> make the transaction commit anymore.
+     * <p>Switch this to "false" to let the transaction originator make the rollback
+     * decision. If a participating transaction fails with an exception, the caller
+     * can still decide to continue with a different path within the transaction.
+     * However, note that this will only work as long as all participating resources
+     * are capable of continuing towards a transaction commit even after a data access
+     * failure: This is generally not the case for a Hibernate Session, for example;
+     * neither is it for a sequence of JDBC insert/update/delete operations.
+     * <p><b>Note:</b>This flag only applies to an explicit rollback attempt for a
+     * subtransaction, typically caused by an exception thrown by a data access operation
+     * (where TransactionInterceptor will trigger a {@code PlatformTransactionManager.rollback()}
+     * call according to a rollback rule). If the flag is off, the caller can handle the exception
+     * and decide on a rollback, independent of the rollback rules of the subtransaction.
+     * This flag does, however, <i>not</i> apply to explicit {@code setRollbackOnly}
+     * calls on a {@code TransactionStatus}, which will always cause an eventual
+     * global rollback (as it might not throw an exception after the rollback-only call).
+     * <p>The recommended solution for handling failure of a subtransaction
+     * is a "nested transaction", where the global transaction can be rolled
+     * back to a savepoint taken at the beginning of the subtransaction.
+     * PROPAGATION_NESTED provides exactly those semantics; however, it will
+     * only work when nested transaction support is available. This is the case
+     * with DataSourceTransactionManager, but not with JtaTransactionManager.
+     * @see #setNestedTransactionAllowed
+     * @see org.springframework.transaction.jta.JtaTransactionManager
+     */
+    public final void setGlobalRollbackOnParticipationFailure(boolean globalRollbackOnParticipationFailure) {
+        this.globalRollbackOnParticipationFailure = globalRollbackOnParticipationFailure;
+    }
 
 	/**
-	 * Set whether to fail early in case of the transaction being globally marked
-	 * as rollback-only.
-	 * <p>Default is "false", only causing an UnexpectedRollbackException at the
-	 * outermost transaction boundary. Switch this flag on to cause an
-	 * UnexpectedRollbackException as early as the global rollback-only marker
-	 * has been first detected, even from within an inner transaction boundary.
-	 * <p>Note that, as of Spring 2.0, the fail-early behavior for global
-	 * rollback-only markers has been unified: All transaction managers will by
-	 * default only cause UnexpectedRollbackException at the outermost transaction
-	 * boundary. This allows, for example, to continue unit tests even after an
-	 * operation failed and the transaction will never be completed. All transaction
-	 * managers will only fail earlier if this flag has explicitly been set to "true".
-	 * @see org.springframework.transaction.UnexpectedRollbackException
+     * Return whether to fail early in case of the transaction being globally marked
+     * as rollback-only.
 	 */
-	public final void setFailEarlyOnGlobalRollbackOnly(boolean failEarlyOnGlobalRollbackOnly) {
-		this.failEarlyOnGlobalRollbackOnly = failEarlyOnGlobalRollbackOnly;
-	}
+    public final boolean isFailEarlyOnGlobalRollbackOnly() {
+        return this.failEarlyOnGlobalRollbackOnly;
+    }
 
 	/**
-	 * Return whether to fail early in case of the transaction being globally marked
-	 * as rollback-only.
-	 */
-	public final boolean isFailEarlyOnGlobalRollbackOnly() {
-		return this.failEarlyOnGlobalRollbackOnly;
-	}
+     * Set whether to fail early in case of the transaction being globally marked
+     * as rollback-only.
+     * <p>Default is "false", only causing an UnexpectedRollbackException at the
+     * outermost transaction boundary. Switch this flag on to cause an
+     * UnexpectedRollbackException as early as the global rollback-only marker
+     * has been first detected, even from within an inner transaction boundary.
+     * <p>Note that, as of Spring 2.0, the fail-early behavior for global
+     * rollback-only markers has been unified: All transaction managers will by
+     * default only cause UnexpectedRollbackException at the outermost transaction
+     * boundary. This allows, for example, to continue unit tests even after an
+     * operation failed and the transaction will never be completed. All transaction
+     * managers will only fail earlier if this flag has explicitly been set to "true".
+     * @see org.springframework.transaction.UnexpectedRollbackException
+     */
+    public final void setFailEarlyOnGlobalRollbackOnly(boolean failEarlyOnGlobalRollbackOnly) {
+        this.failEarlyOnGlobalRollbackOnly = failEarlyOnGlobalRollbackOnly;
+    }
 
 	/**
-	 * Set whether {@code doRollback} should be performed on failure of the
-	 * {@code doCommit} call. Typically not necessary and thus to be avoided,
-	 * as it can potentially override the commit exception with a subsequent
-	 * rollback exception.
-	 * <p>Default is "false".
-	 * @see #doCommit
-	 * @see #doRollback
-	 */
-	public final void setRollbackOnCommitFailure(boolean rollbackOnCommitFailure) {
-		this.rollbackOnCommitFailure = rollbackOnCommitFailure;
-	}
+     * Return whether {@code doRollback} should be performed on failure of the
+     * {@code doCommit} call.
+     */
+    public final boolean isRollbackOnCommitFailure() {
+        return this.rollbackOnCommitFailure;
+    }
 
 	/**
-	 * Return whether {@code doRollback} should be performed on failure of the
-	 * {@code doCommit} call.
-	 */
-	public final boolean isRollbackOnCommitFailure() {
-		return this.rollbackOnCommitFailure;
-	}
+     * Set whether {@code doRollback} should be performed on failure of the
+     * {@code doCommit} call. Typically not necessary and thus to be avoided,
+     * as it can potentially override the commit exception with a subsequent
+     * rollback exception.
+     * <p>Default is "false".
+     * @see #doCommit
+     * @see #doRollback
+     */
+    public final void setRollbackOnCommitFailure(boolean rollbackOnCommitFailure) {
+        this.rollbackOnCommitFailure = rollbackOnCommitFailure;
+    }
 
 
 	//---------------------------------------------------------------------
