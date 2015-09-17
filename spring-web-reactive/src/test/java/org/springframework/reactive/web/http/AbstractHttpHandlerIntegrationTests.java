@@ -27,7 +27,7 @@ import org.springframework.util.SocketUtils;
 @RunWith(Parameterized.class)
 public abstract class AbstractHttpHandlerIntegrationTests {
 
-	protected static int port = SocketUtils.findAvailableTcpPort();
+	protected int port;
 
 	@Parameterized.Parameter(0)
 	public HttpServer server;
@@ -45,7 +45,8 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 
 	@Before
 	public void setup() throws Exception {
-		this.server.setPort(port);
+		this.port = SocketUtils.findAvailableTcpPort();
+		this.server.setPort(this.port);
 		this.server.setHandler(createHttpHandler());
 		this.server.afterPropertiesSet();
 		this.server.start();

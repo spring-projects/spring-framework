@@ -150,10 +150,25 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 	}
 
 	@Test
-	public void capitalize() throws Exception {
+	public void publisherCapitalize() throws Exception {
+		capitalize("http://localhost:" + port + "/publisher-capitalize");
+	}
+
+	@Test
+	public void observableCapitalize() throws Exception {
+		capitalize("http://localhost:" + port + "/observable-capitalize");
+	}
+
+	@Test
+	public void streamCapitalize() throws Exception {
+		capitalize("http://localhost:" + port + "/stream-capitalize");
+	}
+
+
+	public void capitalize(String requestUrl) throws Exception {
 		RestTemplate restTemplate = new RestTemplate();
 
-		URI url = new URI("http://localhost:" + port + "/capitalize");
+		URI url = new URI(requestUrl);
 		List<Person> persons = Arrays.asList(new Person("Robert"), new Person("Marie"));
 		RequestEntity<List<Person>> request = RequestEntity
 				.post(url)
@@ -208,9 +223,27 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 			return Streams.just(new Person("Robert"), new Person("Marie"));
 		}
 
-		@RequestMapping("/capitalize")
+		@RequestMapping("/publisher-capitalize")
 		@ResponseBody
-		public Observable<Person> capitalize(@RequestBody Observable<Person> persons) {
+		public Publisher<Person> publisherCapitalize(@RequestBody Publisher<Person> persons) {
+			return Streams.wrap(persons).map(person -> {
+				person.setName(person.getName().toUpperCase());
+				return person;
+			});
+		}
+
+		@RequestMapping("/observable-capitalize")
+		@ResponseBody
+		public Observable<Person> observableCapitalize(@RequestBody Observable<Person> persons) {
+			return persons.map(person -> {
+				person.setName(person.getName().toUpperCase());
+				return person;
+			});
+		}
+
+		@RequestMapping("/stream-capitalize")
+		@ResponseBody
+		public Stream<Person> streamCapitalize(@RequestBody Stream<Person> persons) {
 			return persons.map(person -> {
 				person.setName(person.getName().toUpperCase());
 				return person;

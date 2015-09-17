@@ -44,7 +44,6 @@ public class EchoHandlerIntegrationTests extends AbstractHttpHandlerIntegrationT
 
 
 	@Test
-	@Ignore
 	public void echoBytes() throws Exception {
 		RestTemplate restTemplate = new RestTemplate();
 
