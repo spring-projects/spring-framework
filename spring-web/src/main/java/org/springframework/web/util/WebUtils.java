@@ -47,6 +47,7 @@ import org.springframework.util.StringUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
+ * @author Georgij Cernysiov
  */
 public abstract class WebUtils {
 
@@ -792,7 +793,19 @@ public abstract class WebUtils {
 			return isSameOrigin(request);
 		}
 		else {
-			return allowedOrigins.contains(origin);
+			if(allowedOrigins.contains(origin)) {
+				return true;
+			} else {
+				UriComponents headerOriginUrl = UriComponentsBuilder.fromOriginHeader(origin).build();
+				UriComponents allowedOriginUrl;
+				for (String allowed : allowedOrigins) {
+					allowedOriginUrl = UriComponentsBuilder.fromOriginHeader(allowed).build();
+					if (isSameHostAndPort(headerOriginUrl, allowedOriginUrl)) {
+						return true;
+					}
+				}
+				return false;
+			}
 		}
 	}
 
@@ -810,7 +823,23 @@ public abstract class WebUtils {
 		}
 		UriComponents actualUrl = UriComponentsBuilder.fromHttpRequest(request).build();
 		UriComponents originUrl = UriComponentsBuilder.fromOriginHeader(origin).build();
-		return (actualUrl.getHost().equals(originUrl.getHost()) && getPort(actualUrl) == getPort(originUrl));
+		return isSameHostAndPort(actualUrl, originUrl);
+	}
+
+	/**
+	 * Checks {@link UriComponents} {@code Host} and {@code Port}.
+	 * @return {@code true} if components have the same {@code Host} and {@code Port}.
+	 * @since 4.2.2
+	 */
+	public static boolean isSameHostAndPort(UriComponents a, UriComponents b) {
+		if (a == null && b == null) {
+			return true;
+		}
+		else if (a == null || b == null) {
+			return false;
+		}
+
+		return (a.getHost().equals(b.getHost()) && getPort(a) == getPort( b));
 	}
 
 	private static int getPort(UriComponents component) {

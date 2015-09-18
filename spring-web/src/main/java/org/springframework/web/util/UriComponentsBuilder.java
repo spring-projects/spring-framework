@@ -50,6 +50,7 @@ import org.springframework.web.util.HierarchicalUriComponents.PathComponent;
  * @author Rossen Stoyanchev
  * @author Phillip Webb
  * @author Oliver Gierke
+ * @author Georgij Cernysiov
  * @since 3.1
  * @see #newInstance()
  * @see #fromPath(String)
@@ -338,24 +339,35 @@ public class UriComponentsBuilder implements Cloneable {
 
 
 	/**
-	 * Create an instance by parsing the "origin" header of an HTTP request.
+	 * Creates a new {@code UriComponents} instance from the {@code ORIGIN} header of an HTTP request.
+	 * @param origin the {@code ORIGIN} header value
+	 * @return the URI components of the {@code ORIGIN} value
+	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>
 	 */
 	public static UriComponentsBuilder fromOriginHeader(String origin) {
-		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
-		if (StringUtils.hasText(origin)) {
-			int schemaIdx = origin.indexOf("://");
-			String schema = (schemaIdx != -1 ? origin.substring(0, schemaIdx) : "http");
-			builder.scheme(schema);
-			String hostString = (schemaIdx != -1 ? origin.substring(schemaIdx + 3) : origin);
-			if (hostString.contains(":")) {
-				String[] hostAndPort = StringUtils.split(hostString, ":");
-				builder.host(hostAndPort[0]);
-				builder.port(Integer.parseInt(hostAndPort[1]));
+		UriComponentsBuilder builder = new UriComponentsBuilder();
+
+		Matcher matcher = URI_PATTERN.matcher(origin);
+		if (matcher.matches()) {
+			String scheme = matcher.group(2);
+			String host = matcher.group(6);
+			String port = matcher.group(8);
+
+			if (StringUtils.hasLength(scheme)) {
+				int schemaIdx = origin.indexOf("://");
+				scheme = (schemaIdx != -1 ? origin.substring(0, schemaIdx) : "http");
 			}
-			else {
-				builder.host(hostString);
+			builder.scheme(scheme);
+
+			builder.host(host);
+			if (StringUtils.hasLength(port)) {
+				builder.port(port);
 			}
 		}
+		else {
+			builder.scheme("http").host(null).port(null);
+		}
+
 		return builder;
 	}
 
