@@ -345,7 +345,7 @@ public class UriComponentsBuilder implements Cloneable {
 	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>
 	 */
 	public static UriComponentsBuilder fromOriginHeader(String origin) {
-		final UriComponentsBuilder builder = new UriComponentsBuilder().scheme(null).host(null).port(null);
+		final UriComponentsBuilder builder = new UriComponentsBuilder().scheme("").host("").port(-1);
 
 		if (StringUtils.hasLength(origin)) {
 			Matcher matcher = URI_PATTERN.matcher(origin);
@@ -356,7 +356,7 @@ public class UriComponentsBuilder implements Cloneable {
 
 				if (StringUtils.hasLength(scheme)) {
 					int schemaIdx = origin.indexOf("://");
-					scheme = (schemaIdx != -1 ? origin.substring(0, schemaIdx) : null);
+					scheme = (schemaIdx != -1 ? origin.substring(0, schemaIdx) : "");
 				}
 				builder.scheme(scheme);
 

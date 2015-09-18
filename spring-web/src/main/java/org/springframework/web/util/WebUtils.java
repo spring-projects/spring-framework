@@ -800,7 +800,7 @@ public abstract class WebUtils {
 				UriComponents allowedOriginUrl;
 				for (String allowed : allowedOrigins) {
 					allowedOriginUrl = UriComponentsBuilder.fromOriginHeader(allowed).build();
-					if (isSameHostAndPort(headerOriginUrl, allowedOriginUrl)) {
+					if (isSameHostAndPort(allowedOriginUrl, headerOriginUrl)) {
 						return true;
 					}
 				}
