@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,10 @@ import org.springframework.util.Assert;
  * @author Juergen Hoeller
  * @since 2.5
  * @see TransactionConfiguration
+ * @deprecated As of Spring Framework 4.2, this class is officially deprecated
+ * and will be removed when {@code @TransactionConfiguration} is removed.
  */
+@Deprecated
 public class TransactionConfigurationAttributes {
 
 	private final String transactionManagerName;
@@ -36,14 +39,27 @@ public class TransactionConfigurationAttributes {
 
 
 	/**
-	 * Construct a new TransactionConfigurationAttributes instance from the
-	 * supplied arguments.
+	 * Construct a new {@code TransactionConfigurationAttributes} instance
+	 * using an empty string for the bean name of the
+	 * {@link PlatformTransactionManager} and {@code true} for the default
+	 * rollback flag.
+	 * @see #TransactionConfigurationAttributes(String, boolean)
+	 */
+	public TransactionConfigurationAttributes() {
+		this("", true);
+	}
+
+	/**
+	 * Construct a new {@code TransactionConfigurationAttributes} instance
+	 * from the supplied arguments.
 	 * @param transactionManagerName the bean name of the
-	 * {@link PlatformTransactionManager} that is to be used to drive transactions
-	 * @param defaultRollback whether or not transactions should be rolled back by default
+	 * {@link PlatformTransactionManager} that is to be used to drive
+	 * <em>test-managed transactions</em>
+	 * @param defaultRollback whether or not <em>test-managed transactions</em>
+	 * should be rolled back by default
 	 */
 	public TransactionConfigurationAttributes(String transactionManagerName, boolean defaultRollback) {
-		Assert.notNull(transactionManagerName, "transactionManagerName can not be null");
+		Assert.notNull(transactionManagerName, "transactionManagerName must not be null");
 		this.transactionManagerName = transactionManagerName;
 		this.defaultRollback = defaultRollback;
 	}
@@ -51,14 +67,14 @@ public class TransactionConfigurationAttributes {
 
 	/**
 	 * Get the bean name of the {@link PlatformTransactionManager} that is to
-	 * be used to drive transactions.
+	 * be used to drive <em>test-managed transactions</em>.
 	 */
 	public final String getTransactionManagerName() {
 		return this.transactionManagerName;
 	}
 
 	/**
-	 * Whether or not transactions should be rolled back by default.
+	 * Whether <em>test-managed transactions</em> should be rolled back by default.
 	 * @return the <em>default rollback</em> flag
 	 */
 	public final boolean isDefaultRollback() {

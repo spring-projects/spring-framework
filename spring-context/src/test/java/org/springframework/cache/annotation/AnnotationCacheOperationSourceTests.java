@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -191,9 +191,12 @@ public class AnnotationCacheOperationSourceTests {
 	}
 
 	@Test
-	public void validateAtLeastOneCacheNameMustBeSet() {
-		thrown.expect(IllegalStateException.class);
-		getOps(AnnotatedClass.class, "noCacheNameSpecified");
+	public void validateNoCacheIsValid() {
+		// Valid as a CacheResolver might return the cache names to use with other info
+		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "noCacheNameSpecified");
+		CacheOperation cacheOperation = ops.iterator().next();
+		assertNotNull("cache names set must not be null", cacheOperation.getCacheNames());
+		assertEquals("no cache names specified", 0, cacheOperation.getCacheNames().size());
 	}
 
 	@Test
@@ -257,15 +260,15 @@ public class AnnotationCacheOperationSourceTests {
 		public void caching() {
 		}
 
-		@Cacheable(value = "test", keyGenerator = "custom")
+		@Cacheable(cacheNames = "test", keyGenerator = "custom")
 		public void customKeyGenerator() {
 		}
 
-		@Cacheable(value = "test", cacheManager = "custom")
+		@Cacheable(cacheNames = "test", cacheManager = "custom")
 		public void customCacheManager() {
 		}
 
-		@Cacheable(value = "test", cacheResolver = "custom")
+		@Cacheable(cacheNames = "test", cacheResolver = "custom")
 		public void customCacheResolver() {
 		}
 
@@ -279,7 +282,7 @@ public class AnnotationCacheOperationSourceTests {
 		public void multipleStereotype() {
 		}
 
-		@Caching(cacheable = {@Cacheable(value = "test", key = "a"), @Cacheable(value = "test", key = "b")})
+		@Caching(cacheable = { @Cacheable(cacheNames = "test", key = "a"), @Cacheable(cacheNames = "test", key = "b") })
 		public void multipleCaching() {
 		}
 
@@ -287,7 +290,7 @@ public class AnnotationCacheOperationSourceTests {
 		public void customKeyGeneratorInherited() {
 		}
 
-		@Cacheable(value = "test", key = "#root.methodName", keyGenerator = "custom")
+		@Cacheable(cacheNames = "test", key = "#root.methodName", keyGenerator = "custom")
 		public void invalidKeyAndKeyGeneratorSet() {
 		}
 
@@ -299,7 +302,7 @@ public class AnnotationCacheOperationSourceTests {
 		public void customCacheResolverInherited() {
 		}
 
-		@Cacheable(value = "test", cacheManager = "custom", cacheResolver = "custom")
+		@Cacheable(cacheNames = "test", cacheManager = "custom", cacheResolver = "custom")
 		public void invalidCacheResolverAndCacheManagerSet() {
 		}
 
@@ -374,31 +377,31 @@ public class AnnotationCacheOperationSourceTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@Cacheable(value = "foo", keyGenerator = "custom")
+	@Cacheable(cacheNames = "foo", keyGenerator = "custom")
 	public @interface CacheableFooCustomKeyGenerator {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@Cacheable(value = "foo", cacheManager = "custom")
+	@Cacheable(cacheNames = "foo", cacheManager = "custom")
 	public @interface CacheableFooCustomCacheManager {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@Cacheable(value = "foo", cacheResolver = "custom")
+	@Cacheable(cacheNames = "foo", cacheResolver = "custom")
 	public @interface CacheableFooCustomCacheResolver {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@CacheEvict(value = "foo")
+	@CacheEvict("foo")
 	public @interface EvictFoo {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@CacheEvict(value = "bar")
+	@CacheEvict("bar")
 	public @interface EvictBar {
 	}
 

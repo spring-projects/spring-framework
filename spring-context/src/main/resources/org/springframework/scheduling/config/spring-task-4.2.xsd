@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<xsd:schema xmlns="http://www.springframework.org/schema/task"
+			xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			xmlns:tool="http://www.springframework.org/schema/tool"
+			targetNamespace="http://www.springframework.org/schema/task"
+			elementFormDefault="qualified"
+			attributeFormDefault="unqualified">
+
+	<xsd:annotation>
+		<xsd:documentation><![CDATA[
+	Defines the elements used in the Spring Framework's support for task execution and scheduling.
+		]]></xsd:documentation>
+	</xsd:annotation>
+
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-4.1.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool-4.1.xsd"/>
+
+	<xsd:element name="annotation-driven">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	Enables the detection of @Async and @Scheduled annotations on any Spring-managed
+	object. If present, a proxy will be generated for executing the annotated methods
+	asynchronously.
+
+	See Javadoc for the org.springframework.scheduling.annotation.EnableAsync and
+	org.springframework.scheduling.annotation.EnableScheduling annotations for information
+	on code-based alternatives to this XML element.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute name="executor" type="xsd:string" use="optional">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Specifies the java.util.Executor instance to use when invoking asynchronous methods.
+	If not provided, an instance of org.springframework.core.task.SimpleAsyncTaskExecutor
+	will be used by default.
+	Note that as of Spring 3.1.2, individual @Async methods may qualify which executor to
+	use, meaning that the executor specified here acts as a default for all non-qualified
+	@Async methods.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="exception-handler" type="xsd:string" use="optional">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Specifies the org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler
+	instance to use when an exception is thrown during an asynchronous method execution
+	and cannot be accessed by the caller. If not provided, an instance of
+	org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler will be
+	used by default.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="scheduler" type="xsd:string" use="optional">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Specifies the org.springframework.scheduling.TaskScheduler or
+	java.util.ScheduledExecutorService instance to use when invoking scheduled
+	methods. If no reference is provided, a TaskScheduler backed by a single
+	thread scheduled executor will be used.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="mode" default="proxy">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Should annotated beans be proxied using Spring's AOP framework,
+	or should they rather be weaved with an AspectJ async execution aspect?
+
+	AspectJ weaving requires spring-aspects.jar on the classpath,
+	as well as load-time weaving (or compile-time weaving) enabled.
+
+	Note: The weaving-based aspect requires the @Async annotation to be
+	defined on the concrete class. Annotations in interfaces will not work
+	in that case (they will rather only work with interface-based proxies)!
+					]]></xsd:documentation>
+				</xsd:annotation>
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:enumeration value="proxy"/>
+						<xsd:enumeration value="aspectj"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:attribute>
+			<xsd:attribute name="proxy-target-class" type="xsd:boolean" default="false">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Are class-based (CGLIB) proxies to be created? By default, standard
+	Java interface-based proxies are created.
+
+	Note: Class-based proxies require the @Async annotation to be defined
+	on the concrete class. Annotations in interfaces will not work in
+	that case (they will rather only work with interface-based proxies)!
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="scheduler">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	Defines a ThreadPoolTaskScheduler instance with configurable pool size. See Javadoc
+	for the org.springframework.scheduling.annotation.EnableScheduling annotation for
+	information on a code-based alternative to this XML element.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute name="id" type="xsd:string" use="required">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The bean name for the generated ThreadPoolTaskScheduler instance.
+	It will also be used as the default thread name prefix.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="pool-size" type="xsd:string" use="optional">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The size of the ScheduledExecutorService's thread pool. The default is 1.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="executor">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	Defines a ThreadPoolTaskExecutor instance with configurable pool size,
+	queue-capacity, keep-alive, and rejection-policy values.
+
+	See Javadoc for the org.springframework.scheduling.annotation.EnableAsync annotation
+	for information on code-based alternatives to this XML element.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attribute name="id" type="xsd:string" use="required">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The bean name for the generated ThreadPoolTaskExecutor instance.
+	This value will also be used as the thread name prefix which is why it is
+	required even when defining the executor as an inner bean: The executor
+	won't be directly accessible then but will nevertheless use the specified
+	id as the thread name prefix of the threads that it manages.
+	In the case of multiple task:executors, as of Spring 3.1.2 this value may be used to
+	qualify which executor should handle a given @Async method, e.g. @Async("executorId").
+	See the Javadoc for the #value attribute of Spring's @Async annotation for details.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="pool-size" type="xsd:string" use="optional">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The size of the executor's thread pool as either a single value or a range
+	(e.g. 5-10). If no bounded queue-capacity value is provided, then a max value
+	has no effect unless the range is specified as 0-n. In that case, the core pool
+	will have a size of n, but the 'allowCoreThreadTimeout' flag will be set to true.
+	If a queue-capacity is provided, then the lower bound of a range will map to the
+	core size and the upper bound will map to the max size. If this attribute is not
+	provided, the default core size will be 1, and the default max size will be
+	Integer.MAX_VALUE (i.e. unbounded).
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="queue-capacity" type="xsd:string" use="optional">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Queue capacity for the ThreadPoolTaskExecutor. If not specified, the default will
+	be Integer.MAX_VALUE (i.e. unbounded).
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="keep-alive" type="xsd:string" use="optional">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Keep-alive time in seconds. Inactive threads that have been created beyond the
+	core size will timeout after the specified number of seconds elapse. If the
+	executor has an unbounded queue capacity and a size range represented as 0-n,
+	then the core threads will also be configured to timeout when inactive.
+	Otherwise, core threads will not ever timeout.
+					]]></xsd:documentation>
+				</xsd:annotation>
+			</xsd:attribute>
+			<xsd:attribute name="rejection-policy" use="optional">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	The RejectedExecutionHandler type. When a bounded queue cannot accept any
+	additional tasks, this determines the behavior. While the default is ABORT,
+	consider using CALLER_RUNS to throttle inbound tasks. In other words, by forcing
+	the caller to run the task itself, it will not be able to provide another task
+	until after it completes the task at hand. In the meantime, one or more tasks
+	may be removed from the queue. Alternatively, if it is not critical to run every
+	task, consider using DISCARD to drop the current task or DISCARD_OLDEST to drop
+	the task at the head of the queue.
+					]]></xsd:documentation>
+				</xsd:annotation>
+				<xsd:simpleType>
+					<xsd:restriction base="xsd:string">
+						<xsd:enumeration value="ABORT"/>
+						<xsd:enumeration value="CALLER_RUNS"/>
+						<xsd:enumeration value="DISCARD"/>
+						<xsd:enumeration value="DISCARD_OLDEST"/>
+					</xsd:restriction>
+				</xsd:simpleType>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="scheduled-tasks">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	Top-level element that contains one or more task sub-elements to be
+	managed by a given TaskScheduler.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="scheduled" type="scheduledTaskType" minOccurs="1" maxOccurs="unbounded"/>
+			</xsd:sequence>
+			<xsd:attribute name="scheduler" type="xsd:string" use="optional">
+				<xsd:annotation>
+					<xsd:documentation><![CDATA[
+	Reference to an instance of TaskScheduler to manage the provided tasks. If not specified,
+	the default value will be a wrapper for a single-threaded Executor.
+					]]></xsd:documentation>
+					<xsd:appinfo>
+						<tool:annotation kind="ref">
+							<tool:expected-type type="org.springframework.scheduling.TaskScheduler"/>
+						</tool:annotation>
+					</xsd:appinfo>
+				</xsd:annotation>
+			</xsd:attribute>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:complexType name="scheduledTaskType">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	Element defining a scheduled method-invoking task and its corresponding trigger.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:attribute name="cron" type="xsd:string" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	A cron-based trigger. See the org.springframework.scheduling.support.CronSequenceGenerator
+	JavaDoc for example patterns.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="fixed-delay" type="xsd:string" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	An interval-based trigger where the interval is measured from the completion time of the
+	previous task. The time unit value is measured in milliseconds.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="fixed-rate" type="xsd:string" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	An interval-based trigger where the interval is measured from the start time of the
+	previous task. The time unit value is measured in milliseconds.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="trigger" type="xsd:string" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	A reference to a bean that implements the Trigger interface.
+ 				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="initial-delay" type="xsd:string" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Number of milliseconds to delay before the first execution of a 'fixed-rate' or
+	'fixed-delay' task.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="ref" type="xsd:string" use="required">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Reference to an object that provides a method to be invoked.
+				]]></xsd:documentation>
+				<xsd:appinfo>
+					<tool:annotation kind="ref" />
+				</xsd:appinfo>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="method" type="xsd:string" use="required">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	The name of the method to be invoked.
+				]]></xsd:documentation>
+				<xsd:appinfo>
+					<tool:annotation>
+						<tool:expected-method type-ref="@ref"/>
+					</tool:annotation>
+				</xsd:appinfo>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:complexType>
+
+</xsd:schema>

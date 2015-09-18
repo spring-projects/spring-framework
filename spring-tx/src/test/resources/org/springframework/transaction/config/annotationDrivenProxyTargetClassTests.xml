@@ -15,7 +15,7 @@
 	<bean id="transactionManager1" class="org.springframework.tests.transaction.CallCountingTransactionManager">
 		<qualifier value="synch"/>
 	</bean>
-	
+
 	<bean id="transactionManager2" class="org.springframework.tests.transaction.CallCountingTransactionManager">
 		<property name="transactionSynchronizationName" value="SYNCHRONIZATION_NEVER"/>
 		<qualifier value="noSynch"/>

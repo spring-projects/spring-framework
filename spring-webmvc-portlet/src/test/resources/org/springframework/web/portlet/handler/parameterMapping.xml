@@ -11,9 +11,9 @@
 	 		</map>
 	 	</property>
 	</bean>
-	
+
 	<bean id="addItemHandler" class="java.lang.Object"/>
 
 	<bean id="removeItemHandler" class="java.lang.Object"/>
-	
+
 </beans>

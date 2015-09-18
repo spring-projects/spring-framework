@@ -137,7 +137,7 @@ public class CustomMapEditor extends PropertyEditorSupport {
 						"Could not instantiate map class [" + mapType.getName() + "]: " + ex.getMessage());
 			}
 		}
-		else if (SortedMap.class.equals(mapType)) {
+		else if (SortedMap.class == mapType) {
 			return new TreeMap<Object, Object>();
 		}
 		else {

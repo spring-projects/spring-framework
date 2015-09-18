@@ -61,6 +61,7 @@ import static org.mockito.BDDMockito.*;
  * Tests for {@link ResolvableType}.
  *
  * @author Phillip Webb
+ * @author Juergen Hoeller
  */
 @SuppressWarnings("rawtypes")
 @RunWith(MockitoJUnitRunner.class)
@@ -100,13 +101,64 @@ public class ResolvableTypeTests {
 	public void forClass() throws Exception {
 		ResolvableType type = ResolvableType.forClass(ExtendsList.class);
 		assertThat(type.getType(), equalTo((Type) ExtendsList.class));
+		assertThat(type.getRawClass(), equalTo(ExtendsList.class));
+		assertTrue(type.isAssignableFrom(ExtendsList.class));
+		assertFalse(type.isAssignableFrom(ArrayList.class));
 	}
 
 	@Test
-	public void forClassMustNotBeNull() throws Exception {
+	public void forClassWithNull() throws Exception {
+		ResolvableType type = ResolvableType.forClass(null);
+		assertThat(type.getType(), equalTo((Type) Object.class));
+		assertThat(type.getRawClass(), equalTo(Object.class));
+		assertTrue(type.isAssignableFrom(Object.class));
+		assertTrue(type.isAssignableFrom(String.class));
+	}
+
+	@Test
+	public void forRawClass() throws Exception {
+		ResolvableType type = ResolvableType.forRawClass(ExtendsList.class);
+		assertThat(type.getType(), equalTo((Type) ExtendsList.class));
+		assertThat(type.getRawClass(), equalTo(ExtendsList.class));
+		assertTrue(type.isAssignableFrom(ExtendsList.class));
+		assertFalse(type.isAssignableFrom(ArrayList.class));
+	}
+
+	@Test
+	public void forRawClassWithNull() throws Exception {
+		ResolvableType type = ResolvableType.forRawClass(null);
+		assertThat(type.getType(), equalTo((Type) Object.class));
+		assertThat(type.getRawClass(), equalTo(Object.class));
+		assertTrue(type.isAssignableFrom(Object.class));
+		assertTrue(type.isAssignableFrom(String.class));
+	}
+
+	@Test
+	public void forInstanceMustNotBeNull() {
 		this.thrown.expect(IllegalArgumentException.class);
-		this.thrown.expectMessage("Source class must not be null");
-		ResolvableType.forClass(null);
+		this.thrown.expectMessage("Instance must not be null");
+		ResolvableType.forInstance(null);
+	}
+
+	@Test
+	public void forInstanceNoProvider() {
+		ResolvableType type = ResolvableType.forInstance(new Object());
+		assertThat(type.getType(), equalTo(Object.class));
+		assertThat(type.resolve(), equalTo(Object.class));
+	}
+
+	@Test
+	public void forInstanceProvider() {
+		ResolvableType type = ResolvableType.forInstance(new MyGenericInterfaceType<String>(String.class));
+		assertThat(type.getRawClass(), equalTo(MyGenericInterfaceType.class));
+		assertThat(type.getGeneric().resolve(), equalTo(String.class));
+	}
+
+	@Test
+	public void forInstanceProviderNull() {
+		ResolvableType type = ResolvableType.forInstance(new MyGenericInterfaceType<String>(null));
+		assertThat(type.getType(), equalTo(MyGenericInterfaceType.class));
+		assertThat(type.resolve(), equalTo(MyGenericInterfaceType.class));
 	}
 
 	@Test
@@ -882,7 +934,7 @@ public class ResolvableTypeTests {
 	public void isAssignableFromMustNotBeNull() throws Exception {
 		this.thrown.expect(IllegalArgumentException.class);
 		this.thrown.expectMessage("Type must not be null");
-		ResolvableType.forClass(Object.class).isAssignableFrom(null);
+		ResolvableType.forClass(Object.class).isAssignableFrom((ResolvableType) null);
 	}
 
 	@Test
@@ -901,6 +953,20 @@ public class ResolvableTypeTests {
 		assertAssignable(objectType, objectType, charSequenceType, stringType).equalTo(true, true, true);
 		assertAssignable(charSequenceType, objectType, charSequenceType, stringType).equalTo(false, true, true);
 		assertAssignable(stringType, objectType, charSequenceType, stringType).equalTo(false, false, true);
+
+		assertTrue(objectType.isAssignableFrom(String.class));
+		assertTrue(objectType.isAssignableFrom(StringBuilder.class));
+		assertTrue(charSequenceType.isAssignableFrom(String.class));
+		assertTrue(charSequenceType.isAssignableFrom(StringBuilder.class));
+		assertTrue(stringType.isAssignableFrom(String.class));
+		assertFalse(stringType.isAssignableFrom(StringBuilder.class));
+
+		assertTrue(objectType.isInstance("a String"));
+		assertTrue(objectType.isInstance(new StringBuilder("a StringBuilder")));
+		assertTrue(charSequenceType.isInstance("a String"));
+		assertTrue(charSequenceType.isInstance(new StringBuilder("a StringBuilder")));
+		assertTrue(stringType.isInstance("a String"));
+		assertFalse(stringType.isInstance(new StringBuilder("a StringBuilder")));
 	}
 
 	@Test
@@ -1414,6 +1480,23 @@ public class ResolvableTypeTests {
 
 
 	public interface MyInterfaceType<T> {
+	}
+
+	public class MyGenericInterfaceType<T> implements MyInterfaceType<T>, ResolvableTypeProvider {
+
+		private final Class<T> type;
+
+		public MyGenericInterfaceType(Class<T> type) {
+			this.type = type;
+		}
+
+		@Override
+		public ResolvableType getResolvableType() {
+			if (this.type == null) {
+				return null;
+			}
+			return ResolvableType.forClassWithGenerics(getClass(), this.type);
+		}
 	}
 
 

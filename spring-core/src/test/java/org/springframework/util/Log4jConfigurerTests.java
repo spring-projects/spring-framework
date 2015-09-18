@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,47 +19,61 @@ package org.springframework.util;
 import java.io.FileNotFoundException;
 import java.net.URL;
 
-import junit.framework.TestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Alef Arendsen
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
-public class Log4jConfigurerTests extends TestCase {
+@SuppressWarnings("deprecation")
+public class Log4jConfigurerTests {
 
-	public void testInitLoggingWithClasspath() throws FileNotFoundException {
+	@Test
+	public void initLoggingWithClasspath() throws FileNotFoundException {
 		doTestInitLogging("classpath:org/springframework/util/testlog4j.properties", false);
 	}
 
-	public void testInitLoggingWithRelativeFilePath() throws FileNotFoundException {
+	@Test
+	public void initLoggingWithRelativeFilePath() throws FileNotFoundException {
 		doTestInitLogging("src/test/resources/org/springframework/util/testlog4j.properties", false);
 	}
 
-	public void testInitLoggingWithAbsoluteFilePath() throws FileNotFoundException {
+	@Test
+	public void initLoggingWithAbsoluteFilePath() throws FileNotFoundException {
 		URL url = getClass().getResource("testlog4j.properties");
 		doTestInitLogging(url.toString(), false);
 	}
 
-	public void testInitLoggingWithClasspathAndRefreshInterval() throws FileNotFoundException {
+	@Test
+	public void initLoggingWithClasspathAndRefreshInterval() throws FileNotFoundException {
 		doTestInitLogging("classpath:org/springframework/util/testlog4j.properties", true);
 	}
 
-	public void testInitLoggingWithRelativeFilePathAndRefreshInterval() throws FileNotFoundException {
+	@Test
+	public void initLoggingWithRelativeFilePathAndRefreshInterval() throws FileNotFoundException {
 		doTestInitLogging("src/test/resources/org/springframework/util/testlog4j.properties", true);
 	}
 
-	/* only works on Windows
-	public void testInitLoggingWithAbsoluteFilePathAndRefreshInterval() throws FileNotFoundException {
+	@Test
+	public void initLoggingWithAbsoluteFilePathAndRefreshInterval() throws FileNotFoundException {
 		URL url = getClass().getResource("testlog4j.properties");
 		doTestInitLogging(url.getFile(), true);
 	}
-	*/
 
-	public void testInitLoggingWithFileUrlAndRefreshInterval() throws FileNotFoundException {
+	@Test
+	public void initLoggingWithFileUrlAndRefreshInterval() throws FileNotFoundException {
 		URL url = getClass().getResource("testlog4j.properties");
 		doTestInitLogging(url.toString(), true);
+	}
+
+	@Test(expected = FileNotFoundException.class)
+	public void initLoggingWithRefreshIntervalAndFileNotFound() throws FileNotFoundException {
+		Log4jConfigurer.initLogging("test/org/springframework/util/bla.properties", 10);
 	}
 
 	private void doTestInitLogging(String location, boolean refreshInterval) throws FileNotFoundException {
@@ -87,14 +101,5 @@ public class Log4jConfigurerTests extends TestCase {
 		assertTrue(MockLog4jAppender.closeCalled);
 	}
 
-	public void testInitLoggingWithRefreshIntervalAndFileNotFound() throws FileNotFoundException {
-		try {
-			Log4jConfigurer.initLogging("test/org/springframework/util/bla.properties", 10);
-			fail("Exception should have been thrown, file does not exist!");
-		}
-		catch (FileNotFoundException ex) {
-			// OK
-		}
-	}
-
 }
+

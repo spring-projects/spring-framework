@@ -10,8 +10,7 @@
 
 	<bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor"/>
 
-	<bean id="calculator"
-		  class="org.springframework.scripting.groovy.GroovyScriptFactory">
+	<bean id="calculator" class="org.springframework.scripting.groovy.GroovyScriptFactory">
 		<constructor-arg>
 			<value>inline:
 package org.springframework.scripting.groovy;
@@ -25,28 +24,24 @@ class GroovyCalculator implements Calculator {
 		</constructor-arg>
 	</bean>
 
-	<bean id="messenger"
-		  class="org.springframework.scripting.groovy.GroovyScriptFactory">
+	<bean id="messenger" class="org.springframework.scripting.groovy.GroovyScriptFactory">
 		<constructor-arg value="classpath:org/springframework/scripting/groovy/Messenger.groovy"/>
 		<property name="message" value="Hello World!"/>
 	</bean>
 
-	<bean id="messengerPrototype"
-		  class="org.springframework.scripting.groovy.GroovyScriptFactory"
+	<bean id="messengerPrototype" class="org.springframework.scripting.groovy.GroovyScriptFactory"
 		  scope="prototype">
 		<constructor-arg value="classpath:org/springframework/scripting/groovy/Messenger.groovy"/>
 		<property name="message" value="Hello World!"/>
 	</bean>
 
-	<bean id="messengerInstance"
-		  class="org.springframework.scripting.groovy.GroovyScriptFactory">
+	<bean id="messengerInstance" class="org.springframework.scripting.groovy.GroovyScriptFactory">
 		<constructor-arg value="classpath:org/springframework/scripting/groovy/MessengerInstance.groovy"/>
 		<property name="message" ref="myMessage"/>
 	</bean>
 
-  <bean id="messengerInstanceInline"
-      class="org.springframework.scripting.groovy.GroovyScriptFactory">
-    <constructor-arg>
+  <bean id="messengerInstanceInline" class="org.springframework.scripting.groovy.GroovyScriptFactory">
+	  <constructor-arg>
       <value>inline:
 package org.springframework.scripting.groovy;
 import org.springframework.scripting.Messenger

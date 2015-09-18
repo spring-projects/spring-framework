@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -124,7 +124,7 @@ public class ConcurrentMapCache implements Cache {
 
 	@Override
 	public ValueWrapper putIfAbsent(Object key, Object value) {
-		Object existing = this.store.putIfAbsent(key, value);
+		Object existing = this.store.putIfAbsent(key, toStoreValue(value));
 		return toWrapper(existing);
 	}
 
@@ -168,6 +168,7 @@ public class ConcurrentMapCache implements Cache {
 	private ValueWrapper toWrapper(Object value) {
 		return (value != null ? new SimpleValueWrapper(fromStoreValue(value)) : null);
 	}
+
 
 	@SuppressWarnings("serial")
 	private static class NullHolder implements Serializable {

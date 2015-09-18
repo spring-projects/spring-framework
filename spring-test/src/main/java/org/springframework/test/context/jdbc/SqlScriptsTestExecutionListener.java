@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 package org.springframework.test.context.jdbc;
 
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Set;
+
 import javax.sql.DataSource;
 
 import org.apache.commons.logging.Log;
@@ -25,7 +27,9 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
@@ -45,23 +49,25 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.ResourceUtils;
+import org.springframework.util.StringUtils;
 
 /**
- * {@code TestExecutionListener} that provides support for executing SQL scripts
+ * {@code TestExecutionListener} that provides support for executing SQL
+ * {@link Sql#scripts scripts} and inlined {@link Sql#statements statements}
  * configured via the {@link Sql @Sql} annotation.
  *
- * <p>Scripts will be executed {@linkplain #beforeTestMethod(TestContext) before}
+ * <p>Scripts and inlined statements will be executed {@linkplain #beforeTestMethod(TestContext) before}
  * or {@linkplain #afterTestMethod(TestContext) after} execution of the corresponding
  * {@linkplain java.lang.reflect.Method test method}, depending on the configured
  * value of the {@link Sql#executionPhase executionPhase} flag.
  *
- * <p>Scripts will be executed without a transaction, within an existing
- * Spring-managed transaction, or within an isolated transaction, depending
- * on the configured value of {@link SqlConfig#transactionMode} and the
+ * <p>Scripts and inlined statements will be executed without a transaction,
+ * within an existing Spring-managed transaction, or within an isolated transaction,
+ * depending on the configured value of {@link SqlConfig#transactionMode} and the
  * presence of a transaction manager.
  *
  * <h3>Script Resources</h3>
- * <p>For details on default script detection and how explicit script locations
+ * <p>For details on default script detection and how script resource locations
  * are interpreted, see {@link Sql#scripts}.
  *
  * <h3>Required Spring Beans</h3>
@@ -123,11 +129,11 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	private void executeSqlScripts(TestContext testContext, ExecutionPhase executionPhase) throws Exception {
 		boolean classLevel = false;
 
-		Set<Sql> sqlAnnotations = AnnotationUtils.getRepeatableAnnotation(testContext.getTestMethod(), SqlGroup.class,
-			Sql.class);
+		Set<Sql> sqlAnnotations = AnnotationUtils.getRepeatableAnnotations(testContext.getTestMethod(), Sql.class,
+			SqlGroup.class);
 		if (sqlAnnotations.isEmpty()) {
-			sqlAnnotations = AnnotationUtils.getRepeatableAnnotation(testContext.getTestClass(), SqlGroup.class,
-				Sql.class);
+			sqlAnnotations = AnnotationUtils.getRepeatableAnnotations(testContext.getTestClass(), Sql.class,
+				SqlGroup.class);
 			if (!sqlAnnotations.isEmpty()) {
 				classLevel = true;
 			}
@@ -175,9 +181,19 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 
 		String[] scripts = getScripts(sql, testContext, classLevel);
 		scripts = TestContextResourceUtils.convertToClasspathResourcePaths(testContext.getTestClass(), scripts);
-		populator.setScripts(TestContextResourceUtils.convertToResources(testContext.getApplicationContext(), scripts));
+		List<Resource> scriptResources = TestContextResourceUtils.convertToResourceList(
+			testContext.getApplicationContext(), scripts);
+
+		for (String statement : sql.statements()) {
+			if (StringUtils.hasText(statement)) {
+				statement = statement.trim();
+				scriptResources.add(new ByteArrayResource(statement.getBytes(), "from inlined SQL statement: " + statement));
+			}
+		}
+
+		populator.setScripts(scriptResources.toArray(new Resource[scriptResources.size()]));
 		if (logger.isDebugEnabled()) {
-			logger.debug("Executing SQL scripts: " + ObjectUtils.nullSafeToString(scripts));
+			logger.debug("Executing SQL scripts: " + ObjectUtils.nullSafeToString(scriptResources));
 		}
 
 		String dsName = mergedSqlConfig.getDataSource();
@@ -255,25 +271,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 
 	private String[] getScripts(Sql sql, TestContext testContext, boolean classLevel) {
 		String[] scripts = sql.scripts();
-		String[] value = sql.value();
-		boolean scriptsDeclared = !ObjectUtils.isEmpty(scripts);
-		boolean valueDeclared = !ObjectUtils.isEmpty(value);
-
-		if (valueDeclared && scriptsDeclared) {
-			String elementType = (classLevel ? "class" : "method");
-			String elementName = (classLevel ? testContext.getTestClass().getName()
-					: testContext.getTestMethod().toString());
-			String msg = String.format("Test %s [%s] has been configured with @Sql's 'value' [%s] "
-					+ "and 'scripts' [%s] attributes. Only one declaration of SQL script "
-					+ "paths is permitted per @Sql annotation.", elementType, elementName,
-				ObjectUtils.nullSafeToString(value), ObjectUtils.nullSafeToString(scripts));
-			logger.error(msg);
-			throw new IllegalStateException(msg);
-		}
-		if (valueDeclared) {
-			scripts = value;
-		}
-		if (ObjectUtils.isEmpty(scripts)) {
+		if (ObjectUtils.isEmpty(scripts) && ObjectUtils.isEmpty(sql.statements())) {
 			scripts = new String[] { detectDefaultScript(testContext, classLevel) };
 		}
 		return scripts;
@@ -307,7 +305,7 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 		}
 		else {
 			String msg = String.format("Could not detect default SQL script for test %s [%s]: "
-					+ "%s does not exist. Either declare scripts via @Sql or make the "
+					+ "%s does not exist. Either declare statements or scripts via @Sql or make the "
 					+ "default SQL script available.", elementType, elementName, classPathResource);
 			logger.error(msg);
 			throw new IllegalStateException(msg);

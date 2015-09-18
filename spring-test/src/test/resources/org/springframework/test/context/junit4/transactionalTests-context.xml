@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:p="http://www.springframework.org/schema/p"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource"
-		p:driverClassName="org.hsqldb.jdbcDriver" p:url="jdbc:hsqldb:mem:transactional_tests" p:username="sa" p:password=""/>
+	<jdbc:embedded-database id="dataSource" generate-name="true">
+		<jdbc:script location="classpath:/org/springframework/test/jdbc/schema.sql"/>
+	</jdbc:embedded-database>
 
-	<bean id="dataSource2" class="org.springframework.jdbc.datasource.DriverManagerDataSource"
-		p:driverClassName="org.hsqldb.jdbcDriver" p:url="jdbc:hsqldb:mem:transactional_tests" p:username="sa" p:password=""/>
+	<jdbc:embedded-database id="dataSource2" generate-name="true">
+		<jdbc:script location="classpath:/org/springframework/test/jdbc/schema.sql"/>
+	</jdbc:embedded-database>
 
 	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
-		p:dataSource-ref="dataSource"/>
+		p:dataSource-ref="dataSource" />
 
 	<bean id="transactionManager2" class="org.springframework.jdbc.datasource.DataSourceTransactionManager"
 		p:dataSource-ref="dataSource2">

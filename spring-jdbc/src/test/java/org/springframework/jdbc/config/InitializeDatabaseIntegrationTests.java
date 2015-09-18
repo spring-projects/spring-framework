@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,9 @@ import static org.junit.Assert.*;
 public class InitializeDatabaseIntegrationTests {
 
 	private String enabled;
+
 	private ClassPathXmlApplicationContext context;
+
 
 	@Before
 	public void init() {
@@ -48,13 +50,15 @@ public class InitializeDatabaseIntegrationTests {
 	public void after() {
 		if (enabled != null) {
 			System.setProperty("ENABLED", enabled);
-		} else {
+		}
+		else {
 			System.clearProperty("ENABLED");
 		}
 		if (context != null) {
 			context.close();
 		}
 	}
+
 
 	@Test
 	public void testCreateEmbeddedDatabase() throws Exception {
@@ -107,13 +111,15 @@ public class InitializeDatabaseIntegrationTests {
 	}
 
 	private void assertCorrectSetup(DataSource dataSource) {
-		JdbcTemplate t = new JdbcTemplate(dataSource);
-		assertEquals(1, t.queryForObject("select count(*) from T_TEST", Integer.class).intValue());
+		JdbcTemplate jt = new JdbcTemplate(dataSource);
+		assertEquals(1, jt.queryForObject("select count(*) from T_TEST", Integer.class).intValue());
 	}
+
 
 	public static class CacheData implements InitializingBean {
 
 		private JdbcTemplate jdbcTemplate;
+
 		private List<Map<String,Object>> cache;
 
 		public void setDataSource(DataSource dataSource) {
@@ -128,7 +134,6 @@ public class InitializeDatabaseIntegrationTests {
 		public void afterPropertiesSet() throws Exception {
 			cache = jdbcTemplate.queryForList("SELECT * FROM T_TEST");
 		}
-
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.Set;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.convert.ConversionService;
@@ -50,8 +51,10 @@ import org.springframework.messaging.handler.annotation.support.MessageMethodArg
 import org.springframework.messaging.handler.annotation.support.PayloadArgumentResolver;
 import org.springframework.messaging.handler.invocation.AbstractExceptionHandlerMethodResolver;
 import org.springframework.messaging.handler.invocation.AbstractMethodMessageHandler;
+import org.springframework.messaging.handler.invocation.CompletableFutureReturnValueHandler;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
+import org.springframework.messaging.handler.invocation.ListenableFutureReturnValueHandler;
 import org.springframework.messaging.simp.SimpAttributesContextHolder;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageMappingInfo;
@@ -67,6 +70,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.PathMatcher;
+import org.springframework.util.StringValueResolver;
 import org.springframework.validation.Validator;
 
 /**
@@ -80,7 +84,11 @@ import org.springframework.validation.Validator;
  * @since 4.0
  */
 public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHandler<SimpMessageMappingInfo>
-		implements SmartLifecycle {
+		implements EmbeddedValueResolverAware, SmartLifecycle {
+
+	private static final boolean completableFuturePresent = ClassUtils.isPresent("java.util.concurrent.CompletableFuture",
+			SimpAnnotationMethodMessageHandler.class.getClassLoader());
+
 
 	private final SubscribableChannel clientInboundChannel;
 
@@ -97,6 +105,8 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	private boolean slashPathSeparator = true;
 
 	private Validator validator;
+
+	private StringValueResolver valueResolver;
 
 	private MessageHeaderInitializer headerInitializer;
 
@@ -228,6 +238,11 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		this.validator = validator;
 	}
 
+	@Override
+	public void setEmbeddedValueResolver(StringValueResolver resolver) {
+		this.valueResolver = resolver;
+	}
+
 	/**
 	 * Configure a {@link MessageHeaderInitializer} to pass on to
 	 * {@link org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler}s
@@ -312,7 +327,14 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 	@Override
 	protected List<? extends HandlerMethodReturnValueHandler> initReturnValueHandlers() {
+
 		List<HandlerMethodReturnValueHandler> handlers = new ArrayList<HandlerMethodReturnValueHandler>();
+
+		// Single-purpose return value types
+		handlers.add(new ListenableFutureReturnValueHandler());
+		if (completableFuturePresent) {
+			handlers.add(new CompletableFutureReturnValueHandler());
+		}
 
 		// Annotation-based return value types
 		SendToMethodReturnValueHandler sth = new SendToMethodReturnValueHandler(this.brokerTemplate, true);
@@ -363,13 +385,30 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 	private SimpMessageMappingInfo createMessageMappingCondition(MessageMapping annotation) {
+		String[] destinations = resolveEmbeddedValuesInDestinations(annotation.value());
 		return new SimpMessageMappingInfo(SimpMessageTypeMessageCondition.MESSAGE,
-				new DestinationPatternsMessageCondition(annotation.value(), this.pathMatcher));
+				new DestinationPatternsMessageCondition(destinations, this.pathMatcher));
 	}
 
 	private SimpMessageMappingInfo createSubscribeCondition(SubscribeMapping annotation) {
+		String[] destinations = resolveEmbeddedValuesInDestinations(annotation.value());
 		return new SimpMessageMappingInfo(SimpMessageTypeMessageCondition.SUBSCRIBE,
-				new DestinationPatternsMessageCondition(annotation.value(), this.pathMatcher));
+				new DestinationPatternsMessageCondition(destinations, this.pathMatcher));
+	}
+
+	/**
+	 * Resolve placeholder values in the given array of destinations.
+	 * @return a new array with updated destinations
+	 */
+	protected String[] resolveEmbeddedValuesInDestinations(String[] destinations) {
+		if (this.valueResolver == null) {
+			return destinations;
+		}
+		String[] result = new String[destinations.length];
+		for (int i = 0; i < destinations.length; i++) {
+			result[i] = this.valueResolver.resolveStringValue(destinations[i]);
+		}
+		return result;
 	}
 
 	@Override

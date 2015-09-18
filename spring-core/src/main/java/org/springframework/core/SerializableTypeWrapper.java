@@ -244,10 +244,10 @@ abstract class SerializableTypeWrapper {
 				}
 				return this.provider.getType().equals(other);
 			}
-			if (Type.class.equals(method.getReturnType()) && args == null) {
+			if (Type.class == method.getReturnType() && args == null) {
 				return forTypeProvider(new MethodInvokeTypeProvider(this.provider, method, -1));
 			}
-			if (Type[].class.equals(method.getReturnType()) && args == null) {
+			if (Type[].class == method.getReturnType() && args == null) {
 				Type[] result = new Type[((Type[]) method.invoke(this.provider.getType(), args)).length];
 				for (int i = 0; i < result.length; i++) {
 					result[i] = forTypeProvider(new MethodInvokeTypeProvider(this.provider, method, i));

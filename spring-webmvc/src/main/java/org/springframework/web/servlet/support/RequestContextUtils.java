@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
 import org.springframework.ui.context.Theme;
 import org.springframework.ui.context.ThemeSource;
+import org.springframework.web.context.ContextLoader;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -52,15 +53,25 @@ import org.springframework.web.servlet.ThemeResolver;
 public abstract class RequestContextUtils {
 
 	/**
+	 * The name of the bean to use to look up in an implementation of
+	 * {@link RequestDataValueProcessor} has been configured.
+	 * @since 4.2.1
+	 */
+	public static final String REQUEST_DATA_VALUE_PROCESSOR_BEAN_NAME = "requestDataValueProcessor";
+
+
+	/**
 	 * Look for the WebApplicationContext associated with the DispatcherServlet
 	 * that has initiated request processing.
 	 * @param request current HTTP request
 	 * @return the request-specific web application context
 	 * @throws IllegalStateException if no servlet-specific context has been found
+	 * @see #getWebApplicationContext(ServletRequest, ServletContext)
+	 * @deprecated as of Spring 4.2.1, in favor of
+	 * {@link #findWebApplicationContext(HttpServletRequest)}
 	 */
-	public static WebApplicationContext getWebApplicationContext(ServletRequest request)
-		throws IllegalStateException {
-
+	@Deprecated
+	public static WebApplicationContext getWebApplicationContext(ServletRequest request) throws IllegalStateException {
 		return getWebApplicationContext(request, null);
 	}
 
@@ -76,7 +87,12 @@ public abstract class RequestContextUtils {
 	 * if no request-specific context has been found
 	 * @throws IllegalStateException if neither a servlet-specific nor a
 	 * global context has been found
+	 * @see DispatcherServlet#WEB_APPLICATION_CONTEXT_ATTRIBUTE
+	 * @see WebApplicationContextUtils#getRequiredWebApplicationContext(ServletContext)
+	 * @deprecated as of Spring 4.2.1, in favor of
+	 * {@link #findWebApplicationContext(HttpServletRequest, ServletContext)}
 	 */
+	@Deprecated
 	public static WebApplicationContext getWebApplicationContext(
 			ServletRequest request, ServletContext servletContext) throws IllegalStateException {
 
@@ -89,6 +105,57 @@ public abstract class RequestContextUtils {
 			webApplicationContext = WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext);
 		}
 		return webApplicationContext;
+	}
+
+	/**
+	 * Look for the WebApplicationContext associated with the DispatcherServlet
+	 * that has initiated request processing, and for the global context if none
+	 * was found associated with the current request. The global context will
+	 * be found via the ServletContext or via ContextLoader's current context.
+	 * <p>NOTE: This variant remains compatible with Servlet 2.5, explicitly
+	 * checking a given ServletContext instead of deriving it from the request.
+	 * @param request current HTTP request
+	 * @param servletContext current servlet context
+	 * @return the request-specific WebApplicationContext, or the global one
+	 * if no request-specific context has been found, or {@code null} if none
+	 * @since 4.2.1
+	 * @see DispatcherServlet#WEB_APPLICATION_CONTEXT_ATTRIBUTE
+	 * @see WebApplicationContextUtils#getWebApplicationContext(ServletContext)
+	 * @see ContextLoader#getCurrentWebApplicationContext()
+	 */
+	public static WebApplicationContext findWebApplicationContext(
+			HttpServletRequest request, ServletContext servletContext) {
+
+		WebApplicationContext webApplicationContext = (WebApplicationContext) request.getAttribute(
+				DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE);
+		if (webApplicationContext == null) {
+			if (servletContext != null) {
+				webApplicationContext = WebApplicationContextUtils.getWebApplicationContext(servletContext);
+			}
+			if (webApplicationContext == null) {
+				webApplicationContext = ContextLoader.getCurrentWebApplicationContext();
+			}
+		}
+		return webApplicationContext;
+	}
+
+	/**
+	 * Look for the WebApplicationContext associated with the DispatcherServlet
+	 * that has initiated request processing, and for the global context if none
+	 * was found associated with the current request. The global context will
+	 * be found via the ServletContext or via ContextLoader's current context.
+	 * <p>NOTE: This variant requires Servlet 3.0+ and is generally recommended
+	 * for forward-looking custom user code.
+	 * @param request current HTTP request
+	 * @return the request-specific WebApplicationContext, or the global one
+	 * if no request-specific context has been found, or {@code null} if none
+	 * @since 4.2.1
+	 * @see #findWebApplicationContext(HttpServletRequest, ServletContext)
+	 * @see ServletRequest#getServletContext()
+	 * @see ContextLoader#getCurrentWebApplicationContext()
+	 */
+	public static WebApplicationContext findWebApplicationContext(HttpServletRequest request) {
+		return findWebApplicationContext(request, request.getServletContext());
 	}
 
 	/**

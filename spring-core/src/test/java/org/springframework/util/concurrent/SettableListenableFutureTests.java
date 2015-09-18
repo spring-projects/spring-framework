@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,10 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
 
-
 /**
  * @author Mattias Severson
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class SettableListenableFutureTests {
 
 	private SettableListenableFuture<String> settableListenableFuture;
@@ -320,12 +320,12 @@ public class SettableListenableFutureTests {
 	private static class InterruptableSettableListenableFuture extends SettableListenableFuture<String> {
 
 		private boolean interrupted = false;
-	
+
 		@Override
 		protected void interruptTask() {
 			interrupted = true;
 		}
-	
+
 		boolean calledInterruptTask() {
 			return interrupted;
 		}

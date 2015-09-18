@@ -41,7 +41,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.SettableListenableFuture;
 
-
 /**
  * {@link org.springframework.http.client.ClientHttpRequest} implementation that uses
  * Netty 4 to execute requests.
@@ -147,7 +146,7 @@ class Netty4ClientHttpRequest extends AbstractAsyncClientHttpRequest implements 
 				io.netty.handler.codec.http.HttpMethod.valueOf(this.method.name());
 
 		FullHttpRequest nettyRequest = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1,
-				nettyMethod, this.uri.getRawPath(), this.body.buffer());
+				nettyMethod, this.uri.toString(), this.body.buffer());
 
 		nettyRequest.headers().set(HttpHeaders.HOST, uri.getHost());
 		nettyRequest.headers().set(HttpHeaders.CONNECTION, io.netty.handler.codec.http.HttpHeaders.Values.CLOSE);

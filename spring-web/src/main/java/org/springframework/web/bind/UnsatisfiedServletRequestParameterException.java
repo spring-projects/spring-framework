@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,13 @@
 
 package org.springframework.web.bind;
 
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
@@ -34,7 +38,7 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("serial")
 public class UnsatisfiedServletRequestParameterException extends ServletRequestBindingException {
 
-	private final String[] paramConditions;
+	private final List<String[]> paramConditions;
 
 	private final Map<String, String[]> actualParams;
 
@@ -46,6 +50,21 @@ public class UnsatisfiedServletRequestParameterException extends ServletRequestB
 	 */
 	public UnsatisfiedServletRequestParameterException(String[] paramConditions, Map<String, String[]> actualParams) {
 		super("");
+		this.paramConditions = Arrays.<String[]>asList(paramConditions);
+		this.actualParams = actualParams;
+	}
+
+	/**
+	 * Create a new UnsatisfiedServletRequestParameterException.
+	 * @param paramConditions all sets of parameter conditions that have been violated
+	 * @param actualParams the actual parameter Map associated with the ServletRequest
+	 * @since 4.2
+	 */
+	public UnsatisfiedServletRequestParameterException(List<String[]> paramConditions,
+			Map<String, String[]> actualParams) {
+
+		super("");
+		Assert.isTrue(!CollectionUtils.isEmpty(paramConditions));
 		this.paramConditions = paramConditions;
 		this.actualParams = actualParams;
 	}
@@ -53,9 +72,48 @@ public class UnsatisfiedServletRequestParameterException extends ServletRequestB
 
 	@Override
 	public String getMessage() {
-		return "Parameter conditions \"" + StringUtils.arrayToDelimitedString(this.paramConditions, ", ") +
-				"\" not met for actual request parameters: " + requestParameterMapToString(this.actualParams);
+		StringBuilder sb = new StringBuilder("Parameter conditions ");
+		int i = 0;
+		for (String[] conditions : this.paramConditions) {
+			if (i > 0) {
+				sb.append(" OR ");
+			}
+			sb.append("\"");
+			sb.append(StringUtils.arrayToDelimitedString(conditions, ", "));
+			sb.append("\"");
+			i++;
+		}
+		sb.append(" not met for actual request parameters: ");
+		sb.append(requestParameterMapToString(this.actualParams));
+		return sb.toString();
 	}
+
+	/**
+	 * Return the parameter conditions that have been violated or the first group
+	 * in case of multiple groups.
+	 * @see org.springframework.web.bind.annotation.RequestMapping#params()
+	 */
+	public final String[] getParamConditions() {
+		return this.paramConditions.get(0);
+	}
+
+	/**
+	 * Return all parameter condition groups that have been violated.
+	 * @see org.springframework.web.bind.annotation.RequestMapping#params()
+	 * @since 4.2
+	 */
+	public final List<String[]> getParamConditionGroups() {
+		return this.paramConditions;
+	}
+
+	/**
+	 * Return the actual parameter Map associated with the ServletRequest.
+	 * @see javax.servlet.ServletRequest#getParameterMap()
+	 */
+	public final Map<String, String[]> getActualParams() {
+		return this.actualParams;
+	}
+
 
 	private static String requestParameterMapToString(Map<String, String[]> actualParams) {
 		StringBuilder result = new StringBuilder();
@@ -67,22 +125,6 @@ public class UnsatisfiedServletRequestParameterException extends ServletRequestB
 			}
 		}
 		return result.toString();
-	}
-
-	/**
-	 * Return the parameter conditions that have been violated.
-	 * @see org.springframework.web.bind.annotation.RequestMapping#params()
-	 */
-	public final String[] getParamConditions() {
-		return this.paramConditions;
-	}
-
-	/**
-	 * Return the actual parameter Map associated with the ServletRequest.
-	 * @see javax.servlet.ServletRequest#getParameterMap()
-	 */
-	public final Map<String, String[]> getActualParams() {
-		return this.actualParams;
 	}
 
 }

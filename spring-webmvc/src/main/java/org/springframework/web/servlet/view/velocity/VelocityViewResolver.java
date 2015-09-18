@@ -106,7 +106,7 @@ public class VelocityViewResolver extends AbstractTemplateViewResolver {
 		super.initApplicationContext();
 
 		if (this.toolboxConfigLocation != null) {
-			if (VelocityView.class.equals(getViewClass())) {
+			if (VelocityView.class == getViewClass()) {
 				logger.info("Using VelocityToolboxView instead of default VelocityView " +
 						"due to specified toolboxConfigLocation");
 				setViewClass(VelocityToolboxView.class);

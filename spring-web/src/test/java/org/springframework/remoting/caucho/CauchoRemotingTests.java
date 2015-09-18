@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,29 +16,48 @@
 
 package org.springframework.remoting.caucho;
 
-import com.caucho.burlap.client.BurlapProxyFactory;
-import com.caucho.hessian.client.HessianProxyFactory;
-import junit.framework.TestCase;
+import java.io.IOException;
+import java.net.InetSocketAddress;
 
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.remoting.RemoteAccessException;
 import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
+import org.springframework.util.SocketUtils;
+
+import com.caucho.burlap.client.BurlapProxyFactory;
+import com.caucho.hessian.client.HessianProxyFactory;
+
+import com.sun.net.httpserver.HttpServer;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 16.05.2003
  */
-public class CauchoRemotingTests extends TestCase {
+@SuppressWarnings("deprecation")
+public class CauchoRemotingTests {
 
-	public void testHessianProxyFactoryBeanWithAccessError() throws Exception {
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
+
+
+	@Test
+	public void hessianProxyFactoryBeanWithClassInsteadOfInterface() throws Exception {
 		HessianProxyFactoryBean factory = new HessianProxyFactoryBean();
-		try {
-			factory.setServiceInterface(TestBean.class);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
+		exception.expect(IllegalArgumentException.class);
+		factory.setServiceInterface(TestBean.class);
+	}
+
+	@Test
+	public void hessianProxyFactoryBeanWithAccessError() throws Exception {
+		HessianProxyFactoryBean factory = new HessianProxyFactoryBean();
 		factory.setServiceInterface(ITestBean.class);
 		factory.setServiceUrl("http://localhosta/testbean");
 		factory.afterPropertiesSet();
@@ -47,24 +66,13 @@ public class CauchoRemotingTests extends TestCase {
 		assertTrue(factory.getObject() instanceof ITestBean);
 		ITestBean bean = (ITestBean) factory.getObject();
 
-		try {
-			bean.setName("test");
-			fail("Should have thrown RemoteAccessException");
-		}
-		catch (RemoteAccessException ex) {
-			// expected
-		}
+		exception.expect(RemoteAccessException.class);
+		bean.setName("test");
 	}
 
-	public void testHessianProxyFactoryBeanWithAuthenticationAndAccessError() throws Exception {
+	@Test
+	public void hessianProxyFactoryBeanWithAuthenticationAndAccessError() throws Exception {
 		HessianProxyFactoryBean factory = new HessianProxyFactoryBean();
-		try {
-			factory.setServiceInterface(TestBean.class);
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// expected
-		}
 		factory.setServiceInterface(ITestBean.class);
 		factory.setServiceUrl("http://localhosta/testbean");
 		factory.setUsername("test");
@@ -76,16 +84,12 @@ public class CauchoRemotingTests extends TestCase {
 		assertTrue(factory.getObject() instanceof ITestBean);
 		ITestBean bean = (ITestBean) factory.getObject();
 
-		try {
-			bean.setName("test");
-			fail("Should have thrown RemoteAccessException");
-		}
-		catch (RemoteAccessException ex) {
-			// expected
-		}
+		exception.expect(RemoteAccessException.class);
+		bean.setName("test");
 	}
 
-	public void testHessianProxyFactoryBeanWithCustomProxyFactory() throws Exception {
+	@Test
+	public void hessianProxyFactoryBeanWithCustomProxyFactory() throws Exception {
 		TestHessianProxyFactory proxyFactory = new TestHessianProxyFactory();
 		HessianProxyFactoryBean factory = new HessianProxyFactoryBean();
 		factory.setServiceInterface(ITestBean.class);
@@ -103,16 +107,12 @@ public class CauchoRemotingTests extends TestCase {
 		assertEquals(proxyFactory.password, "bean");
 		assertTrue(proxyFactory.overloadEnabled);
 
-		try {
-			bean.setName("test");
-			fail("Should have thrown RemoteAccessException");
-		}
-		catch (RemoteAccessException ex) {
-			// expected
-		}
+		exception.expect(RemoteAccessException.class);
+		bean.setName("test");
 	}
 
-	public void testBurlapProxyFactoryBeanWithAccessError() throws Exception {
+	@Test
+	public void burlapProxyFactoryBeanWithAccessError() throws Exception {
 		BurlapProxyFactoryBean factory = new BurlapProxyFactoryBean();
 		factory.setServiceInterface(ITestBean.class);
 		factory.setServiceUrl("http://localhosta/testbean");
@@ -122,16 +122,12 @@ public class CauchoRemotingTests extends TestCase {
 		assertTrue(factory.getObject() instanceof ITestBean);
 		ITestBean bean = (ITestBean) factory.getObject();
 
-		try {
-			bean.setName("test");
-			fail("Should have thrown RemoteAccessException");
-		}
-		catch (RemoteAccessException ex) {
-			// expected
-		}
+		exception.expect(RemoteAccessException.class);
+		bean.setName("test");
 	}
 
-	public void testBurlapProxyFactoryBeanWithAuthenticationAndAccessError() throws Exception {
+	@Test
+	public void burlapProxyFactoryBeanWithAuthenticationAndAccessError() throws Exception {
 		BurlapProxyFactoryBean factory = new BurlapProxyFactoryBean();
 		factory.setServiceInterface(ITestBean.class);
 		factory.setServiceUrl("http://localhosta/testbean");
@@ -144,16 +140,12 @@ public class CauchoRemotingTests extends TestCase {
 		assertTrue(factory.getObject() instanceof ITestBean);
 		ITestBean bean = (ITestBean) factory.getObject();
 
-		try {
-			bean.setName("test");
-			fail("Should have thrown RemoteAccessException");
-		}
-		catch (RemoteAccessException ex) {
-			// expected
-		}
+		exception.expect(RemoteAccessException.class);
+		bean.setName("test");
 	}
 
-	public void testBurlapProxyFactoryBeanWithCustomProxyFactory() throws Exception {
+	@Test
+	public void burlapProxyFactoryBeanWithCustomProxyFactory() throws Exception {
 		TestBurlapProxyFactory proxyFactory = new TestBurlapProxyFactory();
 		BurlapProxyFactoryBean factory = new BurlapProxyFactoryBean();
 		factory.setServiceInterface(ITestBean.class);
@@ -172,32 +164,27 @@ public class CauchoRemotingTests extends TestCase {
 		assertEquals(proxyFactory.password, "bean");
 		assertTrue(proxyFactory.overloadEnabled);
 
-		try {
-			bean.setName("test");
-			fail("Should have thrown RemoteAccessException");
-		}
-		catch (RemoteAccessException ex) {
-			// expected
-		}
+		exception.expect(RemoteAccessException.class);
+		bean.setName("test");
 	}
 
-	/** Using the JDK 1.6 HttpServer breaks when running multiple test methods
-	public void testSimpleHessianServiceExporter() throws IOException {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_16) {
-			return;
-		}
+	@Test
+	public void simpleHessianServiceExporter() throws IOException {
+		final int port = SocketUtils.findAvailableTcpPort();
+
 		TestBean tb = new TestBean("tb");
 		SimpleHessianServiceExporter exporter = new SimpleHessianServiceExporter();
 		exporter.setService(tb);
 		exporter.setServiceInterface(ITestBean.class);
 		exporter.setDebug(true);
 		exporter.prepare();
-		HttpServer server = HttpServer.create(new InetSocketAddress(8889), -1);
+
+		HttpServer server = HttpServer.create(new InetSocketAddress(port), -1);
 		server.createContext("/hessian", exporter);
 		server.start();
 		try {
 			HessianClientInterceptor client = new HessianClientInterceptor();
-			client.setServiceUrl("http://localhost:8889/hessian");
+			client.setServiceUrl("http://localhost:" + port + "/hessian");
 			client.setServiceInterface(ITestBean.class);
 			//client.setHessian2(true);
 			client.prepare();
@@ -210,7 +197,6 @@ public class CauchoRemotingTests extends TestCase {
 			server.stop(Integer.MAX_VALUE);
 		}
 	}
-	*/
 
 
 	private static class TestHessianProxyFactory extends HessianProxyFactory {

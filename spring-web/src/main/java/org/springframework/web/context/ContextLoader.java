@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -193,6 +193,7 @@ public class ContextLoader {
 	 */
 	private static volatile WebApplicationContext currentContext;
 
+
 	/**
 	 * The root WebApplicationContext instance that this loader manages.
 	 */
@@ -203,6 +204,10 @@ public class ContextLoader {
 	 * ContextSingletonBeanFactoryLocator.
 	 */
 	private BeanFactoryReference parentContextRef;
+
+	/** Actual ApplicationContextInitializer instances to apply to the context */
+	private final List<ApplicationContextInitializer<ConfigurableApplicationContext>> contextInitializers =
+			new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
 
 
 	/**
@@ -259,6 +264,24 @@ public class ContextLoader {
 	public ContextLoader(WebApplicationContext context) {
 		this.context = context;
 	}
+
+
+	/**
+	 * Specify which {@link ApplicationContextInitializer} instances should be used
+	 * to initialize the application context used by this {@code ContextLoader}.
+	 * @since 4.2
+	 * @see #configureAndRefreshWebApplicationContext
+	 * @see #customizeContext
+	 */
+	@SuppressWarnings("unchecked")
+	public void setContextInitializers(ApplicationContextInitializer<?>... initializers) {
+		if (initializers != null) {
+			for (ApplicationContextInitializer<?> initializer : initializers) {
+				this.contextInitializers.add((ApplicationContextInitializer<ConfigurableApplicationContext>) initializer);
+			}
+		}
+	}
+
 
 	/**
 	 * Initialize Spring's web application context for the given servlet context,
@@ -359,6 +382,37 @@ public class ContextLoader {
 		return (ConfigurableWebApplicationContext) BeanUtils.instantiateClass(contextClass);
 	}
 
+	/**
+	 * Return the WebApplicationContext implementation class to use, either the
+	 * default XmlWebApplicationContext or a custom context class if specified.
+	 * @param servletContext current servlet context
+	 * @return the WebApplicationContext implementation class to use
+	 * @see #CONTEXT_CLASS_PARAM
+	 * @see org.springframework.web.context.support.XmlWebApplicationContext
+	 */
+	protected Class<?> determineContextClass(ServletContext servletContext) {
+		String contextClassName = servletContext.getInitParameter(CONTEXT_CLASS_PARAM);
+		if (contextClassName != null) {
+			try {
+				return ClassUtils.forName(contextClassName, ClassUtils.getDefaultClassLoader());
+			}
+			catch (ClassNotFoundException ex) {
+				throw new ApplicationContextException(
+						"Failed to load custom context class [" + contextClassName + "]", ex);
+			}
+		}
+		else {
+			contextClassName = defaultStrategies.getProperty(WebApplicationContext.class.getName());
+			try {
+				return ClassUtils.forName(contextClassName, ContextLoader.class.getClassLoader());
+			}
+			catch (ClassNotFoundException ex) {
+				throw new ApplicationContextException(
+						"Failed to load default context class [" + contextClassName + "]", ex);
+			}
+		}
+	}
+
 	protected void configureAndRefreshWebApplicationContext(ConfigurableWebApplicationContext wac, ServletContext sc) {
 		if (ObjectUtils.identityToString(wac).equals(wac.getId())) {
 			// The application context id is still set to its original default value
@@ -412,13 +466,6 @@ public class ContextLoader {
 	protected void customizeContext(ServletContext sc, ConfigurableWebApplicationContext wac) {
 		List<Class<ApplicationContextInitializer<ConfigurableApplicationContext>>> initializerClasses =
 				determineContextInitializerClasses(sc);
-		if (initializerClasses.isEmpty()) {
-			// no ApplicationContextInitializers have been declared -> nothing to do
-			return;
-		}
-
-		ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerInstances =
-				new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
 
 		for (Class<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerClass : initializerClasses) {
 			Class<?> initializerContextClass =
@@ -430,43 +477,12 @@ public class ContextLoader {
 						"context loader [%s]: ", initializerClass.getName(), initializerContextClass.getName(),
 						wac.getClass().getName()));
 			}
-			initializerInstances.add(BeanUtils.instantiateClass(initializerClass));
+			this.contextInitializers.add(BeanUtils.instantiateClass(initializerClass));
 		}
 
-		AnnotationAwareOrderComparator.sort(initializerInstances);
-		for (ApplicationContextInitializer<ConfigurableApplicationContext> initializer : initializerInstances) {
+		AnnotationAwareOrderComparator.sort(this.contextInitializers);
+		for (ApplicationContextInitializer<ConfigurableApplicationContext> initializer : this.contextInitializers) {
 			initializer.initialize(wac);
-		}
-	}
-
-	/**
-	 * Return the WebApplicationContext implementation class to use, either the
-	 * default XmlWebApplicationContext or a custom context class if specified.
-	 * @param servletContext current servlet context
-	 * @return the WebApplicationContext implementation class to use
-	 * @see #CONTEXT_CLASS_PARAM
-	 * @see org.springframework.web.context.support.XmlWebApplicationContext
-	 */
-	protected Class<?> determineContextClass(ServletContext servletContext) {
-		String contextClassName = servletContext.getInitParameter(CONTEXT_CLASS_PARAM);
-		if (contextClassName != null) {
-			try {
-				return ClassUtils.forName(contextClassName, ClassUtils.getDefaultClassLoader());
-			}
-			catch (ClassNotFoundException ex) {
-				throw new ApplicationContextException(
-						"Failed to load custom context class [" + contextClassName + "]", ex);
-			}
-		}
-		else {
-			contextClassName = defaultStrategies.getProperty(WebApplicationContext.class.getName());
-			try {
-				return ClassUtils.forName(contextClassName, ContextLoader.class.getClassLoader());
-			}
-			catch (ClassNotFoundException ex) {
-				throw new ApplicationContextException(
-						"Failed to load default context class [" + contextClassName + "]", ex);
-			}
 		}
 	}
 

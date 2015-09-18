@@ -5,7 +5,7 @@ buildscript {
 	dependencies {
 		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.7")
 		classpath("org.asciidoctor:asciidoctor-gradle-plugin:1.5.2")
-		classpath("io.spring.gradle:docbook-reference-plugin:0.3.0")
+		classpath("io.spring.gradle:docbook-reference-plugin:0.3.1")
 		classpath("ws.antonov.gradle.plugins:gradle-plugin-protobuf:0.9.1")
 	}
 }
@@ -27,41 +27,53 @@ configure(allprojects) { project ->
 	group = "org.springframework"
 	version = qualifyVersionIfNecessary(version)
 
-	ext.aspectjVersion       = "1.8.5"
+	ext.aspectjVersion       = "1.8.6"
 	ext.eclipselinkVersion   = "2.4.2"
-	ext.ehcacheVersion       = "2.9.1"
+	ext.ehcacheVersion       = "2.10.0"
 	ext.ehcachejcacheVersion = "1.0.1"
+	ext.ehcache3Version      = "3.0.0.m2"
+	ext.ejbApiVersion        = "3.0"
 	ext.fileuploadVersion    = "1.3.1"
-	ext.freemarkerVersion    = "2.3.22"
-	ext.groovyVersion        = "2.4.1"
+	ext.freemarkerVersion    = "2.3.23"
+	ext.groovyVersion        = "2.4.4"
 	ext.gsonVersion          = "2.3.1"
+	ext.hamcrestVersion      = "1.3"
 	ext.hibernate3Version    = "3.6.10.Final"
-	ext.hibernate4Version    = "4.3.8.Final"
+	ext.hibernate4Version    = "4.3.11.Final"
+	ext.hibernate5Version    = "5.0.1.Final"
 	ext.hibval4Version       = "4.3.2.Final"
-	ext.hibval5Version       = "5.1.3.Final"
-	ext.hsqldbVersion        = "2.3.2"
-	ext.httpclientVersion    = "4.4"
-	ext.httpasyncVersion     = "4.0.2"
-	ext.jackson2Version      = "2.5.1"
-	ext.jasperreportsVersion = "6.0.3"
-	ext.jettyVersion         = "9.2.9.v20150224"
-	ext.jodaVersion          = "2.7"
+	ext.hibval5Version       = "5.2.1.Final"
+	ext.hsqldbVersion        = "2.3.3"
+	ext.httpclientVersion    = "4.5"
+	ext.httpasyncVersion     = "4.1"
+	ext.jackson2Version      = "2.6.1"
+	ext.jsonassertVersion    = "1.2.3"
+	ext.jsonpathVersion      = "2.0.0"
+	ext.htmlunitVersion      = "2.18"
+	ext.jasperreportsVersion = "6.1.1"
+	ext.javamailVersion      = "1.5.4"
+	ext.jettyVersion         = "9.3.3.v20150827"
+	ext.jodaVersion          = "2.8.2"
+	ext.jrubyVersion         = "1.7.22"  // JRuby 9.0.0.0 only supported through JSR-223 (StandardScriptFactory)
 	ext.jtaVersion           = "1.2"
 	ext.junitVersion         = "4.12"
-	ext.nettyVersion         = "4.0.25.Final"
-	ext.openjpaVersion       = "2.2.2"  // 2.3.0 not Java 8 compatible (based on ASM 4)
+	ext.nettyVersion         = "4.0.31.Final"
+	ext.openjpaVersion       = "2.4.0"
+	ext.poiVersion           = "3.12"
 	ext.protobufVersion      = "2.6.1"
-	ext.reactorVersion       = "1.1.5.RELEASE"
-	ext.slf4jVersion         = "1.7.10"
-	ext.snakeyamlVersion     = "1.15"
+	ext.reactorVersion       = "2.0.5.RELEASE"
+	ext.romeVersion          = "1.5.1"
+	ext.seleniumVersion      = "2.47.1"
+	ext.slf4jVersion         = "1.7.12"
+	ext.snakeyamlVersion     = "1.16"
 	ext.snifferVersion       = "1.14"
-	ext.testngVersion        = "6.8.21"
+	ext.testngVersion        = "6.9.6"
 	ext.tiles2Version        = "2.2.2"
 	ext.tiles3Version        = "3.0.5"
-	ext.tomcatVersion        = "8.0.20"
+	ext.tomcatVersion        = "8.0.26"
 	ext.tyrusVersion         = "1.3.5"  // constrained by WebLogic 12.1.3 support
-	ext.undertowVersion      = "1.1.2.Final"
-	ext.woodstoxVersion      = "4.4.1"
+	ext.undertowVersion      = "1.2.12.Final"
+	ext.woodstoxVersion      = "5.0.1"
 	ext.xmlunitVersion       = "1.6"
 	ext.xstreamVersion       = "1.4.8"
 
@@ -93,13 +105,13 @@ configure(allprojects) { project ->
 		"-Xlint:-unchecked", "-Xlint:-options"]
 
 	compileJava {
-		sourceCompatibility=1.6
-		targetCompatibility=1.6
+		sourceCompatibility = 1.6
+		targetCompatibility = 1.6
 	}
 
 	compileTestJava {
-		sourceCompatibility=1.8
-		targetCompatibility=1.8
+		sourceCompatibility = 1.8
+		targetCompatibility = 1.8
 		options.compilerArgs += "-parameters"
 	}
 
@@ -123,10 +135,10 @@ configure(allprojects) { project ->
 		testCompile("junit:junit:${junitVersion}") {
 			exclude group:'org.hamcrest', module:'hamcrest-core'
 		}
-		testCompile("org.mockito:mockito-core:1.9.5") {
+		testCompile("org.mockito:mockito-core:1.10.19") {
 			exclude group:'org.hamcrest', module:'hamcrest-core'
 		}
-		testCompile("org.hamcrest:hamcrest-all:1.3")
+		testCompile("org.hamcrest:hamcrest-all:${hamcrestVersion}")
 
 		sniffer("org.codehaus.mojo:animal-sniffer-ant-tasks:${snifferVersion}")
 		javaApiSignature("org.codehaus.mojo.signature:java16:1.1@signature")  // as from JDK 6 update 18
@@ -277,7 +289,7 @@ project("spring-core") {
 	// further transformed by the JarJar task to depend on org.springframework.asm; this
 	// avoids including two different copies of asm unnecessarily.
 	def cglibVersion = "3.1"
-	def objenesisVersion = "2.1"
+	def objenesisVersion = "2.2"
 
 	configurations {
 		jarjar
@@ -337,11 +349,11 @@ project("spring-core") {
 		compile("commons-logging:commons-logging:1.2")
 		optional("commons-codec:commons-codec:1.10")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
-		optional("net.sf.jopt-simple:jopt-simple:4.8")
+		optional("net.sf.jopt-simple:jopt-simple:4.9")
 		optional("log4j:log4j:1.2.17")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("xmlunit:xmlunit:${xmlunitVersion}")
-		testCompile("org.codehaus.woodstox:woodstox-core-asl:${woodstoxVersion}") {
+		testCompile("com.fasterxml.woodstox:woodstox-core:${woodstoxVersion}") {
 			exclude group: "stax", module: "stax-api"
 		}
 	}
@@ -395,8 +407,8 @@ project("spring-beans-groovy") {
 	}
 
 	compileGroovy {
-		sourceCompatibility=1.6
-		targetCompatibility=1.6
+		sourceCompatibility = 1.6
+		targetCompatibility = 1.6
 	}
 }
 
@@ -411,7 +423,7 @@ project("spring-aop") {
 		compile("aopalliance:aopalliance:1.0")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("commons-pool:commons-pool:1.6")
-		optional("org.apache.commons:commons-pool2:2.2")
+		optional("org.apache.commons:commons-pool2:2.4.2")
 		optional("com.jamonapi:jamon:2.81")
 	}
 }
@@ -444,6 +456,10 @@ project("spring-instrument-tomcat") {
 	dependencies {
 		provided("org.apache.tomcat:catalina:6.0.16")
 	}
+
+	jar {
+		exclude("org/apache/**")  // exclude the mock used to bridge between pre-7.0.63 and 7.0.63+
+	}
 }
 
 project("spring-context") {
@@ -458,9 +474,9 @@ project("spring-context") {
 		compile(files(project(":spring-core").cglibRepackJar))
 		optional(project(":spring-instrument"))
 		optional("javax.inject:javax.inject:1")
-		optional("javax.ejb:ejb-api:3.0")
+		optional("javax.ejb:ejb-api:${ejbApiVersion}")
 		optional("javax.enterprise.concurrent:javax.enterprise.concurrent-api:1.0")
-		optional("javax.money:money-api:1.0-RC3")
+		optional("javax.money:money-api:1.0")
 		optional("org.eclipse.persistence:javax.persistence:2.0.0")
 		optional("javax.validation:validation-api:1.0.0.GA")
 		optional("org.hibernate:hibernate-validator:${hibval4Version}")
@@ -468,11 +484,11 @@ project("spring-context") {
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("org.beanshell:bsh:2.0b4")
-		optional("org.jruby:jruby:1.7.19")
+		optional("org.jruby:jruby:${jrubyVersion}")
 		testCompile("javax.inject:javax.inject-tck:1")
-		testCompile("org.javamoney:moneta:1.0-RC3")
+		testCompile("org.javamoney:moneta:1.0")
 		testCompile("commons-dbcp:commons-dbcp:1.4")
-		testCompile("org.apache.commons:commons-pool2:2.2")
+		testCompile("org.apache.commons:commons-pool2:2.4.2")
 		testCompile("org.slf4j:slf4j-api:${slf4jVersion}")
 	}
 }
@@ -484,10 +500,12 @@ project("spring-messaging") {
 		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
 		compile(project(":spring-context"))
-		optional("org.projectreactor:reactor-core:${reactorVersion}")
-		optional("org.projectreactor:reactor-net:${reactorVersion}") {
+		optional(project(":spring-oxm"))
+		optional("io.projectreactor:reactor-core:${reactorVersion}")
+		optional("io.projectreactor:reactor-net:${reactorVersion}") {
 			exclude group: "io.netty", module: "netty-all"
 		}
+		optional "io.netty:netty-all:$nettyVersion"
 		optional("org.eclipse.jetty.websocket:websocket-server:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
 		}
@@ -513,6 +531,7 @@ project("spring-messaging") {
 		testCompile("commons-dbcp:commons-dbcp:1.4")
 		testCompile("log4j:log4j:1.2.17")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
+		testCompile("xmlunit:xmlunit:${xmlunitVersion}")
 	}
 }
 
@@ -527,7 +546,7 @@ project("spring-tx") {
 		optional("aopalliance:aopalliance:1.0")
 		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
 		optional("javax.resource:connector-api:1.5")
-		optional("javax.ejb:ejb-api:3.0")
+		optional("javax.ejb:ejb-api:${ejbApiVersion}")
 		optional("com.ibm.websphere:uow:6.0.2.17")
 		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		testCompile("org.eclipse.persistence:javax.persistence:2.0.0")
@@ -541,11 +560,11 @@ project("spring-oxm") {
 	compileTestJava {
 		// necessary to avoid java.lang.VerifyError on jibx compilation
 		// see http://jira.codehaus.org/browse/JIBX-465
-		sourceCompatibility=1.6
-		targetCompatibility=1.6
+		sourceCompatibility = 1.6
+		targetCompatibility = 1.6
 	}
 
-	if (System.getProperty("java.version").contains("1.9.")) {
+	if (!System.getProperty("java.version").contains("1.8.")) {
 		// necessary because castor and xjc tasks cannot find the JDK's compiler on JDK 9
 		compileTestJava.enabled = false
 	}
@@ -607,9 +626,9 @@ project("spring-jdbc") {
 		compile(project(":spring-tx"))
 		optional(project(":spring-context"))  // for JndiDataSourceLookup
 		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
-		optional("com.mchange:c3p0:0.9.2.1")
+		optional("com.mchange:c3p0:0.9.5.1")
 		optional("org.hsqldb:hsqldb:${hsqldbVersion}")
-		optional("com.h2database:h2:1.4.186")
+		optional("com.h2database:h2:1.4.188")
 		optional("org.apache.derby:derby:10.11.1.1")
 		optional("org.apache.derby:derbyclient:10.11.1.1")
 	}
@@ -624,7 +643,7 @@ project("spring-context-support") {
 		compile(project(":spring-context"))
 		optional(project(":spring-jdbc"))  // for Quartz support
 		optional(project(":spring-tx"))  // for Quartz support
-		optional("javax.mail:javax.mail-api:1.5.2")
+		optional("javax.mail:javax.mail-api:${javamailVersion}")
 		optional("javax.cache:cache-api:1.0.0")
 		optional("com.google.guava:guava:18.0")
 		optional("net.sf.ehcache:ehcache:${ehcacheVersion}")
@@ -642,13 +661,13 @@ project("spring-context-support") {
 			exclude group: "org.springframework", module: "spring-context"
 		}
 		testCompile(project(":spring-context"))
-		testCompile("org.apache.poi:poi:3.11")
+		testCompile("org.apache.poi:poi:${poiVersion}")
 		testCompile("commons-beanutils:commons-beanutils:1.8.0")  // for Velocity/JasperReports
 		testCompile("commons-digester:commons-digester:1.8.1")  // for Velocity/JasperReports
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
 		testCompile("org.slf4j:slf4j-api:${slf4jVersion}")
-		testCompile("org.ehcache:jcache:${ehcachejcacheVersion}")
-		testRuntime("com.sun.mail:javax.mail:1.5.2")
+		testRuntime("com.sun.mail:javax.mail:${javamailVersion}")
+		testRuntime("org.ehcache:jcache:${ehcachejcacheVersion}")
 	}
 }
 
@@ -682,6 +701,7 @@ project("spring-web") {
 		optional("javax.portlet:portlet-api:2.0")
 		optional("javax.el:javax.el-api:2.2.5")
 		optional("javax.faces:javax.faces-api:2.2")
+		optional("javax.validation:validation-api:1.0.0.GA")
 		optional("aopalliance:aopalliance:1.0")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("com.caucho:hessian:4.0.38")
@@ -689,10 +709,11 @@ project("spring-web") {
 		optional("org.apache.httpcomponents:httpclient:${httpclientVersion}")
 		optional("org.apache.httpcomponents:httpasyncclient:${httpasyncVersion}")
 		optional("io.netty:netty-all:${nettyVersion}")
+		optional("com.squareup.okhttp:okhttp:2.5.0")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jackson2Version}")
 		optional("com.google.code.gson:gson:${gsonVersion}")
-		optional("com.rometools:rome:1.5.0")
+		optional("com.rometools:rome:${romeVersion}")
 		optional("org.eclipse.jetty:jetty-servlet:${jettyVersion}") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
 		}
@@ -702,7 +723,7 @@ project("spring-web") {
 		optional("log4j:log4j:1.2.17")
 		optional("com.googlecode.protobuf-java-format:protobuf-java-format:1.2")
 		optional("com.google.protobuf:protobuf-java:${protobufVersion}")
-		optional("javax.mail:javax.mail-api:1.5.2")
+		optional("javax.mail:javax.mail-api:${javamailVersion}")
 		testCompile(project(":spring-context-support"))  // for JafMediaTypeFactory
 		testCompile("xmlunit:xmlunit:${xmlunitVersion}")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
@@ -710,7 +731,9 @@ project("spring-web") {
 			exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"
 		}
 		testCompile("com.fasterxml.jackson.datatype:jackson-datatype-joda:${jackson2Version}")
-		testRuntime("com.sun.mail:javax.mail:1.5.2")
+		testCompile("com.fasterxml.jackson.datatype:jackson-datatype-jdk7:${jackson2Version}")
+		testCompile("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jackson2Version}")
+		testRuntime("com.sun.mail:javax.mail:${javamailVersion}")
 	}
 }
 
@@ -753,8 +776,8 @@ project("spring-websocket") {
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}")
-		testCompile("org.projectreactor:reactor-core:${reactorVersion}")
-		testCompile("org.projectreactor:reactor-net:${reactorVersion}")
+		testCompile("io.projectreactor:reactor-net:${reactorVersion}")
+		testCompile("io.netty:netty-all:${nettyVersion}")
 		testCompile("log4j:log4j:1.2.17")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 	}
@@ -790,7 +813,7 @@ project("spring-orm") {
 			exclude group: 'org.apache.geronimo.specs', module: 'geronimo-jta_1.1_spec'
 			exclude group: 'org.apache.geronimo.specs', module: 'geronimo-jms_1.1_spec'
 		}
-		optional("javax.jdo:jdo-api:3.0.1") {
+		optional("javax.jdo:jdo-api:3.1") {
 			exclude group: 'javax.transaction', module: 'transaction-api'
 		}
 		optional("javax.servlet:javax.servlet-api:3.0.1")
@@ -820,6 +843,21 @@ project("spring-orm-hibernate4") {
 	}
 }
 
+project("spring-orm-hibernate5") {
+	description = "Spring Object/Relational Mapping - Hibernate 5 support"
+	merge.into = project(":spring-orm")
+
+	dependencies {
+		provided(project(":spring-jdbc"))
+		provided(project(":spring-tx"))
+		optional(project(":spring-web"))
+		optional("org.hibernate:hibernate-core:${hibernate5Version}")
+		optional("org.hibernate:hibernate-entitymanager:${hibernate5Version}")
+		optional("javax.servlet:javax.servlet-api:3.0.1")
+		optional("aopalliance:aopalliance:1.0")
+	}
+}
+
 project("spring-webmvc") {
 	description = "Spring Web MVC"
 
@@ -836,7 +874,8 @@ project("spring-webmvc") {
 		optional("javax.servlet.jsp:javax.servlet.jsp-api:2.2.1")
 		optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1")
 		optional("net.sourceforge.jexcelapi:jxl:2.6.12")
-		optional("org.apache.poi:poi:3.11")
+		optional("org.apache.poi:poi:${poiVersion}")
+		optional("org.apache.poi:poi-ooxml:${poiVersion}")
 		optional("org.apache.velocity:velocity:1.7")
 		optional("velocity-tools:velocity-tools-view:1.4")
 		optional("org.freemarker:freemarker:${freemarkerVersion}")
@@ -852,7 +891,7 @@ project("spring-webmvc") {
 		}
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jackson2Version}")
-		optional("com.rometools:rome:1.5.0")
+		optional("com.rometools:rome:${romeVersion}")
 		optional("javax.el:javax.el-api:2.2.5")
 		optional("org.apache.tiles:tiles-api:${tiles3Version}")
 		optional("org.apache.tiles:tiles-core:${tiles3Version}") {
@@ -871,6 +910,7 @@ project("spring-webmvc") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 			exclude group: "org.springframework", module: "spring-web"
 		}
+		optional 'org.webjars:webjars-locator:0.28'
 		testCompile(project(":spring-aop"))
 		testCompile("rhino:js:1.7R1")
 		testCompile("xmlunit:xmlunit:${xmlunitVersion}")
@@ -895,6 +935,9 @@ project("spring-webmvc") {
 		testCompile("commons-io:commons-io:1.3")
 		testCompile("joda-time:joda-time:${jodaVersion}")
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
+		testCompile("org.jruby:jruby:${jrubyVersion}")
+		testCompile("org.python:jython-standalone:2.5.3")
+		testCompile("org.webjars:underscorejs:1.8.2")
 	}
 }
 
@@ -971,20 +1014,22 @@ project("spring-test") {
 		optional("javax.el:javax.el-api:2.2.5")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
-		optional("org.hamcrest:hamcrest-core:1.3")
-		optional("com.jayway.jsonpath:json-path:1.2.0")
-		optional("org.skyscreamer:jsonassert:1.2.3")
+		optional("org.hamcrest:hamcrest-core:${hamcrestVersion}")
+		optional("com.jayway.jsonpath:json-path:${jsonpathVersion}")
+		optional("org.skyscreamer:jsonassert:${jsonassertVersion}")
 		optional("xmlunit:xmlunit:${xmlunitVersion}")
+		optional("net.sourceforge.htmlunit:htmlunit:${htmlunitVersion}")
+		optional("org.seleniumhq.selenium:selenium-htmlunit-driver:${seleniumVersion}")
 		testCompile(project(":spring-context-support"))
 		testCompile(project(":spring-oxm"))
-		testCompile("javax.mail:javax.mail-api:1.5.2")
-		testCompile("javax.ejb:ejb-api:3.0")
+		testCompile("javax.mail:javax.mail-api:${javamailVersion}")
+		testCompile("javax.ejb:ejb-api:${ejbApiVersion}")
 		testCompile("org.hibernate:hibernate-core:${hibernate4Version}")
 		testCompile("org.hibernate:hibernate-entitymanager:${hibernate4Version}")
 		testCompile("org.hibernate:hibernate-validator:${hibval5Version}")
 		testCompile("com.thoughtworks.xstream:xstream:${xstreamVersion}")
 		testCompile("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
-		testCompile("com.rometools:rome:1.5.0")
+		testCompile("com.rometools:rome:${romeVersion}")
 		testCompile("org.apache.tiles:tiles-api:${tiles3Version}")
 		testCompile("org.apache.tiles:tiles-core:${tiles3Version}") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
@@ -993,7 +1038,10 @@ project("spring-test") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 		}
 		testCompile("org.hsqldb:hsqldb:${hsqldbVersion}")
-		testCompile "org.slf4j:slf4j-jcl:${slf4jVersion}"
+		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
+		testCompile("org.apache.httpcomponents:httpclient:${httpclientVersion}")
+		testCompile("javax.cache:cache-api:1.0.0")
+		testRuntime("org.ehcache:ehcache:${ehcache3Version}")
 	}
 
 	task testNG(type: Test) {
@@ -1028,8 +1076,8 @@ project("spring-aspects") {
 
 	dependencies {
 		aspects(project(":spring-orm"))
-		ajc("org.aspectj:aspectjtools:1.9.0.BETA-1")  // for the ability to build on JDK 9, not exposed in the POMs yet
-		rt("org.aspectj:aspectjrt:${aspectjVersion}")
+		ajc("org.aspectj:aspectjtools:1.9.0.BETA-2")  // for the ability to build on JDK 9, not exposed in the POMs yet
+		rt("org.aspectj:aspectjrt:${aspectjVersion}")  // regular AspectJ version here, to be exposed in the POMs
 		compile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		provided("org.eclipse.persistence:javax.persistence:2.0.0")
 		optional(project(":spring-aop"))  // for @Async support
@@ -1042,7 +1090,7 @@ project("spring-aspects") {
 		optional("javax.cache:cache-api:1.0.0")
 		testCompile(project(":spring-core"))  // for CodeStyleAspect
 		testCompile(project(":spring-test"))
-		testCompile("javax.mail:javax.mail-api:1.5.2")
+		testCompile("javax.mail:javax.mail-api:${javamailVersion}")
 	}
 
 	eclipse.project {
@@ -1118,7 +1166,8 @@ configure(rootProject) {
 		separateOutputDirs = false
 		backends = ['docbook']
 		options doctype: 'book', eruby: 'erubis'
-		attributes 'spring-version': project.version,
+		attributes 	'spring-version': project.version,
+					'javadoc-baseurl' : "http://docs.spring.io/spring/docs/current/javadoc-api",
 					revnumber : project.version,
 					docinfo : ""
 	}
@@ -1329,7 +1378,7 @@ configure(rootProject) {
 
 	task wrapper(type: Wrapper) {
 		description = "Generates gradlew[.bat] scripts"
-		gradleVersion = "2.2.1"
+		gradleVersion = "2.5"
 
 		doLast() {
 			def gradleOpts = "-XX:MaxMetaspaceSize=1024m -Xmx1024m"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,10 @@ import org.springframework.util.xml.DomUtils;
 
 /**
  * Parse the <mvc:tiles-configurer> MVC namespace element and register
- * TilesConfigurer bean
+ * a corresponding TilesConfigurer bean.
 
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.1
  */
 public class TilesConfigurerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
@@ -50,11 +51,6 @@ public class TilesConfigurerBeanDefinitionParser extends AbstractSingleBeanDefin
 	}
 
 	@Override
-	protected boolean shouldGenerateId() {
-		return super.shouldGenerateId();
-	}
-
-	@Override
 	protected void doParse(Element element, ParserContext parserContext, BeanDefinitionBuilder builder) {
 		List<Element> childElements = DomUtils.getChildElementsByTagName(element, "definitions");
 		if (!childElements.isEmpty()) {
@@ -69,6 +65,12 @@ public class TilesConfigurerBeanDefinitionParser extends AbstractSingleBeanDefin
 		}
 		if (element.hasAttribute("validate-definitions")) {
 			builder.addPropertyValue("validateDefinitions", element.getAttribute("validate-definitions"));
+		}
+		if (element.hasAttribute("definitions-factory")) {
+			builder.addPropertyValue("definitionsFactoryClass", element.getAttribute("definitions-factory"));
+		}
+		if (element.hasAttribute("preparer-factory")) {
+			builder.addPropertyValue("preparerFactoryClass", element.getAttribute("preparer-factory"));
 		}
 	}
 

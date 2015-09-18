@@ -29,13 +29,13 @@ public enum SimpMessageType {
 
 	CONNECT_ACK,
 
-	HEARTBEAT,
-
 	MESSAGE,
 
 	SUBSCRIBE,
 
 	UNSUBSCRIBE,
+
+	HEARTBEAT,
 
 	DISCONNECT,
 

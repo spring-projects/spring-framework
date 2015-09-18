@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.Assert;
-
 
 /**
  * A controller method return value type for asynchronous request processing
@@ -53,22 +53,52 @@ import org.springframework.util.Assert;
  * emitter.complete();
  * </pre>
  *
- * <p><strong>Note:</strong> this class is not thread-safe. Callers must ensure
- * that use from multiple threads is synchronized.
- *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.2
  */
 public class ResponseBodyEmitter {
 
+	private final Long timeout;
+
+	private final Set<DataWithMediaType> earlySendAttempts = new LinkedHashSet<DataWithMediaType>(8);
+
 	private Handler handler;
 
-	/* Cache for objects sent before handler is set. */
-	private final Map<Object, MediaType> initHandlerCache = new LinkedHashMap<Object, MediaType>(10);
-
-	private volatile boolean complete;
+	private boolean complete;
 
 	private Throwable failure;
+
+	private Runnable timeoutCallback;
+
+	private Runnable completionCallback;
+
+
+	/**
+	 * Create a new ResponseBodyEmitter instance.
+	 */
+	public ResponseBodyEmitter() {
+		this.timeout = null;
+	}
+
+	/**
+	 * Create a ResponseBodyEmitter with a custom timeout value.
+	 * <p>By default not set in which case the default configured in the MVC
+	 * Java Config or the MVC namespace is used, or if that's not set, then the
+	 * timeout depends on the default of the underlying server.
+	 * @param timeout timeout value in milliseconds
+	 */
+	public ResponseBodyEmitter(Long timeout) {
+		this.timeout = timeout;
+	}
+
+
+	/**
+	 * Return the configured timeout value, if any.
+	 */
+	public Long getTimeout() {
+		return this.timeout;
+	}
 
 
 	/**
@@ -80,25 +110,28 @@ public class ResponseBodyEmitter {
 	protected void extendResponse(ServerHttpResponse outputMessage) {
 	}
 
-	void initialize(Handler handler) throws IOException {
-		synchronized (this) {
-			this.handler = handler;
-			for (Map.Entry<Object, MediaType> entry : this.initHandlerCache.entrySet()) {
-				try {
-					sendInternal(entry.getKey(), entry.getValue());
-				}
-				catch (Throwable ex) {
-					return;
-				}
+	synchronized void initialize(Handler handler) throws IOException {
+		this.handler = handler;
+
+		for (DataWithMediaType sendAttempt : this.earlySendAttempts) {
+			sendInternal(sendAttempt.getData(), sendAttempt.getMediaType());
+		}
+		this.earlySendAttempts.clear();
+
+		if (this.complete) {
+			if (this.failure != null) {
+				this.handler.completeWithError(this.failure);
 			}
-			if (this.complete) {
-				if (this.failure != null) {
-					this.handler.completeWithError(this.failure);
-				}
-				else {
-					this.handler.complete();
-				}
+			else {
+				this.handler.complete();
 			}
+		}
+
+		if (this.timeoutCallback != null) {
+			this.handler.onTimeout(this.timeoutCallback);
+		}
+		if (this.completionCallback != null) {
+			this.handler.onCompletion(this.completionCallback);
 		}
 	}
 
@@ -123,33 +156,29 @@ public class ResponseBodyEmitter {
 	 * @throws IOException raised when an I/O error occurs
 	 * @throws java.lang.IllegalStateException wraps any other errors
 	 */
-	public void send(Object object, MediaType mediaType) throws IOException {
-		Assert.state(!this.complete, "ResponseBodyEmitter is already set complete.");
+	public synchronized void send(Object object, MediaType mediaType) throws IOException {
+		Assert.state(!this.complete, "ResponseBodyEmitter is already set complete");
 		sendInternal(object, mediaType);
 	}
 
 	private void sendInternal(Object object, MediaType mediaType) throws IOException {
-		if (object == null) {
-			return;
-		}
-		if (handler == null) {
-			synchronized (this) {
-				if (handler == null) {
-					this.initHandlerCache.put(object, mediaType);
-					return;
+		if (object != null) {
+			if (this.handler != null) {
+				try {
+					this.handler.send(object, mediaType);
+				}
+				catch (IOException ex) {
+					this.handler.completeWithError(ex);
+					throw ex;
+				}
+				catch (Throwable ex) {
+					this.handler.completeWithError(ex);
+					throw new IllegalStateException("Failed to send " + object, ex);
 				}
 			}
-		}
-		try {
-			this.handler.send(object, mediaType);
-		}
-		catch(IOException ex){
-			this.handler.completeWithError(ex);
-			throw ex;
-		}
-		catch(Throwable ex){
-			this.handler.completeWithError(ex);
-			throw new IllegalStateException("Failed to send " + object, ex);
+			else {
+				this.earlySendAttempts.add(new DataWithMediaType(object, mediaType));
+			}
 		}
 	}
 
@@ -158,12 +187,10 @@ public class ResponseBodyEmitter {
 	 * <p>A dispatch is made into the app server where Spring MVC completes
 	 * asynchronous request processing.
 	 */
-	public void complete() {
-		synchronized (this) {
-			this.complete = true;
-			if (handler != null) {
-				this.handler.complete();
-			}
+	public synchronized void complete() {
+		this.complete = true;
+		if (this.handler != null) {
+			this.handler.complete();
 		}
 	}
 
@@ -172,13 +199,35 @@ public class ResponseBodyEmitter {
 	 * <p>A dispatch is made into the app server where Spring MVC will pass the
 	 * exception through its exception handling mechanism.
 	 */
-	public void completeWithError(Throwable ex) {
-		synchronized (this) {
-			this.complete = true;
-			this.failure = ex;
-			if (handler != null) {
-				this.handler.completeWithError(ex);
-			}
+	public synchronized void completeWithError(Throwable ex) {
+		this.complete = true;
+		this.failure = ex;
+		if (this.handler != null) {
+			this.handler.completeWithError(ex);
+		}
+	}
+
+	/**
+	 * Register code to invoke when the async request times out. This method is
+	 * called from a container thread when an async request times out.
+	 */
+	public synchronized void onTimeout(Runnable callback) {
+		this.timeoutCallback = callback;
+		if (this.handler != null) {
+			this.handler.onTimeout(callback);
+		}
+	}
+
+	/**
+	 * Register code to invoke when the async request completes. This method is
+	 * called from a container thread when an async request completed for any
+	 * reason including timeout and network error. This method is useful for
+	 * detecting that a {@code ResponseBodyEmitter} instance is no longer usable.
+	 */
+	public synchronized void onCompletion(Runnable callback) {
+		this.completionCallback = callback;
+		if (this.handler != null) {
+			this.handler.onCompletion(callback);
 		}
 	}
 
@@ -193,6 +242,34 @@ public class ResponseBodyEmitter {
 		void complete();
 
 		void completeWithError(Throwable failure);
+
+		void onTimeout(Runnable callback);
+
+		void onCompletion(Runnable callback);
+	}
+
+
+	/**
+	 * Simple struct for a data entry.
+	 */
+	static class DataWithMediaType {
+
+		private final Object data;
+
+		private final MediaType mediaType;
+
+		public DataWithMediaType(Object data, MediaType mediaType) {
+			this.data = data;
+			this.mediaType = mediaType;
+		}
+
+		public Object getData() {
+			return this.data;
+		}
+
+		public MediaType getMediaType() {
+			return this.mediaType;
+		}
 	}
 
 }

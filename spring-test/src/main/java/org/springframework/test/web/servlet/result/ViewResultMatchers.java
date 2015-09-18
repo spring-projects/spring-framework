@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,16 +22,18 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.web.servlet.ModelAndView;
 
+import static org.hamcrest.MatcherAssert.*;
 import static org.springframework.test.util.AssertionErrors.*;
-import static org.springframework.test.util.MatcherAssertionErrors.*;
 
 /**
- * Factory for assertions on the selected view. An instance of this class is
- * typically accessed via {@link MockMvcResultMatchers#view()}.
+ * Factory for assertions on the selected view.
+ * <p>An instance of this class is typically accessed via
+ * {@link MockMvcResultMatchers#view}.
+ *
+ * @author Rossen Stoyanchev
  * @since 3.2
  */
 public class ViewResultMatchers {
-
 
 	/**
 	 * Protected constructor.
@@ -39,6 +41,7 @@ public class ViewResultMatchers {
 	 */
 	protected ViewResultMatchers() {
 	}
+
 
 	/**
 	 * Assert the selected view name with the given Hamcrest {@link Matcher}.
@@ -67,4 +70,5 @@ public class ViewResultMatchers {
 			}
 		};
 	}
+
 }

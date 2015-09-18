@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
+import org.springframework.context.Lifecycle;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
@@ -56,9 +57,11 @@ import org.springframework.web.socket.sockjs.support.AbstractSockJsService;
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  * @since 4.0
  */
-public class TransportHandlingSockJsService extends AbstractSockJsService implements SockJsServiceConfig {
+public class TransportHandlingSockJsService extends AbstractSockJsService
+		implements SockJsServiceConfig, Lifecycle {
 
 	private static final boolean jackson2Present = ClassUtils.isPresent(
 			"com.fasterxml.jackson.databind.ObjectMapper", TransportHandlingSockJsService.class.getClassLoader());
@@ -73,6 +76,8 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 	private final Map<String, SockJsSession> sessions = new ConcurrentHashMap<String, SockJsSession>();
 
 	private ScheduledFuture<?> sessionCleanupTask;
+
+	private boolean running;
 
 
 	/**
@@ -146,7 +151,36 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 	 * Return the configured WebSocket handshake request interceptors.
 	 */
 	public List<HandshakeInterceptor> getHandshakeInterceptors() {
-		return Collections.unmodifiableList(this.interceptors);
+		return this.interceptors;
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.running;
+	}
+
+	@Override
+	public void start() {
+		if (!isRunning()) {
+			this.running = true;
+			for (TransportHandler handler : this.handlers.values()) {
+				if (handler instanceof Lifecycle) {
+					((Lifecycle) handler).start();
+				}
+			}
+		}
+	}
+
+	@Override
+	public void stop() {
+		if (isRunning()) {
+			this.running = false;
+			for (TransportHandler handler : this.handlers.values()) {
+				if (handler instanceof Lifecycle) {
+					((Lifecycle) handler).stop();
+				}
+			}
+		}
 	}
 
 
@@ -208,27 +242,27 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			return;
 		}
 
-		HttpMethod supportedMethod = transportType.getHttpMethod();
-		if (!supportedMethod.equals(request.getMethod())) {
-			if (HttpMethod.OPTIONS.equals(request.getMethod()) && transportType.supportsCors()) {
-				if (checkAndAddCorsHeaders(request, response, HttpMethod.OPTIONS, supportedMethod)) {
-					response.setStatusCode(HttpStatus.NO_CONTENT);
-					addCacheHeaders(response);
-				}
-			}
-			else if (transportType.supportsCors()) {
-				sendMethodNotAllowed(response, supportedMethod, HttpMethod.OPTIONS);
-			}
-			else {
-				sendMethodNotAllowed(response, supportedMethod);
-			}
-			return;
-		}
-
-		HandshakeInterceptorChain chain = new HandshakeInterceptorChain(this.interceptors, handler);
 		SockJsException failure = null;
+		HandshakeInterceptorChain chain = new HandshakeInterceptorChain(this.interceptors, handler);
 
 		try {
+			HttpMethod supportedMethod = transportType.getHttpMethod();
+			if (!supportedMethod.equals(request.getMethod())) {
+				if (HttpMethod.OPTIONS.equals(request.getMethod()) && transportType.supportsCors()) {
+					if (checkOrigin(request, response, HttpMethod.OPTIONS, supportedMethod)) {
+						response.setStatusCode(HttpStatus.NO_CONTENT);
+						addCacheHeaders(response);
+					}
+				}
+				else if (transportType.supportsCors()) {
+					sendMethodNotAllowed(response, supportedMethod, HttpMethod.OPTIONS);
+				}
+				else {
+					sendMethodNotAllowed(response, supportedMethod);
+				}
+				return;
+			}
+
 			SockJsSession session = this.sessions.get(sessionId);
 			if (session == null) {
 				if (transportHandler instanceof SockJsSessionFactory) {
@@ -264,7 +298,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			}
 
 			if (transportType.supportsCors()) {
-				if (!checkAndAddCorsHeaders(request, response)) {
+				if (!checkOrigin(request, response)) {
 					return;
 				}
 			}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -199,7 +199,7 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 		private static Constructor<?> getEndpointConstructor() {
 			for (Constructor<?> current : TyrusEndpointWrapper.class.getConstructors()) {
 				Class<?>[] types = current.getParameterTypes();
-				if (types[0].equals(Endpoint.class) && types[1].equals(EndpointConfig.class)) {
+				if (Endpoint.class == types[0] && EndpointConfig.class == types[1]) {
 					return current;
 				}
 			}

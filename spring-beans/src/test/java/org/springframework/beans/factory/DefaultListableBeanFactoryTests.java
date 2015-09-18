@@ -17,6 +17,7 @@
 package org.springframework.beans.factory;
 
 import java.io.Closeable;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.security.AccessControlContext;
@@ -32,6 +33,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import javax.annotation.Priority;
 import javax.security.auth.Subject;
 
@@ -73,6 +75,7 @@ import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ConstructorDependenciesBean;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.support.DefaultConversionService;
@@ -194,13 +197,16 @@ public class DefaultListableBeanFactoryTests {
 		assertTrue(lbf.isTypeMatch("x1", TestBean.class));
 		assertFalse(lbf.isTypeMatch("&x1", TestBean.class));
 		assertTrue(lbf.isTypeMatch("&x1", DummyFactory.class));
+		assertTrue(lbf.isTypeMatch("&x1", ResolvableType.forClass(DummyFactory.class)));
+		assertTrue(lbf.isTypeMatch("&x1", ResolvableType.forClassWithGenerics(FactoryBean.class, Object.class)));
+		assertFalse(lbf.isTypeMatch("&x1", ResolvableType.forClassWithGenerics(FactoryBean.class, String.class)));
 		assertEquals(TestBean.class, lbf.getType("x1"));
 		assertEquals(DummyFactory.class, lbf.getType("&x1"));
 		assertTrue("prototype not instantiated", !DummyFactory.wasPrototypeCreated());
 	}
 
 	@Test
-	public void testPrototypeSingletonFactoryBeanIgnoredByNonEagerTypeMatching() {
+	public void testSingletonFactoryBeanIgnoredByNonEagerTypeMatching() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		Properties p = new Properties();
 		p.setProperty("x1.(class)", DummyFactory.class.getName());
@@ -226,6 +232,9 @@ public class DefaultListableBeanFactoryTests {
 		assertTrue(lbf.isTypeMatch("x1", TestBean.class));
 		assertFalse(lbf.isTypeMatch("&x1", TestBean.class));
 		assertTrue(lbf.isTypeMatch("&x1", DummyFactory.class));
+		assertTrue(lbf.isTypeMatch("&x1", ResolvableType.forClass(DummyFactory.class)));
+		assertTrue(lbf.isTypeMatch("&x1", ResolvableType.forClassWithGenerics(FactoryBean.class, Object.class)));
+		assertFalse(lbf.isTypeMatch("&x1", ResolvableType.forClassWithGenerics(FactoryBean.class, String.class)));
 		assertEquals(TestBean.class, lbf.getType("x1"));
 		assertEquals(DummyFactory.class, lbf.getType("&x1"));
 		assertTrue("prototype not instantiated", !DummyFactory.wasPrototypeCreated());
@@ -257,6 +266,9 @@ public class DefaultListableBeanFactoryTests {
 		assertTrue(lbf.isTypeMatch("x1", TestBean.class));
 		assertFalse(lbf.isTypeMatch("&x1", TestBean.class));
 		assertTrue(lbf.isTypeMatch("&x1", DummyFactory.class));
+		assertTrue(lbf.isTypeMatch("&x1", ResolvableType.forClass(DummyFactory.class)));
+		assertTrue(lbf.isTypeMatch("&x1", ResolvableType.forClassWithGenerics(FactoryBean.class, Object.class)));
+		assertFalse(lbf.isTypeMatch("&x1", ResolvableType.forClassWithGenerics(FactoryBean.class, String.class)));
 		assertEquals(TestBean.class, lbf.getType("x1"));
 		assertEquals(DummyFactory.class, lbf.getType("&x1"));
 		assertTrue("prototype not instantiated", !DummyFactory.wasPrototypeCreated());
@@ -776,6 +788,15 @@ public class DefaultListableBeanFactoryTests {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		lbf.registerAlias("test", "test2");
 		lbf.registerAlias("test2", "test3");
+
+		try {
+			lbf.registerAlias("test3", "test2");
+			fail("Should have thrown IllegalStateException");
+		}
+		catch (IllegalStateException ex) {
+			// expected
+		}
+
 		try {
 			lbf.registerAlias("test3", "test");
 			fail("Should have thrown IllegalStateException");
@@ -783,6 +804,8 @@ public class DefaultListableBeanFactoryTests {
 		catch (IllegalStateException ex) {
 			// expected
 		}
+
+		lbf.registerAlias("test", "test3");
 	}
 
 	@Test
@@ -1381,7 +1404,7 @@ public class DefaultListableBeanFactoryTests {
 		}
 	}
 
-	@Test(expected=NoSuchBeanDefinitionException.class)
+	@Test(expected = NoSuchBeanDefinitionException.class)
 	public void testGetBeanByTypeWithNoneFound() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		lbf.getBean(TestBean.class);
@@ -1397,7 +1420,7 @@ public class DefaultListableBeanFactoryTests {
 		assertThat(bean.getBeanName(), equalTo("bd1"));
 	}
 
-	@Test(expected=NoUniqueBeanDefinitionException.class)
+	@Test(expected = NoUniqueBeanDefinitionException.class)
 	public void testGetBeanByTypeWithAmbiguity() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
@@ -1606,6 +1629,8 @@ public class DefaultListableBeanFactoryTests {
 
 		assertEquals(1, lbf.getBeanNamesForType(ConstructorDependency.class).length);
 		assertEquals(1, lbf.getBeanNamesForType(ConstructorDependencyFactoryBean.class).length);
+		assertEquals(1, lbf.getBeanNamesForType(ResolvableType.forClassWithGenerics(FactoryBean.class, Object.class)).length);
+		assertEquals(0, lbf.getBeanNamesForType(ResolvableType.forClassWithGenerics(FactoryBean.class, String.class)).length);
 	}
 
 	private RootBeanDefinition createConstructorDependencyBeanDefinition(int age) {
@@ -1654,13 +1679,59 @@ public class DefaultListableBeanFactoryTests {
 		assertNull(lbf.getType("factoryBean"));
 	}
 
+	@Test
+	public void testGetBeanNamesForTypeBeforeFactoryBeanCreation() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.registerBeanDefinition("factoryBean", new RootBeanDefinition(FactoryBeanThatShouldntBeCalled.class));
+		assertFalse(lbf.containsSingleton("factoryBean"));
+
+		String[] beanNames = lbf.getBeanNamesForType(Runnable.class, false, false);
+		assertEquals(1, beanNames.length);
+		assertEquals("&factoryBean", beanNames[0]);
+
+		beanNames = lbf.getBeanNamesForType(Callable.class, false, false);
+		assertEquals(1, beanNames.length);
+		assertEquals("&factoryBean", beanNames[0]);
+
+		beanNames = lbf.getBeanNamesForType(RepositoryFactoryInformation.class, false, false);
+		assertEquals(1, beanNames.length);
+		assertEquals("&factoryBean", beanNames[0]);
+
+		beanNames = lbf.getBeanNamesForType(FactoryBean.class, false, false);
+		assertEquals(1, beanNames.length);
+		assertEquals("&factoryBean", beanNames[0]);
+	}
+
+	@Test
+	public void testGetBeanNamesForTypeAfterFactoryBeanCreation() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		lbf.registerBeanDefinition("factoryBean", new RootBeanDefinition(FactoryBeanThatShouldntBeCalled.class));
+		lbf.getBean("&factoryBean");
+
+		String[] beanNames = lbf.getBeanNamesForType(Runnable.class, false, false);
+		assertEquals(1, beanNames.length);
+		assertEquals("&factoryBean", beanNames[0]);
+
+		beanNames = lbf.getBeanNamesForType(Callable.class, false, false);
+		assertEquals(1, beanNames.length);
+		assertEquals("&factoryBean", beanNames[0]);
+
+		beanNames = lbf.getBeanNamesForType(RepositoryFactoryInformation.class, false, false);
+		assertEquals(1, beanNames.length);
+		assertEquals("&factoryBean", beanNames[0]);
+
+		beanNames = lbf.getBeanNamesForType(FactoryBean.class, false, false);
+		assertEquals(1, beanNames.length);
+		assertEquals("&factoryBean", beanNames[0]);
+	}
+
 	/**
 	 * Verifies that a dependency on a {@link FactoryBean} can <strong>not</strong>
 	 * be autowired <em>by name</em>, as &amp; is an illegal character in
 	 * Java method names. In other words, you can't name a method
 	 * {@code set&amp;FactoryBean(...)}.
 	 */
-	@Test(expected=TypeMismatchException.class)
+	@Test(expected = TypeMismatchException.class)
 	public void testAutowireBeanWithFactoryBeanByName() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd = new RootBeanDefinition(LazyInitFactory.class);
@@ -2537,7 +2608,7 @@ public class DefaultListableBeanFactoryTests {
 		assertEquals(expectedNameFromArgs, tb2.getName());
 	}
 
-	@Test(expected=IllegalStateException.class)
+	@Test(expected = IllegalStateException.class)
 	public void testScopingBeanToUnregisteredScopeResultsInAnException() throws Exception {
 		BeanDefinitionBuilder builder = BeanDefinitionBuilder.rootBeanDefinition(TestBean.class);
 		AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
@@ -2850,10 +2921,24 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 
-	public static class FactoryBeanThatShouldntBeCalled implements FactoryBean<Object> {
+	public interface Repository<T, ID extends Serializable> {
+	}
+
+
+	public interface RepositoryFactoryInformation<T, ID extends Serializable> {
+	}
+
+
+	public static abstract class RepositoryFactoryBeanSupport<T extends Repository<S, ID>, S, ID extends Serializable>
+			implements RepositoryFactoryInformation<S, ID>, FactoryBean<T> {
+	}
+
+
+	public static class FactoryBeanThatShouldntBeCalled<T extends Repository<S, ID>, S, ID extends Serializable>
+			extends RepositoryFactoryBeanSupport<T, S, ID> implements Runnable, Callable<T> {
 
 		@Override
-		public Object getObject() {
+		public T getObject() {
 			throw new IllegalStateException();
 		}
 
@@ -2865,6 +2950,16 @@ public class DefaultListableBeanFactoryTests {
 		@Override
 		public boolean isSingleton() {
 			return false;
+		}
+
+		@Override
+		public void run() {
+			throw new IllegalStateException();
+		}
+
+		@Override
+		public T call() throws Exception {
+			throw new IllegalStateException();
 		}
 	}
 
@@ -2980,7 +3075,6 @@ public class DefaultListableBeanFactoryTests {
 	private static class FactoryBeanDependentBean {
 
 		private FactoryBean<?> factoryBean;
-
 
 		public final FactoryBean<?> getFactoryBean() {
 			return this.factoryBean;

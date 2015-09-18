@@ -563,7 +563,13 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 						logger.debug("Still waiting for shutdown of " + this.activeInvokerCount +
 								" message listener invokers");
 					}
-					this.lifecycleMonitor.wait();
+					long timeout = getReceiveTimeout();
+					if (timeout > 0) {
+						this.lifecycleMonitor.wait(timeout);
+					}
+					else {
+						this.lifecycleMonitor.wait();
+					}
 				}
 				// Clear remaining scheduled invokers, possibly left over as paused tasks...
 				for (AsyncMessageListenerInvoker scheduledInvoker : this.scheduledInvokers) {

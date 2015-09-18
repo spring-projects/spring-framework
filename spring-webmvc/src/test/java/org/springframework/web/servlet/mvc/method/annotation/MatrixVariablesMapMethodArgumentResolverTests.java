@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.LinkedMultiValueMap;
@@ -66,11 +67,11 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 		Method method = getClass().getMethod("handle", String.class,
 				Map.class, MultiValueMap.class, MultiValueMap.class, Map.class);
 
-		this.paramString = new MethodParameter(method, 0);
-		this.paramMap = new MethodParameter(method, 1);
-		this.paramMultivalueMap = new MethodParameter(method, 2);
-		this.paramMapForPathVar = new MethodParameter(method, 3);
-		this.paramMapWithName = new MethodParameter(method, 4);
+		this.paramString = new SynthesizingMethodParameter(method, 0);
+		this.paramMap = new SynthesizingMethodParameter(method, 1);
+		this.paramMultivalueMap = new SynthesizingMethodParameter(method, 2);
+		this.paramMapForPathVar = new SynthesizingMethodParameter(method, 3);
+		this.paramMapWithName = new SynthesizingMethodParameter(method, 4);
 
 		this.mavContainer = new ModelAndViewContainer();
 		this.request = new MockHttpServletRequest();
@@ -91,7 +92,6 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 
 	@Test
 	public void resolveArgument() throws Exception {
-
 		MultiValueMap<String, String> params = getMatrixVariables("cars");
 		params.add("colors", "red");
 		params.add("colors", "green");
@@ -113,7 +113,6 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 
 	@Test
 	public void resolveArgumentPathVariable() throws Exception {
-
 		MultiValueMap<String, String> params1 = getMatrixVariables("cars");
 		params1.add("colors", "red");
 		params1.add("colors", "purple");
@@ -137,7 +136,6 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 
 	@Test
 	public void resolveArgumentNoParams() throws Exception {
-
 		@SuppressWarnings("unchecked")
 		Map<String, String> map = (Map<String, String>) this.resolver.resolveArgument(
 				this.paramMap, this.mavContainer, this.webRequest, null);
@@ -147,7 +145,6 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 
 	@Test
 	public void resolveArgumentNoMatch() throws Exception {
-
 		MultiValueMap<String, String> params2 = getMatrixVariables("planes");
 		params2.add("colors", "yellow");
 		params2.add("colors", "orange");
@@ -162,7 +159,6 @@ public class MatrixVariablesMapMethodArgumentResolverTests {
 
 	@SuppressWarnings("unchecked")
 	private MultiValueMap<String, String> getMatrixVariables(String pathVarName) {
-
 		Map<String, MultiValueMap<String, String>> matrixVariables =
 				(Map<String, MultiValueMap<String, String>>) this.request.getAttribute(
 						HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE);

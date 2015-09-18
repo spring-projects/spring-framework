@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.web.servlet.mvc.method.annotation;
+
+import static org.junit.Assert.*;
 
 import java.beans.PropertyEditorSupport;
 import java.io.IOException;
@@ -42,6 +44,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -110,6 +113,7 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -136,8 +140,6 @@ import org.springframework.web.servlet.mvc.annotation.ModelAndViewResolver;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
-
-import static org.junit.Assert.*;
 
 /**
  * The origin of this test class is {@link ServletAnnotationControllerHandlerMethodTests}.
@@ -281,6 +283,29 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
 		assertEquals("[1, 2]-org.springframework.tests.sample.beans.TestBean", response.getContentAsString());
+	}
+
+	// SPR-12903
+
+	@Test
+	public void pathVariableWithCustomConverter() throws Exception {
+		initServlet(new ApplicationContextInitializer<GenericWebApplicationContext>() {
+			@Override
+			public void initialize(GenericWebApplicationContext context) {
+				RootBeanDefinition csDef = new RootBeanDefinition(FormattingConversionServiceFactoryBean.class);
+				csDef.getPropertyValues().add("converters", new AnnotatedExceptionRaisingConverter());
+				RootBeanDefinition wbiDef = new RootBeanDefinition(ConfigurableWebBindingInitializer.class);
+				wbiDef.getPropertyValues().add("conversionService", csDef);
+				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
+				adapterDef.getPropertyValues().add("webBindingInitializer", wbiDef);
+				context.registerBeanDefinition("handlerAdapter", adapterDef);
+			}
+		}, PathVariableWithCustomConverterController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myPath/1");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+		assertEquals(404, response.getStatus());
 	}
 
 	@Test
@@ -1532,7 +1557,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		// GET after POST
 		request = new MockHttpServletRequest("GET", "/messages/1");
-		request.addParameter("name", "value");
+		request.setQueryString("name=value");
 		request.setSession(session);
 		response = new MockHttpServletResponse();
 		getServlet().service(request, response);
@@ -1632,7 +1657,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		@RequestMapping("/myPath2.do")
 		public void myHandle(@RequestParam("param1") String p1, @RequestParam("param2") int p2,
-				@RequestHeader("header1") long h1, @CookieValue("cookie1") Cookie c1,
+				@RequestHeader("header1") long h1, @CookieValue(name = "cookie1") Cookie c1,
 				HttpServletResponse response) throws IOException {
 			response.getWriter().write("test-" + p1 + "-" + p2 + "-" + h1 + "-" + c1.getValue());
 		}
@@ -1749,7 +1774,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 	@Controller
 	@RequestMapping("/myPage")
-	@SessionAttributes({"object1", "object2"})
+	@SessionAttributes(names = { "object1", "object2" })
 	public static class MySessionAttributesController {
 
 		@RequestMapping(method = RequestMethod.GET)
@@ -2370,6 +2395,27 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
+	public static class PathVariableWithCustomConverterController {
+
+		@RequestMapping("/myPath/{id}")
+		public void myHandle(@PathVariable("id") ITestBean bean) throws Exception {
+		}
+	}
+
+	public static class AnnotatedExceptionRaisingConverter implements Converter<String, ITestBean> {
+
+		@Override
+		public ITestBean convert(String source) {
+			throw new NotFoundException();
+		}
+
+		@ResponseStatus(HttpStatus.NOT_FOUND)
+		@SuppressWarnings("serial")
+		private static class NotFoundException extends RuntimeException {
+		}
+	}
+
+	@Controller
 	public static class MethodNotAllowedController {
 
 		@RequestMapping(value = "/myPath.do", method = RequestMethod.DELETE)
@@ -2611,7 +2657,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	public static class ResponseStatusController {
 
 		@RequestMapping("/something")
-		@ResponseStatus(value = HttpStatus.CREATED, reason = "It's alive!")
+		@ResponseStatus(code = HttpStatus.CREATED, reason = "It's alive!")
 		public void handle(Writer writer) throws IOException {
 			writer.write("something");
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import org.springframework.test.annotation.Rollback;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTransactionalTestNGSpringContextTests;
 import org.springframework.test.context.transaction.AfterTransaction;
@@ -36,6 +36,7 @@ import org.springframework.test.context.transaction.programmatic.ProgrammaticTxM
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
 import org.testng.IHookCallBack;
 import org.testng.ITestResult;
 import org.testng.annotations.Test;
@@ -219,7 +220,7 @@ public class ProgrammaticTxMgmtTestNGTests extends AbstractTransactionalTestNGSp
 	}
 
 	@Test
-	@Rollback(false)
+	@Commit
 	public void rollbackTxAndStartNewTxWithDefaultCommitSemantics() {
 		assertInTransaction(true);
 		assertTrue(TestTransaction.isActive());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 package org.springframework.web.method.annotation;
 
+
 import java.util.HashSet;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -40,20 +40,13 @@ import static org.junit.Assert.*;
  */
 public class SessionAttributesHandlerTests {
 
-	private Class<?> handlerType = SessionAttributeHandler.class;
+	private final SessionAttributeStore sessionAttributeStore = new DefaultSessionAttributeStore();
 
-	private SessionAttributesHandler sessionAttributesHandler;
+	private final SessionAttributesHandler sessionAttributesHandler = new SessionAttributesHandler(
+		SessionAttributeHandler.class, sessionAttributeStore);
 
-	private SessionAttributeStore sessionAttributeStore;
+	private final NativeWebRequest request = new ServletWebRequest(new MockHttpServletRequest());
 
-	private NativeWebRequest request;
-
-	@Before
-	public void setUp() {
-		this.sessionAttributeStore = new DefaultSessionAttributeStore();
-		this.sessionAttributesHandler = new SessionAttributesHandler(handlerType, sessionAttributeStore);
-		this.request = new ServletWebRequest(new MockHttpServletRequest());
-	}
 
 	@Test
 	public void isSessionAttribute() throws Exception {
@@ -115,7 +108,8 @@ public class SessionAttributesHandlerTests {
 		assertTrue(sessionAttributeStore.retrieveAttribute(request, "attr3") instanceof TestBean);
 	}
 
-	@SessionAttributes(value = { "attr1", "attr2" }, types = { TestBean.class })
+
+	@SessionAttributes(names = { "attr1", "attr2" }, types = { TestBean.class })
 	private static class SessionAttributeHandler {
 	}
 

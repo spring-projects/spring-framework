@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,23 +16,22 @@
 
 package org.springframework.web.socket.config.annotation;
 
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import org.springframework.messaging.SubscribableChannel;
-import org.springframework.messaging.simp.user.DefaultUserSessionRegistry;
-import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.socket.messaging.StompSubProtocolErrorHandler;
 import org.springframework.web.socket.messaging.StompSubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
 import org.springframework.web.util.UrlPathHelper;
-
-import static org.junit.Assert.*;
 
 /**
  * Test fixture for
@@ -46,17 +45,16 @@ public class WebMvcStompEndpointRegistryTests {
 
 	private SubProtocolWebSocketHandler webSocketHandler;
 
-	private UserSessionRegistry userSessionRegistry;
-
 
 	@Before
 	public void setup() {
-		SubscribableChannel inChannel = Mockito.mock(SubscribableChannel.class);
-		SubscribableChannel outChannel = Mockito.mock(SubscribableChannel.class);
+		SubscribableChannel inChannel = mock(SubscribableChannel.class);
+		SubscribableChannel outChannel = mock(SubscribableChannel.class);
 		this.webSocketHandler = new SubProtocolWebSocketHandler(inChannel, outChannel);
-		this.userSessionRegistry = new DefaultUserSessionRegistry();
-		this.endpointRegistry = new WebMvcStompEndpointRegistry(this.webSocketHandler,
-				new WebSocketTransportRegistration(), this.userSessionRegistry, Mockito.mock(TaskScheduler.class));
+
+		WebSocketTransportRegistration transport = new WebSocketTransportRegistration();
+		TaskScheduler scheduler = mock(TaskScheduler.class);
+		this.endpointRegistry = new WebMvcStompEndpointRegistry(this.webSocketHandler, transport, null, scheduler);
 	}
 
 
@@ -69,9 +67,6 @@ public class WebMvcStompEndpointRegistryTests {
 		assertNotNull(protocolHandlers.get("v10.stomp"));
 		assertNotNull(protocolHandlers.get("v11.stomp"));
 		assertNotNull(protocolHandlers.get("v12.stomp"));
-
-		StompSubProtocolHandler stompHandler = (StompSubProtocolHandler) protocolHandlers.get("v10.stomp");
-		assertSame(this.userSessionRegistry, stompHandler.getUserSessionRegistry());
 	}
 
 	@Test
@@ -92,6 +87,17 @@ public class WebMvcStompEndpointRegistryTests {
 		assertNotNull(hm.getUrlMap().get("/stompOverWebSocket"));
 		assertNotNull(hm.getUrlMap().get("/stompOverSockJS/**"));
 		assertSame(pathHelper, hm.getUrlPathHelper());
+	}
+
+	@Test
+	public void errorHandler() throws Exception {
+		StompSubProtocolErrorHandler errorHandler = mock(StompSubProtocolErrorHandler.class);
+		this.endpointRegistry.setErrorHandler(errorHandler);
+		this.endpointRegistry.addEndpoint("/stompOverWebSocket");
+
+		Map<String, SubProtocolHandler> protocolHandlers = this.webSocketHandler.getProtocolHandlerMap();
+		StompSubProtocolHandler stompHandler = (StompSubProtocolHandler) protocolHandlers.get("v12.stomp");
+		assertSame(errorHandler, stompHandler.getErrorHandler());
 	}
 
 }

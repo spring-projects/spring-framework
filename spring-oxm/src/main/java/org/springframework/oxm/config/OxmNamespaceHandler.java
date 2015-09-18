@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,12 @@ import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 public class OxmNamespaceHandler extends NamespaceHandlerSupport {
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void init() {
 		registerBeanDefinitionParser("jaxb2-marshaller", new Jaxb2MarshallerBeanDefinitionParser());
 		registerBeanDefinitionParser("jibx-marshaller", new JibxMarshallerBeanDefinitionParser());
-		registerBeanDefinitionParser("xmlbeans-marshaller", new XmlBeansMarshallerBeanDefinitionParser());
 		registerBeanDefinitionParser("castor-marshaller", new CastorMarshallerBeanDefinitionParser());
+		registerBeanDefinitionParser("xmlbeans-marshaller", new XmlBeansMarshallerBeanDefinitionParser());
 	}
 
 }

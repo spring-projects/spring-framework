@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,12 @@
 
 package org.springframework.test;
 
-import java.io.IOException;
-import java.io.LineNumberReader;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import javax.sql.DataSource;
 
-import org.springframework.core.io.support.EncodedResource;
+import org.springframework.core.io.Resource;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.jdbc.JdbcTestUtils;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 
 /**
  * This class is only used within tests in the spring-orm module.
@@ -139,61 +133,20 @@ public abstract class AbstractTransactionalDataSourceSpringContextTests extends 
 
 
 	/**
-	 * Execute the given SQL script. Will be rolled back by default,
-	 * according to the fate of the current transaction.
-	 * @param sqlResourcePath Spring resource path for the SQL script.
-	 * Should normally be loaded by classpath.
-	 * <p>Statements should be delimited with a semicolon.  If statements are not delimited with
-	 * a semicolon then there should be one statement per line.  Statements are allowed to span
-	 * lines only if they are delimited with a semicolon.
+	 * Execute the given SQL script.
+	 * <p>Use with caution outside of a transaction!
+	 * <p>The script will normally be loaded by classpath.
 	 * <p><b>Do not use this method to execute DDL if you expect rollback.</b>
-	 * @param continueOnError whether or not to continue without throwing
-	 * an exception in the event of an error
+	 * @param sqlResourcePath the Spring resource path for the SQL script
+	 * @param continueOnError whether or not to continue without throwing an
+	 * exception in the event of an error
 	 * @throws DataAccessException if there is an error executing a statement
-	 * and continueOnError was false
+	 * @see ResourceDatabasePopulator
+	 * @see #setSqlScriptEncoding
 	 */
 	protected void executeSqlScript(String sqlResourcePath, boolean continueOnError) throws DataAccessException {
-		if (logger.isInfoEnabled()) {
-			logger.info("Executing SQL script '" + sqlResourcePath + "'");
-		}
-
-		EncodedResource resource =
-				new EncodedResource(getApplicationContext().getResource(sqlResourcePath), this.sqlScriptEncoding);
-		long startTime = System.currentTimeMillis();
-		List statements = new LinkedList();
-		try {
-			LineNumberReader lnr = new LineNumberReader(resource.getReader());
-			String script = JdbcTestUtils.readScript(lnr);
-			char delimiter = ';';
-			if (!JdbcTestUtils.containsSqlScriptDelimiters(script, delimiter)) {
-				delimiter = '\n';
-			}
-			JdbcTestUtils.splitSqlScript(script, delimiter, statements);
-			for (Iterator itr = statements.iterator(); itr.hasNext(); ) {
-				String statement = (String) itr.next();
-				try {
-					int rowsAffected = this.jdbcTemplate.update(statement);
-					if (logger.isDebugEnabled()) {
-						logger.debug(rowsAffected + " rows affected by SQL: " + statement);
-					}
-				}
-				catch (DataAccessException ex) {
-					if (continueOnError) {
-						if (logger.isWarnEnabled()) {
-							logger.warn("SQL: " + statement + " failed", ex);
-						}
-					}
-					else {
-						throw ex;
-					}
-				}
-			}
-			long elapsedTime = System.currentTimeMillis() - startTime;
-			logger.info("Done executing SQL scriptBuilder '" + sqlResourcePath + "' in " + elapsedTime + " ms");
-		}
-		catch (IOException ex) {
-			throw new DataAccessResourceFailureException("Failed to open SQL script '" + sqlResourcePath + "'", ex);
-		}
+		Resource resource = this.applicationContext.getResource(sqlResourcePath);
+		new ResourceDatabasePopulator(continueOnError, false, this.sqlScriptEncoding, resource).execute(jdbcTemplate.getDataSource());
 	}
 
 }

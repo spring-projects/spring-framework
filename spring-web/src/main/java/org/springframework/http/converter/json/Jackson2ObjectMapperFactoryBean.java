@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -35,6 +36,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.cfg.HandlerInstantiator;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import org.springframework.beans.factory.BeanClassLoaderAware;
@@ -106,6 +108,15 @@ import org.springframework.context.ApplicationContextAware;
  * &lt;/bean>
  * </pre>
  *
+ * <p>It also automatically registers the following well-known modules if they are
+ * detected on the classpath:
+ * <ul>
+ * <li><a href="https://github.com/FasterXML/jackson-datatype-jdk7">jackson-datatype-jdk7</a>: support for Java 7 types like {@link java.nio.file.Path}</li>
+ * <li><a href="https://github.com/FasterXML/jackson-datatype-joda">jackson-datatype-joda</a>: support for Joda-Time types</li>
+ * <li><a href="https://github.com/FasterXML/jackson-datatype-jsr310">jackson-datatype-jsr310</a>: support for Java 8 Date & Time API types</li>
+ * <li><a href="https://github.com/FasterXML/jackson-datatype-jdk8">jackson-datatype-jdk8</a>: support for other Java 8 types like {@link java.util.Optional}</li>
+ * </ul>
+ *
  * <p>In case you want to configure Jackson's {@link ObjectMapper} with a custom {@link Module},
  * you can register one or more such Modules by class name via {@link #setModulesToInstall}:
  *
@@ -115,10 +126,7 @@ import org.springframework.context.ApplicationContextAware;
  * &lt;/bean
  * </pre>
  *
- * Note that Jackson's JSR-310 and Joda-Time support modules will be registered automatically
- * when available (and when Java 8 and Joda-Time themselves are available, respectively).
- *
- * <p>Tested against Jackson 2.2, 2.3 and 2.4; compatible with Jackson 2.0 and higher.
+ * <p>Tested against Jackson 2.2, 2.3, 2.4, 2.5, 2.6; compatible with Jackson 2.0 and higher.
  *
  * @author <a href="mailto:dmitry.katsubo@gmail.com">Dmitry Katsubo</a>
  * @author Rossen Stoyanchev
@@ -346,6 +354,7 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	 * @since 4.0.1
 	 * @see com.fasterxml.jackson.databind.Module
 	 */
+	@SuppressWarnings("unchecked")
 	public void setModulesToInstall(Class<? extends Module>... modules) {
 		this.builder.modulesToInstall(modules);
 	}
@@ -373,6 +382,15 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 		this.builder.handlerInstantiator(handlerInstantiator);
 	}
 
+	/**
+	 * Set the global filters to use in order to support {@link JsonFilter @JsonFilter} annotated POJO.
+	 * @since 4.2
+	 * @see Jackson2ObjectMapperBuilder#filters(FilterProvider)
+	 */
+	public void setFilters(FilterProvider filters) {
+		this.builder.filters(filters);
+	}
+
 	@Override
 	public void setBeanClassLoader(ClassLoader beanClassLoader) {
 		this.builder.moduleClassLoader(beanClassLoader);
@@ -380,7 +398,6 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public void afterPropertiesSet() {
 		if (this.objectMapper != null) {
 			this.builder.configure(this.objectMapper);

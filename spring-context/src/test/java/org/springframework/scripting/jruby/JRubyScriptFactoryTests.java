@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,6 +64,27 @@ public class JRubyScriptFactoryTests {
 		assertNotSame(messenger.hashCode(), calc.hashCode());
 		assertTrue(!messenger.toString().equals(calc.toString()));
 
+		assertEquals(3, calc.add(1, 2));
+		String desiredMessage = "Hello World!";
+		assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
+	}
+
+	@Test
+	public void testStaticScriptUsingJsr223() throws Exception {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("jrubyContextWithJsr223.xml", getClass());
+		Calculator calc = (Calculator) ctx.getBean("calculator");
+		Messenger messenger = (Messenger) ctx.getBean("messenger");
+
+		assertFalse("Scripted object should not be instance of Refreshable", calc instanceof Refreshable);
+		assertFalse("Scripted object should not be instance of Refreshable", messenger instanceof Refreshable);
+
+		assertEquals(calc, calc);
+		assertEquals(messenger, messenger);
+		assertTrue(!messenger.equals(calc));
+		assertNotSame(messenger.hashCode(), calc.hashCode());
+		assertTrue(!messenger.toString().equals(calc.toString()));
+
+		assertEquals(3, calc.add(1, 2));
 		String desiredMessage = "Hello World!";
 		assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
 	}
@@ -164,6 +185,15 @@ public class JRubyScriptFactoryTests {
 	}
 
 	@Test
+	public void testResourceScriptFromTagUsingJsr223() throws Exception {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("jruby-with-xsd-jsr223.xml", getClass());
+
+		Messenger messenger = (Messenger) ctx.getBean("messenger");
+		assertEquals("Hello World!", messenger.getMessage());
+		assertFalse(messenger instanceof Refreshable);
+	}
+
+	@Test
 	public void testPrototypeScriptFromTag() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jruby-with-xsd.xml", getClass());
 		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
@@ -185,6 +215,16 @@ public class JRubyScriptFactoryTests {
 		Calculator calculator = (Calculator) ctx.getBean("calculator");
 		assertNotNull(calculator);
 		assertFalse(calculator instanceof Refreshable);
+		assertEquals(3, calculator.add(1, 2));
+	}
+
+	@Test
+	public void testInlineScriptFromTagUsingJsr223() throws Exception {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("jruby-with-xsd-jsr223.xml", getClass());
+		Calculator calculator = (Calculator) ctx.getBean("calculator");
+		assertNotNull(calculator);
+		assertFalse(calculator instanceof Refreshable);
+		assertEquals(3, calculator.add(1, 2));
 	}
 
 	@Test
@@ -195,6 +235,15 @@ public class JRubyScriptFactoryTests {
 		assertTrue("Messenger should be Refreshable", messenger instanceof Refreshable);
 	}
 
+	@Test
+	public void testRefreshableFromTagUsingJsr223() throws Exception {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("jruby-with-xsd-jsr223.xml", getClass());
+		Messenger messenger = (Messenger) ctx.getBean("refreshableMessenger");
+		assertEquals("Hello World!", messenger.getMessage());
+		assertTrue("Messenger should be Refreshable", messenger instanceof Refreshable);
+	}
+
+	@Test
 	public void testThatMultipleScriptInterfacesAreSupported() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jruby-with-xsd.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("calculatingMessenger");
@@ -208,6 +257,15 @@ public class JRubyScriptFactoryTests {
 	@Test
 	public void testWithComplexArg() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("jrubyContext.xml", getClass());
+		Printer printer = (Printer) ctx.getBean("printer");
+		CountingPrintable printable = new CountingPrintable();
+		printer.print(printable);
+		assertEquals(1, printable.count);
+	}
+
+	@Test
+	public void testWithComplexArgUsingJsr223() throws Exception {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("jrubyContextWithJsr223.xml", getClass());
 		Printer printer = (Printer) ctx.getBean("printer");
 		CountingPrintable printable = new CountingPrintable();
 		printer.print(printable);

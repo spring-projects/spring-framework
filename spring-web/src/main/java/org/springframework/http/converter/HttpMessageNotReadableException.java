@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package org.springframework.http.converter;
 
 /**
  * Thrown by {@link HttpMessageConverter} implementations when the
- * {@link HttpMessageConverter#read(Class, org.springframework.http.HttpInputMessage) read} method fails.
+ * {@link HttpMessageConverter#read} method fails.
  *
  * @author Arjen Poutsma
  * @since 3.0
@@ -28,7 +28,6 @@ public class HttpMessageNotReadableException extends HttpMessageConversionExcept
 
 	/**
 	 * Create a new HttpMessageNotReadableException.
-	 *
 	 * @param msg the detail message
 	 */
 	public HttpMessageNotReadableException(String msg) {
@@ -37,11 +36,11 @@ public class HttpMessageNotReadableException extends HttpMessageConversionExcept
 
 	/**
 	 * Create a new HttpMessageNotReadableException.
-	 *
 	 * @param msg the detail message
 	 * @param cause the root cause (if any)
 	 */
 	public HttpMessageNotReadableException(String msg, Throwable cause) {
 		super(msg, cause);
 	}
+
 }

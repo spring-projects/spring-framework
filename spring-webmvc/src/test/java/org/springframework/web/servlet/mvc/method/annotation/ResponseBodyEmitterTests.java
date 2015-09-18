@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
@@ -20,19 +21,19 @@ import java.io.IOException;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
+import static org.mockito.Mockito.*;
+
 import org.mockito.MockitoAnnotations;
 
 import org.springframework.http.MediaType;
 
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-
 
 /**
  * Unit tests for {@link ResponseBodyEmitter}.
+ *
  * @author Rossen Stoyanchev
+ * @author Tomasz Nurkiewicz
  */
 public class ResponseBodyEmitterTests {
 
@@ -59,6 +60,19 @@ public class ResponseBodyEmitterTests {
 		this.emitter.initialize(this.handler);
 		verify(this.handler).send("foo", MediaType.TEXT_PLAIN);
 		verify(this.handler).send("bar", MediaType.TEXT_PLAIN);
+		verify(this.handler).complete();
+		verifyNoMoreInteractions(this.handler);
+	}
+
+	@Test
+	public void sendDuplicateBeforeHandlerInitialized() throws Exception {
+		this.emitter.send("foo", MediaType.TEXT_PLAIN);
+		this.emitter.send("foo", MediaType.TEXT_PLAIN);
+		this.emitter.complete();
+		verifyNoMoreInteractions(this.handler);
+
+		this.emitter.initialize(this.handler);
+		verify(this.handler, times(2)).send("foo", MediaType.TEXT_PLAIN);
 		verify(this.handler).complete();
 		verifyNoMoreInteractions(this.handler);
 	}
@@ -132,6 +146,38 @@ public class ResponseBodyEmitterTests {
 		verify(this.handler).send("foo", MediaType.TEXT_PLAIN);
 		verify(this.handler).completeWithError(failure);
 		verifyNoMoreInteractions(this.handler);
+	}
+
+	@Test
+	public void onTimeoutBeforeHandlerInitialized() throws Exception  {
+		Runnable runnable = mock(Runnable.class);
+		this.emitter.onTimeout(runnable);
+		this.emitter.initialize(this.handler);
+		verify(this.handler).onTimeout(runnable);
+	}
+
+	@Test
+	public void onTimeoutAfterHandlerInitialized() throws Exception  {
+		Runnable runnable = mock(Runnable.class);
+		this.emitter.initialize(this.handler);
+		this.emitter.onTimeout(runnable);
+		verify(this.handler).onTimeout(runnable);
+	}
+
+	@Test
+	public void onCompletionBeforeHandlerInitialized() throws Exception  {
+		Runnable runnable = mock(Runnable.class);
+		this.emitter.onCompletion(runnable);
+		this.emitter.initialize(this.handler);
+		verify(this.handler).onCompletion(runnable);
+	}
+
+	@Test
+	public void onCompletionAfterHandlerInitialized() throws Exception  {
+		Runnable runnable = mock(Runnable.class);
+		this.emitter.initialize(this.handler);
+		this.emitter.onCompletion(runnable);
+		verify(this.handler).onCompletion(runnable);
 	}
 
 }

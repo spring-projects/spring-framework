@@ -75,7 +75,7 @@ import org.springframework.context.annotation.Import;
  *	&#064;Bean
  *	public RequestMappingHandlerAdapter requestMappingHandlerAdapter() {
  *		// Create or delegate to "super" to create and
- *		// customize properties of RequestMapingHandlerAdapter
+ *		// customize properties of RequestMappingHandlerAdapter
  *	}
  * }
  * </pre>

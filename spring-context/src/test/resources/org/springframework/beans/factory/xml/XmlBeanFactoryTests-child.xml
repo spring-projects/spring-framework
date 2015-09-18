@@ -7,7 +7,7 @@
 		<property name="name"><value>override</value></property>
 		<!-- age should inherit value of 1 from parent -->
 	</bean>
-	
+
 	<bean id="inheritsWithDifferentClass" class="org.springframework.tests.sample.beans.DerivedTestBean"
 			parent="inheritedTestBean" init-method="initialize">
 		<property name="name"><value>override</value></property>
@@ -24,17 +24,17 @@
 		<property name="name"><value>prototypeOverridesInheritedSingleton</value></property>
 		<!-- age should inherit value of 1 from parent -->
 	</bean>
-	
+
 	<bean id="prototypeInheritsFromParentFactoryPrototype" parent="inheritedTestBeanPrototype" scope="prototype">
 		<property name="name"><value>prototype-override</value></property>
 		<!-- age should inherit value of 2 from parent -->
 	</bean>
-	
+
 	<bean id="singletonInheritsFromParentFactoryPrototype" parent="inheritedTestBeanPrototype" scope="singleton">
 		<property name="name"><value>prototype-override</value></property>
 		<!-- age should inherit value of 2 from parent -->
 	</bean>
-	
+
 	<bean id="inheritedTestBean" parent="inheritedTestBean">
 		<property name="name"><value>overrideParentBean</value></property>
 		<!-- age should inherit value of 1 from parent -->

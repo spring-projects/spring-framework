@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,25 +20,23 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import reactor.core.composable.Promise;
-import reactor.function.Consumer;
-
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.FailureCallback;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.util.concurrent.ListenableFutureCallbackRegistry;
 import org.springframework.util.concurrent.SuccessCallback;
+import reactor.fn.Consumer;
+import reactor.rx.Promise;
 
 /**
  * Adapts a reactor {@link Promise} to {@link ListenableFuture} optionally converting
  * the result Object type {@code <S>} to the expected target type {@code <T>}.
  *
- * @param <S> the type of object expected from the {@link Promise}
- * @param <T> the type of object expected from the {@link ListenableFuture}
- *
  * @author Rossen Stoyanchev
  * @since 4.0
+ * @param <S> the type of object expected from the {@link Promise}
+ * @param <T> the type of object expected from the {@link ListenableFuture}
  */
 abstract class AbstractPromiseToListenableFutureAdapter<S, T> implements ListenableFuture<T> {
 
@@ -82,7 +80,7 @@ abstract class AbstractPromiseToListenableFutureAdapter<S, T> implements Listena
 	@Override
 	public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
 		S result = this.promise.await(timeout, unit);
-		if (result == null) {
+		if (!this.promise.isComplete()) {
 			throw new TimeoutException();
 		}
 		return adapt(result);
@@ -113,4 +111,5 @@ abstract class AbstractPromiseToListenableFutureAdapter<S, T> implements Listena
 		this.registry.addSuccessCallback(successCallback);
 		this.registry.addFailureCallback(failureCallback);
 	}
+
 }

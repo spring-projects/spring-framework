@@ -15,7 +15,7 @@
 
 		def String message;
 	}
-				
+			
 	class Bingo {
 
 		def String message;

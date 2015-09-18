@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ public class MessagingMessageConverter implements MessageConverter, Initializing
 					Message.class.getName() + "] is handled by this converter");
 		}
 		Message<?> input = (Message<?>) object;
-		javax.jms.Message reply = this.payloadConverter.toMessage(input.getPayload(), session);
+		javax.jms.Message reply = createMessageForPayload(input.getPayload(), session);
 		this.headerMapper.fromHeaders(input.getHeaders(), reply);
 		return reply;
 	}
@@ -117,6 +117,14 @@ public class MessagingMessageConverter implements MessageConverter, Initializing
 	 */
 	protected Object extractPayload(javax.jms.Message message) throws JMSException {
 		return this.payloadConverter.fromMessage(message);
+	}
+
+	/**
+	 * Create a JMS message for the specified payload.
+	 * @see MessageConverter#toMessage(Object, Session)
+	 */
+	protected javax.jms.Message createMessageForPayload(Object payload, Session session) throws JMSException {
+		return this.payloadConverter.toMessage(payload, session);
 	}
 
 }

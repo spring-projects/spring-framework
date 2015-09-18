@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.web.servlet.support.WebContentGenerator;
 import org.springframework.web.util.WebUtils;
 
 /**
- * <p>Convenient superclass for controller implementations, using the Template Method
+ * Convenient superclass for controller implementations, using the Template Method
  * design pattern.
  *
  * <p><b><a name="workflow">Workflow
@@ -130,7 +130,8 @@ public abstract class AbstractController extends WebContentGenerator implements 
 			throws Exception {
 
 		// Delegate to WebContentGenerator for checking and preparing.
-		checkAndPrepare(request, response, this instanceof LastModified);
+		checkRequest(request);
+		prepareResponse(response);
 
 		// Execute handleRequestInternal in synchronized block if required.
 		if (this.synchronizeOnSession) {
@@ -152,6 +153,6 @@ public abstract class AbstractController extends WebContentGenerator implements 
 	 * @see #handleRequest
 	 */
 	protected abstract ModelAndView handleRequestInternal(HttpServletRequest request, HttpServletResponse response)
-	    throws Exception;
+			throws Exception;
 
 }

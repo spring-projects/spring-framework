@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,6 @@ import java.util.Arrays;
 import java.util.Locale;
 
 import org.junit.After;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,11 +34,15 @@ import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StreamUtils;
 
-/** @author Arjen Poutsma */
-public abstract class AbstractHttpRequestFactoryTestCase extends
-		AbstractJettyServerTestCase {
+import static org.junit.Assert.*;
+
+/**
+ * @author Arjen Poutsma
+ */
+public abstract class AbstractHttpRequestFactoryTestCase extends AbstractJettyServerTestCase {
 
 	protected ClientHttpRequestFactory factory;
+
 
 	@Before
 	public final void createFactory() throws Exception {
@@ -59,6 +61,7 @@ public abstract class AbstractHttpRequestFactoryTestCase extends
 
 
 	protected abstract ClientHttpRequestFactory createRequestFactory();
+
 
 	@Test
 	public void status() throws Exception {
@@ -169,6 +172,15 @@ public abstract class AbstractHttpRequestFactoryTestCase extends
 		ClientHttpResponse response = null;
 		try {
 			ClientHttpRequest request = factory.createRequest(new URI(baseUrl + "/methods/" + path), method);
+			if (method == HttpMethod.POST || method == HttpMethod.PUT || method == HttpMethod.PATCH) {
+				// requires a body
+				try {
+					request.getBody().write(32);
+				}
+				catch (UnsupportedOperationException ex) {
+					// probably a streaming request - let's simply ignore it
+				}
+			}
 			response = request.execute();
 			assertEquals("Invalid response status", HttpStatus.OK, response.getStatusCode());
 			assertEquals("Invalid method", path.toUpperCase(Locale.ENGLISH), request.getMethod().name());
@@ -177,6 +189,20 @@ public abstract class AbstractHttpRequestFactoryTestCase extends
 			if (response != null) {
 				response.close();
 			}
+		}
+	}
+
+	@Test
+	public void queryParameters() throws Exception {
+		URI uri = new URI(baseUrl + "/params?param1=value&param2=value1&param2=value2");
+		ClientHttpRequest request = factory.createRequest(uri, HttpMethod.GET);
+
+		ClientHttpResponse response = request.execute();
+		try {
+			assertEquals("Invalid status code", HttpStatus.OK, response.getStatusCode());
+		}
+		finally {
+			response.close();
 		}
 	}
 

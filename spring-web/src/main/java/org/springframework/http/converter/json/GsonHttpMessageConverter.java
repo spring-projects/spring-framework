@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.AbstractHttpMessageConverter;
+import org.springframework.http.converter.AbstractGenericHttpMessageConverter;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
@@ -54,7 +54,7 @@ import org.springframework.util.Assert;
  * @see #setGson
  * @see #setSupportedMediaTypes
  */
-public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Object>
+public class GsonHttpMessageConverter extends AbstractGenericHttpMessageConverter<Object>
 		implements GenericHttpMessageConverter<Object> {
 
 	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
@@ -101,27 +101,21 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 	}
 
 	/**
-	 * Indicate whether the JSON output by this view should be prefixed with "{} &&".
+	 * Indicate whether the JSON output by this view should be prefixed with ")]}', ".
 	 * Default is {@code false}.
 	 * <p>Prefixing the JSON string in this manner is used to help prevent JSON
 	 * Hijacking. The prefix renders the string syntactically invalid as a script
-	 * so that it cannot be hijacked. This prefix does not affect the evaluation
-	 * of JSON, but if JSON validation is performed on the string, the prefix
-	 * would need to be ignored.
+	 * so that it cannot be hijacked.
+	 * This prefix should be stripped before parsing the string as JSON.
 	 * @see #setJsonPrefix
 	 */
 	public void setPrefixJson(boolean prefixJson) {
-		this.jsonPrefix = (prefixJson ? "{} && " : null);
+		this.jsonPrefix = (prefixJson ? ")]}', " : null);
 	}
 
 
 	@Override
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
-		return canRead(mediaType);
-	}
-
-	@Override
-	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
 		return canRead(mediaType);
 	}
 
@@ -192,7 +186,7 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 	}
 
 	@Override
-	protected void writeInternal(Object o, HttpOutputMessage outputMessage)
+	protected void writeInternal(Object o, Type type, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
 		Charset charset = getCharset(outputMessage.getHeaders());
@@ -201,7 +195,12 @@ public class GsonHttpMessageConverter extends AbstractHttpMessageConverter<Objec
 			if (this.jsonPrefix != null) {
 				writer.append(this.jsonPrefix);
 			}
-			this.gson.toJson(o, writer);
+			if (type != null) {
+				this.gson.toJson(o, type, writer);
+			}
+			else {
+				this.gson.toJson(o, writer);
+			}
 			writer.close();
 		}
 		catch (JsonIOException ex) {

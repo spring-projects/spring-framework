@@ -17,7 +17,7 @@
 		<property name="proxyInterfaces" value="org.springframework.tests.sample.beans.ITestBean"/>
 		<property name="targetName" value="target2"/>
 	</bean>
-	
+
 	<bean id="target2" class="org.springframework.tests.sample.beans.DependenciesBean">
 		<property name="spouse">
 			<bean class="org.springframework.tests.sample.beans.TestBean">

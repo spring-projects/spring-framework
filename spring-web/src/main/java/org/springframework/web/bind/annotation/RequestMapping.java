@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.concurrent.Callable;
+
+import org.springframework.core.annotation.AliasFor;
 
 /**
  * Annotation for mapping web requests onto specific handler classes and/or
@@ -57,8 +59,9 @@ import java.util.concurrent.Callable;
  * As a consequence, such an argument will never be {@code null}.
  * <i>Note that session access may not be thread-safe, in particular in a
  * Servlet environment: Consider switching the
- * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter#setSynchronizeOnSession "synchronizeOnSession"}
- * flag to "true" if multiple requests are allowed to access a session concurrently.</i>
+ * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter#setSynchronizeOnSession
+ * "synchronizeOnSession"} flag to "true" if multiple requests are allowed to
+ * access a session concurrently.</i>
  * <li>{@link org.springframework.web.context.request.WebRequest} or
  * {@link org.springframework.web.context.request.NativeWebRequest}.
  * Allows for generic request parameter access as well as request/session
@@ -213,11 +216,18 @@ import java.util.concurrent.Callable;
  * <li>A {@link org.springframework.util.concurrent.ListenableFuture}
  * which the application uses to produce a return value in a separate
  * thread of its own choosing, as an alternative to returning a Callable.
+ * <li>A {@link java.util.concurrent.CompletionStage} (implemented by
+ * {@link java.util.concurrent.CompletableFuture} for example)
+ * which the application uses to produce a return value in a separate
+ * thread of its own choosing, as an alternative to returning a Callable.
  * <li>A {@link org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter}
  * can be used to write multiple objects to the response asynchronously;
  * also supported as the body within {@code ResponseEntity}.</li>
  * <li>An {@link org.springframework.web.servlet.mvc.method.annotation.SseEmitter}
  * can be used to write Server-Sent Events to the response asynchronously;
+ * also supported as the body within {@code ResponseEntity}.</li>
+ * <li>A {@link org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody}
+ * can be used to write to the response asynchronously;
  * also supported as the body within {@code ResponseEntity}.</li>
  * <li>{@code void} if the method handles the response itself (by
  * writing the response content directly, declaring an argument of type
@@ -290,19 +300,32 @@ public @interface RequestMapping {
 
 	/**
 	 * The primary mapping expressed by this annotation.
-	 * <p>In a Servlet environment: the path mapping URIs (e.g. "/myPath.do").
-	 * Ant-style path patterns are also supported (e.g. "/myPath/*.do").
-	 * At the method level, relative paths (e.g. "edit.do") are supported
-	 * within the primary mapping expressed at the type level.
-	 * Path mapping URIs may contain placeholders (e.g. "/${connect}")
-	 * <p>In a Portlet environment: the mapped portlet modes
+	 * <p>In a Servlet environment this is an alias for {@link #path}.
+	 * For example {@code @RequestMapping("/foo")} is equivalent to
+	 * {@code @RequestMapping(path="/foo")}.
+	 * <p>In a Portlet environment this is the mapped portlet modes
 	 * (i.e. "EDIT", "VIEW", "HELP" or any custom modes).
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used at the type level, all method-level mappings inherit
 	 * this primary mapping, narrowing it for a specific handler method.
-	 * @see org.springframework.web.bind.annotation.ValueConstants#DEFAULT_NONE
 	 */
+	@AliasFor("path")
 	String[] value() default {};
+
+	/**
+	 * In a Servlet environment only: the path mapping URIs (e.g. "/myPath.do").
+	 * Ant-style path patterns are also supported (e.g. "/myPath/*.do").
+	 * At the method level, relative paths (e.g. "edit.do") are supported within
+	 * the primary mapping expressed at the type level. Path mapping URIs may
+	 * contain placeholders (e.g. "/${connect}")
+	 * <p><b>Supported at the type level as well as at the method level!</b>
+	 * When used at the type level, all method-level mappings inherit
+	 * this primary mapping, narrowing it for a specific handler method.
+	 * @see org.springframework.web.bind.annotation.ValueConstants#DEFAULT_NONE
+	 * @since 4.2
+	 */
+	@AliasFor("value")
+	String[] path() default {};
 
 	/**
 	 * The HTTP request methods to map to, narrowing the primary mapping:

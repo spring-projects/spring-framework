@@ -460,7 +460,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 		@Override
 		public long lastModified() {
-			return 99;
+			return 1427846401000L;
 		}
 	}
 

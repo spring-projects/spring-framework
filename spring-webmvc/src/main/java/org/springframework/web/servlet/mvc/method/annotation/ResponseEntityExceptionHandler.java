@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -96,6 +97,7 @@ public abstract class ResponseEntityExceptionHandler {
 			HttpRequestMethodNotSupportedException.class,
 			HttpMediaTypeNotSupportedException.class,
 			HttpMediaTypeNotAcceptableException.class,
+			MissingPathVariableException.class,
 			MissingServletRequestParameterException.class,
 			ServletRequestBindingException.class,
 			ConversionNotSupportedException.class,
@@ -126,6 +128,10 @@ public abstract class ResponseEntityExceptionHandler {
 		else if (ex instanceof HttpMediaTypeNotAcceptableException) {
 			HttpStatus status = HttpStatus.NOT_ACCEPTABLE;
 			return handleHttpMediaTypeNotAcceptable((HttpMediaTypeNotAcceptableException) ex, headers, status, request);
+		}
+		else if (ex instanceof MissingPathVariableException) {
+			HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+			return handleMissingPathVariable((MissingPathVariableException) ex, headers, status, request);
 		}
 		else if (ex instanceof MissingServletRequestParameterException) {
 			HttpStatus status = HttpStatus.BAD_REQUEST;
@@ -265,6 +271,22 @@ public abstract class ResponseEntityExceptionHandler {
 	 * @return a {@code ResponseEntity} instance
 	 */
 	protected ResponseEntity<Object> handleHttpMediaTypeNotAcceptable(HttpMediaTypeNotAcceptableException ex,
+			HttpHeaders headers, HttpStatus status, WebRequest request) {
+
+		return handleExceptionInternal(ex, null, headers, status, request);
+	}
+
+	/**
+	 * Customize the response for MissingPathVariableException.
+	 * This method delegates to {@link #handleExceptionInternal(Exception, Object, HttpHeaders, HttpStatus, WebRequest)}.
+	 * @param ex the exception
+	 * @param headers the headers to be written to the response
+	 * @param status the selected response status
+	 * @param request the current request
+	 * @return a {@code ResponseEntity} instance
+	 * @since 4.2
+	 */
+	protected ResponseEntity<Object> handleMissingPathVariable(MissingPathVariableException ex,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
 
 		return handleExceptionInternal(ex, null, headers, status, request);

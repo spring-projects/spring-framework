@@ -36,7 +36,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
@@ -1887,6 +1886,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void SPR12522() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("T(java.util.Arrays).asList('')");
@@ -1917,6 +1917,164 @@ public class SpelReproTests extends AbstractExpressionTests {
 		sec = new StandardEvaluationContext();
 		sec.setVariable("no", "1.0");
 		assertTrue(expression.getValue(sec).toString().startsWith("Object"));
+	}
+
+	@Test
+	@SuppressWarnings("rawtypes")
+	public void SPR13055() throws Exception {
+		List<Map<String, Object>> myPayload = new ArrayList<Map<String, Object>>();
+
+		Map<String, Object> v1 = new HashMap<String, Object>();
+		Map<String, Object> v2 = new HashMap<String, Object>();
+
+		v1.put("test11", "test11");
+		v1.put("test12", "test12");
+		v2.put("test21", "test21");
+		v2.put("test22", "test22");
+
+		myPayload.add(v1);
+		myPayload.add(v2);
+
+		EvaluationContext context = new StandardEvaluationContext(myPayload);
+
+		ExpressionParser parser = new SpelExpressionParser();
+
+		String ex = "#root.![T(org.springframework.util.StringUtils).collectionToCommaDelimitedString(#this.values())]";
+		List res = parser.parseExpression(ex).getValue(context, List.class);
+		assertEquals("[test12,test11, test22,test21]", res.toString());
+
+		res = parser.parseExpression("#root.![#this.values()]").getValue(context,
+				List.class);
+		assertEquals("[[test12, test11], [test22, test21]]", res.toString());
+
+		res = parser.parseExpression("#root.![values()]").getValue(context, List.class);
+		assertEquals("[[test12, test11], [test22, test21]]", res.toString());
+	}
+
+	@Test
+	public void SPR12035() {
+		ExpressionParser parser = new SpelExpressionParser();
+
+		Expression expression1 = parser.parseExpression("list.?[ value>2 ].size()!=0");
+		assertTrue(expression1.getValue(new BeanClass(new ListOf(1.1), new ListOf(2.2)),
+				Boolean.class));
+
+		Expression expression2 = parser.parseExpression("list.?[ T(java.lang.Math).abs(value) > 2 ].size()!=0");
+		assertTrue(expression2.getValue(new BeanClass(new ListOf(1.1), new ListOf(-2.2)),
+				Boolean.class));
+	}
+
+	static class CCC {
+		public boolean method(Object o) {
+			System.out.println(o);
+			return false;
+		}
+	}
+
+	@Test
+	public void SPR13055_maps() {
+		EvaluationContext context = new StandardEvaluationContext();
+		ExpressionParser parser = new SpelExpressionParser();
+
+		Expression ex = parser.parseExpression("{'a':'y','b':'n'}.![value=='y'?key:null]");
+		assertEquals("[a, null]", ex.getValue(context).toString());
+
+		ex = parser.parseExpression("{2:4,3:6}.![T(java.lang.Math).abs(#this.key) + 5]");
+		assertEquals("[7, 8]", ex.getValue(context).toString());
+
+		ex = parser.parseExpression("{2:4,3:6}.![T(java.lang.Math).abs(#this.value) + 5]");
+		assertEquals("[9, 11]", ex.getValue(context).toString());
+	}
+
+	@Test
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void SPR10417() {
+		List list1 = new ArrayList();
+		list1.add("a");
+		list1.add("b");
+		list1.add("x");
+		List list2 = new ArrayList();
+		list2.add("c");
+		list2.add("x");
+		EvaluationContext context = new StandardEvaluationContext();
+		context.setVariable("list1", list1);
+		context.setVariable("list2", list2);
+
+		// #this should be the element from list1
+		Expression ex = parser.parseExpression("#list1.?[#list2.contains(#this)]");
+		Object result = ex.getValue(context);
+		assertEquals("[x]", result.toString());
+
+		// toString() should be called on the element from list1
+		ex = parser.parseExpression("#list1.?[#list2.contains(toString())]");
+		result = ex.getValue(context);
+		assertEquals("[x]", result.toString());
+
+		List list3 = new ArrayList();
+		list3.add(1);
+		list3.add(2);
+		list3.add(3);
+		list3.add(4);
+
+		context = new StandardEvaluationContext();
+		context.setVariable("list3", list3);
+		ex = parser.parseExpression("#list3.?[#this > 2]");
+		result = ex.getValue(context);
+		assertEquals("[3, 4]", result.toString());
+
+		ex = parser.parseExpression("#list3.?[#this >= T(java.lang.Math).abs(T(java.lang.Math).abs(#this))]");
+		result = ex.getValue(context);
+		assertEquals("[1, 2, 3, 4]", result.toString());
+	}
+
+	@Test
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public void SPR10417_maps() {
+		Map map1 = new HashMap();
+		map1.put("A", 65);
+		map1.put("B", 66);
+		map1.put("X", 66);
+		Map map2 = new HashMap();
+		map2.put("X", 66);
+
+		EvaluationContext context = new StandardEvaluationContext();
+		context.setVariable("map1", map1);
+		context.setVariable("map2", map2);
+
+		// #this should be the element from list1
+		Expression ex = parser.parseExpression("#map1.?[#map2.containsKey(#this.getKey())]");
+		Object result = ex.getValue(context);
+		assertEquals("{X=66}", result.toString());
+
+		ex = parser.parseExpression("#map1.?[#map2.containsKey(key)]");
+		result = ex.getValue(context);
+		assertEquals("{X=66}", result.toString());
+	}
+
+	public static class ListOf {
+
+		private final double value;
+
+		public ListOf(double v) {
+			this.value = v;
+		}
+
+		public double getValue() {
+			return value;
+		}
+	}
+
+	public static class BeanClass {
+
+		private final List<ListOf> list;
+
+		public BeanClass(ListOf... list) {
+			this.list = Arrays.asList(list);
+		}
+
+		public List<ListOf> getList() {
+			return list;
+		}
 	}
 
 

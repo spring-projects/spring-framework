@@ -39,7 +39,7 @@ import org.springframework.util.CollectionUtils;
  * @see EnableCaching
  */
 @Configuration
-public abstract class AbstractCachingConfiguration<C extends CachingConfigurer> implements ImportAware {
+public abstract class AbstractCachingConfiguration implements ImportAware {
 
 	protected AnnotationAttributes enableCaching;
 
@@ -63,7 +63,7 @@ public abstract class AbstractCachingConfiguration<C extends CachingConfigurer> 
 	}
 
 	@Autowired(required = false)
-	void setConfigurers(Collection<C> configurers) {
+	void setConfigurers(Collection<CachingConfigurer> configurers) {
 		if (CollectionUtils.isEmpty(configurers)) {
 			return;
 		}
@@ -73,14 +73,14 @@ public abstract class AbstractCachingConfiguration<C extends CachingConfigurer> 
 					"Refactor the configuration such that CachingConfigurer is " +
 					"implemented only once or not at all.");
 		}
-		C configurer = configurers.iterator().next();
+		CachingConfigurer configurer = configurers.iterator().next();
 		useCachingConfigurer(configurer);
 	}
 
 	/**
 	 * Extract the configuration from the nominated {@link CachingConfigurer}.
 	 */
-	protected void useCachingConfigurer(C config) {
+	protected void useCachingConfigurer(CachingConfigurer config) {
 		this.cacheManager = config.cacheManager();
 		this.cacheResolver = config.cacheResolver();
 		this.keyGenerator = config.keyGenerator();

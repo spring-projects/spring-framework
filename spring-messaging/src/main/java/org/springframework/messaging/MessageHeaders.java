@@ -207,7 +207,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 	}
 
 	public Set<Map.Entry<String, Object>> entrySet() {
-		return Collections.unmodifiableSet(this.headers.entrySet());
+		return Collections.unmodifiableMap(this.headers).entrySet();
 	}
 
 	public Object get(Object key) {

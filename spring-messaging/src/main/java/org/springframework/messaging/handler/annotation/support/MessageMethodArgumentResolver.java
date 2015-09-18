@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,17 +22,17 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
+import org.springframework.util.ClassUtils;
 
 /**
- * A {@link HandlerMethodArgumentResolver} for {@link Message} parameters. Validates
- * that the generic type of the payload matches with the message value.
+ * A {@link HandlerMethodArgumentResolver} for {@link Message} parameters.
+ * Validates that the generic type of the payload matches with the message value.
  *
  * @author Rossen Stoyanchev
  * @author Stephane Nicoll
  * @since 4.0
  */
 public class MessageMethodArgumentResolver implements HandlerMethodArgumentResolver {
-
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
@@ -41,22 +41,19 @@ public class MessageMethodArgumentResolver implements HandlerMethodArgumentResol
 
 	@Override
 	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
-
 		Class<?> paramType = parameter.getParameterType();
-
 		if (!paramType.isAssignableFrom(message.getClass())) {
 				throw new MethodArgumentTypeMismatchException(message, parameter,
-						"The actual message type [" + message.getClass().getName() + "] " +
-						"does not match the expected type [" + paramType.getName() + "]");
+						"The actual message type [" + ClassUtils.getQualifiedName(message.getClass()) + "] " +
+						"does not match the expected type [" + ClassUtils.getQualifiedName(paramType) + "]");
 		}
 
 		Class<?> expectedPayloadType = getPayloadType(parameter);
 		Object payload = message.getPayload();
-
-		if (expectedPayloadType != null && !expectedPayloadType.isInstance(payload)) {
+		if (payload != null && expectedPayloadType != null && !expectedPayloadType.isInstance(payload)) {
 			throw new MethodArgumentTypeMismatchException(message, parameter,
-					"The expected Message<?> payload type [" + expectedPayloadType.getName() +
-					"] does not match the actual payload type [" + payload.getClass().getName() + "]");
+					"The expected Message<?> payload type [" + ClassUtils.getQualifiedName(expectedPayloadType) +
+					"] does not match the actual payload type [" + ClassUtils.getQualifiedName(payload.getClass()) + "]");
 		}
 
 		return message;

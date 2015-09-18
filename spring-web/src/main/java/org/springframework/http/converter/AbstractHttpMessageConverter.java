@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,30 +160,15 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	}
 
 	/**
-	 * This implementation delegates to {@link #getDefaultContentType(Object)} if a content
-	 * type was not provided, calls {@link #getContentLength}, and sets the corresponding headers
-	 * on the output message. It then calls {@link #writeInternal}.
+	 * This implementation sets the default headers by calling {@link #addDefaultHeaders},
+	 * and then calls {@link #writeInternal}.
 	 */
 	@Override
 	public final void write(final T t, MediaType contentType, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
 		final HttpHeaders headers = outputMessage.getHeaders();
-		if (headers.getContentType() == null) {
-			MediaType contentTypeToUse = contentType;
-			if (contentType == null || contentType.isWildcardType() || contentType.isWildcardSubtype()) {
-				contentTypeToUse = getDefaultContentType(t);
-			}
-			if (contentTypeToUse != null) {
-				headers.setContentType(contentTypeToUse);
-			}
-		}
-		if (headers.getContentLength() == -1) {
-			Long contentLength = getContentLength(t, headers.getContentType());
-			if (contentLength != null) {
-				headers.setContentLength(contentLength);
-			}
-		}
+		addDefaultHeaders(headers, t, contentType);
 
 		if (outputMessage instanceof StreamingHttpOutputMessage) {
 			StreamingHttpOutputMessage streamingOutputMessage =
@@ -207,6 +192,34 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 		else {
 			writeInternal(t, outputMessage);
 			outputMessage.getBody().flush();
+		}
+	}
+
+	/**
+	 * Add default headers to the output message.
+	 * <p>This implementation delegates to {@link #getDefaultContentType(Object)} if a content
+	 * type was not provided, calls {@link #getContentLength}, and sets the corresponding headers
+	 * @since 4.2
+	 */
+	protected void addDefaultHeaders(HttpHeaders headers, T t, MediaType contentType) throws IOException{
+		if (headers.getContentType() == null) {
+			MediaType contentTypeToUse = contentType;
+			if (contentType == null || contentType.isWildcardType() || contentType.isWildcardSubtype()) {
+				contentTypeToUse = getDefaultContentType(t);
+			}
+			else if (MediaType.APPLICATION_OCTET_STREAM.equals(contentType)) {
+				MediaType mediaType = getDefaultContentType(t);
+				contentTypeToUse = (mediaType != null ? mediaType : contentTypeToUse);
+			}
+			if (contentTypeToUse != null) {
+				headers.setContentType(contentTypeToUse);
+			}
+		}
+		if (headers.getContentLength() == -1) {
+			Long contentLength = getContentLength(t, headers.getContentType());
+			if (contentLength != null) {
+				headers.setContentLength(contentLength);
+			}
 		}
 	}
 

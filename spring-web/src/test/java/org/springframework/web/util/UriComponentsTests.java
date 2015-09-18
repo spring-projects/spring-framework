@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,17 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.Test;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.web.util.UriComponentsBuilder.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 /**
  * @author Arjen Poutsma
@@ -81,6 +86,16 @@ public class UriComponentsTests {
 		assertEquals("http://example.com/1 2 3 4", uriComponents.toUriString());
 	}
 
+	// SPR-13311
+
+	@Test
+	public void expandWithRegexVar() {
+		String template = "/myurl/{name:[a-z]{1,5}}/show";
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(template).build();
+		uriComponents = uriComponents.expand(Collections.singletonMap("name", "test"));
+		assertEquals("/myurl/test/show", uriComponents.getPath());
+	}
+
 	// SPR-12123
 
 	@Test
@@ -130,6 +145,16 @@ public class UriComponentsTests {
 		ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bos.toByteArray()));
 		UriComponents readObject = (UriComponents) ois.readObject();
 		assertThat(uriComponents.toString(), equalTo(readObject.toString()));
+	}
+
+	@Test
+	public void copyToUriComponentsBuilder() {
+		UriComponents source = UriComponentsBuilder.fromPath("/foo/bar").pathSegment("ba/z").build();
+		UriComponentsBuilder targetBuilder = UriComponentsBuilder.newInstance();
+		source.copyToUriComponentsBuilder(targetBuilder);
+		UriComponents result = targetBuilder.build().encode();
+		assertEquals("/foo/bar/ba%2Fz", result.getPath());
+		assertEquals(Arrays.asList("foo", "bar", "ba%2Fz"), result.getPathSegments());
 	}
 
 	@Test

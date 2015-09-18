@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,9 @@ package org.springframework.cache.guava;
 import java.io.Serializable;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+
+import com.google.common.cache.LoadingCache;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.support.SimpleValueWrapper;
@@ -88,8 +91,16 @@ public class GuavaCache implements Cache {
 
 	@Override
 	public ValueWrapper get(Object key) {
-		Object value = this.cache.getIfPresent(key);
-		return toWrapper(value);
+		if (this.cache instanceof LoadingCache) {
+			try {
+				Object value = ((LoadingCache<Object, Object>) this.cache).get(key);
+				return toWrapper(value);
+			}
+			catch (ExecutionException ex) {
+				throw new UncheckedExecutionException(ex.getMessage(), ex);
+			}
+		}
+		return toWrapper(this.cache.getIfPresent(key));
 	}
 
 	@Override

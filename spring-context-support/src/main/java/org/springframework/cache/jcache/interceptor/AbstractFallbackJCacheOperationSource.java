@@ -29,19 +29,18 @@ import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.ClassUtils;
 
 /**
- * Abstract implementation of {@link JCacheOperationSource} that caches
- * attributes for methods and implements a fallback policy: 1. specific
- * target method; 2. declaring method.
+ * Abstract implementation of {@link JCacheOperationSource} that caches attributes
+ * for methods and implements a fallback policy: 1. specific target method;
+ * 2. declaring method.
  *
- * <p>This implementation caches attributes by method after they are
- * first used.
+ * <p>This implementation caches attributes by method after they are first used.
  *
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 4.1
  * @see org.springframework.cache.interceptor.AbstractFallbackCacheOperationSource
  */
-public abstract class AbstractFallbackJCacheOperationSource
-		implements JCacheOperationSource {
+public abstract class AbstractFallbackJCacheOperationSource implements JCacheOperationSource {
 
 	/**
 	 * Canonical value held in cache to indicate no caching attribute was
@@ -49,33 +48,30 @@ public abstract class AbstractFallbackJCacheOperationSource
 	 */
 	private final static Object NULL_CACHING_ATTRIBUTE = new Object();
 
+
 	protected final Log logger = LogFactory.getLog(getClass());
 
-	private final Map<Object, Object> cache =
-			new ConcurrentHashMap<Object, Object>(1024);
+	private final Map<Object, Object> cache = new ConcurrentHashMap<Object, Object>(1024);
+
 
 	@Override
 	public JCacheOperation<?> getCacheOperation(Method method, Class<?> targetClass) {
-		// First, see if we have a cached value.
 		Object cacheKey = new AnnotatedElementKey(method, targetClass);
 		Object cached = this.cache.get(cacheKey);
+
 		if (cached != null) {
-			if (cached == NULL_CACHING_ATTRIBUTE) {
-				return null;
-			}
-			return (JCacheOperation<?>) cached;
+			return (cached != NULL_CACHING_ATTRIBUTE ? (JCacheOperation<?>) cached : null);
 		}
 		else {
 			JCacheOperation<?> operation = computeCacheOperation(method, targetClass);
-			if (operation == null) {
-				this.cache.put(cacheKey, NULL_CACHING_ATTRIBUTE);
-			}
-			else {
+			if (operation != null) {
 				if (logger.isDebugEnabled()) {
-					logger.debug("Adding cacheable method '" + method.getName()
-							+ "' with operation: " + operation);
+					logger.debug("Adding cacheable method '" + method.getName() + "' with operation: " + operation);
 				}
 				this.cache.put(cacheKey, operation);
+			}
+			else {
+				this.cache.put(cacheKey, NULL_CACHING_ATTRIBUTE);
 			}
 			return operation;
 		}
@@ -107,6 +103,7 @@ public abstract class AbstractFallbackJCacheOperationSource
 		}
 		return null;
 	}
+
 
 	/**
 	 * Subclasses need to implement this to return the caching operation

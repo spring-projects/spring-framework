@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,21 +24,25 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
 
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.AbstractHttpMessageConverter;
+import org.springframework.http.converter.AbstractGenericHttpMessageConverter;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.TypeUtils;
 
 /**
  * Abstract base class for Jackson based and content type independent
@@ -53,7 +57,7 @@ import org.springframework.util.ClassUtils;
  * @author Sebastien Deleuze
  * @since 4.1
  */
-public abstract class AbstractJackson2HttpMessageConverter extends AbstractHttpMessageConverter<Object>
+public abstract class AbstractJackson2HttpMessageConverter extends AbstractGenericHttpMessageConverter<Object>
 		implements GenericHttpMessageConverter<Object> {
 
 	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
@@ -61,6 +65,10 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractHttpM
 	// Check for Jackson 2.3's overloaded canDeserialize/canSerialize variants with cause reference
 	private static final boolean jackson23Available = ClassUtils.hasMethod(ObjectMapper.class,
 			"canDeserialize", JavaType.class, AtomicReference.class);
+
+	// Check for Jackson 2.6+ for support of generic type aware serialization of polymorphic collections
+	private static final boolean jackson26Available = ClassUtils.hasMethod(ObjectMapper.class,
+			"setDefaultPrettyPrinter", PrettyPrinter.class);
 
 
 	protected ObjectMapper objectMapper;
@@ -200,36 +208,61 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractHttpM
 		return readJavaType(javaType, inputMessage);
 	}
 
+	@SuppressWarnings("deprecation")
 	private Object readJavaType(JavaType javaType, HttpInputMessage inputMessage) {
 		try {
+			if (inputMessage instanceof MappingJacksonInputMessage) {
+				Class<?> deserializationView = ((MappingJacksonInputMessage) inputMessage).getDeserializationView();
+				if (deserializationView != null) {
+					return this.objectMapper.readerWithView(deserializationView).withType(javaType).
+							readValue(inputMessage.getBody());
+				}
+			}
 			return this.objectMapper.readValue(inputMessage.getBody(), javaType);
 		}
 		catch (IOException ex) {
-			throw new HttpMessageNotReadableException("Could not read JSON: " + ex.getMessage(), ex);
+			throw new HttpMessageNotReadableException("Could not read document: " + ex.getMessage(), ex);
 		}
 	}
 
 	@Override
-	protected void writeInternal(Object object, HttpOutputMessage outputMessage)
+	@SuppressWarnings("deprecation")
+	protected void writeInternal(Object object, Type type, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
 		JsonEncoding encoding = getJsonEncoding(outputMessage.getHeaders().getContentType());
 		JsonGenerator generator = this.objectMapper.getFactory().createGenerator(outputMessage.getBody(), encoding);
 		try {
 			writePrefix(generator, object);
+
 			Class<?> serializationView = null;
+			FilterProvider filters = null;
 			Object value = object;
-			if (value instanceof MappingJacksonValue) {
+			JavaType javaType = null;
+			if (object instanceof MappingJacksonValue) {
 				MappingJacksonValue container = (MappingJacksonValue) object;
 				value = container.getValue();
 				serializationView = container.getSerializationView();
+				filters = container.getFilters();
 			}
+			if (jackson26Available && type != null && value != null && TypeUtils.isAssignable(type, value.getClass())) {
+				javaType = getJavaType(type, null);
+			}
+			ObjectWriter objectWriter;
 			if (serializationView != null) {
-				this.objectMapper.writerWithView(serializationView).writeValue(generator, value);
+				objectWriter = this.objectMapper.writerWithView(serializationView);
+			}
+			else if (filters != null) {
+				objectWriter = this.objectMapper.writer(filters);
 			}
 			else {
-				this.objectMapper.writeValue(generator, value);
+				objectWriter = this.objectMapper.writer();
 			}
+			if (javaType != null && javaType.isContainerType()) {
+				objectWriter = objectWriter.withType(javaType);
+			}
+			objectWriter.writeValue(generator, value);
+
 			writeSuffix(generator, object);
 			generator.flush();
 

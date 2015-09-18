@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -31,6 +32,8 @@ import org.junit.Test;
 
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.SynthesizingMethodParameter;
+import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -90,8 +93,6 @@ public class RequestPartMethodArgumentResolverTests {
 
 	private MockMultipartHttpServletRequest multipartRequest;
 
-	private MockHttpServletResponse servletResponse;
-
 
 	@SuppressWarnings("unchecked")
 	@Before
@@ -101,26 +102,26 @@ public class RequestPartMethodArgumentResolverTests {
 				Integer.TYPE, MultipartFile.class, Part.class, List.class, Part[].class,
 				MultipartFile.class, Optional.class, Optional.class, Optional.class);
 
-		paramRequestPart = new MethodParameter(method, 0);
+		paramRequestPart = new SynthesizingMethodParameter(method, 0);
 		paramRequestPart.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
-		paramNamedRequestPart = new MethodParameter(method, 1);
-		paramValidRequestPart = new MethodParameter(method, 2);
-		paramMultipartFile = new MethodParameter(method, 3);
-		paramMultipartFileList = new MethodParameter(method, 4);
-		paramMultipartFileArray = new MethodParameter(method, 5);
-		paramInt = new MethodParameter(method, 6);
-		paramMultipartFileNotAnnot = new MethodParameter(method, 7);
+		paramNamedRequestPart = new SynthesizingMethodParameter(method, 1);
+		paramValidRequestPart = new SynthesizingMethodParameter(method, 2);
+		paramMultipartFile = new SynthesizingMethodParameter(method, 3);
+		paramMultipartFileList = new SynthesizingMethodParameter(method, 4);
+		paramMultipartFileArray = new SynthesizingMethodParameter(method, 5);
+		paramInt = new SynthesizingMethodParameter(method, 6);
+		paramMultipartFileNotAnnot = new SynthesizingMethodParameter(method, 7);
 		paramMultipartFileNotAnnot.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
-		paramPart = new MethodParameter(method, 8);
+		paramPart = new SynthesizingMethodParameter(method, 8);
 		paramPart.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
-		paramPartList = new MethodParameter(method, 9);
-		paramPartArray = new MethodParameter(method, 10);
-		paramRequestParamAnnot = new MethodParameter(method, 11);
-		optionalMultipartFile = new MethodParameter(method, 12);
+		paramPartList = new SynthesizingMethodParameter(method, 9);
+		paramPartArray = new SynthesizingMethodParameter(method, 10);
+		paramRequestParamAnnot = new SynthesizingMethodParameter(method, 11);
+		optionalMultipartFile = new SynthesizingMethodParameter(method, 12);
 		optionalMultipartFile.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
-		optionalPart = new MethodParameter(method, 13);
+		optionalPart = new SynthesizingMethodParameter(method, 13);
 		optionalPart.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
-		optionalRequestPart = new MethodParameter(method, 14);
+		optionalRequestPart = new SynthesizingMethodParameter(method, 14);
 
 		messageConverter = mock(HttpMessageConverter.class);
 		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
@@ -128,13 +129,14 @@ public class RequestPartMethodArgumentResolverTests {
 		resolver = new RequestPartMethodArgumentResolver(Collections.<HttpMessageConverter<?>>singletonList(messageConverter));
 		reset(messageConverter);
 
-		multipartFile1 = new MockMultipartFile("requestPart", "", "text/plain", (byte[]) null);
-		multipartFile2 = new MockMultipartFile("requestPart", "", "text/plain", (byte[]) null);
+		byte[] content = "doesn't matter as long as not empty".getBytes(Charset.forName("UTF-8"));
+
+		multipartFile1 = new MockMultipartFile("requestPart", "", "text/plain", content);
+		multipartFile2 = new MockMultipartFile("requestPart", "", "text/plain", content);
 		multipartRequest = new MockMultipartHttpServletRequest();
 		multipartRequest.addFile(multipartFile1);
 		multipartRequest.addFile(multipartFile2);
-		servletResponse = new MockHttpServletResponse();
-		webRequest = new ServletWebRequest(multipartRequest, servletResponse);
+		webRequest = new ServletWebRequest(multipartRequest, new MockHttpServletResponse());
 	}
 
 
@@ -361,7 +363,7 @@ public class RequestPartMethodArgumentResolverTests {
 		SimpleBean simpleBean = new SimpleBean("foo");
 
 		given(messageConverter.canRead(SimpleBean.class, MediaType.TEXT_PLAIN)).willReturn(true);
-		given(messageConverter.read(eq(SimpleBean.class), isA(RequestPartServletServerHttpRequest.class))).willReturn(simpleBean);
+		given(messageConverter.read(eq(SimpleBean.class), isA(HttpInputMessage.class))).willReturn(simpleBean);
 
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 		Object actualValue = resolver.resolveArgument(optionalRequestPart, mavContainer, webRequest, new ValidatingBinderFactory());
@@ -385,7 +387,7 @@ public class RequestPartMethodArgumentResolverTests {
 
 	private void testResolveArgument(SimpleBean argValue, MethodParameter parameter) throws Exception {
 		given(messageConverter.canRead(SimpleBean.class, MediaType.TEXT_PLAIN)).willReturn(true);
-		given(messageConverter.read(eq(SimpleBean.class), isA(RequestPartServletServerHttpRequest.class))).willReturn(argValue);
+		given(messageConverter.read(eq(SimpleBean.class), isA(HttpInputMessage.class))).willReturn(argValue);
 
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 		Object actualValue = resolver.resolveArgument(parameter, mavContainer, webRequest, new ValidatingBinderFactory());
@@ -423,7 +425,7 @@ public class RequestPartMethodArgumentResolverTests {
 		}
 	}
 
-
+	@SuppressWarnings("unused")
 	public void handle(@RequestPart SimpleBean requestPart,
 					   @RequestPart(value="requestPart", required=false) SimpleBean namedRequestPart,
 					   @Valid @RequestPart("requestPart") SimpleBean validRequestPart,

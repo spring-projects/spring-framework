@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import static org.junit.Assert.*;
 /**
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  */
 public class DestroyMethodInferenceTests {
 
@@ -45,6 +46,7 @@ public class DestroyMethodInferenceTests {
 		WithInheritedCloseMethod c5 = ctx.getBean("c5", WithInheritedCloseMethod.class);
 		WithNoCloseMethod c6 = ctx.getBean("c6", WithNoCloseMethod.class);
 		WithLocalShutdownMethod c7 = ctx.getBean("c7", WithLocalShutdownMethod.class);
+		WithInheritedCloseMethod c8 = ctx.getBean("c8", WithInheritedCloseMethod.class);
 
 		assertThat(c0.closed, is(false));
 		assertThat(c1.closed, is(false));
@@ -54,6 +56,7 @@ public class DestroyMethodInferenceTests {
 		assertThat(c5.closed, is(false));
 		assertThat(c6.closed, is(false));
 		assertThat(c7.closed, is(false));
+		assertThat(c8.closed, is(false));
 		ctx.close();
 		assertThat("c0", c0.closed, is(true));
 		assertThat("c1", c1.closed, is(true));
@@ -63,6 +66,7 @@ public class DestroyMethodInferenceTests {
 		assertThat("c5", c5.closed, is(true));
 		assertThat("c6", c6.closed, is(false));
 		assertThat("c7", c7.closed, is(true));
+		assertThat("c8", c8.closed, is(false));
 	}
 
 	@Test
@@ -73,6 +77,8 @@ public class DestroyMethodInferenceTests {
 		WithLocalCloseMethod x2 = ctx.getBean("x2", WithLocalCloseMethod.class);
 		WithLocalCloseMethod x3 = ctx.getBean("x3", WithLocalCloseMethod.class);
 		WithNoCloseMethod x4 = ctx.getBean("x4", WithNoCloseMethod.class);
+		WithInheritedCloseMethod x8 = ctx.getBean("x8", WithInheritedCloseMethod.class);
+
 		assertThat(x1.closed, is(false));
 		assertThat(x2.closed, is(false));
 		assertThat(x3.closed, is(false));
@@ -82,6 +88,7 @@ public class DestroyMethodInferenceTests {
 		assertThat(x2.closed, is(true));
 		assertThat(x3.closed, is(true));
 		assertThat(x4.closed, is(false));
+		assertThat(x8.closed, is(false));
 	}
 
 	@Configuration
@@ -133,6 +140,11 @@ public class DestroyMethodInferenceTests {
 		@Bean
 		public WithLocalShutdownMethod c7() {
 			return new WithLocalShutdownMethod();
+		}
+
+		@Bean(destroyMethod = "")
+		public WithInheritedCloseMethod c8() {
+			return new WithInheritedCloseMethod();
 		}
 	}
 

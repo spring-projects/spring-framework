@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -75,13 +76,13 @@ public abstract class ClassUtils {
 	 * Map with primitive wrapper type as key and corresponding primitive
 	 * type as value, for example: Integer.class -> int.class.
 	 */
-	private static final Map<Class<?>, Class<?>> primitiveWrapperTypeMap = new HashMap<Class<?>, Class<?>>(8);
+	private static final Map<Class<?>, Class<?>> primitiveWrapperTypeMap = new IdentityHashMap<Class<?>, Class<?>>(8);
 
 	/**
 	 * Map with primitive type as key and corresponding wrapper
 	 * type as value, for example: int.class -> Integer.class.
 	 */
-	private static final Map<Class<?>, Class<?>> primitiveTypeToWrapperMap = new HashMap<Class<?>, Class<?>>(8);
+	private static final Map<Class<?>, Class<?>> primitiveTypeToWrapperMap = new IdentityHashMap<Class<?>, Class<?>>(8);
 
 	/**
 	 * Map with primitive type name as key and corresponding primitive
@@ -352,9 +353,9 @@ public abstract class ClassUtils {
 	 */
 	public static Class<?> getUserClass(Class<?> clazz) {
 		if (clazz != null && clazz.getName().contains(CGLIB_CLASS_SEPARATOR)) {
-			Class<?> superClass = clazz.getSuperclass();
-			if (superClass != null && !Object.class.equals(superClass)) {
-				return superClass;
+			Class<?> superclass = clazz.getSuperclass();
+			if (superclass != null && Object.class != superclass) {
+				return superclass;
 			}
 		}
 		return clazz;
@@ -821,8 +822,8 @@ public abstract class ClassUtils {
 
 	/**
 	 * Return a public static method of a class.
-	 * @param methodName the static method name
 	 * @param clazz the class which defines the method
+	 * @param methodName the static method name
 	 * @param args the parameter types to the method
 	 * @return the static method, or {@code null} if no static method was found
 	 * @throws IllegalArgumentException if the method name is blank or the clazz is null
@@ -1186,7 +1187,7 @@ public abstract class ClassUtils {
 		Class<?> ancestor = clazz1;
 		do {
 			ancestor = ancestor.getSuperclass();
-			if (ancestor == null || Object.class.equals(ancestor)) {
+			if (ancestor == null || Object.class == ancestor) {
 				return null;
 			}
 		}

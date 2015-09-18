@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import javax.mail.internet.MimeUtility;
 
 import org.springframework.core.io.Resource;
@@ -39,6 +38,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
@@ -89,12 +89,6 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
-	private static final byte[] BOUNDARY_CHARS =
-			new byte[] {'-', '_', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b', 'c', 'd', 'e', 'f', 'g',
-					'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A',
-					'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U',
-					'V', 'W', 'X', 'Y', 'Z'};
-
 
 	private Charset charset = DEFAULT_CHARSET;
 
@@ -103,8 +97,6 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	private List<MediaType> supportedMediaTypes = new ArrayList<MediaType>();
 
 	private List<HttpMessageConverter<?>> partConverters = new ArrayList<HttpMessageConverter<?>>();
-
-	private final Random random = new Random();
 
 
 	public FormHttpMessageConverter() {
@@ -365,15 +357,11 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 
 	/**
 	 * Generate a multipart boundary.
-	 * <p>The default implementation returns a random boundary.
-	 * Can be overridden in subclasses.
+	 * <p>This implementation delegates to
+	 * {@link MimeTypeUtils#generateMultipartBoundary()}.
 	 */
 	protected byte[] generateMultipartBoundary() {
-		byte[] boundary = new byte[this.random.nextInt(11) + 30];
-		for (int i = 0; i < boundary.length; i++) {
-			boundary[i] = BOUNDARY_CHARS[this.random.nextInt(BOUNDARY_CHARS.length)];
-		}
-		return boundary;
+		return MimeTypeUtils.generateMultipartBoundary();
 	}
 
 	/**

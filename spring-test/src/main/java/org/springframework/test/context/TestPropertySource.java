@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import org.springframework.core.annotation.AliasFor;
 
 /**
  * {@code @TestPropertySource} is a class-level annotation that is used to
@@ -94,6 +96,7 @@ public @interface TestPropertySource {
 	 *
 	 * @see #locations
 	 */
+	@AliasFor("locations")
 	String[] value() default {};
 
 	/**
@@ -141,6 +144,7 @@ public @interface TestPropertySource {
 	 * @see #properties
 	 * @see org.springframework.core.env.PropertySource
 	 */
+	@AliasFor("value")
 	String[] locations() default {};
 
 	/**

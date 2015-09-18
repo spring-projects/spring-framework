@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -68,6 +69,7 @@ import org.springframework.beans.factory.config.InstantiationAwareBeanPostProces
 import org.springframework.beans.factory.config.Scope;
 import org.springframework.core.DecoratingClassLoader;
 import org.springframework.core.NamedThreadLocal;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -479,9 +481,8 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	@Override
-	public boolean isTypeMatch(String name, Class<?> targetType) throws NoSuchBeanDefinitionException {
+	public boolean isTypeMatch(String name, ResolvableType typeToMatch) throws NoSuchBeanDefinitionException {
 		String beanName = transformedBeanName(name);
-		Class<?> typeToMatch = (targetType != null ? targetType : Object.class);
 
 		// Check manually registered singletons.
 		Object beanInstance = getSingleton(beanName, false);
@@ -489,15 +490,14 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			if (beanInstance instanceof FactoryBean) {
 				if (!BeanFactoryUtils.isFactoryDereference(name)) {
 					Class<?> type = getTypeForFactoryBean((FactoryBean<?>) beanInstance);
-					return (type != null && ClassUtils.isAssignable(typeToMatch, type));
+					return (type != null && typeToMatch.isAssignableFrom(type));
 				}
 				else {
-					return ClassUtils.isAssignableValue(typeToMatch, beanInstance);
+					return typeToMatch.isInstance(beanInstance);
 				}
 			}
 			else {
-				return !BeanFactoryUtils.isFactoryDereference(name) &&
-						ClassUtils.isAssignableValue(typeToMatch, beanInstance);
+				return (!BeanFactoryUtils.isFactoryDereference(name) && typeToMatch.isInstance(beanInstance));
 			}
 		}
 		else if (containsSingleton(beanName) && !containsBeanDefinition(beanName)) {
@@ -510,14 +510,15 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			BeanFactory parentBeanFactory = getParentBeanFactory();
 			if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {
 				// No bean definition found in this factory -> delegate to parent.
-				return parentBeanFactory.isTypeMatch(originalBeanName(name), targetType);
+				return parentBeanFactory.isTypeMatch(originalBeanName(name), typeToMatch);
 			}
 
 			// Retrieve corresponding bean definition.
 			RootBeanDefinition mbd = getMergedLocalBeanDefinition(beanName);
 
-			Class<?>[] typesToMatch = (FactoryBean.class.equals(typeToMatch) ?
-					new Class<?>[] {typeToMatch} : new Class<?>[] {FactoryBean.class, typeToMatch});
+			Class<?> classToMatch = typeToMatch.getRawClass();
+			Class<?>[] typesToMatch = (FactoryBean.class == classToMatch ?
+					new Class<?>[] {classToMatch} : new Class<?>[] {FactoryBean.class, classToMatch});
 
 			// Check decorated bean definition, if any: We assume it'll be easier
 			// to determine the decorated bean's type than the proxy's type.
@@ -557,6 +558,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 			return typeToMatch.isAssignableFrom(beanType);
 		}
+	}
+
+	@Override
+	public boolean isTypeMatch(String name, Class<?> typeToMatch) throws NoSuchBeanDefinitionException {
+		return isTypeMatch(name, ResolvableType.forRawClass(typeToMatch));
 	}
 
 	@Override
@@ -1257,7 +1263,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 				// Only cache the merged bean definition if we're already about to create an
 				// instance of the bean, or at least have already created an instance before.
-				if (containingBd == null && isCacheBeanMetadata() && isBeanEligibleForMetadataCaching(beanName)) {
+				if (containingBd == null && isCacheBeanMetadata()) {
 					this.mergedBeanDefinitions.put(beanName, mbd);
 				}
 			}
@@ -1289,6 +1295,23 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 */
 	protected void clearMergedBeanDefinition(String beanName) {
 		this.mergedBeanDefinitions.remove(beanName);
+	}
+
+	/**
+	 * Clear the merged bean definition cache, removing entries for beans
+	 * which are not considered eligible for full metadata caching yet.
+	 * <p>Typically triggered after changes to the original bean definitions,
+	 * e.g. after applying a {@code BeanFactoryPostProcessor}. Note that metadata
+	 * for beans which have already been created at this point will be kept around.
+	 * @since 4.2
+	 */
+	public void clearMetadataCache() {
+		Iterator<String> mergedBeans = this.mergedBeanDefinitions.keySet().iterator();
+		while (mergedBeans.hasNext()) {
+			if (!isBeanEligibleForMetadataCaching(mergedBeans.next())) {
+				mergedBeans.remove();
+			}
+		}
 	}
 
 	/**
@@ -1333,20 +1356,44 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	private Class<?> doResolveBeanClass(RootBeanDefinition mbd, Class<?>... typesToMatch) throws ClassNotFoundException {
+		ClassLoader beanClassLoader = getBeanClassLoader();
+		ClassLoader classLoaderToUse = beanClassLoader;
 		if (!ObjectUtils.isEmpty(typesToMatch)) {
+			// When just doing type checks (i.e. not creating an actual instance yet),
+			// use the specified temporary class loader (e.g. in a weaving scenario).
 			ClassLoader tempClassLoader = getTempClassLoader();
 			if (tempClassLoader != null) {
+				classLoaderToUse = tempClassLoader;
 				if (tempClassLoader instanceof DecoratingClassLoader) {
 					DecoratingClassLoader dcl = (DecoratingClassLoader) tempClassLoader;
 					for (Class<?> typeToMatch : typesToMatch) {
 						dcl.excludeClass(typeToMatch.getName());
 					}
 				}
-				String className = mbd.getBeanClassName();
-				return (className != null ? ClassUtils.forName(className, tempClassLoader) : null);
 			}
 		}
-		return mbd.resolveBeanClass(getBeanClassLoader());
+		String className = mbd.getBeanClassName();
+		if (className != null) {
+			Object evaluated = evaluateBeanDefinitionString(className, mbd);
+			if (!className.equals(evaluated)) {
+				// A dynamically resolved expression, supported as of 4.2...
+				if (evaluated instanceof Class) {
+					return (Class<?>) evaluated;
+				}
+				else if (evaluated instanceof String) {
+					return ClassUtils.forName((String) evaluated, classLoaderToUse);
+				}
+				else {
+					throw new IllegalStateException("Invalid class name expression result: " + evaluated);
+				}
+			}
+			// When resolving against a temporary class loader, exit early in order
+			// to avoid storing the resolved Class in the bean definition.
+			if (classLoaderToUse != beanClassLoader) {
+				return ClassUtils.forName(className, classLoaderToUse);
+			}
+		}
+		return mbd.resolveBeanClass(beanClassLoader);
 	}
 
 	/**
@@ -1422,9 +1469,15 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			return getTypeForFactoryBean(factoryBean);
 		}
 		catch (BeanCreationException ex) {
-			// Can only happen when getting a FactoryBean.
-			if (logger.isWarnEnabled()) {
-				logger.warn("Bean creation exception on FactoryBean type check: " + ex);
+			if (ex instanceof BeanCurrentlyInCreationException) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Bean currently in creation on FactoryBean type check: " + ex);
+				}
+			}
+			else {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Bean creation exception on FactoryBean type check: " + ex);
+				}
 			}
 			onSuppressedException(ex);
 			return null;
@@ -1440,6 +1493,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	protected void markBeanAsCreated(String beanName) {
 		if (!this.alreadyCreated.contains(beanName)) {
 			this.alreadyCreated.add(beanName);
+
+			// Let the bean definition get re-merged now that we're actually creating
+			// the bean... just in case some of its metadata changed in the meantime.
+			clearMergedBeanDefinition(beanName);
 		}
 	}
 

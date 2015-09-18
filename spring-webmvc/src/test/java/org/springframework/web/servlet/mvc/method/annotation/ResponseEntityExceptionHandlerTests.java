@@ -26,6 +26,7 @@ import org.junit.Test;
 
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -41,6 +42,7 @@ import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -54,6 +56,7 @@ import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMeth
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 import static org.junit.Assert.*;
+import org.mockito.Mockito;
 
 /**
  * Test fixture for {@link ResponseEntityExceptionHandler}.
@@ -86,15 +89,16 @@ public class ResponseEntityExceptionHandlerTests {
 	@Test
 	public void supportsAllDefaultHandlerExceptionResolverExceptionTypes() throws Exception {
 
-		Method annotMethod = ResponseEntityExceptionHandler.class.getMethod("handleException", Exception.class, WebRequest.class);
-		ExceptionHandler annot = annotMethod.getAnnotation(ExceptionHandler.class);
-		List<Class<? extends Throwable>> supportedTypes = Arrays.asList(annot.value());
+		Class<ResponseEntityExceptionHandler> clazz = ResponseEntityExceptionHandler.class;
+		Method handleExceptionMethod = clazz.getMethod("handleException", Exception.class, WebRequest.class);
+		ExceptionHandler annotation = handleExceptionMethod.getAnnotation(ExceptionHandler.class);
+		List<Class<?>> exceptionTypes = Arrays.asList(annotation.value());
 
 		for (Method method : DefaultHandlerExceptionResolver.class.getDeclaredMethods()) {
 			Class<?>[] paramTypes = method.getParameterTypes();
 			if (method.getName().startsWith("handle") && (paramTypes.length == 4)) {
 				String name = paramTypes[0].getSimpleName();
-				assertTrue("@ExceptionHandler is missing " + name, supportedTypes.contains(paramTypes[0]));
+				assertTrue("@ExceptionHandler is missing " + name, exceptionTypes.contains(paramTypes[0]));
 			}
 		}
 	}
@@ -127,6 +131,14 @@ public class ResponseEntityExceptionHandlerTests {
 	@Test
 	public void httpMediaTypeNotAcceptable() {
 		Exception ex = new HttpMediaTypeNotAcceptableException("");
+		testException(ex);
+	}
+
+	@Test
+	public void missingPathVariable() throws NoSuchMethodException {
+		Method method = getClass().getDeclaredMethod("handle", String.class);
+		MethodParameter parameter = new MethodParameter(method, 0);
+		Exception ex = new MissingPathVariableException("param", parameter);
 		testException(ex);
 	}
 
@@ -168,7 +180,7 @@ public class ResponseEntityExceptionHandlerTests {
 
 	@Test
 	public void methodArgumentNotValid() {
-		Exception ex = new MethodArgumentNotValidException(null, null);
+		Exception ex = Mockito.mock(MethodArgumentNotValidException.class);
 		testException(ex);
 	}
 
@@ -241,8 +253,10 @@ public class ResponseEntityExceptionHandlerTests {
 			headers.set("someHeader", "someHeaderValue");
 			return handleExceptionInternal(ex, "error content", headers, status, request);
 		}
+	}
 
-
+	@SuppressWarnings("unused")
+	void handle(String arg) {
 	}
 
 }

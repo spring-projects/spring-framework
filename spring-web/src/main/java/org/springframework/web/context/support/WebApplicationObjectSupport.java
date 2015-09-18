@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,7 +125,11 @@ public abstract class WebApplicationObjectSupport extends ApplicationObjectSuppo
 		if (this.servletContext != null) {
 			return this.servletContext;
 		}
-		ServletContext servletContext = getWebApplicationContext().getServletContext();
+		WebApplicationContext wac = getWebApplicationContext();
+		if (wac == null) {
+			return null;
+		}
+		ServletContext servletContext = wac.getServletContext();
 		if (servletContext == null && isContextRequired()) {
 			throw new IllegalStateException("WebApplicationObjectSupport instance [" + this +
 					"] does not run within a ServletContext. Make sure the object is fully configured!");

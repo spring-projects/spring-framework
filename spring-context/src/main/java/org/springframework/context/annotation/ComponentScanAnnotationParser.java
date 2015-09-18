@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 3.1
  * @see ClassPathBeanDefinitionScanner#scan(String...)
  * @see ComponentScanBeanDefinitionParser
@@ -73,17 +74,16 @@ class ComponentScanAnnotationParser {
 
 
 	public Set<BeanDefinitionHolder> parse(AnnotationAttributes componentScan, final String declaringClass) {
+		Assert.state(this.environment != null, "Environment must not be null");
+		Assert.state(this.resourceLoader != null, "ResourceLoader must not be null");
+
 		ClassPathBeanDefinitionScanner scanner =
 				new ClassPathBeanDefinitionScanner(this.registry, componentScan.getBoolean("useDefaultFilters"));
-
-		Assert.notNull(this.environment, "Environment must not be null");
 		scanner.setEnvironment(this.environment);
-
-		Assert.notNull(this.resourceLoader, "ResourceLoader must not be null");
 		scanner.setResourceLoader(this.resourceLoader);
 
 		Class<? extends BeanNameGenerator> generatorClass = componentScan.getClass("nameGenerator");
-		boolean useInheritedGenerator = BeanNameGenerator.class.equals(generatorClass);
+		boolean useInheritedGenerator = BeanNameGenerator.class == generatorClass;
 		scanner.setBeanNameGenerator(useInheritedGenerator ? this.beanNameGenerator :
 				BeanUtils.instantiateClass(generatorClass));
 
@@ -115,11 +115,8 @@ class ComponentScanAnnotationParser {
 		}
 
 		Set<String> basePackages = new LinkedHashSet<String>();
-		Set<String> specifiedPackages = new LinkedHashSet<String>();
-		specifiedPackages.addAll(Arrays.asList(componentScan.getStringArray("value")));
-		specifiedPackages.addAll(Arrays.asList(componentScan.getStringArray("basePackages")));
-
-		for (String pkg : specifiedPackages) {
+		String[] basePackagesArray = componentScan.getAliasedStringArray("basePackages", ComponentScan.class, declaringClass);
+		for (String pkg : basePackagesArray) {
 			String[] tokenized = StringUtils.tokenizeToStringArray(this.environment.resolvePlaceholders(pkg),
 					ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS);
 			basePackages.addAll(Arrays.asList(tokenized));
@@ -144,7 +141,7 @@ class ComponentScanAnnotationParser {
 		List<TypeFilter> typeFilters = new ArrayList<TypeFilter>();
 		FilterType filterType = filterAttributes.getEnum("type");
 
-		for (Class<?> filterClass : filterAttributes.getClassArray("value")) {
+		for (Class<?> filterClass : filterAttributes.getAliasedClassArray("classes", ComponentScan.Filter.class, null)) {
 			switch (filterType) {
 				case ANNOTATION:
 					Assert.isAssignable(Annotation.class, filterClass,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.cache;
 
 /**
- * Interface that defines the common cache operations.
+ * Interface that defines common cache operations.
  *
  * <b>Note:</b> Due to the generic use of caching, it is recommended that
  * implementations allow storage of <tt>null</tt> values (for example to
@@ -68,8 +68,8 @@ public interface Cache {
 	 * the cache contains no mapping for this key
 	 * @throws IllegalStateException if a cache entry has been found
 	 * but failed to match the specified type
-	 * @see #get(Object)
 	 * @since 4.0
+	 * @see #get(Object)
 	 */
 	<T> T get(Object key, Class<T> type);
 

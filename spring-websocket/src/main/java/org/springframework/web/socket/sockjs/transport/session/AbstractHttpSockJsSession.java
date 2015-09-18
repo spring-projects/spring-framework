@@ -26,10 +26,14 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import javax.servlet.ServletRequest;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.server.ServerHttpAsyncRequestControl;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.http.server.ServletServerHttpRequest;
+import org.springframework.web.filter.ShallowEtagHeaderFilter;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
@@ -168,7 +172,7 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 	}
 
 	/**
-	 * @deprecated as of 4.2 this method is no longer used.
+	 * @deprecated as of 4.2, since this method is no longer used.
 	 */
 	@Deprecated
 	protected abstract boolean isStreaming();
@@ -201,6 +205,8 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 				this.frameFormat = frameFormat;
 				this.asyncRequestControl = request.getAsyncRequestControl(response);
 				this.asyncRequestControl.start(-1);
+
+				disableShallowEtagHeaderFilter(request);
 
 				// Let "our" handler know before sending the open frame to the remote handler
 				delegateConnectionEstablished();
@@ -243,6 +249,8 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 				this.asyncRequestControl = request.getAsyncRequestControl(response);
 				this.asyncRequestControl.start(-1);
 
+				disableShallowEtagHeaderFilter(request);
+
 				handleRequestInternal(request, response, false);
 				this.readyToSend = isActive();
 			}
@@ -250,6 +258,13 @@ public abstract class AbstractHttpSockJsSession extends AbstractSockJsSession {
 				tryCloseWithSockJsTransportError(ex, CloseStatus.SERVER_ERROR);
 				throw new SockJsTransportFailureException("Failed to handle SockJS receive request", getId(), ex);
 			}
+		}
+	}
+
+	private void disableShallowEtagHeaderFilter(ServerHttpRequest request) {
+		if (request instanceof ServletServerHttpRequest) {
+			ServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
+			ShallowEtagHeaderFilter.disableContentCaching(servletRequest);
 		}
 	}
 

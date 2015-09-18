@@ -296,11 +296,12 @@ class MyScopeMetadataResolver extends AnnotationScopeMetadataResolver {
 }
 
 @Configuration
-@ComponentScan(basePackages="org.springframework.context.annotation",
+@ComponentScan(
+		basePackages="org.springframework.context.annotation",
 		useDefaultFilters=false,
-		includeFilters=@Filter(type=FilterType.CUSTOM, value=ComponentScanParserTests.CustomTypeFilter.class),
+		includeFilters = @Filter(type = FilterType.CUSTOM, classes = ComponentScanParserTests.CustomTypeFilter.class),
 		// exclude this class from scanning since it's in the scanned package
-		excludeFilters=@Filter(type=FilterType.ASSIGNABLE_TYPE, value=ComponentScanWithCustomTypeFilter.class),
+		excludeFilters = @Filter(type = FilterType.ASSIGNABLE_TYPE, classes = ComponentScanWithCustomTypeFilter.class),
 		lazyInit = true)
 class ComponentScanWithCustomTypeFilter {
 	@Bean
@@ -320,7 +321,7 @@ class ComponentScanWithCustomTypeFilter {
 @ComponentScan(basePackages="example.scannable",
 		scopedProxy=ScopedProxyMode.INTERFACES,
 		useDefaultFilters=false,
-		includeFilters=@Filter(type=FilterType.ASSIGNABLE_TYPE, value=ScopedProxyTestBean.class))
+		includeFilters = @Filter(type = FilterType.ASSIGNABLE_TYPE, classes = ScopedProxyTestBean.class))
 class ComponentScanWithScopedProxy {}
 
 @Configuration

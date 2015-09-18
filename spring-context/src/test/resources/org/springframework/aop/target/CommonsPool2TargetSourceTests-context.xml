@@ -2,21 +2,21 @@
 <!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
 
 <beans>
-	
+
 	<bean id="prototypeTest" class="org.springframework.tests.sample.beans.SideEffectBean" scope="prototype">
 		<property name="count"><value>10</value></property>
 	</bean>
-	
+
 	<bean id="poolTargetSource" class="org.springframework.aop.target.CommonsPool2TargetSource">
 		<property name="targetBeanName"><value>prototypeTest</value></property>
 		<property name="maxSize"><value>25</value></property>
 	</bean>
-	
+
 	<bean id="poolConfigAdvisor" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
 		<property name="targetObject"><ref local="poolTargetSource" /></property>
 		<property name="targetMethod"><value>getPoolingConfigMixin</value></property>
 	</bean>
-	
+
 	<bean id="nop" class="org.springframework.tests.aop.interceptor.NopInterceptor"/>
 
 	<!--
@@ -26,11 +26,11 @@
 		<property name="targetSource"><ref local="poolTargetSource"/></property>
 		<property name="interceptorNames"><value>nop</value></property>
 	</bean>
-	
+
 	<bean id="pooledNoInterceptors"  class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="targetSource"><ref local="poolTargetSource"/></property>
 	</bean>
-	
+
 	<bean id="pooledWithMixin" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="targetSource"><ref local="poolTargetSource"/></property>
 		<property name="interceptorNames"><value>poolConfigAdvisor</value></property>
@@ -41,18 +41,18 @@
 
 	<!-- Serialization tests using serializable target and advice -->
 	<bean id="serializableNop" class="org.springframework.tests.aop.interceptor.SerializableNopInterceptor" />
-	
+
 	<bean id="prototypePerson" class="org.springframework.tests.sample.beans.SerializablePerson" scope="prototype"/>
 
 	<bean id="personPoolTargetSource" class="org.springframework.aop.target.CommonsPool2TargetSource">
 		<property name="targetBeanName"><value>prototypePerson</value></property>
 		<property name="maxSize"><value>10</value></property>
 	</bean>
-	
+
 	<bean id="pooledPerson" class="org.springframework.aop.framework.ProxyFactoryBean">
 		<property name="targetSource"><ref local="personPoolTargetSource"/></property>
 		<property name="interceptorNames"><value>serializableNop</value></property>
-		
+	
 	</bean>
 
 	<bean id="maxSizePooledPerson" class="org.springframework.aop.framework.ProxyFactoryBean">
@@ -66,4 +66,4 @@
 		<property name="interceptorNames"><value>serializableNop</value></property>
 	</bean>
 
-</beans>		
+</beans>	

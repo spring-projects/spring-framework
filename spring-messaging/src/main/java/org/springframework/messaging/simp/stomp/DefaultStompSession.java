@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.simp.stomp;
 
 import java.lang.reflect.Type;
@@ -34,7 +35,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageDeliveryException;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.MessageConverter;
-import org.springframework.messaging.converter.StringMessageConverter;
+import org.springframework.messaging.converter.SimpleMessageConverter;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
 import org.springframework.messaging.tcp.TcpConnection;
@@ -47,7 +48,6 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.util.concurrent.SettableListenableFuture;
 
-
 /**
  * Default implementation of {@link ConnectionHandlingStompSession}.
  *
@@ -56,7 +56,7 @@ import org.springframework.util.concurrent.SettableListenableFuture;
  */
 public class DefaultStompSession implements ConnectionHandlingStompSession {
 
-	private static Log logger = LogFactory.getLog(DefaultStompSession.class);
+	private static final Log logger = LogFactory.getLog(DefaultStompSession.class);
 
 	private static final IdGenerator idGenerator = new AlternativeJdkIdGenerator();
 
@@ -82,13 +82,13 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	private final SettableListenableFuture<StompSession> sessionFuture = new SettableListenableFuture<StompSession>();
 
-	private MessageConverter converter = new StringMessageConverter();
+	private MessageConverter converter = new SimpleMessageConverter();
 
 	private TaskScheduler taskScheduler;
 
 	private long receiptTimeLimit = 15 * 1000;
 
-	private volatile  boolean autoReceiptEnabled;
+	private volatile boolean autoReceiptEnabled;
 
 
 	private volatile TcpConnection<byte[]> connection;
@@ -107,7 +107,6 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	/**
 	 * Create a new session.
-	 *
 	 * @param sessionHandler the application handler for the session
 	 * @param connectHeaders headers for the STOMP CONNECT frame
 	 */
@@ -141,7 +140,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	 * Set the {@link MessageConverter} to use to convert the payload of incoming
 	 * and outgoing messages to and from {@code byte[]} based on object type, or
 	 * expected object type, and the "content-type" header.
-	 * <p>By default, {@link StringMessageConverter} is configured.
+	 * <p>By default, {@link SimpleMessageConverter} is configured.
 	 * @param messageConverter the message converter to use
 	 */
 	public void setMessageConverter(MessageConverter messageConverter) {
@@ -201,7 +200,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 
 	@Override
 	public boolean isConnected() {
-		return this.connection != null;
+		return (this.connection != null);
 	}
 
 	@Override
@@ -331,6 +330,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		}
 	}
 
+
 	// TcpConnectionHandler
 
 	@Override
@@ -389,7 +389,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 					}
 				}
 				else if (StompCommand.CONNECTED.equals(command)) {
-					initHeartbeats(stompHeaders);
+					initHeartbeatTasks(stompHeaders);
 					this.sessionFuture.set(this);
 					this.sessionHandler.afterConnected(this, stompHeaders);
 				}
@@ -415,25 +415,24 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		Class<?> payloadType = ResolvableType.forType(type).getRawClass();
 		Object object = getMessageConverter().fromMessage(message, payloadType);
 		if (object == null) {
-			throw new MessageConversionException("No suitable converter, payloadType=" + payloadType);
+			throw new MessageConversionException("No suitable converter, payloadType=" + payloadType +
+					", handlerType=" + handler.getClass());
 		}
 		handler.handleFrame(stompHeaders, object);
 	}
 
-	private void initHeartbeats(StompHeaders connectedHeaders) {
-		long clientRead = this.connectHeaders.getHeartbeat()[0];
-		long serverWrite = connectedHeaders.getHeartbeat()[1];
-
-		if (clientRead > 0 && serverWrite > 0) {
-			long interval = Math.max(clientRead,  serverWrite);
+	private void initHeartbeatTasks(StompHeaders connectedHeaders) {
+		long[] connect = this.connectHeaders.getHeartbeat();
+		long[] connected = connectedHeaders.getHeartbeat();
+		if (connect == null || connected == null) {
+			return;
+		}
+		if (connect[0] > 0 && connected[1] > 0) {
+			long interval = Math.max(connect[0],  connected[1]);
 			this.connection.onWriteInactivity(new WriteInactivityTask(), interval);
 		}
-
-		long clientWrite = this.connectHeaders.getHeartbeat()[1];
-		long serverRead = connectedHeaders.getHeartbeat()[0];
-
-		if (clientWrite > 0 && serverRead > 0) {
-			final long interval = Math.max(clientWrite, serverRead) * HEARTBEAT_MULTIPLIER;
+		if (connect[1] > 0 && connected[0] > 0) {
+			final long interval = Math.max(connect[1], connected[0]) * HEARTBEAT_MULTIPLIER;
 			this.connection.onReadInactivity(new ReadInactivityTask(), interval);
 		}
 	}
@@ -476,7 +475,6 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 	}
 
 
-
 	private class ReceiptHandler implements Receiptable {
 
 		private final String receiptId;
@@ -488,7 +486,6 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		private ScheduledFuture<?> future;
 
 		private Boolean result;
-
 
 		public ReceiptHandler(String receiptId) {
 			this.receiptId = receiptId;
@@ -575,6 +572,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		}
 	}
 
+
 	private class DefaultSubscription extends ReceiptHandler implements Subscription {
 
 		private final String id;
@@ -582,7 +580,6 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		private final String destination;
 
 		private final StompFrameHandler handler;
-
 
 		public DefaultSubscription(String id, String destination, String receiptId, StompFrameHandler handler) {
 			super(receiptId);
@@ -621,6 +618,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		}
 	}
 
+
 	private class WriteInactivityTask implements Runnable {
 
 		@Override
@@ -638,6 +636,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 			}
 		}
 	}
+
 
 	private class ReadInactivityTask implements Runnable {
 

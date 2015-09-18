@@ -244,6 +244,26 @@ public class CommonAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
+	public void testResourceInjectionWithDefaultMethod() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(DefaultMethodResourceInjectionBean.class));
+		TestBean tb2 = new TestBean();
+		bf.registerSingleton("testBean2", tb2);
+		NestedTestBean tb7 = new NestedTestBean();
+		bf.registerSingleton("testBean7", tb7);
+
+		DefaultMethodResourceInjectionBean bean = (DefaultMethodResourceInjectionBean) bf.getBean("annotatedBean");
+		assertSame(tb2, bean.getTestBean2());
+		assertSame(2, bean.counter);
+
+		bf.destroySingletons();
+		assertSame(3, bean.counter);
+	}
+
+	@Test
 	public void testResourceInjectionWithTwoProcessors() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		CommonAnnotationBeanPostProcessor bpp = new CommonAnnotationBeanPostProcessor();
@@ -691,6 +711,42 @@ public class CommonAnnotationBeanPostProcessorTests {
 
 
 	public static class ExtendedResourceInjectionBean extends NonPublicResourceInjectionBean<ITestBean> {
+	}
+
+
+	public interface InterfaceWithDefaultMethod {
+
+		@Resource
+		void setTestBean2(TestBean testBean2);
+
+		@Resource
+		default void setTestBean7(INestedTestBean testBean7) {
+			increaseCounter();
+		}
+
+		@PostConstruct
+		default void initDefault() {
+			increaseCounter();
+		}
+
+		@PreDestroy
+		default void destroyDefault() {
+			increaseCounter();
+		}
+
+		void increaseCounter();
+	}
+
+
+	public static class DefaultMethodResourceInjectionBean extends ResourceInjectionBean
+			implements InterfaceWithDefaultMethod {
+
+		public int counter = 0;
+
+		@Override
+		public void increaseCounter() {
+			counter++;
+		}
 	}
 
 

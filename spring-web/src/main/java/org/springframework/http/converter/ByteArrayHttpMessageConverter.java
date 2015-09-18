@@ -43,7 +43,7 @@ public class ByteArrayHttpMessageConverter extends AbstractHttpMessageConverter<
 
 	@Override
 	public boolean supports(Class<?> clazz) {
-		return byte[].class.equals(clazz);
+		return byte[].class == clazz;
 	}
 
 	@Override

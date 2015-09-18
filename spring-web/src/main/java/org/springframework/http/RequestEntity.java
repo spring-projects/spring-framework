@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,7 +133,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof RequestEntity) || !super.equals(other)) {
+		if (!super.equals(other)) {
 			return false;
 		}
 		RequestEntity<?> otherEntity = (RequestEntity<?>) other;
@@ -325,8 +325,8 @@ public class RequestEntity<T> extends HttpEntity<T> {
 
 		/**
 		 * Set the body of the request entity and build the RequestEntity.
-		 * @param body the body of the request entity
 		 * @param <T> the type of the body
+		 * @param body the body of the request entity
 		 * @return the built request entity
 		 */
 		<T> RequestEntity<T> body(T body);

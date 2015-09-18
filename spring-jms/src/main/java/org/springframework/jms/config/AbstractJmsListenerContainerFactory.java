@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -52,6 +52,8 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 
 	private Boolean pubSubDomain;
 
+	private Boolean replyPubSubDomain;
+
 	private Boolean subscriptionDurable;
 
 	private Boolean subscriptionShared;
@@ -59,6 +61,8 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 	private String clientId;
 
 	private Integer phase;
+
+	private Boolean autoStartup;
 
 
 	/**
@@ -111,6 +115,13 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 	}
 
 	/**
+	 * @see AbstractMessageListenerContainer#setReplyPubSubDomain(boolean)
+	 */
+	public void setReplyPubSubDomain(Boolean replyPubSubDomain) {
+		this.replyPubSubDomain = replyPubSubDomain;
+	}
+
+	/**
 	 * @see AbstractMessageListenerContainer#setSubscriptionDurable(boolean)
 	 */
 	public void setSubscriptionDurable(Boolean subscriptionDurable) {
@@ -138,6 +149,12 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 		this.phase = phase;
 	}
 
+	/**
+	 * @see AbstractMessageListenerContainer#setAutoStartup(boolean)
+	 */
+	public void setAutoStartup(boolean autoStartup) {
+		this.autoStartup = autoStartup;
+	}
 
 	@Override
 	public C createListenerContainer(JmsListenerEndpoint endpoint) {
@@ -164,6 +181,9 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 		if (this.pubSubDomain != null) {
 			instance.setPubSubDomain(this.pubSubDomain);
 		}
+		if (this.replyPubSubDomain != null) {
+			instance.setReplyPubSubDomain(this.replyPubSubDomain);
+		}
 		if (this.subscriptionDurable != null) {
 			instance.setSubscriptionDurable(this.subscriptionDurable);
 		}
@@ -175,6 +195,9 @@ public abstract class AbstractJmsListenerContainerFactory<C extends AbstractMess
 		}
 		if (this.phase != null) {
 			instance.setPhase(this.phase);
+		}
+		if (this.autoStartup != null) {
+			instance.setAutoStartup(this.autoStartup);
 		}
 
 		endpoint.setupListenerContainer(instance);

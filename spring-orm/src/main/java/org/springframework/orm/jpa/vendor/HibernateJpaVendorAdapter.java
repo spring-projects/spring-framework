@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ import org.hibernate.dialect.PostgreSQLDialect;
 import org.hibernate.dialect.SQLServerDialect;
 
 /**
- * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for
- * Hibernate EntityManager. Developed and tested against Hibernate 3.6 and 4.2/4.3.
+ * {@link org.springframework.orm.jpa.JpaVendorAdapter} implementation for Hibernate
+ * EntityManager. Developed and tested against Hibernate 3.6, 4.2/4.3 as well as 5.0.
  * <b>Hibernate 4.2+ is strongly recommended for use with Spring 4.0+.</b>
  *
  * <p>Exposes Hibernate's persistence provider and EntityManager extension interface,
@@ -70,7 +70,7 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 	private final Class<? extends EntityManager> entityManagerInterface;
 
 
-	@SuppressWarnings({"deprecation", "unchecked"})
+	@SuppressWarnings("unchecked")
 	public HibernateJpaVendorAdapter() {
 		ClassLoader cl = HibernateJpaVendorAdapter.class.getClassLoader();
 		Class<? extends EntityManagerFactory> emfIfcToUse;
@@ -79,7 +79,7 @@ public class HibernateJpaVendorAdapter extends AbstractJpaVendorAdapter {
 		PersistenceProvider providerToUse;
 		try {
 			try {
-				// Try Hibernate 4.3's org.hibernate.jpa package in order to avoid deprecation warnings
+				// Try Hibernate 4.3/5.0's org.hibernate.jpa package in order to avoid deprecation warnings
 				emfIfcToUse = (Class<? extends EntityManagerFactory>) cl.loadClass("org.hibernate.jpa.HibernateEntityManagerFactory");
 				emIfcToUse = (Class<? extends EntityManager>) cl.loadClass("org.hibernate.jpa.HibernateEntityManager");
 				providerClass = cl.loadClass("org.springframework.orm.jpa.vendor.SpringHibernateJpaPersistenceProvider");

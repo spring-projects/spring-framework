@@ -27,6 +27,7 @@ import org.junit.Test;
 
 import org.springframework.aop.scope.ScopedObject;
 import org.springframework.aop.scope.ScopedProxyUtils;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.FactoryBean;
@@ -298,8 +299,45 @@ public class ConfigurationClassPostProcessorTests {
 		beanFactory.registerBeanDefinition("config2", new RootBeanDefinition(SingletonBeanConfig.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.postProcessBeanFactory(beanFactory);
-		assertTrue(beanFactory.getBean(Foo.class) instanceof ExtendedFoo);
-		beanFactory.getBean(Bar.class);
+
+		Foo foo = beanFactory.getBean(Foo.class);
+		assertTrue(foo instanceof ExtendedFoo);
+		Bar bar = beanFactory.getBean(Bar.class);
+		assertSame(foo, bar.foo);
+	}
+
+	@Test
+	public void configurationClassesWithValidOverridingForProgrammaticCall() {
+		beanFactory.registerBeanDefinition("config1", new RootBeanDefinition(OverridingAgainSingletonBeanConfig.class));
+		beanFactory.registerBeanDefinition("config2", new RootBeanDefinition(OverridingSingletonBeanConfig.class));
+		beanFactory.registerBeanDefinition("config3", new RootBeanDefinition(SingletonBeanConfig.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+
+		Foo foo = beanFactory.getBean(Foo.class);
+		assertTrue(foo instanceof ExtendedAgainFoo);
+		Bar bar = beanFactory.getBean(Bar.class);
+		assertSame(foo, bar.foo);
+	}
+
+	@Test
+	public void configurationClassesWithInvalidOverridingForProgrammaticCall() {
+		beanFactory.registerBeanDefinition("config1", new RootBeanDefinition(InvalidOverridingSingletonBeanConfig.class));
+		beanFactory.registerBeanDefinition("config2", new RootBeanDefinition(OverridingSingletonBeanConfig.class));
+		beanFactory.registerBeanDefinition("config3", new RootBeanDefinition(SingletonBeanConfig.class));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+
+		try {
+			beanFactory.getBean(Bar.class);
+			fail("Should have thrown BeanCreationException");
+		}
+		catch (BeanCreationException ex) {
+			assertTrue(ex.getMessage().contains("OverridingSingletonBeanConfig.foo"));
+			assertTrue(ex.getMessage().contains(ExtendedFoo.class.getName()));
+			assertTrue(ex.getMessage().contains(Foo.class.getName()));
+			assertTrue(ex.getMessage().contains("InvalidOverridingSingletonBeanConfig"));
+		}
 	}
 
 	@Test
@@ -311,6 +349,7 @@ public class ConfigurationClassPostProcessorTests {
 		beanFactory.registerBeanDefinition("consumer", new RootBeanDefinition(ScopedProxyConsumer.class));
 		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
 		pp.postProcessBeanFactory(beanFactory);
+
 		ITestBean injected = beanFactory.getBean("consumer", ScopedProxyConsumer.class).testBean;
 		assertTrue(injected instanceof ScopedObject);
 		assertSame(beanFactory.getBean("scopedClass"), injected);
@@ -388,6 +427,28 @@ public class ConfigurationClassPostProcessorTests {
 		RepositoryInjectionBean bean = (RepositoryInjectionBean) beanFactory.getBean("annotatedBean");
 		assertEquals("Repository<String>", bean.stringRepository.toString());
 		assertEquals("Repository<Integer>", bean.integerRepository.toString());
+		assertTrue(AopUtils.isCglibProxy(bean.stringRepository));
+		assertTrue(AopUtils.isCglibProxy(bean.integerRepository));
+	}
+
+	@Test
+	public void genericsBasedInjectionWithScopedProxyUsingAsm() {
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(RepositoryInjectionBean.class.getName());
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		beanFactory.registerBeanDefinition("annotatedBean", bd);
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(ScopedProxyRepositoryConfiguration.class.getName()));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+		beanFactory.freezeConfiguration();
+
+		RepositoryInjectionBean bean = (RepositoryInjectionBean) beanFactory.getBean("annotatedBean");
+		assertEquals("Repository<String>", bean.stringRepository.toString());
+		assertEquals("Repository<Integer>", bean.integerRepository.toString());
+		assertTrue(AopUtils.isCglibProxy(bean.stringRepository));
+		assertTrue(AopUtils.isCglibProxy(bean.integerRepository));
 	}
 
 	@Test
@@ -470,6 +531,36 @@ public class ConfigurationClassPostProcessorTests {
 		beanFactory.registerBeanDefinition("serviceBeanProvider", new RootBeanDefinition(ServiceBeanProvider.class));
 		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
 		beanFactory.preInstantiateSingletons();
+
+		beanFactory.getBean(ServiceBean.class);
+	}
+
+	@Test
+	public void testConfigWithDefaultMethods() {
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(bpp);
+		beanFactory.addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(ConcreteConfigWithDefaultMethods.class));
+		beanFactory.registerBeanDefinition("serviceBeanProvider", new RootBeanDefinition(ServiceBeanProvider.class));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		beanFactory.preInstantiateSingletons();
+
+		beanFactory.getBean(ServiceBean.class);
+	}
+
+	@Test
+	public void testConfigWithDefaultMethodsUsingAsm() {
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(bpp);
+		beanFactory.addBeanPostProcessor(new CommonAnnotationBeanPostProcessor());
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(ConcreteConfigWithDefaultMethods.class.getName()));
+		beanFactory.registerBeanDefinition("serviceBeanProvider", new RootBeanDefinition(ServiceBeanProvider.class.getName()));
+		new ConfigurationClassPostProcessor().postProcessBeanFactory(beanFactory);
+		beanFactory.preInstantiateSingletons();
+
+		beanFactory.getBean(ServiceBean.class);
 	}
 
 	@Test
@@ -519,13 +610,11 @@ public class ConfigurationClassPostProcessorTests {
 	@Order(1)
 	static class SingletonBeanConfig {
 
-		public @Bean
-		Foo foo() {
+		public @Bean Foo foo() {
 			return new Foo();
 		}
 
-		public @Bean
-		Bar bar() {
+		public @Bean Bar bar() {
 			return new Bar(foo());
 		}
 	}
@@ -534,14 +623,28 @@ public class ConfigurationClassPostProcessorTests {
 	@Order(2)
 	static class OverridingSingletonBeanConfig {
 
-		public @Bean
-		ExtendedFoo foo() {
+		public @Bean ExtendedFoo foo() {
 			return new ExtendedFoo();
 		}
 
-		public @Bean
-		Bar bar() {
+		public @Bean Bar bar() {
 			return new Bar(foo());
+		}
+	}
+
+	@Configuration
+	static class OverridingAgainSingletonBeanConfig {
+
+		public @Bean ExtendedAgainFoo foo() {
+			return new ExtendedAgainFoo();
+		}
+	}
+
+	@Configuration
+	static class InvalidOverridingSingletonBeanConfig {
+
+		public @Bean Foo foo() {
+			return new Foo();
 		}
 	}
 
@@ -549,6 +652,9 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	static class ExtendedFoo extends Foo {
+	}
+
+	static class ExtendedAgainFoo extends ExtendedFoo {
 	}
 
 	static class Bar {
@@ -700,11 +806,18 @@ public class ConfigurationClassPostProcessorTests {
 		}
 	}
 
+	@Retention(RetentionPolicy.RUNTIME)
+	@Scope(scopeName = "prototype")
+	public @interface PrototypeScoped {
+
+		ScopedProxyMode proxyMode() default ScopedProxyMode.TARGET_CLASS;
+	}
+
 	@Configuration
 	public static class ScopedProxyRepositoryConfiguration {
 
 		@Bean
-		@Scope(value = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
+		@Scope(scopeName = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
 		public Repository<String> stringRepo() {
 			return new Repository<String>() {
 				@Override
@@ -715,7 +828,7 @@ public class ConfigurationClassPostProcessorTests {
 		}
 
 		@Bean
-		@Scope(value = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
+		@PrototypeScoped
 		public Repository<Integer> integerRepo() {
 			return new Repository<Integer>() {
 				@Override
@@ -928,6 +1041,37 @@ public class ConfigurationClassPostProcessorTests {
 
 	@Configuration
 	public static class ConcreteConfig extends AbstractConfig {
+
+		@Autowired
+		private ServiceBeanProvider provider;
+
+		@Bean
+		@Override
+		public ServiceBeanProvider provider() {
+			return provider;
+		}
+
+		@PostConstruct
+		public void validate() {
+			Assert.notNull(provider);
+		}
+	}
+
+	public interface DefaultMethodsConfig {
+
+		@Bean
+		default ServiceBean serviceBean() {
+			return provider().getServiceBean();
+		}
+
+		@Bean
+		default ServiceBeanProvider provider() {
+			return new ServiceBeanProvider();
+		}
+	}
+
+	@Configuration
+	public static class ConcreteConfigWithDefaultMethods implements DefaultMethodsConfig {
 
 		@Autowired
 		private ServiceBeanProvider provider;
