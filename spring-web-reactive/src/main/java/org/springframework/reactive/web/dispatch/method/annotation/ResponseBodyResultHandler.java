@@ -23,7 +23,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.reactivestreams.Publisher;
-import reactor.io.buffer.Buffer;
 import reactor.rx.Streams;
 import rx.Observable;
 import rx.RxReactiveStreams;
@@ -125,7 +124,7 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 				outputStream = postProcessor.encode(outputStream, type, mediaType, hints.toArray());
 			}
 			response.getHeaders().setContentType(mediaType);
-			return response.writeWith(Streams.wrap(outputStream).map(buffer -> new Buffer(buffer).asBytes()));
+			return response.writeWith(Streams.wrap(outputStream));
 		}
 		return Streams.fail(new IllegalStateException(
 				"Return value type not supported: " + returnType));

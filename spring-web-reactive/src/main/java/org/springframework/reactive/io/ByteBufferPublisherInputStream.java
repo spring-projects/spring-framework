@@ -16,9 +16,9 @@
 
 package org.springframework.reactive.io;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -32,13 +32,14 @@ import org.springframework.util.Assert;
 /**
  * {@code InputStream} implementation based on a byte array {@link Publisher}.
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  */
-public class ByteArrayPublisherInputStream extends InputStream {
+public class ByteBufferPublisherInputStream extends InputStream {
 
-	private final BlockingQueue<PublisherSignal<byte[]>> queue =
+	private final BlockingQueue<PublisherSignal<ByteBuffer>> queue =
 			new LinkedBlockingQueue<>();
 
-	private ByteArrayInputStream currentStream;
+	private ByteBufferInputStream currentStream;
 
 	private boolean completed;
 
@@ -47,7 +48,7 @@ public class ByteArrayPublisherInputStream extends InputStream {
 	 * Creates a new {@code ByteArrayPublisherInputStream} based on the given publisher.
 	 * @param publisher the publisher to use
 	 */
-	public ByteArrayPublisherInputStream(Publisher<byte[]> publisher) {
+	public ByteBufferPublisherInputStream(Publisher<ByteBuffer> publisher) {
 		this(publisher, 1);
 	}
 
@@ -57,7 +58,7 @@ public class ByteArrayPublisherInputStream extends InputStream {
 	 * @param requestSize the {@linkplain Subscription#request(long) request size} to use
 	 * on the publisher
 	 */
-	public ByteArrayPublisherInputStream(Publisher<byte[]> publisher, long requestSize) {
+	public ByteBufferPublisherInputStream(Publisher<ByteBuffer> publisher, long requestSize) {
 		Assert.notNull(publisher, "'publisher' must not be null");
 
 		publisher.subscribe(new BlockingQueueSubscriber(requestSize));
@@ -130,11 +131,11 @@ public class ByteArrayPublisherInputStream extends InputStream {
 			}
 			else {
 				// take() blocks, but that's OK since this is a *blocking* InputStream
-				PublisherSignal<byte[]> signal = this.queue.take();
+				PublisherSignal<ByteBuffer> signal = this.queue.take();
 
 				if (signal.isData()) {
-					byte[] data = signal.data();
-					this.currentStream = new ByteArrayInputStream(data);
+					ByteBuffer data = signal.data();
+					this.currentStream = new ByteBufferInputStream(data);
 					return this.currentStream;
 				}
 				else if (signal.isComplete()) {
@@ -159,7 +160,7 @@ public class ByteArrayPublisherInputStream extends InputStream {
 		throw new IOException();
 	}
 
-	private class BlockingQueueSubscriber implements Subscriber<byte[]> {
+	private class BlockingQueueSubscriber implements Subscriber<ByteBuffer> {
 
 		private final long requestSize;
 
@@ -177,7 +178,7 @@ public class ByteArrayPublisherInputStream extends InputStream {
 		}
 
 		@Override
-		public void onNext(byte[] bytes) {
+		public void onNext(ByteBuffer bytes) {
 			try {
 				queue.put(PublisherSignal.data(bytes));
 				this.subscription.request(requestSize);

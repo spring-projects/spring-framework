@@ -17,6 +17,7 @@ package org.springframework.reactive.web.http.rxnetty;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
 
 import io.netty.buffer.ByteBuf;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
@@ -74,12 +75,8 @@ public class RxNettyServerHttpRequest implements ServerHttpRequest {
 	}
 
 	@Override
-	public Publisher<byte[]> getBody() {
-		Observable<byte[]> bytesContent = this.request.getContent().map(byteBuf -> {
-			byte[] copy = new byte[byteBuf.readableBytes()];
-			byteBuf.readBytes(copy);
-			return copy;
-		});
+	public Publisher<ByteBuffer> getBody() {
+		Observable<ByteBuffer> bytesContent = this.request.getContent().map(byteBuf -> byteBuf.nioBuffer());
 		return rx.RxReactiveStreams.toPublisher(bytesContent);
 	}
 

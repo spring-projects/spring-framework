@@ -15,6 +15,7 @@
  */
 package org.springframework.reactive.web.http.servlet;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
@@ -60,7 +61,7 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public Publisher<Void> writeWith(final Publisher<byte[]> contentPublisher) {
+	public Publisher<Void> writeWith(final Publisher<ByteBuffer> contentPublisher) {
 		writeHeaders();
 		return (s -> contentPublisher.subscribe(responseSubscriber));
 	}

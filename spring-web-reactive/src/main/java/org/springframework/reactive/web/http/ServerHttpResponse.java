@@ -15,6 +15,8 @@
  */
 package org.springframework.reactive.web.http;
 
+import java.nio.ByteBuffer;
+
 import org.reactivestreams.Publisher;
 
 import org.springframework.http.HttpStatus;
@@ -26,6 +28,6 @@ public interface ServerHttpResponse extends HttpMessage {
 
 	void setStatusCode(HttpStatus status);
 
-	Publisher<Void> writeWith(Publisher<byte[]> contentPublisher);
+	Publisher<Void> writeWith(Publisher<ByteBuffer> contentPublisher);
 
 }

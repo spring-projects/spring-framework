@@ -15,6 +15,8 @@
  */
 package org.springframework.reactive.web.http;
 
+import java.nio.ByteBuffer;
+
 import org.reactivestreams.Publisher;
 
 /**
@@ -23,6 +25,6 @@ import org.reactivestreams.Publisher;
  */
 public interface ServerHttpRequest extends HttpRequest {
 
-	Publisher<byte[]> getBody();
+	Publisher<ByteBuffer> getBody();
 
 }

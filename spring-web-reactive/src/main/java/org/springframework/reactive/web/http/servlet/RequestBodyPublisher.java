@@ -17,6 +17,7 @@
 package org.springframework.reactive.web.http.servlet;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import javax.servlet.ReadListener;
@@ -33,7 +34,7 @@ import org.springframework.reactive.util.DemandCounter;
 /**
  * @author Arjen Poutsma
  */
-public class RequestBodyPublisher implements ReadListener, Publisher<byte[]> {
+public class RequestBodyPublisher implements ReadListener, Publisher<ByteBuffer> {
 
 	private final Charset UTF_8 = Charset.forName("UTF-8");
 
@@ -45,7 +46,7 @@ public class RequestBodyPublisher implements ReadListener, Publisher<byte[]> {
 
 	private final DemandCounter demand = new DemandCounter();
 
-	private Subscriber<? super byte[]> subscriber;
+	private Subscriber<? super ByteBuffer> subscriber;
 
 	private boolean stalled;
 
@@ -57,7 +58,7 @@ public class RequestBodyPublisher implements ReadListener, Publisher<byte[]> {
 	}
 
 	@Override
-	public void subscribe(Subscriber<? super byte[]> subscriber) {
+	public void subscribe(Subscriber<? super ByteBuffer> subscriber) {
 		if (subscriber == null) {
 			throw new NullPointerException();
 		}
@@ -103,7 +104,7 @@ public class RequestBodyPublisher implements ReadListener, Publisher<byte[]> {
 
 //				logger.debug("Next: " + new String(copy, UTF_8));
 
-				this.subscriber.onNext(copy);
+				this.subscriber.onNext(ByteBuffer.wrap(copy));
 
 			}
 		}

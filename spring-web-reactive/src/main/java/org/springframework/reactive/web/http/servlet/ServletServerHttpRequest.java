@@ -17,6 +17,7 @@ package org.springframework.reactive.web.http.servlet;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.Map;
@@ -39,12 +40,12 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	private final HttpServletRequest servletRequest;
 
-	private final Publisher<byte[]> requestBodyPublisher;
+	private final Publisher<ByteBuffer> requestBodyPublisher;
 
 	private HttpHeaders headers;
 
 
-	public ServletServerHttpRequest(HttpServletRequest servletRequest, Publisher<byte[]> requestBodyPublisher) {
+	public ServletServerHttpRequest(HttpServletRequest servletRequest, Publisher<ByteBuffer> requestBodyPublisher) {
 		Assert.notNull(servletRequest, "HttpServletRequest must not be null");
 		this.servletRequest = servletRequest;
 		this.requestBodyPublisher = requestBodyPublisher;
@@ -111,7 +112,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	}
 
 	@Override
-	public Publisher<byte[]> getBody() {
+	public Publisher<ByteBuffer> getBody() {
 		return this.requestBodyPublisher;
 	}
 

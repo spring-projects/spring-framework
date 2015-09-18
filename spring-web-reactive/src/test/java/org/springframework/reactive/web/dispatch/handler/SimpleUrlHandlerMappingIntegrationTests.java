@@ -22,6 +22,7 @@ import java.util.Map;
 
 import org.junit.Test;
 import org.reactivestreams.Publisher;
+import reactor.io.buffer.Buffer;
 import reactor.rx.Streams;
 
 import org.springframework.http.RequestEntity;
@@ -97,7 +98,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 
 		@Override
 		public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-			return response.writeWith(Streams.just("foo".getBytes(UTF_8)));
+			return response.writeWith(Streams.just(Buffer.wrap("foo").byteBuffer()));
 		}
 	}
 
@@ -105,7 +106,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 
 		@Override
 		public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-			return response.writeWith(Streams.just("bar".getBytes(UTF_8)));
+			return response.writeWith(Streams.just(Buffer.wrap("bar").byteBuffer()));
 		}
 	}
 

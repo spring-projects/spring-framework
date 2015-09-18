@@ -42,7 +42,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 import org.springframework.reactive.codec.CodecException;
 import org.springframework.reactive.codec.encoder.Jaxb2Encoder;
-import org.springframework.reactive.io.ByteArrayPublisherInputStream;
+import org.springframework.reactive.io.ByteBufferPublisherInputStream;
 import org.springframework.util.Assert;
 
 /**
@@ -63,10 +63,9 @@ public class Jaxb2Decoder implements ByteToMessageDecoder<Object> {
 
 	@Override
 	public Publisher<Object> decode(Publisher<ByteBuffer> inputStream, ResolvableType type, MediaType mediaType, Object... hints) {
-		Stream<byte[]> stream = Streams.wrap(inputStream).map(chunk -> new Buffer(chunk).asBytes());
 		Class<?> outputClass = type.getRawClass();
 		try {
-			Source source = processSource(new StreamSource(new ByteArrayPublisherInputStream(stream)));
+			Source source = processSource(new StreamSource(new ByteBufferPublisherInputStream(inputStream)));
 			Unmarshaller unmarshaller = createUnmarshaller(outputClass);
 			if (outputClass.isAnnotationPresent(XmlRootElement.class)) {
 				return Streams.just(unmarshaller.unmarshal(source));

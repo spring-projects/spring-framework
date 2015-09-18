@@ -78,7 +78,7 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 		ByteToMessageDecoder<?> deserializer = resolveDeserializers(request, type, mediaType, hints.toArray());
 		if (deserializer != null) {
 
-			Publisher<ByteBuffer> inputStream = Streams.wrap(request.getBody()).map(bytes -> ByteBuffer.wrap(bytes));
+			Publisher<ByteBuffer> inputStream = request.getBody();
 			List<ByteToMessageDecoder<ByteBuffer>> preProcessors = resolvePreProcessors(request, type, mediaType, hints.toArray());
 			for (ByteToMessageDecoder<ByteBuffer> preProcessor : preProcessors) {
 				inputStream = preProcessor.decode(inputStream, type, mediaType, hints.toArray());

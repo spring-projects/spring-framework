@@ -15,9 +15,12 @@
  */
 package org.springframework.reactive.web.http.rxnetty;
 
+import java.nio.ByteBuffer;
+
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import org.reactivestreams.Publisher;
+import reactor.io.buffer.Buffer;
 import rx.Observable;
 import rx.RxReactiveStreams;
 
@@ -56,9 +59,9 @@ public class RxNettyServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public Publisher<Void> writeWith(Publisher<byte[]> contentPublisher) {
+	public Publisher<Void> writeWith(Publisher<ByteBuffer> contentPublisher) {
 		writeHeaders();
-		Observable<byte[]> contentObservable = RxReactiveStreams.toObservable(contentPublisher);
+		Observable<byte[]> contentObservable = RxReactiveStreams.toObservable(contentPublisher).map(content -> new Buffer(content).asBytes());
 		return RxReactiveStreams.toPublisher(this.response.writeBytes(contentObservable));
 	}
 

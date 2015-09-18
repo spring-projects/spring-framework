@@ -23,13 +23,14 @@ import javax.xml.bind.Unmarshaller;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
-import reactor.rx.Streams;
 
 import org.springframework.http.MediaType;
-import org.springframework.reactive.io.ByteArrayPublisherInputStream;
-import org.springframework.reactive.io.ByteArrayPublisherOutputStream;
+import org.springframework.reactive.io.BufferOutputStream;
+import org.springframework.reactive.io.ByteBufferPublisherInputStream;
 
 import static org.junit.Assert.fail;
+import reactor.io.buffer.Buffer;
+import reactor.rx.Streams;
 
 /**
  * @author Arjen Poutsma
@@ -48,7 +49,7 @@ public class XmlHandler implements HttpHandler {
 
 			Runnable r = () -> {
 				try {
-					ByteArrayPublisherInputStream bis = new ByteArrayPublisherInputStream(request.getBody());
+					ByteBufferPublisherInputStream bis = new ByteBufferPublisherInputStream(request.getBody());
 
 					XmlHandlerIntegrationTests.Person johnDoe =
 						(XmlHandlerIntegrationTests.Person) unmarshaller.unmarshal(bis);
@@ -66,11 +67,13 @@ public class XmlHandler implements HttpHandler {
 
 			response.getHeaders().setContentType(MediaType.APPLICATION_XML);
 			XmlHandlerIntegrationTests.Person janeDoe = new XmlHandlerIntegrationTests.Person("Jane Doe");
-			ByteArrayPublisherOutputStream bos = new ByteArrayPublisherOutputStream();
+			Buffer buffer = new Buffer();
+			BufferOutputStream bos = new BufferOutputStream(buffer);
 			marshaller.marshal(janeDoe, bos);
 			bos.close();
+			buffer.flip();
 
-			return response.writeWith(bos.toByteArrayPublisher());
+			return response.writeWith(Streams.just(buffer.byteBuffer()));
 		}
 		catch (Exception ex) {
 			logger.error(ex, ex);
