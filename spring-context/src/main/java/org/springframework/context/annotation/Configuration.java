@@ -218,7 +218,7 @@ import org.springframework.stereotype.Component;
  * {@code <bean>} definitions within Spring XML files. It is also possible to
  * import Spring XML configuration files into {@code @Configuration} classes using
  * the {@link ImportResource @ImportResource} annotation. Bean definitions imported from XML can be
- * injected using {@code @Autowired} or {@code @Import}:
+ * injected using {@code @Autowired} or {@code @Inject}:
  * <pre class="code">
  * &#064;Configuration
  * &#064;ImportResource("classpath:/com/acme/database-config.xml")
