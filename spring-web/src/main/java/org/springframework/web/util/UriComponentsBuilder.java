@@ -345,27 +345,26 @@ public class UriComponentsBuilder implements Cloneable {
 	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>
 	 */
 	public static UriComponentsBuilder fromOriginHeader(String origin) {
-		UriComponentsBuilder builder = new UriComponentsBuilder();
+		final UriComponentsBuilder builder = new UriComponentsBuilder().scheme(null).host(null).port(null);
 
-		Matcher matcher = URI_PATTERN.matcher(origin);
-		if (matcher.matches()) {
-			String scheme = matcher.group(2);
-			String host = matcher.group(6);
-			String port = matcher.group(8);
+		if (StringUtils.hasLength(origin)) {
+			Matcher matcher = URI_PATTERN.matcher(origin);
+			if (matcher.matches()) {
+				String scheme = matcher.group(2);
+				String host = matcher.group(6);
+				String port = matcher.group(8);
 
-			if (StringUtils.hasLength(scheme)) {
-				int schemaIdx = origin.indexOf("://");
-				scheme = (schemaIdx != -1 ? origin.substring(0, schemaIdx) : "http");
+				if (StringUtils.hasLength(scheme)) {
+					int schemaIdx = origin.indexOf("://");
+					scheme = (schemaIdx != -1 ? origin.substring(0, schemaIdx) : null);
+				}
+				builder.scheme(scheme);
+
+				builder.host(host);
+				if (StringUtils.hasLength(port)) {
+					builder.port(port);
+				}
 			}
-			builder.scheme(scheme);
-
-			builder.host(host);
-			if (StringUtils.hasLength(port)) {
-				builder.port(port);
-			}
-		}
-		else {
-			builder.scheme("http").host(null).port(null);
 		}
 
 		return builder;
