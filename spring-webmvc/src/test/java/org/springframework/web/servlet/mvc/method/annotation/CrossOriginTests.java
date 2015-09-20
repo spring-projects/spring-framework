@@ -16,6 +16,11 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
@@ -177,6 +182,32 @@ public class CrossOriginTests {
 		assertNotNull(config);
 		assertArrayEquals(new String[]{"GET"}, config.getAllowedMethods().toArray());
 		assertArrayEquals(new String[]{"*"}, config.getAllowedOrigins().toArray());
+		assertTrue(config.getAllowCredentials());
+	}
+
+	@Test // SPR-13468
+	public void classLevelMetaAnnotation() throws Exception {
+		this.handlerMapping.registerHandler(new ClassLevelControllerWithMetaAnnotation());
+
+		this.request.setRequestURI("/foo");
+		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
+		CorsConfiguration config = getCorsConfiguration(chain, false);
+		assertNotNull(config);
+		assertArrayEquals(new String[]{"GET"}, config.getAllowedMethods().toArray());
+		assertArrayEquals(new String[]{"http://foo.com"}, config.getAllowedOrigins().toArray());
+		assertTrue(config.getAllowCredentials());
+	}
+
+	@Test // SPR-13468
+	public void methodLevelMetaAnnotation() throws Exception {
+		this.handlerMapping.registerHandler(new MethodLevelControllerWithMetaAnnotation());
+
+		this.request.setRequestURI("/foo");
+		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
+		CorsConfiguration config = getCorsConfiguration(chain, false);
+		assertNotNull(config);
+		assertArrayEquals(new String[]{"GET"}, config.getAllowedMethods().toArray());
+		assertArrayEquals(new String[]{"http://foo.com"}, config.getAllowedOrigins().toArray());
 		assertTrue(config.getAllowCredentials());
 	}
 
@@ -343,6 +374,34 @@ public class CrossOriginTests {
 		public void baz() {
 		}
 
+	}
+
+	@Target({ElementType.METHOD, ElementType.TYPE})
+	@Retention(RetentionPolicy.RUNTIME)
+	@Documented
+	@CrossOrigin
+	private @interface CrossOriginMetaAnnotation {
+		String[] origins() default {};
+		String allowCredentials() default "";
+	}
+
+	@Controller
+	@CrossOriginMetaAnnotation(origins = "http://foo.com", allowCredentials = "true")
+	private static class ClassLevelControllerWithMetaAnnotation {
+
+		@RequestMapping(path = "/foo", method = RequestMethod.GET)
+		public void foo() {
+		}
+	}
+
+
+	@Controller
+	private static class MethodLevelControllerWithMetaAnnotation {
+
+		@RequestMapping(path = "/foo", method = RequestMethod.GET)
+		@CrossOriginMetaAnnotation(origins = "http://foo.com", allowCredentials = "true")
+		public void foo() {
+		}
 	}
 
 	private static class TestRequestMappingInfoHandlerMapping extends RequestMappingHandlerMapping {
