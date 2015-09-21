@@ -27,7 +27,7 @@ configure(allprojects) { project ->
 	group = "org.springframework"
 	version = qualifyVersionIfNecessary(version)
 
-	ext.aspectjVersion       = "1.8.6"
+	ext.aspectjVersion       = "1.8.7"
 	ext.eclipseLinkVersion   = "2.4.2"
 	ext.ehcacheVersion       = "2.9.1"
 	ext.ehcacheJCacheVersion = "1.0.1"
