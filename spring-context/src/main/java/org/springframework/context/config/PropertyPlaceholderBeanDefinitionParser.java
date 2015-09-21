@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,9 @@ import org.springframework.util.StringUtils;
 class PropertyPlaceholderBeanDefinitionParser extends AbstractPropertyLoadingBeanDefinitionParser {
 
 	private static final String SYSTEM_PROPERTIES_MODE_ATTRIB = "system-properties-mode";
+
 	private static final String SYSTEM_PROPERTIES_MODE_DEFAULT = "ENVIRONMENT";
+
 
 	@Override
 	protected Class<?> getBeanClass(Element element) {
