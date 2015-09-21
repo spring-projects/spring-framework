@@ -121,13 +121,17 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		assertEquals(",\"origins\":[\"*:*\"],\"cookie_needed\":true,\"websocket\":true}", body.substring(body.indexOf(',')));
 
 		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
-		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.FORBIDDEN);
+		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
 
 		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com", "http://mydomain2.com", "http://mydomain3.com"));
 		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
 
 		this.service.setAllowedOrigins(Arrays.asList("*"));
 		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.OK);
+
+		this.servletRequest.setServerName("mydomain3.com");
+		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
+		resetResponseAndHandleRequest("GET", "/echo/info", HttpStatus.FORBIDDEN);
 	}
 
 	@Test  // SPR-11443
@@ -176,7 +180,8 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		assertNotNull(this.service.getCorsConfiguration(this.servletRequest));
 
 		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
-		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.FORBIDDEN);
+		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
+		assertNotNull(this.service.getCorsConfiguration(this.servletRequest));
 
 		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com", "http://mydomain2.com", "http://mydomain3.com"));
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
@@ -185,6 +190,10 @@ public class SockJsServiceTests extends AbstractHttpRequestTests {
 		this.service.setAllowedOrigins(Arrays.asList("*"));
 		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.NO_CONTENT);
 		assertNotNull(this.service.getCorsConfiguration(this.servletRequest));
+
+		this.servletRequest.setServerName("mydomain3.com");
+		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
+		resetResponseAndHandleRequest("OPTIONS", "/echo/info", HttpStatus.FORBIDDEN);
 	}
 
 	@Test  // SPR-12283

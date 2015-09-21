@@ -448,13 +448,12 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	protected boolean checkOrigin(ServerHttpRequest request, ServerHttpResponse response,
 			HttpMethod... httpMethods) throws IOException {
 
-		String origin = request.getHeaders().getOrigin();
-
-		if (origin == null) {
+		if (WebUtils.isSameOrigin(request)) {
 			return true;
 		}
 
 		if (!WebUtils.isValidOrigin(request, this.allowedOrigins)) {
+			String origin = request.getHeaders().getOrigin();
 			logger.debug("Request rejected, Origin header value " + origin + " not allowed");
 			response.setStatusCode(HttpStatus.FORBIDDEN);
 			return false;
