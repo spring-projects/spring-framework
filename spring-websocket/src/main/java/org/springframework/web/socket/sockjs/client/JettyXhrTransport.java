@@ -44,7 +44,6 @@ import org.springframework.web.socket.sockjs.SockJsException;
 import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
 
-
 /**
  * An XHR transport based on Jetty's {@link org.eclipse.jetty.client.HttpClient}.
  *
@@ -61,7 +60,7 @@ import org.springframework.web.socket.sockjs.frame.SockJsFrame;
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public class JettyXhrTransport extends AbstractXhrTransport implements XhrTransport, Lifecycle {
+public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle {
 
 	private final HttpClient httpClient;
 
@@ -104,6 +103,7 @@ public class JettyXhrTransport extends AbstractXhrTransport implements XhrTransp
 	public boolean isRunning() {
 		return this.httpClient.isRunning();
 	}
+
 
 	@Override
 	protected ResponseEntity<String> executeInfoRequestInternal(URI infoUrl) {
