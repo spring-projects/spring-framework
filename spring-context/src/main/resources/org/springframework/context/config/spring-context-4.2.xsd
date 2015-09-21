@@ -19,7 +19,7 @@
 		]]></xsd:documentation>
 	</xsd:annotation>
 
-	<xsd:complexType name="propertyPlaceholder">
+	<xsd:complexType name="propertyLoading">
 		<xsd:attribute name="location" type="xsd:string">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
@@ -112,7 +112,7 @@
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:complexContent>
-				<xsd:extension base="propertyPlaceholder">
+				<xsd:extension base="propertyLoading">
 					<xsd:attribute name="system-properties-mode" default="ENVIRONMENT">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
@@ -144,6 +144,14 @@
 							</xsd:restriction>
 						</xsd:simpleType>
 					</xsd:attribute>
+					<xsd:attribute name="null-value">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+	A value that should be treated as {@code null} when resolved as a placeholder value:
+	e.g. "" (empty String) or "null". By default, no such null value is defined.
+				]]></xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
 				</xsd:extension>
 			</xsd:complexContent>
 		</xsd:complexType>
@@ -163,7 +171,7 @@
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:complexContent>
-				<xsd:extension base="propertyPlaceholder"/>
+				<xsd:extension base="propertyLoading"/>
 			</xsd:complexContent>
 		</xsd:complexType>
 	</xsd:element>

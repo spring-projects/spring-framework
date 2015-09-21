@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ public class ContextNamespaceHandlerTests {
 		System.getProperties().remove("foo");
 	}
 
+
 	@Test
 	public void propertyPlaceholder() throws Exception {
 		ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
@@ -55,7 +56,8 @@ public class ContextNamespaceHandlerTests {
 				.getBeansOfType(PlaceholderConfigurerSupport.class);
 		assertFalse("No PropertyPlaceholderConfigurer found", beans.isEmpty());
 		String s = (String) applicationContext.getBean("string");
-		assertEquals("No properties replaced", "bar", s);
+		assertEquals("bar", s);
+		assertEquals("null", applicationContext.getBean("nullString"));
 	}
 
 	@Test
@@ -68,8 +70,9 @@ public class ContextNamespaceHandlerTests {
 					.getBeansOfType(PropertyPlaceholderConfigurer.class);
 			assertFalse("No PropertyPlaceholderConfigurer found", beans.isEmpty());
 			String s = (String) applicationContext.getBean("string");
-			assertEquals("No properties replaced", "spam", s);
-		} finally {
+			assertEquals("spam", s);
+		}
+		finally {
 			if (value!=null) {
 				System.setProperty("foo", value);
 			}
@@ -87,7 +90,7 @@ public class ContextNamespaceHandlerTests {
 				.getBeansOfType(PlaceholderConfigurerSupport.class);
 		assertFalse("No PropertyPlaceholderConfigurer found", beans.isEmpty());
 		String s = (String) applicationContext.getBean("string");
-		assertEquals("No properties replaced", "spam", s);
+		assertEquals("spam", s);
 	}
 
 	@Test
@@ -98,11 +101,11 @@ public class ContextNamespaceHandlerTests {
 				.getBeansOfType(PropertyPlaceholderConfigurer.class);
 		assertFalse("No PropertyPlaceholderConfigurer found", beans.isEmpty());
 		String s = (String) applicationContext.getBean("foo");
-		assertEquals("No properties replaced", "bar", s);
+		assertEquals("bar", s);
 		s = (String) applicationContext.getBean("bar");
-		assertEquals("No properties replaced", "foo", s);
+		assertEquals("foo", s);
 		s = (String) applicationContext.getBean("spam");
-		assertEquals("No properties replaced", "maps", s);
+		assertEquals("maps", s);
 	}
 
 	@Test
@@ -113,7 +116,8 @@ public class ContextNamespaceHandlerTests {
 				.getBeansOfType(PlaceholderConfigurerSupport.class);
 		assertFalse("No PropertyPlaceholderConfigurer found", beans.isEmpty());
 		String s = (String) applicationContext.getBean("string");
-		assertEquals("Properties replaced", "${bar}", s);
+		assertEquals("${bar}", s);
+		assertEquals("null", applicationContext.getBean("nullString"));
 	}
 
 	@Test
@@ -126,6 +130,7 @@ public class ContextNamespaceHandlerTests {
 		Date date = (Date) applicationContext.getBean("date");
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
-		assertEquals("No properties overriden", 42, calendar.get(Calendar.MINUTE));
+		assertEquals(42, calendar.get(Calendar.MINUTE));
 	}
+
 }
