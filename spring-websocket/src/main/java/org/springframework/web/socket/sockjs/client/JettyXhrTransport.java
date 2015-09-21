@@ -60,7 +60,7 @@ import org.springframework.web.socket.sockjs.frame.SockJsFrame;
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public class JettyXhrTransport extends AbstractXhrTransport implements XhrTransport, Lifecycle {
+public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle {
 
 	private final HttpClient httpClient;
 

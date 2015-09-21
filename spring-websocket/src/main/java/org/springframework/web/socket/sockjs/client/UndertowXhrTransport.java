@@ -82,7 +82,7 @@ import org.springframework.web.socket.sockjs.frame.SockJsFrame;
  * @since 4.1.2
  * @see org.xnio.Options
  */
-public class UndertowXhrTransport extends AbstractXhrTransport implements XhrTransport {
+public class UndertowXhrTransport extends AbstractXhrTransport {
 
 	private static final AttachmentKey<String> RESPONSE_BODY = AttachmentKey.create(String.class);
 

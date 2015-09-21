@@ -50,7 +50,7 @@ import org.springframework.web.socket.sockjs.frame.SockJsFrame;
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public class RestTemplateXhrTransport extends AbstractXhrTransport implements XhrTransport {
+public class RestTemplateXhrTransport extends AbstractXhrTransport {
 
 	private final RestOperations restTemplate;
 
