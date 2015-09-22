@@ -41,7 +41,6 @@ public class JacksonJsonEncoder implements MessageToByteEncoder<Object> {
 
 	private final ObjectMapper mapper;
 
-
 	public JacksonJsonEncoder() {
 		this(new ObjectMapper());
 	}
@@ -50,7 +49,6 @@ public class JacksonJsonEncoder implements MessageToByteEncoder<Object> {
 		this.mapper = mapper;
 	}
 
-
 	@Override
 	public boolean canEncode(ResolvableType type, MediaType mediaType, Object... hints) {
 		return mediaType.isCompatibleWith(MediaType.APPLICATION_JSON);
@@ -58,7 +56,7 @@ public class JacksonJsonEncoder implements MessageToByteEncoder<Object> {
 
 	@Override
 	public Publisher<ByteBuffer> encode(Publisher<? extends Object> messageStream, ResolvableType type, MediaType mediaType, Object... hints) {
-			Stream<ByteBuffer> stream = Streams.wrap(messageStream).map(value -> {
+		Stream<ByteBuffer> stream = Streams.wrap(messageStream).map(value -> {
 			Buffer buffer = new Buffer();
 			BufferOutputStream outputStream = new BufferOutputStream(buffer);
 			try {

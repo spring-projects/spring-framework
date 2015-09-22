@@ -16,11 +16,13 @@
 
 package org.springframework.reactive.util;
 
+import org.reactivestreams.Publisher;
+
 import org.springframework.util.Assert;
 
 /**
  * Represents a signal value object, useful for wrapping signals as published by a {@link
- * #Publisher()}. Mostly used to store signals in buffers.
+ * Publisher}. Mostly used to store signals in buffers.
  * @author Arjen Poutsma
  */
 public abstract class PublisherSignal<T> {

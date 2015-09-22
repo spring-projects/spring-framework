@@ -21,6 +21,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.reactivestreams.Publisher;
@@ -73,10 +74,10 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	public HttpHeaders getHeaders() {
 		if (this.headers == null) {
 			this.headers = new HttpHeaders();
-			for (Enumeration<?> headerNames = this.servletRequest.getHeaderNames(); headerNames.hasMoreElements();) {
+			for (Enumeration<?> headerNames = this.servletRequest.getHeaderNames(); headerNames.hasMoreElements(); ) {
 				String headerName = (String) headerNames.nextElement();
 				for (Enumeration<?> headerValues = this.servletRequest.getHeaders(headerName);
-					 headerValues.hasMoreElements();) {
+					 headerValues.hasMoreElements(); ) {
 					String headerValue = (String) headerValues.nextElement();
 					this.headers.add(headerName, headerValue);
 				}

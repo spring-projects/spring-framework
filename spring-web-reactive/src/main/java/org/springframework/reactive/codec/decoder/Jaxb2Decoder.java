@@ -19,6 +19,7 @@ package org.springframework.reactive.codec.decoder;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
@@ -34,8 +35,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
-import reactor.io.buffer.Buffer;
-import reactor.rx.Stream;
 import reactor.rx.Streams;
 
 import org.springframework.core.ResolvableType;
@@ -54,7 +53,6 @@ import org.springframework.util.Assert;
 public class Jaxb2Decoder implements ByteToMessageDecoder<Object> {
 
 	private final ConcurrentMap<Class<?>, JAXBContext> jaxbContexts = new ConcurrentHashMap<Class<?>, JAXBContext>(64);
-
 
 	@Override
 	public boolean canDecode(ResolvableType type, MediaType mediaType, Object... hints) {
@@ -127,5 +125,4 @@ public class Jaxb2Decoder implements ByteToMessageDecoder<Object> {
 		}
 		return jaxbContext;
 	}
-
 }

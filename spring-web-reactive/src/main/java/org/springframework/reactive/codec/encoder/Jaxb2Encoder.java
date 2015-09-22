@@ -20,6 +20,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.MarshalException;
@@ -46,7 +47,6 @@ import org.springframework.util.ClassUtils;
 public class Jaxb2Encoder implements MessageToByteEncoder<Object> {
 
 	private final ConcurrentMap<Class<?>, JAXBContext> jaxbContexts = new ConcurrentHashMap<Class<?>, JAXBContext>(64);
-
 
 	@Override
 	public boolean canEncode(ResolvableType type, MediaType mediaType, Object... hints) {
@@ -106,3 +106,4 @@ public class Jaxb2Encoder implements MessageToByteEncoder<Object> {
 	}
 
 }
+

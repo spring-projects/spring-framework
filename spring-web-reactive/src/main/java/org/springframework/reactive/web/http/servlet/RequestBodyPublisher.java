@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 
@@ -35,8 +36,6 @@ import org.springframework.reactive.util.DemandCounter;
  * @author Arjen Poutsma
  */
 public class RequestBodyPublisher implements ReadListener, Publisher<ByteBuffer> {
-
-	private final Charset UTF_8 = Charset.forName("UTF-8");
 
 	private static final Log logger = LogFactory.getLog(RequestBodyPublisher.class);
 

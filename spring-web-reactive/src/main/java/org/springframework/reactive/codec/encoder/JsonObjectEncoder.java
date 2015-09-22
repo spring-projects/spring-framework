@@ -19,7 +19,6 @@ package org.springframework.reactive.codec.encoder;
 import java.nio.ByteBuffer;
 
 import org.reactivestreams.Publisher;
-
 import rx.Observable;
 import rx.RxReactiveStreams;
 
@@ -37,7 +36,9 @@ import org.springframework.reactive.codec.decoder.JsonObjectDecoder;
 public class JsonObjectEncoder implements MessageToByteEncoder<ByteBuffer> {
 
 	private final ByteBuffer START_ARRAY = ByteBuffer.wrap("[".getBytes());
+
 	private final ByteBuffer END_ARRAY = ByteBuffer.wrap("]".getBytes());
+
 	private final ByteBuffer COMMA = ByteBuffer.wrap(",".getBytes());
 
 

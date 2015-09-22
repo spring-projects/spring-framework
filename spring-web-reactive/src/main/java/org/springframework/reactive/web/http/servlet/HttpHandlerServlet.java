@@ -17,6 +17,7 @@
 package org.springframework.reactive.web.http.servlet;
 
 import java.io.IOException;
+
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -36,7 +37,7 @@ import org.springframework.reactive.web.http.HttpHandler;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
-@WebServlet(asyncSupported = true )
+@WebServlet(asyncSupported = true)
 public class HttpHandlerServlet extends HttpServlet {
 
 	private static final int BUFFER_SIZE = 8192;

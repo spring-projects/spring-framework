@@ -45,8 +45,6 @@ public class XmlHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTe
 				johnDoe);
 		ResponseEntity<Person> response = restTemplate.exchange(request, Person.class);
 		System.out.println(response.getBody());
-
-
 	}
 
 	@XmlRootElement

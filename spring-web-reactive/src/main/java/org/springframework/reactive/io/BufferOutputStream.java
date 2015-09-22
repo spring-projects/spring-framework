@@ -22,24 +22,29 @@ import java.io.OutputStream;
 import reactor.io.buffer.Buffer;
 
 /**
+ * Simple extension of {@link OutputStream} that uses {@link Buffer} to stream
+ * the content
+ *
  * @author Sebastien Deleuze
  */
 public class BufferOutputStream extends OutputStream {
 
-    private Buffer buffer;
+	private Buffer buffer;
 
 	public BufferOutputStream(Buffer buffer) {
-        this.buffer = buffer;
-    }
+		this.buffer = buffer;
+	}
 
-    public void write(int b) throws IOException {
-        buffer.append(b);
-    }
+	@Override
+	public void write(int b) throws IOException {
+		buffer.append(b);
+	}
 
-    public void write(byte[] bytes, int off, int len)
-            throws IOException {
-        buffer.append(bytes, off, len);
-    }
+	@Override
+	public void write(byte[] bytes, int off, int len)
+			throws IOException {
+		buffer.append(bytes, off, len);
+	}
 
 	public Buffer getBuffer() {
 		return buffer;

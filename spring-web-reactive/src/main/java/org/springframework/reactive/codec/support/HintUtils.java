@@ -23,7 +23,6 @@ import org.springframework.reactive.codec.encoder.MessageToByteEncoder;
  * Utility methods for dealing with codec hints.
  *
  * @author Sebastien Deleuze
- * @see Hints
  * @see MessageToByteEncoder
  * @see ByteToMessageDecoder
  */
@@ -36,7 +35,7 @@ public abstract class HintUtils {
 	public static <T> T getHintByClass(Class<T> clazz, Object[] hints, T defaultValue) {
 		for (Object hint : hints) {
 			if (hint.getClass().isAssignableFrom(clazz)) {
-				return (T)hint;
+				return (T) hint;
 			}
 		}
 		return defaultValue;

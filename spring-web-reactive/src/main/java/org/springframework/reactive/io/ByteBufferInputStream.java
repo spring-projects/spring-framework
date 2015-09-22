@@ -26,16 +26,23 @@ import java.nio.ByteBuffer;
  *
  * From Jackson <a href="https://github.com/FasterXML/jackson-databind/blob/master/src/main/java/com/fasterxml/jackson/databind/util/ByteBufferBackedInputStream.java">ByteBufferBackedInputStream</a>
  */
-public class ByteBufferInputStream  extends InputStream {
+public class ByteBufferInputStream extends InputStream {
 
 	protected final ByteBuffer b;
 
-	public ByteBufferInputStream(ByteBuffer buf) { b = buf; }
-
-	@Override public int available() { return b.remaining(); }
+	public ByteBufferInputStream(ByteBuffer buf) {
+		b = buf;
+	}
 
 	@Override
-	public int read() throws IOException { return b.hasRemaining() ? (b.get() & 0xFF) : -1; }
+	public int available() {
+		return b.remaining();
+	}
+
+	@Override
+	public int read() throws IOException {
+		return b.hasRemaining() ? (b.get() & 0xFF) : -1;
+	}
 
 	@Override
 	public int read(byte[] bytes, int off, int len) throws IOException {
