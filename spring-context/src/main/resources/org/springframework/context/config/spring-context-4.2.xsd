@@ -96,13 +96,13 @@
 	PropertySources.
 
 	Note that as of Spring 3.1 the system-properties-mode attribute has been removed in
-	favor of the more flexible PropertySources mechanism. However, Spring 3.1-based
-	applications may continue to use the 3.0 (and older) versions of the spring-context
-	schema in order to preserve system-properties-mode behavior. In this case, the
-	traditional PropertyPlaceholderConfigurer component will be registered instead of the
-	new PropertySourcesPlaceholderConfigurer.
+	favor of the more flexible PropertySources mechanism. However, applications may
+	continue to use the 3.0 (and older) versions of the spring-context schema in order
+	to preserve system-properties-mode behavior. In this case, the traditional
+	PropertyPlaceholderConfigurer component will be registered instead of the newer
+	PropertySourcesPlaceholderConfigurer.
 
-	See ConfigurableEnvironment javadoc for more information on using.
+	See ConfigurableEnvironment javadoc for more information on usage.
 			]]></xsd:documentation>
 			<xsd:appinfo>
 				<tool:annotation>
@@ -126,8 +126,8 @@
 	will cause a traditional PropertyPlaceholderConfigurer to be registered instead of the
 	newer PropertySourcesPlaceholderConfigurer variant. In this case, the Spring Environment
 	and its property sources are not interrogated when resolving placeholders. Users are
-	encouraged to consider this attribute deprecated, and to take advantage of
-	Environment/PropertySource mechanisms. See ConfigurableEnvironment javadoc for examples.
+	encouraged to consider this attribute deprecated, and to take advantage of the
+	Environment and PropertySource mechanisms. See ConfigurableEnvironment javadoc for examples.
 
 	"ENVIRONMENT" indicates placeholders should be resolved against the current Environment and against any local properties;
 	"NEVER" indicates placeholders should be resolved only against local properties and never against system properties;
@@ -147,7 +147,7 @@
 					<xsd:attribute name="null-value">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
-	A value that should be treated as {@code null} when resolved as a placeholder value:
+	A value that should be treated as 'null' when resolved as a placeholder value:
 	e.g. "" (empty String) or "null". By default, no such null value is defined.
 				]]></xsd:documentation>
 						</xsd:annotation>
@@ -181,17 +181,16 @@
 			<xsd:documentation><![CDATA[
 	Activates various annotations to be detected in bean classes: Spring's @Required and
 	@Autowired, as well as JSR 250's @PostConstruct, @PreDestroy and @Resource (if available),
-	JAX-WS's @WebServiceRef (if available), EJB3's @EJB (if available), and JPA's
+	JAX-WS's @WebServiceRef (if available), EJB 3's @EJB (if available), and JPA's
 	@PersistenceContext and @PersistenceUnit (if available). Alternatively, you may
 	choose to activate the individual BeanPostProcessors for those annotations.
 
-	Note: This tag does not activate processing of Spring's @Transactional or EJB3's
+	Note: This tag does not activate processing of Spring's @Transactional or EJB 3's
 	@TransactionAttribute annotation. Consider the use of the <tx:annotation-driven>
 	tag for that purpose.
 
 	See javadoc for org.springframework.context.annotation.AnnotationConfigApplicationContext
 	for information on code-based alternatives to bootstrapping annotation-driven support.
-	from XML.
 			]]></xsd:documentation>
 		</xsd:annotation>
 	</xsd:element>
@@ -200,8 +199,9 @@
 		<xsd:annotation>
 			<xsd:documentation><![CDATA[
 	Scans the classpath for annotated components that will be auto-registered as
-	Spring beans. By default, the Spring-provided @Component, @Repository,
-	@Service, and @Controller stereotypes will be detected.
+	Spring beans. By default, the Spring-provided @Component, @Repository, @Service,
+	@Controller, @RestController, @ControllerAdvice, and @Configuration stereotypes
+	will be detected.
 
 	Note: This tag implies the effects of the 'annotation-config' tag, activating @Required,
 	@Autowired, @PostConstruct, @PreDestroy, @Resource, @PersistenceContext and @PersistenceUnit
@@ -211,8 +211,8 @@
 	for handling those annotations.
 
 	Note: You may use placeholders in package paths, but only resolved against system
-	properties (analogous to resource paths). A component scan results in new bean definition
-	being registered; Spring's PropertyPlaceholderConfigurer will apply to those bean
+	properties (analogous to resource paths). A component scan results in new bean definitions
+	being registered; Spring's PropertySourcesPlaceholderConfigurer will apply to those bean
 	definitions just like to regular bean definitions, but it won't apply to the component
 	scan settings themselves.
 
