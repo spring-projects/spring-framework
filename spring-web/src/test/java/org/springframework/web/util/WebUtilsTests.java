@@ -130,9 +130,9 @@ public class WebUtilsTests {
 
 		allowed = Collections.singletonList("http://mydomain1.com");
 		assertTrue(checkValidOrigin("mydomain2.com", -1, "http://mydomain1.com", allowed));
-		assertTrue(checkValidOrigin("mydomain2.com", -1, "http://mydomain1.com/", allowed));
 		assertTrue(checkValidOrigin("mydomain1.com", -1, null, allowed));
 
+		assertFalse(checkValidOrigin("mydomain2.com", -1, "http://mydomain1.com/", allowed));
 		assertFalse(checkValidOrigin("mydomain2.com", -1, "http://mydomain1.com/path/file", allowed));
 		assertFalse(checkValidOrigin("mydomain1.com", -1, "", allowed));
 		assertFalse(checkValidOrigin("mydomain1.com", -1, "null", allowed));

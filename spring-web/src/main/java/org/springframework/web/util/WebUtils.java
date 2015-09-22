@@ -793,10 +793,6 @@ public abstract class WebUtils {
 			return isSameOrigin(request);
 		}
 		else {
-			if((origin.length() > 0) && ('/' == origin.charAt(origin.length() - 1))) {
-				origin = origin.substring(0, origin.length() - 1);
-			}
-		
 			return allowedOrigins.contains(origin);
 		}
 	}
