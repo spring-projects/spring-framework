@@ -194,11 +194,11 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		return new DefaultCacheConfig();
 	}
 
-	private <T extends Annotation> Collection<T> getAnnotations(AnnotatedElement ae, Class<T> annotationType) {
-		Collection<T> anns = new ArrayList<T>(2);
+	private <A extends Annotation> Collection<A> getAnnotations(AnnotatedElement ae, Class<A> annotationType) {
+		Collection<A> anns = new ArrayList<A>(2);
 
 		// look at raw annotation
-		T ann = ae.getAnnotation(annotationType);
+		A ann = ae.getAnnotation(annotationType);
 		if (ann != null) {
 			anns.add(AnnotationUtils.synthesizeAnnotation(ann, ae));
 		}

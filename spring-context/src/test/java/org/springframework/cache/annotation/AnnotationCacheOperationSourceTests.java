@@ -21,6 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -31,6 +32,7 @@ import org.junit.rules.ExpectedException;
 import org.springframework.cache.interceptor.CacheEvictOperation;
 import org.springframework.cache.interceptor.CacheOperation;
 import org.springframework.cache.interceptor.CacheableOperation;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.util.ReflectionUtils;
 
 import static org.junit.Assert.*;
@@ -42,15 +44,14 @@ import static org.junit.Assert.*;
 public class AnnotationCacheOperationSourceTests {
 
 	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
+	public final ExpectedException exception = ExpectedException.none();
 
 	private AnnotationCacheOperationSource source = new AnnotationCacheOperationSource();
 
-	private Collection<CacheOperation> getOps(Class<?> target, String name,
-											  int expectedNumberOfOperations) {
+
+	private Collection<CacheOperation> getOps(Class<?> target, String name, int expectedNumberOfOperations) {
 		Collection<CacheOperation> result = getOps(target, name);
-		assertEquals("Wrong number of operation(s) for '"+name+"'",
-				expectedNumberOfOperations, result.size());
+		assertEquals("Wrong number of operation(s) for '" + name + "'", expectedNumberOfOperations, result.size());
 		return result;
 	}
 
@@ -60,13 +61,13 @@ public class AnnotationCacheOperationSourceTests {
 	}
 
 	@Test
-	public void testSingularAnnotation() throws Exception {
+	public void singularAnnotation() throws Exception {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "singular", 1);
 		assertTrue(ops.iterator().next() instanceof CacheableOperation);
 	}
 
 	@Test
-	public void testMultipleAnnotation() throws Exception {
+	public void multipleAnnotation() throws Exception {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "multiple", 2);
 		Iterator<CacheOperation> it = ops.iterator();
 		assertTrue(it.next() instanceof CacheableOperation);
@@ -74,7 +75,7 @@ public class AnnotationCacheOperationSourceTests {
 	}
 
 	@Test
-	public void testCaching() throws Exception {
+	public void caching() throws Exception {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "caching", 2);
 		Iterator<CacheOperation> it = ops.iterator();
 		assertTrue(it.next() instanceof CacheableOperation);
@@ -82,13 +83,13 @@ public class AnnotationCacheOperationSourceTests {
 	}
 
 	@Test
-	public void testSingularStereotype() throws Exception {
+	public void singularStereotype() throws Exception {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "singleStereotype", 1);
 		assertTrue(ops.iterator().next() instanceof CacheEvictOperation);
 	}
 
 	@Test
-	public void testMultipleStereotypes() throws Exception {
+	public void multipleStereotypes() throws Exception {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "multipleStereotype", 3);
 		Iterator<CacheOperation> it = ops.iterator();
 		assertTrue(it.next() instanceof CacheableOperation);
@@ -101,65 +102,57 @@ public class AnnotationCacheOperationSourceTests {
 	}
 
 	@Test
-	public void testCustomKeyGenerator() {
+	public void customKeyGenerator() {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "customKeyGenerator", 1);
 		CacheOperation cacheOperation = ops.iterator().next();
 		assertEquals("Custom key generator not set", "custom", cacheOperation.getKeyGenerator());
 	}
 
 	@Test
-	public void testCustomKeyGeneratorInherited() {
+	public void customKeyGeneratorInherited() {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "customKeyGeneratorInherited", 1);
 		CacheOperation cacheOperation = ops.iterator().next();
 		assertEquals("Custom key generator not set", "custom", cacheOperation.getKeyGenerator());
 	}
 
 	@Test
-	public void testKeyAndKeyGeneratorCannotBeSetTogether() {
-		try {
-			getOps(AnnotatedClass.class, "invalidKeyAndKeyGeneratorSet");
-			fail("Should have failed to parse @Cacheable annotation");
-		} catch (IllegalStateException e) {
-			// expected
-		}
+	public void keyAndKeyGeneratorCannotBeSetTogether() {
+		exception.expect(IllegalStateException.class);
+		getOps(AnnotatedClass.class, "invalidKeyAndKeyGeneratorSet");
 	}
 
 	@Test
-	public void testCustomCacheManager() {
+	public void customCacheManager() {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "customCacheManager", 1);
 		CacheOperation cacheOperation = ops.iterator().next();
 		assertEquals("Custom cache manager not set", "custom", cacheOperation.getCacheManager());
 	}
 
 	@Test
-	public void testCustomCacheManagerInherited() {
+	public void customCacheManagerInherited() {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "customCacheManagerInherited", 1);
 		CacheOperation cacheOperation = ops.iterator().next();
 		assertEquals("Custom cache manager not set", "custom", cacheOperation.getCacheManager());
 	}
 
 	@Test
-	public void testCustomCacheResolver() {
+	public void customCacheResolver() {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "customCacheResolver", 1);
 		CacheOperation cacheOperation = ops.iterator().next();
 		assertEquals("Custom cache resolver not set", "custom", cacheOperation.getCacheResolver());
 	}
 
 	@Test
-	public void testCustomCacheResolverInherited() {
+	public void customCacheResolverInherited() {
 		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "customCacheResolverInherited", 1);
 		CacheOperation cacheOperation = ops.iterator().next();
 		assertEquals("Custom cache resolver not set", "custom", cacheOperation.getCacheResolver());
 	}
 
 	@Test
-	public void testCacheResolverAndCacheManagerCannotBeSetTogether() {
-		try {
-			getOps(AnnotatedClass.class, "invalidCacheResolverAndCacheManagerSet");
-			fail("Should have failed to parse @Cacheable annotation");
-		} catch (IllegalStateException e) {
-			// expected
-		}
+	public void cacheResolverAndCacheManagerCannotBeSetTogether() {
+		exception.expect(IllegalStateException.class);
+		getOps(AnnotatedClass.class, "invalidCacheResolverAndCacheManagerSet");
 	}
 
 	@Test
@@ -239,14 +232,14 @@ public class AnnotationCacheOperationSourceTests {
 		assertEquals("Wrong key manager",  keyGenerator, actual.getKeyGenerator());
 		assertEquals("Wrong cache manager", cacheManager, actual.getCacheManager());
 		assertEquals("Wrong cache resolver", cacheResolver, actual.getCacheResolver());
-		for (String cacheName : cacheNames) {
-			assertTrue("Cache '"+cacheName+"' not found (got "+actual.getCacheNames(),
-					actual.getCacheNames().contains(cacheName));
-		}
-		assertEquals("Wrong number of cache name(s)", cacheNames.length, actual.getCacheNames().size());
+		assertEquals("Wrong number of cache names", cacheNames.length, actual.getCacheNames().size());
+		Arrays.stream(cacheNames).forEach(
+			cacheName -> assertTrue("Cache '" + cacheName + "' not found in " + actual.getCacheNames(),
+				actual.getCacheNames().contains(cacheName)));
 	}
 
 	private static class AnnotatedClass {
+
 		@Cacheable("test")
 		public void singular() {
 		}
@@ -256,7 +249,7 @@ public class AnnotationCacheOperationSourceTests {
 		public void multiple() {
 		}
 
-		@Caching(cacheable = {@Cacheable("test")}, evict = {@CacheEvict("test")})
+		@Caching(cacheable = @Cacheable("test"), evict = @CacheEvict("test"))
 		public void caching() {
 		}
 
@@ -357,7 +350,6 @@ public class AnnotationCacheOperationSourceTests {
 		@Cacheable
 		public void noCustomization() {
 		}
-
 	}
 
 	@CacheConfigFoo
@@ -411,4 +403,20 @@ public class AnnotationCacheOperationSourceTests {
 			cacheManager = "classCacheManager", cacheResolver = "classCacheResolver")
 	public @interface CacheConfigFoo {
 	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.METHOD, ElementType.TYPE })
+	@Cacheable
+	public @interface ComposedCacheable {
+
+		@AliasFor(annotation = Cacheable.class, attribute = "cacheNames")
+		String[] value() default {};
+
+		@AliasFor(annotation = Cacheable.class, attribute = "cacheNames")
+		String[] cacheNames() default {};
+
+		@AliasFor(annotation = Cacheable.class, attribute = "key")
+		String key() default "";
+	}
+
 }
