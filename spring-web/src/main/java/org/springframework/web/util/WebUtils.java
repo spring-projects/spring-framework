@@ -793,19 +793,11 @@ public abstract class WebUtils {
 			return isSameOrigin(request);
 		}
 		else {
-			if(allowedOrigins.contains(origin)) {
-				return true;
-			} else {
-				UriComponents headerOriginUrl = UriComponentsBuilder.fromOriginHeader(origin).build();
-				UriComponents allowedOriginUrl;
-				for (String allowed : allowedOrigins) {
-					allowedOriginUrl = UriComponentsBuilder.fromOriginHeader(allowed).build();
-					if (isSameHostAndPort(allowedOriginUrl, headerOriginUrl)) {
-						return true;
-					}
-				}
-				return false;
+			if((origin.length() > 0) && ('/' == origin.charAt(origin.length() - 1))) {
+				origin = origin.substring(0, origin.length() - 1);
 			}
+		
+			return allowedOrigins.contains(origin);
 		}
 	}
 
