@@ -3,7 +3,11 @@ of Spring Framework 5. For more information about this topic, you can have a loo
 [Intro to Reactive programming][] and [Reactive Web Applications][] talks.
 
 ## Downloading Artifacts
-Artifacts are not yet available, so you have to build the project from source for now.
+Spring Reactive JAR dependency is available from Spring snapshot repository:
+ - Repository URL: `https://repo.spring.io/snapshot/`
+ - GroupId: `org.springframework.reactive`
+ - ArtifactId: `spring-reactive`
+ - Version: `0.1.0.BUILD-SNAPSHOT`
 
 ## Building from Source
 Spring Reactive uses a [Gradle][]-based build system. In the instructions
