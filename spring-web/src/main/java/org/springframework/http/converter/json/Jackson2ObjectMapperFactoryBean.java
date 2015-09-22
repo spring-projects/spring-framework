@@ -269,7 +269,8 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 
 	/**
 	 * Shortcut for {@link MapperFeature#AUTO_DETECT_SETTERS}/
-	 * {@link MapperFeature#AUTO_DETECT_GETTERS} option.
+	 * {@link MapperFeature#AUTO_DETECT_GETTERS}/{@link MapperFeature#AUTO_DETECT_IS_GETTERS}
+	 * options.
 	 */
 	public void setAutoDetectGettersSetters(boolean autoDetectGettersSetters) {
 		this.builder.autoDetectGettersSetters(autoDetectGettersSetters);

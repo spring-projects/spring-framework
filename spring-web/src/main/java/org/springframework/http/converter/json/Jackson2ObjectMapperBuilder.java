@@ -338,11 +338,13 @@ public class Jackson2ObjectMapperBuilder {
 
 	/**
 	 * Shortcut for {@link MapperFeature#AUTO_DETECT_SETTERS}/
-	 * {@link MapperFeature#AUTO_DETECT_GETTERS} option.
+	 * {@link MapperFeature#AUTO_DETECT_GETTERS}/{@link MapperFeature#AUTO_DETECT_IS_GETTERS}
+	 * options.
 	 */
 	public Jackson2ObjectMapperBuilder autoDetectGettersSetters(boolean autoDetectGettersSetters) {
 		this.features.put(MapperFeature.AUTO_DETECT_GETTERS, autoDetectGettersSetters);
 		this.features.put(MapperFeature.AUTO_DETECT_SETTERS, autoDetectGettersSetters);
+		this.features.put(MapperFeature.AUTO_DETECT_IS_GETTERS, autoDetectGettersSetters);
 		return this;
 	}
 
