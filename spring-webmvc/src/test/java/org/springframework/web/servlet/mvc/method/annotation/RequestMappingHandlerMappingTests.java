@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -28,12 +27,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.StringValueResolver;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,19 +45,15 @@ import static org.junit.Assert.*;
  * Tests for {@link RequestMappingHandlerMapping}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class RequestMappingHandlerMappingTests {
 
-	private RequestMappingHandlerMapping handlerMapping;
+	private final StaticWebApplicationContext wac = new StaticWebApplicationContext();
 
-	private StaticWebApplicationContext applicationContext;
-
-
-	@Before
-	public void setup() {
-		this.handlerMapping = new RequestMappingHandlerMapping();
-		this.applicationContext = new StaticWebApplicationContext();
-		this.handlerMapping.setApplicationContext(applicationContext);
+	private final RequestMappingHandlerMapping handlerMapping = new RequestMappingHandlerMapping();
+	{
+		this.handlerMapping.setApplicationContext(wac);
 	}
 
 
@@ -97,8 +91,7 @@ public class RequestMappingHandlerMappingTests {
 			}
 		};
 
-		StaticWebApplicationContext wac = new StaticWebApplicationContext();
-		wac.registerSingleton("testController", MetaAnnotationController.class);
+		wac.registerSingleton("testController", ComposedAnnotationController.class);
 		wac.refresh();
 
 		hm.setContentNegotiationManager(manager);
@@ -127,12 +120,9 @@ public class RequestMappingHandlerMappingTests {
 
 	@Test
 	public void resolveEmbeddedValuesInPatterns() {
-		this.handlerMapping.setEmbeddedValueResolver(new StringValueResolver() {
-			@Override
-			public String resolveStringValue(String value) {
-				return "/${pattern}/bar".equals(value) ? "/foo/bar" : value;
-			}
-		});
+		this.handlerMapping.setEmbeddedValueResolver(
+				value -> "/${pattern}/bar".equals(value) ? "/foo/bar" : value
+		);
 
 		String[] patterns = new String[] { "/foo", "/${pattern}/bar" };
 		String[] result = this.handlerMapping.resolveEmbeddedValuesInPatterns(patterns);
@@ -141,9 +131,10 @@ public class RequestMappingHandlerMappingTests {
 	}
 
 	@Test
-	public void resolveRequestMappingViaMetaAnnotation() throws Exception {
-		Method method = MetaAnnotationController.class.getMethod("handleInput");
-		RequestMappingInfo info = this.handlerMapping.getMappingForMethod(method, MetaAnnotationController.class);
+	public void resolveRequestMappingViaComposedAnnotation() throws Exception {
+		Class<?> clazz = ComposedAnnotationController.class;
+		Method method = clazz.getMethod("handleInput");
+		RequestMappingInfo info = this.handlerMapping.getMappingForMethod(method, clazz);
 
 		assertNotNull(info);
 		assertEquals(Collections.singleton("/input"), info.getPatternsCondition().getPatterns());
@@ -151,26 +142,26 @@ public class RequestMappingHandlerMappingTests {
 
 
 	@Controller
-	static class MetaAnnotationController {
+	static class ComposedAnnotationController {
 
 		@RequestMapping
 		public void handle() {
 		}
 
-		@PostJson(path="/input")
+		@PostJson("/input")
 		public void handleInput() {
 		}
-
 	}
 
 	@RequestMapping(method = RequestMethod.POST,
 			produces = MediaType.APPLICATION_JSON_VALUE,
 			consumes = MediaType.APPLICATION_JSON_VALUE)
-	@Target({ElementType.METHOD, ElementType.TYPE})
+	@Target(ElementType.METHOD)
 	@Retention(RetentionPolicy.RUNTIME)
-	@Documented
 	@interface PostJson {
-		String[] path() default {};
+
+		@AliasFor(annotation = RequestMapping.class, attribute = "path")
+		String[] value() default {};
 	}
 
 }
