@@ -16,6 +16,8 @@
 package org.springframework.test.web.servlet.request;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collections;
@@ -89,6 +91,16 @@ public class MockHttpServletRequestBuilderTests {
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
 		assertEquals("/foo%20bar", request.getRequestURI());
+	}
+
+	// SPR-13435
+
+	@Test
+	public void requestUriWithDoubleSlashes() throws URISyntaxException {
+		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, new URI("/test//currentlyValid/0"));
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+
+		assertEquals("/test//currentlyValid/0", request.getRequestURI());
 	}
 
 	@Test
