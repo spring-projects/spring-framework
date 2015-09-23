@@ -23,8 +23,10 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -35,11 +37,13 @@ import org.springframework.cache.interceptor.CacheableOperation;
 import org.springframework.core.annotation.AliasFor;
 import org.springframework.util.ReflectionUtils;
 
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 /**
  * @author Costin Leau
  * @author Stephane Nicoll
+ * @author Sam Brannen
  */
 public class AnnotationCacheOperationSourceTests {
 
@@ -99,6 +103,36 @@ public class AnnotationCacheOperationSourceTests {
 		next = it.next();
 		assertTrue(next instanceof CacheEvictOperation);
 		assertTrue(next.getCacheNames().contains("bar"));
+	}
+
+	// TODO [SPR-13475] Enable test once @Cache* is supported as a composed annotation.
+	@Ignore("Disabled until SPR-13475 is resolved")
+	@Test
+	public void singleComposedAnnotation() throws Exception {
+		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "singleComposed", 1);
+		CacheOperation cacheOperation = ops.iterator().next();
+		assertThat(cacheOperation, instanceOf(CacheableOperation.class));
+		assertThat(cacheOperation.getCacheNames(), equalTo(Collections.singleton("composed")));
+	}
+
+	// TODO [SPR-13475] Enable test once @Cache* is supported as a composed annotation.
+	@Ignore("Disabled until SPR-13475 is resolved")
+	@Test
+	public void multipleComposedAnnotations() throws Exception {
+		Collection<CacheOperation> ops = getOps(AnnotatedClass.class, "multipleComposed", 3);
+		Iterator<CacheOperation> it = ops.iterator();
+
+		CacheOperation cacheOperation = it.next();
+		assertThat(cacheOperation, instanceOf(CacheableOperation.class));
+		assertThat(cacheOperation.getCacheNames(), equalTo(Collections.singleton("composedCache")));
+
+		cacheOperation = it.next();
+		assertThat(cacheOperation, instanceOf(CacheableOperation.class));
+		assertThat(cacheOperation.getCacheNames(), equalTo(Collections.singleton("foo")));
+
+		cacheOperation = it.next();
+		assertThat(cacheOperation, instanceOf(CacheEvictOperation.class));
+		assertThat(cacheOperation.getCacheNames(), equalTo(Collections.singleton("composedCache")));
 	}
 
 	@Test
@@ -275,6 +309,16 @@ public class AnnotationCacheOperationSourceTests {
 		public void multipleStereotype() {
 		}
 
+		@ComposedCacheable("composed")
+		public void singleComposed() {
+		}
+
+		@ComposedCacheable(cacheNames = "composedCache", key = "composedKey")
+		@CacheableFoo
+		@ComposedCacheEvict(cacheNames = "composedCache", key = "composedKey")
+		public void multipleComposed() {
+		}
+
 		@Caching(cacheable = { @Cacheable(cacheNames = "test", key = "a"), @Cacheable(cacheNames = "test", key = "b") })
 		public void multipleCaching() {
 		}
@@ -406,8 +450,23 @@ public class AnnotationCacheOperationSourceTests {
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ ElementType.METHOD, ElementType.TYPE })
-	@Cacheable
+	@Cacheable(cacheNames = "shadowed cache name", key = "shadowed key")
 	public @interface ComposedCacheable {
+
+		@AliasFor(annotation = Cacheable.class, attribute = "cacheNames")
+		String[] value() default {};
+
+		@AliasFor(annotation = Cacheable.class, attribute = "cacheNames")
+		String[] cacheNames() default {};
+
+		@AliasFor(annotation = Cacheable.class, attribute = "key")
+		String key() default "";
+	}
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target({ ElementType.METHOD, ElementType.TYPE })
+	@CacheEvict(cacheNames = "shadowed cache name", key = "shadowed key")
+	public @interface ComposedCacheEvict {
 
 		@AliasFor(annotation = Cacheable.class, attribute = "cacheNames")
 		String[] value() default {};
