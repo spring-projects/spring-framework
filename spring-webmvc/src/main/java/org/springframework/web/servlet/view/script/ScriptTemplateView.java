@@ -69,8 +69,9 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 	private static final String DEFAULT_RESOURCE_LOADER_PATH = "classpath:";
 
+	private static final ThreadLocal<ScriptEngine> engineHolder =
+			new NamedThreadLocal<ScriptEngine>("ScriptTemplateView engine");
 
-	private final ThreadLocal<ScriptEngine> engineHolder = new NamedThreadLocal<ScriptEngine>("ScriptTemplateView engine");
 
 	private ScriptEngine engine;
 
@@ -235,10 +236,10 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 	protected ScriptEngine getEngine() {
 		if (Boolean.FALSE.equals(this.sharedEngine)) {
-			ScriptEngine engine = this.engineHolder.get();
+			ScriptEngine engine = engineHolder.get();
 			if (engine == null) {
 				engine = createEngineFromName();
-				this.engineHolder.set(engine);
+				engineHolder.set(engine);
 			}
 			return engine;
 		}
