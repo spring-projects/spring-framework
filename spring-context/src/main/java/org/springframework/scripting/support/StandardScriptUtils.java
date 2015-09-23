@@ -43,7 +43,7 @@ public abstract class StandardScriptUtils {
 	 * @param engineName the name of the engine
 	 * @return a corresponding ScriptEngine (never {@code null})
 	 * @throws IllegalArgumentException if no matching engine has been found
-	 * @throws IllegalStateException if no matching engine has been found or if
+	 * @throws IllegalStateException if the desired engine failed to initialize
 	 */
 	public static ScriptEngine retrieveEngineByName(ScriptEngineManager scriptEngineManager, String engineName) {
 		ScriptEngine engine = scriptEngineManager.getEngineByName(engineName);
