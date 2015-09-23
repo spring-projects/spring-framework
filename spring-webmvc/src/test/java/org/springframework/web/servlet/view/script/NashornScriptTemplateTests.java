@@ -44,6 +44,7 @@ public class NashornScriptTemplateTests {
 
 	private ServletContext servletContext;
 
+
 	@Before
 	public void setup() {
 		this.webAppContext = mock(WebApplicationContext.class);
@@ -90,6 +91,7 @@ public class NashornScriptTemplateTests {
 		return view;
 	}
 
+
 	@Configuration
 	static class ScriptTemplatingConfiguration {
 
@@ -102,6 +104,7 @@ public class NashornScriptTemplateTests {
 			return configurer;
 		}
 	}
+
 
 	@Configuration
 	static class ScriptTemplatingWithUrlConfiguration {

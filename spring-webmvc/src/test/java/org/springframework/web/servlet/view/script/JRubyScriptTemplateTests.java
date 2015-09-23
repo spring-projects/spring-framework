@@ -44,6 +44,7 @@ public class JRubyScriptTemplateTests {
 
 	private ServletContext servletContext;
 
+
 	@Before
 	public void setup() {
 		this.webAppContext = mock(WebApplicationContext.class);
@@ -80,6 +81,7 @@ public class JRubyScriptTemplateTests {
 		view.afterPropertiesSet();
 		return view;
 	}
+
 
 	@Configuration
 	static class ScriptTemplatingConfiguration {
