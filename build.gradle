@@ -18,7 +18,7 @@ ext {
 	linkScmConnection = 'scm:git:git://github.com/spring-projects/spring-framework.git'
 	linkScmDevConnection = 'scm:git:ssh://git@github.com:spring-projects/spring-framework.git'
 
-	moduleProjects  = subprojects.findAll {
+	moduleProjects = subprojects.findAll {
 		!it.name.equals('spring-build-src') && !it.name.equals('spring-framework-bom')
 	}
 }
@@ -141,7 +141,7 @@ configure(allprojects) { project ->
 		testCompile("org.hamcrest:hamcrest-all:${hamcrestVersion}")
 
 		sniffer("org.codehaus.mojo:animal-sniffer-ant-tasks:${snifferVersion}")
-		javaApiSignature("org.codehaus.mojo.signature:java16:1.1@signature")  // as from JDK 6 update 18
+		javaApiSignature("org.codehaus.mojo.signature:java16:1.1@signature")  // API level from JDK 6 update 18
 	}
 
 	task copyJavaApiSignature(type: Copy) {
@@ -628,7 +628,7 @@ project("spring-jdbc") {
 		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
 		optional("com.mchange:c3p0:0.9.5.1")
 		optional("org.hsqldb:hsqldb:${hsqldbVersion}")
-		optional("com.h2database:h2:1.4.188")
+		optional("com.h2database:h2:1.4.189")
 		optional("org.apache.derby:derby:10.11.1.1")
 		optional("org.apache.derby:derbyclient:10.11.1.1")
 	}
@@ -937,7 +937,7 @@ project("spring-webmvc") {
 		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 		testCompile("org.jruby:jruby:${jrubyVersion}")
 		testCompile("org.python:jython-standalone:2.5.3")
-		testCompile("org.webjars:underscorejs:1.8.2")
+		testCompile("org.webjars:underscorejs:1.8.3")
 	}
 }
 
