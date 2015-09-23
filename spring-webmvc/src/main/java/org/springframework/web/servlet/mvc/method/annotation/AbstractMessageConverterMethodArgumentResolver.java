@@ -179,46 +179,52 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 		}
 
 		HttpMethod httpMethod = ((HttpRequest) inputMessage).getMethod();
-		inputMessage = new EmptyBodyCheckingHttpInputMessage(inputMessage);
 		Object body = NO_VALUE;
 
-		for (HttpMessageConverter<?> converter : this.messageConverters) {
-			Class<HttpMessageConverter<?>> converterType = (Class<HttpMessageConverter<?>>) converter.getClass();
-			if (converter instanceof GenericHttpMessageConverter) {
-				GenericHttpMessageConverter<?> genericConverter = (GenericHttpMessageConverter<?>) converter;
-				if (genericConverter.canRead(targetType, contextClass, contentType)) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Read [" + targetType + "] as \"" + contentType + "\" with [" + converter + "]");
+		try {
+			inputMessage = new EmptyBodyCheckingHttpInputMessage(inputMessage);
+
+			for (HttpMessageConverter<?> converter : this.messageConverters) {
+				Class<HttpMessageConverter<?>> converterType = (Class<HttpMessageConverter<?>>) converter.getClass();
+				if (converter instanceof GenericHttpMessageConverter) {
+					GenericHttpMessageConverter<?> genericConverter = (GenericHttpMessageConverter<?>) converter;
+					if (genericConverter.canRead(targetType, contextClass, contentType)) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Read [" + targetType + "] as \"" + contentType + "\" with [" + converter + "]");
+						}
+						if (inputMessage.getBody() != null) {
+							inputMessage = getAdvice().beforeBodyRead(inputMessage, param, targetType, converterType);
+							body = genericConverter.read(targetType, contextClass, inputMessage);
+							body = getAdvice().afterBodyRead(body, inputMessage, param, targetType, converterType);
+						}
+						else {
+							body = null;
+							body = getAdvice().handleEmptyBody(body, inputMessage, param, targetType, converterType);
+						}
+						break;
 					}
-					if (inputMessage.getBody() != null) {
-						inputMessage = getAdvice().beforeBodyRead(inputMessage, param, targetType, converterType);
-						body = genericConverter.read(targetType, contextClass, inputMessage);
-						body = getAdvice().afterBodyRead(body, inputMessage, param, targetType, converterType);
+				}
+				else if (targetClass != null) {
+					if (converter.canRead(targetClass, contentType)) {
+						if (logger.isDebugEnabled()) {
+							logger.debug("Read [" + targetType + "] as \"" + contentType + "\" with [" + converter + "]");
+						}
+						if (inputMessage.getBody() != null) {
+							inputMessage = getAdvice().beforeBodyRead(inputMessage, param, targetType, converterType);
+							body = ((HttpMessageConverter<T>) converter).read(targetClass, inputMessage);
+							body = getAdvice().afterBodyRead(body, inputMessage, param, targetType, converterType);
+						}
+						else {
+							body = null;
+							body = getAdvice().handleEmptyBody(body, inputMessage, param, targetType, converterType);
+						}
+						break;
 					}
-					else {
-						body = null;
-						body = getAdvice().handleEmptyBody(body, inputMessage, param, targetType, converterType);
-					}
-					break;
 				}
 			}
-			else if (targetClass != null) {
-				if (converter.canRead(targetClass, contentType)) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Read [" + targetType + "] as \"" + contentType + "\" with [" + converter + "]");
-					}
-					if (inputMessage.getBody() != null) {
-						inputMessage = getAdvice().beforeBodyRead(inputMessage, param, targetType, converterType);
-						body = ((HttpMessageConverter<T>) converter).read(targetClass, inputMessage);
-						body = getAdvice().afterBodyRead(body, inputMessage, param, targetType, converterType);
-					}
-					else {
-						body = null;
-						body = getAdvice().handleEmptyBody(body, inputMessage, param, targetType, converterType);
-					}
-					break;
-				}
-			}
+		}
+		catch (IOException ex) {
+			throw new HttpMessageNotReadableException("Could not read document: " + ex.getMessage(), ex);
 		}
 
 		if (body == NO_VALUE) {
