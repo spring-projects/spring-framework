@@ -22,6 +22,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.script.Invocable;
@@ -39,8 +41,10 @@ import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.scripting.support.StandardScriptUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.view.AbstractUrlBasedView;
 
@@ -57,6 +61,7 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * {@link ScriptTemplateConfigurer#setSharedEngine(Boolean)} for more details.
  *
  * @author Sebastien Deleuze
+ * @author Juergen Hoeller
  * @since 4.2
  * @see ScriptTemplateConfigurer
  * @see ScriptTemplateViewResolver
@@ -69,8 +74,9 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 	private static final String DEFAULT_RESOURCE_LOADER_PATH = "classpath:";
 
-	private static final ThreadLocal<ScriptEngine> engineHolder =
-			new NamedThreadLocal<ScriptEngine>("ScriptTemplateView engine");
+
+	private static final ThreadLocal<Map<Object, ScriptEngine>> enginesHolder =
+			new NamedThreadLocal<Map<Object, ScriptEngine>>("ScriptTemplateView engines");
 
 
 	private ScriptEngine engine;
@@ -87,9 +93,11 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 	private Charset charset;
 
+	private String resourceLoaderPath;
+
 	private ResourceLoader resourceLoader;
 
-	private String resourceLoaderPath;
+	private volatile ScriptEngineManager scriptEngineManager;
 
 
 	/**
@@ -234,12 +242,20 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		Assert.isTrue(this.renderFunction != null, "The 'renderFunction' property must be defined.");
 	}
 
+
 	protected ScriptEngine getEngine() {
 		if (Boolean.FALSE.equals(this.sharedEngine)) {
-			ScriptEngine engine = engineHolder.get();
+			Map<Object, ScriptEngine> engines = enginesHolder.get();
+			if (engines == null) {
+				engines = new HashMap<Object, ScriptEngine>(4);
+				enginesHolder.set(engines);
+			}
+			Object engineKey = (!ObjectUtils.isEmpty(this.scripts) ?
+					new EngineKey(this.engineName, this.scripts) : this.engineName);
+			ScriptEngine engine = engines.get(engineKey);
 			if (engine == null) {
 				engine = createEngineFromName();
-				engineHolder.set(engine);
+				engines.put(engineKey, engine);
 			}
 			return engine;
 		}
@@ -250,21 +266,22 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 	}
 
 	protected ScriptEngine createEngineFromName() {
-		ScriptEngine engine = new ScriptEngineManager().getEngineByName(this.engineName);
-		if (engine == null) {
-			throw new IllegalStateException("No engine with name '" + this.engineName + "' found");
+		if (this.scriptEngineManager == null) {
+			this.scriptEngineManager = new ScriptEngineManager(getApplicationContext().getClassLoader());
 		}
+
+		ScriptEngine engine = StandardScriptUtils.retrieveEngineByName(this.scriptEngineManager, this.engineName);
 		loadScripts(engine);
 		return engine;
 	}
 
 	protected void loadScripts(ScriptEngine engine) {
-		if (this.scripts != null) {
+		if (!ObjectUtils.isEmpty(this.scripts)) {
 			try {
 				for (String script : this.scripts) {
 					Resource resource = this.resourceLoader.getResource(script);
 					if (!resource.exists()) {
-						throw new IllegalStateException("Resource " + script + " not found");
+						throw new IllegalStateException("Script resource [" + script + "] not found");
 					}
 					engine.eval(new InputStreamReader(resource.getInputStream()));
 				}
@@ -309,6 +326,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		}
 	}
 
+
 	@Override
 	protected void prepareResponse(HttpServletRequest request, HttpServletResponse response) {
 		super.prepareResponse(request, response);
@@ -326,6 +344,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 			Invocable invocable = (Invocable) engine;
 			String url = getUrl();
 			String template = getTemplate(url);
+
 			Object html;
 			if (this.renderObject != null) {
 				Object thiz = engine.eval(this.renderObject);
@@ -334,6 +353,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 			else {
 				html = invocable.invokeFunction(this.renderFunction, template, model, url);
 			}
+
 			response.getWriter().write(String.valueOf(html));
 		}
 		catch (Exception ex) {
@@ -345,6 +365,41 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		Resource resource = this.resourceLoader.getResource(path);
 		InputStreamReader reader = new InputStreamReader(resource.getInputStream(), this.charset);
 		return FileCopyUtils.copyToString(reader);
+	}
+
+
+	/**
+	 * Key class for the {@code enginesHolder ThreadLocal}.
+	 * Only used if scripts have been specified; otherwise, the
+	 * {@code engineName String} will be used as cache key directly.
+	 */
+	private static class EngineKey {
+
+		private final String engineName;
+
+		private final String[] scripts;
+
+		public EngineKey(String engineName, String[] scripts) {
+			this.engineName = engineName;
+			this.scripts = scripts;
+		}
+
+		@Override
+		public boolean equals(Object other) {
+			if (this == other) {
+				return true;
+			}
+			if (!(other instanceof EngineKey)) {
+				return false;
+			}
+			EngineKey otherKey = (EngineKey) other;
+			return (this.engineName.equals(otherKey.engineName) && Arrays.equals(this.scripts, otherKey.scripts));
+		}
+
+		@Override
+		public int hashCode() {
+			return (this.engineName.hashCode() * 29 + Arrays.hashCode(this.scripts));
+		}
 	}
 
 }
