@@ -38,6 +38,7 @@ import static org.junit.Assert.*;
  * @author Arjen Poutsma
  * @author Dave Syer
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @since 2.5.6
  */
 public class ContextNamespaceHandlerTests {
@@ -55,8 +56,7 @@ public class ContextNamespaceHandlerTests {
 		Map<String, PlaceholderConfigurerSupport> beans = applicationContext
 				.getBeansOfType(PlaceholderConfigurerSupport.class);
 		assertFalse("No PropertyPlaceholderConfigurer found", beans.isEmpty());
-		String s = (String) applicationContext.getBean("string");
-		assertEquals("bar", s);
+		assertEquals("bar", applicationContext.getBean("string"));
 		assertEquals("null", applicationContext.getBean("nullString"));
 	}
 
@@ -69,11 +69,11 @@ public class ContextNamespaceHandlerTests {
 			Map<String, PropertyPlaceholderConfigurer> beans = applicationContext
 					.getBeansOfType(PropertyPlaceholderConfigurer.class);
 			assertFalse("No PropertyPlaceholderConfigurer found", beans.isEmpty());
-			String s = (String) applicationContext.getBean("string");
-			assertEquals("spam", s);
+			assertEquals("spam", applicationContext.getBean("string"));
+			assertEquals("none", applicationContext.getBean("fallback"));
 		}
 		finally {
-			if (value!=null) {
+			if (value != null) {
 				System.setProperty("foo", value);
 			}
 		}
@@ -89,8 +89,8 @@ public class ContextNamespaceHandlerTests {
 		Map<String, PlaceholderConfigurerSupport> beans = applicationContext
 				.getBeansOfType(PlaceholderConfigurerSupport.class);
 		assertFalse("No PropertyPlaceholderConfigurer found", beans.isEmpty());
-		String s = (String) applicationContext.getBean("string");
-		assertEquals("spam", s);
+		assertEquals("spam", applicationContext.getBean("string"));
+		assertEquals("none", applicationContext.getBean("fallback"));
 	}
 
 	@Test
@@ -100,12 +100,9 @@ public class ContextNamespaceHandlerTests {
 		Map<String, PropertyPlaceholderConfigurer> beans = applicationContext
 				.getBeansOfType(PropertyPlaceholderConfigurer.class);
 		assertFalse("No PropertyPlaceholderConfigurer found", beans.isEmpty());
-		String s = (String) applicationContext.getBean("foo");
-		assertEquals("bar", s);
-		s = (String) applicationContext.getBean("bar");
-		assertEquals("foo", s);
-		s = (String) applicationContext.getBean("spam");
-		assertEquals("maps", s);
+		assertEquals("bar", applicationContext.getBean("foo"));
+		assertEquals("foo", applicationContext.getBean("bar"));
+		assertEquals("maps", applicationContext.getBean("spam"));
 	}
 
 	@Test
@@ -115,8 +112,7 @@ public class ContextNamespaceHandlerTests {
 		Map<String, PlaceholderConfigurerSupport> beans = applicationContext
 				.getBeansOfType(PlaceholderConfigurerSupport.class);
 		assertFalse("No PropertyPlaceholderConfigurer found", beans.isEmpty());
-		String s = (String) applicationContext.getBean("string");
-		assertEquals("${bar}", s);
+		assertEquals("${bar}", applicationContext.getBean("string"));
 		assertEquals("null", applicationContext.getBean("nullString"));
 	}
 

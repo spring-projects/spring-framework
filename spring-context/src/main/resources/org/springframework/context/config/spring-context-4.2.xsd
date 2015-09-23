@@ -144,6 +144,14 @@
 							</xsd:restriction>
 						</xsd:simpleType>
 					</xsd:attribute>
+					<xsd:attribute name="value-separator" default=":">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+	The separating character between the placeholder variable and the associated
+	default value: by default, a ':' symbol.
+				]]></xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
 					<xsd:attribute name="null-value">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
