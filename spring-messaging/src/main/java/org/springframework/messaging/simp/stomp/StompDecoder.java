@@ -208,10 +208,15 @@ public class StompDecoder {
 	private void readHeaders(ByteBuffer buffer, StompHeaderAccessor headerAccessor) {
 		while (true) {
 			ByteArrayOutputStream headerStream = new ByteArrayOutputStream(256);
-			while (buffer.remaining() > 0 && !tryConsumeEndOfLine(buffer)) {
+			boolean headerComplete = false;
+			while (buffer.hasRemaining()) {
+				if (tryConsumeEndOfLine(buffer)) {
+					headerComplete = true;
+					break;
+				}
 				headerStream.write(buffer.get());
 			}
-			if (headerStream.size() > 0) {
+			if (headerStream.size() > 0 && headerComplete) {
 				String header = new String(headerStream.toByteArray(), UTF8_CHARSET);
 				int colonIndex = header.indexOf(':');
 				if (colonIndex <= 0) {
