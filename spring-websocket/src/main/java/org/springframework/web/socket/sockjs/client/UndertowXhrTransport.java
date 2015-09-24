@@ -69,7 +69,7 @@ import org.springframework.web.socket.sockjs.frame.SockJsFrame;
 
 /**
  * An XHR transport based on Undertow's {@link io.undertow.client.UndertowClient}.
- * Compatible with Undertow from version 1.0 to 1.3.
+ * Compatible with Undertow 1.0 to 1.3, as of Spring Framework 4.2.2.
  *
  * <p>When used for testing purposes (e.g. load testing) or for specific use cases
  * (like HTTPS configuration), a custom OptionMap should be provided:
@@ -92,10 +92,10 @@ import org.springframework.web.socket.sockjs.frame.SockJsFrame;
  */
 public class UndertowXhrTransport extends AbstractXhrTransport {
 
-	private static final boolean undertow13Present = ClassUtils.isPresent("io.undertow.connector.ByteBufferPool",
-			UndertowXhrTransport.class.getClassLoader());
-
 	private static final AttachmentKey<String> RESPONSE_BODY = AttachmentKey.create(String.class);
+
+	private static final boolean undertow13Present = ClassUtils.isPresent(
+			"io.undertow.connector.ByteBufferPool", UndertowXhrTransport.class.getClassLoader());
 
 
 	private final OptionMap optionMap;
@@ -116,12 +116,8 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 		this.optionMap = optionMap;
 		this.httpClient = UndertowClient.getInstance();
 		this.worker = Xnio.getInstance().createWorker(optionMap);
-		if (undertow13Present) {
-			this.undertowBufferSupport = new Undertow13BufferSupport();
-		}
-		else {
-			this.undertowBufferSupport = new Undertow10BufferSupport();
-		}
+		this.undertowBufferSupport =
+				(undertow13Present ? new Undertow13BufferSupport() : new UndertowXnioBufferSupport());
 	}
 
 
@@ -490,6 +486,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 		}
 	}
 
+
 	private interface UndertowBufferSupport {
 
 		Object allocatePooledResource();
@@ -505,7 +502,8 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 				final XnioWorker worker, OptionMap options);
 	}
 
-	private class Undertow10BufferSupport implements UndertowBufferSupport {
+
+	private class UndertowXnioBufferSupport implements UndertowBufferSupport {
 
 		private final org.xnio.Pool<ByteBuffer> xnioBufferPool;
 
@@ -513,7 +511,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 
 		private final Method httpClientConnectMethod;
 
-		public Undertow10BufferSupport() {
+		public UndertowXnioBufferSupport() {
 			this.xnioBufferPool = new org.xnio.ByteBufferSlicePool(1048, 1048);
 			this.httpClientConnectCallbackMethod = ReflectionUtils.findMethod(UndertowClient.class, "connect",
 					ClientCallback.class, URI.class, XnioWorker.class, Pool.class, OptionMap.class);
@@ -543,7 +541,6 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 				XnioWorker worker, OptionMap options) {
 			ReflectionUtils.invokeMethod(httpClientConnectCallbackMethod, httpClient, listener, uri, worker,
 					this.xnioBufferPool, options);
-
 		}
 
 		@Override
@@ -554,6 +551,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 					worker, this.xnioBufferPool, options);
 		}
 	}
+
 
 	private class Undertow13BufferSupport implements UndertowBufferSupport {
 
