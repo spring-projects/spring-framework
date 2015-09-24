@@ -19,14 +19,17 @@ package org.springframework.aop.aspectj.annotation;
 import java.util.Arrays;
 
 import org.apache.commons.logging.LogFactory;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+
 import org.junit.Ignore;
 import org.junit.Test;
-import test.aop.PerThisAspect;
 
 import org.springframework.util.SerializationTestUtils;
+
+import test.aop.PerThisAspect;
 
 import static org.junit.Assert.*;
 
@@ -134,6 +137,7 @@ public class AspectProxyFactoryTests {
 			this.age = age;
 		}
 
+		@SuppressWarnings("unchecked")
 		public <V extends MyInterface> boolean doWithVarargs(V... args) {
 			return true;
 		}
