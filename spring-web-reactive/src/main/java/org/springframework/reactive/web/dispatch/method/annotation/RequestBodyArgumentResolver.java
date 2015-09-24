@@ -21,18 +21,22 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.reactivestreams.Publisher;
+import reactor.rx.Promise;
 import reactor.rx.Stream;
 import reactor.rx.Streams;
 import rx.Observable;
 import rx.RxReactiveStreams;
+import rx.Single;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.reactive.codec.decoder.ByteToMessageDecoder;
+import org.springframework.reactive.util.CompletableFutureUtils;
 import org.springframework.reactive.web.dispatch.method.HandlerMethodArgumentResolver;
 import org.springframework.reactive.web.http.ServerHttpRequest;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -69,9 +73,14 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 		ResolvableType type = ResolvableType.forMethodParameter(parameter);
 		List<Object> hints = new ArrayList<>();
 		hints.add(UTF_8);
+
 		// TODO: Refactor type conversion
 		ResolvableType readType = type;
-		if (Observable.class.isAssignableFrom(type.getRawClass()) || Publisher.class.isAssignableFrom(type.getRawClass())) {
+		if (Observable.class.isAssignableFrom(type.getRawClass()) ||
+				Single.class.isAssignableFrom(type.getRawClass()) ||
+				Promise.class.isAssignableFrom(type.getRawClass()) ||
+				Publisher.class.isAssignableFrom(type.getRawClass()) ||
+				CompletableFuture.class.isAssignableFrom(type.getRawClass())) {
 			readType = type.getGeneric(0);
 		}
 
@@ -89,8 +98,17 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 			if (Stream.class.isAssignableFrom(type.getRawClass())) {
 				return Streams.wrap(elementStream);
 			}
+			else if (Promise.class.isAssignableFrom(type.getRawClass())) {
+				return Streams.wrap(elementStream).take(1).next();
+			}
 			else if (Observable.class.isAssignableFrom(type.getRawClass())) {
 				return RxReactiveStreams.toObservable(elementStream);
+			}
+			else if (Single.class.isAssignableFrom(type.getRawClass())) {
+				return RxReactiveStreams.toObservable(elementStream).toSingle();
+			}
+			else if (CompletableFuture.class.isAssignableFrom(type.getRawClass())) {
+				return CompletableFutureUtils.fromSinglePublisher(elementStream);
 			}
 			else if (Publisher.class.isAssignableFrom(type.getRawClass())) {
 				return elementStream;
@@ -99,11 +117,11 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 				try {
 					return Streams.wrap(elementStream).next().await();
 				} catch(InterruptedException ex) {
-					throw new IllegalStateException("Timeout before getter the value");
+					return Streams.fail(new IllegalStateException("Timeout before getter the value"));
 				}
 			}
 		}
-		throw new IllegalStateException("Argument type not supported: " + type);
+		return Streams.fail(new IllegalStateException("Argument type not supported: " + type));
 	}
 
 	private MediaType resolveMediaType(ServerHttpRequest request) {

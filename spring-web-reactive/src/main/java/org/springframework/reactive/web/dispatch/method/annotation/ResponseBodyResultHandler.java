@@ -21,11 +21,15 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import org.reactivestreams.Publisher;
+import reactor.rx.Promise;
+import reactor.rx.Stream;
 import reactor.rx.Streams;
 import rx.Observable;
 import rx.RxReactiveStreams;
+import rx.Single;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
@@ -34,6 +38,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.reactive.codec.encoder.MessageToByteEncoder;
+import org.springframework.reactive.util.CompletableFutureUtils;
 import org.springframework.reactive.web.dispatch.HandlerResult;
 import org.springframework.reactive.web.dispatch.HandlerResultHandler;
 import org.springframework.reactive.web.http.ServerHttpRequest;
@@ -108,8 +113,17 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 			Publisher<Object> elementStream;
 
 			// TODO: Refactor type conversion
-			if (Observable.class.isAssignableFrom(type.getRawClass())) {
+			if (Promise.class.isAssignableFrom(type.getRawClass())) {
+				elementStream = ((Promise)value).stream();
+			}
+			else if (Observable.class.isAssignableFrom(type.getRawClass())) {
 				elementStream = RxReactiveStreams.toPublisher((Observable) value);
+			}
+			else if (Single.class.isAssignableFrom(type.getRawClass())) {
+				elementStream = RxReactiveStreams.toPublisher(((Single)value).toObservable());
+			}
+			else if (CompletableFuture.class.isAssignableFrom(type.getRawClass())) {
+				elementStream = CompletableFutureUtils.toPublisher((CompletableFuture) value);
 			}
 			else if (Publisher.class.isAssignableFrom(type.getRawClass())) {
 				elementStream = (Publisher)value;

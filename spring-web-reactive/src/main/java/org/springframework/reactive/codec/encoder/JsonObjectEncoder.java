@@ -19,6 +19,7 @@ package org.springframework.reactive.codec.encoder;
 import java.nio.ByteBuffer;
 
 import org.reactivestreams.Publisher;
+import reactor.rx.Promise;
 import rx.Observable;
 import rx.RxReactiveStreams;
 
@@ -44,7 +45,7 @@ public class JsonObjectEncoder implements MessageToByteEncoder<ByteBuffer> {
 
 	@Override
 	public boolean canEncode(ResolvableType type, MediaType mediaType, Object... hints) {
-		return mediaType.isCompatibleWith(MediaType.APPLICATION_JSON) &&
+		return mediaType.isCompatibleWith(MediaType.APPLICATION_JSON) && !Promise.class.isAssignableFrom(type.getRawClass()) &&
 				(Observable.class.isAssignableFrom(type.getRawClass()) || Publisher.class.isAssignableFrom(type.getRawClass()));
 	}
 

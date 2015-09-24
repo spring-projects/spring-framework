@@ -25,6 +25,7 @@ import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import org.reactivestreams.Publisher;
 import reactor.fn.Function;
+import reactor.rx.Promise;
 import reactor.rx.Streams;
 import rx.Observable;
 
@@ -90,7 +91,7 @@ public class JsonObjectDecoder implements ByteToMessageDecoder<ByteBuffer> {
 
 	@Override
 	public boolean canDecode(ResolvableType type, MediaType mediaType, Object... hints) {
-		return mediaType.isCompatibleWith(MediaType.APPLICATION_JSON) &&
+		return mediaType.isCompatibleWith(MediaType.APPLICATION_JSON) && !Promise.class.isAssignableFrom(type.getRawClass()) &&
 				(Observable.class.isAssignableFrom(type.getRawClass()) || Publisher.class.isAssignableFrom(type.getRawClass()));
 	}
 

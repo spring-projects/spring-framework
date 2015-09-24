@@ -19,13 +19,17 @@ package org.springframework.reactive.web.dispatch.method.annotation;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
+import reactor.rx.Promise;
+import reactor.rx.Promises;
 import reactor.rx.Stream;
 import reactor.rx.Streams;
 import rx.Observable;
+import rx.Single;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
@@ -81,22 +85,89 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 	@Test
 	public void serializeAsPojo() throws Exception {
+		serializeAsPojo("http://localhost:" + port + "/person");
+	}
 
+	@Test
+	public void serializeAsCompletableFuture() throws Exception {
+		serializeAsPojo("http://localhost:" + port + "/completable-future");
+	}
+
+	@Test
+	public void serializeAsSingle() throws Exception {
+		serializeAsPojo("http://localhost:" + port + "/single");
+	}
+
+	@Test
+	public void serializeAsPromise() throws Exception {
+		serializeAsPojo("http://localhost:" + port + "/promise");
+	}
+
+	@Test
+	public void serializeAsList() throws Exception {
+		serializeAsCollection("http://localhost:" + port + "/list");
+	}
+
+	@Test
+	public void serializeAsPublisher() throws Exception {
+		serializeAsCollection("http://localhost:" + port + "/publisher");
+	}
+
+	@Test
+	public void serializeAsObservable() throws Exception {
+		serializeAsCollection("http://localhost:" + port + "/observable");
+	}
+
+	@Test
+	public void serializeAsReactorStream() throws Exception {
+		serializeAsCollection("http://localhost:" + port + "/stream");
+	}
+
+	@Test
+	public void publisherCapitalize() throws Exception {
+		capitalizeCollection("http://localhost:" + port + "/publisher-capitalize");
+	}
+
+	@Test
+	public void observableCapitalize() throws Exception {
+		capitalizeCollection("http://localhost:" + port + "/observable-capitalize");
+	}
+
+	@Test
+	public void streamCapitalize() throws Exception {
+		capitalizeCollection("http://localhost:" + port + "/stream-capitalize");
+	}
+
+	@Test
+	public void completableFutureCapitalize() throws Exception {
+		capitalizePojo("http://localhost:" + port + "/completable-future-capitalize");
+	}
+
+	@Test
+	public void singleCapitalize() throws Exception {
+		capitalizePojo("http://localhost:" + port + "/single-capitalize");
+	}
+
+	@Test
+	public void promiseCapitalize() throws Exception {
+		capitalizePojo("http://localhost:" + port + "/promise-capitalize");
+	}
+
+
+	public void serializeAsPojo(String requestUrl) throws Exception {
 		RestTemplate restTemplate = new RestTemplate();
 
-		URI url = new URI("http://localhost:" + port + "/person");
+		URI url = new URI(requestUrl);
 		RequestEntity<Void> request = RequestEntity.get(url).accept(MediaType.APPLICATION_JSON).build();
 		ResponseEntity<Person> response = restTemplate.exchange(request, Person.class);
 
 		assertEquals(new Person("Robert"), response.getBody());
 	}
 
-	@Test
-	public void serializeAsList() throws Exception {
-
+	public void serializeAsCollection(String requestUrl) throws Exception {
 		RestTemplate restTemplate = new RestTemplate();
 
-		URI url = new URI("http://localhost:" + port + "/list");
+		URI url = new URI(requestUrl);
 		RequestEntity<Void> request = RequestEntity.get(url).accept(MediaType.APPLICATION_JSON).build();
 		List<Person> results = restTemplate.exchange(request, new ParameterizedTypeReference<List<Person>>(){}).getBody();
 
@@ -105,67 +176,23 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		assertEquals(new Person("Marie"), results.get(1));
 	}
 
-	@Test
-	public void serializeAsPublisher() throws Exception {
 
+	public void capitalizePojo(String requestUrl) throws Exception {
 		RestTemplate restTemplate = new RestTemplate();
 
-		URI url = new URI("http://localhost:" + port + "/publisher");
-		RequestEntity<Void> request = RequestEntity.get(url).accept(MediaType.APPLICATION_JSON).build();
-		List<Person> results = restTemplate.exchange(request, new ParameterizedTypeReference<List<Person>>(){}).getBody();
+		URI url = new URI(requestUrl);
+		RequestEntity<Person> request = RequestEntity
+				.post(url)
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+				.body(new Person("Robert"));
+		ResponseEntity<Person> response = restTemplate.exchange(request, Person.class);
 
-		assertEquals(2, results.size());
-		assertEquals(new Person("Robert"), results.get(0));
-		assertEquals(new Person("Marie"), results.get(1));
-	}
-
-	@Test
-	public void serializeAsObservable() throws Exception {
-
-		RestTemplate restTemplate = new RestTemplate();
-
-		URI url = new URI("http://localhost:" + port + "/observable");
-		RequestEntity<Void> request = RequestEntity.get(url).accept(MediaType.APPLICATION_JSON).build();
-		List<Person> results = restTemplate.exchange(request, new ParameterizedTypeReference<List<Person>>() {
-		}).getBody();
-
-		assertEquals(2, results.size());
-		assertEquals(new Person("Robert"), results.get(0));
-		assertEquals(new Person("Marie"), results.get(1));
-	}
-
-	@Test
-	public void serializeAsReactorStream() throws Exception {
-
-		RestTemplate restTemplate = new RestTemplate();
-
-		URI url = new URI("http://localhost:" + port + "/stream");
-		RequestEntity<Void> request = RequestEntity.get(url).accept(MediaType.APPLICATION_JSON).build();
-		List<Person> results = restTemplate.exchange(request, new ParameterizedTypeReference<List<Person>>() {
-		}).getBody();
-
-		assertEquals(2, results.size());
-		assertEquals(new Person("Robert"), results.get(0));
-		assertEquals(new Person("Marie"), results.get(1));
-	}
-
-	@Test
-	public void publisherCapitalize() throws Exception {
-		capitalize("http://localhost:" + port + "/publisher-capitalize");
-	}
-
-	@Test
-	public void observableCapitalize() throws Exception {
-		capitalize("http://localhost:" + port + "/observable-capitalize");
-	}
-
-	@Test
-	public void streamCapitalize() throws Exception {
-		capitalize("http://localhost:" + port + "/stream-capitalize");
+		assertEquals(new Person("ROBERT"), response.getBody());
 	}
 
 
-	public void capitalize(String requestUrl) throws Exception {
+	public void capitalizeCollection(String requestUrl) throws Exception {
 		RestTemplate restTemplate = new RestTemplate();
 
 		URI url = new URI(requestUrl);
@@ -197,6 +224,24 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		@ResponseBody
 		public Person personResponseBody() {
 			return new Person("Robert");
+		}
+
+		@RequestMapping("/completable-future")
+		@ResponseBody
+		public CompletableFuture<Person> completableFutureResponseBody() {
+			return CompletableFuture.completedFuture(new Person("Robert"));
+		}
+
+		@RequestMapping("/single")
+		@ResponseBody
+		public Single<Person> singleResponseBody() {
+			return Single.just(new Person("Robert"));
+		}
+
+		@RequestMapping("/promise")
+		@ResponseBody
+		public Promise<Person> promiseResponseBody() {
+			return Promises.success(new Person("Robert"));
 		}
 
 		@RequestMapping("/list")
@@ -245,6 +290,33 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		@ResponseBody
 		public Stream<Person> streamCapitalize(@RequestBody Stream<Person> persons) {
 			return persons.map(person -> {
+				person.setName(person.getName().toUpperCase());
+				return person;
+			});
+		}
+
+		@RequestMapping("/completable-future-capitalize")
+		@ResponseBody
+		public CompletableFuture<Person> completableFutureCapitalize(@RequestBody CompletableFuture<Person> personFuture) {
+			return personFuture.thenApply(person -> {
+				person.setName(person.getName().toUpperCase());
+				return person;
+			});
+		}
+
+		@RequestMapping("/single-capitalize")
+		@ResponseBody
+		public Single<Person> singleCapitalize(@RequestBody Single<Person> personFuture) {
+			return personFuture.map(person -> {
+				person.setName(person.getName().toUpperCase());
+				return person;
+			});
+		}
+
+		@RequestMapping("/promise-capitalize")
+		@ResponseBody
+		public Promise<Person> promiseCapitalize(@RequestBody Promise<Person> personFuture) {
+			return personFuture.map(person -> {
 				person.setName(person.getName().toUpperCase());
 				return person;
 			});
