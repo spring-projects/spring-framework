@@ -30,7 +30,8 @@ import org.springframework.http.HttpStatus;
  * {@link #reason} that should be returned.
  *
  * <p>The status code is applied to the HTTP response when the handler
- * method is invoked.
+ * method is invoked and overrides status information set by other means,
+ * like {@code ResponseEntity} or {@code "redirect:"}.
  *
  * <p><strong>Warning</strong>: when using this annotation on an exception
  * class, or when setting the {@code reason} attribute of this annotation,
