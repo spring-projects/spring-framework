@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,25 +100,28 @@ public class StopWatch {
 	/**
 	 * Start an unnamed task. The results are undefined if {@link #stop()}
 	 * or timing methods are called without invoking this method.
+	 * @return this StopWatch
 	 * @see #stop()
 	 */
-	public void start() throws IllegalStateException {
-		start("");
+	public StopWatch start() throws IllegalStateException {
+		return start("");
 	}
 
 	/**
 	 * Start a named task. The results are undefined if {@link #stop()}
 	 * or timing methods are called without invoking this method.
 	 * @param taskName the name of the task to start
+	 * @return this StopWatch
 	 * @see #stop()
 	 */
-	public void start(String taskName) throws IllegalStateException {
+	public StopWatch start(String taskName) throws IllegalStateException {
 		if (this.running) {
 			throw new IllegalStateException("Can't start StopWatch: it's already running");
 		}
 		this.startTimeMillis = System.currentTimeMillis();
 		this.running = true;
 		this.currentTaskName = taskName;
+		return this;
 	}
 
 	/**
