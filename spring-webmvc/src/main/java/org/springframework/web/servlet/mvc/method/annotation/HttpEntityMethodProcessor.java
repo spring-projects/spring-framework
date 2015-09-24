@@ -172,7 +172,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		Object body = responseEntity.getBody();
 		if (responseEntity instanceof ResponseEntity) {
 			outputMessage.setStatusCode(((ResponseEntity<?>) responseEntity).getStatusCode());
-			if (inputMessage.getServletRequest().getMethod() == "GET"
+			if ("GET".equals(inputMessage.getServletRequest().getMethod())
 					&& isResourceNotModified(inputMessage, outputMessage)) {
 				outputMessage.setStatusCode(HttpStatus.NOT_MODIFIED);
 				// Ensure headers are flushed, no body should be written.
