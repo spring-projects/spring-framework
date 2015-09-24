@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,26 +35,24 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringValueResolver;
 
 /**
- * Specialization of {@link org.springframework.beans.factory.config.PlaceholderConfigurerSupport
- * PlaceholderConfigurerSupport} that resolves ${...} placeholders within bean definition
- * property values and {@code @Value} annotations against the current Spring {@link
- * Environment} and its set of {@link PropertySources}.
+ * Specialization of {@link PlaceholderConfigurerSupport} that resolves ${...} placeholders
+ * within bean definition property values and {@code @Value} annotations against the current
+ * Spring {@link Environment} and its set of {@link PropertySources}.
  *
- * <p>This class is designed as a general replacement for {@code
- * PropertyPlaceholderConfigurer} in Spring 3.1 applications. It is used by default to
- * support the {@code property-placeholder} element in working against the
- * spring-context-3.1 XSD, whereas spring-context versions &lt;= 3.0 default to
- * {@code PropertyPlaceholderConfigurer} to ensure backward compatibility. See
- * spring-context XSD documentation for complete details.
+ * <p>This class is designed as a general replacement for {@code PropertyPlaceholderConfigurer}
+ * in Spring 3.1 applications. It is used by default to support the {@code property-placeholder}
+ * element in working against the spring-context-3.1 XSD, whereas spring-context versions
+ * &lt;= 3.0 default to {@code PropertyPlaceholderConfigurer} to ensure backward compatibility.
+ * See the spring-context XSD documentation for complete details.
  *
- * <p>Any local properties (e.g. those added via {@link #setProperties},
- * {@link #setLocations} et al.) are added as a {@code PropertySource}. Search precedence
- * of local properties is based on the value of the {@link #setLocalOverride localOverride}
- * property, which is by default {@code false} meaning that local properties are to be
- * searched last, after all environment property sources.
+ * <p>Any local properties (e.g. those added via {@link #setProperties}, {@link #setLocations}
+ * et al.) are added as a {@code PropertySource}. Search precedence of local properties is
+ * based on the value of the {@link #setLocalOverride localOverride} property, which is by
+ * default {@code false} meaning that local properties are to be searched last, after all
+ * environment property sources.
  *
  * <p>See {@link org.springframework.core.env.ConfigurableEnvironment ConfigurableEnvironment}
- * and related Javadoc for details on manipulating environment property sources.
+ * and related javadocs for details on manipulating environment property sources.
  *
  * @author Chris Beams
  * @since 3.1
@@ -62,8 +60,7 @@ import org.springframework.util.StringValueResolver;
  * @see org.springframework.beans.factory.config.PlaceholderConfigurerSupport
  * @see org.springframework.beans.factory.config.PropertyPlaceholderConfigurer
  */
-public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerSupport
-		implements EnvironmentAware {
+public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerSupport implements EnvironmentAware {
 
 	/**
 	 * {@value} is the name given to the {@link PropertySource} for the set of
@@ -139,7 +136,7 @@ public class PropertySourcesPlaceholderConfigurer extends PlaceholderConfigurerS
 			}
 			try {
 				PropertySource<?> localPropertySource =
-					new PropertiesPropertySource(LOCAL_PROPERTIES_PROPERTY_SOURCE_NAME, mergeProperties());
+						new PropertiesPropertySource(LOCAL_PROPERTIES_PROPERTY_SOURCE_NAME, mergeProperties());
 				if (this.localOverride) {
 					this.propertySources.addFirst(localPropertySource);
 				}
