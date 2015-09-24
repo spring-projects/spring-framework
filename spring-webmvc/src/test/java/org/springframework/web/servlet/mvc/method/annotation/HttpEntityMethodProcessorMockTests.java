@@ -112,7 +112,7 @@ public class HttpEntityMethodProcessorMockTests {
 		returnTypeInt = new MethodParameter(getClass().getMethod("handle3"), -1);
 
 		mavContainer = new ModelAndViewContainer();
-		servletRequest = new MockHttpServletRequest("POST", "/foo");
+		servletRequest = new MockHttpServletRequest("GET", "/foo");
 		servletResponse = new MockHttpServletResponse();
 		webRequest = new ServletWebRequest(servletRequest, servletResponse);
 	}
@@ -182,6 +182,7 @@ public class HttpEntityMethodProcessorMockTests {
 	@Test(expected = HttpMediaTypeNotSupportedException.class)
 	public void resolveArgumentNotReadable() throws Exception {
 		MediaType contentType = MediaType.TEXT_PLAIN;
+		servletRequest.setMethod("POST");
 		servletRequest.addHeader("Content-Type", contentType.toString());
 
 		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(contentType));
@@ -194,6 +195,7 @@ public class HttpEntityMethodProcessorMockTests {
 
 	@Test(expected = HttpMediaTypeNotSupportedException.class)
 	public void resolveArgumentNoContentType() throws Exception {
+		servletRequest.setMethod("POST");
 		servletRequest.setContent("some content".getBytes(Charset.forName("UTF-8")));
 		processor.resolveArgument(paramHttpEntity, mavContainer, webRequest, null);
 		fail("Expected exception");
@@ -453,6 +455,32 @@ public class HttpEntityMethodProcessorMockTests {
 		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
 		assertEquals(changedEtagValue, servletResponse.getHeader(HttpHeaders.ETAG));
 		assertEquals(0, servletResponse.getContentAsByteArray().length);
+	}
+
+	// SPR-13496
+	@Test
+	public void handleReturnTypePostRequestWithIfNotModified() throws Exception {
+		String wildcardValue = "*";
+		String etagValue = "\"some-etag\"";
+		servletRequest.setMethod("POST");
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, wildcardValue);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.set(HttpHeaders.ETAG, etagValue);
+		ResponseEntity<String> returnValue = new ResponseEntity<String>("body", responseHeaders, HttpStatus.OK);
+
+		given(messageConverter.canWrite(String.class, null)).willReturn(true);
+		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		given(messageConverter.canWrite(String.class, MediaType.TEXT_PLAIN)).willReturn(true);
+
+
+		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
+
+		assertTrue(mavContainer.isRequestHandled());
+		assertEquals(HttpStatus.OK.value(), servletResponse.getStatus());
+		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
+		assertEquals(etagValue, servletResponse.getHeader(HttpHeaders.ETAG));
+		ArgumentCaptor<HttpOutputMessage> outputMessage = ArgumentCaptor.forClass(HttpOutputMessage.class);
+		verify(messageConverter).write(eq("body"), eq(MediaType.TEXT_PLAIN),  outputMessage.capture());
 	}
 
 	@SuppressWarnings("unused")
