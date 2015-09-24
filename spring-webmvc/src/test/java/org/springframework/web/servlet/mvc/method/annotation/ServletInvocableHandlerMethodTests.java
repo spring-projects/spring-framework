@@ -22,7 +22,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Test;
@@ -66,7 +65,7 @@ public class ServletInvocableHandlerMethodTests {
 
 	private final ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 
-	private final MockHttpServletRequest request = new MockHttpServletRequest();
+	private final MockHttpServletRequest request = new MockHttpServletRequest("GET", "/");
 
 	private final MockHttpServletResponse response = new MockHttpServletResponse();
 

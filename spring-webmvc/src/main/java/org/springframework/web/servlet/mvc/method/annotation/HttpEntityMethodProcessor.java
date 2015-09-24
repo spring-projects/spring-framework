@@ -57,7 +57,6 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  */
 public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodProcessor {
 
-
 	/**
 	 * Basic constructor with converters only. Suitable for resolving
 	 * {@code HttpEntity}. For handling {@code ResponseEntity} consider also
@@ -169,11 +168,12 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		if (!entityHeaders.isEmpty()) {
 			outputMessage.getHeaders().putAll(entityHeaders);
 		}
+
 		Object body = responseEntity.getBody();
 		if (responseEntity instanceof ResponseEntity) {
 			outputMessage.setStatusCode(((ResponseEntity<?>) responseEntity).getStatusCode());
-			if ("GET".equals(inputMessage.getServletRequest().getMethod())
-					&& isResourceNotModified(inputMessage, outputMessage)) {
+			if (inputMessage.getMethod() == HttpMethod.GET &&
+					isResourceNotModified(inputMessage, outputMessage)) {
 				outputMessage.setStatusCode(HttpStatus.NOT_MODIFIED);
 				// Ensure headers are flushed, no body should be written.
 				outputMessage.flush();
@@ -190,7 +190,6 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 	}
 
 	private boolean isResourceNotModified(ServletServerHttpRequest inputMessage, ServletServerHttpResponse outputMessage) {
-
 		List<String> ifNoneMatch = inputMessage.getHeaders().getIfNoneMatch();
 		long ifModifiedSince = inputMessage.getHeaders().getIfModifiedSince();
 		String eTag = addEtagPadding(outputMessage.getHeaders().getETag());
@@ -212,10 +211,10 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 	private boolean isETagNotModified(List<String> ifNoneMatch, String etag) {
 		if (StringUtils.hasLength(etag)) {
 			for (String clientETag : ifNoneMatch) {
-				// compare weak/strong ETags as per https://tools.ietf.org/html/rfc7232#section-2.3
+				// Compare weak/strong ETags as per https://tools.ietf.org/html/rfc7232#section-2.3
 				if (StringUtils.hasLength(clientETag) &&
-						(clientETag.replaceFirst("^W/", "").equals(etag.replaceFirst("^W/", ""))
-								|| clientETag.equals("*"))) {
+						(clientETag.replaceFirst("^W/", "").equals(etag.replaceFirst("^W/", "")) ||
+								clientETag.equals("*"))) {
 					return true;
 				}
 			}

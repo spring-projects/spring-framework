@@ -96,7 +96,7 @@ public class RequestMappingHandlerAdapterTests {
 		this.webAppContext = new StaticWebApplicationContext();
 		this.handlerAdapter = new RequestMappingHandlerAdapter();
 		this.handlerAdapter.setApplicationContext(this.webAppContext);
-		this.request = new MockHttpServletRequest();
+		this.request = new MockHttpServletRequest("GET", "/");
 		this.response = new MockHttpServletResponse();
 	}
 
