@@ -69,9 +69,9 @@ public class ResponseBodyEmitter {
 
 	private Throwable failure;
 
-	private Runnable timeoutCallback;
+	private final DefaultCallback timeoutCallback = new DefaultCallback();
 
-	private Runnable completionCallback;
+	private final DefaultCallback completionCallback = new DefaultCallback();
 
 
 	/**
@@ -126,11 +126,8 @@ public class ResponseBodyEmitter {
 				this.handler.complete();
 			}
 		}
-
-		if (this.timeoutCallback != null) {
+		else {
 			this.handler.onTimeout(this.timeoutCallback);
-		}
-		if (this.completionCallback != null) {
 			this.handler.onCompletion(this.completionCallback);
 		}
 	}
@@ -168,11 +165,11 @@ public class ResponseBodyEmitter {
 					this.handler.send(object, mediaType);
 				}
 				catch (IOException ex) {
-					this.handler.completeWithError(ex);
+					completeWithError(ex);
 					throw ex;
 				}
 				catch (Throwable ex) {
-					this.handler.completeWithError(ex);
+					completeWithError(ex);
 					throw new IllegalStateException("Failed to send " + object, ex);
 				}
 			}
@@ -212,10 +209,7 @@ public class ResponseBodyEmitter {
 	 * called from a container thread when an async request times out.
 	 */
 	public synchronized void onTimeout(Runnable callback) {
-		this.timeoutCallback = callback;
-		if (this.handler != null) {
-			this.handler.onTimeout(callback);
-		}
+		this.timeoutCallback.setDelegate(callback);
 	}
 
 	/**
@@ -225,10 +219,7 @@ public class ResponseBodyEmitter {
 	 * detecting that a {@code ResponseBodyEmitter} instance is no longer usable.
 	 */
 	public synchronized void onCompletion(Runnable callback) {
-		this.completionCallback = callback;
-		if (this.handler != null) {
-			this.handler.onCompletion(callback);
-		}
+		this.completionCallback.setDelegate(callback);
 	}
 
 
@@ -269,6 +260,24 @@ public class ResponseBodyEmitter {
 
 		public MediaType getMediaType() {
 			return this.mediaType;
+		}
+	}
+
+	private class DefaultCallback implements Runnable {
+
+		private Runnable delegate;
+
+
+		public void setDelegate(Runnable delegate) {
+			this.delegate = delegate;
+		}
+
+		@Override
+		public void run() {
+			ResponseBodyEmitter.this.complete = true;
+			if (this.delegate != null) {
+				this.delegate.run();
+			}
 		}
 	}
 
