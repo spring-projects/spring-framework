@@ -20,6 +20,7 @@ package org.springframework.scheduling.config;
  * Configuration constants for internal sharing across subpackages.
  *
  * @author Juergen Hoeller
+ * @author Tobias Montagna-Hay
  * @since 4.1
  */
 public class TaskManagementConfigUtils {
@@ -29,6 +30,12 @@ public class TaskManagementConfigUtils {
 	 */
 	public static final String SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME =
 			"org.springframework.context.annotation.internalScheduledAnnotationProcessor";
+	
+	/**
+	 * The bean name of the internally managed Schedule task registrar
+	 */
+	public static final String SCHEDULED_TASK_REGISTRAR_BEAN_NAME =
+			"org.springframework.scheduling.config.internalScheduledTaskRegistrar";
 
 	/**
 	 * The bean name of the internally managed Async annotation processor.

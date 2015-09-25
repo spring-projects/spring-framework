@@ -32,8 +32,10 @@ import org.junit.After;
 import org.junit.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.support.StaticApplicationContext;
@@ -58,6 +60,7 @@ import static org.junit.Assert.*;
  * @author Chris Beams
  * @author Sam Brannen
  * @author Stevo Slavić
+ * @author Tobias Montagna-Hay
  */
 public class ScheduledAnnotationBeanPostProcessorTests {
 
@@ -72,7 +75,10 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 	@Test
 	public void fixedDelayTask() {
-		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
+		constructorArgumentValues.addGenericArgumentValue(new ScheduledTaskRegistrar());
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class, 
+				constructorArgumentValues, new MutablePropertyValues());
 		BeanDefinition targetDefinition = new RootBeanDefinition(FixedDelayTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
@@ -98,7 +104,10 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 	@Test
 	public void fixedRateTask() {
-		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
+		constructorArgumentValues.addGenericArgumentValue(new ScheduledTaskRegistrar());
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class, 
+				constructorArgumentValues, new MutablePropertyValues());
 		BeanDefinition targetDefinition = new RootBeanDefinition(FixedRateTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
@@ -124,7 +133,10 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 	@Test
 	public void fixedRateTaskWithInitialDelay() {
-		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
+		constructorArgumentValues.addGenericArgumentValue(new ScheduledTaskRegistrar());
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class, 
+				constructorArgumentValues, new MutablePropertyValues());
 		BeanDefinition targetDefinition = new RootBeanDefinition(FixedRateWithInitialDelayTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
@@ -150,28 +162,40 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 	@Test
 	public void severalFixedRatesWithRepeatedScheduledAnnotation() {
-		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
+		constructorArgumentValues.addGenericArgumentValue(new ScheduledTaskRegistrar());
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class, 
+				constructorArgumentValues, new MutablePropertyValues());
 		BeanDefinition targetDefinition = new RootBeanDefinition(SeveralFixedRatesWithRepeatedScheduledAnnotationTestBean.class);
 		severalFixedRates(context, processorDefinition, targetDefinition);
 	}
 
 	@Test
 	public void severalFixedRatesWithSchedulesContainerAnnotation() {
-		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
+		constructorArgumentValues.addGenericArgumentValue(new ScheduledTaskRegistrar());
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class, 
+				constructorArgumentValues, new MutablePropertyValues());
 		BeanDefinition targetDefinition = new RootBeanDefinition(SeveralFixedRatesWithSchedulesContainerAnnotationTestBean.class);
 		severalFixedRates(context, processorDefinition, targetDefinition);
 	}
 
 	@Test
 	public void severalFixedRatesOnBaseClass() {
-		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
+		constructorArgumentValues.addGenericArgumentValue(new ScheduledTaskRegistrar());
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class, 
+				constructorArgumentValues, new MutablePropertyValues());
 		BeanDefinition targetDefinition = new RootBeanDefinition(FixedRatesSubBean.class);
 		severalFixedRates(context, processorDefinition, targetDefinition);
 	}
 
 	@Test
 	public void severalFixedRatesOnDefaultMethod() {
-		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
+		constructorArgumentValues.addGenericArgumentValue(new ScheduledTaskRegistrar());
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class, 
+				constructorArgumentValues, new MutablePropertyValues());
 		BeanDefinition targetDefinition = new RootBeanDefinition(FixedRatesDefaultBean.class);
 		severalFixedRates(context, processorDefinition, targetDefinition);
 	}
@@ -213,7 +237,10 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	public void cronTask() throws InterruptedException {
 		Assume.group(TestGroup.LONG_RUNNING);
 
-		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
+		constructorArgumentValues.addGenericArgumentValue(new ScheduledTaskRegistrar());
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class, 
+				constructorArgumentValues, new MutablePropertyValues());
 		BeanDefinition targetDefinition = new RootBeanDefinition(CronTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
@@ -241,7 +268,10 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	public void cronTaskWithZone() throws InterruptedException {
 		Assume.group(TestGroup.LONG_RUNNING);
 
-		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
+		constructorArgumentValues.addGenericArgumentValue(new ScheduledTaskRegistrar());
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class, 
+				constructorArgumentValues, new MutablePropertyValues());
 		BeanDefinition targetDefinition = new RootBeanDefinition(CronWithTimezoneTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
@@ -286,7 +316,10 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	public void cronTaskWithInvalidZone() throws InterruptedException {
 		Assume.group(TestGroup.LONG_RUNNING);
 
-		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
+		constructorArgumentValues.addGenericArgumentValue(new ScheduledTaskRegistrar());
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class, 
+				constructorArgumentValues, new MutablePropertyValues());
 		BeanDefinition targetDefinition = new RootBeanDefinition(CronWithInvalidTimezoneTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
@@ -297,7 +330,10 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	@Test(expected = BeanCreationException.class)
 	public void cronTaskWithMethodValidation() throws InterruptedException {
 		BeanDefinition validationDefinition = new RootBeanDefinition(MethodValidationPostProcessor.class);
-		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
+		constructorArgumentValues.addGenericArgumentValue(new ScheduledTaskRegistrar());
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class, 
+				constructorArgumentValues, new MutablePropertyValues());
 		BeanDefinition targetDefinition = new RootBeanDefinition(CronTestBean.class);
 		context.registerBeanDefinition("methodValidation", validationDefinition);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
@@ -307,7 +343,10 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 	@Test
 	public void metaAnnotationWithFixedRate() {
-		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
+		constructorArgumentValues.addGenericArgumentValue(new ScheduledTaskRegistrar());
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class, 
+				constructorArgumentValues, new MutablePropertyValues());
 		BeanDefinition targetDefinition = new RootBeanDefinition(MetaAnnotationFixedRateTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
@@ -332,7 +371,10 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 	@Test
 	public void metaAnnotationWithCronExpression() {
-		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
+		constructorArgumentValues.addGenericArgumentValue(new ScheduledTaskRegistrar());
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class, 
+				constructorArgumentValues, new MutablePropertyValues());
 		BeanDefinition targetDefinition = new RootBeanDefinition(MetaAnnotationCronTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
@@ -358,7 +400,10 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	@Test
 	public void propertyPlaceholderWithCron() {
 		String businessHoursCronExpression = "0 0 9-17 * * MON-FRI";
-		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
+		constructorArgumentValues.addGenericArgumentValue(new ScheduledTaskRegistrar());
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class, 
+				constructorArgumentValues, new MutablePropertyValues());
 		BeanDefinition placeholderDefinition = new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
 		Properties properties = new Properties();
 		properties.setProperty("schedules.businessHours", businessHoursCronExpression);
@@ -388,7 +433,10 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 	@Test
 	public void propertyPlaceholderWithFixedDelay() {
-		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
+		constructorArgumentValues.addGenericArgumentValue(new ScheduledTaskRegistrar());
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class, 
+				constructorArgumentValues, new MutablePropertyValues());
 		BeanDefinition placeholderDefinition = new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
 		Properties properties = new Properties();
 		properties.setProperty("fixedDelay", "5000");
@@ -420,7 +468,10 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 	@Test
 	public void propertyPlaceholderWithFixedRate() {
-		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
+		constructorArgumentValues.addGenericArgumentValue(new ScheduledTaskRegistrar());
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class, 
+				constructorArgumentValues, new MutablePropertyValues());
 		BeanDefinition placeholderDefinition = new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
 		Properties properties = new Properties();
 		properties.setProperty("fixedRate", "3000");
@@ -453,7 +504,10 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 	@Test
 	public void propertyPlaceholderForMetaAnnotation() {
 		String businessHoursCronExpression = "0 0 9-17 * * MON-FRI";
-		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
+		constructorArgumentValues.addGenericArgumentValue(new ScheduledTaskRegistrar());
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class, 
+				constructorArgumentValues, new MutablePropertyValues());
 		BeanDefinition placeholderDefinition = new RootBeanDefinition(PropertyPlaceholderConfigurer.class);
 		Properties properties = new Properties();
 		properties.setProperty("schedules.businessHours", businessHoursCronExpression);
@@ -483,7 +537,10 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 	@Test(expected = BeanCreationException.class)
 	public void emptyAnnotation() {
-		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		ConstructorArgumentValues constructorArgumentValues = new ConstructorArgumentValues();
+		constructorArgumentValues.addGenericArgumentValue(new ScheduledTaskRegistrar());
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class, 
+				constructorArgumentValues, new MutablePropertyValues());
 		BeanDefinition targetDefinition = new RootBeanDefinition(EmptyAnnotationTestBean.class);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
