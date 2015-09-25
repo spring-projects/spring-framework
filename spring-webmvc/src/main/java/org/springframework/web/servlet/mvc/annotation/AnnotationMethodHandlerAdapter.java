@@ -56,6 +56,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.Ordered;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -119,7 +120,7 @@ import org.springframework.web.util.WebUtils;
 
 /**
  * Implementation of the {@link org.springframework.web.servlet.HandlerAdapter} interface
- * that maps handler methods based on HTTP paths, HTTP methods and request parameters
+ * that maps handler methods based on HTTP paths, HTTP methods, and request parameters
  * expressed through the {@link RequestMapping} annotation.
  *
  * <p>Supports request parameter binding through the {@link RequestParam} annotation.
@@ -133,13 +134,13 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Juergen Hoeller
  * @author Arjen Poutsma
+ * @author Sam Brannen
  * @since 2.5
  * @see #setPathMatcher
  * @see #setMethodNameResolver
  * @see #setWebBindingInitializer
  * @see #setSessionAttributeStore
- *
- * @deprecated in Spring 3.2 in favor of
+ * @deprecated as of Spring 3.2, in favor of
  * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter RequestMappingHandlerAdapter}
  */
 @Deprecated
@@ -411,13 +412,10 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		}
 
 		if (annotatedWithSessionAttributes) {
-			// Always prevent caching in case of session attribute management.
-			checkAndPrepare(request, response, this.cacheSecondsForSessionAttributeHandlers);
-			// Prepare cached set of session attributes names.
+			checkAndPrepare(request, response, this.cacheSecondsForSessionAttributeHandlers, true);
 		}
 		else {
-			// Uses configured default cacheSeconds setting.
-			checkAndPrepare(request, response);
+			checkAndPrepare(request, response, true);
 		}
 
 		// Execute invokeHandlerMethod in synchronized block if required.
@@ -891,7 +889,7 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 			else if (Principal.class.isAssignableFrom(parameterType)) {
 				return request.getUserPrincipal();
 			}
-			else if (Locale.class.equals(parameterType)) {
+			else if (Locale.class == parameterType) {
 				return RequestContextUtils.getLocale(request);
 			}
 			else if (InputStream.class.isAssignableFrom(parameterType)) {
@@ -915,19 +913,19 @@ public class AnnotationMethodHandlerAdapter extends WebContentGenerator
 		public ModelAndView getModelAndView(Method handlerMethod, Class<?> handlerType, Object returnValue,
 				ExtendedModelMap implicitModel, ServletWebRequest webRequest) throws Exception {
 
-			ResponseStatus responseStatusAnn = AnnotationUtils.findAnnotation(handlerMethod, ResponseStatus.class);
-			if (responseStatusAnn != null) {
-				HttpStatus responseStatus = responseStatusAnn.value();
-				String reason = responseStatusAnn.reason();
+			ResponseStatus responseStatus = AnnotatedElementUtils.findMergedAnnotation(handlerMethod, ResponseStatus.class);
+			if (responseStatus != null) {
+				HttpStatus statusCode = responseStatus.code();
+				String reason = responseStatus.reason();
 				if (!StringUtils.hasText(reason)) {
-					webRequest.getResponse().setStatus(responseStatus.value());
+					webRequest.getResponse().setStatus(statusCode.value());
 				}
 				else {
-					webRequest.getResponse().sendError(responseStatus.value(), reason);
+					webRequest.getResponse().sendError(statusCode.value(), reason);
 				}
 
 				// to be picked up by the RedirectView
-				webRequest.getRequest().setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, responseStatus);
+				webRequest.getRequest().setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, statusCode);
 
 				this.responseArgumentUsed = true;
 			}

@@ -47,7 +47,8 @@ import org.springframework.util.Assert;
  * on acknowledge modes and transaction options. Note that this container
  * exposes standard JMS behavior for the default "AUTO_ACKNOWLEDGE" mode:
  * that is, automatic message acknowledgment after listener execution,
- * with redelivery in case of an exception thrown.
+ * with no redelivery in case of a user exception thrown but potential
+ * redelivery in case of the JVM dying during listener execution.
  *
  * <p>For a different style of MessageListener handling, through looped
  * {@code MessageConsumer.receive()} calls that also allow for

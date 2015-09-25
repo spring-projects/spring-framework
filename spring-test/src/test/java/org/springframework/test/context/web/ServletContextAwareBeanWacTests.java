@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,13 @@
 package org.springframework.test.context.web;
 
 import org.junit.Test;
-import org.junit.runner.JUnitCore;
 
-import org.springframework.test.context.junit4.TrackingRunListener;
-
-import static org.junit.Assert.*;
+import static org.springframework.test.context.junit4.JUnitTestingUtils.*;
 
 /**
  * Introduced to investigate claims in SPR-11145.
  *
- * <p>
- * Yes, this test class does in fact use JUnit to run JUnit. ;)
+ * <p>Yes, this test class does in fact use JUnit to run JUnit. ;)
  *
  * @author Sam Brannen
  * @since 4.0.2
@@ -35,16 +31,8 @@ import static org.junit.Assert.*;
 public class ServletContextAwareBeanWacTests {
 
 	@Test
-	public void ensureServletContextAwareBeanIsProcessedProperlyWhenExecutingJUnitManually() {
-		TrackingRunListener listener = new TrackingRunListener();
-		JUnitCore junit = new JUnitCore();
-		junit.addListener(listener);
-
-		junit.run(BasicAnnotationConfigWacTests.class);
-
-		assertEquals(3, listener.getTestStartedCount());
-		assertEquals(3, listener.getTestFinishedCount());
-		assertEquals(0, listener.getTestFailureCount());
+	public void ensureServletContextAwareBeanIsProcessedProperlyWhenExecutingJUnitManually() throws Exception {
+		runTestsAndAssertCounters(BasicAnnotationConfigWacTests.class, 3, 0, 3, 0, 0);
 	}
 
 }

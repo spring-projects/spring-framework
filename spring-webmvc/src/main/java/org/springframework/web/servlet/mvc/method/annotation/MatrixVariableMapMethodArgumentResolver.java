@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,8 @@ import org.springframework.web.servlet.HandlerMapping;
 
 /**
  * Resolves method arguments of type Map annotated with
- * {@link MatrixVariable @MatrixVariable} where the annotation the does not
- * specify a name. If a name specified then the argument will by resolved by the
+ * {@link MatrixVariable @MatrixVariable} where the annotation does not
+ * specify a name. If a name is specified then the argument will by resolved by the
  * {@link MatrixVariableMethodArgumentResolver} instead.
  *
  * @author Rossen Stoyanchev
@@ -46,10 +46,10 @@ public class MatrixVariableMapMethodArgumentResolver implements HandlerMethodArg
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		MatrixVariable paramAnnot = parameter.getParameterAnnotation(MatrixVariable.class);
-		if (paramAnnot != null) {
+		MatrixVariable matrixVariable = parameter.getParameterAnnotation(MatrixVariable.class);
+		if (matrixVariable != null) {
 			if (Map.class.isAssignableFrom(parameter.getParameterType())) {
-				return !StringUtils.hasText(paramAnnot.value());
+				return !StringUtils.hasText(matrixVariable.name());
 			}
 		}
 		return false;

@@ -33,6 +33,7 @@ import org.springframework.beans.factory.xml.BeanDefinitionParser;
 import org.springframework.beans.factory.xml.ParserContext;
 import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.core.Ordered;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 import org.springframework.http.CacheControl;
@@ -51,6 +52,7 @@ import org.springframework.web.servlet.resource.ResourceTransformer;
 import org.springframework.web.servlet.resource.ResourceUrlProvider;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
 import org.springframework.web.servlet.resource.VersionResourceResolver;
+import org.springframework.web.servlet.resource.WebJarsResourceResolver;
 
 /**
  * {@link org.springframework.beans.factory.xml.BeanDefinitionParser} that parses a
@@ -77,6 +79,9 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 	private static final String CONTENT_VERSION_STRATEGY_ELEMENT = "content-version-strategy";
 
 	private static final String RESOURCE_URL_PROVIDER = "mvcResourceUrlProvider";
+
+	private static final boolean isWebJarsAssetLocatorPresent = ClassUtils.isPresent(
+			"org.webjars.WebJarAssetLocator", ResourcesBeanDefinitionParser.class.getClassLoader());
 
 
 	@Override
@@ -110,6 +115,9 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		String order = element.getAttribute("order");
 		// Use a default of near-lowest precedence, still allowing for even lower precedence in other mappings
 		handlerMappingDef.getPropertyValues().add("order", StringUtils.hasText(order) ? order : Ordered.LOWEST_PRECEDENCE - 1);
+
+		RuntimeBeanReference corsConfigurationsRef = MvcNamespaceUtils.registerCorsConfigurations(null, parserContext, source);
+		handlerMappingDef.getPropertyValues().add("corsConfigurations", corsConfigurationsRef);
 
 		String beanName = parserContext.getReaderContext().generateBeanName(handlerMappingDef);
 		parserContext.getRegistry().registerBeanDefinition(beanName, handlerMappingDef);
@@ -164,7 +172,7 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 			resourceHandlerDef.getPropertyValues().add("cacheSeconds", cacheSeconds);
 		}
 
-		Element cacheControlElement = DomUtils.getChildElementByTagName(element, "cachecontrol");
+		Element cacheControlElement = DomUtils.getChildElementByTagName(element, "cache-control");
 		if (cacheControlElement != null) {
 			CacheControl cacheControl = parseCacheControl(cacheControlElement);
 			resourceHandlerDef.getPropertyValues().add("cacheControl", cacheControl);
@@ -302,6 +310,12 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		}
 
 		if (isAutoRegistration) {
+			if (isWebJarsAssetLocatorPresent) {
+				RootBeanDefinition webJarsResolverDef = new RootBeanDefinition(WebJarsResourceResolver.class);
+				webJarsResolverDef.setSource(source);
+				webJarsResolverDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+				resourceResolvers.add(webJarsResolverDef);
+			}
 			RootBeanDefinition pathResolverDef = new RootBeanDefinition(PathResourceResolver.class);
 			pathResolverDef.setSource(source);
 			pathResolverDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);

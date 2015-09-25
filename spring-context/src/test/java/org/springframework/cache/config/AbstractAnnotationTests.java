@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,8 +50,12 @@ public abstract class AbstractAnnotationTests {
 
 	protected CacheManager cm;
 
-	/** @return a refreshed application context */
+
+	/**
+	 * @return a refreshed application context
+	 */
 	protected abstract ConfigurableApplicationContext getApplicationContext();
+
 
 	@Before
 	public void setup() {
@@ -68,8 +72,11 @@ public abstract class AbstractAnnotationTests {
 
 	@After
 	public void tearDown() {
-		  ctx.close();
+		if (ctx != null) {
+			ctx.close();
+		}
 	}
+
 
 	public void testCacheable(CacheableService<?> service) throws Exception {
 		Object o1 = new Object();
@@ -731,4 +738,5 @@ public abstract class AbstractAnnotationTests {
 	public void testClassMultiConditionalCacheAndEvict() {
 		testMultiConditionalCacheAndEvict(ccs);
 	}
+
 }

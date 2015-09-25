@@ -6,7 +6,7 @@
            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd">
 
 	<!-- just ensures that one can use <ref local=""/> to refer to the various <util:collections/> types -->
-	
+
 	<util:map id="map"/>
 	<util:list id="list"/>
 	<util:set id="set"/>

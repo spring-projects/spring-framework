@@ -23,18 +23,20 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.context.event.EventListener;
+import org.springframework.core.annotation.AliasFor;
 
 /**
  * An {@link EventListener} that is invoked according to a {@link TransactionPhase}.
  *
  * <p>If the event is not published within the boundaries of a managed transaction, the event
- * is discarded unless the {@link #fallbackExecution()} flag is explicitly set. If a
- * transaction is running, the event is processed according to its {@link TransactionPhase}.
+ * is discarded unless the {@link #fallbackExecution} flag is explicitly set. If a
+ * transaction is running, the event is processed according to its {@code TransactionPhase}.
  *
  * <p>Adding {@link org.springframework.core.annotation.Order @Order} on your annotated method
  * allows you to prioritize that listener amongst other listeners running in the same phase.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 4.2
  */
 @EventListener
@@ -44,21 +46,37 @@ import org.springframework.context.event.EventListener;
 public @interface TransactionalEventListener {
 
 	/**
-	 * Phase to bind the handling of an event to. If no transaction is in progress, the
-	 * event is not processed at all unless {@link #fallbackExecution} has been
-	 * enabled explicitly.
+	 * Phase to bind the handling of an event to.
+	 * <p>If no transaction is in progress, the event is not processed at
+	 * all unless {@link #fallbackExecution} has been enabled explicitly.
 	 */
 	TransactionPhase phase() default TransactionPhase.AFTER_COMMIT;
 
 	/**
-	 * Specify if the event should be processed if no transaction is running.
+	 * Whether the event should be processed if no transaction is running.
 	 */
 	boolean fallbackExecution() default false;
 
 	/**
+	 * Alias for {@link #classes}.
+	 */
+	@AliasFor(annotation = EventListener.class, attribute = "classes")
+	Class<?>[] value() default {};
+
+	/**
+	 * The event classes that this listener handles.
+	 * <p>If this attribute is specified with a single value, the annotated
+	 * method may optionally accept a single parameter. However, if this
+	 * attribute is specified with multiple values, the annotated method
+	 * must <em>not</em> declare any parameters.
+	 */
+	@AliasFor(annotation = EventListener.class, attribute = "classes")
+	Class<?>[] classes() default {};
+
+	/**
 	 * Spring Expression Language (SpEL) attribute used for making the event
 	 * handling conditional.
-	 * <p>Default is "", meaning the event is always handled.
+	 * <p>Default is {@code ""}, meaning the event is always handled.
 	 * @see EventListener#condition
 	 */
 	String condition() default "";

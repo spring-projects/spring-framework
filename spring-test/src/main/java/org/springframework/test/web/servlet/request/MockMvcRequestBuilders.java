@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.servlet.request;
 
 import java.net.URI;
@@ -24,15 +25,22 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
 
 /**
- * Static factory methods for {@link RequestBuilder}s.
+ * Static factory methods for {@link RequestBuilder RequestBuilders}.
  *
- * <p><strong>Eclipse users:</strong> Consider adding this class as a Java
- * editor favorite. To navigate, open the Preferences and type "favorites".
+ * <h3>Integration with the Spring TestContext Framework</h3>
+ * <p>Methods in this class will reuse a
+ * {@link org.springframework.mock.web.MockServletContext MockServletContext}
+ * that was created by the Spring TestContext Framework.
+ *
+ * <h3>Eclipse Users</h3>
+ * <p>Consider adding this class as a Java editor favorite. To navigate to
+ * this setting, open the Preferences and type "favorites".
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Greg Turnquist
  * @author Sebastien Deleuze
+ * @author Sam Brannen
  * @since 3.2
  */
 public abstract class MockMvcRequestBuilders {
@@ -185,7 +193,7 @@ public abstract class MockMvcRequestBuilders {
 	}
 
 	/**
-	 * Create a {@link MockHttpServletRequestBuilder} for a multipart request.
+	 * Create a {@link MockMultipartHttpServletRequestBuilder} for a multipart request.
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param urlVariables zero or more URL variables
 	 */
@@ -194,7 +202,7 @@ public abstract class MockMvcRequestBuilders {
 	}
 
 	/**
-	 * Create a {@link MockHttpServletRequestBuilder} for a multipart request.
+	 * Create a {@link MockMultipartHttpServletRequestBuilder} for a multipart request.
 	 * @param uri the URL
 	 * @since 4.0.3
 	 */
@@ -205,7 +213,7 @@ public abstract class MockMvcRequestBuilders {
 	/**
 	 * Create a {@link RequestBuilder} for an async dispatch from the
 	 * {@link MvcResult} of the request that started async processing.
-	 * <p>Usage involves performing one request first that starts async processing:
+	 * <p>Usage involves performing a request that starts async processing first:
 	 * <pre class="code">
 	 * MvcResult mvcResult = this.mockMvc.perform(get("/1"))
 	 *	.andExpect(request().asyncStarted())
@@ -221,6 +229,10 @@ public abstract class MockMvcRequestBuilders {
 	 * @param mvcResult the result from the request that started async processing
 	 */
 	public static RequestBuilder asyncDispatch(final MvcResult mvcResult) {
+
+		// There must be an async result before dispatching
+		mvcResult.getAsyncResult();
+
 		return new RequestBuilder() {
 			@Override
 			public MockHttpServletRequest buildRequest(ServletContext servletContext) {

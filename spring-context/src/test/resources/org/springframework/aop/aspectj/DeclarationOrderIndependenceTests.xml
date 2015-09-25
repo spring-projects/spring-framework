@@ -6,12 +6,12 @@
        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
 
   <bean id="topsyTurvyAspect" class="org.springframework.aop.aspectj.TopsyTurvyAspect"/>
-  
+ 
   <bean id="topsyTurvyTarget" class="org.springframework.aop.aspectj.TopsyTurvyTargetImpl"/>
 
   <aop:config>
     <aop:aspect id="myAspect" ref="topsyTurvyAspect">
-      <aop:before pointcut-ref="pc1" 
+      <aop:before pointcut-ref="pc1"
                   method="before"/>
       <aop:declare-parents
         types-matching="*..TopsyTurvyTarget+"
@@ -25,8 +25,8 @@
       <aop:declare-parents
         types-matching="*..TopsyTurvyTarget+"
         implement-interface="org.springframework.beans.factory.BeanNameAware"
-        default-impl="org.springframework.aop.aspectj.DeclarationOrderIndependenceTests$BeanNameAwareMixin"/>          
+        default-impl="org.springframework.aop.aspectj.DeclarationOrderIndependenceTests$BeanNameAwareMixin"/>         
     </aop:aspect>
   </aop:config>
-  
+ 
 </beans>

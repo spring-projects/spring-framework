@@ -16,6 +16,8 @@
 
 package org.springframework.web.socket.messaging;
 
+import java.security.Principal;
+
 import org.springframework.messaging.Message;
 
 /**
@@ -35,6 +37,10 @@ public class SessionConnectedEvent extends AbstractSubProtocolEvent {
 	 */
 	public SessionConnectedEvent(Object source, Message<byte[]> message) {
 		super(source, message);
+	}
+
+	public SessionConnectedEvent(Object source, Message<byte[]> message, Principal user) {
+		super(source, message, user);
 	}
 
 }

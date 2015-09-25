@@ -12,5 +12,5 @@
     <property name="name"><value>beans2.bean2</value></property>
     <property name="objRef"><ref bean="beans1.bean1"/></property>
   </bean>
- 
+
 </beans>

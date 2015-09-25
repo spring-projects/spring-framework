@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,8 +48,6 @@ public class MessageBrokerRegistry {
 	private String[] applicationDestinationPrefixes;
 
 	private String userDestinationPrefix;
-
-	private String userDestinationBroadcast;
 
 	private PathMatcher pathMatcher;
 
@@ -139,22 +137,14 @@ public class MessageBrokerRegistry {
 		return this.userDestinationPrefix;
 	}
 
-	/**
-	 * Set a destination to broadcast messages to that remain unresolved because
-	 * the user is not connected. In a multi-application server scenario this
-	 * gives other application servers a chance to try.
-	 * <p><strong>Note:</strong> this option applies only when the
-	 * {@link #enableStompBrokerRelay "broker relay"} is enabled.
-	 * <p>By default this is not set.
-	 * @param destination the destination to forward unresolved
-	 * messages to, e.g. "/topic/unresolved-user-destination".
-	 */
-	public void setUserDestinationBroadcast(String destination) {
-		this.userDestinationBroadcast = destination;
+	protected String getUserDestinationBroadcast() {
+		return (this.brokerRelayRegistration != null ?
+				this.brokerRelayRegistration.getUserDestinationBroadcast() : null);
 	}
 
-	protected String getUserDestinationBroadcast() {
-		return this.userDestinationBroadcast;
+	protected String getUserRegistryBroadcast() {
+		return (this.brokerRelayRegistration != null ?
+				this.brokerRelayRegistration.getUserRegistryBroadcast() : null);
 	}
 
 	/**

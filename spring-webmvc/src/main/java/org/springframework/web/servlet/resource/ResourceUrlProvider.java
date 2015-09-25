@@ -36,7 +36,6 @@ import org.springframework.util.PathMatcher;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
 import org.springframework.web.util.UrlPathHelper;
 
-
 /**
  * A central component to use to obtain the public URL path that clients should
  * use to access a static resource.
@@ -130,7 +129,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 			if (this.handlerMap.isEmpty() && logger.isDebugEnabled()) {
 				logger.debug("No resource handling mappings found");
 			}
-			if(!this.handlerMap.isEmpty()) {
+			if (!this.handlerMap.isEmpty()) {
 				this.autodetect = false;
 			}
 		}
@@ -172,17 +171,24 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		if (logger.isTraceEnabled()) {
 			logger.trace("Getting resource URL for requestURL=" + requestUrl);
 		}
-		int index = getLookupPathIndex(request);
-		String prefix = requestUrl.substring(0, index);
-		String lookupPath = requestUrl.substring(index);
+		int prefixIndex = getLookupPathIndex(request);
+		int suffixIndex = getQueryParamsIndex(requestUrl);
+		String prefix = requestUrl.substring(0, prefixIndex);
+		String suffix = requestUrl.substring(suffixIndex);
+		String lookupPath = requestUrl.substring(prefixIndex, suffixIndex);
 		String resolvedLookupPath = getForLookupPath(lookupPath);
-		return (resolvedLookupPath != null) ? prefix + resolvedLookupPath : null;
+		return (resolvedLookupPath != null) ? prefix + resolvedLookupPath + suffix : null;
 	}
 
 	private int getLookupPathIndex(HttpServletRequest request) {
 		String requestUri = getPathHelper().getRequestUri(request);
 		String lookupPath = getPathHelper().getLookupPathForRequest(request);
 		return requestUri.indexOf(lookupPath);
+	}
+
+	private int getQueryParamsIndex(String lookupPath) {
+		int index = lookupPath.indexOf("?");
+		return index > 0 ? index : lookupPath.length();
 	}
 
 	/**

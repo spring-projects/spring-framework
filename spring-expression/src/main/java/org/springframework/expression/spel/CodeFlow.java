@@ -222,7 +222,7 @@ public class CodeFlow implements Opcodes {
 					mv.visitTypeInsn(CHECKCAST, "java/lang/Number");
 				}
 				mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Number", "doubleValue", "()D", false);
-				break;		
+				break;
 			case 'F':
 				if (stackDescriptor.equals("Ljava/lang/Object")) {
 					mv.visitTypeInsn(CHECKCAST, "java/lang/Number");
@@ -945,7 +945,8 @@ public class CodeFlow implements Opcodes {
 				// is [[I then we want [I and not [I;
 				if (CodeFlow.isReferenceTypeArray(arraytype)) {
 					mv.visitTypeInsn(ANEWARRAY, arraytype+";");
-				} else {
+				}
+				else {
 					mv.visitTypeInsn(ANEWARRAY, arraytype);
 				}
 			}
@@ -956,19 +957,22 @@ public class CodeFlow implements Opcodes {
 	}
 
 	/**
-	 * For use in mathematical operators, handles converting from a (possibly boxed) number on the stack to a primitive numeric type.
-	 * For example, from a Integer to a double, just need to call 'Number.doubleValue()' but from an int to a double, need to use
-	 * the bytecode 'i2d'.
+	 * For use in mathematical operators, handles converting from a (possibly boxed)
+	 * number on the stack to a primitive numeric type.
+	 * <p>For example, from a Integer to a double, just need to call 'Number.doubleValue()'
+	 * but from an int to a double, need to use the bytecode 'i2d'.
 	 * @param mv the method visitor when instructions should be appended
 	 * @param stackDescriptor a descriptor of the operand on the stack
 	 * @param targetDescriptor a primitive type descriptor
 	 */
-	public static void insertNumericUnboxOrPrimitiveTypeCoercion(MethodVisitor mv,
-			String stackDescriptor, char targetDecriptor) {
+	public static void insertNumericUnboxOrPrimitiveTypeCoercion(
+			MethodVisitor mv, String stackDescriptor, char targetDescriptor) {
+
 		if (!CodeFlow.isPrimitive(stackDescriptor)) {
-			CodeFlow.insertUnboxNumberInsns(mv, targetDecriptor, stackDescriptor);
-		} else {
-			CodeFlow.insertAnyNecessaryTypeConversionBytecodes(mv, targetDecriptor, stackDescriptor);
+			CodeFlow.insertUnboxNumberInsns(mv, targetDescriptor, stackDescriptor);
+		}
+		else {
+			CodeFlow.insertAnyNecessaryTypeConversionBytecodes(mv, targetDescriptor, stackDescriptor);
 		}
 	}
 

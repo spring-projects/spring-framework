@@ -44,9 +44,11 @@ public class StreamConverter implements ConditionalGenericConverter {
 
 	private final ConversionService conversionService;
 
+
 	public StreamConverter(ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
+
 
 	@Override
 	public Set<ConvertiblePair> getConvertibleTypes() {

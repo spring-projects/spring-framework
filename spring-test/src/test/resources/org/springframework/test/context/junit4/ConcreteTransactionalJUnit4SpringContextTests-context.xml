@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 	<import resource="transactionalTests-context.xml" />
 
-	<bean id="databaseSetup"
-		class="org.springframework.test.context.junit4.ConcreteTransactionalJUnit4SpringContextTests$DatabaseSetup" />
+	<jdbc:initialize-database data-source="dataSource" >
+		<jdbc:script location="classpath:/org/springframework/test/jdbc/data.sql"/>
+	</jdbc:initialize-database>
 
 	<bean id="employee" class="org.springframework.tests.sample.beans.Employee">
 		<property name="name" value="John Smith" />

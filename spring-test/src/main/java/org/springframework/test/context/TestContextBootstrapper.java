@@ -99,7 +99,7 @@ public interface TestContextBootstrapper {
 	 * <li>If a {@code ContextLoader} class has been explicitly declared via
 	 * {@link ContextConfiguration#loader}, use it.</li>
 	 * <li>Otherwise, concrete implementations are free to determine which
-	 * {@code ContextLoader} class to use as as default.</li>
+	 * {@code ContextLoader} class to use as a default.</li>
 	 * </ol>
 	 * @return the merged context configuration, never {@code null}
 	 * @see #buildTestContext()

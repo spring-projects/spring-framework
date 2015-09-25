@@ -19,9 +19,8 @@ package org.springframework.web.servlet.view.script;
 import org.springframework.web.servlet.view.UrlBasedViewResolver;
 
 /**
- * Convenience subclass of
- * {@link org.springframework.web.servlet.view.UrlBasedViewResolver}
- * that supports {@link ScriptTemplateView} and custom subclasses of it.
+ * Convenience subclass of {@link UrlBasedViewResolver} that supports
+ * {@link ScriptTemplateView} and custom subclasses of it.
  *
  * <p>The view class for all views created by this resolver can be specified
  * via the {@link #setViewClass(Class)} property.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.core.annotation;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -24,18 +25,24 @@ import java.lang.annotation.Target;
 import org.springframework.core.Ordered;
 
 /**
- * Annotation that defines ordering. The value is optional, and represents order value
- * as defined in the {@link Ordered} interface. Lower values have higher priority.
- * The default value is {@code Ordered.LOWEST_PRECEDENCE}, indicating
+ * {@code @Order} defines the sort order for an annotated component.
+ *
+ * <p>The {@link #value} is optional and represents an order value as defined
+ * in the {@link Ordered} interface. Lower values have higher priority. The
+ * default value is {@code Ordered.LOWEST_PRECEDENCE}, indicating
  * lowest priority (losing to any other specified order value).
  *
- * <p>Since Spring 4.1, the standard {@link javax.annotation.Priority} can be used as
- * a drop-in replacement of this annotation.
+ * <p>Since Spring 4.1, the standard {@link javax.annotation.Priority}
+ * annotation can be used as a drop-in replacement for this annotation.
  *
- * <p><b>NOTE:</b> Annotation-based ordering is supported for specific kinds of
- * components only, e.g. for annotation-based AspectJ aspects. Spring container
- * strategies, on the other hand, are typically based on the {@link Ordered}
- * interface in order to allow for configurable ordering of each <i>instance</i>.
+ * <p><b>NOTE</b>: Annotation-based ordering is supported for specific kinds
+ * of components only &mdash; for example, for annotation-based AspectJ
+ * aspects. Ordering strategies within the Spring container, on the other
+ * hand, are typically based on the {@link Ordered} interface in order to
+ * allow for programmatically configurable ordering of each <i>instance</i>.
+ *
+ * <p>Consult the Javadoc for {@link org.springframework.core.OrderComparator
+ * OrderComparator} for details on the sort semantics for non-ordered objects.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -47,10 +54,12 @@ import org.springframework.core.Ordered;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD})
+@Documented
 public @interface Order {
 
 	/**
-	 * The order value. Default is {@link Ordered#LOWEST_PRECEDENCE}.
+	 * The order value.
+	 * <p>Default is {@link Ordered#LOWEST_PRECEDENCE}.
 	 * @see Ordered#getOrder()
 	 */
 	int value() default Ordered.LOWEST_PRECEDENCE;

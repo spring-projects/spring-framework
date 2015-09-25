@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,20 @@
 
 package org.springframework.aop.aspectj.annotation;
 
+import java.util.Arrays;
+
+import org.apache.commons.logging.LogFactory;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+
 import org.junit.Ignore;
 import org.junit.Test;
-import test.aop.PerThisAspect;
 
 import org.springframework.util.SerializationTestUtils;
+
+import test.aop.PerThisAspect;
 
 import static org.junit.Assert.*;
 
@@ -32,9 +38,9 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Chris Beams
  */
-public final class AspectProxyFactoryTests {
+public class AspectProxyFactoryTests {
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testWithNonAspect() {
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
 		proxyFactory.addAspect(TestBean.class);
@@ -70,7 +76,7 @@ public final class AspectProxyFactoryTests {
 		assertEquals(2, proxy1.getAge());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testWithInstanceWithNonAspect() throws Exception {
 		AspectJProxyFactory pf = new AspectJProxyFactory();
 		pf.addAspect(new TestBean());
@@ -96,14 +102,23 @@ public final class AspectProxyFactoryTests {
 		assertEquals(target.getAge() * multiple, serializedProxy.getAge());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testWithNonSingletonAspectInstance() throws Exception {
 		AspectJProxyFactory pf = new AspectJProxyFactory();
 		pf.addAspect(new PerThisAspect());
 	}
 
+	@Test  // SPR-13328
+	public void testVarargsWithEnumArray() throws Exception {
+		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
+		proxyFactory.addAspect(LoggingAspect.class);
+		proxyFactory.setProxyTargetClass(true);
+		TestBean proxy = proxyFactory.getProxy();
+		assertTrue(proxy.doWithVarargs(MyEnum.A, MyEnum.B));
+	}
 
-	public static interface ITestBean {
+
+	public interface ITestBean {
 
 		int getAge();
 	}
@@ -121,8 +136,33 @@ public final class AspectProxyFactoryTests {
 		public void setAge(int age) {
 			this.age = age;
 		}
+
+		@SuppressWarnings("unchecked")
+		public <V extends MyInterface> boolean doWithVarargs(V... args) {
+			return true;
+		}
 	}
 
+
+	public interface MyInterface {
+	}
+
+
+	public enum MyEnum implements MyInterface {
+
+		A, B;
+	}
+
+
+	@Aspect
+	public static class LoggingAspect {
+
+		@Around("execution(* doWithVarargs(*))")
+		public Object doLog(ProceedingJoinPoint pjp) throws Throwable {
+			LogFactory.getLog(LoggingAspect.class).debug(Arrays.asList(pjp.getArgs()));
+			return pjp.proceed();
+		}
+	}
 }
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,7 +51,6 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
-import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
@@ -64,6 +63,7 @@ import org.springframework.web.util.UriUtils;
  *
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
+ * @author Sam Brannen
  * @since 3.2
  */
 public class MockHttpServletRequestBuilder
@@ -71,7 +71,7 @@ public class MockHttpServletRequestBuilder
 
 	private final HttpMethod method;
 
-	private final UriComponents uriComponents;
+	private final URI url;
 
 	private final MultiValueMap<String, Object> headers = new LinkedMultiValueMap<String, Object>();
 
@@ -115,14 +115,11 @@ public class MockHttpServletRequestBuilder
 	 * the {@code MockHttpServletRequest} can be plugged in via
 	 * {@link #with(RequestPostProcessor)}.
 	 * @param httpMethod the HTTP method (GET, POST, etc)
-	 * @param urlTemplate a URL template; the resulting URL will be encoded
-	 * @param urlVariables zero or more URL variables
+	 * @param url a URL template; the resulting URL will be encoded
+	 * @param vars zero or more URL variables
 	 */
-	MockHttpServletRequestBuilder(HttpMethod httpMethod, String urlTemplate, Object... urlVariables) {
-		Assert.notNull(httpMethod, "httpMethod is required");
-		Assert.notNull(urlTemplate, "uriTemplate is required");
-		this.method = httpMethod;
-		this.uriComponents = UriComponentsBuilder.fromUriString(urlTemplate).buildAndExpand(urlVariables).encode();
+	MockHttpServletRequestBuilder(HttpMethod httpMethod, String url, Object... vars) {
+		this(httpMethod, UriComponentsBuilder.fromUriString(url).buildAndExpand(vars).encode().toUri());
 	}
 
 	/**
@@ -132,14 +129,14 @@ public class MockHttpServletRequestBuilder
 	 * the {@code MockHttpServletRequest} can be plugged in via
 	 * {@link #with(RequestPostProcessor)}.
 	 * @param httpMethod the HTTP method (GET, POST, etc)
-	 * @param uri the URL
+	 * @param url the URL
 	 * @since 4.0.3
 	 */
-	MockHttpServletRequestBuilder(HttpMethod httpMethod, URI uri) {
+	MockHttpServletRequestBuilder(HttpMethod httpMethod, URI url) {
 		Assert.notNull(httpMethod, "httpMethod is required");
-		Assert.notNull(uri, "uri is required");
+		Assert.notNull(url, "url is required");
 		this.method = httpMethod;
-		this.uriComponents = UriComponentsBuilder.fromUri(uri).build();
+		this.url = url;
 	}
 
 
@@ -558,21 +555,22 @@ public class MockHttpServletRequestBuilder
 	public final MockHttpServletRequest buildRequest(ServletContext servletContext) {
 		MockHttpServletRequest request = createServletRequest(servletContext);
 
-		String requestUri = this.uriComponents.getPath();
+		String requestUri = this.url.getRawPath();
 		request.setRequestURI(requestUri);
 		updatePathRequestProperties(request, requestUri);
 
-		if (this.uriComponents.getScheme() != null) {
-			request.setScheme(this.uriComponents.getScheme());
+		if (this.url.getScheme() != null) {
+			request.setScheme(this.url.getScheme());
 		}
-		if (this.uriComponents.getHost() != null) {
-			request.setServerName(uriComponents.getHost());
+		if (this.url.getHost() != null) {
+			request.setServerName(this.url.getHost());
 		}
-		if (this.uriComponents.getPort() != -1) {
-			request.setServerPort(this.uriComponents.getPort());
+		if (this.url.getPort() != -1) {
+			request.setServerPort(this.url.getPort());
 		}
 
 		request.setMethod(this.method.name());
+
 		for (String name : this.headers.keySet()) {
 			for (Object value : this.headers.get(name)) {
 				request.addHeader(name, value);
@@ -580,11 +578,14 @@ public class MockHttpServletRequestBuilder
 		}
 
 		try {
-			if (this.uriComponents.getQuery() != null) {
-				request.setQueryString(this.uriComponents.getQuery());
+			if (this.url.getRawQuery() != null) {
+				request.setQueryString(this.url.getRawQuery());
 			}
 
-			for (Entry<String, List<String>> entry : this.uriComponents.getQueryParams().entrySet()) {
+			MultiValueMap<String, String> queryParams =
+					UriComponentsBuilder.fromUri(this.url).build().getQueryParams();
+
+			for (Entry<String, List<String>> entry : queryParams.entrySet()) {
 				for (String value : entry.getValue()) {
 					value = (value != null) ? UriUtils.decode(value, "UTF-8") : null;
 					request.addParameter(UriUtils.decode(entry.getKey(), "UTF-8"), value);
@@ -603,16 +604,20 @@ public class MockHttpServletRequestBuilder
 
 		request.setContentType(this.contentType);
 		request.setContent(this.content);
-		request.setCookies(this.cookies.toArray(new Cookie[this.cookies.size()]));
+		request.setCharacterEncoding(this.characterEncoding);
+
+		if (!ObjectUtils.isEmpty(this.cookies)) {
+			request.setCookies(this.cookies.toArray(new Cookie[this.cookies.size()]));
+		}
 
 		if (this.locale != null) {
 			request.addPreferredLocale(this.locale);
 		}
-		request.setCharacterEncoding(this.characterEncoding);
 
 		if (this.secure != null) {
 			request.setSecure(this.secure);
 		}
+
 		request.setUserPrincipal(this.principal);
 
 		for (String name : this.attributes.keySet()) {
@@ -639,8 +644,9 @@ public class MockHttpServletRequestBuilder
 	}
 
 	/**
-	 * Create a new {@link MockHttpServletRequest} based on the given
-	 * {@link ServletContext}. Can be overridden in subclasses.
+	 * Create a new {@link MockHttpServletRequest} based on the supplied
+	 * {@code ServletContext}.
+	 * <p>Can be overridden in subclasses.
 	 */
 	protected MockHttpServletRequest createServletRequest(ServletContext servletContext) {
 		return new MockHttpServletRequest(servletContext);

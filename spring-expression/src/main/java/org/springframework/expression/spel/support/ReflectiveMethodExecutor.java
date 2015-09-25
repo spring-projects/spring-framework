@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,13 +80,14 @@ public class ReflectiveMethodExecutor implements MethodExecutor {
 			try {
 				clazz.getDeclaredMethod(method.getName(), method.getParameterTypes());
 				return clazz;
-			} catch (NoSuchMethodException nsme) {
-		
+			}
+			catch (NoSuchMethodException ex) {
+				// Continue below...
 			}
 		}
-		Class<?>[] intfaces = clazz.getInterfaces();
-		for (Class<?> intface: intfaces) {
-			discoverPublicClass(method, intface);
+		Class<?>[] ifcs = clazz.getInterfaces();
+		for (Class<?> ifc: ifcs) {
+			discoverPublicClass(method, ifc);
 		}
 		if (clazz.getSuperclass() != null) {
 			return discoverPublicClass(method, clazz.getSuperclass());

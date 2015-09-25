@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,8 +59,7 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 		/* Cache the index of the path within the DispatcherServlet mapping. */
 		private Integer indexLookupPath;
 
-
-		private ResourceUrlEncodingResponseWrapper(HttpServletRequest request, HttpServletResponse wrapped) {
+		public ResourceUrlEncodingResponseWrapper(HttpServletRequest request, HttpServletResponse wrapped) {
 			super(wrapped);
 			this.request = request;
 		}
@@ -69,14 +68,21 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 		public String encodeURL(String url) {
 			ResourceUrlProvider resourceUrlProvider = getResourceUrlProvider();
 			if (resourceUrlProvider == null) {
-				logger.debug("Request attribute exposing ResourceUrlProvider not found.");
+				logger.debug("Request attribute exposing ResourceUrlProvider not found");
 				return super.encodeURL(url);
 			}
 			initIndexLookupPath(resourceUrlProvider);
-			String prefix = url.substring(0, this.indexLookupPath);
-			String lookupPath = url.substring(this.indexLookupPath);
-			lookupPath = resourceUrlProvider.getForLookupPath(lookupPath);
-			return (lookupPath != null ? super.encodeURL(prefix + lookupPath) : super.encodeURL(url));
+			if (url.length() >= this.indexLookupPath) {
+				String prefix = url.substring(0, this.indexLookupPath);
+				int suffixIndex = getQueryParamsIndex(url);
+				String suffix = url.substring(suffixIndex);
+				String lookupPath = url.substring(this.indexLookupPath, suffixIndex);
+				lookupPath = resourceUrlProvider.getForLookupPath(lookupPath);
+				if (lookupPath != null) {
+					return super.encodeURL(prefix + lookupPath + suffix);
+				}
+			}
+			return super.encodeURL(url);
 		}
 
 		private ResourceUrlProvider getResourceUrlProvider() {
@@ -90,6 +96,11 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 				String lookupPath = urlProvider.getPathHelper().getLookupPathForRequest(this.request);
 				this.indexLookupPath = requestUri.lastIndexOf(lookupPath);
 			}
+		}
+
+		private int getQueryParamsIndex(String url) {
+			int index = url.indexOf("?");
+			return index > 0 ? index : url.length();
 		}
 	}
 

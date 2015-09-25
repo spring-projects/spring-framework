@@ -58,5 +58,5 @@
     <bean id="thetaFactory" class="org.springframework.beans.factory.xml.QualifierAnnotationTests$QualifiedFactoryBean"/>
 
     <bean id="thetaImpl" class="org.springframework.beans.factory.xml.QualifierAnnotationTests$ThetaImpl"/>
-	
+
 </beans>

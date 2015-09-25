@@ -64,15 +64,16 @@ import org.springframework.web.util.UriComponentsBuilder;
  * @author Oliver Gierke
  * @author Dietrich Schulten
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
+@SuppressWarnings("unused")
 public class MvcUriComponentsBuilderTests {
 
-	private MockHttpServletRequest request;
+	private final MockHttpServletRequest request = new MockHttpServletRequest();
 
 
 	@Before
 	public void setUp() {
-		this.request = new MockHttpServletRequest();
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(this.request));
 	}
 
@@ -169,6 +170,14 @@ public class MvcUriComponentsBuilderTests {
 		assertThat(queryParams.get("offset"), contains("10"));
 	}
 
+	// SPR-12977
+
+	@Test
+	public void fromMethodNameWithBridgedMethod() throws Exception {
+		UriComponents uriComponents = fromMethodName(PersonCrudController.class, "get", (long) 42).build();
+		assertThat(uriComponents.toUriString(), is("http://localhost/42"));
+	}
+
 	// SPR-11391
 
 	@Test
@@ -218,6 +227,14 @@ public class MvcUriComponentsBuilderTests {
 
 		assertThat(uriComponents.toUriString(), startsWith("http://localhost"));
 		assertThat(uriComponents.toUriString(), endsWith("/something/else"));
+	}
+
+ 	@Test
+	public void testFromMethodCallOnSubclass() {
+		UriComponents uriComponents = fromMethodCall(on(ExtendedController.class).myMethod(null)).build();
+
+		assertThat(uriComponents.toUriString(), startsWith("http://localhost"));
+		assertThat(uriComponents.toUriString(), endsWith("/extended/else"));
 	}
 
 	@Test
@@ -295,7 +312,7 @@ public class MvcUriComponentsBuilderTests {
 
 		String mappingName = "PAC#getAddressesForCountry";
 		String url = MvcUriComponentsBuilder.fromMappingName(mappingName).arg(0, "DE").buildAndExpand(123);
-		assertEquals("http://example.org:9999/base/people/123/addresses/DE", url);
+		assertEquals("/base/people/123/addresses/DE", url);
 	}
 
 	@Test
@@ -356,7 +373,6 @@ public class MvcUriComponentsBuilderTests {
 
 	}
 
-	@SuppressWarnings("unused")
 	@RequestMapping("/people/{id}/addresses")
 	static class PersonsAddressesController {
 
@@ -371,7 +387,6 @@ public class MvcUriComponentsBuilderTests {
 
 	}
 
-	@SuppressWarnings("unused")
 	class UnmappedController {
 
 		@RequestMapping
@@ -379,7 +394,6 @@ public class MvcUriComponentsBuilderTests {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	@RequestMapping("/something")
 	static class ControllerWithMethods {
 
@@ -412,7 +426,11 @@ public class MvcUriComponentsBuilderTests {
 		}
 	}
 
-	@SuppressWarnings("unused")
+	@RequestMapping("/extended")
+	static class ExtendedController extends ControllerWithMethods {
+
+	}
+
 	@RequestMapping("/user/{userId}/contacts")
 	static class UserContactController {
 
@@ -422,7 +440,19 @@ public class MvcUriComponentsBuilderTests {
 		}
 	}
 
-	@SuppressWarnings("unused")
+	static abstract class AbstractCrudController<T, ID> {
+
+		abstract T get(ID id);
+	}
+
+	static class PersonCrudController extends AbstractCrudController<Person, Long> {
+
+		@RequestMapping(path = "/{id}", method = RequestMethod.GET)
+		public Person get(@PathVariable Long id) {
+			return new Person();
+		}
+	}
+
 	@Controller
 	static class MetaAnnotationController {
 

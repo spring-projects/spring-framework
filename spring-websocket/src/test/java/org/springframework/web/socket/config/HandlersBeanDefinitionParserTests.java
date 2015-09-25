@@ -16,6 +16,9 @@
 
 package org.springframework.web.socket.config;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -24,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledFuture;
 
-import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -64,9 +66,6 @@ import org.springframework.web.socket.sockjs.transport.handler.WebSocketTranspor
 import org.springframework.web.socket.sockjs.transport.handler.XhrPollingTransportHandler;
 import org.springframework.web.socket.sockjs.transport.handler.XhrReceivingTransportHandler;
 import org.springframework.web.socket.sockjs.transport.handler.XhrStreamingTransportHandler;
-
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
 
 /**
  * Test fixture for HandlersBeanDefinitionParser.

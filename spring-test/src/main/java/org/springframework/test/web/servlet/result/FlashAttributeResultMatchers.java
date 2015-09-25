@@ -25,8 +25,9 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.springframework.test.util.AssertionErrors.*;
 
 /**
- * Factory for "output" flash attribute assertions. An instance of this class is
- * typically accessed via {@link MockMvcResultMatchers#flash()}.
+ * Factory for "output" flash attribute assertions.
+ * <p>An instance of this class is typically accessed via
+ * {@link MockMvcResultMatchers#flash}.
  *
  * @author Rossen Stoyanchev
  * @since 3.2

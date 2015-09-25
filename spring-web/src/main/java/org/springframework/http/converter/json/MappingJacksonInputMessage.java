@@ -49,14 +49,6 @@ public class MappingJacksonInputMessage implements HttpInputMessage {
 	}
 
 
-	public void setDeserializationView(Class<?> deserializationView) {
-		this.deserializationView = deserializationView;
-	}
-
-	public Class<?> getDeserializationView() {
-		return deserializationView;
-	}
-
 	@Override
 	public InputStream getBody() throws IOException {
 		return this.body;
@@ -65,6 +57,14 @@ public class MappingJacksonInputMessage implements HttpInputMessage {
 	@Override
 	public HttpHeaders getHeaders() {
 		return this.headers;
+	}
+
+	public void setDeserializationView(Class<?> deserializationView) {
+		this.deserializationView = deserializationView;
+	}
+
+	public Class<?> getDeserializationView() {
+		return this.deserializationView;
 	}
 
 }

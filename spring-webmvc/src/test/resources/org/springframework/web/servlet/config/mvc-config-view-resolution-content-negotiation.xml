@@ -44,4 +44,3 @@
 	<mvc:script-template-configurer engine-name="nashorn" render-function="render"/>
 
 </beans>
- 

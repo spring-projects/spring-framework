@@ -30,7 +30,10 @@ import org.springframework.ui.ModelMap;
  * @since 2.5
  * @see org.apache.log4j.NDC#push(String)
  * @see org.apache.log4j.NDC#pop()
+ * @deprecated as of Spring 4.2.1, in favor of Apache Log4j 2
+ * (following Apache's EOL declaration for log4j 1.x)
  */
+@Deprecated
 public class Log4jNestedDiagnosticContextInterceptor implements AsyncWebRequestInterceptor {
 
 	/** Logger available to subclasses */

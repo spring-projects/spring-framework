@@ -7,5 +7,5 @@
 		<!--<property name="assembler"><ref bean="assemblerTwo"/></property>-->
 		<property name="assembler"><ref bean="wrappedAssemblerTwo"/></property>
 	</bean>
-	
+
 </beans>

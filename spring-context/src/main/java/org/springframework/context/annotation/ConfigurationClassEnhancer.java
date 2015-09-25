@@ -39,12 +39,15 @@ import org.springframework.cglib.core.SpringNamingPolicy;
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.CallbackFilter;
 import org.springframework.cglib.proxy.Enhancer;
+import org.springframework.cglib.proxy.Factory;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
 import org.springframework.cglib.proxy.NoOp;
 import org.springframework.cglib.transform.ClassEmitterTransformer;
 import org.springframework.cglib.transform.TransformingClassGenerator;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.objenesis.ObjenesisException;
+import org.springframework.objenesis.SpringObjenesis;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
@@ -80,7 +83,10 @@ class ConfigurationClassEnhancer {
 
 	private static final String BEAN_FACTORY_FIELD = "$$beanFactory";
 
+
 	private static final Log logger = LogFactory.getLog(ConfigurationClassEnhancer.class);
+
+	private static final SpringObjenesis objenesis = new SpringObjenesis();
 
 
 	/**
@@ -240,7 +246,7 @@ class ConfigurationClassEnhancer {
 		public boolean isMatch(Method candidateMethod) {
 			return (candidateMethod.getName().equals("setBeanFactory") &&
 					candidateMethod.getParameterTypes().length == 1 &&
-					candidateMethod.getParameterTypes()[0].equals(BeanFactory.class) &&
+					BeanFactory.class == candidateMethod.getParameterTypes()[0] &&
 					BeanFactoryAware.class.isAssignableFrom(candidateMethod.getDeclaringClass()));
 		}
 	}
@@ -384,13 +390,39 @@ class ConfigurationClassEnhancer {
 		 * it will not be proxied. This too is aligned with the way XML configuration works.
 		 */
 		private Object enhanceFactoryBean(final Object factoryBean, final ConfigurableBeanFactory beanFactory,
-				final String beanName) throws InstantiationException, IllegalAccessException {
+				final String beanName) {
 
 			Enhancer enhancer = new Enhancer();
 			enhancer.setSuperclass(factoryBean.getClass());
-			enhancer.setUseFactory(false);
 			enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
-			enhancer.setCallback(new MethodInterceptor() {
+			enhancer.setCallbackType(MethodInterceptor.class);
+
+			// Ideally create enhanced FactoryBean proxy without constructor side effects,
+			// analogous to AOP proxy creation in ObjenesisCglibAopProxy...
+			Class<?> fbClass = enhancer.createClass();
+			Object fbProxy = null;
+
+			if (objenesis.isWorthTrying()) {
+				try {
+					fbProxy = objenesis.newInstance(fbClass, enhancer.getUseCache());
+				}
+				catch (ObjenesisException ex) {
+					logger.debug("Unable to instantiate enhanced FactoryBean using Objenesis, " +
+							"falling back to regular construction", ex);
+				}
+			}
+
+			if (fbProxy == null) {
+				try {
+					fbProxy = fbClass.newInstance();
+				}
+				catch (Exception ex) {
+					throw new IllegalStateException("Unable to instantiate enhanced FactoryBean using Objenesis, " +
+							"and regular FactoryBean instantiation via default constructor fails as well", ex);
+				}
+			}
+
+			((Factory) fbProxy).setCallback(0, new MethodInterceptor() {
 				@Override
 				public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
 					if (method.getName().equals("getObject") && args.length == 0) {
@@ -399,7 +431,8 @@ class ConfigurationClassEnhancer {
 					return proxy.invoke(factoryBean, args);
 				}
 			});
-			return enhancer.create();
+
+			return fbProxy;
 		}
 
 		private ConfigurableBeanFactory getBeanFactory(Object enhancedConfigInstance) {

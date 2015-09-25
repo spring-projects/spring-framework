@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.messaging.simp.stomp;
 
 import java.io.Serializable;
@@ -45,7 +46,7 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  * @since 4.2
  * @see <a href="http://stomp.github.io/stomp-specification-1.2.html#Frames_and_Headers">
- *     http://stomp.github.io/stomp-specification-1.2.html#Frames_and_Headers</a>
+ * http://stomp.github.io/stomp-specification-1.2.html#Frames_and_Headers</a>
  */
 public class StompHeaders implements MultiValueMap<String, String>, Serializable {
 
@@ -104,9 +105,9 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	 * Create a new instance to be populated with new header values.
 	 */
 	public StompHeaders() {
-		this(new LinkedMultiValueMap<String, String>(4), false);	
+		this(new LinkedMultiValueMap<String, String>(4), false);
 	}
-	
+
 	private StompHeaders(Map<String, List<String>> headers, boolean readOnly) {
 		Assert.notNull(headers, "'headers' must not be null");
 		if (readOnly) {

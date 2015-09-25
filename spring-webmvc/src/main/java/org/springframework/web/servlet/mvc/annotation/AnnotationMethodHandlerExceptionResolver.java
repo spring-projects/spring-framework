@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,9 @@ import javax.xml.transform.Source;
 import org.springframework.core.ExceptionDepthComparator;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.HttpStatus;
@@ -80,7 +82,6 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 3.0
- *
  * @deprecated as of Spring 3.2, in favor of
  * {@link org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver ExceptionHandlerExceptionResolver}
  */
@@ -258,7 +259,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 		Object[] args = new Object[paramTypes.length];
 		Class<?> handlerType = handler.getClass();
 		for (int i = 0; i < args.length; i++) {
-			MethodParameter methodParam = new MethodParameter(handlerMethod, i);
+			MethodParameter methodParam = new SynthesizingMethodParameter(handlerMethod, i);
 			GenericTypeResolver.resolveParameterType(methodParam, handlerType);
 			Class<?> paramType = methodParam.getParameterType();
 			Object argValue = resolveCommonArgument(methodParam, webRequest, thrownException);
@@ -341,7 +342,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 		else if (Principal.class.isAssignableFrom(parameterType)) {
 			return request.getUserPrincipal();
 		}
-		else if (Locale.class.equals(parameterType)) {
+		else if (Locale.class == parameterType) {
 			return RequestContextUtils.getLocale(request);
 		}
 		else if (InputStream.class.isAssignableFrom(parameterType)) {
@@ -377,15 +378,15 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	private ModelAndView getModelAndView(Method handlerMethod, Object returnValue, ServletWebRequest webRequest)
 			throws Exception {
 
-		ResponseStatus responseStatusAnn = AnnotationUtils.findAnnotation(handlerMethod, ResponseStatus.class);
-		if (responseStatusAnn != null) {
-			HttpStatus responseStatus = responseStatusAnn.value();
-			String reason = responseStatusAnn.reason();
+		ResponseStatus responseStatus = AnnotatedElementUtils.findMergedAnnotation(handlerMethod, ResponseStatus.class);
+		if (responseStatus != null) {
+			HttpStatus statusCode = responseStatus.code();
+			String reason = responseStatus.reason();
 			if (!StringUtils.hasText(reason)) {
-				webRequest.getResponse().setStatus(responseStatus.value());
+				webRequest.getResponse().setStatus(statusCode.value());
 			}
 			else {
-				webRequest.getResponse().sendError(responseStatus.value(), reason);
+				webRequest.getResponse().sendError(statusCode.value(), reason);
 			}
 		}
 

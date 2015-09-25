@@ -16,10 +16,10 @@
 
 package org.springframework.messaging.tcp.reactor;
 
-import reactor.fn.Functions;
 import reactor.io.net.ChannelStream;
+import reactor.rx.Promise;
 import reactor.rx.Promises;
-import reactor.rx.broadcast.Broadcaster;
+import reactor.rx.Streams;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.tcp.TcpConnection;
@@ -38,35 +38,39 @@ public class Reactor2TcpConnection<P> implements TcpConnection<P> {
 
 	private final ChannelStream<Message<P>, Message<P>> channelStream;
 
-	private final Broadcaster<Message<P>> sink;
+	private final Promise<Void> closePromise;
 
 
-	public Reactor2TcpConnection(ChannelStream<Message<P>, Message<P>> channelStream) {
+	public Reactor2TcpConnection(ChannelStream<Message<P>, Message<P>> channelStream,
+			Promise<Void> closePromise) {
+
 		this.channelStream = channelStream;
-		this.sink = Broadcaster.create();
-		this.channelStream.sink(this.sink);
+		this.closePromise = closePromise;
 	}
 
 
 	@Override
 	public ListenableFuture<Void> send(Message<P> message) {
-		this.sink.onNext(message);
-		return new PassThroughPromiseToListenableFutureAdapter<Void>(Promises.<Void>success(null));
+		Promise<Void> afterWrite = Promises.prepare();
+		this.channelStream.writeWith(Streams.just(message)).subscribe(afterWrite);
+		return new PassThroughPromiseToListenableFutureAdapter<Void>(afterWrite);
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void onReadInactivity(Runnable runnable, long inactivityDuration) {
-		this.channelStream.on().readIdle(inactivityDuration, Functions.<Void>consumer(runnable));
+		this.channelStream.on().readIdle(inactivityDuration, reactor.fn.Functions.<Void>consumer(runnable));
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void onWriteInactivity(Runnable runnable, long inactivityDuration) {
-		this.channelStream.on().writeIdle(inactivityDuration, Functions.<Void>consumer(runnable));
+		this.channelStream.on().writeIdle(inactivityDuration, reactor.fn.Functions.<Void>consumer(runnable));
 	}
 
 	@Override
 	public void close() {
-		this.sink.onComplete();
+		this.closePromise.onComplete();
 	}
 
 }

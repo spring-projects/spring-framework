@@ -54,6 +54,8 @@ server integration, and solutions to common problems.)
   declarative transaction management.
 * <<transaction-programmatic,Programmatic transaction management>> covers support for
   programmatic (that is, explicitly coded) transaction management.
+* <<transaction-event,Transaction bound event>> describes how you could use application
+  events within a transaction.
 
 
 
@@ -306,7 +308,7 @@ infrastructure.
 [NOTE]
 ====
 The above definition of the `dataSource` bean uses the `<jndi-lookup/>` tag from the
-`jee` namespace. For more information on schema-based configuration, see <<xsd-config>>,
+`jee` namespace. For more information on schema-based configuration, see <<xsd-configuration>>,
 and for more information on the `<jee/>` tags see the section entitled
 <<xsd-config-body-schemas-jee>>.
 ====
@@ -1924,8 +1926,44 @@ management out of business logic, and is not difficult to configure. When using 
 Spring Framework, rather than EJB CMT, the configuration cost of declarative transaction
 management is greatly reduced.
 
+[[transaction-event]]
+=== Transaction bound event
 
+As of Spring 4.2, the listener of an event can be bound to a phase of the transaction. The
+typical example is to handle the event when the transaction has completed successfully: this
+allows events to be used with more flexibility when the outcome of the current transaction
+actually matters to the listener.
 
+Registering a regular event listener is done via the `@EventListener` annotation. If you need
+to bind it to the transaction use `@TransactionalEventListener`. When you do so, the listener
+will be bound to the commit phase of the transaction by default.
+
+Let's take an example to illustrate this concept. Assume that a component publish an order
+created event and we want to define a listener that should only handle that event once the
+transaction in which it has been published as committed successfully:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Component
+    public class MyComponent {
+
+    	@TransactionalEventListener
+    	public void handleOrderCreatedEvent(CreationEvent<Order> creationEvent) {
+      		...
+    	}
+
+    }
+----
+
+The `TransactionalEventListener` annotation exposes a `phase` attribute  that allows to customize
+to which phase of the transaction the listener should be bound to. The valid phases are `BEFORE_COMMIT`,
+`AFTER_COMMIT` (default), `AFTER_ROLLBACK` and `AFTER_COMPLETION` that aggregates the transaction
+completion (be it a commit or a rollback).
+
+If no transaction is running, the listener is not invoked at all since we can't honor the required
+semantics. It is however possible to override that behaviour by setting the `fallbackExecution` attribute
+of the annotation to `true`.
 
 [[transaction-application-server-integration]]
 === Application server-specific integration
@@ -2254,19 +2292,19 @@ various callback interfaces, plus a variety of related classes. A subpackage nam
 `SimpleJdbcCall` classes. Another subpackage named
 `org.springframework.jdbc.core.namedparam` contains the `NamedParameterJdbcTemplate`
 class and the related support classes. See <<jdbc-core>>, <<jdbc-advanced-jdbc>>, and
-<<jdbc-simple-jdbc>>
+<<jdbc-simple-jdbc>>.
 
 The `org.springframework.jdbc.datasource` package contains a utility class for easy
-`DataSource` access, and various simple `DataSource` implementations that can be used
-for testing and running unmodified JDBC code outside of a Java EE container. A
-subpackage named `org.springfamework.jdbc.datasource.embedded` provides support for
-creating in-memory database instances using Java database engines such as HSQL and H2.
-See <<jdbc-connections>> and <<jdbc-embedded-database-support>>
+`DataSource` access, and various simple `DataSource` implementations that can be used for
+testing and running unmodified JDBC code outside of a Java EE container. A subpackage
+named `org.springfamework.jdbc.datasource.embedded` provides support for creating
+embedded databases using Java database engines such as HSQL, H2, and Derby. See
+<<jdbc-connections>> and <<jdbc-embedded-database-support>>.
 
 The `org.springframework.jdbc.object` package contains classes that represent RDBMS
-queries, updates, and stored procedures as thread safe, reusable objects. See
-<<jdbc-object>>.This approach is modeled by JDO, although of course objects returned by
-queries are "disconnected" from the database. This higher level of JDBC abstraction
+queries, updates, and stored procedures as thread-safe, reusable objects. See
+<<jdbc-object>>. This approach is modeled by JDO, although objects returned by queries
+are naturally _disconnected_ from the database. This higher level of JDBC abstraction
 depends on the lower-level abstraction in the `org.springframework.jdbc.core` package.
 
 The `org.springframework.jdbc.support` package provides `SQLException` translation
@@ -3700,12 +3738,10 @@ data retrieved. Again, it is important to use the names of the `out` parameters 
 are declared in the stored procedure. Also, the case in the names of the `out`
 parameters stored in the results map matches that of the `out` parameter names in the
 database, which could vary between databases. To make your code more portable you should
-do a case-insensitive lookup or instruct Spring to use a `CaseInsensitiveMap` from the
-Jakarta Commons project. To do the latter, you create your own `JdbcTemplate` and set
-the `setResultsMapCaseInsensitive` property to `true`. Then you pass this customized
-`JdbcTemplate` instance into the constructor of your `SimpleJdbcCall`. You must include
-the `commons-collections.jar` in your classpath for this to work. Here is an example of
-this configuration:
+do a case-insensitive lookup or instruct Spring to use a `LinkedCaseInsensitiveMap`.
+To do the latter, you create your own `JdbcTemplate` and set the `setResultsMapCaseInsensitive`
+property to `true`. Then you pass this customized `JdbcTemplate` instance into
+the constructor of your `SimpleJdbcCall`. Here is an example of this configuration:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -3743,7 +3779,7 @@ as input. See the next section for details on how to define an `SqlParameter`.
 Explicit declarations are necessary if the database you use is not a Spring-supported
 database. Currently Spring supports metadata lookup of stored procedure calls for the
 following databases: Apache Derby, DB2, MySQL, Microsoft SQL Server, Oracle, and Sybase.
-We also support metadata lookup of stored functions for: MySQL, Microsoft SQL Server,
+We also support metadata lookup of stored functions for MySQL, Microsoft SQL Server,
 and Oracle.
 ====
 
@@ -3916,7 +3952,7 @@ rows from the t_actor table. Here is the MySQL source for this procedure:
 ----
 
 To call this procedure you declare the `RowMapper`. Because the class you want to map to
-follows the JavaBean rules, you can use a `ParameterizedBeanPropertyRowMapper` that is
+follows the JavaBean rules, you can use a `BeanPropertyRowMapper` that is
 created by passing in the required class to map to in the `newInstance` method.
 
 [source,java,indent=0]
@@ -3932,7 +3968,7 @@ created by passing in the required class to map to in the `newInstance` method.
 			this.procReadAllActors = new SimpleJdbcCall(jdbcTemplate)
 					.withProcedureName("read_all_actors")
 					.returningResultSet("actors",
-					ParameterizedBeanPropertyRowMapper.newInstance(Actor.class));
+					BeanPropertyRowMapper.newInstance(Actor.class));
 		}
 
 		public List getActorsList() {
@@ -4357,33 +4393,34 @@ You can provide SQL type information in several ways:
 
 [[jdbc-lob]]
 ==== Handling BLOB and CLOB objects
-You can store images, other binary objects, and large chunks of text. These large object
-are called BLOB for binary data and CLOB for character data. In Spring you can handle
-these large objects by using the JdbcTemplate directly and also when using the higher
-abstractions provided by RDBMS Objects and the `SimpleJdbc` classes. All of these
-approaches use an implementation of the `LobHandler` interface for the actual management
-of the LOB data. The `LobHandler` provides access to a `LobCreator` class, through the
-`getLobCreator` method, used for creating new LOB objects to be inserted.
+You can store images, other binary data, and large chunks of text in the database. These
+large objects are called BLOBs (Binary Large OBject) for binary data and CLOBs (Character
+Large OBject) for character data. In Spring you can handle these large objects by using
+the `JdbcTemplate` directly and also when using the higher abstractions provided by RDBMS
+Objects and the `SimpleJdbc` classes. All of these approaches use an implementation of
+the `LobHandler` interface for the actual management of the LOB (Large OBject) data. The
+`LobHandler` provides access to a `LobCreator` class, through the `getLobCreator` method,
+used for creating new LOB objects to be inserted.
 
 The `LobCreator/LobHandler` provides the following support for LOB input and output:
 
 * BLOB
-* byte[] -- getBlobAsBytes and setBlobAsBytes
-* InputStream -- getBlobAsBinaryStream and setBlobAsBinaryStream
+** `byte[]` -- `getBlobAsBytes` and `setBlobAsBytes`
+** `InputStream` -- `getBlobAsBinaryStream` and `setBlobAsBinaryStream`
 * CLOB
-* String -- getClobAsString and setClobAsString
-* InputStream -- getClobAsAsciiStream and setClobAsAsciiStream
-* Reader -- getClobAsCharacterStream and setClobAsCharacterStream
+** `String` -- `getClobAsString` and `setClobAsString`
+** `InputStream` -- `getClobAsAsciiStream` and `setClobAsAsciiStream`
+** `Reader` -- `getClobAsCharacterStream` and `setClobAsCharacterStream`
 
 The next example shows how to create and insert a BLOB. Later you will see how to read
 it back from the database.
 
 This example uses a `JdbcTemplate` and an implementation of the
-`AbstractLobCreatingPreparedStatementCallbac` `k`. It implements one method,
+`AbstractLobCreatingPreparedStatementCallback`. It implements one method,
 `setValues`. This method provides a `LobCreator` that you use to set the values for the
 LOB columns in your SQL insert statement.
 
-For this example we assume that there is a variable, `lobHandle` `r`, that already is
+For this example we assume that there is a variable, `lobHandler`, that already is
 set to an instance of a `DefaultLobHandler`. You typically set this value through
 dependency injection.
 
@@ -4409,12 +4446,27 @@ dependency injection.
 	clobReader.close();
 ----
 
-<1> Pass in the lobHandler that in this example is a plain `DefaultLobHandler`
+<1> Pass in the `lobHandler` that in this example is a plain `DefaultLobHandler`.
 <2> Using the method `setClobAsCharacterStream`, pass in the contents of the CLOB.
 <3> Using the method `setBlobAsBinaryStream`, pass in the contents of the BLOB.
 
+
+[NOTE]
+====
+If you invoke the `setBlobAsBinaryStream`, `setClobAsAsciiStream`, or
+`setClobAsCharacterStream` method on the `LobCreator` returned from
+`DefaultLobHandler.getLobCreator()`, you can optionally specify a negative value for the
+`contentLength` argument. If the specified content length is negative, the
+`DefaultLobHandler` will use the JDBC 4.0 variants of the set-stream methods without a
+length parameter; otherwise, it will pass the specified length on to the driver.
+
+Consult the documentation for the JDBC driver in use to verify support for streaming a
+LOB without providing the content length.
+====
+
+
 Now it's time to read the LOB data from the database. Again, you use a `JdbcTemplate`
-with the same instance variable `l` `obHandler` and a reference to a `DefaultLobHandler`.
+with the same instance variable `lobHandler` and a reference to a `DefaultLobHandler`.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4563,91 +4615,121 @@ testability, and the ability to rapidly evolve SQL during development.
 
 
 [[jdbc-embedded-database-xml]]
-==== Creating an embedded database instance using Spring XML
+==== Creating an embedded database using Spring XML
+
 If you want to expose an embedded database instance as a bean in a Spring
-ApplicationContext, use the embedded-database tag in the spring-jdbc namespace:
+`ApplicationContext`, use the `embedded-database` tag in the `spring-jdbc` namespace:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<jdbc:embedded-database id="dataSource">
+	<jdbc:embedded-database id="dataSource" generate-name="true">
 		<jdbc:script location="classpath:schema.sql"/>
 		<jdbc:script location="classpath:test-data.sql"/>
 	</jdbc:embedded-database>
 ----
 
 The preceding configuration creates an embedded HSQL database populated with SQL from
-schema.sql and testdata.sql resources in the classpath. The database instance is made
-available to the Spring container as a bean of type `javax.sql.DataSource`. This bean
-can then be injected into data access objects as needed.
+`schema.sql` and `test-data.sql` resources in the root of the classpath. In addition, as
+a best practice, the embedded database will be assigned a uniquely generated name. The
+embedded database is made available to the Spring container as a bean of type
+`javax.sql.DataSource` which can then be injected into data access objects as needed.
 
 
 
 [[jdbc-embedded-database-java]]
-==== Creating an embedded database instance programmatically
+==== Creating an embedded database programmatically
+
 The `EmbeddedDatabaseBuilder` class provides a fluent API for constructing an embedded
-database programmatically. Use this when you need to create an embedded database
-instance in a standalone environment, such as a data access object unit test:
+database programmatically. Use this when you need to create an embedded database in a
+standalone environment or in a standalone integration test like in the following example.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	EmbeddedDatabaseBuilder builder = new EmbeddedDatabaseBuilder();
-	EmbeddedDatabase db = builder.setType(H2).addScript("my-schema.sql").addScript("my-test-data.sql").build();
-	// do stuff against the db (EmbeddedDatabase extends javax.sql.DataSource)
-	db.shutdown()
+EmbeddedDatabase db = new EmbeddedDatabaseBuilder()
+    .generateUniqueName(true)
+    .setType(H2)
+    .setScriptEncoding("UTF-8")
+    .ignoreFailedDrops(true)
+    .addScript("schema.sql")
+    .addScripts("user_data.sql", "country_data.sql")
+    .build();
+
+// perform actions against the db (EmbeddedDatabase extends javax.sql.DataSource)
+
+db.shutdown()
 ----
 
+Consult the Javadoc for `EmbeddedDatabaseBuilder` for further details on all supported
+options.
 
+The `EmbeddedDatabaseBuilder` can also be used to create an embedded database using Java
+Config like in the following example.
 
-[[jdbc-embedded-database-extension]]
-==== Extending the embedded database support
-Spring JDBC embedded database support can be extended in two ways:
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@Configuration
+public class DataSourceConfig {
 
-* Implement `EmbeddedDatabaseConfigurer` to support a new embedded database type, such
-  as Apache Derby.
-* Implement `DataSourceFactory` to support a new DataSource implementation, such as a
-  connection pool, to manage embedded database connections.
+    @Bean
+    public DataSource dataSource() {
+        return new EmbeddedDatabaseBuilder()
+            .generateUniqueName(true)
+            .setType(H2)
+            .setScriptEncoding("UTF-8")
+            .ignoreFailedDrops(true)
+            .addScript("schema.sql")
+            .addScripts("user_data.sql", "country_data.sql")
+            .build();
+    }
+}
+----
 
-You are encouraged to contribute back extensions to the Spring community at
-https://jira.spring.io/browse/SPR[jira.spring.io].
-
+[[jdbc-embedded-database-types]]
+==== Selecting the embedded database type
 
 
 [[jdbc-embedded-database-using-HSQL]]
-==== Using HSQL
-Spring supports HSQL 1.8.0 and above. HSQL is the default embedded database if no type
-is specified explicitly. To specify HSQL explicitly, set the `type` attribute of the
+===== Using HSQL
+Spring supports HSQL 1.8.0 and above. HSQL is the default embedded database if no type is
+specified explicitly. To specify HSQL explicitly, set the `type` attribute of the
 `embedded-database` tag to `HSQL`. If you are using the builder API, call the
 `setType(EmbeddedDatabaseType)` method with `EmbeddedDatabaseType.HSQL`.
 
 
-
 [[jdbc-embedded-database-using-H2]]
-==== Using H2
+===== Using H2
 Spring supports the H2 database as well. To enable H2, set the `type` attribute of the
 `embedded-database` tag to `H2`. If you are using the builder API, call the
 `setType(EmbeddedDatabaseType)` method with `EmbeddedDatabaseType.H2`.
 
 
-
 [[jdbc-embedded-database-using-Derby]]
-==== Using Derby
+===== Using Derby
 Spring also supports Apache Derby 10.5 and above. To enable Derby, set the `type`
-attribute of the `embedded-database` tag to `Derby`. If using the builder API, call the
-`setType(EmbeddedDatabaseType)` method with `EmbeddedDatabaseType.Derby`.
+attribute of the `embedded-database` tag to `DERBY`. If you are using the builder API,
+call the `setType(EmbeddedDatabaseType)` method with `EmbeddedDatabaseType.DERBY`.
 
 
 
 [[jdbc-embedded-database-dao-testing]]
 ==== Testing data access logic with an embedded database
-Embedded databases provide a lightweight way to test data access code. The following is
-a data access unit test template that uses an embedded database:
+
+Embedded databases provide a lightweight way to test data access code. The following is a
+data access integration test template that uses an embedded database. Using a template
+like this can be useful for _one-offs_ when the embedded database does not need to be
+reused across test classes. However, if you wish to create an embedded database that is
+shared within a test suite, consider using the <<testcontext-framework,Spring TestContext
+Framework>> and configuring the embedded database as a bean in the Spring
+`ApplicationContext` as described in <<jdbc-embedded-database-xml>> and
+<<jdbc-embedded-database-java>>.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	public class DataAccessUnitTestTemplate {
+	public class DataAccessIntegrationTestTemplate {
 
 		private EmbeddedDatabase db;
 
@@ -4655,13 +4737,16 @@ a data access unit test template that uses an embedded database:
 		public void setUp() {
 			// creates an HSQL in-memory database populated from default scripts
 			// classpath:schema.sql and classpath:data.sql
-			db = new EmbeddedDatabaseBuilder().addDefaultScripts().build();
+			db = new EmbeddedDatabaseBuilder()
+					.generateUniqueName(true)
+					.addDefaultScripts()
+					.build();
 		}
 
 		@Test
 		public void testDataAccess() {
 			JdbcTemplate template = new JdbcTemplate(db);
-			template.query(...);
+			template.query( /* ... */ );
 		}
 
 		@After
@@ -4672,6 +4757,50 @@ a data access unit test template that uses an embedded database:
 	}
 ----
 
+
+[[jdbc-embedded-database-unique-names]]
+==== Generating unique names for embedded databases
+
+Development teams often encounter errors with embedded databases if their test suite
+inadvertently attempts to recreate additional instances of the same database. This can
+happen quite easily if an XML configuration file or `@Configuration` class is responsible
+for creating an embedded database and the corresponding configuration is then reused
+across multiple testing scenarios within the same test suite (i.e., within the same JVM
+process) –- for example, integration tests against embedded databases whose
+`ApplicationContext` configuration only differs with regard to which bean definition
+profiles are active.
+
+The root cause of such errors is the fact that Spring's `EmbeddedDatabaseFactory` (used
+internally by both the `<jdbc:embedded-database>` XML namespace element and the
+`EmbeddedDatabaseBuilder` for Java Config) will set the name of the embedded database to
+`"testdb"` if not otherwise specified. For the case of `<jdbc:embedded-database>`, the
+embedded database is typically assigned a name equal to the bean's `id` (i.e., often
+something like `"dataSource"`). Thus, subsequent attempts to create an embedded database
+will not result in a new database. Instead, the same JDBC connection URL will be reused,
+and attempts to create a new embedded database will actually point to an existing
+embedded database created from the same configuration.
+
+To address this common issue Spring Framework 4.2 provides support for generating
+_unique_ names for embedded databases. To enable the use of generated names, use one of
+the following options.
+
+* `EmbeddedDatabaseFactory.setGenerateUniqueDatabaseName()`
+* `EmbeddedDatabaseBuilder.generateUniqueName()`
+* `<jdbc:embedded-database generate-name="true" ... >`
+
+
+
+[[jdbc-embedded-database-extension]]
+==== Extending the embedded database support
+
+Spring JDBC embedded database support can be extended in two ways:
+
+* Implement `EmbeddedDatabaseConfigurer` to support a new embedded database type.
+* Implement `DataSourceFactory` to support a new `DataSource` implementation, such as a
+  connection pool to manage embedded database connections.
+
+You are encouraged to contribute back extensions to the Spring community at
+https://jira.spring.io/browse/SPR[jira.spring.io].
 
 
 
@@ -4685,8 +4814,8 @@ an instance running on a server somewhere.
 
 
 [[jdbc-initializing-datasource-xml]]
-==== Initializing a database instance using Spring XML
-If you want to initialize a database and you can provide a reference to a DataSource
+==== Initializing a database using Spring XML
+If you want to initialize a database and you can provide a reference to a `DataSource`
 bean, use the `initialize-database` tag in the `spring-jdbc` namespace:
 
 [source,xml,indent=0]
@@ -4698,23 +4827,24 @@ bean, use the `initialize-database` tag in the `spring-jdbc` namespace:
 	</jdbc:initialize-database>
 ----
 
-The example above runs the two scripts specified against the database: the first script
-is a schema creation, and the second is a test data set insert. The script locations can
-also be patterns with wildcards in the usual ant style used for resources in Spring
-(e.g. `classpath{asterisk}:/com/foo/{asterisk}{asterisk}/sql/{asterisk}-data.sql`).
-If a pattern is used the scripts are executed in lexical order of their URL or filename.
+The example above executes the two scripts specified against the database: the first
+script creates a schema, and the second populates tables with a test data set. The script
+locations can also be patterns with wildcards in the usual ant style used for resources
+in Spring (e.g.
+`classpath{asterisk}:/com/foo/{asterisk}{asterisk}/sql/{asterisk}-data.sql`). If a
+pattern is used, the scripts are executed in lexical order of their URL or filename.
 
 The default behavior of the database initializer is to unconditionally execute the
-scripts provided. This will not always be what you want, for instance if running against
-an existing database that already has test data in it. The likelihood of accidentally
-deleting data is reduced by the commonest pattern (as shown above) that creates the
-tables first and then inserts the data - the first step will fail if the tables already
-exist.
+scripts provided. This will not always be what you want, for instance, if you are
+executing the scripts against a database that already has test data in it. The likelihood
+of accidentally deleting data is reduced by following the common pattern (as shown above)
+of creating the tables first and then inserting the data -- the first step will fail if
+the tables already exist.
 
-However, to get more control over the creation and deletion of existing data, the XML
-namespace provides a couple more options. The first is flag to switch the initialization
-on and off. This can be set according to the environment (e.g. to pull a boolean value
-from system properties or an environment bean), e.g.
+However, to gain more control over the creation and deletion of existing data, the XML
+namespace provides a few additional options. The first is a flag to switch the
+initialization on and off. This can be set according to the environment (e.g. to pull a
+boolean value from system properties or an environment bean), for example:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -4727,7 +4857,7 @@ from system properties or an environment bean), e.g.
 
 The second option to control what happens with existing data is to be more tolerant of
 failures. To this end you can control the ability of the initializer to ignore certain
-errors in the SQL it executes from the scripts, e.g.
+errors in the SQL it executes from the scripts, for example:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -4737,62 +4867,68 @@ errors in the SQL it executes from the scripts, e.g.
 	</jdbc:initialize-database>
 ----
 
-In this example we are saying we expect that sometimes the scripts will be run against
-an empty database and there are some DROP statements in the scripts which would
-therefore fail. So failed SQL `DROP` statements will be ignored, but other failures will
-cause an exception. This is useful if your SQL dialect doesn't support `DROP ... IF
+In this example we are saying we expect that sometimes the scripts will be executed
+against an empty database, and there are some `DROP` statements in the scripts which
+would therefore fail. So failed SQL `DROP` statements will be ignored, but other failures
+will cause an exception. This is useful if your SQL dialect doesn't support `DROP ... IF
 EXISTS` (or similar) but you want to unconditionally remove all test data before
-re-creating it. In that case the first script is usually a set of drops, followed by a
-set of `CREATE` statements.
+re-creating it. In that case the first script is usually a set of `DROP` statements,
+followed by a set of `CREATE` statements.
 
 The `ignore-failures` option can be set to `NONE` (the default), `DROPS` (ignore failed
-drops) or `ALL` (ignore all failures).
+drops), or `ALL` (ignore all failures).
 
 If you need more control than you get from the XML namespace, you can simply use the
-`DataSourceInitializer` directly, and define it as a component in your application.
+`DataSourceInitializer` directly and define it as a component in your application.
 
 
 [[jdbc-client-component-initialization]]
-===== Initialization of Other Components that Depend on the Database
+===== Initialization of other components that depend on the database
+
 A large class of applications can just use the database initializer with no further
 complications: those that do not use the database until after the Spring context has
-started. If your application is __not__ one of those then you might need to read the
-rest of this section.
+started. If your application is __not__ one of those then you might need to read the rest
+of this section.
 
-The database initializer depends on a data source instance and runs the scripts provided
-in its initialization callback (c.f. `init-method` in an XML bean definition or
-`InitializingBean`). If other beans depend on the same data source and also use the data
-source in an initialization callback then there might be a problem because the data has
-not yet been initialized. A common example of this is a cache that initializes eagerly
-and loads up data from the database on application startup.
+The database initializer depends on a `DataSource` instance and executes the scripts
+provided in its initialization callback (analogous to an `init-method` in an XML bean
+definition, a `@PostConstruct` method in a component, or the `afterPropertiesSet()`
+method in a component that implements `InitializingBean`). If other beans depend on the
+same data source and also use the data source in an initialization callback, then there
+might be a problem because the data has not yet been initialized. A common example of
+this is a cache that initializes eagerly and loads data from the database on application
+startup.
 
-To get round this issue you two options: change your cache initialization strategy to a
-later phase, or ensure that the database initializer is initialized first.
+To get around this issue you have two options: change your cache initialization strategy
+to a later phase, or ensure that the database initializer is initialized first.
 
 The first option might be easy if the application is in your control, and not otherwise.
-Some suggestions for how to implement this are
+Some suggestions for how to implement this include:
 
-* Make the cache initialize lazily on first usage, which improves application startup time
+* Make the cache initialize lazily on first usage, which improves application startup
+  time.
 * Have your cache or a separate component that initializes the cache implement
   `Lifecycle` or `SmartLifecycle`. When the application context starts up a
   `SmartLifecycle` can be automatically started if its `autoStartup` flag is set, and a
-  `Lifecycle` can be started manually by calling
-  `ConfigurableApplicationContext.start()` on the enclosing context.
+  `Lifecycle` can be started manually by calling `ConfigurableApplicationContext.start()`
+  on the enclosing context.
 * Use a Spring `ApplicationEvent` or similar custom observer mechanism to trigger the
   cache initialization. `ContextRefreshedEvent` is always published by the context when
   it is ready for use (after all beans have been initialized), so that is often a useful
   hook (this is how the `SmartLifecycle` works by default).
 
-The second option can also be easy. Some suggestions on how to implement this are
+The second option can also be easy. Some suggestions on how to implement this include:
 
-* Rely on Spring BeanFactory default behavior, which is that beans are initialized in
-  registration order. You can easily arrange that by adopting the common practice of a
-  set of <import/> elements that order your application modules, and ensure that the
-  database and database initialization are listed first
-* Separate the datasource and the business components that use it and control their
-  startup order by putting them in separate ApplicationContext instances (e.g. parent
-  has the datasource and child has the business components). This structure is common in
-  Spring web applications, but can be more generally applied.
+* Rely on the default behavior of the Spring `BeanFactory`, which is that beans are
+  initialized in registration order. You can easily arrange that by adopting the common
+  practice of a set of `<import/>` elements in XML configuration that order your
+  application modules, and ensure that the database and database initialization are
+  listed first.
+* Separate the `DataSource` and the business components that use it, and control their
+  startup order by putting them in separate `ApplicationContext` instances (e.g. the
+  parent context contains the `DataSource`, and child context contains the business
+  components). This structure is common in Spring web applications but can be more
+  generally applied.
 
 
 
@@ -5662,9 +5798,6 @@ example of a corresponding DAO implementation:
 	}
 ----
 
-Because the above DAO follows the dependency injection pattern, it fits nicely into a
-Spring container, just as it would if coded against Spring's `JdoTemplate`:
-
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
@@ -5842,12 +5975,10 @@ JDO 2.0 implementations by default.
 [[orm-jdo-dialect]]
 ==== JdoDialect
 
-As an advanced feature, both `JdoTemplate` and `JdoTransactionManager` support a custom
-`JdoDialect` that can be passed into the `jdoDialect` bean property. In this scenario,
-the DAOs will not receive a `PersistenceManagerFactory` reference but rather a full
-`JdoTemplate` instance (for example, passed into the `jdoTemplate` property of
-`JdoDaoSupport`). Using a `JdoDialect` implementation, you can enable advanced features
-supported by Spring, usually in a vendor-specific manner:
+As an advanced feature, both `LocalPersistenceManagerFactoryBean` and `JdoTransactionManager`
+support a custom `JdoDialect` that can be passed into the `jdoDialect` bean property.
+Using a `JdoDialect` implementation, you can enable advanced features supported by Spring,
+usually in a vendor-specific manner:
 
 * Applying specific transaction semantics such as custom isolation level or transaction
   timeout
@@ -6325,21 +6456,18 @@ declarative transaction facilities. For example:
 Spring JPA allows a configured `JpaTransactionManager` to expose a JPA transaction to
 JDBC access code that accesses the same JDBC `DataSource`, provided that the registered
 `JpaDialect` supports retrieval of the underlying JDBC `Connection`. Out of the box,
-Spring provides dialects for the Toplink, Hibernate and OpenJPA JPA implementations. See
-the next section for details on the `JpaDialect` mechanism.
+Spring provides dialects for the EclipseLink, Hibernate and OpenJPA JPA implementations.
+See the next section for details on the `JpaDialect` mechanism.
 
 
 
 [[orm-jpa-dialect]]
 ==== JpaDialect
 
-As an advanced feature `JpaTemplate`, `JpaTransactionManager` and subclasses of
+As an advanced feature `JpaTransactionManager` and subclasses of
 `AbstractEntityManagerFactoryBean` support a custom `JpaDialect`, to be passed into the
-`jpaDialect` bean property. In such a scenario, the DAOs do not receive an
-`EntityManagerFactory` reference but rather a full `JpaTemplate` instance (for example,
-passed into the `jpaTemplate` property of `JpaDaoSupport`). A `JpaDialect`
-implementation can enable some advanced features supported by Spring, usually in a
-vendor-specific manner:
+`jpaDialect` bean property. A `JpaDialect` implementation can enable some advanced
+features supported by Spring, usually in a vendor-specific manner:
 
 * Applying specific transaction semantics such as custom isolation level or transaction
   timeout)
@@ -6514,6 +6642,7 @@ provide a distinction between marshalling and unmarshalling operations, even tho
 underlying O/X mapping tool does not do so.
 
 The O/X Mapping exception hierarchy is shown in the following figure:
+
 image::images/oxm-exceptions.png[width=400]
 
 O/X Mapping exception hierarchy
@@ -6771,7 +6900,7 @@ not require any further configuration, though a mapping file can be used to have
 control over the behavior of Castor.
 
 For more information on Castor, refer to the
-http://castor.codehaus.org/xml-framework.html[__Castor web site__]. The Spring
+http://castor-data-binding.github.io/castor[__Castor web site__]. The Spring
 integration classes reside in the `org.springframework.oxm.castor` package.
 
 
@@ -6796,7 +6925,7 @@ interface. It can be wired up as follows:
 ==== Mapping
 Although it is possible to rely on Castor's default marshalling behavior, it might be
 necessary to have more control over it. This can be accomplished using a Castor mapping
-file. For more information, refer to http://castor.codehaus.org/xml-mapping.html[Castor
+file. For more information, refer to http://castor-data-binding.github.io/castor/reference-guides/1.3.3/html-single/index.html#xml.mapping[Castor
 XML Mapping].
 
 The mapping can be set using the `mappingLocation` resource property, indicated below
@@ -7001,7 +7130,7 @@ Available attributes are:
 XStream is a simple library to serialize objects to XML and back again. It does not
 require any mapping, and generates clean XML.
 
-For more information on XStream, refer to the http://xstream.codehaus.org/[__XStream
+For more information on XStream, refer to the http://x-stream.github.io/[__XStream
 web site__]. The Spring integration classes reside in the
 `org.springframework.oxm.xstream` package.
 

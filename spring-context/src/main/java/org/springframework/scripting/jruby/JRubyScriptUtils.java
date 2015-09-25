@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,12 +45,17 @@ import org.springframework.util.StringUtils;
  * Utility methods for handling JRuby-scripted objects.
  *
  * <p>Note: Spring 4.0 supports JRuby 1.5 and higher.
+ * As of Spring 4.2, JRuby 9.0.0.0 is supported but only through
+ * {@link org.springframework.scripting.support.StandardScriptFactory}.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Rick Evans
  * @since 2.0
+ * @deprecated in favor of JRuby support via the JSR-223 abstraction
+ * ({@link org.springframework.scripting.support.StandardScriptFactory})
  */
+@Deprecated
 public abstract class JRubyScriptUtils {
 
 	/**
@@ -95,6 +100,7 @@ public abstract class JRubyScriptUtils {
 	/**
 	 * Initializes an instance of the {@link org.jruby.Ruby} runtime.
 	 */
+	@SuppressWarnings("unchecked")
 	private static Ruby initializeRuntime() {
 		return JavaEmbedUtils.initialize(Collections.EMPTY_LIST);
 	}

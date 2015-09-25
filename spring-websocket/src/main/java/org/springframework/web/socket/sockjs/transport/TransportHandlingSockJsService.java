@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
+import org.springframework.context.Lifecycle;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
@@ -59,7 +60,8 @@ import org.springframework.web.socket.sockjs.support.AbstractSockJsService;
  * @author Sebastien Deleuze
  * @since 4.0
  */
-public class TransportHandlingSockJsService extends AbstractSockJsService implements SockJsServiceConfig {
+public class TransportHandlingSockJsService extends AbstractSockJsService
+		implements SockJsServiceConfig, Lifecycle {
 
 	private static final boolean jackson2Present = ClassUtils.isPresent(
 			"com.fasterxml.jackson.databind.ObjectMapper", TransportHandlingSockJsService.class.getClassLoader());
@@ -74,6 +76,8 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 	private final Map<String, SockJsSession> sessions = new ConcurrentHashMap<String, SockJsSession>();
 
 	private ScheduledFuture<?> sessionCleanupTask;
+
+	private boolean running;
 
 
 	/**
@@ -148,6 +152,35 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 	 */
 	public List<HandshakeInterceptor> getHandshakeInterceptors() {
 		return this.interceptors;
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.running;
+	}
+
+	@Override
+	public void start() {
+		if (!isRunning()) {
+			this.running = true;
+			for (TransportHandler handler : this.handlers.values()) {
+				if (handler instanceof Lifecycle) {
+					((Lifecycle) handler).start();
+				}
+			}
+		}
+	}
+
+	@Override
+	public void stop() {
+		if (isRunning()) {
+			this.running = false;
+			for (TransportHandler handler : this.handlers.values()) {
+				if (handler instanceof Lifecycle) {
+					((Lifecycle) handler).stop();
+				}
+			}
+		}
 	}
 
 

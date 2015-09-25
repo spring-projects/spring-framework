@@ -16,16 +16,12 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
-
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
 import javax.servlet.http.Part;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -36,6 +32,7 @@ import org.junit.Test;
 
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -57,6 +54,9 @@ import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.multipart.support.RequestPartServletServerHttpRequest;
+
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture with {@link RequestPartMethodArgumentResolver} and mock {@link HttpMessageConverter}.
@@ -102,26 +102,26 @@ public class RequestPartMethodArgumentResolverTests {
 				Integer.TYPE, MultipartFile.class, Part.class, List.class, Part[].class,
 				MultipartFile.class, Optional.class, Optional.class, Optional.class);
 
-		paramRequestPart = new MethodParameter(method, 0);
+		paramRequestPart = new SynthesizingMethodParameter(method, 0);
 		paramRequestPart.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
-		paramNamedRequestPart = new MethodParameter(method, 1);
-		paramValidRequestPart = new MethodParameter(method, 2);
-		paramMultipartFile = new MethodParameter(method, 3);
-		paramMultipartFileList = new MethodParameter(method, 4);
-		paramMultipartFileArray = new MethodParameter(method, 5);
-		paramInt = new MethodParameter(method, 6);
-		paramMultipartFileNotAnnot = new MethodParameter(method, 7);
+		paramNamedRequestPart = new SynthesizingMethodParameter(method, 1);
+		paramValidRequestPart = new SynthesizingMethodParameter(method, 2);
+		paramMultipartFile = new SynthesizingMethodParameter(method, 3);
+		paramMultipartFileList = new SynthesizingMethodParameter(method, 4);
+		paramMultipartFileArray = new SynthesizingMethodParameter(method, 5);
+		paramInt = new SynthesizingMethodParameter(method, 6);
+		paramMultipartFileNotAnnot = new SynthesizingMethodParameter(method, 7);
 		paramMultipartFileNotAnnot.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
-		paramPart = new MethodParameter(method, 8);
+		paramPart = new SynthesizingMethodParameter(method, 8);
 		paramPart.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
-		paramPartList = new MethodParameter(method, 9);
-		paramPartArray = new MethodParameter(method, 10);
-		paramRequestParamAnnot = new MethodParameter(method, 11);
-		optionalMultipartFile = new MethodParameter(method, 12);
+		paramPartList = new SynthesizingMethodParameter(method, 9);
+		paramPartArray = new SynthesizingMethodParameter(method, 10);
+		paramRequestParamAnnot = new SynthesizingMethodParameter(method, 11);
+		optionalMultipartFile = new SynthesizingMethodParameter(method, 12);
 		optionalMultipartFile.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
-		optionalPart = new MethodParameter(method, 13);
+		optionalPart = new SynthesizingMethodParameter(method, 13);
 		optionalPart.initParameterNameDiscovery(new LocalVariableTableParameterNameDiscoverer());
-		optionalRequestPart = new MethodParameter(method, 14);
+		optionalRequestPart = new SynthesizingMethodParameter(method, 14);
 
 		messageConverter = mock(HttpMessageConverter.class);
 		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));

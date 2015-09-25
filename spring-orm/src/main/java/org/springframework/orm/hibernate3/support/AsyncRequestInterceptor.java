@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,8 +41,7 @@ import org.springframework.web.context.request.async.DeferredResultProcessingInt
  * @author Rossen Stoyanchev
  * @since 3.2.5
  */
-class AsyncRequestInterceptor extends CallableProcessingInterceptorAdapter
-		implements DeferredResultProcessingInterceptor {
+class AsyncRequestInterceptor extends CallableProcessingInterceptorAdapter implements DeferredResultProcessingInterceptor {
 
 	private static final Log logger = LogFactory.getLog(AsyncRequestInterceptor.class);
 
@@ -57,6 +56,7 @@ class AsyncRequestInterceptor extends CallableProcessingInterceptorAdapter
 		this.sessionFactory = sessionFactory;
 		this.sessionHolder = sessionHolder;
 	}
+
 
 	@Override
 	public <T> void preProcess(NativeWebRequest request, Callable<T> task) {
@@ -76,7 +76,7 @@ class AsyncRequestInterceptor extends CallableProcessingInterceptorAdapter
 	@Override
 	public <T> Object handleTimeout(NativeWebRequest request, Callable<T> task) {
 		this.timeoutInProgress = true;
-		return RESULT_NONE; // give other interceptors a chance to handle the timeout
+		return RESULT_NONE;  // give other interceptors a chance to handle the timeout
 	}
 
 	@Override
@@ -87,20 +87,29 @@ class AsyncRequestInterceptor extends CallableProcessingInterceptorAdapter
 	private void closeAfterTimeout() {
 		if (this.timeoutInProgress) {
 			logger.debug("Closing Hibernate Session after async request timeout");
-			SessionFactoryUtils.closeSession(sessionHolder.getSession());
+			SessionFactoryUtils.closeSession(this.sessionHolder.getSession());
 		}
 	}
 
+
 	// Implementation of DeferredResultProcessingInterceptor methods
 
-	public <T> void beforeConcurrentHandling(NativeWebRequest request, DeferredResult<T> deferredResult) {}
-	public <T> void preProcess(NativeWebRequest request, DeferredResult<T> deferredResult) {}
-	public <T> void postProcess(NativeWebRequest request, DeferredResult<T> deferredResult, Object result) {}
+	@Override
+	public <T> void beforeConcurrentHandling(NativeWebRequest request, DeferredResult<T> deferredResult) {
+	}
+
+	@Override
+	public <T> void preProcess(NativeWebRequest request, DeferredResult<T> deferredResult) {
+	}
+
+	@Override
+	public <T> void postProcess(NativeWebRequest request, DeferredResult<T> deferredResult, Object result) {
+	}
 
 	@Override
 	public <T> boolean handleTimeout(NativeWebRequest request, DeferredResult<T> deferredResult) {
 		this.timeoutInProgress = true;
-		return true; // give other interceptors a chance to handle the timeout
+		return true;  // give other interceptors a chance to handle the timeout
 	}
 
 	@Override

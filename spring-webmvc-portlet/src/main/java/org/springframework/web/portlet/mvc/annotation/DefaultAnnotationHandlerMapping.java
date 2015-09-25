@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -163,11 +163,11 @@ public class DefaultAnnotationHandlerMapping extends AbstractMapBasedHandlerMapp
 					RequestMapping requestMapping = AnnotationUtils.findAnnotation(method, RequestMapping.class);
 					if (actionMapping != null) {
 						params = StringUtils.mergeStringArrays(params, actionMapping.params());
-						predicate = new ActionMappingPredicate(actionMapping.value(), params);
+						predicate = new ActionMappingPredicate(actionMapping.name(), params);
 					}
 					else if (renderMapping != null) {
 						params = StringUtils.mergeStringArrays(params, renderMapping.params());
-						predicate = new RenderMappingPredicate(renderMapping.value(), params);
+						predicate = new RenderMappingPredicate(renderMapping.windowState(), params);
 					}
 					else if (resourceMapping != null) {
 						predicate = new ResourceMappingPredicate(resourceMapping.value());

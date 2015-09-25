@@ -18,6 +18,7 @@ package org.springframework.scheduling.aspectj;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -140,8 +141,11 @@ public class AnnotationAsyncExecutionAspectTests {
 		assertThat(defaultThread.get(), not(Thread.currentThread()));
 		assertThat(defaultThread.get().getName(), not(startsWith("e1-")));
 
-		Future<Thread> e1Thread = obj.e1Work();
+		ListenableFuture<Thread> e1Thread = obj.e1Work();
 		assertThat(e1Thread.get().getName(), startsWith("e1-"));
+
+		CompletableFuture<Thread> e1OtherThread = obj.e1OtherWork();
+		assertThat(e1OtherThread.get().getName(), startsWith("e1-"));
 	}
 
 	@Test
@@ -277,6 +281,11 @@ public class AnnotationAsyncExecutionAspectTests {
 		@Async("e1")
 		public ListenableFuture<Thread> e1Work() {
 			return new AsyncResult<Thread>(Thread.currentThread());
+		}
+
+		@Async("e1")
+		public CompletableFuture<Thread> e1OtherWork() {
+			return CompletableFuture.completedFuture(Thread.currentThread());
 		}
 	}
 

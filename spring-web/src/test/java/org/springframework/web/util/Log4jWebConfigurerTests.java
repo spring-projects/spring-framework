@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,23 +17,27 @@
 package org.springframework.web.util;
 
 import java.net.URL;
+
 import javax.servlet.ServletContextEvent;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.Ignore;
+
 import org.junit.Test;
 
 import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.mock.web.test.MockServletContext;
 
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
+import static org.junit.Assume.*;
 
 /**
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 21.02.2005
  */
+@SuppressWarnings("deprecation")
 public class Log4jWebConfigurerTests {
 
 	private static final String TESTLOG4J_PROPERTIES = "testlog4j.properties";
@@ -78,9 +82,11 @@ public class Log4jWebConfigurerTests {
 		initLogging(url.toString(), true);
 	}
 
-	@Ignore("Only works on MS Windows")
 	@Test
 	public void initLoggingWithAbsoluteFilePathAndRefreshInterval() {
+		// Only works on MS Windows
+		assumeThat(System.getProperty("os.name"), containsString("Windows"));
+
 		URL url = Log4jWebConfigurerTests.class.getResource(TESTLOG4J_PROPERTIES);
 		initLogging(url.getFile(), true);
 	}

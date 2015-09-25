@@ -1,6 +1,5 @@
 /*
- * Copyright 2004, 2005 Acegi Technology Pty Limited
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,9 +43,7 @@ public class CompositeFilterTests {
 	@Test
 	public void testCompositeFilter() throws ServletException, IOException {
 		ServletContext sc = new MockServletContext();
-
 		MockFilter targetFilter = new MockFilter();
-
 		MockFilterConfig proxyConfig = new MockFilterConfig(sc);
 
 		CompositeFilter filterProxy = new CompositeFilter();
@@ -75,7 +72,7 @@ public class CompositeFilterTests {
 		}
 
 		@Override
-		public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+		public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) {
 			request.setAttribute("called", Boolean.TRUE);
 		}
 

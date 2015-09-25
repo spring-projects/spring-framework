@@ -80,7 +80,7 @@ abstract class AbstractPromiseToListenableFutureAdapter<S, T> implements Listena
 	@Override
 	public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
 		S result = this.promise.await(timeout, unit);
-		if (result == null) {
+		if (!this.promise.isComplete()) {
 			throw new TimeoutException();
 		}
 		return adapt(result);

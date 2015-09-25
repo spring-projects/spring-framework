@@ -16,8 +16,8 @@
 
 package org.springframework.web.util;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,59 +107,54 @@ public class WebUtilsTests {
 
 	@Test
 	public void isValidOrigin() {
-		List<String> allowedOrigins = new ArrayList<>();
+		List<String> allowed = Collections.emptyList();
+		assertTrue(checkValidOrigin("mydomain1.com", -1, "http://mydomain1.com", allowed));
+		assertFalse(checkValidOrigin("mydomain1.com", -1, "http://mydomain2.com", allowed));
+
+		allowed = Collections.singletonList("*");
+		assertTrue(checkValidOrigin("mydomain1.com", -1, "http://mydomain2.com", allowed));
+
+		allowed = Collections.singletonList("http://mydomain1.com");
+		assertTrue(checkValidOrigin("mydomain2.com", -1, "http://mydomain1.com", allowed));
+		assertFalse(checkValidOrigin("mydomain2.com", -1, "http://mydomain3.com", allowed));
+	}
+
+	@Test
+	public void isSameOrigin() {
+		assertTrue(checkSameOrigin("mydomain1.com", -1, "http://mydomain1.com"));
+		assertTrue(checkSameOrigin("mydomain1.com", -1, "http://mydomain1.com:80"));
+		assertTrue(checkSameOrigin("mydomain1.com", 443, "https://mydomain1.com"));
+		assertTrue(checkSameOrigin("mydomain1.com", 443, "https://mydomain1.com:443"));
+		assertTrue(checkSameOrigin("mydomain1.com", 123, "http://mydomain1.com:123"));
+		assertTrue(checkSameOrigin("mydomain1.com", -1, "ws://mydomain1.com"));
+		assertTrue(checkSameOrigin("mydomain1.com", 443, "wss://mydomain1.com"));
+
+		assertFalse(checkSameOrigin("mydomain1.com", -1, "http://mydomain2.com"));
+		assertFalse(checkSameOrigin("mydomain1.com", -1, "https://mydomain1.com"));
+		assertFalse(checkSameOrigin("mydomain1.com", -1, "invalid-origin"));
+	}
+
+
+	private boolean checkValidOrigin(String serverName, int port, String originHeader, List<String> allowed) {
 		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
 		ServerHttpRequest request = new ServletServerHttpRequest(servletRequest);
+		servletRequest.setServerName(serverName);
+		if (port != -1) {
+			servletRequest.setServerPort(port);
+		}
+		request.getHeaders().set(HttpHeaders.ORIGIN, originHeader);
+		return WebUtils.isValidOrigin(request, allowed);
+	}
 
-		servletRequest.setServerName("mydomain1.com");
-		request.getHeaders().set(HttpHeaders.ORIGIN, "http://mydomain1.com");
-		assertTrue(WebUtils.isValidOrigin(request, allowedOrigins));
-
-		servletRequest.setServerName("mydomain1.com");
-		request.getHeaders().set(HttpHeaders.ORIGIN, "http://mydomain1.com:80");
-		assertTrue(WebUtils.isValidOrigin(request, allowedOrigins));
-
-		servletRequest.setServerName("mydomain1.com");
-		servletRequest.setServerPort(443);
-		request.getHeaders().set(HttpHeaders.ORIGIN, "https://mydomain1.com");
-		assertTrue(WebUtils.isValidOrigin(request, allowedOrigins));
-
-		servletRequest.setServerName("mydomain1.com");
-		servletRequest.setServerPort(443);
-		request.getHeaders().set(HttpHeaders.ORIGIN, "https://mydomain1.com:443");
-		assertTrue(WebUtils.isValidOrigin(request, allowedOrigins));
-
-		servletRequest.setServerName("mydomain1.com");
-		servletRequest.setServerPort(123);
-		request.getHeaders().set(HttpHeaders.ORIGIN, "http://mydomain1.com:123");
-		assertTrue(WebUtils.isValidOrigin(request, allowedOrigins));
-
-		servletRequest.setServerName("mydomain1.com");
-		request.getHeaders().set(HttpHeaders.ORIGIN, "http://mydomain2.com");
-		assertFalse(WebUtils.isValidOrigin(request, allowedOrigins));
-
-		servletRequest.setServerName("mydomain1.com");
-		request.getHeaders().set(HttpHeaders.ORIGIN, "https://mydomain1.com");
-		assertFalse(WebUtils.isValidOrigin(request, allowedOrigins));
-
-		servletRequest.setServerName("invalid-origin");
-		request.getHeaders().set(HttpHeaders.ORIGIN, "invalid-origin");
-		assertFalse(WebUtils.isValidOrigin(request, allowedOrigins));
-
-		allowedOrigins = Arrays.asList("*");
-		servletRequest.setServerName("mydomain1.com");
-		request.getHeaders().set(HttpHeaders.ORIGIN, "http://mydomain2.com");
-		assertTrue(WebUtils.isValidOrigin(request, allowedOrigins));
-
-		allowedOrigins = Arrays.asList("http://mydomain1.com");
-		servletRequest.setServerName("mydomain2.com");
-		request.getHeaders().set(HttpHeaders.ORIGIN, "http://mydomain1.com");
-		assertTrue(WebUtils.isValidOrigin(request, allowedOrigins));
-
-		allowedOrigins = Arrays.asList("http://mydomain1.com");
-		servletRequest.setServerName("mydomain2.com");
-		request.getHeaders().set(HttpHeaders.ORIGIN, "http://mydomain3.com");
-		assertFalse(WebUtils.isValidOrigin(request, allowedOrigins));
+	private boolean checkSameOrigin(String serverName, int port, String originHeader) {
+		MockHttpServletRequest servletRequest = new MockHttpServletRequest();
+		ServerHttpRequest request = new ServletServerHttpRequest(servletRequest);
+		servletRequest.setServerName(serverName);
+		if (port != -1) {
+			servletRequest.setServerPort(port);
+		}
+		request.getHeaders().set(HttpHeaders.ORIGIN, originHeader);
+		return WebUtils.isSameOrigin(request);
 	}
 
 }

@@ -124,4 +124,12 @@ public class PathResourceResolverTests {
 		assertTrue(this.resolver.checkResource(resource, resource));
 	}
 
+	// SPR-13241
+	@Test
+	public void resolvePathRootResource() throws Exception {
+		Resource webjarsLocation = new ClassPathResource("/META-INF/resources/webjars/", PathResourceResolver.class);
+		String path = this.resolver.resolveUrlPathInternal("", Arrays.asList(webjarsLocation), null);
+
+		assertNull(path);
+	}
 }

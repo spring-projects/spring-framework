@@ -505,7 +505,7 @@ public class ScriptFactoryPostProcessor extends InstantiationAwareBeanPostProces
 				Signature signature = new Signature(abd.getInitMethodName(), Type.VOID_TYPE, new Type[0]);
 				maker.add(signature, new Type[0]);
 			}
-			if (abd.getDestroyMethodName() != null) {
+			if (StringUtils.hasText(abd.getDestroyMethodName())) {
 				Signature signature = new Signature(abd.getDestroyMethodName(), Type.VOID_TYPE, new Type[0]);
 				maker.add(signature, new Type[0]);
 			}

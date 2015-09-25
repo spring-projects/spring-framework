@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,10 +17,13 @@
 package org.springframework.web.socket.server.jetty;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -34,13 +37,16 @@ import org.eclipse.jetty.websocket.servlet.ServletUpgradeRequest;
 import org.eclipse.jetty.websocket.servlet.ServletUpgradeResponse;
 import org.eclipse.jetty.websocket.servlet.WebSocketCreator;
 
+import org.springframework.context.Lifecycle;
 import org.springframework.core.NamedThreadLocal;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.adapter.jetty.JettyWebSocketHandlerAdapter;
@@ -57,7 +63,11 @@ import org.springframework.web.socket.server.RequestUpgradeStrategy;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
+public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Lifecycle, ServletContextAware {
+
+	// Pre-Jetty 9.3 init method without ServletContext
+	private static final Method webSocketFactoryInitMethod =
+			ClassUtils.getMethodIfAvailable(WebSocketServerFactory.class, "init");
 
 	private static final ThreadLocal<WebSocketHandlerContainer> wsContainerHolder =
 			new NamedThreadLocal<WebSocketHandlerContainer>("WebSocket Handler Container");
@@ -66,6 +76,10 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 	private final WebSocketServerFactory factory;
 
 	private volatile List<WebSocketExtension> supportedExtensions;
+
+	private ServletContext servletContext;
+
+	private volatile boolean running = false;
 
 
 	/**
@@ -99,12 +113,6 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 				return container.getHandler();
 			}
 		});
-		try {
-			this.factory.init();
-		}
-		catch (Exception ex) {
-			throw new IllegalStateException("Unable to initialize Jetty WebSocketServerFactory", ex);
-		}
 	}
 
 
@@ -127,6 +135,43 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 			result.add(new WebSocketExtension(name));
 		}
 		return result;
+	}
+
+	@Override
+	public void setServletContext(ServletContext servletContext) {
+		this.servletContext = servletContext;
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.running;
+	}
+
+
+	@Override
+	public void start() {
+		if (!isRunning()) {
+			this.running = true;
+			try {
+				if (webSocketFactoryInitMethod != null) {
+					webSocketFactoryInitMethod.invoke(this.factory);
+				}
+				else {
+					this.factory.init(this.servletContext);
+				}
+			}
+			catch (Exception ex) {
+				throw new IllegalStateException("Unable to initialize Jetty WebSocketServerFactory", ex);
+			}
+		}
+	}
+
+	@Override
+	public void stop() {
+		if (isRunning()) {
+			this.running = false;
+			this.factory.cleanup();
+		}
 	}
 
 	@Override

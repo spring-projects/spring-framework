@@ -46,20 +46,19 @@ import org.springframework.transaction.support.TransactionSynchronizationUtils;
  * configured through the {@link #setReceiveTimeout "receiveTimeout"} property.
  *
  * <p>The underlying mechanism is based on standard JMS MessageConsumer handling,
- * which is perfectly compatible with both native JMS and JMS in a J2EE environment.
- * Neither the JMS {@code MessageConsumer.setMessageListener} facility
- * nor the JMS ServerSessionPool facility is required. A further advantage
- * of this approach is full control over the listening process, allowing for
- * custom scaling and throttling and of concurrent message processing
- * (which is up to concrete subclasses).
+ * which is perfectly compatible with both native JMS and JMS in a Java EE environment.
+ * Neither the JMS {@code MessageConsumer.setMessageListener} facility  nor the JMS
+ * ServerSessionPool facility is required. A further advantage of this approach is
+ * full control over the listening process, allowing for custom scaling and throttling
+ * and of concurrent message processing (which is up to concrete subclasses).
  *
  * <p>Message reception and listener execution can automatically be wrapped
  * in transactions through passing a Spring
  * {@link org.springframework.transaction.PlatformTransactionManager} into the
  * {@link #setTransactionManager "transactionManager"} property. This will usually
  * be a {@link org.springframework.transaction.jta.JtaTransactionManager} in a
- * J2EE enviroment, in combination with a JTA-aware JMS ConnectionFactory obtained
- * from JNDI (check your J2EE server's documentation).
+ * Java EE enviroment, in combination with a JTA-aware JMS ConnectionFactory
+ * obtained from JNDI (check your application server's documentation).
  *
  * <p>This base class does not assume any specific mechanism for asynchronous
  * execution of polling invokers. Check out {@link DefaultMessageListenerContainer}

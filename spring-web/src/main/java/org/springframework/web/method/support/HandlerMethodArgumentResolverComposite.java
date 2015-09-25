@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.util.Assert;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 
@@ -61,7 +60,7 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 	 */
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return getArgumentResolver(parameter) != null;
+		return (getArgumentResolver(parameter) != null);
 	}
 
 	/**
@@ -73,7 +72,9 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
 		HandlerMethodArgumentResolver resolver = getArgumentResolver(parameter);
-		Assert.notNull(resolver, "Unknown parameter type [" + parameter.getParameterType().getName() + "]");
+		if (resolver == null) {
+			throw new IllegalArgumentException("Unknown parameter type [" + parameter.getParameterType().getName() + "]");
+		}
 		return resolver.resolveArgument(parameter, mavContainer, webRequest, binderFactory);
 	}
 

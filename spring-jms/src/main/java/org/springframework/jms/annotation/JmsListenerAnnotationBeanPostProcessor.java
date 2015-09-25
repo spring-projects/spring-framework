@@ -199,8 +199,8 @@ public class JmsListenerAnnotationBeanPostProcessor
 			ReflectionUtils.doWithMethods(targetClass, new ReflectionUtils.MethodCallback() {
 				@Override
 				public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
-					JmsListener jmsListener = AnnotationUtils.getAnnotation(method, JmsListener.class);
-					if (jmsListener != null) {
+					for (JmsListener jmsListener :
+							AnnotationUtils.getRepeatableAnnotations(method, JmsListener.class, JmsListeners.class)) {
 						processJmsListener(jmsListener, method, bean);
 						annotatedMethods.add(method);
 					}

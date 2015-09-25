@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,11 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
 /**
- * Tests covering the integration of {@link Environment} into {@link ApplicationContext} hierarchies.
+ * Tests covering the integration of the {@link Environment} into
+ * {@link ApplicationContext} hierarchies.
  *
  * @author Chris Beams
+ * @see org.springframework.core.env.EnvironmentSystemIntegrationTests
  */
 public class EnvironmentIntegrationTests {
 
@@ -48,6 +50,9 @@ public class EnvironmentIntegrationTests {
 				sameInstance(parent.getEnvironment()),
 				sameInstance(child.getEnvironment())));
 		assertThat("expected child ctx env", env, sameInstance(child.getEnvironment()));
+
+		child.close();
+		parent.close();
 	}
 
 }

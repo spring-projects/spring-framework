@@ -71,7 +71,7 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 			// no conversion required
 			return false;
 		}
-		return (String.class.equals(targetType.getType()) ?
+		return (String.class == targetType.getType() ?
 				hasFactoryConstructor(String.class, sourceType.getType()) :
 				hasToMethodOrFactoryMethodOrConstructor(targetType.getType(), sourceType.getType()));
 	}
@@ -85,7 +85,7 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 		Class<?> targetClass = targetType.getType();
 		try {
 			// Do not invoke a toString() method
-			if (!String.class.equals(targetClass)) {
+			if (String.class != targetClass) {
 				Method method = getToMethod(targetClass, sourceClass);
 				if (method != null) {
 					ReflectionUtils.makeAccessible(method);

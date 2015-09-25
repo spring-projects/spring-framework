@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
@@ -21,7 +22,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.verify;
+
 import org.mockito.MockitoAnnotations;
 
 import org.springframework.http.MediaType;
@@ -30,7 +31,9 @@ import static org.junit.Assert.fail;
 
 /**
  * Unit tests for {@link ResponseBodyEmitter}.
+ *
  * @author Rossen Stoyanchev
+ * @author Tomasz Nurkiewicz
  */
 public class ResponseBodyEmitterTests {
 
@@ -57,6 +60,19 @@ public class ResponseBodyEmitterTests {
 		this.emitter.initialize(this.handler);
 		verify(this.handler).send("foo", MediaType.TEXT_PLAIN);
 		verify(this.handler).send("bar", MediaType.TEXT_PLAIN);
+		verify(this.handler).complete();
+		verifyNoMoreInteractions(this.handler);
+	}
+
+	@Test
+	public void sendDuplicateBeforeHandlerInitialized() throws Exception {
+		this.emitter.send("foo", MediaType.TEXT_PLAIN);
+		this.emitter.send("foo", MediaType.TEXT_PLAIN);
+		this.emitter.complete();
+		verifyNoMoreInteractions(this.handler);
+
+		this.emitter.initialize(this.handler);
+		verify(this.handler, times(2)).send("foo", MediaType.TEXT_PLAIN);
 		verify(this.handler).complete();
 		verifyNoMoreInteractions(this.handler);
 	}

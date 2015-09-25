@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,11 +23,14 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.core.annotation.AliasFor;
+
 /**
- * Annotation that indicates the session attributes that a specific handler
- * uses. This will typically list the names of model attributes which should be
+ * Annotation that indicates the session attributes that a specific handler uses.
+ *
+ * <p>This will typically list the names of model attributes which should be
  * transparently stored in the session or some conversational storage,
- * serving as form-backing beans. <b>Declared at the type level,</b> applying
+ * serving as form-backing beans. <b>Declared at the type level</b>, applying
  * to the model attributes that the annotated handler class operates on.
  *
  * <p><b>NOTE:</b> Session attributes as indicated using this annotation
@@ -44,11 +47,12 @@ import java.lang.annotation.Target;
  * generic {@link org.springframework.web.context.request.WebRequest} interface.
  *
  * <p><b>NOTE:</b> When using controller interfaces (e.g. for AOP proxying),
- * make sure to consistently put <i>all</i> your mapping annotations - such as
- * {@code @RequestMapping} and {@code @SessionAttributes} - on
+ * make sure to consistently put <i>all</i> your mapping annotations &mdash;
+ * such as {@code @RequestMapping} and {@code @SessionAttributes} &mdash; on
  * the controller <i>interface</i> rather than on the implementation class.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 2.5
  */
 @Target({ElementType.TYPE})
@@ -58,18 +62,28 @@ import java.lang.annotation.Target;
 public @interface SessionAttributes {
 
 	/**
-	 * The names of session attributes in the model, to be stored in the
-	 * session or some conversational storage.
-	 * <p>Note: This indicates the model attribute names. The session attribute
-	 * names may or may not match the model attribute names; applications should
-	 * not rely on the session attribute names but rather operate on the model only.
+	 * Alias for {@link #names}.
 	 */
+	@AliasFor("names")
 	String[] value() default {};
 
 	/**
-	 * The types of session attributes in the model, to be stored in the
-	 * session or some conversational storage. All model attributes of this
-	 * type will be stored in the session, regardless of attribute name.
+	 * The names of session attributes in the model that should be stored in the
+	 * session or some conversational storage.
+	 * <p><strong>Note</strong>: This indicates the <em>model attribute names</em>.
+	 * The <em>session attribute names</em> may or may not match the model attribute
+	 * names. Applications should therefore not rely on the session attribute
+	 * names but rather operate on the model only.
+	 * @since 4.2
+	 */
+	@AliasFor("value")
+	String[] names() default {};
+
+	/**
+	 * The types of session attributes in the model that should be stored in the
+	 * session or some conversational storage.
+	 * <p>All model attributes of these types will be stored in the session,
+	 * regardless of attribute name.
 	 */
 	Class<?>[] types() default {};
 

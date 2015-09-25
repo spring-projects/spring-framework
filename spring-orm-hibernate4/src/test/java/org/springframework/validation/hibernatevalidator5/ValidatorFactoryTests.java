@@ -39,7 +39,7 @@ import org.hibernate.validator.HibernateValidator;
 import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.env.Environment;
 import org.springframework.validation.BeanPropertyBindingResult;
@@ -179,7 +179,8 @@ public class ValidatorFactoryTests {
 
 	@Test
 	public void testSpringValidationWithAutowiredValidator() throws Exception {
-		ApplicationContext ctx = new AnnotationConfigApplicationContext(LocalValidatorFactoryBean.class);
+		ConfigurableApplicationContext ctx = new AnnotationConfigApplicationContext(
+				LocalValidatorFactoryBean.class);
 		LocalValidatorFactoryBean validator = ctx.getBean(LocalValidatorFactoryBean.class);
 
 		ValidPerson person = new ValidPerson();
@@ -194,6 +195,7 @@ public class ValidatorFactoryTests {
 		assertEquals(2, errorCodes.size());
 		assertTrue(errorCodes.contains("NameAddressValid.person"));
 		assertTrue(errorCodes.contains("NameAddressValid"));
+		ctx.close();
 	}
 
 	@Test

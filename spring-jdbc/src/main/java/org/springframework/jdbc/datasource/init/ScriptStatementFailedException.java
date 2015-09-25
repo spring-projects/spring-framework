@@ -41,6 +41,7 @@ public class ScriptStatementFailedException extends ScriptException {
 		super(buildErrorMessage(stmt, stmtNumber, encodedResource), cause);
 	}
 
+
 	/**
 	 * Build an error message for an SQL script execution failure,
 	 * based on the supplied arguments.
@@ -53,8 +54,7 @@ public class ScriptStatementFailedException extends ScriptException {
 	 * @since 4.2
 	 */
 	public static String buildErrorMessage(String stmt, int stmtNumber, EncodedResource encodedResource) {
-		return String.format("Failed to execute SQL script statement #%s of %s: %s",
-				stmtNumber, encodedResource, stmt);
+		return String.format("Failed to execute SQL script statement #%s of %s: %s", stmtNumber, encodedResource, stmt);
 	}
 
 }

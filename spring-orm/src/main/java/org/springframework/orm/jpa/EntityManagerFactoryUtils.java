@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -221,20 +221,23 @@ public abstract class EntityManagerFactoryUtils {
 				(EntityManagerHolder) TransactionSynchronizationManager.getResource(emf);
 		if (emHolder != null) {
 			if (synchronizedWithTransaction) {
-				if (!emHolder.isSynchronizedWithTransaction() &&
-						TransactionSynchronizationManager.isSynchronizationActive()) {
-					// Try to explicitly synchronize the EntityManager itself
-					// with an ongoing JTA transaction, if any.
-					try {
-						emHolder.getEntityManager().joinTransaction();
+				if (!emHolder.isSynchronizedWithTransaction()) {
+					if (TransactionSynchronizationManager.isActualTransactionActive()) {
+						// Try to explicitly synchronize the EntityManager itself
+						// with an ongoing JTA transaction, if any.
+						try {
+							emHolder.getEntityManager().joinTransaction();
+						}
+						catch (TransactionRequiredException ex) {
+							logger.debug("Could not join transaction because none was actually active", ex);
+						}
 					}
-					catch (TransactionRequiredException ex) {
-						logger.debug("Could not join transaction because none was actually active", ex);
+					if (TransactionSynchronizationManager.isSynchronizationActive()) {
+						Object transactionData = prepareTransaction(emHolder.getEntityManager(), emf);
+						TransactionSynchronizationManager.registerSynchronization(
+								new TransactionalEntityManagerSynchronization(emHolder, emf, transactionData, false));
+						emHolder.setSynchronizedWithTransaction(true);
 					}
-					Object transactionData = prepareTransaction(emHolder.getEntityManager(), emf);
-					TransactionSynchronizationManager.registerSynchronization(
-							new TransactionalEntityManagerSynchronization(emHolder, emf, transactionData, false));
-					emHolder.setSynchronizedWithTransaction(true);
 				}
 				// Use holder's reference count to track synchronizedWithTransaction access.
 				// isOpen() check used below to find out about it.

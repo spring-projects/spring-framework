@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -98,28 +99,28 @@ public class RequestParamMethodArgumentResolverTests {
 				String.class, MultipartFile.class, List.class, Part.class,
 				MultipartFile.class, String.class, String.class, Optional.class);
 
-		paramNamedDefaultValueString = new MethodParameter(method, 0);
-		paramNamedStringArray = new MethodParameter(method, 1);
-		paramNamedMap = new MethodParameter(method, 2);
-		paramMultipartFile = new MethodParameter(method, 3);
-		paramMultipartFileList = new MethodParameter(method, 4);
-		paramMultipartFileArray = new MethodParameter(method, 5);
-		paramPart = new MethodParameter(method, 6);
-		paramPartList  = new MethodParameter(method, 7);
-		paramPartArray  = new MethodParameter(method, 8);
-		paramMap = new MethodParameter(method, 9);
-		paramStringNotAnnot = new MethodParameter(method, 10);
+		paramNamedDefaultValueString = new SynthesizingMethodParameter(method, 0);
+		paramNamedStringArray = new SynthesizingMethodParameter(method, 1);
+		paramNamedMap = new SynthesizingMethodParameter(method, 2);
+		paramMultipartFile = new SynthesizingMethodParameter(method, 3);
+		paramMultipartFileList = new SynthesizingMethodParameter(method, 4);
+		paramMultipartFileArray = new SynthesizingMethodParameter(method, 5);
+		paramPart = new SynthesizingMethodParameter(method, 6);
+		paramPartList  = new SynthesizingMethodParameter(method, 7);
+		paramPartArray  = new SynthesizingMethodParameter(method, 8);
+		paramMap = new SynthesizingMethodParameter(method, 9);
+		paramStringNotAnnot = new SynthesizingMethodParameter(method, 10);
 		paramStringNotAnnot.initParameterNameDiscovery(paramNameDiscoverer);
-		paramMultipartFileNotAnnot = new MethodParameter(method, 11);
+		paramMultipartFileNotAnnot = new SynthesizingMethodParameter(method, 11);
 		paramMultipartFileNotAnnot.initParameterNameDiscovery(paramNameDiscoverer);
-		paramMultipartFileListNotAnnot = new MethodParameter(method, 12);
+		paramMultipartFileListNotAnnot = new SynthesizingMethodParameter(method, 12);
 		paramMultipartFileListNotAnnot.initParameterNameDiscovery(paramNameDiscoverer);
-		paramPartNotAnnot = new MethodParameter(method, 13);
+		paramPartNotAnnot = new SynthesizingMethodParameter(method, 13);
 		paramPartNotAnnot.initParameterNameDiscovery(paramNameDiscoverer);
-		paramRequestPartAnnot = new MethodParameter(method, 14);
-		paramRequired = new MethodParameter(method, 15);
-		paramNotRequired = new MethodParameter(method, 16);
-		paramOptional = new MethodParameter(method, 17);
+		paramRequestPartAnnot = new SynthesizingMethodParameter(method, 14);
+		paramRequired = new SynthesizingMethodParameter(method, 15);
+		paramNotRequired = new SynthesizingMethodParameter(method, 16);
+		paramOptional = new SynthesizingMethodParameter(method, 17);
 
 		request = new MockHttpServletRequest();
 		webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
@@ -427,6 +428,7 @@ public class RequestParamMethodArgumentResolverTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void resolveOptional() throws Exception {
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(new DefaultConversionService());
@@ -443,24 +445,24 @@ public class RequestParamMethodArgumentResolverTests {
 	}
 
 
-	public void params(@RequestParam(value = "name", defaultValue = "bar") String param1,
+	public void params(@RequestParam(name = "name", defaultValue = "bar") String param1,
 			@RequestParam("name") String[] param2,
 			@RequestParam("name") Map<?, ?> param3,
-			@RequestParam(value = "mfile") MultipartFile param4,
-			@RequestParam(value = "mfilelist") List<MultipartFile> param5,
-			@RequestParam(value = "mfilearray") MultipartFile[] param6,
-			@RequestParam(value = "pfile") Part param7,
-			@RequestParam(value = "pfilelist") List<Part> param8,
-			@RequestParam(value = "pfilearray") Part[] param9,
+			@RequestParam("mfile") MultipartFile param4,
+			@RequestParam("mfilelist") List<MultipartFile> param5,
+			@RequestParam("mfilearray") MultipartFile[] param6,
+			@RequestParam("pfile") Part param7,
+			@RequestParam("pfilelist") List<Part> param8,
+			@RequestParam("pfilearray") Part[] param9,
 			@RequestParam Map<?, ?> param10,
 			String stringNotAnnot,
 			MultipartFile multipartFileNotAnnot,
 			List<MultipartFile> multipartFileList,
 			Part part,
 			@RequestPart MultipartFile requestPartAnnot,
-			@RequestParam(value = "name") String paramRequired,
-			@RequestParam(value = "name", required=false) String paramNotRequired,
-			@RequestParam(value = "name") Optional<Integer> paramOptional) {
+			@RequestParam("name") String paramRequired,
+			@RequestParam(name = "name", required = false) String paramNotRequired,
+			@RequestParam("name") Optional<Integer> paramOptional) {
 	}
 
 }

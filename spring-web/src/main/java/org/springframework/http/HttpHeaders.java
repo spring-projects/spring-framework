@@ -87,6 +87,46 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public static final String ACCEPT_RANGES = "Accept-Ranges";
 	/**
+	 * The CORS {@code Access-Control-Allow-Credentials} response header field name.
+	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+	 */
+	public static final String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
+	/**
+	 * The CORS {@code Access-Control-Allow-Headers} response header field name.
+	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+	 */
+	public static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
+	/**
+	 * The CORS {@code Access-Control-Allow-Methods} response header field name.
+	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+	 */
+	public static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
+	/**
+	 * The CORS {@code Access-Control-Allow-Origin} response header field name.
+	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+	 */
+	public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
+	/**
+	 * The CORS {@code Access-Control-Expose-Headers} response header field name.
+	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+	 */
+	public static final String ACCESS_CONTROL_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
+	/**
+	 * The CORS {@code Access-Control-Max-Age} response header field name.
+	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+	 */
+	public static final String ACCESS_CONTROL_MAX_AGE = "Access-Control-Max-Age";
+	/**
+	 * The CORS {@code Access-Control-Request-Headers} request header field name.
+	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+	 */
+	public static final String ACCESS_CONTROL_REQUEST_HEADERS = "Access-Control-Request-Headers";
+	/**
+	 * The CORS {@code Access-Control-Request-Method} request header field name.
+	 * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+	 */
+	public static final String ACCESS_CONTROL_REQUEST_METHOD = "Access-Control-Request-Method";
+	/**
 	 * The HTTP {@code Age} header field name.
 	 * @see <a href="http://tools.ietf.org/html/rfc7234#section-5.1">Section 5.1 of RFC 7234</a>
 	 */
@@ -322,6 +362,10 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
 
+	/**
+	 * Date formats as specified in the HTTP RFC
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
+	 */
 	private static final String[] DATE_FORMATS = new String[] {
 		"EEE, dd MMM yyyy HH:mm:ss zzz",
 		"EEE, dd-MMM-yy HH:mm:ss zzz",
@@ -388,6 +432,129 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		}
 
 		return result;
+	}
+
+	/**
+	 * Set the (new) value of the {@code Access-Control-Allow-Credentials} response header.
+	 */
+	public void setAccessControlAllowCredentials(boolean allowCredentials) {
+		set(ACCESS_CONTROL_ALLOW_CREDENTIALS, Boolean.toString(allowCredentials));
+	}
+
+	/**
+	 * Returns the value of the {@code Access-Control-Allow-Credentials} response header.
+	 */
+	public boolean getAccessControlAllowCredentials() {
+		return new Boolean(getFirst(ACCESS_CONTROL_ALLOW_CREDENTIALS));
+	}
+
+	/**
+	 * Set the (new) value of the {@code Access-Control-Allow-Headers} response header.
+	 */
+	public void setAccessControlAllowHeaders(List<String> allowedHeaders) {
+		set(ACCESS_CONTROL_ALLOW_HEADERS, toCommaDelimitedString(allowedHeaders));
+	}
+
+	/**
+	 * Returns the value of the {@code Access-Control-Allow-Headers} response header.
+	 */
+	public List<String> getAccessControlAllowHeaders() {
+		return getFirstValueAsList(ACCESS_CONTROL_ALLOW_HEADERS);
+	}
+
+	/**
+	 * Set the (new) value of the {@code Access-Control-Allow-Methods} response header.
+	 */
+	public void setAccessControlAllowMethods(List<HttpMethod> allowedMethods) {
+		set(ACCESS_CONTROL_ALLOW_METHODS, StringUtils.collectionToCommaDelimitedString(allowedMethods));
+	}
+
+	/**
+	 * Returns the value of the {@code Access-Control-Allow-Methods} response header.
+	 */
+	public List<HttpMethod> getAccessControlAllowMethods() {
+		List<HttpMethod> result = new ArrayList<HttpMethod>();
+		String value = getFirst(ACCESS_CONTROL_ALLOW_METHODS);
+		if (value != null) {
+			String[] tokens = value.split(",\\s*");
+			for (String token : tokens) {
+				result.add(HttpMethod.valueOf(token));
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Set the (new) value of the {@code Access-Control-Allow-Origin} response header.
+	 */
+	public void setAccessControlAllowOrigin(String allowedOrigin) {
+		set(ACCESS_CONTROL_ALLOW_ORIGIN, allowedOrigin);
+	}
+
+	/**
+	 * Returns the value of the {@code Access-Control-Allow-Origin} response header.
+	 */
+	public String getAccessControlAllowOrigin() {
+		return getFirst(ACCESS_CONTROL_ALLOW_ORIGIN);
+	}
+
+	/**
+	 * Set the (new) value of the {@code Access-Control-Expose-Headers} response header.
+	 */
+	public void setAccessControlExposeHeaders(List<String> exposedHeaders) {
+		set(ACCESS_CONTROL_EXPOSE_HEADERS, toCommaDelimitedString(exposedHeaders));
+	}
+
+	/**
+	 * Returns the value of the {@code Access-Control-Expose-Headers} response header.
+	 */
+	public List<String> getAccessControlExposeHeaders() {
+		return getFirstValueAsList(ACCESS_CONTROL_EXPOSE_HEADERS);
+	}
+
+	/**
+	 * Set the (new) value of the {@code Access-Control-Max-Age} response header.
+	 */
+	public void setAccessControlMaxAge(long maxAge) {
+		set(ACCESS_CONTROL_MAX_AGE, Long.toString(maxAge));
+	}
+
+	/**
+	 * Returns the value of the {@code Access-Control-Max-Age} response header.
+	 * <p>Returns -1 when the max age is unknown.
+	 */
+	public long getAccessControlMaxAge() {
+		String value = getFirst(ACCESS_CONTROL_MAX_AGE);
+		return (value != null ? Long.parseLong(value) : -1);
+	}
+
+	/**
+	 * Set the (new) value of the {@code Access-Control-Request-Headers} request header.
+	 */
+	public void setAccessControlRequestHeaders(List<String> requestHeaders) {
+		set(ACCESS_CONTROL_REQUEST_HEADERS, toCommaDelimitedString(requestHeaders));
+	}
+
+	/**
+	 * Returns the value of the {@code Access-Control-Request-Headers} request header.
+	 */
+	public List<String> getAccessControlRequestHeaders() {
+		return getFirstValueAsList(ACCESS_CONTROL_REQUEST_HEADERS);
+	}
+
+	/**
+	 * Set the (new) value of the {@code Access-Control-Request-Method} request header.
+	 */
+	public void setAccessControlRequestMethod(HttpMethod requestedMethod) {
+		set(ACCESS_CONTROL_REQUEST_METHOD, requestedMethod.name());
+	}
+
+	/**
+	 * Returns the value of the {@code Access-Control-Request-Method} request header.
+	 */
+	public HttpMethod getAccessControlRequestMethod() {
+		String value = getFirst(ACCESS_CONTROL_REQUEST_METHOD);
+		return (value != null ? HttpMethod.valueOf(value) : null);
 	}
 
 	/**
@@ -791,7 +958,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 			try {
 				return simpleDateFormat.parse(headerValue).getTime();
 			}
-			catch (ParseException e) {
+			catch (ParseException ex) {
 				// ignore
 			}
 		}
@@ -817,8 +984,8 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	@Override
 	public String getFirst(String headerName) {
-		List<String> headerValues = headers.get(headerName);
-		return headerValues != null ? headerValues.get(0) : null;
+		List<String> headerValues = this.headers.get(headerName);
+		return (headerValues != null ? headerValues.get(0) : null);
 	}
 
 	/**
@@ -831,7 +998,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	@Override
 	public void add(String headerName, String headerValue) {
-		List<String> headerValues = headers.get(headerName);
+		List<String> headerValues = this.headers.get(headerName);
 		if (headerValues == null) {
 			headerValues = new LinkedList<String>();
 			this.headers.put(headerName, headerValues);
@@ -851,7 +1018,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	public void set(String headerName, String headerValue) {
 		List<String> headerValues = new LinkedList<String>();
 		headerValues.add(headerValue);
-		headers.put(headerName, headerValues);
+		this.headers.put(headerName, headerValues);
 	}
 
 	@Override
@@ -864,7 +1031,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	@Override
 	public Map<String, String> toSingleValueMap() {
 		LinkedHashMap<String, String> singleValueMap = new LinkedHashMap<String,String>(this.headers.size());
-		for (Entry<String, List<String>> entry : headers.entrySet()) {
+		for (Entry<String, List<String>> entry : this.headers.entrySet()) {
 			singleValueMap.put(entry.getKey(), entry.getValue().get(0));
 		}
 		return singleValueMap;

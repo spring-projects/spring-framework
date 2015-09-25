@@ -146,7 +146,7 @@ public class QualifierAnnotationAutowireCandidateResolver extends GenericTypeAwa
 				MethodParameter methodParam = descriptor.getMethodParameter();
 				if (methodParam != null) {
 					Method method = methodParam.getMethod();
-					if (method == null || void.class.equals(method.getReturnType())) {
+					if (method == null || void.class == method.getReturnType()) {
 						match = checkQualifiers(bdHolder, methodParam.getMethodAnnotations());
 					}
 				}

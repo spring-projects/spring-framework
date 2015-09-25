@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -182,7 +182,8 @@ public class RestTemplateXhrTransportTests {
 		SockJsUrlInfo urlInfo = new SockJsUrlInfo(new URI("http://example.com"));
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("h-foo", "h-bar");
-		TransportRequest request = new DefaultTransportRequest(urlInfo, headers, transport, TransportType.XHR, CODEC);
+		TransportRequest request = new DefaultTransportRequest(urlInfo, headers, headers,
+				transport, TransportType.XHR, CODEC);
 
 		return transport.connect(request, this.webSocketHandler);
 	}

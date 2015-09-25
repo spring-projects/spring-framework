@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,6 +102,7 @@ public class RequestResponseBodyMethodProcessorMockTests {
 		mavContainer = new ModelAndViewContainer();
 
 		servletRequest = new MockHttpServletRequest();
+		servletRequest.setMethod("POST");
 		webRequest = new ServletWebRequest(servletRequest, new MockHttpServletResponse());
 	}
 
@@ -178,17 +179,11 @@ public class RequestResponseBodyMethodProcessorMockTests {
 		processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, null);
 	}
 
-	@Test
+	@Test(expected = HttpMediaTypeNotSupportedException.class)
 	public void resolveArgumentNoContentType() throws Exception {
 		servletRequest.setContent("payload".getBytes(Charset.forName("UTF-8")));
 		given(messageConverter.canRead(String.class, MediaType.APPLICATION_OCTET_STREAM)).willReturn(false);
-		try {
-			processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, null);
-			fail("Expected exception");
-		}
-		catch (HttpMediaTypeNotSupportedException ex) {
-			// expected
-		}
+		processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, null);
 	}
 
 	@Test(expected = HttpMediaTypeNotSupportedException.class)
@@ -214,6 +209,23 @@ public class RequestResponseBodyMethodProcessorMockTests {
 		servletRequest.setContentType("text/plain");
 		servletRequest.setContent(new byte[0]);
 		given(messageConverter.canRead(String.class, MediaType.TEXT_PLAIN)).willReturn(true);
+		assertNull(processor.resolveArgument(paramStringNotRequired, mavContainer, webRequest, new ValidatingBinderFactory()));
+	}
+
+	// SPR-13417
+	@Test
+	public void resolveArgumentNotRequiredNoContentNoContentType() throws Exception {
+		servletRequest.setContent(new byte[0]);
+		given(messageConverter.canRead(String.class, MediaType.TEXT_PLAIN)).willReturn(true);
+		given(messageConverter.canRead(String.class, MediaType.APPLICATION_OCTET_STREAM)).willReturn(false);
+		assertNull(processor.resolveArgument(paramStringNotRequired, mavContainer, webRequest, new ValidatingBinderFactory()));
+	}
+
+	@Test
+	public void resolveArgumentNotGetRequests() throws Exception {
+		servletRequest.setMethod("GET");
+		servletRequest.setContent(new byte[0]);
+		given(messageConverter.canRead(String.class, MediaType.APPLICATION_OCTET_STREAM)).willReturn(false);
 		assertNull(processor.resolveArgument(paramStringNotRequired, mavContainer, webRequest, new ValidatingBinderFactory()));
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,17 @@ import org.junit.Test;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 
+import static java.util.Collections.singletonMap;
 import static org.junit.Assert.*;
 
 /**
+ * Unit tests for {@link MimeType}.
+ *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public class MimeTypeTests {
-
 
 	@Test(expected = IllegalArgumentException.class)
 	public void slashInSubtype() {
@@ -85,7 +88,7 @@ public class MimeTypeTests {
 	}
 
 	@Test
-	public void testWithConversionService() {
+	public void withConversionService() {
 		ConversionService conversionService = new DefaultConversionService();
 		assertTrue(conversionService.canConvert(String.class, MimeType.class));
 		MimeType mimeType = MimeType.valueOf("application/xml");
@@ -211,16 +214,18 @@ public class MimeTypeTests {
 		MimeTypeUtils.parseMimeType("text/html; charset=foo-bar");
 	}
 
-	// SPR-8917
-
+	/**
+	 * SPR-8917
+	 */
 	@Test
 	public void parseMimeTypeQuotedParameterValue() {
 		MimeType mimeType = MimeTypeUtils.parseMimeType("audio/*;attr=\"v>alue\"");
 		assertEquals("\"v>alue\"", mimeType.getParameter("attr"));
 	}
 
-	// SPR-8917
-
+	/**
+	 * SPR-8917
+	 */
 	@Test
 	public void parseMimeTypeSingleQuotedParameterValue() {
 		MimeType mimeType = MimeTypeUtils.parseMimeType("audio/*;attr='v>alue'");
@@ -249,7 +254,7 @@ public class MimeTypeTests {
 		MimeType audioBasic = new MimeType("audio", "basic");
 		MimeType audio = new MimeType("audio");
 		MimeType audioWave = new MimeType("audio", "wave");
-		MimeType audioBasicLevel = new MimeType("audio", "basic", Collections.singletonMap("level", "1"));
+		MimeType audioBasicLevel = new MimeType("audio", "basic", singletonMap("level", "1"));
 
 		// equal
 		assertEquals("Invalid comparison result", 0, audioBasic.compareTo(audioBasic));
@@ -284,16 +289,27 @@ public class MimeTypeTests {
 		assertEquals("Invalid comparison result", 0, m1.compareTo(m2));
 		assertEquals("Invalid comparison result", 0, m2.compareTo(m1));
 
-		m1 = new MimeType("audio", "basic", Collections.singletonMap("foo", "bar"));
-		m2 = new MimeType("audio", "basic", Collections.singletonMap("Foo", "bar"));
+		m1 = new MimeType("audio", "basic", singletonMap("foo", "bar"));
+		m2 = new MimeType("audio", "basic", singletonMap("Foo", "bar"));
 		assertEquals("Invalid comparison result", 0, m1.compareTo(m2));
 		assertEquals("Invalid comparison result", 0, m2.compareTo(m1));
 
-		m1 = new MimeType("audio", "basic", Collections.singletonMap("foo", "bar"));
-		m2 = new MimeType("audio", "basic", Collections.singletonMap("foo", "Bar"));
+		m1 = new MimeType("audio", "basic", singletonMap("foo", "bar"));
+		m2 = new MimeType("audio", "basic", singletonMap("foo", "Bar"));
 		assertTrue("Invalid comparison result", m1.compareTo(m2) != 0);
 		assertTrue("Invalid comparison result", m2.compareTo(m1) != 0);
 	}
 
+	/**
+	 * SPR-13157
+	 * @since 4.2
+	 */
+	@Test
+	public void equalsIsCaseInsensitiveForCharsets() {
+		MimeType m1 = new MimeType("text", "plain", singletonMap("charset", "UTF-8"));
+		MimeType m2 = new MimeType("text", "plain", singletonMap("charset", "utf-8"));
+		assertEquals(m1, m2);
+		assertEquals(m2, m1);
+	}
 
 }

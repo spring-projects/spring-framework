@@ -90,7 +90,7 @@ public class SimpleWebApplicationContext extends StaticWebApplicationContext {
 
 		@Override
 		public long getLastModified(HttpServletRequest request) {
-			return 98;
+			return 1427846400000L;
 		}
 	}
 

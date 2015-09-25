@@ -1095,7 +1095,7 @@ ternary operator.
 [[expressions-operator-elvis]]
 === The Elvis Operator
 The Elvis operator is a shortening of the ternary operator syntax and is used in the
-http://groovy.codehaus.org/Operators#Operators-ElvisOperator(%3F%3A)[Groovy] language.
+http://www.groovy-lang.org/operators.html#_elvis_operator[Groovy] language.
 With the ternary operator syntax you usually have to repeat a variable twice, for
 example:
 
@@ -1144,7 +1144,7 @@ Here is a more complex example.
 [[expressions-operator-safe-navigation]]
 === Safe Navigation operator
 The Safe Navigation operator is used to avoid a `NullPointerException` and comes from
-the http://groovy.codehaus.org/Operators#Operators-SafeNavigationOperator(%3F.)[Groovy]
+the http://www.groovy-lang.org/operators.html#_safe_navigation_operator[Groovy]
 language. Typically when you have a reference to an object you might need to verify that
 it is not null before accessing methods or properties of the object. To avoid this, the
 safe navigation operator will simply return null instead of throwing an exception.

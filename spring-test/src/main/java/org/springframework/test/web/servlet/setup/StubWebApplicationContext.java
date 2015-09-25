@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletContext;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanFactory;
@@ -43,20 +44,22 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.ServletContextResourcePatternResolver;
 
 /**
- * A mock WebApplicationContext that accepts registrations of object instances.
+ * A stub WebApplicationContext that accepts registrations of object instances.
  *
- * <p>As registered object instances are instantiated and initialized
- * externally, there is no wiring, bean initialization, lifecycle events, as
- * well as no pre-processing and post-processing hooks typically associated with
- * beans managed by an {@link ApplicationContext}. Just a simple lookup into a
+ * <p>As registered object instances are instantiated and initialized externally,
+ * there is no wiring, bean initialization, lifecycle events, as well as no
+ * pre-processing and post-processing hooks typically associated with beans
+ * managed by an {@link ApplicationContext}. Just a simple lookup into a
  * {@link StaticListableBeanFactory}.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.2
  */
 class StubWebApplicationContext implements WebApplicationContext {
@@ -78,9 +81,6 @@ class StubWebApplicationContext implements WebApplicationContext {
 	private final ResourcePatternResolver resourcePatternResolver;
 
 
-	/**
-	 * Class constructor.
-	 */
 	public StubWebApplicationContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 		this.resourcePatternResolver = new ServletContextResourcePatternResolver(servletContext);
@@ -322,7 +322,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 
 	@Override
 	public ClassLoader getClassLoader() {
-		return null;
+		return ClassUtils.getDefaultClassLoader();
 	}
 
 	@Override
@@ -366,65 +366,59 @@ class StubWebApplicationContext implements WebApplicationContext {
 
 		@Override
 		public <T> T createBean(Class<T> beanClass) {
-			throw new UnsupportedOperationException();
+			return BeanUtils.instantiate(beanClass);
 		}
 
 		@Override
-		@SuppressWarnings("rawtypes")
-		public Object createBean(Class beanClass, int autowireMode, boolean dependencyCheck) {
-			throw new UnsupportedOperationException();
+		public Object createBean(Class<?> beanClass, int autowireMode, boolean dependencyCheck) {
+			return BeanUtils.instantiate(beanClass);
 		}
 
 		@Override
-		@SuppressWarnings("rawtypes")
-		public Object autowire(Class beanClass, int autowireMode, boolean dependencyCheck) {
-			throw new UnsupportedOperationException();
+		public Object autowire(Class<?> beanClass, int autowireMode, boolean dependencyCheck) {
+			return BeanUtils.instantiate(beanClass);
 		}
 
 		@Override
 		public void autowireBean(Object existingBean) throws BeansException {
-			throw new UnsupportedOperationException();
 		}
 
 		@Override
 		public void autowireBeanProperties(Object existingBean, int autowireMode, boolean dependencyCheck) {
-			throw new UnsupportedOperationException();
 		}
 
 		@Override
 		public Object configureBean(Object existingBean, String beanName) {
-			throw new UnsupportedOperationException();
+			return existingBean;
 		}
 
 		@Override
 		public Object resolveDependency(DependencyDescriptor descriptor, String beanName) {
-			throw new UnsupportedOperationException();
+			throw new UnsupportedOperationException("Dependency resolution not supported");
 		}
 
 		@Override
 		public Object resolveDependency(DependencyDescriptor descriptor, String beanName,
 				Set<String> autowiredBeanNames, TypeConverter typeConverter) {
-			throw new UnsupportedOperationException();
+			throw new UnsupportedOperationException("Dependency resolution not supported");
 		}
 
 		@Override
 		public void applyBeanPropertyValues(Object existingBean, String beanName) throws BeansException {
-			throw new UnsupportedOperationException();
 		}
 
 		@Override
 		public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName) {
-			throw new UnsupportedOperationException();
+			return existingBean;
 		}
 
 		@Override
 		public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName) {
-			throw new UnsupportedOperationException();
+			return existingBean;
 		}
 
 		@Override
 		public void destroyBean(Object existingBean) {
-			throw new UnsupportedOperationException();
 		}
 	}
 

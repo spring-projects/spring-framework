@@ -17,7 +17,6 @@
 package org.springframework.messaging.simp.config;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,14 +42,16 @@ import org.springframework.messaging.simp.broker.AbstractBrokerMessageHandler;
 import org.springframework.messaging.simp.broker.SimpleBrokerMessageHandler;
 import org.springframework.messaging.simp.stomp.StompBrokerRelayMessageHandler;
 import org.springframework.messaging.simp.user.DefaultUserDestinationResolver;
-import org.springframework.messaging.simp.user.DefaultUserSessionRegistry;
+import org.springframework.messaging.simp.user.MultiServerUserRegistry;
+import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.messaging.simp.user.UserDestinationMessageHandler;
 import org.springframework.messaging.simp.user.UserDestinationResolver;
-import org.springframework.messaging.simp.user.UserSessionRegistry;
+import org.springframework.messaging.simp.user.UserRegistryMessageHandler;
 import org.springframework.messaging.support.AbstractSubscribableChannel;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.util.PathMatcher;
@@ -88,13 +89,13 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 			"com.fasterxml.jackson.databind.ObjectMapper", AbstractMessageBrokerConfiguration.class.getClassLoader());
 
 
+	private ApplicationContext applicationContext;
+
 	private ChannelRegistration clientInboundChannelRegistration;
 
 	private ChannelRegistration clientOutboundChannelRegistration;
 
 	private MessageBrokerRegistry brokerRegistry;
-
-	private ApplicationContext applicationContext;
 
 
 	/**
@@ -287,12 +288,16 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		if (handler == null) {
 			return new NoOpBrokerMessageHandler();
 		}
+		Map<String, MessageHandler> subscriptions = new HashMap<String, MessageHandler>(1);
 		String destination = getBrokerRegistry().getUserDestinationBroadcast();
 		if (destination != null) {
-			Map<String, MessageHandler> map = new HashMap<String, MessageHandler>(1);
-			map.put(destination, userDestinationMessageHandler());
-			handler.setSystemSubscriptions(map);
+			subscriptions.put(destination, userDestinationMessageHandler());
 		}
+		destination = getBrokerRegistry().getUserRegistryBroadcast();
+		if (destination != null) {
+			subscriptions.put(destination, userRegistryMessageHandler());
+		}
+		handler.setSystemSubscriptions(subscriptions);
 		return handler;
 	}
 
@@ -301,8 +306,28 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		UserDestinationMessageHandler handler = new UserDestinationMessageHandler(clientInboundChannel(),
 				brokerChannel(), userDestinationResolver());
 		String destination = getBrokerRegistry().getUserDestinationBroadcast();
-		handler.setUserDestinationBroadcast(destination);
+		handler.setBroadcastDestination(destination);
 		return handler;
+	}
+
+	@Bean
+	public MessageHandler userRegistryMessageHandler() {
+		if (getBrokerRegistry().getUserRegistryBroadcast() == null) {
+			return new NoOpMessageHandler();
+		}
+		return new UserRegistryMessageHandler(userRegistry(), brokerMessagingTemplate(),
+				getBrokerRegistry().getUserRegistryBroadcast(), messageBrokerTaskScheduler());
+	}
+
+	// Expose alias for 4.1 compatibility
+
+	@Bean(name={"messageBrokerTaskScheduler", "messageBrokerSockJsTaskScheduler"})
+	public ThreadPoolTaskScheduler messageBrokerTaskScheduler() {
+		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
+		scheduler.setThreadNamePrefix("MessageBroker-");
+		scheduler.setPoolSize(Runtime.getRuntime().availableProcessors());
+		scheduler.setRemoveOnCancelPolicy(true);
+		return scheduler;
 	}
 
 	@Bean
@@ -350,7 +375,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 
 	@Bean
 	public UserDestinationResolver userDestinationResolver() {
-		DefaultUserDestinationResolver resolver = new DefaultUserDestinationResolver(userSessionRegistry());
+		DefaultUserDestinationResolver resolver = new DefaultUserDestinationResolver(userRegistry());
 		String prefix = getBrokerRegistry().getUserDestinationPrefix();
 		if (prefix != null) {
 			resolver.setUserDestinationPrefix(prefix);
@@ -359,8 +384,26 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 	}
 
 	@Bean
-	public UserSessionRegistry userSessionRegistry() {
-		return new DefaultUserSessionRegistry();
+	public SimpUserRegistry userRegistry() {
+		return (getBrokerRegistry().getUserRegistryBroadcast() != null ?
+				new MultiServerUserRegistry(createLocalUserRegistry()) : createLocalUserRegistry());
+	}
+
+	/**
+	 * Create the user registry that provides access to the local users.
+	 */
+	protected abstract SimpUserRegistry createLocalUserRegistry();
+
+	/**
+	 * As of 4.2, UserSessionRegistry is deprecated in favor of SimpUserRegistry
+	 * exposing information about all connected users. The MultiServerUserRegistry
+	 * implementation in combination with UserRegistryMessageHandler can be used
+	 * to share user registries across multiple servers.
+	 */
+	@Deprecated
+	@SuppressWarnings("deprecation")
+	protected org.springframework.messaging.simp.user.UserSessionRegistry userSessionRegistry() {
+		return null;
 	}
 
 	/**
@@ -416,6 +459,14 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		return null;
 	}
 
+
+	private static class NoOpMessageHandler implements MessageHandler {
+
+		@Override
+		public void handleMessage(Message<?> message) {
+		}
+
+	}
 
 	private class NoOpBrokerMessageHandler extends AbstractBrokerMessageHandler {
 

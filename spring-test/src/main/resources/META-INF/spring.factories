@@ -1,7 +1,8 @@
 # Default TestExecutionListeners for the Spring TestContext Framework
 #
 org.springframework.test.context.TestExecutionListener = \
-    org.springframework.test.context.web.ServletTestExecutionListener,\
+	org.springframework.test.context.web.ServletTestExecutionListener,\
+	org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener,\
 	org.springframework.test.context.support.DependencyInjectionTestExecutionListener,\
 	org.springframework.test.context.support.DirtiesContextTestExecutionListener,\
 	org.springframework.test.context.transaction.TransactionalTestExecutionListener,\

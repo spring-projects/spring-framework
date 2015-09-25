@@ -72,7 +72,6 @@ import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler
  */
 public class WebSocketMessageBrokerConfigurationSupportTests {
 
-
 	@Test
 	public void handlerMapping() {
 		ApplicationContext config = createConfig(TestChannelConfig.class, TestConfigurer.class);
@@ -136,19 +135,16 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 	}
 
 	@Test
-	public void webSocketTransportOptions() {
+	public void webSocketHandler() {
 		ApplicationContext config = createConfig(TestChannelConfig.class, TestConfigurer.class);
-		SubProtocolWebSocketHandler subProtocolWebSocketHandler =
-				config.getBean("subProtocolWebSocketHandler", SubProtocolWebSocketHandler.class);
+		SubProtocolWebSocketHandler subWsHandler = config.getBean(SubProtocolWebSocketHandler.class);
 
-		assertEquals(1024 * 1024, subProtocolWebSocketHandler.getSendBufferSizeLimit());
-		assertEquals(25 * 1000, subProtocolWebSocketHandler.getSendTimeLimit());
+		assertEquals(1024 * 1024, subWsHandler.getSendBufferSizeLimit());
+		assertEquals(25 * 1000, subWsHandler.getSendTimeLimit());
 
-		List<SubProtocolHandler> protocolHandlers = subProtocolWebSocketHandler.getProtocolHandlers();
-		for(SubProtocolHandler protocolHandler : protocolHandlers) {
-			assertTrue(protocolHandler instanceof StompSubProtocolHandler);
-			assertEquals(128 * 1024, ((StompSubProtocolHandler) protocolHandler).getMessageSizeLimit());
-		}
+		Map<String, SubProtocolHandler> handlerMap = subWsHandler.getProtocolHandlerMap();
+		StompSubProtocolHandler protocolHandler = (StompSubProtocolHandler) handlerMap.get("v12.stomp");
+		assertEquals(128 * 1024, protocolHandler.getMessageSizeLimit());
 	}
 
 	@Test
@@ -207,7 +203,6 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 	}
 
 
-	@SuppressWarnings("unused")
 	@Controller
 	static class TestController {
 
@@ -223,7 +218,6 @@ public class WebSocketMessageBrokerConfigurationSupportTests {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	@Configuration
 	static class TestConfigurer extends AbstractWebSocketMessageBrokerConfigurer {
 

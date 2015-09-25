@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor"/>
+
+	<bean id="calculator" class="org.springframework.scripting.support.StandardScriptFactory">
+		<constructor-arg value="jruby"/>
+		<constructor-arg>
+			<value>inline:
+require 'java'
+
+class RubyCalculator
+	include org.springframework.scripting.Calculator
+
+	def add(x, y)
+		x + y
+	end
+end
+
+RubyCalculator.new
+			</value>
+		</constructor-arg>
+		<constructor-arg value="org.springframework.scripting.Calculator"/>
+	</bean>
+
+	<bean id="messenger" class="org.springframework.scripting.support.StandardScriptFactory">
+		<constructor-arg value="jruby"/>
+		<constructor-arg value="classpath:org/springframework/scripting/jruby/MessengerWithInstance.rb"/>
+		<constructor-arg value="org.springframework.scripting.Messenger"/>
+	</bean>
+
+	<bean id="printer" class="org.springframework.scripting.support.StandardScriptFactory">
+		<constructor-arg value="jruby"/>
+		<constructor-arg value="classpath:org/springframework/scripting/jruby/PrinterWithInstance.rb"/>
+		<constructor-arg value="org.springframework.scripting.jruby.Printer"/>
+	</bean>
+
+</beans>

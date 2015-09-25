@@ -34,8 +34,9 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.springframework.test.util.AssertionErrors.*;
 
 /**
- * Factory for response content assertions. An instance of this class is
- * typically accessed via {@link MockMvcResultMatchers#content()}.
+ * Factory for response content assertions.
+ * <p>An instance of this class is typically accessed via
+ * {@link MockMvcResultMatchers#content}.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -213,7 +214,7 @@ public class ContentResultMatchers {
 
 	/**
 	 * Parse the response content and the given string as JSON and assert the two
-	 * are "similar" - i.e. they contain the same attribute-value pairs
+	 * are "similar" &mdash; i.e. they contain the same attribute-value pairs
 	 * regardless of order and formatting.
 	 * <p>Use of this matcher requires the <a
 	 * href="http://jsonassert.skyscreamer.org/">JSONassert<a/> library.

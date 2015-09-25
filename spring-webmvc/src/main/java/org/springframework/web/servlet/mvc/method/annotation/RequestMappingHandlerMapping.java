@@ -18,17 +18,15 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringValueResolver;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -38,14 +36,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.condition.AbstractRequestCondition;
 import org.springframework.web.servlet.mvc.condition.CompositeRequestCondition;
-import org.springframework.web.servlet.mvc.condition.ConsumesRequestCondition;
-import org.springframework.web.servlet.mvc.condition.HeadersRequestCondition;
-import org.springframework.web.servlet.mvc.condition.NameValueExpression;
-import org.springframework.web.servlet.mvc.condition.ParamsRequestCondition;
-import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
-import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.RequestCondition;
-import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMapping;
 
@@ -56,6 +47,7 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfoHandlerMappi
  *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 3.1
  */
 public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMapping
@@ -69,9 +61,9 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	private ContentNegotiationManager contentNegotiationManager = new ContentNegotiationManager();
 
-	private final List<String> fileExtensions = new ArrayList<String>();
-
 	private StringValueResolver embeddedValueResolver;
+
+	private RequestMappingInfo.BuilderConfiguration config = new RequestMappingInfo.BuilderConfiguration();
 
 
 	/**
@@ -130,12 +122,16 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	@Override
 	public void afterPropertiesSet() {
-		if (this.useRegisteredSuffixPatternMatch) {
-			this.fileExtensions.addAll(this.contentNegotiationManager.getAllFileExtensions());
-		}
+		this.config = new RequestMappingInfo.BuilderConfiguration();
+		this.config.setPathHelper(getUrlPathHelper());
+		this.config.setPathMatcher(getPathMatcher());
+		this.config.setSuffixPatternMatch(this.useSuffixPatternMatch);
+		this.config.setTrailingSlashMatch(this.useTrailingSlashMatch);
+		this.config.setRegisteredSuffixPatternMatch(this.useRegisteredSuffixPatternMatch);
+		this.config.setContentNegotiationManager(getContentNegotiationManager());
+
 		super.afterPropertiesSet();
 	}
-
 
 
 	/**
@@ -170,7 +166,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 * Return the file extensions to use for suffix pattern matching.
 	 */
 	public List<String> getFileExtensions() {
-		return this.fileExtensions;
+		return this.config.getFileExtensions();
 	}
 
 
@@ -205,6 +201,20 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
+	 * Delegates to {@link #createRequestMappingInfo(RequestMapping, RequestCondition)},
+	 * supplying the appropriate custom {@link RequestCondition} depending on whether
+	 * the supplied {@code annotatedElement} is a class or method.
+	 * @see #getCustomTypeCondition(Class)
+	 * @see #getCustomMethodCondition(Method)
+	 */
+	private RequestMappingInfo createRequestMappingInfo(AnnotatedElement element) {
+		RequestMapping requestMapping = AnnotatedElementUtils.findMergedAnnotation(element, RequestMapping.class);
+		RequestCondition<?> condition = (element instanceof Class<?> ?
+				getCustomTypeCondition((Class<?>) element) : getCustomMethodCondition((Method) element));
+		return (requestMapping != null ? createRequestMappingInfo(requestMapping, condition) : null);
+	}
+
+	/**
 	 * Provide a custom type-level request condition.
 	 * The custom {@link RequestCondition} can be of any type so long as the
 	 * same condition type is returned from all calls to this method in order
@@ -235,83 +245,25 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
-	 * Transitional method used to invoke one of two createRequestMappingInfo
-	 * variants one of which is deprecated.
+	 * Create a {@link RequestMappingInfo} from the supplied
+	 * {@link RequestMapping @RequestMapping} annotation, which is either
+	 * a directly declared annotation, a meta-annotation, or the synthesized
+	 * result of merging annotation attributes within an annotation hierarchy.
 	 */
-	private RequestMappingInfo createRequestMappingInfo(AnnotatedElement annotatedElement) {
-		RequestMapping annotation;
-		AnnotationAttributes attributes;
-		RequestCondition<?> customCondition;
-		String annotationType = RequestMapping.class.getName();
-		if (annotatedElement instanceof Class<?>) {
-			Class<?> type = (Class<?>) annotatedElement;
-			annotation = AnnotationUtils.findAnnotation(type, RequestMapping.class);
-			attributes = AnnotatedElementUtils.findAnnotationAttributes(type, annotationType);
-			customCondition = getCustomTypeCondition(type);
-		}
-		else {
-			Method method = (Method) annotatedElement;
-			annotation = AnnotationUtils.findAnnotation(method, RequestMapping.class);
-			attributes = AnnotatedElementUtils.findAnnotationAttributes(method, annotationType);
-			customCondition = getCustomMethodCondition(method);
-		}
-		RequestMappingInfo info = null;
-		if (annotation != null) {
-			info = createRequestMappingInfo(annotation, customCondition);
-			if (info == null) {
-				info = createRequestMappingInfo(attributes, customCondition);
-			}
-		}
-		return info;
-	}
+	protected RequestMappingInfo createRequestMappingInfo(
+			RequestMapping requestMapping, RequestCondition<?> customCondition) {
 
-	/**
-	 * Create a RequestMappingInfo from a RequestMapping annotation.
-	 * @deprecated as of 4.2 after the introduction of support for
-	 * {@code @RequestMapping} as meta-annotation. Please use
-	 * {@link #createRequestMappingInfo(AnnotationAttributes, RequestCondition)}.
-	 */
-	@Deprecated
-	protected RequestMappingInfo createRequestMappingInfo(RequestMapping annotation,
-			RequestCondition<?> customCondition) {
-
-		return null;
-	}
-
-	/**
-	 * Create a RequestMappingInfo from the attributes of an
-	 * {@code @RequestMapping} annotation or a meta-annotation, i.e. a custom
-	 * annotation annotated with {@code @RequestMapping}.
-	 * @since 4.2
-	 */
-	protected RequestMappingInfo createRequestMappingInfo(AnnotationAttributes attributes,
-			RequestCondition<?> customCondition) {
-
-		String mappingName = attributes.getString("name");
-
-		String[] paths = attributes.getStringArray("path");
-		paths = ObjectUtils.isEmpty(paths) ? attributes.getStringArray("value") : paths;
-		PatternsRequestCondition patternsCondition = new PatternsRequestCondition(
-				resolveEmbeddedValuesInPatterns(paths), getUrlPathHelper(), getPathMatcher(),
-				this.useSuffixPatternMatch, this.useTrailingSlashMatch, this.fileExtensions);
-
-		RequestMethod[] methods = (RequestMethod[]) attributes.get("method");
-		RequestMethodsRequestCondition methodsCondition = new RequestMethodsRequestCondition(methods);
-
-		String[] params = attributes.getStringArray("params");
-		ParamsRequestCondition paramsCondition = new ParamsRequestCondition(params);
-
-		String[] headers = attributes.getStringArray("headers");
-		String[] consumes = attributes.getStringArray("consumes");
-		String[] produces = attributes.getStringArray("produces");
-
-		HeadersRequestCondition headersCondition = new HeadersRequestCondition(headers);
-		ConsumesRequestCondition consumesCondition = new ConsumesRequestCondition(consumes, headers);
-		ProducesRequestCondition producesCondition = new ProducesRequestCondition(produces,
-				headers, this.contentNegotiationManager);
-
-		return new RequestMappingInfo(mappingName, patternsCondition, methodsCondition, paramsCondition,
-				headersCondition, consumesCondition, producesCondition, customCondition);
+		return RequestMappingInfo
+				.paths(resolveEmbeddedValuesInPatterns(requestMapping.path()))
+				.methods(requestMapping.method())
+				.params(requestMapping.params())
+				.headers(requestMapping.headers())
+				.consumes(requestMapping.consumes())
+				.produces(requestMapping.produces())
+				.mappingName(requestMapping.name())
+				.customCondition(customCondition)
+				.options(this.config)
+				.build();
 	}
 
 	/**
@@ -334,40 +286,45 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	@Override
 	protected CorsConfiguration initCorsConfiguration(Object handler, Method method, RequestMappingInfo mappingInfo) {
 		HandlerMethod handlerMethod = createHandlerMethod(handler, method);
-		CrossOrigin typeAnnotation = AnnotationUtils.findAnnotation(handlerMethod.getBeanType(), CrossOrigin.class);
-		CrossOrigin methodAnnotation = AnnotationUtils.findAnnotation(method, CrossOrigin.class);
+		CrossOrigin typeAnnotation = AnnotatedElementUtils.findMergedAnnotation(handlerMethod.getBeanType(), CrossOrigin.class);
+		CrossOrigin methodAnnotation = AnnotatedElementUtils.findMergedAnnotation(method, CrossOrigin.class);
 
 		if (typeAnnotation == null && methodAnnotation == null) {
 			return null;
 		}
 
 		CorsConfiguration config = new CorsConfiguration();
-		applyAnnotation(config, typeAnnotation);
-		applyAnnotation(config, methodAnnotation);
+		updateCorsConfig(config, typeAnnotation);
+		updateCorsConfig(config, methodAnnotation);
 
+		if (CollectionUtils.isEmpty(config.getAllowedOrigins())) {
+			config.setAllowedOrigins(Arrays.asList(CrossOrigin.DEFAULT_ORIGINS));
+		}
 		if (CollectionUtils.isEmpty(config.getAllowedMethods())) {
 			for (RequestMethod allowedMethod : mappingInfo.getMethodsCondition().getMethods()) {
 				config.addAllowedMethod(allowedMethod.name());
 			}
 		}
 		if (CollectionUtils.isEmpty(config.getAllowedHeaders())) {
-			for (NameValueExpression<String> headerExpression : mappingInfo.getHeadersCondition().getExpressions()) {
-				if (!headerExpression.isNegated()) {
-					config.addAllowedHeader(headerExpression.getName());
-				}
-			}
+			config.setAllowedHeaders(Arrays.asList(CrossOrigin.DEFAULT_ALLOWED_HEADERS));
+		}
+		if (config.getAllowCredentials() == null) {
+			config.setAllowCredentials(CrossOrigin.DEFAULT_ALLOW_CREDENTIALS);
+		}
+		if (config.getMaxAge() == null) {
+			config.setMaxAge(CrossOrigin.DEFAULT_MAX_AGE);
 		}
 		return config;
 	}
 
-	private void applyAnnotation(CorsConfiguration config, CrossOrigin annotation) {
+	private void updateCorsConfig(CorsConfiguration config, CrossOrigin annotation) {
 		if (annotation == null) {
 			return;
 		}
-		for (String origin : annotation.origin()) {
+		for (String origin : annotation.origins()) {
 			config.addAllowedOrigin(origin);
 		}
-		for (RequestMethod method : annotation.method()) {
+		for (RequestMethod method : annotation.methods()) {
 			config.addAllowedMethod(method.name());
 		}
 		for (String header : annotation.allowedHeaders()) {
@@ -376,17 +333,20 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 		for (String header : annotation.exposedHeaders()) {
 			config.addExposedHeader(header);
 		}
-		if (annotation.allowCredentials().equalsIgnoreCase("true")) {
+
+		String allowCredentials = annotation.allowCredentials();
+		if ("true".equalsIgnoreCase(allowCredentials)) {
 			config.setAllowCredentials(true);
 		}
-		else if (annotation.allowCredentials().equalsIgnoreCase("false")) {
+		else if ("false".equalsIgnoreCase(allowCredentials)) {
 			config.setAllowCredentials(false);
 		}
-		else if (!annotation.allowCredentials().isEmpty()) {
-			throw new IllegalStateException("AllowCredentials value must be \"true\", \"false\" " +
-					"or \"\" (empty string), current value is " + annotation.allowCredentials());
+		else if (!allowCredentials.isEmpty()) {
+			throw new IllegalStateException("@CrossOrigin's allowCredentials value must be \"true\", \"false\", "
+					+ "or an empty string (\"\"); current value is [" + allowCredentials + "].");
 		}
-		if (annotation.maxAge() != -1 && config.getMaxAge() == null) {
+
+		if (annotation.maxAge() >= 0 && config.getMaxAge() == null) {
 			config.setMaxAge(annotation.maxAge());
 		}
 	}

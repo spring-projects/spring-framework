@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,12 +23,14 @@ import java.util.List;
 import java.util.Properties;
 
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.FutureListener;
+import org.reactivestreams.Publisher;
 import reactor.Environment;
 import reactor.core.config.ConfigurationReader;
 import reactor.core.config.DispatcherConfiguration;
 import reactor.core.config.ReactorConfiguration;
 import reactor.core.support.NamedDaemonThreadFactory;
-import reactor.fn.BiFunction;
 import reactor.fn.Consumer;
 import reactor.fn.Function;
 import reactor.fn.tuple.Tuple;
@@ -37,12 +39,15 @@ import reactor.io.buffer.Buffer;
 import reactor.io.codec.Codec;
 import reactor.io.net.ChannelStream;
 import reactor.io.net.NetStreams;
+import reactor.io.net.NetStreams.TcpClientFactory;
+import reactor.io.net.ReactorChannelHandler;
 import reactor.io.net.Reconnect;
 import reactor.io.net.Spec.TcpClientSpec;
 import reactor.io.net.impl.netty.NettyClientSocketOptions;
 import reactor.io.net.impl.netty.tcp.NettyTcpClient;
 import reactor.io.net.tcp.TcpClient;
 import reactor.rx.Promise;
+import reactor.rx.Promises;
 import reactor.rx.Stream;
 import reactor.rx.Streams;
 import reactor.rx.action.Signal;
@@ -53,7 +58,6 @@ import org.springframework.messaging.tcp.TcpConnectionHandler;
 import org.springframework.messaging.tcp.TcpOperations;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
-
 
 /**
  * An implementation of {@link org.springframework.messaging.tcp.TcpOperations}
@@ -71,10 +75,15 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 	@SuppressWarnings("rawtypes")
 	public static final Class<NettyTcpClient> REACTOR_TCP_CLIENT_TYPE = NettyTcpClient.class;
 
-	private final TcpClientSpecFactory<Message<P>, Message<P>> tcpClientSpecFactory;
+
+	private final NioEventLoopGroup eventLoopGroup;
+
+	private final TcpClientFactory<Message<P>, Message<P>> tcpClientSpecFactory;
 
 	private final List<TcpClient<Message<P>, Message<P>>> tcpClients =
 			new ArrayList<TcpClient<Message<P>, Message<P>>>();
+
+	private boolean stopping;
 
 
 	/**
@@ -85,16 +94,14 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 	 * threads will be shared amongst the active clients.
 	 * <p>Also see the constructor accepting a ready Reactor
 	 * {@link TcpClientSpec} {@link Function} factory.
-	 * @param host  the host to connect to
-	 * @param port  the port to connect to
+	 * @param host the host to connect to
+	 * @param port the port to connect to
 	 * @param codec the codec to use for encoding and decoding the TCP stream
 	 */
 	public Reactor2TcpClient(final String host, final int port, final Codec<Buffer, Message<P>, Message<P>> codec) {
+		this.eventLoopGroup = initEventLoopGroup();
 
-		final NioEventLoopGroup eventLoopGroup = initEventLoopGroup();
-
-		this.tcpClientSpecFactory = new TcpClientSpecFactory<Message<P>, Message<P>>() {
-
+		this.tcpClientSpecFactory = new TcpClientFactory<Message<P>, Message<P>>() {
 			@Override
 			public TcpClientSpec<Message<P>, Message<P>> apply(TcpClientSpec<Message<P>, Message<P>> spec) {
 				return spec
@@ -106,12 +113,28 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 		};
 	}
 
-	private NioEventLoopGroup initEventLoopGroup() {
+	/**
+	 * A constructor with a pre-configured {@link TcpClientSpec} {@link Function}
+	 * factory. This might be used to add SSL or specific network parameters to
+	 * the generated client configuration.
+	 * <p><strong>NOTE:</strong> if the client is configured with a thread-creating
+	 * dispatcher, you are responsible for cleaning them, e.g. using
+	 * {@link reactor.core.Dispatcher#shutdown}.
+	 * @param tcpClientSpecFactory the TcpClientSpec {@link Function} to use for each client creation
+	 */
+	public Reactor2TcpClient(TcpClientFactory<Message<P>, Message<P>> tcpClientSpecFactory) {
+		Assert.notNull(tcpClientSpecFactory, "'tcpClientClientFactory' must not be null");
+		this.tcpClientSpecFactory = tcpClientSpecFactory;
+		this.eventLoopGroup = null;
+	}
+
+
+	private static NioEventLoopGroup initEventLoopGroup() {
 		int ioThreadCount;
 		try {
 			ioThreadCount = Integer.parseInt(System.getProperty("reactor.tcp.ioThreadCount"));
 		}
-		catch (Exception i) {
+		catch (Exception ex) {
 			ioThreadCount = -1;
 		}
 		if (ioThreadCount <= 0l) {
@@ -122,120 +145,100 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 				new NamedDaemonThreadFactory("reactor-tcp-io"));
 	}
 
-	/**
-	 * A constructor with a pre-configured {@link TcpClientSpec} {@link Function}
-	 * factory. This might be used to add SSL or specific network parameters to
-	 * the generated client configuration.
-	 * <p><strong>NOTE:</strong> if the client is configured with a thread-creating
-	 * dispatcher, you are responsible for cleaning them, e.g. using
-	 * {@link reactor.core.Dispatcher#shutdown}.
-	 *
-	 * @param tcpClientSpecFactory the TcpClientSpec {@link Function} to use for each client creation.
-	 */
-	public Reactor2TcpClient(TcpClientSpecFactory<Message<P>, Message<P>> tcpClientSpecFactory) {
-		Assert.notNull(tcpClientSpecFactory, "'tcpClientClientFactory' must not be null");
-		this.tcpClientSpecFactory = tcpClientSpecFactory;
-	}
-
 
 	@Override
-	public ListenableFuture<Void> connect(TcpConnectionHandler<P> connectionHandler) {
-		Class<NettyTcpClient> type = REACTOR_TCP_CLIENT_TYPE;
-		TcpClient<Message<P>, Message<P>> tcpClient = NetStreams.tcpClient(type, this.tcpClientSpecFactory);
-		composeConnectionHandling(tcpClient, connectionHandler);
-		Promise<Boolean> promise = tcpClient.open();
-		return new BooleanToVoidAdapter(promise);
-	}
+	public ListenableFuture<Void> connect(final TcpConnectionHandler<P> connectionHandler) {
+		Assert.notNull(connectionHandler, "TcpConnectionHandler must not be null");
 
-	@Override
-	public ListenableFuture<Void> connect(TcpConnectionHandler<P> handler, ReconnectStrategy strategy) {
-		Assert.notNull(strategy, "ReconnectStrategy must not be null");
-		Class<NettyTcpClient> type = REACTOR_TCP_CLIENT_TYPE;
-		TcpClient<Message<P>, Message<P>> tcpClient = NetStreams.tcpClient(type, this.tcpClientSpecFactory);
-		composeConnectionHandling(tcpClient, handler);
-		Stream<Boolean> stream = tcpClient.open(new ReactorRectonnectAdapter(strategy));
-		return new BooleanToVoidAdapter(stream.next());
-	}
-
-	private void composeConnectionHandling(final TcpClient<Message<P>, Message<P>> tcpClient,
-			final TcpConnectionHandler<P> connectionHandler) {
-
-		synchronized (this.tcpClients){
+		TcpClient<Message<P>, Message<P>> tcpClient;
+		synchronized (this.tcpClients) {
+			if (this.stopping) {
+				IllegalStateException ex = new IllegalStateException("Shutting down.");
+				connectionHandler.afterConnectFailure(ex);
+				return new PassThroughPromiseToListenableFutureAdapter<Void>(Promises.<Void>error(ex));
+			}
+			tcpClient = NetStreams.tcpClient(REACTOR_TCP_CLIENT_TYPE, this.tcpClientSpecFactory);
 			this.tcpClients.add(tcpClient);
 		}
 
-		tcpClient
-				.finallyDo(new Consumer<Signal<ChannelStream<Message<P>, Message<P>>>>() {
+		Promise<Void> promise = tcpClient.start(new MessageChannelStreamHandler<P>(connectionHandler));
 
+		return new PassThroughPromiseToListenableFutureAdapter<Void>(
+				promise.onError(new Consumer<Throwable>() {
 					@Override
-					public void accept(Signal<ChannelStream<Message<P>, Message<P>>> signal) {
-						synchronized (tcpClients) {
-							tcpClients.remove(tcpClient);
-						}
-						if (signal.isOnError()) {
-							connectionHandler.afterConnectFailure(signal.getThrowable());
-						}
+					public void accept(Throwable throwable) {
+						connectionHandler.afterConnectFailure(throwable);
 					}
 				})
-				.consume(new Consumer<ChannelStream<Message<P>, Message<P>>>() {
-
-					@Override
-					public void accept(ChannelStream<Message<P>, Message<P>> connection) {
-						connection
-								.finallyDo(new Consumer<Signal<Message<P>>>() {
-
-									@Override
-									public void accept(Signal<Message<P>> signal) {
-										if (signal.isOnError()) {
-											connectionHandler.handleFailure(signal.getThrowable());
-										}
-										else if (signal.isOnComplete()) {
-											connectionHandler.afterConnectionClosed();
-										}
-									}
-								})
-								.consume(new Consumer<Message<P>>() {
-
-									@Override
-									public void accept(Message<P> message) {
-										connectionHandler.handleMessage(message);
-									}
-								});
-						connectionHandler.afterConnected(new Reactor2TcpConnection<P>(connection));
-					}
-				});
+		);
 	}
 
 	@Override
-	public ListenableFuture<Boolean> shutdown() {
+	public ListenableFuture<Void> connect(TcpConnectionHandler<P> connectionHandler, ReconnectStrategy strategy) {
+		Assert.notNull(connectionHandler, "TcpConnectionHandler must not be null");
+		Assert.notNull(strategy, "ReconnectStrategy must not be null");
 
-		final List<TcpClient<Message<P>, Message<P>>> clients;
-
+		TcpClient<Message<P>, Message<P>> tcpClient;
 		synchronized (this.tcpClients) {
-			clients = new ArrayList<TcpClient<Message<P>, Message<P>>>(this.tcpClients);
+			if (this.stopping) {
+				IllegalStateException ex = new IllegalStateException("Shutting down.");
+				connectionHandler.afterConnectFailure(ex);
+				return new PassThroughPromiseToListenableFutureAdapter<Void>(Promises.<Void>error(ex));
+			}
+			tcpClient = NetStreams.tcpClient(REACTOR_TCP_CLIENT_TYPE, this.tcpClientSpecFactory);
+			this.tcpClients.add(tcpClient);
 		}
 
-		Promise<Boolean> promise = Streams.from(clients)
-				.flatMap(new Function<TcpClient<Message<P>, Message<P>>, Promise<Boolean>>() {
+		Stream<Tuple2<InetSocketAddress, Integer>> stream = tcpClient.start(
+				new MessageChannelStreamHandler<P>(connectionHandler),
+				new ReactorReconnectAdapter(strategy));
+
+		return new PassThroughPromiseToListenableFutureAdapter<Void>(stream.next().after());
+	}
+
+	@Override
+	public ListenableFuture<Void> shutdown() {
+		synchronized (this.tcpClients) {
+			this.stopping = true;
+		}
+
+		Promise<Void> promise = Streams.from(this.tcpClients)
+				.flatMap(new Function<TcpClient<Message<P>, Message<P>>, Promise<Void>>() {
 					@Override
-					public Promise<Boolean> apply(TcpClient<Message<P>, Message<P>> client) {
-						return client.close();
-					}
-				})
-				.reduce(new BiFunction<Boolean, Boolean, Boolean>() {
-					@Override
-					public Boolean apply(Boolean prev, Boolean next) {
-						return prev && next;
+					public Promise<Void> apply(final TcpClient<Message<P>, Message<P>> client) {
+						return client.shutdown().onComplete(new Consumer<Promise<Void>>() {
+							@Override
+							public void accept(Promise<Void> voidPromise) {
+								tcpClients.remove(client);
+							}
+						});
 					}
 				})
 				.next();
 
-		return new PassThroughPromiseToListenableFutureAdapter<Boolean>(promise);
+		if (this.eventLoopGroup != null) {
+			final Promise<Void> eventLoopPromise = Promises.prepare();
+			promise.onComplete(new Consumer<Promise<Void>>() {
+				@Override
+				public void accept(Promise<Void> voidPromise) {
+					eventLoopGroup.shutdownGracefully().addListener(new FutureListener<Object>() {
+						@Override
+						public void operationComplete(Future<Object> future) throws Exception {
+							if (future.isSuccess()) {
+								eventLoopPromise.onComplete();
+							}
+							else {
+								eventLoopPromise.onError(future.cause());
+							}
+						}
+					});
+				}
+			});
+			promise = eventLoopPromise;
+		}
+		return new PassThroughPromiseToListenableFutureAdapter<Void>(promise);
 	}
 
-
-	public interface TcpClientSpecFactory<I, O> extends Function<TcpClientSpec<I, O>, TcpClientSpec<I, O>> {
-	}
 
 	private static class SynchronousDispatcherConfigReader implements ConfigurationReader {
 
@@ -245,29 +248,55 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 		}
 	}
 
-	private static class ReactorRectonnectAdapter implements Reconnect {
+
+	private static class MessageChannelStreamHandler<P>
+			implements ReactorChannelHandler<Message<P>, Message<P>, ChannelStream<Message<P>, Message<P>>> {
+
+		private final TcpConnectionHandler<P> connectionHandler;
+
+		public MessageChannelStreamHandler(TcpConnectionHandler<P> connectionHandler) {
+			this.connectionHandler = connectionHandler;
+		}
+
+		@Override
+		public Publisher<Void> apply(ChannelStream<Message<P>, Message<P>> channelStream) {
+			Promise<Void> closePromise = Promises.prepare();
+			this.connectionHandler.afterConnected(new Reactor2TcpConnection<P>(channelStream, closePromise));
+			channelStream
+					.finallyDo(new Consumer<Signal<Message<P>>>() {
+						@Override
+						public void accept(Signal<Message<P>> signal) {
+							if (signal.isOnError()) {
+								connectionHandler.handleFailure(signal.getThrowable());
+							}
+							else if (signal.isOnComplete()) {
+								connectionHandler.afterConnectionClosed();
+							}
+						}
+					})
+					.consume(new Consumer<Message<P>>() {
+						@Override
+						public void accept(Message<P> message) {
+							connectionHandler.handleMessage(message);
+						}
+					});
+
+			return closePromise;
+		}
+	}
+
+
+	private static class ReactorReconnectAdapter implements Reconnect {
 
 		private final ReconnectStrategy strategy;
 
-		public ReactorRectonnectAdapter(ReconnectStrategy strategy) {
+		public ReactorReconnectAdapter(ReconnectStrategy strategy) {
 			this.strategy = strategy;
 		}
 
 		@Override
 		public Tuple2<InetSocketAddress, Long> reconnect(InetSocketAddress address, int attempt) {
-			return Tuple.of(address, strategy.getTimeToNextAttempt(attempt));
-		}
-	}
-
-	private static class BooleanToVoidAdapter extends AbstractPromiseToListenableFutureAdapter<Boolean, Void> {
-
-		public BooleanToVoidAdapter(Promise<Boolean> promise) {
-			super(promise);
-		}
-
-		@Override
-		protected Void adapt(Boolean result) {
-			return null;
+			return Tuple.of(address, this.strategy.getTimeToNextAttempt(attempt));
 		}
 	}
 
