@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,24 @@
 
 package org.springframework.orm.hibernate3.support;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.aop.scope.ScopedObject;
 
+import static org.junit.Assert.*;
+
 /**
+ * Unit tests for {@link ScopedBeanInterceptor}.
+ *
  * @author Costin Leau
  */
-public class ScopedBeanInterceptorTests extends TestCase {
+public class ScopedBeanInterceptorTests {
 
-	public void testInterceptorWithPlainObject() throws Exception {
-		ScopedBeanInterceptor interceptor = new ScopedBeanInterceptor();
+	private final ScopedBeanInterceptor interceptor = new ScopedBeanInterceptor();
+
+	@Test
+	public void interceptorWithPlainObject() throws Exception {
 		final Object realObject = new Object();
 
 		ScopedObject scoped = new ScopedObject() {
@@ -42,12 +48,12 @@ public class ScopedBeanInterceptorTests extends TestCase {
 		};
 
 		// default contract is to return null for default behavior
-		assertEquals(null, interceptor.getEntityName(realObject));
+		assertNull(interceptor.getEntityName(realObject));
 		assertEquals(realObject.getClass().getName(), interceptor.getEntityName(scoped));
 	}
 
-	public void testInterceptorWithCglibProxy() throws Exception {
-		ScopedBeanInterceptor interceptor = new ScopedBeanInterceptor();
+	@Test
+	public void interceptorWithCglibProxy() throws Exception {
 		final Object realObject = new Object();
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTarget(realObject);

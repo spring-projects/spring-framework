@@ -50,7 +50,7 @@ import static org.junit.Assert.*;
 public class ImportResourceTests {
 
 	@Test
-	public void testImportXml() {
+	public void importXml() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ImportXmlConfig.class);
 		assertTrue("did not contain java-declared bean", ctx.containsBean("javaDeclaredBean"));
 		assertTrue("did not contain xml-declared bean", ctx.containsBean("xmlDeclaredBean"));
@@ -61,7 +61,7 @@ public class ImportResourceTests {
 
 	@Ignore // TODO: SPR-6310
 	@Test
-	public void testImportXmlWithRelativePath() {
+	public void importXmlWithRelativePath() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ImportXmlWithRelativePathConfig.class);
 		assertTrue("did not contain java-declared bean", ctx.containsBean("javaDeclaredBean"));
 		assertTrue("did not contain xml-declared bean", ctx.containsBean("xmlDeclaredBean"));
@@ -72,7 +72,7 @@ public class ImportResourceTests {
 
 	@Ignore // TODO: SPR-6310
 	@Test
-	public void testImportXmlByConvention() {
+	public void importXmlByConvention() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
 			ImportXmlByConventionConfig.class);
 		assertTrue("context does not contain xml-declared bean", ctx.containsBean("xmlDeclaredBean"));
@@ -80,14 +80,14 @@ public class ImportResourceTests {
 	}
 
 	@Test
-	public void testImportXmlIsInheritedFromSuperclassDeclarations() {
+	public void importXmlIsInheritedFromSuperclassDeclarations() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(FirstLevelSubConfig.class);
 		assertTrue(ctx.containsBean("xmlDeclaredBean"));
 		ctx.close();
 	}
 
 	@Test
-	public void testImportXmlIsMergedFromSuperclassDeclarations() {
+	public void importXmlIsMergedFromSuperclassDeclarations() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(SecondLevelSubConfig.class);
 		assertTrue("failed to pick up second-level-declared XML bean", ctx.containsBean("secondLevelXmlDeclaredBean"));
 		assertTrue("failed to pick up parent-declared XML bean", ctx.containsBean("xmlDeclaredBean"));
@@ -95,7 +95,7 @@ public class ImportResourceTests {
 	}
 
 	@Test
-	public void testImportXmlWithNamespaceConfig() {
+	public void importXmlWithNamespaceConfig() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ImportXmlWithAopNamespaceConfig.class);
 		Object bean = ctx.getBean("proxiedXmlBean");
 		assertTrue(AopUtils.isAopProxy(bean));
@@ -103,7 +103,7 @@ public class ImportResourceTests {
 	}
 
 	@Test
-	public void testImportXmlWithOtherConfigurationClass() {
+	public void importXmlWithOtherConfigurationClass() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ImportXmlWithConfigurationClass.class);
 		assertTrue("did not contain java-declared bean", ctx.containsBean("javaDeclaredBean"));
 		assertTrue("did not contain xml-declared bean", ctx.containsBean("xmlDeclaredBean"));
@@ -114,7 +114,7 @@ public class ImportResourceTests {
 
 	@Ignore // TODO: SPR-6327
 	@Test
-	public void testImportDifferentResourceTypes() {
+	public void importDifferentResourceTypes() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(SubResourceConfig.class);
 		assertTrue(ctx.containsBean("propertiesDeclaredBean"));
 		assertTrue(ctx.containsBean("xmlDeclaredBean"));
@@ -134,7 +134,7 @@ public class ImportResourceTests {
 	}
 
 	@Test
-	public void testImportXmlWithAutowiredConfig() {
+	public void importXmlWithAutowiredConfig() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ImportXmlAutowiredConfig.class);
 		String name = ctx.getBean("xmlBeanName", String.class);
 		assertThat(name, equalTo("xml.declared"));
@@ -142,7 +142,7 @@ public class ImportResourceTests {
 	}
 
 	@Test
-	public void testImportNonXmlResource() {
+	public void importNonXmlResource() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ImportNonXmlResourceConfig.class);
 		assertTrue(ctx.containsBean("propertiesDeclaredBean"));
 		ctx.close();

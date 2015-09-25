@@ -16,18 +16,26 @@
 
 package org.springframework.util;
 
-import junit.framework.TestCase;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
-public class StopWatchTests extends TestCase {
+public class StopWatchTests {
 
-	/**
-	 * Are timings off in JUnit?
-	 */
-	public void testValidUsage() throws Exception {
+	private final StopWatch sw = new StopWatch();
+
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
+
+	@Test
+	public void validUsage() throws Exception {
 		String id = "myId";
 		StopWatch sw = new StopWatch(id);
 		long int1 = 166L;
@@ -45,14 +53,18 @@ public class StopWatchTests extends TestCase {
 		// TODO are timings off in JUnit? Why do these assertions sometimes fail
 		// under both Ant and Eclipse?
 
-		//long fudgeFactor = 5L;
-		//assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() >= int1);
-		//assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() <= int1 + fudgeFactor);
+		// long fudgeFactor = 5L;
+		// assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() >=
+		// int1);
+		// assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() <= int1
+		// + fudgeFactor);
 		sw.start(name2);
 		Thread.sleep(int2);
 		sw.stop();
-		//assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() >= int1 + int2);
-		//assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() <= int1 + int2 + fudgeFactor);
+		// assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() >= int1
+		// + int2);
+		// assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() <= int1
+		// + int2 + fudgeFactor);
 
 		assertTrue(sw.getTaskCount() == 2);
 		String pp = sw.prettyPrint();
@@ -72,8 +84,8 @@ public class StopWatchTests extends TestCase {
 		assertEquals(id, sw.getId());
 	}
 
-	public void testValidUsageNotKeepingTaskList() throws Exception {
-		StopWatch sw = new StopWatch();
+	@Test
+	public void validUsageNotKeepingTaskList() throws Exception {
 		sw.setKeepTaskList(false);
 		long int1 = 166L;
 		long int2 = 45L;
@@ -89,14 +101,18 @@ public class StopWatchTests extends TestCase {
 		// TODO are timings off in JUnit? Why do these assertions sometimes fail
 		// under both Ant and Eclipse?
 
-		//long fudgeFactor = 5L;
-		//assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() >= int1);
-		//assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() <= int1 + fudgeFactor);
+		// long fudgeFactor = 5L;
+		// assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() >=
+		// int1);
+		// assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() <= int1
+		// + fudgeFactor);
 		sw.start(name2);
 		Thread.sleep(int2);
 		sw.stop();
-		//assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() >= int1 + int2);
-		//assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() <= int1 + int2 + fudgeFactor);
+		// assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() >= int1
+		// + int2);
+		// assertTrue("Unexpected timing " + sw.getTotalTime(), sw.getTotalTime() <= int1
+		// + int2 + fudgeFactor);
 
 		assertTrue(sw.getTaskCount() == 2);
 		String pp = sw.prettyPrint();
@@ -106,50 +122,30 @@ public class StopWatchTests extends TestCase {
 		assertFalse(toString.contains(name1));
 		assertFalse(toString.contains(name2));
 
-		try {
-			sw.getTaskInfo();
-			fail();
-		}
-		catch (UnsupportedOperationException ex) {
-			// Ok
-		}
+		exception.expect(UnsupportedOperationException.class);
+		sw.getTaskInfo();
 	}
 
-	public void testFailureToStartBeforeGettingTimings() {
-		StopWatch sw = new StopWatch();
-		try {
-			sw.getLastTaskTimeMillis();
-			fail("Can't get last interval if no tests run");
-		}
-		catch (IllegalStateException ex) {
-			// Ok
-		}
+	@Test
+	public void failureToStartBeforeGettingTimings() {
+		exception.expect(IllegalStateException.class);
+		sw.getLastTaskTimeMillis();
 	}
 
-	public void testFailureToStartBeforeStop() {
-		StopWatch sw = new StopWatch();
-		try {
-			sw.stop();
-			fail("Can't stop without starting");
-		}
-		catch (IllegalStateException ex) {
-			// Ok
-		}
+	@Test
+	public void failureToStartBeforeStop() {
+		exception.expect(IllegalStateException.class);
+		sw.stop();
 	}
 
-	public void testRejectsStartTwice() {
-		StopWatch sw = new StopWatch();
-		try {
-			sw.start("");
-			sw.stop();
-			sw.start("");
-			assertTrue(sw.isRunning());
-			sw.start("");
-			fail("Can't start twice");
-		}
-		catch (IllegalStateException ex) {
-			// Ok
-		}
+	@Test
+	public void rejectsStartTwice() {
+		sw.start("");
+		sw.stop();
+		sw.start("");
+		assertTrue(sw.isRunning());
+		exception.expect(IllegalStateException.class);
+		sw.start("");
 	}
 
 }

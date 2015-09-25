@@ -23,6 +23,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -45,7 +46,8 @@ import org.springframework.orm.jpa.ExtendedEntityManagerCreator;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager;
-import org.springframework.test.annotation.AbstractAnnotationAwareTransactionalTests;
+import org.springframework.test.AbstractAnnotationAwareTransactionalTests;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -261,6 +263,7 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 				/* AbstractSpringContextTests.addContext(Object, ApplicationContext) */
 				Class applicationContextClass = shadowingClassLoader.loadClass(ConfigurableApplicationContext.class.getName());
 				Method addContextMethod = shadowedTestClass.getMethod("addContext", Object.class, applicationContextClass);
+				ReflectionUtils.makeAccessible(addContextMethod);
 				addContextMethod.invoke(shadowedTestCase, configLocations, cachedContext);
 
 				// Invoke tests on shadowed test case

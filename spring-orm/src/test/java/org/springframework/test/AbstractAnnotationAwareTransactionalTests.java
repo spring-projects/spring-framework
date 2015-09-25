@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package org.springframework.test.annotation;
+package org.springframework.test;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import org.springframework.test.AbstractTransactionalDataSourceSpringContextTests;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.AnnotationTransactionAttributeSource;
 import org.springframework.transaction.interceptor.TransactionAttributeSource;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,14 +21,17 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Juergen Hoeller
  */
-public class ResourceUtilsTests extends TestCase {
+public class ResourceUtilsTests {
 
-	public void testIsJarURL() throws Exception {
+	@Test
+	public void isJarURL() throws Exception {
 		assertTrue(ResourceUtils.isJarURL(new URL("jar:file:myjar.jar!/mypath")));
 		assertTrue(ResourceUtils.isJarURL(new URL(null, "zip:file:myjar.jar!/mypath", new DummyURLStreamHandler())));
 		assertTrue(ResourceUtils.isJarURL(new URL(null, "wsjar:file:myjar.jar!/mypath", new DummyURLStreamHandler())));
@@ -36,7 +39,8 @@ public class ResourceUtilsTests extends TestCase {
 		assertFalse(ResourceUtils.isJarURL(new URL("http:myserver/myjar.jar")));
 	}
 
-	public void testExtractJarFileURL() throws Exception {
+	@Test
+	public void extractJarFileURL() throws Exception {
 		assertEquals(new URL("file:myjar.jar"),
 				ResourceUtils.extractJarFileURL(new URL("jar:file:myjar.jar!/mypath")));
 		assertEquals(new URL("file:/myjar.jar"),

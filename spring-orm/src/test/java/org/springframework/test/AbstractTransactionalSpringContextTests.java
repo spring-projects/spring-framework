@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
  * ({@link org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests})
  */
 @Deprecated
-public abstract class AbstractTransactionalSpringContextTests extends AbstractDependencyInjectionSpringContextTests {
+abstract class AbstractTransactionalSpringContextTests extends AbstractDependencyInjectionSpringContextTests {
 
 	/** The transaction manager to use */
 	protected PlatformTransactionManager transactionManager;

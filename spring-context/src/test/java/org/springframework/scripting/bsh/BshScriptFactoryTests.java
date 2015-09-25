@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.scripting.bsh;
 import java.util.Arrays;
 import java.util.Collection;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.dynamic.Refreshable;
@@ -36,6 +36,7 @@ import org.springframework.scripting.TestBeanAwareMessenger;
 import org.springframework.scripting.support.ScriptFactoryPostProcessor;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
 /**
@@ -43,9 +44,10 @@ import static org.mockito.BDDMockito.*;
  * @author Rick Evans
  * @author Juergen Hoeller
  */
-public class BshScriptFactoryTests extends TestCase {
+public class BshScriptFactoryTests {
 
-	public void testStaticScript() throws Exception {
+	@Test
+	public void staticScript() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("bshContext.xml", getClass());
 
 		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Calculator.class)).contains("calculator"));
@@ -72,7 +74,8 @@ public class BshScriptFactoryTests extends TestCase {
 		assertTrue(ctx.getBeansOfType(Messenger.class).values().contains(messenger));
 	}
 
-	public void testStaticScriptWithNullReturnValue() throws Exception {
+	@Test
+	public void staticScriptWithNullReturnValue() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("bshContext.xml", getClass());
 		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("messengerWithConfig"));
 
@@ -82,7 +85,8 @@ public class BshScriptFactoryTests extends TestCase {
 		assertTrue(ctx.getBeansOfType(Messenger.class).values().contains(messenger));
 	}
 
-	public void testStaticScriptWithTwoInterfacesSpecified() throws Exception {
+	@Test
+	public void staticScriptWithTwoInterfacesSpecified() throws Exception {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("bshContext.xml", getClass());
 		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("messengerWithConfigExtra"));
 
@@ -95,7 +99,8 @@ public class BshScriptFactoryTests extends TestCase {
 		assertNull(messenger.getMessage());
 	}
 
-	public void testStaticWithScriptReturningInstance() throws Exception {
+	@Test
+	public void staticWithScriptReturningInstance() throws Exception {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("bshContext.xml", getClass());
 		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("messengerInstance"));
 
@@ -108,7 +113,8 @@ public class BshScriptFactoryTests extends TestCase {
 		assertNull(messenger.getMessage());
 	}
 
-	public void testStaticScriptImplementingInterface() throws Exception {
+	@Test
+	public void staticScriptImplementingInterface() throws Exception {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("bshContext.xml", getClass());
 		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("messengerImpl"));
 
@@ -121,7 +127,8 @@ public class BshScriptFactoryTests extends TestCase {
 		assertNull(messenger.getMessage());
 	}
 
-	public void testStaticPrototypeScript() throws Exception {
+	@Test
+	public void staticPrototypeScript() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("bshContext.xml", getClass());
 		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
 		ConfigurableMessenger messenger2 = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
@@ -139,7 +146,8 @@ public class BshScriptFactoryTests extends TestCase {
 		assertEquals("Byebye World!", messenger2.getMessage());
 	}
 
-	public void testNonStaticScript() throws Exception {
+	@Test
+	public void nonStaticScript() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("bshRefreshableContext.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("messenger");
 
@@ -156,7 +164,8 @@ public class BshScriptFactoryTests extends TestCase {
 		assertEquals("Incorrect refresh count", 2, refreshable.getRefreshCount());
 	}
 
-	public void testNonStaticPrototypeScript() throws Exception {
+	@Test
+	public void nonStaticPrototypeScript() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("bshRefreshableContext.xml", getClass());
 		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
 		ConfigurableMessenger messenger2 = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
@@ -179,7 +188,8 @@ public class BshScriptFactoryTests extends TestCase {
 		assertEquals("Incorrect refresh count", 2, refreshable.getRefreshCount());
 	}
 
-	public void testScriptCompilationException() throws Exception {
+	@Test
+	public void scriptCompilationException() throws Exception {
 		try {
 			new ClassPathXmlApplicationContext("org/springframework/scripting/bsh/bshBrokenContext.xml");
 			fail("Must throw exception for broken script file");
@@ -189,7 +199,8 @@ public class BshScriptFactoryTests extends TestCase {
 		}
 	}
 
-	public void testScriptThatCompilesButIsJustPlainBad() throws Exception {
+	@Test
+	public void scriptThatCompilesButIsJustPlainBad() throws Exception {
 		ScriptSource script = mock(ScriptSource.class);
 		final String badScript = "String getMessage() { throw new IllegalArgumentException(); }";
 		given(script.getScriptAsString()).willReturn(badScript);
@@ -205,7 +216,8 @@ public class BshScriptFactoryTests extends TestCase {
 		}
 	}
 
-	public void testCtorWithNullScriptSourceLocator() throws Exception {
+	@Test
+	public void ctorWithNullScriptSourceLocator() throws Exception {
 		try {
 			new BshScriptFactory(null, Messenger.class);
 			fail("Must have thrown exception by this point.");
@@ -214,7 +226,8 @@ public class BshScriptFactoryTests extends TestCase {
 		}
 	}
 
-	public void testCtorWithEmptyScriptSourceLocator() throws Exception {
+	@Test
+	public void ctorWithEmptyScriptSourceLocator() throws Exception {
 		try {
 			new BshScriptFactory("", new Class<?>[] {Messenger.class});
 			fail("Must have thrown exception by this point.");
@@ -223,7 +236,8 @@ public class BshScriptFactoryTests extends TestCase {
 		}
 	}
 
-	public void testCtorWithWhitespacedScriptSourceLocator() throws Exception {
+	@Test
+	public void ctorWithWhitespacedScriptSourceLocator() throws Exception {
 		try {
 			new BshScriptFactory("\n   ", new Class<?>[] {Messenger.class});
 			fail("Must have thrown exception by this point.");
@@ -232,7 +246,8 @@ public class BshScriptFactoryTests extends TestCase {
 		}
 	}
 
-	public void testResourceScriptFromTag() throws Exception {
+	@Test
+	public void resourceScriptFromTag() throws Exception {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("bsh-with-xsd.xml", getClass());
 		TestBean testBean = (TestBean) ctx.getBean("testBean");
 
@@ -270,7 +285,8 @@ public class BshScriptFactoryTests extends TestCase {
 		assertNull(messengerInstance.getMessage());
 	}
 
-	public void testPrototypeScriptFromTag() throws Exception {
+	@Test
+	public void prototypeScriptFromTag() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("bsh-with-xsd.xml", getClass());
 		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
 		ConfigurableMessenger messenger2 = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
@@ -285,21 +301,24 @@ public class BshScriptFactoryTests extends TestCase {
 		assertEquals("Byebye World!", messenger2.getMessage());
 	}
 
-	public void testInlineScriptFromTag() throws Exception {
+	@Test
+	public void inlineScriptFromTag() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("bsh-with-xsd.xml", getClass());
 		Calculator calculator = (Calculator) ctx.getBean("calculator");
 		assertNotNull(calculator);
 		assertFalse(calculator instanceof Refreshable);
 	}
 
-	public void testRefreshableFromTag() throws Exception {
+	@Test
+	public void refreshableFromTag() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("bsh-with-xsd.xml", getClass());
 		Messenger messenger = (Messenger) ctx.getBean("refreshableMessenger");
 		assertEquals("Hello World!", messenger.getMessage());
 		assertTrue("Messenger should be Refreshable", messenger instanceof Refreshable);
 	}
 
-	public void testApplicationEventListener() throws Exception {
+	@Test
+	public void applicationEventListener() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("bsh-with-xsd.xml", getClass());
 		Messenger eventListener = (Messenger) ctx.getBean("eventListener");
 		ctx.publishEvent(new MyEvent(ctx));

@@ -72,7 +72,7 @@ public class StopWatch {
 	 * Construct a new stop watch. Does not start any task.
 	 */
 	public StopWatch() {
-		this.id = "";
+		this("");
 	}
 
 	/**

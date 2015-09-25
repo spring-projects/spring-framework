@@ -16,10 +16,12 @@
 
 package org.springframework.jmx.export.annotation;
 
+import org.junit.Test;
+
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -29,9 +31,10 @@ import org.springframework.jmx.support.ObjectNameManager;
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
-public class AnnotationLazyInitMBeanTests extends TestCase {
+public class AnnotationLazyInitMBeanTests {
 
-	public void testLazyNaming() throws Exception {
+	@Test
+	public void lazyNaming() throws Exception {
 		ConfigurableApplicationContext ctx =
 				new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/lazyNaming.xml");
 		try {
@@ -46,7 +49,8 @@ public class AnnotationLazyInitMBeanTests extends TestCase {
 		}
 	}
 
-	public void testLazyAssembling() throws Exception {
+	@Test
+	public void lazyAssembling() throws Exception {
 		System.setProperty("domain", "bean");
 		ConfigurableApplicationContext ctx =
 				new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/lazyAssembling.xml");
@@ -79,7 +83,8 @@ public class AnnotationLazyInitMBeanTests extends TestCase {
 		}
 	}
 
-	public void testComponentScan() throws Exception {
+	@Test
+	public void componentScan() throws Exception {
 		ConfigurableApplicationContext ctx =
 				new ClassPathXmlApplicationContext("org/springframework/jmx/export/annotation/componentScan.xml");
 		try {

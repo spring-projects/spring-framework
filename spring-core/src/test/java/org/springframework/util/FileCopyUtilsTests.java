@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,9 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Arrays;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for the FileCopyUtils class.
@@ -31,9 +33,10 @@ import junit.framework.TestCase;
  * @author Juergen Hoeller
  * @since 12.03.2005
  */
-public class FileCopyUtilsTests extends TestCase {
+public class FileCopyUtilsTests {
 
-	public void testCopyFromInputStream() throws IOException {
+	@Test
+	public void copyFromInputStream() throws IOException {
 		byte[] content = "content".getBytes();
 		ByteArrayInputStream in = new ByteArrayInputStream(content);
 		ByteArrayOutputStream out = new ByteArrayOutputStream(content.length);
@@ -42,21 +45,24 @@ public class FileCopyUtilsTests extends TestCase {
 		assertTrue(Arrays.equals(content, out.toByteArray()));
 	}
 
-	public void testCopyFromByteArray() throws IOException {
+	@Test
+	public void copyFromByteArray() throws IOException {
 		byte[] content = "content".getBytes();
 		ByteArrayOutputStream out = new ByteArrayOutputStream(content.length);
 		FileCopyUtils.copy(content, out);
 		assertTrue(Arrays.equals(content, out.toByteArray()));
 	}
 
-	public void testCopyToByteArray() throws IOException {
+	@Test
+	public void copyToByteArray() throws IOException {
 		byte[] content = "content".getBytes();
 		ByteArrayInputStream in = new ByteArrayInputStream(content);
 		byte[] result = FileCopyUtils.copyToByteArray(in);
 		assertTrue(Arrays.equals(content, result));
 	}
 
-	public void testCopyFromReader() throws IOException {
+	@Test
+	public void copyFromReader() throws IOException {
 		String content = "content";
 		StringReader in = new StringReader(content);
 		StringWriter out = new StringWriter();
@@ -65,14 +71,16 @@ public class FileCopyUtilsTests extends TestCase {
 		assertEquals(content, out.toString());
 	}
 
-	public void testCopyFromString() throws IOException {
+	@Test
+	public void copyFromString() throws IOException {
 		String content = "content";
 		StringWriter out = new StringWriter();
 		FileCopyUtils.copy(content, out);
 		assertEquals(content, out.toString());
 	}
 
-	public void testCopyToString() throws IOException {
+	@Test
+	public void copyToString() throws IOException {
 		String content = "content";
 		StringReader in = new StringReader(content);
 		String result = FileCopyUtils.copyToString(in);

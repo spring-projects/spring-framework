@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,11 @@ package org.springframework.test;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import junit.framework.TestCase;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.util.Assert;
@@ -54,6 +59,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @since 1.1.1
+ * @see #isDisabledInThisEnvironment
  * @see AbstractSingleSpringContextTests
  * @see AbstractDependencyInjectionSpringContextTests
  * @see AbstractTransactionalSpringContextTests
@@ -62,7 +68,10 @@ import org.springframework.util.StringUtils;
  * ({@link org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests})
  */
 @Deprecated
-public abstract class AbstractSpringContextTests extends ConditionalTestCase {
+abstract class AbstractSpringContextTests extends TestCase {
+
+	/** Logger available to subclasses */
+	protected final Log logger = LogFactory.getLog(getClass());
 
 	/**
 	 * Map of context keys returned by subclasses of this class, to Spring
@@ -72,6 +81,14 @@ public abstract class AbstractSpringContextTests extends ConditionalTestCase {
 	private static Map<String, ConfigurableApplicationContext> contextKeyToContextMap =
 			new HashMap<String, ConfigurableApplicationContext>();
 
+	private static int disabledTestCount;
+
+	/**
+	 * Return the number of tests disabled in this environment.
+	 */
+	public static int getDisabledTestCount() {
+		return disabledTestCount;
+	}
 
 	/**
 	 * Default constructor for AbstractSpringContextTests.
@@ -86,6 +103,39 @@ public abstract class AbstractSpringContextTests extends ConditionalTestCase {
 		super(name);
 	}
 
+	@Override
+	public void runBare() throws Throwable {
+		// getName will return the name of the method being run
+		if (isDisabledInThisEnvironment(getName())) {
+			recordDisabled();
+			this.logger.info("**** " + getClass().getName() + "." + getName()
+					+ " is disabled in this environment: " + "Total disabled tests = "
+					+ getDisabledTestCount());
+			return;
+		}
+
+		// Let JUnit handle execution
+		super.runBare();
+	}
+
+	/**
+	 * Should this test run?
+	 * 
+	 * @param testMethodName name of the test method
+	 * @return whether the test should execute in the current environment
+	 */
+	protected boolean isDisabledInThisEnvironment(String testMethodName) {
+		return false;
+	}
+
+	/**
+	 * Record a disabled test.
+	 * 
+	 * @return the current disabled test count
+	 */
+	protected int recordDisabled() {
+		return ++disabledTestCount;
+	}
 
 	/**
 	 * Explicitly add an ApplicationContext instance under a given key.

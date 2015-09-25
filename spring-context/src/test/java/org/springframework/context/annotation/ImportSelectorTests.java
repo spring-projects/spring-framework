@@ -27,7 +27,6 @@ import org.hamcrest.Matcher;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.InOrder;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
@@ -35,7 +34,6 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.EnvironmentAware;
-import org.springframework.context.MessageSource;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrarTests.SampleRegistrar;
 import org.springframework.core.Ordered;
@@ -53,6 +51,7 @@ import static org.mockito.Mockito.*;
  *
  * @author Phillip Webb
  */
+@SuppressWarnings("resource")
 public class ImportSelectorTests {
 
 	static Map<Class<?>, String> importFrom = new HashMap<Class<?>, String>();
@@ -81,7 +80,6 @@ public class ImportSelectorTests {
 	@Test
 	public void invokeAwareMethodsInImportSelector() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(AwareConfig.class);
-		context.getBean(MessageSource.class);
 		assertThat(SampleRegistrar.beanFactory, is((BeanFactory) context.getBeanFactory()));
 		assertThat(SampleRegistrar.classLoader, is(context.getBeanFactory().getBeanClassLoader()));
 		assertThat(SampleRegistrar.resourceLoader, is(notNullValue()));
@@ -90,7 +88,7 @@ public class ImportSelectorTests {
 
 	@Test
 	public void correctMetaDataOnIndirectImports() throws Exception {
-		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(IndirectConfig.class);
+		new AnnotationConfigApplicationContext(IndirectConfig.class);
 		Matcher<String> isFromIndirect = equalTo(IndirectImport.class.getName());
 		assertThat(importFrom.get(ImportSelector1.class), isFromIndirect);
 		assertThat(importFrom.get(ImportSelector2.class), isFromIndirect);

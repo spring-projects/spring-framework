@@ -18,7 +18,7 @@ package org.springframework.jdbc.support;
 
 import java.sql.SQLException;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -30,10 +30,12 @@ import org.springframework.dao.RecoverableDataAccessException;
 import org.springframework.dao.TransientDataAccessResourceException;
 import org.springframework.jdbc.BadSqlGrammarException;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Thomas Risberg
  */
-public class SQLExceptionSubclassTranslatorTests extends TestCase {
+public class SQLExceptionSubclassTranslatorTests {
 
 	private static SQLErrorCodes ERROR_CODES = new SQLErrorCodes();
 
@@ -42,7 +44,8 @@ public class SQLExceptionSubclassTranslatorTests extends TestCase {
 	}
 
 
-	public void testErrorCodeTranslation() {
+	@Test
+	public void errorCodeTranslation() {
 		SQLExceptionTranslator sext = new SQLErrorCodeSQLExceptionTranslator(ERROR_CODES);
 
 		SQLException dataIntegrityViolationEx = SQLExceptionSubclassFactory.newSQLDataException("", "", 0);

@@ -43,7 +43,7 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
  * ({@link org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests})
  */
 @Deprecated
-public abstract class AbstractTransactionalDataSourceSpringContextTests extends AbstractTransactionalSpringContextTests {
+abstract class AbstractTransactionalDataSourceSpringContextTests extends AbstractTransactionalSpringContextTests {
 
 	protected JdbcTemplate jdbcTemplate;
 

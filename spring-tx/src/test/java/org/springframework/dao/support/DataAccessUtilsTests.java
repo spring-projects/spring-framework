@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,20 +23,23 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.IncorrectResultSizeDataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.TypeMismatchDataAccessException;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Juergen Hoeller
  * @since 20.10.2004
  */
-public class DataAccessUtilsTests extends TestCase {
+public class DataAccessUtilsTests {
 
-	public void testWithEmptyCollection() {
+	@Test
+	public void withEmptyCollection() {
 		Collection<String> col = new HashSet<String>();
 
 		assertNull(DataAccessUtils.uniqueResult(col));
@@ -82,7 +85,8 @@ public class DataAccessUtilsTests extends TestCase {
 		}
 	}
 
-	public void testWithTooLargeCollection() {
+	@Test
+	public void withTooLargeCollection() {
 		Collection<String> col = new HashSet<String>(2);
 		col.add("test1");
 		col.add("test2");
@@ -138,7 +142,8 @@ public class DataAccessUtilsTests extends TestCase {
 		}
 	}
 
-	public void testWithInteger() {
+	@Test
+	public void withInteger() {
 		Collection<Integer> col = new HashSet<Integer>(1);
 		col.add(5);
 
@@ -150,7 +155,8 @@ public class DataAccessUtilsTests extends TestCase {
 		assertEquals(5, DataAccessUtils.longResult(col));
 	}
 
-	public void testWithSameIntegerInstanceTwice() {
+	@Test
+	public void withSameIntegerInstanceTwice() {
 		Integer i = 5;
 		Collection<Integer> col = new ArrayList<Integer>(1);
 		col.add(i);
@@ -164,7 +170,8 @@ public class DataAccessUtilsTests extends TestCase {
 		assertEquals(5, DataAccessUtils.longResult(col));
 	}
 
-	public void testWithEquivalentIntegerInstanceTwice() {
+	@Test
+	public void withEquivalentIntegerInstanceTwice() {
 		Collection<Integer> col = new ArrayList<Integer>(2);
 		col.add(new Integer(5));
 		col.add(new Integer(5));
@@ -180,7 +187,8 @@ public class DataAccessUtilsTests extends TestCase {
 		}
 	}
 
-	public void testWithLong() {
+	@Test
+	public void withLong() {
 		Collection<Long> col = new HashSet<Long>(1);
 		col.add(5L);
 
@@ -192,7 +200,8 @@ public class DataAccessUtilsTests extends TestCase {
 		assertEquals(5, DataAccessUtils.longResult(col));
 	}
 
-	public void testWithString() {
+	@Test
+	public void withString() {
 		Collection<String> col = new HashSet<String>(1);
 		col.add("test1");
 
@@ -217,7 +226,8 @@ public class DataAccessUtilsTests extends TestCase {
 		}
 	}
 
-	public void testWithDate() {
+	@Test
+	public void withDate() {
 		Date date = new Date();
 		Collection<Date> col = new HashSet<Date>(1);
 		col.add(date);
@@ -244,13 +254,15 @@ public class DataAccessUtilsTests extends TestCase {
 		}
 	}
 
-	public void testExceptionTranslationWithNoTranslation() {
+	@Test
+	public void exceptionTranslationWithNoTranslation() {
 		MapPersistenceExceptionTranslator mpet = new MapPersistenceExceptionTranslator();
 		RuntimeException in = new RuntimeException();
 		assertSame(in, DataAccessUtils.translateIfNecessary(in, mpet));
 	}
 
-	public void testExceptionTranslationWithTranslation() {
+	@Test
+	public void exceptionTranslationWithTranslation() {
 		MapPersistenceExceptionTranslator mpet = new MapPersistenceExceptionTranslator();
 		RuntimeException in = new RuntimeException("in");
 		InvalidDataAccessApiUsageException out = new InvalidDataAccessApiUsageException("out");

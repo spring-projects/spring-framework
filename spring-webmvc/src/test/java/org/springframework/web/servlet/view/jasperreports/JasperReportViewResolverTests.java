@@ -18,17 +18,20 @@ package org.springframework.web.servlet.view.jasperreports;
 
 import java.util.Locale;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.web.servlet.view.velocity.VelocityView;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Rob Harrop
  */
-public class JasperReportViewResolverTests extends TestCase {
+public class JasperReportViewResolverTests {
 
-	public void testResolveView() throws Exception {
+	@Test
+	public void resolveView() throws Exception {
 		StaticApplicationContext ctx = new StaticApplicationContext();
 
 		String prefix = "org/springframework/ui/jasperreports/";
@@ -47,7 +50,8 @@ public class JasperReportViewResolverTests extends TestCase {
 		assertEquals("Incorrect URL", prefix + viewName + suffix, view.getUrl());
 	}
 
-	public void testSetIncorrectViewClass() {
+	@Test
+	public void setIncorrectViewClass() {
 		try {
 			new JasperReportsViewResolver().setViewClass(VelocityView.class);
 			fail("Should not be able to set view class to a class that does not extend AbstractJasperReportsView");
@@ -57,15 +61,18 @@ public class JasperReportViewResolverTests extends TestCase {
 		}
 	}
 
-	public void testWithViewNamesAndEndsWithPattern() throws Exception {
+	@Test
+	public void withViewNamesAndEndsWithPattern() throws Exception {
 		doViewNamesTest(new String[]{"DataSource*"});
 	}
 
-	public void testWithViewNamesAndStartsWithPattern() throws Exception {
+	@Test
+	public void withViewNamesAndStartsWithPattern() throws Exception {
 		doViewNamesTest(new String[]{"*Report"});
 	}
 
-	public void testWithViewNamesAndStatic() throws Exception {
+	@Test
+	public void withViewNamesAndStatic() throws Exception {
 		doViewNamesTest(new String[]{"DataSourceReport"});
 	}
 

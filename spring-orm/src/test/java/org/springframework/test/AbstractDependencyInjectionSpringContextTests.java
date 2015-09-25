@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -212,8 +212,8 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 	}
 
 	private void initManagedVariableNames() throws IllegalAccessException {
-		List managedVarNames = new LinkedList();
-		Class clazz = getClass();
+		List<String> managedVarNames = new LinkedList<>();
+		Class<?> clazz = getClass();
 		do {
 			Field[] fields = clazz.getDeclaredFields();
 			if (this.logger.isDebugEnabled()) {
@@ -243,7 +243,7 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 			clazz = clazz.getSuperclass();
 		} while (!clazz.equals(AbstractDependencyInjectionSpringContextTests.class));
 
-		this.managedVariableNames = (String[]) managedVarNames.toArray(new String[managedVarNames.size()]);
+		this.managedVariableNames = managedVarNames.toArray(new String[managedVarNames.size()]);
 	}
 
 	private boolean isProtectedInstanceField(Field field) {
@@ -277,12 +277,12 @@ public abstract class AbstractDependencyInjectionSpringContextTests extends Abst
 		}
 	}
 
-	private Field findField(Class clazz, String name) throws NoSuchFieldException {
+	private Field findField(Class<?> clazz, String name) throws NoSuchFieldException {
 		try {
 			return clazz.getDeclaredField(name);
 		}
 		catch (NoSuchFieldException ex) {
-			Class superclass = clazz.getSuperclass();
+			Class<?> superclass = clazz.getSuperclass();
 			if (superclass != AbstractSpringContextTests.class) {
 				return findField(superclass, name);
 			}
