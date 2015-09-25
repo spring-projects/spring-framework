@@ -155,7 +155,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	private AutowireCandidateResolver autowireCandidateResolver = new SimpleAutowireCandidateResolver();
 
 	/** Map from dependency type to corresponding autowired value */
-	private final Map<Class<?>, Object> resolvableDependencies = new HashMap<Class<?>, Object>(16);
+	private final Map<Class<?>, Object> resolvableDependencies = new ConcurrentHashMap<Class<?>, Object>(16);
 
 	/** Map of bean definition objects, keyed by bean name */
 	private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<String, BeanDefinition>(64);
@@ -167,16 +167,16 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	private final Map<Class<?>, String[]> singletonBeanNamesByType = new ConcurrentHashMap<Class<?>, String[]>(64);
 
 	/** List of bean definition names, in registration order */
-	private final List<String> beanDefinitionNames = new ArrayList<String>(64);
+	private volatile List<String> beanDefinitionNames = new ArrayList<String>(64);
 
 	/** List of names of manually registered singletons, in registration order */
-	private final Set<String> manualSingletonNames = new LinkedHashSet<String>(16);
-
-	/** Whether bean definition metadata may be cached for all beans */
-	private boolean configurationFrozen = false;
+	private volatile Set<String> manualSingletonNames = new LinkedHashSet<String>(16);
 
 	/** Cached array of bean definition names in case of frozen configuration */
-	private String[] frozenBeanDefinitionNames;
+	private volatile String[] frozenBeanDefinitionNames;
+
+	/** Whether bean definition metadata may be cached for all beans */
+	private volatile boolean configurationFrozen = false;
 
 
 	/**
@@ -848,13 +848,32 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 							"] with [" + beanDefinition + "]");
 				}
 			}
+			this.beanDefinitionMap.put(beanName, beanDefinition);
 		}
 		else {
-			this.beanDefinitionNames.add(beanName);
-			this.manualSingletonNames.remove(beanName);
+			if (hasBeanCreationStarted()) {
+				// Cannot modify startup-time collection elements anymore (for stable iteration)
+				synchronized (this.beanDefinitionMap) {
+					this.beanDefinitionMap.put(beanName, beanDefinition);
+					List<String> updatedDefinitions = new ArrayList<String>(this.beanDefinitionNames.size() + 1);
+					updatedDefinitions.addAll(this.beanDefinitionNames);
+					updatedDefinitions.add(beanName);
+					this.beanDefinitionNames = updatedDefinitions;
+					if (this.manualSingletonNames.contains(beanName)) {
+						Set<String> updatedSingletons = new LinkedHashSet<String>(this.manualSingletonNames);
+						updatedSingletons.remove(beanName);
+						this.manualSingletonNames = updatedSingletons;
+					}
+				}
+			}
+			else {
+				// Still in startup registration phase
+				this.beanDefinitionMap.put(beanName, beanDefinition);
+				this.beanDefinitionNames.add(beanName);
+				this.manualSingletonNames.remove(beanName);
+			}
 			this.frozenBeanDefinitionNames = null;
 		}
-		this.beanDefinitionMap.put(beanName, beanDefinition);
 
 		if (oldBeanDefinition != null || containsSingleton(beanName)) {
 			resetBeanDefinition(beanName);
@@ -872,7 +891,19 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			throw new NoSuchBeanDefinitionException(beanName);
 		}
-		this.beanDefinitionNames.remove(beanName);
+
+		if (hasBeanCreationStarted()) {
+			// Cannot modify startup-time collection elements anymore (for stable iteration)
+			synchronized (this.beanDefinitionMap) {
+				List<String> updatedDefinitions = new ArrayList<String>(this.beanDefinitionNames);
+				updatedDefinitions.remove(beanName);
+				this.beanDefinitionNames = updatedDefinitions;
+			}
+		}
+		else {
+			// Still in startup registration phase
+			this.beanDefinitionNames.remove(beanName);
+		}
 		this.frozenBeanDefinitionNames = null;
 
 		resetBeanDefinition(beanName);
@@ -914,9 +945,25 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	@Override
 	public void registerSingleton(String beanName, Object singletonObject) throws IllegalStateException {
 		super.registerSingleton(beanName, singletonObject);
-		if (!this.beanDefinitionMap.containsKey(beanName)) {
-			this.manualSingletonNames.add(beanName);
+
+		if (hasBeanCreationStarted()) {
+			// Cannot modify startup-time collection elements anymore (for stable iteration)
+			synchronized (this.beanDefinitionMap) {
+				if (!this.beanDefinitionMap.containsKey(beanName)) {
+					Set<String> updatedSingletons = new LinkedHashSet<String>(this.manualSingletonNames.size() + 1);
+					updatedSingletons.addAll(this.manualSingletonNames);
+					updatedSingletons.add(beanName);
+					this.manualSingletonNames = updatedSingletons;
+				}
+			}
 		}
+		else {
+			// Still in startup registration phase
+			if (!this.beanDefinitionMap.containsKey(beanName)) {
+				this.manualSingletonNames.add(beanName);
+			}
+		}
+
 		clearByTypeCache();
 	}
 

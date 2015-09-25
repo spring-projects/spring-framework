@@ -1536,6 +1536,16 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	}
 
 	/**
+	 * Check whether this factory's bean creation phase already started,
+	 * i.e. whether any bean has been marked as created in the meantime.
+	 * @since 4.2.2
+	 * @see #markBeanAsCreated
+	 */
+	protected boolean hasBeanCreationStarted() {
+		return !this.alreadyCreated.isEmpty();
+	}
+
+	/**
 	 * Get the object for the given bean instance, either the bean
 	 * instance itself or its created object in case of a FactoryBean.
 	 * @param beanInstance the shared bean instance

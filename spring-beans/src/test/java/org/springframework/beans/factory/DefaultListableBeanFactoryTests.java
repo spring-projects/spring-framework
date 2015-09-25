@@ -1224,7 +1224,7 @@ public class DefaultListableBeanFactoryTests {
 
 		RootBeanDefinition rbd = new RootBeanDefinition(PropertiesFactoryBean.class);
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.add("locations", new String[] {"#{foo}"});
+		pvs.add("locations", new String[]{"#{foo}"});
 		rbd.setPropertyValues(pvs);
 		bf.registerBeanDefinition("myProperties", rbd);
 		Properties properties = (Properties) bf.getBean("myProperties");
@@ -2462,6 +2462,7 @@ public class DefaultListableBeanFactoryTests {
 			public Object postProcessBeforeInitialization(Object bean, String beanName) {
 				return new TestBean();
 			}
+
 			@Override
 			public Object postProcessAfterInitialization(Object bean, String beanName) {
 				return bean;
@@ -2750,10 +2751,6 @@ public class DefaultListableBeanFactoryTests {
 		verify(r3, never()).resolveStringValue(isNull(String.class));
 	}
 
-
-	static class A { }
-	static class B { }
-
 	/**
 	 * Test that by-type bean lookup caching is working effectively by searching for a
 	 * bean of type B 10K times within a container having 1K additional beans of type A.
@@ -2764,22 +2761,51 @@ public class DefaultListableBeanFactoryTests {
 	 * under the 1000 ms timeout, usually ~= 300ms. With caching removed and on the same
 	 * hardware the method will take ~13000 ms. See SPR-6870.
 	 */
-	@Test(timeout=1000)
+	@Test(timeout = 1000)
 	public void testByTypeLookupIsFastEnough() {
 		Assume.group(TestGroup.PERFORMANCE);
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 
 		for (int i = 0; i < 1000; i++) {
-			bf.registerBeanDefinition("a"+i, new RootBeanDefinition(A.class));
+			bf.registerBeanDefinition("a" + i, new RootBeanDefinition(A.class));
 		}
 		bf.registerBeanDefinition("b", new RootBeanDefinition(B.class));
 
 		bf.freezeConfiguration();
 
-		for (int i=0; i<10000; i++) {
+		for (int i = 0; i < 10000; i++) {
 			bf.getBean(B.class);
 		}
 	}
+
+	@Test(timeout = 1000)
+	public void testRegistrationOfManyBeanDefinitionsIsFastEnough() {
+		// Assume.group(TestGroup.PERFORMANCE);
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerBeanDefinition("b", new RootBeanDefinition(B.class));
+		// bf.getBean("b");
+
+		for (int i = 0; i < 100000; i++) {
+			bf.registerBeanDefinition("a" + i, new RootBeanDefinition(A.class));
+		}
+	}
+
+	@Test(timeout = 1000)
+	public void testRegistrationOfManySingletonsIsFastEnough() {
+		// Assume.group(TestGroup.PERFORMANCE);
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerBeanDefinition("b", new RootBeanDefinition(B.class));
+		// bf.getBean("b");
+
+		for (int i = 0; i < 100000; i++) {
+			bf.registerSingleton("a" + i, new A());
+		}
+	}
+
+
+	static class A { }
+
+	static class B { }
 
 
 	public static class NoDependencies {
