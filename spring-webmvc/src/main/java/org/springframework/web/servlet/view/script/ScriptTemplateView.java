@@ -29,6 +29,7 @@ import java.util.Map;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -357,7 +358,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 			response.getWriter().write(String.valueOf(html));
 		}
 		catch (Exception ex) {
-			throw new IllegalStateException("Failed to render script template", ex);
+			throw new ServletException("Failed to render script template", new ScriptRenderException(ex.getMessage()));
 		}
 	}
 
