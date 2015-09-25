@@ -1,6 +1,5 @@
-
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +20,7 @@ import junit.framework.TestCase;
 
 /**
  * @author Rod Johnson
+ * @author Juergen Hoeller
  */
 public class StopWatchTests extends TestCase {
 
@@ -28,7 +28,8 @@ public class StopWatchTests extends TestCase {
 	 * Are timings off in JUnit?
 	 */
 	public void testValidUsage() throws Exception {
-		StopWatch sw = new StopWatch();
+		String id = "myId";
+		StopWatch sw = new StopWatch(id);
 		long int1 = 166L;
 		long int2 = 45L;
 		String name1 = "Task 1";
@@ -38,6 +39,7 @@ public class StopWatchTests extends TestCase {
 		sw.start(name1);
 		Thread.sleep(int1);
 		assertTrue(sw.isRunning());
+		assertEquals(name1, sw.currentTaskName());
 		sw.stop();
 
 		// TODO are timings off in JUnit? Why do these assertions sometimes fail
@@ -54,14 +56,20 @@ public class StopWatchTests extends TestCase {
 
 		assertTrue(sw.getTaskCount() == 2);
 		String pp = sw.prettyPrint();
-		assertTrue(pp.indexOf(name1) != -1);
-		assertTrue(pp.indexOf(name2) != -1);
+		assertTrue(pp.contains(name1));
+		assertTrue(pp.contains(name2));
 
 		StopWatch.TaskInfo[] tasks = sw.getTaskInfo();
 		assertTrue(tasks.length == 2);
 		assertTrue(tasks[0].getTaskName().equals(name1));
 		assertTrue(tasks[1].getTaskName().equals(name2));
-		sw.toString();
+
+		String toString = sw.toString();
+		assertTrue(toString.contains(id));
+		assertTrue(toString.contains(name1));
+		assertTrue(toString.contains(name2));
+
+		assertEquals(id, sw.getId());
 	}
 
 	public void testValidUsageNotKeepingTaskList() throws Exception {
@@ -92,8 +100,11 @@ public class StopWatchTests extends TestCase {
 
 		assertTrue(sw.getTaskCount() == 2);
 		String pp = sw.prettyPrint();
-		assertTrue(pp.indexOf("kept") != -1);
-		sw.toString();
+		assertTrue(pp.contains("kept"));
+
+		String toString = sw.toString();
+		assertFalse(toString.contains(name1));
+		assertFalse(toString.contains(name2));
 
 		try {
 			sw.getTaskInfo();
