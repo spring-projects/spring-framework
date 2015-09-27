@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -46,7 +45,7 @@ import org.springframework.orm.jpa.ExtendedEntityManagerCreator;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.SharedEntityManagerCreator;
 import org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager;
-import org.springframework.test.AbstractAnnotationAwareTransactionalTests;
+import org.springframework.test.AbstractTransactionalSpringContextTests;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -84,7 +83,7 @@ import org.springframework.util.StringUtils;
  * ({@link org.springframework.test.context.junit38.AbstractJUnit38SpringContextTests})
  */
 @Deprecated
-public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactionalTests {
+public abstract class AbstractJpaTests extends AbstractTransactionalSpringContextTests {
 
 	private static final String DEFAULT_ORM_XML_LOCATION = "META-INF/orm.xml";
 
@@ -141,39 +140,9 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 		return !InstrumentationLoadTimeWeaver.isInstrumentationAvailable();
 	}
 
-	@Override
-	public void setDirty() {
-		super.setDirty();
-		contextCache.remove(cacheKeys());
-		classLoaderCache.remove(cacheKeys());
-
-		// If we are a shadow loader, we need to invoke
-		// the shadow parent to set it dirty, as
-		// it is the shadow parent that maintains the cache state,
-		// not the child
-		if (this.shadowParent != null) {
-			try {
-				Method m = shadowParent.getClass().getMethod("setDirty", (Class[]) null);
-				m.invoke(shadowParent, (Object[]) null);
-			}
-			catch (Exception ex) {
-				throw new RuntimeException(ex);
-			}
-		}
-	}
-
-
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public void runBare() throws Throwable {
-
-		// getName will return the name of the method being run.
-		if (isDisabledInThisEnvironment(getName())) {
-			// Let superclass log that we didn't run the test.
-			super.runBare();
-			return;
-		}
-
 		if (!shouldUseShadowLoader()) {
 			super.runBare();
 			return;
@@ -262,7 +231,7 @@ public abstract class AbstractJpaTests extends AbstractAnnotationAwareTransactio
 
 				/* AbstractSpringContextTests.addContext(Object, ApplicationContext) */
 				Class applicationContextClass = shadowingClassLoader.loadClass(ConfigurableApplicationContext.class.getName());
-				Method addContextMethod = shadowedTestClass.getMethod("addContext", Object.class, applicationContextClass);
+				Method addContextMethod = shadowedTestClass.getMethod("addContext", String[].class, applicationContextClass);
 				ReflectionUtils.makeAccessible(addContextMethod);
 				addContextMethod.invoke(shadowedTestCase, configLocations, cachedContext);
 

@@ -47,6 +47,7 @@ import static org.mockito.BDDMockito.*;
  * @author Juergen Hoeller
  * @author Phillip Webb
  */
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class JpaTransactionManagerTests {
 
 	private EntityManagerFactory factory;

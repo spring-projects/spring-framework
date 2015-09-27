@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.orm.jpa.openjpa;
 
-
 /**
  * Test that AspectJ weaving (in particular the currently shipped aspects) works
  * with JPA (see SPR-3873 for more details).
@@ -27,7 +26,7 @@ package org.springframework.orm.jpa.openjpa;
 public class OpenJpaEntityManagerFactoryWithAspectJWeavingIntegrationTests extends OpenJpaEntityManagerFactoryIntegrationTests {
 
 	@Override
-	protected String[] getConfigLocations() {
+	protected String[] getConfigPaths() {
 		return new String[] {
 				"/org/springframework/orm/jpa/openjpa/openjpa-manager-aspectj-weaving.xml",
 				"/org/springframework/orm/jpa/memdb.xml",
