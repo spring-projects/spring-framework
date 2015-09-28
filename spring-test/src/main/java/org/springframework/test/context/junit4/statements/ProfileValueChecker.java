@@ -16,6 +16,7 @@
 
 package org.springframework.test.context.junit4.statements;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 import org.junit.Assume;
@@ -49,9 +50,8 @@ public class ProfileValueChecker extends Statement {
 
 	/**
 	 * Construct a new {@code ProfileValueChecker} statement.
-	 *
-	 * @param next the next {@code Statement} in the execution chain; never
-	 * {@code null}
+	 * @param next the next {@code Statement} in the execution chain;
+	 * never {@code null}
 	 * @param testClass the test class to check; never {@code null}
 	 * @param testMethod the test method to check; may be {@code null} if
 	 * this {@code ProfileValueChecker} is being applied at the class level
@@ -81,21 +81,22 @@ public class ProfileValueChecker extends Statement {
 	@Override
 	public void evaluate() throws Throwable {
 		if (this.testMethod == null) {
-			if (!ProfileValueUtils.isTestEnabledInThisEnvironment(testClass)) {
+			if (!ProfileValueUtils.isTestEnabledInThisEnvironment(this.testClass)) {
 				// Invoke assumeTrue() with false to avoid direct reference to JUnit's
 				// AssumptionViolatedException which exists in two packages as of JUnit 4.12.
+				Annotation ann = AnnotationUtils.findAnnotation(this.testClass, IfProfileValue.class);
 				Assume.assumeTrue(String.format(
-					"Profile configured via [%s] is not enabled in this environment for test class [%s].",
-					AnnotationUtils.findAnnotation(testClass, IfProfileValue.class), testClass.getName()), false);
+						"Profile configured via [%s] is not enabled in this environment for test class [%s].",
+						ann, this.testClass.getName()), false);
 			}
 		}
 		else {
-			if (!ProfileValueUtils.isTestEnabledInThisEnvironment(testMethod, testClass)) {
+			if (!ProfileValueUtils.isTestEnabledInThisEnvironment(this.testMethod, this.testClass)) {
 				// Invoke assumeTrue() with false to avoid direct reference to JUnit's
 				// AssumptionViolatedException which exists in two packages as of JUnit 4.12.
 				Assume.assumeTrue(String.format(
-					"Profile configured via @IfProfileValue is not enabled in this environment for test method [%s].",
-					testMethod), false);
+						"Profile configured via @IfProfileValue is not enabled in this environment for test method [%s].",
+						this.testMethod), false);
 			}
 		}
 

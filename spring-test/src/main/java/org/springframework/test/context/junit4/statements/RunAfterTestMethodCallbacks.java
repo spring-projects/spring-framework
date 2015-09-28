@@ -33,10 +33,10 @@ import org.springframework.test.context.TestContextManager;
  *
  * <p><strong>NOTE:</strong> This class requires JUnit 4.9 or higher.
  *
- * @see #evaluate()
- * @see RunBeforeTestMethodCallbacks
  * @author Sam Brannen
  * @since 3.0
+ * @see #evaluate()
+ * @see RunBeforeTestMethodCallbacks
  */
 public class RunAfterTestMethodCallbacks extends Statement {
 
@@ -51,7 +51,6 @@ public class RunAfterTestMethodCallbacks extends Statement {
 
 	/**
 	 * Construct a new {@code RunAfterTestMethodCallbacks} statement.
-	 *
 	 * @param next the next {@code Statement} in the execution chain
 	 * @param testInstance the current test instance (never {@code null})
 	 * @param testMethod the test method which has just been executed on the
@@ -61,11 +60,13 @@ public class RunAfterTestMethodCallbacks extends Statement {
 	 */
 	public RunAfterTestMethodCallbacks(Statement next, Object testInstance, Method testMethod,
 			TestContextManager testContextManager) {
+
 		this.next = next;
 		this.testInstance = testInstance;
 		this.testMethod = testMethod;
 		this.testContextManager = testContextManager;
 	}
+
 
 	/**
 	 * Evaluate the next {@link Statement} in the execution chain (typically an instance of
@@ -84,16 +85,16 @@ public class RunAfterTestMethodCallbacks extends Statement {
 		try {
 			this.next.evaluate();
 		}
-		catch (Throwable e) {
-			testException = e;
-			errors.add(e);
+		catch (Throwable ex) {
+			testException = ex;
+			errors.add(ex);
 		}
 
 		try {
 			this.testContextManager.afterTestMethod(this.testInstance, this.testMethod, testException);
 		}
-		catch (Exception e) {
-			errors.add(e);
+		catch (Throwable ex) {
+			errors.add(ex);
 		}
 
 		if (errors.isEmpty()) {
