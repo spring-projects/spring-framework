@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,10 +28,10 @@ import org.springframework.test.context.TestContextManager;
  * by calling {@link TestContextManager#beforeTestMethod(Object, Method)
  * beforeTestMethod()} on the supplied {@link TestContextManager}.
  *
- * @see #evaluate()
- * @see RunAfterTestMethodCallbacks
  * @author Sam Brannen
  * @since 3.0
+ * @see #evaluate()
+ * @see RunAfterTestMethodCallbacks
  */
 public class RunBeforeTestMethodCallbacks extends Statement {
 
@@ -45,8 +45,7 @@ public class RunBeforeTestMethodCallbacks extends Statement {
 
 
 	/**
-	 * Constructs a new {@code RunBeforeTestMethodCallbacks} statement.
-	 *
+	 * Construct a new {@code RunBeforeTestMethodCallbacks} statement.
 	 * @param next the next {@code Statement} in the execution chain
 	 * @param testInstance the current test instance (never {@code null})
 	 * @param testMethod the test method which is about to be executed on the
@@ -56,15 +55,18 @@ public class RunBeforeTestMethodCallbacks extends Statement {
 	 */
 	public RunBeforeTestMethodCallbacks(Statement next, Object testInstance, Method testMethod,
 			TestContextManager testContextManager) {
+
 		this.next = next;
 		this.testInstance = testInstance;
 		this.testMethod = testMethod;
 		this.testContextManager = testContextManager;
 	}
 
+
 	/**
-	 * Calls {@link TestContextManager#beforeTestMethod(Object, Method)} and then invokes
-	 * the next {@link Statement} in the execution chain (typically an instance of
+	 * Invoke {@link TestContextManager#beforeTestMethod(Object, Method)}
+	 * and then evaluate the next {@link Statement} in the execution chain
+	 * (typically an instance of
 	 * {@link org.junit.internal.runners.statements.RunBefores RunBefores}).
 	 */
 	@Override

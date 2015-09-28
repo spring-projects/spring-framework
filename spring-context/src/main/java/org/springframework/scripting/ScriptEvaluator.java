@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ public interface ScriptEvaluator {
 	 * Evaluate the given script with the given arguments.
 	 * @param script the ScriptSource for the script to evaluate
 	 * @param arguments the key-value pairs to expose to the script,
-	 * typically as script variables. May be {@code null}.
+	 * typically as script variables (may be {@code null} or empty)
 	 * @return the return value of the script, if any
 	 * @throws ScriptCompilationException if the evaluator failed to read,
 	 * compile or evaluate the script

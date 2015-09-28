@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 
 	private final ConcurrentMap<String, Cache> cacheMap = new ConcurrentHashMap<String, Cache>(16);
 
-	private Set<String> cacheNames = new LinkedHashSet<String>(16);
+	private final Set<String> cacheNames = new LinkedHashSet<String>(16);
 
 
 	// Early cache initialization on startup
@@ -96,6 +96,16 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 		this.cacheNames.add(cache.getName());
 	}
 
+	/**
+	 * Check for a registered cache of the given name.
+	 * In contrast to {@link #getCache(String)}, this method does not trigger
+	 * the lazy creation of missing caches via {@link #getMissingCache(String)}.
+	 * @param name the cache identifier (must not be {@code null})
+	 * @return the associated Cache instance, or {@code null} if none found
+	 * @since 4.1
+	 * @see #getCache(String)
+	 * @see #getMissingCache(String)
+	 */
 	protected final Cache lookupCache(String name) {
 		return this.cacheMap.get(name);
 	}
@@ -120,6 +130,7 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	 * @param name the name of the cache to retrieve
 	 * @return the missing cache or {@code null} if no such cache exists or could be
 	 * created
+	 * @since 4.1
 	 * @see #getCache(String)
 	 */
 	protected Cache getMissingCache(String name) {
