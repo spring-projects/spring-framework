@@ -33,6 +33,7 @@ import org.springframework.test.context.junit4.statements.RunBeforeTestMethodCal
 import org.springframework.test.context.junit4.statements.RunPrepareTestInstanceCallbacks;
 import org.springframework.test.context.junit4.statements.SpringFailOnTimeout;
 import org.springframework.test.context.junit4.statements.SpringRepeat;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -92,6 +93,19 @@ import org.springframework.util.ReflectionUtils;
 public class SpringMethodRule implements MethodRule {
 
 	private static final Log logger = LogFactory.getLog(SpringMethodRule.class);
+
+	// Used by RunAfterTestMethodCallbacks
+	private static final String MULTIPLE_FAILURE_EXCEPTION_CLASS_NAME = "org.junit.runners.model.MultipleFailureException";
+
+	static {
+		boolean junit4dot9Present = ClassUtils.isPresent(MULTIPLE_FAILURE_EXCEPTION_CLASS_NAME,
+			SpringMethodRule.class.getClassLoader());
+		if (!junit4dot9Present) {
+			throw new IllegalStateException(String.format(
+				"Failed to find class [%s]: SpringMethodRule requires JUnit 4.9 or higher.",
+				MULTIPLE_FAILURE_EXCEPTION_CLASS_NAME));
+		}
+	}
 
 
 	/**

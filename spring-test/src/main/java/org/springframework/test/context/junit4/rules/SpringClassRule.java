@@ -34,6 +34,7 @@ import org.springframework.test.context.junit4.statements.ProfileValueChecker;
 import org.springframework.test.context.junit4.statements.RunAfterTestClassCallbacks;
 import org.springframework.test.context.junit4.statements.RunBeforeTestClassCallbacks;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
  * {@code SpringClassRule} is a custom JUnit {@link TestRule} that supports
@@ -95,6 +96,19 @@ public class SpringClassRule implements TestRule {
 	 */
 	private static final Map<Class<?>, TestContextManager> testContextManagerCache =
 			new ConcurrentHashMap<Class<?>, TestContextManager>(64);
+
+	// Used by RunAfterTestClassCallbacks
+	private static final String MULTIPLE_FAILURE_EXCEPTION_CLASS_NAME = "org.junit.runners.model.MultipleFailureException";
+
+	static {
+		boolean junit4dot9Present = ClassUtils.isPresent(MULTIPLE_FAILURE_EXCEPTION_CLASS_NAME,
+			SpringClassRule.class.getClassLoader());
+		if (!junit4dot9Present) {
+			throw new IllegalStateException(String.format(
+				"Failed to find class [%s]: SpringClassRule requires JUnit 4.9 or higher.",
+				MULTIPLE_FAILURE_EXCEPTION_CLASS_NAME));
+		}
+	}
 
 
 	/**
