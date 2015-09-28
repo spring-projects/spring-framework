@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,40 +44,36 @@ public class JasperReportViewResolverTests {
 		viewResolver.setSuffix(suffix);
 		viewResolver.setApplicationContext(ctx);
 
-		AbstractJasperReportsView view =
-				(AbstractJasperReportsView) viewResolver.resolveViewName(viewName, Locale.ENGLISH);
+		AbstractJasperReportsView view = (AbstractJasperReportsView) viewResolver.resolveViewName(viewName,
+			Locale.ENGLISH);
 		assertNotNull("View should not be null", view);
 		assertEquals("Incorrect URL", prefix + viewName + suffix, view.getUrl());
 	}
 
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void setIncorrectViewClass() {
-		try {
-			new JasperReportsViewResolver().setViewClass(VelocityView.class);
-			fail("Should not be able to set view class to a class that does not extend AbstractJasperReportsView");
-		}
-		catch (IllegalArgumentException ex) {
-			// success
-		}
+		// Should not be able to set view class to a class that does not extend
+		// AbstractJasperReportsView.
+		new JasperReportsViewResolver().setViewClass(VelocityView.class);
 	}
 
 	@Test
 	public void withViewNamesAndEndsWithPattern() throws Exception {
-		doViewNamesTest(new String[]{"DataSource*"});
+		doViewNamesTest("DataSource*");
 	}
 
 	@Test
 	public void withViewNamesAndStartsWithPattern() throws Exception {
-		doViewNamesTest(new String[]{"*Report"});
+		doViewNamesTest("*Report");
 	}
 
 	@Test
 	public void withViewNamesAndStatic() throws Exception {
-		doViewNamesTest(new String[]{"DataSourceReport"});
+		doViewNamesTest("DataSourceReport");
 	}
 
-	private void doViewNamesTest(String[] viewNames) throws Exception {
-		 StaticApplicationContext ctx = new StaticApplicationContext();
+	private void doViewNamesTest(String... viewNames) throws Exception {
+		StaticApplicationContext ctx = new StaticApplicationContext();
 
 		String prefix = "org/springframework/ui/jasperreports/";
 		String suffix = ".jasper";
@@ -90,10 +86,11 @@ public class JasperReportViewResolverTests {
 		viewResolver.setViewNames(viewNames);
 		viewResolver.setApplicationContext(ctx);
 
-		AbstractJasperReportsView view =
-				(AbstractJasperReportsView) viewResolver.resolveViewName(viewName, Locale.ENGLISH);
+		AbstractJasperReportsView view = (AbstractJasperReportsView) viewResolver.resolveViewName(viewName,
+			Locale.ENGLISH);
 		assertNotNull("View should not be null", view);
 		assertEquals("Incorrect URL", prefix + viewName + suffix, view.getUrl());
 		assertNull(viewResolver.resolveViewName("foo", Locale.ENGLISH));
 	}
+
 }
