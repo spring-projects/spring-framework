@@ -339,6 +339,7 @@ public class UriComponentsBuilder implements Cloneable {
 
 	/**
 	 * Create an instance by parsing the "origin" header of an HTTP request.
+	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454</a>
 	 */
 	public static UriComponentsBuilder fromOriginHeader(String origin) {
 		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
@@ -347,6 +348,11 @@ public class UriComponentsBuilder implements Cloneable {
 			String schema = (schemaIdx != -1 ? origin.substring(0, schemaIdx) : "http");
 			builder.scheme(schema);
 			String hostString = (schemaIdx != -1 ? origin.substring(schemaIdx + 3) : origin);
+			// Handling of invalid origins as described in SPR-13478
+			int firstSlashIdx = hostString.indexOf("/");
+			if (firstSlashIdx != -1) {
+				hostString = hostString.substring(0, firstSlashIdx);
+			}
 			if (hostString.contains(":")) {
 				String[] hostAndPort = StringUtils.split(hostString, ":");
 				builder.host(hostAndPort[0]);

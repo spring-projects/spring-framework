@@ -132,6 +132,16 @@ public class WebUtilsTests {
 		assertFalse(checkSameOrigin("mydomain1.com", -1, "http://mydomain2.com"));
 		assertFalse(checkSameOrigin("mydomain1.com", -1, "https://mydomain1.com"));
 		assertFalse(checkSameOrigin("mydomain1.com", -1, "invalid-origin"));
+
+		// Handling of invalid origins as described in SPR-13478
+		assertTrue(checkSameOrigin("mydomain1.com", -1, "http://mydomain1.com/"));
+		assertTrue(checkSameOrigin("mydomain1.com", -1, "http://mydomain1.com:80/"));
+		assertTrue(checkSameOrigin("mydomain1.com", -1, "http://mydomain1.com/path"));
+		assertTrue(checkSameOrigin("mydomain1.com", -1, "http://mydomain1.com:80/path"));
+		assertFalse(checkSameOrigin("mydomain2.com", -1, "http://mydomain1.com/"));
+		assertFalse(checkSameOrigin("mydomain2.com", -1, "http://mydomain1.com:80/"));
+		assertFalse(checkSameOrigin("mydomain2.com", -1, "http://mydomain1.com/path"));
+		assertFalse(checkSameOrigin("mydomain2.com", -1, "http://mydomain1.com:80/path"));
 	}
 
 
