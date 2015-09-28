@@ -335,7 +335,7 @@ performance can be very important and there is no real need for the dynamism.
 
 The new SpEL compiler is intended to address this need. The 
 compiler will generate a real Java class on the fly during evaluation that embodies the
-expression behaviour and use that to achieve much faster expression
+expression behavior and use that to achieve much faster expression
 evaluation. Due to the lack of typing around expressions the compiler
 uses information gathered during the interpreted evaluations of an
 expression when performing compilation. For example, it does not know the type
@@ -351,7 +351,7 @@ For a basic expression like this:
 `someArray[0].someProperty.someOtherProperty < 0.1`
 
 which involves array access, some property derefencing and numeric operations, the performance
-gain can be very noticeable. In an example microbenchmark run of 50000 iterations, it was
+gain can be very noticeable. In an example micro benchmark run of 50000 iterations, it was
 taking 75ms to evaluate using only the interpreter and just 3ms using the compiled version
 of the expression.
 
@@ -459,7 +459,7 @@ symbol in this context.
 [subs="verbatim,quotes"]
 ----
 	<bean id="taxCalculator" class="org.spring.samples.TaxCalculator">
-		<property name="defaultLocale" value="#{ systemProperties[''user.region''] }"/>
+		<property name="defaultLocale" value="#{ systemProperties['user.region'] }"/>
 
 		<!-- other properties -->
 	</bean>
@@ -497,7 +497,7 @@ Here is an example to set the default value of a field variable.
 ----
 	public static class FieldValueTestBean
 
-		@Value("#{ systemProperties[''user.region''] }")
+		@Value("#{ systemProperties['user.region'] }")
 		private String defaultLocale;
 
 		public void setDefaultLocale(String defaultLocale) {
@@ -520,7 +520,7 @@ The equivalent but on a property setter method is shown below.
 
 		private String defaultLocale;
 
-		@Value("#{ systemProperties[''user.region''] }")
+		@Value("#{ systemProperties['user.region'] }")
 		public void setDefaultLocale(String defaultLocale) {
 			this.defaultLocale = defaultLocale;
 		}
@@ -544,7 +544,7 @@ Autowired methods and constructors can also use the `@Value` annotation.
 
 		@Autowired
 		public void configure(MovieFinder movieFinder,
-				@Value("#{ systemProperties[''user.region''] }") String defaultLocale) {
+				@Value("#{ systemProperties['user.region'] }") String defaultLocale) {
 			this.movieFinder = movieFinder;
 			this.defaultLocale = defaultLocale;
 		}
