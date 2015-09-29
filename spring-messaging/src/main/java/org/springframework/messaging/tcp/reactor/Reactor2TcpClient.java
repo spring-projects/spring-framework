@@ -19,9 +19,11 @@ package org.springframework.messaging.tcp.reactor;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.FutureListener;
@@ -76,7 +78,7 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 	public static final Class<NettyTcpClient> REACTOR_TCP_CLIENT_TYPE = NettyTcpClient.class;
 
 
-	private final NioEventLoopGroup eventLoopGroup;
+	private final EventLoopGroup eventLoopGroup;
 
 	private final TcpClientFactory<Message<P>, Message<P>> tcpClientSpecFactory;
 
@@ -99,7 +101,10 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 	 * @param codec the codec to use for encoding and decoding the TCP stream
 	 */
 	public Reactor2TcpClient(final String host, final int port, final Codec<Buffer, Message<P>, Message<P>> codec) {
-		this.eventLoopGroup = initEventLoopGroup();
+
+		// Reactor 2.0.5 required NioEventLoopGroup (2.0.6 changed to EventLoopGroup)
+		final NioEventLoopGroup nioEventLoopGroup = initEventLoopGroup();
+		this.eventLoopGroup = nioEventLoopGroup;
 
 		this.tcpClientSpecFactory = new TcpClientFactory<Message<P>, Message<P>>() {
 			@Override
@@ -108,7 +113,7 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 						.env(new Environment(new SynchronousDispatcherConfigReader()))
 						.codec(codec)
 						.connect(host, port)
-						.options(new NettyClientSocketOptions().eventLoopGroup(eventLoopGroup));
+						.options(new NettyClientSocketOptions().eventLoopGroup(nioEventLoopGroup));
 			}
 		};
 	}
@@ -244,7 +249,8 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 
 		@Override
 		public ReactorConfiguration read() {
-			return new ReactorConfiguration(Arrays.<DispatcherConfiguration>asList(), "sync", new Properties());
+			return new ReactorConfiguration(Collections.<DispatcherConfiguration>emptyList(),
+					"sync", new Properties());
 		}
 	}
 
