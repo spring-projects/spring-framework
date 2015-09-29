@@ -23,7 +23,7 @@ import java.util.concurrent.CompletableFuture;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import reactor.core.support.Exceptions;
+import reactor.core.error.Exceptions;
 import reactor.rx.Stream;
 import reactor.rx.action.Action;
 import reactor.rx.subscription.ReactiveSubscription;
@@ -131,8 +131,7 @@ public class CompletableFutureUtils {
 					}
 				});
 			} catch (Throwable throwable) {
-				Exceptions.throwIfFatal(throwable);
-				subscriber.onError(throwable);
+				Exceptions.publisher(throwable);
 			}
 		}
 
