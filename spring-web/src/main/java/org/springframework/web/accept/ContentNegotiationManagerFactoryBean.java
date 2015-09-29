@@ -130,7 +130,7 @@ public class ContentNegotiationManagerFactoryBean
 	}
 
 	/**
-	 * Indicate whether to use the Java Activation Framework as a fallback option
+	 * Whether to use the Java Activation Framework as a fallback option
 	 * to map from file extensions to media types. This is used only when
 	 * {@link #setFavorPathExtension(boolean)} is set to {@code true}.
 	 * <p>The default value is {@code true}.
@@ -184,8 +184,8 @@ public class ContentNegotiationManagerFactoryBean
 	 * FixedContentNegotiationStrategy}. Alternatively you can also provide a
 	 * custom strategy via {@link #setDefaultContentTypeStrategy}.
 	 */
-	public void setDefaultContentType(MediaType defaultContentType) {
-		this.defaultNegotiationStrategy = new FixedContentNegotiationStrategy(defaultContentType);
+	public void setDefaultContentType(MediaType contentType) {
+		this.defaultNegotiationStrategy = new FixedContentNegotiationStrategy(contentType);
 	}
 
 	/**
@@ -195,8 +195,8 @@ public class ContentNegotiationManagerFactoryBean
 	 * provides a simpler alternative to doing the same.
 	 * @since 4.1.2
 	 */
-	public void setDefaultContentTypeStrategy(ContentNegotiationStrategy defaultStrategy) {
-		this.defaultNegotiationStrategy = defaultStrategy;
+	public void setDefaultContentTypeStrategy(ContentNegotiationStrategy strategy) {
+		this.defaultNegotiationStrategy = strategy;
 	}
 
 	@Override
@@ -212,7 +212,8 @@ public class ContentNegotiationManagerFactoryBean
 		if (this.favorPathExtension) {
 			PathExtensionContentNegotiationStrategy strategy;
 			if (this.servletContext != null) {
-				strategy = new ServletPathExtensionContentNegotiationStrategy(this.servletContext, this.mediaTypes);
+				strategy = new ServletPathExtensionContentNegotiationStrategy(
+						this.servletContext, this.mediaTypes);
 			}
 			else {
 				strategy = new PathExtensionContentNegotiationStrategy(this.mediaTypes);
@@ -225,7 +226,8 @@ public class ContentNegotiationManagerFactoryBean
 		}
 
 		if (this.favorParameter) {
-			ParameterContentNegotiationStrategy strategy = new ParameterContentNegotiationStrategy(this.mediaTypes);
+			ParameterContentNegotiationStrategy strategy =
+					new ParameterContentNegotiationStrategy(this.mediaTypes);
 			strategy.setParameterName(this.parameterName);
 			strategies.add(strategy);
 		}

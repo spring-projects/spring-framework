@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
 import org.springframework.web.accept.ContentNegotiationStrategy;
 
 /**
- * Helps with configuring a {@link ContentNegotiationManager}.
+ * Help to create and configure a {@link ContentNegotiationManager}.
  *
  * <p>By default strategies for checking the extension of the request path and
  * the {@code Accept} header are registered. The path extension check will perform
@@ -37,7 +37,8 @@ import org.springframework.web.accept.ContentNegotiationStrategy;
  */
 public class ContentNegotiationConfigurer {
 
-	private final ContentNegotiationManagerFactoryBean factoryBean = new ContentNegotiationManagerFactoryBean();
+	private final ContentNegotiationManagerFactoryBean factoryBean =
+			new ContentNegotiationManagerFactoryBean();
 
 	private final Map<String, MediaType> mediaTypes = new HashMap<String, MediaType>();
 
