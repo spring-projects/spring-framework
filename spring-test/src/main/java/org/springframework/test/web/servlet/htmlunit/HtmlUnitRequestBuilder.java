@@ -362,7 +362,10 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 			String name = values.getKey();
 			for (String value : values.getValue()) {
 				try {
-					request.addParameter(name, URLDecoder.decode(value, "UTF-8"));
+					if (value != null) {
+						value = URLDecoder.decode(value, "UTF-8");
+					}
+					request.addParameter(name, value);
 				}
 				catch (UnsupportedEncodingException e) {
 					throw new RuntimeException(e);
