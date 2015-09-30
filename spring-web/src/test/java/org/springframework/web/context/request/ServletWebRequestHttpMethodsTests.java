@@ -87,6 +87,18 @@ public class ServletWebRequestHttpMethodsTests {
 		assertNull(servletResponse.getHeader("Last-Modified"));
 	}
 
+	// SPR-13516
+	@Test
+	public void checkNotModifiedInvalidStatus() {
+		long epochTime = currentDate.getTime();
+		servletRequest.addHeader("If-Modified-Since", epochTime);
+		servletResponse.setStatus(0);
+
+		assertTrue(request.checkNotModified(epochTime));
+		assertEquals(304, servletResponse.getStatus());
+		assertEquals(dateFormat.format(epochTime), servletResponse.getHeader("Last-Modified"));
+	}
+
 	@Test
 	public void checkNotModifiedHeaderAlreadySet() {
 		long epochTime = currentDate.getTime();

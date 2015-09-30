@@ -244,11 +244,15 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 
 	private boolean isCompatibleWithConditionalRequests(HttpServletResponse response) {
-		if (response == null || !servlet3Present) {
-			// Can't check response.getStatus() - let's assume we're good
+		try {
+			if (response == null || !servlet3Present) {
+				// Can't check response.getStatus() - let's assume we're good
+				return true;
+			}
+			return HttpStatus.valueOf(response.getStatus()).is2xxSuccessful();
+		} catch (IllegalArgumentException e) {
 			return true;
 		}
-		return HttpStatus.valueOf(response.getStatus()).is2xxSuccessful();
 	}
 
 	private boolean isHeaderAbsent(HttpServletResponse response, String header) {
