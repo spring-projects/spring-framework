@@ -55,6 +55,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
  * Unit tests for {@link HtmlUnitRequestBuilder}.
  *
  * @author Rob Winch
+ * @author Sam Brannen
  * @since 4.2
  */
 public class HtmlUnitRequestBuilderTests {
@@ -320,7 +321,7 @@ public class HtmlUnitRequestBuilderTests {
 	}
 
 	@Test
-	public void buildRequestLocaleName() {
+	public void buildRequestLocalName() {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		assertThat(actualRequest.getLocalName(), equalTo("localhost"));
@@ -348,7 +349,7 @@ public class HtmlUnitRequestBuilderTests {
 		for (HttpMethod expectedMethod : methods) {
 			webRequest.setHttpMethod(expectedMethod);
 			String actualMethod = requestBuilder.buildRequest(servletContext).getMethod();
-			assertThat(actualMethod, equalTo(actualMethod));
+			assertThat(actualMethod, equalTo(expectedMethod.name()));
 		}
 	}
 
@@ -363,7 +364,7 @@ public class HtmlUnitRequestBuilderTests {
 	}
 
 	@Test
-	public void buildRequestParameterMapQuery() throws Exception {
+	public void buildRequestParameterMapFromSingleQueryParam() throws Exception {
 		webRequest.setUrl(new URL("http://example.com/example/?name=value"));
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
@@ -373,7 +374,7 @@ public class HtmlUnitRequestBuilderTests {
 	}
 
 	@Test
-	public void buildRequestParameterMapQueryMulti() throws Exception {
+	public void buildRequestParameterMapFromMultipleQueryParams() throws Exception {
 		webRequest.setUrl(new URL("http://example.com/example/?name=value&param2=value+2"));
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
@@ -418,8 +419,18 @@ public class HtmlUnitRequestBuilderTests {
 	}
 
 	@Test
-	public void buildRequestQuery() throws Exception {
-		String expectedQuery = "aparam=avalue";
+	public void buildRequestQueryWithSingleQueryParam() throws Exception {
+		String expectedQuery = "param=value";
+		webRequest.setUrl(new URL("http://example.com/example?" + expectedQuery));
+
+		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
+
+		assertThat(actualRequest.getQueryString(), equalTo(expectedQuery));
+	}
+
+	@Test
+	public void buildRequestQueryWithMultipleQueryParams() throws Exception {
+		String expectedQuery = "param1=value1&param2=value2";
 		webRequest.setUrl(new URL("http://example.com/example?" + expectedQuery));
 
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
