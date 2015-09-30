@@ -78,19 +78,11 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
-	 * Whether to use suffix pattern match for registered file extensions only
-	 * when matching patterns to requests.
-	 * <p>If enabled, a controller method mapped to "/users" also matches to
-	 * "/users.json" assuming ".json" is a file extension registered with the
-	 * provided {@link #setContentNegotiationManager(ContentNegotiationManager)
-	 * contentNegotiationManager}. This can be useful for allowing only specific
-	 * URL extensions to be used as well as in cases where a "." in the URL path
-	 * can lead to ambiguous interpretation of path variable content, (e.g. given
-	 * "/users/{user}" and incoming URLs such as "/users/john.j.joe" and
-	 * "/users/john.j.joe.json").
-	 * <p>If enabled, this flag also enables
-	 * {@link #setUseSuffixPatternMatch(boolean) useSuffixPatternMatch}. The
-	 * default value is {@code false}.
+	 * Whether suffix pattern matching should work only against path extensions
+	 * explicitly registered with the {@link ContentNegotiationManager}. This
+	 * is generally recommended to reduce ambiguity and to avoid issues such as
+	 * when a "." appears in the path for other reasons.
+	 * <p>By default this is set to "false".
 	 */
 	public void setUseRegisteredSuffixPatternMatch(boolean useRegisteredSuffixPatternMatch) {
 		this.useRegisteredSuffixPatternMatch = useRegisteredSuffixPatternMatch;
