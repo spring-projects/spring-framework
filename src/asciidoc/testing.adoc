@@ -4448,7 +4448,7 @@ HtmlPage newMessagePage = submit.click();
 ----
 
 Finally, we can verify that a new message was created successfully. The following
-assertions use the https://code.google.com/p/fest/[FEST assertion library].
+assertions use the http://joel-costigliola.github.io/assertj/[AssertJ] library.
 
 [source,java]
 ----
@@ -5161,6 +5161,8 @@ Consult the following resources for more information about testing:
   Used by the Spring Framework in its test suite.
 * http://testng.org/[TestNG]: A testing framework inspired by JUnit with added support
   for annotations, test groups, data-driven testing, distributed testing, etc.
+* http://joel-costigliola.github.io/assertj/[AssertJ]: "__Fluent assertions for Java__"
+  including support for Java 8 lambdas, streams, etc.
 * http://en.wikipedia.org/wiki/Mock_Object[Mock Objects]: Article in Wikipedia.
 * http://www.mockobjects.com/[MockObjects.com]: Web site dedicated to mock objects, a
   technique for improving the design of code within test-driven development.
