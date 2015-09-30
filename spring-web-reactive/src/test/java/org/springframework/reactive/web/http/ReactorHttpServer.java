@@ -18,7 +18,6 @@ package org.springframework.reactive.web.http;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.reactive.web.http.reactor.RequestHandlerAdapter;
 import org.springframework.util.Assert;
-import reactor.Environment;
 import reactor.bus.selector.Selectors;
 import reactor.io.buffer.Buffer;
 import reactor.io.net.NetStreams;
@@ -47,8 +46,6 @@ public class ReactorHttpServer extends HttpServerSupport implements Initializing
 
 		Assert.notNull(getHttpHandler());
 		this.reactorHandler = new RequestHandlerAdapter(getHttpHandler());
-
-		Environment.initializeIfEmpty();
 
 		this.reactorServer = (getPort() != -1 ?
 		 NetStreams.httpServer(getPort()) :
