@@ -101,8 +101,9 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	}
 
 	/**
-	 * Returns true if any of the {@linkplain #setSupportedMediaTypes(List) supported media types}
-	 * include the given media type.
+	 * Returns true if any of the {@linkplain #setSupportedMediaTypes(List)
+	 * supported} media types {@link MediaType#includes(MediaType) include} the
+	 * given media type.
 	 * @param mediaType the media type to read, can be {@code null} if not specified.
 	 * Typically the value of a {@code Content-Type} header.
 	 * @return {@code true} if the supported media types include the media type,
@@ -121,8 +122,9 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	}
 
 	/**
-	 * This implementation checks if the given class is {@linkplain #supports(Class) supported},
-	 * and if the {@linkplain #getSupportedMediaTypes() supported media types}
+	 * This implementation checks if the given class is
+	 * {@linkplain #supports(Class) supported}, and if the
+	 * {@linkplain #getSupportedMediaTypes() supported} media types
 	 * {@linkplain MediaType#includes(MediaType) include} the given media type.
 	 */
 	@Override
