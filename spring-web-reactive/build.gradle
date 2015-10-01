@@ -25,6 +25,11 @@ repositories {
 	maven { url 'http://repo.spring.io/snapshot' }  // Reactor snapshot
 }
 
+configurations.all {
+	// check for updates every build
+	resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
 dependencies {
 	compile "org.springframework:spring-core:4.2.0.RELEASE"
 	compile "org.springframework:spring-web:4.2.0.RELEASE"
