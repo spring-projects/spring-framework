@@ -28,6 +28,7 @@ import reactor.rx.Streams;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.reactive.web.dispatch.DispatcherHandler;
+import org.springframework.reactive.web.dispatch.SimpleHandlerResultHandler;
 import org.springframework.reactive.web.http.AbstractHttpHandlerIntegrationTests;
 import org.springframework.reactive.web.http.HttpHandler;
 import org.springframework.reactive.web.http.ServerHttpRequest;
@@ -52,6 +53,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.registerSingleton("hm", TestHandlerMapping.class);
 		wac.registerSingleton("ha", HttpHandlerAdapter.class);
+		wac.registerSingleton("hhrh", SimpleHandlerResultHandler.class);
 		wac.refresh();
 
 		DispatcherHandler dispatcherHandler = new DispatcherHandler();

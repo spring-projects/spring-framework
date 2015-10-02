@@ -91,9 +91,9 @@ public class DispatcherHandler implements HttpHandler, ApplicationContextAware {
 		}
 
 		HandlerAdapter handlerAdapter = getHandlerAdapter(handler);
-		Publisher<HandlerResult> resultPublisher = handlerAdapter.handle(request, response, handler);
 
-		return Streams.wrap(resultPublisher).concatMap((HandlerResult result) -> {
+		try {
+			HandlerResult result = handlerAdapter.handle(request, response, handler);
 			for (HandlerResultHandler resultHandler : resultHandlers) {
 				if (resultHandler.supports(result)) {
 					return resultHandler.handleResult(request, response, result);
@@ -101,7 +101,11 @@ public class DispatcherHandler implements HttpHandler, ApplicationContextAware {
 			}
 			return Streams.fail(new IllegalStateException(
 					"No HandlerResultHandler for " + result.getValue()));
-		});
+		}
+		catch(Exception ex) {
+			return Streams.fail(ex);
+		}
+
 	}
 
 	protected Object getHandler(ServerHttpRequest request) {

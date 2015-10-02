@@ -16,7 +16,6 @@
 package org.springframework.reactive.web.dispatch.handler;
 
 import org.reactivestreams.Publisher;
-import reactor.rx.Streams;
 
 import org.springframework.reactive.web.dispatch.HandlerAdapter;
 import org.springframework.reactive.web.dispatch.HandlerResult;
@@ -34,6 +33,7 @@ import org.springframework.reactive.web.http.ServerHttpResponse;
  * handler mappings.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 public class HttpHandlerAdapter implements HandlerAdapter {
 
@@ -44,10 +44,10 @@ public class HttpHandlerAdapter implements HandlerAdapter {
 	}
 
 	@Override
-	public Publisher<HandlerResult> handle(ServerHttpRequest request, ServerHttpResponse response, Object handler) {
-		HttpHandler httpHandler = (HttpHandler) handler;
-		Publisher<Void> publisher = httpHandler.handle(request, response);
-		return Streams.wrap(publisher).map(aVoid -> null);
+	public HandlerResult handle(ServerHttpRequest request, ServerHttpResponse response, Object handler) {
+		HttpHandler httpHandler = (HttpHandler)handler;
+		Publisher<Void> completion = httpHandler.handle(request, response);
+		return new HandlerResult(httpHandler, completion);
 	}
 
 }

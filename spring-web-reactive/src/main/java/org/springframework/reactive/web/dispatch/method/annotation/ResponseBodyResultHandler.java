@@ -16,6 +16,7 @@
 package org.springframework.reactive.web.dispatch.method.annotation;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -25,7 +26,6 @@ import java.util.concurrent.CompletableFuture;
 
 import org.reactivestreams.Publisher;
 import reactor.rx.Promise;
-import reactor.rx.Stream;
 import reactor.rx.Streams;
 import rx.Observable;
 import rx.RxReactiveStreams;
@@ -33,6 +33,7 @@ import rx.Single;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpHeaders;
@@ -60,7 +61,7 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 	private final List<MessageToByteEncoder<?>> serializers;
 	private final List<MessageToByteEncoder<ByteBuffer>> postProcessors;
 
-	private int order = Ordered.LOWEST_PRECEDENCE;
+	private int order = 0;
 
 
 	public ResponseBodyResultHandler(List<MessageToByteEncoder<?>> serializers) {
@@ -86,8 +87,10 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 	public boolean supports(HandlerResult result) {
 		Object handler = result.getHandler();
 		if (handler instanceof HandlerMethod) {
-			Method method = ((HandlerMethod) handler).getMethod();
-			return AnnotatedElementUtils.isAnnotated(method, ResponseBody.class.getName());
+			HandlerMethod handlerMethod = (HandlerMethod) handler;
+			Type publisherVoidType = new ParameterizedTypeReference<Publisher<Void>>(){}.getType();
+			return AnnotatedElementUtils.isAnnotated(handlerMethod.getMethod(), ResponseBody.class.getName()) &&
+					!handlerMethod.getReturnType().getGenericParameterType().equals(publisherVoidType);
 		}
 		return false;
 	}

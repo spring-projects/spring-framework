@@ -19,9 +19,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.reactivestreams.Publisher;
-import reactor.rx.Streams;
-
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.reactive.codec.decoder.JacksonJsonDecoder;
 import org.springframework.reactive.codec.decoder.JsonObjectDecoder;
@@ -64,21 +61,15 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 	}
 
 	@Override
-	public Publisher<HandlerResult> handle(ServerHttpRequest request, ServerHttpResponse response,
-			Object handler) {
+	public HandlerResult handle(ServerHttpRequest request, ServerHttpResponse response,
+			Object handler) throws Exception {
 
 		final InvocableHandlerMethod invocable = new InvocableHandlerMethod((HandlerMethod) handler);
 		invocable.setHandlerMethodArgumentResolvers(this.argumentResolvers);
 
-		Object result;
-		try {
-			result = invocable.invokeForRequest(request);
-		}
-		catch (Exception ex) {
-			return Streams.fail(ex);
-		}
+		Object result = invocable.invokeForRequest(request);
 
-		return Streams.just(new HandlerResult(invocable, result));
+		return new HandlerResult(invocable, result);
 	}
 
 }

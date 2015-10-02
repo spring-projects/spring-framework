@@ -13,18 +13,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.reactive.web.dispatch;
 
+import org.reactivestreams.Publisher;
+
+import org.springframework.core.Ordered;
 import org.springframework.reactive.web.http.ServerHttpRequest;
 import org.springframework.reactive.web.http.ServerHttpResponse;
 
 /**
- * @author Rossen Stoyanchev
+ * Supports {@link HandlerResult} with a {@code Publisher<Void>} value.
+ *
+ * @author Sebastien Deleuze
  */
-public interface HandlerAdapter {
+public class SimpleHandlerResultHandler implements Ordered, HandlerResultHandler {
 
-	boolean supports(Object handler);
+	private int order = Ordered.LOWEST_PRECEDENCE;
 
-	HandlerResult handle(ServerHttpRequest request, ServerHttpResponse response, Object handler) throws Exception;
+	@Override
+	public int getOrder() {
+		return this.order;
+	}
 
+	@Override
+	public boolean supports(HandlerResult result) {
+		Object value = result.getValue();
+		return value != null && Publisher.class.isAssignableFrom(value.getClass());
+	}
+
+	@Override
+	public Publisher<Void> handleResult(ServerHttpRequest request, ServerHttpResponse response, HandlerResult result) {
+		return (Publisher<Void>)result.getValue();
+	}
 }
