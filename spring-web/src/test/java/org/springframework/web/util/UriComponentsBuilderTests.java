@@ -42,6 +42,7 @@ import static org.junit.Assert.*;
  * @author Phillip Webb
  * @author Oliver Gierke
  * @author David Eckel
+ * @author Sam Brannen
  */
 public class UriComponentsBuilderTests {
 
@@ -609,18 +610,23 @@ public class UriComponentsBuilderTests {
 	public void queryParamWithValueWithEquals() throws Exception {
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com/foo?bar=baz").build();
 		assertThat(uriComponents.toUriString(), equalTo("http://example.com/foo?bar=baz"));
+		assertThat(uriComponents.getQueryParams().get("bar").get(0), equalTo("baz"));
 	}
 
 	@Test
 	public void queryParamWithoutValueWithEquals() throws Exception {
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com/foo?bar=").build();
 		assertThat(uriComponents.toUriString(), equalTo("http://example.com/foo?bar="));
+		assertThat(uriComponents.getQueryParams().get("bar").get(0), equalTo(""));
 	}
 
 	@Test
 	public void queryParamWithoutValueWithoutEquals() throws Exception {
 		UriComponents uriComponents = UriComponentsBuilder.fromUriString("http://example.com/foo?bar").build();
 		assertThat(uriComponents.toUriString(), equalTo("http://example.com/foo?bar"));
+
+		// TODO [SPR-13537] Change equalTo(null) to equalTo("").
+		assertThat(uriComponents.getQueryParams().get("bar").get(0), equalTo(null));
 	}
 
 	@Test
