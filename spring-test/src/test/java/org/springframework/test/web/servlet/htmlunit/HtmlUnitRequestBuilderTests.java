@@ -417,7 +417,7 @@ public class HtmlUnitRequestBuilderTests {
 		MockHttpServletRequest actualRequest = requestBuilder.buildRequest(servletContext);
 
 		assertThat(actualRequest.getParameterMap().size(), equalTo(1));
-		assertThat(actualRequest.getParameter("name"), nullValue());
+		assertThat(actualRequest.getParameter("name"), equalTo(""));
 	}
 
 	@Test
