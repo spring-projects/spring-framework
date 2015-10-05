@@ -324,43 +324,14 @@ public class MappingJackson2JsonViewTests {
 	}
 
 	@Test
-	public void renderWithJsonpDefaultParameterName() throws Exception {
-		Map<String, Object> model = new HashMap<String, Object>();
-		model.put("foo", "bar");
-		request.addParameter("otherparam", "value");
-		request.addParameter("jsonp", "jsonpCallback");
+	public void renderWithJsonp() throws Exception {
+		testJsonp("jsonp", "callback", true);
+		testJsonp("jsonp", "_callback", true);
+		testJsonp("jsonp", "_Call.bAcK", true);
+		testJsonp("jsonp", "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_.", true);
 
-		view.render(model, request, response);
-
-		String content = response.getContentAsString();
-		assertEquals("jsonpCallback({\"foo\":\"bar\"});", content);
-	}
-
-	@Test
-	public void renderWithCallbackDefaultParameterName() throws Exception {
-		Map<String, Object> model = new HashMap<String, Object>();
-		model.put("foo", "bar");
-		request.addParameter("otherparam", "value");
-		request.addParameter("callback", "jsonpCallback");
-
-		view.render(model, request, response);
-
-		String content = response.getContentAsString();
-		assertEquals("jsonpCallback({\"foo\":\"bar\"});", content);
-	}
-
-	@Test
-	 public void renderWithCustomJsonpParameterName() throws Exception {
-		Map<String, Object> model = new HashMap<String, Object>();
-		model.put("foo", "bar");
-		request.addParameter("otherparam", "value");
-		request.addParameter("custom", "jsonpCallback");
-		view.setJsonpParameterNames(new LinkedHashSet(Arrays.asList("jsonp", "callback", "custom")));
-
-		view.render(model, request, response);
-
-		String content = response.getContentAsString();
-		assertEquals("jsonpCallback({\"foo\":\"bar\"});", content);
+		testJsonp("jsonp", "<script>", false);
+		testJsonp("jsonp", "!foo!bar", false);
 	}
 
 	private void validateResult() throws Exception {
@@ -374,6 +345,26 @@ public class MappingJackson2JsonViewTests {
 				jsContext.evaluateString(jsScope, "(" + json + ")", "JSON Stream", 1, null);
 		assertNotNull("Json Result did not eval as valid JavaScript", jsResult);
 		assertEquals("application/json", response.getContentType());
+	}
+
+	private void testJsonp(String paramName, String paramValue, boolean validValue) throws Exception {
+		Map<String, Object> model = new HashMap<String, Object>();
+		model.put("foo", "bar");
+
+		this.request = new MockHttpServletRequest();
+		this.request.addParameter("otherparam", "value");
+		this.request.addParameter(paramName, paramValue);
+		this.response = new MockHttpServletResponse();
+
+		this.view.render(model, this.request, this.response);
+
+		String content = this.response.getContentAsString();
+		if (validValue) {
+			assertEquals("/**/" + paramValue + "({\"foo\":\"bar\"});", content);
+		}
+		else {
+			assertEquals("{\"foo\":\"bar\"}", content);
+		}
 	}
 
 

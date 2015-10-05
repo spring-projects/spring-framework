@@ -417,7 +417,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 					response.setStatusCode(HttpStatus.NOT_FOUND);
 					return;
 				}
-				else if (!validateRequest(serverId, sessionId, transport)) {
+				else if (!validateRequest(serverId, sessionId, transport) || !validatePath(request)) {
 					if (requestInfo != null) {
 						logger.debug("Ignoring transport request: " + requestInfo);
 					}
@@ -452,6 +452,21 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 		return true;
 	}
 
+	/**
+	 * Ensure the path does not contain a file extension, either in the filename
+	 * (e.g. "/jsonp.bat") or possibly after path parameters ("/jsonp;Setup.bat")
+	 * which could be used for RFD exploits.
+	 * <p>Since the last part of the path is expected to be a transport type, the
+	 * presence of an extension would not work. All we need to do is check if
+	 * there are any path parameters, which would have been removed from the
+	 * SockJS path during request mapping, and if found reject the request.
+	 */
+	private boolean validatePath(ServerHttpRequest request) {
+		String path = request.getURI().getPath();
+		int index = path.lastIndexOf('/') + 1;
+		String filename = path.substring(index);
+		return filename.indexOf(';') == -1;
+	}
 
 	/**
 	 * Handle request for raw WebSocket communication, i.e. without any SockJS message framing.

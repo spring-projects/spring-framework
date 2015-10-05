@@ -178,6 +178,10 @@ public class ContentNegotiationManagerFactoryBean
 		this.useJaf = useJaf;
 	}
 
+	private boolean isUseJafTurnedOff() {
+		return (this.useJaf != null && !this.useJaf);
+	}
+
 	/**
 	 * Whether a request parameter ("format" by default) should be used to
 	 * determine the requested media type. For this option to work you must
@@ -240,7 +244,7 @@ public class ContentNegotiationManagerFactoryBean
 
 		if (this.favorPathExtension) {
 			PathExtensionContentNegotiationStrategy strategy;
-			if (this.servletContext != null) {
+			if (this.servletContext != null && !isUseJafTurnedOff()) {
 				strategy = new ServletPathExtensionContentNegotiationStrategy(
 						this.servletContext, this.mediaTypes);
 			}
@@ -271,7 +275,6 @@ public class ContentNegotiationManagerFactoryBean
 
 		this.contentNegotiationManager = new ContentNegotiationManager(strategies);
 	}
-
 
 	@Override
 	public ContentNegotiationManager getObject() {

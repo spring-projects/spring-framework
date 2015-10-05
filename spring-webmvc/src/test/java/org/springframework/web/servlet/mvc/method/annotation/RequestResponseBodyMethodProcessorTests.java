@@ -16,8 +16,6 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import static org.junit.Assert.*;
-
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
@@ -56,6 +54,7 @@ import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -68,6 +67,13 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
+import org.springframework.web.util.WebUtils;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test fixture for a {@link RequestResponseBodyMethodProcessor} with
@@ -324,6 +330,37 @@ public class RequestResponseBodyMethodProcessorTests {
 		MethodParameter returnType = new MethodParameter(method, -1);
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(new ArrayList<>());
 		processor.writeWithMessageConverters(new ByteArrayOutputStream(), returnType, this.webRequest);
+	}
+
+	@Test
+	public void addContentDispositionHeader() throws Exception {
+
+		ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
+		factory.addMediaType("pdf", new MediaType("application", "pdf"));
+		factory.afterPropertiesSet();
+
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(
+				Collections.singletonList(new StringHttpMessageConverter()),
+				factory.getObject());
+
+		assertContentDisposition(processor, false, "/hello.json", "whitelisted extension");
+		assertContentDisposition(processor, false, "/hello.pdf", "registered extension");
+		assertContentDisposition(processor, true, "/hello.dataless", "uknown extension");
+
+		// path parameters
+		assertContentDisposition(processor, false, "/hello.json;a=b", "path param shouldn't cause issue");
+		assertContentDisposition(processor, true, "/hello.json;a=b;setup.dataless", "uknown ext in path params");
+		assertContentDisposition(processor, true, "/hello.dataless;a=b;setup.json", "uknown ext in filename");
+		assertContentDisposition(processor, false, "/hello.json;a=b;setup.json", "whitelisted extensions");
+
+		// encoded dot
+		assertContentDisposition(processor, true, "/hello%2Edataless;a=b;setup.json", "encoded dot in filename");
+		assertContentDisposition(processor, true, "/hello.json;a=b;setup%2Edataless", "encoded dot in path params");
+		assertContentDisposition(processor, true, "/hello.dataless%3Bsetup.bat", "encoded dot in path params");
+
+		this.servletRequest.setAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE, "/hello.bat");
+		assertContentDisposition(processor, true, "/bonjour", "forwarded URL");
+		this.servletRequest.removeAttribute(WebUtils.FORWARD_REQUEST_URI_ATTRIBUTE);
 	}
 
 	@Test
@@ -597,6 +634,27 @@ public class RequestResponseBodyMethodProcessorTests {
 		assertTrue(content.contains("\"id\":456"));
 		assertTrue(content.contains("\"name\":\"bar\""));
 	}
+
+	private void assertContentDisposition(RequestResponseBodyMethodProcessor processor,
+			boolean expectContentDisposition, String requestURI, String comment) throws Exception {
+
+		this.servletRequest.setRequestURI(requestURI);
+		processor.handleReturnValue("body", this.returnTypeString, this.mavContainer, this.webRequest);
+
+		String header = servletResponse.getHeader("Content-Disposition");
+		if (expectContentDisposition) {
+			assertEquals("Expected 'Content-Disposition' header. Use case: '" + comment + "'",
+					"attachment;filename=f.txt", header);
+		}
+		else {
+			assertNull("Did not expect 'Content-Disposition' header. Use case: '" + comment + "'", header);
+		}
+
+		this.servletRequest = new MockHttpServletRequest();
+		this.servletResponse = new MockHttpServletResponse();
+		this.webRequest = new ServletWebRequest(servletRequest, servletResponse);
+	}
+
 
 
 	String handle(

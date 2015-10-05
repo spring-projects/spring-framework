@@ -66,7 +66,8 @@ public class PathExtensionContentNegotiationStrategy
 		PATH_HELPER.setUrlDecode(false);
 	}
 
-	private boolean useJaf = JAF_PRESENT;
+
+	private boolean useJaf = true;
 
 	private boolean ignoreUnknownExtensions = true;
 
@@ -89,8 +90,7 @@ public class PathExtensionContentNegotiationStrategy
 
 	/**
 	 * Whether to use the Java Activation Framework to look up file extensions.
-	 * <p>By default if this property is not set JAF is present on the
-	 * classpath it will be used.
+	 * <p>By default this is set to "true" but depends on JAF being present.
 	 */
 	public void setUseJaf(boolean useJaf) {
 		this.useJaf = useJaf;
@@ -123,7 +123,7 @@ public class PathExtensionContentNegotiationStrategy
 	protected MediaType handleNoMatch(NativeWebRequest webRequest, String extension)
 			throws HttpMediaTypeNotAcceptableException {
 
-		if (this.useJaf) {
+		if (this.useJaf && JAF_PRESENT) {
 			MediaType mediaType = JafMediaTypeFactory.getMediaType("file." + extension);
 			if (mediaType != null && !MediaType.APPLICATION_OCTET_STREAM.equals(mediaType)) {
 				return mediaType;

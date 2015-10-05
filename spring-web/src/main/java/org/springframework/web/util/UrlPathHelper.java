@@ -438,7 +438,7 @@ public class UrlPathHelper {
 	 * @see java.net.URLDecoder#decode(String)
 	 */
 	public String decodeRequestString(HttpServletRequest request, String source) {
-		if (this.urlDecode) {
+		if (this.urlDecode && source != null) {
 			return decodeInternal(request, source);
 		}
 		return source;

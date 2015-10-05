@@ -95,6 +95,7 @@ public class MappingJackson2HttpMessageConverter extends AbstractJackson2HttpMes
 		String jsonpFunction =
 				(object instanceof MappingJacksonValue ? ((MappingJacksonValue) object).getJsonpFunction() : null);
 		if (jsonpFunction != null) {
+			generator.writeRaw("/**/");
 			generator.writeRaw(jsonpFunction + "(");
 		}
 	}

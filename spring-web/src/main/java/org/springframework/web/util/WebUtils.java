@@ -723,20 +723,23 @@ public abstract class WebUtils {
 	}
 
 	/**
-	 * Extract the full URL filename (including file extension) from the given request URL path.
-	 * Correctly resolves nested paths such as "/products/view.html" as well.
+	 * Extract the full URL filename (including file extension) from the given
+	 * request URL path. Correctly resolve nested paths such as
+	 * "/products/view.html" and remove any path and or query parameters.
 	 * @param urlPath the request URL path (e.g. "/products/index.html")
 	 * @return the extracted URI filename (e.g. "index.html")
 	 */
 	public static String extractFullFilenameFromUrlPath(String urlPath) {
-		int end = urlPath.indexOf(';');
+		int end = urlPath.indexOf('?');
 		if (end == -1) {
-			end = urlPath.indexOf('?');
+			end = urlPath.indexOf('#');
 			if (end == -1) {
 				end = urlPath.length();
 			}
 		}
 		int begin = urlPath.lastIndexOf('/', end) + 1;
+		int paramIndex = urlPath.indexOf(';', begin);
+		end = (paramIndex != -1 && paramIndex < end ? paramIndex : end);
 		return urlPath.substring(begin, end);
 	}
 
