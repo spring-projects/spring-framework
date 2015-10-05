@@ -20,11 +20,15 @@ import java.nio.ByteBuffer;
 import org.reactivestreams.Publisher;
 
 /**
+ * Represent a server-side HTTP request.
  *
  * @author Rossen Stoyanchev
  */
 public interface ServerHttpRequest extends HttpRequest {
 
+	/**
+	 * Return the body of the message as a reactive stream.
+	 */
 	Publisher<ByteBuffer> getBody();
 
 }

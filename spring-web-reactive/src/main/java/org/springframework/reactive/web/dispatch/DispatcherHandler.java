@@ -35,7 +35,22 @@ import org.springframework.reactive.web.http.ServerHttpRequest;
 import org.springframework.reactive.web.http.ServerHttpResponse;
 
 /**
+ * Central dispatcher for HTTP request handlers/controllers. Dispatches to registered
+ * handlers for processing a web request, providing convenient mapping facilities.
+ *
+ * <li>It can use any {@link HandlerMapping} implementation to control the routing of
+ * requests to handler objects. HandlerMapping objects can be defined as beans in
+ * the application context.
+ *
+ * <li>It can use any {@link HandlerAdapter}; this allows for using any handler interface.
+ * HandlerAdapter objects can be added as beans in the application context.
+ *
+ * <li>It can use any {@link HandlerResultHandler}; this allows to process the result of
+ * the request handling. HandlerResultHandler objects can be added as beans in the
+ * application context.
+ *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 public class DispatcherHandler implements HttpHandler, ApplicationContextAware {
 

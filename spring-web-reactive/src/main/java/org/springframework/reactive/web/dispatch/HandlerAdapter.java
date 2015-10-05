@@ -19,12 +19,39 @@ import org.springframework.reactive.web.http.ServerHttpRequest;
 import org.springframework.reactive.web.http.ServerHttpResponse;
 
 /**
+ * Interface that must be implemented for each handler type to handle an HTTP request.
+ * This interface is used to allow the {@link DispatcherHandler} to be indefinitely
+ * extensible. The {@code DispatcherHandler} accesses all installed handlers through
+ * this interface, meaning that it does not contain code specific to any handler type.
+ *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 public interface HandlerAdapter {
 
+	/**
+	 * Given a handler instance, return whether or not this {@code HandlerAdapter}
+	 * can support it. Typical HandlerAdapters will base the decision on the handler
+	 * type. HandlerAdapters will usually only support one handler type each.
+	 * <p>A typical implementation:
+	 * <p>{@code
+	 * return (handler instanceof MyHandler);
+	 * }
+	 * @param handler handler object to check
+	 * @return whether or not this object can use the given handler
+	 */
 	boolean supports(Object handler);
 
+	/**
+	 * Use the given handler to handle this request.
+	 * @param request current HTTP request
+	 * @param response current HTTP response
+	 * @param handler handler to use. This object must have previously been passed
+	 * to the {@code supports} method of this interface, which must have
+	 * returned {@code true}.
+	 * @throws Exception in case of errors
+	 * @return An {@link HandlerResult} instance
+	 */
 	HandlerResult handle(ServerHttpRequest request, ServerHttpResponse response, Object handler) throws Exception;
 
 }

@@ -17,6 +17,8 @@ package org.springframework.reactive.web.dispatch;
 
 
 /**
+ * Represent the result of the invocation of an handler.
+ *
  * @author Rossen Stoyanchev
  */
 public class HandlerResult {

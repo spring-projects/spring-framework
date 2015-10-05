@@ -21,12 +21,32 @@ import org.springframework.reactive.web.http.ServerHttpRequest;
 import org.springframework.reactive.web.http.ServerHttpResponse;
 
 /**
+ * Process the {@link HandlerResult}, usually returned by an {@link HandlerAdapter}.
+ *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  */
 public interface HandlerResultHandler {
 
+	/**
+	 * Given a handler instance, return whether or not this {@code HandlerResultHandler}
+	 * can support it.
+	 *
+	 * @param result result object to check
+	 * @return whether or not this object can use the given result
+	 */
 	boolean supports(HandlerResult result);
 
+	/**
+	 * Process the given result in an asynchronous non blocking way, by eventually modifying
+	 * response headers, or writing some data stream into the response.
+	 * Implementations should not throw exceptions but signal them via the returned
+	 * {@code Publisher<Void>}.
+	 *
+	 * @return A {@code Publisher<Void>} used to signal the demand, and receive a notification
+	 * when the handling is complete (success or error) including the flush of the data on the
+	 * network.
+	 */
 	Publisher<Void> handleResult(ServerHttpRequest request, ServerHttpResponse response, HandlerResult result);
 
 }

@@ -22,12 +22,22 @@ import org.reactivestreams.Publisher;
 import org.springframework.http.HttpStatus;
 
 /**
+ * Represent a server-side HTTP response.
+ *
  * @author Rossen Stoyanchev
  */
 public interface ServerHttpResponse extends HttpMessage {
 
 	void setStatusCode(HttpStatus status);
 
+	/**
+	 * Write the provided reactive stream of bytes to the response body. Most servers
+	 * support multiple {@code writeWith} calls.
+	 * @param contentPublisher the stream to write in the response body.
+	 * @return A {@code Publisher<Void>} used to signal the demand, and receive a notification
+	 * when the handling is complete (success or error) including the flush of the data on the
+	 * network.
+	 */
 	Publisher<Void> writeWith(Publisher<ByteBuffer> contentPublisher);
 
 }

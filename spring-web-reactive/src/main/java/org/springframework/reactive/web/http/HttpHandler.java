@@ -20,11 +20,30 @@ import org.reactivestreams.Publisher;
 
 
 /**
+ * Interface for handlers that process HTTP requests and generate an HTTP response.
+ * This handler is designed to be called when the HTTP headers have been received, making
+ * the HTTP request body available as stream. The HTTP response body can also be written
+ * as a stream.
+ *
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
+ * @see ServerHttpRequest#getBody()
+ * @see ServerHttpResponse#writeWith(Publisher)
  */
 public interface HttpHandler {
 
+	/**
+	 * Process the given request, generating a response in an asynchronous non blocking way.
+	 * Implementations should not throw exceptions but signal them via the returned
+	 * {@code Publisher<Void>}.
+	 *
+	 * @param request current HTTP request, the body can be processed as a data stream.
+	 * @param response current HTTP response, the body can be provided as a data stream.
+	 * @return A {@code Publisher<Void>} used to signal the demand, and receive a notification
+	 * when the handling is complete (success or error) including the flush of the data on the
+	 * network.
+	 */
 	Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response);
 
 }
