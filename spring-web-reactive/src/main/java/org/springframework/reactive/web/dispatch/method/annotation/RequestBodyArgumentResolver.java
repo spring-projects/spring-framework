@@ -22,8 +22,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.reactivestreams.Publisher;
+import reactor.Publishers;
 import reactor.rx.Promise;
 import reactor.rx.Stream;
 import reactor.rx.Streams;
@@ -115,13 +117,13 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 			}
 			else {
 				try {
-					return Streams.wrap(elementStream).next().await();
+					return Publishers.toReadQueue(elementStream, 1, true).poll(30, TimeUnit.SECONDS);
 				} catch(InterruptedException ex) {
-					return Streams.fail(new IllegalStateException("Timeout before getter the value"));
+					return Publishers.error(new IllegalStateException("Timeout before getter the value"));
 				}
 			}
 		}
-		return Streams.fail(new IllegalStateException("Argument type not supported: " + type));
+		return Publishers.error(new IllegalStateException("Argument type not supported: " + type));
 	}
 
 	private MediaType resolveMediaType(ServerHttpRequest request) {

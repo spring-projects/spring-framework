@@ -16,20 +16,18 @@
 
 package org.springframework.reactive.codec.encoder;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.reactivestreams.Publisher;
-import reactor.io.buffer.Buffer;
-import reactor.rx.Stream;
-import reactor.rx.Streams;
-
 import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 import org.springframework.reactive.codec.CodecException;
 import org.springframework.reactive.codec.decoder.JacksonJsonDecoder;
 import org.springframework.reactive.io.BufferOutputStream;
+import reactor.Publishers;
+import reactor.io.buffer.Buffer;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * Encode from an {@code Object} stream to a byte stream of JSON objects.
@@ -56,19 +54,17 @@ public class JacksonJsonEncoder implements MessageToByteEncoder<Object> {
 
 	@Override
 	public Publisher<ByteBuffer> encode(Publisher<? extends Object> messageStream, ResolvableType type, MediaType mediaType, Object... hints) {
-		Stream<ByteBuffer> stream = Streams.wrap(messageStream).map(value -> {
+		return Publishers.map(messageStream, value -> {
 			Buffer buffer = new Buffer();
 			BufferOutputStream outputStream = new BufferOutputStream(buffer);
 			try {
 				this.mapper.writeValue(outputStream, value);
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				throw new CodecException("Error while writing the data", e);
 			}
 			buffer.flip();
 			return buffer.byteBuffer();
 		});
-		return stream;
 	}
 
 }

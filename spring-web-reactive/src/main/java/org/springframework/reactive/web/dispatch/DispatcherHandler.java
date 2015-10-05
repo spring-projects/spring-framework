@@ -15,15 +15,9 @@
  */
 package org.springframework.reactive.web.dispatch;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
-import reactor.rx.Streams;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
@@ -33,6 +27,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.reactive.web.http.HttpHandler;
 import org.springframework.reactive.web.http.ServerHttpRequest;
 import org.springframework.reactive.web.http.ServerHttpResponse;
+import reactor.Publishers;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Central dispatcher for HTTP request handlers/controllers. Dispatches to registered
@@ -102,7 +101,7 @@ public class DispatcherHandler implements HttpHandler, ApplicationContextAware {
 		if (handler == null) {
 			// No exception handling mechanism yet
 			response.setStatusCode(HttpStatus.NOT_FOUND);
-			return Streams.empty();
+			return Publishers.empty();
 		}
 
 		HandlerAdapter handlerAdapter = getHandlerAdapter(handler);
@@ -114,11 +113,11 @@ public class DispatcherHandler implements HttpHandler, ApplicationContextAware {
 					return resultHandler.handleResult(request, response, result);
 				}
 			}
-			return Streams.fail(new IllegalStateException(
-					"No HandlerResultHandler for " + result.getValue()));
+			return Publishers.error(new IllegalStateException(
+			  "No HandlerResultHandler for " + result.getValue()));
 		}
 		catch(Exception ex) {
-			return Streams.fail(ex);
+			return Publishers.error(ex);
 		}
 
 	}

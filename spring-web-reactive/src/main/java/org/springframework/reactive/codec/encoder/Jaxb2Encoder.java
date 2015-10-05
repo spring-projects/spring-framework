@@ -16,20 +16,7 @@
 
 package org.springframework.reactive.codec.encoder;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.MarshalException;
-import javax.xml.bind.Marshaller;
-
 import org.reactivestreams.Publisher;
-import reactor.io.buffer.Buffer;
-import reactor.rx.Streams;
-
 import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 import org.springframework.reactive.codec.CodecException;
@@ -37,6 +24,17 @@ import org.springframework.reactive.codec.decoder.Jaxb2Decoder;
 import org.springframework.reactive.io.BufferOutputStream;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import reactor.Publishers;
+import reactor.io.buffer.Buffer;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.MarshalException;
+import javax.xml.bind.Marshaller;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Encode from an {@code Object} stream to a byte stream of XML elements.
@@ -55,7 +53,7 @@ public class Jaxb2Encoder implements MessageToByteEncoder<Object> {
 
 	@Override
 	public Publisher<ByteBuffer> encode(Publisher<? extends Object> messageStream, ResolvableType type, MediaType mediaType, Object... hints) {
-		return Streams.wrap(messageStream).map(value -> {
+		return Publishers.map(messageStream, value -> {
 			try {
 				Buffer buffer = new Buffer();
 				BufferOutputStream outputStream = new BufferOutputStream(buffer);
@@ -65,14 +63,12 @@ public class Jaxb2Encoder implements MessageToByteEncoder<Object> {
 				marshaller.marshal(value, outputStream);
 				buffer.flip();
 				return buffer.byteBuffer();
-			}
-			catch (MarshalException ex) {
+			} catch (MarshalException ex) {
 				throw new CodecException(
-						"Could not marshal [" + value + "]: " + ex.getMessage(), ex);
-			}
-			catch (JAXBException ex) {
+				  "Could not marshal [" + value + "]: " + ex.getMessage(), ex);
+			} catch (JAXBException ex) {
 				throw new CodecException(
-						"Could not instantiate JAXBContext: " + ex.getMessage(), ex);
+				  "Could not instantiate JAXBContext: " + ex.getMessage(), ex);
 			}
 		});
 	}

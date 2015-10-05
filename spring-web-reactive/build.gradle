@@ -34,9 +34,10 @@ dependencies {
 	compile "org.springframework:spring-core:4.2.0.RELEASE"
 	compile "org.springframework:spring-web:4.2.0.RELEASE"
 	compile "org.reactivestreams:reactive-streams:1.0.0"
-	compile "io.projectreactor:reactor-stream:2.1.0.BUILD-SNAPSHOT"
+	compile "io.projectreactor:reactor-core:2.1.0.BUILD-SNAPSHOT"
 	compile "commons-logging:commons-logging:1.2"
-	compile "com.fasterxml.jackson.core:jackson-databind:2.6.1"
+
+	optional "com.fasterxml.jackson.core:jackson-databind:2.6.1"
 
 	optional "io.reactivex:rxnetty:0.5.0-SNAPSHOT"
 	optional "io.reactivex:rxjava-reactive-streams:1.0.1"

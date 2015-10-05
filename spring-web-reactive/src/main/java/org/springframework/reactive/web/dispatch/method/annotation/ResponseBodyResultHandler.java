@@ -15,22 +15,7 @@
  */
 package org.springframework.reactive.web.dispatch.method.annotation;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-
 import org.reactivestreams.Publisher;
-import reactor.rx.Promise;
-import reactor.rx.Streams;
-import rx.Observable;
-import rx.RxReactiveStreams;
-import rx.Single;
-
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.ParameterizedTypeReference;
@@ -46,6 +31,19 @@ import org.springframework.reactive.web.http.ServerHttpRequest;
 import org.springframework.reactive.web.http.ServerHttpResponse;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.HandlerMethod;
+import reactor.Publishers;
+import reactor.rx.Promise;
+import rx.Observable;
+import rx.RxReactiveStreams;
+import rx.Single;
+
+import java.lang.reflect.Type;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 
 /**
@@ -104,7 +102,7 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 		MethodParameter returnType = handlerMethod.getReturnValueType(value);
 
 		if (value == null) {
-			return Streams.empty();
+			return Publishers.empty();
 		}
 
 		MediaType mediaType = resolveMediaType(request);
@@ -132,7 +130,7 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 				elementStream = (Publisher)value;
 			}
 			else {
-				elementStream = Streams.just(value);
+				elementStream = Publishers.just(value);
 			}
 
 			Publisher<ByteBuffer> outputStream = serializer.encode(elementStream, type, mediaType, hints.toArray());
@@ -141,10 +139,10 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 				outputStream = postProcessor.encode(outputStream, type, mediaType, hints.toArray());
 			}
 			response.getHeaders().setContentType(mediaType);
-			return response.writeWith(Streams.wrap(outputStream));
+			return response.writeWith(outputStream);
 		}
-		return Streams.fail(new IllegalStateException(
-				"Return value type not supported: " + returnType));
+		return Publishers.error(new IllegalStateException(
+		  "Return value type not supported: " + returnType));
 	}
 
 	private MediaType resolveMediaType(ServerHttpRequest request) {

@@ -16,17 +16,16 @@
 
 package org.springframework.reactive.codec.encoder;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-
 import org.reactivestreams.Publisher;
-import reactor.rx.Streams;
-
 import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 import org.springframework.reactive.codec.decoder.StringDecoder;
 import org.springframework.reactive.codec.support.HintUtils;
+import reactor.Publishers;
+
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Encode from a String stream to a bytes stream.
@@ -47,7 +46,7 @@ public class StringEncoder implements MessageToByteEncoder<String> {
 	@Override
 	public Publisher<ByteBuffer> encode(Publisher<? extends String> elementStream, ResolvableType type, MediaType mediaType, Object... hints) {
 		final Charset charset = HintUtils.getHintByClass(Charset.class, hints, DEFAULT_CHARSET);
-		return Streams.wrap(elementStream).map(s -> ByteBuffer.wrap(s.getBytes(charset)));
+		return Publishers.map(elementStream, s -> ByteBuffer.wrap(s.getBytes(charset)));
 	}
 
 }

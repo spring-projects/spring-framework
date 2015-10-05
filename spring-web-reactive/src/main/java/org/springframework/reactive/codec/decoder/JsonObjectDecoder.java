@@ -16,22 +16,21 @@
 
 package org.springframework.reactive.codec.decoder;
 
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import org.reactivestreams.Publisher;
-import reactor.fn.Function;
-import reactor.rx.Promise;
-import reactor.rx.Streams;
-import rx.Observable;
-
 import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 import org.springframework.reactive.codec.encoder.JsonObjectEncoder;
+import reactor.Publishers;
+import reactor.fn.Function;
+import reactor.rx.Promise;
+import rx.Observable;
+
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Decode an arbitrary split byte stream representing JSON objects to a bye stream
@@ -98,7 +97,7 @@ public class JsonObjectDecoder implements ByteToMessageDecoder<ByteBuffer> {
 	@Override
 	public Publisher<ByteBuffer> decode(Publisher<ByteBuffer> inputStream, ResolvableType type, MediaType mediaType, Object... hints) {
 
-		return Streams.wrap(inputStream).flatMap(new Function<ByteBuffer, Publisher<? extends ByteBuffer>>() {
+		return Publishers.flatMap(inputStream, new Function<ByteBuffer, Publisher<? extends ByteBuffer>>() {
 
 			int openBraces;
 			int idx;
@@ -121,17 +120,17 @@ public class JsonObjectDecoder implements ByteToMessageDecoder<ByteBuffer> {
 				}
 				if (state == ST_CORRUPTED) {
 					in.skipBytes(in.readableBytes());
-					return Streams.fail(new IllegalStateException("Corrupted stream"));
+					return Publishers.error(new IllegalStateException("Corrupted stream"));
 				}
 
 				if (wrtIdx > maxObjectLength) {
 					// buffer size exceeded maxObjectLength; discarding the complete buffer.
 					in.skipBytes(in.readableBytes());
 					reset();
-					return Streams.fail(new IllegalStateException(
-							"object length exceeds " + maxObjectLength + ": " +
-									wrtIdx +
-									" bytes discarded"));
+					return Publishers.error(new IllegalStateException(
+					  "object length exceeds " + maxObjectLength + ": " +
+						wrtIdx +
+						" bytes discarded"));
 				}
 
 				for (/* use current idx */; idx < wrtIdx; idx++) {
@@ -202,16 +201,16 @@ public class JsonObjectDecoder implements ByteToMessageDecoder<ByteBuffer> {
 					}
 					else {
 						state = ST_CORRUPTED;
-						return Streams.fail(new IllegalStateException(
-								"invalid JSON received at byte position " + idx +
-										": " + ByteBufUtil.hexDump(in)));
+						return Publishers.error(new IllegalStateException(
+						  "invalid JSON received at byte position " + idx +
+							": " + ByteBufUtil.hexDump(in)));
 					}
 				}
 
 				if (in.readableBytes() == 0) {
 					idx = 0;
 				}
-				return Streams.from(chunks);
+				return Publishers.from(chunks);
 			}
 
 			/**

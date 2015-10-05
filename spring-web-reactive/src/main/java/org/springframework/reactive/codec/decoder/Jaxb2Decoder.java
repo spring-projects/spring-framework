@@ -16,33 +16,27 @@
 
 package org.springframework.reactive.codec.decoder;
 
-import java.nio.ByteBuffer;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.UnmarshalException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.transform.Source;
-import javax.xml.transform.sax.SAXSource;
-import javax.xml.transform.stream.StreamSource;
-
 import org.reactivestreams.Publisher;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
-import reactor.rx.Streams;
-
 import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 import org.springframework.reactive.codec.CodecException;
 import org.springframework.reactive.codec.encoder.Jaxb2Encoder;
 import org.springframework.reactive.io.ByteBufferPublisherInputStream;
 import org.springframework.util.Assert;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.XMLReaderFactory;
+import reactor.Publishers;
+
+import javax.xml.bind.*;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.transform.Source;
+import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamSource;
+import java.nio.ByteBuffer;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Decode from a bytes stream of XML elements to a stream of {@code Object} (POJO).
@@ -66,18 +60,19 @@ public class Jaxb2Decoder implements ByteToMessageDecoder<Object> {
 			Source source = processSource(new StreamSource(new ByteBufferPublisherInputStream(inputStream)));
 			Unmarshaller unmarshaller = createUnmarshaller(outputClass);
 			if (outputClass.isAnnotationPresent(XmlRootElement.class)) {
-				return Streams.just(unmarshaller.unmarshal(source));
+				return Publishers.just(unmarshaller.unmarshal(source));
 			}
 			else {
 				JAXBElement<?> jaxbElement = unmarshaller.unmarshal(source, outputClass);
-				return Streams.just(jaxbElement.getValue());
+				return Publishers.just(jaxbElement.getValue());
 			}
 		}
 		catch (UnmarshalException ex) {
-			return Streams.fail(new CodecException("Could not unmarshal to [" + outputClass + "]: " + ex.getMessage(), ex));
+			return Publishers.error(
+			  new CodecException("Could not unmarshal to [" + outputClass + "]: " + ex.getMessage(), ex));
 		}
 		catch (JAXBException ex) {
-			return Streams.fail(new CodecException("Could not instantiate JAXBContext: " + ex.getMessage(), ex));
+			return Publishers.error(new CodecException("Could not instantiate JAXBContext: " + ex.getMessage(), ex));
 		}
 	}
 
