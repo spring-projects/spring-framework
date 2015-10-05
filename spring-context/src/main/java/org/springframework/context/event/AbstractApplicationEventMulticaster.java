@@ -60,7 +60,7 @@ public abstract class AbstractApplicationEventMulticaster
 
 	private final ListenerRetriever defaultRetriever = new ListenerRetriever(false);
 
-	private final Map<ListenerCacheKey, ListenerRetriever> retrieverCache =
+	final Map<ListenerCacheKey, ListenerRetriever> retrieverCache =
 			new ConcurrentHashMap<ListenerCacheKey, ListenerRetriever>(64);
 
 	private ClassLoader beanClassLoader;
@@ -303,13 +303,13 @@ public abstract class AbstractApplicationEventMulticaster
 				return true;
 			}
 			ListenerCacheKey otherKey = (ListenerCacheKey) other;
-			return ObjectUtils.nullSafeEquals(this.eventType, otherKey.eventType) &&
-					ObjectUtils.nullSafeEquals(this.sourceType, otherKey.sourceType);
+			return (ObjectUtils.nullSafeEquals(this.eventType, otherKey.eventType) &&
+					ObjectUtils.nullSafeEquals(this.sourceType, otherKey.sourceType));
 		}
 
 		@Override
 		public int hashCode() {
-			return ObjectUtils.nullSafeHashCode(this.eventType) * 29 + ObjectUtils.nullSafeHashCode(this.sourceType);
+			return (ObjectUtils.nullSafeHashCode(this.eventType) * 29 + ObjectUtils.nullSafeHashCode(this.sourceType));
 		}
 	}
 
