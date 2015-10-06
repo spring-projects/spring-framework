@@ -291,7 +291,7 @@ public class MockServletContext implements ServletContext {
 	 */
 	@Override
 	public String getMimeType(String filePath) {
-		String mimeType = MimeTypeResolver.getMimeType(filePath);
+		String mimeType = FileTypeMap.getDefaultFileTypeMap().getContentType(filePath);
 		return ("application/octet-stream".equals(mimeType) ? null : mimeType);
 	}
 
@@ -678,18 +678,6 @@ public class MockServletContext implements ServletContext {
 	@Override
 	public <T extends EventListener> T createListener(Class<T> c) throws ServletException {
 		throw new UnsupportedOperationException();
-	}
-
-
-	/**
-	 * Inner factory class used to introduce a Java Activation Framework
-	 * dependency when actually asked to resolve a MIME type.
-	 */
-	private static class MimeTypeResolver {
-
-		public static String getMimeType(String filePath) {
-			return FileTypeMap.getDefaultFileTypeMap().getContentType(filePath);
-		}
 	}
 
 }
