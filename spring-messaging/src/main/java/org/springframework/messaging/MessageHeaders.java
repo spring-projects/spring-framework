@@ -165,6 +165,7 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 		return get(ERROR_CHANNEL);
 	}
 
+
 	@SuppressWarnings("unchecked")
 	public <T> T get(Object key, Class<T> type) {
 		Object value = this.headers.get(key);
@@ -176,23 +177,6 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 					key + "'. Expected [" + type + "] but actual type is [" + value.getClass() + "]");
 		}
 		return (T) value;
-	}
-
-
-	@Override
-	public boolean equals(Object other) {
-		return (this == other ||
-				(other instanceof MessageHeaders && this.headers.equals(((MessageHeaders) other).headers)));
-	}
-
-	@Override
-	public int hashCode() {
-		return this.headers.hashCode();
-	}
-
-	@Override
-	public String toString() {
-		return this.headers.toString();
 	}
 
 
@@ -275,17 +259,38 @@ public class MessageHeaders implements Map<String, Object>, Serializable {
 				keysToRemove.add(entry.getKey());
 			}
 		}
-		for (String key : keysToRemove) {
-			if (logger.isInfoEnabled()) {
-				logger.info("Removing non-serializable header: " + key);
+		if (!keysToRemove.isEmpty()) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Removing non-serializable message headers: " + keysToRemove);
 			}
-			this.headers.remove(key);
+			for (String key : keysToRemove) {
+				this.headers.remove(key);
+			}
 		}
 		out.defaultWriteObject();
 	}
 
 	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
 		in.defaultReadObject();
+	}
+
+
+	// equals, hashCode, toString
+
+	@Override
+	public boolean equals(Object other) {
+		return (this == other ||
+				(other instanceof MessageHeaders && this.headers.equals(((MessageHeaders) other).headers)));
+	}
+
+	@Override
+	public int hashCode() {
+		return this.headers.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return this.headers.toString();
 	}
 
 }

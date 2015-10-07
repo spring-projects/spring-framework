@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,8 +54,8 @@ import org.springframework.util.StringUtils;
 /**
  * Bean post-processor that registers methods annotated with {@link JmsListener}
  * to be invoked by a JMS message listener container created under the cover
- * by a {@link org.springframework.jms.config.JmsListenerContainerFactory} according
- * to the parameters of the annotation.
+ * by a {@link org.springframework.jms.config.JmsListenerContainerFactory}
+ * according to the attributes of the annotation.
  *
  * <p>Annotated methods can use flexible arguments as defined by {@link JmsListener}.
  *
@@ -63,10 +63,10 @@ import org.springframework.util.StringUtils;
  * {@code <jms:annotation-driven>} XML element, and also by the {@link EnableJms}
  * annotation.
  *
- * <p>Auto-detect any {@link JmsListenerConfigurer} instances in the container,
+ * <p>Autodetects any {@link JmsListenerConfigurer} instances in the container,
  * allowing for customization of the registry to be used, the default container
- * factory or for fine-grained control over endpoints registration. See
- * {@link EnableJms} Javadoc for complete usage details.
+ * factory or for fine-grained control over endpoints registration. See the
+ * {@link EnableJms} javadocs for complete usage details.
  *
  * @author Stephane Nicoll
  * @author Juergen Hoeller
@@ -208,8 +208,8 @@ public class JmsListenerAnnotationBeanPostProcessor
 			});
 			if (annotatedMethods.isEmpty()) {
 				this.nonAnnotatedClasses.add(bean.getClass());
-				if (logger.isDebugEnabled()) {
-					logger.debug("No @JmsListener annotations found on bean class: " + bean.getClass());
+				if (logger.isTraceEnabled()) {
+					logger.trace("No @JmsListener annotations found on bean class: " + bean.getClass());
 				}
 			}
 			else {
@@ -281,7 +281,7 @@ public class JmsListenerAnnotationBeanPostProcessor
 			return resolve(jmsListener.id());
 		}
 		else {
-			return "org.springframework.jms.JmsListenerEndpointContainer#" + counter.getAndIncrement();
+			return "org.springframework.jms.JmsListenerEndpointContainer#" + this.counter.getAndIncrement();
 		}
 	}
 
