@@ -32,6 +32,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -49,6 +50,7 @@ import static org.junit.Assert.*;
  *
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
+ * @author Kazuki Shimizu
  * @since 3.1
  */
 public class ExceptionHandlerExceptionResolverTests {
@@ -169,6 +171,19 @@ public class ExceptionHandlerExceptionResolverTests {
 		assertNotNull(mav);
 		assertTrue(mav.isEmpty());
 		assertEquals("IllegalArgumentException", this.response.getContentAsString());
+	}
+
+	// Add for SPR-13546
+	@Test
+	public void resolveExceptionModelAtArgument() throws Exception {
+		IllegalArgumentException ex = new IllegalArgumentException();
+		HandlerMethod handlerMethod = new HandlerMethod(new ModelAtArgumentController(), "handle");
+		this.resolver.afterPropertiesSet();
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
+
+		assertNotNull(mav);
+		assertEquals(1, mav.getModelMap().size());
+		assertEquals("IllegalArgumentException", mav.getModelMap().get("exceptionClassName"));
 	}
 
 	@Test
@@ -294,6 +309,18 @@ public class ExceptionHandlerExceptionResolverTests {
 
 		@ExceptionHandler(value=IOException.class)
 		public void handleException() {
+		}
+	}
+
+	// Add for SPR-13546
+	@Controller
+	static class ModelAtArgumentController {
+
+		public void handle() {}
+
+		@ExceptionHandler
+		public void handleException(Exception ex, Model model) {
+			model.addAttribute("exceptionClassName", ClassUtils.getShortName(ex.getClass()));
 		}
 	}
 
