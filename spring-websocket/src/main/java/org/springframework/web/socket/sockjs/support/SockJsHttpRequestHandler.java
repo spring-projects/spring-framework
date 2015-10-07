@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,8 +56,8 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler {
 	 * @param webSocketHandler the websocket handler
 	 */
 	public SockJsHttpRequestHandler(SockJsService sockJsService, WebSocketHandler webSocketHandler) {
-		Assert.notNull(sockJsService, "sockJsService must not be null");
-		Assert.notNull(webSocketHandler, "webSocketHandler must not be null");
+		Assert.notNull(sockJsService, "SockJsService must not be null");
+		Assert.notNull(webSocketHandler, "WebSocketHandler must not be null");
 		this.sockJsService = sockJsService;
 		this.webSocketHandler =
 				new ExceptionWebSocketHandlerDecorator(new LoggingWebSocketHandlerDecorator(webSocketHandler));
@@ -97,7 +97,7 @@ public class SockJsHttpRequestHandler implements HttpRequestHandler {
 	private String getSockJsPath(HttpServletRequest servletRequest) {
 		String attribute = HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE;
 		String path = (String) servletRequest.getAttribute(attribute);
-		return ((path.length() > 0) && (path.charAt(0) != '/')) ? "/" + path : path;
+		return (path.length() > 0 && path.charAt(0) != '/' ? "/" + path : path);
 	}
 
 }

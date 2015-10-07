@@ -16,9 +16,6 @@
 
 package org.springframework.web.socket.sockjs.transport.handler;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
@@ -28,6 +25,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.socket.AbstractHttpRequestTests;
 import org.springframework.web.socket.WebSocketHandler;
@@ -41,11 +39,15 @@ import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.session.StubSockJsServiceConfig;
 import org.springframework.web.socket.sockjs.transport.session.TestSockJsSession;
 
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+
 /**
  * Test fixture for {@link org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService}.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @author Ben Kiefer
  */
 public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 
@@ -174,6 +176,18 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		assertEquals(403, this.servletResponse.getStatus());
 		assertNull(this.response.getHeaders().getFirst("Access-Control-Allow-Origin"));
 		assertNull(this.response.getHeaders().getFirst("Access-Control-Allow-Credentials"));
+	}
+
+	@Test  // SPR-13545
+	public void handleInvalidTransportType() throws Exception {
+		String sockJsPath = sessionUrlPrefix + "invalid";
+		setRequest("POST", sockJsPrefix + sockJsPath);
+		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
+		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://mydomain2.com");
+		this.servletRequest.setServerName("mydomain2.com");
+		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
+
+		assertEquals(404, this.servletResponse.getStatus());
 	}
 
 	@Test
