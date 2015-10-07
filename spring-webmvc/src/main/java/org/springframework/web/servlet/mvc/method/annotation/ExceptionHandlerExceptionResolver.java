@@ -65,6 +65,7 @@ import org.springframework.web.servlet.handler.AbstractHandlerMethodExceptionRes
  * {@link #setArgumentResolvers} and {@link #setReturnValueHandlers(List)}.
  *
  * @author Rossen Stoyanchev
+ * @author Kazuki Shimizu
  * @since 3.1
  */
 public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExceptionResolver
@@ -293,6 +294,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		// Type-based argument resolution
 		resolvers.add(new ServletRequestMethodArgumentResolver());
 		resolvers.add(new ServletResponseMethodArgumentResolver());
+		resolvers.add(new ModelMethodProcessor());
 
 		// Custom arguments
 		if (getCustomArgumentResolvers() != null) {
