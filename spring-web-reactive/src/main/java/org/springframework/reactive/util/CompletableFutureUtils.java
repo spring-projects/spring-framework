@@ -27,7 +27,6 @@ import reactor.core.error.Exceptions;
 import reactor.core.error.SpecificationExceptions;
 import reactor.core.support.BackpressureUtils;
 import reactor.rx.Stream;
-import reactor.rx.action.Action;
 import reactor.rx.subscription.ReactiveSubscription;
 
 import org.springframework.util.Assert;
@@ -115,12 +114,14 @@ public class CompletableFutureUtils {
 					public void request(long elements) {
 						try{
 							BackpressureUtils.checkRequest(elements);
-						}catch(SpecificationExceptions.Spec309_NullOrNegativeRequest iae){
+						}
+						catch (SpecificationExceptions.Spec309_NullOrNegativeRequest iae) {
 							subscriber.onError(iae);
 							return;
 						}
-						if (isComplete()) return;
-
+						if (isComplete()) {
+							return;
+						}
 						try {
 							future.whenComplete((result, error) -> {
 								if (error != null) {
@@ -130,17 +131,17 @@ public class CompletableFutureUtils {
 									onComplete();
 								}
 							});
-
-						} catch (Throwable e) {
+						}
+						catch (Throwable e) {
 							onError(e);
 						}
 					}
 				});
-			} catch (Throwable throwable) {
+			}
+			catch (Throwable throwable) {
 				Exceptions.publisher(throwable);
 			}
 		}
-
 	}
 
 }
