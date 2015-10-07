@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.reactive.web.http;
+package org.springframework.reactive.web.http.servlet;
 
 import java.io.File;
 
@@ -22,7 +22,8 @@ import org.apache.catalina.LifecycleException;
 import org.apache.catalina.startup.Tomcat;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.reactive.web.http.servlet.HttpHandlerServlet;
+import org.springframework.reactive.web.http.HttpServer;
+import org.springframework.reactive.web.http.HttpServerSupport;
 import org.springframework.util.Assert;
 import org.springframework.util.SocketUtils;
 

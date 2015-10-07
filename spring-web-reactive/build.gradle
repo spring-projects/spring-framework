@@ -44,16 +44,16 @@ dependencies {
 
 	optional "io.projectreactor:reactor-net:2.1.0.BUILD-SNAPSHOT"
 
+	optional 'org.apache.tomcat:tomcat-util:8.0.24'
+	optional 'org.apache.tomcat.embed:tomcat-embed-core:8.0.24'
+
+	optional 'org.eclipse.jetty:jetty-server:9.3.2.v20150730'
+	optional 'org.eclipse.jetty:jetty-servlet:9.3.2.v20150730'
+
 	provided "javax.servlet:javax.servlet-api:3.1.0"
 
 	testCompile "junit:junit:4.12"
 	testCompile "org.springframework:spring-test:4.2.0.RELEASE"
-
-	testCompile 'org.apache.tomcat:tomcat-util:8.0.24'
-	testCompile 'org.apache.tomcat.embed:tomcat-embed-core:8.0.24'
-
-	testCompile 'org.eclipse.jetty:jetty-server:9.3.2.v20150730'
-	testCompile 'org.eclipse.jetty:jetty-servlet:9.3.2.v20150730'
 
 	testCompile "org.slf4j:slf4j-jcl:1.7.12"
 	testCompile "org.slf4j:jul-to-slf4j:1.7.12"
