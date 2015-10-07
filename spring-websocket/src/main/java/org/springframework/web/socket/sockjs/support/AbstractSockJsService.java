@@ -26,7 +26,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
@@ -279,16 +278,13 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	 * Configure allowed {@code Origin} header values. This check is mostly
 	 * designed for browsers. There is nothing preventing other types of client
 	 * to modify the {@code Origin} header value.
-	 *
 	 * <p>When SockJS is enabled and origins are restricted, transport types
 	 * that do not allow to check request origin (JSONP and Iframe based
 	 * transports) are disabled. As a consequence, IE 6 to 9 are not supported
 	 * when origins are restricted.
-	 *
 	 * <p>Each provided allowed origin must have a scheme, and optionally a port
 	 * (e.g. "http://example.org", "http://example.org:9090"). An allowed origin
 	 * string may also be "*" in which case all origins are allowed.
-	 *
 	 * @since 4.1.2
 	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>
 	 * @see <a href="https://github.com/sockjs/sockjs-client#supported-transports-by-browser-html-served-from-http-or-https">SockJS supported transports by browser</a>
@@ -325,6 +321,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 		return this.suppressCors;
 	}
 
+
 	/**
 	 * This method determines the SockJS path and handles SockJS static URLs.
 	 * Session URLs and raw WebSocket requests are delegated to abstract methods.
@@ -348,22 +345,26 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 			// As per SockJS protocol content-type can be ignored (it's always json)
 		}
 
-		String requestInfo = logger.isDebugEnabled() ? request.getMethod() + " " + request.getURI() : "";
+		String requestInfo = (logger.isDebugEnabled() ? request.getMethod() + " " + request.getURI() : null);
 		try {
 			if (sockJsPath.equals("") || sockJsPath.equals("/")) {
-				logger.debug(requestInfo);
+				if (requestInfo != null) {
+					logger.debug("Processing transport request: " + requestInfo);
+				}
 				response.getHeaders().setContentType(new MediaType("text", "plain", UTF8_CHARSET));
 				response.getBody().write("Welcome to SockJS!\n".getBytes(UTF8_CHARSET));
 			}
 			else if (sockJsPath.equals("/info")) {
-				logger.debug(requestInfo);
+				if (requestInfo != null) {
+					logger.debug("Processing transport request: " + requestInfo);
+				}
 				this.infoHandler.handle(request, response);
 			}
 			else if (sockJsPath.matches("/iframe[0-9-.a-z_]*.html")) {
 				if (!this.allowedOrigins.isEmpty() && !this.allowedOrigins.contains("*")) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("Iframe support is disabled when an origin check is required, ignoring " +
-										requestInfo);
+					if (requestInfo != null) {
+						logger.debug("Iframe support is disabled when an origin check is required. " +
+								"Ignoring transport request: " + requestInfo);
 					}
 					response.setStatusCode(HttpStatus.NOT_FOUND);
 					return;
@@ -371,44 +372,56 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 				if (this.allowedOrigins.isEmpty()) {
 					response.getHeaders().add(XFRAME_OPTIONS_HEADER, "SAMEORIGIN");
 				}
-				logger.debug(requestInfo);
+				if (requestInfo != null) {
+					logger.debug("Processing transport request: " + requestInfo);
+				}
 				this.iframeHandler.handle(request, response);
 			}
 			else if (sockJsPath.equals("/websocket")) {
 				if (isWebSocketEnabled()) {
-					logger.debug(requestInfo);
+					if (requestInfo != null) {
+						logger.debug("Processing transport request: " + requestInfo);
+					}
 					handleRawWebSocketRequest(request, response, wsHandler);
 				}
-				else if (logger.isDebugEnabled()) {
-					logger.debug("WebSocket disabled, ignoring " + requestInfo);
+				else if (requestInfo != null) {
+					logger.debug("WebSocket disabled. Ignoring transport request: " + requestInfo);
 				}
 			}
 			else {
 				String[] pathSegments = StringUtils.tokenizeToStringArray(sockJsPath.substring(1), "/");
 				if (pathSegments.length != 3) {
 					if (logger.isWarnEnabled()) {
-						logger.warn("Ignoring invalid transport request " + requestInfo);
+						logger.warn("Invalid SockJS path '" + sockJsPath + "' - required to have 3 path segments");
+					}
+					if (requestInfo != null) {
+						logger.debug("Ignoring transport request: " + requestInfo);
 					}
 					response.setStatusCode(HttpStatus.NOT_FOUND);
 					return;
 				}
+
 				String serverId = pathSegments[0];
 				String sessionId = pathSegments[1];
 				String transport = pathSegments[2];
 
 				if (!isWebSocketEnabled() && transport.equals("websocket")) {
-					if (logger.isDebugEnabled()) {
-						logger.debug("WebSocket transport is disabled, ignoring " + requestInfo);
+					if (requestInfo != null) {
+						logger.debug("WebSocket disabled. Ignoring transport request: " + requestInfo);
 					}
 					response.setStatusCode(HttpStatus.NOT_FOUND);
 					return;
 				}
 				else if (!validateRequest(serverId, sessionId, transport)) {
-					if (logger.isWarnEnabled()) {
-						logger.warn("Ignoring transport request " + requestInfo);
+					if (requestInfo != null) {
+						logger.debug("Ignoring transport request: " + requestInfo);
 					}
 					response.setStatusCode(HttpStatus.NOT_FOUND);
 					return;
+				}
+
+				if (requestInfo != null) {
+					logger.debug("Processing transport request: " + requestInfo);
 				}
 				handleTransportRequest(request, response, wsHandler, sessionId, transport);
 			}
@@ -421,14 +434,16 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 
 	protected boolean validateRequest(String serverId, String sessionId, String transport) {
 		if (!StringUtils.hasText(serverId) || !StringUtils.hasText(sessionId) || !StringUtils.hasText(transport)) {
-			logger.warn("No server, session, or transport path segment");
+			logger.warn("No server, session, or transport path segment in SockJS request.");
 			return false;
 		}
+
 		// Server and session id's must not contain "."
 		if (serverId.contains(".") || sessionId.contains(".")) {
 			logger.warn("Either server or session contains a \".\" which is not allowed by SockJS protocol.");
 			return false;
 		}
+
 		return true;
 	}
 
@@ -445,6 +460,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 	protected abstract void handleTransportRequest(ServerHttpRequest request, ServerHttpResponse response,
 			WebSocketHandler webSocketHandler, String sessionId, String transport) throws SockJsException;
 
+
 	protected boolean checkOrigin(ServerHttpRequest request, ServerHttpResponse response,
 			HttpMethod... httpMethods) throws IOException {
 
@@ -454,7 +470,9 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 
 		if (!WebUtils.isValidOrigin(request, this.allowedOrigins)) {
 			String origin = request.getHeaders().getOrigin();
-			logger.debug("Request rejected, Origin header value " + origin + " not allowed");
+			if (logger.isWarnEnabled()) {
+				logger.warn("Origin header value '" + origin + "' not allowed.");
+			}
 			response.setStatusCode(HttpStatus.FORBIDDEN);
 			return false;
 		}
