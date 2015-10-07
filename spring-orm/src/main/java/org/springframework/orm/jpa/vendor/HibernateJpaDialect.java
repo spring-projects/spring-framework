@@ -71,11 +71,15 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * {@link org.springframework.orm.jpa.JpaDialect} implementation for
- * Hibernate EntityManager. Developed against Hibernate 3.6 and 4.2/4.3.
+ * Hibernate EntityManager. Developed and tested against Hibernate 3.6,
+ * 4.2/4.3 as well as 5.0.
  *
  * @author Juergen Hoeller
  * @author Costin Leau
  * @since 2.0
+ * @see HibernateJpaVendorAdapter
+ * @see org.hibernate.Session#setFlushMode
+ * @see org.hibernate.Transaction#setTimeout
  */
 @SuppressWarnings("serial")
 public class HibernateJpaDialect extends DefaultJpaDialect {

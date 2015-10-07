@@ -346,6 +346,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 		}
 
 		String requestInfo = (logger.isDebugEnabled() ? request.getMethod() + " " + request.getURI() : null);
+
 		try {
 			if (sockJsPath.equals("") || sockJsPath.equals("/")) {
 				if (requestInfo != null) {
@@ -354,12 +355,14 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 				response.getHeaders().setContentType(new MediaType("text", "plain", UTF8_CHARSET));
 				response.getBody().write("Welcome to SockJS!\n".getBytes(UTF8_CHARSET));
 			}
+
 			else if (sockJsPath.equals("/info")) {
 				if (requestInfo != null) {
 					logger.debug("Processing transport request: " + requestInfo);
 				}
 				this.infoHandler.handle(request, response);
 			}
+
 			else if (sockJsPath.matches("/iframe[0-9-.a-z_]*.html")) {
 				if (!this.allowedOrigins.isEmpty() && !this.allowedOrigins.contains("*")) {
 					if (requestInfo != null) {
@@ -377,6 +380,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 				}
 				this.iframeHandler.handle(request, response);
 			}
+
 			else if (sockJsPath.equals("/websocket")) {
 				if (isWebSocketEnabled()) {
 					if (requestInfo != null) {
@@ -388,6 +392,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 					logger.debug("WebSocket disabled. Ignoring transport request: " + requestInfo);
 				}
 			}
+
 			else {
 				String[] pathSegments = StringUtils.tokenizeToStringArray(sockJsPath.substring(1), "/");
 				if (pathSegments.length != 3) {
@@ -469,9 +474,8 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 		}
 
 		if (!WebUtils.isValidOrigin(request, this.allowedOrigins)) {
-			String origin = request.getHeaders().getOrigin();
 			if (logger.isWarnEnabled()) {
-				logger.warn("Origin header value '" + origin + "' not allowed.");
+				logger.warn("Origin header value '" + request.getHeaders().getOrigin() + "' not allowed.");
 			}
 			response.setStatusCode(HttpStatus.FORBIDDEN);
 			return false;
