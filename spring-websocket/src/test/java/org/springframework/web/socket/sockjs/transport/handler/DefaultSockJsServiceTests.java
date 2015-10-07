@@ -16,19 +16,10 @@
 
 package org.springframework.web.socket.sockjs.transport.handler;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.socket.AbstractHttpRequestTests;
@@ -42,6 +33,24 @@ import org.springframework.web.socket.sockjs.transport.TransportHandlingSockJsSe
 import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.session.StubSockJsServiceConfig;
 import org.springframework.web.socket.sockjs.transport.session.TestSockJsSession;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.mockito.BDDMockito.any;
+import static org.mockito.BDDMockito.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.reset;
+import static org.mockito.BDDMockito.verify;
+import static org.mockito.BDDMockito.verifyNoMoreInteractions;
 
 /**
  * Test fixture for {@link org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService}.
@@ -184,6 +193,18 @@ public class DefaultSockJsServiceTests extends AbstractHttpRequestTests {
 		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
 
 		assertEquals(200, this.servletResponse.getStatus());
+	}
+
+	@Test  // SPR-13545
+	public void handleInvalidTransportType() throws Exception {
+		String sockJsPath = sessionUrlPrefix + "invalid";
+		setRequest("POST", sockJsPrefix + sockJsPath);
+		this.service.setAllowedOrigins(Arrays.asList("http://mydomain1.com"));
+		this.servletRequest.addHeader(HttpHeaders.ORIGIN, "http://mydomain2.com");
+		this.servletRequest.setServerName("mydomain2.com");
+		this.service.handleRequest(this.request, this.response, sockJsPath, this.wsHandler);
+
+		assertEquals(404, this.servletResponse.getStatus());
 	}
 
 	@Test
