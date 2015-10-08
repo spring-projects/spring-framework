@@ -588,7 +588,7 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 		public void httpClientConnect(UndertowClient httpClient, ClientCallback<ClientConnection> listener, URI uri,
 				XnioWorker worker, OptionMap options) {
 			ReflectionUtils.invokeMethod(httpClientConnectCallbackMethod, httpClient, listener, uri,
-					this.undertowBufferPool, worker, options);
+					worker, this.undertowBufferPool, options);
 		}
 
 		@Override
