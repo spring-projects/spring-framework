@@ -22120,14 +22120,14 @@ otherwise is nearly identical with two exceptions. One is support for features n
 TestContext framework, which provides caching benefits for the loaded configuration.
 ****
 
-The __Spring MVC Test framework__ provides first class JUnit support for testing client
-and server-side Spring MVC code through a fluent API. Typically it loads the actual
-Spring configuration through the __TestContext framework__ and always uses the
-`DispatcherServlet` to process requests thus approximating full integration tests
-without requiring a running Servlet container.
+The __Spring MVC Test framework__ provides first class support for testing Spring MVC
+code using a fluent API that can be used with JUnit, TestNG, or any other testing
+framework. It typically loads the actual Spring configuration through the __TestContext
+framework__ and always uses the `DispatcherServlet` to process requests thus approximating
+full integration tests without using a running Servlet container.
 
 Client-side tests are `RestTemplate`-based and allow tests for code that relies on the
-`RestTemplate` without requiring a running server to respond to the requests.
+`RestTemplate` without using a running server to respond to the requests.
 
 
 [[spring-mvc-test-server]]
@@ -22162,7 +22162,7 @@ All other means of rendering including `@ResponseBody` methods and `View` types 
 JSPs) such as Freemarker, Velocity, Thymeleaf, and others for rendering HTML, JSON, XML,
 and so on should work as expected, and the response will contain the generated content.
 
-Below is an example of a test requesting account information in JSON format:
+Below is a JUnit-based example of a test requesting account information in JSON format:
 
 [source,java,indent=0]
 ----
