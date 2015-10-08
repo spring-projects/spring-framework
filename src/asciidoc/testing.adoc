@@ -3755,8 +3755,9 @@ instrumenting your test class with a `TestContextManager`. See the source code o
 [[spring-mvc-test-framework]]
 === Spring MVC Test Framework
 
-The __Spring MVC Test framework__ provides first class JUnit support for testing
-Spring MVC code using a fluent API. It's built on the
+The __Spring MVC Test framework__ provides first class support for testing Spring MVC
+code using a fluent API that can be used with JUnit, TestNG, or any other testing
+framework. It's built on the
 http://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/mock/web/package-summary.html[Servlet API mock objects]
 from the `spring-test` module and hence does not require a running Servlet container,
 it uses the `DispatcherServlet` thus providing full Spring MVC support, and
@@ -3781,13 +3782,13 @@ For more on the difference with end-to-end integration tests see
 
 [[spring-mvc-test-server]]
 ==== Server-Side Tests
-It's easy to write a plain JUnit test for a Spring MVC controller. Simply instantiate
-the controller, inject it with mock or stub dependencies, and call its methods
-passing `MockHttpServletRequest`, `MockHttpServletResponse`, etc. if necessary.
-However much remains untested, e.g. request mappings, data binding, type conversion,
-validation and much more. Furthermore other controller methods such as `@InitBinder`,
-`@ModelAttribute`, and `@ExceptionHandler` may also be invoked as part of the request
-processing lifecycle.
+It's easy to write a plain unit test for a Spring MVC controller using JUnit or TestNG:
+simply instantiate the controller, inject it with mocked or stubbed dependencies, and call
+its methods passing `MockHttpServletRequest`, `MockHttpServletResponse`, etc., as necessary.
+However, when writing such a unit test, much remains untested: for example, request
+mappings, data binding, type conversion, validation, and much more. Furthermore, other
+controller methods such as `@InitBinder`, `@ModelAttribute`, and `@ExceptionHandler` may
+also be invoked as part of the request processing lifecycle.
 
 The goal of __Spring MVC Test__ is to provide an effective way of testing controllers
 by performing requests and generating responses through the `DispatcherServlet`.
@@ -3796,8 +3797,8 @@ __Spring MVC Test__ builds on the familiar <<mock-objects-servlet,"mock" impleme
 of the Servlet API>> available in the `spring-test` module. This allows performing
 requests and generating responses without the need for running in a Servlet container.
 For the most part everything should work as it does at runtime with a few notable
-exceptions as explained in <<spring-mvc-test-vs-end-to-end-integration-tests>>. Here is
-an example of using Spring MVC Test:
+exceptions as explained in <<spring-mvc-test-vs-end-to-end-integration-tests>>. Here is a
+JUnit-based example of using Spring MVC Test:
 
 [source,java,indent=0]
 ----
