@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.web.util;
 
 import java.io.UnsupportedEncodingException;
 
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -27,23 +26,20 @@ import org.springframework.mock.web.test.MockHttpServletRequest;
 import static org.junit.Assert.*;
 
 /**
+ * Unit tests for {@link UrlPathHelper}.
+ *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Costin Leau
  */
 public class UrlPathHelperTests {
 
-	private UrlPathHelper helper;
-
-	private MockHttpServletRequest request;
-
 	private static final String WEBSPHERE_URI_ATTRIBUTE = "com.ibm.websphere.servlet.uri_non_decoded";
 
-	@Before
-	public void setUp() {
-		helper = new UrlPathHelper();
-		request = new MockHttpServletRequest();
-	}
+	private final UrlPathHelper helper = new UrlPathHelper();
+
+	private final MockHttpServletRequest request = new MockHttpServletRequest();
+
 
 	@Test
 	public void getPathWithinApplication() {
@@ -112,7 +108,6 @@ public class UrlPathHelperTests {
 
 		request.setRequestURI("/foo+bar");
 		assertEquals("Incorrect path returned", "/foo+bar", helper.getRequestUri(request));
-
 	}
 
 	@Test
@@ -354,7 +349,8 @@ public class UrlPathHelperTests {
 	}
 
 	// test the root mapping for /foo/* w/o a trailing slash - <host>/<context>/foo
-	@Test @Ignore
+	@Ignore
+	@Test
 	public void wasCasualServletRootWithMissingSlash() throws Exception {
 		request.setContextPath("/test");
 		request.setPathInfo(null);
@@ -365,7 +361,8 @@ public class UrlPathHelperTests {
 		assertEquals("/", helper.getLookupPathForRequest(request));
 	}
 
-	@Test @Ignore
+	@Ignore
+	@Test
 	public void wasCasualServletRootWithMissingSlashWithCompliantSetting() throws Exception {
 		request.setAttribute(WEBSPHERE_URI_ATTRIBUTE, "/test/foo");
 		tomcatCasualServletRootWithMissingSlash();
