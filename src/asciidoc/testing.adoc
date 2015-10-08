@@ -1213,9 +1213,9 @@ configuration.
 
 In addition to generic testing infrastructure, the TestContext framework provides
 explicit support for JUnit and TestNG in the form of `abstract` support classes. For
-JUnit, Spring also provides a custom JUnit `Runner` that allows one to write so-called
-__POJO test classes__. POJO test classes are not required to extend a particular class
-hierarchy.
+JUnit, Spring also provides a custom JUnit `Runner` and custom JUnit `Rules` that allow
+one to write so-called __POJO test classes__. POJO test classes are not required to
+extend a particular class hierarchy.
 
 The following section provides an overview of the internals of the TestContext
 framework. If you are only interested in using the framework and not necessarily
@@ -3759,23 +3759,22 @@ The __Spring MVC Test framework__ provides first class support for testing Sprin
 code using a fluent API that can be used with JUnit, TestNG, or any other testing
 framework. It's built on the
 http://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/mock/web/package-summary.html[Servlet API mock objects]
-from the `spring-test` module and hence does not require a running Servlet container,
-it uses the `DispatcherServlet` thus providing full Spring MVC support, and
-may optionally load actual Spring configuration with the __TestContext framework__
-in addition to a standalone mode in which controllers may be instantiated manually
-and tested one at a time.
+from the `spring-test` module and hence does _not_ use a running Servlet container. It
+uses the `DispatcherServlet` to provide full Spring MVC runtime behavior and provides support
+for loading actual Spring configuration with the __TestContext framework__ in addition to a
+standalone mode in which controllers may be instantiated manually and tested one at a time.
 
 __Spring MVC Test__ also provides client-side support for testing code that uses
-the `RestTemplate`. Client-side tests mock the server responses and also do not
-require a running server.
+the `RestTemplate`. Client-side tests mock the server responses and also do _not_
+use a running server.
 
 [TIP]
 ====
 Spring Boot provides an option to write full, end-to-end integration tests that include
 a running server. If this is your goal please have a look at the
 http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-testing.html#boot-features-testing-spring-boot-applications[Spring Boot reference page].
-For more on the difference with end-to-end integration tests see
-<<spring-mvc-test-vs-end-to-end-integration-tests>>.
+For more information on the differences between out-of-container and end-to-end
+integration tests, see <<spring-mvc-test-vs-end-to-end-integration-tests>>.
 ====
 
 
@@ -3790,8 +3789,8 @@ mappings, data binding, type conversion, validation, and much more. Furthermore,
 controller methods such as `@InitBinder`, `@ModelAttribute`, and `@ExceptionHandler` may
 also be invoked as part of the request processing lifecycle.
 
-The goal of __Spring MVC Test__ is to provide an effective way of testing controllers
-by performing requests and generating responses through the `DispatcherServlet`.
+The goal of __Spring MVC Test__ is to provide an effective way for testing controllers
+by performing requests and generating responses through the actual `DispatcherServlet`.
 
 __Spring MVC Test__ builds on the familiar <<mock-objects-servlet,"mock" implementations
 of the Servlet API>> available in the `spring-test` module. This allows performing
@@ -3832,14 +3831,14 @@ JUnit-based example of using Spring MVC Test:
 ----
 
 The above test relies on the `WebApplicationContext` support of the __TestContext framework__
-to loads Spring configuration from an XML configuration file located in the same package
-as the test class but also supported is Java-based configuration. See these
+for loading Spring configuration from an XML configuration file located in the same package
+as the test class, but Java-based and Groovy-based configuration are also supported. See these
 https://github.com/spring-projects/spring-framework/tree/master/spring-test/src/test/java/org/springframework/test/web/servlet/samples/context[sample tests].
 
-The `MockMvc` instance is used to perform a request to `"/accounts/1"` and verify the
-resulting response has status 200, content type is `"application/json"`, and
-response body has a JSON property called "name" with the value "Lee". The jsonPath
-syntax is supported  through the Jayway https://github.com/jayway/JsonPath[JsonPath
+The `MockMvc` instance is used to perform a `GET` request to `"/accounts/1"` and verify
+that the resulting response has status 200, the content type is `"application/json"`, and the
+response body has a JSON property called "name" with the value "Lee". The `jsonPath`
+syntax is supported through the Jayway https://github.com/jayway/JsonPath[JsonPath
 project]. There are lots of other options for verifying the result of the performed
 request that will be discussed below.
 
@@ -3860,7 +3859,7 @@ completion on static members.
 There are two main options for creating an instance of `MockMvc`.
 The first is to load Spring MVC configuration through the __TestContext
 framework__, which loads the Spring configuration and injects a `WebApplicationContext`
-into the test to use to create a `MockMvc`:
+into the test to use to build a `MockMvc` instance:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4000,7 +3999,7 @@ Or you can add Servlet request parameters representing either query of form para
 If application code relies on Servlet request parameters and doesn't check the query
 string explicitly (as is most often the case) then it doesn't matter which option you use.
 Keep in mind however that query params provided with the URI template will be decoded while
-request parameters provided through the `param(...)` method are expected to be decoded.
+request parameters provided through the `param(...)` method are expected to already be decoded.
 
 In most cases it's preferable to leave out the context path and the Servlet path from
 the request URI. If you must test with the full request URI, be sure to set the
@@ -4048,19 +4047,20 @@ performing a request:
 	mockMvc.perform(get("/accounts/1")).andExpect(status().isOk());
 ----
 
-`MockMvcResultMatchers.*` provides a number of expectations some of which are further
+`MockMvcResultMatchers.*` provides a number of expectations, some of which are further
 nested with more detailed expectations.
 
-Expectations fall in two general categories. The first category of assertions verify
-properties of the response, i.e the response status, headers, and content. Those
+Expectations fall in two general categories. The first category of assertions verifies
+properties of the response: for example, the response status, headers, and content. These
 are the most important results to assert.
 
-The second category of assertions go beyond the response. They allow inspecting Spring
-MVC specific things such as which controller method processed the request, whether
-an exception was raised and handled, what the content of the model is, what view was
-selected, what flash attributes were added, and so on. They also allow inspecting
-Servlet specific things such as request and session attributes. The following test
-asserts that binding/validation failed:
+The second category of assertions goes beyond the response. These assertions allow
+one to inspect Spring MVC specific aspects such as which controller method processed
+the request, whether an exception was raised and handled, what the content of the model
+is, what view was selected, what flash attributes were added, and so on. They also allow
+one to inspect Servlet specific aspects such as request and session attributes.
+
+The following test asserts that binding or validation failed:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4085,7 +4085,7 @@ This can be done as follows, where `print()` is a static import from
 
 As long as request processing does not cause an unhandled exception, the `print()` method
 will print all the available result data to `System.out`. Spring Framework 4.2 introduces
-a new `log()` method and two additional variants of the `print()` method: one that accepts
+a `log()` method and two additional variants of the `print()` method, one that accepts
 an `OutputStream` and one that accepts a `Writer`. For example, invoking
 `print(System.err)` will print the result data to `System.err`; while invoking
 `print(myWriter)` will print the result data to a custom writer. If you would like to
@@ -4094,8 +4094,8 @@ will log the result data as a single `DEBUG` message under the
 `org.springframework.test.web.servlet.result` logging category.
 
 In some cases, you may want to get direct access to the result and verify something that
-cannot be verified otherwise. This can be done by appending `.andReturn()` at the end
-after all expectations:
+cannot be verified otherwise. This can be achieved by appending `.andReturn()` after all
+other expectations:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4104,7 +4104,7 @@ after all expectations:
 	// ...
 ----
 
-When all tests repeat the same expectations you can set up common expectations once
+If all tests repeat the same expectations you can set up common expectations once
 when building the `MockMvc` instance:
 
 [source,java,indent=0]
@@ -4116,12 +4116,12 @@ when building the `MockMvc` instance:
 		.build()
 ----
 
-Note that the expectation is __always__ applied and cannot be overridden without
+Note that common expectations are __always__ applied and cannot be overridden without
 creating a separate `MockMvc` instance.
 
 When JSON response content contains hypermedia links created with
 https://github.com/spring-projects/spring-hateoas[Spring HATEOAS], the resulting links can
-be verified:
+be verified using JsonPath expressions:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4132,7 +4132,7 @@ be verified:
 
 When XML response content contains hypermedia links created with
 https://github.com/spring-projects/spring-hateoas[Spring HATEOAS], the resulting links can
-be verified:
+be verified using XPath expressions:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4144,7 +4144,7 @@ be verified:
 
 [[spring-mvc-test-server-filters]]
 ===== Filter Registrations
-When setting up a `MockMvc`, you can register one or more `Filter` instances:
+When setting up a `MockMvc` instance, you can register one or more Servlet `Filter` instances:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4152,53 +4152,55 @@ When setting up a `MockMvc`, you can register one or more `Filter` instances:
 	mockMvc = standaloneSetup(new PersonController()).addFilters(new CharacterEncodingFilter()).build();
 ----
 
-Registered filters will be invoked through `MockFilterChain` from `spring-test` and the
-last filter will delegates to the `DispatcherServlet`.
+Registered filters will be invoked through via the `MockFilterChain` from `spring-test`, and the
+last filter will delegate to the `DispatcherServlet`.
 
 [[spring-mvc-test-vs-end-to-end-integration-tests]]
-===== Difference With End-to-End Integration Tests
+===== Differences between Out-of-Container and End-to-End Integration Tests
 
 As mentioned earlier __Spring MVC Test__ is built on the Servlet API mock objects from
-the `spring-test` module and does not rely on a running Servlet container. Therefore
+the `spring-test` module and does not use a running Servlet container. Therefore
 there are some important differences compared to full end-to-end integration tests
 with an actual client and server running.
 
 The easiest way to think about this is starting with a blank `MockHttpServletRequest`.
-Whatever you add to it is what the request will be. The things that may catch you out are
-there is no context path by default, no jsessionid cookie, no forwarding, error, or async
-dispatches, and therefore no actual JSP rendering. Instead "forwarded" and "redirected"
-URLs are saved in the `MockHttpServletResponse` and can be asserted with expectations.
+Whatever you add to it is what the request will be. Things that may catch you by surprise
+are that there is no context path by default, no `jsessionid` cookie, no forwarding, error,
+or async dispatches, and therefore no actual JSP rendering. Instead, "forwarded" and
+"redirected" URLs are saved in the `MockHttpServletResponse` and can be asserted with
+expectations.
 
 This means if you are using JSPs you can verify the JSP page to which the request was
-forwarded but there won't be any HTML rendered. Note however that all other rendering
-technologies that don't rely on forwarding such as Thymeleaf, Freemarker, Velocity
-will render HTML to the response body as expected. The same is true for rendering JSON,
-XML and others via `@ResponseBody` methods.
+forwarded, but there won't be any HTML rendered. In other words, the JSP will not be
+_invoked_. Note however that all other rendering technologies which don't rely on
+forwarding such as Thymeleaf, Freemarker, and Velocity will render HTML to the response
+body as expected. The same is true for rendering JSON, XML, and other formats via
+`@ResponseBody` methods.
 
 Alternatively you may consider the full end-to-end integration testing support from
 Spring Boot via `@WebIntegrationTest`. See the
 http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-testing.html#boot-features-testing-spring-boot-applications[Spring Boot reference].
 
-There are pros and cons for each. The options provided in __Spring MVC Test__
-are different stops on the scale from classic unit to full integration tests.
-To be sure none of the options in Spring MVC Test are classic unit tests but they are a
-little closer to it. For example you can isolate the service layer with mocks
-injected into controllers and then you're testing the web layer only through
-the `DispatcherServlet` and with actual Spring configuration, just like you might test
-the database layer in isolation of the layers above. Or you could be using the
-standalone setup focusing on one controller at a time and manually providing the
-configuration required to make it work.
+There are pros and cons for each approach. The options provided in __Spring MVC Test__
+are different stops on the scale from classic unit testing to full integration testing.
+To be certain, none of the options in Spring MVC Test fall under the category of classic
+unit testing, but they _are_ a little closer to it. For example, you can isolate the web
+layer by injecting mocked services into controllers, in which case you're testing the web
+layer only through the `DispatcherServlet` but with actual Spring configuration, just
+like you might test the data access layer in isolation from the layers above. Or you
+can use the standalone setup focusing on one controller at a time and manually providing
+the configuration required to make it work.
 
 Another important distinction when using __Spring MVC Test__ is that conceptually such
-tests are on the inside of the server-side so you can check what handler was used,
+tests are on the _inside_ of the server-side so you can check what handler was used,
 if an exception was handled with a HandlerExceptionResolver, what the content of the
 model is, what binding errors there were, etc. That means it's easier to write
 expectations since the server is not a black box as it is when testing it through
-an actual HTTP client. This is generally the advantage of classic unit testing that it's
+an actual HTTP client. This is generally an advantage of classic unit testing, that it's
 easier to write, reason about, and debug but does not replace the need for full
-integration tests. At the same time it's important not to lose sight of the fact
-the response is the most important thing to check. In short there is room here for
-multiple styles and strategies of testing even in the same project.
+integration tests. At the same time it's important not to lose sight of the fact that
+the response is the most important thing to check. In short, there is room here for
+multiple styles and strategies of testing even within the same project.
 
 
 [[spring-mvc-test-server-resources]]
