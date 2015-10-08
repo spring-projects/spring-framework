@@ -421,6 +421,7 @@ public class UrlPathHelper {
 	private String decodeAndCleanUriString(HttpServletRequest request, String uri) {
 		uri = removeSemicolonContent(uri);
 		uri = decodeRequestString(request, uri);
+		uri = getSanitizedPath(uri);
 		return uri;
 	}
 
