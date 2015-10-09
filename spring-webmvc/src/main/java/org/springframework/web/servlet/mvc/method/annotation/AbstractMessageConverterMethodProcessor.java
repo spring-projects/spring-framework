@@ -18,26 +18,32 @@ package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Extends {@link AbstractMessageConverterMethodArgumentResolver} with the ability to handle
@@ -52,9 +58,25 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 	private static final MediaType MEDIA_TYPE_APPLICATION = new MediaType("application");
 
+	private static final UrlPathHelper RAW_URL_PATH_HELPER = new UrlPathHelper();
+
+	private static final UrlPathHelper DECODING_URL_PATH_HELPER = new UrlPathHelper();
+
+	static {
+		RAW_URL_PATH_HELPER.setRemoveSemicolonContent(false);
+		RAW_URL_PATH_HELPER.setUrlDecode(false);
+	}
+
+	/* Extensions associated with the built-in message converters */
+	private static final Set<String> WHITELISTED_EXTENSIONS = new HashSet<String>(Arrays.asList(
+			"txt", "text", "json", "xml", "atom", "rss", "png", "jpe", "jpeg", "jpg", "gif", "wbmp", "bmp"));
+
+
 	private final ContentNegotiationManager contentNegotiationManager;
 
 	private final ResponseBodyAdviceChain adviceChain;
+
+	private final Set<String> safeExtensions = new HashSet<String>();
 
 
 	protected AbstractMessageConverterMethodProcessor(List<HttpMessageConverter<?>> messageConverters) {
@@ -72,6 +94,8 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		super(messageConverters);
 		this.contentNegotiationManager = (manager != null ? manager : new ContentNegotiationManager());
 		this.adviceChain = new ResponseBodyAdviceChain(responseBodyAdvice);
+		this.safeExtensions.addAll(this.contentNegotiationManager.getAllFileExtensions());
+		this.safeExtensions.addAll(WHITELISTED_EXTENSIONS);
 	}
 
 
@@ -158,6 +182,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 					returnValue = this.adviceChain.invoke(returnValue, returnType, selectedMediaType,
 							(Class<HttpMessageConverter<?>>) messageConverter.getClass(), inputMessage, outputMessage);
 					if (returnValue != null) {
+						addContentDispositionHeader(inputMessage, outputMessage);
 						((HttpMessageConverter<T>) messageConverter).write(returnValue, selectedMediaType, outputMessage);
 						if (logger.isDebugEnabled()) {
 							logger.debug("Written [" + returnValue + "] as \"" + selectedMediaType + "\" using [" +
@@ -224,6 +249,50 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	private MediaType getMostSpecificMediaType(MediaType acceptType, MediaType produceType) {
 		MediaType produceTypeToUse = produceType.copyQualityValue(acceptType);
 		return (MediaType.SPECIFICITY_COMPARATOR.compare(acceptType, produceTypeToUse) <= 0 ? acceptType : produceTypeToUse);
+	}
+
+	/**
+	 * Check if the path has a file extension and whether the extension is either
+	 * {@link #WHITELISTED_EXTENSIONS whitelisted} or
+	 * {@link ContentNegotiationManager#getAllFileExtensions() explicitly
+	 * registered}. If not add a 'Content-Disposition' header with a safe
+	 * attachment file name ("f.txt") to prevent RFD exploits.
+	 */
+	private void addContentDispositionHeader(ServletServerHttpRequest request,
+			ServletServerHttpResponse response) {
+
+		HttpHeaders headers = response.getHeaders();
+		if (headers.containsKey(HttpHeaders.CONTENT_DISPOSITION)) {
+			return;
+		}
+
+		HttpServletRequest servletRequest = request.getServletRequest();
+		String requestUri = RAW_URL_PATH_HELPER.getOriginatingRequestUri(servletRequest);
+
+		int index = requestUri.lastIndexOf('/') + 1;
+		String filename = requestUri.substring(index);
+		String pathParams = "";
+
+		index = filename.indexOf(';');
+		if (index != -1) {
+			pathParams = filename.substring(index);
+			filename = filename.substring(0, index);
+		}
+
+		filename = DECODING_URL_PATH_HELPER.decodeRequestString(servletRequest, filename);
+		String ext = StringUtils.getFilenameExtension(filename);
+
+		pathParams = DECODING_URL_PATH_HELPER.decodeRequestString(servletRequest, pathParams);
+		String extInPathParams = StringUtils.getFilenameExtension(pathParams);
+
+		if (!isSafeExtension(ext) || !isSafeExtension(extInPathParams)) {
+			headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=f.txt");
+		}
+	}
+
+	private boolean isSafeExtension(String extension) {
+		return (!StringUtils.hasText(extension) ||
+				this.safeExtensions.contains(extension.toLowerCase(Locale.ENGLISH)));
 	}
 
 }

@@ -267,7 +267,7 @@ public class MappingJackson2HttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		this.converter.writeInternal(jacksonValue, outputMessage);
 
-		assertEquals("callback(\"foo\");", outputMessage.getBodyAsString(Charset.forName("UTF-8")));
+		assertEquals("/**/callback(\"foo\");", outputMessage.getBodyAsString(Charset.forName("UTF-8")));
 	}
 
 	@Test
@@ -284,7 +284,7 @@ public class MappingJackson2HttpMessageConverterTests {
 		this.converter.writeInternal(jacksonValue, outputMessage);
 
 		String result = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
-		assertThat(result, startsWith("callback("));
+		assertThat(result, startsWith("/**/callback("));
 		assertThat(result, endsWith(");"));
 		assertThat(result, containsString("\"withView1\":\"with\""));
 		assertThat(result, not(containsString("\"withView2\":\"with\"")));

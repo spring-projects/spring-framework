@@ -141,6 +141,10 @@ public class ContentNegotiationManagerFactoryBean
 		this.useJaf = useJaf;
 	}
 
+	private boolean isUseJafTurnedOff() {
+		return (this.useJaf != null && !this.useJaf);
+	}
+
 	/**
 	 * Indicate whether a request parameter should be used to determine the
 	 * requested media type with the <em>2nd highest priority</em>, i.e.
@@ -211,7 +215,7 @@ public class ContentNegotiationManagerFactoryBean
 
 		if (this.favorPathExtension) {
 			PathExtensionContentNegotiationStrategy strategy;
-			if (this.servletContext != null) {
+			if (this.servletContext != null && !isUseJafTurnedOff()) {
 				strategy = new ServletPathExtensionContentNegotiationStrategy(this.servletContext, this.mediaTypes);
 			}
 			else {
