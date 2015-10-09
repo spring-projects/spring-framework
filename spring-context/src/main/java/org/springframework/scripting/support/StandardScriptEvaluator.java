@@ -133,10 +133,10 @@ public class StandardScriptEvaluator implements ScriptEvaluator, BeanClassLoader
 			}
 		}
 		catch (IOException ex) {
-			throw new ScriptCompilationException(script, "Cannot access script", ex);
+			throw new ScriptCompilationException(script, "Cannot access script for ScriptEngine", ex);
 		}
 		catch (ScriptException ex) {
-			throw new ScriptCompilationException(script, "Evaluation failure", ex);
+			throw new ScriptCompilationException(script, new StandardScriptEvalException(ex));
 		}
 	}
 
