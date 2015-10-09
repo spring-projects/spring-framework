@@ -63,7 +63,7 @@ public class PathExtensionContentNegotiationStrategy extends AbstractMappingCont
 		urlPathHelper.setUrlDecode(false);
 	}
 
-	private boolean useJaf = JAF_PRESENT;
+	private boolean useJaf = true;
 
 
 	/**
@@ -109,7 +109,7 @@ public class PathExtensionContentNegotiationStrategy extends AbstractMappingCont
 
 	@Override
 	protected MediaType handleNoMatch(NativeWebRequest webRequest, String extension) {
-		if (this.useJaf) {
+		if (this.useJaf && JAF_PRESENT) {
 			MediaType jafMediaType = JafMediaTypeFactory.getMediaType("file." + extension);
 			if (jafMediaType != null && !MediaType.APPLICATION_OCTET_STREAM.equals(jafMediaType)) {
 				return jafMediaType;

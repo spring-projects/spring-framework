@@ -26,6 +26,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.test.MockHttpServletRequest;
+import org.springframework.mock.web.test.MockServletContext;
+import org.springframework.util.StringUtils;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 
@@ -43,7 +45,10 @@ public class ContentNegotiationManagerFactoryBeanTests {
 
 	@Before
 	public void setup() {
-		this.servletRequest = new MockHttpServletRequest();
+		TestServletContext servletContext = new TestServletContext();
+		servletContext.getMimeTypes().put("foo", "application/foo");
+
+		this.servletRequest = new MockHttpServletRequest(servletContext);
 		this.webRequest = new ServletWebRequest(this.servletRequest);
 
 		this.factoryBean = new ContentNegotiationManagerFactoryBean();
@@ -74,16 +79,36 @@ public class ContentNegotiationManagerFactoryBeanTests {
 	}
 
 	@Test
-	public void addMediaTypes() throws Exception {
-		Map<String, MediaType> mediaTypes = new HashMap<String, MediaType>();
-		mediaTypes.put("json", MediaType.APPLICATION_JSON);
-		this.factoryBean.addMediaTypes(mediaTypes);
-
+	public void favorPath() throws Exception {
+		this.factoryBean.setFavorPathExtension(true);
+		this.factoryBean.addMediaTypes(Collections.singletonMap("bar", new MediaType("application", "bar")));
 		this.factoryBean.afterPropertiesSet();
 		ContentNegotiationManager manager = this.factoryBean.getObject();
 
-		this.servletRequest.setRequestURI("/flower.json");
-		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON), manager.resolveMediaTypes(this.webRequest));
+		this.servletRequest.setRequestURI("/flower.foo");
+		assertEquals(Collections.singletonList(new MediaType("application", "foo")),
+				manager.resolveMediaTypes(this.webRequest));
+
+		this.servletRequest.setRequestURI("/flower.bar");
+		assertEquals(Collections.singletonList(new MediaType("application", "bar")),
+				manager.resolveMediaTypes(this.webRequest));
+
+		this.servletRequest.setRequestURI("/flower.gif");
+		assertEquals(Collections.singletonList(MediaType.IMAGE_GIF), manager.resolveMediaTypes(this.webRequest));
+	}
+
+	@Test
+	public void favorPathWithJafTurnedOff() throws Exception {
+		this.factoryBean.setFavorPathExtension(true);
+		this.factoryBean.setUseJaf(false);
+		this.factoryBean.afterPropertiesSet();
+		ContentNegotiationManager manager = this.factoryBean.getObject();
+
+		this.servletRequest.setRequestURI("/flower.foo");
+		assertEquals(Collections.emptyList(), manager.resolveMediaTypes(this.webRequest));
+
+		this.servletRequest.setRequestURI("/flower.gif");
+		assertEquals(Collections.emptyList(), manager.resolveMediaTypes(this.webRequest));
 	}
 
 	@Test
@@ -128,6 +153,23 @@ public class ContentNegotiationManagerFactoryBeanTests {
 		this.servletRequest.addHeader("Accept", MediaType.ALL_VALUE);
 
 		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON), manager.resolveMediaTypes(this.webRequest));
+	}
+
+
+	private static class TestServletContext extends MockServletContext {
+
+		private final Map<String, String> mimeTypes = new HashMap<>();
+
+
+		public Map<String, String> getMimeTypes() {
+			return this.mimeTypes;
+		}
+
+		@Override
+		public String getMimeType(String filePath) {
+			String extension = StringUtils.getFilenameExtension(filePath);
+			return getMimeTypes().get(extension);
+		}
 	}
 
 }
