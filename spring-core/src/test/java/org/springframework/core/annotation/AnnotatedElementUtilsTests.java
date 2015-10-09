@@ -288,8 +288,8 @@ public class AnnotatedElementUtilsTests {
 		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, name);
 
 		assertNotNull("Should find @ContextConfig on " + element.getSimpleName(), attributes);
-		assertArrayEquals("locations", new String[] { "explicitDeclaration" }, attributes.getStringArray("locations"));
-		assertArrayEquals("value", new String[] { "explicitDeclaration" }, attributes.getStringArray("value"));
+		assertArrayEquals("locations", asArray("explicitDeclaration"), attributes.getStringArray("locations"));
+		assertArrayEquals("value", asArray("explicitDeclaration"), attributes.getStringArray("value"));
 
 		// Verify contracts between utility methods:
 		assertTrue(isAnnotated(element, name));
@@ -305,7 +305,7 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	private void getMergedAnnotationAttributesWithHalfConventionBasedAndHalfAliasedComposedAnnotation(Class<?> clazz) {
-		String[] expected = new String[] { "explicitDeclaration" };
+		String[] expected = asArray("explicitDeclaration");
 		String name = ContextConfig.class.getName();
 		String simpleName = clazz.getSimpleName();
 		AnnotationAttributes attributes = getMergedAnnotationAttributes(clazz, name);
@@ -325,8 +325,8 @@ public class AnnotatedElementUtilsTests {
 		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, name);
 
 		assertNotNull("Should find @ContextConfig on " + element.getSimpleName(), attributes);
-		assertArrayEquals("value", new String[] { "test.xml" }, attributes.getStringArray("value"));
-		assertArrayEquals("locations", new String[] { "test.xml" }, attributes.getStringArray("locations"));
+		assertArrayEquals("value", asArray("test.xml"), attributes.getStringArray("value"));
+		assertArrayEquals("locations", asArray("test.xml"), attributes.getStringArray("locations"));
 
 		// Verify contracts between utility methods:
 		assertTrue(isAnnotated(element, name));
@@ -339,8 +339,8 @@ public class AnnotatedElementUtilsTests {
 		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, name);
 
 		assertNotNull("Should find @ContextConfig on " + element.getSimpleName(), attributes);
-		assertArrayEquals("locations", new String[] { "test.xml" }, attributes.getStringArray("locations"));
-		assertArrayEquals("value", new String[] { "test.xml" }, attributes.getStringArray("value"));
+		assertArrayEquals("locations", asArray("test.xml"), attributes.getStringArray("locations"));
+		assertArrayEquals("value", asArray("test.xml"), attributes.getStringArray("value"));
 
 		// Verify contracts between utility methods:
 		assertTrue(isAnnotated(element, name));
@@ -351,7 +351,7 @@ public class AnnotatedElementUtilsTests {
 		Class<?> element = ComposedImplicitAliasesContextConfigClass.class;
 		String name = ImplicitAliasesContextConfig.class.getName();
 		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, name);
-		String[] expected = new String[] { "A.xml", "B.xml" };
+		String[] expected = asArray("A.xml", "B.xml");
 
 		assertNotNull("Should find @ImplicitAliasesContextConfig on " + element.getSimpleName(), attributes);
 		assertArrayEquals("groovyScripts", expected, attributes.getStringArray("groovyScripts"));
@@ -403,7 +403,7 @@ public class AnnotatedElementUtilsTests {
 		Class<?> element = ComposedImplicitAliasesContextConfigClass.class;
 		String name = ImplicitAliasesContextConfig.class.getName();
 		ImplicitAliasesContextConfig config = getMergedAnnotation(element, ImplicitAliasesContextConfig.class);
-		String[] expected = new String[] { "A.xml", "B.xml" };
+		String[] expected = asArray("A.xml", "B.xml");
 
 		assertNotNull("Should find @ImplicitAliasesContextConfig on " + element.getSimpleName(), config);
 		assertArrayEquals("groovyScripts", expected, config.groovyScripts());
@@ -573,8 +573,8 @@ public class AnnotatedElementUtilsTests {
 
 	@Test
 	public void findMergedAnnotationForMultipleMetaAnnotationsWithClashingAttributeNames() {
-		final String[] xmlLocations = new String[] { "test.xml" };
-		final String[] propFiles = new String[] { "test.properties" };
+		final String[] xmlLocations = asArray("test.xml");
+		final String[] propFiles = asArray("test.properties");
 
 		Class<?> element = AliasedComposedContextConfigAndTestPropSourceClass.class;
 
@@ -597,7 +597,7 @@ public class AnnotatedElementUtilsTests {
 
 	@Test
 	public void findMergedAnnotationAttributesOnClassWithAttributeAliasInComposedAnnotationAndNestedAnnotationsInTargetAnnotation() {
-		String[] expected = new String[] { "com.example.app.test" };
+		String[] expected = asArray("com.example.app.test");
 		Class<?> element = TestComponentScanClass.class;
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(element, ComponentScan.class);
 		assertNotNull("Should find @ComponentScan on " + element, attributes);
@@ -617,7 +617,7 @@ public class AnnotatedElementUtilsTests {
 	 */
 	@Test
 	public void findMergedAnnotationAttributesOnClassWithBothAttributesOfAnAliasPairDeclared() {
-		String[] expected = new String[] { "com.example.app.test" };
+		String[] expected = asArray("com.example.app.test");
 		Class<?> element = ComponentScanWithBasePackagesAndValueAliasClass.class;
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(element, ComponentScan.class);
 
@@ -638,12 +638,17 @@ public class AnnotatedElementUtilsTests {
 		assertArrayEquals("classes for " + element, new Class<?>[] { Number.class }, contextConfig.classes());
 	}
 
+
 	private Set<String> names(Class<?>... classes) {
 		return stream(classes).map(Class::getName).collect(toSet());
 	}
 
+	@SafeVarargs
+	private static <T> T[] asArray(T... arr) {
+		return arr;
+	}
 
-	static AnnotationAttributes findMergedAnnotationAttributes(AnnotatedElement element, Class<? extends Annotation> annotationType) {
+	private static AnnotationAttributes findMergedAnnotationAttributes(AnnotatedElement element, Class<? extends Annotation> annotationType) {
 		Assert.notNull(annotationType, "annotationType must not be null");
 		return AnnotatedElementUtils.findMergedAnnotationAttributes(element, annotationType.getName(), false, false);
 	}
