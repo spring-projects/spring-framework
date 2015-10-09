@@ -18,7 +18,6 @@ package org.springframework.reactive.web.http.reactor;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.reactive.web.http.HttpServer;
 import org.springframework.reactive.web.http.HttpServerSupport;
-import org.springframework.reactive.web.http.reactor.RequestHandlerAdapter;
 import org.springframework.util.Assert;
 import reactor.bus.selector.Selectors;
 import reactor.io.buffer.Buffer;
@@ -50,24 +49,33 @@ public class ReactorHttpServer extends HttpServerSupport implements Initializing
 		this.reactorHandler = new RequestHandlerAdapter(getHttpHandler());
 
 		this.reactorServer = (getPort() != -1 ?
-		 NetStreams.httpServer(getPort()) :
-		  NetStreams.httpServer());
+				NetStreams.httpServer(getPort()) : NetStreams.httpServer());
 	}
 
 
 	@Override
 	public void start() {
 		if (!this.running) {
-			this.running = true;
-			this.reactorServer.route(Selectors.matchAll(), this.reactorHandler).start();
+			try {
+				this.reactorServer.route(Selectors.matchAll(), this.reactorHandler).start().await();
+				this.running = true;
+			}
+			catch (InterruptedException ex) {
+				throw new IllegalStateException(ex);
+			}
 		}
 	}
 
 	@Override
 	public void stop() {
 		if (this.running) {
-			this.running = false;
-			this.reactorServer.shutdown();
+			try {
+				this.reactorServer.shutdown().await();
+				this.running = false;
+			}
+			catch (InterruptedException ex) {
+				throw new IllegalStateException(ex);
+			}
 		}
 	}
 
