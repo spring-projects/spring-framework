@@ -27,6 +27,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -292,6 +293,29 @@ public class AnnotatedElementUtilsTests {
 
 		// Verify contracts between utility methods:
 		assertTrue(isAnnotated(element, name));
+	}
+
+	@Ignore("Disabled until SPR-13554 is addressed")
+	@Test
+	public void getMergedAnnotationAttributesWithHalfConventionBasedAndHalfAliasedComposedAnnotation() {
+		for (Class<?> clazz : asList(HalfConventionBasedAndHalfAliasedComposedContextConfigClassV1.class,
+				HalfConventionBasedAndHalfAliasedComposedContextConfigClassV2.class)) {
+			getMergedAnnotationAttributesWithHalfConventionBasedAndHalfAliasedComposedAnnotation(clazz);
+		}
+	}
+
+	private void getMergedAnnotationAttributesWithHalfConventionBasedAndHalfAliasedComposedAnnotation(Class<?> clazz) {
+		String[] expected = new String[] { "explicitDeclaration" };
+		String name = ContextConfig.class.getName();
+		String simpleName = clazz.getSimpleName();
+		AnnotationAttributes attributes = getMergedAnnotationAttributes(clazz, name);
+
+		assertNotNull("Should find @ContextConfig on " + simpleName, attributes);
+		assertArrayEquals("locations for class [" + clazz.getSimpleName() + "]", expected, attributes.getStringArray("locations"));
+		assertArrayEquals("value for class [" + clazz.getSimpleName() + "]", expected, attributes.getStringArray("value"));
+
+		// Verify contracts between utility methods:
+		assertTrue(isAnnotated(clazz, name));
 	}
 
 	@Test
@@ -774,6 +798,17 @@ public class AnnotatedElementUtilsTests {
 
 	@ContextConfig
 	@Retention(RetentionPolicy.RUNTIME)
+	@interface HalfConventionBasedAndHalfAliasedComposedContextConfig {
+
+		String[] locations() default {};
+
+		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
+		String[] xmlConfigFiles() default {};
+	}
+
+
+	@ContextConfig
+	@Retention(RetentionPolicy.RUNTIME)
 	@interface AliasedComposedContextConfig {
 
 		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
@@ -1038,6 +1073,14 @@ public class AnnotatedElementUtilsTests {
 
 	@InvalidConventionBasedComposedContextConfig(locations = "requiredLocationsDeclaration")
 	static class InvalidConventionBasedComposedContextConfigClass {
+	}
+
+	@HalfConventionBasedAndHalfAliasedComposedContextConfig(xmlConfigFiles = "explicitDeclaration")
+	static class HalfConventionBasedAndHalfAliasedComposedContextConfigClassV1 {
+	}
+
+	@HalfConventionBasedAndHalfAliasedComposedContextConfig(locations = "explicitDeclaration")
+	static class HalfConventionBasedAndHalfAliasedComposedContextConfigClassV2 {
 	}
 
 	@AliasedComposedContextConfig(xmlConfigFiles = "test.xml")
