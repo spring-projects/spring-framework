@@ -13,21 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.reactive.web.http.reactor;
+
+import reactor.bus.selector.Selectors;
+import reactor.io.buffer.Buffer;
+import reactor.io.net.NetStreams;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.reactive.web.http.HttpServer;
 import org.springframework.reactive.web.http.HttpServerSupport;
 import org.springframework.util.Assert;
-import reactor.bus.selector.Selectors;
-import reactor.io.buffer.Buffer;
-import reactor.io.net.NetStreams;
-
 
 /**
  * @author Stephane Maldini
  */
-public class ReactorHttpServer extends HttpServerSupport implements InitializingBean, HttpServer {
+public class ReactorHttpServer extends HttpServerSupport
+		implements InitializingBean, HttpServer {
 
 	private RequestHandlerAdapter reactorHandler;
 
@@ -35,12 +37,10 @@ public class ReactorHttpServer extends HttpServerSupport implements Initializing
 
 	private boolean running;
 
-
 	@Override
 	public boolean isRunning() {
 		return this.running;
 	}
-
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
@@ -48,16 +48,16 @@ public class ReactorHttpServer extends HttpServerSupport implements Initializing
 		Assert.notNull(getHttpHandler());
 		this.reactorHandler = new RequestHandlerAdapter(getHttpHandler());
 
-		this.reactorServer = (getPort() != -1 ?
-				NetStreams.httpServer(getPort()) : NetStreams.httpServer());
+		this.reactorServer = (getPort() != -1 ? NetStreams.httpServer(getPort()) :
+				NetStreams.httpServer());
 	}
-
 
 	@Override
 	public void start() {
 		if (!this.running) {
 			try {
-				this.reactorServer.route(Selectors.matchAll(), this.reactorHandler).start().await();
+				this.reactorServer.route(Selectors.matchAll(), this.reactorHandler)
+						.start().await();
 				this.running = true;
 			}
 			catch (InterruptedException ex) {
@@ -69,13 +69,8 @@ public class ReactorHttpServer extends HttpServerSupport implements Initializing
 	@Override
 	public void stop() {
 		if (this.running) {
-			try {
-				this.reactorServer.shutdown().await();
-				this.running = false;
-			}
-			catch (InterruptedException ex) {
-				throw new IllegalStateException(ex);
-			}
+			this.reactorServer.shutdown();
+			this.running = false;
 		}
 	}
 
