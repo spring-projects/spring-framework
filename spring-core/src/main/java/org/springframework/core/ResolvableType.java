@@ -16,7 +16,6 @@
 
 package org.springframework.core;
 
-import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -859,7 +858,7 @@ public class ResolvableType implements Serializable {
 	/**
 	 * Custom serialization support for {@link #NONE}.
 	 */
-	private Object readResolve() throws ObjectStreamException {
+	private Object readResolve() {
 		return (this.type == null ? NONE : this);
 	}
 
