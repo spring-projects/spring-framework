@@ -25,8 +25,8 @@ import org.springframework.cache.support.SimpleValueWrapper;
 import org.springframework.util.Assert;
 
 /**
- * Simple {@link Cache} implementation based on the core JDK
- * {@code java.util.concurrent} package.
+ * Simple {@link org.springframework.cache.Cache} implementation based on the
+ * core JDK {@code java.util.concurrent} package.
  *
  * <p>Useful for testing or simple caching scenarios, typically in combination
  * with {@link org.springframework.cache.support.SimpleCacheManager} or
@@ -172,6 +172,10 @@ public class ConcurrentMapCache implements Cache {
 
 	@SuppressWarnings("serial")
 	private static class NullHolder implements Serializable {
+
+		private Object readResolve() {
+			return NULL_HOLDER;
+		}
 	}
 
 }

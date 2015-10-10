@@ -28,8 +28,8 @@ import org.springframework.cache.support.SimpleValueWrapper;
 import org.springframework.util.Assert;
 
 /**
- * Spring {@link Cache} adapter implementation on top of a
- * Guava {@link com.google.common.cache.Cache} instance.
+ * Spring {@link org.springframework.cache.Cache} adapter implementation
+ * on top of a Guava {@link com.google.common.cache.Cache} instance.
  *
  * <p>Requires Google Guava 12.0 or higher.
  *
@@ -174,6 +174,10 @@ public class GuavaCache implements Cache {
 
 	@SuppressWarnings("serial")
 	private static class NullHolder implements Serializable {
+
+		private Object readResolve() {
+			return NULL_HOLDER;
+		}
 	}
 
 
