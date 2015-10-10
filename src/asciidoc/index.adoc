@@ -32623,7 +32623,7 @@ To support the resolution of a view based on a file extension, use the
 extensions to media types. For more information on the algorithm used to determine the
 request media type, refer to the API documentation for `ContentNegotiatingViewResolver`.
 
-Here is an example configuration of a `ContentNegotiatingViewResolver:`
+Here is an example configuration of a `ContentNegotiatingViewResolver`:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -32647,7 +32647,7 @@ Here is an example configuration of a `ContentNegotiatingViewResolver:`
 		</property>
 		<property name="defaultViews">
 			<list>
-				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" />
+				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView"/>
 			</list>
 		</property>
 	</bean>
@@ -34054,7 +34054,7 @@ context defined):
 			http://www.springframework.org/schema/mvc
 			http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
-		<mvc:annotation-driven />
+		<mvc:annotation-driven/>
 
 	</beans>
 ----
@@ -34191,15 +34191,15 @@ And in XML use the `<mvc:interceptors>` element:
 [subs="verbatim"]
 ----
 	<mvc:interceptors>
-		<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" />
+		<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"/>
 		<mvc:interceptor>
 			<mvc:mapping path="/**"/>
 			<mvc:exclude-mapping path="/admin/**"/>
-			<bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor" />
+			<bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor"/>
 		</mvc:interceptor>
 		<mvc:interceptor>
 			<mvc:mapping path="/secure/*"/>
-			<bean class="org.example.SecurityInterceptor" />
+			<bean class="org.example.SecurityInterceptor"/>
 		</mvc:interceptor>
 	</mvc:interceptors>
 ----
@@ -34250,11 +34250,11 @@ that in turn can be created with a `ContentNegotiationManagerFactoryBean`:
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<mvc:annotation-driven content-negotiation-manager="contentNegotiationManager" />
+	<mvc:annotation-driven content-negotiation-manager="contentNegotiationManager"/>
 
 	<bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
-		<property name="favorPathExtension" value="false" />
-		<property name="favorParameter" value="true" />
+		<property name="favorPathExtension" value="false"/>
+		<property name="favorParameter" value="true"/>
 		<property name="mediaTypes" >
 			<value>
 				json=application/json
@@ -34270,7 +34270,7 @@ for request mapping purposes, and `RequestMappingHandlerAdapter` and
 `ExceptionHandlerExceptionResolver` for content negotiation purposes.
 
 Note that `ContentNegotiatingViewResolver` now can also be configured with a
-`ContentNegotiatingViewResolver`, so you can use one instance throughout Spring MVC.
+`ContentNegotiationManager`, so you can use one instance throughout Spring MVC.
 
 In more advanced cases, it may be useful to configure multiple
 `ContentNegotiationManager` instances that in turn may contain custom
@@ -34346,10 +34346,10 @@ And the same in XML:
 	<mvc:view-resolvers>
 		<mvc:content-negotiation>
 			<mvc:default-views>
-				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" />
+				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView"/>
 			</mvc:default-views>
 		</mvc:content-negotiation>
-		<mvc:jsp />
+		<mvc:jsp/>
 	</mvc:view-resolvers>
 ----
 
@@ -34365,14 +34365,14 @@ The MVC namespace provides dedicated elements. For example with FreeMarker:
 	<mvc:view-resolvers>
 		<mvc:content-negotiation>
 			<mvc:default-views>
-				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" />
+				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView"/>
 			</mvc:default-views>
 		</mvc:content-negotiation>
-		<mvc:freemarker cache="false" />
+		<mvc:freemarker cache="false"/>
 	</mvc:view-resolvers>
 
 	<mvc:freemarker-configurer>
-		<mvc:template-loader-path location="/freemarker" />
+		<mvc:template-loader-path location="/freemarker"/>
 	</mvc:freemarker-configurer>
 
 ----
@@ -34689,11 +34689,11 @@ And the same in XML, use the `<mvc:path-matching>` element:
             trailing-slash="false"
             registered-suffixes-only="true"
             path-helper="pathHelper"
-            path-matcher="pathMatcher" />
+            path-matcher="pathMatcher"/>
     </mvc:annotation-driven>
 
-    <bean id="pathHelper" class="org.example.app.MyPathHelper" />
-    <bean id="pathMatcher" class="org.example.app.MyPathMatcher" />
+    <bean id="pathHelper" class="org.example.app.MyPathHelper"/>
+    <bean id="pathMatcher" class="org.example.app.MyPathMatcher"/>
 ----
 
 
