@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.servlet.view.jasperreports;
 
-import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
 import org.junit.Test;
 
 import org.springframework.beans.factory.support.BeanDefinitionReader;
@@ -44,7 +43,8 @@ public class JasperReportsHtmlViewTests extends AbstractJasperReportsViewTests {
 	}
 
 	@Test
-	public void testConfigureExporterParametersWithEncodingFromPropertiesFile() throws Exception {
+	@SuppressWarnings("deprecation")
+	public void configureExporterParametersWithEncodingFromPropertiesFile() throws Exception {
 		GenericWebApplicationContext ac = new GenericWebApplicationContext();
 		ac.setServletContext(new MockServletContext());
 		BeanDefinitionReader reader = new PropertiesBeanDefinitionReader(ac);
@@ -52,7 +52,8 @@ public class JasperReportsHtmlViewTests extends AbstractJasperReportsViewTests {
 		ac.refresh();
 
 		AbstractJasperReportsView view = (AbstractJasperReportsView) ac.getBean("report");
-		String encoding = (String) view.getConvertedExporterParameters().get(JRHtmlExporterParameter.CHARACTER_ENCODING);
+		String encoding = (String) view.getConvertedExporterParameters().get(
+			net.sf.jasperreports.engine.export.JRHtmlExporterParameter.CHARACTER_ENCODING);
 		assertEquals("UTF-8", encoding);
 
 		request.setAttribute(DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE, ac);

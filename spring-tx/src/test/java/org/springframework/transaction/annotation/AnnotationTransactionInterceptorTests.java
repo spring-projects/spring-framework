@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,35 +16,30 @@
 
 package org.springframework.transaction.annotation;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
-public class AnnotationTransactionInterceptorTests extends TestCase {
+public class AnnotationTransactionInterceptorTests {
 
-	private CallCountingTransactionManager ptm;
+	private final CallCountingTransactionManager ptm = new CallCountingTransactionManager();
 
-	private AnnotationTransactionAttributeSource source;
+	private final AnnotationTransactionAttributeSource source = new AnnotationTransactionAttributeSource();
 
-	private TransactionInterceptor ti;
-
-
-	@Override
-	public void setUp() {
-		this.ptm = new CallCountingTransactionManager();
-		this.source = new AnnotationTransactionAttributeSource();
-		this.ti = new TransactionInterceptor(this.ptm, this.source);
-	}
+	private final TransactionInterceptor ti = new TransactionInterceptor(this.ptm, this.source);
 
 
-	public void testClassLevelOnly() {
+	@Test
+	public void classLevelOnly() {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTarget(new TestClassLevelOnly());
 		proxyFactory.addAdvice(this.ti);
@@ -64,7 +59,8 @@ public class AnnotationTransactionInterceptorTests extends TestCase {
 		assertGetTransactionAndCommitCount(4);
 	}
 
-	public void testWithSingleMethodOverride() {
+	@Test
+	public void withSingleMethodOverride() {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTarget(new TestWithSingleMethodOverride());
 		proxyFactory.addAdvice(this.ti);
@@ -84,7 +80,8 @@ public class AnnotationTransactionInterceptorTests extends TestCase {
 		assertGetTransactionAndCommitCount(4);
 	}
 
-	public void testWithSingleMethodOverrideInverted() {
+	@Test
+	public void withSingleMethodOverrideInverted() {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTarget(new TestWithSingleMethodOverrideInverted());
 		proxyFactory.addAdvice(this.ti);
@@ -104,7 +101,8 @@ public class AnnotationTransactionInterceptorTests extends TestCase {
 		assertGetTransactionAndCommitCount(4);
 	}
 
-	public void testWithMultiMethodOverride() {
+	@Test
+	public void withMultiMethodOverride() {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTarget(new TestWithMultiMethodOverride());
 		proxyFactory.addAdvice(this.ti);
@@ -124,8 +122,8 @@ public class AnnotationTransactionInterceptorTests extends TestCase {
 		assertGetTransactionAndCommitCount(4);
 	}
 
-
-	public void testWithRollback() {
+	@Test
+	public void withRollback() {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTarget(new TestWithRollback());
 		proxyFactory.addAdvice(this.ti);
@@ -149,7 +147,8 @@ public class AnnotationTransactionInterceptorTests extends TestCase {
 		}
 	}
 
-	public void testWithInterface() {
+	@Test
+	public void withInterface() {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTarget(new TestWithInterfaceImpl());
 		proxyFactory.addInterface(TestWithInterface.class);
@@ -170,7 +169,8 @@ public class AnnotationTransactionInterceptorTests extends TestCase {
 		assertGetTransactionAndCommitCount(4);
 	}
 
-	public void testCrossClassInterfaceMethodLevelOnJdkProxy() throws Exception {
+	@Test
+	public void crossClassInterfaceMethodLevelOnJdkProxy() throws Exception {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTarget(new SomeServiceImpl());
 		proxyFactory.addInterface(SomeService.class);
@@ -188,7 +188,8 @@ public class AnnotationTransactionInterceptorTests extends TestCase {
 		assertGetTransactionAndCommitCount(3);
 	}
 
-	public void testCrossClassInterfaceOnJdkProxy() throws Exception {
+	@Test
+	public void crossClassInterfaceOnJdkProxy() throws Exception {
 		ProxyFactory proxyFactory = new ProxyFactory();
 		proxyFactory.setTarget(new OtherServiceImpl());
 		proxyFactory.addInterface(OtherService.class);
@@ -364,7 +365,7 @@ public class AnnotationTransactionInterceptorTests extends TestCase {
 	}
 
 
-	public static interface OtherService {
+	public interface OtherService {
 
 		void foo();
 	}

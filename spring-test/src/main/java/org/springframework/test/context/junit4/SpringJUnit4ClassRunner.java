@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.internal.runners.model.ReflectiveCallable;
@@ -45,6 +46,7 @@ import org.springframework.test.context.junit4.statements.RunBeforeTestClassCall
 import org.springframework.test.context.junit4.statements.RunBeforeTestMethodCallbacks;
 import org.springframework.test.context.junit4.statements.SpringFailOnTimeout;
 import org.springframework.test.context.junit4.statements.SpringRepeat;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -90,7 +92,18 @@ public class SpringJUnit4ClassRunner extends BlockJUnit4ClassRunner {
 
 	private static final Method withRulesMethod;
 
+	// Used by RunAfterTestClassCallbacks and RunAfterTestMethodCallbacks
+	private static final String MULTIPLE_FAILURE_EXCEPTION_CLASS_NAME = "org.junit.runners.model.MultipleFailureException";
+
 	static {
+		boolean junit4dot9Present = ClassUtils.isPresent(MULTIPLE_FAILURE_EXCEPTION_CLASS_NAME,
+			SpringJUnit4ClassRunner.class.getClassLoader());
+		if (!junit4dot9Present) {
+			throw new IllegalStateException(String.format(
+				"Failed to find class [%s]: SpringJUnit4ClassRunner requires JUnit 4.9 or higher.",
+				MULTIPLE_FAILURE_EXCEPTION_CLASS_NAME));
+		}
+
 		withRulesMethod = ReflectionUtils.findMethod(SpringJUnit4ClassRunner.class, "withRules",
 				FrameworkMethod.class, Object.class, Statement.class);
 		if (withRulesMethod == null) {

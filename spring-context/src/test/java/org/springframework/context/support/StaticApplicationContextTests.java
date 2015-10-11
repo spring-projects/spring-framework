@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import org.junit.Test;
+
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.context.ACATester;
@@ -38,7 +40,6 @@ public class StaticApplicationContextTests extends AbstractApplicationContextTes
 
 	protected StaticApplicationContext sac;
 
-	/** Run for each test */
 	@Override
 	protected ConfigurableApplicationContext createContext() throws Exception {
 		StaticApplicationContext parent = new StaticApplicationContext();
@@ -66,9 +67,9 @@ public class StaticApplicationContextTests extends AbstractApplicationContextTes
 		return sac;
 	}
 
-	/** Overridden */
+	@Test
 	@Override
-	public void testCount() {
+	public void count() {
 		assertCount(15);
 	}
 

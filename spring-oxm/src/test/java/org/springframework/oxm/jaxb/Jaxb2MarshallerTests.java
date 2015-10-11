@@ -35,8 +35,10 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.junit.Test;
+
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
@@ -45,7 +47,6 @@ import org.xml.sax.Locator;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.oxm.AbstractMarshallerTests;
-import org.springframework.oxm.Marshaller;
 import org.springframework.oxm.UncategorizedMappingException;
 import org.springframework.oxm.XmlMappingException;
 import org.springframework.oxm.jaxb.test.FlightType;
@@ -65,19 +66,18 @@ import static org.mockito.BDDMockito.*;
 /**
  * @author Arjen Poutsma
  * @author Biju Kunjummen
+ * @author Sam Brannen
  */
-public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
+public class Jaxb2MarshallerTests extends AbstractMarshallerTests<Jaxb2Marshaller> {
 
 	private static final String CONTEXT_PATH = "org.springframework.oxm.jaxb.test";
-
-	private Jaxb2Marshaller marshaller;
 
 	private Flights flights;
 
 
 	@Override
-	public Marshaller createMarshaller() throws Exception {
-		marshaller = new Jaxb2Marshaller();
+	protected Jaxb2Marshaller createMarshaller() throws Exception {
+		Jaxb2Marshaller marshaller = new Jaxb2Marshaller();
 		marshaller.setContextPath(CONTEXT_PATH);
 		marshaller.afterPropertiesSet();
 		return marshaller;
@@ -389,7 +389,6 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 	public static class DummyRootElement {
 
 		private DummyType t = new DummyType();
-
 	}
 
 	@XmlType
@@ -397,7 +396,6 @@ public class Jaxb2MarshallerTests extends AbstractMarshallerTests {
 	public static class DummyType {
 
 		private String s = "Hello";
-
 	}
 
 	@SuppressWarnings("unused")

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.oxm.xmlbeans;
 
 import java.io.StringReader;
+
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamReader;
@@ -26,7 +27,6 @@ import javax.xml.transform.stream.StreamSource;
 import org.junit.Test;
 
 import org.springframework.oxm.AbstractUnmarshallerTests;
-import org.springframework.oxm.Unmarshaller;
 import org.springframework.oxm.ValidationFailureException;
 import org.springframework.samples.flight.FlightDocument;
 import org.springframework.samples.flight.FlightType;
@@ -38,10 +38,12 @@ import static org.junit.Assert.*;
 /**
  * @author Arjen Poutsma
  */
-public class XmlBeansUnmarshallerTests extends AbstractUnmarshallerTests {
+@SuppressWarnings("deprecation")
+public class XmlBeansUnmarshallerTests extends
+		AbstractUnmarshallerTests<org.springframework.oxm.xmlbeans.XmlBeansMarshaller> {
 
 	@Override
-	protected Unmarshaller createUnmarshaller() throws Exception {
+	protected XmlBeansMarshaller createUnmarshaller() throws Exception {
 		return new XmlBeansMarshaller();
 	}
 
@@ -68,6 +70,7 @@ public class XmlBeansUnmarshallerTests extends AbstractUnmarshallerTests {
 		assertEquals("Number is invalid", 42L, flight.getNumber());
 	}
 
+	@Test
 	@Override
 	public void unmarshalPartialStaxSourceXmlStreamReader() throws Exception {
 		XMLInputFactory inputFactory = XMLInputFactory.newInstance();
@@ -84,8 +87,8 @@ public class XmlBeansUnmarshallerTests extends AbstractUnmarshallerTests {
 	}
 
 	@Test(expected = ValidationFailureException.class)
-	public void testValidate() throws Exception {
-		((XmlBeansMarshaller) unmarshaller).setValidating(true);
+	public void validate() throws Exception {
+		unmarshaller.setValidating(true);
 		String invalidInput = "<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">" +
 				"<tns:flight><tns:number>abc</tns:number></tns:flight></tns:flights>";
 		unmarshaller.unmarshal(new StreamSource(new StringReader(invalidInput)));

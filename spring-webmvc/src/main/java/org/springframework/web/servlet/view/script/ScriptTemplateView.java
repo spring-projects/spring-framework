@@ -29,6 +29,8 @@ import java.util.Map;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -41,6 +43,7 @@ import org.springframework.core.NamedThreadLocal;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.scripting.support.StandardScriptEvalException;
 import org.springframework.scripting.support.StandardScriptUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
@@ -356,8 +359,8 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 			response.getWriter().write(String.valueOf(html));
 		}
-		catch (Exception ex) {
-			throw new IllegalStateException("Failed to render script template", ex);
+		catch (ScriptException ex) {
+			throw new ServletException("Failed to render script template", new StandardScriptEvalException(ex));
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,16 @@ package org.springframework.web.servlet.view.velocity;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Vector;
 
-import junit.framework.TestCase;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.VelocityException;
+
+import org.junit.Test;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.DescriptiveResource;
@@ -44,9 +46,10 @@ import static org.junit.Assert.*;
  * @author Rod Johnson
  * @author Juergen Hoeller
  */
-public class VelocityConfigurerTests extends TestCase {
+public class VelocityConfigurerTests {
 
-	public void testVelocityEngineFactoryBeanWithConfigLocation() throws VelocityException {
+	@Test
+	public void velocityEngineFactoryBeanWithConfigLocation() throws VelocityException {
 		VelocityEngineFactoryBean vefb = new VelocityEngineFactoryBean();
 		vefb.setConfigLocation(new FileSystemResource("myprops.properties"));
 		Properties props = new Properties();
@@ -61,13 +64,14 @@ public class VelocityConfigurerTests extends TestCase {
 		}
 	}
 
-	public void testVelocityEngineFactoryBeanWithVelocityProperties() throws VelocityException, IOException {
+	@Test
+	public void velocityEngineFactoryBeanWithVelocityProperties() throws VelocityException, IOException {
 		VelocityEngineFactoryBean vefb = new VelocityEngineFactoryBean();
 		Properties props = new Properties();
 		props.setProperty("myprop", "/mydir");
 		vefb.setVelocityProperties(props);
 		Object value = new Object();
-		Map map = new HashMap();
+		Map<String, Object> map = new HashMap<>();
 		map.put("myentry", value);
 		vefb.setVelocityPropertiesMap(map);
 		vefb.afterPropertiesSet();
@@ -77,7 +81,8 @@ public class VelocityConfigurerTests extends TestCase {
 		assertEquals(value, ve.getProperty("myentry"));
 	}
 
-	public void testVelocityEngineFactoryBeanWithResourceLoaderPath() throws IOException, VelocityException {
+	@Test
+	public void velocityEngineFactoryBeanWithResourceLoaderPath() throws IOException, VelocityException {
 		VelocityEngineFactoryBean vefb = new VelocityEngineFactoryBean();
 		vefb.setResourceLoaderPath("file:/mydir");
 		vefb.afterPropertiesSet();
@@ -86,7 +91,9 @@ public class VelocityConfigurerTests extends TestCase {
 		assertEquals(new File("/mydir").getAbsolutePath(), ve.getProperty(VelocityEngine.FILE_RESOURCE_LOADER_PATH));
 	}
 
-	public void testVelocityEngineFactoryBeanWithNonFileResourceLoaderPath() throws Exception {
+	@Test
+	@SuppressWarnings("deprecation")
+	public void velocityEngineFactoryBeanWithNonFileResourceLoaderPath() throws Exception {
 		VelocityEngineFactoryBean vefb = new VelocityEngineFactoryBean();
 		vefb.setResourceLoaderPath("file:/mydir");
 		vefb.setResourceLoader(new ResourceLoader() {
@@ -110,10 +117,11 @@ public class VelocityConfigurerTests extends TestCase {
 		vefb.afterPropertiesSet();
 		assertThat(vefb.getObject(), instanceOf(VelocityEngine.class));
 		VelocityEngine ve = vefb.getObject();
-		assertEquals("test", VelocityEngineUtils.mergeTemplateIntoString(ve, "test", new HashMap()));
+		assertEquals("test", VelocityEngineUtils.mergeTemplateIntoString(ve, "test", Collections.emptyMap()));
 	}
 
-	public void testVelocityConfigurer() throws IOException, VelocityException {
+	@Test
+	public void velocityConfigurer() throws IOException, VelocityException {
 		VelocityConfigurer vc = new VelocityConfigurer();
 		vc.setResourceLoaderPath("file:/mydir");
 		vc.afterPropertiesSet();
@@ -122,19 +130,22 @@ public class VelocityConfigurerTests extends TestCase {
 		assertEquals(new File("/mydir").getAbsolutePath(), ve.getProperty(VelocityEngine.FILE_RESOURCE_LOADER_PATH));
 	}
 
-	public void testVelocityConfigurerWithCsvPath() throws IOException, VelocityException {
+	@Test
+	public void velocityConfigurerWithCsvPath() throws IOException, VelocityException {
 		VelocityConfigurer vc = new VelocityConfigurer();
 		vc.setResourceLoaderPath("file:/mydir,file:/yourdir");
 		vc.afterPropertiesSet();
 		assertThat(vc.createVelocityEngine(), instanceOf(VelocityEngine.class));
 		VelocityEngine ve = vc.createVelocityEngine();
-		Vector paths = new Vector();
+		Vector<String> paths = new Vector<>();
 		paths.add(new File("/mydir").getAbsolutePath());
 		paths.add(new File("/yourdir").getAbsolutePath());
 		assertEquals(paths, ve.getProperty(VelocityEngine.FILE_RESOURCE_LOADER_PATH));
 	}
 
-	public void testVelocityConfigurerWithCsvPathAndNonFileAccess() throws IOException, VelocityException {
+	@Test
+	@SuppressWarnings("deprecation")
+	public void velocityConfigurerWithCsvPathAndNonFileAccess() throws IOException, VelocityException {
 		VelocityConfigurer vc = new VelocityConfigurer();
 		vc.setResourceLoaderPath("file:/mydir,file:/yourdir");
 		vc.setResourceLoader(new ResourceLoader() {
@@ -154,7 +165,7 @@ public class VelocityConfigurerTests extends TestCase {
 		vc.afterPropertiesSet();
 		assertThat(vc.createVelocityEngine(), instanceOf(VelocityEngine.class));
 		VelocityEngine ve = vc.createVelocityEngine();
-		assertEquals("test", VelocityEngineUtils.mergeTemplateIntoString(ve, "test", new HashMap()));
+		assertEquals("test", VelocityEngineUtils.mergeTemplateIntoString(ve, "test", Collections.emptyMap()));
 	}
 
 }

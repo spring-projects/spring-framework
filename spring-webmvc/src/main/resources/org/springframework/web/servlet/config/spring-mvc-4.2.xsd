@@ -52,12 +52,11 @@
 						<xsd:attribute name="registered-suffixes-only" type="xsd:boolean">
 							<xsd:annotation>
 								<xsd:documentation><![CDATA[
-	Whether to use suffix pattern match for registered file extensions only when matching patterns to requests.
-	If enabled, a controller method mapped to "/users" also matches to "/users.json" assuming ".json" is a file extension registered with
-	the provided ContentNegotiationManager. This can be useful for allowing only specific URL extensions to be used as well as in cases
-	where a "." in the URL path can lead to ambiguous interpretation of path variable content, (e.g. given "/users/{user}" and incoming
-	URLs such as "/users/john.j.joe" and "/users/john.j.joe.json").
-	If enabled, this attribute also enables suffix-pattern. The default value is false.
+	Whether suffix pattern matching should work only against path extensions
+	explicitly registered when you configure content negotiation.
+	This is generally recommended to reduce ambiguity and to
+	avoid issues such as when a "." appears in the path for other reasons.
+	The default value is false.
 								]]></xsd:documentation>
 							</xsd:annotation>
 						</xsd:attribute>

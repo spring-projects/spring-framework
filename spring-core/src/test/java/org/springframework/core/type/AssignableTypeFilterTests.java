@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,23 @@
 
 package org.springframework.core.type;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Ramnivas Laddad
  * @author Juergen Hoeller
  */
-public class AssignableTypeFilterTests extends TestCase {
+public class AssignableTypeFilterTests {
 
-	public void testDirectMatch() throws Exception {
+	@Test
+	public void directMatch() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AssignableTypeFilterTests$TestNonInheritingClass";
 		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(classUnderTest);
@@ -40,7 +43,8 @@ public class AssignableTypeFilterTests extends TestCase {
 		assertTrue(matchingFilter.match(metadataReader, metadataReaderFactory));
 	}
 
-	public void testInterfaceMatch() throws Exception {
+	@Test
+	public void interfaceMatch() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AssignableTypeFilterTests$TestInterfaceImpl";
 		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(classUnderTest);
@@ -50,7 +54,8 @@ public class AssignableTypeFilterTests extends TestCase {
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
 
-	public void testSuperClassMatch() throws Exception {
+	@Test
+	public void superClassMatch() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AssignableTypeFilterTests$SomeDaoLikeImpl";
 		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(classUnderTest);
@@ -60,7 +65,8 @@ public class AssignableTypeFilterTests extends TestCase {
 		ClassloadingAssertions.assertClassNotLoaded(classUnderTest);
 	}
 
-	public void testInterfaceThroughSuperClassMatch() throws Exception {
+	@Test
+	public void interfaceThroughSuperClassMatch() throws Exception {
 		MetadataReaderFactory metadataReaderFactory = new SimpleMetadataReaderFactory();
 		String classUnderTest = "org.springframework.core.type.AssignableTypeFilterTests$SomeDaoLikeImpl";
 		MetadataReader metadataReader = metadataReaderFactory.getMetadataReader(classUnderTest);
@@ -76,30 +82,24 @@ public class AssignableTypeFilterTests extends TestCase {
 	private static class TestNonInheritingClass {
 	}
 
-
-	private static interface TestInterface {
+	private interface TestInterface {
 	}
-
 
 	@SuppressWarnings("unused")
 	private static class TestInterfaceImpl implements TestInterface {
 	}
 
-
-	private static interface SomeDaoLikeInterface {
+	private interface SomeDaoLikeInterface {
 	}
-
 
 	@SuppressWarnings("unused")
 	private static class SomeDaoLikeImpl extends SimpleJdbcDaoSupport implements SomeDaoLikeInterface {
 	}
 
-	private static interface JdbcDaoSupport {
-
+	private interface JdbcDaoSupport {
 	}
 
 	private static class SimpleJdbcDaoSupport implements JdbcDaoSupport {
-
 	}
 
 }

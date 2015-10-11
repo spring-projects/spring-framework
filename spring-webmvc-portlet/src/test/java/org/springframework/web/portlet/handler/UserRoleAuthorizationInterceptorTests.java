@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,22 +18,30 @@ package org.springframework.web.portlet.handler;
 
 import javax.portlet.PortletSecurityException;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.mock.web.portlet.MockRenderRequest;
 import org.springframework.mock.web.portlet.MockRenderResponse;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Mark Fisher
+ * @author Sam Brannen
  */
-public class UserRoleAuthorizationInterceptorTests extends TestCase {
+public class UserRoleAuthorizationInterceptorTests {
 
-	public void testAuthorizedUser() throws Exception {
-		UserRoleAuthorizationInterceptor interceptor = new UserRoleAuthorizationInterceptor();
+	private final UserRoleAuthorizationInterceptor interceptor = new UserRoleAuthorizationInterceptor();
+
+	private final MockRenderRequest request = new MockRenderRequest();
+
+	private final MockRenderResponse response = new MockRenderResponse();
+
+
+	@Test
+	public void authorizedUser() throws Exception {
 		String validRole = "allowed";
 		interceptor.setAuthorizedRoles(new String[] {validRole});
-		MockRenderRequest request = new MockRenderRequest();
-		MockRenderResponse response = new MockRenderResponse();
 		Object handler = new Object();
 		request.addUserRole(validRole);
 		assertTrue(request.isUserInRole(validRole));
@@ -41,13 +49,11 @@ public class UserRoleAuthorizationInterceptorTests extends TestCase {
 		assertTrue(shouldProceed);
 	}
 
-	public void testAuthorizedUserWithMultipleRoles() throws Exception {
-		UserRoleAuthorizationInterceptor interceptor = new UserRoleAuthorizationInterceptor();
+	@Test
+	public void authorizedUserWithMultipleRoles() throws Exception {
 		String validRole1 = "allowed1";
 		String validRole2 = "allowed2";
 		interceptor.setAuthorizedRoles(new String[] {validRole1, validRole2});
-		MockRenderRequest request = new MockRenderRequest();
-		MockRenderResponse response = new MockRenderResponse();
 		Object handler = new Object();
 		request.addUserRole(validRole2);
 		request.addUserRole("someOtherRole");
@@ -57,54 +63,29 @@ public class UserRoleAuthorizationInterceptorTests extends TestCase {
 		assertTrue(shouldProceed);
 	}
 
-	public void testUnauthorizedUser() throws Exception {
-		UserRoleAuthorizationInterceptor interceptor = new UserRoleAuthorizationInterceptor();
+	@Test(expected = PortletSecurityException.class)
+	public void unauthorizedUser() throws Exception {
 		String validRole = "allowed";
 		interceptor.setAuthorizedRoles(new String[] {validRole});
-		MockRenderRequest request = new MockRenderRequest();
-		MockRenderResponse response = new MockRenderResponse();
-		Object handler = new Object();
 		request.addUserRole("someOtherRole");
 		assertFalse(request.isUserInRole(validRole));
-		try {
-			interceptor.preHandle(request, response, handler);
-			fail("should have thrown PortletSecurityException");
-		}
-		catch (PortletSecurityException ex) {
-			// expected
-		}
+
+		interceptor.preHandle(request, response, new Object());
 	}
 
-	public void testRequestWithNoUserRoles() throws Exception {
-		UserRoleAuthorizationInterceptor interceptor = new UserRoleAuthorizationInterceptor();
+	@Test(expected = PortletSecurityException.class)
+	public void requestWithNoUserRoles() throws Exception {
 		String validRole = "allowed";
 		interceptor.setAuthorizedRoles(new String[] {validRole});
-		MockRenderRequest request = new MockRenderRequest();
-		MockRenderResponse response = new MockRenderResponse();
-		Object handler = new Object();
 		assertFalse(request.isUserInRole(validRole));
-		try {
-			interceptor.preHandle(request, response, handler);
-			fail("should have thrown PortletSecurityException");
-		}
-		catch (PortletSecurityException ex) {
-			// expected
-		}
+
+		interceptor.preHandle(request, response, new Object());
 	}
 
-	public void testInterceptorWithNoAuthorizedRoles() throws Exception {
-		UserRoleAuthorizationInterceptor interceptor = new UserRoleAuthorizationInterceptor();
-		MockRenderRequest request = new MockRenderRequest();
-		MockRenderResponse response = new MockRenderResponse();
-		Object handler = new Object();
+	@Test(expected = PortletSecurityException.class)
+	public void interceptorWithNoAuthorizedRoles() throws Exception {
 		request.addUserRole("someRole");
-		try {
-			interceptor.preHandle(request, response, handler);
-			fail("should have thrown PortletSecurityException");
-		}
-		catch (PortletSecurityException ex) {
-			// expected
-		}
+		interceptor.preHandle(request, response, new Object());
 	}
 
 }

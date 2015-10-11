@@ -16,7 +16,6 @@
 
 package org.springframework.core;
 
-import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -27,6 +26,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -858,7 +858,7 @@ public class ResolvableType implements Serializable {
 	/**
 	 * Custom serialization support for {@link #NONE}.
 	 */
-	private Object readResolve() throws ObjectStreamException {
+	private Object readResolve() {
 		return (this.type == null ? NONE : this);
 	}
 
@@ -1393,8 +1393,8 @@ public class ResolvableType implements Serializable {
 		}
 
 		@Override
-		public Type[] getActualTypeArguments() {
-			return this.typeArguments;
+		public Type getOwnerType() {
+			return null;
 		}
 
 		@Override
@@ -1403,8 +1403,26 @@ public class ResolvableType implements Serializable {
 		}
 
 		@Override
-		public Type getOwnerType() {
-			return null;
+		public Type[] getActualTypeArguments() {
+			return this.typeArguments;
+		}
+
+		@Override
+		public boolean equals(Object other) {
+			if (this == other) {
+				return true;
+			}
+			if (!(other instanceof ParameterizedType)) {
+				return false;
+			}
+			ParameterizedType otherType = (ParameterizedType) other;
+			return (otherType.getOwnerType() == null && this.rawType.equals(otherType.getRawType()) &&
+					Arrays.equals(this.typeArguments, otherType.getActualTypeArguments()));
+		}
+
+		@Override
+		public int hashCode() {
+			return (this.rawType.hashCode() * 31 + Arrays.hashCode(this.typeArguments));
 		}
 	}
 

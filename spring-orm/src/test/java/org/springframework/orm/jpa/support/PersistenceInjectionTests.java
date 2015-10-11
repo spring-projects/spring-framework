@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import javax.persistence.PersistenceProperty;
 import javax.persistence.PersistenceUnit;
 
 import org.hibernate.ejb.HibernateEntityManager;
+
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -58,6 +59,7 @@ import static org.mockito.BDDMockito.*;
  * @author Juergen Hoeller
  * @author Phillip Webb
  */
+@SuppressWarnings("resource")
 public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanTests {
 
 	@Test
@@ -189,7 +191,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void testPublicExtendedPersistenceContextSetterWithEntityManagerInfoAndSerialization() throws Exception {
 		EntityManager mockEm = mock(EntityManager.class, withSettings().serializable());
 		given(mockEm.isOpen()).willReturn(true);
@@ -717,6 +719,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	}
 
 
+	@SuppressWarnings("rawtypes")
 	public static class FactoryBeanWithPersistenceContextField implements FactoryBean {
 
 		@PersistenceContext
@@ -840,6 +843,7 @@ public class PersistenceInjectionTests extends AbstractEntityManagerFactoryBeanT
 	public static class SetterOfWrongTypeAnnotatedWithPersistenceUnit {
 
 		@PersistenceUnit
+		@SuppressWarnings("rawtypes")
 		public void setSomething(Comparable c) {
 		}
 	}

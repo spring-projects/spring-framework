@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,8 +48,7 @@ import org.springframework.beans.factory.InitializingBean;
  * environments.prod.name=My Cool App
  * </pre>
  *
- * Lists are represented as comma-separated values (useful for simple String
- * values) and also as property keys with <code>[]</code> dereferencers, for
+ * Lists are split as property keys with <code>[]</code> dereferencers, for
  * example this YAML:
  *
  * <pre class="code">
@@ -61,7 +60,6 @@ import org.springframework.beans.factory.InitializingBean;
  * becomes Java Properties like this:
  *
  * <pre class="code">
- * servers=dev.bar.com,foo.bar.com
  * servers[0]=dev.bar.com
  * servers[1]=foo.bar.com
  * </pre>

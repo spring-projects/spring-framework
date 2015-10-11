@@ -29,6 +29,7 @@ import org.eclipse.jetty.server.NetworkConnector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -66,8 +67,8 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
-import static org.junit.Assert.assertEquals;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static org.junit.Assert.*;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 /**
  * Test access to parts of a multipart request with {@link RequestPart}.

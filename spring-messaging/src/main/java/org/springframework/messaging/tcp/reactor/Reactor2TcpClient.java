@@ -16,12 +16,14 @@
 
 package org.springframework.messaging.tcp.reactor;
 
+import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.FutureListener;
@@ -43,6 +45,7 @@ import reactor.io.net.NetStreams.TcpClientFactory;
 import reactor.io.net.ReactorChannelHandler;
 import reactor.io.net.Reconnect;
 import reactor.io.net.Spec.TcpClientSpec;
+import reactor.io.net.config.ClientSocketOptions;
 import reactor.io.net.impl.netty.NettyClientSocketOptions;
 import reactor.io.net.impl.netty.tcp.NettyTcpClient;
 import reactor.io.net.tcp.TcpClient;
@@ -57,6 +60,8 @@ import org.springframework.messaging.tcp.ReconnectStrategy;
 import org.springframework.messaging.tcp.TcpConnectionHandler;
 import org.springframework.messaging.tcp.TcpOperations;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 
 /**
@@ -75,8 +80,11 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 	@SuppressWarnings("rawtypes")
 	public static final Class<NettyTcpClient> REACTOR_TCP_CLIENT_TYPE = NettyTcpClient.class;
 
+	private static final Method eventLoopGroupMethod = initEventLoopGroupMethod();
 
-	private final NioEventLoopGroup eventLoopGroup;
+
+
+	private final EventLoopGroup eventLoopGroup;
 
 	private final TcpClientFactory<Message<P>, Message<P>> tcpClientSpecFactory;
 
@@ -99,7 +107,10 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 	 * @param codec the codec to use for encoding and decoding the TCP stream
 	 */
 	public Reactor2TcpClient(final String host, final int port, final Codec<Buffer, Message<P>, Message<P>> codec) {
-		this.eventLoopGroup = initEventLoopGroup();
+
+		// Reactor 2.0.5 requires NioEventLoopGroup vs 2.0.6+ requires EventLoopGroup
+		final NioEventLoopGroup nioEventLoopGroup = initEventLoopGroup();
+		this.eventLoopGroup = nioEventLoopGroup;
 
 		this.tcpClientSpecFactory = new TcpClientFactory<Message<P>, Message<P>>() {
 			@Override
@@ -108,7 +119,12 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 						.env(new Environment(new SynchronousDispatcherConfigReader()))
 						.codec(codec)
 						.connect(host, port)
-						.options(new NettyClientSocketOptions().eventLoopGroup(eventLoopGroup));
+						.options(createClientSocketOptions());
+			}
+
+			private ClientSocketOptions createClientSocketOptions() {
+				return (ClientSocketOptions) ReflectionUtils.invokeMethod(eventLoopGroupMethod,
+						new NettyClientSocketOptions(), nioEventLoopGroup);
 			}
 		};
 	}
@@ -240,11 +256,22 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 	}
 
 
+	private static Method initEventLoopGroupMethod() {
+		for (Method method : NettyClientSocketOptions.class.getMethods()) {
+			if (method.getName().equals("eventLoopGroup") && method.getParameterTypes().length == 1) {
+				return method;
+			}
+		}
+		throw new IllegalStateException("No compatible Reactor version found.");
+	}
+
+
 	private static class SynchronousDispatcherConfigReader implements ConfigurationReader {
 
 		@Override
 		public ReactorConfiguration read() {
-			return new ReactorConfiguration(Arrays.<DispatcherConfiguration>asList(), "sync", new Properties());
+			return new ReactorConfiguration(Collections.<DispatcherConfiguration>emptyList(),
+					"sync", new Properties());
 		}
 	}
 

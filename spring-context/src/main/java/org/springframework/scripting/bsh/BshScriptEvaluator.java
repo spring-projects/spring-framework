@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,10 +79,10 @@ public class BshScriptEvaluator implements ScriptEvaluator, BeanClassLoaderAware
 			return interpreter.eval(new StringReader(script.getScriptAsString()));
 		}
 		catch (IOException ex) {
-			throw new ScriptCompilationException(script, "Cannot access script", ex);
+			throw new ScriptCompilationException(script, "Cannot access BeanShell script", ex);
 		}
 		catch (EvalError ex) {
-			throw new ScriptCompilationException(script, "Evaluation failure", ex);
+			throw new ScriptCompilationException(script, ex);
 		}
 	}
 

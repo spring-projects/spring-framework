@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ public class StopWatch {
 	 * Construct a new stop watch. Does not start any task.
 	 */
 	public StopWatch() {
-		this.id = "";
+		this("");
 	}
 
 	/**
@@ -86,6 +86,16 @@ public class StopWatch {
 		this.id = id;
 	}
 
+
+	/**
+	 * Return the id of this stop watch, as specified on construction.
+	 * @return the id (empty String by default)
+	 * @since 4.2.2
+	 * @see #StopWatch(String)
+	 */
+	public String getId() {
+		return this.id;
+	}
 
 	/**
 	 * Determine whether the TaskInfo array is built over time. Set this to
@@ -116,15 +126,15 @@ public class StopWatch {
 		if (this.running) {
 			throw new IllegalStateException("Can't start StopWatch: it's already running");
 		}
-		this.startTimeMillis = System.currentTimeMillis();
 		this.running = true;
 		this.currentTaskName = taskName;
+		this.startTimeMillis = System.currentTimeMillis();
 	}
 
 	/**
 	 * Stop the current task. The results are undefined if timing
 	 * methods are called without invoking at least one pair
-	 * {@link #start()} / {@link #stop()} methods.
+	 * {@code #start()} / {@code #stop()} methods.
 	 * @see #start()
 	 */
 	public void stop() throws IllegalStateException {
@@ -144,9 +154,19 @@ public class StopWatch {
 
 	/**
 	 * Return whether the stop watch is currently running.
+	 * @see #currentTaskName()
 	 */
 	public boolean isRunning() {
 		return this.running;
+	}
+
+	/**
+	 * Return the name of the currently running task, if any.
+	 * @since 4.2.2
+	 * @see #isRunning()
+	 */
+	public String currentTaskName() {
+		return this.currentTaskName;
 	}
 
 
@@ -217,7 +237,7 @@ public class StopWatch {
 	 * Return a short description of the total running time.
 	 */
 	public String shortSummary() {
-		return "StopWatch '" + this.id + "': running time (millis) = " + getTotalTimeMillis();
+		return "StopWatch '" + getId() + "': running time (millis) = " + getTotalTimeMillis();
 	}
 
 	/**
@@ -302,7 +322,7 @@ public class StopWatch {
 		 * Return the time in seconds this task took.
 		 */
 		public double getTimeSeconds() {
-			return this.timeMillis / 1000.0;
+			return (this.timeMillis / 1000.0);
 		}
 	}
 

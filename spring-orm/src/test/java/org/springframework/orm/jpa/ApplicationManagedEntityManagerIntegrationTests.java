@@ -41,7 +41,8 @@ public class ApplicationManagedEntityManagerIntegrationTests extends AbstractEnt
 		assertTrue("EntityManagerFactory is proxied", Proxy.isProxyClass(entityManagerFactory.getClass()));
 	}
 
-	@Transactional(readOnly=true)
+	@Transactional(readOnly = true)
+	@SuppressWarnings("unchecked")
 	public void testEntityManagerProxyIsProxy() {
 		EntityManager em = entityManagerFactory.createEntityManager();
 		assertTrue(Proxy.isProxyClass(em.getClass()));

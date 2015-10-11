@@ -338,25 +338,28 @@ public class UriComponentsBuilder implements Cloneable {
 
 
 	/**
-	 * Create an instance by parsing the "origin" header of an HTTP request.
+	 * Create an instance by parsing the "Origin" header of an HTTP request.
+	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454</a>
 	 */
 	public static UriComponentsBuilder fromOriginHeader(String origin) {
-		UriComponentsBuilder builder = UriComponentsBuilder.newInstance();
-		if (StringUtils.hasText(origin)) {
-			int schemaIdx = origin.indexOf("://");
-			String schema = (schemaIdx != -1 ? origin.substring(0, schemaIdx) : "http");
-			builder.scheme(schema);
-			String hostString = (schemaIdx != -1 ? origin.substring(schemaIdx + 3) : origin);
-			if (hostString.contains(":")) {
-				String[] hostAndPort = StringUtils.split(hostString, ":");
-				builder.host(hostAndPort[0]);
-				builder.port(Integer.parseInt(hostAndPort[1]));
+		Matcher matcher = URI_PATTERN.matcher(origin);
+		if (matcher.matches()) {
+			UriComponentsBuilder builder = new UriComponentsBuilder();
+			String scheme = matcher.group(2);
+			String host = matcher.group(6);
+			String port = matcher.group(8);
+			if (StringUtils.hasLength(scheme)) {
+				builder.scheme(scheme);
 			}
-			else {
-				builder.host(hostString);
+			builder.host(host);
+			if (StringUtils.hasLength(port)) {
+				builder.port(port);
 			}
+			return builder;
 		}
-		return builder;
+		else {
+			throw new IllegalArgumentException("[" + origin + "] is not a valid \"Origin\" header value");
+		}
 	}
 
 

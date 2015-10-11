@@ -17,7 +17,6 @@
 package org.springframework.web.socket.sockjs.support;
 
 import java.io.IOException;
-
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -66,8 +65,8 @@ public class SockJsHttpRequestHandler
 	 * @param webSocketHandler the websocket handler
 	 */
 	public SockJsHttpRequestHandler(SockJsService sockJsService, WebSocketHandler webSocketHandler) {
-		Assert.notNull(sockJsService, "sockJsService must not be null");
-		Assert.notNull(webSocketHandler, "webSocketHandler must not be null");
+		Assert.notNull(sockJsService, "SockJsService must not be null");
+		Assert.notNull(webSocketHandler, "WebSocketHandler must not be null");
 		this.sockJsService = sockJsService;
 		this.webSocketHandler =
 				new ExceptionWebSocketHandlerDecorator(new LoggingWebSocketHandlerDecorator(webSocketHandler));
@@ -95,10 +94,6 @@ public class SockJsHttpRequestHandler
 		}
 	}
 
-	@Override
-	public boolean isRunning() {
-		return this.running;
-	}
 
 	@Override
 	public void start() {
@@ -120,6 +115,11 @@ public class SockJsHttpRequestHandler
 		}
 	}
 
+	@Override
+	public boolean isRunning() {
+		return this.running;
+	}
+
 
 	@Override
 	public void handleRequest(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
@@ -139,13 +139,13 @@ public class SockJsHttpRequestHandler
 	private String getSockJsPath(HttpServletRequest servletRequest) {
 		String attribute = HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE;
 		String path = (String) servletRequest.getAttribute(attribute);
-		return ((path.length() > 0) && (path.charAt(0) != '/')) ? "/" + path : path;
+		return (path.length() > 0 && path.charAt(0) != '/' ? "/" + path : path);
 	}
 
 	@Override
 	public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-		if (sockJsService instanceof CorsConfigurationSource) {
-			return ((CorsConfigurationSource)sockJsService).getCorsConfiguration(request);
+		if (this.sockJsService instanceof CorsConfigurationSource) {
+			return ((CorsConfigurationSource) this.sockJsService).getCorsConfiguration(request);
 		}
 		return null;
 	}

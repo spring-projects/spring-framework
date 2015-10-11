@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,16 @@
 
 package org.springframework.web.servlet.view.jasperreports;
 
-import net.sf.jasperreports.engine.export.JRHtmlExporter;
-
 /**
  * @author Rob Harrop
  */
 public class ConfigurableJasperReportsViewWithStreamTests extends AbstractConfigurableJasperReportsViewTests {
 
 	@Override
+	@SuppressWarnings("deprecation")
 	protected AbstractJasperReportsView getViewImplementation() {
 		ConfigurableJasperReportsView view = new ConfigurableJasperReportsView();
-		view.setExporterClass(JRHtmlExporter.class);
+		view.setExporterClass(net.sf.jasperreports.engine.export.JRHtmlExporter.class);
 		view.setUseWriter(true);
 		view.setContentType("application/pdf");
 		return view;
@@ -36,4 +35,5 @@ public class ConfigurableJasperReportsViewWithStreamTests extends AbstractConfig
 	protected String getDesiredContentType() {
 		return "application/pdf";
 	}
+
 }

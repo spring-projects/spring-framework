@@ -100,7 +100,7 @@ public class WebRequestDataBinderIntegrationTests {
 
 
 	@Test
-	public void testPartsBinding() {
+	public void partsBinding() {
 
 		PartsBean bean = new PartsBean();
 		partsServlet.setBean(bean);
@@ -117,7 +117,7 @@ public class WebRequestDataBinderIntegrationTests {
 	}
 
 	@Test
-	public void testPartListBinding() {
+	public void partListBinding() {
 
 		PartListBean bean = new PartListBean();
 		partListServlet.setBean(bean);

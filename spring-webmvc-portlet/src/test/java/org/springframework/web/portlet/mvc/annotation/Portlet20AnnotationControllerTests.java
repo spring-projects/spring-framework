@@ -993,6 +993,7 @@ public class Portlet20AnnotationControllerTests {
 		}
 
 		@ModelAttribute
+		@SuppressWarnings("unchecked")
 		protected TB2 getModelAttr() {
 			return (TB2) new DerivedTestBean();
 		}
@@ -1032,6 +1033,7 @@ public class Portlet20AnnotationControllerTests {
 
 
 	@Controller
+	@SuppressWarnings("rawtypes")
 	private static class MyBinderInitializingCommandProvidingFormController extends MyCommandProvidingFormController {
 
 		@InitBinder
@@ -1044,9 +1046,9 @@ public class Portlet20AnnotationControllerTests {
 
 
 	@Controller
+	@SuppressWarnings("rawtypes")
 	private static class MySpecificBinderInitializingCommandProvidingFormController extends MyCommandProvidingFormController {
 
-		@SuppressWarnings("unused")
 		@InitBinder({"myCommand", "date"})
 		private void initBinder(WebDataBinder binder) {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -1238,13 +1240,14 @@ public class Portlet20AnnotationControllerTests {
 
 	private static class TestView {
 
+		@SuppressWarnings("deprecation")
 		public void render(String viewName, Map<String, Object> model, PortletRequest request, MimeResponse response) throws Exception {
 			TestBean tb = (TestBean) model.get("testBean");
 			if (tb == null) {
 				tb = (TestBean) model.get("myCommand");
 			}
 			if (tb.getName().endsWith("myDefaultName")) {
-				assertTrue(tb.getDate().getYear() == 107);
+				assertEquals(107, tb.getDate().getYear());
 			}
 			Errors errors = (Errors) model.get(BindingResult.MODEL_KEY_PREFIX + "testBean");
 			if (errors == null) {

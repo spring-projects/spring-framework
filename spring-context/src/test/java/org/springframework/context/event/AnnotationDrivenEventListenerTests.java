@@ -73,12 +73,14 @@ public class AnnotationDrivenEventListenerTests {
 
 	private CountDownLatch countDownLatch; // 1 call by default
 
+
 	@After
 	public void closeContext() {
 		if (this.context != null) {
 			this.context.close();
 		}
 	}
+
 
 	@Test
 	public void simpleEventJavaConfig() {
@@ -242,13 +244,6 @@ public class AnnotationDrivenEventListenerTests {
 	}
 
 	@Test
-	public void methodNotAvailableOnProxyIsDetected() throws Exception {
-		thrown.expect(BeanInitializationException.class);
-		thrown.expectMessage("handleIt2");
-		load(InvalidProxyTestBean.class);
-	}
-
-	@Test
 	public void eventListenerWorksWithCglibProxy() throws Exception {
 		load(CglibProxyTestBean.class);
 
@@ -409,6 +404,7 @@ public class AnnotationDrivenEventListenerTests {
 		assertThat(listener.order, contains("first", "second", "third"));
 	}
 
+
 	private void load(Class<?>... classes) {
 		List<Class<?>> allClasses = new ArrayList<>();
 		allClasses.add(BasicConfiguration.class);
@@ -450,6 +446,7 @@ public class AnnotationDrivenEventListenerTests {
 
 	}
 
+
 	static abstract class AbstractTestEventListener extends AbstractIdentifiable {
 
 		@Autowired
@@ -458,8 +455,8 @@ public class AnnotationDrivenEventListenerTests {
 		protected void collectEvent(Object content) {
 			this.eventCollector.addEvent(this, content);
 		}
-
 	}
+
 
 	@Component
 	static class TestEventListener extends AbstractTestEventListener {
@@ -473,14 +470,15 @@ public class AnnotationDrivenEventListenerTests {
 		public void handleString(String content) {
 			collectEvent(content);
 		}
-
 	}
+
 
 	@EventListener
 	@Target(ElementType.METHOD)
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface FooListener {
 	}
+
 
 	@Component
 	static class MetaAnnotationListenerTestBean extends AbstractTestEventListener {
@@ -490,6 +488,7 @@ public class AnnotationDrivenEventListenerTests {
 			collectEvent(event);
 		}
 	}
+
 
 	@Component
 	static class ContextEventListener extends AbstractTestEventListener {
@@ -501,6 +500,7 @@ public class AnnotationDrivenEventListenerTests {
 
 	}
 
+
 	@Component
 	static class InvalidMethodSignatureEventListener {
 
@@ -508,6 +508,7 @@ public class AnnotationDrivenEventListenerTests {
 		public void cannotBeCalled(String s, Integer what) {
 		}
 	}
+
 
 	@Component
 	static class ReplyEventListener extends AbstractTestEventListener {
@@ -531,6 +532,7 @@ public class AnnotationDrivenEventListenerTests {
 		}
 
 	}
+
 
 	@Component
 	static class ExceptionEventListener extends AbstractTestEventListener {
@@ -557,11 +559,13 @@ public class AnnotationDrivenEventListenerTests {
 		}
 	}
 
+
 	@Configuration
 	@Import(BasicConfiguration.class)
 	@EnableAsync(proxyTargetClass = true)
 	static class AsyncConfiguration {
 	}
+
 
 	@Component
 	static class AsyncEventListener extends AbstractTestEventListener {
@@ -578,12 +582,14 @@ public class AnnotationDrivenEventListenerTests {
 		}
 	}
 
+
 	interface SimpleService extends Identifiable {
 
 		@EventListener
 		void handleIt(TestEvent event);
 
 	}
+
 
 	@Component
 	@Scope(proxyMode = ScopedProxyMode.INTERFACES)
@@ -598,14 +604,6 @@ public class AnnotationDrivenEventListenerTests {
 		}
 	}
 
-	@Component
-	@Scope(proxyMode = ScopedProxyMode.INTERFACES)
-	static class InvalidProxyTestBean extends ProxyTestBean {
-
-		@EventListener // does not exist on any interface so it should fail
-		public void handleIt2(TestEvent event) {
-		}
-	}
 
 	@Component
 	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -617,6 +615,7 @@ public class AnnotationDrivenEventListenerTests {
 		}
 	}
 
+
 	@Component
 	static class GenericEventListener extends AbstractTestEventListener {
 
@@ -625,6 +624,7 @@ public class AnnotationDrivenEventListenerTests {
 			collectEvent(event.getPayload());
 		}
 	}
+
 
 	@Component
 	static class ConditionalEventListener extends TestEventListener {
@@ -647,6 +647,7 @@ public class AnnotationDrivenEventListenerTests {
 		}
 
 	}
+
 
 	@Component
 	static class OrderedTestListener extends TestEventListener {

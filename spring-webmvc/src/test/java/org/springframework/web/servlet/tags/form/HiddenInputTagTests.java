@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,12 @@ package org.springframework.web.servlet.tags.form;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.Tag;
 
+import org.junit.Test;
+
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.validation.BeanPropertyBindingResult;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
@@ -43,7 +47,8 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 		this.tag.setPageContext(getPageContext());
 	}
 
-	public void testRender() throws Exception {
+	@Test
+	public void render() throws Exception {
 		this.tag.setPath("name");
 		int result = this.tag.doStartTag();
 		assertEquals(Tag.SKIP_BODY, result);
@@ -58,7 +63,8 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 		assertAttributeNotPresent(output, "disabled");
 	}
 
-	public void testWithCustomBinder() throws Exception {
+	@Test
+	public void withCustomBinder() throws Exception {
 		this.tag.setPath("myFloat");
 
 		BeanPropertyBindingResult errors = new BeanPropertyBindingResult(this.bean, COMMAND_NAME);
@@ -76,7 +82,8 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 		assertContainsAttribute(output, "value", "12.34f");
 	}
 
-	public void testDynamicTypeAttribute() throws JspException {
+	@Test
+	public void dynamicTypeAttribute() throws JspException {
 		try {
 			this.tag.setDynamicAttribute(null, "type", "email");
 			fail("Expected exception");
@@ -86,7 +93,8 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 		}
 	}
 
-	public void testDisabledTrue() throws Exception {
+	@Test
+	public void disabledTrue() throws Exception {
 		this.tag.setDisabled(true);
 
 		this.tag.doStartTag();
@@ -101,7 +109,8 @@ public class HiddenInputTagTests extends AbstractFormTagTests {
 
 	// SPR-8661
 
-	public void testDisabledFalse() throws Exception {
+	@Test
+	public void disabledFalse() throws Exception {
 		this.tag.setDisabled(false);
 
 		this.tag.doStartTag();

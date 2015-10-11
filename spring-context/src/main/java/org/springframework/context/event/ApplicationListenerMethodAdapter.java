@@ -81,6 +81,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 
 	private EventListener eventListener;
 
+
 	public ApplicationListenerMethodAdapter(String beanName, Class<?> targetClass, Method method) {
 		this.beanName = beanName;
 		this.method = method;
@@ -90,6 +91,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		this.methodKey = new AnnotatedElementKey(this.method, this.targetClass);
 	}
 
+
 	/**
 	 * Initialize this instance.
 	 */
@@ -98,10 +100,39 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		this.evaluator = evaluator;
 	}
 
+
 	@Override
 	public void onApplicationEvent(ApplicationEvent event) {
 		processEvent(event);
 	}
+
+	@Override
+	public boolean supportsEventType(ResolvableType eventType) {
+		for (ResolvableType declaredEventType : this.declaredEventTypes) {
+			if (declaredEventType.isAssignableFrom(eventType)) {
+				return true;
+			}
+			else if (PayloadApplicationEvent.class.isAssignableFrom(eventType.getRawClass())) {
+				ResolvableType payloadType = eventType.as(PayloadApplicationEvent.class).getGeneric();
+				if (declaredEventType.isAssignableFrom(payloadType)) {
+					return true;
+				}
+			}
+		}
+		return eventType.hasUnresolvableGenerics();
+	}
+
+	@Override
+	public boolean supportsSourceType(Class<?> sourceType) {
+		return true;
+	}
+
+	@Override
+	public int getOrder() {
+		Order order = getMethodAnnotation(Order.class);
+		return (order != null ? order.value() : 0);
+	}
+
 
 	/**
 	 * Process the specified {@link ApplicationEvent}, checking if the condition
@@ -144,7 +175,6 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	}
 
 	protected void handleResult(Object result) {
-		Assert.notNull(this.applicationContext, "ApplicationContext must no be null.");
 		if (result.getClass().isArray()) {
 			Object[] events = ObjectUtils.toObjectArray(result);
 			for (Object event : events) {
@@ -164,6 +194,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 
 	private void publishEvent(Object event) {
 		if (event != null) {
+			Assert.notNull(this.applicationContext, "ApplicationContext must no be null");
 			this.applicationContext.publishEvent(event);
 		}
 	}
@@ -174,39 +205,12 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		}
 		String condition = getCondition();
 		if (StringUtils.hasText(condition)) {
-			Assert.notNull(this.evaluator, "Evaluator must no be null.");
-			EvaluationContext evaluationContext = this.evaluator.createEvaluationContext(event,
-					this.targetClass, this.method, args);
+			Assert.notNull(this.evaluator, "EventExpressionEvaluator must no be null");
+			EvaluationContext evaluationContext = this.evaluator.createEvaluationContext(
+					event, this.targetClass, this.method, args);
 			return this.evaluator.condition(condition, this.methodKey, evaluationContext);
 		}
 		return true;
-	}
-
-	@Override
-	public boolean supportsEventType(ResolvableType eventType) {
-		for (ResolvableType declaredEventType : this.declaredEventTypes) {
-			if (declaredEventType.isAssignableFrom(eventType)) {
-				return true;
-			}
-			else if (PayloadApplicationEvent.class.isAssignableFrom(eventType.getRawClass())) {
-				ResolvableType payloadType = eventType.as(PayloadApplicationEvent.class).getGeneric();
-				if (declaredEventType.isAssignableFrom(payloadType)) {
-					return true;
-				}
-			}
-		}
-		return eventType.hasUnresolvableGenerics();
-	}
-
-	@Override
-	public boolean supportsSourceType(Class<?> sourceType) {
-		return true;
-	}
-
-	@Override
-	public int getOrder() {
-		Order order = getMethodAnnotation(Order.class);
-		return (order != null ? order.value() : 0);
 	}
 
 	protected <A extends Annotation> A getMethodAnnotation(Class<A> annotationType) {
@@ -246,7 +250,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	 * Return the target bean instance to use.
 	 */
 	protected Object getTargetBean() {
-		Assert.notNull(this.applicationContext, "ApplicationContext must no be null.");
+		Assert.notNull(this.applicationContext, "ApplicationContext must no be null");
 		return this.applicationContext.getBean(this.beanName);
 	}
 
@@ -346,8 +350,8 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	private List<ResolvableType> resolveDeclaredEventTypes() {
 		int count = this.method.getParameterTypes().length;
 		if (count > 1) {
-			throw new IllegalStateException("Maximum one parameter is allowed " +
-					"for event listener method: " + method);
+			throw new IllegalStateException(
+					"Maximum one parameter is allowed for event listener method: " + this.method);
 		}
 		EventListener ann = getEventListener();
 		if (ann != null && ann.classes().length > 0) {
@@ -359,12 +363,13 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		}
 		else {
 			if (count == 0) {
-				throw new IllegalStateException("Event parameter is mandatory " +
-						"for event listener method: " + method);
+				throw new IllegalStateException(
+						"Event parameter is mandatory for event listener method: " + this.method);
 			}
 			return Collections.singletonList(ResolvableType.forMethodParameter(this.method, 0));
 		}
 	}
+
 
 	@Override
 	public String toString() {

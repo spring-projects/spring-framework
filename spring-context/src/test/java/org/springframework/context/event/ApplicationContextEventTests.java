@@ -34,6 +34,7 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.BeanThatBroadcasts;
 import org.springframework.context.BeanThatListens;
+import org.springframework.context.PayloadApplicationEvent;
 import org.springframework.context.support.AbstractApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.context.support.StaticApplicationContext;
@@ -101,8 +102,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		multicastEvent(false, StringEventListener.class, new SmartGenericTestEvent<>(this, 123L), null);
 	}
 
-	private void multicastEvent(boolean match, Class<?> listenerType,
-			ApplicationEvent event, ResolvableType eventType) {
+	private void multicastEvent(boolean match, Class<?> listenerType, ApplicationEvent event, ResolvableType eventType) {
 		@SuppressWarnings("unchecked")
 		ApplicationListener<ApplicationEvent> listener =
 				(ApplicationListener<ApplicationEvent>) mock(listenerType);
@@ -111,7 +111,8 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 
 		if (eventType != null) {
 			smc.multicastEvent(event, eventType);
-		} else {
+		}
+		else {
 			smc.multicastEvent(event);
 		}
 		int invocation = match ? 1 : 0;
@@ -267,6 +268,31 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		assertTrue(listener1.seenEvents.contains(event3));
 		assertTrue(listener1.seenEvents.contains(event4));
 
+		AbstractApplicationEventMulticaster multicaster = context.getBean(AbstractApplicationEventMulticaster.class);
+		assertEquals(2, multicaster.retrieverCache.size());
+
+		context.close();
+	}
+
+	@Test
+	public void listenersInApplicationContextWithPayloadEvents() {
+		StaticApplicationContext context = new StaticApplicationContext();
+		context.registerBeanDefinition("listener", new RootBeanDefinition(MyPayloadListener.class));
+		context.refresh();
+
+		MyPayloadListener listener = context.getBean("listener", MyPayloadListener.class);
+		context.publishEvent("event1");
+		context.publishEvent("event2");
+		context.publishEvent("event3");
+		context.publishEvent("event4");
+		assertTrue(listener.seenPayloads.contains("event1"));
+		assertTrue(listener.seenPayloads.contains("event2"));
+		assertTrue(listener.seenPayloads.contains("event3"));
+		assertTrue(listener.seenPayloads.contains("event4"));
+
+		AbstractApplicationEventMulticaster multicaster = context.getBean(AbstractApplicationEventMulticaster.class);
+		assertEquals(2, multicaster.retrieverCache.size());
+
 		context.close();
 	}
 
@@ -278,7 +304,7 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		nestedChild.setInitMethodName("refresh");
 		context.registerBeanDefinition("nestedChild", nestedChild);
 		RootBeanDefinition listener1Def = new RootBeanDefinition(MyOrderedListener1.class);
-		listener1Def.setDependsOn(new String[] {"nestedChild"});
+		listener1Def.setDependsOn("nestedChild");
 		context.registerBeanDefinition("listener1", listener1Def);
 		context.refresh();
 
@@ -427,6 +453,17 @@ public class ApplicationContextEventTests extends AbstractApplicationEventListen
 		@Override
 		public void onApplicationEvent(MyEvent event) {
 			assertTrue(otherListener.seenEvents.contains(event));
+		}
+	}
+
+
+	public static class MyPayloadListener implements ApplicationListener<PayloadApplicationEvent> {
+
+		public final Set<Object> seenPayloads = new HashSet<Object>();
+
+		@Override
+		public void onApplicationEvent(PayloadApplicationEvent event) {
+			this.seenPayloads.add(event.getPayload());
 		}
 	}
 

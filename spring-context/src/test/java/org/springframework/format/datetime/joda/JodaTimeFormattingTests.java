@@ -28,6 +28,7 @@ import org.joda.time.Instant;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
+import org.joda.time.chrono.ISOChronology;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -249,7 +250,7 @@ public class JodaTimeFormattingTests {
 	@Test
 	public void testBindDateTime() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("dateTime", new DateTime(2009, 10, 31, 12, 0));
+		propertyValues.add("dateTime", new DateTime(2009, 10, 31, 12, 0, ISOChronology.getInstanceUTC()));
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 		String value = binder.getBindingResult().getFieldValue("dateTime").toString();
@@ -297,7 +298,7 @@ public class JodaTimeFormattingTests {
 	@Test
 	public void testBindDateTimeAnnotated() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("dateTimeAnnotated", new DateTime(2009, 10, 31, 12, 0));
+		propertyValues.add("dateTimeAnnotated", new DateTime(2009, 10, 31, 12, 0, ISOChronology.getInstanceUTC()));
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 		String value = binder.getBindingResult().getFieldValue("dateTimeAnnotated").toString();
@@ -316,7 +317,7 @@ public class JodaTimeFormattingTests {
 	@Test
 	public void testBindDateTimeAnnotatedDefault() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
-		propertyValues.add("dateTimeAnnotatedDefault", new DateTime(2009, 10, 31, 12, 0));
+		propertyValues.add("dateTimeAnnotatedDefault", new DateTime(2009, 10, 31, 12, 0, ISOChronology.getInstanceUTC()));
 		binder.bind(propertyValues);
 		assertEquals(0, binder.getBindingResult().getErrorCount());
 		String value = binder.getBindingResult().getFieldValue("dateTimeAnnotatedDefault").toString();

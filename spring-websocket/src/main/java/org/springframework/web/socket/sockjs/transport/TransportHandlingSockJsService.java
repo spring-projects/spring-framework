@@ -60,8 +60,7 @@ import org.springframework.web.socket.sockjs.support.AbstractSockJsService;
  * @author Sebastien Deleuze
  * @since 4.0
  */
-public class TransportHandlingSockJsService extends AbstractSockJsService
-		implements SockJsServiceConfig, Lifecycle {
+public class TransportHandlingSockJsService extends AbstractSockJsService implements SockJsServiceConfig, Lifecycle {
 
 	private static final boolean jackson2Present = ClassUtils.isPresent(
 			"com.fasterxml.jackson.databind.ObjectMapper", TransportHandlingSockJsService.class.getClassLoader());
@@ -154,10 +153,6 @@ public class TransportHandlingSockJsService extends AbstractSockJsService
 		return this.interceptors;
 	}
 
-	@Override
-	public boolean isRunning() {
-		return this.running;
-	}
 
 	@Override
 	public void start() {
@@ -181,6 +176,11 @@ public class TransportHandlingSockJsService extends AbstractSockJsService
 				}
 			}
 		}
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.running;
 	}
 
 
@@ -322,13 +322,21 @@ public class TransportHandlingSockJsService extends AbstractSockJsService
 
 	@Override
 	protected boolean validateRequest(String serverId, String sessionId, String transport) {
-		if (!getAllowedOrigins().contains("*") && !TransportType.fromValue(transport).supportsOrigin()) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Origin check has been enabled, but transport " + transport + " does not support it");
-			}
+		if (!super.validateRequest(serverId, sessionId, transport)) {
 			return false;
 		}
-		return super.validateRequest(serverId, sessionId, transport);
+
+		if (!getAllowedOrigins().contains("*")) {
+			TransportType transportType = TransportType.fromValue(transport);
+			if (transportType == null || !transportType.supportsOrigin()) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Origin check enabled but transport '" + transport + "' does not support it.");
+				}
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	private SockJsSession createSockJsSession(String sessionId, SockJsSessionFactory sessionFactory,
