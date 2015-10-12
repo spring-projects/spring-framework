@@ -26,6 +26,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.util.StreamUtils;
 
 /**
  * {@link org.springframework.http.client.ClientHttpResponse} implementation that uses
@@ -76,7 +77,7 @@ final class HttpComponentsClientHttpResponse extends AbstractClientHttpResponse 
 	@Override
 	public InputStream getBody() throws IOException {
 		HttpEntity entity = this.httpResponse.getEntity();
-		return (entity != null ? entity.getContent() : null);
+		return (entity != null ? entity.getContent() : StreamUtils.emptyInput());
 	}
 
 	@Override
