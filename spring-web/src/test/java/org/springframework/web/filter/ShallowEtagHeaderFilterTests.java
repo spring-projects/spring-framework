@@ -16,16 +16,15 @@
 
 package org.springframework.web.filter;
 
-import java.io.ByteArrayInputStream;
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StreamUtils;
 
 import static org.junit.Assert.*;
 
@@ -36,27 +35,23 @@ import static org.junit.Assert.*;
  */
 public class ShallowEtagHeaderFilterTests {
 
-	private ShallowEtagHeaderFilter filter;
+	private final ShallowEtagHeaderFilter filter = new ShallowEtagHeaderFilter();
 
-	@Before
-	public void createFilter() throws Exception {
-		filter = new ShallowEtagHeaderFilter();
-	}
 
 	@Test
 	public void isEligibleForEtag() {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 
-		assertTrue(filter.isEligibleForEtag(request, response, 200, new ByteArrayInputStream(new byte[0])));
-		assertFalse(filter.isEligibleForEtag(request, response, 300, new ByteArrayInputStream(new byte[0])));
+		assertTrue(filter.isEligibleForEtag(request, response, 200, StreamUtils.emptyInput()));
+		assertFalse(filter.isEligibleForEtag(request, response, 300, StreamUtils.emptyInput()));
 
 		request = new MockHttpServletRequest("POST", "/hotels");
-		assertFalse(filter.isEligibleForEtag(request, response, 200, new ByteArrayInputStream(new byte[0])));
+		assertFalse(filter.isEligibleForEtag(request, response, 200, StreamUtils.emptyInput()));
 
 		request = new MockHttpServletRequest("POST", "/hotels");
 		request.addHeader("Cache-Control","must-revalidate, no-store");
-		assertFalse(filter.isEligibleForEtag(request, response, 200, new ByteArrayInputStream(new byte[0])));
+		assertFalse(filter.isEligibleForEtag(request, response, 200, StreamUtils.emptyInput()));
 	}
 
 	@Test
@@ -120,9 +115,7 @@ public class ShallowEtagHeaderFilterTests {
 		assertArrayEquals("Invalid content", new byte[0], response.getContentAsByteArray());
 	}
 
-	// SPR-12960
-
-	@Test
+	@Test  // SPR-12960
 	public void filterWriterWithDisabledCaching() throws Exception {
 		final MockHttpServletRequest request = new MockHttpServletRequest("GET", "/hotels");
 		MockHttpServletResponse response = new MockHttpServletResponse();

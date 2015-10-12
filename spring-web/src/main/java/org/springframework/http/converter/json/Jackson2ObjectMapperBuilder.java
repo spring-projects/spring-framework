@@ -16,7 +16,6 @@
 
 package org.springframework.http.converter.json;
 
-import java.io.ByteArrayInputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -54,6 +53,7 @@ import org.springframework.beans.FatalBeanException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -761,7 +761,7 @@ public class Jackson2ObjectMapperBuilder {
 		private static final XMLResolver NO_OP_XML_RESOLVER = new XMLResolver() {
 			@Override
 			public Object resolveEntity(String publicID, String systemID, String base, String ns) {
-				return new ByteArrayInputStream(new byte[0]);
+				return StreamUtils.emptyInput();
 			}
 		};
 	}
