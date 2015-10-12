@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -191,7 +191,7 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 	 * Filter out undesired attributes from the given model.
 	 * The return value can be either another {@link Map} or a single value object.
 	 * <p>The default implementation removes {@link BindingResult} instances and entries
-	 * not included in the {@link #setRenderedAttributes renderedAttributes} property.
+	 * not included in the {@link #setModelKeys renderedAttributes} property.
 	 * @param model the model, as passed on to {@link #renderMergedOutputModel}
 	 * @return the value to be rendered
 	 */
@@ -230,9 +230,10 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 		if (this.jsonPrefix != null) {
 			generator.writeRaw(this.jsonPrefix);
 		}
+
 		String jsonpFunction = null;
 		if (object instanceof MappingJacksonValue) {
-			jsonpFunction = ((MappingJacksonValue)object).getJsonpFunction();
+			jsonpFunction = ((MappingJacksonValue) object).getJsonpFunction();
 		}
 		if (jsonpFunction != null) {
 			generator.writeRaw(jsonpFunction + "(" );
@@ -243,7 +244,7 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 	protected void writeSuffix(JsonGenerator generator, Object object) throws IOException {
 		String jsonpFunction = null;
 		if (object instanceof MappingJacksonValue) {
-			jsonpFunction = ((MappingJacksonValue)object).getJsonpFunction();
+			jsonpFunction = ((MappingJacksonValue) object).getJsonpFunction();
 		}
 		if (jsonpFunction != null) {
 			generator.writeRaw(");");

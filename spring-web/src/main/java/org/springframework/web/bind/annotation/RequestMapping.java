@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,8 @@ import java.util.concurrent.Callable;
  * details see the note on the new support classes added in Spring MVC 3.1
  * further below.
  *
- * <p>Handler methods which are annotated with this annotation are allowed
- * to have very flexible signatures. They may have arguments of the following
+ * <p>Handler methods which are annotated with this annotation are allowed to
+ * have very flexible signatures. They may have parameters of the following
  * types, in arbitrary order (except for validation results, which need to
  * follow right after the corresponding command object, if desired):
  * <ul>
@@ -57,8 +57,9 @@ import java.util.concurrent.Callable;
  * As a consequence, such an argument will never be {@code null}.
  * <i>Note that session access may not be thread-safe, in particular in a
  * Servlet environment: Consider switching the
- * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter#setSynchronizeOnSession "synchronizeOnSession"}
- * flag to "true" if multiple requests are allowed to access a session concurrently.</i>
+ * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter#setSynchronizeOnSession
+ * "synchronizeOnSession"} flag to "true" if multiple requests are allowed to
+ * access a session concurrently.</i>
  * <li>{@link org.springframework.web.context.request.WebRequest} or
  * {@link org.springframework.web.context.request.NativeWebRequest}.
  * Allows for generic request parameter access as well as request/session
@@ -160,7 +161,7 @@ import java.util.concurrent.Callable;
  * context path, and the literal part of the servlet mapping.
  * </ul>
  *
- * <p><strong>Note:</strong> JDK 1.8's {@code java.util.Optional} is supported
+ * <p><strong>Note:</strong> Java 8's {@code java.util.Optional} is supported
  * as a method parameter type with annotations that provide a {@code required}
  * attribute (e.g. {@code @RequestParam}, {@code @RequestHeader}, etc.). The use
  * of {@code java.util.Optional} in those cases is equivalent to having
@@ -171,8 +172,8 @@ import java.util.concurrent.Callable;
  * <li>A {@code ModelAndView} object (Servlet MVC or Portlet MVC),
  * with the model implicitly enriched with command objects and the results
  * of {@link ModelAttribute @ModelAttribute} annotated reference data accessor methods.
- * <li>A {@link org.springframework.ui.Model Model} object, with the view name
- * implicitly determined through a {@link org.springframework.web.servlet.RequestToViewNameTranslator}
+ * <li>A {@link org.springframework.ui.Model Model} object, with the view name implicitly
+ * determined through a {@link org.springframework.web.servlet.RequestToViewNameTranslator}
  * and the model implicitly enriched with command objects and the results
  * of {@link ModelAttribute @ModelAttribute} annotated reference data accessor methods.
  * <li>A {@link java.util.Map} object for exposing a model,

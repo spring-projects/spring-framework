@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,7 +129,7 @@ public abstract class StreamUtils {
 	}
 
 	/**
-	 * Returns a variant of the given {@link InputStream} where calling
+	 * Return a variant of the given {@link InputStream} where calling
 	 * {@link InputStream#close() close()} has no effect.
 	 * @param in the InputStream to decorate
 	 * @return a version of the InputStream that ignores calls to close
@@ -140,7 +140,7 @@ public abstract class StreamUtils {
 	}
 
 	/**
-	 * Returns a variant of the given {@link OutputStream} where calling
+	 * Return a variant of the given {@link OutputStream} where calling
 	 * {@link OutputStream#close() close()} has no effect.
 	 * @param out the OutputStream to decorate
 	 * @return a version of the OutputStream that ignores calls to close
