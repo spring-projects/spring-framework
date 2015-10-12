@@ -635,8 +635,8 @@ controller. When this is the case, for controllers specifically, we recommend
 using class-based proxying. This is typically the default choice with controllers.
 However if a controller must implement an interface that is not a Spring Context
 callback (e.g. `InitializingBean`, `*Aware`, etc), you may need to explicitly
-configure class-based proxying. For example with `<tx:annotation-driven />`,
-change to `<tx:annotation-driven proxy-target-class="true" />`.
+configure class-based proxying. For example with `<tx:annotation-driven/>`,
+change to `<tx:annotation-driven proxy-target-class="true"/>`.
 
 [[mvc-ann-requestmapping-31-vs-30]]
 ==== New Support Classes for @RequestMapping methods in Spring MVC 3.1
@@ -1368,8 +1368,8 @@ the MVC namespace or the MVC Java config see <<mvc-config-enable>> instead.
 
 	<bean id="marshallingHttpMessageConverter"
 			class="org.springframework.http.converter.xml.MarshallingHttpMessageConverter">
-		<property name="marshaller" ref="castorMarshaller" />
-		<property name="unmarshaller" ref="castorMarshaller" />
+		<property name="marshaller" ref="castorMarshaller"/>
+		<property name="unmarshaller" ref="castorMarshaller"/>
 	</bean>
 
 	<bean id="castorMarshaller" class="org.springframework.oxm.castor.CastorMarshaller"/>
@@ -1897,9 +1897,9 @@ PropertyEditors required by several of the PetClinic controllers.
 [subs="verbatim,quotes"]
 ----
 	<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
-		<property name="cacheSeconds" value="0" />
+		<property name="cacheSeconds" value="0"/>
 		<property name="webBindingInitializer">
-			<bean class="org.springframework.samples.petclinic.web.ClinicBindingInitializer" />
+			<bean class="org.springframework.samples.petclinic.web.ClinicBindingInitializer"/>
 		</property>
 	</bean>
 ----
@@ -4512,7 +4512,7 @@ context defined):
 			http://www.springframework.org/schema/mvc
 			http://www.springframework.org/schema/mvc/spring-mvc.xsd">
 
-		<mvc:annotation-driven />
+		<mvc:annotation-driven/>
 
 	</beans>
 ----
@@ -4602,7 +4602,7 @@ and override the methods you need:
 	}
 ----
 
-To customize the default configuration of `<mvc:annotation-driven />` check what
+To customize the default configuration of `<mvc:annotation-driven/>` check what
 attributes and sub-elements it supports. You can view the
 http://schema.spring.io/mvc/spring-mvc.xsd[Spring MVC XML schema] or use the code
 completion feature of your IDE to discover what attributes and sub-elements are
@@ -4799,15 +4799,15 @@ And in XML use the `<mvc:interceptors>` element:
 [subs="verbatim"]
 ----
 	<mvc:interceptors>
-		<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor" />
+		<bean class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor"/>
 		<mvc:interceptor>
 			<mvc:mapping path="/**"/>
 			<mvc:exclude-mapping path="/admin/**"/>
-			<bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor" />
+			<bean class="org.springframework.web.servlet.theme.ThemeChangeInterceptor"/>
 		</mvc:interceptor>
 		<mvc:interceptor>
 			<mvc:mapping path="/secure/*"/>
-			<bean class="org.example.SecurityInterceptor" />
+			<bean class="org.example.SecurityInterceptor"/>
 		</mvc:interceptor>
 	</mvc:interceptors>
 ----
@@ -4858,7 +4858,7 @@ that in turn can be created with a `ContentNegotiationManagerFactoryBean`:
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<mvc:annotation-driven content-negotiation-manager="contentNegotiationManager" />
+	<mvc:annotation-driven content-negotiation-manager="contentNegotiationManager"/>
 
 	<bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
 		<property name="favorPathExtension" value="false"/>
@@ -4954,10 +4954,10 @@ And the same in XML:
 	<mvc:view-resolvers>
 		<mvc:content-negotiation>
 			<mvc:default-views>
-				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" />
+				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView"/>
 			</mvc:default-views>
 		</mvc:content-negotiation>
-		<mvc:jsp />
+		<mvc:jsp/>
 	</mvc:view-resolvers>
 ----
 
@@ -4973,14 +4973,14 @@ The MVC namespace provides dedicated elements. For example with FreeMarker:
 	<mvc:view-resolvers>
 		<mvc:content-negotiation>
 			<mvc:default-views>
-				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" />
+				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView"/>
 			</mvc:default-views>
 		</mvc:content-negotiation>
-		<mvc:freemarker cache="false" />
+		<mvc:freemarker cache="false"/>
 	</mvc:view-resolvers>
 
 	<mvc:freemarker-configurer>
-		<mvc:template-loader-path location="/freemarker" />
+		<mvc:template-loader-path location="/freemarker"/>
 	</mvc:freemarker-configurer>
 
 ----
@@ -5158,7 +5158,7 @@ XML example:
 ----
 <mvc:resources mapping="/resources/**" location="/public-resources/">
 	<mvc:resource-chain>
-		<mvc:resource-cache />
+		<mvc:resource-cache/>
 		<mvc:resolvers>
 			<mvc:version-resolver>
 				<mvc:content-version-strategy patterns="/**"/>
@@ -5306,11 +5306,11 @@ And the same in XML, use the `<mvc:path-matching>` element:
             trailing-slash="false"
             registered-suffixes-only="true"
             path-helper="pathHelper"
-            path-matcher="pathMatcher" />
+            path-matcher="pathMatcher"/>
     </mvc:annotation-driven>
 
-    <bean id="pathHelper" class="org.example.app.MyPathHelper" />
-    <bean id="pathMatcher" class="org.example.app.MyPathMatcher" />
+    <bean id="pathHelper" class="org.example.app.MyPathHelper"/>
+    <bean id="pathMatcher" class="org.example.app.MyPathMatcher"/>
 ----
 
 
@@ -5373,10 +5373,10 @@ It is also possible to do the same in XML:
     <mvc:annotation-driven>
         <mvc:message-converters>
             <bean class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
-                <property name="objectMapper" ref="objectMapper" />
+                <property name="objectMapper" ref="objectMapper"/>
             </bean>
             <bean class="org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConverter">
-                <property name="objectMapper" ref="xmlMapper" />
+                <property name="objectMapper" ref="xmlMapper"/>
             </bean>
         </mvc:message-converters>
     </mvc:annotation-driven>
@@ -5384,9 +5384,9 @@ It is also possible to do the same in XML:
     <bean id="objectMapper" class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean"
           p:indentOutput="true"
           p:simpleDateFormat="yyyy-MM-dd"
-          p:modulesToInstall="com.fasterxml.jackson.module.paramnames.ParameterNamesModule" />
+          p:modulesToInstall="com.fasterxml.jackson.module.paramnames.ParameterNamesModule"/>
 
-    <bean id="xmlMapper" parent="objectMapper" p:createXmlMapper="true" />
+    <bean id="xmlMapper" parent="objectMapper" p:createXmlMapper="true"/>
 ----
 
 
@@ -5470,6 +5470,6 @@ by type and then modifying its properties as necessary. For example:
 	}
 ----
 
-Note that `MyPostProcessor` needs to be included in an `<component scan />` in order for
+Note that `MyPostProcessor` needs to be included in an `<component scan/>` in order for
 it to be detected or if you prefer you can declare it explicitly with an XML bean
 declaration.

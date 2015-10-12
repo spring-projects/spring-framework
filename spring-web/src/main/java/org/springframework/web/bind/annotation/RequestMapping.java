@@ -40,8 +40,8 @@ import org.springframework.core.annotation.AliasFor;
  * details see the note on the new support classes added in Spring MVC 3.1
  * further below.
  *
- * <p>Handler methods which are annotated with this annotation are allowed
- * to have very flexible signatures. They may have arguments of the following
+ * <p>Handler methods which are annotated with this annotation are allowed to
+ * have very flexible signatures. They may have parameters of the following
  * types, in arbitrary order (except for validation results, which need to
  * follow right after the corresponding command object, if desired):
  * <ul>
@@ -163,7 +163,7 @@ import org.springframework.core.annotation.AliasFor;
  * context path, and the literal part of the servlet mapping.
  * </ul>
  *
- * <p><strong>Note:</strong> JDK 1.8's {@code java.util.Optional} is supported
+ * <p><strong>Note:</strong> Java 8's {@code java.util.Optional} is supported
  * as a method parameter type with annotations that provide a {@code required}
  * attribute (e.g. {@code @RequestParam}, {@code @RequestHeader}, etc.). The use
  * of {@code java.util.Optional} in those cases is equivalent to having
@@ -174,8 +174,8 @@ import org.springframework.core.annotation.AliasFor;
  * <li>A {@code ModelAndView} object (Servlet MVC or Portlet MVC),
  * with the model implicitly enriched with command objects and the results
  * of {@link ModelAttribute @ModelAttribute} annotated reference data accessor methods.
- * <li>A {@link org.springframework.ui.Model Model} object, with the view name
- * implicitly determined through a {@link org.springframework.web.servlet.RequestToViewNameTranslator}
+ * <li>A {@link org.springframework.ui.Model Model} object, with the view name implicitly
+ * determined through a {@link org.springframework.web.servlet.RequestToViewNameTranslator}
  * and the model implicitly enriched with command objects and the results
  * of {@link ModelAttribute @ModelAttribute} annotated reference data accessor methods.
  * <li>A {@link java.util.Map} object for exposing a model,

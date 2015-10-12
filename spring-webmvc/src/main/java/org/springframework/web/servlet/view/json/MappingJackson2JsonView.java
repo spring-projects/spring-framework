@@ -143,10 +143,11 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 	}
 
 	/**
-	 * Set whether to serialize models containing a single attribute as a map or whether to
-	 * extract the single value from the model and serialize it directly.
-	 * <p>The effect of setting this flag is similar to using {@code MappingJackson2HttpMessageConverter}
-	 * with an {@code @ResponseBody} request-handling method.
+	 * Set whether to serialize models containing a single attribute as a map or
+	 * whether to extract the single value from the model and serialize it directly.
+	 * <p>The effect of setting this flag is similar to using
+	 * {@code MappingJackson2HttpMessageConverter} with an {@code @ResponseBody}
+	 * request-handling method.
 	 * <p>Default is {@code false}.
 	 */
 	public void setExtractValueFromSingleKeyModel(boolean extractValueFromSingleKeyModel) {
@@ -181,7 +182,7 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 	 * Filter out undesired attributes from the given model.
 	 * The return value can be either another {@link Map} or a single value object.
 	 * <p>The default implementation removes {@link BindingResult} instances and entries
-	 * not included in the {@link #setRenderedAttributes renderedAttributes} property.
+	 * not included in the {@link #setModelKeys renderedAttributes} property.
 	 * @param model the model, as passed on to {@link #renderMergedOutputModel}
 	 * @return the value to be rendered
 	 */
@@ -221,9 +222,10 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 		if (this.jsonPrefix != null) {
 			generator.writeRaw(this.jsonPrefix);
 		}
+
 		String jsonpFunction = null;
 		if (object instanceof MappingJacksonValue) {
-			jsonpFunction = ((MappingJacksonValue)object).getJsonpFunction();
+			jsonpFunction = ((MappingJacksonValue) object).getJsonpFunction();
 		}
 		if (jsonpFunction != null) {
 			generator.writeRaw(jsonpFunction + "(" );
@@ -234,7 +236,7 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 	protected void writeSuffix(JsonGenerator generator, Object object) throws IOException {
 		String jsonpFunction = null;
 		if (object instanceof MappingJacksonValue) {
-			jsonpFunction = ((MappingJacksonValue)object).getJsonpFunction();
+			jsonpFunction = ((MappingJacksonValue) object).getJsonpFunction();
 		}
 		if (jsonpFunction != null) {
 			generator.writeRaw(");");
