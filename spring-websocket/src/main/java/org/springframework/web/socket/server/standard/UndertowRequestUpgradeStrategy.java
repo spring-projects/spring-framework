@@ -59,8 +59,8 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.web.socket.server.HandshakeFailureException;
 
 /**
- * A {@link org.springframework.web.socket.server.RequestUpgradeStrategy} for use
- * with WildFly and its underlying Undertow web server.
+ * A WebSocket {@code RequestUpgradeStrategy} for use with WildFly and its
+ * underlying Undertow web server. Also compatible with embedded Undertow usage.
  *
  * <p>Compatible with Undertow 1.0 to 1.3 - as included in WildFly 8.x, 9 and 10.
  *

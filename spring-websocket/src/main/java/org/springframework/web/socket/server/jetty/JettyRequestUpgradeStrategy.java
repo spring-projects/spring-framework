@@ -56,8 +56,8 @@ import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
 
 /**
- * {@link RequestUpgradeStrategy} for use with Jetty 9. Based on Jetty's internal
- * {@code org.eclipse.jetty.websocket.server.WebSocketHandler} class.
+ * A {@link RequestUpgradeStrategy} for use with Jetty 9.0-9.3. Based on Jetty's
+ * internal {@code org.eclipse.jetty.websocket.server.WebSocketHandler} class.
  *
  * @author Phillip Webb
  * @author Rossen Stoyanchev
@@ -83,17 +83,17 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 
 
 	/**
-	 * Default constructor that creates {@link WebSocketServerFactory} through its default
-	 * constructor thus using a default {@link WebSocketPolicy}.
+	 * Default constructor that creates {@link WebSocketServerFactory} through
+	 * its default constructor thus using a default {@link WebSocketPolicy}.
 	 */
 	public JettyRequestUpgradeStrategy() {
 		this(new WebSocketServerFactory());
 	}
 
 	/**
-	 * A constructor accepting a {@link WebSocketServerFactory}. This may be useful for
-	 * modifying the factory's {@link WebSocketPolicy} via
-	 * {@link WebSocketServerFactory#getPolicy()}.
+	 * A constructor accepting a {@link WebSocketServerFactory}.
+	 * This may be useful for modifying the factory's {@link WebSocketPolicy}
+	 * via {@link WebSocketServerFactory#getPolicy()}.
 	 */
 	public JettyRequestUpgradeStrategy(WebSocketServerFactory factory) {
 		Assert.notNull(factory, "WebSocketServerFactory must not be null");
@@ -199,7 +199,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy, Life
 		}
 		catch (IOException ex) {
 			throw new HandshakeFailureException(
-					"Response update failed during upgrade to WebSocket, uri=" + request.getURI(), ex);
+					"Response update failed during upgrade to WebSocket: " + request.getURI(), ex);
 		}
 		finally {
 			wsContainerHolder.remove();

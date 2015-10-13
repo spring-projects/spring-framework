@@ -46,19 +46,26 @@ import org.springframework.web.socket.server.HandshakeHandler;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
 
 /**
- * A base class to use for {@link HandshakeHandler} implementations.
- * Performs initial validation of the WebSocket handshake request -- possibly rejecting it
- * through the appropriate HTTP status code -- while also allowing sub-classes to override
+ * A base class for {@link HandshakeHandler} implementations, independent from the Servlet API.
+ *
+ * <p>Performs initial validation of the WebSocket handshake request - possibly rejecting it
+ * through the appropriate HTTP status code - while also allowing its subclasses to override
  * various parts of the negotiation process (e.g. origin validation, sub-protocol negotiation,
  * extensions negotiation, etc).
  *
  * <p>If the negotiation succeeds, the actual upgrade is delegated to a server-specific
- * {@link RequestUpgradeStrategy}, which will update
+ * {@link org.springframework.web.socket.server.RequestUpgradeStrategy}, which will update
  * the response as necessary and initialize the WebSocket. Currently supported servers are
- * Tomcat 7 and 8, Jetty 9, and GlassFish 4.
+ * Jetty 9.0-9.3, Tomcat 7.0.47+ and 8.x, Undertow 1.0-1.3, GlassFish 4.1+, WebLogic 12.1.3+.
  *
  * @author Rossen Stoyanchev
- * @since 4.0
+ * @author Juergen Hoeller
+ * @since 4.2
+ * @see org.springframework.web.socket.server.jetty.JettyRequestUpgradeStrategy
+ * @see org.springframework.web.socket.server.standard.TomcatRequestUpgradeStrategy
+ * @see org.springframework.web.socket.server.standard.UndertowRequestUpgradeStrategy
+ * @see org.springframework.web.socket.server.standard.GlassFishRequestUpgradeStrategy
+ * @see org.springframework.web.socket.server.standard.WebLogicRequestUpgradeStrategy
  */
 public abstract class AbstractHandshakeHandler implements HandshakeHandler, Lifecycle {
 
@@ -137,6 +144,7 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 		else {
 			throw new IllegalStateException("No suitable default RequestUpgradeStrategy found");
 		}
+
 		try {
 			Class<?> clazz = ClassUtils.forName(className, classLoader);
 			return (RequestUpgradeStrategy) clazz.newInstance();
@@ -258,7 +266,7 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 		}
 		catch (IOException ex) {
 			throw new HandshakeFailureException(
-					"Response update failed during upgrade to WebSocket, uri=" + request.getURI(), ex);
+					"Response update failed during upgrade to WebSocket: " + request.getURI(), ex);
 		}
 
 		String subProtocol = selectProtocol(headers.getSecWebSocketProtocol(), wsHandler);
@@ -392,8 +400,7 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 	 * in the process of being established. The default implementation calls
 	 * {@link ServerHttpRequest#getPrincipal()}
 	 * <p>Subclasses can provide custom logic for associating a user with a session,
-	 * for example for assigning a name to anonymous users (i.e. not fully
-	 * authenticated).
+	 * for example for assigning a name to anonymous users (i.e. not fully authenticated).
 	 * @param request the handshake request
 	 * @param wsHandler the WebSocket handler that will handle messages
 	 * @param attributes handshake attributes to pass to the WebSocket session
