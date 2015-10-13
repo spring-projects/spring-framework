@@ -60,6 +60,7 @@ import org.springframework.web.socket.server.HandshakeFailureException;
  * <p>Works with Tyrus 1.3.5 (WebLogic 12.1.3) and Tyrus 1.7+ (GlassFish 4.1.x).
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 4.1
  * @see <a href="https://tyrus.java.net/">Project Tyrus</a>
  */
@@ -181,6 +182,8 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 
 		private static final Constructor<?> constructor;
 
+		private static boolean constructorWithBooleanArgument;
+
 		private static final Method registerMethod;
 
 		private static final Method unRegisterMethod;
@@ -188,6 +191,11 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 		static {
 			try {
 				constructor = getEndpointConstructor();
+				int parameterCount = constructor.getParameterTypes().length;
+				constructorWithBooleanArgument = (parameterCount == 10);
+				if (!constructorWithBooleanArgument && parameterCount != 9) {
+					throw new IllegalStateException("Expected TyrusEndpointWrapper constructor with 9 or 10 arguments");
+				}
 				registerMethod = TyrusWebSocketEngine.class.getDeclaredMethod("register", TyrusEndpointWrapper.class);
 				unRegisterMethod = TyrusWebSocketEngine.class.getDeclaredMethod("unregister", TyrusEndpointWrapper.class);
 				ReflectionUtils.makeAccessible(registerMethod);
@@ -216,13 +224,13 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 			Object sessionListener = accessor.getPropertyValue("sessionListener");
 			Object clusterContext = accessor.getPropertyValue("clusterContext");
 			try {
-				if (constructor.getParameterTypes().length == 9) {
+				if (constructorWithBooleanArgument) {
 					return constructor.newInstance(registration.getEndpoint(), registration, provider, container,
-							"/", registration.getConfigurator(), sessionListener, clusterContext, null);
+							"/", registration.getConfigurator(), sessionListener, clusterContext, null, Boolean.TRUE);
 				}
 				else {
 					return constructor.newInstance(registration.getEndpoint(), registration, provider, container,
-							"/", registration.getConfigurator(), sessionListener, clusterContext, null, Boolean.TRUE);
+							"/", registration.getConfigurator(), sessionListener, clusterContext, null);
 				}
 			}
 			catch (Exception ex) {
