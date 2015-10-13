@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -118,7 +118,7 @@ import org.springframework.context.ApplicationContextAware;
  * Note that Jackson's JSR-310 and Joda-Time support modules will be registered automatically
  * when available (and when Java 8 and Joda-Time themselves are available, respectively).
  *
- * <p>Tested against Jackson 2.2, 2.3 and 2.4; compatible with Jackson 2.0 and higher.
+ * <p>Tested against Jackson 2.2, 2.3, 2.4 and 2.5; compatible with Jackson 2.0 and higher.
  *
  * @author <a href="mailto:dmitry.katsubo@gmail.com">Dmitry Katsubo</a>
  * @author Rossen Stoyanchev
@@ -346,6 +346,7 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	 * @since 4.0.1
 	 * @see com.fasterxml.jackson.databind.Module
 	 */
+	@SuppressWarnings("unchecked")
 	public void setModulesToInstall(Class<? extends Module>... modules) {
 		this.builder.modulesToInstall(modules);
 	}
@@ -363,6 +364,11 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 		this.builder.findModulesViaServiceLoader(findModules);
 	}
 
+	@Override
+	public void setBeanClassLoader(ClassLoader beanClassLoader) {
+		this.builder.moduleClassLoader(beanClassLoader);
+	}
+
 	/**
 	 * Customize the construction of Jackson handlers ({@link JsonSerializer}, {@link JsonDeserializer},
 	 * {@link KeyDeserializer}, {@code TypeResolverBuilder} and {@code TypeIdResolver}).
@@ -371,23 +377,6 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	 */
 	public void setHandlerInstantiator(HandlerInstantiator handlerInstantiator) {
 		this.builder.handlerInstantiator(handlerInstantiator);
-	}
-
-	@Override
-	public void setBeanClassLoader(ClassLoader beanClassLoader) {
-		this.builder.moduleClassLoader(beanClassLoader);
-	}
-
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public void afterPropertiesSet() {
-		if (this.objectMapper != null) {
-			this.builder.configure(this.objectMapper);
-		}
-		else {
-			this.objectMapper = this.builder.build();
-		}
 	}
 
 	/**
@@ -400,6 +389,17 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.builder.applicationContext(applicationContext);
+	}
+
+
+	@Override
+	public void afterPropertiesSet() {
+		if (this.objectMapper != null) {
+			this.builder.configure(this.objectMapper);
+		}
+		else {
+			this.objectMapper = this.builder.build();
+		}
 	}
 
 	/**
