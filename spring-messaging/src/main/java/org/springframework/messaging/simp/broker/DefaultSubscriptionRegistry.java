@@ -72,7 +72,9 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 	private String selectorHeaderName = "selector";
 
-	private ExpressionParser expressionParser = new SpelExpressionParser();
+	private volatile boolean selectorHeaderInUse = false;
+
+	private final ExpressionParser expressionParser = new SpelExpressionParser();
 
 	private final DestinationCache destinationCache = new DestinationCache();
 
@@ -143,6 +145,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 		if (selector != null) {
 			try {
 				expression = this.expressionParser.parseExpression(selector);
+				this.selectorHeaderInUse = true;
 				if (logger.isTraceEnabled()) {
 					logger.trace("Subscription selector: [" + selector + "]");
 				}
@@ -185,6 +188,9 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 	private MultiValueMap<String, String> filterSubscriptions(
 			MultiValueMap<String, String> allMatches, Message<?> message) {
 
+		if (!this.selectorHeaderInUse) {
+			return allMatches;
+		}
 		EvaluationContext context = null;
 		MultiValueMap<String, String> result = new LinkedMultiValueMap<String, String>(allMatches.size());
 		for (String sessionId : allMatches.keySet()) {
