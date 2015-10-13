@@ -18,6 +18,7 @@ package org.springframework.format.datetime.standard;
 
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.time.format.ResolverStyle;
 import java.util.TimeZone;
 
 import org.springframework.format.annotation.DateTimeFormat.ISO;
@@ -174,7 +175,8 @@ public class DateTimeFormatterFactory {
 	public DateTimeFormatter createDateTimeFormatter(DateTimeFormatter fallbackFormatter) {
 		DateTimeFormatter dateTimeFormatter = null;
 		if (StringUtils.hasLength(this.pattern)) {
-			dateTimeFormatter = DateTimeFormatter.ofPattern(this.pattern);
+			dateTimeFormatter = DateTimeFormatter.ofPattern(this.pattern)
+					.withResolverStyle(ResolverStyle.STRICT);
 		}
 		else if (this.iso != null && this.iso != ISO.NONE) {
 			switch (this.iso) {

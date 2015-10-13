@@ -290,6 +290,23 @@ public class DateTimeFormattingTests {
 	}
 
 	@Test
+	public void testBindLocalTimeAnnotatedPattern() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("localDateAnnotatedPattern", "2015-02-28");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals("2015-02-28", binder.getBindingResult().getFieldValue("localDateAnnotatedPattern"));
+	}
+
+	@Test
+	public void testBindLocalTimeAnnotatedPatternInValid_SPR13567() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("localDateAnnotatedPattern", "2015-02-29");
+		binder.bind(propertyValues);
+		assertEquals(1, binder.getBindingResult().getErrorCount());
+	}
+
+	@Test
 	public void testBindISODate() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("isoDate", "2009-10-31");
@@ -352,8 +369,11 @@ public class DateTimeFormattingTests {
 		@DateTimeFormat(style="MM")
 		private LocalDateTime localDateTimeAnnotated;
 
-		@DateTimeFormat(pattern="M/d/yy h:mm a")
+		@DateTimeFormat(pattern="M/d/uu h:mm a") // change according to SPR-13567
 		private LocalDateTime dateTimeAnnotatedPattern;
+
+		@DateTimeFormat(pattern = "uuuu-MM-dd")
+		private LocalDate localDateAnnotatedPattern;
 
 		@DateTimeFormat(iso=ISO.DATE)
 		private LocalDate isoDate;
@@ -422,6 +442,14 @@ public class DateTimeFormattingTests {
 
 		public void setDateTimeAnnotatedPattern(LocalDateTime dateTimeAnnotatedPattern) {
 			this.dateTimeAnnotatedPattern = dateTimeAnnotatedPattern;
+		}
+
+		public LocalDate getLocalDateAnnotatedPattern() {
+			return localDateAnnotatedPattern;
+		}
+
+		public void setLocalDateAnnotatedPattern(LocalDate localDateAnnotatedPattern) {
+			this.localDateAnnotatedPattern = localDateAnnotatedPattern;
 		}
 
 		public LocalDate getIsoDate() {
