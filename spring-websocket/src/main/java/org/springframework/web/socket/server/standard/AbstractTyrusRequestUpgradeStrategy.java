@@ -216,7 +216,7 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 			Object sessionListener = accessor.getPropertyValue("sessionListener");
 			Object clusterContext = accessor.getPropertyValue("clusterContext");
 			try {
-				if (constructor.getParameterCount() == 9) {
+				if (constructor.getParameterTypes().length == 9) {
 					return constructor.newInstance(registration.getEndpoint(), registration, provider, container,
 							"/", registration.getConfigurator(), sessionListener, clusterContext, null);
 				}
