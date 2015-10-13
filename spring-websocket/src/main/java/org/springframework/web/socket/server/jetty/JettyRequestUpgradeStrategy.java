@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,8 +50,8 @@ import org.springframework.web.socket.server.HandshakeFailureException;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
 
 /**
- * {@link RequestUpgradeStrategy} for use with Jetty 9. Based on Jetty's internal
- * {@code org.eclipse.jetty.websocket.server.WebSocketHandler} class.
+ * A {@link RequestUpgradeStrategy} for use with Jetty 9.x. Based on Jetty's
+ * internal {@code org.eclipse.jetty.websocket.server.WebSocketHandler} class.
  *
  * @author Phillip Webb
  * @author Rossen Stoyanchev
@@ -69,17 +69,17 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 
 
 	/**
-	 * Default constructor that creates {@link WebSocketServerFactory} through its default
-	 * constructor thus using a default {@link WebSocketPolicy}.
+	 * Default constructor that creates {@link WebSocketServerFactory} through
+	 * its default constructor thus using a default {@link WebSocketPolicy}.
 	 */
 	public JettyRequestUpgradeStrategy() {
 		this(new WebSocketServerFactory());
 	}
 
 	/**
-	 * A constructor accepting a {@link WebSocketServerFactory}. This may be useful for
-	 * modifying the factory's {@link WebSocketPolicy} via
-	 * {@link WebSocketServerFactory#getPolicy()}.
+	 * A constructor accepting a {@link WebSocketServerFactory}.
+	 * This may be useful for modifying the factory's {@link WebSocketPolicy}
+	 * via {@link WebSocketServerFactory#getPolicy()}.
 	 */
 	public JettyRequestUpgradeStrategy(WebSocketServerFactory factory) {
 		Assert.notNull(factory, "WebSocketServerFactory must not be null");
@@ -154,7 +154,7 @@ public class JettyRequestUpgradeStrategy implements RequestUpgradeStrategy {
 		}
 		catch (IOException ex) {
 			throw new HandshakeFailureException(
-					"Response update failed during upgrade to WebSocket, uri=" + request.getURI(), ex);
+					"Response update failed during upgrade to WebSocket: " + request.getURI(), ex);
 		}
 		finally {
 			wsContainerHolder.remove();
