@@ -51,7 +51,7 @@ configure(allprojects) { project ->
 	ext.jackson2Version      = "2.6.3"
 	ext.jasperreportsVersion = "6.1.1"
 	ext.javamailVersion      = "1.5.4"
-	ext.jettyVersion         = "9.3.3.v20150827"
+	ext.jettyVersion         = "9.3.5.v20151012"
 	ext.jodaVersion          = "2.8.2"
 	ext.jrubyVersion         = "1.7.22"  // JRuby 9000 only supported through JSR-223 (StandardScriptFactory)
 	ext.jsonassertVersion    = "1.2.3"
