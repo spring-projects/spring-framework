@@ -35,6 +35,7 @@ public class ResourceUtilsTests {
 		assertTrue(ResourceUtils.isJarURL(new URL("jar:file:myjar.jar!/mypath")));
 		assertTrue(ResourceUtils.isJarURL(new URL(null, "zip:file:myjar.jar!/mypath", new DummyURLStreamHandler())));
 		assertTrue(ResourceUtils.isJarURL(new URL(null, "wsjar:file:myjar.jar!/mypath", new DummyURLStreamHandler())));
+		assertTrue(ResourceUtils.isJarURL(new URL(null, "war:jar:file:myjar.jar!/mypath", new DummyURLStreamHandler())));
 		assertFalse(ResourceUtils.isJarURL(new URL("file:myjar.jar")));
 		assertFalse(ResourceUtils.isJarURL(new URL("http:myserver/myjar.jar")));
 	}
@@ -50,11 +51,16 @@ public class ResourceUtilsTests {
 		assertEquals(new URL("file:myjar.jar"),
 				ResourceUtils.extractJarFileURL(new URL(null, "wsjar:file:myjar.jar!/mypath", new DummyURLStreamHandler())));
 		assertEquals(new URL("file:myjar.jar"),
+				ResourceUtils.extractJarFileURL(new URL(null, "war:jar:file:myjar.jar!/mypath", new DummyURLStreamHandler())));
+
+		assertEquals(new URL("file:myjar.jar"),
 				ResourceUtils.extractJarFileURL(new URL("jar:file:myjar.jar!/")));
 		assertEquals(new URL("file:myjar.jar"),
 				ResourceUtils.extractJarFileURL(new URL(null, "zip:file:myjar.jar!/", new DummyURLStreamHandler())));
 		assertEquals(new URL("file:myjar.jar"),
 				ResourceUtils.extractJarFileURL(new URL(null, "wsjar:file:myjar.jar!/", new DummyURLStreamHandler())));
+		assertEquals(new URL("file:myjar.jar"),
+				ResourceUtils.extractJarFileURL(new URL(null, "war:jar:file:myjar.jar!/", new DummyURLStreamHandler())));
 		assertEquals(new URL("file:myjar.jar"),
 				ResourceUtils.extractJarFileURL(new URL("file:myjar.jar")));
 	}

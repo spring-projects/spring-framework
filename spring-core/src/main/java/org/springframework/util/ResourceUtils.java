@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,6 +68,9 @@ public abstract class ResourceUtils {
 
 	/** URL protocol for an entry from a zip file: "zip" */
 	public static final String URL_PROTOCOL_ZIP = "zip";
+
+	/** URL protocol for an entry from a Tomcat war file: "war" */
+	public static final String URL_PROTOCOL_WAR = "war";
 
 	/** URL protocol for an entry from a WebSphere jar file: "wsjar" */
 	public static final String URL_PROTOCOL_WSJAR = "wsjar";
@@ -275,7 +278,8 @@ public abstract class ResourceUtils {
 	public static boolean isJarURL(URL url) {
 		String protocol = url.getProtocol();
 		return (URL_PROTOCOL_JAR.equals(protocol) || URL_PROTOCOL_ZIP.equals(protocol) ||
-				URL_PROTOCOL_VFSZIP.equals(protocol) || URL_PROTOCOL_WSJAR.equals(protocol));
+				URL_PROTOCOL_WAR.equals(protocol) || URL_PROTOCOL_WSJAR.equals(protocol) ||
+				URL_PROTOCOL_VFSZIP.equals(protocol));
 	}
 
 	/**
@@ -299,9 +303,10 @@ public abstract class ResourceUtils {
 	 */
 	public static URL extractJarFileURL(URL jarUrl) throws MalformedURLException {
 		String urlFile = jarUrl.getFile();
-		int separatorIndex = urlFile.indexOf(JAR_URL_SEPARATOR);
-		if (separatorIndex != -1) {
-			String jarFile = urlFile.substring(0, separatorIndex);
+		int startIndex = (urlFile.startsWith(JAR_URL_PREFIX) ? JAR_URL_PREFIX.length() : 0);
+		int endIndex = urlFile.indexOf(JAR_URL_SEPARATOR);
+		if (endIndex != -1) {
+			String jarFile = urlFile.substring(startIndex, endIndex);
 			try {
 				return new URL(jarFile);
 			}
