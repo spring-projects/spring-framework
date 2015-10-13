@@ -100,7 +100,7 @@ configure(allprojects) { project ->
 	]
 
 	compileTestJava.options*.compilerArgs = [
-		"-Xlint:serial", "-Xlint:varargs", "-Xlint:cast", "-Xlint:classfile",
+		"-Xlint:serial", "-Xlint:-varargs", "-Xlint:cast", "-Xlint:classfile",
 		"-Xlint:dep-ann", "-Xlint:divzero", "-Xlint:empty", "-Xlint:finally",
 		"-Xlint:overrides", "-Xlint:path", "-Xlint:processing", "-Xlint:static",
 		"-Xlint:try", "-Xlint:-fallthrough", "-Xlint:-rawtypes", "-Xlint:-deprecation",
