@@ -216,8 +216,14 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 			Object sessionListener = accessor.getPropertyValue("sessionListener");
 			Object clusterContext = accessor.getPropertyValue("clusterContext");
 			try {
-				return constructor.newInstance(registration.getEndpoint(), registration, provider, container,
-						"/",  registration.getConfigurator(), sessionListener, clusterContext, null);
+				if (constructor.getParameterCount() == 9) {
+					return constructor.newInstance(registration.getEndpoint(), registration, provider, container,
+							"/", registration.getConfigurator(), sessionListener, clusterContext, null);
+				}
+				else {
+					return constructor.newInstance(registration.getEndpoint(), registration, provider, container,
+							"/", registration.getConfigurator(), sessionListener, clusterContext, null, Boolean.TRUE);
+				}
 			}
 			catch (Exception ex) {
 				throw new HandshakeFailureException("Failed to register " + registration, ex);
