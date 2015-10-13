@@ -115,24 +115,7 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 
 	@Override
 	protected MultiValueMap<String, String> findSubscriptionsInternal(String destination, Message<?> message) {
-		MultiValueMap<String, String> result = this.destinationCache.getSubscriptions(destination);
-		if (result != null) {
-			return result;
-		}
-		result = new LinkedMultiValueMap<String, String>();
-		for (SessionSubscriptionInfo info : this.subscriptionRegistry.getAllSubscriptions()) {
-			for (String destinationPattern : info.getDestinations()) {
-				if (this.pathMatcher.match(destinationPattern, destination)) {
-					for (String subscriptionId : info.getSubscriptions(destinationPattern)) {
-						result.add(info.sessionId, subscriptionId);
-					}
-				}
-			}
-		}
-		if (!result.isEmpty()) {
-			this.destinationCache.addSubscriptions(destination, result);
-		}
-		return result;
+		return this.destinationCache.getSubscriptions(destination, message);
 	}
 
 	@Override
@@ -157,20 +140,38 @@ public class DefaultSubscriptionRegistry extends AbstractSubscriptionRegistry {
 				new LinkedHashMap<String, MultiValueMap<String, String>>(DEFAULT_CACHE_LIMIT, 0.75f, true) {
 					@Override
 					protected boolean removeEldestEntry(Map.Entry<String, MultiValueMap<String, String>> eldest) {
-						return size() > getCacheLimit();
+						if (size() > getCacheLimit()) {
+							accessCache.remove(eldest.getKey());
+							return true;
+						}
+						else {
+							return false;
+						}
 					}
 				};
 
 
-		public MultiValueMap<String, String> getSubscriptions(String destination) {
-			return this.accessCache.get(destination);
-		}
-
-		public void addSubscriptions(String destination, MultiValueMap<String, String> subscriptions) {
-			synchronized (this.updateCache) {
-				this.updateCache.put(destination, deepCopy(subscriptions));
-				this.accessCache.put(destination, subscriptions);
+		public MultiValueMap<String, String> getSubscriptions(String destination, Message<?> message) {
+			MultiValueMap<String, String> result = this.accessCache.get(destination);
+			if (result == null) {
+				synchronized (this.updateCache) {
+					result = new LinkedMultiValueMap<String, String>();
+					for (SessionSubscriptionInfo info : subscriptionRegistry.getAllSubscriptions()) {
+						for (String destinationPattern : info.getDestinations()) {
+							if (getPathMatcher().match(destinationPattern, destination)) {
+								for (String subscriptionId : info.getSubscriptions(destinationPattern)) {
+									result.add(info.sessionId, subscriptionId);
+								}
+							}
+						}
+					}
+					if (!result.isEmpty()) {
+						this.updateCache.put(destination, deepCopy(result));
+						this.accessCache.put(destination, result);
+					}
+				}
 			}
+			return result;
 		}
 
 		public void updateAfterNewSubscription(String destination, String sessionId, String subsId) {

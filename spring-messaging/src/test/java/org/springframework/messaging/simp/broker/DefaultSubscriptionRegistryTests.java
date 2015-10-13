@@ -69,7 +69,7 @@ public class DefaultSubscriptionRegistryTests {
 
 		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message(dest));
 		assertEquals("Expected one element " + actual, 1, actual.size());
-		assertEquals(Arrays.asList(subsId), actual.get(sessId));
+		assertEquals(Collections.singletonList(subsId), actual.get(sessId));
 	}
 
 	@Test
@@ -116,7 +116,7 @@ public class DefaultSubscriptionRegistryTests {
 
 		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message(dest));
 		assertEquals("Expected one element " + actual, 1, actual.size());
-		assertEquals(Arrays.asList(subsId), actual.get(sessId));
+		assertEquals(Collections.singletonList(subsId), actual.get(sessId));
 	}
 
 	@Test  // SPR-11657
@@ -143,13 +143,13 @@ public class DefaultSubscriptionRegistryTests {
 		actual = this.registry.findSubscriptions(message("/topic/PRICE.STOCK.NASDAQ.IBM"));
 		assertEquals(2, actual.size());
 		assertEquals(Arrays.asList(subs2, subs1), actual.get(sess1));
-		assertEquals(Arrays.asList(subs1), actual.get(sess2));
+		assertEquals(Collections.singletonList(subs1), actual.get(sess2));
 
 		this.registry.unregisterAllSubscriptions(sess1);
 
 		actual = this.registry.findSubscriptions(message("/topic/PRICE.STOCK.NASDAQ.IBM"));
 		assertEquals(1, actual.size());
-		assertEquals(Arrays.asList(subs1), actual.get(sess2));
+		assertEquals(Collections.singletonList(subs1), actual.get(sess2));
 
 		this.registry.registerSubscription(subscribeMessage(sess1, subs1, "/topic/PRICE.STOCK.*.IBM"));
 		this.registry.registerSubscription(subscribeMessage(sess1, subs2, "/topic/PRICE.STOCK.NASDAQ.IBM"));
@@ -157,20 +157,20 @@ public class DefaultSubscriptionRegistryTests {
 		actual = this.registry.findSubscriptions(message("/topic/PRICE.STOCK.NASDAQ.IBM"));
 		assertEquals(2, actual.size());
 		assertEquals(Arrays.asList(subs1, subs2), actual.get(sess1));
-		assertEquals(Arrays.asList(subs1), actual.get(sess2));
+		assertEquals(Collections.singletonList(subs1), actual.get(sess2));
 
 		this.registry.unregisterSubscription(unsubscribeMessage(sess1, subs2));
 
 		actual = this.registry.findSubscriptions(message("/topic/PRICE.STOCK.NASDAQ.IBM"));
 		assertEquals(2, actual.size());
-		assertEquals(Arrays.asList(subs1), actual.get(sess1));
-		assertEquals(Arrays.asList(subs1), actual.get(sess2));
+		assertEquals(Collections.singletonList(subs1), actual.get(sess1));
+		assertEquals(Collections.singletonList(subs1), actual.get(sess2));
 
 		this.registry.unregisterSubscription(unsubscribeMessage(sess1, subs1));
 
 		actual = this.registry.findSubscriptions(message("/topic/PRICE.STOCK.NASDAQ.IBM"));
 		assertEquals(1, actual.size());
-		assertEquals(Arrays.asList(subs1), actual.get(sess2));
+		assertEquals(Collections.singletonList(subs1), actual.get(sess2));
 
 		this.registry.unregisterSubscription(unsubscribeMessage(sess2, subs1));
 
@@ -222,13 +222,13 @@ public class DefaultSubscriptionRegistryTests {
 		MultiValueMap<String, String> actual = this.registry.findSubscriptions(message);
 
 		assertEquals("Expected one element " + actual, 1, actual.size());
-		assertEquals(Arrays.asList(subsId), actual.get(sessId));
+		assertEquals(Collections.singletonList(subsId), actual.get(sessId));
 
 		message = message("/topic/PRICE.STOCK.NASDAQ.MSFT");
 		actual = this.registry.findSubscriptions(message);
 
 		assertEquals("Expected one element " + actual, 1, actual.size());
-		assertEquals(Arrays.asList(subsId), actual.get(sessId));
+		assertEquals(Collections.singletonList(subsId), actual.get(sessId));
 
 		message = message("/topic/PRICE.STOCK.NASDAQ.VMW");
 		actual = this.registry.findSubscriptions(message);
@@ -249,7 +249,7 @@ public class DefaultSubscriptionRegistryTests {
 
 		actual = this.registry.findSubscriptions(message("/foo"));
 		assertEquals("Expected 1 element", 1, actual.size());
-		assertEquals(Arrays.asList("subs02"), actual.get("sess01"));
+		assertEquals(Collections.singletonList("subs02"), actual.get("sess01"));
 
 		this.registry.unregisterSubscription(unsubscribeMessage("sess01", "subs02"));
 
@@ -343,6 +343,22 @@ public class DefaultSubscriptionRegistryTests {
 
 		iteratorValues.next();
 		// no ConcurrentModificationException
+	}
+
+	@Test // SPR-13555
+	public void cacheLimitExceeded() throws Exception {
+		this.registry.setCacheLimit(1);
+		this.registry.registerSubscription(subscribeMessage("sess1", "1", "/foo"));
+		this.registry.registerSubscription(subscribeMessage("sess1", "2", "/bar"));
+
+		assertEquals(1, this.registry.findSubscriptions(message("/foo")).size());
+		assertEquals(1, this.registry.findSubscriptions(message("/bar")).size());
+
+		this.registry.registerSubscription(subscribeMessage("sess2", "1", "/foo"));
+		this.registry.registerSubscription(subscribeMessage("sess2", "2", "/bar"));
+
+		assertEquals(2, this.registry.findSubscriptions(message("/foo")).size());
+		assertEquals(2, this.registry.findSubscriptions(message("/bar")).size());
 	}
 
 

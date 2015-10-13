@@ -23,6 +23,8 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -34,6 +36,10 @@ import org.springframework.util.MultiValueMap;
  * @since 4.0
  */
 public abstract class AbstractSubscriptionRegistry implements SubscriptionRegistry {
+
+	private static MultiValueMap<String, String> EMPTY_MAP =
+			CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<String, String>(0));
+
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -104,7 +110,7 @@ public abstract class AbstractSubscriptionRegistry implements SubscriptionRegist
 		String destination = SimpMessageHeaderAccessor.getDestination(headers);
 		if (destination == null) {
 			logger.error("No destination in " + message);
-			return null;
+			return EMPTY_MAP;
 		}
 
 		return findSubscriptionsInternal(destination, message);
