@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.reactive.web.http.servlet;
 
 import java.net.URI;
@@ -21,7 +22,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.reactivestreams.Publisher;
@@ -29,7 +29,7 @@ import org.reactivestreams.Publisher;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.reactive.web.http.ServerHttpRequest;
+import org.springframework.http.server.ReactiveServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
@@ -37,7 +37,7 @@ import org.springframework.util.StringUtils;
 /**
  * @author Rossen Stoyanchev
  */
-public class ServletServerHttpRequest implements ServerHttpRequest {
+public class ServletServerHttpRequest implements ReactiveServerHttpRequest {
 
 	private final HttpServletRequest servletRequest;
 

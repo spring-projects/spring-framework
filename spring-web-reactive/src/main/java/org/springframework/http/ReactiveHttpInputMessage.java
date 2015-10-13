@@ -13,21 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.reactive.web.http;
+
+package org.springframework.http;
 
 import java.nio.ByteBuffer;
 
 import org.reactivestreams.Publisher;
 
 /**
- * Represent a server-side HTTP request.
+ * Represents a "reactive" HTTP input message, consisting of {@linkplain #getHeaders() headers}
+ * and a readable {@linkplain #getBody() streaming body }.
  *
- * @author Rossen Stoyanchev
+ * <p>Typically implemented by an HTTP request on the server-side, or a response on the client-side.
+ *
+ * @author Arjen Poutsma
  */
-public interface ServerHttpRequest extends HttpRequest {
+public interface ReactiveHttpInputMessage extends HttpMessage {
 
 	/**
-	 * Return the body of the message as a reactive stream.
+	 * Return the body of the message as an publisher of {@code ByteBuffer}s.
+	 * @return the body
 	 */
 	Publisher<ByteBuffer> getBody();
 

@@ -13,9 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.reactive.web.dispatch.method.annotation;
 
+import java.lang.reflect.Type;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
 import org.reactivestreams.Publisher;
+import reactor.Publishers;
+import reactor.core.publisher.convert.CompletableFutureConverter;
+import reactor.core.publisher.convert.RxJava1Converter;
+import reactor.core.publisher.convert.RxJava1SingleConverter;
+import reactor.rx.Promise;
+import rx.Observable;
+import rx.Single;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
@@ -23,20 +40,13 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.ReactiveServerHttpRequest;
+import org.springframework.http.server.ReactiveServerHttpResponse;
 import org.springframework.reactive.codec.encoder.MessageToByteEncoder;
 import org.springframework.reactive.web.dispatch.HandlerResult;
 import org.springframework.reactive.web.dispatch.HandlerResultHandler;
-import org.springframework.reactive.web.http.ServerHttpRequest;
-import org.springframework.reactive.web.http.ServerHttpResponse;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.HandlerMethod;
-import reactor.Publishers;
-
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 
 /**
@@ -95,7 +105,8 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Publisher<Void> handleResult(ServerHttpRequest request, ServerHttpResponse response,
+	public Publisher<Void> handleResult(ReactiveServerHttpRequest request,
+			ReactiveServerHttpResponse response,
 			HandlerResult result) {
 
 		Object value = result.getValue();
@@ -129,20 +140,20 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 				outputStream = postProcessor.encode(outputStream, elementType, mediaType, hints.toArray());
 			}
 			response.getHeaders().setContentType(mediaType);
-			return response.writeWith(outputStream);
+			return response.addBody(outputStream);
 		}
 		return Publishers.error(new IllegalStateException(
 		  "Return value type '" + returnType.getParameterType().getName() + "' with media type '" + mediaType + "' not supported"  ));
 	}
 
-	private MediaType resolveMediaType(ServerHttpRequest request) {
+	private MediaType resolveMediaType(ReactiveServerHttpRequest request) {
 		String acceptHeader = request.getHeaders().getFirst(HttpHeaders.ACCEPT);
 		List<MediaType> mediaTypes = MediaType.parseMediaTypes(acceptHeader);
 		MediaType.sortBySpecificityAndQuality(mediaTypes);
 		return ( mediaTypes.size() > 0 ? mediaTypes.get(0) : MediaType.TEXT_PLAIN);
 	}
 
-	private MessageToByteEncoder<?> resolveSerializer(ServerHttpRequest request, ResolvableType type, MediaType mediaType, Object[] hints) {
+	private MessageToByteEncoder<?> resolveSerializer(ReactiveServerHttpRequest request, ResolvableType type, MediaType mediaType, Object[] hints) {
 		for (MessageToByteEncoder<?> codec : this.serializers) {
 			if (codec.canEncode(type, mediaType, hints)) {
 				return codec;
@@ -151,7 +162,7 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 		return null;
 	}
 
-	private List<MessageToByteEncoder<ByteBuffer>> resolvePostProcessors(ServerHttpRequest request, ResolvableType type, MediaType mediaType, Object[] hints) {
+	private List<MessageToByteEncoder<ByteBuffer>> resolvePostProcessors(ReactiveServerHttpRequest request, ResolvableType type, MediaType mediaType, Object[] hints) {
 		List<MessageToByteEncoder<ByteBuffer>> postProcessors = new ArrayList<>();
 		for (MessageToByteEncoder<ByteBuffer> postProcessor : this.postProcessors) {
 			if (postProcessor.canEncode(type, mediaType, hints)) {

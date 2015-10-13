@@ -26,7 +26,7 @@ import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
-import org.springframework.reactive.web.http.ServerHttpRequest;
+import org.springframework.http.server.ReactiveServerHttpRequest;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.method.HandlerMethod;
 
@@ -55,7 +55,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 
-	public Object invokeForRequest(ServerHttpRequest request, Object... providedArgs) throws Exception {
+	public Object invokeForRequest(ReactiveServerHttpRequest request, Object... providedArgs) throws Exception {
 		Object[] args = getMethodArgumentValues(request, providedArgs);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Invoking [" + getBeanType().getSimpleName() + "." +
@@ -68,7 +68,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		return returnValue;
 	}
 
-	private Object[] getMethodArgumentValues(ServerHttpRequest request, Object... providedArgs) throws Exception {
+	private Object[] getMethodArgumentValues(ReactiveServerHttpRequest request, Object... providedArgs) throws Exception {
 		MethodParameter[] parameters = getMethodParameters();
 		Object[] args = new Object[parameters.length];
 		for (int i = 0; i < parameters.length; i++) {

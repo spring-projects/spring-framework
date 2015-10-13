@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.reactive.web.dispatch.handler;
 
 import java.net.URI;
@@ -27,12 +28,12 @@ import reactor.rx.Streams;
 
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.ReactiveServerHttpRequest;
+import org.springframework.http.server.ReactiveServerHttpResponse;
 import org.springframework.reactive.web.dispatch.DispatcherHandler;
 import org.springframework.reactive.web.dispatch.SimpleHandlerResultHandler;
 import org.springframework.reactive.web.http.AbstractHttpHandlerIntegrationTests;
 import org.springframework.reactive.web.http.HttpHandler;
-import org.springframework.reactive.web.http.ServerHttpRequest;
-import org.springframework.reactive.web.http.ServerHttpResponse;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 
@@ -99,16 +100,16 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 	private static class FooHandler implements HttpHandler {
 
 		@Override
-		public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-			return response.writeWith(Streams.just(Buffer.wrap("foo").byteBuffer()));
+		public Publisher<Void> handle(ReactiveServerHttpRequest request, ReactiveServerHttpResponse response) {
+			return response.addBody(Streams.just(Buffer.wrap("foo").byteBuffer()));
 		}
 	}
 
 	private static class BarHandler implements HttpHandler {
 
 		@Override
-		public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-			return response.writeWith(Streams.just(Buffer.wrap("bar").byteBuffer()));
+		public Publisher<Void> handle(ReactiveServerHttpRequest request, ReactiveServerHttpResponse response) {
+			return response.addBody(Streams.just(Buffer.wrap("bar").byteBuffer()));
 		}
 	}
 

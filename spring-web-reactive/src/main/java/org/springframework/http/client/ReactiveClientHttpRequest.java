@@ -13,15 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.reactive.web.http;
 
-import org.springframework.http.HttpHeaders;
+package org.springframework.http.client;
+
+import org.springframework.http.HttpRequest;
+import org.springframework.http.ReactiveHttpOutputMessage;
 
 /**
- * @author Rossen Stoyanchev
+ * Represents a "reactive" client-side HTTP request.
+ *
+ * @author Arjen Poutsma
  */
-public interface HttpMessage {
-
-	HttpHeaders getHeaders();
+public interface ReactiveClientHttpRequest extends HttpRequest, ReactiveHttpOutputMessage {
 
 }

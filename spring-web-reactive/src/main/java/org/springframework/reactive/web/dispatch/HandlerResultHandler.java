@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.reactive.web.dispatch;
 
 import org.reactivestreams.Publisher;
 
-import org.springframework.reactive.web.http.ServerHttpRequest;
-import org.springframework.reactive.web.http.ServerHttpResponse;
+import org.springframework.http.server.ReactiveServerHttpRequest;
+import org.springframework.http.server.ReactiveServerHttpResponse;
 
 /**
  * Process the {@link HandlerResult}, usually returned by an {@link HandlerAdapter}.
@@ -47,6 +48,6 @@ public interface HandlerResultHandler {
 	 * when the handling is complete (success or error) including the flush of the data on the
 	 * network.
 	 */
-	Publisher<Void> handleResult(ServerHttpRequest request, ServerHttpResponse response, HandlerResult result);
+	Publisher<Void> handleResult(ReactiveServerHttpRequest request, ReactiveServerHttpResponse response, HandlerResult result);
 
 }

@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.reactive.web.dispatch.method;
 
-
 import org.springframework.core.MethodParameter;
-import org.springframework.reactive.web.http.ServerHttpRequest;
+import org.springframework.http.server.ReactiveServerHttpRequest;
 
 
 /**
@@ -27,6 +27,6 @@ public interface HandlerMethodArgumentResolver {
 
 	boolean supportsParameter(MethodParameter parameter);
 
-	Object resolveArgument(MethodParameter parameter, ServerHttpRequest request);
+	Object resolveArgument(MethodParameter parameter, ReactiveServerHttpRequest request);
 
 }

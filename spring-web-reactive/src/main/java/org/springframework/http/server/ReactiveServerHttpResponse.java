@@ -13,23 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.reactive.web.http;
 
-import java.nio.ByteBuffer;
-
-import org.reactivestreams.Publisher;
+package org.springframework.http.server;
 
 import org.springframework.http.HttpStatus;
+import org.reactivestreams.Publisher;
+import org.springframework.http.ReactiveHttpOutputMessage;
 
 /**
- * Represent a server-side HTTP response.
+ * Represents a "reactive" server-side HTTP response.
  *
- * @author Rossen Stoyanchev
+ * @author Arjen Poutsma
  */
-public interface ServerHttpResponse extends HttpMessage {
+public interface ReactiveServerHttpResponse
+		extends ReactiveHttpOutputMessage {
 
+	/**
+	 * Set the HTTP status code of the response.
+	 * @param status the HTTP status as an HttpStatus enum value
+	 */
 	void setStatusCode(HttpStatus status);
-
+	
 	/**
 	 * Write the response headers. This method must be invoked to send responses without body.
 	 * @return A {@code Publisher<Void>} used to signal the demand, and receive a notification
@@ -37,16 +41,4 @@ public interface ServerHttpResponse extends HttpMessage {
 	 * network.
 	 */
 	Publisher<Void> writeHeaders();
-
-	/**
-	 * Write the provided reactive stream of bytes to the response body. Most servers
-	 * support multiple {@code writeWith} calls. Headers are written automatically
-	 * before the body, so not need to call {@link #writeHeaders()} explicitly.
-	 * @param contentPublisher the stream to write in the response body.
-	 * @return A {@code Publisher<Void>} used to signal the demand, and receive a notification
-	 * when the handling is complete (success or error) including the flush of the data on the
-	 * network.
-	 */
-	Publisher<Void> writeWith(Publisher<ByteBuffer> contentPublisher);
-
 }

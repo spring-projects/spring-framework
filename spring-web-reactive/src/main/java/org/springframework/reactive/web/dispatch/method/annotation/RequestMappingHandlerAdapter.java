@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.reactive.web.dispatch.method.annotation;
 
 import java.nio.ByteBuffer;
@@ -23,6 +24,8 @@ import java.util.List;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.reactive.codec.decoder.ByteBufferDecoder;
 import org.springframework.reactive.codec.decoder.ByteToMessageDecoder;
+import org.springframework.http.server.ReactiveServerHttpRequest;
+import org.springframework.http.server.ReactiveServerHttpResponse;
 import org.springframework.reactive.codec.decoder.JacksonJsonDecoder;
 import org.springframework.reactive.codec.decoder.JsonObjectDecoder;
 import org.springframework.reactive.codec.decoder.StringDecoder;
@@ -30,8 +33,6 @@ import org.springframework.reactive.web.dispatch.HandlerAdapter;
 import org.springframework.reactive.web.dispatch.HandlerResult;
 import org.springframework.reactive.web.dispatch.method.HandlerMethodArgumentResolver;
 import org.springframework.reactive.web.dispatch.method.InvocableHandlerMethod;
-import org.springframework.reactive.web.http.ServerHttpRequest;
-import org.springframework.reactive.web.http.ServerHttpResponse;
 import org.springframework.web.method.HandlerMethod;
 
 
@@ -68,7 +69,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 	}
 
 	@Override
-	public HandlerResult handle(ServerHttpRequest request, ServerHttpResponse response,
+	public HandlerResult handle(ReactiveServerHttpRequest request, ReactiveServerHttpResponse response,
 			Object handler) throws Exception {
 
 		final InvocableHandlerMethod invocable = new InvocableHandlerMethod((HandlerMethod) handler);

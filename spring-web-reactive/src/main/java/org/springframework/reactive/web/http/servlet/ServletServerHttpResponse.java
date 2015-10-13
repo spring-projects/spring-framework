@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.reactive.web.http.servlet;
 
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletResponse;
 
 import org.reactivestreams.Publisher;
@@ -26,13 +26,13 @@ import reactor.Publishers;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.reactive.web.http.ServerHttpResponse;
+import org.springframework.http.server.ReactiveServerHttpResponse;
 import org.springframework.util.Assert;
 
 /**
  * @author Rossen Stoyanchev
  */
-public class ServletServerHttpResponse implements ServerHttpResponse {
+public class ServletServerHttpResponse implements ReactiveServerHttpResponse {
 
 	private final HttpServletResponse servletResponse;
 
@@ -69,7 +69,7 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public Publisher<Void> writeWith(final Publisher<ByteBuffer> contentPublisher) {
+	public Publisher<Void> addBody(final Publisher<ByteBuffer> contentPublisher) {
 		applyHeaders();
 		return (s -> contentPublisher.subscribe(responseSubscriber));
 	}

@@ -13,19 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.reactive.web.http;
 
-import java.net.URI;
+package org.springframework.http.server;
 
-import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRequest;
+import org.springframework.http.ReactiveHttpInputMessage;
 
 /**
- * @author Rossen Stoyanchev
+ * Represents a "reactive" server-side HTTP request
+ *
+ * @author Arjen Poutsma
  */
-public interface HttpRequest extends HttpMessage {
-
-	HttpMethod getMethod();
-
-	URI getURI();
+public interface ReactiveServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage {
 
 }
