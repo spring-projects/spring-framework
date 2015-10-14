@@ -13,16 +13,13 @@
     <title>Introduction</title>
 
     <sidebar>
-      <title>JSR-168 The Java Portlet Specification</title>
-      <para>For more general information about portlet development, please
-      review a whitepaper from Sun entitled
-      <link xl:href="http://developers.sun.com/prodtech/portalserver/reference/techart/jsr168/">"Introduction to JSR 168"</link>,
-      and of course the
-      <link xl:href="http://jcp.org/aboutJava/communityprocess/final/jsr168/">JSR-168 Specification</link> itself.</para>
+      <title>JSR-286 The Java Portlet Specification</title>
+      <para>For more general information about portlet development, please review the
+      <link xl:href="https://jcp.org/en/jsr/detail?id=286">JSR-286 Specification</link>.</para>
     </sidebar>
 
     <para>In addition to supporting conventional (servlet-based) Web development,
-    Spring also supports JSR-168 Portlet development. As much as possible, the
+    Spring also supports JSR-286 Portlet development. As much as possible, the
     Portlet MVC framework is a mirror image of the Web MVC framework, and also
     uses the same underlying view abstractions and integration technology. So, be
     sure to review the chapters entitled <xref linkend="mvc"/> and
@@ -31,7 +28,7 @@
     <note>
       <para>Bear in mind that while the concepts of Spring MVC are the
       same in Spring Portlet MVC, there are some notable differences
-      created by the unique workflow of JSR-168 portlets.</para>
+      created by the unique workflow of JSR-286 portlets.</para>
     </note>
 
     <para>The main way in which portlet workflow differs from servlet
@@ -50,7 +47,7 @@
     <xi:include href="swf-sidebar.xml"/>
 
     <para>The dual phases of portlet requests are one of the real strengths
-    of the JSR-168 specification. For example, dynamic search results can be
+    of the JSR-286 specification. For example, dynamic search results can be
     updated routinely on the display without the user explicitly rerunning
     the search. Most other portlet MVC frameworks attempt to completely
     hide the two phases from the developer and make it look as much like
@@ -670,7 +667,7 @@ public class SampleController extends AbstractController {
 
       <para>This can be very valuable since you can then use interceptors
       to pre-process and post-process requests going to these portlets.
-      Since JSR-168 does not support any kind of filter mechanism, this is
+      Since JSR-286 does not support any kind of filter mechanism, this is
       quite handy. For example, this can be used to wrap the Hibernate
       <classname>OpenSessionInViewInterceptor</classname> around a MyFaces
       JSF Portlet.</para>
@@ -1017,7 +1014,7 @@ public class SampleController extends AbstractController {
       <classname>CommonsMultipartResolver</classname>, you need to use
       <literal>commons-fileupload.jar</literal>. Be sure to use at least
       version 1.1 of Commons FileUpload as previous versions do not
-      support JSR-168 Portlet applications.</para>
+      support JSR-286 Portlet applications.</para>
 
       <para>Now that you have seen how to set Portlet MVC up to handle
       multipart requests, let's talk about how to actually use it. When
@@ -1776,7 +1773,7 @@ public class MyFormController {
     <title>Portlet application deployment</title>
 
     <para>The process of deploying a Spring Portlet MVC application is no
-    different than deploying any JSR-168 Portlet application. However, this
+    different than deploying any JSR-286 Portlet application. However, this
     area is confusing enough in general that it is worth talking about here
     briefly.</para>
 
@@ -1787,7 +1784,7 @@ public class MyFormController {
     well-known servlet that provides access to the portlet services defined
     in your <literal>portlet.xml</literal> file.</para>
 
-    <para>The JSR-168 specification does not specify exactly how this should
+    <para>The JSR-286 specification does not specify exactly how this should
     happen, so each portlet container has its own mechanism for this, which
     usually involves some kind of “deployment process” that makes changes to
     the portlet webapp itself and then registers the portlets within the
