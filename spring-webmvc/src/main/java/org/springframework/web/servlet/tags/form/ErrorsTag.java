@@ -72,7 +72,7 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
 	/**
 	 * Set the HTML element must be used to render the error messages.
-	 * <p>Defaults to an HTML '{@code &lt;span/&gt;}' tag.
+	 * <p>Defaults to an HTML '{@code <span/>}' tag.
 	 */
 	public void setElement(String element) {
 		Assert.hasText(element, "'element' cannot be null or blank");
@@ -88,7 +88,7 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
 	/**
 	 * Set the delimiter to be used between error messages.
-	 * <p>Defaults to an HTML '{@code &lt;br/&gt;}' tag.
+	 * <p>Defaults to an HTML '{@code <br/>}' tag.
 	 */
 	public void setDelimiter(String delimiter) {
 		this.delimiter = delimiter;
@@ -105,7 +105,7 @@ public class ErrorsTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	/**
 	 * Get the value for the HTML '{@code id}' attribute.
 	 * <p>Appends '{@code .errors}' to the value returned by {@link #getPropertyPath()}
-	 * or to the model attribute name if the {@code &lt;form:errors/&gt;} tag's
+	 * or to the model attribute name if the {@code <form:errors/>} tag's
 	 * '{@code path}' attribute has been omitted.
 	 * @return the value for the HTML '{@code id}' attribute
 	 * @see #getPropertyPath()

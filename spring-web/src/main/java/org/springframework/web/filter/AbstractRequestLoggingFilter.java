@@ -86,7 +86,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 
 	/**
 	 * Set whether the query string should be included in the log message.
-	 * <p>Should be configured using an {@code &lt;init-param&gt;} for parameter name
+	 * <p>Should be configured using an {@code <init-param>} for parameter name
 	 * "includeQueryString" in the filter definition in {@code web.xml}.
 	 */
 	public void setIncludeQueryString(boolean includeQueryString) {
@@ -103,7 +103,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	/**
 	 * Set whether the client address and session id should be included in the
 	 * log message.
-	 * <p>Should be configured using an {@code &lt;init-param&gt;} for parameter name
+	 * <p>Should be configured using an {@code <init-param>} for parameter name
 	 * "includeClientInfo" in the filter definition in {@code web.xml}.
 	 */
 	public void setIncludeClientInfo(boolean includeClientInfo) {
@@ -120,7 +120,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 
 	/**
 	 * Set whether the request payload (body) should be included in the log message.
-	 * <p>Should be configured using an {@code &lt;init-param&gt;} for parameter name
+	 * <p>Should be configured using an {@code <init-param>} for parameter name
 	 * "includePayload" in the filter definition in {@code web.xml}.
 	 */
 
