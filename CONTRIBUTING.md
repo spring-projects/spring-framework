@@ -189,11 +189,11 @@ intend to submit as pull requests. For example, this is not acceptable:
     Author: Nickname <user@mail.com>
 
 Rather, please include your first and last name, properly capitalized, as
-submitted against the SpringSource contributor license agreement:
+submitted against the Spring Individual Contributor License Agreement (ICLA):
 
     Author: First Last <user@mail.com>
 
-This helps ensure traceability against the CLA and also goes a long way to
+This helps ensure traceability against the ICLA and also goes a long way to
 ensuring useful output from tools like `git shortlog` and others.
 
 You can configure this via the account admin area in GitHub (useful for
@@ -236,16 +236,16 @@ Most importantly, please format your commit messages in the following way
     Issue: SPR-1234, SPR-1235
 
 
-1. Use imperative statements in the subject line, e.g. "Fix broken Javadoc link"
+1. Use imperative statements in the subject line, e.g. "Fix broken Javadoc link".
 1. Begin the subject line with a capitalized verb, e.g. "Add, Prune, Fix,
     Introduce, Avoid, etc."
-1. Do not end the subject line with a period
-1. Restrict the subject line to 50 characters or less if possible
-1. Wrap lines in the body at 72 characters or less
+1. Do not end the subject line with a period.
+1. Restrict the subject line to 50 characters or less if possible.
+1. Wrap lines in the body at 72 characters or less.
 1. Mention associated JIRA issue(s) at the end of the commit comment, prefixed
-    with "Issue: " as above
+    with "Issue: " as above.
 1. In the body of the commit message, explain how things worked before this
-    commit, what has changed, and how things work now
+    commit, what has changed, and how things work now.
 
 For examples of this style, issue a `git log --author=cbeams` in the
 `spring-framework` git repository. For convenience, here are several such commits:
@@ -276,9 +276,9 @@ In the body:
     mechanisms in the framework insufficient? Make a case that this is a
     general-purpose problem and that yours is a general-purpose solution, etc.
 1. Add any additional information and ask questions; start a conversation or
-    continue one from JIRA
-1. Mention the JIRA issue ID
-1. Also mention that you have submitted the CLA as described above
+    continue one from JIRA.
+1. Mention the JIRA issue ID.
+1. Also mention that you have submitted the ICLA as described above.
 
 Note that for pull requests containing a single commit, GitHub will default the
 subject line and body of the pull request to match the subject line and body of
