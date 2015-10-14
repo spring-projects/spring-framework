@@ -24,7 +24,7 @@
 	</oxm:jaxb2-marshaller>
 
 	<!-- Castor -->
-	
+
 	<oxm:castor-marshaller id="castorEncodingMarshaller" encoding="ISO-8859-1"/>
 
 	<oxm:castor-marshaller id="castorTargetClassMarshaller" target-class="org.springframework.oxm.castor.Flight"/>

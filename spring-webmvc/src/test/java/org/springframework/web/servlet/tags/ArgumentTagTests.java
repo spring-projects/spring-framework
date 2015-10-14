@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,16 @@ import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.TagSupport;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import org.springframework.mock.web.test.MockBodyContent;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
+import static org.junit.Assert.*;
+
 /**
- * Unit tests for ArgumentTag
+ * Unit tests for {@link ArgumentTag}
  *
  * @author Nicholas Williams
  */
@@ -35,8 +40,8 @@ public class ArgumentTagTests extends AbstractTagTests {
 
 	private MockArgumentSupportTag parent;
 
-	@Override
-	protected void setUp() throws Exception {
+	@Before
+	public void setUp() throws Exception {
 		PageContext context = createPageContext();
 		parent = new MockArgumentSupportTag();
 		tag = new ArgumentTag();
@@ -44,7 +49,8 @@ public class ArgumentTagTests extends AbstractTagTests {
 		tag.setParent(parent);
 	}
 
-	public void testArgumentWithStringValue() throws JspException {
+	@Test
+	public void argumentWithStringValue() throws JspException {
 		tag.setValue("value1");
 
 		int action = tag.doEndTag();
@@ -53,14 +59,16 @@ public class ArgumentTagTests extends AbstractTagTests {
 		assertEquals("value1", parent.getArgument());
 	}
 
-	public void testArgumentWithImplicitNullValue() throws JspException {
+	@Test
+	public void argumentWithImplicitNullValue() throws JspException {
 		int action = tag.doEndTag();
 
 		assertEquals(Tag.EVAL_PAGE, action);
 		assertNull(parent.getArgument());
 	}
 
-	public void testArgumentWithExplicitNullValue() throws JspException {
+	@Test
+	public void argumentWithExplicitNullValue() throws JspException {
 		tag.setValue(null);
 
 		int action = tag.doEndTag();
@@ -69,7 +77,8 @@ public class ArgumentTagTests extends AbstractTagTests {
 		assertNull(parent.getArgument());
 	}
 
-	public void testArgumentWithBodyValue() throws JspException {
+	@Test
+	public void argumentWithBodyValue() throws JspException {
 		tag.setBodyContent(new MockBodyContent("value2",
 				new MockHttpServletResponse()));
 
@@ -79,7 +88,8 @@ public class ArgumentTagTests extends AbstractTagTests {
 		assertEquals("value2", parent.getArgument());
 	}
 
-	public void testArgumentWithValueThenReleaseThenBodyValue() throws JspException {
+	@Test
+	public void argumentWithValueThenReleaseThenBodyValue() throws JspException {
 		tag.setValue("value3");
 
 		int action = tag.doEndTag();

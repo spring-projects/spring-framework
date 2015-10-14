@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -993,6 +993,7 @@ public class Portlet20AnnotationControllerTests {
 		}
 
 		@ModelAttribute
+		@SuppressWarnings("unchecked")
 		protected TB2 getModelAttr() {
 			return (TB2) new DerivedTestBean();
 		}
@@ -1032,6 +1033,7 @@ public class Portlet20AnnotationControllerTests {
 
 
 	@Controller
+	@SuppressWarnings("rawtypes")
 	private static class MyBinderInitializingCommandProvidingFormController extends MyCommandProvidingFormController {
 
 		@InitBinder
@@ -1044,9 +1046,9 @@ public class Portlet20AnnotationControllerTests {
 
 
 	@Controller
+	@SuppressWarnings("rawtypes")
 	private static class MySpecificBinderInitializingCommandProvidingFormController extends MyCommandProvidingFormController {
 
-		@SuppressWarnings("unused")
 		@InitBinder({"myCommand", "date"})
 		private void initBinder(WebDataBinder binder) {
 			SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -1163,7 +1165,7 @@ public class Portlet20AnnotationControllerTests {
 	@RequestMapping("VIEW")
 	private static class MyPortlet20DispatchingController {
 
-		@ActionMapping("this")
+		@ActionMapping(name = "this")
 		public void myHandle(StateAwareResponse response) {
 			response.setRenderParameter("test", "value");
 		}
@@ -1238,13 +1240,14 @@ public class Portlet20AnnotationControllerTests {
 
 	private static class TestView {
 
+		@SuppressWarnings("deprecation")
 		public void render(String viewName, Map<String, Object> model, PortletRequest request, MimeResponse response) throws Exception {
 			TestBean tb = (TestBean) model.get("testBean");
 			if (tb == null) {
 				tb = (TestBean) model.get("myCommand");
 			}
 			if (tb.getName().endsWith("myDefaultName")) {
-				assertTrue(tb.getDate().getYear() == 107);
+				assertEquals(107, tb.getDate().getYear());
 			}
 			Errors errors = (Errors) model.get(BindingResult.MODEL_KEY_PREFIX + "testBean");
 			if (errors == null) {
@@ -1260,7 +1263,7 @@ public class Portlet20AnnotationControllerTests {
 	}
 
 
-	@RequestMapping(value="view")
+	@RequestMapping("view")
 	public static class FirstController {
 
 		@RenderMapping
@@ -1277,7 +1280,7 @@ public class Portlet20AnnotationControllerTests {
 	}
 
 
-	@RequestMapping(value="view")
+	@RequestMapping("view")
 	public static class SecondController {
 
 		@ResourceMapping("second")
@@ -1286,7 +1289,7 @@ public class Portlet20AnnotationControllerTests {
 			return "resourceSecond";
 		}
 
-		@RenderMapping(value = "MAXIMIZED", params = "report=second")
+		@RenderMapping(windowState = "MAXIMIZED", params = "report=second")
 		public String renderSecond(RenderResponse response) {
 			response.setProperty("RESPONSE", "renderSecond");
 			return "renderSecond";
@@ -1294,7 +1297,7 @@ public class Portlet20AnnotationControllerTests {
 	}
 
 
-	@RequestMapping(value="view")
+	@RequestMapping("view")
 	public static class ThirdController {
 
 		@ResourceMapping("third")
@@ -1303,7 +1306,7 @@ public class Portlet20AnnotationControllerTests {
 			return "resourceThird";
 		}
 
-		@RenderMapping(value = "MAXIMIZED", params = "report=third")
+		@RenderMapping(windowState = "MAXIMIZED", params = "report=third")
 		public String renderSecond(RenderResponse response) {
 			response.setProperty("RESPONSE", "renderThird");
 			return "renderThird";

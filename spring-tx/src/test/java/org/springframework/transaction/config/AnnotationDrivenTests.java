@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,9 +18,10 @@ package org.springframework.transaction.config;
 
 import java.io.Serializable;
 
-import junit.framework.TestCase;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
+
+import org.junit.Test;
 
 import org.springframework.aop.support.AopUtils;
 import org.springframework.context.ApplicationContext;
@@ -30,18 +31,22 @@ import org.springframework.tests.transaction.CallCountingTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.SerializationTestUtils;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
-public class AnnotationDrivenTests extends TestCase {
+public class AnnotationDrivenTests {
 
-	public void testWithProxyTargetClass() throws Exception {
+	@Test
+	public void withProxyTargetClass() throws Exception {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("annotationDrivenProxyTargetClassTests.xml", getClass());
 		doTestWithMultipleTransactionManagers(context);
 	}
 
-	public void testWithConfigurationClass() throws Exception {
+	@Test
+	public void withConfigurationClass() throws Exception {
 		AnnotationConfigApplicationContext parent = new AnnotationConfigApplicationContext();
 		parent.register(TransactionManagerConfiguration.class);
 		parent.refresh();
@@ -68,7 +73,9 @@ public class AnnotationDrivenTests extends TestCase {
 		assertEquals(2, tm2.commits);
 	}
 
-	public void testSerializableWithPreviousUsage() throws Exception {
+	@Test
+	@SuppressWarnings("resource")
+	public void serializableWithPreviousUsage() throws Exception {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("annotationDrivenProxyTargetClassTests.xml", getClass());
 		TransactionalService service = context.getBean("service", TransactionalService.class);
 		service.setSomething("someName");
@@ -76,7 +83,9 @@ public class AnnotationDrivenTests extends TestCase {
 		service.setSomething("someName");
 	}
 
-	public void testSerializableWithoutPreviousUsage() throws Exception {
+	@Test
+	@SuppressWarnings("resource")
+	public void serializableWithoutPreviousUsage() throws Exception {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext("annotationDrivenProxyTargetClassTests.xml", getClass());
 		TransactionalService service = context.getBean("service", TransactionalService.class);
 		service = (TransactionalService) SerializationTestUtils.serializeAndDeserialize(service);

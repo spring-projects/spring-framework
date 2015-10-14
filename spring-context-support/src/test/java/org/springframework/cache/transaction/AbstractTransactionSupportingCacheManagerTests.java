@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,11 +42,10 @@ public abstract class AbstractTransactionSupportingCacheManagerTests<T extends C
 
 	/**
 	 * Returns the {@link CacheManager} to use.
-	 *
 	 * @param transactionAware if the requested cache manager should be aware
 	 * of the transaction
 	 * @return the cache manager to use
-	 * @see org.springframework.cache.transaction.AbstractTransactionSupportingCacheManager#setTransactionAware(boolean)
+	 * @see org.springframework.cache.transaction.AbstractTransactionSupportingCacheManager#setTransactionAware
 	 */
 	protected abstract T getCacheManager(boolean transactionAware);
 
@@ -65,6 +64,7 @@ public abstract class AbstractTransactionSupportingCacheManagerTests<T extends C
 	 */
 	protected abstract void removeNativeCache(String cacheName);
 
+
 	@Test
 	public void getOnExistingCache() {
 		assertThat(getCacheManager(false).getCache(CACHE_NAME), is(instanceOf(getCacheType())));
@@ -77,10 +77,10 @@ public abstract class AbstractTransactionSupportingCacheManagerTests<T extends C
 		addNativeCache(cacheName);
 		assertFalse(cacheManager.getCacheNames().contains(cacheName));
 		try {
-			assertThat(cacheManager.getCache(cacheName),
-					is(instanceOf(getCacheType())));
+			assertThat(cacheManager.getCache(cacheName), is(instanceOf(getCacheType())));
 			assertTrue(cacheManager.getCacheNames().contains(cacheName));
-		} finally {
+		}
+		finally {
 			removeNativeCache(cacheName);
 		}
 	}
@@ -109,8 +109,10 @@ public abstract class AbstractTransactionSupportingCacheManagerTests<T extends C
 			assertThat(cacheManager.getCache(cacheName),
 					is(instanceOf(TransactionAwareCacheDecorator.class)));
 			assertTrue(cacheManager.getCacheNames().contains(cacheName));
-		} finally {
+		}
+		finally {
 			removeNativeCache(cacheName);
 		}
 	}
+
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -419,8 +419,8 @@ public class StringUtilsTests {
 	public void testRemoveDuplicateStrings() {
 		String[] input = new String[] {"myString2", "myString1", "myString2"};
 		input = StringUtils.removeDuplicateStrings(input);
-		assertEquals("myString1", input[0]);
-		assertEquals("myString2", input[1]);
+		assertEquals("myString2", input[0]);
+		assertEquals("myString1", input[1]);
 	}
 
 	@Test

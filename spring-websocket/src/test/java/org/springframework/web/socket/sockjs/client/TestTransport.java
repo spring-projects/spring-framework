@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,12 @@ package org.springframework.web.socket.sockjs.client;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.mockito.ArgumentCaptor;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.socket.TextMessage;
@@ -29,13 +31,15 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * Test SockJS Transport.
  *
  * @author Rossen Stoyanchev
  */
+@SuppressWarnings("rawtypes")
 class TestTransport implements Transport {
 
 	private final String name;
@@ -51,7 +55,7 @@ class TestTransport implements Transport {
 
 	@Override
 	public List<TransportType> getTransportTypes() {
-		return Arrays.asList(TransportType.WEBSOCKET);
+		return Collections.singletonList(TransportType.WEBSOCKET);
 	}
 
 	public TransportRequest getRequest() {
@@ -95,7 +99,7 @@ class TestTransport implements Transport {
 		@Override
 		public List<TransportType> getTransportTypes() {
 			return (isXhrStreamingDisabled() ?
-					Arrays.asList(TransportType.XHR) :
+					Collections.singletonList(TransportType.XHR) :
 					Arrays.asList(TransportType.XHR_STREAMING, TransportType.XHR));
 		}
 
@@ -109,11 +113,11 @@ class TestTransport implements Transport {
 		}
 
 		@Override
-		public void executeSendRequest(URI transportUrl, TextMessage message) {
+		public void executeSendRequest(URI transportUrl, HttpHeaders headers, TextMessage message) {
 		}
 
 		@Override
-		public String executeInfoRequest(URI infoUrl) {
+		public String executeInfoRequest(URI infoUrl, HttpHeaders headers) {
 			return null;
 		}
 	}

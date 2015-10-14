@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.web.util.HtmlUtils;
  * context-param in {@code web.xml}) is used.
  *
  * @author Juergen Hoeller
+ * @author Brian Clozel
  * @since 1.1
  * @see #setHtmlEscape
  * @see HtmlEscapeTag
@@ -76,24 +77,26 @@ public abstract class HtmlEscapingAwareTag extends RequestContextAwareTag {
 	}
 
 	/**
-	 * Return the applicable default for the use of response encoding with HTML escape for this tag.
+	 * Return the applicable default for the use of response encoding with
+	 * HTML escaping for this tag.
 	 * <p>The default implementation checks the RequestContext's setting,
 	 * falling back to {@code false} in case of no explicit default given.
-	 * @see #getRequestContext()
 	 * @since 4.1.2
+	 * @see #getRequestContext()
 	 */
 	protected boolean isResponseEncodedHtmlEscape() {
 		return getRequestContext().isResponseEncodedHtmlEscape();
 	}
 
 	/**
-	 * HTML encodes the given string, only if the htmlEscape setting is enabled.
-	 * The response encoding will be taken into account if the responseEncodedHtmlEscape setting is enabled.
-	 * @param content
-	 * @return
+	 * HTML-encodes the given String, only if the "htmlEscape" setting is enabled.
+	 * <p>The response encoding will be taken into account if the
+	 * "responseEncodedHtmlEscape" setting is enabled as well.
+	 * @param content the String to escape
+	 * @return the escaped String
+	 * @since 4.1.2
 	 * @see #isHtmlEscape()
 	 * @see #isResponseEncodedHtmlEscape()
-	 * @since 4.1.2
 	 */
 	protected String htmlEscape(String content) {
 		String out = content;

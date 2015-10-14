@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,19 +20,20 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.net.BindException;
 import java.net.SocketException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -43,24 +44,17 @@ import static org.junit.Assert.*;
 /**
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 @Deprecated
 public class AnnotationMethodHandlerExceptionResolverTests {
 
-	private AnnotationMethodHandlerExceptionResolver exceptionResolver;
+	private final AnnotationMethodHandlerExceptionResolver exceptionResolver = new AnnotationMethodHandlerExceptionResolver();
 
-	private MockHttpServletRequest request;
+	private final MockHttpServletRequest request = new MockHttpServletRequest("GET", "");
 
-	private MockHttpServletResponse response;
+	private final MockHttpServletResponse response = new MockHttpServletResponse();
 
-
-	@Before
-	public void setUp() {
-		exceptionResolver = new AnnotationMethodHandlerExceptionResolver();
-		request = new MockHttpServletRequest();
-		response = new MockHttpServletResponse();
-		request.setMethod("GET");
-	}
 
 	@Test
 	public void simpleWithIOException() {
@@ -101,6 +95,16 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 		assertNotNull("No ModelAndView returned", mav);
 		assertEquals("Invalid view name returned", "Y:BindException", mav.getViewName());
 		assertEquals("Invalid status code returned", 406, response.getStatus());
+	}
+
+	@Test
+	public void simpleWithNumberFormatExceptionAndComposedResponseStatusAnnotation() {
+		NumberFormatException ex = new NumberFormatException();
+		SimpleController controller = new SimpleController();
+		ModelAndView mav = exceptionResolver.resolveException(request, response, controller, ex);
+		assertNotNull("No ModelAndView returned", mav);
+		assertEquals("Invalid view name returned", "X:NumberFormatException", mav.getViewName());
+		assertEquals("Invalid status code returned", 400, response.getStatus());
 	}
 
 	@Test
@@ -155,6 +159,13 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 		assertNull(mav);
 	}
 
+	@ResponseStatus
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface ComposedResponseStatus {
+
+		@AliasFor(annotation = ResponseStatus.class, attribute = "code")
+		HttpStatus responseStatus() default HttpStatus.INTERNAL_SERVER_ERROR;
+	}
 
 	@Controller
 	private static class SimpleController {
@@ -162,18 +173,24 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 		@ExceptionHandler(IOException.class)
 		@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 		public String handleIOException(IOException ex, HttpServletRequest request) {
-			return "X:" + ClassUtils.getShortName(ex.getClass());
+			return "X:" + ex.getClass().getSimpleName();
 		}
 
 		@ExceptionHandler(SocketException.class)
-		@ResponseStatus(value = HttpStatus.NOT_ACCEPTABLE, reason = "This is simply unacceptable!")
+		@ResponseStatus(code = HttpStatus.NOT_ACCEPTABLE, reason = "This is simply unacceptable!")
 		public String handleSocketException(Exception ex, HttpServletResponse response) {
-			return "Y:" + ClassUtils.getShortName(ex.getClass());
+			return "Y:" + ex.getClass().getSimpleName();
 		}
 
 		@ExceptionHandler(IllegalArgumentException.class)
 		public String handleIllegalArgumentException(Exception ex) {
-			return ClassUtils.getShortName(ex.getClass());
+			return ex.getClass().getSimpleName();
+		}
+
+		@ExceptionHandler(NumberFormatException.class)
+		@ComposedResponseStatus(responseStatus = HttpStatus.BAD_REQUEST)
+		public String handleNumberFormatException(NumberFormatException ex) {
+			return "X:" + ex.getClass().getSimpleName();
 		}
 	}
 
@@ -194,12 +211,12 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 		@ExceptionHandler({BindException.class, IllegalArgumentException.class})
 		public String handle1(Exception ex, HttpServletRequest request, HttpServletResponse response)
 				throws IOException {
-			return ClassUtils.getShortName(ex.getClass());
+			return ex.getClass().getSimpleName();
 		}
 
 		@ExceptionHandler
 		public String handle2(IllegalArgumentException ex) {
-			return ClassUtils.getShortName(ex.getClass());
+			return ex.getClass().getSimpleName();
 		}
 	}
 
@@ -209,7 +226,7 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 
 		@ExceptionHandler(Exception.class)
 		public void handle(Exception ex, Writer writer) throws IOException {
-			writer.write(ClassUtils.getShortName(ex.getClass()));
+			writer.write(ex.getClass().getSimpleName());
 		}
 	}
 
@@ -220,7 +237,7 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 		@ExceptionHandler(Exception.class)
 		@ResponseBody
 		public String handle(Exception ex) {
-			return ClassUtils.getShortName(ex.getClass());
+			return ex.getClass().getSimpleName();
 		}
 	}
 

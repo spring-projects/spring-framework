@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,7 +80,12 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 /**
  * A test fixture with a controller with all supported method signature styles
@@ -101,6 +106,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 	private MockHttpServletRequest request;
 
 	private MockHttpServletResponse response;
+
 
 	@Before
 	public void setup() throws Exception {
@@ -123,6 +129,8 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		request = new MockHttpServletRequest();
 		response = new MockHttpServletResponse();
 
+		request.setMethod("POST");
+
 		// Expose request to the current thread (for SpEL expressions)
 		RequestContextHolder.setRequestAttributes(new ServletWebRequest(request));
 	}
@@ -131,6 +139,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 	public void teardown() {
 		RequestContextHolder.resetRequestAttributes();
 	}
+
 
 	@Test
 	public void handle() throws Exception {
@@ -212,6 +221,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 
 		Class<?>[] parameterTypes = new Class<?>[] { byte[].class };
 
+		request.setMethod("POST");
 		request.addHeader("Content-Type", "text/plain; charset=utf-8");
 		request.setContent("Hello Server".getBytes("UTF-8"));
 
@@ -353,14 +363,14 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 			return "viewName";
 		}
 
-		@ResponseStatus(value=HttpStatus.ACCEPTED)
+		@ResponseStatus(HttpStatus.ACCEPTED)
 		@ResponseBody
 		public String handleRequestBody(@RequestBody byte[] bytes) throws Exception {
 			String requestBody = new String(bytes, "UTF-8");
 			return "Handled requestBody=[" + requestBody + "]";
 		}
 
-		@ResponseStatus(value=HttpStatus.ACCEPTED)
+		@ResponseStatus(code = HttpStatus.ACCEPTED)
 		@ResponseBody
 		public String handleAndValidateRequestBody(@Valid TestBean modelAttr, Errors errors) throws Exception {
 			return "Error count [" + errors.getErrorCount() + "]";

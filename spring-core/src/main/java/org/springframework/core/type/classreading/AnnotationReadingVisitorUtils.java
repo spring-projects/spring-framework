@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,10 @@ import org.springframework.asm.Type;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.ObjectUtils;
 
 /**
- * Internal utility class used when reading annotations.
+ * Internal utility class used when reading annotations via ASM.
  *
  * @author Juergen Hoeller
  * @author Mark Fisher
@@ -61,15 +62,15 @@ abstract class AnnotationReadingVisitorUtils {
 					}
 				}
 				else if (value instanceof Type) {
-					value = (classValuesAsString ? ((Type) value).getClassName()
-							: classLoader.loadClass(((Type) value).getClassName()));
+					value = (classValuesAsString ? ((Type) value).getClassName() :
+							classLoader.loadClass(((Type) value).getClassName()));
 				}
 				else if (value instanceof Type[]) {
 					Type[] array = (Type[]) value;
 					Object[] convArray = (classValuesAsString ? new String[array.length] : new Class<?>[array.length]);
 					for (int i = 0; i < array.length; i++) {
-						convArray[i] = (classValuesAsString ? array[i].getClassName()
-								: classLoader.loadClass(array[i].getClassName()));
+						convArray[i] = (classValuesAsString ? array[i].getClassName() :
+								classLoader.loadClass(array[i].getClassName()));
 					}
 					value = convArray;
 				}
@@ -89,8 +90,8 @@ abstract class AnnotationReadingVisitorUtils {
 				result.put(entry.getKey(), value);
 			}
 			catch (Exception ex) {
-				// Class not found - can't resolve class reference in annotation
-				// attribute.
+				// Class not found - can't resolve class reference in annotation attribute.
+				result.put(entry.getKey(), ex);
 			}
 		}
 		return result;
@@ -102,21 +103,22 @@ abstract class AnnotationReadingVisitorUtils {
 	 * <p>Annotation attribute values appearing <em>lower</em> in the annotation
 	 * hierarchy (i.e., closer to the declaring class) will override those
 	 * defined <em>higher</em> in the annotation hierarchy.
-	 * @param attributesMap the map of annotation attribute lists,
-	 * keyed by annotation type name
+	 * @param attributesMap the map of annotation attribute lists, keyed by
+	 * annotation type name
 	 * @param metaAnnotationMap the map of meta annotation relationships,
 	 * keyed by annotation type name
-	 * @param annotationType the name of the annotation type to look for
+	 * @param annotationName the fully qualified class name of the annotation
+	 * type to look for
 	 * @return the merged annotation attributes, or {@code null} if no
 	 * matching annotation is present in the {@code attributesMap}
 	 * @since 4.0.3
 	 */
 	public static AnnotationAttributes getMergedAnnotationAttributes(
 			LinkedMultiValueMap<String, AnnotationAttributes> attributesMap,
-			Map<String, Set<String>> metaAnnotationMap, String annotationType) {
+			Map<String, Set<String>> metaAnnotationMap, String annotationName) {
 
 		// Get the unmerged list of attributes for the target annotation.
-		List<AnnotationAttributes> attributesList = attributesMap.get(annotationType);
+		List<AnnotationAttributes> attributesList = attributesMap.get(annotationName);
 		if (attributesList == null || attributesList.isEmpty()) {
 			return null;
 		}
@@ -137,13 +139,13 @@ abstract class AnnotationReadingVisitorUtils {
 		Collections.reverse(annotationTypes);
 
 		// No need to revisit the target annotation type:
-		annotationTypes.remove(annotationType);
+		annotationTypes.remove(annotationName);
 
 		for (String currentAnnotationType : annotationTypes) {
 			List<AnnotationAttributes> currentAttributesList = attributesMap.get(currentAnnotationType);
-			if (currentAttributesList != null && !currentAttributesList.isEmpty()) {
+			if (!ObjectUtils.isEmpty(currentAttributesList)) {
 				Set<String> metaAnns = metaAnnotationMap.get(currentAnnotationType);
-				if (metaAnns != null && metaAnns.contains(annotationType)) {
+				if (metaAnns != null && metaAnns.contains(annotationName)) {
 					AnnotationAttributes currentAttributes = currentAttributesList.get(0);
 					for (String overridableAttributeName : overridableAttributeNames) {
 						Object value = currentAttributes.get(overridableAttributeName);

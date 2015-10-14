@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -89,7 +89,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		UserRoleAuthorizationInterceptor interceptor5 = new UserRoleAuthorizationInterceptor();
 		interceptor5.setAuthorizedRoles(new String[] {"role1", "role2"});
 
-		List interceptors = new ArrayList();
+		List<Object> interceptors = new ArrayList<>();
 		interceptors.add(interceptor5);
 		interceptors.add(interceptor1);
 		interceptors.add(interceptor2);
@@ -158,7 +158,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 		pvs = new MutablePropertyValues();
 		pvs.add("order", "0");
 		pvs.add("exceptionMappings", "java.lang.Exception=failed1");
-		List mappedHandlers = new ManagedList();
+		List<RuntimeBeanReference> mappedHandlers = new ManagedList<RuntimeBeanReference>();
 		mappedHandlers.add(new RuntimeBeanReference("anotherLocaleHandler"));
 		pvs.add("mappedHandlers", mappedHandlers);
 		pvs.add("defaultStatusCode", "500");
@@ -397,6 +397,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 	public static class ComplexLocaleChecker implements MyHandler {
 
 		@Override
+		@SuppressWarnings("deprecation")
 		public void doSomething(HttpServletRequest request) throws ServletException, IllegalAccessException {
 			WebApplicationContext wac = RequestContextUtils.getWebApplicationContext(request);
 			if (!(wac instanceof ComplexWebApplicationContext)) {
@@ -460,7 +461,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 
 		@Override
 		public long lastModified() {
-			return 99;
+			return 1427846401000L;
 		}
 	}
 
@@ -506,7 +507,7 @@ public class ComplexWebApplicationContext extends StaticWebApplicationContext {
 	}
 
 
-	public static class TestApplicationListener implements ApplicationListener {
+	public static class TestApplicationListener implements ApplicationListener<ApplicationEvent> {
 
 		public int counter = 0;
 

@@ -16,8 +16,8 @@
 
 package org.springframework.test.context.transaction.ejb;
 
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.transaction.TransactionConfiguration;
 import org.springframework.test.context.transaction.TransactionalTestExecutionListener;
 import org.springframework.test.context.transaction.ejb.dao.RequiredEjbTxTestEntityDao;
 
@@ -31,7 +31,7 @@ import org.springframework.test.context.transaction.ejb.dao.RequiredEjbTxTestEnt
  * @since 4.0.1
  */
 @ContextConfiguration("required-tx-config.xml")
-@TransactionConfiguration(defaultRollback = false)
+@Commit
 public class CommitForRequiredEjbTxDaoTests extends AbstractEjbTxDaoTests {
 
 	/* test methods in superclass */

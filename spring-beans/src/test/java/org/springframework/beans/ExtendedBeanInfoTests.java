@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.math.BigDecimal;
 
 import org.junit.Test;
 
-import org.springframework.core.JdkVersion;
 import org.springframework.tests.sample.beans.TestBean;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -138,7 +137,7 @@ public class ExtendedBeanInfoTests {
 
 		assertThat(hasReadMethodForProperty(bi, "foo"), is(true));
 		assertThat(hasWriteMethodForProperty(bi, "foo"), is(false));
-		assertThat(hasIndexedWriteMethodForProperty(bi, "foo"), is(trueUntilJdk17()));
+		assertThat(hasIndexedWriteMethodForProperty(bi, "foo"), is(false));
 
 		BeanInfo ebi = new ExtendedBeanInfo(bi);
 
@@ -484,7 +483,7 @@ public class ExtendedBeanInfoTests {
 
 		assertThat(hasIndexedReadMethodForProperty(bi, "foos"), is(true));
 		// interesting! standard Inspector picks up non-void return types on indexed write methods by default
-		assertThat(hasIndexedWriteMethodForProperty(bi, "foos"), is(trueUntilJdk17()));
+		assertThat(hasIndexedWriteMethodForProperty(bi, "foos"), is(false));
 
 		BeanInfo ebi = new ExtendedBeanInfo(Introspector.getBeanInfo(C.class));
 
@@ -509,13 +508,13 @@ public class ExtendedBeanInfoTests {
 		assertThat(hasIndexedReadMethodForProperty(bi, "foos"), is(true));
 		assertThat(hasWriteMethodForProperty(bi, "foos"), is(false));
 		// again as above, standard Inspector picks up non-void return types on indexed write methods by default
-		assertThat(hasIndexedWriteMethodForProperty(bi, "foos"), is(trueUntilJdk17()));
+		assertThat(hasIndexedWriteMethodForProperty(bi, "foos"), is(false));
 
 		BeanInfo ebi = new ExtendedBeanInfo(Introspector.getBeanInfo(C.class));
 
 		assertThat(hasIndexedReadMethodForProperty(bi, "foos"), is(true));
 		assertThat(hasWriteMethodForProperty(bi, "foos"), is(false));
-		assertThat(hasIndexedWriteMethodForProperty(bi, "foos"), is(trueUntilJdk17()));
+		assertThat(hasIndexedWriteMethodForProperty(bi, "foos"), is(false));
 
 		assertThat(hasIndexedReadMethodForProperty(ebi, "foos"), is(true));
 		assertThat(hasWriteMethodForProperty(ebi, "foos"), is(true));
@@ -719,19 +718,19 @@ public class ExtendedBeanInfoTests {
 		assertThat(hasReadMethodForProperty(bi, "dateFormat"), is(false));
 		assertThat(hasWriteMethodForProperty(bi, "dateFormat"), is(false));
 		assertThat(hasIndexedReadMethodForProperty(bi, "dateFormat"), is(false));
-		assertThat(hasIndexedWriteMethodForProperty(bi, "dateFormat"), is(trueUntilJdk17()));
+		assertThat(hasIndexedWriteMethodForProperty(bi, "dateFormat"), is(false));
 
 		BeanInfo ebi = new ExtendedBeanInfo(bi);
 
 		assertThat(hasReadMethodForProperty(bi, "dateFormat"), is(false));
 		assertThat(hasWriteMethodForProperty(bi, "dateFormat"), is(false));
 		assertThat(hasIndexedReadMethodForProperty(bi, "dateFormat"), is(false));
-		assertThat(hasIndexedWriteMethodForProperty(bi, "dateFormat"), is(trueUntilJdk17()));
+		assertThat(hasIndexedWriteMethodForProperty(bi, "dateFormat"), is(false));
 
 		assertThat(hasReadMethodForProperty(ebi, "dateFormat"), is(false));
 		assertThat(hasWriteMethodForProperty(ebi, "dateFormat"), is(true));
 		assertThat(hasIndexedReadMethodForProperty(ebi, "dateFormat"), is(false));
-		assertThat(hasIndexedWriteMethodForProperty(ebi, "dateFormat"), is(trueUntilJdk17()));
+		assertThat(hasIndexedWriteMethodForProperty(ebi, "dateFormat"), is(false));
 	}
 
 	@Test
@@ -926,10 +925,6 @@ public class ExtendedBeanInfoTests {
 			}
 		}
 		return false;
-	}
-
-	private boolean trueUntilJdk17() {
-		return JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_17;
 	}
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,6 +135,16 @@ public class MessageBrokerRegistry {
 
 	protected String getUserDestinationPrefix() {
 		return this.userDestinationPrefix;
+	}
+
+	protected String getUserDestinationBroadcast() {
+		return (this.brokerRelayRegistration != null ?
+				this.brokerRelayRegistration.getUserDestinationBroadcast() : null);
+	}
+
+	protected String getUserRegistryBroadcast() {
+		return (this.brokerRelayRegistration != null ?
+				this.brokerRelayRegistration.getUserRegistryBroadcast() : null);
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,6 +66,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.context.ServletContextAware;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.support.CompositeUriComponentsContributor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
@@ -83,7 +84,9 @@ import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.JsonViewRequestBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBodyAdvice;
+import org.springframework.web.servlet.mvc.method.annotation.RequestBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
@@ -198,6 +201,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
 	private List<HttpMessageConverter<?>> messageConverters;
 
+	private Map<String, CorsConfiguration> corsConfigurations;
+
 
 	/**
 	 * Set the Spring {@link ApplicationContext}, e.g. for resource loading.
@@ -205,6 +210,10 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) {
 		this.applicationContext = applicationContext;
+	}
+
+	public ApplicationContext getApplicationContext() {
+		return this.applicationContext;
 	}
 
 	/**
@@ -216,6 +225,9 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		this.servletContext = servletContext;
 	}
 
+	public ServletContext getServletContext() {
+		return this.servletContext;
+	}
 
 	/**
 	 * Return a {@link RequestMappingHandlerMapping} ordered at 0 for mapping
@@ -223,10 +235,11 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public RequestMappingHandlerMapping requestMappingHandlerMapping() {
-		RequestMappingHandlerMapping handlerMapping = new RequestMappingHandlerMapping();
+		RequestMappingHandlerMapping handlerMapping = createRequestMappingHandlerMapping();
 		handlerMapping.setOrder(0);
 		handlerMapping.setInterceptors(getInterceptors());
 		handlerMapping.setContentNegotiationManager(mvcContentNegotiationManager());
+		handlerMapping.setCorsConfigurations(getCorsConfigurations());
 
 		PathMatchConfigurer configurer = getPathMatchConfigurer();
 		if (configurer.isUseSuffixPatternMatch() != null) {
@@ -246,6 +259,14 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		}
 
 		return handlerMapping;
+	}
+
+	/**
+	 * Protected method for plugging in a custom sub-class of
+	 * {@link RequestMappingHandlerMapping}.
+	 */
+	protected RequestMappingHandlerMapping createRequestMappingHandlerMapping() {
+		return new RequestMappingHandlerMapping();
 	}
 
 	/**
@@ -350,6 +371,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		handlerMapping.setPathMatcher(mvcPathMatcher());
 		handlerMapping.setUrlPathHelper(mvcUrlPathHelper());
 		handlerMapping.setInterceptors(getInterceptors());
+		handlerMapping.setCorsConfigurations(getCorsConfigurations());
 		return handlerMapping;
 	}
 
@@ -369,6 +391,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		BeanNameUrlHandlerMapping mapping = new BeanNameUrlHandlerMapping();
 		mapping.setOrder(2);
 		mapping.setInterceptors(getInterceptors());
+		mapping.setCorsConfigurations(getCorsConfigurations());
 		return mapping;
 	}
 
@@ -388,6 +411,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			handlerMapping.setUrlPathHelper(mvcUrlPathHelper());
 			handlerMapping.setInterceptors(new HandlerInterceptor[] {
 					new ResourceUrlProviderExposingInterceptor(mvcResourceUrlProvider())});
+			handlerMapping.setCorsConfigurations(getCorsConfigurations());
 		}
 		else {
 			handlerMapping = new EmptyHandlerMapping();
@@ -463,9 +487,13 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		adapter.setCustomReturnValueHandlers(returnValueHandlers);
 
 		if (jackson2Present) {
-			List<ResponseBodyAdvice<?>> interceptors = new ArrayList<ResponseBodyAdvice<?>>();
-			interceptors.add(new JsonViewResponseBodyAdvice());
-			adapter.setResponseBodyAdvice(interceptors);
+			List<RequestBodyAdvice> requestBodyAdvices = new ArrayList<RequestBodyAdvice>();
+			requestBodyAdvices.add(new JsonViewRequestBodyAdvice());
+			adapter.setRequestBodyAdvice(requestBodyAdvices);
+
+			List<ResponseBodyAdvice<?>> responseBodyAdvices = new ArrayList<ResponseBodyAdvice<?>>();
+			responseBodyAdvices.add(new JsonViewResponseBodyAdvice());
+			adapter.setResponseBodyAdvice(responseBodyAdvices);
 		}
 
 		AsyncSupportConfigurer configurer = new AsyncSupportConfigurer();
@@ -840,6 +868,26 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * @see ViewResolverRegistry
 	 */
 	protected void configureViewResolvers(ViewResolverRegistry registry) {
+	}
+
+	/**
+	 * @since 4.2
+	 */
+	protected final Map<String, CorsConfiguration> getCorsConfigurations() {
+		if (this.corsConfigurations == null) {
+			CorsRegistry registry = new CorsRegistry();
+			addCorsMappings(registry);
+			this.corsConfigurations = registry.getCorsConfigurations();
+		}
+		return this.corsConfigurations;
+	}
+
+	/**
+	 * Override this method to configure cross origin requests processing.
+	 * @since 4.2
+	 * @see CorsRegistry
+	 */
+	protected void addCorsMappings(CorsRegistry registry) {
 	}
 
 

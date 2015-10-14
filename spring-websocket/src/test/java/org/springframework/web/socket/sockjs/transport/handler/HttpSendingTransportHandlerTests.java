@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,9 +62,9 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 		setRequest("POST", "/");
 	}
 
+
 	@Test
 	public void handleRequestXhr() throws Exception {
-
 		XhrPollingTransportHandler transportHandler = new XhrPollingTransportHandler();
 		transportHandler.initialize(this.sockJsConfig);
 
@@ -91,7 +91,6 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 
 	@Test
 	public void jsonpTransport() throws Exception {
-
 		JsonpPollingTransportHandler transportHandler = new JsonpPollingTransportHandler();
 		transportHandler.initialize(this.sockJsConfig);
 		PollingSockJsSession session = transportHandler.createSession("1", this.webSocketHandler, null);
@@ -114,7 +113,6 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 
 	@Test
 	public void handleRequestXhrStreaming() throws Exception {
-
 		XhrStreamingTransportHandler transportHandler = new XhrStreamingTransportHandler();
 		transportHandler.initialize(this.sockJsConfig);
 		AbstractSockJsSession session = transportHandler.createSession("1", this.webSocketHandler, null);
@@ -128,7 +126,6 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 
 	@Test
 	public void htmlFileTransport() throws Exception {
-
 		HtmlFileTransportHandler transportHandler = new HtmlFileTransportHandler();
 		transportHandler.initialize(this.sockJsConfig);
 		StreamingSockJsSession session = transportHandler.createSession("1", this.webSocketHandler, null);
@@ -151,7 +148,6 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 
 	@Test
 	public void eventSourceTransport() throws Exception {
-
 		EventSourceTransportHandler transportHandler = new EventSourceTransportHandler();
 		transportHandler.initialize(this.sockJsConfig);
 		StreamingSockJsSession session = transportHandler.createSession("1", this.webSocketHandler, null);
@@ -165,7 +161,6 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 
 	@Test
 	public void frameFormats() throws Exception {
-
 		this.servletRequest.setQueryString("c=callback");
 		this.servletRequest.addParameter("c", "callback");
 

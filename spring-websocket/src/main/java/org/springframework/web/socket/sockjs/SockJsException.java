@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,15 +30,30 @@ public class SockJsException extends NestedRuntimeException {
 	private final String sessionId;
 
 
+	/**
+	 * Constructor for SockJsException.
+	 * @param message the exception message
+	 * @param cause the root cause
+	 */
 	public SockJsException(String message, Throwable cause) {
 		this(message, null, cause);
 	}
 
+	/**
+	 * Constructor for SockJsException.
+	 * @param message the exception message
+	 * @param sessionId the SockJS session id
+	 * @param cause the root cause
+	 */
 	public SockJsException(String message, String sessionId, Throwable cause) {
 		super(message, cause);
 		this.sessionId = sessionId;
 	}
 
+
+	/**
+	 * Return the SockJS session id.
+	 */
 	public String getSockJsSessionId() {
 		return this.sessionId;
 	}

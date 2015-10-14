@@ -117,4 +117,19 @@ public class PathResourceResolverTests {
 		assertNotNull(this.resolver.resolveResource(null, "main.css", Arrays.asList(location), null));
 	}
 
+	// SPR-12747
+	@Test
+	public void checkFileLocation() throws Exception {
+		Resource resource = new ClassPathResource("test/main.css", PathResourceResolver.class);
+		assertTrue(this.resolver.checkResource(resource, resource));
+	}
+
+	// SPR-13241
+	@Test
+	public void resolvePathRootResource() throws Exception {
+		Resource webjarsLocation = new ClassPathResource("/META-INF/resources/webjars/", PathResourceResolver.class);
+		String path = this.resolver.resolveUrlPathInternal("", Arrays.asList(webjarsLocation), null);
+
+		assertNull(path);
+	}
 }

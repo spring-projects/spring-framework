@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.test.context.support;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.test.context.TestPropertySource;
@@ -58,18 +57,17 @@ class TestPropertySourceAttributes {
 
 	/**
 	 * Create a new {@code TestPropertySourceAttributes} instance for the
-	 * supplied {@link AnnotationAttributes} (parsed from a
-	 * {@link TestPropertySource @TestPropertySource} annotation) and
-	 * the {@linkplain Class test class} that declared them, enforcing
+	 * supplied {@link TestPropertySource @TestPropertySource} annotation and
+	 * the {@linkplain Class test class} that declared it, enforcing
 	 * configuration rules and detecting a default properties file if
 	 * necessary.
 	 * @param declaringClass the class that declared {@code @TestPropertySource}
-	 * @param annAttrs the annotation attributes from which to retrieve the attributes
+	 * @param testPropertySource the annotation from which to retrieve the attributes
+	 * @since 4.2
 	 */
-	TestPropertySourceAttributes(Class<?> declaringClass, AnnotationAttributes annAttrs) {
-		this(declaringClass, resolveLocations(declaringClass, annAttrs.getStringArray("locations"),
-			annAttrs.getStringArray("value")), annAttrs.getBoolean("inheritLocations"),
-			annAttrs.getStringArray("properties"), annAttrs.getBoolean("inheritProperties"));
+	TestPropertySourceAttributes(Class<?> declaringClass, TestPropertySource testPropertySource) {
+		this(declaringClass, testPropertySource.locations(), testPropertySource.inheritLocations(),
+			testPropertySource.properties(), testPropertySource.inheritProperties());
 	}
 
 	private TestPropertySourceAttributes(Class<?> declaringClass, String[] locations, boolean inheritLocations,
@@ -154,31 +152,6 @@ class TestPropertySourceAttributes {
 		.append("properties", ObjectUtils.nullSafeToString(properties))//
 		.append("inheritProperties", inheritProperties)//
 		.toString();
-	}
-
-	/**
-	 * Resolve resource locations from the supplied {@code locations} and
-	 * {@code value} arrays, which correspond to attributes of the same names in
-	 * the {@link TestPropertySource} annotation.
-	 *
-	 * @throws IllegalStateException if both the locations and value attributes have been declared
-	 */
-	private static String[] resolveLocations(Class<?> declaringClass, String[] locations, String[] value) {
-		Assert.notNull(declaringClass, "declaringClass must not be null");
-
-		if (!ObjectUtils.isEmpty(value) && !ObjectUtils.isEmpty(locations)) {
-			String msg = String.format("Class [%s] has been configured with @TestPropertySource's 'value' [%s] "
-					+ "and 'locations' [%s] attributes. Only one declaration of resource "
-					+ "locations is permitted per @TestPropertySource annotation.", declaringClass.getName(),
-				ObjectUtils.nullSafeToString(value), ObjectUtils.nullSafeToString(locations));
-			logger.error(msg);
-			throw new IllegalStateException(msg);
-		}
-		else if (!ObjectUtils.isEmpty(value)) {
-			locations = value;
-		}
-
-		return locations;
 	}
 
 	/**

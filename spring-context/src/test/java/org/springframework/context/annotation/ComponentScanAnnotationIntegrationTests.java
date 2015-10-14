@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import example.scannable.FooService;
 import example.scannable.MessageBean;
 import example.scannable.ScopedProxyTestBean;
 import example.scannable_implicitbasepackage.ComponentScanAnnotatedConfigWithImplicitBasePackage;
+import example.scannable_implicitbasepackage.ConfigurableComponent;
 import example.scannable_scoped.CustomScopeAnnotationBean;
 import example.scannable_scoped.MyScope;
 import org.junit.Test;
@@ -107,6 +108,7 @@ public class ComponentScanAnnotationIntegrationTests {
 		assertThat("@ComponentScan annotated @Configuration class registered directly against " +
 				"AnnotationConfigApplicationContext did not trigger component scanning as expected",
 				ctx.containsBean("scannedComponent"), is(true));
+		assertThat("@Bean method overrides scanned class", ctx.getBean(ConfigurableComponent.class).isFlag(), is(true));
 	}
 
 	@Test
@@ -294,11 +296,12 @@ class MyScopeMetadataResolver extends AnnotationScopeMetadataResolver {
 }
 
 @Configuration
-@ComponentScan(basePackages="org.springframework.context.annotation",
+@ComponentScan(
+		basePackages="org.springframework.context.annotation",
 		useDefaultFilters=false,
-		includeFilters=@Filter(type=FilterType.CUSTOM, value=ComponentScanParserTests.CustomTypeFilter.class),
+		includeFilters = @Filter(type = FilterType.CUSTOM, classes = ComponentScanParserTests.CustomTypeFilter.class),
 		// exclude this class from scanning since it's in the scanned package
-		excludeFilters=@Filter(type=FilterType.ASSIGNABLE_TYPE, value=ComponentScanWithCustomTypeFilter.class),
+		excludeFilters = @Filter(type = FilterType.ASSIGNABLE_TYPE, classes = ComponentScanWithCustomTypeFilter.class),
 		lazyInit = true)
 class ComponentScanWithCustomTypeFilter {
 	@Bean
@@ -318,7 +321,7 @@ class ComponentScanWithCustomTypeFilter {
 @ComponentScan(basePackages="example.scannable",
 		scopedProxy=ScopedProxyMode.INTERFACES,
 		useDefaultFilters=false,
-		includeFilters=@Filter(type=FilterType.ASSIGNABLE_TYPE, value=ScopedProxyTestBean.class))
+		includeFilters = @Filter(type = FilterType.ASSIGNABLE_TYPE, classes = ScopedProxyTestBean.class))
 class ComponentScanWithScopedProxy {}
 
 @Configuration

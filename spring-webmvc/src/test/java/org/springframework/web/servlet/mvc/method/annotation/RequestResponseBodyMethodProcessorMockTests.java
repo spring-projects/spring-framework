@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,15 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import java.io.IOException;
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -48,9 +51,6 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerMapping;
-
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.*;
 
 /**
  * Test fixture for {@link RequestResponseBodyMethodProcessor} delegating to a
@@ -81,7 +81,6 @@ public class RequestResponseBodyMethodProcessorMockTests {
 
 	private MockHttpServletRequest servletRequest;
 
-	private MockHttpServletResponse servletResponse;
 
 	@SuppressWarnings("unchecked")
 	@Before
@@ -103,8 +102,8 @@ public class RequestResponseBodyMethodProcessorMockTests {
 		mavContainer = new ModelAndViewContainer();
 
 		servletRequest = new MockHttpServletRequest();
-		servletResponse = new MockHttpServletResponse();
-		webRequest = new ServletWebRequest(servletRequest, servletResponse);
+		servletRequest.setMethod("POST");
+		webRequest = new ServletWebRequest(servletRequest, new MockHttpServletResponse());
 	}
 
 	@Test
@@ -154,7 +153,7 @@ public class RequestResponseBodyMethodProcessorMockTests {
 		testResolveArgumentWithValidation(new SimpleBean("name"));
 	}
 
-	private void testResolveArgumentWithValidation(SimpleBean simpleBean) throws IOException, Exception {
+	private void testResolveArgumentWithValidation(SimpleBean simpleBean) throws Exception {
 		MediaType contentType = MediaType.TEXT_PLAIN;
 		servletRequest.addHeader("Content-Type", contentType.toString());
 		servletRequest.setContent("payload".getBytes(Charset.forName("UTF-8")));
@@ -180,16 +179,11 @@ public class RequestResponseBodyMethodProcessorMockTests {
 		processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, null);
 	}
 
-	@Test
+	@Test(expected = HttpMediaTypeNotSupportedException.class)
 	public void resolveArgumentNoContentType() throws Exception {
 		servletRequest.setContent("payload".getBytes(Charset.forName("UTF-8")));
 		given(messageConverter.canRead(String.class, MediaType.APPLICATION_OCTET_STREAM)).willReturn(false);
-		try {
-			processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, null);
-			fail("Expected exception");
-		}
-		catch (HttpMediaTypeNotSupportedException ex) {
-		}
+		processor.resolveArgument(paramRequestBodyString, mavContainer, webRequest, null);
 	}
 
 	@Test(expected = HttpMediaTypeNotSupportedException.class)
@@ -212,7 +206,26 @@ public class RequestResponseBodyMethodProcessorMockTests {
 
 	@Test
 	public void resolveArgumentNotRequiredNoContent() throws Exception {
+		servletRequest.setContentType("text/plain");
 		servletRequest.setContent(new byte[0]);
+		given(messageConverter.canRead(String.class, MediaType.TEXT_PLAIN)).willReturn(true);
+		assertNull(processor.resolveArgument(paramStringNotRequired, mavContainer, webRequest, new ValidatingBinderFactory()));
+	}
+
+	// SPR-13417
+	@Test
+	public void resolveArgumentNotRequiredNoContentNoContentType() throws Exception {
+		servletRequest.setContent(new byte[0]);
+		given(messageConverter.canRead(String.class, MediaType.TEXT_PLAIN)).willReturn(true);
+		given(messageConverter.canRead(String.class, MediaType.APPLICATION_OCTET_STREAM)).willReturn(false);
+		assertNull(processor.resolveArgument(paramStringNotRequired, mavContainer, webRequest, new ValidatingBinderFactory()));
+	}
+
+	@Test
+	public void resolveArgumentNotGetRequests() throws Exception {
+		servletRequest.setMethod("GET");
+		servletRequest.setContent(new byte[0]);
+		given(messageConverter.canRead(String.class, MediaType.APPLICATION_OCTET_STREAM)).willReturn(false);
 		assertNull(processor.resolveArgument(paramStringNotRequired, mavContainer, webRequest, new ValidatingBinderFactory()));
 	}
 
@@ -293,23 +306,28 @@ public class RequestResponseBodyMethodProcessorMockTests {
 	}
 
 
+	@SuppressWarnings("unused")
 	@ResponseBody
 	public String handle1(@RequestBody String s, int i) {
 		return s;
 	}
 
+	@SuppressWarnings("unused")
 	public int handle2() {
 		return 42;
 	}
 
+	@SuppressWarnings("unused")
 	@ResponseBody
 	public String handle3() {
 		return null;
 	}
 
+	@SuppressWarnings("unused")
 	public void handle4(@Valid @RequestBody SimpleBean b) {
 	}
 
+	@SuppressWarnings("unused")
 	public void handle5(@RequestBody(required=false) String s) {
 	}
 

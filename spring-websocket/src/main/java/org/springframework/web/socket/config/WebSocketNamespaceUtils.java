@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ class WebSocketNamespaceUtils {
 		return handlerRef;
 	}
 
-	public static RuntimeBeanReference registerSockJsService(Element element, String sockJsSchedulerName,
+	public static RuntimeBeanReference registerSockJsService(Element element, String schedulerName,
 			ParserContext context, Object source) {
 
 		Element sockJsElement = DomUtils.getChildElementByTagName(element, "sockjs");
@@ -79,7 +79,7 @@ class WebSocketNamespaceUtils {
 				scheduler = new RuntimeBeanReference(customTaskSchedulerName);
 			}
 			else {
-				scheduler = registerSockJsScheduler(sockJsSchedulerName, context, source);
+				scheduler = registerScheduler(schedulerName, context, source);
 			}
 			sockJsServiceDef.getConstructorArgumentValues().addIndexedArgumentValue(0, scheduler);
 
@@ -105,12 +105,8 @@ class WebSocketNamespaceUtils {
 			ManagedList<? super Object> interceptors = WebSocketNamespaceUtils.parseBeanSubElements(interceptorsElement, context);
 			String allowedOriginsAttribute = element.getAttribute("allowed-origins");
 			List<String> allowedOrigins = Arrays.asList(StringUtils.tokenizeToStringArray(allowedOriginsAttribute, ","));
-			if (!allowedOrigins.isEmpty()) {
-				sockJsServiceDef.getPropertyValues().add("allowedOrigins", allowedOrigins);
-				OriginHandshakeInterceptor interceptor = new OriginHandshakeInterceptor();
-				interceptor.setAllowedOrigins(allowedOrigins);
-				interceptors.add(interceptor);
-			}
+			sockJsServiceDef.getPropertyValues().add("allowedOrigins", allowedOrigins);
+			interceptors.add(new OriginHandshakeInterceptor(allowedOrigins));
 			sockJsServiceDef.getPropertyValues().add("handshakeInterceptors", interceptors);
 
 			String attrValue = sockJsElement.getAttribute("name");
@@ -141,6 +137,10 @@ class WebSocketNamespaceUtils {
 			if (!attrValue.isEmpty()) {
 				sockJsServiceDef.getPropertyValues().add("heartbeatTime", Long.valueOf(attrValue));
 			}
+			attrValue = sockJsElement.getAttribute("client-library-url");
+			if (!attrValue.isEmpty()) {
+				sockJsServiceDef.getPropertyValues().add("sockJsClientLibraryUrl", attrValue);
+			}
 			attrValue = sockJsElement.getAttribute("message-codec");
 			if (!attrValue.isEmpty()) {
 				sockJsServiceDef.getPropertyValues().add("messageCodec", new RuntimeBeanReference(attrValue));
@@ -156,7 +156,7 @@ class WebSocketNamespaceUtils {
 		return null;
 	}
 
-	private static RuntimeBeanReference registerSockJsScheduler(String schedulerName, ParserContext context, Object source) {
+	public static RuntimeBeanReference registerScheduler(String schedulerName, ParserContext context, Object source) {
 		if (!context.getRegistry().containsBeanDefinition(schedulerName)) {
 			RootBeanDefinition taskSchedulerDef = new RootBeanDefinition(ThreadPoolTaskScheduler.class);
 			taskSchedulerDef.setSource(source);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,18 +27,18 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
+import static org.hamcrest.MatcherAssert.*;
 import static org.springframework.test.util.AssertionErrors.*;
-import static org.springframework.test.util.MatcherAssertionErrors.*;
 
 /**
- * Factory for assertions on the selected handler. An instance of this class is
- * typically accessed via {@link MockMvcResultMatchers#handler()}.
+ * Factory for assertions on the selected handler.
+ * <p>An instance of this class is typically accessed via
+ * {@link MockMvcResultMatchers#handler}.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
  */
 public class HandlerResultMatchers {
-
 
 	/**
 	 * Protected constructor.
@@ -46,6 +46,7 @@ public class HandlerResultMatchers {
 	 */
 	protected HandlerResultMatchers() {
 	}
+
 
 	/**
 	 * Assert the type of the handler that processed the request.
@@ -68,7 +69,6 @@ public class HandlerResultMatchers {
 	/**
 	 * Assert the name of the controller method that processed the request with
 	 * the given Hamcrest {@link Matcher}.
-	 *
 	 * <p>Use of this method implies annotated controllers are processed with
 	 * {@link RequestMappingHandlerMapping} and {@link RequestMappingHandlerAdapter}.
 	 */
@@ -84,7 +84,6 @@ public class HandlerResultMatchers {
 
 	/**
 	 * Assert the name of the controller method that processed the request.
-	 *
 	 * <p>Use of this method implies annotated controllers are processed with
 	 * {@link RequestMappingHandlerMapping} and {@link RequestMappingHandlerAdapter}.
 	 */
@@ -100,7 +99,6 @@ public class HandlerResultMatchers {
 
 	/**
 	 * Assert the controller method that processed the request.
-	 *
 	 * <p>Use of this method implies annotated controllers are processed with
 	 * {@link RequestMappingHandlerMapping} and {@link RequestMappingHandlerAdapter}.
 	 */

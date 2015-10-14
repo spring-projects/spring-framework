@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -153,7 +153,7 @@ class ExtendedBeanInfo implements BeanInfo {
 		int nParams = parameterTypes.length;
 		return (methodName.length() > 3 && methodName.startsWith("set") && Modifier.isPublic(method.getModifiers()) &&
 				(!void.class.isAssignableFrom(method.getReturnType()) || Modifier.isStatic(method.getModifiers())) &&
-				(nParams == 1 || (nParams == 2 && parameterTypes[0].equals(int.class))));
+				(nParams == 1 || (nParams == 2 && int.class == parameterTypes[0])));
 	}
 
 	private void handleCandidateWriteMethod(Method method) throws IntrospectionException {

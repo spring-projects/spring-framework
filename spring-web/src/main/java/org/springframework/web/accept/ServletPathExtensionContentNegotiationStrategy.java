@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,43 +25,42 @@ import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.context.request.NativeWebRequest;
 
 /**
- * An extension of {@code PathExtensionContentNegotiationStrategy} that uses
- * {@link ServletContext#getMimeType(String)} as a fallback mechanism when
- * matching a path extension to a media type.
+ * Extends {@code PathExtensionContentNegotiationStrategy} that also uses
+ * {@link ServletContext#getMimeType(String)} to resolve file extensions.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public class ServletPathExtensionContentNegotiationStrategy extends PathExtensionContentNegotiationStrategy {
+public class ServletPathExtensionContentNegotiationStrategy
+		extends PathExtensionContentNegotiationStrategy {
 
 	private final ServletContext servletContext;
 
 
 	/**
 	 * Create an instance with the given extension-to-MediaType lookup.
-	 * @throws IllegalArgumentException if a media type string cannot be parsed
 	 */
-	public ServletPathExtensionContentNegotiationStrategy(
-			ServletContext servletContext, Map<String, MediaType> mediaTypes) {
+	public ServletPathExtensionContentNegotiationStrategy(ServletContext context,
+			Map<String, MediaType> mediaTypes) {
 
 		super(mediaTypes);
-		Assert.notNull(servletContext, "ServletContext is required!");
-		this.servletContext = servletContext;
+		Assert.notNull(context, "ServletContext is required!");
+		this.servletContext = context;
 	}
 
 	/**
 	 * Create an instance without any mappings to start with. Mappings may be
-	 * added later on if any extensions are resolved through
-	 * {@link ServletContext#getMimeType(String)} or through the Java Activation
-	 * framework.
+	 * added later when extensions are resolved through
+	 * {@link ServletContext#getMimeType(String)} or via JAF.
 	 */
-	public ServletPathExtensionContentNegotiationStrategy(ServletContext servletContext) {
-		this(servletContext, null);
+	public ServletPathExtensionContentNegotiationStrategy(ServletContext context) {
+		this(context, null);
 	}
 
+
 	/**
-	 * Look up the given extension via {@link ServletContext#getMimeType(String)}
-	 * and if that doesn't help, delegate to the parent implementation.
+	 * Resolve file extension via {@link ServletContext#getMimeType(String)}
+	 * and also delegate to base class for a potential JAF lookup.
 	 */
 	@Override
 	protected MediaType handleNoMatch(NativeWebRequest webRequest, String extension)

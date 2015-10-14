@@ -16,16 +16,19 @@
 
 package org.springframework.jmx.export.naming;
 
+import org.junit.Test;
+
 import javax.management.ObjectName;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
  */
-public abstract class AbstractNamingStrategyTests extends TestCase {
+public abstract class AbstractNamingStrategyTests {
 
-	public void testNaming() throws Exception {
+	@Test
+	public void naming() throws Exception {
 		ObjectNamingStrategy strat = getStrategy();
 		ObjectName objectName = strat.getObjectName(getManagedResource(), getKey());
 		assertEquals(objectName.getCanonicalName(), getCorrectObjectName());

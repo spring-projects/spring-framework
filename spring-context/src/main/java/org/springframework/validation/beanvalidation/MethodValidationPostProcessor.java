@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,12 +101,23 @@ public class MethodValidationPostProcessor extends AbstractAdvisingBeanPostProce
 		this.validator = validatorFactory.getValidator();
 	}
 
+
 	@Override
 	public void afterPropertiesSet() {
 		Pointcut pointcut = new AnnotationMatchingPointcut(this.validatedAnnotationType, true);
-		Advice advice = (this.validator != null ? new MethodValidationInterceptor(this.validator) :
-				new MethodValidationInterceptor());
-		this.advisor = new DefaultPointcutAdvisor(pointcut, advice);
+		this.advisor = new DefaultPointcutAdvisor(pointcut, createMethodValidationAdvice(this.validator));
+	}
+
+	/**
+	 * Create AOP advice for method validation purposes, to be applied
+	 * with a pointcut for the specified 'validated' annotation.
+	 * @param validator the JSR-303 Validator to delegate to
+	 * @return the interceptor to use (typically, but not necessarily,
+	 * a {@link MethodValidationInterceptor} or subclass thereof)
+	 * @since 4.2
+	 */
+	protected Advice createMethodValidationAdvice(Validator validator) {
+		return (validator != null ? new MethodValidationInterceptor(validator) : new MethodValidationInterceptor());
 	}
 
 }

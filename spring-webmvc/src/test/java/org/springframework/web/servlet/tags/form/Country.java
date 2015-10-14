@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.List;
  * @author Rob Harrop
  * @author Sam Brannen
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class Country {
 
 	public static final Country COUNTRY_AT = new Country("AT", "Austria");

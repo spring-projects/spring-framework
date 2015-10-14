@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -372,6 +372,21 @@ public class JavaMailSenderImpl implements JavaMailSender {
 		}
 	}
 
+	/**
+	 * Validate that this instance can connect to the server that it is configured
+	 * for. Throws a {@link MessagingException} if the connection attempt failed.
+	 */
+	public void testConnection() throws MessagingException {
+		Transport transport = null;
+		try {
+			transport = connectTransport();
+		}
+		finally {
+			if (transport != null) {
+				transport.close();
+			}
+		}
+	}
 
 	/**
 	 * Actually send the given array of MimeMessages via JavaMail.

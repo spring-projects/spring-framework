@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -215,6 +215,7 @@ public class YamlPropertiesFactoryBeanTests {
 		Properties properties = factory.getObject();
 		assertThat(properties.getProperty("foo[0]"), equalTo("bar"));
 		assertThat(properties.getProperty("foo[1]"), equalTo("baz"));
+		assertThat(properties.get("foo"), is(nullValue()));
 	}
 
 	@Test
@@ -229,6 +230,7 @@ public class YamlPropertiesFactoryBeanTests {
 		assertThat(properties.getProperty("foo[1]"), equalTo("baz"));
 		assertThat(properties.getProperty("foo[2].one"), equalTo("two"));
 		assertThat(properties.getProperty("foo[2].three"), equalTo("four"));
+		assertThat(properties.get("foo"), is(nullValue()));
 	}
 
 	@SuppressWarnings("unchecked")

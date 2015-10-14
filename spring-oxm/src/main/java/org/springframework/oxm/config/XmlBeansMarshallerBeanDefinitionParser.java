@@ -28,7 +28,9 @@ import org.springframework.util.StringUtils;
  *
  * @author Arjen Poutsma
  * @since 3.0
+ * @deprecated as of Spring 4.2, following the XMLBeans retirement at Apache
  */
+@Deprecated
 class XmlBeansMarshallerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
 	@Override

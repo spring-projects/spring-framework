@@ -128,4 +128,31 @@ public class TransactionAwareCacheDecoratorTests {
 		assertNull(target.get(key));
 	}
 
+	@Test
+	public void clearNonTransactional() {
+		Cache target = new ConcurrentMapCache("testCache");
+		Cache cache = new TransactionAwareCacheDecorator(target);
+		Object key = new Object();
+		cache.put(key, "123");
+
+		cache.clear();
+		assertNull(target.get(key));
+	}
+
+	@Test
+	public void clearTransactional() {
+		Cache target = new ConcurrentMapCache("testCache");
+		Cache cache = new TransactionAwareCacheDecorator(target);
+		Object key = new Object();
+		cache.put(key, "123");
+
+
+		TransactionStatus status = txManager.getTransaction(new DefaultTransactionAttribute(
+				TransactionDefinition.PROPAGATION_REQUIRED));
+		cache.clear();
+		assertEquals("123", target.get(key, String.class));
+		txManager.commit(status);
+
+		assertNull(target.get(key));
+	}
 }

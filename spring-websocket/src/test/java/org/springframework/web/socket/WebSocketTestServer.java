@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.web.socket;
 
 import javax.servlet.Filter;
+import javax.servlet.ServletContext;
 
 import org.springframework.web.context.WebApplicationContext;
 
@@ -24,6 +25,7 @@ import org.springframework.web.context.WebApplicationContext;
  * Contract for a test server to use for WebSocket integration tests.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public interface WebSocketTestServer {
 
@@ -32,6 +34,16 @@ public interface WebSocketTestServer {
 	void setup();
 
 	void deployConfig(WebApplicationContext cxt, Filter... filters);
+
+	/**
+	 * Get the {@link ServletContext} created by the underlying server.
+	 *
+	 * <p>The {@code ServletContext} is only guaranteed to be available
+	 * after {@link #deployConfig} has been invoked.
+	 *
+	 * @since 4.2
+	 */
+	ServletContext getServletContext();
 
 	void undeployConfig();
 

@@ -73,6 +73,7 @@ import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
 import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.JsonViewRequestBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.JsonViewResponseBodyAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
@@ -196,6 +197,9 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 
 		configurePathMatchingProperties(handlerMappingDef, element, parserContext);
 
+		RuntimeBeanReference corsConfigurationsRef = MvcNamespaceUtils.registerCorsConfigurations(null, parserContext, source);
+		handlerMappingDef.getPropertyValues().add("corsConfigurations", corsConfigurationsRef);
+
 		RuntimeBeanReference conversionService = getConversionService(element, source, parserContext);
 		RuntimeBeanReference validator = getValidator(element, source, parserContext);
 		RuntimeBeanReference messageCodesResolver = getMessageCodesResolver(element);
@@ -221,6 +225,7 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		handlerAdapterDef.getPropertyValues().add("contentNegotiationManager", contentNegotiationManager);
 		handlerAdapterDef.getPropertyValues().add("webBindingInitializer", bindingDef);
 		handlerAdapterDef.getPropertyValues().add("messageConverters", messageConverters);
+		addRequestBodyAdvice(handlerAdapterDef);
 		addResponseBodyAdvice(handlerAdapterDef);
 
 		if (element.hasAttribute("ignore-default-model-on-redirect")) {
@@ -306,6 +311,13 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 		parserContext.popAndRegisterContainingComponent();
 
 		return null;
+	}
+
+	protected void addRequestBodyAdvice(RootBeanDefinition beanDef) {
+		if (jackson2Present) {
+			beanDef.getPropertyValues().add("requestBodyAdvice",
+					new RootBeanDefinition(JsonViewRequestBodyAdvice.class));
+		}
 	}
 
 	protected void addResponseBodyAdvice(RootBeanDefinition beanDef) {

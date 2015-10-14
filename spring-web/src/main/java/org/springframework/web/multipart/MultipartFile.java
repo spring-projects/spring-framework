@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.springframework.core.io.InputStreamSource;
+
 /**
  * A representation of an uploaded file received in a multipart request.
  *
@@ -34,7 +36,7 @@ import java.io.InputStream;
  * @see org.springframework.web.multipart.MultipartHttpServletRequest
  * @see org.springframework.web.multipart.MultipartResolver
  */
-public interface MultipartFile {
+public interface MultipartFile extends InputStreamSource {
 
 	/**
 	 * Return the name of the parameter in the multipart form.
@@ -84,6 +86,7 @@ public interface MultipartFile {
 	 * @return the contents of the file as stream, or an empty stream if empty
 	 * @throws IOException in case of access errors (if the temporary store fails)
 	 */
+	@Override
 	InputStream getInputStream() throws IOException;
 
 	/**
@@ -94,6 +97,9 @@ public interface MultipartFile {
 	 * <p>If the file has been moved in the filesystem, this operation cannot
 	 * be invoked again. Therefore, call this method just once to be able to
 	 * work with any storage mechanism.
+	 * <p><strong>Note:</strong> when using Servlet 3.0 multipart support you
+	 * need to configure the location relative to which files will be copied
+	 * as explained in {@link javax.servlet.http.Part#write}.
 	 * @param dest the destination file
 	 * @throws IOException in case of reading or writing errors
 	 * @throws IllegalStateException if the file has already been moved

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,8 +33,11 @@ import static org.mockito.BDDMockito.*;
 public class JCacheCacheManagerTests extends AbstractTransactionSupportingCacheManagerTests<JCacheCacheManager> {
 
 	private CacheManagerMock cacheManagerMock;
+
 	private JCacheCacheManager cacheManager;
+
 	private JCacheCacheManager transactionalCacheManager;
+
 
 	@Before
 	public void setupOnce() {
@@ -55,7 +58,8 @@ public class JCacheCacheManagerTests extends AbstractTransactionSupportingCacheM
 	protected JCacheCacheManager getCacheManager(boolean transactionAware) {
 		if (transactionAware) {
 			return transactionalCacheManager;
-		} else {
+		}
+		else {
 			return cacheManager;
 		}
 	}
@@ -75,9 +79,11 @@ public class JCacheCacheManagerTests extends AbstractTransactionSupportingCacheM
 		cacheManagerMock.removeCache(cacheName);
 	}
 
+
 	private static class CacheManagerMock {
 
 		private final List<String> cacheNames;
+
 		private final CacheManager cacheManager;
 
 		private CacheManagerMock() {
@@ -103,4 +109,5 @@ public class JCacheCacheManagerTests extends AbstractTransactionSupportingCacheM
 			given(cacheManager.getCache(name)).willReturn(null);
 		}
 	}
+
 }

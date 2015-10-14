@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2008 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,10 +44,10 @@ public interface AliasRegistry {
 	/**
 	 * Determine whether this given name is defines as an alias
 	 * (as opposed to the name of an actually registered component).
-	 * @param beanName the bean name to check
+	 * @param name the name to check
 	 * @return whether the given name is an alias
 	 */
-	boolean isAlias(String beanName);
+	boolean isAlias(String name);
 
 	/**
 	 * Return the aliases for the given name, if defined.

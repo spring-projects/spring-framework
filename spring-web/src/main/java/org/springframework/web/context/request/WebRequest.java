@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import java.util.Map;
  * not for actual handling of the request.
  *
  * @author Juergen Hoeller
+ * @author Brian Clozel
  * @since 2.0
  * @see WebRequestInterceptor
  */
@@ -141,9 +142,12 @@ public interface WebRequest extends RequestAttributes {
 	 *   model.addAttribute(...);
 	 *   return "myViewName";
 	 * }</pre>
-	 * <p><strong>Note:</strong> that you typically want to use either
+	 * <p><strong>Note:</strong> you can use either
 	 * this {@code #checkNotModified(long)} method; or
-	 * {@link #checkNotModified(String)}, but not both.
+	 * {@link #checkNotModified(String)}. If you want enforce both
+	 * a strong entity tag and a Last-Modified value,
+	 * as recommended by the HTTP specification,
+	 * then you should use {@link #checkNotModified(String, long)}.
 	 * <p>If the "If-Modified-Since" header is set but cannot be parsed
 	 * to a date value, this method will ignore the header and proceed
 	 * with setting the last-modified timestamp on the response.
@@ -172,9 +176,12 @@ public interface WebRequest extends RequestAttributes {
 	 *   model.addAttribute(...);
 	 *   return "myViewName";
 	 * }</pre>
-	 * <p><strong>Note:</strong> that you typically want to use either
+	 * <p><strong>Note:</strong> you can use either
 	 * this {@code #checkNotModified(String)} method; or
-	 * {@link #checkNotModified(long)}, but not both.
+	 * {@link #checkNotModified(long)}. If you want enforce both
+	 * a strong entity tag and a Last-Modified value,
+	 * as recommended by the HTTP specification,
+	 * then you should use {@link #checkNotModified(String, long)}.
 	 * @param etag the entity tag that the application determined
 	 * for the underlying resource. This parameter will be padded
 	 * with quotes (") if necessary.
@@ -183,6 +190,41 @@ public interface WebRequest extends RequestAttributes {
 	 * telling the client that the content has not been modified
 	 */
 	boolean checkNotModified(String etag);
+
+	/**
+	 * Check whether the request qualifies as not modified given the
+	 * supplied {@code ETag} (entity tag) and last-modified timestamp,
+	 * as determined by the application.
+	 * <p>This will also transparently set the "ETag" and "Last-Modified"
+	 * response headers, for both the modified case and the not-modified case.
+	 * <p>Typical usage:
+	 * <pre class="code">
+	 * public String myHandleMethod(WebRequest webRequest, Model model) {
+	 *   String eTag = // application-specific calculation
+	 *   long lastModified = // application-specific calculation
+	 *   if (request.checkNotModified(eTag, lastModified)) {
+	 *     // shortcut exit - no further processing necessary
+	 *     return null;
+	 *   }
+	 *   // further request processing, actually building content
+	 *   model.addAttribute(...);
+	 *   return "myViewName";
+	 * }</pre>
+	 * <p><strong>Note:</strong> The HTTP specification recommends
+	 * setting both ETag and Last-Modified values, but you can also
+	 * use {@code #checkNotModified(String)} or
+	 * {@link #checkNotModified(long)}.
+	 * @param etag the entity tag that the application determined
+	 * for the underlying resource. This parameter will be padded
+	 * with quotes (") if necessary.
+	 * @param lastModifiedTimestamp the last-modified timestamp that
+	 * the application determined for the underlying resource
+	 * @return whether the request qualifies as not modified,
+	 * allowing to abort request processing and relying on the response
+	 * telling the client that the content has not been modified
+	 * @since 4.2
+	 */
+	boolean checkNotModified(String etag, long lastModifiedTimestamp);
 
 	/**
 	 * Get a short description of this request,

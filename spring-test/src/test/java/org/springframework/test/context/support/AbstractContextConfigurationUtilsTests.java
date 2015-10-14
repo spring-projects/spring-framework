@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -164,12 +164,12 @@ abstract class AbstractContextConfigurationUtilsTests {
 	}
 
 	@ContextConfiguration(locations = "/foo.xml", inheritLocations = false)
-	@ActiveProfiles(profiles = "foo")
+	@ActiveProfiles("foo")
 	static class LocationsFoo {
 	}
 
 	@ContextConfiguration(classes = FooConfig.class, inheritLocations = false)
-	@ActiveProfiles(profiles = "foo")
+	@ActiveProfiles("foo")
 	static class ClassesFoo {
 	}
 
@@ -198,14 +198,14 @@ abstract class AbstractContextConfigurationUtilsTests {
 	}
 
 	@ContextConfiguration(locations = "/foo.properties", loader = GenericPropertiesContextLoader.class)
-	@ActiveProfiles(profiles = "foo")
+	@ActiveProfiles("foo")
 	static class PropertiesLocationsFoo {
 	}
 
 	// Combining @Configuration classes with a Properties based loader doesn't really make
 	// sense, but that's OK for unit testing purposes.
 	@ContextConfiguration(classes = FooConfig.class, loader = GenericPropertiesContextLoader.class)
-	@ActiveProfiles(profiles = "foo")
+	@ActiveProfiles("foo")
 	static class PropertiesClassesFoo {
 	}
 

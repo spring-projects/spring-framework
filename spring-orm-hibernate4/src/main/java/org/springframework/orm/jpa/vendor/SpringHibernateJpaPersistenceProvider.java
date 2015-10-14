@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.orm.jpa.vendor;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceUnitInfo;
@@ -24,7 +26,6 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl;
 import org.hibernate.jpa.boot.internal.PersistenceUnitInfoDescriptor;
-import org.hibernate.service.ServiceRegistry;
 
 import org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo;
 
@@ -33,7 +34,7 @@ import org.springframework.orm.jpa.persistenceunit.SmartPersistenceUnitInfo;
  * from the {@code org.hibernate.jpa} package, adding support for
  * {@link SmartPersistenceUnitInfo#getManagedPackages()}.
  *
- * <p>Compatible with Hibernate 4.3. {@link SpringHibernateEjbPersistenceProvider}
+ * <p>Compatible with Hibernate 4.3-5.0. {@link SpringHibernateEjbPersistenceProvider}
  * is an alternative for compatibility with earlier Hibernate versions (3.6-4.2).
  *
  * @author Juergen Hoeller
@@ -45,19 +46,18 @@ class SpringHibernateJpaPersistenceProvider extends HibernatePersistenceProvider
 
 	@Override
 	@SuppressWarnings("rawtypes")
-	public EntityManagerFactory createContainerEntityManagerFactory(final PersistenceUnitInfo info, Map properties) {
-		return new EntityManagerFactoryBuilderImpl(new PersistenceUnitInfoDescriptor(info), properties) {
-			@Override
-			public Configuration buildHibernateConfiguration(ServiceRegistry serviceRegistry) {
-				Configuration configuration = super.buildHibernateConfiguration(serviceRegistry);
-				if (info instanceof SmartPersistenceUnitInfo) {
-					for (String managedPackage : ((SmartPersistenceUnitInfo) info).getManagedPackages()) {
-						configuration.addPackage(managedPackage);
+	public EntityManagerFactory createContainerEntityManagerFactory(PersistenceUnitInfo info, Map properties) {
+		final List<String> mergedClassesAndPackages = new ArrayList<String>(info.getManagedClassNames());
+		if (info instanceof SmartPersistenceUnitInfo) {
+			mergedClassesAndPackages.addAll(((SmartPersistenceUnitInfo) info).getManagedPackages());
+		}
+		return new EntityManagerFactoryBuilderImpl(
+				new PersistenceUnitInfoDescriptor(info) {
+					@Override
+					public List<String> getManagedClassNames() {
+						return mergedClassesAndPackages;
 					}
-				}
-				return configuration;
-			}
-		}.build();
+				}, properties).build();
 	}
 
 }

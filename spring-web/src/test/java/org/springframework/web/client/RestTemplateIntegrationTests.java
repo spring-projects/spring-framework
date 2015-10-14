@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,6 @@ import java.nio.charset.Charset;
 import java.util.EnumSet;
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonView;
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.io.ClassPathResource;
@@ -40,6 +38,8 @@ import org.springframework.http.converter.json.MappingJacksonValue;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import com.fasterxml.jackson.annotation.JsonView;
+
 import static org.junit.Assert.*;
 
 /**
@@ -47,12 +47,8 @@ import static org.junit.Assert.*;
  */
 public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 
-	private RestTemplate template;
+	private final RestTemplate template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
 
-	@Before
-	public void createTemplate() {
-		template = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
-	}
 
 	@Test
 	public void getString() {
@@ -177,6 +173,16 @@ public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 		parts.add("logo", logo);
 
 		template.postForLocation(baseUrl + "/multipart", parts);
+	}
+
+	@Test
+	public void form() throws UnsupportedEncodingException {
+		MultiValueMap<String, String> form = new LinkedMultiValueMap<String, String>();
+		form.add("name 1", "value 1");
+		form.add("name 2", "value 2+1");
+		form.add("name 2", "value 2+2");
+
+		template.postForLocation(baseUrl + "/form", form);
 	}
 
 	@Test

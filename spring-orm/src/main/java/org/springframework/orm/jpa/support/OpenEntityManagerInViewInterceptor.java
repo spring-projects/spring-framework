@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,9 +43,8 @@ import org.springframework.web.context.request.async.WebAsyncUtils;
  * or {@link org.springframework.transaction.jta.JtaTransactionManager} as well
  * as for non-transactional read-only execution.
  *
- * <p>In contrast to {@link OpenEntityManagerInViewFilter}, this interceptor
- * is set up in a Spring application context and can thus take advantage of
- * bean wiring.
+ * <p>In contrast to {@link OpenEntityManagerInViewFilter}, this interceptor is set
+ * up in a Spring application context and can thus take advantage of bean wiring.
  *
  * @author Juergen Hoeller
  * @since 2.0
@@ -67,7 +66,6 @@ public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAcce
 
 	@Override
 	public void preHandle(WebRequest request) throws DataAccessException {
-
 		String participateAttributeName = getParticipateAttributeName();
 
 		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
@@ -78,7 +76,7 @@ public class OpenEntityManagerInViewInterceptor extends EntityManagerFactoryAcce
 		}
 
 		if (TransactionSynchronizationManager.hasResource(getEntityManagerFactory())) {
-			// do not modify the EntityManager: just mark the request accordingly
+			// Do not modify the EntityManager: just mark the request accordingly.
 			Integer count = (Integer) request.getAttribute(participateAttributeName, WebRequest.SCOPE_REQUEST);
 			int newCount = (count != null ? count + 1 : 1);
 			request.setAttribute(getParticipateAttributeName(), newCount, WebRequest.SCOPE_REQUEST);

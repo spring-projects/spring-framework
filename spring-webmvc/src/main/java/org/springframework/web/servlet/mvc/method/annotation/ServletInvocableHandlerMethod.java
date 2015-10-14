@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -83,7 +83,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	private void initResponseStatus() {
 		ResponseStatus annotation = getMethodAnnotation(ResponseStatus.class);
 		if (annotation != null) {
-			this.responseStatus = annotation.value();
+			this.responseStatus = annotation.code();
 			this.responseReason = annotation.reason();
 		}
 	}
@@ -260,7 +260,19 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 		@Override
 		public Class<?> getParameterType() {
-			return (this.returnValue != null ? this.returnValue.getClass() : this.returnType.getRawClass());
+			if (this.returnValue != null) {
+				return this.returnValue.getClass();
+			}
+			Class<?> parameterType = super.getParameterType();
+			if (ResponseBodyEmitter.class.isAssignableFrom(parameterType) ||
+					StreamingResponseBody.class.isAssignableFrom(parameterType)) {
+				return parameterType;
+			}
+			if (ResolvableType.NONE.equals(this.returnType)) {
+				throw new IllegalArgumentException("Expected one of Callable, DeferredResult, or ListenableFuture: " +
+						super.getParameterType());
+			}
+			return this.returnType.getRawClass();
 		}
 
 		@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.aop.framework;
 
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 
 import org.springframework.aop.SpringProxy;
@@ -40,11 +41,11 @@ public abstract class AopProxyUtils {
 
 	/**
 	 * Determine the ultimate target class of the given bean instance, traversing
-	 * not only a top-level proxy but any number of nested proxies as well -
+	 * not only a top-level proxy but any number of nested proxies as well &mdash;
 	 * as long as possible without side effects, that is, just for singleton targets.
 	 * @param candidate the instance to check (might be an AOP proxy)
-	 * @return the target class (or the plain class of the given object as fallback;
-	 * never {@code null})
+	 * @return the ultimate target class (or the plain class of the given
+	 * object as fallback; never {@code null})
 	 * @see org.springframework.aop.TargetClassAware#getTargetClass()
 	 * @see Advised#getTargetSource()
 	 */
@@ -83,8 +84,14 @@ public abstract class AopProxyUtils {
 		if (specifiedInterfaces.length == 0) {
 			// No user-specified interfaces: check whether target class is an interface.
 			Class<?> targetClass = advised.getTargetClass();
-			if (targetClass != null && targetClass.isInterface()) {
-				specifiedInterfaces = new Class<?>[] {targetClass};
+			if (targetClass != null) {
+				if (targetClass.isInterface()) {
+					advised.setInterfaces(targetClass);
+				}
+				else if (Proxy.isProxyClass(targetClass)) {
+					advised.setInterfaces(targetClass.getInterfaces());
+				}
+				specifiedInterfaces = advised.getProxiedInterfaces();
 			}
 		}
 		boolean addSpringProxy = !advised.isInterfaceProxied(SpringProxy.class);

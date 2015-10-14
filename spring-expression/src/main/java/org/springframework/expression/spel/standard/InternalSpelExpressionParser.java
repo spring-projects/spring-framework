@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -556,7 +556,13 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			if (!typeName.stringValue().equals("T")) {
 				return false;
 			}
-			nextToken();
+			// It looks like a type reference but is T being used as a map key?
+			Token t = nextToken();
+			if (peekToken(TokenKind.RSQUARE)) {
+				// looks like 'T]' (T is map key)
+				push(new PropertyOrFieldReference(false,t.data,toPos(t)));
+				return true;
+			}
 			eatToken(TokenKind.LPAREN);
 			SpelNodeImpl node = eatPossiblyQualifiedId();
 			// dotted qualified id
@@ -622,7 +628,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 			// '}' - end of list
 			// ',' - more expressions in this list
 			// ':' - this is a map!
-			
+
 			if (peekToken(TokenKind.RCURLY)) { // list with one item in it
 				List<SpelNodeImpl> listElements = new ArrayList<SpelNodeImpl>();
 				listElements.add(firstExpression);
@@ -638,7 +644,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 				while (peekToken(TokenKind.COMMA,true));
 				closingCurly = eatToken(TokenKind.RCURLY);
 				expr = new InlineList(toPos(t.startPos,closingCurly.endPos),listElements.toArray(new SpelNodeImpl[listElements.size()]));
-				
+
 			}
 			else if (peekToken(TokenKind.COLON, true)) {  // map!
 				List<SpelNodeImpl> mapElements = new ArrayList<SpelNodeImpl>();
@@ -754,6 +760,12 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	private boolean maybeEatConstructorReference() {
 		if (peekIdentifierToken("new")) {
 			Token newToken = nextToken();
+			// It looks like a constructor reference but is NEW being used as a map key?
+			if (peekToken(TokenKind.RSQUARE)) {
+				// looks like 'NEW]' (so NEW used as map key)
+				push(new PropertyOrFieldReference(false,newToken.data,toPos(newToken)));
+				return true;
+			}
 			SpelNodeImpl possiblyQualifiedConstructorName = eatPossiblyQualifiedId();
 			List<SpelNodeImpl> nodes = new ArrayList<SpelNodeImpl>();
 			nodes.add(possiblyQualifiedConstructorName);

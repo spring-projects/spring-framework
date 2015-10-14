@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,19 +23,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
 
 import org.springframework.util.ObjectUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Keith Donald
  */
-public class ToStringCreatorTests extends TestCase {
+@SuppressWarnings({ "rawtypes", "unchecked" })
+public class ToStringCreatorTests {
 
 	private SomeObject s1, s2, s3;
 
-	@Override
-	protected void setUp() throws Exception {
+
+	@Before
+	public void setUp() throws Exception {
 		s1 = new SomeObject() {
 			@Override
 			public String toString() {
@@ -56,7 +61,8 @@ public class ToStringCreatorTests extends TestCase {
 		};
 	}
 
-	public void testDefaultStyleMap() {
+	@Test
+	public void defaultStyleMap() {
 		final Map map = getMap();
 		Object stringy = new Object() {
 			@Override
@@ -77,20 +83,23 @@ public class ToStringCreatorTests extends TestCase {
 		return map;
 	}
 
-	public void testDefaultStyleArray() {
+	@Test
+	public void defaultStyleArray() {
 		SomeObject[] array = new SomeObject[] { s1, s2, s3 };
 		String str = new ToStringCreator(array).toString();
 		assertEquals("[@" + ObjectUtils.getIdentityHexString(array)
 				+ " array<ToStringCreatorTests.SomeObject>[A, B, C]]", str);
 	}
 
-	public void testPrimitiveArrays() {
+	@Test
+	public void primitiveArrays() {
 		int[] integers = new int[] { 0, 1, 2, 3, 4 };
 		String str = new ToStringCreator(integers).toString();
 		assertEquals("[@" + ObjectUtils.getIdentityHexString(integers) + " array<Integer>[0, 1, 2, 3, 4]]", str);
 	}
 
-	public void testList() {
+	@Test
+	public void appendList() {
 		List list = new ArrayList();
 		list.add(s1);
 		list.add(s2);
@@ -100,7 +109,8 @@ public class ToStringCreatorTests extends TestCase {
 				str);
 	}
 
-	public void testSet() {
+	@Test
+	public void appendSet() {
 		Set set = new LinkedHashSet<>(3);
 		set.add(s1);
 		set.add(s2);
@@ -110,22 +120,23 @@ public class ToStringCreatorTests extends TestCase {
 				str);
 	}
 
-	public void testClass() {
+	@Test
+	public void appendClass() {
 		String str = new ToStringCreator(this).append("myClass", this.getClass()).toString();
 		assertEquals("[ToStringCreatorTests@" + ObjectUtils.getIdentityHexString(this)
 				+ " myClass = ToStringCreatorTests]", str);
 	}
 
-	public void testMethod() throws Exception {
-		String str = new ToStringCreator(this).append("myMethod", this.getClass().getMethod("testMethod"))
+	@Test
+	public void appendMethod() throws Exception {
+		String str = new ToStringCreator(this).append("myMethod", this.getClass().getMethod("appendMethod"))
 				.toString();
 		assertEquals("[ToStringCreatorTests@" + ObjectUtils.getIdentityHexString(this)
-				+ " myMethod = testMethod@ToStringCreatorTests]", str);
+				+ " myMethod = appendMethod@ToStringCreatorTests]", str);
 	}
 
 
 	public static class SomeObject {
-
 	}
 
 }

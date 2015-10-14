@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 package org.springframework.test.web.servlet.request;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collections;
@@ -23,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 
@@ -42,21 +45,22 @@ import org.springframework.web.servlet.support.SessionFlashMapManager;
 import static org.junit.Assert.*;
 
 /**
- * Tests building a MockHttpServletRequest with {@link MockHttpServletRequestBuilder}.
+ * Unit tests for building a {@link MockHttpServletRequest} with
+ * {@link MockHttpServletRequestBuilder}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class MockHttpServletRequestBuilderTests {
 
-	private MockHttpServletRequestBuilder builder;
+	private final ServletContext servletContext = new MockServletContext();
 
-	private ServletContext servletContext;
+	private MockHttpServletRequestBuilder builder;
 
 
 	@Before
 	public void setUp() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/foo/bar");
-		servletContext = new MockServletContext();
 	}
 
 	@Test
@@ -87,6 +91,16 @@ public class MockHttpServletRequestBuilderTests {
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
 		assertEquals("/foo%20bar", request.getRequestURI());
+	}
+
+	// SPR-13435
+
+	@Test
+	public void requestUriWithDoubleSlashes() throws URISyntaxException {
+		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, new URI("/test//currentlyValid/0"));
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+
+		assertEquals("/test//currentlyValid/0", request.getRequestURI());
 	}
 
 	@Test
@@ -210,7 +224,7 @@ public class MockHttpServletRequestBuilderTests {
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
-		assertEquals("foo[0]=bar&foo[1]=baz", request.getQueryString());
+		assertEquals("foo%5B0%5D=bar&foo%5B1%5D=baz", request.getQueryString());
 		assertEquals("bar", request.getParameter("foo[0]"));
 		assertEquals("baz", request.getParameter("foo[1]"));
 	}
@@ -221,7 +235,7 @@ public class MockHttpServletRequestBuilderTests {
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
-		assertEquals("foo=bar=baz", request.getQueryString());
+		assertEquals("foo=bar%3Dbaz", request.getQueryString());
 		assertEquals("bar=baz", request.getParameter("foo"));
 	}
 
@@ -355,6 +369,12 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
+	public void noCookies() {
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+		assertNull(request.getCookies());
+	}
+
+	@Test
 	public void locale() {
 		Locale locale = new Locale("nl", "nl");
 		this.builder.locale(locale);
@@ -434,6 +454,27 @@ public class MockHttpServletRequestBuilderTests {
 		assertEquals(user, request.getUserPrincipal());
 	}
 
+	// SPR-12945
+	@Test
+	public void mergeInvokesDefaultRequestPostProcessorFirst() {
+		final String ATTR = "ATTR";
+		final String EXEPCTED = "override";
+
+		MockHttpServletRequestBuilder defaultBuilder =
+				new MockHttpServletRequestBuilder(HttpMethod.GET, "/foo/bar")
+				.with(requestAttr(ATTR).value("default"));
+
+		builder
+				.with(requestAttr(ATTR).value(EXEPCTED));
+
+		builder.merge(defaultBuilder);
+
+		MockHttpServletRequest request = builder.buildRequest(servletContext);
+		request = builder.postProcessRequest(request);
+
+		assertEquals(EXEPCTED, request.getAttribute(ATTR));
+	}
+
 
 	private final class User implements Principal {
 
@@ -443,4 +484,29 @@ public class MockHttpServletRequestBuilderTests {
 		}
 	}
 
+	private static RequestAttributePostProcessor requestAttr(String attrName) {
+		return new RequestAttributePostProcessor().attr(attrName);
+	}
+
+	private static class RequestAttributePostProcessor implements RequestPostProcessor {
+
+		String attr;
+
+		String value;
+
+		public RequestAttributePostProcessor attr(String attr) {
+			this.attr = attr;
+			return this;
+		}
+
+		public RequestAttributePostProcessor value(String value) {
+			this.value = value;
+			return this;
+		}
+
+		public MockHttpServletRequest postProcessRequest(MockHttpServletRequest request) {
+			request.setAttribute(attr, value);
+			return request;
+		}
+	}
 }

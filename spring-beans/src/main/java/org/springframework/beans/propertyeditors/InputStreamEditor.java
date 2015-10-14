@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,13 +25,13 @@ import org.springframework.util.Assert;
 
 /**
  * One-way PropertyEditor which can convert from a text String to a
- * {@code java.io.InputStream}, interpreting the given String
- * as Spring resource location (e.g. a URL String).
+ * {@code java.io.InputStream}, interpreting the given String as a
+ * Spring resource location (e.g. a URL String).
  *
  * <p>Supports Spring-style URL notation: any fully qualified standard URL
- * ("file:", "http:", etc) and Spring's special "classpath:" pseudo-URL.
+ * ("file:", "http:", etc.) and Spring's special "classpath:" pseudo-URL.
  *
- * <p>Note that in the default usage, the stream is not closed by Spring itself!
+ * <p>Note that such streams usually do not get closed by Spring itself!
  *
  * @author Juergen Hoeller
  * @since 1.0.1
@@ -73,8 +73,7 @@ public class InputStreamEditor extends PropertyEditorSupport {
 			setValue(resource != null ? resource.getInputStream() : null);
 		}
 		catch (IOException ex) {
-			throw new IllegalArgumentException(
-					"Could not retrieve InputStream for " + resource + ": " + ex.getMessage());
+			throw new IllegalArgumentException("Failed to retrieve InputStream for " + resource, ex);
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.concurrent.Executor;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
+import org.springframework.core.ResolvableType;
 import org.springframework.util.ErrorHandler;
 
 /**
@@ -38,6 +39,7 @@ import org.springframework.util.ErrorHandler;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @see #setTaskExecutor
  */
 public class SimpleApplicationEventMulticaster extends AbstractApplicationEventMulticaster {
@@ -113,8 +115,14 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 
 
 	@Override
-	public void multicastEvent(final ApplicationEvent event) {
-		for (final ApplicationListener<?> listener : getApplicationListeners(event)) {
+	public void multicastEvent(ApplicationEvent event) {
+		multicastEvent(event, resolveDefaultEventType(event));
+	}
+
+	@Override
+	public void multicastEvent(final ApplicationEvent event, ResolvableType eventType) {
+		ResolvableType type = (eventType != null ? eventType : resolveDefaultEventType(event));
+		for (final ApplicationListener<?> listener : getApplicationListeners(event, type)) {
 			Executor executor = getTaskExecutor();
 			if (executor != null) {
 				executor.execute(new Runnable() {
@@ -128,6 +136,10 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 				invokeListener(listener, event);
 			}
 		}
+	}
+
+	private ResolvableType resolveDefaultEventType(ApplicationEvent event) {
+		return ResolvableType.forInstance(event);
 	}
 
 	/**

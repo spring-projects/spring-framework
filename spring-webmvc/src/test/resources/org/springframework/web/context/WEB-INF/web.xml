@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<web-app>
+	<display-name>ticket-webapp</display-name>
+	<description>Web interface for ticket application</description>
+
+	<distributable/>
+
+	<!--
+	<listener>
+		<listener-class>com.wrox.j2eedd.ticket.web.SessionCleanupListener</listener-class>
+	</listener>
+-->
+
+
+	<!-- This servlet must be loaded first to configure the log4j
+	 system and create the WebApplicationContext
+	 -->
+	<servlet>
+		<servlet-name>config</servlet-name>
+		<servlet-class>org.springframework.framework.web.context.ContextLoaderServlet</servlet-class>
+		<init-param>
+			<param-name>contextClass</param-name>
+			<param-value>org.springframework.framework.web.context.XMLWebApplicationContext</param-value>   	
+		</init-param>
+		<init-param>
+			<param-name>log4jPropertiesUrl</param-name>
+			<param-value>/WEB-INF/log4j_PRODUCTION.properties</param-value>   	
+		</init-param>
+		<!-- This is essential -->
+		<load-on-startup>1</load-on-startup>
+	  </servlet>
+ 
+ 
+  <servlet>
+      	<servlet-name>boxOffice</servlet-name>
+      	<servlet-class>org.springframework.framework.web.workflow.CommandServlet</servlet-class>
+  </servlet> 
+ 
+ 
+ 
+ 
+  <servlet-mapping>
+        	<servlet-name>boxOffice</servlet-name>
+        	<url-pattern>/*.html</url-pattern>
+  </servlet-mapping>
+ 
+  <servlet-mapping>
+          	<servlet-name>config</servlet-name>
+          	<url-pattern>/context/context.html</url-pattern>
+  </servlet-mapping>
+ 
+
+<session-config>
+<session-timeout>60</session-timeout>
+</session-config>
+
+<welcome-file-list>
+	<!-- Simply doesn't work to a servlet -->
+	<welcome-file>/welcome.jsp</welcome-file>
+</welcome-file-list>
+
+<error-page>
+     <error-code>403</error-code>
+     <location>/jsp/layout/twocolumn/403-Forbidden.jsp</location>
+  </error-page>
+ 
+    <error-page>
+       <error-code>404</error-code>
+       <location>/jsp/layout/twocolumn/404-NotFound.jsp</location>
+  </error-page>
+ 
+  <error-page>
+         <exception-type>java.lang.Throwable</exception-type>
+         <location>/jsp/layout/twocolumn/uncaughtException.jsp</location>
+  </error-page>
+ 
+ <taglib>
+ 	      	<taglib-uri>/bind</taglib-uri>
+ 	      	<taglib-location>/WEB-INF/tlds/b11.tld</taglib-location>
+   </taglib>
+  
+   <taglib>
+   	      	<taglib-uri>/events</taglib-uri>
+   	      	<taglib-location>/WEB-INF/tlds/event11.tld</taglib-location>
+  </taglib>
+ 
+  <security-constraint>
+  	<web-resource-collection>
+  	<web-resource-name>SalesInfo
+  	</web-resource-name>
+  	<url-pattern>purchase.html</url-pattern>
+  	<http-method>GET</http-method>
+  	<http-method>POST</http-method>
+  	</web-resource-collection>
+  	<auth-constraint>
+  	<role-name>registeredUsers</role-name>
+  	</auth-constraint>
+  	<user-data-constraint>  	
+  	<transport-guarantee>NONE</transport-guarantee>
+  	</user-data-constraint>
+</security-constraint>
+
+
+ 	<login-config>
+ 		<auth-method>FORM</auth-method>
+ 	
+ 		<!-- Used only for BASIC authentication: only included because ServletUnit needs it -->
+ 		<realm-name>ticket</realm-name>
+ 	
+ 		<form-login-config>
+ 			<form-login-page>login.jsp</form-login-page>
+ 			<form-error-page>loginError.jsp</form-error-page>
+ 		</form-login-config>
+ 	</login-config>
+ 
+ 
+ 	<security-role>
+		<role-name>registeredUsers</role-name>
+	</security-role>
+
+
+
+
+<ejb-ref>
+	<ejb-ref-name>ejb/FixtureManager</ejb-ref-name>
+	<ejb-ref-type>Session</ejb-ref-type>
+	<home>com.wrox.j2eedd.ticket.ejb.fixturemanager.FixtureManagerRemoteHome</home>
+	<remote>com.wrox.j2eedd.ticket.ejb.fixturemanager.FixtureManagerRemote</remote>
+	<ejb-link>FixtureManager</ejb-link>
+</ejb-ref>
+
+
+<ejb-ref>
+	<ejb-ref-name>ejb/BoxOffice</ejb-ref-name>
+	<ejb-ref-type>Session</ejb-ref-type>
+	<home>com.wrox.j2eedd.ticket.ejb.booking.BoxOfficeRemoteHome</home>
+	<remote>com.wrox.j2eedd.ticket.ejb.booking.BoxOfficeRemote</remote>
+	<ejb-link>BookingManager</ejb-link>
+</ejb-ref>
+
+<ejb-ref>
+	<ejb-ref-name>ejb/CustomerManager</ejb-ref-name>
+	<ejb-ref-type>Session</ejb-ref-type>
+	<home>com.wrox.j2eedd.ticket.ejb.customer.CustomerManagerRemoteHoms</home>
+	<remote>com.wrox.j2eedd.ticket.ejb.customer.CustomerManagerRemote</remote>
+	<ejb-link>CustomerManager</ejb-link>
+</ejb-ref>
+
+</web-app>

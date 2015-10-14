@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -62,11 +62,13 @@ public abstract aspect AbstractAsyncExecutionAspect extends AsyncExecutionAspect
 	@SuppressAjWarnings("adviceDidNotMatch")
 	Object around() : asyncMethod() {
 		final MethodSignature methodSignature = (MethodSignature) thisJoinPointStaticPart.getSignature();
+
 		AsyncTaskExecutor executor = determineAsyncExecutor(methodSignature.getMethod());
 		if (executor == null) {
 			return proceed();
 		}
-		Callable<Object> callable = new Callable<Object>() {
+
+		Callable<Object> task = new Callable<Object>() {
 			public Object call() throws Exception {
 				try {
 					Object result = proceed();
@@ -80,17 +82,7 @@ public abstract aspect AbstractAsyncExecutionAspect extends AsyncExecutionAspect
 				return null;
 			}};
 
-		Class<?> returnType = methodSignature.getReturnType();
-		if (ListenableFuture.class.isAssignableFrom(returnType)) {
-			return ((AsyncListenableTaskExecutor) executor).submitListenable(callable);
-		}
-		else if (Future.class.isAssignableFrom(returnType)) {
-			return executor.submit(callable);
-		}
-		else {
-			executor.submit(callable);
-			return null;
-		}
+		return doSubmit(task, executor, methodSignature.getReturnType());
 	}
 
 	/**

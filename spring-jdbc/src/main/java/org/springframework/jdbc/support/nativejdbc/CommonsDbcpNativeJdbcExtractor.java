@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import org.springframework.util.ReflectionUtils;
 
 /**
  * Implementation of the {@link NativeJdbcExtractor} interface for the
- * Jakarta Commons DBCP connection pool, version 1.1 or higher.
+ * Apache Commons DBCP connection pool, version 1.1 or higher.
  *
  * <p>Returns the underlying native Connection, Statement, etc to application
  * code instead of DBCP's wrapper implementations. The returned JDBC classes
@@ -46,7 +46,9 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Juergen Hoeller
  * @since 25.08.2003
+ * @deprecated as of Spring 4.2, in favor of Commons DBCP 2.x and JDBC 4.x
  */
+@Deprecated
 public class CommonsDbcpNativeJdbcExtractor extends NativeJdbcExtractorAdapter {
 
 	private static final String GET_INNERMOST_DELEGATE_METHOD_NAME = "getInnermostDelegate";

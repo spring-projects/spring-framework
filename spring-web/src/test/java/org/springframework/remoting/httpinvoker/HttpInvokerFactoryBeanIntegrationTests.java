@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ import static org.junit.Assert.*;
 public class HttpInvokerFactoryBeanIntegrationTests {
 
 	@Test
+	@SuppressWarnings("resource")
 	public void testLoadedConfigClass() {
 		ApplicationContext context = new AnnotationConfigApplicationContext(InvokerAutowiringConfig.class);
 		MyBean myBean = context.getBean("myBean", MyBean.class);
@@ -51,6 +52,7 @@ public class HttpInvokerFactoryBeanIntegrationTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void testNonLoadedConfigClass() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.registerBeanDefinition("config", new RootBeanDefinition(InvokerAutowiringConfig.class.getName()));
@@ -62,6 +64,7 @@ public class HttpInvokerFactoryBeanIntegrationTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void withConfigurationClassWithPlainFactoryBean() {
 		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
 		context.register(ConfigWithPlainFactoryBean.class);
@@ -133,7 +136,7 @@ public class HttpInvokerFactoryBeanIntegrationTests {
 		}
 
 		@Bean
-		public FactoryBean myService() {
+		public HttpInvokerProxyFactoryBean myService() {
 			String name = env.getProperty("testbean.name");
 			HttpInvokerProxyFactoryBean factory = new HttpInvokerProxyFactoryBean();
 			factory.setServiceUrl("/svc/" + name);

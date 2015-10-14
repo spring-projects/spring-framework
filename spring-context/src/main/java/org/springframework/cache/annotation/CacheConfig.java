@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,23 +23,27 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Provide a way to share common cache-related settings at class-level.
+ * {@code @CacheConfig} provides a mechanism for sharing common cache-related
+ * settings at the class level.
+ *
  * <p>When this annotation is present on a given class, it provides a set
- * of default settings for any cache operation defined on that class.
+ * of default settings for any cache operation defined in that class.
  *
  * @author Stephane Nicoll
+ * @author Sam Brannen
  * @since 4.1
  */
-@Target({ElementType.TYPE})
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface CacheConfig {
 
 	/**
-	 * Name of the default caches to consider for a caching operation defined in the class.
-	 * <p>If none is set at the operation level, these ones are used instead of the default.
+	 * Names of the default caches to consider for caching operations defined
+	 * in the annotated class.
+	 * <p>If none is set at the operation level, these are used instead of the default.
 	 * <p>May be used to determine the target cache (or caches), matching the
-	 * qualifier value (or the bean name(s)) of (a) specific bean definition.
+	 * qualifier value or the bean names of a specific bean definition.
 	 */
 	String[] cacheNames() default {};
 
@@ -57,7 +61,7 @@ public @interface CacheConfig {
 	 * create a default {@link org.springframework.cache.interceptor.CacheResolver} if none
 	 * is set already.
 	 * <p>If no resolver and no cache manager are set at the operation level, and no cache
-	 * resolver is set on this instance, this one is used instead of the default.
+	 * resolver is set via {@link #cacheResolver}, this one is used instead of the default.
 	 * @see org.springframework.cache.interceptor.SimpleCacheResolver
 	 */
 	String cacheManager() default "";
@@ -68,6 +72,5 @@ public @interface CacheConfig {
 	 * instead of the default.
 	 */
 	String cacheResolver() default "";
+
 }
-
-

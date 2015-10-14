@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.ImportAware;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -43,6 +42,7 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 	protected AnnotationAttributes enableAsync;
 
 	protected Executor executor;
+
 	protected AsyncUncaughtExceptionHandler exceptionHandler;
 
 
@@ -50,14 +50,16 @@ public abstract class AbstractAsyncConfiguration implements ImportAware {
 	public void setImportMetadata(AnnotationMetadata importMetadata) {
 		this.enableAsync = AnnotationAttributes.fromMap(
 				importMetadata.getAnnotationAttributes(EnableAsync.class.getName(), false));
-		Assert.notNull(this.enableAsync,
-				"@EnableAsync is not present on importing class " + importMetadata.getClassName());
+		if (this.enableAsync == null) {
+			throw new IllegalArgumentException(
+					"@EnableAsync is not present on importing class " + importMetadata.getClassName());
+		}
 	}
 
 	/**
 	 * Collect any {@link AsyncConfigurer} beans through autowiring.
 	 */
-	@Autowired(required=false)
+	@Autowired(required = false)
 	void setConfigurers(Collection<AsyncConfigurer> configurers) {
 		if (CollectionUtils.isEmpty(configurers)) {
 			return;

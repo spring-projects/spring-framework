@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,9 +45,11 @@ public interface SubscriptionRegistry {
 	void unregisterAllSubscriptions(String sessionId);
 
 	/**
-	 * Find all subscriptions that should receive the given message.
+	 * Find all subscriptions that should receive the given message. The map
+	 * returned is safe to iterate and will never be modified.
 	 * @param message the message
-	 * @return a {@link MultiValueMap} from sessionId to subscriptionId's, possibly empty.
+	 * @return a {@code MultiValueMap} with sessionId-subscriptionId pairs,
+	 * possibly empty.
 	 */
 	MultiValueMap<String, String> findSubscriptions(Message<?> message);
 

@@ -170,7 +170,7 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 
 	private class CacheSection implements SectionTransformer {
 
-		private final String COMMENT_DIRECTIVE = "#";
+		private static final String COMMENT_DIRECTIVE = "#";
 
 		@Override
 		public String transform(String line, HashBuilder builder, Resource resource,

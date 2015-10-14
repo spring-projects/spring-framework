@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
+
 import org.junit.AssumptionViolatedException;
 
 import org.springframework.util.ClassUtils;
@@ -73,9 +74,11 @@ import static org.junit.Assume.*;
  *
  * @author Rob Winch
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 3.2
  * @see #atLeast(JavaVersion)
  * @see #group(TestGroup)
+ * @see #group(TestGroup, Executable)
  */
 public abstract class Assume {
 
@@ -83,8 +86,9 @@ public abstract class Assume {
 
 
 	/**
-	 * Assume a minimum {@link JavaVersion} is running.
+	 * Assume that a minimum {@link JavaVersion} is running.
 	 * @param version the minimum version for the test to run
+	 * @throws AssumptionViolatedException if the assumption fails
 	 */
 	public static void atLeast(JavaVersion version) {
 		if (!JavaVersion.runningVersion().isAtLeast(version)) {
@@ -95,7 +99,8 @@ public abstract class Assume {
 
 	/**
 	 * Assume that a particular {@link TestGroup} has been specified.
-	 * @param group the group that must be specified.
+	 * @param group the group that must be specified
+	 * @throws AssumptionViolatedException if the assumption fails
 	 */
 	public static void group(TestGroup group) {
 		if (!GROUPS.contains(group)) {
@@ -105,8 +110,24 @@ public abstract class Assume {
 	}
 
 	/**
+	 * Assume that a particular {@link TestGroup} has been specified before
+	 * executing the supplied {@link Executable}.
+	 * <p>If the assumption fails, the executable will not be executed, but
+	 * no {@link AssumptionViolatedException} will be thrown.
+	 * @param group the group that must be specified
+	 * @param executable the executable to execute if the test group is active
+	 * @since 4.2
+	 */
+	public static void group(TestGroup group, Executable executable) throws Exception {
+		if (GROUPS.contains(group)) {
+			executable.execute();
+		}
+	}
+
+	/**
 	 * Assume that the specified log is not set to Trace or Debug.
 	 * @param log the log to test
+	 * @throws AssumptionViolatedException if the assumption fails
 	 */
 	public static void notLogging(Log log) {
 		assumeFalse(log.isTraceEnabled());
@@ -114,7 +135,10 @@ public abstract class Assume {
 	}
 
 	/**
-	 * Assume that we can load fonts (https://java.net/jira/browse/MACOSX_PORT-355)
+	 * Assume that we can load fonts.
+	 * <p>See <a href="https://java.net/jira/browse/MACOSX_PORT-355">MACOSX_PORT-355</a>
+	 * issue.
+	 * @throws AssumptionViolatedException if the assumption fails
 	 */
 	public static void canLoadNativeDirFonts() {
 		try {
@@ -128,6 +152,14 @@ public abstract class Assume {
 		catch (Throwable ex) {
 			throw new AssumptionViolatedException("Requires GraphicsEnvironment that can load fonts", ex);
 		}
+	}
+
+	/**
+	 * @since 4.2
+	 */
+	@FunctionalInterface
+	public static interface Executable {
+		void execute() throws Exception;
 	}
 
 }

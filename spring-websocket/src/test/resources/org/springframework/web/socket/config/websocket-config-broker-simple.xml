@@ -6,7 +6,8 @@
 
 	<websocket:message-broker application-destination-prefix="/app"
 							  user-destination-prefix="/personal"
-							  path-matcher="pathMatcher">
+							  path-matcher="pathMatcher"
+							  path-helper="urlPathHelper">
 
 		<!-- message-size=128*1024, send-buffer-size=1024*1024 -->
 		<websocket:transport message-size="131072" send-timeout="25000" send-buffer-size="1048576">
@@ -32,7 +33,9 @@
 			<websocket:sockjs/>
 		</websocket:stomp-endpoint>
 
-		<websocket:simple-broker prefix="/topic, /queue"/>
+		<websocket:stomp-error-handler ref="errorHandler" />
+
+		<websocket:simple-broker prefix="/topic, /queue" heartbeat="15000,15000" scheduler="scheduler" />
 
 	</websocket:message-broker>
 
@@ -40,7 +43,13 @@
 		<property name="pathSeparator" value="." />
 	</bean>
 
+	<bean id="urlPathHelper" class="org.springframework.web.util.UrlPathHelper">
+		<property name="alwaysUseFullPath" value="true"/>
+	</bean>
+
 	<bean id="myHandler" class="org.springframework.web.socket.config.TestHandshakeHandler"/>
 	<bean id="barTestInterceptor" class="org.springframework.web.socket.config.BarTestInterceptor"/>
+	<bean id="errorHandler" class="org.springframework.web.socket.config.TestStompErrorHandler"/>
+	<bean id="scheduler" class="org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler"/>
 
 </beans>

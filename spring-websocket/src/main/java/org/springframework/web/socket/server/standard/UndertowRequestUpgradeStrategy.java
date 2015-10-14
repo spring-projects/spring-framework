@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,9 @@
 package org.springframework.web.socket.server.standard;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -30,7 +33,6 @@ import javax.websocket.Endpoint;
 import javax.websocket.Extension;
 import javax.websocket.server.ServerEndpointConfig;
 
-import io.undertow.server.HttpServerExchange;
 import io.undertow.server.HttpUpgradeListener;
 import io.undertow.servlet.api.InstanceFactory;
 import io.undertow.servlet.api.InstanceHandle;
@@ -48,56 +50,82 @@ import io.undertow.websockets.jsr.handshake.HandshakeUtil;
 import io.undertow.websockets.jsr.handshake.JsrHybi07Handshake;
 import io.undertow.websockets.jsr.handshake.JsrHybi08Handshake;
 import io.undertow.websockets.jsr.handshake.JsrHybi13Handshake;
-import org.xnio.StreamConnection;
+import io.undertow.websockets.spi.WebSocketHttpExchange;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.web.socket.server.HandshakeFailureException;
 
-
 /**
- * A {@link org.springframework.web.socket.server.RequestUpgradeStrategy} for use
- * with WildFly and its underlying Undertow web server.
+ * A WebSocket {@code RequestUpgradeStrategy} for use with WildFly and its
+ * underlying Undertow web server. Also compatible with embedded Undertow usage.
+ *
+ * <p>Compatible with Undertow 1.0 to 1.3 - as included in WildFly 8.x, 9 and 10.
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
+ * @author Juergen Hoeller
  * @since 4.0.1
  */
 public class UndertowRequestUpgradeStrategy extends AbstractStandardUpgradeStrategy {
 
 	private static final Constructor<ServletWebSocketHttpExchange> exchangeConstructor;
 
+	private static final boolean exchangeConstructorWithPeerConnections;
+
 	private static final Constructor<ConfiguredServerEndpoint> endpointConstructor;
 
-	private static final boolean undertow10Present;
+	private static final boolean endpointConstructorWithEndpointFactory;
 
-	private static final boolean undertow11Present;
+	private static final Method getBufferPoolMethod;
+
+	private static final Method createChannelMethod;
 
 	static {
-		Class<ServletWebSocketHttpExchange> exchangeType = ServletWebSocketHttpExchange.class;
-		Class<?>[] exchangeParamTypes = new Class<?>[] {HttpServletRequest.class, HttpServletResponse.class, Set.class};
-		if (ClassUtils.hasConstructor(exchangeType, exchangeParamTypes)) {
-			exchangeConstructor = ClassUtils.getConstructorIfAvailable(exchangeType, exchangeParamTypes);
-			undertow10Present = false;
-		}
-		else {
-			exchangeParamTypes = new Class<?>[] {HttpServletRequest.class, HttpServletResponse.class};
-			exchangeConstructor = ClassUtils.getConstructorIfAvailable(exchangeType, exchangeParamTypes);
-			undertow10Present = true;
-		}
+		try {
+			Class<ServletWebSocketHttpExchange> exchangeType = ServletWebSocketHttpExchange.class;
+			Class<?>[] exchangeParamTypes =
+					new Class<?>[] {HttpServletRequest.class, HttpServletResponse.class, Set.class};
+			Constructor<ServletWebSocketHttpExchange> exchangeCtor =
+					ClassUtils.getConstructorIfAvailable(exchangeType, exchangeParamTypes);
+			if (exchangeCtor != null) {
+				// Undertow 1.1+
+				exchangeConstructor = exchangeCtor;
+				exchangeConstructorWithPeerConnections = true;
+			}
+			else {
+				// Undertow 1.0
+				exchangeParamTypes = new Class<?>[] {HttpServletRequest.class, HttpServletResponse.class};
+				exchangeConstructor = exchangeType.getConstructor(exchangeParamTypes);
+				exchangeConstructorWithPeerConnections = false;
+			}
 
-		Class<ConfiguredServerEndpoint> endpointType = ConfiguredServerEndpoint.class;
-		Class<?>[] endpointParamTypes = new Class<?>[] {ServerEndpointConfig.class, InstanceFactory.class,
-				PathTemplate.class, EncodingFactory.class, AnnotatedEndpointFactory.class};
-		if (ClassUtils.hasConstructor(endpointType, endpointParamTypes)) {
-			endpointConstructor = ClassUtils.getConstructorIfAvailable(endpointType, endpointParamTypes);
-			undertow11Present = true;
+			Class<ConfiguredServerEndpoint> endpointType = ConfiguredServerEndpoint.class;
+			Class<?>[] endpointParamTypes = new Class<?>[] {ServerEndpointConfig.class, InstanceFactory.class,
+					PathTemplate.class, EncodingFactory.class, AnnotatedEndpointFactory.class};
+			Constructor<ConfiguredServerEndpoint> endpointCtor =
+					ClassUtils.getConstructorIfAvailable(endpointType, endpointParamTypes);
+			if (endpointCtor != null) {
+				// Undertow 1.1+
+				endpointConstructor = endpointCtor;
+				endpointConstructorWithEndpointFactory = true;
+			}
+			else {
+				// Undertow 1.0
+				endpointParamTypes = new Class<?>[] {ServerEndpointConfig.class, InstanceFactory.class,
+						PathTemplate.class, EncodingFactory.class};
+				endpointConstructor = endpointType.getConstructor(endpointParamTypes);
+				endpointConstructorWithEndpointFactory = false;
+			}
+
+			// Adapting between different Pool API types in Undertow 1.0-1.2 vs 1.3
+			getBufferPoolMethod = WebSocketHttpExchange.class.getMethod("getBufferPool");
+			createChannelMethod = ReflectionUtils.findMethod(Handshake.class, "createChannel", (Class<?>[]) null);
 		}
-		else {
-			endpointParamTypes = new Class<?>[] {ServerEndpointConfig.class, InstanceFactory.class,
-					PathTemplate.class, EncodingFactory.class};
-			endpointConstructor = ClassUtils.getConstructorIfAvailable(endpointType, endpointParamTypes);
-			undertow11Present = false;
+		catch (Throwable ex) {
+			throw new IllegalStateException("Incompatible Undertow API version", ex);
 		}
 	}
 
@@ -112,11 +140,11 @@ public class UndertowRequestUpgradeStrategy extends AbstractStandardUpgradeStrat
 
 
 	public UndertowRequestUpgradeStrategy() {
-		if (undertow10Present) {
-			this.peerConnections = null;
+		if (exchangeConstructorWithPeerConnections) {
+			this.peerConnections = Collections.newSetFromMap(new ConcurrentHashMap<WebSocketChannel, Boolean>());
 		}
 		else {
-			this.peerConnections = Collections.newSetFromMap(new ConcurrentHashMap<WebSocketChannel, Boolean>());
+			this.peerConnections = null;
 		}
 	}
 
@@ -133,29 +161,39 @@ public class UndertowRequestUpgradeStrategy extends AbstractStandardUpgradeStrat
 
 		HttpServletRequest servletRequest = getHttpServletRequest(request);
 		HttpServletResponse servletResponse = getHttpServletResponse(response);
-
 		final ServletWebSocketHttpExchange exchange = createHttpExchange(servletRequest, servletResponse);
 		exchange.putAttachment(HandshakeUtil.PATH_PARAMS, Collections.<String, String>emptyMap());
 
 		ServerWebSocketContainer wsContainer = (ServerWebSocketContainer) getContainer(servletRequest);
 		final EndpointSessionHandler endpointSessionHandler = new EndpointSessionHandler(wsContainer);
-
 		final ConfiguredServerEndpoint configuredServerEndpoint = createConfiguredServerEndpoint(
 				selectedProtocol, selectedExtensions, endpoint, servletRequest);
-
 		final Handshake handshake = getHandshakeToUse(exchange, configuredServerEndpoint);
 
-		exchange.upgradeChannel(new HttpUpgradeListener() {
-			@Override
-			public void handleUpgrade(StreamConnection connection, HttpServerExchange serverExchange) {
-				WebSocketChannel channel = handshake.createChannel(exchange, connection, exchange.getBufferPool());
-				if (peerConnections != null) {
-					peerConnections.add(channel);
-				}
-				endpointSessionHandler.onConnect(exchange, channel);
-			}
-		});
+		HttpUpgradeListener upgradeListener = (HttpUpgradeListener) Proxy.newProxyInstance(
+				getClass().getClassLoader(), new Class<?>[] {HttpUpgradeListener.class},
+				new InvocationHandler() {
+					@Override
+					public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+						if ("handleUpgrade".equals(method.getName())) {
+							Object connection = args[0];  // currently an XNIO StreamConnection
+							Object bufferPool = ReflectionUtils.invokeMethod(getBufferPoolMethod, exchange);
+							WebSocketChannel channel = (WebSocketChannel) ReflectionUtils.invokeMethod(
+									createChannelMethod, handshake, exchange, connection, bufferPool);
+							if (peerConnections != null) {
+								peerConnections.add(channel);
+							}
+							endpointSessionHandler.onConnect(exchange, channel);
+							return null;
+						}
+						else {
+							// any java.lang.Object method: equals, hashCode, toString...
+							return ReflectionUtils.invokeMethod(method, this, args);
+						}
+					}
+				});
 
+		exchange.upgradeChannel(upgradeListener);
 		handshake.handshake(exchange);
 	}
 
@@ -201,11 +239,11 @@ public class UndertowRequestUpgradeStrategy extends AbstractStandardUpgradeStrat
 				Collections.<Class<?>, List<InstanceFactory<? extends Encoder>>>emptyMap(),
 				Collections.<Class<?>, List<InstanceFactory<? extends Decoder>>>emptyMap());
 		try {
-			return undertow11Present ?
+			return (endpointConstructorWithEndpointFactory ?
 					endpointConstructor.newInstance(endpointRegistration,
-						new EndpointInstanceFactory(endpoint), null, encodingFactory, null) :
+							new EndpointInstanceFactory(endpoint), null, encodingFactory, null) :
 					endpointConstructor.newInstance(endpointRegistration,
-						new EndpointInstanceFactory(endpoint), null, encodingFactory);
+							new EndpointInstanceFactory(endpoint), null, encodingFactory));
 		}
 		catch (Exception ex) {
 			throw new HandshakeFailureException("Failed to instantiate ConfiguredServerEndpoint", ex);

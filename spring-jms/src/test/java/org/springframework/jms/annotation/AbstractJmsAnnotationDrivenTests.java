@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.jms.annotation;
 
+import java.lang.reflect.Method;
 import javax.jms.JMSException;
 import javax.jms.Session;
 
@@ -32,7 +33,9 @@ import org.springframework.jms.config.MethodJmsListenerEndpoint;
 import org.springframework.jms.config.SimpleJmsListenerEndpoint;
 import org.springframework.jms.listener.SimpleMessageListenerContainer;
 import org.springframework.jms.listener.adapter.MessagingMessageListenerAdapter;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
@@ -69,6 +72,12 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 
 	@Test
 	public abstract void jmsHandlerMethodFactoryConfiguration() throws JMSException;
+
+	@Test
+	public abstract void jmsListenerIsRepeatable();
+
+	@Test
+	public abstract void jmsListeners();
 
 	/**
 	 * Test for {@link SampleBean} discovery. If a factory with the default name
@@ -111,6 +120,11 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 		assertEquals("mySelector", endpoint.getSelector());
 		assertEquals("mySubscription", endpoint.getSubscription());
 		assertEquals("1-10", endpoint.getConcurrency());
+
+		Method m = ReflectionUtils.findMethod(endpoint.getClass(), "getDefaultResponseDestination");
+		ReflectionUtils.makeAccessible(m);
+		Object destination = ReflectionUtils.invokeMethod(m, endpoint);
+		assertEquals("queueOut", destination);
 	}
 
 	@Component
@@ -118,6 +132,7 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 
 		@JmsListener(id = "listener1", containerFactory = "simpleFactory", destination = "queueIn",
 				selector = "mySelector", subscription = "mySubscription", concurrency = "1-10")
+		@SendTo("queueOut")
 		public String fullHandle(String msg) {
 			return "reply";
 		}
@@ -129,6 +144,7 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 		@JmsListener(id = "${jms.listener.id}", containerFactory = "${jms.listener.containerFactory}",
 				destination = "${jms.listener.destination}", selector = "${jms.listener.selector}",
 				subscription = "${jms.listener.subscription}", concurrency = "${jms.listener.concurrency}")
+		@SendTo("${jms.listener.sendTo}")
 		public String fullHandle(String msg) {
 			return "reply";
 		}
@@ -222,6 +238,50 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 		@JmsListener(containerFactory = "defaultFactory", destination = "myQueue")
 		public void defaultHandle(@Validated String msg) {
 		}
+	}
+
+	/**
+	 * Test for {@link JmsListenerRepeatableBean} and {@link JmsListenersBean} that validates that the
+	 * {@code @JmsListener} annotation is repeatable and generate one specific container per annotation.
+	 */
+	public void testJmsListenerRepeatable(ApplicationContext context) {
+		JmsListenerContainerTestFactory simpleFactory =
+				context.getBean("jmsListenerContainerFactory", JmsListenerContainerTestFactory.class);
+		assertEquals(2, simpleFactory.getListenerContainers().size());
+
+		MethodJmsListenerEndpoint first = (MethodJmsListenerEndpoint)
+				simpleFactory.getListenerContainer("first").getEndpoint();
+		assertEquals("first", first.getId());
+		assertEquals("myQueue", first.getDestination());
+		assertEquals(null, first.getConcurrency());
+
+		MethodJmsListenerEndpoint second = (MethodJmsListenerEndpoint)
+				simpleFactory.getListenerContainer("second").getEndpoint();
+		assertEquals("second", second.getId());
+		assertEquals("anotherQueue", second.getDestination());
+		assertEquals("2-10", second.getConcurrency());
+	}
+
+	@Component
+	static class JmsListenerRepeatableBean {
+
+		@JmsListener(id = "first", destination = "myQueue")
+		@JmsListener(id = "second", destination = "anotherQueue", concurrency = "2-10")
+		public void repeatableHandle(String msg) {
+		}
+
+	}
+
+	@Component
+	static class JmsListenersBean {
+
+		@JmsListeners({
+				@JmsListener(id = "first", destination = "myQueue"),
+				@JmsListener(id = "second", destination = "anotherQueue", concurrency = "2-10")
+		})
+		public void repeatableHandle(String msg) {
+		}
+
 	}
 
 	static class TestValidator implements Validator {

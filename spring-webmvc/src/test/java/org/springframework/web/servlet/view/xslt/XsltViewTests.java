@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,41 +31,38 @@ import javax.xml.transform.stream.StreamSource;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
-import org.junit.Before;
+
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
 import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.core.JdkVersion;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 
+import org.xml.sax.SAXException;
+
+import static java.util.Collections.*;
 import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public class XsltViewTests {
 
 	private static final String HTML_OUTPUT = "/org/springframework/web/servlet/view/xslt/products.xsl";
 
-	private MockHttpServletRequest request;
+	private final MockHttpServletRequest request = new MockHttpServletRequest();
 
-	private MockHttpServletResponse response;
+	private final MockHttpServletResponse response = new MockHttpServletResponse();
 
-	@Before
-	public void setUp() throws Exception {
-		this.request = new MockHttpServletRequest();
-		this.response = new MockHttpServletResponse();
-	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void withNoSource() throws Exception {
 		final XsltView view = getXsltView(HTML_OUTPUT);
-		view.render(new HashMap(), request, response);
+		view.render(emptyMap(), request, response);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -77,46 +74,34 @@ public class XsltViewTests {
 	@Test
 	public void simpleTransformWithSource() throws Exception {
 		Source source = new StreamSource(getProductDataResource().getInputStream());
-		Map model = new HashMap();
-		model.put("someKey", source);
-		doTestWithModel(model);
+		doTestWithModel(singletonMap("someKey", source));
 	}
 
 	@Test
 	public void testSimpleTransformWithDocument() throws Exception {
 		org.w3c.dom.Document document = getDomDocument();
-		Map model = new HashMap();
-		model.put("someKey", document);
-		doTestWithModel(model);
+		doTestWithModel(singletonMap("someKey", document));
 	}
 
 	@Test
 	public void testSimpleTransformWithNode() throws Exception {
 		org.w3c.dom.Document document = getDomDocument();
-		Map model = new HashMap();
-		model.put("someKey", document.getDocumentElement());
-		doTestWithModel(model);
+		doTestWithModel(singletonMap("someKey", document.getDocumentElement()));
 	}
 
 	@Test
 	public void testSimpleTransformWithInputStream() throws Exception {
-		Map model = new HashMap();
-		model.put("someKey", getProductDataResource().getInputStream());
-		doTestWithModel(model);
+		doTestWithModel(singletonMap("someKey", getProductDataResource().getInputStream()));
 	}
 
 	@Test
 	public void testSimpleTransformWithReader() throws Exception {
-		Map model = new HashMap();
-		model.put("someKey", new InputStreamReader(getProductDataResource().getInputStream()));
-		doTestWithModel(model);
+		doTestWithModel(singletonMap("someKey", new InputStreamReader(getProductDataResource().getInputStream())));
 	}
 
 	@Test
 	public void testSimpleTransformWithResource() throws Exception {
-		Map model = new HashMap();
-		model.put("someKey", getProductDataResource());
-		doTestWithModel(model);
+		doTestWithModel(singletonMap("someKey", getProductDataResource()));
 	}
 
 	@Test
@@ -124,7 +109,7 @@ public class XsltViewTests {
 		XsltView view = getXsltView(HTML_OUTPUT);
 		view.setSourceKey("actualData");
 
-		Map model = new HashMap();
+		Map<String, Object> model = new HashMap<>();
 		model.put("actualData", getProductDataResource());
 		model.put("otherData", new ClassPathResource("dummyData.xsl", getClass()));
 
@@ -137,17 +122,14 @@ public class XsltViewTests {
 		XsltView view = getXsltView(HTML_OUTPUT);
 
 		Source source = new StreamSource(getProductDataResource().getInputStream());
-		Map model = new HashMap();
-		model.put("someKey", source);
-
-		view.render(model, this.request, this.response);
+		view.render(singletonMap("someKey", source), this.request, this.response);
 		assertTrue(this.response.getContentType().startsWith("text/html"));
 		assertEquals("UTF-8", this.response.getCharacterEncoding());
 	}
 
 	@Test
 	public void testModelParametersCarriedAcross() throws Exception {
-		Map model = new HashMap();
+		Map<String, Object> model = new HashMap<>();
 		model.put("someKey", getProductDataResource());
 		model.put("title", "Product List");
 		doTestWithModel(model);
@@ -160,7 +142,7 @@ public class XsltViewTests {
 		view.setSourceKey("actualData");
 		view.addStaticAttribute("title", "Product List");
 
-		Map model = new HashMap();
+		Map<String, Object> model = new HashMap<>();
 		model.put("actualData", getProductDataResource());
 		model.put("otherData", new ClassPathResource("dummyData.xsl", getClass()));
 
@@ -177,18 +159,14 @@ public class XsltViewTests {
 		return document;
 	}
 
-	private void doTestWithModel(Map model) throws Exception {
+	private void doTestWithModel(Map<String, Object> model) throws Exception {
 		XsltView view = getXsltView(HTML_OUTPUT);
 		view.render(model, this.request, this.response);
 		assertHtmlOutput(this.response.getContentAsString());
 	}
 
+	@SuppressWarnings("rawtypes")
 	private void assertHtmlOutput(String output) throws Exception {
-		if (JdkVersion.getMajorJavaVersion() < JdkVersion.JAVA_15) {
-			// TODO: find out why the SAXReader.read call fails on JDK 1.4 and 1.3
-			return;
-		}
-
 		SAXReader reader = new SAXReader();
 		Document document = reader.read(new StringReader(output));
 		List nodes = document.getRootElement().selectNodes("/html/body/table/tr");
@@ -224,4 +202,5 @@ public class XsltViewTests {
 	private Resource getProductDataResource() {
 		return new ClassPathResource("productData.xml", getClass());
 	}
+
 }

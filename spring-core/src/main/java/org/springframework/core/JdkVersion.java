@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,10 @@ package org.springframework.core;
  * @author Juergen Hoeller
  * @author Rick Evans
  * @author Sam Brannen
+ * @deprecated as of Spring 4.2.1, in favor of direct checks for the desired
+ * JDK API variants via reflection
  */
+@Deprecated
 public abstract class JdkVersion {
 
 	/**
@@ -104,9 +107,9 @@ public abstract class JdkVersion {
 	 * {@code if (getMajorJavaVersion() >= JAVA_17)}.
 	 * @return a code comparable to the {@code JAVA_XX} codes in this class
 	 * @see #JAVA_16
-     * @see #JAVA_17
-     * @see #JAVA_18
-     * @see #JAVA_19
+	 * @see #JAVA_17
+	 * @see #JAVA_18
+	 * @see #JAVA_19
 	 */
 	public static int getMajorJavaVersion() {
 		return majorJavaVersion;

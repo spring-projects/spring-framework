@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -264,6 +264,10 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+		// WebSocketHandlerDecorator could close the session
+		if (!session.isOpen()) {
+			return;
+		}
 		this.stats.incrementSessionCount(session);
 		session = new ConcurrentWebSocketSessionDecorator(session, getSendTimeLimit(), getSendBufferSizeLimit());
 		this.sessions.put(session.getId(), new WebSocketSessionHolder(session));
@@ -305,9 +309,12 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 	 */
 	@Override
 	public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
+		WebSocketSessionHolder holder = this.sessions.get(session.getId());
+		if (holder != null) {
+			session = holder.getSession();
+		}
 		SubProtocolHandler protocolHandler = findProtocolHandler(session);
 		protocolHandler.handleMessageFromClient(session, message, this.clientInboundChannel);
-		WebSocketSessionHolder holder = this.sessions.get(session.getId());
 		if (holder != null) {
 			holder.setHasHandledMessages();
 		}

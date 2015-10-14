@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.beans.factory.config.DestructionAwareBeanPostProcesso
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * Adapter that implements the {@link DisposableBean} and {@link Runnable} interfaces
@@ -50,6 +51,7 @@ import org.springframework.util.ReflectionUtils;
  *
  * @author Juergen Hoeller
  * @author Costin Leau
+ * @author Stephane Nicoll
  * @since 2.0
  * @see AbstractBeanFactory
  * @see org.springframework.beans.factory.DisposableBean
@@ -130,7 +132,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 					throw new BeanDefinitionValidationException("Method '" + destroyMethodName + "' of bean '" +
 							beanName + "' has more than one parameter - not supported as destroy method");
 				}
-				else if (paramTypes.length == 1 && !paramTypes[0].equals(boolean.class)) {
+				else if (paramTypes.length == 1 && boolean.class != paramTypes[0]) {
 					throw new BeanDefinitionValidationException("Method '" + destroyMethodName + "' of bean '" +
 							beanName + "' has a non-boolean parameter - not supported as destroy method");
 				}
@@ -175,8 +177,8 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	/**
 	 * If the current value of the given beanDefinition's "destroyMethodName" property is
 	 * {@link AbstractBeanDefinition#INFER_METHOD}, then attempt to infer a destroy method.
-	 * Candidate methods are currently limited to public, no-arg methods named "close"
-	 * (whether declared locally or inherited). The given BeanDefinition's
+	 * Candidate methods are currently limited to public, no-arg methods named "close" or
+	 * "shutdown" (whether declared locally or inherited). The given BeanDefinition's
 	 * "destroyMethodName" is updated to be null if no such method is found, otherwise set
 	 * to the name of the inferred method. This constant serves as the default for the
 	 * {@code @Bean#destroyMethod} attribute and the value of the constant may also be
@@ -186,8 +188,9 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 * interfaces, reflectively calling the "close" method on implementing beans as well.
 	 */
 	private String inferDestroyMethodIfNecessary(Object bean, RootBeanDefinition beanDefinition) {
-		if (AbstractBeanDefinition.INFER_METHOD.equals(beanDefinition.getDestroyMethodName()) ||
-				(beanDefinition.getDestroyMethodName() == null && closeableInterface.isInstance(bean))) {
+		String destroyMethodName = beanDefinition.getDestroyMethodName();
+		if (AbstractBeanDefinition.INFER_METHOD.equals(destroyMethodName) ||
+				(destroyMethodName == null && closeableInterface.isInstance(bean))) {
 			// Only perform destroy method inference or Closeable detection
 			// in case of the bean not explicitly implementing DisposableBean
 			if (!(bean instanceof DisposableBean)) {
@@ -205,7 +208,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			}
 			return null;
 		}
-		return beanDefinition.getDestroyMethodName();
+		return (StringUtils.hasLength(destroyMethodName) ? destroyMethodName : null);
 	}
 
 	/**
@@ -399,7 +402,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 		if (AbstractBeanDefinition.INFER_METHOD.equals(destroyMethodName)) {
 			return ClassUtils.hasMethod(bean.getClass(), CLOSE_METHOD_NAME);
 		}
-		return (destroyMethodName != null);
+		return StringUtils.hasLength(destroyMethodName);
 	}
 
 }

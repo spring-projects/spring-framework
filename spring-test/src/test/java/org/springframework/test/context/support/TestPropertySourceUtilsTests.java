@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,23 @@
 
 package org.springframework.test.context.support;
 
+import java.util.Map;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.annotation.AnnotationConfigurationException;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.MutablePropertySources;
+import org.springframework.mock.env.MockEnvironment;
+import org.springframework.mock.env.MockPropertySource;
 import org.springframework.test.context.TestPropertySource;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 import static org.springframework.test.context.support.TestPropertySourceUtils.*;
 
 /**
@@ -35,6 +44,7 @@ import static org.springframework.test.context.support.TestPropertySourceUtils.*
 public class TestPropertySourceUtilsTests {
 
 	private static final String[] EMPTY_STRING_ARRAY = new String[0];
+	private static final String[] KEY_VALUE_PAIR = new String[] { "key = value" };
 
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
@@ -72,7 +82,7 @@ public class TestPropertySourceUtilsTests {
 
 	@Test
 	public void locationsAndValueAttributes() {
-		expectedException.expect(IllegalStateException.class);
+		expectedException.expect(AnnotationConfigurationException.class);
 		buildMergedTestPropertySources(LocationsAndValuePropertySources.class);
 	}
 
@@ -104,15 +114,96 @@ public class TestPropertySourceUtilsTests {
 	@Test
 	public void overriddenProperties() {
 		assertMergedTestPropertySources(OverriddenPropertiesPropertySources.class, new String[] {
-			"classpath:/foo1.xml", "classpath:/foo2.xml", "classpath:/baz.properties" }, new String[] { "key = value" });
+			"classpath:/foo1.xml", "classpath:/foo2.xml", "classpath:/baz.properties" }, KEY_VALUE_PAIR);
 	}
 
 	@Test
 	public void overriddenLocationsAndProperties() {
 		assertMergedTestPropertySources(OverriddenLocationsAndPropertiesPropertySources.class,
-			new String[] { "classpath:/baz.properties" }, new String[] { "key = value" });
+			new String[] { "classpath:/baz.properties" }, KEY_VALUE_PAIR);
 	}
 
+	/**
+	 * @since 4.1.5
+	 */
+	@Test
+	public void addInlinedPropertiesToEnvironmentWithNullContext() {
+		expectedException.expect(IllegalArgumentException.class);
+		expectedException.expectMessage("context");
+		addInlinedPropertiesToEnvironment((ConfigurableApplicationContext) null, KEY_VALUE_PAIR);
+	}
+
+	/**
+	 * @since 4.1.5
+	 */
+	@Test
+	public void addInlinedPropertiesToEnvironmentWithContextAndNullInlinedProperties() {
+		expectedException.expect(IllegalArgumentException.class);
+		expectedException.expectMessage("inlined");
+		addInlinedPropertiesToEnvironment(mock(ConfigurableApplicationContext.class), null);
+	}
+
+	/**
+	 * @since 4.1.5
+	 */
+	@Test
+	public void addInlinedPropertiesToEnvironmentWithNullEnvironment() {
+		expectedException.expect(IllegalArgumentException.class);
+		expectedException.expectMessage("environment");
+		addInlinedPropertiesToEnvironment((ConfigurableEnvironment) null, KEY_VALUE_PAIR);
+	}
+
+	/**
+	 * @since 4.1.5
+	 */
+	@Test
+	public void addInlinedPropertiesToEnvironmentWithEnvironmentAndNullInlinedProperties() {
+		expectedException.expect(IllegalArgumentException.class);
+		expectedException.expectMessage("inlined");
+		addInlinedPropertiesToEnvironment(new MockEnvironment(), null);
+	}
+
+	/**
+	 * @since 4.1.5
+	 */
+	@Test
+	public void addInlinedPropertiesToEnvironmentWithMalformedUnicodeInValue() {
+		expectedException.expect(IllegalStateException.class);
+		expectedException.expectMessage("Failed to load test environment property");
+		addInlinedPropertiesToEnvironment(new MockEnvironment(), new String[] { "key = \\uZZZZ" });
+	}
+
+	/**
+	 * @since 4.1.5
+	 */
+	@Test
+	public void addInlinedPropertiesToEnvironmentWithMultipleKeyValuePairsInSingleInlinedProperty() {
+		expectedException.expect(IllegalStateException.class);
+		expectedException.expectMessage("Failed to load exactly one test environment property");
+		addInlinedPropertiesToEnvironment(new MockEnvironment(), new String[] { "a=b\nx=y" });
+	}
+
+	/**
+	 * @since 4.1.5
+	 */
+	@Test
+	@SuppressWarnings("rawtypes")
+	public void addInlinedPropertiesToEnvironmentWithEmptyProperty() {
+		ConfigurableEnvironment environment = new MockEnvironment();
+		MutablePropertySources propertySources = environment.getPropertySources();
+		propertySources.remove(MockPropertySource.MOCK_PROPERTIES_PROPERTY_SOURCE_NAME);
+		assertEquals(0, propertySources.size());
+		addInlinedPropertiesToEnvironment(environment, new String[] { "  " });
+		assertEquals(1, propertySources.size());
+		assertEquals(0, ((Map) propertySources.iterator().next().getSource()).size());
+	}
+
+	@Test
+	public void convertInlinedPropertiesToMapWithNullInlinedProperties() {
+		expectedException.expect(IllegalArgumentException.class);
+		expectedException.expectMessage("inlined");
+		convertInlinedPropertiesToMap(null);
+	}
 
 	// -------------------------------------------------------------------
 

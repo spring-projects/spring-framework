@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,8 @@ import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Test;
 
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.tests.transaction.MockJtaTransaction;
@@ -38,15 +39,17 @@ import org.springframework.transaction.support.TransactionSynchronizationAdapter
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
 /**
  * @author Juergen Hoeller
  * @since 12.05.2003
  */
-public class JtaTransactionManagerTests extends TestCase {
+public class JtaTransactionManagerTests {
 
-	public void testJtaTransactionManagerWithCommit() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithCommit() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION, Status.STATUS_ACTIVE, Status.STATUS_ACTIVE);
 
@@ -82,7 +85,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(synch).afterCompletion(TransactionSynchronization.STATUS_COMMITTED);
 	}
 
-	public void testJtaTransactionManagerWithCommitAndSynchronizationOnActual() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithCommitAndSynchronizationOnActual() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION, Status.STATUS_ACTIVE, Status.STATUS_ACTIVE);
 
@@ -110,7 +114,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(synch).afterCompletion(TransactionSynchronization.STATUS_COMMITTED);
 	}
 
-	public void testJtaTransactionManagerWithCommitAndSynchronizationNever() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithCommitAndSynchronizationNever() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(
 		Status.STATUS_NO_TRANSACTION, Status.STATUS_ACTIVE, Status.STATUS_ACTIVE);
@@ -133,7 +138,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(ut).commit();
 	}
 
-	public void testJtaTransactionManagerWithRollback() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithRollback() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION, Status.STATUS_ACTIVE);
 		final TransactionSynchronization synch = mock(TransactionSynchronization.class);
@@ -167,7 +173,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(synch).afterCompletion(TransactionSynchronization.STATUS_ROLLED_BACK);
 	}
 
-	public void testJtaTransactionManagerWithRollbackAndSynchronizationOnActual() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithRollbackAndSynchronizationOnActual() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION, Status.STATUS_ACTIVE);
 		final TransactionSynchronization synch = mock(TransactionSynchronization.class);
@@ -194,7 +201,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(synch).afterCompletion(TransactionSynchronization.STATUS_ROLLED_BACK);
 	}
 
-	public void testJtaTransactionManagerWithRollbackAndSynchronizationNever() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithRollbackAndSynchronizationNever() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION, Status.STATUS_ACTIVE);
 
@@ -220,7 +228,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(ut).rollback();
 	}
 
-	public void testJtaTransactionManagerWithExistingTransactionAndRollbackOnly() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithExistingTransactionAndRollbackOnly() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_ACTIVE);
 
@@ -244,7 +253,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(synch).afterCompletion(TransactionSynchronization.STATUS_UNKNOWN);
 	}
 
-	public void testJtaTransactionManagerWithExistingTransactionAndException() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithExistingTransactionAndException() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_ACTIVE);
 
@@ -274,7 +284,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(synch).afterCompletion(TransactionSynchronization.STATUS_UNKNOWN);
 	}
 
-	public void testJtaTransactionManagerWithExistingTransactionAndCommitException() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithExistingTransactionAndCommitException() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_ACTIVE);
 
@@ -304,7 +315,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(synch).afterCompletion(TransactionSynchronization.STATUS_UNKNOWN);
 	}
 
-	public void testJtaTransactionManagerWithExistingTransactionAndRollbackOnlyAndNoGlobalRollback() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithExistingTransactionAndRollbackOnlyAndNoGlobalRollback() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_ACTIVE);
 
@@ -329,7 +341,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(synch).afterCompletion(TransactionSynchronization.STATUS_UNKNOWN);
 	}
 
-	public void testJtaTransactionManagerWithExistingTransactionAndExceptionAndNoGlobalRollback() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithExistingTransactionAndExceptionAndNoGlobalRollback() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_ACTIVE);
 		final TransactionSynchronization synch = mock(TransactionSynchronization.class);
@@ -358,7 +371,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(synch).afterCompletion(TransactionSynchronization.STATUS_UNKNOWN);
 	}
 
-	public void testJtaTransactionManagerWithExistingTransactionAndJtaSynchronization() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithExistingTransactionAndJtaSynchronization() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		TransactionManager tm = mock(TransactionManager.class);
 		MockJtaTransaction tx = new MockJtaTransaction();
@@ -389,7 +403,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(synch).afterCompletion(TransactionSynchronization.STATUS_ROLLED_BACK);
 	}
 
-	public void testJtaTransactionManagerWithExistingTransactionAndSynchronizationOnActual() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithExistingTransactionAndSynchronizationOnActual() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_ACTIVE);
 
@@ -414,7 +429,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(synch).afterCompletion(TransactionSynchronization.STATUS_UNKNOWN);
 	}
 
-	public void testJtaTransactionManagerWithExistingTransactionAndSynchronizationNever() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithExistingTransactionAndSynchronizationNever() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_ACTIVE);
 
@@ -436,7 +452,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(ut).setRollbackOnly();
 	}
 
-	public void testJtaTransactionManagerWithExistingAndPropagationSupports() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithExistingAndPropagationSupports() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_ACTIVE);
 
@@ -461,7 +478,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(synch).afterCompletion(TransactionSynchronization.STATUS_UNKNOWN);
 	}
 
-	public void testJtaTransactionManagerWithPropagationSupports() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithPropagationSupports() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION);
 
@@ -485,7 +503,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(synch).afterCompletion(TransactionSynchronization.STATUS_ROLLED_BACK);
 	}
 
-	public void testJtaTransactionManagerWithPropagationSupportsAndSynchronizationOnActual() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithPropagationSupportsAndSynchronizationOnActual() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION);
 
@@ -506,7 +525,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 	}
 
-	public void testJtaTransactionManagerWithPropagationSupportsAndSynchronizationNever() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithPropagationSupportsAndSynchronizationNever() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION);
 
@@ -527,7 +547,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 	}
 
-	public void testJtaTransactionManagerWithPropagationNotSupported() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithPropagationNotSupported() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		TransactionManager tm = mock(TransactionManager.class);
 		Transaction tx = mock(Transaction.class);
@@ -550,7 +571,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(tm).resume(tx);
 	}
 
-	public void testJtaTransactionManagerWithPropagationRequiresNew() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithPropagationRequiresNew() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		TransactionManager tm = mock(TransactionManager.class);
 		Transaction tx = mock(Transaction.class);
@@ -597,7 +619,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(tm).resume(tx);
 	}
 
-	public void testJtaTransactionManagerWithPropagationRequiresNewWithinSupports() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithPropagationRequiresNewWithinSupports() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION,
 				Status.STATUS_NO_TRANSACTION, Status.STATUS_ACTIVE, Status.STATUS_ACTIVE);
@@ -636,7 +659,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(ut).commit();
 	}
 
-	public void testJtaTransactionManagerWithPropagationRequiresNewAndExisting() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithPropagationRequiresNewAndExisting() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		TransactionManager tm = mock(TransactionManager.class);
 		Transaction tx = mock(Transaction.class);
@@ -660,7 +684,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(tm).resume(tx);
 	}
 
-	public void testJtaTransactionManagerWithPropagationRequiresNewAndExistingWithSuspendException() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithPropagationRequiresNewAndExistingWithSuspendException() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		TransactionManager tm = mock(TransactionManager.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_ACTIVE);
@@ -685,7 +710,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 	}
 
-	public void testJtaTransactionManagerWithPropagationRequiresNewAndExistingWithBeginException() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithPropagationRequiresNewAndExistingWithBeginException() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		TransactionManager tm = mock(TransactionManager.class);
 		Transaction tx = mock(Transaction.class);
@@ -713,7 +739,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(tm).resume(tx);
 	}
 
-	public void testJtaTransactionManagerWithPropagationRequiresNewAndAdapter() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithPropagationRequiresNewAndAdapter() throws Exception {
 		TransactionManager tm = mock(TransactionManager.class);
 		Transaction tx = mock(Transaction.class);
 		given(tm.getStatus()).willReturn(Status.STATUS_ACTIVE);
@@ -736,7 +763,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(tm).resume(tx);
 	}
 
-	public void testJtaTransactionManagerWithPropagationRequiresNewAndSuspensionNotSupported() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithPropagationRequiresNewAndSuspensionNotSupported() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_ACTIVE);
 
@@ -758,7 +786,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 	}
 
-	public void testJtaTransactionManagerWithIsolationLevel() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithIsolationLevel() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION);
 
@@ -779,7 +808,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		}
 	}
 
-	public void testJtaTransactionManagerWithSystemExceptionOnIsExisting() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithSystemExceptionOnIsExisting() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willThrow(new SystemException("system exception"));
 
@@ -799,7 +829,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		}
 	}
 
-	public void testJtaTransactionManagerWithNestedBegin() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithNestedBegin() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_ACTIVE);
 
@@ -817,7 +848,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(ut).commit();
 	}
 
-	public void testJtaTransactionManagerWithNotSupportedExceptionOnNestedBegin() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithNotSupportedExceptionOnNestedBegin() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_ACTIVE);
 		willThrow(new NotSupportedException("not supported")).given(ut).begin();
@@ -839,7 +871,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		}
 	}
 
-	public void testJtaTransactionManagerWithUnsupportedOperationExceptionOnNestedBegin() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithUnsupportedOperationExceptionOnNestedBegin() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_ACTIVE);
 		willThrow(new UnsupportedOperationException("not supported")).given(ut).begin();
@@ -861,7 +894,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		}
 	}
 
-	public void testJtaTransactionManagerWithSystemExceptionOnBegin() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithSystemExceptionOnBegin() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION);
 		willThrow(new SystemException("system exception")).given(ut).begin();
@@ -882,7 +916,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		}
 	}
 
-	public void testJtaTransactionManagerWithRollbackExceptionOnCommit() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithRollbackExceptionOnCommit() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION,
 				Status.STATUS_ACTIVE, Status.STATUS_ACTIVE);
@@ -912,11 +947,13 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(ut).begin();
 	}
 
-	public void testJtaTransactionManagerWithNoExceptionOnGlobalRollbackOnly() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithNoExceptionOnGlobalRollbackOnly() throws Exception {
 		doTestJtaTransactionManagerWithNoExceptionOnGlobalRollbackOnly(false);
 	}
 
-	public void testJtaTransactionManagerWithNoExceptionOnGlobalRollbackOnlyAndFailEarly() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithNoExceptionOnGlobalRollbackOnlyAndFailEarly() throws Exception {
 		doTestJtaTransactionManagerWithNoExceptionOnGlobalRollbackOnly(true);
 	}
 
@@ -977,7 +1014,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		}
 	}
 
-	public void testJtaTransactionManagerWithHeuristicMixedExceptionOnCommit() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithHeuristicMixedExceptionOnCommit() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION,
 				Status.STATUS_ACTIVE, Status.STATUS_ACTIVE);
@@ -1008,7 +1046,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(ut).begin();
 	}
 
-	public void testJtaTransactionManagerWithHeuristicRollbackExceptionOnCommit() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithHeuristicRollbackExceptionOnCommit() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION,
 				Status.STATUS_ACTIVE, Status.STATUS_ACTIVE);
@@ -1039,7 +1078,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(ut).begin();
 	}
 
-	public void testJtaTransactionManagerWithSystemExceptionOnCommit() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithSystemExceptionOnCommit() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION,
 				Status.STATUS_ACTIVE, Status.STATUS_ACTIVE);
@@ -1069,7 +1109,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(ut).begin();
 	}
 
-	public void testJtaTransactionManagerWithSystemExceptionOnRollback() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithSystemExceptionOnRollback() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION, Status.STATUS_ACTIVE);
 		willThrow(new SystemException("system exception")).given(ut).rollback();
@@ -1098,7 +1139,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(ut).begin();
 	}
 
-	public void testJtaTransactionManagerWithIllegalStateExceptionOnRollbackOnly() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithIllegalStateExceptionOnRollbackOnly() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_ACTIVE);
 		willThrow(new IllegalStateException("no existing transaction")).given(ut).setRollbackOnly();
@@ -1119,7 +1161,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		}
 	}
 
-	public void testJtaTransactionManagerWithSystemExceptionOnRollbackOnly() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithSystemExceptionOnRollbackOnly() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_ACTIVE);
 		willThrow(new SystemException("system exception")).given(ut).setRollbackOnly();
@@ -1146,7 +1189,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		}
 	}
 
-	public void testJtaTransactionManagerWithDoubleCommit() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithDoubleCommit() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION,
 				Status.STATUS_ACTIVE, Status.STATUS_ACTIVE);
@@ -1171,7 +1215,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(ut).commit();
 	}
 
-	public void testJtaTransactionManagerWithDoubleRollback() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithDoubleRollback() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION, Status.STATUS_ACTIVE);
 
@@ -1195,7 +1240,8 @@ public class JtaTransactionManagerTests extends TestCase {
 		verify(ut).rollback();
 	}
 
-	public void testJtaTransactionManagerWithRollbackAndCommit() throws Exception {
+	@Test
+	public void jtaTransactionManagerWithRollbackAndCommit() throws Exception {
 		UserTransaction ut = mock(UserTransaction.class);
 		given(ut.getStatus()).willReturn(Status.STATUS_NO_TRANSACTION, Status.STATUS_ACTIVE);
 
@@ -1237,8 +1283,8 @@ public class JtaTransactionManagerTests extends TestCase {
 	 * Prevent any side-effects due to this test modifying ThreadLocals that might
 	 * affect subsequent tests when all tests are run in the same JVM, as with Eclipse.
 	 */
-	@Override
-	protected void tearDown() {
+	@After
+	public void tearDown() {
 		assertTrue(TransactionSynchronizationManager.getResourceMap().isEmpty());
 		assertFalse(TransactionSynchronizationManager.isSynchronizationActive());
 		assertNull(TransactionSynchronizationManager.getCurrentTransactionName());

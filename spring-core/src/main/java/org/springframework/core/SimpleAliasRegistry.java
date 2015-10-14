@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,9 +49,13 @@ public class SimpleAliasRegistry implements AliasRegistry {
 			this.aliasMap.remove(alias);
 		}
 		else {
-			if (!allowAliasOverriding()) {
-				String registeredName = this.aliasMap.get(alias);
-				if (registeredName != null && !registeredName.equals(name)) {
+			String registeredName = this.aliasMap.get(alias);
+			if (registeredName != null) {
+				if (registeredName.equals(name)) {
+					// An existing alias - no need to re-register
+					return;
+				}
+				if (!allowAliasOverriding()) {
 					throw new IllegalStateException("Cannot register alias '" + alias + "' for name '" +
 							name + "': It is already registered for name '" + registeredName + "'.");
 				}
@@ -67,6 +71,23 @@ public class SimpleAliasRegistry implements AliasRegistry {
 	 */
 	protected boolean allowAliasOverriding() {
 		return true;
+	}
+
+	/**
+	 * Determine whether the given name has the given alias registered.
+	 * @param name the name to check
+	 * @param alias the alias to look for
+	 * @since 4.2.1
+	 */
+	public boolean hasAlias(String name, String alias) {
+		for (Map.Entry<String, String> entry : this.aliasMap.entrySet()) {
+			String registeredName = entry.getValue();
+			if (registeredName.equals(name)) {
+				String registeredAlias = entry.getKey();
+				return (registeredAlias.equals(alias) || hasAlias(registeredAlias, alias));
+			}
+		}
+		return false;
 	}
 
 	@Override
@@ -122,12 +143,17 @@ public class SimpleAliasRegistry implements AliasRegistry {
 				String registeredName = aliasCopy.get(alias);
 				String resolvedAlias = valueResolver.resolveStringValue(alias);
 				String resolvedName = valueResolver.resolveStringValue(registeredName);
-				if (resolvedAlias.equals(resolvedName)) {
+				if (resolvedAlias == null || resolvedName == null || resolvedAlias.equals(resolvedName)) {
 					this.aliasMap.remove(alias);
 				}
 				else if (!resolvedAlias.equals(alias)) {
 					String existingName = this.aliasMap.get(resolvedAlias);
-					if (existingName != null && !existingName.equals(resolvedName)) {
+					if (existingName != null) {
+						if (existingName.equals(resolvedName)) {
+							// Pointing to existing alias - just remove placeholder
+							this.aliasMap.remove(alias);
+							break;
+						}
 						throw new IllegalStateException(
 								"Cannot register resolved alias '" + resolvedAlias + "' (original: '" + alias +
 								"') for name '" + resolvedName + "': It is already registered for name '" +
@@ -141,6 +167,23 @@ public class SimpleAliasRegistry implements AliasRegistry {
 					this.aliasMap.put(alias, resolvedName);
 				}
 			}
+		}
+	}
+
+	/**
+	 * Check whether the given name points back to the given alias as an alias
+	 * in the other direction already, catching a circular reference upfront
+	 * and throwing a corresponding IllegalStateException.
+	 * @param name the candidate name
+	 * @param alias the candidate alias
+	 * @see #registerAlias
+	 * @see #hasAlias
+	 */
+	protected void checkForAliasCircle(String name, String alias) {
+		if (hasAlias(alias, name)) {
+			throw new IllegalStateException("Cannot register alias '" + alias +
+					"' for name '" + name + "': Circular reference - '" +
+					name + "' is a direct or indirect alias for '" + alias + "' already");
 		}
 	}
 
@@ -161,22 +204,6 @@ public class SimpleAliasRegistry implements AliasRegistry {
 		}
 		while (resolvedName != null);
 		return canonicalName;
-	}
-
-	/**
-	 * Check whether the given name points back to given alias as an alias
-	 * in the other direction, catching a circular reference upfront and
-	 * throwing a corresponding IllegalStateException.
-	 * @param name the candidate name
-	 * @param alias the candidate alias
-	 * @see #registerAlias
-	 */
-	protected void checkForAliasCircle(String name, String alias) {
-		if (alias.equals(canonicalName(name))) {
-			throw new IllegalStateException("Cannot register alias '" + alias +
-					"' for name '" + name + "': Circular reference - '" +
-					name + "' is a direct or indirect alias for '" + alias + "' already");
-		}
 	}
 
 }

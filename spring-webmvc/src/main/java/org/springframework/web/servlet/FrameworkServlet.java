@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.servlet;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Callable;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -60,6 +61,7 @@ import org.springframework.web.context.request.async.WebAsyncUtils;
 import org.springframework.web.context.support.ServletRequestHandledEvent;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
+import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.util.NestedServletException;
 import org.springframework.web.util.WebUtils;
 
@@ -182,7 +184,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	private String contextConfigLocation;
 
 	/** Actual ApplicationContextInitializer instances to apply to the context */
-	private final ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>> contextInitializers =
+	private final List<ApplicationContextInitializer<ConfigurableApplicationContext>> contextInitializers =
 			new ArrayList<ApplicationContextInitializer<ConfigurableApplicationContext>>();
 
 	/** Comma-delimited ApplicationContextInitializer class names set through init param */
@@ -364,13 +366,15 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	/**
 	 * Specify which {@link ApplicationContextInitializer} instances should be used
 	 * to initialize the application context used by this {@code FrameworkServlet}.
-	 * @see #configureAndRefreshWebApplicationContext(ConfigurableWebApplicationContext)
-	 * @see #applyInitializers(ConfigurableApplicationContext)
+	 * @see #configureAndRefreshWebApplicationContext
+	 * @see #applyInitializers
 	 */
 	@SuppressWarnings("unchecked")
-	public void setContextInitializers(ApplicationContextInitializer<? extends ConfigurableApplicationContext>... contextInitializers) {
-		for (ApplicationContextInitializer<? extends ConfigurableApplicationContext> initializer : contextInitializers) {
-			this.contextInitializers.add((ApplicationContextInitializer<ConfigurableApplicationContext>) initializer);
+	public void setContextInitializers(ApplicationContextInitializer<?>... initializers) {
+		if (initializers != null) {
+			for (ApplicationContextInitializer<?> initializer : initializers) {
+				this.contextInitializers.add((ApplicationContextInitializer<ConfigurableApplicationContext>) initializer);
+			}
 		}
 	}
 
@@ -900,7 +904,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	protected void doOptions(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		if (this.dispatchOptionsRequest) {
+		if (this.dispatchOptionsRequest || CorsUtils.isPreFlightRequest(request)) {
 			processRequest(request, response);
 			if (response.containsHeader("Allow")) {
 				// Proper OPTIONS response coming from a handler - we're done.

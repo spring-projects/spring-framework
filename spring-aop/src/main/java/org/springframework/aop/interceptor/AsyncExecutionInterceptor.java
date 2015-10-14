@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.aop.interceptor;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 
@@ -27,10 +28,8 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.Ordered;
-import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * AOP Alliance {@code MethodInterceptor} that processes method invocations
@@ -64,8 +63,7 @@ import org.springframework.util.concurrent.ListenableFuture;
  * @see org.springframework.scheduling.annotation.AsyncAnnotationAdvisor
  * @see org.springframework.scheduling.annotation.AnnotationAsyncExecutionInterceptor
  */
-public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
-		implements MethodInterceptor, Ordered {
+public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport implements MethodInterceptor, Ordered {
 
 	/**
 	 * Create a new {@code AsyncExecutionInterceptor}.
@@ -112,6 +110,9 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 						return ((Future<?>) result).get();
 					}
 				}
+				catch (ExecutionException ex) {
+					handleError(ex.getCause(), userDeclaredMethod, invocation.getArguments());
+				}
 				catch (Throwable ex) {
 					handleError(ex, userDeclaredMethod, invocation.getArguments());
 				}
@@ -119,17 +120,7 @@ public class AsyncExecutionInterceptor extends AsyncExecutionAspectSupport
 			}
 		};
 
-		Class<?> returnType = invocation.getMethod().getReturnType();
-		if (ListenableFuture.class.isAssignableFrom(returnType)) {
-			return ((AsyncListenableTaskExecutor) executor).submitListenable(task);
-		}
-		else if (Future.class.isAssignableFrom(returnType)) {
-			return executor.submit(task);
-		}
-		else {
-			executor.submit(task);
-			return null;
-		}
+		return doSubmit(task, executor, invocation.getMethod().getReturnType());
 	}
 
 	/**

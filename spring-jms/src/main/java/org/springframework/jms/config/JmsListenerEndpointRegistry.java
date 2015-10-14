@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package org.springframework.jms.config;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.logging.Log;
@@ -57,7 +57,7 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 	protected final Log logger = LogFactory.getLog(getClass());
 
 	private final Map<String, MessageListenerContainer> listenerContainers =
-			new LinkedHashMap<String, MessageListenerContainer>();
+			new ConcurrentHashMap<String, MessageListenerContainer>();
 
 	private int phase = Integer.MAX_VALUE;
 
@@ -86,21 +86,43 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 	 * Create a message listener container for the given {@link JmsListenerEndpoint}.
 	 * <p>This create the necessary infrastructure to honor that endpoint
 	 * with regards to its configuration.
+	 * <p>The {@code startImmediately} flag determines if the container should be
+	 * started immediately.
 	 * @param endpoint the endpoint to add
+	 * @param factory the listener factory to use
+	 * @param startImmediately start the container immediately if necessary
 	 * @see #getListenerContainers()
 	 * @see #getListenerContainer(String)
 	 */
-	public void registerListenerContainer(JmsListenerEndpoint endpoint, JmsListenerContainerFactory<?> factory) {
+	public void registerListenerContainer(JmsListenerEndpoint endpoint, JmsListenerContainerFactory<?> factory,
+			boolean startImmediately) {
+
 		Assert.notNull(endpoint, "Endpoint must not be null");
 		Assert.notNull(factory, "Factory must not be null");
 
 		String id = endpoint.getId();
 		Assert.notNull(id, "Endpoint id must not be null");
-		Assert.state(!this.listenerContainers.containsKey(id),
-				"Another endpoint is already registered with id '" + id + "'");
+		synchronized (this.listenerContainers) {
+			Assert.state(!this.listenerContainers.containsKey(id),
+					"Another endpoint is already registered with id '" + id + "'");
+			MessageListenerContainer container = createListenerContainer(endpoint, factory);
+			this.listenerContainers.put(id, container);
+			if (startImmediately) {
+				startIfNecessary(container);
+			}
+		}
+	}
 
-		MessageListenerContainer container = createListenerContainer(endpoint, factory);
-		this.listenerContainers.put(id, container);
+	/**
+	 * Create a message listener container for the given {@link JmsListenerEndpoint}.
+	 * <p>This create the necessary infrastructure to honor that endpoint
+	 * with regards to its configuration.
+	 * @param endpoint the endpoint to add
+	 * @param factory the listener factory to use
+	 * @see #registerListenerContainer(JmsListenerEndpoint, JmsListenerContainerFactory, boolean)
+	 */
+	public void registerListenerContainer(JmsListenerEndpoint endpoint, JmsListenerContainerFactory<?> factory) {
+		registerListenerContainer(endpoint, factory, false);
 	}
 
 	/**
@@ -163,9 +185,7 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 	@Override
 	public void start() {
 		for (MessageListenerContainer listenerContainer : getListenerContainers()) {
-			if (listenerContainer.isAutoStartup()) {
-				listenerContainer.start();
-			}
+			startIfNecessary(listenerContainer);
 		}
 	}
 
@@ -193,6 +213,17 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Start the specified {@link MessageListenerContainer} if it should be started
+	 * on startup.
+	 * @see MessageListenerContainer#isAutoStartup()
+	 */
+	private static void startIfNecessary(MessageListenerContainer listenerContainer) {
+		if (listenerContainer.isAutoStartup()) {
+			listenerContainer.start();
+		}
 	}
 
 

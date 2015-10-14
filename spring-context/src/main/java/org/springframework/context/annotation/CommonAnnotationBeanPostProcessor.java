@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,8 @@ import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceClient;
 import javax.xml.ws.WebServiceRef;
 
+import org.springframework.aop.TargetSource;
+import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
@@ -64,6 +66,7 @@ import org.springframework.core.Ordered;
 import org.springframework.jndi.support.SimpleJndiBeanFactory;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -337,81 +340,129 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 		return metadata;
 	}
 
-	private InjectionMetadata buildResourceMetadata(Class<?> clazz) {
+	private InjectionMetadata buildResourceMetadata(final Class<?> clazz) {
 		LinkedList<InjectionMetadata.InjectedElement> elements = new LinkedList<InjectionMetadata.InjectedElement>();
 		Class<?> targetClass = clazz;
 
 		do {
-			LinkedList<InjectionMetadata.InjectedElement> currElements = new LinkedList<InjectionMetadata.InjectedElement>();
-			for (Field field : targetClass.getDeclaredFields()) {
-				if (webServiceRefClass != null && field.isAnnotationPresent(webServiceRefClass)) {
-					if (Modifier.isStatic(field.getModifiers())) {
-						throw new IllegalStateException("@WebServiceRef annotation is not supported on static fields");
+			final LinkedList<InjectionMetadata.InjectedElement> currElements =
+					new LinkedList<InjectionMetadata.InjectedElement>();
+
+			ReflectionUtils.doWithLocalFields(targetClass, new ReflectionUtils.FieldCallback() {
+				@Override
+				public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
+					if (webServiceRefClass != null && field.isAnnotationPresent(webServiceRefClass)) {
+						if (Modifier.isStatic(field.getModifiers())) {
+							throw new IllegalStateException("@WebServiceRef annotation is not supported on static fields");
+						}
+						currElements.add(new WebServiceRefElement(field, field, null));
 					}
-					currElements.add(new WebServiceRefElement(field, field, null));
+					else if (ejbRefClass != null && field.isAnnotationPresent(ejbRefClass)) {
+						if (Modifier.isStatic(field.getModifiers())) {
+							throw new IllegalStateException("@EJB annotation is not supported on static fields");
+						}
+						currElements.add(new EjbRefElement(field, field, null));
+					}
+					else if (field.isAnnotationPresent(Resource.class)) {
+						if (Modifier.isStatic(field.getModifiers())) {
+							throw new IllegalStateException("@Resource annotation is not supported on static fields");
+						}
+						if (!ignoredResourceTypes.contains(field.getType().getName())) {
+							currElements.add(new ResourceElement(field, field, null));
+						}
+					}
 				}
-				else if (ejbRefClass != null && field.isAnnotationPresent(ejbRefClass)) {
-					if (Modifier.isStatic(field.getModifiers())) {
-						throw new IllegalStateException("@EJB annotation is not supported on static fields");
+			});
+
+			ReflectionUtils.doWithLocalMethods(targetClass, new ReflectionUtils.MethodCallback() {
+				@Override
+				public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
+					Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
+					if (!BridgeMethodResolver.isVisibilityBridgeMethodPair(method, bridgedMethod)) {
+						return;
 					}
-					currElements.add(new EjbRefElement(field, field, null));
-				}
-				else if (field.isAnnotationPresent(Resource.class)) {
-					if (Modifier.isStatic(field.getModifiers())) {
-						throw new IllegalStateException("@Resource annotation is not supported on static fields");
-					}
-					if (!ignoredResourceTypes.contains(field.getType().getName())) {
-						currElements.add(new ResourceElement(field, field, null));
-					}
-				}
-			}
-			for (Method method : targetClass.getDeclaredMethods()) {
-				Method bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
-				if (!BridgeMethodResolver.isVisibilityBridgeMethodPair(method, bridgedMethod)) {
-					continue;
-				}
-				if (method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
-					if (webServiceRefClass != null && bridgedMethod.isAnnotationPresent(webServiceRefClass)) {
-						if (Modifier.isStatic(method.getModifiers())) {
-							throw new IllegalStateException("@WebServiceRef annotation is not supported on static methods");
-						}
-						if (method.getParameterTypes().length != 1) {
-							throw new IllegalStateException("@WebServiceRef annotation requires a single-arg method: " + method);
-						}
-						PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
-						currElements.add(new WebServiceRefElement(method, bridgedMethod, pd));
-					}
-					else if (ejbRefClass != null && bridgedMethod.isAnnotationPresent(ejbRefClass)) {
-						if (Modifier.isStatic(method.getModifiers())) {
-							throw new IllegalStateException("@EJB annotation is not supported on static methods");
-						}
-						if (method.getParameterTypes().length != 1) {
-							throw new IllegalStateException("@EJB annotation requires a single-arg method: " + method);
-						}
-						PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
-						currElements.add(new EjbRefElement(method, bridgedMethod, pd));
-					}
-					else if (bridgedMethod.isAnnotationPresent(Resource.class)) {
-						if (Modifier.isStatic(method.getModifiers())) {
-							throw new IllegalStateException("@Resource annotation is not supported on static methods");
-						}
-						Class<?>[] paramTypes = method.getParameterTypes();
-						if (paramTypes.length != 1) {
-							throw new IllegalStateException("@Resource annotation requires a single-arg method: " + method);
-						}
-						if (!ignoredResourceTypes.contains(paramTypes[0].getName())) {
+					if (method.equals(ClassUtils.getMostSpecificMethod(method, clazz))) {
+						if (webServiceRefClass != null && bridgedMethod.isAnnotationPresent(webServiceRefClass)) {
+							if (Modifier.isStatic(method.getModifiers())) {
+								throw new IllegalStateException("@WebServiceRef annotation is not supported on static methods");
+							}
+							if (method.getParameterTypes().length != 1) {
+								throw new IllegalStateException("@WebServiceRef annotation requires a single-arg method: " + method);
+							}
 							PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
-							currElements.add(new ResourceElement(method, bridgedMethod, pd));
+							currElements.add(new WebServiceRefElement(method, bridgedMethod, pd));
+						}
+						else if (ejbRefClass != null && bridgedMethod.isAnnotationPresent(ejbRefClass)) {
+							if (Modifier.isStatic(method.getModifiers())) {
+								throw new IllegalStateException("@EJB annotation is not supported on static methods");
+							}
+							if (method.getParameterTypes().length != 1) {
+								throw new IllegalStateException("@EJB annotation requires a single-arg method: " + method);
+							}
+							PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
+							currElements.add(new EjbRefElement(method, bridgedMethod, pd));
+						}
+						else if (bridgedMethod.isAnnotationPresent(Resource.class)) {
+							if (Modifier.isStatic(method.getModifiers())) {
+								throw new IllegalStateException("@Resource annotation is not supported on static methods");
+							}
+							Class<?>[] paramTypes = method.getParameterTypes();
+							if (paramTypes.length != 1) {
+								throw new IllegalStateException("@Resource annotation requires a single-arg method: " + method);
+							}
+							if (!ignoredResourceTypes.contains(paramTypes[0].getName())) {
+								PropertyDescriptor pd = BeanUtils.findPropertyForMethod(bridgedMethod, clazz);
+								currElements.add(new ResourceElement(method, bridgedMethod, pd));
+							}
 						}
 					}
 				}
-			}
+			});
+
 			elements.addAll(0, currElements);
 			targetClass = targetClass.getSuperclass();
 		}
 		while (targetClass != null && targetClass != Object.class);
 
 		return new InjectionMetadata(clazz, elements);
+	}
+
+	/**
+	 * Obtain a lazily resolving resource proxy for the given name and type,
+	 * delegating to {@link #getResource} on demand once a method call comes in.
+	 * @param element the descriptor for the annotated field/method
+	 * @param requestingBeanName the name of the requesting bean
+	 * @return the resource object (never {@code null})
+	 * @since 4.2
+	 * @see #getResource
+	 * @see Lazy
+	 */
+	protected Object buildLazyResourceProxy(final LookupElement element, final String requestingBeanName) {
+		TargetSource ts = new TargetSource() {
+			@Override
+			public Class<?> getTargetClass() {
+				return element.lookupType;
+			}
+			@Override
+			public boolean isStatic() {
+				return false;
+			}
+			@Override
+			public Object getTarget() {
+				return getResource(element, requestingBeanName);
+			}
+			@Override
+			public void releaseTarget(Object target) {
+			}
+		};
+		ProxyFactory pf = new ProxyFactory();
+		pf.setTargetSource(ts);
+		if (element.lookupType.isInterface()) {
+			pf.addInterface(element.lookupType);
+		}
+		ClassLoader classLoader = (this.beanFactory instanceof ConfigurableBeanFactory ?
+				((ConfigurableBeanFactory) this.beanFactory).getBeanClassLoader() : null);
+		return pf.getProxy(classLoader);
 	}
 
 	/**
@@ -527,6 +578,8 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	 */
 	private class ResourceElement extends LookupElement {
 
+		private final boolean lazyLookup;
+
 		public ResourceElement(Member member, AnnotatedElement ae, PropertyDescriptor pd) {
 			super(member, pd);
 			Resource resource = ae.getAnnotation(Resource.class);
@@ -542,7 +595,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			else if (beanFactory instanceof ConfigurableBeanFactory){
 				resourceName = ((ConfigurableBeanFactory) beanFactory).resolveEmbeddedValue(resourceName);
 			}
-			if (resourceType != null && !Object.class.equals(resourceType)) {
+			if (resourceType != null && Object.class != resourceType) {
 				checkResourceType(resourceType);
 			}
 			else {
@@ -552,11 +605,14 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			this.name = resourceName;
 			this.lookupType = resourceType;
 			this.mappedName = resource.mappedName();
+			Lazy lazy = ae.getAnnotation(Lazy.class);
+			this.lazyLookup = (lazy != null && lazy.value());
 		}
 
 		@Override
 		protected Object getResourceToInject(Object target, String requestingBeanName) {
-			return getResource(this, requestingBeanName);
+			return (this.lazyLookup ? buildLazyResourceProxy(this, requestingBeanName) :
+					getResource(this, requestingBeanName));
 		}
 	}
 
@@ -583,7 +639,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 					resourceName = Introspector.decapitalize(resourceName.substring(3));
 				}
 			}
-			if (resourceType != null && !Object.class.equals(resourceType)) {
+			if (resourceType != null && Object.class != resourceType) {
 				checkResourceType(resourceType);
 			}
 			else {
@@ -596,7 +652,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 				this.lookupType = resourceType;
 			}
 			else {
-				this.lookupType = (!Object.class.equals(resource.value()) ? resource.value() : Service.class);
+				this.lookupType = resource.value();
 			}
 			this.mappedName = resource.mappedName();
 			this.wsdlLocation = resource.wsdlLocation();
@@ -610,7 +666,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			}
 			catch (NoSuchBeanDefinitionException notFound) {
 				// Service to be created through generated class.
-				if (Service.class.equals(this.lookupType)) {
+				if (Service.class == this.lookupType) {
 					throw new IllegalStateException("No resource with name '" + this.name + "' found in context, " +
 							"and no specific JAX-WS Service subclass specified. The typical solution is to either specify " +
 							"a LocalJaxWsServiceFactoryBean with the given name or to specify the (generated) Service " +
@@ -667,7 +723,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 				}
 			}
 			Class<?> resourceType = resource.beanInterface();
-			if (resourceType != null && !Object.class.equals(resourceType)) {
+			if (resourceType != null && Object.class != resourceType) {
 				checkResourceType(resourceType);
 			}
 			else {

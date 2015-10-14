@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:aop="http://www.springframework.org/schema/aop"
+		xmlns:lang="http://www.springframework.org/schema/lang"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+				http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd
+				http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.5.xsd">
+
+	<aop:config>
+		<aop:aspect ref="getMessageAspect">
+			<aop:before method="before" pointcut="execution(* *..Messenger.*(..))"/>
+		</aop:aspect>
+	</aop:config>
+
+	<lang:groovy id="getMessageAspect" script-source="classpath:org/springframework/scripting/groovy/CallCounter.groovy"
+			init-method="init" destroy-method="destroy"/>
+
+	<lang:groovy id="messenger" script-source="classpath:org/springframework/scripting/groovy/Messenger.groovy">
+		<lang:property name="message" value="Hello World!"/>
+	</lang:groovy>
+
+	<lang:groovy id="messengerPrototype" script-source="classpath:org/springframework/scripting/groovy/Messenger.groovy"
+			scope="prototype">
+		<lang:property name="message" value="Hello World!"/>
+	</lang:groovy>
+
+	<lang:groovy id="calculator" depends-on="messenger" customizer-ref="customizer">
+		<lang:inline-script>
+			package org.springframework.scripting.groovy;
+import org.springframework.scripting.Calculator
+class GroovyCalculator implements Calculator {
+	int add(int x, int y) {
+	   return x + y;
+	}
+}
+		</lang:inline-script>
+	</lang:groovy>
+
+	<lang:groovy id="customizer">
+		<lang:inline-script><![CDATA[
+import org.springframework.scripting.groovy.GroovyObjectCustomizer;
+
+public class TestCustomizer implements GroovyObjectCustomizer {
+	public void customize(GroovyObject o) {
+		println "customizing ${o}.."
+	}
+}]]>
+		</lang:inline-script>
+	</lang:groovy>
+
+	<lang:groovy id="refreshableMessenger" refresh-check-delay="5000"
+			script-source="classpath:org/springframework/scripting/groovy/Messenger.groovy">
+		<lang:property name="message" value="Hello World!"/>
+	</lang:groovy>
+
+  <lang:groovy script-source="classpath:org/springframework/scripting/groovy/Messenger.groovy">
+    <lang:property name="message" value="Hello World!"/>
+  </lang:groovy>
+
+</beans>

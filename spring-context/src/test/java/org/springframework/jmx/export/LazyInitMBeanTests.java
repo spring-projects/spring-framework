@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2007 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,24 +19,22 @@ package org.springframework.jmx.export;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jmx.support.ObjectNameManager;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
  */
-public class LazyInitMBeanTests extends TestCase {
+public class LazyInitMBeanTests {
 
-	public void testLazyInit() {
-		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getApplicationContextPath());
-		ctx.close();
-	}
-
-	public void testInvokeOnLazyInitBean() throws Exception {
-		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(getApplicationContextPath());
+	@Test
+	public void invokeOnLazyInitBean() throws Exception {
+		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("org/springframework/jmx/export/lazyInit.xml");
 		assertFalse(ctx.getBeanFactory().containsSingleton("testBean"));
 		assertFalse(ctx.getBeanFactory().containsSingleton("testBean2"));
 		try {
@@ -48,10 +46,6 @@ public class LazyInitMBeanTests extends TestCase {
 		finally {
 			ctx.close();
 		}
-	}
-
-	private String getApplicationContextPath() {
-		return "org/springframework/jmx/export/lazyInit.xml";
 	}
 
 }

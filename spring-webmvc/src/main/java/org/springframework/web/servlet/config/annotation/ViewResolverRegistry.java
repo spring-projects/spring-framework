@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 import org.springframework.web.servlet.view.groovy.GroovyMarkupConfigurer;
 import org.springframework.web.servlet.view.groovy.GroovyMarkupViewResolver;
+import org.springframework.web.servlet.view.script.ScriptTemplateConfigurer;
+import org.springframework.web.servlet.view.script.ScriptTemplateViewResolver;
 import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
 import org.springframework.web.servlet.view.velocity.VelocityConfigurer;
@@ -234,6 +236,22 @@ public class ViewResolverRegistry {
 	}
 
 	/**
+	 * Register a script template view resolver with an empty default view name prefix and suffix.
+	 * @since 4.2
+	 */
+	public UrlBasedViewResolverRegistration scriptTemplate() {
+		if (this.applicationContext != null && !hasBeanOfType(ScriptTemplateConfigurer.class)) {
+			throw new BeanInitializationException("In addition to a script template view resolver " +
+					"there must also be a single ScriptTemplateConfig bean in this web application context " +
+					"(or its parent): ScriptTemplateConfigurer is the usual implementation. " +
+					"This bean may be given any name.");
+		}
+		ScriptRegistration registration = new ScriptRegistration();
+		this.viewResolvers.add(registration.getViewResolver());
+		return registration;
+	}
+
+	/**
 	 * Register a bean name view resolver that interprets view names as the names
 	 * of {@link org.springframework.web.servlet.View} beans.
 	 */
@@ -321,6 +339,14 @@ public class ViewResolverRegistry {
 		private GroovyMarkupRegistration() {
 			super(new GroovyMarkupViewResolver());
 			getViewResolver().setSuffix(".tpl");
+		}
+	}
+
+	private static class ScriptRegistration extends UrlBasedViewResolverRegistration {
+
+		private ScriptRegistration() {
+			super(new ScriptTemplateViewResolver());
+			getViewResolver();
 		}
 	}
 

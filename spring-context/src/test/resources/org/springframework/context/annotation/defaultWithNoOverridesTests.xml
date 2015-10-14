@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+				            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+	<context:component-scan base-package="org.springframework.context.annotation"
+            use-default-filters="false"
+            annotation-config="false">
+        <context:include-filter type="assignable"
+                expression="org.springframework.context.annotation.ComponentScanParserBeanDefinitionDefaultsTests$DefaultsTestBean"/>
+    </context:component-scan>
+
+    <bean class="org.springframework.context.annotation.ComponentScanParserBeanDefinitionDefaultsTests$ConstructorDependencyTestBean">
+        <constructor-arg value="cd"/>
+    </bean>
+
+    <bean class="org.springframework.context.annotation.ComponentScanParserBeanDefinitionDefaultsTests$PropertyDependencyTestBean">
+        <constructor-arg value="pd1"/>
+    </bean>
+
+    <bean id="propertyDependency2"
+          class="org.springframework.context.annotation.ComponentScanParserBeanDefinitionDefaultsTests$PropertyDependencyTestBean">
+        <constructor-arg value="pd2"/>
+    </bean>
+
+</beans>

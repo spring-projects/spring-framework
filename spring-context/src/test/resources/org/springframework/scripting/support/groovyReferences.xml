@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<bean class="org.springframework.scripting.support.ScriptFactoryPostProcessor"/>
+
+	<bean id="messenger" class="org.springframework.scripting.groovy.GroovyScriptFactory">
+		<constructor-arg>
+			<value>inline:package org.springframework.scripting;
+
+import org.springframework.scripting.Messenger
+
+class DelegatingMessenger implements Messenger {
+
+	private Messenger wrappedMessenger;
+
+	public String getMessage() {
+		this.wrappedMessenger.getMessage();
+	}
+
+	public void setMessenger(Messenger wrappedMessenger) {
+		this.wrappedMessenger = wrappedMessenger;
+	}
+}</value>
+		</constructor-arg>
+		<property name="messenger" ref="wrappedMessenger"/>
+	</bean>
+
+	<bean id="wrappedMessenger" class="org.springframework.scripting.support.StubMessenger"/>
+
+</beans>

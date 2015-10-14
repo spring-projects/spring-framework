@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,17 +45,20 @@ public interface WebSocketHandlerRegistration {
 	WebSocketHandlerRegistration addInterceptors(HandshakeInterceptor... interceptors);
 
 	/**
-	 * Configure allowed {@code Origin} header values. This check is mostly designed for browser
-	 * clients. There is noting preventing other types of client to modify the Origin header value.
+	 * Configure allowed {@code Origin} header values. This check is mostly designed for
+	 * browser clients. There is nothing preventing other types of client to modify the
+	 * {@code Origin} header value.
 	 *
-	 * <p>When SockJS is enabled and allowed origins are restricted, transport types that do not
-	 * use {@code Origin} headers for cross origin requests (jsonp-polling, iframe-xhr-polling,
-	 * iframe-eventsource and iframe-htmlfile) are disabled. As a consequence, IE6/IE7 won't be
-	 * supported anymore and IE8/IE9 will only be supported without cookies.
+	 * <p>When SockJS is enabled and origins are restricted, transport types that do not
+	 * allow to check request origin (JSONP and Iframe based transports) are disabled.
+	 * As a consequence, IE 6 to 9 are not supported when origins are restricted.
 	 *
-	 * <p>By default, all origins are allowed.
+	 * <p>Each provided allowed origin must start by "http://", "https://" or be "*"
+	 * (means that all origins are allowed). By default, only same origin requests are
+	 * allowed (empty list).
 	 *
 	 * @since 4.1.2
+	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>
 	 * @see <a href="https://github.com/sockjs/sockjs-client#supported-transports-by-browser-html-served-from-http-or-https">SockJS supported transports by browser</a>
 	 */
 	WebSocketHandlerRegistration setAllowedOrigins(String... origins);

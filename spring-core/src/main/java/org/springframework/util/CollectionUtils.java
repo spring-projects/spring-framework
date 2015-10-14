@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -335,26 +335,28 @@ public abstract class CollectionUtils {
 	}
 
 	/**
-	 * Adapt a {@code Map<K, List<V>>} to an {@code MultiValueMap<K,V>}.
-	 * @param map the map
+	 * Adapt a {@code Map<K, List<V>>} to an {@code MultiValueMap<K, V>}.
+	 * @param map the original map
 	 * @return the multi-value map
+	 * @since 3.1
 	 */
 	public static <K, V> MultiValueMap<K, V> toMultiValueMap(Map<K, List<V>> map) {
 		return new MultiValueMapAdapter<K, V>(map);
-
 	}
 
 	/**
 	 * Return an unmodifiable view of the specified multi-value map.
 	 * @param  map the map for which an unmodifiable view is to be returned.
 	 * @return an unmodifiable view of the specified multi-value map.
+	 * @since 3.1
 	 */
-	public static <K,V> MultiValueMap<K,V> unmodifiableMultiValueMap(MultiValueMap<? extends K, ? extends V> map) {
+	@SuppressWarnings("unchecked")
+	public static <K, V> MultiValueMap<K, V> unmodifiableMultiValueMap(MultiValueMap<? extends K, ? extends V> map) {
 		Assert.notNull(map, "'map' must not be null");
 		Map<K, List<V>> result = new LinkedHashMap<K, List<V>>(map.size());
 		for (Map.Entry<? extends K, ? extends List<? extends V>> entry : map.entrySet()) {
-			List<V> values = Collections.unmodifiableList(entry.getValue());
-			result.put(entry.getKey(), values);
+			List<? extends V> values = Collections.unmodifiableList(entry.getValue());
+			result.put(entry.getKey(), (List<V>) values);
 		}
 		Map<K, List<V>> unmodifiableMap = Collections.unmodifiableMap(result);
 		return toMultiValueMap(unmodifiableMap);
@@ -366,7 +368,7 @@ public abstract class CollectionUtils {
 	 */
 	private static class EnumerationIterator<E> implements Iterator<E> {
 
-		private Enumeration<E> enumeration;
+		private final Enumeration<E> enumeration;
 
 		public EnumerationIterator(Enumeration<E> enumeration) {
 			this.enumeration = enumeration;
@@ -387,6 +389,7 @@ public abstract class CollectionUtils {
 			throw new UnsupportedOperationException("Not supported");
 		}
 	}
+
 
 	/**
 	 * Adapts a Map to the MultiValueMap contract.
@@ -476,8 +479,8 @@ public abstract class CollectionUtils {
 		}
 
 		@Override
-		public void putAll(Map<? extends K, ? extends List<V>> m) {
-			this.map.putAll(m);
+		public void putAll(Map<? extends K, ? extends List<V>> map) {
+			this.map.putAll(map);
 		}
 
 		@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TestName;
 
+import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.support.StaticListableBeanFactory;
 import org.springframework.jms.StubTextMessage;
 import org.springframework.jms.listener.DefaultMessageListenerContainer;
@@ -46,6 +47,7 @@ import org.springframework.jms.listener.adapter.MessagingMessageListenerAdapter;
 import org.springframework.jms.listener.adapter.ReplyFailureException;
 import org.springframework.jms.support.JmsHeaders;
 import org.springframework.jms.support.JmsMessageHeaderAccessor;
+import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -108,6 +110,20 @@ public class MethodJmsListenerEndpointTests {
 	}
 
 	@Test
+	public void setExtraCollaborators() {
+		MessageConverter messageConverter = mock(MessageConverter.class);
+		DestinationResolver destinationResolver = mock(DestinationResolver.class);
+		this.container.setMessageConverter(messageConverter);
+		this.container.setDestinationResolver(destinationResolver);
+
+		MessagingMessageListenerAdapter listener = createInstance(this.factory,
+				getListenerMethod("resolveObjectPayload", MyBean.class), container);
+		DirectFieldAccessor accessor = new DirectFieldAccessor(listener);
+		assertSame(messageConverter, accessor.getPropertyValue("messageConverter"));
+		assertSame(destinationResolver, accessor.getPropertyValue("destinationResolver"));
+	}
+
+	@Test
 	public void resolveMessageAndSession() throws JMSException {
 		MessagingMessageListenerAdapter listener = createDefaultInstance(javax.jms.Message.class, Session.class);
 
@@ -138,6 +154,17 @@ public class MethodJmsListenerEndpointTests {
 
 	@Test
 	public void resolveCustomHeaderNameAndPayload() throws JMSException {
+		MessagingMessageListenerAdapter listener = createDefaultInstance(String.class, int.class);
+
+		Session session = mock(Session.class);
+		StubTextMessage message = createSimpleJmsTextMessage("my payload");
+		message.setIntProperty("myCounter", 24);
+		listener.onMessage(message, session);
+		assertDefaultListenerMethodInvocation();
+	}
+
+	@Test
+	public void resolveCustomHeaderNameAndPayloadWithHeaderNameSet() throws JMSException {
 		MessagingMessageListenerAdapter listener = createDefaultInstance(String.class, int.class);
 
 		Session session = mock(Session.class);
@@ -242,10 +269,33 @@ public class MethodJmsListenerEndpointTests {
 	}
 
 	@Test
+	public void processFromTopicAndReplyWithSendToQueue() throws JMSException {
+		String methodName = "processAndReplyWithSendTo";
+		SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
+		container.setPubSubDomain(true);
+		container.setReplyPubSubDomain(false);
+		MessagingMessageListenerAdapter listener = createInstance(this.factory,
+				getListenerMethod(methodName, String.class), container);
+		processAndReplyWithSendTo(listener, false);
+		assertListenerMethodInvocation(sample, methodName);
+	}
+
+	@Test
 	public void processAndReplyWithSendToTopic() throws JMSException {
 		String methodName = "processAndReplyWithSendTo";
 		SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
 		container.setPubSubDomain(true);
+		MessagingMessageListenerAdapter listener = createInstance(this.factory,
+				getListenerMethod(methodName, String.class), container);
+		processAndReplyWithSendTo(listener, true);
+		assertListenerMethodInvocation(sample, methodName);
+	}
+
+	@Test
+	public void processFromQueueAndReplyWithSendToTopic() throws JMSException {
+		String methodName = "processAndReplyWithSendTo";
+		SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
+		container.setReplyPubSubDomain(true);
 		MessagingMessageListenerAdapter listener = createInstance(this.factory,
 				getListenerMethod(methodName, String.class), container);
 		processAndReplyWithSendTo(listener, true);
@@ -441,6 +491,12 @@ public class MethodJmsListenerEndpointTests {
 
 		public void resolveCustomHeaderNameAndPayload(@Payload String content, @Header("myCounter") int counter) {
 			invocations.put("resolveCustomHeaderNameAndPayload", true);
+			assertEquals("Wrong @Payload resolution", "my payload", content);
+			assertEquals("Wrong @Header resolution", 24, counter);
+		}
+
+		public void resolveCustomHeaderNameAndPayloadWithHeaderNameSet(@Payload String content, @Header(name = "myCounter") int counter) {
+			invocations.put("resolveCustomHeaderNameAndPayloadWithHeaderNameSet", true);
 			assertEquals("Wrong @Payload resolution", "my payload", content);
 			assertEquals("Wrong @Header resolution", 24, counter);
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import org.springframework.core.annotation.AliasFor;
 
 /**
  * {@code @TestPropertySource} is a class-level annotation that is used to
@@ -94,6 +96,7 @@ public @interface TestPropertySource {
 	 *
 	 * @see #locations
 	 */
+	@AliasFor("locations")
 	String[] value() default {};
 
 	/**
@@ -121,7 +124,10 @@ public @interface TestPropertySource {
 	 * {@code http:}, etc.) will be loaded using the specified resource protocol.
 	 * Resource location wildcards (e.g. <code>*&#42;/*.properties</code>)
 	 * are not permitted: each location must evaluate to exactly one
-	 * {@code .properties} or {@code .xml} resource.
+	 * {@code .properties} or {@code .xml} resource. Property placeholders
+	 * in paths (i.e., <code>${...}</code>) will be
+	 * {@linkplain org.springframework.core.env.Environment#resolveRequiredPlaceholders(String) resolved}
+	 * against the {@code Environment}.
 	 *
 	 * <h3>Default Properties File Detection</h3>
 	 * <p>See the class-level Javadoc for a discussion on detection of defaults.
@@ -138,6 +144,7 @@ public @interface TestPropertySource {
 	 * @see #properties
 	 * @see org.springframework.core.env.PropertySource
 	 */
+	@AliasFor("value")
 	String[] locations() default {};
 
 	/**

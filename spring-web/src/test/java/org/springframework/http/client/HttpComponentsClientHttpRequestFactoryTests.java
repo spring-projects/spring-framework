@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,9 @@ import org.springframework.http.HttpMethod;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * @author Stephane Nicoll
+ */
 public class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpRequestFactoryTestCase {
 
 	@Override
@@ -42,6 +45,7 @@ public class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpReq
 	@Override
 	@Test
 	public void httpMethods() throws Exception {
+		super.httpMethods();
 		assertHttpMethod("patch", HttpMethod.PATCH);
 	}
 
@@ -79,19 +83,6 @@ public class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpReq
 		assertEquals("Wrong custom connection timeout", 1234, requestConfig.getConnectTimeout());
 		assertEquals("Wrong custom connection request timeout", 4321, requestConfig.getConnectionRequestTimeout());
 		assertEquals("Wrong custom socket timeout", 4567, requestConfig.getSocketTimeout());
-	}
-
-	@Test
-	public void customHttpClientUsesItsDefault() throws Exception {
-		HttpComponentsClientHttpRequestFactory hrf =
-				new HttpComponentsClientHttpRequestFactory(HttpClientBuilder.create().build());
-
-		URI uri = new URI(baseUrl + "/status/ok");
-		HttpComponentsClientHttpRequest request = (HttpComponentsClientHttpRequest)
-				hrf.createRequest(uri, HttpMethod.GET);
-
-		assertNull("No custom config should be set with a custom HttpClient",
-				request.getHttpContext().getAttribute(HttpClientContext.REQUEST_CONFIG));
 	}
 
 	@Test

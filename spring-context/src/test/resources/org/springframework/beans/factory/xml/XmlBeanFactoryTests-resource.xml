@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<beans>
+
+	<import resource="XmlBeanFactoryTests-resourceImport.xml"/>
+
+	<bean id="resource2" class="org.springframework.tests.sample.beans.ResourceTestBean">
+		<constructor-arg index="0" value="classpath:org/springframework/beans/factory/xml/test.properties"/>
+		<constructor-arg index="1" value="classpath:org/springframework/beans/factory/xml/test.properties"/>
+	</bean>
+
+</beans>

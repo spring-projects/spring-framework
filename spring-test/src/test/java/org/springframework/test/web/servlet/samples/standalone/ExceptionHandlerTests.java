@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,17 +16,18 @@
 
 package org.springframework.test.web.servlet.samples.standalone;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
+
 import org.junit.Test;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
 /**
  * Exception handling via {@code @ExceptionHandler} method.
@@ -34,6 +35,7 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
  * @author Rossen Stoyanchev
  */
 public class ExceptionHandlerTests {
+
 
 	@Test
 	public void testExceptionHandlerMethod() throws Exception {
@@ -43,6 +45,14 @@ public class ExceptionHandlerTests {
 				.andExpect(forwardedUrl("errorView"));
 	}
 
+	@Test
+	public void testGlobalExceptionHandlerMethod() throws Exception {
+		standaloneSetup(new PersonController()).setControllerAdvice(new GlobalExceptionHandler()).build()
+				.perform(get("/person/Bonnie"))
+				.andExpect(status().isOk())
+				.andExpect(forwardedUrl("globalErrorView"));
+	}
+
 
 	@Controller
 	private static class PersonController {
@@ -50,7 +60,10 @@ public class ExceptionHandlerTests {
 		@RequestMapping(value="/person/{name}", method=RequestMethod.GET)
 		public String show(@PathVariable String name) {
 			if (name.equals("Clyde")) {
-				throw new IllegalArgumentException("Black listed");
+				throw new IllegalArgumentException("simulated exception");
+			}
+			else if (name.equals("Bonnie")) {
+				throw new IllegalStateException("simulated exception");
 			}
 			return "person/show";
 		}
@@ -60,4 +73,15 @@ public class ExceptionHandlerTests {
 			return "errorView";
 		}
 	}
+
+	@ControllerAdvice
+	private static class GlobalExceptionHandler {
+
+		@ExceptionHandler
+		public String handleException(IllegalStateException exception) {
+			return "globalErrorView";
+		}
+
+	}
+
 }

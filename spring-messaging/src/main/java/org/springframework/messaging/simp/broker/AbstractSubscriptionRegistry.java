@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,8 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
-import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -36,72 +37,94 @@ import org.springframework.util.MultiValueMap;
  */
 public abstract class AbstractSubscriptionRegistry implements SubscriptionRegistry {
 
+	private static MultiValueMap<String, String> EMPTY_MAP =
+			CollectionUtils.unmodifiableMultiValueMap(new LinkedMultiValueMap<String, String>(0));
+
+
 	protected final Log logger = LogFactory.getLog(getClass());
 
 
 	@Override
 	public final void registerSubscription(Message<?> message) {
 		MessageHeaders headers = message.getHeaders();
+
 		SimpMessageType messageType = SimpMessageHeaderAccessor.getMessageType(headers);
-		Assert.isTrue(SimpMessageType.SUBSCRIBE.equals(messageType), "Expected SUBSCRIBE: " + message);
+		if (!SimpMessageType.SUBSCRIBE.equals(messageType)) {
+			throw new IllegalArgumentException("Expected SUBSCRIBE: " + message);
+		}
+
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 		if (sessionId == null) {
 			logger.error("No sessionId in  " + message);
 			return;
 		}
+
 		String subscriptionId = SimpMessageHeaderAccessor.getSubscriptionId(headers);
 		if (subscriptionId == null) {
 			logger.error("No subscriptionId in " + message);
 			return;
 		}
+
 		String destination = SimpMessageHeaderAccessor.getDestination(headers);
 		if (destination == null) {
 			logger.error("No destination in " + message);
 			return;
 		}
+
 		addSubscriptionInternal(sessionId, subscriptionId, destination, message);
 	}
-
-	protected abstract void addSubscriptionInternal(String sessionId, String subscriptionId,
-			String destination, Message<?> message);
 
 	@Override
 	public final void unregisterSubscription(Message<?> message) {
 		MessageHeaders headers = message.getHeaders();
+
 		SimpMessageType messageType = SimpMessageHeaderAccessor.getMessageType(headers);
-		Assert.isTrue(SimpMessageType.UNSUBSCRIBE.equals(messageType), "Expected UNSUBSCRIBE: " + message);
+		if (!SimpMessageType.UNSUBSCRIBE.equals(messageType)) {
+			throw new IllegalArgumentException("Expected UNSUBSCRIBE: " + message);
+		}
+
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 		if (sessionId == null) {
 			logger.error("No sessionId in " + message);
 			return;
 		}
+
 		String subscriptionId = SimpMessageHeaderAccessor.getSubscriptionId(headers);
 		if (subscriptionId == null) {
 			logger.error("No subscriptionId " + message);
 			return;
 		}
+
 		removeSubscriptionInternal(sessionId, subscriptionId, message);
 	}
+
+	@Override
+	public final MultiValueMap<String, String> findSubscriptions(Message<?> message) {
+		MessageHeaders headers = message.getHeaders();
+
+		SimpMessageType type = SimpMessageHeaderAccessor.getMessageType(headers);
+		if (!SimpMessageType.MESSAGE.equals(type)) {
+			throw new IllegalArgumentException("Unexpected message type: " + type);
+		}
+
+		String destination = SimpMessageHeaderAccessor.getDestination(headers);
+		if (destination == null) {
+			logger.error("No destination in " + message);
+			return EMPTY_MAP;
+		}
+
+		return findSubscriptionsInternal(destination, message);
+	}
+
+
+	protected abstract void addSubscriptionInternal(String sessionId, String subscriptionId,
+			String destination, Message<?> message);
 
 	protected abstract void removeSubscriptionInternal(String sessionId, String subscriptionId, Message<?> message);
 
 	@Override
 	public abstract void unregisterAllSubscriptions(String sessionId);
 
-	@Override
-	public final MultiValueMap<String, String> findSubscriptions(Message<?> message) {
-		MessageHeaders headers = message.getHeaders();
-		SimpMessageType type = SimpMessageHeaderAccessor.getMessageType(headers);
-		Assert.isTrue(SimpMessageType.MESSAGE.equals(type), "Unexpected message type: " + type);
-		String destination = SimpMessageHeaderAccessor.getDestination(headers);
-		if (destination == null) {
-			logger.error("No destination in " + message);
-			return null;
-		}
-		return findSubscriptionsInternal(destination, message);
-	}
-
-	protected abstract MultiValueMap<String, String> findSubscriptionsInternal(
-			String destination, Message<?> message);
+	protected abstract MultiValueMap<String, String> findSubscriptionsInternal(String destination, Message<?> message);
 
 }

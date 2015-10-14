@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -162,13 +162,12 @@ public @interface EnableCaching {
 	 * Indicate whether subclass-based (CGLIB) proxies are to be created as opposed
 	 * to standard Java interface-based proxies. The default is {@code false}. <strong>
 	 * Applicable only if {@link #mode()} is set to {@link AdviceMode#PROXY}</strong>.
-	 *
 	 * <p>Note that setting this attribute to {@code true} will affect <em>all</em>
-	 * Spring-managed beans requiring proxying, not just those marked with
-	 * {@code @Cacheable}. For example, other beans marked with Spring's
-	 * {@code @Transactional} annotation will be upgraded to subclass proxying at the same
-	 * time. This approach has no negative impact in practice unless one is explicitly
-	 * expecting one type of proxy vs another, e.g. in tests.
+	 * Spring-managed beans requiring proxying, not just those marked with {@code @Cacheable}.
+	 * For example, other beans marked with Spring's {@code @Transactional} annotation will
+	 * be upgraded to subclass proxying at the same time. This approach has no negative
+	 * impact in practice unless one is explicitly expecting one type of proxy vs another,
+	 * e.g. in tests.
 	 */
 	boolean proxyTargetClass() default false;
 
@@ -185,4 +184,5 @@ public @interface EnableCaching {
 	 * The default is {@link Ordered#LOWEST_PRECEDENCE}.
 	 */
 	int order() default Ordered.LOWEST_PRECEDENCE;
+
 }

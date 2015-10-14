@@ -184,7 +184,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			}
 			catch (NoUniqueBeanDefinitionException ex) {
 				throw new IllegalStateException("No CacheResolver specified, and no unique bean of type " +
-						"CacheManager found. Mark one as primary or declare a specific CacheManager to use.");
+						"CacheManager found. Mark one as primary (or give it the name 'cacheManager') or " +
+						"declare a specific CacheManager to use, that serves as the default one.");
 			}
 			catch (NoSuchBeanDefinitionException ex) {
 				throw new IllegalStateException("No CacheResolver specified, and no bean of type CacheManager found. " +
@@ -288,6 +289,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	 */
 	protected void clearMetadataCache() {
 		this.metadataCache.clear();
+		this.evaluator.clear();
 	}
 
 	protected Object execute(CacheOperationInvoker invoker, Object target, Method method, Object[] args) {
@@ -434,6 +436,11 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 				if (cached != null) {
 					return cached;
 				}
+				else {
+					if (logger.isTraceEnabled()) {
+						logger.trace("No cache entry for key '" + key + "' in cache(s) " + context.getCacheNames());
+					}
+				}
 			}
 		}
 		return null;
@@ -461,6 +468,9 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		for (Cache cache : context.getCaches()) {
 			Cache.ValueWrapper wrapper = doGet(cache, key);
 			if (wrapper != null) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Cache entry for key '" + key + "' found in cache '" + cache.getName() + "'");
+				}
 				return wrapper;
 			}
 		}
@@ -483,7 +493,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 					"using named params on classes without debug info?) " + context.metadata.operation);
 		}
 		if (logger.isTraceEnabled()) {
-			logger.trace("Computed cache key " + key + " for operation " + context.metadata.operation);
+			logger.trace("Computed cache key '" + key + "' for operation " + context.metadata.operation);
 		}
 		return key;
 	}
@@ -547,6 +557,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		private final Collection<? extends Cache> caches;
 
+		private final Collection<String> cacheNames;
+
 		private final AnnotatedElementKey methodCacheKey;
 
 		public CacheOperationContext(CacheOperationMetadata metadata, Object[] args, Object target) {
@@ -554,6 +566,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			this.args = extractArgs(metadata.method, args);
 			this.target = target;
 			this.caches = CacheAspectSupport.this.getCaches(this, metadata.cacheResolver);
+			this.cacheNames = createCacheNames(this.caches);
 			this.methodCacheKey = new AnnotatedElementKey(metadata.method, metadata.targetClass);
 		}
 
@@ -631,6 +644,18 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		protected Collection<? extends Cache> getCaches() {
 			return this.caches;
+		}
+
+		protected Collection<String> getCacheNames() {
+			return this.cacheNames;
+		}
+
+		private Collection<String> createCacheNames(Collection<? extends Cache> caches) {
+			Collection<String> names = new ArrayList<String>();
+			for (Cache cache : caches) {
+				names.add(cache.getName());
+			}
+			return names;
 		}
 	}
 

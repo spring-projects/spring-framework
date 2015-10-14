@@ -61,6 +61,23 @@ public class ContentCachingRequestWrapperTests {
 		// getting request parameters will consume the request body
 		Assert.assertFalse(wrapper.getParameterMap().isEmpty());
 		Assert.assertEquals("first=value&second=foo&second=bar", new String(wrapper.getContentAsByteArray()));
+		// SPR-12810 : inputstream body should be consumed
+		Assert.assertEquals("", new String(FileCopyUtils.copyToByteArray(wrapper.getInputStream())));
+	}
+
+	// SPR-12810
+	@Test
+	public void inputStreamFormPostRequest() throws Exception {
+		this.request.setMethod("POST");
+		this.request.setContentType(FORM_CONTENT_TYPE);
+		this.request.setCharacterEncoding(CHARSET);
+		this.request.setParameter("first", "value");
+		this.request.setParameter("second", new String[] {"foo", "bar"});
+
+		ContentCachingRequestWrapper wrapper = new ContentCachingRequestWrapper(this.request);
+
+		byte[] response = FileCopyUtils.copyToByteArray(wrapper.getInputStream());
+		Assert.assertArrayEquals(response, wrapper.getContentAsByteArray());
 	}
 
 }

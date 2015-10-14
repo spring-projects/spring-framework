@@ -126,7 +126,7 @@ public class ProxyProcessorSupport extends ProxyConfig implements Ordered, BeanC
 	 * @return whether the given interface is just a container callback
 	 */
 	protected boolean isConfigurationCallbackInterface(Class<?> ifc) {
-		return (ifc.equals(InitializingBean.class) || ifc.equals(DisposableBean.class) ||
+		return (InitializingBean.class == ifc || DisposableBean.class == ifc ||
 				ObjectUtils.containsElement(ifc.getInterfaces(), Aware.class));
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -32,7 +33,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.springframework.http.HttpRequest;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -43,6 +46,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
+ * @author Sebastien Deleuze
  */
 public abstract class WebUtils {
 
@@ -133,7 +137,7 @@ public abstract class WebUtils {
 	 * Set a system property to the web application root directory.
 	 * The key of the system property can be defined with the "webAppRootKey"
 	 * context-param in {@code web.xml}. Default is "webapp.root".
-	 * <p>Can be used for tools that support substition with {@code System.getProperty}
+	 * <p>Can be used for tools that support substitution with {@code System.getProperty}
 	 * values, like log4j's "${key}" syntax within log file locations.
 	 * @param servletContext the servlet context of the web application
 	 * @throws IllegalStateException if the system property is already set,
@@ -181,7 +185,7 @@ public abstract class WebUtils {
 	 * i.e. the value of the "defaultHtmlEscape" context-param in {@code web.xml}
 	 * (if any). Falls back to {@code false} in case of no explicit default given.
 	 * @param servletContext the servlet context of the web application
-	 * @return whether default HTML escaping is enabled (default is false)
+	 * @return whether default HTML escaping is enabled (default is {@code false})
 	 * @deprecated as of Spring 4.1, in favor of {@link #getDefaultHtmlEscape}
 	 */
 	@Deprecated
@@ -201,7 +205,8 @@ public abstract class WebUtils {
 	 * an actual boolean value specified, allowing to have a context-specific
 	 * default in case of no setting at the global level.
 	 * @param servletContext the servlet context of the web application
-	 * @return whether default HTML escaping is enabled (null = no explicit default)
+	 * @return whether default HTML escaping is enabled for the given application
+	 * ({@code null} = no explicit default)
 	 */
 	public static Boolean getDefaultHtmlEscape(ServletContext servletContext) {
 		if (servletContext == null) {
@@ -221,7 +226,8 @@ public abstract class WebUtils {
 	 * an actual boolean value specified, allowing to have a context-specific
 	 * default in case of no setting at the global level.
 	 * @param servletContext the servlet context of the web application
-	 * @return whether response encoding is used for HTML escaping (null = no explicit default)
+	 * @return whether response encoding is to be used for HTML escaping
+	 * ({@code null} = no explicit default)
 	 * @since 4.1.2
 	 */
 	public static Boolean getResponseEncodedHtmlEscape(ServletContext servletContext) {
@@ -739,9 +745,9 @@ public abstract class WebUtils {
 	 * like this {@code "q1=a;q1=b;q2=a,b,c"}. The resulting map would contain
 	 * keys {@code "q1"} and {@code "q2"} with values {@code ["a","b"]} and
 	 * {@code ["a","b","c"]} respectively.
-	 *
 	 * @param matrixVariables the unparsed matrix variables string
-	 * @return a map with matrix variable names and values, never {@code null}
+	 * @return a map with matrix variable names and values (never {@code null})
+	 * @since 3.2
 	 */
 	public static MultiValueMap<String, String> parseMatrixVariables(String matrixVariables) {
 		MultiValueMap<String, String> result = new LinkedMultiValueMap<String, String>();
@@ -765,4 +771,59 @@ public abstract class WebUtils {
 		}
 		return result;
 	}
+
+	/**
+	 * Check the given request origin against a list of allowed origins.
+	 * A list containing "*" means that all origins are allowed.
+	 * An empty list means only same origin is allowed.
+	 * @return {@code true} if the request origin is valid, {@code false} otherwise
+	 * @since 4.1.5
+	 * @see <a href="https://tools.ietf.org/html/rfc6454">RFC 6454: The Web Origin Concept</a>
+	 */
+	public static boolean isValidOrigin(HttpRequest request, Collection<String> allowedOrigins) {
+		Assert.notNull(request, "Request must not be null");
+		Assert.notNull(allowedOrigins, "Allowed origins must not be null");
+
+		String origin = request.getHeaders().getOrigin();
+		if (origin == null || allowedOrigins.contains("*")) {
+			return true;
+		}
+		else if (CollectionUtils.isEmpty(allowedOrigins)) {
+			return isSameOrigin(request);
+		}
+		else {
+			return allowedOrigins.contains(origin);
+		}
+	}
+
+	/**
+	 * Check if the request is a same-origin one, based on {@code Origin}, {@code Host},
+	 * {@code Forwarded} and {@code X-Forwarded-Host} headers.
+	 * @return {@code true} if the request is a same-origin one, {@code false} in case
+	 * of cross-origin request.
+	 * @since 4.2
+	 */
+	public static boolean isSameOrigin(HttpRequest request) {
+		String origin = request.getHeaders().getOrigin();
+		if (origin == null) {
+			return true;
+		}
+		UriComponents actualUrl = UriComponentsBuilder.fromHttpRequest(request).build();
+		UriComponents originUrl = UriComponentsBuilder.fromOriginHeader(origin).build();
+		return (actualUrl.getHost().equals(originUrl.getHost()) && getPort(actualUrl) == getPort(originUrl));
+	}
+
+	private static int getPort(UriComponents component) {
+		int port = component.getPort();
+		if (port == -1) {
+			if ("http".equals(component.getScheme()) || "ws".equals(component.getScheme())) {
+				port = 80;
+			}
+			else if ("https".equals(component.getScheme()) || "wss".equals(component.getScheme())) {
+				port = 443;
+			}
+		}
+		return port;
+	}
+
 }

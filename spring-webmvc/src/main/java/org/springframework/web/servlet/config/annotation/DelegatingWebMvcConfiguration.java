@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 
 	private final WebMvcConfigurerComposite configurers = new WebMvcConfigurerComposite();
 
+
 	@Autowired(required = false)
 	public void setConfigurers(List<WebMvcConfigurer> configurers) {
 		if (configurers == null || configurers.isEmpty()) {
@@ -49,6 +50,7 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 		}
 		this.configurers.addWebMvcConfigurers(configurers);
 	}
+
 
 	@Override
 	protected void addInterceptors(InterceptorRegistry registry) {
@@ -128,6 +130,11 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 	@Override
 	protected void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
 		this.configurers.configureHandlerExceptionResolvers(exceptionResolvers);
+	}
+
+	@Override
+	protected void addCorsMappings(CorsRegistry registry) {
+		this.configurers.addCorsMappings(registry);
 	}
 
 }

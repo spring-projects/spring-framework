@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import javax.el.ELContext;
 import javax.servlet.Servlet;
@@ -34,8 +35,6 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.PageContext;
-import javax.servlet.jsp.el.ExpressionEvaluator;
-import javax.servlet.jsp.el.VariableResolver;
 
 import org.springframework.util.Assert;
 
@@ -46,8 +45,8 @@ import org.springframework.util.Assert;
  * applications when testing custom JSP tags.
  *
  * <p>Note: Expects initialization via the constructor rather than via the
- * {@code PageContext.initialize} method. Does not support writing to
- * a JspWriter, request dispatching, and {@code handlePageException} calls.
+ * {@code PageContext.initialize} method. Does not support writing to a
+ * JspWriter, request dispatching, or {@code handlePageException} calls.
  *
  * @author Juergen Hoeller
  * @since 1.0.2
@@ -258,7 +257,7 @@ public class MockPageContext extends PageContext {
 	}
 
 	public Enumeration<String> getAttributeNames() {
-		return Collections.enumeration(this.attributes.keySet());
+		return Collections.enumeration(new LinkedHashSet<String>(this.attributes.keySet()));
 	}
 
 	@Override
@@ -288,7 +287,7 @@ public class MockPageContext extends PageContext {
 
 	@Override
 	@Deprecated
-	public ExpressionEvaluator getExpressionEvaluator() {
+	public javax.servlet.jsp.el.ExpressionEvaluator getExpressionEvaluator() {
 		return new MockExpressionEvaluator(this);
 	}
 
@@ -299,7 +298,7 @@ public class MockPageContext extends PageContext {
 
 	@Override
 	@Deprecated
-	public VariableResolver getVariableResolver() {
+	public javax.servlet.jsp.el.VariableResolver getVariableResolver() {
 		return null;
 	}
 

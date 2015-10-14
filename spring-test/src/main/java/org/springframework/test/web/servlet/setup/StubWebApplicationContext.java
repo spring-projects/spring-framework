@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 import javax.servlet.ServletContext;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanFactory;
@@ -38,24 +39,27 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.NoSuchMessageException;
 import org.springframework.context.support.DelegatingMessageSource;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.ServletContextResourcePatternResolver;
 
 /**
- * A mock WebApplicationContext that accepts registrations of object instances.
+ * A stub WebApplicationContext that accepts registrations of object instances.
  *
- * <p>As registered object instances are instantiated and initialized
- * externally, there is no wiring, bean initialization, lifecycle events, as
- * well as no pre-processing and post-processing hooks typically associated with
- * beans managed by an {@link ApplicationContext}. Just a simple lookup into a
+ * <p>As registered object instances are instantiated and initialized externally,
+ * there is no wiring, bean initialization, lifecycle events, as well as no
+ * pre-processing and post-processing hooks typically associated with beans
+ * managed by an {@link ApplicationContext}. Just a simple lookup into a
  * {@link StaticListableBeanFactory}.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 3.2
  */
 class StubWebApplicationContext implements WebApplicationContext {
@@ -77,13 +81,11 @@ class StubWebApplicationContext implements WebApplicationContext {
 	private final ResourcePatternResolver resourcePatternResolver;
 
 
-	/**
-	 * Class constructor.
-	 */
 	public StubWebApplicationContext(ServletContext servletContext) {
 		this.servletContext = servletContext;
 		this.resourcePatternResolver = new ServletContextResourcePatternResolver(servletContext);
 	}
+
 
 	/**
 	 * Returns an instance that can initialize {@link ApplicationContextAware} beans.
@@ -97,6 +99,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 	public ServletContext getServletContext() {
 		return this.servletContext;
 	}
+
 
 	//---------------------------------------------------------------------
 	// Implementation of ApplicationContext interface
@@ -137,11 +140,15 @@ class StubWebApplicationContext implements WebApplicationContext {
 	}
 
 	public void addBeans(List<?> beans) {
+		if (beans == null) {
+			return;
+		}
 		for (Object bean : beans) {
 			String name = bean.getClass().getName() + "#" +  ObjectUtils.getIdentityHexString(bean);
 			this.beanFactory.addBean(name, bean);
 		}
 	}
+
 
 	//---------------------------------------------------------------------
 	// Implementation of BeanFactory interface
@@ -188,8 +195,13 @@ class StubWebApplicationContext implements WebApplicationContext {
 	}
 
 	@Override
-	public boolean isTypeMatch(String name, Class<?> targetType) throws NoSuchBeanDefinitionException {
-		return this.beanFactory.isTypeMatch(name, targetType);
+	public boolean isTypeMatch(String name, ResolvableType typeToMatch) throws NoSuchBeanDefinitionException {
+		return this.beanFactory.isTypeMatch(name, typeToMatch);
+	}
+
+	@Override
+	public boolean isTypeMatch(String name, Class<?> typeToMatch) throws NoSuchBeanDefinitionException {
+		return this.beanFactory.isTypeMatch(name, typeToMatch);
 	}
 
 	@Override
@@ -201,6 +213,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 	public String[] getAliases(String name) {
 		return this.beanFactory.getAliases(name);
 	}
+
 
 	//---------------------------------------------------------------------
 	// Implementation of ListableBeanFactory interface
@@ -219,6 +232,11 @@ class StubWebApplicationContext implements WebApplicationContext {
 	@Override
 	public String[] getBeanDefinitionNames() {
 		return this.beanFactory.getBeanDefinitionNames();
+	}
+
+	@Override
+	public String[] getBeanNamesForType(ResolvableType type) {
+		return this.beanFactory.getBeanNamesForType(type);
 	}
 
 	@Override
@@ -262,6 +280,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 		return this.beanFactory.findAnnotationOnBean(beanName, annotationType);
 	}
 
+
 	//---------------------------------------------------------------------
 	// Implementation of HierarchicalBeanFactory interface
 	//---------------------------------------------------------------------
@@ -275,6 +294,7 @@ class StubWebApplicationContext implements WebApplicationContext {
 	public boolean containsLocalBean(String name) {
 		return this.beanFactory.containsBean(name);
 	}
+
 
 	//---------------------------------------------------------------------
 	// Implementation of MessageSource interface
@@ -295,13 +315,14 @@ class StubWebApplicationContext implements WebApplicationContext {
 		return this.messageSource.getMessage(resolvable, locale);
 	}
 
+
 	//---------------------------------------------------------------------
 	// Implementation of ResourceLoader interface
 	//---------------------------------------------------------------------
 
 	@Override
 	public ClassLoader getClassLoader() {
-		return null;
+		return ClassUtils.getDefaultClassLoader();
 	}
 
 	@Override
@@ -309,12 +330,17 @@ class StubWebApplicationContext implements WebApplicationContext {
 		return this.resourcePatternResolver.getResource(location);
 	}
 
+
 	//---------------------------------------------------------------------
 	// Other
 	//---------------------------------------------------------------------
 
 	@Override
 	public void publishEvent(ApplicationEvent event) {
+	}
+
+	@Override
+	public void publishEvent(Object event) {
 	}
 
 	@Override
@@ -340,65 +366,59 @@ class StubWebApplicationContext implements WebApplicationContext {
 
 		@Override
 		public <T> T createBean(Class<T> beanClass) {
-			throw new UnsupportedOperationException();
+			return BeanUtils.instantiate(beanClass);
 		}
 
 		@Override
-		@SuppressWarnings("rawtypes")
-		public Object createBean(Class beanClass, int autowireMode, boolean dependencyCheck) {
-			throw new UnsupportedOperationException();
+		public Object createBean(Class<?> beanClass, int autowireMode, boolean dependencyCheck) {
+			return BeanUtils.instantiate(beanClass);
 		}
 
 		@Override
-		@SuppressWarnings("rawtypes")
-		public Object autowire(Class beanClass, int autowireMode, boolean dependencyCheck) {
-			throw new UnsupportedOperationException();
+		public Object autowire(Class<?> beanClass, int autowireMode, boolean dependencyCheck) {
+			return BeanUtils.instantiate(beanClass);
 		}
 
 		@Override
 		public void autowireBean(Object existingBean) throws BeansException {
-			throw new UnsupportedOperationException();
 		}
 
 		@Override
 		public void autowireBeanProperties(Object existingBean, int autowireMode, boolean dependencyCheck) {
-			throw new UnsupportedOperationException();
 		}
 
 		@Override
 		public Object configureBean(Object existingBean, String beanName) {
-			throw new UnsupportedOperationException();
+			return existingBean;
 		}
 
 		@Override
 		public Object resolveDependency(DependencyDescriptor descriptor, String beanName) {
-			throw new UnsupportedOperationException();
+			throw new UnsupportedOperationException("Dependency resolution not supported");
 		}
 
 		@Override
 		public Object resolveDependency(DependencyDescriptor descriptor, String beanName,
 				Set<String> autowiredBeanNames, TypeConverter typeConverter) {
-			throw new UnsupportedOperationException();
+			throw new UnsupportedOperationException("Dependency resolution not supported");
 		}
 
 		@Override
 		public void applyBeanPropertyValues(Object existingBean, String beanName) throws BeansException {
-			throw new UnsupportedOperationException();
 		}
 
 		@Override
 		public Object applyBeanPostProcessorsBeforeInitialization(Object existingBean, String beanName) {
-			throw new UnsupportedOperationException();
+			return existingBean;
 		}
 
 		@Override
 		public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName) {
-			throw new UnsupportedOperationException();
+			return existingBean;
 		}
 
 		@Override
 		public void destroyBean(Object existingBean) {
-			throw new UnsupportedOperationException();
 		}
 	}
 

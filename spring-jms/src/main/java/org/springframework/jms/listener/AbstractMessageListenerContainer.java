@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,19 +37,19 @@ import org.springframework.util.ErrorHandler;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Abstract base class for message listener containers. Can either host
- * a standard JMS {@link javax.jms.MessageListener} or a Spring-specific
- * {@link SessionAwareMessageListener}.
+ * Abstract base class for Spring message listener container implementations.
+ * Can either host a standard JMS {@link javax.jms.MessageListener} or Spring's
+ * {@link SessionAwareMessageListener} for actual message processing.
  *
- * <p>Usually holds a single JMS {@link Connection} that all listeners are
- * supposed to be registered on, which is the standard JMS way of managing
- * listeners. Can alternatively also be used with a fresh Connection per
- * listener, for J2EE-style XA-aware JMS messaging. The actual registration
- * process is up to concrete subclasses.
+ * <p>Usually holds a single JMS {@link Connection} that all listeners are supposed
+ * to be registered on, which is the standard JMS way of managing listener sessions.
+ * Can alternatively also be used with a fresh Connection per listener, for Java EE
+ * style XA-aware JMS messaging. The actual registration process is up to concrete
+ * subclasses.
  *
- * <p><b>NOTE:</b> The default behavior of this message listener container
- * is to <b>never</b> propagate an exception thrown by a message listener up to
- * the JMS provider. Instead, it will log any such exception at the error level.
+ * <p><b>NOTE:</b> The default behavior of this message listener container is to
+ * <b>never</b> propagate an exception thrown by a message listener up to the JMS
+ * provider. Instead, it will log any such exception at the error level.
  * This means that from the perspective of the attendant JMS provider no such
  * listener will ever fail. However, if error handling is necessary, then
  * any implementation of the {@link ErrorHandler} strategy may be provided to
@@ -60,34 +60,50 @@ import org.springframework.util.ReflectionUtils;
  * <p>The listener container offers the following message acknowledgment options:
  * <ul>
  * <li>"sessionAcknowledgeMode" set to "AUTO_ACKNOWLEDGE" (default):
- * Automatic message acknowledgment <i>before</i> listener execution;
- * no redelivery in case of exception thrown.
+ * This mode is container-dependent: For {@link DefaultMessageListenerContainer},
+ * it means automatic message acknowledgment <i>before</i> listener execution, with
+ * no redelivery in case of an exception and no redelivery in case of other listener
+ * execution interruptions either. For {@link SimpleMessageListenerContainer},
+ * it means automatic message acknowledgment <i>after</i> listener execution, with
+ * no redelivery in case of a user exception thrown but potential redelivery in case
+ * of the JVM dying during listener execution. In order to consistently arrange for
+ * redelivery with any container variant, consider "CLIENT_ACKNOWLEDGE" mode or -
+ * preferably - setting "sessionTransacted" to "true" instead.
+ * <li>"sessionAcknowledgeMode" set to "DUPS_OK_ACKNOWLEDGE":
+ * <i>Lazy</i> message acknowledgment during ({@link DefaultMessageListenerContainer})
+ * or shortly after ({@link SimpleMessageListenerContainer}) listener execution;
+ * no redelivery in case of a user exception thrown but potential redelivery in case
+ * of the JVM dying during listener execution. In order to consistently arrange for
+ * redelivery with any container variant, consider "CLIENT_ACKNOWLEDGE" mode or -
+ * preferably - setting "sessionTransacted" to "true" instead.
  * <li>"sessionAcknowledgeMode" set to "CLIENT_ACKNOWLEDGE":
  * Automatic message acknowledgment <i>after</i> successful listener execution;
- * no redelivery in case of exception thrown.
- * <li>"sessionAcknowledgeMode" set to "DUPS_OK_ACKNOWLEDGE":
- * <i>Lazy</i> message acknowledgment during or after listener execution;
- * <i>potential redelivery</i> in case of exception thrown.
+ * best-effort redelivery in case of a user exception thrown as well as in case
+ * of other listener execution interruptions (such as the JVM dying).
  * <li>"sessionTransacted" set to "true":
  * Transactional acknowledgment after successful listener execution;
- * <i>guaranteed redelivery</i> in case of exception thrown.
+ * <i>guaranteed redelivery</i> in case of a user exception thrown as well as
+ * in case of other listener execution interruptions (such as the JVM dying).
  * </ul>
- * The exact behavior might vary according to the concrete listener container
- * and JMS provider used.
  *
- * <p>There are two solutions to the duplicate processing problem:
+ * <p>There are two solutions to the duplicate message processing problem:
  * <ul>
  * <li>Either add <i>duplicate message detection</i> to your listener, in the
  * form of a business entity existence check or a protocol table check. This
  * usually just needs to be done in case of the JMSRedelivered flag being
- * set on the incoming message (else just process straightforwardly).
- * <li>Or wrap the <i>entire processing with an XA transaction</i>, covering the
- * reception of the message as well as the execution of the message listener.
- * This is only supported by {@link DefaultMessageListenerContainer}, through
- * specifying a "transactionManager" (typically a
+ * set on the incoming message (otherwise just process straightforwardly).
+ * Note that with "sessionTransacted" set to "true", duplicate messages will
+ * only appear in case of the JVM dying at the most unfortunate point possible
+ * (i.e. after your business logic executed but before the JMS part got committed),
+ * so duplicate message detection is just there to cover a corner case.
+ * <li>Or wrap your <i>entire processing with an XA transaction</i>, covering the
+ * reception of the JMS message as well as the execution of the business logic in
+ * your message listener (including database operations etc). This is only
+ * supported by {@link DefaultMessageListenerContainer}, through specifying
+ * an external "transactionManager" (typically a
  * {@link org.springframework.transaction.jta.JtaTransactionManager}, with
- * a corresponding XA-aware JMS {@link javax.jms.ConnectionFactory} passed in as
- * "connectionFactory").
+ * a corresponding XA-aware JMS {@link javax.jms.ConnectionFactory} passed in
+ * as "connectionFactory").
  * </ul>
  * Note that XA transaction coordination adds significant runtime overhead,
  * so it might be feasible to avoid it unless absolutely necessary.
@@ -103,19 +119,17 @@ import org.springframework.util.ReflectionUtils;
  * <li>Alternatively, specify a
  * {@link org.springframework.transaction.jta.JtaTransactionManager} as
  * "transactionManager" for a fully XA-aware JMS provider - typically when
- * running on a J2EE server, but also for other environments with a JTA
+ * running on a Java EE server, but also for other environments with a JTA
  * transaction manager present. This will give full "exactly-once" guarantees
  * without custom duplicate message checks, at the price of additional
  * runtime processing overhead.
  * </ul>
  *
- * <p>Note that even if
- * {@link org.springframework.jms.connection.JmsTransactionManager} used to
- * only provide fully synchronized Spring transactions based
- * on local JMS transactions, "sessionTransacted" offers now the same feature and
- * is the recommended option when transactions are not managed externally. In
- * other words, set the transaction manager only if you are using JTA , or
- * synchronizing transactions.
+ * <p>Note that the "sessionTransacted" flag is strongly recommended over
+ * {@link org.springframework.jms.connection.JmsTransactionManager}, provided
+ * that transactions do not need to be managed externally. As a consequence,
+ * set the transaction manager only if you are using JTA or if you need to
+ * synchronize with custom external transaction arrangements.
  *
  * @author Juergen Hoeller
  * @author Stephane Nicoll
@@ -128,12 +142,14 @@ import org.springframework.util.ReflectionUtils;
  * @see SimpleMessageListenerContainer
  * @see org.springframework.jms.listener.endpoint.JmsMessageEndpointManager
  */
-public abstract class AbstractMessageListenerContainer
-		extends AbstractJmsListeningContainer implements MessageListenerContainer {
+public abstract class AbstractMessageListenerContainer extends AbstractJmsListeningContainer
+		implements MessageListenerContainer {
 
+	/** The JMS 2.0 Session.createSharedConsumer method, if available */
 	private static final Method createSharedConsumerMethod = ClassUtils.getMethodIfAvailable(
 			Session.class, "createSharedConsumer", Topic.class, String.class, String.class);
 
+	/** The JMS 2.0 Session.createSharedDurableConsumer method, if available */
 	private static final Method createSharedDurableConsumerMethod = ClassUtils.getMethodIfAvailable(
 			Session.class, "createSharedDurableConsumer", Topic.class, String.class, String.class);
 
@@ -149,6 +165,8 @@ public abstract class AbstractMessageListenerContainer
 	private boolean subscriptionShared = false;
 
 	private String subscriptionName;
+
+	private Boolean replyPubSubDomain;
 
 	private boolean pubSubNoLocal = false;
 
@@ -351,6 +369,7 @@ public abstract class AbstractMessageListenerContainer
 	 * <p>Only makes sense when listening to a topic (pub-sub domain),
 	 * therefore this method switches the "pubSubDomain" flag as well.
 	 * <p><b>Requires a JMS 2.0 compatible message broker.</b>
+	 * @since 4.1
 	 * @see #setSubscriptionName
 	 * @see #setSubscriptionDurable
 	 * @see #setPubSubDomain
@@ -364,6 +383,7 @@ public abstract class AbstractMessageListenerContainer
 
 	/**
 	 * Return whether to make the subscription shared.
+	 * @since 4.1
 	 */
 	public boolean isSubscriptionShared() {
 		return this.subscriptionShared;
@@ -377,6 +397,7 @@ public abstract class AbstractMessageListenerContainer
 	 * <p>Note: Only 1 concurrent consumer (which is the default of this
 	 * message listener container) is allowed for each subscription,
 	 * except for a shared subscription (which requires JMS 2.0).
+	 * @since 4.1
 	 * @see #setPubSubDomain
 	 * @see #setSubscriptionDurable
 	 * @see #setSubscriptionShared
@@ -387,6 +408,10 @@ public abstract class AbstractMessageListenerContainer
 		this.subscriptionName = subscriptionName;
 	}
 
+	/**
+	 * Return the name of a subscription to create, if any.
+	 * @since 4.1
+	 */
 	public String getSubscriptionName() {
 		return this.subscriptionName;
 	}
@@ -420,6 +445,7 @@ public abstract class AbstractMessageListenerContainer
 	/**
 	 * Set whether to inhibit the delivery of messages published by its own connection.
 	 * Default is "false".
+	 * @since 4.1
 	 * @see javax.jms.Session#createConsumer(javax.jms.Destination, String, boolean)
 	 */
 	public void setPubSubNoLocal(boolean pubSubNoLocal) {
@@ -428,13 +454,45 @@ public abstract class AbstractMessageListenerContainer
 
 	/**
 	 * Return whether to inhibit the delivery of messages published by its own connection.
+	 * @since 4.1
 	 */
 	public boolean isPubSubNoLocal() {
 		return this.pubSubNoLocal;
 	}
 
 	/**
+	 * Configure the reply destination type. By default, the configured {@code pubSubDomain}
+	 * value is used (see {@link #isPubSubDomain()}.
+	 * <p>This setting primarily indicates what type of destination to resolve if dynamic
+	 * destinations are enabled.
+	 * @param replyPubSubDomain "true" for the Publish/Subscribe domain ({@link Topic Topics}),
+	 * "false" for the Point-to-Point domain ({@link Queue Queues})
+	 * @since 4.2
+	 * @see #setDestinationResolver
+	 */
+	public void setReplyPubSubDomain(boolean replyPubSubDomain) {
+		this.replyPubSubDomain = replyPubSubDomain;
+	}
+
+	/**
+	 * Return whether the Publish/Subscribe domain ({@link javax.jms.Topic Topics}) is used
+	 * for replies. Otherwise, the Point-to-Point domain ({@link javax.jms.Queue Queues})
+	 * is used.
+	 * @since 4.2
+	 */
+	@Override
+	public boolean isReplyPubSubDomain() {
+		if (this.replyPubSubDomain != null) {
+			return replyPubSubDomain;
+		}
+		else {
+			return isPubSubDomain();
+		}
+	}
+
+	/**
 	 * Set the {@link MessageConverter} strategy for converting JMS Messages.
+	 * @since 4.1
 	 */
 	public void setMessageConverter(MessageConverter messageConverter) {
 		this.messageConverter = messageConverter;
@@ -474,6 +532,7 @@ public abstract class AbstractMessageListenerContainer
 	/**
 	 * Return the ErrorHandler to be invoked in case of any uncaught exceptions thrown
 	 * while processing a Message.
+	 * @since 4.1
 	 */
 	public ErrorHandler getErrorHandler() {
 		return this.errorHandler;
@@ -587,6 +646,7 @@ public abstract class AbstractMessageListenerContainer
 			rollbackIfNecessary(session);
 			throw new MessageRejectedWhileStoppingException();
 		}
+
 		try {
 			invokeListener(session, message);
 		}
@@ -616,6 +676,7 @@ public abstract class AbstractMessageListenerContainer
 	@SuppressWarnings("rawtypes")
 	protected void invokeListener(Session session, Message message) throws JMSException {
 		Object listener = getMessageListener();
+
 		if (listener instanceof SessionAwareMessageListener) {
 			doInvokeListener((SessionAwareMessageListener) listener, session, message);
 		}
@@ -717,7 +778,7 @@ public abstract class AbstractMessageListenerContainer
 				JmsUtils.rollbackIfNecessary(session);
 			}
 		}
-		else {
+		else if (isClientAcknowledge(session)) {
 			session.recover();
 		}
 	}
@@ -739,7 +800,7 @@ public abstract class AbstractMessageListenerContainer
 					JmsUtils.rollbackIfNecessary(session);
 				}
 			}
-			else {
+			else if (isClientAcknowledge(session)) {
 				session.recover();
 			}
 		}
@@ -871,7 +932,7 @@ public abstract class AbstractMessageListenerContainer
 		if (errorHandler != null) {
 			errorHandler.handleError(ex);
 		}
-		else if (logger.isWarnEnabled()) {
+		else {
 			logger.warn("Execution of JMS message listener failed, and no ErrorHandler has been set.", ex);
 		}
 	}
@@ -883,7 +944,6 @@ public abstract class AbstractMessageListenerContainer
 	 */
 	@SuppressWarnings("serial")
 	private static class MessageRejectedWhileStoppingException extends RuntimeException {
-
 	}
 
 }

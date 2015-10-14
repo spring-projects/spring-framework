@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,20 +19,22 @@ package org.springframework.transaction.support;
 import javax.transaction.TransactionManager;
 import javax.transaction.UserTransaction;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.tests.mock.jndi.SimpleNamingContextBuilder;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.util.SerializationTestUtils;
 
-import static org.mockito.BDDMockito.*;
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Rod Johnson
  */
-public class JtaTransactionManagerSerializationTests extends TestCase {
+public class JtaTransactionManagerSerializationTests {
 
-	public void testSerializable() throws Exception {
+	@Test
+	public void serializable() throws Exception {
 		UserTransaction ut1 = mock(UserTransaction.class);
 		UserTransaction ut2 = mock(UserTransaction.class);
 		TransactionManager tm = mock(TransactionManager.class);

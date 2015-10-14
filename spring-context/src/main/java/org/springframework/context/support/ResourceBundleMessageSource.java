@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.context.support;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.AccessController;
@@ -67,7 +68,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 
 	private String[] basenames = new String[0];
 
-	private String defaultEncoding;
+	private String defaultEncoding = "ISO-8859-1";
 
 	private boolean fallbackToSystemLocale = true;
 
@@ -150,9 +151,9 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 
 	/**
 	 * Set the default charset to use for parsing resource bundle files.
-	 * <p>Default is none, using the {@code java.util.ResourceBundle}
-	 * default encoding: ISO-8859-1.
-	 * and more flexibility in setting of an encoding per file.
+	 * <p>Default is the {@code java.util.ResourceBundle} default encoding:
+	 * ISO-8859-1.
+	 * @since 3.1.3
 	 */
 	public void setDefaultEncoding(String defaultEncoding) {
 		this.defaultEncoding = defaultEncoding;
@@ -167,6 +168,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * {@code java.util.ResourceBundle}. However, this is often not desirable
 	 * in an application server environment, where the system Locale is not relevant
 	 * to the application at all: Set this flag to "false" in such a scenario.
+	 * @since 3.1.3
 	 */
 	public void setFallbackToSystemLocale(boolean fallbackToSystemLocale) {
 		this.fallbackToSystemLocale = fallbackToSystemLocale;
@@ -188,6 +190,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * Consider {@link ReloadableResourceBundleMessageSource} in combination
 	 * with resource bundle files in a non-classpath location.
 	 * </ul>
+	 * @since 3.1.3
 	 */
 	public void setCacheSeconds(int cacheSeconds) {
 		this.cacheMillis = (cacheSeconds * 1000);
@@ -304,18 +307,24 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 * @param locale the Locale to look for
 	 * @return the corresponding ResourceBundle
 	 * @throws MissingResourceException if no matching bundle could be found
-	 * @see java.util.ResourceBundle#getBundle(String, java.util.Locale, ClassLoader)
+	 * @see java.util.ResourceBundle#getBundle(String, Locale, ClassLoader)
 	 * @see #getBundleClassLoader()
 	 */
 	protected ResourceBundle doGetBundle(String basename, Locale locale) throws MissingResourceException {
-		if ((this.defaultEncoding != null && !"ISO-8859-1".equals(this.defaultEncoding)) ||
-				!this.fallbackToSystemLocale || this.cacheMillis >= 0) {
-			return ResourceBundle.getBundle(basename, locale, getBundleClassLoader(), new MessageSourceControl());
-		}
-		else {
-			// Good old standard call...
-			return ResourceBundle.getBundle(basename, locale, getBundleClassLoader());
-		}
+		return ResourceBundle.getBundle(basename, locale, getBundleClassLoader(), new MessageSourceControl());
+	}
+
+	/**
+	 * Load a property-based resource bundle from the given reader.
+	 * <p>The default implementation returns a {@link PropertyResourceBundle}.
+	 * @param reader the reader for the target resource
+	 * @return the fully loaded bundle
+	 * @throws IOException in case of I/O failure
+	 * @since 4.2
+	 * @see PropertyResourceBundle#PropertyResourceBundle(Reader)
+	 */
+	protected ResourceBundle loadBundle(Reader reader) throws IOException {
+		return new PropertyResourceBundle(reader);
 	}
 
 	/**
@@ -363,15 +372,31 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 		}
 	}
 
-	private String getStringOrNull(ResourceBundle bundle, String key) {
-		try {
-			return bundle.getString(key);
+	/**
+	 * Efficiently retrieve the String value for the specified key,
+	 * or return {@code null} if not found.
+	 * <p>As of 4.2, the default implementation checks {@code containsKey}
+	 * before it attempts to call {@code getString} (which would require
+	 * catching {@code MissingResourceException} for key not found).
+	 * <p>Can be overridden in subclasses.
+	 * @param bundle the ResourceBundle to perform the lookup in
+	 * @param key the key to look up
+	 * @return the associated value, or {@code null} if none
+	 * @since 4.2
+	 * @see ResourceBundle#getString(String)
+	 * @see ResourceBundle#containsKey(String)
+	 */
+	protected String getStringOrNull(ResourceBundle bundle, String key) {
+		if (bundle.containsKey(key)) {
+			try {
+				return bundle.getString(key);
+			}
+			catch (MissingResourceException ex){
+				// Assume key not found for some other reason
+				// -> do NOT throw the exception to allow for checking parent message source.
+			}
 		}
-		catch (MissingResourceException ex) {
-			// Assume key not found
-			// -> do NOT throw the exception to allow for checking parent message source.
-			return null;
-		}
+		return null;
 	}
 
 	/**
@@ -394,6 +419,8 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 		@Override
 		public ResourceBundle newBundle(String baseName, Locale locale, String format, ClassLoader loader, boolean reload)
 				throws IllegalAccessException, InstantiationException, IOException {
+
+			// Special handling of default encoding
 			if (format.equals("java.properties")) {
 				String bundleName = toBundleName(baseName, locale);
 				final String resourceName = toResourceName(bundleName, "properties");
@@ -428,9 +455,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 				}
 				if (stream != null) {
 					try {
-						return (defaultEncoding != null ?
-								new PropertyResourceBundle(new InputStreamReader(stream, defaultEncoding)) :
-								new PropertyResourceBundle(stream));
+						return loadBundle(new InputStreamReader(stream, defaultEncoding));
 					}
 					finally {
 						stream.close();
@@ -441,6 +466,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 				}
 			}
 			else {
+				// Delegate handling of "java.class" format to standard Control
 				return super.newBundle(baseName, locale, format, loader, reload);
 			}
 		}

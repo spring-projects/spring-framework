@@ -147,10 +147,10 @@ public class AnnotatedBeanDefinitionReader {
 		AnnotationConfigUtils.processCommonDefinitionAnnotations(abd);
 		if (qualifiers != null) {
 			for (Class<? extends Annotation> qualifier : qualifiers) {
-				if (Primary.class.equals(qualifier)) {
+				if (Primary.class == qualifier) {
 					abd.setPrimary(true);
 				}
-				else if (Lazy.class.equals(qualifier)) {
+				else if (Lazy.class == qualifier) {
 					abd.setLazyInit(true);
 				}
 				else {

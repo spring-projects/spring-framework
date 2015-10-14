@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,9 +21,8 @@ import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.jasperreports.engine.JRExporterParameter;
 import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.export.JRHtmlExporterParameter;
+
 import org.junit.Test;
 
 import org.springframework.mock.web.test.MockServletContext;
@@ -36,6 +35,7 @@ import static org.junit.Assert.*;
  * @author Rob Harrop
  * @author Sam Brannen
  */
+@SuppressWarnings("deprecation")
 public class ExporterParameterTests extends AbstractJasperReportsTests {
 
 	@Test
@@ -46,13 +46,12 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 		AbstractJasperReportsView view = new AbstractJasperReportsView() {
 
 			@Override
-			@SuppressWarnings("deprecation")
 			protected void renderReport(JasperPrint filledReport, Map<String, Object> model, HttpServletResponse response)
 					throws Exception {
 
 				assertEquals("Invalid number of exporter parameters", 1, getConvertedExporterParameters().size());
 
-				JRExporterParameter key = JRHtmlExporterParameter.IMAGES_URI;
+				net.sf.jasperreports.engine.JRExporterParameter key = net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IMAGES_URI;
 				Object value = getConvertedExporterParameters().get(key);
 
 				assertNotNull("Value not mapped to correct key", value);
@@ -112,7 +111,8 @@ public class ExporterParameterTests extends AbstractJasperReportsTests {
 
 		view.setExporterParameters(params);
 		view.convertExporterParameters();
-		Object value = view.getConvertedExporterParameters().get(JRHtmlExporterParameter.IS_USING_IMAGES_TO_ALIGN);
+		Object value = view.getConvertedExporterParameters().get(
+			net.sf.jasperreports.engine.export.JRHtmlExporterParameter.IS_USING_IMAGES_TO_ALIGN);
 		assertEquals(Boolean.TRUE, value);
 	}
 

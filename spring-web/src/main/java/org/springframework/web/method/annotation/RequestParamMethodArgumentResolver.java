@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,8 +53,8 @@ import org.springframework.web.util.WebUtils;
  * type {@link MultipartFile} in conjunction with Spring's {@link MultipartResolver}
  * abstraction, and arguments of type {@code javax.servlet.http.Part} in conjunction
  * with Servlet 3.0 multipart requests. This resolver can also be created in default
- * resolution mode in which simple types (int, long, etc.) not annotated
- * with @{@link RequestParam} are also treated as request parameters with the
+ * resolution mode in which simple types (int, long, etc.) not annotated with
+ * @{@link RequestParam} are also treated as request parameters with the
  * parameter name derived from the argument name.
  *
  * <p>If the method parameter type is {@link Map}, the name specified in the
@@ -127,7 +127,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 		Class<?> paramType = parameter.getParameterType();
 		if (parameter.hasParameterAnnotation(RequestParam.class)) {
 			if (Map.class.isAssignableFrom(paramType)) {
-				String paramName = parameter.getParameterAnnotation(RequestParam.class).value();
+				String paramName = parameter.getParameterAnnotation(RequestParam.class).name();
 				return StringUtils.hasText(paramName);
 			}
 			else {
@@ -138,7 +138,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 			if (parameter.hasParameterAnnotation(RequestPart.class)) {
 				return false;
 			}
-			else if (MultipartFile.class.equals(paramType) || "javax.servlet.http.Part".equals(paramType.getName())) {
+			else if (MultipartFile.class == paramType || "javax.servlet.http.Part".equals(paramType.getName())) {
 				return true;
 			}
 			else if (this.useDefaultResolution) {
@@ -163,7 +163,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 				WebUtils.getNativeRequest(servletRequest, MultipartHttpServletRequest.class);
 		Object arg;
 
-		if (MultipartFile.class.equals(parameter.getParameterType())) {
+		if (MultipartFile.class == parameter.getParameterType()) {
 			assertIsMultipartRequest(servletRequest);
 			Assert.notNull(multipartRequest, "Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
 			arg = multipartRequest.getFile(name);
@@ -202,7 +202,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 			if (arg == null) {
 				String[] paramValues = webRequest.getParameterValues(name);
 				if (paramValues != null) {
-					arg = paramValues.length == 1 ? paramValues[0] : paramValues;
+					arg = (paramValues.length == 1 ? paramValues[0] : paramValues);
 				}
 			}
 		}
@@ -218,28 +218,26 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	}
 
 	private boolean isMultipartFileCollection(MethodParameter parameter) {
-		Class<?> collectionType = getCollectionParameterType(parameter);
-		return ((collectionType != null) && collectionType.equals(MultipartFile.class));
+		return (MultipartFile.class == getCollectionParameterType(parameter));
+	}
+
+	private boolean isMultipartFileArray(MethodParameter parameter) {
+		return (MultipartFile.class == parameter.getParameterType().getComponentType());
 	}
 
 	private boolean isPartCollection(MethodParameter parameter) {
 		Class<?> collectionType = getCollectionParameterType(parameter);
-		return ((collectionType != null) && "javax.servlet.http.Part".equals(collectionType.getName()));
+		return (collectionType != null && "javax.servlet.http.Part".equals(collectionType.getName()));
 	}
 
 	private boolean isPartArray(MethodParameter parameter) {
 		Class<?> paramType = parameter.getParameterType().getComponentType();
-		return ((paramType != null) && "javax.servlet.http.Part".equals(paramType.getName()));
-	}
-
-	private boolean isMultipartFileArray(MethodParameter parameter) {
-		Class<?> paramType = parameter.getParameterType().getComponentType();
-		return ((paramType != null) && MultipartFile.class.equals(paramType));
+		return (paramType != null && "javax.servlet.http.Part".equals(paramType.getName()));
 	}
 
 	private Class<?> getCollectionParameterType(MethodParameter parameter) {
 		Class<?> paramType = parameter.getParameterType();
-		if (Collection.class.equals(paramType) || List.class.isAssignableFrom(paramType)){
+		if (Collection.class == paramType || List.class.isAssignableFrom(paramType)){
 			Class<?> valueType = GenericCollectionTypeResolver.getCollectionParameterType(parameter);
 			if (valueType != null) {
 				return valueType;
@@ -258,13 +256,13 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 			UriComponentsBuilder builder, Map<String, Object> uriVariables, ConversionService conversionService) {
 
 		Class<?> paramType = parameter.getParameterType();
-		if (Map.class.isAssignableFrom(paramType) || MultipartFile.class.equals(paramType) ||
+		if (Map.class.isAssignableFrom(paramType) || MultipartFile.class == paramType ||
 				"javax.servlet.http.Part".equals(paramType.getName())) {
 			return;
 		}
 
-		RequestParam ann = parameter.getParameterAnnotation(RequestParam.class);
-		String name = (ann == null || StringUtils.isEmpty(ann.value()) ? parameter.getParameterName() : ann.value());
+		RequestParam requestParam = parameter.getParameterAnnotation(RequestParam.class);
+		String name = (requestParam == null || StringUtils.isEmpty(requestParam.name()) ? parameter.getParameterName() : requestParam.name());
 
 		if (value == null) {
 			builder.queryParam(name);
@@ -303,7 +301,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 		}
 
 		public RequestParamNamedValueInfo(RequestParam annotation) {
-			super(annotation.value(), annotation.required(), annotation.defaultValue());
+			super(annotation.name(), annotation.required(), annotation.defaultValue());
 		}
 	}
 

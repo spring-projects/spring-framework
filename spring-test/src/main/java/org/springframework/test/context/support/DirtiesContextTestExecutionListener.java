@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,37 +16,42 @@
 
 package org.springframework.test.context.support;
 
-import java.lang.reflect.Method;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.annotation.DirtiesContext.HierarchyMode;
+import org.springframework.test.annotation.DirtiesContext.MethodMode;
 import org.springframework.test.context.TestContext;
-import org.springframework.util.Assert;
+import org.springframework.test.context.TestExecutionListeners;
 
 import static org.springframework.test.annotation.DirtiesContext.ClassMode.*;
+import static org.springframework.test.annotation.DirtiesContext.MethodMode.*;
 
 /**
  * {@code TestExecutionListener} which provides support for marking the
  * {@code ApplicationContext} associated with a test as <em>dirty</em> for
- * both test classes and test methods configured with the {@link DirtiesContext
- * &#064;DirtiesContext} annotation.
+ * both test classes and test methods annotated with the
+ * {@link DirtiesContext @DirtiesContext} annotation.
+ *
+ * <p>This listener supports test methods with the
+ * {@linkplain DirtiesContext#methodMode method mode} set to
+ * {@link MethodMode#AFTER_METHOD AFTER_METHOD} and test classes with the
+ * {@linkplain DirtiesContext#classMode() class mode} set to
+ * {@link ClassMode#AFTER_EACH_TEST_METHOD AFTER_EACH_TEST_METHOD} or
+ * {@link ClassMode#AFTER_CLASS AFTER_CLASS}. For support for <em>BEFORE</em>
+ * modes, see {@link DirtiesContextBeforeModesTestExecutionListener}.
+ *
+ * <p>When {@linkplain TestExecutionListeners#mergeMode merging}
+ * {@code TestExecutionListeners} with the defaults, this listener will
+ * automatically be ordered after the {@link DependencyInjectionTestExecutionListener};
+ * otherwise, this listener must be manually configured to execute after the
+ * {@code DependencyInjectionTestExecutionListener}.
  *
  * @author Sam Brannen
- * @author Juergen Hoeller
  * @since 2.5
  * @see DirtiesContext
+ * @see DirtiesContextBeforeModesTestExecutionListener
  */
-public class DirtiesContextTestExecutionListener extends AbstractTestExecutionListener {
-
-	private static final Log logger = LogFactory.getLog(DirtiesContextTestExecutionListener.class);
-
+public class DirtiesContextTestExecutionListener extends AbstractDirtiesContextTestExecutionListener {
 
 	/**
 	 * Returns {@code 3000}.
@@ -58,87 +63,36 @@ public class DirtiesContextTestExecutionListener extends AbstractTestExecutionLi
 
 	/**
 	 * If the current test method of the supplied {@linkplain TestContext test
-	 * context} is annotated with {@link DirtiesContext &#064;DirtiesContext},
-	 * or if the test class is annotated with {@link DirtiesContext
-	 * &#064;DirtiesContext} and the {@linkplain DirtiesContext#classMode() class
-	 * mode} is set to {@link ClassMode#AFTER_EACH_TEST_METHOD
-	 * AFTER_EACH_TEST_METHOD}, the {@linkplain ApplicationContext application
-	 * context} of the test context will be
-	 * {@linkplain TestContext#markApplicationContextDirty marked as dirty} and the
-	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE}
-	 * in the test context will be set to {@code true}.
+	 * context} is annotated with {@code @DirtiesContext} and the {@linkplain
+	 * DirtiesContext#methodMode() method mode} is set to {@link
+	 * MethodMode#AFTER_METHOD AFTER_METHOD}, or if the test class is
+	 * annotated with {@code @DirtiesContext} and the {@linkplain
+	 * DirtiesContext#classMode() class mode} is set to {@link
+	 * ClassMode#AFTER_EACH_TEST_METHOD AFTER_EACH_TEST_METHOD}, the
+	 * {@linkplain ApplicationContext application context} of the test context
+	 * will be {@linkplain TestContext#markApplicationContextDirty marked as dirty} and the
+	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
+	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context will be set to {@code true}.
 	 */
 	@Override
 	public void afterTestMethod(TestContext testContext) throws Exception {
-		Class<?> testClass = testContext.getTestClass();
-		Assert.notNull(testClass, "The test class of the supplied TestContext must not be null");
-		Method testMethod = testContext.getTestMethod();
-		Assert.notNull(testMethod, "The test method of the supplied TestContext must not be null");
-
-		final String annotationType = DirtiesContext.class.getName();
-		AnnotationAttributes methodAnnAttrs = AnnotatedElementUtils.getAnnotationAttributes(testMethod, annotationType);
-		AnnotationAttributes classAnnAttrs = AnnotatedElementUtils.getAnnotationAttributes(testClass, annotationType);
-		boolean methodDirtiesContext = methodAnnAttrs != null;
-		boolean classDirtiesContext = classAnnAttrs != null;
-		ClassMode classMode = classDirtiesContext ? classAnnAttrs.<ClassMode> getEnum("classMode") : null;
-
-		if (logger.isDebugEnabled()) {
-			logger.debug(String.format(
-				"After test method: context %s, class dirties context [%s], class mode [%s], method dirties context [%s].",
-				testContext, classDirtiesContext, classMode, methodDirtiesContext));
-		}
-
-		if (methodDirtiesContext || (classMode == AFTER_EACH_TEST_METHOD)) {
-			HierarchyMode hierarchyMode = methodDirtiesContext ? methodAnnAttrs.<HierarchyMode> getEnum("hierarchyMode")
-					: classAnnAttrs.<HierarchyMode> getEnum("hierarchyMode");
-			dirtyContext(testContext, hierarchyMode);
-		}
+		beforeOrAfterTestMethod(testContext, AFTER_METHOD, AFTER_EACH_TEST_METHOD);
 	}
 
 	/**
-	 * If the test class of the supplied {@linkplain TestContext test context} is
-	 * annotated with {@link DirtiesContext &#064;DirtiesContext}, the
-	 * {@linkplain ApplicationContext application context} of the test context will
-	 * be {@linkplain TestContext#markApplicationContextDirty marked as dirty},
-	 * and the
+	 * If the test class of the supplied {@linkplain TestContext test context}
+	 * is annotated with {@code @DirtiesContext} and the {@linkplain
+	 * DirtiesContext#classMode() class mode} is set to {@link
+	 * ClassMode#AFTER_CLASS AFTER_CLASS}, the {@linkplain ApplicationContext
+	 * application context} of the test context will be
+	 * {@linkplain TestContext#markApplicationContextDirty marked as dirty}, and the
 	 * {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE
 	 * REINJECT_DEPENDENCIES_ATTRIBUTE} in the test context will be set to
 	 * {@code true}.
 	 */
 	@Override
 	public void afterTestClass(TestContext testContext) throws Exception {
-		Class<?> testClass = testContext.getTestClass();
-		Assert.notNull(testClass, "The test class of the supplied TestContext must not be null");
-
-		final String annotationType = DirtiesContext.class.getName();
-		AnnotationAttributes annAttrs = AnnotatedElementUtils.getAnnotationAttributes(testClass, annotationType);
-		boolean dirtiesContext = annAttrs != null;
-
-		if (logger.isDebugEnabled()) {
-			logger.debug(String.format("After test class: context %s, dirtiesContext [%s].", testContext,
-				dirtiesContext));
-		}
-		if (dirtiesContext) {
-			HierarchyMode hierarchyMode = annAttrs.<HierarchyMode> getEnum("hierarchyMode");
-			dirtyContext(testContext, hierarchyMode);
-		}
-	}
-
-	/**
-	 * Marks the {@linkplain ApplicationContext application context} of the supplied
-	 * {@linkplain TestContext test context} as
-	 * {@linkplain TestContext#markApplicationContextDirty(DirtiesContext.HierarchyMode) dirty}
-	 * and sets {@link DependencyInjectionTestExecutionListener#REINJECT_DEPENDENCIES_ATTRIBUTE}
-	 * in the test context to {@code true}.
-	 * @param testContext the test context whose application context should
-	 * marked as dirty
-	 * @param hierarchyMode the context cache clearing mode to be applied if the
-	 * context is part of a hierarchy; may be {@code null}
-	 * @since 3.2.2
-	 */
-	protected void dirtyContext(TestContext testContext, HierarchyMode hierarchyMode) {
-		testContext.markApplicationContextDirty(hierarchyMode);
-		testContext.setAttribute(DependencyInjectionTestExecutionListener.REINJECT_DEPENDENCIES_ATTRIBUTE, Boolean.TRUE);
+		beforeOrAfterTestClass(testContext, AFTER_CLASS);
 	}
 
 }

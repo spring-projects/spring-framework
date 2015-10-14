@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,11 @@ package org.springframework.test.web.servlet.result;
 
 import java.util.Enumeration;
 import java.util.Map;
+
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.core.style.ToStringCreator;
 import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -27,6 +30,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultHandler;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.method.HandlerMethod;
@@ -36,11 +40,16 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.RequestContextUtils;
 
 /**
- * Result handler that prints {@link MvcResult} details to the "standard" output
- * stream. An instance of this class is typically accessed via
- * {@link MockMvcResultHandlers#print()}.
+ * Result handler that prints {@link MvcResult} details to a given output
+ * stream &mdash; for example: {@code System.out}, {@code System.err}, a
+ * custom {@code java.io.PrintWriter}, etc.
+ *
+ * <p>An instance of this class is typically accessed via one of the
+ * {@link MockMvcResultHandlers#print print} or {@link MockMvcResultHandlers#log log}
+ * methods in {@link MockMvcResultHandlers}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 3.2
  */
 public class PrintingResultHandler implements ResultHandler {
@@ -57,18 +66,17 @@ public class PrintingResultHandler implements ResultHandler {
 	}
 
 	/**
-	 * @return the result value printer.
+	 * @return the result value printer
 	 */
 	protected ResultValuePrinter getPrinter() {
 		return this.printer;
 	}
 
 	/**
-	 * Print {@link MvcResult} details to the "standard" output stream.
+	 * Print {@link MvcResult} details.
 	 */
 	@Override
 	public final void handle(MvcResult result) throws Exception {
-
 		this.printer.printHeading("MockHttpServletRequest");
 		printRequest(result.getRequest());
 
@@ -91,7 +99,9 @@ public class PrintingResultHandler implements ResultHandler {
 		printResponse(result.getResponse());
 	}
 
-	/** Print the request */
+	/**
+	 * Print the request.
+	 */
 	protected void printRequest(MockHttpServletRequest request) throws Exception {
 		this.printer.printValue("HTTP Method", request.getMethod());
 		this.printer.printValue("Request URI", request.getRequestURI());
@@ -127,11 +137,20 @@ public class PrintingResultHandler implements ResultHandler {
 
 	protected void printAsyncResult(MvcResult result) throws Exception {
 		HttpServletRequest request = result.getRequest();
-		this.printer.printValue("Was async started", request.isAsyncStarted());
-		this.printer.printValue("Async result", (request.isAsyncStarted() ? result.getAsyncResult(0) : null));
+		this.printer.printValue("Async started", request.isAsyncStarted());
+		Object asyncResult = null;
+		try {
+			asyncResult = result.getAsyncResult(0);
+		}
+		catch (IllegalStateException ex) {
+			// Not set
+		}
+		this.printer.printValue("Async result", asyncResult);
 	}
 
-	/** Print the handler */
+	/**
+	 * Print the handler.
+	 */
 	protected void printHandler(Object handler, HandlerInterceptor[] interceptors) throws Exception {
 		if (handler == null) {
 			this.printer.printValue("Type", null);
@@ -148,7 +167,9 @@ public class PrintingResultHandler implements ResultHandler {
 		}
 	}
 
-	/** Print exceptions resolved through a HandlerExceptionResolver */
+	/**
+	 * Print exceptions resolved through a HandlerExceptionResolver.
+	 */
 	protected void printResolvedException(Exception resolvedException) throws Exception {
 		if (resolvedException == null) {
 			this.printer.printValue("Type", null);
@@ -158,7 +179,9 @@ public class PrintingResultHandler implements ResultHandler {
 		}
 	}
 
-	/** Print the ModelAndView */
+	/**
+	 * Print the ModelAndView.
+	 */
 	protected void printModelAndView(ModelAndView mav) throws Exception {
 		this.printer.printValue("View name", (mav != null) ? mav.getViewName() : null);
 		this.printer.printValue("View", (mav != null) ? mav.getView() : null);
@@ -180,9 +203,11 @@ public class PrintingResultHandler implements ResultHandler {
 		}
 	}
 
-	/** Print "output" flash attributes */
+	/**
+	 * Print "output" flash attributes.
+	 */
 	protected void printFlashMap(FlashMap flashMap) throws Exception {
-		if (flashMap == null) {
+		if (ObjectUtils.isEmpty(flashMap)) {
 			this.printer.printValue("Attributes", null);
 		}
 		else {
@@ -193,7 +218,9 @@ public class PrintingResultHandler implements ResultHandler {
 		}
 	}
 
-	/** Print the response */
+	/**
+	 * Print the response.
+	 */
 	protected void printResponse(MockHttpServletResponse response) throws Exception {
 		this.printer.printValue("Status", response.getStatus());
 		this.printer.printValue("Error message", response.getErrorMessage());
@@ -202,7 +229,31 @@ public class PrintingResultHandler implements ResultHandler {
 		this.printer.printValue("Body", response.getContentAsString());
 		this.printer.printValue("Forwarded URL", response.getForwardedUrl());
 		this.printer.printValue("Redirected URL", response.getRedirectedUrl());
-		this.printer.printValue("Cookies", response.getCookies());
+		printCookies(response.getCookies());
+	}
+
+	/**
+	 * Print the supplied cookies in a human-readable form, assuming the
+	 * {@link Cookie} implementation does not provide its own {@code toString()}.
+	 * @since 4.2
+	 */
+	private void printCookies(Cookie[] cookies) {
+		String[] cookieStrings = new String[cookies.length];
+		for (int i = 0; i < cookies.length; i++) {
+			Cookie cookie = cookies[i];
+			cookieStrings[i] = new ToStringCreator(cookie)
+				.append("name", cookie.getName())
+				.append("value", cookie.getValue())
+				.append("comment", cookie.getComment())
+				.append("domain", cookie.getDomain())
+				.append("maxAge", cookie.getMaxAge())
+				.append("path", cookie.getPath())
+				.append("secure", cookie.getSecure())
+				.append("version", cookie.getVersion())
+				.append("httpOnly", cookie.isHttpOnly())
+				.toString();
+		}
+		this.printer.printValue("Cookies", cookieStrings);
 	}
 
 	protected final HttpHeaders getResponseHeaders(MockHttpServletResponse response) {

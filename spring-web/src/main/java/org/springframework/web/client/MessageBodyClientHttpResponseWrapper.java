@@ -25,8 +25,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
 
 /**
- * Implementation of {@link ClientHttpResponse} that can not only check if the response
- * has a message body, but also if its length is 0 (i.e. empty) by actually reading the input stream.
+ * Implementation of {@link ClientHttpResponse} that can not only check if
+ * the response has a message body, but also if its length is 0 (i.e. empty)
+ * by actually reading the input stream.
  *
  * @author Brian Clozel
  * @since 4.1.5
@@ -34,23 +35,23 @@ import org.springframework.http.client.ClientHttpResponse;
  */
 class MessageBodyClientHttpResponseWrapper implements ClientHttpResponse {
 
+	private final ClientHttpResponse response;
+
 	private PushbackInputStream pushbackInputStream;
 
-	private final ClientHttpResponse response;
 
 	public MessageBodyClientHttpResponseWrapper(ClientHttpResponse response) throws IOException {
 		this.response = response;
 	}
 
+
 	/**
 	 * Indicates whether the response has a message body.
-	 *
 	 * <p>Implementation returns {@code false} for:
 	 * <ul>
-	 *     <li>a response status of {@code 1XX}, {@code 204} or {@code 304}</li>
-	 *     <li>a {@code Content-Length} header of {@code 0}</li>
+	 * <li>a response status of {@code 1XX}, {@code 204} or {@code 304}</li>
+	 * <li>a {@code Content-Length} header of {@code 0}</li>
 	 * </ul>
-	 *
 	 * @return {@code true} if the response has a message body, {@code false} otherwise
 	 * @throws IOException in case of I/O errors
 	 */
@@ -60,7 +61,7 @@ class MessageBodyClientHttpResponseWrapper implements ClientHttpResponse {
 				responseStatus == HttpStatus.NOT_MODIFIED) {
 			return false;
 		}
-		else if(this.getHeaders().getContentLength() == 0) {
+		else if (this.getHeaders().getContentLength() == 0) {
 			return false;
 		}
 		return true;
@@ -68,13 +69,11 @@ class MessageBodyClientHttpResponseWrapper implements ClientHttpResponse {
 
 	/**
 	 * Indicates whether the response has an empty message body.
-	 *
 	 * <p>Implementation tries to read the first bytes of the response stream:
 	 * <ul>
-	 *     <li>if no bytes are available, the message body is empty</li>
-	 *     <li>otherwise it is not empty and the stream is reset to its start for further reading</li>
+	 * <li>if no bytes are available, the message body is empty</li>
+	 * <li>otherwise it is not empty and the stream is reset to its start for further reading</li>
 	 * </ul>
-	 *
 	 * @return {@code true} if the response has a zero-length message body, {@code false} otherwise
 	 * @throws IOException in case of I/O errors
 	 */
@@ -95,44 +94,46 @@ class MessageBodyClientHttpResponseWrapper implements ClientHttpResponse {
 		}
 		else {
 			this.pushbackInputStream = new PushbackInputStream(body);
-			int b = pushbackInputStream.read();
+			int b = this.pushbackInputStream.read();
 			if (b == -1) {
 				return true;
 			}
 			else {
-				pushbackInputStream.unread(b);
+				this.pushbackInputStream.unread(b);
 				return false;
 			}
 		}
 	}
 
-	@Override
-	public HttpStatus getStatusCode() throws IOException {
-		return response.getStatusCode();
-	}
 
 	@Override
-	public int getRawStatusCode() throws IOException {
-		return response.getRawStatusCode();
-	}
-
-	@Override
-	public String getStatusText() throws IOException {
-		return response.getStatusText();
-	}
-
-	@Override
-	public void close() {
-		response.close();
+	public HttpHeaders getHeaders() {
+		return this.response.getHeaders();
 	}
 
 	@Override
 	public InputStream getBody() throws IOException {
-		return this.pushbackInputStream != null ? this.pushbackInputStream : response.getBody();
+		return (this.pushbackInputStream != null ? this.pushbackInputStream : this.response.getBody());
 	}
 
 	@Override
-	public HttpHeaders getHeaders() {
-		return response.getHeaders();
+	public HttpStatus getStatusCode() throws IOException {
+		return this.response.getStatusCode();
 	}
+
+	@Override
+	public int getRawStatusCode() throws IOException {
+		return this.response.getRawStatusCode();
+	}
+
+	@Override
+	public String getStatusText() throws IOException {
+		return this.response.getStatusText();
+	}
+
+	@Override
+	public void close() {
+		this.response.close();
+	}
+
 }

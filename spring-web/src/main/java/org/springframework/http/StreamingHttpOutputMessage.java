@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,32 +21,34 @@ import java.io.OutputStream;
 
 /**
  * Represents a HTTP output message that allows for setting a streaming body.
+ * Note that such messages typically do not support {@link #getBody()} access.
  *
  * @author Arjen Poutsma
  * @since 4.0
+ * @see #setBody
  */
 public interface StreamingHttpOutputMessage extends HttpOutputMessage {
 
 	/**
-	 * Sets the streaming body for this message.
+	 * Set the streaming body for this message.
 	 * @param body the streaming body
 	 */
 	void setBody(Body body);
 
+
 	/**
-	 * Defines the contract for bodies that can be written directly to a
-	 * {@link OutputStream}. It is useful with HTTP client libraries that provide indirect
-	 * access to an {@link OutputStream} via a callback mechanism.
+	 * Defines the contract for bodies that can be written directly to an {@link OutputStream}.
+	 * It is useful with HTTP client libraries that provide indirect access to an
+	 * {@link OutputStream} via a callback mechanism.
 	 */
-	public interface Body {
+	interface Body {
 
 		/**
-		 * Writes this body to the given {@link OutputStream}.
+		 * Write this body to the given {@link OutputStream}.
 		 * @param outputStream the output stream to write to
 		 * @throws IOException in case of errors
 		 */
 		void writeTo(OutputStream outputStream) throws IOException;
-
 	}
 
 }

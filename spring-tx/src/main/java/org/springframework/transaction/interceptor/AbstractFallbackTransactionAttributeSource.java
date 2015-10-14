@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -129,9 +129,11 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	/**
 	 * Same signature as {@link #getTransactionAttribute}, but doesn't cache the result.
 	 * {@link #getTransactionAttribute} is effectively a caching decorator for this method.
+	 * <p>As of 4.1.8, this method can be overridden.
+	 * @since 4.1.8
 	 * @see #getTransactionAttribute
 	 */
-	private TransactionAttribute computeTransactionAttribute(Method method, Class<?> targetClass) {
+	protected TransactionAttribute computeTransactionAttribute(Method method, Class<?> targetClass) {
 		// Don't allow no-public methods as required.
 		if (allowPublicMethodsOnly() && !Modifier.isPublic(method.getModifiers())) {
 			return null;

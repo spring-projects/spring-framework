@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+			 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+			 xmlns:aop="http://www.springframework.org/schema/aop"
+			 xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+	<aop:config>
+
+		<aop:advisor id="lowPrecedenceAdvisor"
+			advice-ref="lowPrecedenceSpringAdvice"
+			pointcut="execution(* getAge(..))"
+			order="900"/>
+
+		<aop:advisor id="highPrecedenceAdvisor"
+			advice-ref="highPrecedenceSpringAdvice"
+			pointcut="execution(* getAge(..))"
+			order="90"/>	
+
+		<aop:aspect ref="lowPrecedenceAspect" order="1000">
+
+			<aop:before
+				method="beforeAdviceOne"
+				pointcut="execution(* getAge())"/>
+
+			<aop:before
+				method="beforeAdviceTwo"
+				pointcut="execution(* getAge())"/>
+
+			<aop:around
+				method="aroundAdviceOne"
+				pointcut="execution(* getAge())"/>
+
+			<aop:around
+				method="aroundAdviceTwo"
+				pointcut="execution(* getAge())"/>
+
+			<aop:after-returning
+				method="afterAdviceOne"
+				pointcut="execution(* getAge())"/>
+
+			<aop:after-returning
+				method="afterAdviceTwo"
+				pointcut="execution(* getAge())"/>
+
+		</aop:aspect>
+
+		<aop:aspect ref="highPrecedenceAspect">
+
+			<aop:before
+				method="beforeAdviceOne"
+				pointcut="execution(* getAge())"/>			
+		
+			<aop:before
+				method="beforeAdviceTwo"
+				pointcut="execution(* getAge())"/>			
+		
+			<aop:around
+				method="aroundAdviceOne"
+				pointcut="execution(* getAge())"/>			
+		
+			<aop:around
+				method="aroundAdviceTwo"
+				pointcut="execution(* getAge())"/>			
+		
+			<aop:after-returning
+				method="afterAdviceOne"
+				pointcut="execution(* getAge())"/>			
+		
+			<aop:after-returning
+				method="afterAdviceTwo"
+				pointcut="execution(* getAge())"/>			
+								
+		</aop:aspect>
+
+	</aop:config>
+
+	<bean id="highPrecedenceSpringAdvice" class="org.springframework.aop.aspectj.SimpleSpringBeforeAdvice"/>
+
+	<bean id="lowPrecedenceSpringAdvice" class="org.springframework.aop.aspectj.SimpleSpringBeforeAdvice"/>
+
+	<bean id="highPrecedenceAspect" class="org.springframework.aop.aspectj.PrecedenceTestAspect">
+		<property name="order" value="10"/>
+	</bean>
+
+	<bean id="lowPrecedenceAspect" class="org.springframework.aop.aspectj.PrecedenceTestAspect"/>
+
+	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean"/>
+
+</beans>

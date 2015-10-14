@@ -32,6 +32,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -49,6 +50,7 @@ import static org.junit.Assert.*;
  *
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
+ * @author Kazuki Shimizu
  * @since 3.1
  */
 public class ExceptionHandlerExceptionResolverTests {
@@ -63,6 +65,7 @@ public class ExceptionHandlerExceptionResolverTests {
 
 	private MockHttpServletResponse response;
 
+
 	@BeforeClass
 	public static void setupOnce() {
 		ExceptionHandlerExceptionResolver r = new ExceptionHandlerExceptionResolver();
@@ -72,11 +75,12 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Before
-	public void setUp() throws Exception {
+	public void setup() throws Exception {
 		this.resolver = new ExceptionHandlerExceptionResolver();
 		this.request = new MockHttpServletRequest("GET", "/");
 		this.response = new MockHttpServletResponse();
 	}
+
 
 	@Test
 	public void nullHandler() {
@@ -171,6 +175,18 @@ public class ExceptionHandlerExceptionResolverTests {
 		assertEquals("IllegalArgumentException", this.response.getContentAsString());
 	}
 
+	@Test  // SPR-13546
+	public void resolveExceptionModelAtArgument() throws Exception {
+		IllegalArgumentException ex = new IllegalArgumentException();
+		HandlerMethod handlerMethod = new HandlerMethod(new ModelArgumentController(), "handle");
+		this.resolver.afterPropertiesSet();
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod, ex);
+
+		assertNotNull(mav);
+		assertEquals(1, mav.getModelMap().size());
+		assertEquals("IllegalArgumentException", mav.getModelMap().get("exceptionClassName"));
+	}
+
 	@Test
 	public void resolveExceptionGlobalHandler() throws Exception {
 		AnnotationConfigApplicationContext cxt = new AnnotationConfigApplicationContext(MyConfig.class);
@@ -253,6 +269,7 @@ public class ExceptionHandlerExceptionResolverTests {
 		assertEquals(handlerCount, this.resolver.getReturnValueHandlers().getHandlers().size());
 	}
 
+
 	@Controller
 	static class ModelAndViewController {
 
@@ -264,6 +281,7 @@ public class ExceptionHandlerExceptionResolverTests {
 		}
 	}
 
+
 	@Controller
 	static class ResponseWriterController {
 
@@ -274,6 +292,7 @@ public class ExceptionHandlerExceptionResolverTests {
 			writer.write(ClassUtils.getShortName(ex.getClass()));
 		}
 	}
+
 
 	@Controller
 	static class ResponseBodyController {
@@ -287,15 +306,29 @@ public class ExceptionHandlerExceptionResolverTests {
 		}
 	}
 
+
 	@Controller
 	static class IoExceptionController {
 
 		public void handle() {}
 
-		@ExceptionHandler(value=IOException.class)
+		@ExceptionHandler(value = IOException.class)
 		public void handleException() {
 		}
 	}
+
+
+	@Controller
+	static class ModelArgumentController {
+
+		public void handle() {}
+
+		@ExceptionHandler
+		public void handleException(Exception ex, Model model) {
+			model.addAttribute("exceptionClassName", ClassUtils.getShortName(ex.getClass()));
+		}
+	}
+
 
 	@ControllerAdvice
 	@Order(1)
@@ -314,6 +347,7 @@ public class ExceptionHandlerExceptionResolverTests {
 		}
 	}
 
+
 	@ControllerAdvice
 	@Order(2)
 	static class AnotherTestExceptionResolver {
@@ -324,6 +358,7 @@ public class ExceptionHandlerExceptionResolverTests {
 			return "AnotherTestExceptionResolver: " + ClassUtils.getShortName(ex.getClass());
 		}
 	}
+
 
 	@Configuration
 	static class MyConfig {
@@ -337,6 +372,7 @@ public class ExceptionHandlerExceptionResolverTests {
 		}
 	}
 
+
 	@ControllerAdvice("java.lang")
 	@Order(1)
 	static class NotCalledTestExceptionResolver {
@@ -347,6 +383,7 @@ public class ExceptionHandlerExceptionResolverTests {
 			return "NotCalledTestExceptionResolver: " + ClassUtils.getShortName(ex.getClass());
 		}
 	}
+
 
 	@ControllerAdvice("org.springframework.web.servlet.mvc.method.annotation")
 	@Order(2)
@@ -359,6 +396,7 @@ public class ExceptionHandlerExceptionResolverTests {
 		}
 	}
 
+
 	@ControllerAdvice
 	@Order(3)
 	static class DefaultTestExceptionResolver {
@@ -370,8 +408,10 @@ public class ExceptionHandlerExceptionResolverTests {
 		}
 	}
 
+
 	@Configuration
 	static class MyControllerAdviceConfig {
+
 		@Bean public NotCalledTestExceptionResolver notCalledTestExceptionResolver() {
 			return new NotCalledTestExceptionResolver();
 		}
@@ -384,4 +424,5 @@ public class ExceptionHandlerExceptionResolverTests {
 			return new DefaultTestExceptionResolver();
 		}
 	}
+
 }

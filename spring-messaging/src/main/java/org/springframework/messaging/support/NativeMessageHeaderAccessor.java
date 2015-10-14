@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -33,8 +34,8 @@ import org.springframework.util.ObjectUtils;
  * created to represent a STOMP message received from a STOMP client or message broker.
  * Native message headers are kept in a {@code Map<String, List<String>>} under the key
  * {@link #NATIVE_HEADERS}.
- * <p>
- * This class is not intended for direct use but is rather expected to be used
+ *
+ * <p>This class is not intended for direct use but is rather expected to be used
  * indirectly through protocol-specific sub-classes such as
  * {@link org.springframework.messaging.simp.stomp.StompHeaderAccessor StompHeaderAccessor}.
  * Such sub-classes may provide factory methods to translate message headers from
@@ -59,7 +60,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 
 	/**
 	 * A protected constructor to create new headers.
-	 * @param nativeHeaders native headers to create the message with, may be {@code null}
+	 * @param nativeHeaders native headers to create the message with (may be {@code null})
 	 */
 	protected NativeMessageHeaderAccessor(Map<String, List<String>> nativeHeaders) {
 		if (!CollectionUtils.isEmpty(nativeHeaders)) {
@@ -114,7 +115,7 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 	 */
 	public boolean containsNativeHeader(String headerName) {
 		Map<String, List<String>> map = getNativeHeaders();
-		return (map != null ? map.containsKey(headerName) : false);
+		return (map != null && map.containsKey(headerName));
 	}
 
 	/**
@@ -186,6 +187,17 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 		setModified(true);
 	}
 
+	public void addNativeHeaders(MultiValueMap<String, String> headers) {
+		if (headers == null) {
+			return;
+		}
+		for (String header : headers.keySet()) {
+			for (String value : headers.get(header)) {
+				addNativeHeader(header, value);
+			}
+		}
+	}
+
 	public List<String> removeNativeHeader(String name) {
 		Assert.state(isMutable(), "Already immutable");
 		Map<String, List<String>> nativeHeaders = getNativeHeaders();
@@ -193,6 +205,18 @@ public class NativeMessageHeaderAccessor extends MessageHeaderAccessor {
 			return null;
 		}
 		return nativeHeaders.remove(name);
+	}
+
+	@SuppressWarnings("unchecked")
+	public static String getFirstNativeHeader(String headerName, Map<String, Object> headers) {
+		Map<String, List<String>> map = (Map<String, List<String>>) headers.get(NATIVE_HEADERS);
+		if (map != null) {
+			List<String> values = map.get(headerName);
+			if (values != null) {
+				return values.get(0);
+			}
+		}
+		return null;
 	}
 
 }

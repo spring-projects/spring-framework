@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,11 +54,13 @@ import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.server.HandshakeFailureException;
 
 /**
- * An base class for WebSocket servers using Tyrus.
+ * A base class for {@code RequestUpgradeStrategy} implementations on top of
+ * JSR-356 based servers which include Tyrus as their WebSocket engine.
  *
- * <p>Works with Tyrus 1.3.5 (WebLogic 12.1.3) and Tyrus 1.7 (GlassFish 4.0.1).
+ * <p>Works with Tyrus 1.3.5 (WebLogic 12.1.3) and Tyrus 1.7+ (GlassFish 4.1.x).
  *
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  * @since 4.1
  * @see <a href="https://tyrus.java.net/">Project Tyrus</a>
  */
@@ -180,6 +182,8 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 
 		private static final Constructor<?> constructor;
 
+		private static boolean constructorWithBooleanArgument;
+
 		private static final Method registerMethod;
 
 		private static final Method unRegisterMethod;
@@ -187,6 +191,11 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 		static {
 			try {
 				constructor = getEndpointConstructor();
+				int parameterCount = constructor.getParameterTypes().length;
+				constructorWithBooleanArgument = (parameterCount == 10);
+				if (!constructorWithBooleanArgument && parameterCount != 9) {
+					throw new IllegalStateException("Expected TyrusEndpointWrapper constructor with 9 or 10 arguments");
+				}
 				registerMethod = TyrusWebSocketEngine.class.getDeclaredMethod("register", TyrusEndpointWrapper.class);
 				unRegisterMethod = TyrusWebSocketEngine.class.getDeclaredMethod("unregister", TyrusEndpointWrapper.class);
 				ReflectionUtils.makeAccessible(registerMethod);
@@ -199,7 +208,7 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 		private static Constructor<?> getEndpointConstructor() {
 			for (Constructor<?> current : TyrusEndpointWrapper.class.getConstructors()) {
 				Class<?>[] types = current.getParameterTypes();
-				if (types[0].equals(Endpoint.class) && types[1].equals(EndpointConfig.class)) {
+				if (Endpoint.class == types[0] && EndpointConfig.class == types[1]) {
 					return current;
 				}
 			}
@@ -215,8 +224,14 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 			Object sessionListener = accessor.getPropertyValue("sessionListener");
 			Object clusterContext = accessor.getPropertyValue("clusterContext");
 			try {
-				return constructor.newInstance(registration.getEndpoint(), registration, provider, container,
-						"/",  registration.getConfigurator(), sessionListener, clusterContext, null);
+				if (constructorWithBooleanArgument) {
+					return constructor.newInstance(registration.getEndpoint(), registration, provider, container,
+							"/", registration.getConfigurator(), sessionListener, clusterContext, null, Boolean.TRUE);
+				}
+				else {
+					return constructor.newInstance(registration.getEndpoint(), registration, provider, container,
+							"/", registration.getConfigurator(), sessionListener, clusterContext, null);
+				}
 			}
 			catch (Exception ex) {
 				throw new HandshakeFailureException("Failed to register " + registration, ex);

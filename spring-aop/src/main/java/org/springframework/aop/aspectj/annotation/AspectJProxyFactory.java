@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.aop.aspectj.AspectJProxyUtils;
 import org.springframework.aop.framework.AopConfigException;
 import org.springframework.aop.framework.ProxyCreatorSupport;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.core.OrderComparator;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -76,7 +76,7 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 	 * Create a new {@code AspectJProxyFactory}.
 	 * No target, only interfaces. Must add interceptors.
 	 */
-	public AspectJProxyFactory(Class<?>[] interfaces) {
+	public AspectJProxyFactory(Class<?>... interfaces) {
 		setInterfaces(interfaces);
 	}
 
@@ -121,7 +121,7 @@ public class AspectJProxyFactory extends ProxyCreatorSupport {
 		List<Advisor> advisors = this.aspectFactory.getAdvisors(instanceFactory);
 		advisors = AopUtils.findAdvisorsThatCanApply(advisors, getTargetClass());
 		AspectJProxyUtils.makeAdvisorChainAspectJCapableIfNecessary(advisors);
-		OrderComparator.sort(advisors);
+		AnnotationAwareOrderComparator.sort(advisors);
 		addAdvisors(advisors);
 	}
 

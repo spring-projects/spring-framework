@@ -36,7 +36,8 @@ public  final class Msg extends
       com.google.protobuf.ExtensionRegistryLite extensionRegistry)
       throws com.google.protobuf.InvalidProtocolBufferException {
     initFields();
-    int mutable_bitField0_ = 0;
+    @SuppressWarnings("unused")
+	int mutable_bitField0_ = 0;
     com.google.protobuf.UnknownFieldSet.Builder unknownFields =
         com.google.protobuf.UnknownFieldSet.newBuilder();
     try {
@@ -129,7 +130,7 @@ public  final class Msg extends
     if (ref instanceof java.lang.String) {
       return (java.lang.String) ref;
     } else {
-      com.google.protobuf.ByteString bs = 
+      com.google.protobuf.ByteString bs =
           (com.google.protobuf.ByteString) ref;
       java.lang.String s = bs.toStringUtf8();
       if (bs.isValidUtf8()) {
@@ -145,7 +146,7 @@ public  final class Msg extends
       getFooBytes() {
     java.lang.Object ref = foo_;
     if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
+      com.google.protobuf.ByteString b =
           com.google.protobuf.ByteString.copyFromUtf8(
               (java.lang.String) ref);
       foo_ = b;
@@ -461,7 +462,7 @@ public  final class Msg extends
         getFooBytes() {
       java.lang.Object ref = foo_;
       if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
+        com.google.protobuf.ByteString b =
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         foo_ = b;
@@ -610,7 +611,7 @@ public  final class Msg extends
      * <code>optional .SecondMsg blah = 2;</code>
      */
     private com.google.protobuf.SingleFieldBuilder<
-        org.springframework.protobuf.SecondMsg, org.springframework.protobuf.SecondMsg.Builder, org.springframework.protobuf.SecondMsgOrBuilder> 
+        org.springframework.protobuf.SecondMsg, org.springframework.protobuf.SecondMsg.Builder, org.springframework.protobuf.SecondMsgOrBuilder>
         getBlahFieldBuilder() {
       if (blahBuilder_ == null) {
         blahBuilder_ = new com.google.protobuf.SingleFieldBuilder<

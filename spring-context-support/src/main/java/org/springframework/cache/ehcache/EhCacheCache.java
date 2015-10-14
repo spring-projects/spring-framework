@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ public class EhCacheCache implements Cache {
 	@Override
 	public ValueWrapper get(Object key) {
 		Element element = this.cache.get(key);
-		return toWrapper(element);
+		return toValueWrapper(element);
 	}
 
 	@Override
@@ -85,7 +85,7 @@ public class EhCacheCache implements Cache {
 	@Override
 	public ValueWrapper putIfAbsent(Object key, Object value) {
 		Element existingElement = this.cache.putIfAbsent(new Element(key, value));
-		return toWrapper(existingElement);
+		return toValueWrapper(existingElement);
 	}
 
 	@Override
@@ -98,7 +98,7 @@ public class EhCacheCache implements Cache {
 		this.cache.removeAll();
 	}
 
-	private ValueWrapper toWrapper(Element element) {
+	private ValueWrapper toValueWrapper(Element element) {
 		return (element != null ? new SimpleValueWrapper(element.getObjectValue()) : null);
 	}
 

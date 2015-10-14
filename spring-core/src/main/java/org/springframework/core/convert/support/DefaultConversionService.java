@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.core.convert.support;
 
+import java.nio.charset.Charset;
+import java.util.Currency;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -33,6 +35,7 @@ import org.springframework.util.ClassUtils;
  *
  * @author Chris Beams
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 3.1
  */
 public class DefaultConversionService extends GenericConversionService {
@@ -44,6 +47,11 @@ public class DefaultConversionService extends GenericConversionService {
 	/** Java 8's java.time package available? */
 	private static final boolean jsr310Available =
 			ClassUtils.isPresent("java.time.ZoneId", DefaultConversionService.class.getClassLoader());
+
+	/** Java 8's java.util.stream.Stream class available? */
+	private static final boolean streamAvailable = ClassUtils.isPresent(
+			"java.util.stream.Stream", DefaultConversionService.class.getClassLoader());
+
 
 
 	/**
@@ -69,7 +77,7 @@ public class DefaultConversionService extends GenericConversionService {
 
 		converterRegistry.addConverter(new ByteBufferConverter((ConversionService) converterRegistry));
 		if (jsr310Available) {
-			Jsr310ConverterRegistrar.registerZoneIdConverters(converterRegistry);
+			Jsr310ConverterRegistrar.registerJsr310Converters(converterRegistry);
 		}
 
 		converterRegistry.addConverter(new ObjectToObjectConverter());
@@ -104,6 +112,12 @@ public class DefaultConversionService extends GenericConversionService {
 		converterRegistry.addConverter(new StringToLocaleConverter());
 		converterRegistry.addConverter(Locale.class, String.class, new ObjectToStringConverter());
 
+		converterRegistry.addConverter(new StringToCharsetConverter());
+		converterRegistry.addConverter(Charset.class, String.class, new ObjectToStringConverter());
+
+		converterRegistry.addConverter(new StringToCurrencyConverter());
+		converterRegistry.addConverter(Currency.class, String.class, new ObjectToStringConverter());
+
 		converterRegistry.addConverter(new StringToPropertiesConverter());
 		converterRegistry.addConverter(new PropertiesToStringConverter());
 
@@ -132,6 +146,10 @@ public class DefaultConversionService extends GenericConversionService {
 
 		converterRegistry.addConverter(new CollectionToObjectConverter(conversionService));
 		converterRegistry.addConverter(new ObjectToCollectionConverter(conversionService));
+
+		if (streamAvailable) {
+			converterRegistry.addConverter(new StreamConverter(conversionService));
+		}
 	}
 
 
@@ -140,7 +158,8 @@ public class DefaultConversionService extends GenericConversionService {
 	 */
 	private static final class Jsr310ConverterRegistrar {
 
-		public static void registerZoneIdConverters(ConverterRegistry converterRegistry) {
+		public static void registerJsr310Converters(ConverterRegistry converterRegistry) {
+			converterRegistry.addConverter(new StringToTimeZoneConverter());
 			converterRegistry.addConverter(new ZoneIdToTimeZoneConverter());
 			converterRegistry.addConverter(new ZonedDateTimeToCalendarConverter());
 		}

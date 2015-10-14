@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import org.springframework.lang.UsesJava8;
  * of Optional when known.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.1
  */
 @UsesJava8
@@ -64,7 +65,10 @@ final class ObjectToOptionalConverter implements ConditionalGenericConverter {
 		if (source == null) {
 			return Optional.empty();
 		}
-		if (targetType.getResolvableType() == null) {
+		else if (source instanceof Optional) {
+			return source;
+		}
+		else if (targetType.getResolvableType() == null) {
 			return Optional.of(source);
 		}
 		else {
