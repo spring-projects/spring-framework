@@ -76,12 +76,12 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
 
 	/**
-	 * The 'value' attribute of the rendered HTML {@code &lt;option&gt;} tag.
+	 * The 'value' attribute of the rendered HTML {@code <option>} tag.
 	 */
 	private Object value;
 
 	/**
-	 * The text body of the rendered HTML {@code &lt;option&gt;} tag.
+	 * The text body of the rendered HTML {@code <option>} tag.
 	 */
 	private String label;
 
@@ -93,14 +93,14 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 
 
 	/**
-	 * Set the 'value' attribute of the rendered HTML {@code &lt;option&gt;} tag.
+	 * Set the 'value' attribute of the rendered HTML {@code <option>} tag.
 	 */
 	public void setValue(Object value) {
 		this.value = value;
 	}
 
 	/**
-	 * Get the 'value' attribute of the rendered HTML {@code &lt;option&gt;} tag.
+	 * Get the 'value' attribute of the rendered HTML {@code <option>} tag.
 	 */
 	protected Object getValue() {
 		return this.value;
@@ -121,7 +121,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	}
 
 	/**
-	 * Set the text body of the rendered HTML {@code &lt;option&gt;} tag.
+	 * Set the text body of the rendered HTML {@code <option>} tag.
 	 * <p>May be a runtime expression.
 	 */
 	public void setLabel(String label) {
@@ -130,7 +130,7 @@ public class OptionTag extends AbstractHtmlElementBodyTag implements BodyTag {
 	}
 
 	/**
-	 * Get the text body of the rendered HTML {@code &lt;option&gt;} tag.
+	 * Get the text body of the rendered HTML {@code <option>} tag.
 	 */
 	protected String getLabel() {
 		return this.label;

@@ -19,7 +19,7 @@ package org.springframework.beans.factory.xml;
 import org.springframework.beans.factory.parsing.DefaultsDefinition;
 
 /**
- * Simple JavaBean that holds the defaults specified at the {@code &lt;beans&gt;}
+ * Simple JavaBean that holds the defaults specified at the {@code <beans>}
  * level in a standard Spring XML bean definition document:
  * {@code default-lazy-init}, {@code default-autowire}, etc.
  *

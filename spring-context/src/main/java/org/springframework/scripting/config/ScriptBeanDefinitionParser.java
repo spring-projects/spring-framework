@@ -34,8 +34,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.util.xml.DomUtils;
 
 /**
- * BeanDefinitionParser implementation for the '{@code &lt;lang:groovy/&gt;}',
- * '{@code &lt;lang:jruby/&gt;}' and '{@code &lt;lang:bsh/&gt;}' tags.
+ * BeanDefinitionParser implementation for the '{@code <lang:groovy/>}',
+ * '{@code <lang:jruby/>}' and '{@code <lang:bsh/>}' tags.
  * Allows for objects written using dynamic languages to be easily exposed with
  * the {@link org.springframework.beans.factory.BeanFactory}.
  *

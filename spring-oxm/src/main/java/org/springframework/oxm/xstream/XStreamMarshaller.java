@@ -300,10 +300,10 @@ public class XStreamMarshaller extends AbstractMarshaller implements Initializin
 
 	/**
 	 * Set the types to use XML attributes for. The given map can contain
-	 * either {@code &lt;String, Class&gt;} pairs, in which case
+	 * either {@code <String, Class>} pairs, in which case
 	 * {@link XStream#useAttributeFor(String, Class)} is called.
-	 * Alternatively, the map can contain {@code &lt;Class, String&gt;}
-	 * or {@code &lt;Class, List&lt;String&gt;&gt;} pairs, which results
+	 * Alternatively, the map can contain {@code <Class, String>}
+	 * or {@code <Class, List<String>>} pairs, which results
 	 * in {@link XStream#useAttributeFor(Class, String)} calls.
 	 */
 	public void setUseAttributeFor(Map<?, ?> useAttributeFor) {
