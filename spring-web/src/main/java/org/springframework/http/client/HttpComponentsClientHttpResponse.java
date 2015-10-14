@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.http.client;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -69,7 +70,7 @@ final class HttpComponentsClientHttpResponse extends AbstractClientHttpResponse 
 
 	public InputStream getBody() throws IOException {
 		HttpEntity entity = this.httpResponse.getEntity();
-		return entity != null ? entity.getContent() : null;
+		return (entity != null ? entity.getContent() : new ByteArrayInputStream(new byte[0]));
 	}
 
 	public void close() {
