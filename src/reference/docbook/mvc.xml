@@ -5150,7 +5150,7 @@ public class WebConfig extends WebMvcConfigurerAdapter {
       content negotiation purposes.</para>
 
       <para>Note that <classname>ContentNegotiatingViewResolver</classname>
-      now can also be configured with a <code>ContentNegotiatingViewResolver</code>,
+      now can also be configured with a <classname>ContentNegotiationManager</classname>,
       so you can use one instance throughout Spring MVC.</para>
 
       <para>In more advanced cases, it may be useful to configure
