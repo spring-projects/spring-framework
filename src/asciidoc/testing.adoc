@@ -1005,6 +1005,8 @@ Indicates that the annotated test is enabled for a specific testing environment.
 configured `ProfileValueSource` returns a matching `value` for the provided `name`, the
 test is enabled. Otherwise, the test will be disabled and effectively _ignored_.
 
++
+
 `@IfProfileValue` can be applied at the class level, the method level, or both.
 Class-level usage of `@IfProfileValue` takes precedence over method-level usage for any
 methods within that class or its subclasses. Specifically, a test is enabled if it is
@@ -3238,7 +3240,7 @@ declarative SQL script execution with default transaction rollback semantics.
 ----
 	@RunWith(SpringJUnit4ClassRunner.class)
 	@ContextConfiguration
-	@Transactional(transactionManager = "txMgr")
+	**@Transactional(transactionManager = "txMgr")**
 	**@Commit**
 	public class FictitiousTransactionalTest {
 
