@@ -3,6 +3,21 @@ SPRING FRAMEWORK CHANGELOG
 http://www.spring.io
 
 
+Changes in version 3.2.15 (2015-10-15)
+-------------------------------------
+
+protect against RFD exploits, see http://pivotal.io/security/cve-2015-5211 (SPR-13548)
+fixed whether HttpInputMessage.getBody() is allowed to return null (SPR-13563)
+fixed JCacheCache doesn't recognize null values in other JVMs (SPR-13553)
+fixed AbstractEmbeddedDatabaseConfigurer.shutdown does not close JDBC resources (SPR-13474)
+fixed DeferredResult not thread-safe for isSetOrExpired call (SPR-13451)
+fixed ConcurrentModificationException when doing a merge on AbstractEnvironment (SPR-13213)
+avoid ambiguous property warning for setter methods with multiple parameters (SPR-13349)
+improved documentation of ContentNegotiationManager reference in MVC chapter (SPR-13558)
+improved documentation on readonly and disabled flags in spring-form.tld (SPR-13397)
+improved documentation of AUTO_ACKNOWLEDGE semantics with SimpleMessageListenerContainer (SPR-13278)
+
+
 Changes in version 3.2.14 (2015-06-30)
 -------------------------------------
 
