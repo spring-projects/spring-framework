@@ -186,6 +186,18 @@ public class NamedParameterUtilsTests {
 	}
 
 	/*
+	 * SPR-13582
+	 */
+	@Test
+	public void parseSqlStatementWithPostgresContainedOperator() throws Exception {
+		String expectedSql = "select 'first name' from artists where info->'stat'->'albums' = ?? ? and '[\"1\",\"2\",\"3\"]'::jsonb ?? '4'";
+		String sql = "select 'first name' from artists where info->'stat'->'albums' = ?? :album and '[\"1\",\"2\",\"3\"]'::jsonb ?? '4'";
+		ParsedSql parsedSql = NamedParameterUtils.parseSqlStatement(sql);
+		assertEquals(1, parsedSql.getTotalParameterCount());
+		assertEquals(expectedSql, NamedParameterUtils.substituteNamedParameters(parsedSql, null));
+	}
+
+	/*
 	 * SPR-7476
 	 */
 	@Test
