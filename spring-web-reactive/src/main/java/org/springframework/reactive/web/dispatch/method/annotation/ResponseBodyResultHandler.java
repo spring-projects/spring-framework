@@ -142,7 +142,7 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 			return response.writeWith(outputStream);
 		}
 		return Publishers.error(new IllegalStateException(
-		  "Return value type not supported: " + returnType));
+		  "Return value type '" + returnType.getParameterType().getName() + "' with media type '" + mediaType + "' not supported"  ));
 	}
 
 	private MediaType resolveMediaType(ServerHttpRequest request) {
