@@ -4695,7 +4695,7 @@ plugged into Spring MVC as a global validator as described next.
 
 By default use of `@EnableWebMvc` or `<mvc:annotation-driven>` automatically registers Bean
 Validation support in Spring MVC through the `LocalValidatorFactoryBean` when a Bean Validation
-provider is such as Hibernate Validator is detected on the classpath.
+provider such as Hibernate Validator is detected on the classpath.
 
 [NOTE]
 ====
@@ -4762,7 +4762,7 @@ To combine global with local validation, simply add one or more local validator(
 	}
 ----
 
-With this minimal configuration anytime an `@Valid` or `@Validated` method argument is encountered, it
+With this minimal configuration any time an `@Valid` or `@Validated` method argument is encountered, it
 will be validated by the configured validators. Any validation violations will automatically
 be exposed as errors in the `BindingResult` accessible as a method argument and also renderable
 in Spring MVC HTML views.
