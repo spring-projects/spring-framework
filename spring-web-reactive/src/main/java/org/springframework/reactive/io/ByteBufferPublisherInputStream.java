@@ -16,28 +16,27 @@
 
 package org.springframework.reactive.io;
 
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscription;
+import org.springframework.util.Assert;
+import reactor.Publishers;
+import reactor.core.error.CancelException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
-
-import org.springframework.reactive.util.PublisherSignal;
-import org.springframework.util.Assert;
 
 /**
  * {@code InputStream} implementation based on a byte array {@link Publisher}.
+ *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @author Stephane Maldini
  */
 public class ByteBufferPublisherInputStream extends InputStream {
 
-	private final BlockingQueue<PublisherSignal<ByteBuffer>> queue =
-			new LinkedBlockingQueue<>();
+	private final BlockingQueue<ByteBuffer> queue;
 
 	private ByteBufferInputStream currentStream;
 
@@ -46,6 +45,7 @@ public class ByteBufferPublisherInputStream extends InputStream {
 
 	/**
 	 * Creates a new {@code ByteArrayPublisherInputStream} based on the given publisher.
+	 *
 	 * @param publisher the publisher to use
 	 */
 	public ByteBufferPublisherInputStream(Publisher<ByteBuffer> publisher) {
@@ -54,14 +54,15 @@ public class ByteBufferPublisherInputStream extends InputStream {
 
 	/**
 	 * Creates a new {@code ByteArrayPublisherInputStream} based on the given publisher.
-	 * @param publisher the publisher to use
+	 *
+	 * @param publisher   the publisher to use
 	 * @param requestSize the {@linkplain Subscription#request(long) request size} to use
-	 * on the publisher
+	 * on the publisher bound to Integer MAX
 	 */
-	public ByteBufferPublisherInputStream(Publisher<ByteBuffer> publisher, long requestSize) {
+	public ByteBufferPublisherInputStream(Publisher<ByteBuffer> publisher, int requestSize) {
 		Assert.notNull(publisher, "'publisher' must not be null");
 
-		publisher.subscribe(new BlockingQueueSubscriber(requestSize));
+		this.queue = Publishers.toReadQueue(publisher, requestSize);
 	}
 
 
@@ -128,85 +129,29 @@ public class ByteBufferPublisherInputStream extends InputStream {
 		try {
 			if (this.currentStream != null && this.currentStream.available() > 0) {
 				return this.currentStream;
-			}
-			else {
-				// take() blocks, but that's OK since this is a *blocking* InputStream
-				PublisherSignal<ByteBuffer> signal = this.queue.take();
-
-				if (signal.isData()) {
-					ByteBuffer data = signal.data();
-					this.currentStream = new ByteBufferInputStream(data);
-					return this.currentStream;
-				}
-				else if (signal.isComplete()) {
+			} else {
+				// take() blocks until next or complete() then return null, but that's OK since this is a *blocking* InputStream
+				ByteBuffer signal = this.queue.take();
+				if(signal == null){
 					this.completed = true;
 					return null;
 				}
-				else if (signal.isError()) {
-					Throwable error = signal.error();
-					this.completed = true;
-					if (error instanceof IOException) {
-						throw (IOException) error;
-					}
-					else {
-						throw new IOException(error);
-					}
-				}
+				this.currentStream = new ByteBufferInputStream(signal);
+				return this.currentStream;
 			}
+		}
+		catch (CancelException ce) {
+			this.completed = true;
+			return null;
 		}
 		catch (InterruptedException ex) {
 			Thread.currentThread().interrupt();
 		}
+		catch (Throwable error ){
+			this.completed = true;
+			throw new IOException(error);
+		}
 		throw new IOException();
-	}
-
-	private class BlockingQueueSubscriber implements Subscriber<ByteBuffer> {
-
-		private final long requestSize;
-
-		private Subscription subscription;
-
-		public BlockingQueueSubscriber(long requestSize) {
-			this.requestSize = requestSize;
-		}
-
-		@Override
-		public void onSubscribe(Subscription subscription) {
-			this.subscription = subscription;
-
-			this.subscription.request(this.requestSize);
-		}
-
-		@Override
-		public void onNext(ByteBuffer bytes) {
-			try {
-				queue.put(PublisherSignal.data(bytes));
-				this.subscription.request(requestSize);
-			}
-			catch (InterruptedException ex) {
-				Thread.currentThread().interrupt();
-			}
-		}
-
-		@Override
-		public void onError(Throwable t) {
-			try {
-				queue.put(PublisherSignal.error(t));
-			}
-			catch (InterruptedException ex) {
-				Thread.currentThread().interrupt();
-			}
-		}
-
-		@Override
-		public void onComplete() {
-			try {
-				queue.put(PublisherSignal.complete());
-			}
-			catch (InterruptedException ex) {
-				Thread.currentThread().interrupt();
-			}
-		}
 	}
 
 }
