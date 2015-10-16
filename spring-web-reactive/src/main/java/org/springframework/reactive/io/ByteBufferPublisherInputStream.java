@@ -20,7 +20,6 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
 import org.springframework.util.Assert;
 import reactor.Publishers;
-import reactor.core.error.CancelException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -139,10 +138,6 @@ public class ByteBufferPublisherInputStream extends InputStream {
 				this.currentStream = new ByteBufferInputStream(signal);
 				return this.currentStream;
 			}
-		}
-		catch (CancelException ce) {
-			this.completed = true;
-			return null;
 		}
 		catch (InterruptedException ex) {
 			Thread.currentThread().interrupt();
