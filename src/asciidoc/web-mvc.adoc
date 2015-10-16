@@ -4530,7 +4530,7 @@ in addition to the JavaBeans PropertyEditors used for Data Binding.
 through the `ConversionService`.
 . Support for <<format,formatting>> Date, Calendar, Long, and Joda Time fields using the
 `@DateTimeFormat` annotation.
-. Support for <<validation-mvc-jsr303,validating>> `@Controller` inputs with `@Valid`, if
+. Support for <<mvc-config-validation,validating>> `@Controller` inputs with `@Valid`, if
 a JSR-303 Provider is present on the classpath.
 . HttpMessageConverter support for `@RequestBody` method parameters and `@ResponseBody`
 method return values from `@RequestMapping` or `@ExceptionHandler` methods.
