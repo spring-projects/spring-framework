@@ -17,6 +17,7 @@
 package org.springframework.reactive.web.dispatch;
 
 import org.reactivestreams.Publisher;
+import reactor.Publishers;
 
 import org.springframework.core.Ordered;
 import org.springframework.reactive.web.http.ServerHttpRequest;
@@ -44,6 +45,6 @@ public class SimpleHandlerResultHandler implements Ordered, HandlerResultHandler
 
 	@Override
 	public Publisher<Void> handleResult(ServerHttpRequest request, ServerHttpResponse response, HandlerResult result) {
-		return (Publisher<Void>)result.getValue();
+		return Publishers.completable((Publisher<?>)result.getValue());
 	}
 }
