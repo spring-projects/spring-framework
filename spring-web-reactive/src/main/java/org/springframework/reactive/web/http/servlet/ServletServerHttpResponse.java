@@ -22,6 +22,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import org.reactivestreams.Publisher;
+import reactor.Publishers;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -62,12 +63,18 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
+	public Publisher<Void> writeHeaders() {
+		applyHeaders();
+		return Publishers.empty();
+	}
+
+	@Override
 	public Publisher<Void> writeWith(final Publisher<ByteBuffer> contentPublisher) {
-		writeHeaders();
+		applyHeaders();
 		return (s -> contentPublisher.subscribe(responseSubscriber));
 	}
 
-	private void writeHeaders() {
+	private void applyHeaders() {
 		if (!this.headersWritten) {
 			for (Map.Entry<String, List<String>> entry : this.headers.entrySet()) {
 				String headerName = entry.getKey();

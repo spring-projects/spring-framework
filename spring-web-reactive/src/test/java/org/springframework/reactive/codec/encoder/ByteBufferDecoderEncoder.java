@@ -16,14 +16,14 @@
 
 package org.springframework.reactive.codec.encoder;
 
-import java.nio.charset.StandardCharsets;
+import java.nio.ByteBuffer;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
+import reactor.io.buffer.Buffer;
+import reactor.rx.Stream;
 import reactor.rx.Streams;
 
 import org.springframework.core.ResolvableType;
@@ -32,27 +32,27 @@ import org.springframework.http.MediaType;
 /**
  * @author Sebastien Deleuze
  */
-public class StringEncoderTests {
+public class ByteBufferDecoderEncoder {
 
-	private final StringEncoder encoder = new StringEncoder();
+	private final ByteBufferEncoder encoder = new ByteBufferEncoder();
 
 	@Test
-	public void canWrite() {
-		assertTrue(encoder.canEncode(ResolvableType.forClass(String.class), MediaType.TEXT_PLAIN));
+	public void canDecode() {
+		assertTrue(encoder.canEncode(ResolvableType.forClass(ByteBuffer.class), MediaType.TEXT_PLAIN));
 		assertFalse(encoder.canEncode(ResolvableType.forClass(Integer.class), MediaType.TEXT_PLAIN));
-		assertFalse(encoder.canEncode(ResolvableType.forClass(String.class), MediaType.APPLICATION_JSON));
+		assertTrue(encoder.canEncode(ResolvableType.forClass(ByteBuffer.class), MediaType.APPLICATION_JSON));
 	}
 
 	@Test
-	public void write() throws InterruptedException {
-		List<String> results = Streams.wrap(encoder.encode(Streams.just("foo"), null, null))
-				.map(chunk -> {
-					byte[] b = new byte[chunk.remaining()];
-					chunk.get(b);
-					return new String(b, StandardCharsets.UTF_8);
-				}).toList().await();
-		assertEquals(1, results.size());
-		assertEquals("foo", results.get(0));
+	public void decode() throws InterruptedException {
+		ByteBuffer fooBuffer = Buffer.wrap("foo").byteBuffer();
+		ByteBuffer barBuffer = Buffer.wrap("bar").byteBuffer();
+		Stream<ByteBuffer> source = Streams.just(fooBuffer, barBuffer);
+		List<ByteBuffer> results = Streams.wrap(encoder.encode(source,
+				ResolvableType.forClassWithGenerics(Publisher.class, ByteBuffer.class), null)).toList().await();
+		assertEquals(2, results.size());
+		assertEquals(fooBuffer, results.get(0));
+		assertEquals(barBuffer, results.get(1));
 	}
 
 }

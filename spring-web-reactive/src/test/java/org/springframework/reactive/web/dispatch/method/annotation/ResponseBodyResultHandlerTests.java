@@ -44,7 +44,7 @@ public class ResponseBodyResultHandlerTests {
 		assertTrue(resultHandler.supports(new HandlerResult(publisherStringMethod, null)));
 
 		HandlerMethod publisherVoidMethod = new HandlerMethod(controller, TestController.class.getMethod("publisherVoid"));
-		assertFalse(resultHandler.supports(new HandlerResult(publisherVoidMethod, null)));
+		assertTrue(resultHandler.supports(new HandlerResult(publisherVoidMethod, null)));
 	}
 
 

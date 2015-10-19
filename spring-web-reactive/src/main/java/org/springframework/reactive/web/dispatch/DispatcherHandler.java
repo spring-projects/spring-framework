@@ -101,6 +101,7 @@ public class DispatcherHandler implements HttpHandler, ApplicationContextAware {
 		if (handler == null) {
 			// No exception handling mechanism yet
 			response.setStatusCode(HttpStatus.NOT_FOUND);
+			response.writeHeaders();
 			return Publishers.empty();
 		}
 

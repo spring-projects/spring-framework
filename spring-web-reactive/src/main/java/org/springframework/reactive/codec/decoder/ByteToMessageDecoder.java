@@ -34,8 +34,7 @@ public interface ByteToMessageDecoder<T> {
 
 	/**
 	 * Indicate whether the given type and media type can be processed by this decoder.
-	 * @param type the (potentially generic) type to ultimately decode to.
-	 * Could be different from {@code T} type.
+	 * @param type the stream element type to ultimately decode to.
 	 * @param mediaType the media type to decode from.
 	 * Typically the value of a {@code Content-Type} header for HTTP request.
 	 * @param hints Additional information about how to do decode, optional.
@@ -46,8 +45,7 @@ public interface ByteToMessageDecoder<T> {
 	/**
 	 * Decode a bytes stream to a message stream.
 	 * @param inputStream the input stream that represent the whole object to decode.
-	 * @param type the (potentially generic) type to ultimately decode to.
-	 * Could be different from {@code T} type.
+	 * @param type the stream element type to ultimately decode to.
 	 * @param hints Additional information about how to do decode, optional.
 	 * @return the decoded message stream
 	 */

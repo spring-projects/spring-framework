@@ -21,21 +21,17 @@ import org.reactivestreams.Subscriber;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 import org.springframework.reactive.codec.decoder.JsonObjectDecoder;
-import org.springframework.util.ClassUtils;
 
 import reactor.core.subscriber.SubscriberBarrier;
-import reactor.io.buffer.Buffer;
-import reactor.rx.Promise;
-import rx.Observable;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 import static reactor.Publishers.*;
+import reactor.io.buffer.Buffer;
 
 /**
- * Encode a bye stream of individual JSON element to a byte stream representing a single
- * JSON array when {@code Hints.ENCODE_AS_ARRAY} is enabled.
+ * Encode a byte stream of individual JSON element to a byte stream representing a single
+ * JSON array when if it contains more than one element.
  *
  * @author Sebastien Deleuze
  * @author Stephane Maldini
@@ -44,57 +40,31 @@ import static reactor.Publishers.*;
  */
 public class JsonObjectEncoder implements MessageToByteEncoder<ByteBuffer> {
 
-	private static final boolean rxJava1Present =
-			ClassUtils.isPresent("rx.Observable", JsonObjectEncoder.class.getClassLoader());
-
-	private static final boolean reactorPresent =
-			ClassUtils.isPresent("reactor.rx.Promise", JsonObjectEncoder.class.getClassLoader());
-
-	final ByteBuffer START_ARRAY = ByteBuffer.wrap("[".getBytes());
-
-	final ByteBuffer END_ARRAY = ByteBuffer.wrap("]".getBytes());
-
-	final ByteBuffer COMMA = ByteBuffer.wrap(",".getBytes());
-
 
 	@Override
 	public boolean canEncode(ResolvableType type, MediaType mediaType, Object... hints) {
-		return mediaType.isCompatibleWith(MediaType.APPLICATION_JSON) &&
-				!(reactorPresent && Promise.class.isAssignableFrom(type.getRawClass())) &&
-				(rxJava1Present && Observable.class.isAssignableFrom(type.getRawClass())
-				|| Publisher.class.isAssignableFrom(type.getRawClass()));
+		return mediaType.isCompatibleWith(MediaType.APPLICATION_JSON);
 	}
 
 	@Override
-	public Publisher<ByteBuffer> encode(Publisher<? extends ByteBuffer> messageStream, ResolvableType type, MediaType
-	  mediaType, Object... hints) {
-		//TODO Merge some chunks, there is no need to have chunks with only '[', ']' or ',' characters
-		return
-		  concat(
-			  from(
-			    Arrays.<Publisher<ByteBuffer>>asList(
-				  just(START_ARRAY),
-				  lift(
-				    flatMap(messageStream, (ByteBuffer b) -> from(Arrays.asList(b, COMMA))),
-				    sub -> new SkipLastBarrier(sub)
-				  ),
-				  just(END_ARRAY)
-			    )
-			  )
-		  );
+	public Publisher<ByteBuffer> encode(Publisher<? extends ByteBuffer> messageStream,
+			ResolvableType type, MediaType mediaType, Object... hints) {
+		return lift(messageStream, sub -> new JsonEncoderBarrier(sub));
 	}
 
-	private static class SkipLastBarrier extends SubscriberBarrier<ByteBuffer, ByteBuffer> {
+	private static class JsonEncoderBarrier extends SubscriberBarrier<ByteBuffer, ByteBuffer> {
 
-		public SkipLastBarrier(Subscriber<? super ByteBuffer> subscriber) {
+		public JsonEncoderBarrier(Subscriber<? super ByteBuffer> subscriber) {
 			super(subscriber);
 		}
 
 		ByteBuffer prev = null;
+		long count = 0;
 
 		@Override
 		protected void doNext(ByteBuffer next) {
-			if (prev == null) {
+			count++;
+			if (count == 1) {
 				prev = next;
 				doRequest(1);
 				return;
@@ -102,8 +72,27 @@ public class JsonObjectEncoder implements MessageToByteEncoder<ByteBuffer> {
 
 			ByteBuffer tmp = prev;
 			prev = next;
-			subscriber.onNext(tmp);
+			Buffer buffer = new Buffer();
+			if (count == 2) {
+				buffer.append("[");
+			}
+			buffer.append(tmp);
+			buffer.append(",");
+			buffer.flip();
+			subscriber.onNext(buffer.byteBuffer());
 		}
 
+		@Override
+		protected void doComplete() {
+			Buffer buffer = new Buffer();
+			buffer.append(prev);
+			if (count > 1) {
+				buffer.append("]");
+			}
+			buffer.flip();
+			subscriber.onNext(buffer.byteBuffer());
+			subscriber.onComplete();
+		}
 	}
+
 }

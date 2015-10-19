@@ -31,8 +31,17 @@ public interface ServerHttpResponse extends HttpMessage {
 	void setStatusCode(HttpStatus status);
 
 	/**
+	 * Write the response headers. This method must be invoked to send responses without body.
+	 * @return A {@code Publisher<Void>} used to signal the demand, and receive a notification
+	 * when the handling is complete (success or error) including the flush of the data on the
+	 * network.
+	 */
+	Publisher<Void> writeHeaders();
+
+	/**
 	 * Write the provided reactive stream of bytes to the response body. Most servers
-	 * support multiple {@code writeWith} calls.
+	 * support multiple {@code writeWith} calls. Headers are written automatically
+	 * before the body, so not need to call {@link #writeHeaders()} explicitly.
 	 * @param contentPublisher the stream to write in the response body.
 	 * @return A {@code Publisher<Void>} used to signal the demand, and receive a notification
 	 * when the handling is complete (success or error) including the flush of the data on the

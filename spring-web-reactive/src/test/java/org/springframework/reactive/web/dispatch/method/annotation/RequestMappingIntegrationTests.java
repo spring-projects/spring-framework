@@ -17,13 +17,20 @@ package org.springframework.reactive.web.dispatch.method.annotation;
 
 
 import java.net.URI;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static org.junit.Assert.assertEquals;
+
 import org.junit.Test;
 import org.reactivestreams.Publisher;
+
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
+import org.springframework.core.ResolvableType;
+import reactor.io.buffer.Buffer;
 import reactor.rx.Promise;
 import reactor.rx.Promises;
 import reactor.rx.Stream;
@@ -32,13 +39,16 @@ import rx.Observable;
 import rx.Single;
 
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.reactive.codec.encoder.ByteBufferEncoder;
 import org.springframework.reactive.codec.encoder.JacksonJsonEncoder;
 import org.springframework.reactive.codec.encoder.JsonObjectEncoder;
 import org.springframework.reactive.codec.encoder.StringEncoder;
 import org.springframework.reactive.web.dispatch.DispatcherHandler;
+import org.springframework.reactive.web.dispatch.SimpleHandlerResultHandler;
 import org.springframework.reactive.web.http.AbstractHttpHandlerIntegrationTests;
 import org.springframework.reactive.web.http.HttpHandler;
 import org.springframework.stereotype.Controller;
@@ -52,18 +62,25 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 /**
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @author Stephane Maldini
  */
 public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrationTests {
+
+	private TestController controller;
 
 	@Override
 	protected HttpHandler createHttpHandler() {
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		DefaultListableBeanFactory factory =  wac.getDefaultListableBeanFactory();
 		wac.registerSingleton("handlerMapping", RequestMappingHandlerMapping.class);
 		wac.registerSingleton("handlerAdapter", RequestMappingHandlerAdapter.class);
-		wac.getDefaultListableBeanFactory().registerSingleton("responseBodyResultHandler",
-				new ResponseBodyResultHandler(Arrays.asList(new StringEncoder(), new JacksonJsonEncoder()), Arrays.asList(new JsonObjectEncoder())));
-		wac.registerSingleton("controller", TestController.class);
+		factory.registerSingleton("responseBodyResultHandler",
+		  new ResponseBodyResultHandler(Arrays.asList(new ByteBufferEncoder(), new StringEncoder(), new JacksonJsonEncoder()), Arrays.asList
+		    (new JsonObjectEncoder())));
+		wac.registerSingleton("simpleResultHandler", SimpleHandlerResultHandler.class);
+		this.controller = new TestController();
+		factory.registerSingleton("controller", this.controller);
 		wac.refresh();
 
 		DispatcherHandler dispatcherHandler = new DispatcherHandler();
@@ -81,6 +98,30 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		ResponseEntity<String> response = restTemplate.exchange(request, String.class);
 
 		assertEquals("Hello George!", response.getBody());
+	}
+
+	@Test
+	public void rawPojoResponse() throws Exception {
+
+		RestTemplate restTemplate = new RestTemplate();
+
+		URI url = new URI("http://localhost:" + port + "/raw");
+		RequestEntity<Void> request = RequestEntity.get(url).build();
+		Person person = restTemplate.exchange(request, Person.class).getBody();
+
+		assertEquals(new Person("Robert"), person);
+	}
+
+	@Test
+	public void rawHelloResponse() throws Exception {
+
+		RestTemplate restTemplate = new RestTemplate();
+
+		URI url = new URI("http://localhost:" + port + "/raw-observable");
+		RequestEntity<Void> request = RequestEntity.get(url).build();
+		ResponseEntity<String> response = restTemplate.exchange(request, String.class);
+
+		assertEquals("Hello!", response.getBody());
 	}
 
 	@Test
@@ -153,12 +194,36 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		capitalizePojo("http://localhost:" + port + "/promise-capitalize");
 	}
 
+	@Test
+	public void create() throws Exception {
+		RestTemplate restTemplate = new RestTemplate();
+
+		URI url = new URI("http://localhost:" + port + "/create");
+		List<Person> persons = Arrays.asList(new Person("Robert"), new Person("Marie"));
+		RequestEntity<List<Person>> request = RequestEntity.post(url).contentType(MediaType.APPLICATION_JSON).body(persons);
+		ResponseEntity<Void> response = restTemplate.exchange(request, Void.class);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertEquals(2, this.controller.persons.size());
+	}
+
 
 	public void serializeAsPojo(String requestUrl) throws Exception {
 		RestTemplate restTemplate = new RestTemplate();
 
 		URI url = new URI(requestUrl);
 		RequestEntity<Void> request = RequestEntity.get(url).accept(MediaType.APPLICATION_JSON).build();
+		ResponseEntity<Person> response = restTemplate.exchange(request, Person.class);
+
+		assertEquals(new Person("Robert"), response.getBody());
+	}
+
+	public void postAsPojo(String requestUrl) throws Exception {
+		RestTemplate restTemplate = new RestTemplate();
+
+		URI url = new URI(requestUrl);
+		RequestEntity<Person> request = RequestEntity.post(url).accept(MediaType.APPLICATION_JSON).body(new Person
+		  ("Robert"));
 		ResponseEntity<Person> response = restTemplate.exchange(request, Person.class);
 
 		assertEquals(new Person("Robert"), response.getBody());
@@ -214,6 +279,8 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 	@SuppressWarnings("unused")
 	private static class TestController {
 
+		final List<Person> persons = new ArrayList<>();
+
 		@RequestMapping("/param")
 		@ResponseBody
 		public Publisher<String> handleWithParam(@RequestParam String name) {
@@ -230,6 +297,19 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		@ResponseBody
 		public CompletableFuture<Person> completableFutureResponseBody() {
 			return CompletableFuture.completedFuture(new Person("Robert"));
+		}
+
+		@RequestMapping("/raw")
+		@ResponseBody
+		public Publisher<ByteBuffer> rawResponseBody() {
+			JacksonJsonEncoder encoder = new JacksonJsonEncoder();
+			return encoder.encode(Streams.just(new Person("Robert")), ResolvableType.forClass(Person.class), MediaType.APPLICATION_JSON);
+		}
+
+		@RequestMapping("/raw-observable")
+		@ResponseBody
+		public Observable<ByteBuffer> rawObservableResponseBody() {
+			return Observable.just(Buffer.wrap("Hello!").byteBuffer());
 		}
 
 		@RequestMapping("/single")
@@ -321,6 +401,13 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 				return person;
 			});
 		}
+
+		@RequestMapping("/create")
+		public Publisher<Void> create(@RequestBody Stream<Person> personStream) {
+			return personStream.toList().onSuccess(personList -> persons.addAll(personList)).after();
+		}
+
+		//TODO add mixed and T request mappings tests
 
 	}
 

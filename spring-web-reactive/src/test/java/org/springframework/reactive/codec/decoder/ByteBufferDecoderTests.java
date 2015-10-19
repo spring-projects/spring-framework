@@ -19,9 +19,7 @@ package org.springframework.reactive.codec.decoder;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.io.buffer.Buffer;
@@ -34,25 +32,27 @@ import org.springframework.http.MediaType;
 /**
  * @author Sebastien Deleuze
  */
-public class StringDecoderTests {
+public class ByteBufferDecoderTests {
 
-	private final StringDecoder decoder = new StringDecoder();
+	private final ByteBufferDecoder decoder = new ByteBufferDecoder();
 
 	@Test
 	public void canDecode() {
-		assertTrue(decoder.canDecode(ResolvableType.forClass(String.class), MediaType.TEXT_PLAIN));
+		assertTrue(decoder.canDecode(ResolvableType.forClass(ByteBuffer.class), MediaType.TEXT_PLAIN));
 		assertFalse(decoder.canDecode(ResolvableType.forClass(Integer.class), MediaType.TEXT_PLAIN));
-		assertFalse(decoder.canDecode(ResolvableType.forClass(String.class), MediaType.APPLICATION_JSON));
+		assertTrue(decoder.canDecode(ResolvableType.forClass(ByteBuffer.class), MediaType.APPLICATION_JSON));
 	}
 
 	@Test
 	public void decode() throws InterruptedException {
-		Stream<ByteBuffer> source = Streams.just(Buffer.wrap("foo").byteBuffer(), Buffer.wrap("bar").byteBuffer());
-		List<String> results = Streams.wrap(decoder.decode(source,
-				ResolvableType.forClassWithGenerics(Publisher.class, String.class), null)).toList().await();
+		ByteBuffer fooBuffer = Buffer.wrap("foo").byteBuffer();
+		ByteBuffer barBuffer = Buffer.wrap("bar").byteBuffer();
+		Stream<ByteBuffer> source = Streams.just(fooBuffer, barBuffer);
+		List<ByteBuffer> results = Streams.wrap(decoder.decode(source,
+				ResolvableType.forClassWithGenerics(Publisher.class, ByteBuffer.class), null)).toList().await();
 		assertEquals(2, results.size());
-		assertEquals("foo", results.get(0));
-		assertEquals("bar", results.get(1));
+		assertEquals(fooBuffer, results.get(0));
+		assertEquals(barBuffer, results.get(1));
 	}
 
 }

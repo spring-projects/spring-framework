@@ -34,8 +34,7 @@ public interface MessageToByteEncoder<T> {
 
 	/**
 	 * Indicate whether the given type and media type can be processed by this encoder.
-	 * @param type the (potentially generic) type to ultimately encode from.
-	 * Could be different from {@code T} type.
+	 * @param type the stream element type to encode.
 	 * @param mediaType the media type to encode.
 	 * Typically the value of an {@code Accept} header for HTTP request.
 	 * @param hints Additional information about how to encode, optional.
@@ -46,8 +45,7 @@ public interface MessageToByteEncoder<T> {
 	/**
 	 * Encode a given message stream to the given output byte stream.
 	 * @param messageStream the message stream to encode.
-	 * @param type the (potentially generic) type to ultimately encode from.
-	 * Could be different from {@code T} type.
+	 * @param type the stream element type to encode.
 	 * @param mediaType the media type to encode.
 	 * Typically the value of an {@code Accept} header for HTTP request.
 	 * @param hints Additional information about how to encode, optional.

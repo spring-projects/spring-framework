@@ -31,28 +31,28 @@ configurations.all {
 }
 
 dependencies {
-	compile "org.springframework:spring-core:4.2.0.RELEASE"
-	compile "org.springframework:spring-web:4.2.0.RELEASE"
+	compile "org.springframework:spring-core:4.2.2.RELEASE"
+	compile "org.springframework:spring-web:4.2.2.RELEASE"
 	compile "org.reactivestreams:reactive-streams:1.0.0"
 	compile "io.projectreactor:reactor-core:2.1.0.BUILD-SNAPSHOT"
 	compile "commons-logging:commons-logging:1.2"
 
-	optional "com.fasterxml.jackson.core:jackson-databind:2.6.1"
+	optional "com.fasterxml.jackson.core:jackson-databind:2.6.2"
 
 	optional "io.reactivex:rxnetty:0.5.0-SNAPSHOT"
 
 	optional "io.projectreactor:reactor-net:2.1.0.BUILD-SNAPSHOT"
 
-	optional 'org.apache.tomcat:tomcat-util:8.0.24'
-	optional 'org.apache.tomcat.embed:tomcat-embed-core:8.0.24'
+	optional 'org.apache.tomcat:tomcat-util:8.0.28'
+	optional 'org.apache.tomcat.embed:tomcat-embed-core:8.0.28'
 
-	optional 'org.eclipse.jetty:jetty-server:9.3.2.v20150730'
-	optional 'org.eclipse.jetty:jetty-servlet:9.3.2.v20150730'
+	optional 'org.eclipse.jetty:jetty-server:9.3.5.v20151012'
+	optional 'org.eclipse.jetty:jetty-servlet:9.3.5.v20151012'
 
 	provided "javax.servlet:javax.servlet-api:3.1.0"
 
 	testCompile "junit:junit:4.12"
-	testCompile "org.springframework:spring-test:4.2.0.RELEASE"
+	testCompile "org.springframework:spring-test:4.2.2.RELEASE"
 
 	testCompile "org.slf4j:slf4j-jcl:1.7.12"
 	testCompile "org.slf4j:jul-to-slf4j:1.7.12"

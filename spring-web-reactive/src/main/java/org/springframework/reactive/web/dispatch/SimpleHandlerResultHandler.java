@@ -16,6 +16,8 @@
 
 package org.springframework.reactive.web.dispatch;
 
+import java.util.Arrays;
+
 import org.reactivestreams.Publisher;
 import reactor.Publishers;
 
@@ -45,6 +47,8 @@ public class SimpleHandlerResultHandler implements Ordered, HandlerResultHandler
 
 	@Override
 	public Publisher<Void> handleResult(ServerHttpRequest request, ServerHttpResponse response, HandlerResult result) {
-		return Publishers.completable((Publisher<?>)result.getValue());
+		Publisher<Void> handleComplete = Publishers.completable((Publisher<?>)result.getValue());
+		return Publishers.concat(Publishers.from(Arrays.asList(handleComplete, response.writeHeaders())));
 	}
+
 }

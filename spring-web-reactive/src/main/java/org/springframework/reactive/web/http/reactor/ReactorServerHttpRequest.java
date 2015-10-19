@@ -15,13 +15,13 @@
  */
 package org.springframework.reactive.web.http.reactor;
 
-import org.reactivestreams.Publisher;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.reactive.web.http.ServerHttpRequest;
 import org.springframework.util.Assert;
 import reactor.io.buffer.Buffer;
 import reactor.io.net.http.HttpChannel;
+import reactor.rx.Stream;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -72,7 +72,7 @@ public class ReactorServerHttpRequest implements ServerHttpRequest {
 	}
 
 	@Override
-	public Publisher<ByteBuffer> getBody() {
+	public Stream<ByteBuffer> getBody() {
 		return this.channel.map(Buffer::byteBuffer);
 	}
 

@@ -23,21 +23,17 @@ import org.reactivestreams.Publisher;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 import org.springframework.reactive.codec.encoder.JsonObjectEncoder;
+
 import reactor.Publishers;
 import reactor.fn.Function;
-import reactor.rx.Promise;
-import rx.Observable;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Decode an arbitrary split byte stream representing JSON objects to a bye stream
+ * Decode an arbitrary split byte stream representing JSON objects to a byte stream
  * where each chunk is a well-formed JSON object.
- *
- * If {@code Hints.STREAM_ARRAY_ELEMENTS} is enabled, each element of top level JSON array
- * will be streamed as an individual JSON object.
  *
  * This class does not do any real parsing or validation. A sequence of bytes is considered a JSON object/array
  * if it contains a matching number of opening and closing braces/brackets.
@@ -90,8 +86,7 @@ public class JsonObjectDecoder implements ByteToMessageDecoder<ByteBuffer> {
 
 	@Override
 	public boolean canDecode(ResolvableType type, MediaType mediaType, Object... hints) {
-		return mediaType.isCompatibleWith(MediaType.APPLICATION_JSON) && !Promise.class.isAssignableFrom(type.getRawClass()) &&
-				(Observable.class.isAssignableFrom(type.getRawClass()) || Publisher.class.isAssignableFrom(type.getRawClass()));
+		return mediaType.isCompatibleWith(MediaType.APPLICATION_JSON);
 	}
 
 	@Override

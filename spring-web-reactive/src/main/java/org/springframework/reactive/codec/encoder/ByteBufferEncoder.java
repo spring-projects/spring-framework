@@ -16,38 +16,26 @@
 
 package org.springframework.reactive.codec.encoder;
 
+import java.nio.ByteBuffer;
+
 import org.reactivestreams.Publisher;
+
 import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
-import org.springframework.reactive.codec.decoder.StringDecoder;
-import org.springframework.reactive.codec.support.HintUtils;
-import reactor.Publishers;
-
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 /**
- * Encode from a String stream to a bytes stream.
- *
  * @author Sebastien Deleuze
- * @see StringDecoder
  */
-public class StringEncoder implements MessageToByteEncoder<String> {
-
-	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
-
+public class ByteBufferEncoder implements MessageToByteEncoder<ByteBuffer> {
 
 	@Override
 	public boolean canEncode(ResolvableType type, MediaType mediaType, Object... hints) {
-		return mediaType.isCompatibleWith(MediaType.TEXT_PLAIN)
-				&& String.class.isAssignableFrom(type.getRawClass());
+		return ByteBuffer.class.isAssignableFrom(type.getRawClass());
 	}
 
 	@Override
-	public Publisher<ByteBuffer> encode(Publisher<? extends String> elementStream, ResolvableType type, MediaType mediaType, Object... hints) {
-		final Charset charset = HintUtils.getHintByClass(Charset.class, hints, DEFAULT_CHARSET);
-		return Publishers.map(elementStream, s -> ByteBuffer.wrap(s.getBytes(charset)));
+	public Publisher<ByteBuffer> encode(Publisher<? extends ByteBuffer> messageStream, ResolvableType type, MediaType mediaType, Object... hints) {
+		return (Publisher<ByteBuffer>)messageStream;
 	}
 
 }

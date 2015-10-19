@@ -32,9 +32,24 @@ import reactor.rx.Streams;
 public class JsonObjectEncoderTests {
 
 	@Test
-	public void encodeToArray() throws InterruptedException {
+	public void encodeSingleElement() throws InterruptedException {
 		JsonObjectEncoder encoder = new JsonObjectEncoder();
-		Stream<ByteBuffer> source = Streams.just(Buffer.wrap("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}").byteBuffer(), Buffer.wrap("{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}").byteBuffer());
+		Stream<ByteBuffer> source = Streams.just(Buffer.wrap("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}").byteBuffer());
+		List<String> results = Streams.wrap(encoder.encode(source, null, null)).map(chunk -> {
+			byte[] b = new byte[chunk.remaining()];
+			chunk.get(b);
+			return new String(b, StandardCharsets.UTF_8);
+		}).toList().await();
+		String result = String.join("", results);
+		assertEquals("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}", result);
+	}
+
+	@Test
+	public void encodeTwoElements() throws InterruptedException {
+		JsonObjectEncoder encoder = new JsonObjectEncoder();
+		Stream<ByteBuffer> source = Streams.just(
+				Buffer.wrap("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}").byteBuffer(),
+				Buffer.wrap("{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}").byteBuffer());
 		List<String> results = Streams.wrap(encoder.encode(source, null, null)).map(chunk -> {
 			byte[] b = new byte[chunk.remaining()];
 			chunk.get(b);
@@ -42,6 +57,23 @@ public class JsonObjectEncoderTests {
 		}).toList().await();
 		String result = String.join("", results);
 		assertEquals("[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]", result);
+	}
+
+	@Test
+	public void encodeThreeElements() throws InterruptedException {
+		JsonObjectEncoder encoder = new JsonObjectEncoder();
+		Stream<ByteBuffer> source = Streams.just(
+				Buffer.wrap("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}").byteBuffer(),
+				Buffer.wrap("{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}").byteBuffer(),
+				Buffer.wrap("{\"foo\": \"foofoofoofoo\", \"bar\": \"barbarbarbar\"}").byteBuffer()
+		);
+		List<String> results = Streams.wrap(encoder.encode(source, null, null)).map(chunk -> {
+			byte[] b = new byte[chunk.remaining()];
+			chunk.get(b);
+			return new String(b, StandardCharsets.UTF_8);
+		}).toList().await();
+		String result = String.join("", results);
+		assertEquals("[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"},{\"foo\": \"foofoofoofoo\", \"bar\": \"barbarbarbar\"}]", result);
 	}
 
 }
