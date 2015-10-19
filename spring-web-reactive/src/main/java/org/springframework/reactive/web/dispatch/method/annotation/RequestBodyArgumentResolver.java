@@ -26,11 +26,13 @@ import java.util.concurrent.TimeUnit;
 
 import org.reactivestreams.Publisher;
 import reactor.Publishers;
+import reactor.core.publisher.convert.CompletableFutureConverter;
+import reactor.core.publisher.convert.RxJava1Converter;
+import reactor.core.publisher.convert.RxJava1SingleConverter;
 import reactor.rx.Promise;
 import reactor.rx.Stream;
 import reactor.rx.Streams;
 import rx.Observable;
-import rx.RxReactiveStreams;
 import rx.Single;
 
 import org.springframework.core.MethodParameter;
@@ -38,7 +40,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.reactive.codec.decoder.ByteToMessageDecoder;
-import org.springframework.reactive.util.CompletableFutureUtils;
 import org.springframework.reactive.web.dispatch.method.HandlerMethodArgumentResolver;
 import org.springframework.reactive.web.http.ServerHttpRequest;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -104,13 +105,13 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 				return Streams.wrap(elementStream).take(1).next();
 			}
 			else if (Observable.class.isAssignableFrom(type.getRawClass())) {
-				return RxReactiveStreams.toObservable(elementStream);
+				return RxJava1Converter.from(elementStream);
 			}
 			else if (Single.class.isAssignableFrom(type.getRawClass())) {
-				return RxReactiveStreams.toObservable(elementStream).toSingle();
+				return RxJava1SingleConverter.from(elementStream);
 			}
 			else if (CompletableFuture.class.isAssignableFrom(type.getRawClass())) {
-				return CompletableFutureUtils.fromSinglePublisher(elementStream);
+				return CompletableFutureConverter.fromSingle(elementStream);
 			}
 			else if (Publisher.class.isAssignableFrom(type.getRawClass())) {
 				return elementStream;

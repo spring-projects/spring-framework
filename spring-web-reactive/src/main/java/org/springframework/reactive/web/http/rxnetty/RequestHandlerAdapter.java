@@ -20,8 +20,8 @@ import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import io.reactivex.netty.protocol.http.server.RequestHandler;
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.convert.RxJava1Converter;
 import rx.Observable;
-import rx.RxReactiveStreams;
 
 import org.springframework.reactive.web.http.HttpHandler;
 import org.springframework.util.Assert;
@@ -44,7 +44,7 @@ public class RequestHandlerAdapter implements RequestHandler<ByteBuf, ByteBuf> {
 		RxNettyServerHttpRequest adaptedRequest = new RxNettyServerHttpRequest(request);
 		RxNettyServerHttpResponse adaptedResponse = new RxNettyServerHttpResponse(response);
 		Publisher<Void> result = this.httpHandler.handle(adaptedRequest, adaptedResponse);
-		return RxReactiveStreams.toObservable(result);
+		return RxJava1Converter.from(result);
 	}
 
 }

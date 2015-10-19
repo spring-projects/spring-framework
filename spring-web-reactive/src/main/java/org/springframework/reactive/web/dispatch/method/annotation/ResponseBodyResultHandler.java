@@ -24,7 +24,6 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.reactive.codec.encoder.MessageToByteEncoder;
-import org.springframework.reactive.util.CompletableFutureUtils;
 import org.springframework.reactive.web.dispatch.HandlerResult;
 import org.springframework.reactive.web.dispatch.HandlerResultHandler;
 import org.springframework.reactive.web.http.ServerHttpRequest;
@@ -32,9 +31,11 @@ import org.springframework.reactive.web.http.ServerHttpResponse;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.HandlerMethod;
 import reactor.Publishers;
+import reactor.core.publisher.convert.CompletableFutureConverter;
+import reactor.core.publisher.convert.RxJava1Converter;
+import reactor.core.publisher.convert.RxJava1SingleConverter;
 import reactor.rx.Promise;
 import rx.Observable;
-import rx.RxReactiveStreams;
 import rx.Single;
 
 import java.lang.reflect.Type;
@@ -118,13 +119,13 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 				elementStream = ((Promise)value).stream();
 			}
 			else if (Observable.class.isAssignableFrom(type.getRawClass())) {
-				elementStream = RxReactiveStreams.toPublisher((Observable) value);
+				elementStream = RxJava1Converter.from((Observable) value);
 			}
 			else if (Single.class.isAssignableFrom(type.getRawClass())) {
-				elementStream = RxReactiveStreams.toPublisher(((Single)value).toObservable());
+				elementStream = RxJava1SingleConverter.from((Single)value);
 			}
 			else if (CompletableFuture.class.isAssignableFrom(type.getRawClass())) {
-				elementStream = CompletableFutureUtils.toPublisher((CompletableFuture) value);
+				elementStream = CompletableFutureConverter.from((CompletableFuture) value);
 			}
 			else if (Publisher.class.isAssignableFrom(type.getRawClass())) {
 				elementStream = (Publisher)value;
