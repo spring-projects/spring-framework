@@ -692,7 +692,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		final MockServletContext servletContext = new MockServletContext();
 		final MockServletConfig servletConfig = new MockServletConfig(servletContext);
 
-		WebApplicationContext  webAppContext =
+		WebApplicationContext webAppContext =
 			initServlet(new ApplicationContextInitializer<GenericWebApplicationContext>() {
 				@Override
 				public void initialize(GenericWebApplicationContext wac) {
@@ -2878,7 +2878,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Controller
-	public static class TrailingSlashController  {
+	public static class TrailingSlashController {
 
 		@RequestMapping(value = "/", method = RequestMethod.GET)
 		public void root(Writer writer) throws IOException {

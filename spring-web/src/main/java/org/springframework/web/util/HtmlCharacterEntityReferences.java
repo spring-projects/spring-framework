@@ -79,7 +79,7 @@ class HtmlCharacterEntityReferences {
 		}
 		catch (IOException ex) {
 			throw new IllegalStateException(
-					"Failed to parse reference definition file [HtmlCharacterEntityReferences.properties]: " +  ex.getMessage());
+					"Failed to parse reference definition file [HtmlCharacterEntityReferences.properties]: " + ex.getMessage());
 		}
 
 		// Parse reference definition properties

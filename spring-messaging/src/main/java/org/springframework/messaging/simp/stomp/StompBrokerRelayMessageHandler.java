@@ -664,7 +664,7 @@ public class StompBrokerRelayMessageHandler extends AbstractBrokerMessageHandler
 			long serverReceiveInterval = connectedHeaders.getHeartbeat()[1];
 
 			if (clientSendInterval > 0 && serverReceiveInterval > 0) {
-				long interval = Math.max(clientSendInterval,  serverReceiveInterval);
+				long interval = Math.max(clientSendInterval, serverReceiveInterval);
 				this.tcpConnection.onWriteInactivity(new Runnable() {
 					@Override
 					public void run() {

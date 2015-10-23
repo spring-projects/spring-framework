@@ -83,7 +83,7 @@ public class NamedParameterJdbcTemplateTests {
 	public void setUp() throws Exception {
 		connection = mock(Connection.class);
 		dataSource = mock(DataSource.class);
-		preparedStatement =	mock(PreparedStatement.class);
+		preparedStatement = mock(PreparedStatement.class);
 		resultSet = mock(ResultSet.class);
 		namedParameterTemplate = new NamedParameterJdbcTemplate(dataSource);
 		databaseMetaData = mock(DatabaseMetaData.class);

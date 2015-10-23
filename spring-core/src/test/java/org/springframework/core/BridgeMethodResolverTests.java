@@ -292,7 +292,7 @@ public class BridgeMethodResolverTests {
 		Method bridgedMethod = MegaMessageProducerImpl.class.getDeclaredMethod("receive", MegaMessageEvent.class);
 		assertFalse(bridgedMethod.isBridge());
 
-		Method bridgeMethod  = MegaMessageProducerImpl.class.getDeclaredMethod("receive", MegaEvent.class);
+		Method bridgeMethod = MegaMessageProducerImpl.class.getDeclaredMethod("receive", MegaEvent.class);
 		assertTrue(bridgeMethod.isBridge());
 
 		assertEquals(bridgedMethod, BridgeMethodResolver.findBridgedMethod(bridgeMethod));

@@ -43,7 +43,7 @@ public class LoggingWebSocketHandlerDecorator extends WebSocketHandlerDecorator 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 		if (logger.isDebugEnabled()) {
-			logger.debug("New "	+ session);
+			logger.debug("New " + session);
 		}
 		super.afterConnectionEstablished(session);
 	}

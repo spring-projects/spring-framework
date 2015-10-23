@@ -28,7 +28,7 @@ public final class NullSourceExtractorTests {
 
 	@Test
 	public void testPassThroughContract() throws Exception {
-		Object source  = new Object();
+		Object source = new Object();
 		Object extractedSource = new NullSourceExtractor().extractSource(source, null);
 		assertNull("The contract of NullSourceExtractor states that the extraction *always* return null", extractedSource);
 	}

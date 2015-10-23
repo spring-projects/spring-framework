@@ -152,7 +152,7 @@ public class JettyWebSocketClient extends AbstractWebSocketClient implements Lif
 	@Override
 	public ListenableFuture<WebSocketSession> doHandshakeInternal(WebSocketHandler wsHandler,
 			HttpHeaders headers, final URI uri, List<String> protocols,
-			List<WebSocketExtension> extensions,  Map<String, Object> attributes) {
+			List<WebSocketExtension> extensions, Map<String, Object> attributes) {
 
 		final ClientUpgradeRequest request = new ClientUpgradeRequest();
 		request.setSubProtocols(protocols);

@@ -45,7 +45,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
  *
  * @author Rossen Stoyanchev
  */
-public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests {
+public class HttpSendingTransportHandlerTests extends AbstractHttpRequestTests {
 
 	private WebSocketHandler webSocketHandler;
 

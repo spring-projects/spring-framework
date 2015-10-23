@@ -285,13 +285,13 @@ public class SimpleRemoteStatelessSessionProxyFactoryBeanTests extends SimpleRem
 	}
 
 
-	protected static interface MyBusinessMethods  {
+	protected static interface MyBusinessMethods {
 
 		int getValue() throws RemoteException;
 	}
 
 
-	protected static interface MyLocalBusinessMethods  {
+	protected static interface MyLocalBusinessMethods {
 
 		int getValue();
 	}

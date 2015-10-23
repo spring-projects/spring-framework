@@ -784,7 +784,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	// Confirms visibility of what is being called.
 	@Test
 	public void functionReferenceVisibility_SPR12359() throws Exception {
-		StandardEvaluationContext context = new StandardEvaluationContext(new  Object[] { "1" });
+		StandardEvaluationContext context = new StandardEvaluationContext(new Object[] { "1" });
 		context.registerFunction("doCompare", SomeCompareMethod.class.getDeclaredMethod(
 				"compare", Object.class, Object.class));
 		context.setVariable("arg", "2");
@@ -794,7 +794,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertCantCompile(expression);
 
 		// type not public but method is
-		context = new StandardEvaluationContext(new  Object[] { "1" });
+		context = new StandardEvaluationContext(new Object[] { "1" });
 		context.registerFunction("doCompare", SomeCompareMethod.class.getDeclaredMethod(
 				"compare2", Object.class, Object.class));
 		context.setVariable("arg", "2");
@@ -805,7 +805,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 	@Test
 	public void functionReferenceNonCompilableArguments_SPR12359() throws Exception {
-		StandardEvaluationContext context = new StandardEvaluationContext(new  Object[] { "1" });
+		StandardEvaluationContext context = new StandardEvaluationContext(new Object[] { "1" });
 		context.registerFunction("negate", SomeCompareMethod2.class.getDeclaredMethod(
 				"negate", Integer.TYPE));
 		context.setVariable("arg", "2");
@@ -4509,7 +4509,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	@SuppressWarnings("serial")
-	public static class MessageHeaders extends HashMap<String,Object> {	}
+	public static class MessageHeaders extends HashMap<String,Object> { }
 
 	public static class GenericMessageTestHelper<T> {
 		private T payload;

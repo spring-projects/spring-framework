@@ -33,7 +33,7 @@ import org.springframework.beans.factory.xml.ParserContext;
  * @see org.springframework.transaction.jta.WebLogicJtaTransactionManager
  * @see org.springframework.transaction.jta.WebSphereUowTransactionManager
  */
-public class JtaTransactionManagerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser  {
+public class JtaTransactionManagerBeanDefinitionParser extends AbstractSingleBeanDefinitionParser {
 
 	@Override
 	protected String getBeanClassName(Element element) {

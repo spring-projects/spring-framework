@@ -329,7 +329,7 @@ public class HttpEntityMethodProcessorMockTests {
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
 
 		ArgumentCaptor<HttpOutputMessage> outputMessage = ArgumentCaptor.forClass(HttpOutputMessage.class);
-		verify(messageConverter).write(eq("body"), eq(MediaType.TEXT_PLAIN),  outputMessage.capture());
+		verify(messageConverter).write(eq("body"), eq(MediaType.TEXT_PLAIN), outputMessage.capture());
 		assertTrue(mavContainer.isRequestHandled());
 		assertEquals("headerValue", outputMessage.getValue().getHeaders().get("header").get(0));
 	}
@@ -337,7 +337,7 @@ public class HttpEntityMethodProcessorMockTests {
 	@Test
 	public void handleReturnTypeLastModified() throws Exception {
 		long currentTime = new Date().getTime();
-		long oneMinuteAgo  = currentTime - (1000 * 60);
+		long oneMinuteAgo = currentTime - (1000 * 60);
 		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, dateFormat.format(currentTime));
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setDate(HttpHeaders.LAST_MODIFIED, oneMinuteAgo);
@@ -380,7 +380,7 @@ public class HttpEntityMethodProcessorMockTests {
 	@Test
 	public void handleReturnTypeETagAndLastModified() throws Exception {
 		long currentTime = new Date().getTime();
-		long oneMinuteAgo  = currentTime - (1000 * 60);
+		long oneMinuteAgo = currentTime - (1000 * 60);
 		String etagValue = "\"deadb33f8badf00d\"";
 		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, dateFormat.format(currentTime));
 		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, etagValue);
@@ -407,7 +407,7 @@ public class HttpEntityMethodProcessorMockTests {
 	@Test
 	public void handleReturnTypeNotModified() throws Exception {
 		long currentTime = new Date().getTime();
-		long oneMinuteAgo  = currentTime - (1000 * 60);
+		long oneMinuteAgo = currentTime - (1000 * 60);
 		String etagValue = "\"deadb33f8badf00d\"";
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setDate(HttpHeaders.LAST_MODIFIED, oneMinuteAgo);
@@ -432,7 +432,7 @@ public class HttpEntityMethodProcessorMockTests {
 	@Test
 	public void handleReturnTypeChangedETagAndLastModified() throws Exception {
 		long currentTime = new Date().getTime();
-		long oneMinuteAgo  = currentTime - (1000 * 60);
+		long oneMinuteAgo = currentTime - (1000 * 60);
 		String etagValue = "\"deadb33f8badf00d\"";
 		String changedEtagValue = "\"changed-etag-value\"";
 		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, dateFormat.format(currentTime));
@@ -480,7 +480,7 @@ public class HttpEntityMethodProcessorMockTests {
 		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
 		assertEquals(etagValue, servletResponse.getHeader(HttpHeaders.ETAG));
 		ArgumentCaptor<HttpOutputMessage> outputMessage = ArgumentCaptor.forClass(HttpOutputMessage.class);
-		verify(messageConverter).write(eq("body"), eq(MediaType.TEXT_PLAIN),  outputMessage.capture());
+		verify(messageConverter).write(eq("body"), eq(MediaType.TEXT_PLAIN), outputMessage.capture());
 	}
 
 	@SuppressWarnings("unused")

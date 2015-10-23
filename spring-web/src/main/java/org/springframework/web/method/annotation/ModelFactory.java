@@ -190,7 +190,7 @@ public final class ModelFactory {
 	public static String getNameForParameter(MethodParameter parameter) {
 		ModelAttribute annot = parameter.getParameterAnnotation(ModelAttribute.class);
 		String attrName = (annot != null) ? annot.value() : null;
-		return StringUtils.hasText(attrName) ? attrName :  Conventions.getVariableNameForParameter(parameter);
+		return StringUtils.hasText(attrName) ? attrName : Conventions.getVariableNameForParameter(parameter);
 	}
 
 	/**

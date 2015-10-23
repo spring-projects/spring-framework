@@ -125,7 +125,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 			}
 			else if (logger.isTraceEnabled()) {
 				logger.trace("Resource path=\"" + resourcePath + "\" was successfully resolved " +
-						"but resource=\"" +	resource.getURL() + "\" is neither under the " +
+						"but resource=\"" + resource.getURL() + "\" is neither under the " +
 						"current location=\"" + location.getURL() + "\" nor under any of the " +
 						"allowed locations=" + Arrays.asList(getAllowedLocations()));
 			}

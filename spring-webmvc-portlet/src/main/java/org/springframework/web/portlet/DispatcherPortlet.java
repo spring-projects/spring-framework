@@ -376,7 +376,7 @@ public class DispatcherPortlet extends FrameworkPortlet {
 			// Default is no multipart resolver.
 			this.multipartResolver = null;
 			if (logger.isDebugEnabled()) {
-				logger.debug("Unable to locate PortletMultipartResolver with name '"	+ MULTIPART_RESOLVER_BEAN_NAME +
+				logger.debug("Unable to locate PortletMultipartResolver with name '" + MULTIPART_RESOLVER_BEAN_NAME +
 						"': no multipart request handling provided");
 			}
 		}

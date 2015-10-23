@@ -126,7 +126,7 @@ public class GroovyMarkupView extends AbstractTemplateView {
 		catch (ClassNotFoundException ex) {
 			Throwable cause = (ex.getCause() != null ? ex.getCause() : ex);
 			throw new NestedServletException("Could not find class while rendering Groovy Markup view with name '" +
-					getUrl() + "': " + ex.getMessage() +  "'", cause);
+					getUrl() + "': " + ex.getMessage() + "'", cause);
 		}
 	}
 

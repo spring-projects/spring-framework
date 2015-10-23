@@ -212,7 +212,7 @@ public class FreeMarkerView extends AbstractTemplateView {
 		}
 		catch (ParseException ex) {
 			throw new ApplicationContextException(
-					"Failed to parse FreeMarker template for URL [" +  getUrl() + "]", ex);
+					"Failed to parse FreeMarker template for URL [" + getUrl() + "]", ex);
 		}
 		catch (IOException ex) {
 			throw new ApplicationContextException(

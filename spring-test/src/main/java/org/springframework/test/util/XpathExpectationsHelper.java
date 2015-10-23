@@ -176,7 +176,7 @@ public class XpathExpectationsHelper {
 	 */
 	public void assertString(byte[] content, String encoding, Matcher<? super String> matcher) throws Exception {
 		Document document = parseXmlByteArray(content, encoding);
-		String result = evaluateXpath(document,  XPathConstants.STRING, String.class);
+		String result = evaluateXpath(document, XPathConstants.STRING, String.class);
 		assertThat("XPath " + this.expression, result, matcher);
 	}
 
@@ -186,7 +186,7 @@ public class XpathExpectationsHelper {
 	 */
 	public void assertString(byte[] content, String encoding, String expectedValue) throws Exception {
 		Document document = parseXmlByteArray(content, encoding);
-		String actual = evaluateXpath(document,  XPathConstants.STRING, String.class);
+		String actual = evaluateXpath(document, XPathConstants.STRING, String.class);
 		assertEquals("XPath " + this.expression, expectedValue, actual);
 	}
 

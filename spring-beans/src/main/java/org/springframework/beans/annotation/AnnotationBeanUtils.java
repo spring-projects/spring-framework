@@ -59,7 +59,7 @@ public abstract class AnnotationBeanUtils {
 	 * @see org.springframework.beans.BeanWrapper
 	 */
 	public static void copyPropertiesToBean(Annotation ann, Object bean, StringValueResolver valueResolver, String... excludedProperties) {
-		Set<String> excluded =  new HashSet<String>(Arrays.asList(excludedProperties));
+		Set<String> excluded = new HashSet<String>(Arrays.asList(excludedProperties));
 		Method[] annotationProperties = ann.annotationType().getDeclaredMethods();
 		BeanWrapper bw = PropertyAccessorFactory.forBeanPropertyAccess(bean);
 		for (Method annotationProperty : annotationProperties) {

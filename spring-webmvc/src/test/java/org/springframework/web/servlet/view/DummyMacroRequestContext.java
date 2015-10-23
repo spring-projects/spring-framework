@@ -84,7 +84,7 @@ public class DummyMacroRequestContext {
 	 */
 	public String getMessage(String code, List args, String defaultMsg) {
 		String msg = (String) this.messageMap.get(code);
-		return (msg != null ? msg  + args.toString(): defaultMsg);
+		return (msg != null ? msg + args.toString(): defaultMsg);
 	}
 
 	/**
@@ -114,7 +114,7 @@ public class DummyMacroRequestContext {
 	 */
 	public String getThemeMessage(String code, List args, String defaultMsg) {
 		String msg = (String) this.themeMessageMap.get(code);
-		return (msg != null ? msg  + args.toString(): defaultMsg);
+		return (msg != null ? msg + args.toString(): defaultMsg);
 	}
 
 	public void setContextPath(String contextPath) {

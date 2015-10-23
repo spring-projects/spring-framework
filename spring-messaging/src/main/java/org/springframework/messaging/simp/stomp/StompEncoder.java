@@ -40,7 +40,7 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public final class StompEncoder  {
+public final class StompEncoder {
 
 	private static final byte LF = '\n';
 
@@ -92,7 +92,7 @@ public final class StompEncoder  {
 			return baos.toByteArray();
 		}
 		catch (IOException ex) {
-			throw new StompConversionException("Failed to encode STOMP frame, headers=" + headers,  ex);
+			throw new StompConversionException("Failed to encode STOMP frame, headers=" + headers, ex);
 		}
 	}
 

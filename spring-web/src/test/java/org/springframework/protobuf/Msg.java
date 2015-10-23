@@ -6,7 +6,7 @@ package org.springframework.protobuf;
 /**
  * Protobuf type {@code Msg}
  */
-public  final class Msg extends
+public final class Msg extends
     com.google.protobuf.GeneratedMessage
     implements MsgOrBuilder {
   // Use Msg.newBuilder() to construct.

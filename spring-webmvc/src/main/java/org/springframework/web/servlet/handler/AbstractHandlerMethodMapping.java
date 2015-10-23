@@ -559,8 +559,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			HandlerMethod handlerMethod = this.mappingLookup.get(mapping);
 			if (handlerMethod != null && !handlerMethod.equals(newHandlerMethod)) {
 				throw new IllegalStateException(
-						"Ambiguous mapping. Cannot map '" +	newHandlerMethod.getBean() + "' method \n" +
-								newHandlerMethod + "\nto " +	mapping + ": There is already '" +
+						"Ambiguous mapping. Cannot map '" + newHandlerMethod.getBean() + "' method \n" +
+								newHandlerMethod + "\nto " + mapping + ": There is already '" +
 								handlerMethod.getBean() + "' bean method\n" + handlerMethod + " mapped.");
 			}
 		}

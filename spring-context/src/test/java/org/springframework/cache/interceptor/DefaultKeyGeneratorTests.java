@@ -56,7 +56,7 @@ public class DefaultKeyGeneratorTests {
 	}
 
 	@Test
-	public void multipleValues()  {
+	public void multipleValues() {
 		Object k1 = generateKey(new Object[] { "a", 1, "b" });
 		Object k2 = generateKey(new Object[] { "a", 1, "b" });
 		Object k3 = generateKey(new Object[] { "b", 1, "a" });

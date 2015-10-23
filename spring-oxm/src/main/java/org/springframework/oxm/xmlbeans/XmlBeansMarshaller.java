@@ -320,7 +320,7 @@ public class XmlBeansMarshaller extends AbstractMarshaller {
 		}
 		else if (ex instanceof XmlException || ex instanceof SAXException) {
 			if (marshalling) {
-				return new MarshallingFailureException("XMLBeans marshalling exception",  ex);
+				return new MarshallingFailureException("XMLBeans marshalling exception", ex);
 			}
 			else {
 				return new UnmarshallingFailureException("XMLBeans unmarshalling exception", ex);

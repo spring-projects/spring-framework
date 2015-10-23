@@ -117,7 +117,7 @@ public class HttpPutFormContentFilter extends OncePerRequestFilter {
 		public String getParameter(String name) {
 			String queryStringValue = super.getParameter(name);
 			String formValue = this.formParameters.getFirst(name);
-			return (queryStringValue != null) ?  queryStringValue : formValue;
+			return (queryStringValue != null) ? queryStringValue : formValue;
 		}
 
 		@Override

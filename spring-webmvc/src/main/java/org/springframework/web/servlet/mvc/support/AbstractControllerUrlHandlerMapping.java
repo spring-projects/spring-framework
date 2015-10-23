@@ -32,7 +32,7 @@ import org.springframework.web.servlet.handler.AbstractDetectingUrlHandlerMappin
  * @see ControllerClassNameHandlerMapping
  * @see ControllerBeanNameHandlerMapping
  */
-public abstract class AbstractControllerUrlHandlerMapping extends AbstractDetectingUrlHandlerMapping  {
+public abstract class AbstractControllerUrlHandlerMapping extends AbstractDetectingUrlHandlerMapping {
 
 	private ControllerTypePredicate predicate = new AnnotationControllerTypePredicate();
 

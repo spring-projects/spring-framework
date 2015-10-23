@@ -159,7 +159,7 @@ public abstract class AbstractClientSockJsSession implements WebSocketSession {
 	public final void close(CloseStatus status) {
 		Assert.isTrue(status != null && isUserSetStatus(status), "Invalid close status: " + status);
 		if (logger.isDebugEnabled()) {
-			logger.debug("Closing session with " +  status + " in " + this);
+			logger.debug("Closing session with " + status + " in " + this);
 		}
 		closeInternal(status);
 	}

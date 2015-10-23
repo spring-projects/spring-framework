@@ -54,7 +54,7 @@ import static org.mockito.BDDMockito.*;
  * @author Juergen Hoeller
  * @since 04.07.2003
  */
-public class DataSourceTransactionManagerTests  {
+public class DataSourceTransactionManagerTests {
 
 	private Connection con;
 
@@ -66,7 +66,7 @@ public class DataSourceTransactionManagerTests  {
 	@Before
 	public void setUp() throws Exception {
 		con = mock(Connection.class);
-		ds	= mock(DataSource.class);
+		ds = mock(DataSource.class);
 		tm = new DataSourceTransactionManager(ds);
 		given(ds.getConnection()).willReturn(con);
 	}
@@ -167,32 +167,32 @@ public class DataSourceTransactionManagerTests  {
 	}
 
 	@Test
-	public void testTransactionRollbackWithAutoCommitTrue() throws Exception  {
+	public void testTransactionRollbackWithAutoCommitTrue() throws Exception {
 		doTestTransactionRollbackRestoringAutoCommit(true, false, false);
 	}
 
 	@Test
-	public void testTransactionRollbackWithAutoCommitFalse() throws Exception  {
+	public void testTransactionRollbackWithAutoCommitFalse() throws Exception {
 		doTestTransactionRollbackRestoringAutoCommit(false, false, false);
 	}
 
 	@Test
-	public void testTransactionRollbackWithAutoCommitTrueAndLazyConnection() throws Exception  {
+	public void testTransactionRollbackWithAutoCommitTrueAndLazyConnection() throws Exception {
 		doTestTransactionRollbackRestoringAutoCommit(true, true, false);
 	}
 
 	@Test
-	public void testTransactionRollbackWithAutoCommitFalseAndLazyConnection() throws Exception  {
+	public void testTransactionRollbackWithAutoCommitFalseAndLazyConnection() throws Exception {
 		doTestTransactionRollbackRestoringAutoCommit(false, true, false);
 	}
 
 	@Test
-	public void testTransactionRollbackWithAutoCommitTrueAndLazyConnectionAndCreateStatement() throws Exception  {
+	public void testTransactionRollbackWithAutoCommitTrueAndLazyConnectionAndCreateStatement() throws Exception {
 		doTestTransactionRollbackRestoringAutoCommit(true, true, true);
 	}
 
 	@Test
-	public void testTransactionRollbackWithAutoCommitFalseAndLazyConnectionAndCreateStatement() throws Exception  {
+	public void testTransactionRollbackWithAutoCommitFalseAndLazyConnectionAndCreateStatement() throws Exception {
 		doTestTransactionRollbackRestoringAutoCommit(false, true, true);
 	}
 

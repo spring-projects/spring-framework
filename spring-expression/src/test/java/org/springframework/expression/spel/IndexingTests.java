@@ -62,7 +62,7 @@ public class IndexingTests {
 	@Test
 	public void indexIntoGenericPropertyContainingMapObject() {
 		Map<String, Map<String, String>> property = new HashMap<String, Map<String, String>>();
-		Map<String, String> map =  new HashMap<String, String>();
+		Map<String, String> map = new HashMap<String, String>();
 		map.put("foo", "bar");
 		property.put("property", map);
 		SpelExpressionParser parser = new SpelExpressionParser();

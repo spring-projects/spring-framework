@@ -70,7 +70,7 @@ public class StandaloneMockMvcBuilderTests {
 	public void applicationContextAttribute() {
 		TestStandaloneMockMvcBuilder builder = new TestStandaloneMockMvcBuilder(new PlaceholderController());
 		builder.addPlaceHolderValue("sys.login.ajax", "/foo");
-		WebApplicationContext  wac = builder.initWebAppContext();
+		WebApplicationContext wac = builder.initWebAppContext();
 		assertEquals(wac, WebApplicationContextUtils
 				.getRequiredWebApplicationContext(wac.getServletContext()));
 	}

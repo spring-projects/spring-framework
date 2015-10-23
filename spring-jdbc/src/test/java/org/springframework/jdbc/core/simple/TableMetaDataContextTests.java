@@ -40,7 +40,7 @@ import static org.mockito.BDDMockito.*;
  *
  * @author Thomas Risberg
  */
-public class TableMetaDataContextTests  {
+public class TableMetaDataContextTests {
 
 	private Connection connection;
 	private DataSource dataSource;

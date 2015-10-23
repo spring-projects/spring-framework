@@ -225,7 +225,7 @@ public class StompHeaders implements MultiValueMap<String, String>, Serializable
 	public void setHeartbeat(long[] heartbeat) {
 		Assert.notNull(heartbeat);
 		String value = heartbeat[0] + "," + heartbeat[1];
-		Assert.isTrue(heartbeat[0] >= 0 && heartbeat[1] >= 0, "Heart-beat values cannot be negative: "  + value);
+		Assert.isTrue(heartbeat[0] >= 0 && heartbeat[1] >= 0, "Heart-beat values cannot be negative: " + value);
 		set(HEARTBEAT, value);
 	}
 

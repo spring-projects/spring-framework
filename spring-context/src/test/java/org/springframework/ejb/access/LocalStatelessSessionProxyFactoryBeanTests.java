@@ -188,7 +188,7 @@ public class LocalStatelessSessionProxyFactoryBeanTests {
 	}
 
 
-	public static interface MyBusinessMethods  {
+	public static interface MyBusinessMethods {
 
 		int getValue();
 	}

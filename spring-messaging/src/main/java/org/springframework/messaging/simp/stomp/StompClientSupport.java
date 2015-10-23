@@ -101,7 +101,7 @@ public abstract class StompClientSupport {
 	 */
 	public void setDefaultHeartbeat(long[] heartbeat) {
 		Assert.notNull(heartbeat);
-		Assert.isTrue(heartbeat[0] >= 0 && heartbeat[1] >=0 , "Invalid heart-beat: "  + Arrays.toString(heartbeat));
+		Assert.isTrue(heartbeat[0] >= 0 && heartbeat[1] >=0 , "Invalid heart-beat: " + Arrays.toString(heartbeat));
 		this.defaultHeartbeat = heartbeat;
 	}
 

@@ -3200,7 +3200,7 @@ public class ServletAnnotationControllerTests {
 	}
 
 	@Controller
-	public static class TrailingSlashController  {
+	public static class TrailingSlashController {
 
 		@RequestMapping(value = "/", method = RequestMethod.GET)
 		public void root(Writer writer) throws IOException {

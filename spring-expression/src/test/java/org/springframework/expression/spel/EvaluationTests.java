@@ -713,7 +713,7 @@ public class EvaluationTests extends AbstractExpressionTests {
 		// Add a new element to the list
 		StandardEvaluationContext ctx = new StandardEvaluationContext(instance);
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
-		Expression e =  parser.parseExpression("listOfStrings[++index3]='def'");
+		Expression e = parser.parseExpression("listOfStrings[++index3]='def'");
 		e.getValue(ctx);
 		assertEquals(2,instance.listOfStrings.size());
 		assertEquals("def",instance.listOfStrings.get(1));
@@ -721,20 +721,20 @@ public class EvaluationTests extends AbstractExpressionTests {
 		// Check reference beyond end of collection
 		ctx = new StandardEvaluationContext(instance);
 		parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
-		e =  parser.parseExpression("listOfStrings[0]");
+		e = parser.parseExpression("listOfStrings[0]");
 		String value = e.getValue(ctx,String.class);
 		assertEquals("abc",value);
-		e =  parser.parseExpression("listOfStrings[1]");
+		e = parser.parseExpression("listOfStrings[1]");
 		value = e.getValue(ctx,String.class);
 		assertEquals("def",value);
-		e =  parser.parseExpression("listOfStrings[2]");
+		e = parser.parseExpression("listOfStrings[2]");
 		value = e.getValue(ctx,String.class);
 		assertEquals("",value);
 
 		// Now turn off growing and reference off the end
 		ctx = new StandardEvaluationContext(instance);
 		parser = new SpelExpressionParser(new SpelParserConfiguration(false, false));
-		e =  parser.parseExpression("listOfStrings[3]");
+		e = parser.parseExpression("listOfStrings[3]");
 		try {
 			e.getValue(ctx,String.class);
 			fail();
@@ -766,7 +766,7 @@ public class EvaluationTests extends AbstractExpressionTests {
 		Integer i = 42;
 		StandardEvaluationContext ctx = new StandardEvaluationContext(i);
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
-		Expression e =  parser.parseExpression("#this++");
+		Expression e = parser.parseExpression("#this++");
 		assertEquals(42,i.intValue());
 		try {
 			e.getValue(ctx,Integer.class);
@@ -914,14 +914,14 @@ public class EvaluationTests extends AbstractExpressionTests {
 		StandardEvaluationContext ctx = new StandardEvaluationContext(i);
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		try {
-			Expression e =  parser.parseExpression("++1");
+			Expression e = parser.parseExpression("++1");
 			e.getValue(ctx,Integer.class);
 			fail();
 		} catch (SpelEvaluationException see) {
 			assertEquals(SpelMessage.NOT_ASSIGNABLE,see.getMessageCode());
 		}
 		try {
-			Expression e =  parser.parseExpression("1++");
+			Expression e = parser.parseExpression("1++");
 			e.getValue(ctx,Integer.class);
 			fail();
 		} catch (SpelEvaluationException see) {
@@ -933,7 +933,7 @@ public class EvaluationTests extends AbstractExpressionTests {
 		Integer i = 42;
 		StandardEvaluationContext ctx = new StandardEvaluationContext(i);
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
-		Expression e =  parser.parseExpression("#this--");
+		Expression e = parser.parseExpression("#this--");
 		assertEquals(42,i.intValue());
 		try {
 			e.getValue(ctx,Integer.class);
@@ -1080,14 +1080,14 @@ public class EvaluationTests extends AbstractExpressionTests {
 		StandardEvaluationContext ctx = new StandardEvaluationContext(i);
 		ExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(true, true));
 		try {
-			Expression e =  parser.parseExpression("--1");
+			Expression e = parser.parseExpression("--1");
 			e.getValue(ctx,Integer.class);
 			fail();
 		} catch (SpelEvaluationException see) {
 			assertEquals(SpelMessage.NOT_ASSIGNABLE,see.getMessageCode());
 		}
 		try {
-			Expression e =  parser.parseExpression("1--");
+			Expression e = parser.parseExpression("1--");
 			e.getValue(ctx,Integer.class);
 			fail();
 		} catch (SpelEvaluationException see) {
@@ -1110,13 +1110,13 @@ public class EvaluationTests extends AbstractExpressionTests {
 		assertEquals(4,helper.intArray[2]);
 
 		// index1 is 3 intArray[3] is 4
-		e =  parser.parseExpression("intArray[#root.index1++]--");
+		e = parser.parseExpression("intArray[#root.index1++]--");
 		assertEquals(4,e.getValue(ctx,Integer.class).intValue());
 		assertEquals(4,helper.index1);
 		assertEquals(3,helper.intArray[3]);
 
 		// index1 is 4, intArray[3] is 3
-		e =  parser.parseExpression("intArray[--#root.index1]++");
+		e = parser.parseExpression("intArray[--#root.index1]++");
 		assertEquals(3,e.getValue(ctx,Integer.class).intValue());
 		assertEquals(3,helper.index1);
 		assertEquals(4,helper.intArray[3]);

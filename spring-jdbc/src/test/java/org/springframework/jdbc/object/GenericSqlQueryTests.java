@@ -44,7 +44,7 @@ import static org.mockito.BDDMockito.*;
 /**
  * @author Thomas Risberg
  */
-public class GenericSqlQueryTests  {
+public class GenericSqlQueryTests {
 
 	private static final String SELECT_ID_FORENAME_NAMED_PARAMETERS_PARSED =
 		"select id, forename from custmr where id = ? and country = ?";

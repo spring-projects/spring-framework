@@ -37,7 +37,7 @@ import org.springframework.format.annotation.DateTimeFormat;
  * @since 3.2
  * @see org.springframework.format.datetime.joda.JodaDateTimeFormatAnnotationFormatterFactory
  */
-public class DateTimeFormatAnnotationFormatterFactory  extends EmbeddedValueResolutionSupport
+public class DateTimeFormatAnnotationFormatterFactory extends EmbeddedValueResolutionSupport
 		implements AnnotationFormatterFactory<DateTimeFormat> {
 
 

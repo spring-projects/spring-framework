@@ -46,7 +46,7 @@ import static org.junit.Assert.*;
 @ContextConfiguration(classes = EmptyDatabaseConfig.class)
 @Transactional
 @Sql(
-	scripts    = "schema.sql",
+	scripts = "schema.sql",
 	statements = "INSERT INTO user VALUES('Dilbert')"
 )
 @DirtiesContext

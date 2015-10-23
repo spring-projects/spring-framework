@@ -279,7 +279,7 @@ public interface SqlRowSet extends Serializable {
 	 * @return a Object representing the column value
 	 * @see java.sql.ResultSet#getObject(int, Map)
 	 */
-	Object getObject(int columnIndex,  Map<String, Class<?>> map) throws InvalidResultSetAccessException;
+	Object getObject(int columnIndex, Map<String, Class<?>> map) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieve the value of the indicated column in the current row
@@ -289,7 +289,7 @@ public interface SqlRowSet extends Serializable {
 	 * @return a Object representing the column value
 	 * @see java.sql.ResultSet#getObject(String, Map)
 	 */
-	Object getObject(String columnLabel,  Map<String, Class<?>> map) throws InvalidResultSetAccessException;
+	Object getObject(String columnLabel, Map<String, Class<?>> map) throws InvalidResultSetAccessException;
 
 	/**
 	 * Retrieve the value of the indicated column in the current row

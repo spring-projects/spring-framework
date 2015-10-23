@@ -115,7 +115,7 @@ public class ExceptionHandlerMethodResolverTests {
 	static class InheritedController extends ExceptionController {
 
 		@Override
-		public void handleIOException()	{
+		public void handleIOException() {
 		}
 	}
 

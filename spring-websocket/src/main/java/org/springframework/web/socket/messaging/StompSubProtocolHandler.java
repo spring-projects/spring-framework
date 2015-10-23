@@ -458,7 +458,7 @@ public class StompSubProtocolHandler implements SubProtocolHandler, ApplicationE
 		}
 	}
 
-	private  StompHeaderAccessor getStompHeaderAccessor(Message<?> message) {
+	private StompHeaderAccessor getStompHeaderAccessor(Message<?> message) {
 		MessageHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, MessageHeaderAccessor.class);
 		if (accessor == null) {
 			// Shouldn't happen (only broker broadcasts directly to clients)

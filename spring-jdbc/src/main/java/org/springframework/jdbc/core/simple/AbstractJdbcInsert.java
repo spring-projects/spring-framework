@@ -456,7 +456,7 @@ public abstract class AbstractJdbcInsert {
 			if (getGeneratedKeyNames().length > 1) {
 				throw new InvalidDataAccessApiUsageException(
 						"Current database only supports retrieving the key for a single column. There are " +
-						getGeneratedKeyNames().length  + " columns specified: " + Arrays.asList(getGeneratedKeyNames()));
+						getGeneratedKeyNames().length + " columns specified: " + Arrays.asList(getGeneratedKeyNames()));
 			}
 			// This is a hack to be able to get the generated key from a database that doesn't support
 			// get generated keys feature. HSQL is one, PostgreSQL is another. Postgres uses a RETURNING

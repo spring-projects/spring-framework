@@ -114,7 +114,7 @@ public class ResourceChainRegistration {
 	}
 
 	protected List<ResourceTransformer> getResourceTransformers() {
-		if (this.hasVersionResolver  && !this.hasCssLinkTransformer) {
+		if (this.hasVersionResolver && !this.hasCssLinkTransformer) {
 			List<ResourceTransformer> result = new ArrayList<ResourceTransformer>(this.transformers);
 			boolean hasTransformers = !this.transformers.isEmpty();
 			boolean hasCaching = hasTransformers && this.transformers.get(0) instanceof CachingResourceTransformer;

@@ -57,7 +57,7 @@ public class OpNE extends Operator {
 
 		String leftDesc = left.exitTypeDescriptor;
 		String rightDesc = right.exitTypeDescriptor;
-		DescriptorComparison dc =  DescriptorComparison.checkNumericCompatibility(leftDesc, rightDesc, leftActualDescriptor, rightActualDescriptor);
+		DescriptorComparison dc = DescriptorComparison.checkNumericCompatibility(leftDesc, rightDesc, leftActualDescriptor, rightActualDescriptor);
 		return (!dc.areNumbers || dc.areCompatible);
 	}
 	

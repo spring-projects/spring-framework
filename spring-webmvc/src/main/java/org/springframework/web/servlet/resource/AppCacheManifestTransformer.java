@@ -131,7 +131,7 @@ public class AppCacheManifestTransformer extends ResourceTransformerSupport {
 			}
 			else {
 				contentWriter.write(
-						currentTransformer.transform(line, hashBuilder, resource, transformerChain, request)  + "\n");
+						currentTransformer.transform(line, hashBuilder, resource, transformerChain, request) + "\n");
 			}
 		}
 

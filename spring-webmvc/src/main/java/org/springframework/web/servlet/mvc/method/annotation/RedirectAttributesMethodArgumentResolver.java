@@ -54,7 +54,7 @@ public class RedirectAttributesMethodArgumentResolver implements HandlerMethodAr
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
 		DataBinder dataBinder = binderFactory.createBinder(webRequest, null, null);
-		ModelMap redirectAttributes  = new RedirectAttributesModelMap(dataBinder);
+		ModelMap redirectAttributes = new RedirectAttributesModelMap(dataBinder);
 		mavContainer.setRedirectModel(redirectAttributes);
 		return redirectAttributes;
 	}

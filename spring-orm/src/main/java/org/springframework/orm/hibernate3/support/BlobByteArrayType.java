@@ -39,7 +39,7 @@ import org.springframework.jdbc.support.lob.LobHandler;
  * @since 1.2
  * @see org.springframework.orm.hibernate3.LocalSessionFactoryBean#setLobHandler
  */
-public class BlobByteArrayType extends AbstractLobType  {
+public class BlobByteArrayType extends AbstractLobType {
 
 	/**
 	 * Constructor used by Hibernate: fetches config-time LobHandler and
