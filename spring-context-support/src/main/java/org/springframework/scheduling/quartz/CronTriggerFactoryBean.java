@@ -237,8 +237,10 @@ public class CronTriggerFactoryBean implements FactoryBean<CronTrigger>, BeanNam
 		CronTriggerImpl cti = new CronTriggerImpl();
 		cti.setName(this.name);
 		cti.setGroup(this.group);
-		cti.setJobKey(this.jobDetail.getKey());
-		cti.setJobDataMap(this.jobDataMap);
+		if (this.jobDetail != null) {
+			cti.setJobKey(this.jobDetail.getKey());
+			cti.setJobDataMap(this.jobDataMap);
+		}
 		cti.setStartTime(this.startTime);
 		cti.setCronExpression(this.cronExpression);
 		cti.setTimeZone(this.timeZone);

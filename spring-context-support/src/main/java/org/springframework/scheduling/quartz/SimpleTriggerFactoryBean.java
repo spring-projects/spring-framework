@@ -228,8 +228,10 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 		SimpleTriggerImpl sti = new SimpleTriggerImpl();
 		sti.setName(this.name);
 		sti.setGroup(this.group);
-		sti.setJobKey(this.jobDetail.getKey());
-		sti.setJobDataMap(this.jobDataMap);
+		if (this.jobDetail != null) {
+			sti.setJobKey(this.jobDetail.getKey());
+			sti.setJobDataMap(this.jobDataMap);
+		}
 		sti.setStartTime(this.startTime);
 		sti.setRepeatInterval(this.repeatInterval);
 		sti.setRepeatCount(this.repeatCount);
