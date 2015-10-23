@@ -213,20 +213,36 @@ public class ContentResultMatchers {
 	}
 
 	/**
-	 * Parse the response content and the given string as JSON and assert the two
-	 * are "similar" &mdash; i.e. they contain the same attribute-value pairs
-	 * regardless of order and formatting.
-	 * <p>Use of this matcher requires the <a
-	 * href="http://jsonassert.skyscreamer.org/">JSONassert<a/> library.
+	 * Uses {@link #json(String, boolean)} with second parameter set to false.
 	 * @param jsonContent the expected JSON content
 	 * @since 4.1
 	 */
 	public ResultMatcher json(final String jsonContent) {
+		return json(jsonContent, false);
+	}
+
+	/**
+	 * Parse the response content and the given string as JSON and assert the two
+	 * are "similar" &mdash; i.e. they contain the same attribute-value pairs
+	 * regardless of formatting.
+	 * <p>Can compare in two modes:
+	 * <ul>
+	 *     <li>Strict checking.  Not extensible, and strict array ordering.</li>
+	 *     <li>Lenient checking.  Extensible, and non-strict array ordering.</li>
+	 * </ul>
+	 * Setting {@code strict} to true enables strict checking, false &mdash; lenient checking.
+	 * <p>Use of this matcher requires the <a
+	 * href="http://jsonassert.skyscreamer.org/">JSONassert<a/> library.
+	 * @param jsonContent the expected JSON content
+	 * @param strict enables strict checking
+	 * @since 4.2
+	 */
+	public ResultMatcher json(final String jsonContent, final boolean strict) {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
-				jsonHelper.assertJsonEqual(jsonContent, content);
+				jsonHelper.assertJsonEqual(jsonContent, content, strict);
 			}
 		};
 	}
