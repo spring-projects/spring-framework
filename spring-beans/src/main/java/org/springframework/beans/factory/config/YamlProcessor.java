@@ -209,8 +209,13 @@ public abstract class YamlProcessor {
 				result.put(key.toString(), value);
 			}
 			else {
-				// It has to be a map key in this case
-				result.put("[" + key.toString() + "]", value);
+				try {
+					Integer intKey = Integer.parseInt(key.toString());
+					result.put(intKey.toString(), value);
+				} catch(NumberFormatException nfe) {
+					// It has to be a map key in this case
+					result.put("[" + key.toString() + "]", value);
+				}
 			}
 		}
 		return result;

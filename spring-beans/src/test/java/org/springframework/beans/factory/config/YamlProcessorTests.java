@@ -116,7 +116,8 @@ public class YamlProcessorTests {
 		this.processor.process(new MatchCallback() {
 			@Override
 			public void process(Properties properties, Map<String, Object> map) {
-				assertEquals("bar", properties.get("[1]"));
+				assertTrue(map.containsKey("1"));
+				assertEquals("bar", properties.get("1"));
 				assertEquals(2, properties.size());
 			}
 		});
@@ -130,7 +131,7 @@ public class YamlProcessorTests {
 
 			@Override
 			public void process(Properties properties, Map<String, Object> map) {
-				assertEquals("bar", properties.get("foo[1]"));
+				assertEquals("bar", properties.get("foo.1"));
 				assertEquals(1, properties.size());
 			}
 		});
