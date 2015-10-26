@@ -32,6 +32,7 @@ import static org.mockito.BDDMockito.*;
 /**
  * @author Rick Evans
  * @author Juergen Hoeller
+ * @author Vedran Pavic
  */
 public class CharacterEncodingFilterTests {
 
@@ -50,9 +51,7 @@ public class CharacterEncodingFilterTests {
 		HttpServletResponse response = mock(HttpServletResponse.class);
 		FilterChain filterChain = mock(FilterChain.class);
 
-		CharacterEncodingFilter filter = new CharacterEncodingFilter();
-		filter.setForceEncoding(true);
-		filter.setEncoding(ENCODING);
+		CharacterEncodingFilter filter = new CharacterEncodingFilter(ENCODING, true);
 		filter.init(new MockFilterConfig(FILTER_NAME));
 		filter.doFilter(request, response, filterChain);
 
@@ -73,9 +72,7 @@ public class CharacterEncodingFilterTests {
 
 		FilterChain filterChain = mock(FilterChain.class);
 
-		CharacterEncodingFilter filter = new CharacterEncodingFilter();
-		filter.setForceEncoding(false);
-		filter.setEncoding(ENCODING);
+		CharacterEncodingFilter filter = new CharacterEncodingFilter(ENCODING);
 		filter.init(new MockFilterConfig(FILTER_NAME));
 		filter.doFilter(request, response, filterChain);
 
@@ -86,7 +83,7 @@ public class CharacterEncodingFilterTests {
 	}
 
 	@Test
-	public void doesNowtIfEncodingIsNotEmptyAndNotForced() throws Exception {
+	public void doesNotIfEncodingIsNotEmptyAndNotForced() throws Exception {
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		given(request.getCharacterEncoding()).willReturn(ENCODING);
 		given(request.getAttribute(WebUtils.ERROR_REQUEST_URI_ATTRIBUTE)).willReturn(null);
@@ -96,8 +93,7 @@ public class CharacterEncodingFilterTests {
 
 		FilterChain filterChain = mock(FilterChain.class);
 
-		CharacterEncodingFilter filter = new CharacterEncodingFilter();
-		filter.setEncoding(ENCODING);
+		CharacterEncodingFilter filter = new CharacterEncodingFilter(ENCODING);
 		filter.init(new MockFilterConfig(FILTER_NAME));
 		filter.doFilter(request, response, filterChain);
 
@@ -140,8 +136,7 @@ public class CharacterEncodingFilterTests {
 
 		FilterChain filterChain = mock(FilterChain.class);
 
-		CharacterEncodingFilter filter = new CharacterEncodingFilter();
-		filter.setEncoding(ENCODING);
+		CharacterEncodingFilter filter = new CharacterEncodingFilter(ENCODING);
 		filter.doFilter(request, response, filterChain);
 
 		verify(request).setCharacterEncoding(ENCODING);

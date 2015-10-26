@@ -22,6 +22,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.util.Assert;
+
 /**
  * Servlet Filter that allows one to specify a character encoding for requests.
  * This is useful because current browsers typically do not set a character
@@ -45,6 +47,40 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 	private String encoding;
 
 	private boolean forceEncoding = false;
+
+
+	/**
+	 * Create a default {@code CharacterEncodingFilter},
+	 * with the encoding to be set via {@link #setEncoding}.
+	 * @see #setEncoding
+	 */
+	public CharacterEncodingFilter() {
+	}
+
+	/**
+	 * Create a {@code CharacterEncodingFilter} for the given encoding.
+	 * @param encoding the encoding to apply
+	 * @since 4.2.3
+	 * @see #setEncoding
+	 */
+	public CharacterEncodingFilter(String encoding) {
+		this(encoding, false);
+	}
+
+	/**
+	 * Create a {@code CharacterEncodingFilter} for the given encoding.
+	 * @param encoding the encoding to apply
+	 * @param forceEncoding whether the specified encoding is supposed to
+	 * override existing request and response encodings
+	 * @since 4.2.3
+	 * @see #setEncoding
+	 * @see #setForceEncoding
+	 */
+	public CharacterEncodingFilter(String encoding, boolean forceEncoding) {
+		Assert.hasLength(encoding, "Encoding must not be empty");
+		this.encoding = encoding;
+		this.forceEncoding = forceEncoding;
+	}
 
 
 	/**
