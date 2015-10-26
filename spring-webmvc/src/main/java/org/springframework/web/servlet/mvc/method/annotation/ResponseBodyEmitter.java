@@ -241,9 +241,10 @@ public class ResponseBodyEmitter {
 
 
 	/**
-	 * Simple struct for a data entry.
+	 * A simple holder of data to be written along with a MediaType hint for
+	 * selecting a message converter to write with.
 	 */
-	static class DataWithMediaType {
+	public static class DataWithMediaType {
 
 		private final Object data;
 
