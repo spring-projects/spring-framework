@@ -169,9 +169,9 @@ public class SseEmitter extends ResponseBodyEmitter {
 		/**
 		 * Return one or more Object-MediaType  pairs to write via
 		 * {@link #send(Object, MediaType)}.
+		 * @since 4.2.3
 		 */
 		Set<DataWithMediaType> build();
-
 	}
 
 

@@ -26,21 +26,22 @@ import org.springframework.util.Assert;
 
 /**
  * A controller method return value type for asynchronous request processing
- * where one or more objects are written to the response. While
- * {@link org.springframework.web.context.request.async.DeferredResult DeferredResult}
+ * where one or more objects are written to the response.
+ *
+ * <p>While {@link org.springframework.web.context.request.async.DeferredResult}
  * is used to produce a single result, a {@code ResponseBodyEmitter} can be used
  * to send multiple objects where each object is written with a compatible
- * {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter}.
+ * {@link org.springframework.http.converter.HttpMessageConverter}.
  *
  * <p>Supported as a return type on its own as well as within a
- * {@link org.springframework.http.ResponseEntity ResponseEntity}.
+ * {@link org.springframework.http.ResponseEntity}.
  *
  * <pre>
  * &#064;RequestMapping(value="/stream", method=RequestMethod.GET)
  * public ResponseBodyEmitter handle() {
- * 	ResponseBodyEmitter emitter = new ResponseBodyEmitter();
- * 	// Pass the emitter to another component...
- * 	return emitter;
+ * 	   ResponseBodyEmitter emitter = new ResponseBodyEmitter();
+ * 	   // Pass the emitter to another component...
+ * 	   return emitter;
  * }
  *
  * // in another thread
@@ -101,15 +102,6 @@ public class ResponseBodyEmitter {
 	}
 
 
-	/**
-	 * Invoked after the response is updated with the status code and headers,
-	 * if the ResponseBodyEmitter is wrapped in a ResponseEntity, but before the
-	 * response is committed, i.e. before the response body has been written to.
-	 * <p>The default implementation is empty.
-	 */
-	protected void extendResponse(ServerHttpResponse outputMessage) {
-	}
-
 	synchronized void initialize(Handler handler) throws IOException {
 		this.handler = handler;
 
@@ -130,6 +122,15 @@ public class ResponseBodyEmitter {
 			this.handler.onTimeout(this.timeoutCallback);
 			this.handler.onCompletion(this.completionCallback);
 		}
+	}
+
+	/**
+	 * Invoked after the response is updated with the status code and headers,
+	 * if the ResponseBodyEmitter is wrapped in a ResponseEntity, but before the
+	 * response is committed, i.e. before the response body has been written to.
+	 * <p>The default implementation is empty.
+	 */
+	protected void extendResponse(ServerHttpResponse outputMessage) {
 	}
 
 	/**
@@ -264,10 +265,10 @@ public class ResponseBodyEmitter {
 		}
 	}
 
+
 	private class DefaultCallback implements Runnable {
 
 		private Runnable delegate;
-
 
 		public void setDelegate(Runnable delegate) {
 			this.delegate = delegate;
