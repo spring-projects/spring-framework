@@ -152,6 +152,12 @@ public abstract class NamedParameterUtils {
 					}
 				}
 				if (c == '?') {
+					int j = i + 1;
+					if (j < statement.length && statement[j] == '?') {
+						// Postgres-style "??" ?-operator - to be skipped.
+						i = i + 2;
+						continue;
+					}
 					unnamedParameterCount++;
 					totalParameterCount++;
 				}
