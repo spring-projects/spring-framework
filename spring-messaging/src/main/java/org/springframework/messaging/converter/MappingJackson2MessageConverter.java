@@ -71,7 +71,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 
 	/**
 	 * Construct a {@code MappingJackson2MessageConverter} supporting
-	 * the {@code application/json} MIME type.
+	 * the {@code application/json} MIME type with {@code UTF-8} character set.
 	 */
 	public MappingJackson2MessageConverter() {
 		super(new MimeType("application", "json", Charset.forName("UTF-8")));

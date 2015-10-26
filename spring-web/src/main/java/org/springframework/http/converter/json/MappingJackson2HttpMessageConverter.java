@@ -29,7 +29,8 @@ import org.springframework.http.MediaType;
  *
  * <p>This converter can be used to bind to typed beans, or untyped {@link java.util.HashMap HashMap} instances.
  *
- * <p>By default, this converter supports {@code application/json} and {@code application/*+json}.
+ * <p>By default, this converter supports {@code application/json} and {@code application/*+json}
+ * with {@code UTF-8} character set.
  * This can be overridden by setting the {@link #setSupportedMediaTypes supportedMediaTypes} property.
  *
  * <p>The default constructor uses the default configuration provided by {@link Jackson2ObjectMapperBuilder}.
