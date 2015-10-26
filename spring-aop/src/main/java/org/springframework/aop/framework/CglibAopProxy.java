@@ -304,13 +304,13 @@ class CglibAopProxy implements AopProxy, Serializable {
 		Callback targetDispatcher = isStatic ?
 				new StaticDispatcher(this.advised.getTargetSource().getTarget()) : new SerializableNoOp();
 
-		Callback[] mainCallbacks = new Callback[]{
-			aopInterceptor, // for normal advice
-			targetInterceptor, // invoke target without considering advice, if optimized
-			new SerializableNoOp(), // no override for methods mapped to this
-			targetDispatcher, this.advisedDispatcher,
-			new EqualsInterceptor(this.advised),
-			new HashCodeInterceptor(this.advised)
+		Callback[] mainCallbacks = new Callback[] {
+				aopInterceptor,  // for normal advice
+				targetInterceptor,  // invoke target without considering advice, if optimized
+				new SerializableNoOp(),  // no override for methods mapped to this
+				targetDispatcher, this.advisedDispatcher,
+				new EqualsInterceptor(this.advised),
+				new HashCodeInterceptor(this.advised)
 		};
 
 		Callback[] callbacks;
@@ -646,7 +646,8 @@ class CglibAopProxy implements AopProxy, Serializable {
 					// Note that the final invoker must be an InvokerInterceptor, so we know
 					// it does nothing but a reflective operation on the target, and no hot
 					// swapping or fancy proxying.
-					retVal = methodProxy.invoke(target, args);
+					Object[] argsToUse = AopProxyUtils.adaptArgumentsIfNecessary(method, args);
+					retVal = methodProxy.invoke(target, argsToUse);
 				}
 				else {
 					// We need to create a method invocation...

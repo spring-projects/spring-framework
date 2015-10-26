@@ -138,6 +138,13 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests implements Seria
 		assertEquals("hashCode()", proxy.hashCode(), named.hashCode());
 	}
 
+	@Test  // SPR-13328
+	public void testVarargsWithEnumArray() throws Exception {
+		ProxyFactory proxyFactory = new ProxyFactory(new VarargTestBean());
+		VarargTestInterface proxy = (VarargTestInterface) proxyFactory.getProxy();
+		assertTrue(proxy.doWithVarargs(MyEnum.A, MyOtherEnum.C));
+	}
+
 
 	public interface Foo {
 
@@ -199,6 +206,38 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests implements Seria
 		public int hashCode() {
 			return name.hashCode();
 		}
+	}
+
+
+	public interface VarargTestInterface {
+
+		<V extends MyInterface> boolean doWithVarargs(V... args);
+	}
+
+
+	public static class VarargTestBean implements VarargTestInterface {
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public <V extends MyInterface> boolean doWithVarargs(V... args) {
+			return true;
+		}
+	}
+
+
+	public interface MyInterface {
+	}
+
+
+	public enum MyEnum implements MyInterface {
+
+		A, B;
+	}
+
+
+	public enum MyOtherEnum implements MyInterface {
+
+		C, D;
 	}
 
 }
