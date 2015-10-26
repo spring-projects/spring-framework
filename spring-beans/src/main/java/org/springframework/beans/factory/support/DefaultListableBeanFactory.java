@@ -1225,7 +1225,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		for (Map.Entry<String, Object> entry : candidateBeans.entrySet()) {
 			String candidateBeanName = entry.getKey();
 			Object beanInstance = entry.getValue();
-			if (this.resolvableDependencies.values().contains(beanInstance) ||
+			if ((beanInstance != null && this.resolvableDependencies.containsValue(beanInstance)) ||
 					matchesBeanName(candidateBeanName, descriptor.getDependencyName())) {
 				return candidateBeanName;
 			}
