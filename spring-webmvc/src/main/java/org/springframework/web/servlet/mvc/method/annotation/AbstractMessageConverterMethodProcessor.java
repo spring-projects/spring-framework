@@ -315,11 +315,12 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	}
 
 	/**
-	 * Check if the path has a file extension and whether the extension is either
-	 * {@link #WHITELISTED_EXTENSIONS whitelisted} or
-	 * {@link ContentNegotiationManager#getAllFileExtensions() explicitly
-	 * registered}. If not add a 'Content-Disposition' header with a safe
-	 * attachment file name ("f.txt") to prevent RFD exploits.
+	 * Check if the path has a file extension and whether the extension is
+	 * either {@link #WHITELISTED_EXTENSIONS whitelisted} or explicitly
+	 * {@link ContentNegotiationManager#getAllFileExtensions() registered}.
+	 * If not, and the status is in the 2xx range, a 'Content-Disposition'
+	 * header with a safe attachment file name ("f.txt") is added to prevent
+	 * RFD exploits.
 	 */
 	private void addContentDispositionHeader(ServletServerHttpRequest request,
 			ServletServerHttpResponse response) {
@@ -327,6 +328,16 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		HttpHeaders headers = response.getHeaders();
 		if (headers.containsKey(HttpHeaders.CONTENT_DISPOSITION)) {
 			return;
+		}
+
+		try {
+			int status = response.getServletResponse().getStatus();
+			if (status < 200 || status > 299) {
+				return;
+			}
+		}
+		catch (Throwable ex) {
+			// Ignore
 		}
 
 		HttpServletRequest servletRequest = request.getServletRequest();
