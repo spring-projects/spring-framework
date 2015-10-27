@@ -879,8 +879,8 @@ proxy will take care of forwarding the call to the server-side object via JMS.
 
 [[remoting-amqp]]
 === AMQP
-Refer to the http://docs.spring.io/spring-amqp/reference/html/amqp.html#remoting[Spring
-AMQP Reference Document 'Spring Remoting with AMQP' section] for more information.
+Refer to the {doc-spring-amqp}/html/_reference.html#remoting[Spring AMQP Reference Document
+'Spring Remoting with AMQP' section] for more information.
 
 
 
@@ -1004,33 +1004,33 @@ RestTemplate has an asynchronous counter-part: see <<rest-async-resttemplate>>.
 | HTTP Method | RestTemplate Method
 
 | DELETE
-| {javadoc-baseurl}/org/springframework/web/client/RestTemplate.html#delete(String,%20Object...)[delete]
+| {api-spring-framework}/web/client/RestTemplate.html#delete(String,%20Object...)[delete]
 
 | GET
-| {javadoc-baseurl}/org/springframework/web/client/RestTemplate.html#getForObject(String,%20Class,%20Object...)[getForObject]
-  {javadoc-baseurl}/org/springframework/web/client/RestTemplate.html#getForEntity(String,%20Class,%20Object...)[getForEntity]
+| {api-spring-framework}/web/client/RestTemplate.html#getForObject(String,%20Class,%20Object...)[getForObject]
+  {api-spring-framework}/web/client/RestTemplate.html#getForEntity(String,%20Class,%20Object...)[getForEntity]
 
 | HEAD
-| {javadoc-baseurl}/org/springframework/web/client/RestTemplate.html#headForHeaders(String,%20Object...)[headForHeaders(String
+| {api-spring-framework}/web/client/RestTemplate.html#headForHeaders(String,%20Object...)[headForHeaders(String
   url, String... urlVariables)]
 
 | OPTIONS
-| {javadoc-baseurl}/org/springframework/web/client/RestTemplate.html#optionsForAllow(String,%20Object...)[optionsForAllow(String
+| {api-spring-framework}/web/client/RestTemplate.html#optionsForAllow(String,%20Object...)[optionsForAllow(String
   url, String... urlVariables)]
 
 | POST
-| {javadoc-baseurl}/org/springframework/web/client/RestTemplate.html#postForLocation(String,%20Object,%20Object...)[postForLocation(String
+| {api-spring-framework}/web/client/RestTemplate.html#postForLocation(String,%20Object,%20Object...)[postForLocation(String
   url, Object request, String... urlVariables)]
-  {javadoc-baseurl}/org/springframework/web/client/RestTemplate.html#postForObject(java.lang.String,%20java.lang.Object,%20java.lang.Class,%20java.lang.String...)[postForObject(String
+  {api-spring-framework}/web/client/RestTemplate.html#postForObject(java.lang.String,%20java.lang.Object,%20java.lang.Class,%20java.lang.String...)[postForObject(String
   url, Object request, Class<T> responseType, String... uriVariables)]
 
 | PUT
-| {javadoc-baseurl}/org/springframework/web/client/RestTemplate.html#put(String,%20Object,%20Object...)[put(String
+| {api-spring-framework}/web/client/RestTemplate.html#put(String,%20Object,%20Object...)[put(String
   url, Object request, String...urlVariables)]
 
 | PATCH and others
-| {javadoc-baseurl}/org/springframework/web/client/RestTemplate.html#exchange(java.lang.String,%20org.springframework.http.HttpMethod,%20org.springframework.http.HttpEntity,%20java.lang.Class,%20java.lang.Object...)[exchange]
-  {javadoc-baseurl}/org/springframework/web/client/RestTemplate.html#execute(java.lang.String,%20org.springframework.http.HttpMethod,%20org.springframework.web.client.RequestCallback,%20org.springframework.web.client.ResponseExtractor,%20java.lang.Object...)[execute]
+| {api-spring-framework}/web/client/RestTemplate.html#exchange(java.lang.String,%20org.springframework.http.HttpMethod,%20org.springframework.http.HttpEntity,%20java.lang.Class,%20java.lang.Object...)[exchange]
+  {api-spring-framework}/web/client/RestTemplate.html#execute(java.lang.String,%20org.springframework.http.HttpMethod,%20org.springframework.web.client.RequestCallback,%20org.springframework.web.client.ResponseExtractor,%20java.lang.Object...)[execute]
 |===
 
 The names of `RestTemplate` methods follow a naming convention, the first part indicates
@@ -1374,7 +1374,7 @@ needs: multiple threads may be blocked, waiting for remote HTTP responses.
 `AsyncRestTemplate` and <<rest-resttemplate>>'s APIs are very similar; see
 <<rest-overview-of-resttemplate-methods-tbl>>. The main difference between those APIs is
 that `AsyncRestTemplate` returns
-{javadoc-baseurl}/org/springframework/util/concurrent/ListenableFuture.html[`ListenableFuture`]
+{api-spring-framework}/util/concurrent/ListenableFuture.html[`ListenableFuture`]
 wrappers as opposed to concrete results.
 
 The previous `RestTemplate` example translates to:
@@ -1390,7 +1390,7 @@ The previous `RestTemplate` example translates to:
 	ResponseEntity<String> entity = futureEntity.get();
 ----
 
-{javadoc-baseurl}/org/springframework/util/concurrent/ListenableFuture.html[`ListenableFuture`]
+{api-spring-framework}/util/concurrent/ListenableFuture.html[`ListenableFuture`]
 accepts completion callbacks:
 
 [source,java,indent=0]
@@ -1416,18 +1416,18 @@ accepts completion callbacks:
 [NOTE]
 ====
 The default `AsyncRestTemplate` constructor registers a
-{javadoc-baseurl}/org/springframework/core/task/SimpleAsyncTaskExecutor.html[`SimpleAsyncTaskExecutor`
+{api-spring-framework}/core/task/SimpleAsyncTaskExecutor.html[`SimpleAsyncTaskExecutor`
 ] for executing HTTP requests.
 When dealing with a large number of short-lived requests, a thread-pooling TaskExecutor
 implementation like
-{javadoc-baseurl}/org/springframework/scheduling/concurrent/ThreadPoolTaskExecutor.html[`ThreadPoolTaskExecutor`]
+{api-spring-framework}/scheduling/concurrent/ThreadPoolTaskExecutor.html[`ThreadPoolTaskExecutor`]
 may be a good choice.
 ====
 
 See the
-{javadoc-baseurl}/org/springframework/util/concurrent/ListenableFuture.html[`ListenableFuture` javadocs]
+{api-spring-framework}/util/concurrent/ListenableFuture.html[`ListenableFuture` javadocs]
 and
-{javadoc-baseurl}/org/springframework/web/client/AsyncRestTemplate.html[`AsyncRestTemplate` javadocs]
+{api-spring-framework}/web/client/AsyncRestTemplate.html[`AsyncRestTemplate` javadocs]
 for more details.
 
 
@@ -7047,7 +7047,7 @@ seconds and one every morning at 6 AM. To finalize everything, we need to set up
 More properties are available for the `SchedulerFactoryBean` for you to set, such as the
 calendars used by the job details, properties to customize Quartz with, etc. Have a look
 at the
-{javadoc-baseurl}/org/springframework/scheduling/quartz/SchedulerFactoryBean.html[`SchedulerFactoryBean`
+{api-spring-framework}/scheduling/quartz/SchedulerFactoryBean.html[`SchedulerFactoryBean`
 javadocs] for more information.
 
 
@@ -8643,7 +8643,7 @@ application through AOP. The configuration is intentionally similar with that of
 [NOTE]
 ====
 Advanced customizations using Java config require to implement `CachingConfigurer`, refer
-to {javadoc-baseurl}/org/springframework/cache/annotation/CachingConfigurer.html[the
+to {api-spring-framework}/cache/annotation/CachingConfigurer.html[the
 javadoc for more details].
 ====
 
@@ -9096,8 +9096,7 @@ GemFire is a memory-oriented/disk-backed, elastically scalable, continuously ava
 active (with built-in pattern-based subscription notifications), globally replicated
 database and provides fully-featured edge caching. For further information on how to use
 GemFire as a CacheManager (and more), please refer to the
-http://docs.spring.io/spring-gemfire/docs/current/reference/htmlsingle/[Spring Data GemFire
-reference documentation].
+{doc-spring-gemfire}/html/[Spring Data GemFire reference documentation].
 
 [[cache-store-configuration-jsr107]]
 ==== JSR-107 Cache

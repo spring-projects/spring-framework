@@ -191,9 +191,9 @@ convenience to aid developers in targeting error messages and suchlike.
 
 More information on the `MessageCodesResolver` and the default strategy can be found
 online in the javadocs of
-{javadoc-baseurl}/org/springframework/validation/MessageCodesResolver.html[`MessageCodesResolver`]
+{api-spring-framework}/validation/MessageCodesResolver.html[`MessageCodesResolver`]
 and
-{javadoc-baseurl}/org/springframework/validation/DefaultMessageCodesResolver.html[`DefaultMessageCodesResolver`],
+{api-spring-framework}/validation/DefaultMessageCodesResolver.html[`DefaultMessageCodesResolver`],
 respectively.
 
 

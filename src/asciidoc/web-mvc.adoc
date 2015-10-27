@@ -1425,7 +1425,7 @@ JSON, XML or custom MediaType content. For convenience, instead of annotating al
 `@RequestMapping` methods with `@ResponseBody`, you can annotate your Controller Class
 with `@RestController`.
 
-{javadoc-baseurl}/org/springframework/web/bind/annotation/RestController.html[`@RestController`]
+{api-spring-framework}/web/bind/annotation/RestController.html[`@RestController`]
 is a stereotype annotation that combines `@ResponseBody` and `@Controller`. More than
 that, it gives more meaning to your Controller and also may carry additional semantics
 in future releases of the framework.
@@ -1941,7 +1941,7 @@ attributes:
 ----
 
 Check out the
-{javadoc-baseurl}/org/springframework/web/bind/annotation/ControllerAdvice.html[`@ControllerAdvice`
+{api-spring-framework}/web/bind/annotation/ControllerAdvice.html[`@ControllerAdvice`
 documentation] for more details.
 
 [[mvc-ann-jsonview]]
@@ -3872,9 +3872,9 @@ or in a JSP:
 
 The http://projects.spring.io/spring-security/[Spring Security] project provides features
 to protect web applications from malicious exploits. Check out the reference documentation in the sections on
-http://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#csrf["CSRF protection"],
-http://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#headers["Security Response Headers"], and also
-http://docs.spring.io/spring-security/site/docs/current/reference/htmlsingle/#mvc["Spring MVC Integration"].
+{doc-spring-security}/htmlsingle/#csrf["CSRF protection"],
+{doc-spring-security}/htmlsingle/#headers["Security Response Headers"], and also
+{doc-spring-security}/htmlsingle/#mvc["Spring MVC Integration"].
 Note that using Spring Security to secure the application is not necessarily required for all features.
 For example CSRF protection can be added simply by adding the `CsrfFilter` and
 `CsrfRequestDataValueProcessor` to your configuration. See the
@@ -4161,7 +4161,7 @@ Spring Web MVC uses a configuration convention in several of its APIs:
 * An `n > 0` value will cache the given response for `n` seconds using the
 `'Cache-Control: max-age=n'` directive.
 
-The {javadoc-baseurl}/org/springframework/http/CacheControl.html[`CacheControl`] builder
+The {api-spring-framework}/http/CacheControl.html[`CacheControl`] builder
 class simply describes the available "Cache-Control" directives and makes it easier to
 build your own HTTP caching strategy. Once built, a `CacheControl` instance can then be
 accepted as an argument in several Spring Web MVC APIs.
@@ -4572,7 +4572,7 @@ default converters.
 [NOTE]
 ====
 Jackson JSON and XML converters are created using `ObjectMapper` instances created by
-{javadoc-baseurl}/org/springframework/http/converter/json/Jackson2ObjectMapperBuilder.html[`Jackson2ObjectMapperBuilder`]
+{api-spring-framework}/http/converter/json/Jackson2ObjectMapperBuilder.html[`Jackson2ObjectMapperBuilder`]
 in order to provide a better default configuration.
 
 This builder customizes Jackson's default properties with the following ones:
@@ -4834,7 +4834,7 @@ corresponding dependencies such as Jackson, JAXB2, or Rome are present on the cl
 Additional extensions may be not need to be registered explicitly if they can be
 discovered via `ServletContext.getMimeType(String)` or the __Java Activation Framework__
 (see `javax.activation.MimetypesFileTypeMap`). You can register more extensions with the
-{javadoc-baseurl}/org/springframework/web/servlet/mvc/method/annotation/RequestMappingHandlerMapping.html#setUseRegisteredSuffixPatternMatch(boolean)[setUseRegisteredSuffixPatternMatch
+{api-spring-framework}/web/servlet/mvc/method/annotation/RequestMappingHandlerMapping.html#setUseRegisteredSuffixPatternMatch(boolean)[setUseRegisteredSuffixPatternMatch
 method].
 
 The introduction of `ContentNegotiationManager` also enables selective suffix pattern
@@ -5267,7 +5267,7 @@ Or in XML:
 === Path Matching
 This allows customizing various settings related to URL mapping and path matching.
 For details on the individual options check out the
-{javadoc-baseurl}/org/springframework/web/servlet/config/annotation/PathMatchConfigurer.html[PathMatchConfigurer] API.
+{api-spring-framework}/web/servlet/config/annotation/PathMatchConfigurer.html[PathMatchConfigurer] API.
 
 Below is an example in Java config:
 
@@ -5325,9 +5325,9 @@ And the same in XML, use the `<mvc:path-matching>` element:
 === Message Converters
 
 Customization of `HttpMessageConverter` can be achieved in Java config by overriding
-{javadoc-baseurl}/org/springframework/web/servlet/config/annotation/WebMvcConfigurerAdapter.html#configureMessageConverters-java.util.List-[`configureMessageConverters()`]
+{api-spring-framework}/web/servlet/config/annotation/WebMvcConfigurerAdapter.html#configureMessageConverters-java.util.List-[`configureMessageConverters()`]
 if you want to replace the default converters created by Spring MVC, or by overriding
-{javadoc-baseurl}/org/springframework/web/servlet/config/annotation/WebMvcConfigurerAdapter.html#extendMessageConverters-java.util.List-[`extendMessageConverters()`]
+{api-spring-framework}/web/servlet/config/annotation/WebMvcConfigurerAdapter.html#extendMessageConverters-java.util.List-[`extendMessageConverters()`]
 if you just want to customize them or add additional converters to the default ones.
 
 Below is an example that adds Jackson JSON and XML converters with a customized

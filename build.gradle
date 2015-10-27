@@ -1169,9 +1169,8 @@ configure(rootProject) {
 		backends = ['docbook']
 		options doctype: 'book', eruby: 'erubis'
 		attributes 	'spring-version': project.version,
-					'javadoc-baseurl' : "http://docs.spring.io/spring/docs/current/javadoc-api",
-					revnumber : project.version,
-					docinfo : ""
+					'revnumber' : project.version,
+					'docinfo' : ""
 	}
 
 	reference {

@@ -83,7 +83,7 @@ context'). This section details how one configures a Spring container (a
 `WebApplicationContext`) that contains all of the 'business beans' in one's application.
 
 On to specifics: all that one need do is to declare a
-{javadoc-baseurl}/org/springframework/web/context/ContextLoaderListener.html[`ContextLoaderListener`]
+{api-spring-framework}/web/context/ContextLoaderListener.html[`ContextLoaderListener`]
 in the standard Java EE servlet `web.xml` file of one's web application, and add a
 `contextConfigLocation`<context-param/> section (in the same file) that defines which
 set of Spring XML configuration files to load.
@@ -112,7 +112,7 @@ Find below the <context-param/> configuration:
 If you don't specify the `contextConfigLocation` context parameter, the
 `ContextLoaderListener` will look for a file called `/WEB-INF/applicationContext.xml` to
 load. Once the context files are loaded, Spring creates a
-{javadoc-baseurl}/org/springframework/web/context/WebApplicationContext.html[`WebApplicationContext`]
+{api-spring-framework}/web/context/WebApplicationContext.html[`WebApplicationContext`]
 object based on the bean definitions and stores it in the `ServletContext` of the web
 application.
 
@@ -127,7 +127,7 @@ created by the `ContextLoaderListener`.
 ----
 
 The
-{javadoc-baseurl}/org/springframework/web/context/support/WebApplicationContextUtils.html[`WebApplicationContextUtils`]
+{api-spring-framework}/web/context/support/WebApplicationContextUtils.html[`WebApplicationContextUtils`]
 class is for convenience, so you don't have to remember the name of the `ServletContext`
 attribute. Its __getWebApplicationContext()__ method will return `null` if an object
 doesn't exist under the `WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE`
@@ -194,7 +194,7 @@ __faces-context.xml__ file:
 === FacesContextUtils
 A custom `VariableResolver` works well when mapping one's properties to beans
 in __faces-config.xml__, but at times one may need to grab a bean explicitly. The
-{javadoc-baseurl}/org/springframework/web/jsf/FacesContextUtils.html[`FacesContextUtils`]
+{api-spring-framework}/web/jsf/FacesContextUtils.html[`FacesContextUtils`]
 class makes this easy. It is similar to `WebApplicationContextUtils`, except that it
 takes a `FacesContext` parameter rather than a `ServletContext` parameter.
 

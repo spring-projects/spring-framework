@@ -14,8 +14,8 @@ support Java 8 features. You can still use Spring with older versions of Java, h
 the minimum requirement has now been raised to Java SE 6. We have also taken the
 opportunity of a major release to remove many deprecated classes and methods.
 
-A https://github.com/spring-projects/spring-framework/wiki/Migrating-from-earlier-versions-of-the-spring-framework[migration guide for upgrading to Spring 4.0]
-is available on the https://github.com/spring-projects/spring-framework/wiki[Spring Framework GitHub Wiki].
+A {wiki-spring-framework}/Migrating-from-earlier-versions-of-the-spring-framework[migration guide for upgrading to Spring 4.0]
+is available on the {wiki-spring-framework}[Spring Framework GitHub Wiki].
 
 
 
@@ -127,7 +127,7 @@ directly in your bootstrap code. For example:
 ----
 
 For more information consult the `GroovyBeanDefinitionReader`
-{javadoc-baseurl}/org/springframework/beans/factory/groovy/GroovyBeanDefinitionReader.html[javadocs].
+{api-spring-framework}/beans/factory/groovy/GroovyBeanDefinitionReader.html[javadocs].
 
 
 
@@ -232,13 +232,13 @@ Framework 4.0 introduces several new features for use in unit and integration te
 === JMS Improvements
 Spring 4.1 introduces a much simpler infrastructure <<jms-annotated,to register JMS
 listener endpoints>> by annotating bean methods with
-{javadoc-baseurl}/org/springframework/jms/annotation/JmsListener.html[`@JmsListener`].
+{api-spring-framework}/jms/annotation/JmsListener.html[`@JmsListener`].
 The XML namespace has been enhanced to support this new style (`jms:annotation-driven`),
 and it is also possible to fully configure the infrastructure using Java config
-({javadoc-baseurl}/org/springframework/jms/annotation/EnableJms.html[`@EnableJms`],
+({api-spring-framework}/jms/annotation/EnableJms.html[`@EnableJms`],
 `JmsListenerContainerFactory`). It is also possible to register listener endpoints
 programmatically using
-{javadoc-baseurl}/org/springframework/jms/annotation/JmsListenerConfigurer.html[`JmsListenerConfigurer`].
+{api-spring-framework}/jms/annotation/JmsListenerConfigurer.html[`JmsListenerConfigurer`].
 
 Spring 4.1 also aligns its JMS support to allow you to benefit from the `spring-messaging`
 abstraction introduced in 4.0, that is:
@@ -247,7 +247,7 @@ abstraction introduced in 4.0, that is:
   standard messaging annotations such as `@Payload`, `@Header`, `@Headers`, and `@SendTo`. It
   is also possible to use a standard `Message` in lieu of `javax.jms.Message` as method
   argument.
-* A new {javadoc-baseurl}/org/springframework/jms/core/JmsMessageOperations.html[`JmsMessageOperations`]
+* A new {api-spring-framework}/jms/core/JmsMessageOperations.html[`JmsMessageOperations`]
   interface is available and permits `JmsTemplate` like operations using the `Message`
   abstraction.
 
@@ -256,7 +256,7 @@ Finally, Spring 4.1 provides additional miscellaneous improvements:
 * Synchronous request-reply operations support in `JmsTemplate`
 * Listener priority can be specified per `<jms:listener/>` element
 * Recovery options for the message listener container are configurable using a
-  {javadoc-baseurl}/org/springframework/util/backoff/BackOff.html[`BackOff`] implementation
+  {api-spring-framework}/util/backoff/BackOff.html[`BackOff`] implementation
 * JMS 2.0 shared consumers are supported
 
 === Caching Improvements
