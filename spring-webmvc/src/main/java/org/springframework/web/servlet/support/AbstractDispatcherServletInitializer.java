@@ -32,6 +32,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.context.AbstractContextLoaderInitializer;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
+import org.springframework.web.servlet.FrameworkServlet;
 
 /**
  * Base class for {@link org.springframework.web.WebApplicationInitializer}
@@ -54,6 +55,7 @@ import org.springframework.web.servlet.DispatcherServlet;
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @author Stephane Nicoll
+ * @author Kamill Sokol
  * @since 3.2
  */
 public abstract class AbstractDispatcherServletInitializer extends AbstractContextLoaderInitializer {
@@ -90,7 +92,7 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 				"createServletApplicationContext() did not return an application " +
 				"context for servlet [" + servletName + "]");
 
-		DispatcherServlet dispatcherServlet = createDispatcherServlet(servletAppContext);
+		FrameworkServlet dispatcherServlet = createDispatcherServlet(servletAppContext);
 		dispatcherServlet.setContextInitializers(getServletApplicationContextInitializers());
 
 		ServletRegistration.Dynamic registration = servletContext.addServlet(servletName, dispatcherServlet);
@@ -132,9 +134,9 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	protected abstract WebApplicationContext createServletApplicationContext();
 
 	/**
-	 * Create a {@link DispatcherServlet} with the specified {@link WebApplicationContext}.
+	 * Create a {@link FrameworkServlet} with the specified {@link WebApplicationContext}.
 	 */
-	protected DispatcherServlet createDispatcherServlet(WebApplicationContext servletAppContext) {
+	protected FrameworkServlet createDispatcherServlet(WebApplicationContext servletAppContext) {
 		return new DispatcherServlet(servletAppContext);
 	}
 
