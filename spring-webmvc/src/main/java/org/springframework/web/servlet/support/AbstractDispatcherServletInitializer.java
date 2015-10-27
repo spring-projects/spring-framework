@@ -92,10 +92,10 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 				"createServletApplicationContext() did not return an application " +
 				"context for servlet [" + servletName + "]");
 
-		FrameworkServlet dispatcherServlet = createDispatcherServlet(servletAppContext);
-		dispatcherServlet.setContextInitializers(getServletApplicationContextInitializers());
+		FrameworkServlet frameworkServlet = createDispatcherServlet(servletAppContext);
+		frameworkServlet.setContextInitializers(getServletApplicationContextInitializers());
 
-		ServletRegistration.Dynamic registration = servletContext.addServlet(servletName, dispatcherServlet);
+		ServletRegistration.Dynamic registration = servletContext.addServlet(servletName, frameworkServlet);
 		Assert.notNull(registration,
 				"Failed to register servlet with name '" + servletName + "'." +
 				"Check if there is another servlet registered under the same name.");
