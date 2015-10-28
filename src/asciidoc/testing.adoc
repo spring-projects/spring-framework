@@ -826,16 +826,16 @@ after the test method has completed. `@Commit` can be used as a direct replaceme
 
 Indicates whether the transaction for a transactional test method should be __rolled
 back__ after the test method has completed. If `true`, the transaction is rolled back;
-otherwise, the transaction is committed. Rollback semantics for integration tests in the
-Spring TestContext Framework default to `true` even if `@Rollback` is not explicitly
-declared.
+otherwise, the transaction is committed (see also `@Commit`). Rollback semantics for
+integration tests in the Spring TestContext Framework default to `true` even if
+`@Rollback` is not explicitly declared.
 
 +
 
 When declared as a class-level annotation, `@Rollback` defines the default rollback
 semantics for all test methods within the test class hierarchy. When declared as a
 method-level annotation, `@Rollback` defines rollback semantics for the specific test
-method, potentially overriding class-level default rollback semantics.
+method, potentially overriding class-level `@Rollback` or `@Commit` semantics.
 
 +
 
@@ -1004,6 +1004,8 @@ The following annotations are __only__ supported when used in conjunction with t
 Indicates that the annotated test is enabled for a specific testing environment. If the
 configured `ProfileValueSource` returns a matching `value` for the provided `name`, the
 test is enabled. Otherwise, the test will be disabled and effectively _ignored_.
+
++
 
 `@IfProfileValue` can be applied at the class level, the method level, or both.
 Class-level usage of `@IfProfileValue` takes precedence over method-level usage for any
@@ -3238,7 +3240,7 @@ declarative SQL script execution with default transaction rollback semantics.
 ----
 	@RunWith(SpringJUnit4ClassRunner.class)
 	@ContextConfiguration
-	@Transactional(transactionManager = "txMgr")
+	**@Transactional(transactionManager = "txMgr")**
 	**@Commit**
 	public class FictitiousTransactionalTest {
 
@@ -3253,7 +3255,7 @@ declarative SQL script execution with default transaction rollback semantics.
 		}
 
 		@Test
-		// overrides the class-level default rollback setting
+		// overrides the class-level @Commit setting
 		**@Rollback**
 		public void modifyDatabaseWithinTransaction() {
 			// logic which uses the test data and modifies database state
@@ -3758,7 +3760,7 @@ instrumenting your test class with a `TestContextManager`. See the source code o
 The __Spring MVC Test framework__ provides first class support for testing Spring MVC
 code using a fluent API that can be used with JUnit, TestNG, or any other testing
 framework. It's built on the
-http://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/mock/web/package-summary.html[Servlet API mock objects]
+{api-spring-framework}/mock/web/package-summary.html[Servlet API mock objects]
 from the `spring-test` module and hence does _not_ use a running Servlet container. It
 uses the `DispatcherServlet` to provide full Spring MVC runtime behavior and provides support
 for loading actual Spring configuration with the __TestContext framework__ in addition to a
@@ -3772,7 +3774,7 @@ use a running server.
 ====
 Spring Boot provides an option to write full, end-to-end integration tests that include
 a running server. If this is your goal please have a look at the
-http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-testing.html#boot-features-testing-spring-boot-applications[Spring Boot reference page].
+{doc-spring-boot}/html/boot-features-testing.html#boot-features-testing-spring-boot-applications[Spring Boot reference page].
 For more information on the differences between out-of-container and end-to-end
 integration tests, see <<spring-mvc-test-vs-end-to-end-integration-tests>>.
 ====
@@ -4179,7 +4181,7 @@ body as expected. The same is true for rendering JSON, XML, and other formats vi
 
 Alternatively you may consider the full end-to-end integration testing support from
 Spring Boot via `@WebIntegrationTest`. See the
-http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-testing.html#boot-features-testing-spring-boot-applications[Spring Boot reference].
+{doc-spring-boot}/html/boot-features-testing.html#boot-features-testing-spring-boot-applications[Spring Boot reference].
 
 There are pros and cons for each approach. The options provided in __Spring MVC Test__
 are different stops on the scale from classic unit testing to full integration testing.

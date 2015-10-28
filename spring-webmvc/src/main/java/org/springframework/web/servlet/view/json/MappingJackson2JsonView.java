@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -69,6 +70,12 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 	 * Default content type for JSONP: "application/javascript".
 	 */
 	public static final String DEFAULT_JSONP_CONTENT_TYPE = "application/javascript";
+
+	/**
+	 * Pattern for validating jsonp callback parameter values.
+	 */
+	private static final Pattern CALLBACK_PARAM_PATTERN = Pattern.compile("[0-9A-Za-z_\\.]*");
+
 
 	private String jsonPrefix;
 
@@ -143,10 +150,11 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 	}
 
 	/**
-	 * Set whether to serialize models containing a single attribute as a map or whether to
-	 * extract the single value from the model and serialize it directly.
-	 * <p>The effect of setting this flag is similar to using {@code MappingJackson2HttpMessageConverter}
-	 * with an {@code @ResponseBody} request-handling method.
+	 * Set whether to serialize models containing a single attribute as a map or
+	 * whether to extract the single value from the model and serialize it directly.
+	 * <p>The effect of setting this flag is similar to using
+	 * {@code MappingJackson2HttpMessageConverter} with an {@code @ResponseBody}
+	 * request-handling method.
 	 * <p>Default is {@code false}.
 	 */
 	public void setExtractValueFromSingleKeyModel(boolean extractValueFromSingleKeyModel) {
@@ -169,19 +177,37 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 		if (this.jsonpParameterNames != null) {
 			for (String name : this.jsonpParameterNames) {
 				String value = request.getParameter(name);
-				if (!StringUtils.isEmpty(value)) {
-					return value;
+				if (StringUtils.isEmpty(value)) {
+					continue;
 				}
+				if (!isValidJsonpQueryParam(value)) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Ignoring invalid jsonp parameter value: " + value);
+					}
+					continue;
+				}
+				return value;
 			}
 		}
 		return null;
 	}
 
 	/**
+	 * Validate the jsonp query parameter value. The default implementation
+	 * returns true if it consists of digits, letters, or "_" and ".".
+	 * Invalid parameter values are ignored.
+	 * @param value the query param value, never {@code null}
+	 * @since 4.1.8
+	 */
+	protected boolean isValidJsonpQueryParam(String value) {
+		return CALLBACK_PARAM_PATTERN.matcher(value).matches();
+	}
+
+	/**
 	 * Filter out undesired attributes from the given model.
 	 * The return value can be either another {@link Map} or a single value object.
 	 * <p>The default implementation removes {@link BindingResult} instances and entries
-	 * not included in the {@link #setRenderedAttributes renderedAttributes} property.
+	 * not included in the {@link #setModelKeys renderedAttributes} property.
 	 * @param model the model, as passed on to {@link #renderMergedOutputModel}
 	 * @return the value to be rendered
 	 */
@@ -221,11 +247,13 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 		if (this.jsonPrefix != null) {
 			generator.writeRaw(this.jsonPrefix);
 		}
+
 		String jsonpFunction = null;
 		if (object instanceof MappingJacksonValue) {
-			jsonpFunction = ((MappingJacksonValue)object).getJsonpFunction();
+			jsonpFunction = ((MappingJacksonValue) object).getJsonpFunction();
 		}
 		if (jsonpFunction != null) {
+			generator.writeRaw("/**/");
 			generator.writeRaw(jsonpFunction + "(" );
 		}
 	}
@@ -234,7 +262,7 @@ public class MappingJackson2JsonView extends AbstractJackson2View {
 	protected void writeSuffix(JsonGenerator generator, Object object) throws IOException {
 		String jsonpFunction = null;
 		if (object instanceof MappingJacksonValue) {
-			jsonpFunction = ((MappingJacksonValue)object).getJsonpFunction();
+			jsonpFunction = ((MappingJacksonValue) object).getJsonpFunction();
 		}
 		if (jsonpFunction != null) {
 			generator.writeRaw(");");

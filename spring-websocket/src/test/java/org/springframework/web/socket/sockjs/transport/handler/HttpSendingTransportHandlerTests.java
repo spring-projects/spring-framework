@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.socket.AbstractHttpRequestTests;
 import org.springframework.web.socket.WebSocketHandler;
+import org.springframework.web.socket.sockjs.SockJsTransportFailureException;
 import org.springframework.web.socket.sockjs.frame.SockJsFrame;
 import org.springframework.web.socket.sockjs.frame.SockJsFrameFormat;
 import org.springframework.web.socket.sockjs.transport.session.AbstractSockJsSession;
@@ -31,8 +32,13 @@ import org.springframework.web.socket.sockjs.transport.session.PollingSockJsSess
 import org.springframework.web.socket.sockjs.transport.session.StreamingSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.StubSockJsServiceConfig;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 /**
  * Test fixture for {@link AbstractHttpSendingTransportHandler} and sub-classes.
@@ -91,24 +97,45 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 
 	@Test
 	public void jsonpTransport() throws Exception {
+		testJsonpTransport(null, false);
+		testJsonpTransport("_jp123xYz", true);
+		testJsonpTransport("A..B__3..4", true);
+		testJsonpTransport("!jp!abc", false);
+		testJsonpTransport("<script>", false);
+		testJsonpTransport("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_.", true);
+	}
+
+	private void testJsonpTransport(String callbackValue, boolean expectSuccess) throws Exception {
 		JsonpPollingTransportHandler transportHandler = new JsonpPollingTransportHandler();
 		transportHandler.initialize(this.sockJsConfig);
 		PollingSockJsSession session = transportHandler.createSession("1", this.webSocketHandler, null);
 
-		transportHandler.handleRequest(this.request, this.response, this.webSocketHandler, session);
-
-		assertEquals(500, this.servletResponse.getStatus());
-		assertEquals("\"callback\" parameter required", this.servletResponse.getContentAsString());
-
 		resetRequestAndResponse();
 		setRequest("POST", "/");
-		this.servletRequest.setQueryString("c=callback");
-		this.servletRequest.addParameter("c", "callback");
-		transportHandler.handleRequest(this.request, this.response, this.webSocketHandler, session);
 
-		assertEquals("application/javascript;charset=UTF-8", this.response.getHeaders().getContentType().toString());
-		assertFalse("Polling request should complete after open frame", this.servletRequest.isAsyncStarted());
-		verify(this.webSocketHandler).afterConnectionEstablished(session);
+		if (callbackValue != null) {
+			this.servletRequest.setQueryString("c=" + callbackValue);
+			this.servletRequest.addParameter("c", callbackValue);
+		}
+
+		try {
+			transportHandler.handleRequest(this.request, this.response, this.webSocketHandler, session);
+		}
+		catch (SockJsTransportFailureException ex) {
+			if (expectSuccess) {
+				throw new AssertionError("Unexpected transport failure", ex);
+			}
+		}
+
+		if (expectSuccess) {
+			assertEquals(200, this.servletResponse.getStatus());
+			assertEquals("application/javascript;charset=UTF-8", this.response.getHeaders().getContentType().toString());
+			verify(this.webSocketHandler).afterConnectionEstablished(session);
+		}
+		else {
+			assertEquals(500, this.servletResponse.getStatus());
+			verifyNoMoreInteractions(this.webSocketHandler);
+		}
 	}
 
 	@Test
@@ -184,7 +211,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 
 		format = new JsonpPollingTransportHandler().getFrameFormat(this.request);
 		formatted = format.format(frame);
-		assertEquals("callback(\"" + frame.getContent() + "\");\r\n", formatted);
+		assertEquals("/**/callback(\"" + frame.getContent() + "\");\r\n", formatted);
 	}
 
 }

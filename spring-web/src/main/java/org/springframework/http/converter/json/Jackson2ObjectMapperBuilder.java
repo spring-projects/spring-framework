@@ -16,7 +16,6 @@
 
 package org.springframework.http.converter.json;
 
-import java.io.ByteArrayInputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -45,6 +44,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.cfg.HandlerInstantiator;
+import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -54,6 +54,7 @@ import org.springframework.beans.FatalBeanException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -97,6 +98,8 @@ public class Jackson2ObjectMapperBuilder {
 	private AnnotationIntrospector annotationIntrospector;
 
 	private PropertyNamingStrategy propertyNamingStrategy;
+
+	private TypeResolverBuilder<?> defaultTyping;
 
 	private JsonInclude.Include serializationInclusion;
 
@@ -213,6 +216,15 @@ public class Jackson2ObjectMapperBuilder {
 	 */
 	public Jackson2ObjectMapperBuilder propertyNamingStrategy(PropertyNamingStrategy propertyNamingStrategy) {
 		this.propertyNamingStrategy = propertyNamingStrategy;
+		return this;
+	}
+
+	/**
+	 * Specify a {@link TypeResolverBuilder} to use for Jackson's default typing.
+	 * @since 4.2.2
+	 */
+	public Jackson2ObjectMapperBuilder defaultTyping(TypeResolverBuilder<?> typeResolverBuilder) {
+		this.defaultTyping = typeResolverBuilder;
 		return this;
 	}
 
@@ -523,6 +535,7 @@ public class Jackson2ObjectMapperBuilder {
 		return this;
 	}
 
+
 	/**
 	 * Build a new {@link ObjectMapper} instance.
 	 * <p>Each build operation produces an independent {@link ObjectMapper} instance.
@@ -588,6 +601,9 @@ public class Jackson2ObjectMapperBuilder {
 		if (this.propertyNamingStrategy != null) {
 			objectMapper.setPropertyNamingStrategy(this.propertyNamingStrategy);
 		}
+		if (this.defaultTyping != null) {
+			objectMapper.setDefaultTyping(this.defaultTyping);
+		}
 		if (this.serializationInclusion != null) {
 			objectMapper.setSerializationInclusion(this.serializationInclusion);
 		}
@@ -622,6 +638,7 @@ public class Jackson2ObjectMapperBuilder {
 					new SpringHandlerInstantiator(this.applicationContext.getAutowireCapableBeanFactory()));
 		}
 	}
+
 
 	// Any change to this method should be also applied to spring-jms and spring-messaging
 	// MappingJackson2MessageConverter default constructors
@@ -761,7 +778,7 @@ public class Jackson2ObjectMapperBuilder {
 		private static final XMLResolver NO_OP_XML_RESOLVER = new XMLResolver() {
 			@Override
 			public Object resolveEntity(String publicID, String systemID, String base, String ns) {
-				return new ByteArrayInputStream(new byte[0]);
+				return StreamUtils.emptyInput();
 			}
 		};
 	}

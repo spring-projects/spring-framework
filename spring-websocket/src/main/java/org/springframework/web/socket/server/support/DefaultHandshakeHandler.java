@@ -22,18 +22,12 @@ import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.socket.server.RequestUpgradeStrategy;
 
 /**
- * A default {@link org.springframework.web.socket.server.HandshakeHandler} implementation.
- * Performs initial validation of the WebSocket handshake request -- possibly rejecting it
- * through the appropriate HTTP status code -- while also allowing sub-classes to override
- * various parts of the negotiation process (e.g. origin validation, sub-protocol negotiation,
- * extensions negotiation, etc).
- *
- * <p>If the negotiation succeeds, the actual upgrade is delegated to a server-specific
- * {@link org.springframework.web.socket.server.RequestUpgradeStrategy}, which will update
- * the response as necessary and initialize the WebSocket. Currently supported servers are
- * Tomcat 7 and 8, Jetty 9, and GlassFish 4.
+ * A default {@link org.springframework.web.socket.server.HandshakeHandler} implementation,
+ * extending {@link AbstractHandshakeHandler} with Servlet-specific initialization support.
+ * See {@link AbstractHandshakeHandler}'s javadoc for details on supported servers etc.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.0
  */
 public class DefaultHandshakeHandler extends AbstractHandshakeHandler implements ServletContextAware {

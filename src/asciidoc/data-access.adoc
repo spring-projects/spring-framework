@@ -7179,7 +7179,7 @@ unmarshal XML from an external source, set the `supportedClasses` property on th
 This will make sure that only the registered classes are eligible for unmarshalling.
 
 Additionally, you can register
-{javadoc-baseurl}/org/springframework/oxm/xstream/XStreamMarshaller.html#setConverters(com.thoughtworks.xstream.converters.ConverterMatcher...)[custom
+{api-spring-framework}/oxm/xstream/XStreamMarshaller.html#setConverters(com.thoughtworks.xstream.converters.ConverterMatcher...)[custom
 converters] to make sure that only your supported classes can be unmarshalled. You might
 want to add a `CatchAllConverter` as the last converter in the list, in addition to
 converters that explicitly support the domain classes that should be supported. As a

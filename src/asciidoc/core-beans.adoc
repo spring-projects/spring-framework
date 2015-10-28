@@ -17,10 +17,10 @@ construction of classes, or a mechanism such as the __Service Locator__ pattern.
 
 The `org.springframework.beans` and `org.springframework.context` packages are the basis
 for Spring Framework's IoC container. The
-{javadoc-baseurl}/org/springframework/beans/factory/BeanFactory.html[`BeanFactory`]
+{api-spring-framework}/beans/factory/BeanFactory.html[`BeanFactory`]
 interface provides an advanced configuration mechanism capable of managing any type of
 object.
-{javadoc-baseurl}/org/springframework/context/ApplicationContext.html[`ApplicationContext`]
+{api-spring-framework}/context/ApplicationContext.html[`ApplicationContext`]
 is a sub-interface of `BeanFactory`. It adds easier integration with Spring's AOP
 features; message resource handling (for use in internationalization), event
 publication; and application-layer specific contexts such as the `WebApplicationContext`
@@ -55,8 +55,8 @@ between such objects.
 Several implementations of the `ApplicationContext` interface are supplied
 out-of-the-box with Spring. In standalone applications it is common to create an
 instance of
-{javadoc-baseurl}/org/springframework/context/support/ClassPathXmlApplicationContext.html[`ClassPathXmlApplicationContext`]
-or {javadoc-baseurl}/org/springframework/context/support/FileSystemXmlApplicationContext.html[`FileSystemXmlApplicationContext`].
+{api-spring-framework}/context/support/ClassPathXmlApplicationContext.html[`ClassPathXmlApplicationContext`]
+or {api-spring-framework}/context/support/FileSystemXmlApplicationContext.html[`FileSystemXmlApplicationContext`].
  While XML has been the traditional format for defining configuration metadata you can
 instruct the container to use Java annotations or code as the metadata format by
 providing a small amount of XML configuration to declaratively enable support for these
@@ -2298,7 +2298,7 @@ The following scopes are supported out of the box. You can also create
 ====
 As of Spring 3.0, a __thread scope__ is available, but is not registered by default. For
 more information, see the documentation for
-{javadoc-baseurl}/org/springframework/context/support/SimpleThreadScope.html[`SimpleThreadScope`].
+{api-spring-framework}/context/support/SimpleThreadScope.html[`SimpleThreadScope`].
 For instructions on how to register this or any other custom scope, see
 <<beans-factory-scopes-custom-using>>.
 ====
@@ -2712,7 +2712,7 @@ To integrate your custom scope(s) into the Spring container, you need to impleme
 `org.springframework.beans.factory.config.Scope` interface, which is described in this
 section. For an idea of how to implement your own scopes, see the `Scope`
 implementations that are supplied with the Spring Framework itself and the
-{javadoc-baseurl}/org/springframework/beans/factory/config/Scope.html[`Scope` javadocs],
+{api-spring-framework}/beans/factory/config/Scope.html[`Scope` javadocs],
 which explains the methods you need to implement in more detail.
 
 The `Scope` interface has four methods to get objects from the scope, remove them from
@@ -4091,11 +4091,11 @@ configuration (notice the inclusion of the `context` namespace):
 ----
 
 (The implicitly registered post-processors include
-{javadoc-baseurl}/org/springframework/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html[`AutowiredAnnotationBeanPostProcessor`],
- {javadoc-baseurl}/org/springframework/context/annotation/CommonAnnotationBeanPostProcessor.html[`CommonAnnotationBeanPostProcessor`],
- {javadoc-baseurl}/org/springframework/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html[`PersistenceAnnotationBeanPostProcessor`],
+{api-spring-framework}/beans/factory/annotation/AutowiredAnnotationBeanPostProcessor.html[`AutowiredAnnotationBeanPostProcessor`],
+ {api-spring-framework}/context/annotation/CommonAnnotationBeanPostProcessor.html[`CommonAnnotationBeanPostProcessor`],
+ {api-spring-framework}/orm/jpa/support/PersistenceAnnotationBeanPostProcessor.html[`PersistenceAnnotationBeanPostProcessor`],
 as well as the aforementioned
-{javadoc-baseurl}/org/springframework/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html[`RequiredAnnotationBeanPostProcessor`].)
+{api-spring-framework}/beans/factory/annotation/RequiredAnnotationBeanPostProcessor.html[`RequiredAnnotationBeanPostProcessor`].)
 
 [NOTE]
 ====
@@ -4836,7 +4836,7 @@ Generic qualifiers also apply when autowiring Lists, Maps and Arrays:
 === CustomAutowireConfigurer
 
 The
-{javadoc-baseurl}/org/springframework/beans/factory/annotation/CustomAutowireConfigurer.html[`CustomAutowireConfigurer`]
+{api-spring-framework}/beans/factory/annotation/CustomAutowireConfigurer.html[`CustomAutowireConfigurer`]
 is a `BeanFactoryPostProcessor` that enables you to register your own custom qualifier
 annotation types even if they are not annotated with Spring's `@Qualifier` annotation.
 
@@ -4918,7 +4918,7 @@ name "movieFinder" injected into its setter method:
 The name provided with the annotation is resolved as a bean name by the
 `ApplicationContext` of which the `CommonAnnotationBeanPostProcessor` is aware. The
 names can be resolved through JNDI if you configure Spring's
-{javadoc-baseurl}/org/springframework/jndi/support/SimpleJndiBeanFactory.html[`SimpleJndiBeanFactory`]
+{api-spring-framework}/jndi/support/SimpleJndiBeanFactory.html[`SimpleJndiBeanFactory`]
 explicitly. However, it is recommended that you rely on the default behavior and simply
 use Spring's JNDI lookup capabilities to preserve the level of indirection.
 ====
@@ -5464,7 +5464,7 @@ were detected, the names would be myMovieLister and movieFinderImpl:
 ====
 If you do not want to rely on the default bean-naming strategy, you can provide a custom
 bean-naming strategy. First, implement the
-{javadoc-baseurl}/org/springframework/beans/factory/support/BeanNameGenerator.html[`BeanNameGenerator`]
+{api-spring-framework}/beans/factory/support/BeanNameGenerator.html[`BeanNameGenerator`]
 interface, and be sure to include a default no-arg constructor. Then, provide the
 fully-qualified class name when configuring the scanner:
 ====
@@ -5516,7 +5516,7 @@ within the annotation:
 ====
 To provide a custom strategy for scope resolution rather than relying on the
 annotation-based approach, implement the
-{javadoc-baseurl}/org/springframework/context/annotation/ScopeMetadataResolver.html[`ScopeMetadataResolver`]
+{api-spring-framework}/context/annotation/ScopeMetadataResolver.html[`ScopeMetadataResolver`]
 interface, and be sure to include a default no-arg constructor. Then, provide the
 fully-qualified class name when configuring the scanner:
 ====
@@ -6373,7 +6373,7 @@ Sometimes it is helpful to provide a more detailed textual description of a bean
 be particularly useful when beans are exposed (perhaps via JMX) for monitoring purposes.
 
 To add a description to a `@Bean` the
-{javadoc-baseurl}/org/springframework/context/annotation/Description.html[`@Description`]
+{api-spring-framework}/context/annotation/Description.html[`@Description`]
 annotation can be used:
 
 [source,java,indent=0]
@@ -6837,7 +6837,7 @@ profile has been enabled in the Spring `Environment` (see <<beans-definition-pro
 for details).
 
 The `@Profile` annotation is actually implemented using a much more flexible annotation
-called {javadoc-baseurl}/org/springframework/context/annotation/Conditional.html[`@Conditional`].
+called {api-spring-framework}/context/annotation/Conditional.html[`@Conditional`].
 The `@Conditional` annotation indicates specific
 `org.springframework.context.annotation.Condition` implementations that should be
 consulted before a `@Bean` is registered.
@@ -6867,7 +6867,7 @@ method that returns `true` or `false`. For example, here is the actual
 	}
 ----
 
-See the {javadoc-baseurl}/org/springframework/context/annotation/Conditional.html[
+See the {api-spring-framework}/context/annotation/Conditional.html[
 `@Conditional` javadocs] for more detail.
 
 [[beans-java-combining]]
@@ -7063,7 +7063,7 @@ jdbc.password=
 [[beans-environment]]
 == Environment abstraction
 
-The {javadoc-baseurl}/org/springframework/core/env/Environment.html[`Environment`]
+The {api-spring-framework}/core/env/Environment.html[`Environment`]
 is an abstraction integrated in the container that models two key
 aspects of the application environment: <<beans-definition-profiles,_profiles_>>
 and <<beans-property-source-abstraction,_properties_>>.
@@ -7145,7 +7145,7 @@ this need.
 [[beans-definition-profiles-java]]
 ==== @Profile
 
-The {javadoc-baseurl}/org/springframework/context/annotation/Profile.html[`@Profile`]
+The {api-spring-framework}/context/annotation/Profile.html[`@Profile`]
 annotation allows you to indicate that a component is eligible for registration
 when one or more specified profiles are active. Using our example above, we
 can rewrite the `dataSource` configuration as follows:
@@ -7397,9 +7397,9 @@ System.out.println("Does my environment contain the ''foo'' property? " + contai
 
 In the snippet above, we see a high-level way of asking Spring whether the `foo` property is
 defined for the current environment. To answer this question, the `Environment` object performs
-a search over a set of {javadoc-baseurl}/org/springframework/core/env/PropertySource.html[`PropertySource`]
+a search over a set of {api-spring-framework}/core/env/PropertySource.html[`PropertySource`]
 objects. A `PropertySource` is a simple abstraction over any source of key-value pairs, and
-Spring's {javadoc-baseurl}/org/springframework/core/env/StandardEnvironment.html[`StandardEnvironment`]
+Spring's {api-spring-framework}/core/env/StandardEnvironment.html[`StandardEnvironment`]
 is configured with two PropertySource objects -- one representing the set of JVM system properties
 (_a la_ `System.getProperties()`) and one representing the set of system environment variables
 (_a la_ `System.getenv()`).
@@ -7407,11 +7407,11 @@ is configured with two PropertySource objects -- one representing the set of JVM
 [NOTE]
 ====
 These default property sources are present for `StandardEnvironment`, for use in standalone
-applications. {javadoc-baseurl}/org/springframework/web/context/support/StandardServletEnvironment.html[`StandardServletEnvironment`]
+applications. {api-spring-framework}/web/context/support/StandardServletEnvironment.html[`StandardServletEnvironment`]
 is populated with additional default property sources including servlet config and servlet
-context parameters. {javadoc-baseurl}/org/springframework/web/portlet/context/StandardPortletEnvironment.html[`StandardPortletEnvironment`]
+context parameters. {api-spring-framework}/web/portlet/context/StandardPortletEnvironment.html[`StandardPortletEnvironment`]
 similarly has access to portlet config and portlet context parameters as property sources.
-Both can optionally enable a {javadoc-baseurl}/org/springframework/jndi/JndiPropertySource.html[`JndiPropertySource`].
+Both can optionally enable a {api-spring-framework}/jndi/JndiPropertySource.html[`JndiPropertySource`].
 See Javadoc for details.
 ====
 
@@ -7443,13 +7443,13 @@ sources.addFirst(new MyPropertySource());
 In the code above, `MyPropertySource` has been added with highest precedence in the
 search. If it contains a  `foo` property, it will be detected and returned ahead of
 any `foo` property in any other `PropertySource`. The
-{javadoc-baseurl}/org/springframework/core/env/MutablePropertySources.html[`MutablePropertySources`]
+{api-spring-framework}/core/env/MutablePropertySources.html[`MutablePropertySources`]
 API exposes a number of methods that allow for precise manipulation of the set of
 property sources.
 
 === @PropertySource
 
-The {javadoc-baseurl}/org/springframework/context/annotation/PropertySource.html[`@PropertySource`]
+The {api-spring-framework}/context/annotation/PropertySource.html[`@PropertySource`]
 annotation provides a convenient and declarative mechanism for adding a `PropertySource`
 to Spring's `Environment`.
 
@@ -7571,7 +7571,7 @@ AspectJ load-time weaving, see <<aop-aj-ltw>>.
 As was discussed in the chapter introduction, the `org.springframework.beans.factory`
 package provides basic functionality for managing and manipulating beans, including in a
 programmatic way. The `org.springframework.context` package adds the
-{javadoc-baseurl}/org/springframework/context/ApplicationContext.html[`ApplicationContext`]
+{api-spring-framework}/context/ApplicationContext.html[`ApplicationContext`]
 interface, which extends the `BeanFactory` interface, in addition to extending other
 interfaces to provide additional functionality in a more __application
 framework-oriented style__. Many people use the `ApplicationContext` in a completely
@@ -8249,7 +8249,7 @@ and JMX support facilities. Application components can also interact with the
 application server's JCA WorkManager through Spring's `TaskExecutor` abstraction.
 
 Check out the JavaDoc of the
-{javadoc-baseurl}/org/springframework/jca/context/SpringContextResourceAdapter.html[`SpringContextResourceAdapter`]
+{api-spring-framework}/jca/context/SpringContextResourceAdapter.html[`SpringContextResourceAdapter`]
 class for the configuration details involved in RAR deployment.
 
 __For a simple deployment of a Spring ApplicationContext as a Java EE RAR file:__ package
@@ -8402,7 +8402,7 @@ option for accessing shared Spring-managed components, such as in an EJB 2.1
 environment, or when you want to share a single ApplicationContext as a parent to
 WebApplicationContexts across WAR files. In this case you should look into using the
 utility class
-{javadoc-baseurl}/org/springframework/context/access/ContextSingletonBeanFactoryLocator.html[`ContextSingletonBeanFactoryLocator`]
+{api-spring-framework}/context/access/ContextSingletonBeanFactoryLocator.html[`ContextSingletonBeanFactoryLocator`]
 locator that is described in this
 https://spring.io/blog/2007/06/11/using-a-shared-parent-application-context-in-a-multi-war-spring-application/[Spring
 team blog entry].

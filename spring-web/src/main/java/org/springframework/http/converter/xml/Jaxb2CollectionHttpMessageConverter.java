@@ -16,7 +16,6 @@
 
 package org.springframework.http.converter.xml;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -46,6 +45,7 @@ import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+import org.springframework.util.StreamUtils;
 
 /**
  * An {@code HttpMessageConverter} that can read XML collections using JAXB2.
@@ -256,7 +256,7 @@ public class Jaxb2CollectionHttpMessageConverter<T extends Collection>
 	private static final XMLResolver NO_OP_XML_RESOLVER = new XMLResolver() {
 		@Override
 		public Object resolveEntity(String publicID, String systemID, String base, String ns) {
-			return new ByteArrayInputStream(new byte[0]);
+			return StreamUtils.emptyInput();
 		}
 	};
 

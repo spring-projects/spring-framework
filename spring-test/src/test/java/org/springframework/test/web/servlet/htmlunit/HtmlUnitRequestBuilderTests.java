@@ -97,6 +97,7 @@ public class HtmlUnitRequestBuilderTests {
 	// --- buildRequest
 
 	@Test
+	@SuppressWarnings("deprecation")
 	public void buildRequestBasicAuth() {
 		String base64Credentials = "dXNlcm5hbWU6cGFzc3dvcmQ=";
 		String authzHeaderValue = "Basic: " + base64Credentials;

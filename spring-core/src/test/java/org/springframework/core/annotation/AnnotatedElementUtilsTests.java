@@ -644,6 +644,13 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	@SafeVarargs
+	// The following "varargs" suppression is necessary for javac from OpenJDK
+	// (1.8.0_60-b27); however, Eclipse warns that it's unnecessary. See the following
+	// Eclipse issues for details.
+	//
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=344783
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=349669#c10
+	// @SuppressWarnings("varargs")
 	private static <T> T[] asArray(T... arr) {
 		return arr;
 	}

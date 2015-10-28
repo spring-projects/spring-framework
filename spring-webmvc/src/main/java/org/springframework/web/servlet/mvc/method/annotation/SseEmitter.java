@@ -117,7 +117,7 @@ public class SseEmitter extends ResponseBodyEmitter {
 	 * @throws IOException raised when an I/O error occurs
 	 */
 	public void send(SseEventBuilder builder) throws IOException {
-		Set<DataWithMediaType> dataToSend = ((SseEventBuilderImpl) builder).build();
+		Set<DataWithMediaType> dataToSend = builder.build();
 		synchronized (this) {
 			for (DataWithMediaType entry : dataToSend) {
 				super.send(entry.getData(), entry.getMediaType());
@@ -165,6 +165,13 @@ public class SseEmitter extends ResponseBodyEmitter {
 		 * Add an SSE "data" line.
 		 */
 		SseEventBuilder data(Object object, MediaType mediaType);
+
+		/**
+		 * Return one or more Object-MediaType  pairs to write via
+		 * {@link #send(Object, MediaType)}.
+		 * @since 4.2.3
+		 */
+		Set<DataWithMediaType> build();
 	}
 
 
@@ -223,7 +230,8 @@ public class SseEmitter extends ResponseBodyEmitter {
 			return this;
 		}
 
-		Set<DataWithMediaType> build() {
+		@Override
+		public Set<DataWithMediaType> build() {
 			if ((this.sb == null || this.sb.length() == 0) && this.dataToSend.isEmpty()) {
 				return Collections.<DataWithMediaType>emptySet();
 			}

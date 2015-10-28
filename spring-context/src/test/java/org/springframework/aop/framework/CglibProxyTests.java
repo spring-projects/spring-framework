@@ -21,7 +21,6 @@ import java.io.Serializable;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.junit.Test;
-
 import test.mixin.LockMixinAdvisor;
 
 import org.springframework.aop.ClassFilter;
@@ -395,7 +394,7 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 	public void testVarargsWithEnumArray() throws Exception {
 		ProxyFactory proxyFactory = new ProxyFactory(new MyBean());
 		MyBean proxy = (MyBean) proxyFactory.getProxy();
-		assertTrue(proxy.doWithVarargs(MyEnum.A, MyEnum.B));
+		assertTrue(proxy.doWithVarargs(MyEnum.A, MyOtherEnum.C));
 	}
 
 
@@ -429,6 +428,12 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 	public enum MyEnum implements MyInterface {
 
 		A, B;
+	}
+
+
+	public enum MyOtherEnum implements MyInterface {
+
+		C, D;
 	}
 
 

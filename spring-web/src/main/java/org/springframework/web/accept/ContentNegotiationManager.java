@@ -120,6 +120,16 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy,
 		return new ArrayList<String>(result);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>At startup this method returns extensions explicitly registered with
+	 * either {@link PathExtensionContentNegotiationStrategy} or
+	 * {@link ParameterContentNegotiationStrategy}. At runtime if there is a
+	 * "path extension" strategy and its
+	 * {@link PathExtensionContentNegotiationStrategy#setUseJaf(boolean)
+	 * useJaf} property is set to "true", the list of extensions may
+	 * increase as file extensions are resolved via JAF and cached.
+	 */
 	@Override
 	public List<String> getAllFileExtensions() {
 		Set<String> result = new LinkedHashSet<String>();

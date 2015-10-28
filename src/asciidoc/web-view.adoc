@@ -233,7 +233,7 @@ inline properties.
 ----
 
 Refer to the
-{javadoc-baseurl}/org/springframework/ui/velocity/VelocityEngineFactory.html[API
+{api-spring-framework}/ui/velocity/VelocityEngineFactory.html[API
 documentation] for Spring configuration of Velocity, or the Velocity documentation for
 examples and definitions of the `'velocity.properties'` file itself.
 

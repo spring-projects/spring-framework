@@ -19,7 +19,7 @@ As of Spring Framework 4.2, CORS is supported out of the box. CORS requests
 (https://github.com/spring-projects/spring-framework/blob/master/spring-webmvc/src/main/java/org/springframework/web/servlet/FrameworkServlet.java#L906[including preflight ones with an `OPTIONS` method])
 are automatically dispatched to the various registered ++HandlerMapping++s. They handle
 CORS preflight requests and intercept CORS simple and actual requests thanks to a
-http://docs.spring.io/spring/docs/4.2.x/javadoc-api/org/springframework/web/cors/CorsProcessor.html[CorsProcessor]
+{api-spring-framework}/web/cors/CorsProcessor.html[CorsProcessor]
 implementation (https://github.com/spring-projects/spring-framework/blob/master/spring-web/src/main/java/org/springframework/web/cors/DefaultCorsProcessor.java[DefaultCorsProcessor]
 by default) in order to add the relevant CORS response headers (like `Access-Control-Allow-Origin`)
 based on the CORS configuration you have provided.
@@ -34,7 +34,7 @@ Since CORS requests are automatically dispatched, you *do not need* to change th
 == Controller method CORS configuration
 
 You can add an
-http://docs.spring.io/spring/docs/4.2.x/javadoc-api/org/springframework/web/bind/annotation/CrossOrigin.html[`@CrossOrigin`]
+{api-spring-framework}/web/bind/annotation/CrossOrigin.html[`@CrossOrigin`]
 annotation to your `@RequestMapping` annotated handler method in order to enable CORS on
 it. By default `@CrossOrigin` allows all origins and the HTTP methods specified in the
 `@RequestMapping` annotation:
@@ -191,16 +191,16 @@ It is also possible to declare several CORS mappings with customized properties:
 
 == Advanced Customization
 
-http://docs.spring.io/spring/docs/4.2.x/javadoc-api/org/springframework/web/cors/CorsConfiguration.html[CorsConfiguration]
+{api-spring-framework}/web/cors/CorsConfiguration.html[CorsConfiguration]
 allows you to specify how the CORS requests should be processed: allowed origins, headers, methods, etc.
 It can be provided in various ways:
 
- * http://docs.spring.io/spring/docs/4.2.x/javadoc-api/org/springframework/web/servlet/handler/AbstractHandlerMapping.html#setCorsConfiguration-java.util.Map-[`AbstractHandlerMapping#setCorsConfiguration()`]
-   allows to specify a `Map` with several http://docs.spring.io/spring/docs/4.2.x/javadoc-api/org/springframework/web/cors/CorsConfiguration.html[CorsConfiguration]
+ * {api-spring-framework}/web/servlet/handler/AbstractHandlerMapping.html#setCorsConfiguration-java.util.Map-[`AbstractHandlerMapping#setCorsConfiguration()`]
+   allows to specify a `Map` with several {api-spring-framework}/web/cors/CorsConfiguration.html[CorsConfiguration]
    instances mapped to path patterns like `/api/**`.
  * Subclasses can provide their own `CorsConfiguration` by overriding the
    `AbstractHandlerMapping#getCorsConfiguration(Object, HttpServletRequest)` method.
- * Handlers can implement the http://docs.spring.io/spring/docs/4.2.x/javadoc-api/org/springframework/web/cors/CorsConfigurationSource.html[`CorsConfigurationSource`]
+ * Handlers can implement the {api-spring-framework}/web/cors/CorsConfigurationSource.html[`CorsConfigurationSource`]
    interface (like https://github.com/spring-projects/spring-framework/blob/master/spring-webmvc/src/main/java/org/springframework/web/servlet/resource/ResourceHttpRequestHandler.java[`ResourceHttpRequestHandler`]
-   now does) in order to provide a http://docs.spring.io/spring/docs/4.2.x/javadoc-api/org/springframework/web/cors/CorsConfiguration.html[CorsConfiguration]
+   now does) in order to provide a {api-spring-framework}/web/cors/CorsConfiguration.html[CorsConfiguration]
    instance for each request.

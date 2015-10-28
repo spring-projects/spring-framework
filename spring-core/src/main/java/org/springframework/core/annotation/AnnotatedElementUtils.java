@@ -101,10 +101,8 @@ public class AnnotatedElementUtils {
 	 * Get the fully qualified class names of all meta-annotation
 	 * types <em>present</em> on the annotation (of the specified
 	 * {@code annotationType}) on the supplied {@link AnnotatedElement}.
-	 *
 	 * <p>This method follows <em>get semantics</em> as described in the
 	 * {@linkplain AnnotatedElementUtils class-level Javadoc}.
-	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the annotation type on which to find
 	 * meta-annotations; never {@code null}
@@ -123,10 +121,8 @@ public class AnnotatedElementUtils {
 	 * Get the fully qualified class names of all meta-annotation
 	 * types <em>present</em> on the annotation (of the specified
 	 * {@code annotationName}) on the supplied {@link AnnotatedElement}.
-	 *
 	 * <p>This method follows <em>get semantics</em> as described in the
 	 * {@linkplain AnnotatedElementUtils class-level Javadoc}.
-	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationName the fully qualified class name of the annotation
 	 * type on which to find meta-annotations; never {@code null} or empty
@@ -137,7 +133,7 @@ public class AnnotatedElementUtils {
 	 */
 	public static Set<String> getMetaAnnotationTypes(AnnotatedElement element, String annotationName) {
 		Assert.notNull(element, "AnnotatedElement must not be null");
-		Assert.hasText(annotationName, "annotationName must not be null or empty");
+		Assert.hasLength(annotationName, "annotationName must not be null or empty");
 
 		final Set<String> types = new LinkedHashSet<String>();
 
@@ -159,17 +155,15 @@ public class AnnotatedElementUtils {
 			throw new IllegalStateException("Failed to introspect annotations on " + element, ex);
 		}
 
-		return (types.isEmpty() ? null : types);
+		return (!types.isEmpty() ? types : null);
 	}
 
 	/**
 	 * Determine if the supplied {@link AnnotatedElement} is annotated with
 	 * a <em>composed annotation</em> that is meta-annotated with an
 	 * annotation of the specified {@code annotationName}.
-	 *
 	 * <p>This method follows <em>get semantics</em> as described in the
 	 * {@linkplain AnnotatedElementUtils class-level Javadoc}.
-	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationName the fully qualified class name of the meta-annotation
 	 * type to find; never {@code null} or empty
@@ -178,13 +172,13 @@ public class AnnotatedElementUtils {
 	 */
 	public static boolean hasMetaAnnotationTypes(AnnotatedElement element, final String annotationName) {
 		Assert.notNull(element, "AnnotatedElement must not be null");
-		Assert.hasText(annotationName, "annotationName must not be null or empty");
+		Assert.hasLength(annotationName, "annotationName must not be null or empty");
 
 		return Boolean.TRUE.equals(searchWithGetSemantics(element, annotationName, new SimpleAnnotationProcessor<Boolean>() {
 			@Override
 			public Boolean process(AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
 				boolean found = annotation.annotationType().getName().equals(annotationName);
-				return ((found && (metaDepth > 0)) ? Boolean.TRUE : CONTINUE);
+				return (found && metaDepth > 0 ? Boolean.TRUE : CONTINUE);
 			}
 		}));
 	}
@@ -193,10 +187,8 @@ public class AnnotatedElementUtils {
 	 * Determine if an annotation of the specified {@code annotationName}
 	 * is <em>present</em> on the supplied {@link AnnotatedElement} or
 	 * within the annotation hierarchy <em>above</em> the specified element.
-	 *
 	 * <p>If this method returns {@code true}, then {@link #getMergedAnnotationAttributes}
 	 * will return a non-null value.
-	 *
 	 * <p>This method follows <em>get semantics</em> as described in the
 	 * {@linkplain AnnotatedElementUtils class-level Javadoc}.
 	 *
@@ -207,7 +199,7 @@ public class AnnotatedElementUtils {
 	 */
 	public static boolean isAnnotated(AnnotatedElement element, final String annotationName) {
 		Assert.notNull(element, "AnnotatedElement must not be null");
-		Assert.hasText(annotationName, "annotationName must not be null or empty");
+		Assert.hasLength(annotationName, "annotationName must not be null or empty");
 
 		return Boolean.TRUE.equals(searchWithGetSemantics(element, annotationName, new SimpleAnnotationProcessor<Boolean>() {
 			@Override
@@ -224,13 +216,10 @@ public class AnnotatedElementUtils {
 	 * merge that annotation's attributes with <em>matching</em> attributes from
 	 * annotations in lower levels of the annotation hierarchy, and synthesize
 	 * the result back into an annotation of the specified {@code annotationType}.
-	 *
 	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both
 	 * within a single annotation and within the annotation hierarchy.
-	 *
 	 * <p>This method delegates to {@link #getMergedAnnotationAttributes(AnnotatedElement, Class)}
 	 * and {@link AnnotationUtils#synthesizeAnnotation(Map, Class, AnnotatedElement)}.
-	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the annotation type to find; never {@code null}
 	 * @return the merged, synthesized {@code Annotation}, or {@code null} if not found
@@ -249,12 +238,9 @@ public class AnnotatedElementUtils {
 	 * the annotation hierarchy <em>above</em> the supplied {@code element} and
 	 * merge that annotation's attributes with <em>matching</em> attributes from
 	 * annotations in lower levels of the annotation hierarchy.
-	 *
 	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both
 	 * within a single annotation and within the annotation hierarchy.
-	 *
 	 * <p>This method delegates to {@link #getMergedAnnotationAttributes(AnnotatedElement, String)}.
-	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the annotation type to find; never {@code null}
 	 * @return the merged {@code AnnotationAttributes}, or {@code null} if not found
@@ -282,13 +268,10 @@ public class AnnotatedElementUtils {
 	 * the annotation hierarchy <em>above</em> the supplied {@code element} and
 	 * merge that annotation's attributes with <em>matching</em> attributes from
 	 * annotations in lower levels of the annotation hierarchy.
-	 *
 	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both
 	 * within a single annotation and within the annotation hierarchy.
-	 *
 	 * <p>This method delegates to {@link #getMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)},
 	 * supplying {@code false} for {@code classValuesAsString} and {@code nestedAnnotationsAsMap}.
-	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationName the fully qualified class name of the annotation
 	 * type to find; never {@code null} or empty
@@ -310,6 +293,7 @@ public class AnnotatedElementUtils {
 	@Deprecated
 	public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement element, String annotationName,
 			boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
+
 		return getMergedAnnotationAttributes(element, annotationName, classValuesAsString, nestedAnnotationsAsMap);
 	}
 
@@ -318,21 +302,17 @@ public class AnnotatedElementUtils {
 	 * the annotation hierarchy <em>above</em> the supplied {@code element} and
 	 * merge that annotation's attributes with <em>matching</em> attributes from
 	 * annotations in lower levels of the annotation hierarchy.
-	 *
 	 * <p>Attributes from lower levels in the annotation hierarchy override
 	 * attributes of the same name from higher levels, and
 	 * {@link AliasFor @AliasFor} semantics are fully supported, both
 	 * within a single annotation and within the annotation hierarchy.
-	 *
 	 * <p>In contrast to {@link #getAllAnnotationAttributes}, the search
 	 * algorithm used by this method will stop searching the annotation
 	 * hierarchy once the first annotation of the specified
 	 * {@code annotationName} has been found. As a consequence, additional
 	 * annotations of the specified {@code annotationName} will be ignored.
-	 *
 	 * <p>This method follows <em>get semantics</em> as described in the
 	 * {@linkplain AnnotatedElementUtils class-level Javadoc}.
-	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationName the fully qualified class name of the annotation
 	 * type to find; never {@code null} or empty
@@ -352,9 +332,8 @@ public class AnnotatedElementUtils {
 			boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
 
 		AnnotationAttributes attributes = searchWithGetSemantics(element, annotationName,
-			new MergedAnnotationAttributesProcessor(annotationName, classValuesAsString, nestedAnnotationsAsMap));
-		AnnotationUtils.postProcessAnnotationAttributes(element, attributes, classValuesAsString,
-			nestedAnnotationsAsMap);
+				new MergedAnnotationAttributesProcessor(annotationName, classValuesAsString, nestedAnnotationsAsMap));
+		AnnotationUtils.postProcessAnnotationAttributes(element, attributes, classValuesAsString, nestedAnnotationsAsMap);
 		return attributes;
 	}
 
@@ -364,12 +343,9 @@ public class AnnotatedElementUtils {
 	 * merge that annotation's attributes with <em>matching</em> attributes from
 	 * annotations in lower levels of the annotation hierarchy, and synthesize
 	 * the result back into an annotation of the specified {@code annotationType}.
-	 *
 	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both
 	 * within a single annotation and within the annotation hierarchy.
-	 *
 	 * <p>This method delegates to {@link #findMergedAnnotation(AnnotatedElement, String)}.
-	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationType the annotation type to find; never {@code null}
 	 * @return the merged, synthesized {@code Annotation}, or {@code null} if not found
@@ -389,14 +365,11 @@ public class AnnotatedElementUtils {
 	 * merge that annotation's attributes with <em>matching</em> attributes from
 	 * annotations in lower levels of the annotation hierarchy, and synthesize
 	 * the result back into an annotation of the specified {@code annotationName}.
-	 *
 	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both
 	 * within a single annotation and within the annotation hierarchy.
-	 *
 	 * <p>This method delegates to {@link #findMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)}
 	 * (supplying {@code false} for {@code classValuesAsString} and {@code nestedAnnotationsAsMap})
 	 * and {@link AnnotationUtils#synthesizeAnnotation(Map, Class, AnnotatedElement)}.
-	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationName the fully qualified class name of the annotation
 	 * type to find; never {@code null} or empty
@@ -409,8 +382,8 @@ public class AnnotatedElementUtils {
 	@SuppressWarnings("unchecked")
 	public static <A extends Annotation> A findMergedAnnotation(AnnotatedElement element, String annotationName) {
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(element, annotationName, false, false);
-		return ((attributes != null) ? AnnotationUtils.synthesizeAnnotation(attributes,
-			(Class<A>) attributes.annotationType(), element) : null);
+		return (attributes != null ?
+				AnnotationUtils.synthesizeAnnotation(attributes, (Class<A>) attributes.annotationType(), element) : null);
 	}
 
 	/**
@@ -418,21 +391,17 @@ public class AnnotatedElementUtils {
 	 * the annotation hierarchy <em>above</em> the supplied {@code element} and
 	 * merge that annotation's attributes with <em>matching</em> attributes from
 	 * annotations in lower levels of the annotation hierarchy.
-	 *
 	 * <p>Attributes from lower levels in the annotation hierarchy override
 	 * attributes of the same name from higher levels, and
 	 * {@link AliasFor @AliasFor} semantics are fully supported, both
 	 * within a single annotation and within the annotation hierarchy.
-	 *
 	 * <p>In contrast to {@link #getAllAnnotationAttributes}, the search
 	 * algorithm used by this method will stop searching the annotation
 	 * hierarchy once the first annotation of the specified
 	 * {@code annotationName} has been found. As a consequence, additional
 	 * annotations of the specified {@code annotationName} will be ignored.
-	 *
 	 * <p>This method follows <em>find semantics</em> as described in the
 	 * {@linkplain AnnotatedElementUtils class-level Javadoc}.
-	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationName the fully qualified class name of the annotation
 	 * type to find; never {@code null} or empty
@@ -451,9 +420,8 @@ public class AnnotatedElementUtils {
 			boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
 
 		AnnotationAttributes attributes = searchWithFindSemantics(element, annotationName,
-			new MergedAnnotationAttributesProcessor(annotationName, classValuesAsString, nestedAnnotationsAsMap));
-		AnnotationUtils.postProcessAnnotationAttributes(element, attributes, classValuesAsString,
-			nestedAnnotationsAsMap);
+				new MergedAnnotationAttributesProcessor(annotationName, classValuesAsString, nestedAnnotationsAsMap));
+		AnnotationUtils.postProcessAnnotationAttributes(element, attributes, classValuesAsString, nestedAnnotationsAsMap);
 		return attributes;
 	}
 
@@ -462,13 +430,10 @@ public class AnnotatedElementUtils {
 	 * the specified {@code annotationName} in the annotation hierarchy above
 	 * the supplied {@link AnnotatedElement} and store the results in a
 	 * {@link MultiValueMap}.
-	 *
 	 * <p>Note: in contrast to {@link #getMergedAnnotationAttributes(AnnotatedElement, String)},
 	 * this method does <em>not</em> support attribute overrides.
-	 *
 	 * <p>This method follows <em>get semantics</em> as described in the
 	 * {@linkplain AnnotatedElementUtils class-level Javadoc}.
-	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationName the fully qualified class name of the annotation
 	 * type to find; never {@code null} or empty
@@ -486,13 +451,10 @@ public class AnnotatedElementUtils {
 	 * the specified {@code annotationName} in the annotation hierarchy above
 	 * the supplied {@link AnnotatedElement} and store the results in a
 	 * {@link MultiValueMap}.
-	 *
 	 * <p>Note: in contrast to {@link #getMergedAnnotationAttributes(AnnotatedElement, String)},
 	 * this method does <em>not</em> support attribute overrides.
-	 *
 	 * <p>This method follows <em>get semantics</em> as described in the
 	 * {@linkplain AnnotatedElementUtils class-level Javadoc}.
-	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationName the fully qualified class name of the annotation
 	 * type to find; never {@code null} or empty
@@ -511,7 +473,6 @@ public class AnnotatedElementUtils {
 		final MultiValueMap<String, Object> attributesMap = new LinkedMultiValueMap<String, Object>();
 
 		searchWithGetSemantics(element, annotationName, new SimpleAnnotationProcessor<Void>() {
-
 			@Override
 			public Void process(AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
 				boolean found = annotation.annotationType().getName().equals(annotationName);
@@ -522,19 +483,17 @@ public class AnnotatedElementUtils {
 						attributesMap.add(entry.getKey(), entry.getValue());
 					}
 				}
-
 				// Continue searching...
 				return null;
 			}
 		});
 
-		return (attributesMap.isEmpty() ? null : attributesMap);
+		return (!attributesMap.isEmpty() ? attributesMap : null);
 	}
 
 	/**
 	 * Search for annotations of the specified {@code annotationName} on
 	 * the specified {@code element}, following <em>get semantics</em>.
-	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationName the fully qualified class name of the annotation
 	 * type to find; never {@code null} or empty
@@ -555,11 +514,8 @@ public class AnnotatedElementUtils {
 	 * Perform the search algorithm for the {@link #searchWithGetSemantics}
 	 * method, avoiding endless recursion by tracking which annotated elements
 	 * have already been <em>visited</em>.
-	 *
 	 * <p>The {@code metaDepth} parameter is explained in the
-	 * {@link Processor#process process()} method of the {@link Processor}
-	 * API.
-	 *
+	 * {@link Processor#process process()} method of the {@link Processor} API.
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationName the fully qualified class name of the annotation
 	 * type to find; never {@code null} or empty
@@ -572,11 +528,10 @@ public class AnnotatedElementUtils {
 			Processor<T> processor, Set<AnnotatedElement> visited, int metaDepth) {
 
 		Assert.notNull(element, "AnnotatedElement must not be null");
-		Assert.hasText(annotationName, "annotationName must not be null or empty");
+		Assert.hasLength(annotationName, "annotationName must not be null or empty");
 
 		if (visited.add(element)) {
 			try {
-
 				// Start searching within locally declared annotations
 				List<Annotation> declaredAnnotations = Arrays.asList(element.getDeclaredAnnotations());
 				T result = searchWithGetSemanticsInAnnotations(element, declaredAnnotations, annotationName, processor,
@@ -593,8 +548,8 @@ public class AnnotatedElementUtils {
 				}
 
 				// Continue searching within inherited annotations
-				result = searchWithGetSemanticsInAnnotations(element, inheritedAnnotations, annotationName, processor,
-					visited, metaDepth);
+				result = searchWithGetSemanticsInAnnotations(
+						element, inheritedAnnotations, annotationName, processor, visited, metaDepth);
 				if (result != null) {
 					return result;
 				}
@@ -611,15 +566,11 @@ public class AnnotatedElementUtils {
 	 * This method is invoked by
 	 * {@link #searchWithGetSemantics(AnnotatedElement, String, Processor, Set, int)}
 	 * to perform the actual search within the supplied list of annotations.
-	 *
 	 * <p>This method should be invoked first with locally declared annotations
 	 * and then subsequently with inherited annotations, thereby allowing
 	 * local annotations to take precedence over inherited annotations.
-	 *
 	 * <p>The {@code metaDepth} parameter is explained in the
-	 * {@link Processor#process process()} method of the {@link Processor}
-	 * API.
-	 *
+	 * {@link Processor#process process()} method of the {@link Processor} API.
 	 * @param annotatedElement the element that is annotated with the supplied
 	 * annotations, used for contextual logging; may be {@code null} if unknown
 	 * @param annotations the annotations to search in; never {@code null}
@@ -636,8 +587,8 @@ public class AnnotatedElementUtils {
 
 		// Search in annotations
 		for (Annotation annotation : annotations) {
-			if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)
-					&& (annotation.annotationType().getName().equals(annotationName) || metaDepth > 0)) {
+			if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation) &&
+					(annotation.annotationType().getName().equals(annotationName) || metaDepth > 0)) {
 				T result = processor.process(annotatedElement, annotation, metaDepth);
 				if (result != null) {
 					return result;
@@ -648,8 +599,8 @@ public class AnnotatedElementUtils {
 		// Recursively search in meta-annotations
 		for (Annotation annotation : annotations) {
 			if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
-				T result = searchWithGetSemantics(annotation.annotationType(), annotationName, processor, visited,
-					metaDepth + 1);
+				T result = searchWithGetSemantics(
+						annotation.annotationType(), annotationName, processor, visited, metaDepth + 1);
 				if (result != null) {
 					processor.postProcess(annotatedElement, annotation, result);
 					return result;
@@ -663,7 +614,6 @@ public class AnnotatedElementUtils {
 	/**
 	 * Search for annotations of the specified {@code annotationName} on
 	 * the specified {@code element}, following <em>find semantics</em>.
-	 *
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationName the fully qualified class name of the annotation
 	 * type to find; never {@code null} or empty
@@ -685,11 +635,8 @@ public class AnnotatedElementUtils {
 	 * Perform the search algorithm for the {@link #searchWithFindSemantics}
 	 * method, avoiding endless recursion by tracking which annotated elements
 	 * have already been <em>visited</em>.
-	 *
 	 * <p>The {@code metaDepth} parameter is explained in the
-	 * {@link Processor#process process()} method of the {@link Processor}
-	 * API.
-	 *
+	 * {@link Processor#process process()} method of the {@link Processor} API.
 	 * @param element the annotated element; never {@code null}
 	 * @param annotationName the fully qualified class name of the annotation
 	 * type to find; never {@code null} or empty
@@ -703,7 +650,7 @@ public class AnnotatedElementUtils {
 			Processor<T> processor, Set<AnnotatedElement> visited, int metaDepth) {
 
 		Assert.notNull(element, "AnnotatedElement must not be null");
-		Assert.hasText(annotationName, "annotationName must not be null or empty");
+		Assert.hasLength(annotationName, "annotationName must not be null or empty");
 
 		if (visited.add(element)) {
 			try {
@@ -759,11 +706,10 @@ public class AnnotatedElementUtils {
 						}
 
 						try {
-							Method equivalentMethod = clazz.getDeclaredMethod(method.getName(),
-								method.getParameterTypes());
+							Method equivalentMethod = clazz.getDeclaredMethod(method.getName(), method.getParameterTypes());
 							Method resolvedEquivalentMethod = BridgeMethodResolver.findBridgedMethod(equivalentMethod);
-							result = searchWithFindSemantics(resolvedEquivalentMethod, annotationName, processor,
-								visited, metaDepth);
+							result = searchWithFindSemantics(
+									resolvedEquivalentMethod, annotationName, processor, visited, metaDepth);
 							if (result != null) {
 								return result;
 							}
@@ -809,9 +755,6 @@ public class AnnotatedElementUtils {
 		return null;
 	}
 
-	/**
-	 * @since 4.2
-	 */
 	private static <T> T searchOnInterfaces(Method method, String annotationName, Processor<T> processor,
 			Set<AnnotatedElement> visited, int metaDepth, Class<?>[] ifcs) {
 
@@ -833,9 +776,9 @@ public class AnnotatedElementUtils {
 		return null;
 	}
 
+
 	/**
 	 * Callback interface that is used to process annotations during a search.
-	 *
 	 * <p>Depending on the use case, a processor may choose to
 	 * {@linkplain #process} a single target annotation, multiple target
 	 * annotations, or all annotations discovered by the currently executing
@@ -846,21 +789,18 @@ public class AnnotatedElementUtils {
 	 * whereas, returning {@code null} from the {@link #process} method
 	 * instructs the search algorithm to continue searching for additional
 	 * annotations.
-	 *
 	 * <p>Processors can optionally {@linkplain #postProcess post-process}
 	 * the result of the {@link #process} method as the search algorithm
 	 * goes back down the annotation hierarchy from an invocation of
 	 * {@link #process} that returned a non-null value down to the
 	 * {@link AnnotatedElement} that was supplied as the starting point to
 	 * the search algorithm.
-	 *
 	 * @param <T> the type of result returned by the processor
 	 */
-	private static interface Processor<T> {
+	private interface Processor<T> {
 
 		/**
 		 * Process the supplied annotation.
-		 *
 		 * <p>Depending on the use case, the supplied annotation may be an
 		 * actual target annotation that has been found by the search
 		 * algorithm, or it may be some other annotation within the
@@ -868,14 +808,12 @@ public class AnnotatedElementUtils {
 		 * should have a value greater than {@code 0}. In any case, it is
 		 * up to concrete implementations of this method to decide what to
 		 * do with the supplied annotation.
-		 *
 		 * <p>The {@code metaDepth} parameter represents the depth of the
 		 * annotation relative to the first annotated element in the
 		 * annotation hierarchy. For example, an annotation that is
 		 * <em>present</em> on a non-annotation element will have a depth
 		 * of 0; a meta-annotation will have a depth of 1; and a
 		 * meta-meta-annotation will have a depth of 2; etc.
-		 *
 		 * @param annotatedElement the element that is annotated with the
 		 * supplied annotation, used for contextual logging; may be
 		 * {@code null} if unknown
@@ -888,12 +826,10 @@ public class AnnotatedElementUtils {
 
 		/**
 		 * Post-process the result returned by the {@link #process} method.
-		 *
 		 * <p>The {@code annotation} supplied to this method is an annotation
 		 * that is present in the annotation hierarchy, between the initial
 		 * {@link AnnotatedElement} and an invocation of {@link #process}
 		 * that returned a non-null value.
-		 *
 		 * @param annotatedElement the element that is annotated with the
 		 * supplied annotation, used for contextual logging; may be
 		 * {@code null} if unknown
@@ -903,6 +839,7 @@ public class AnnotatedElementUtils {
 		void postProcess(AnnotatedElement annotatedElement, Annotation annotation, T result);
 	}
 
+
 	/**
 	 * {@link Processor} that {@linkplain #process processes} annotations
 	 * but does not {@linkplain #postProcess post-process} results.
@@ -910,14 +847,12 @@ public class AnnotatedElementUtils {
 	 */
 	private abstract static class SimpleAnnotationProcessor<T> implements Processor<T> {
 
-		/**
-		 * <em>No-op</em>.
-		 */
 		@Override
 		public final void postProcess(AnnotatedElement annotatedElement, Annotation annotation, T result) {
-			/* no-op */
+			// no-op
 		}
 	}
+
 
 	/**
 	 * {@link Processor} that gets the {@code AnnotationAttributes} for the
@@ -931,12 +866,14 @@ public class AnnotatedElementUtils {
 	private static class MergedAnnotationAttributesProcessor implements Processor<AnnotationAttributes> {
 
 		private final String annotationName;
-		private final boolean classValuesAsString;
-		private final boolean nestedAnnotationsAsMap;
 
+		private final boolean classValuesAsString;
+
+		private final boolean nestedAnnotationsAsMap;
 
 		MergedAnnotationAttributesProcessor(String annotationName, boolean classValuesAsString,
 				boolean nestedAnnotationsAsMap) {
+
 			this.annotationName = annotationName;
 			this.classValuesAsString = classValuesAsString;
 			this.nestedAnnotationsAsMap = nestedAnnotationsAsMap;
@@ -946,7 +883,7 @@ public class AnnotatedElementUtils {
 		public AnnotationAttributes process(AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
 			boolean found = annotation.annotationType().getName().equals(this.annotationName);
 			return (found ? AnnotationUtils.getAnnotationAttributes(annotatedElement, annotation,
-				this.classValuesAsString, this.nestedAnnotationsAsMap, true) : null);
+					this.classValuesAsString, this.nestedAnnotationsAsMap, true) : null);
 		}
 
 		@Override
@@ -975,11 +912,10 @@ public class AnnotatedElementUtils {
 				AnnotationAttributes attributes, String sourceAttributeName, String targetAttributeName) {
 
 			Object value = AnnotationUtils.getValue(annotation, sourceAttributeName);
-			Object adaptedValue = AnnotationUtils.adaptValue(element, value, this.classValuesAsString,
-				this.nestedAnnotationsAsMap);
+			Object adaptedValue = AnnotationUtils.adaptValue(
+					element, value, this.classValuesAsString, this.nestedAnnotationsAsMap);
 			attributes.put(targetAttributeName, adaptedValue);
 		}
-
 	}
 
 }

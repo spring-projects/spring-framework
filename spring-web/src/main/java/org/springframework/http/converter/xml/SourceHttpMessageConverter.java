@@ -289,7 +289,7 @@ public class SourceHttpMessageConverter<T extends Source> extends AbstractHttpMe
 	private static final XMLResolver NO_OP_XML_RESOLVER = new XMLResolver() {
 		@Override
 		public Object resolveEntity(String publicID, String systemID, String base, String ns) {
-			return new ByteArrayInputStream(new byte[0]);
+			return StreamUtils.emptyInput();
 		}
 	};
 
