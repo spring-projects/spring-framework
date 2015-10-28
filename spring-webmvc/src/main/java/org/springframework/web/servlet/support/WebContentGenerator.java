@@ -38,11 +38,11 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
  * {@link org.springframework.web.servlet.HandlerAdapter}.
  *
  * <p>Supports HTTP cache control options. The usage of corresponding HTTP
- * headers can be controlled via the {@link #setCacheSeconds "cacheSeconds"
+ * headers can be controlled via the {@link #setCacheSeconds "cacheSeconds"}
  * and {@link #setCacheControl "cacheControl"} properties.
  *
  * <p><b>NOTE:</b> As of Spring 4.2, this generator's default behavior changed when
- * using only {@link #setCacheSeconds)}, sending HTTP response headers that are in line
+ * using only {@link #setCacheSeconds}, sending HTTP response headers that are in line
  * with current browsers and proxies implementations (i.e. no HTTP 1.0 headers anymore)
  * Reverting to the previous behavior can be easily done by using one of the newly
  * deprecated methods {@link #setUseExpiresHeader}, {@link #setUseCacheControlHeader},
