@@ -8336,13 +8336,14 @@ The following table lists features provided by the `BeanFactory` and
 | Yes
 |===
 
-To explicitly register a bean post-processor with a `BeanFactory` implementation, you
-must write code like this:
+To explicitly register a bean post-processor with a `BeanFactory` implementation,
+you need to write code like this:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	ConfigurableBeanFactory factory = new XmlBeanFactory(...);
+	DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+	// populate the factory with bean definitions
 
 	// now register any needed BeanPostProcessor instances
 	MyBeanPostProcessor postProcessor = new MyBeanPostProcessor();
@@ -8357,7 +8358,9 @@ implementation, you must write code like this:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	XmlBeanFactory factory = new XmlBeanFactory(new FileSystemResource("beans.xml"));
+	DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+	XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
+	reader.loadBeanDefinitions(new FileSystemResource("beans.xml"));
 
 	// bring in some property values from a Properties file
 	PropertyPlaceholderConfigurer cfg = new PropertyPlaceholderConfigurer();
