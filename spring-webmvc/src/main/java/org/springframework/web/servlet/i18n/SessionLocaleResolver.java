@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,14 +32,24 @@ import org.springframework.web.util.WebUtils;
  * accept-header locale.
  *
  * <p>This is most appropriate if the application needs user sessions anyway,
- * that is, when the HttpSession does not have to be created for the locale.
- * The session may optionally contain an associated time zone attribute as well;
- * alternatively, you may specify a default time zone.
+ * i.e. when the {@code HttpSession} does not have to be created just for storing
+ * the user's locale. The session may optionally contain an associated time zone
+ * attribute as well; alternatively, you may specify a default time zone.
  *
  * <p>Custom controllers can override the user's locale and time zone by calling
  * {@code #setLocale(Context)} on the resolver, e.g. responding to a locale change
  * request. As a more convenient alternative, consider using
  * {@link org.springframework.web.servlet.support.RequestContext#changeLocale}.
+ *
+ * <p>In contrast to {@link CookieLocaleResolver}, this strategy stores locally
+ * chosen locale settings in the Servlet container's {@code HttpSession}. As a
+ * consequence, those settings are just temporary for each session and therefore
+ * lost when each session terminates.
+ *
+ * <p>Note that there is no direct relationship with external session management
+ * mechanisms such as the "Spring Session" project. This {@code LocaleResolver}
+ * will simply evaluate and modify corresponding {@code HttpSession} attributes
+ * against the current {@code HttpServletRequest}.
  *
  * @author Juergen Hoeller
  * @since 27.02.2003
