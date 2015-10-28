@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,22 @@ public class ParamTag extends BodyTagSupport {
 
 	private boolean valueSet;
 
-	// tag lifecycle
+
+	/**
+	 * Set the name of the parameter (required).
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	/**
+	 * Set the value of the parameter (optional).
+	 */
+	public void setValue(String value) {
+		this.value = value;
+		this.valueSet = true;
+	}
+
 
 	@Override
 	public int doEndTag() throws JspException {
@@ -50,48 +65,19 @@ public class ParamTag extends BodyTagSupport {
 			param.setValue(this.value);
 		}
 		else if (getBodyContent() != null) {
-			// get the value from the tag body
+			// Get the value from the tag body
 			param.setValue(getBodyContent().getString().trim());
 		}
 
-		// find a param aware ancestor
-		ParamAware paramAwareTag = (ParamAware) findAncestorWithClass(this,
-				ParamAware.class);
+		// Find a param aware ancestor
+		ParamAware paramAwareTag = (ParamAware) findAncestorWithClass(this, ParamAware.class);
 		if (paramAwareTag == null) {
-			throw new JspException(
-					"The param tag must be a descendant of a tag that supports parameters");
+			throw new JspException("The param tag must be a descendant of a tag that supports parameters");
 		}
 
 		paramAwareTag.addParam(param);
 
 		return EVAL_PAGE;
-	}
-
-	// tag attribute accessors
-
-	/**
-	 * Sets the name of the parameter
-	 *
-	 * <p>
-	 * Required
-	 *
-	 * @param name the parameter name
-	 */
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	/**
-	 * Sets the value of the parameter
-	 *
-	 * <p>
-	 * Optional. If not set, the tag's body content is evaluated
-	 *
-	 * @param value the parameter value
-	 */
-	public void setValue(String value) {
-		this.value = value;
-		this.valueSet = true;
 	}
 
 	@Override
