@@ -6227,9 +6227,9 @@ method are automatically enlisted with a destruction callback. If you have a pub
 shuts down, simply add `@Bean(destroyMethod="")` to your bean definition to disable the
 default `(inferred)` mode.
 
-You may want to do that by default for a resource that you acquire via JNDI as its lifecycle
-is managed outside the application. In particular, make sure to always do it for a
-`DataSource` as it is known to be problematic.
+You may want to do that by default for a resource that you acquire via JNDI as its
+lifecycle is managed outside the application. In particular, make sure to always do it
+for a `DataSource` as it is known to be problematic on Java EE application servers.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -6240,6 +6240,12 @@ is managed outside the application. In particular, make sure to always do it for
 	}
 ----
 
+Also, with `@Bean` methods, you will typically choose to use programmatic JNDI lookups:
+either using Spring's `JndiTemplate`/`JndiLocatorDelegate` helpers or straight JNDI
+`InitialContext` usage, but not the `JndiObjectFactoryBean` variant which would force
+you to declare the return type as the `FactoryBean` type instead of the actual target
+type, making it harder to use for cross-reference calls in other `@Bean` methods that
+intend to refer to the provided resource here.
 ====
 
 Of course, in the case of `Foo` above, it would be equally as valid to call the `init()`
@@ -7190,6 +7196,13 @@ can rewrite the `dataSource` configuration as follows:
 	}
 ----
 
+[NOTE]
+====
+As mentioned before, with `@Bean` methods, you will typically choose to use programmatic
+JNDI lookups: either using Spring's `JndiTemplate`/`JndiLocatorDelegate` helpers or the
+straight JNDI `InitialContext` usage shown above, but not the `JndiObjectFactoryBean`
+variant which would force you to declare the return type as the `FactoryBean` type.
+====
 
 `@Profile` can be used as a <<beans-meta-annotations,meta-annotation>> for the purpose
 of creating a custom _composed annotation_. The following example defines a custom
