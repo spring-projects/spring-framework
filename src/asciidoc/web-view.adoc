@@ -67,13 +67,13 @@ The XML counterpart using the MVC namespace is:
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<mvc:annotation-driven />
+	<mvc:annotation-driven/>
 
 	<mvc:view-resolvers>
-		<mvc:groovy />
+		<mvc:groovy/>
 	</mvc:view-resolvers>
 
-	<mvc:groovy-configurer resource-loader-path="/WEB-INF/" />
+	<mvc:groovy-configurer resource-loader-path="/WEB-INF/"/>
 ----
 
 [[view-groovymarkup-example]]
@@ -311,7 +311,7 @@ configured earlier;
 			#springBind( "command.name" )
 			<input type="text"
 				name="${status.expression}"
-				value="$!status.value" /><br>
+				value="$!status.value"/><br>
 			#foreach($error in $status.errorMessages) <b>$error</b> <br> #end
 			<br>
 			...
@@ -326,15 +326,15 @@ configured earlier;
 ----
 	<!-- freemarker macros have to be imported into a namespace. We strongly
 	recommend sticking to 'spring' -->
-	<#import "/spring.ftl" as spring />
+	<#import "/spring.ftl" as spring/>
 	<html>
 		...
 		<form action="" method="POST">
 			Name:
-			<@spring.bind "command.name" />
+			<@spring.bind "command.name"/>
 			<input type="text"
 				name="${spring.status.expression}"
-				value="${spring.status.value?default("")}" /><br>
+				value="${spring.status.value?default("")}"/><br>
 			<#list spring.status.errorMessages as error> <b>${error}</b> <br> </#list>
 			<br>
 			...
@@ -537,7 +537,7 @@ model under the name 'cityMap'.
 ----
 	...
 	Town:
-	<@spring.formRadioButtons "command.address.town", cityMap, "" /><br><br>
+	<@spring.formRadioButtons "command.address.town", cityMap, ""/><br><br>
 ----
 
 This renders a line of radio buttons, one for each value in `cityMap` using the
@@ -622,7 +622,7 @@ In similar fashion, HTML escaping can be specified per field:
 
 	<#assign htmlEscape = true in spring>
 	<#-- next field will use HTML escaping -->
-	<@spring.formInput "command.name" />
+	<@spring.formInput "command.name"/>
 
 	<#assign htmlEscape = false in spring>
 	<#-- all future fields will be bound with HTML escaping off -->
@@ -768,15 +768,15 @@ look like:
 		<table>
 			<tr>
 				<td>First Name:</td>
-				<td><form:input path="firstName" /></td>
+				<td><form:input path="firstName"/></td>
 			</tr>
 			<tr>
 				<td>Last Name:</td>
-				<td><form:input path="lastName" /></td>
+				<td><form:input path="lastName"/></td>
 			</tr>
 			<tr>
 				<td colspan="2">
-					<input type="submit" value="Save Changes" />
+					<input type="submit" value="Save Changes"/>
 				</td>
 			</tr>
 		</table>
@@ -804,7 +804,7 @@ The generated HTML looks like a standard form:
 			</tr>
 			<tr>
 				<td colspan="2">
-					<input type="submit" value="Save Changes" />
+					<input type="submit" value="Save Changes"/>
 				</td>
 			</tr>
 		</table>
@@ -822,15 +822,15 @@ The preceding JSP assumes that the variable name of the form backing object is
 		<table>
 			<tr>
 				<td>First Name:</td>
-				<td><form:input path="firstName" /></td>
+				<td><form:input path="firstName"/></td>
 			</tr>
 			<tr>
 				<td>Last Name:</td>
-				<td><form:input path="lastName" /></td>
+				<td><form:input path="lastName"/></td>
 			</tr>
 			<tr>
 				<td colspan="2">
-					<input type="submit" value="Save Changes" />
+					<input type="submit" value="Save Changes"/>
 				</td>
 			</tr>
 		</table>
@@ -1055,7 +1055,7 @@ This tag renders an HTML 'input' tag with type 'password' using the bound value.
 	<tr>
 		<td>Password:</td>
 		<td>
-			<form:password path="password" />
+			<form:password path="password"/>
 		</td>
 	</tr>
 ----
@@ -1070,7 +1070,7 @@ true, like so.
 	<tr>
 		<td>Password:</td>
 		<td>
-			<form:password path="password" value="^76525bvHGq" showPassword="true" />
+			<form:password path="password" value="^76525bvHGq" showPassword="true"/>
 		</td>
 	</tr>
 ----
@@ -1206,7 +1206,7 @@ happen to be specified as well, the item value property will apply to the map ke
 the item label property will apply to the map value.
 
 
-[[view-jsp-formtaglib-textAreatag]]
+[[view-jsp-formtaglib-textareatag]]
 ==== The textarea tag
 
 This tag renders an HTML 'textarea'.
@@ -1216,8 +1216,8 @@ This tag renders an HTML 'textarea'.
 ----
 	<tr>
 		<td>Notes:</td>
-		<td><form:textarea path="notes" rows="3" cols="20" /></td>
-		<td><form:errors path="notes" /></td>
+		<td><form:textarea path="notes" rows="3" cols="20"/></td>
+		<td><form:errors path="notes"/></td>
 	</tr>
 ----
 
@@ -1231,7 +1231,7 @@ an unbound hidden value, use the HTML `input` tag with type 'hidden'.
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<form:hidden path="house" />
+	<form:hidden path="house"/>
 
 ----
 
@@ -1281,20 +1281,20 @@ The `form.jsp` would look like:
 		<table>
 			<tr>
 				<td>First Name:</td>
-				<td><form:input path="firstName" /></td>
+				<td><form:input path="firstName"/></td>
 				<%-- Show errors for firstName field --%>
-				<td><form:errors path="firstName" /></td>
+				<td><form:errors path="firstName"/></td>
 			</tr>
 
 			<tr>
 				<td>Last Name:</td>
-				<td><form:input path="lastName" /></td>
+				<td><form:input path="lastName"/></td>
 				<%-- Show errors for lastName field --%>
-				<td><form:errors path="lastName" /></td>
+				<td><form:errors path="lastName"/></td>
 			</tr>
 			<tr>
 				<td colspan="3">
-					<input type="submit" value="Save Changes" />
+					<input type="submit" value="Save Changes"/>
 				</td>
 			</tr>
 		</table>
@@ -1324,7 +1324,7 @@ what the HTML would look like:
 			</tr>
 			<tr>
 				<td colspan="3">
-					<input type="submit" value="Save Changes" />
+					<input type="submit" value="Save Changes"/>
 				</td>
 			</tr>
 		</table>
@@ -1345,21 +1345,21 @@ field-specific errors next to the fields:
 [subs="verbatim,quotes"]
 ----
 	<form:form>
-		<form:errors path="*" cssClass="errorBox" />
+		<form:errors path="*" cssClass="errorBox"/>
 		<table>
 			<tr>
 				<td>First Name:</td>
-				<td><form:input path="firstName" /></td>
-				<td><form:errors path="firstName" /></td>
+				<td><form:input path="firstName"/></td>
+				<td><form:errors path="firstName"/></td>
 			</tr>
 			<tr>
 				<td>Last Name:</td>
-				<td><form:input path="lastName" /></td>
-				<td><form:errors path="lastName" /></td>
+				<td><form:input path="lastName"/></td>
+				<td><form:errors path="lastName"/></td>
 			</tr>
 			<tr>
 				<td colspan="3">
-					<input type="submit" value="Save Changes" />
+					<input type="submit" value="Save Changes"/>
 				</td>
 			</tr>
 		</table>
@@ -1387,7 +1387,7 @@ The HTML would look like:
 			</tr>
 			<tr>
 				<td colspan="3">
-					<input type="submit" value="Save Changes" />
+					<input type="submit" value="Save Changes"/>
 				</td>
 			</tr>
 	</form>
@@ -1543,14 +1543,14 @@ The XML counterpart using MVC namespace is:
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<mvc:annotation-driven />
+	<mvc:annotation-driven/>
 
 	<mvc:view-resolvers>
-		<mvc:script-template />
+		<mvc:script-template/>
 	</mvc:view-resolvers>
 
 	<mvc:script-template-configurer engine-name="nashorn" render-object="Mustache" render-function="render">
-		<mvc:script location="mustache.js" />
+		<mvc:script location="mustache.js"/>
 	</mvc:script-template-configurer>
 ----
 
