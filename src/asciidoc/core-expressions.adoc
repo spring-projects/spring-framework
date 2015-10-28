@@ -1113,7 +1113,7 @@ Instead you can use the Elvis operator, named for the resemblance to Elvis' hair
 ----
 	ExpressionParser parser = new SpelExpressionParser();
 
-	String name = parser.parseExpression("null?:'Unknown'").getValue(String.class);
+	String name = parser.parseExpression("name?:'Unknown'").getValue(String.class);
 
 	System.out.println(name); // 'Unknown'
 ----
