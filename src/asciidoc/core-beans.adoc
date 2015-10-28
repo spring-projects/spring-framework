@@ -2561,18 +2561,33 @@ and it is actually exposed and therefore visible as a `ServletContext` attribute
 [[beans-factory-scopes-other-injection]]
 ==== Scoped beans as dependencies
 
-The Spring IoC container manages not only the instantiation of your objects (beans), but
-also the wiring up of collaborators (or dependencies). If you want to inject (for
-example) an HTTP request scoped bean into another bean, you must inject an AOP proxy in
-place of the scoped bean. That is, you need to inject a proxy object that exposes the
-same public interface as the scoped object but that can also retrieve the real, target
-object from the relevant scope (for example, an HTTP request) and delegate method calls
-onto the real object.
+The Spring IoC container manages not only the instantiation of your objects (beans),
+but also the wiring up of collaborators (or dependencies). If you want to inject (for
+example) an HTTP request scoped bean into another bean of a longer-lived scope, you may
+choose to inject an AOP proxy in place of the scoped bean. That is, you need to inject
+a proxy object that exposes the same public interface as the scoped object but that can
+also retrieve the real target object from the relevant scope (such as an HTTP request)
+and delegate method calls onto the real object.
 
 [NOTE]
 ====
-You __do not__ need to use the `<aop:scoped-proxy/>` in conjunction with beans that are
-scoped as `singletons` or `prototypes`.
+You may also use `<aop:scoped-proxy/>` between beans that are scoped as `singleton`,
+with the reference then going through an intermediate proxy that is serializable
+and therefore able to re-obtain the target singleton bean on deserialization.
+
+When declaring `<aop:scoped-proxy/>` against a bean of scope `prototype`, every method
+call on the shared proxy will lead to the creation of a new target instance which the
+call is then being forwarded to.
+
+Also, scoped proxies are not the only way to access beans from shorter scopes in a
+lifecycle-safe fashion. You may also simply declare your injection point (i.e. the
+constructor/setter argument or autowired field) as `ObjectFactory<MyTargetBean>`,
+allowing for a `getObject()` call to retrieve the current instance on demand every
+time it is needed - without holding on to the instance or storing it separately.
+
+The JSR-330 variant of this is called `Provider`, used with a `Provider<MyTargetBean>`
+declaration and a corresponding `get()` call for every retrieval attempt.
+See <<beans-standard-annotations,here>> for more details on JSR-330 overall.
 ====
 
 The configuration in the following example is only one line, but it is important to
@@ -2654,6 +2669,7 @@ Thus you need the following, correct and complete, configuration when injecting
 	<bean id="userPreferences" class="com.foo.UserPreferences" scope="session">
 		<aop:scoped-proxy/>
 	</bean>
+
 	<bean id="userManager" class="com.foo.UserManager">
 		<property name="userPreferences" ref="userPreferences"/>
 	</bean>
@@ -2687,6 +2703,7 @@ interfaces.
 	<bean id="userPreferences" class="com.foo.DefaultUserPreferences" scope="session">
 		<aop:scoped-proxy proxy-target-class="false"/>
 	</bean>
+
 	<bean id="userManager" class="com.foo.UserManager">
 		<property name="userPreferences" ref="userPreferences"/>
 	</bean>
@@ -4165,8 +4182,8 @@ As expected, you can apply the `@Autowired` annotation to "traditional" setter m
 
 [NOTE]
 ====
-JSR 330's @Inject annotation can be used in place of Spring's `@Autowired` annotation in
-the examples below. See <<beans-standard-annotations,here>> for more details
+JSR 330's `@Inject` annotation can be used in place of Spring's `@Autowired` annotation
+in the examples below. See <<beans-standard-annotations,here>> for more details.
 ====
 
 You can also apply the annotation to methods with arbitrary names and/or multiple
@@ -5673,15 +5690,37 @@ Instead of `@Autowired`, `@javax.inject.Inject` may be used as follows:
 			this.movieFinder = movieFinder;
 		}
 
-		// ...
-
+		public void listMovies() {
+			this.movieFinder.findMovies(...);
+			...
+		}
 	}
 ----
 
-As with `@Autowired`, it is possible to use `@Inject` at the class-level, field-level,
-method-level and constructor-argument level. If you would like to use a qualified name
-for the dependency that should be injected, you should use the `@Named` annotation as
-follows:
+As with `@Autowired`, it is possible to use `@Inject` at the field level, method level
+and constructor-argument level. Furthermore, you may declare your injection point as a
+`Provider`, allowing for on-demand access to beans of shorter scopes or lazy access to
+other beans through a `Provider.get()` call. As a variant of the example above:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	import javax.inject.Inject;
+	import javax.inject.Provider;
+
+	public class SimpleMovieLister {
+
+		private Provider<MovieFinder> movieFinder;
+
+		public void listMovies() {
+			this.movieFinder.get().findMovies(...);
+			...
+		}
+	}
+----
+
+If you would like to use a qualified name for the dependency that should be injected,
+you should use the `@Named` annotation as follows:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -5699,7 +5738,6 @@ follows:
 		}
 
 		// ...
-
 	}
 ----
 
@@ -5727,13 +5765,11 @@ Instead of `@Component`, `@javax.inject.Named` may be used as follows:
 		}
 
 		// ...
-
 	}
 ----
 
-It is very common to use `@Component` without
-specifying a name for the component. `@Named`
-can be used in a similar fashion:
+It is very common to use `@Component` without specifying a name for the component.
+`@Named` can be used in a similar fashion:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -5752,7 +5788,6 @@ can be used in a similar fashion:
 		}
 
 		// ...
-
 	}
 ----
 
@@ -5778,32 +5813,32 @@ When working with standard annotations, it is important to know that some signif
 features are not available as shown in the table below:
 
 [[annotations-comparison]]
-.Spring annotations vs. standard annotations
+.Spring component model elements vs. JSR-330 variants
 |===
 | Spring| javax.inject.*| javax.inject restrictions / comments
 
 | @Autowired
 | @Inject
-| @Inject has no 'required' attribute
+| `@Inject` has no 'required' attribute; can be used with Java 8's `Optional` instead.
 
 | @Component
 | @Named
-| -
+| JSR-330 does not provide a composable model, just a way to identify named components.
 
 | @Scope("singleton")
 | @Singleton
 | The JSR-330 default scope is like Spring's `prototype`. However, in order to keep it
   consistent with Spring's general defaults, a JSR-330 bean declared in the Spring
   container is a `singleton` by default. In order to use a scope other than `singleton`,
-  you should use Spring's `@Scope` annotation.
-
-`javax.inject` also provides a
-http://download.oracle.com/javaee/6/api/javax/inject/Scope.html[@Scope] annotation.
-Nevertheless, this one is only intended to be used for creating your own annotations.
+  you should use Spring's `@Scope` annotation. `javax.inject` also provides a
+  http://download.oracle.com/javaee/6/api/javax/inject/Scope.html[@Scope] annotation.
+  Nevertheless, this one is only intended to be used for creating your own annotations.
 
 | @Qualifier
-| @Named
-| -
+| @Qualifier / @Named
+| `javax.inject.Qualifier` is just a meta-annotation for building custom qualifiers.
+  Concrete String qualifiers (like Spring's `@Qualifier` with a value) can be associated
+  through `javax.inject.Named`.
 
 | @Value
 | -
@@ -5816,6 +5851,12 @@ Nevertheless, this one is only intended to be used for creating your own annotat
 | @Lazy
 | -
 | no equivalent
+
+| ObjectFactory
+| Provider
+| `javax.inject.Provider` is a direct alternative to Spring's `ObjectFactory`,
+  just with a shorter `get()` method name. It can also be used in combination with
+  Spring's `@Autowired` or with non-annotated constructors and setter methods.
 |===
 
 
