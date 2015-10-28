@@ -36,12 +36,15 @@ import org.springframework.beans.factory.InitializingBean;
  * "queueCapacity" properties) and exposing it as a bean reference of its native
  * {@link java.util.concurrent.ExecutorService} type.
  *
- * <p>For an alternative, you may set up a ThreadPoolExecutor instance directly using
- * constructor injection, or use a factory method definition that points to the
+ * <p>For an alternative, you may set up a {@link ThreadPoolExecutor} instance directly
+ * using constructor injection, or use a factory method definition that points to the
  * {@link java.util.concurrent.Executors} class.
+ * <b>This is strongly recommended in particular for common {@code @Bean} methods in
+ * configuration classes, where this {@code FactoryBean} variant would force you to
+ * return the {@code FactoryBean} type instead of the actual {@code Executor} type.</b>
  *
- * <p><b>If you need a timing-based {@link java.util.concurrent.ScheduledExecutorService}
- * instead, consider {@link ScheduledExecutorFactoryBean}.</b>
+ * <p>If you need a timing-based {@link java.util.concurrent.ScheduledExecutorService}
+ * instead, consider {@link ScheduledExecutorFactoryBean}.
 
  * @author Juergen Hoeller
  * @since 3.0
