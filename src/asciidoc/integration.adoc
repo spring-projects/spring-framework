@@ -6404,13 +6404,13 @@ default). Here you can see what methods are available for `Trigger` implementati
 
 Spring provides two implementations of the `Trigger` interface. The most interesting one
 is the `CronTrigger`. It enables the scheduling of tasks based on cron expressions. For
-example the following task is being scheduled to run 15 minutes past each hour but only
+example, the following task is being scheduled to run 15 minutes past each hour but only
 during the 9-to-5 "business hours" on weekdays.
 
 [source,java,indent=0]
 [subs="verbatim"]
 ----
-	scheduler.schedule(task, new CronTrigger("* 15 9-17 * * MON-FRI"));
+	scheduler.schedule(task, new CronTrigger("0 15 9-17 * * MON-FRI"));
 ----
 
 The other out-of-the-box implementation is a `PeriodicTrigger` that accepts a fixed
@@ -6422,7 +6422,7 @@ fixed-delay, those methods should be used directly whenever possible. The value 
 the `Trigger` abstraction. For example, it may be convenient to allow periodic triggers,
 cron-based triggers, and even custom trigger implementations to be used interchangeably.
 Such a component could take advantage of dependency injection so that such `Triggers`
-could be configured externally.
+could be configured externally and therefore easily modified or extended.
 
 
 
