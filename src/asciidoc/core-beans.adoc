@@ -5419,11 +5419,18 @@ factory methods as you see fit in non-`@Configuration` classes and also for stat
 methods anywhere. However, regular `@Bean` methods in `@Configuration` classes need
 to be overridable, i.e. they must not be declared as `private` or `final`.
 
-Finally, `@Bean` methods will also be discovered on base classes of a given component
-or configuration class, as well as on Java 8 default methods declared in interfaces
+`@Bean` methods will also be discovered on base classes of a given component or
+configuration class, as well as on Java 8 default methods declared in interfaces
 implemented by the component or configuration class. This allows for a lot of
 flexibility in composing complex configuration arrangements, with even multiple
 inheritance being possible through Java 8 default methods as of Spring 4.2.
+
+Finally, note that a single class may hold multiple `@Bean` methods for the same
+bean, as an arrangement of multiple factory methods to use depending on available
+dependencies at runtime. This is the same algorithm as for choosing the "greediest"
+constructor or factory method in other configuration scenarios: The variant with
+the largest number of satisfiable dependencies will be picked at construction time,
+analogous to how the container selects between multiple `@Autowired` constructors.
 ====
 
 
