@@ -6410,7 +6410,7 @@ during the 9-to-5 "business hours" on weekdays.
 [source,java,indent=0]
 [subs="verbatim"]
 ----
-	scheduler.schedule(task, new CronTrigger("* 15 9-17 * * MON-FRI"));
+	scheduler.schedule(task, new CronTrigger("0 15 9-17 * * MON-FRI"));
 ----
 
 The other out-of-the-box implementation is a `PeriodicTrigger` that accepts a fixed
