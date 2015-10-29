@@ -31,9 +31,11 @@ import org.reactivestreams.Publisher;
 public interface ReactiveHttpOutputMessage extends HttpMessage {
 
 	/**
-	 * Adds the given publisher of {@link ByteBuffer}s as a body. A HTTP/1.1 message has
-	 * one body, but HTTP/1.2 supports multiple bodies.
-	 * @param body the body to add
+	 * Sets the body of this message to the given publisher of {@link ByteBuffer}s. The
+	 * publisher will be used to write to the underlying HTTP layer with asynchronously,
+	 * given pull demand by this layer.
+	 *
+	 * @param body the body to use
 	 * @return a publisher that indicates completion
 	 */
 	Publisher<Void> setBody(Publisher<ByteBuffer> body);
