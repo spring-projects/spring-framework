@@ -101,7 +101,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 
 		@Override
 		public Publisher<Void> handle(ReactiveServerHttpRequest request, ReactiveServerHttpResponse response) {
-			return response.addBody(Streams.just(Buffer.wrap("foo").byteBuffer()));
+			return response.setBody(Streams.just(Buffer.wrap("foo").byteBuffer()));
 		}
 	}
 
@@ -109,7 +109,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 
 		@Override
 		public Publisher<Void> handle(ReactiveServerHttpRequest request, ReactiveServerHttpResponse response) {
-			return response.addBody(Streams.just(Buffer.wrap("bar").byteBuffer()));
+			return response.setBody(Streams.just(Buffer.wrap("bar").byteBuffer()));
 		}
 	}
 

@@ -22,7 +22,7 @@ import org.reactivestreams.Publisher;
 
 /**
  * Represents a "reactive" HTTP output message, consisting of {@linkplain #getHeaders() headers}
- * and the capability to add a {@linkplain #addBody(Publisher) body}.
+ * and the capability to add a {@linkplain #setBody(Publisher) body}.
  *
  * <p>Typically implemented by an HTTP request on the client-side, or a response on the server-side.
  *
@@ -36,6 +36,6 @@ public interface ReactiveHttpOutputMessage extends HttpMessage {
 	 * @param body the body to add
 	 * @return a publisher that indicates completion
 	 */
-	Publisher<Void> addBody(Publisher<ByteBuffer> body);
+	Publisher<Void> setBody(Publisher<ByteBuffer> body);
 
 }

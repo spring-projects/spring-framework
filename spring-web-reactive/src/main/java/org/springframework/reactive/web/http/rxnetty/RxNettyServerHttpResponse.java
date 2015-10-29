@@ -75,7 +75,7 @@ public class RxNettyServerHttpResponse implements ReactiveServerHttpResponse {
 	}
 
 	@Override
-	public Publisher<Void> addBody(Publisher<ByteBuffer> contentPublisher) {
+	public Publisher<Void> setBody(Publisher<ByteBuffer> contentPublisher) {
 		applyHeaders();
 		Observable<byte[]> contentObservable = RxJava1Converter.from(contentPublisher).map(content -> new Buffer(content).asBytes());
 		return RxJava1Converter.from(this.response.writeBytes(contentObservable));

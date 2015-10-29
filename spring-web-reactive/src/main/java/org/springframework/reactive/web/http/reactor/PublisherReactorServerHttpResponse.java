@@ -67,7 +67,7 @@ public class PublisherReactorServerHttpResponse implements ReactiveServerHttpRes
 	}
 
 	@Override
-	public Publisher<Void> addBody(Publisher<ByteBuffer> contentPublisher) {
+	public Publisher<Void> setBody(Publisher<ByteBuffer> contentPublisher) {
 		applyHeaders();
 		return this.channel.writeWith(Publishers.map(contentPublisher, Buffer::new));
 	}

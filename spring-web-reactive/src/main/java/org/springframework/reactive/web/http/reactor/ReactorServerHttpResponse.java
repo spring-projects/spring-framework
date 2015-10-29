@@ -38,7 +38,7 @@ public class ReactorServerHttpResponse extends PublisherReactorServerHttpRespons
 	}
 
 	@Override
-	public Stream<Void> addBody(Publisher<ByteBuffer> contentPublisher) {
-		return Streams.wrap(super.addBody(contentPublisher));
+	public Stream<Void> setBody(Publisher<ByteBuffer> contentPublisher) {
+		return Streams.wrap(super.setBody(contentPublisher));
 	}
 }

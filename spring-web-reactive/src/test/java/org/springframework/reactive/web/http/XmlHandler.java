@@ -75,7 +75,7 @@ public class XmlHandler implements HttpHandler {
 			bos.close();
 			buffer.flip();
 
-			return response.addBody(Streams.just(buffer.byteBuffer()));
+			return response.setBody(Streams.just(buffer.byteBuffer()));
 		}
 		catch (Exception ex) {
 			logger.error(ex, ex);

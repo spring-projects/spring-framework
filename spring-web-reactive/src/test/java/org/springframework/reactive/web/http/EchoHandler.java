@@ -28,6 +28,6 @@ public class EchoHandler implements HttpHandler {
 
 	@Override
 	public Publisher<Void> handle(ReactiveServerHttpRequest request, ReactiveServerHttpResponse response) {
-		return response.addBody(request.getBody());
+		return response.setBody(request.getBody());
 	}
 }

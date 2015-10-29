@@ -31,7 +31,7 @@ import org.springframework.http.server.ReactiveServerHttpResponse;
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  * @see ReactiveServerHttpRequest#getBody()
- * @see ReactiveServerHttpResponse#addBody(Publisher)
+ * @see ReactiveServerHttpResponse#setBody(Publisher)
  */
 public interface HttpHandler {
 

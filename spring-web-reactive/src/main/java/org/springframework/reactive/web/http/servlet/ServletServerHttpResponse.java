@@ -69,7 +69,7 @@ public class ServletServerHttpResponse implements ReactiveServerHttpResponse {
 	}
 
 	@Override
-	public Publisher<Void> addBody(final Publisher<ByteBuffer> contentPublisher) {
+	public Publisher<Void> setBody(final Publisher<ByteBuffer> contentPublisher) {
 		applyHeaders();
 		return (s -> contentPublisher.subscribe(responseSubscriber));
 	}

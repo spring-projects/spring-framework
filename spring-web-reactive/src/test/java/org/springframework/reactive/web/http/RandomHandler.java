@@ -76,7 +76,7 @@ public class RandomHandler implements HttpHandler {
 		});
 
 		response.getHeaders().setContentLength(RESPONSE_SIZE);
-		return response.addBody(Streams.just(ByteBuffer.wrap(randomBytes())));
+		return response.setBody(Streams.just(ByteBuffer.wrap(randomBytes())));
 	}
 
 	private byte[] randomBytes() {

@@ -140,10 +140,11 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 				outputStream = postProcessor.encode(outputStream, elementType, mediaType, hints.toArray());
 			}
 			response.getHeaders().setContentType(mediaType);
-			return response.addBody(outputStream);
+			return response.setBody(outputStream);
 		}
 		return Publishers.error(new IllegalStateException(
-		  "Return value type '" + returnType.getParameterType().getName() + "' with media type '" + mediaType + "' not supported"  ));
+				"Return value type '" + returnType.getParameterType().getName() +
+						"' with media type '" + mediaType + "' not supported"));
 	}
 
 	private MediaType resolveMediaType(ReactiveServerHttpRequest request) {
