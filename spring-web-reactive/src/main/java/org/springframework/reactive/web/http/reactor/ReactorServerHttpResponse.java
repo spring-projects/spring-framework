@@ -25,61 +25,26 @@ import reactor.io.buffer.Buffer;
 import reactor.io.net.http.HttpChannel;
 import reactor.io.net.http.model.Status;
 import reactor.rx.Stream;
+import reactor.rx.Streams;
 
 import java.nio.ByteBuffer;
 
 /**
  * @author Stephane Maldini
  */
-public class ReactorServerHttpResponse implements ServerHttpResponse {
-
-	private final HttpChannel<?, Buffer> channel;
-
-	private final HttpHeaders headers;
-
-	private boolean headersWritten = false;
-
+public class ReactorServerHttpResponse extends PublisherReactorServerHttpResponse {
 
 	public ReactorServerHttpResponse(HttpChannel<?, Buffer> response) {
-		Assert.notNull("'response', response must not be null.");
-		this.channel = response;
-		this.headers = new HttpHeaders();
-	}
-
-
-	@Override
-	public void setStatusCode(HttpStatus status) {
-		this.channel.responseStatus(Status.valueOf(status.value()));
+		super(response);
 	}
 
 	@Override
-	public HttpHeaders getHeaders() {
-		return (this.headersWritten ? HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
-	}
-
-	@Override
-	public Publisher<Void> writeHeaders() {
-		if (this.headersWritten) {
-			return Publishers.empty();
-		}
-		applyHeaders();
-		return this.channel.writeHeaders();
+	public Stream<Void> writeHeaders() {
+		return Streams.wrap(super.writeHeaders());
 	}
 
 	@Override
 	public Stream<Void> writeWith(Publisher<ByteBuffer> contentPublisher) {
-		applyHeaders();
-		return this.channel.writeWith(Publishers.map(contentPublisher, Buffer::new));
-	}
-
-	private void applyHeaders() {
-		if (!this.headersWritten) {
-			for (String name : this.headers.keySet()) {
-				for (String value : this.headers.get(name)) {
-					this.channel.responseHeaders().add(name, value);
-				}
-			}
-			this.headersWritten = true;
-		}
+		return Streams.wrap(super.writeWith(contentPublisher));
 	}
 }

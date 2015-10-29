@@ -15,65 +15,25 @@
  */
 package org.springframework.reactive.web.http.reactor;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.reactive.web.http.ServerHttpRequest;
-import org.springframework.util.Assert;
+import java.nio.ByteBuffer;
+
 import reactor.io.buffer.Buffer;
 import reactor.io.net.http.HttpChannel;
 import reactor.rx.Stream;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
+import reactor.rx.Streams;
 
 /**
  * @author Stephane Maldini
  */
-public class ReactorServerHttpRequest implements ServerHttpRequest {
-
-	private final HttpChannel<Buffer, ?> channel;
-
-	private HttpHeaders headers;
-
+public class ReactorServerHttpRequest extends PublisherReactorServerHttpRequest {
 
 	public ReactorServerHttpRequest(HttpChannel<Buffer, ?> request) {
-		Assert.notNull("'request', request must not be null.");
-		this.channel = request;
-	}
-
-
-	@Override
-	public HttpHeaders getHeaders() {
-		if (this.headers == null) {
-			this.headers = new HttpHeaders();
-			for (String name : this.channel.headers().names()) {
-				for (String value : this.channel.headers().getAll(name)) {
-					this.headers.add(name, value);
-				}
-			}
-		}
-		return this.headers;
-	}
-
-	@Override
-	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(this.channel.method().getName());
-	}
-
-	@Override
-	public URI getURI() {
-		try {
-			return new URI(this.channel.uri());
-		} catch (URISyntaxException ex) {
-			throw new IllegalStateException("Could not get URI: " + ex.getMessage(), ex);
-		}
-
+		super(request);
 	}
 
 	@Override
 	public Stream<ByteBuffer> getBody() {
-		return this.channel.map(Buffer::byteBuffer);
+		return Streams.wrap(super.getBody());
 	}
 
 }
