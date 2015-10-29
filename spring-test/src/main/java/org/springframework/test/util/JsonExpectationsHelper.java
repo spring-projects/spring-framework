@@ -32,26 +32,42 @@ public class JsonExpectationsHelper {
 	/**
 	 * Parse the expected and actual strings as JSON and assert the two
 	 * are "similar" - i.e. they contain the same attribute-value pairs
-	 * regardless of order and formatting.
+	 * regardless of formatting.
+	 *
+	 * <p>Can compare in two modes:
+	 * <ul>
+	 *     <li>Strict checking.  Not extensible, and strict array ordering.</li>
+	 *     <li>Lenient checking.  Extensible, and non-strict array ordering.</li>
+	 * </ul>
+	 * Setting {@code strict} to true enables strict checking, false &mdash; lenient checking.
 	 *
 	 * @param expected the expected JSON content
 	 * @param actual the actual JSON content
-	 * @since 4.1
+	 * @param strict enables strict checking
+	 * @since 4.2
 	 */
-	public void assertJsonEqual(String expected, String actual) throws Exception {
-		JSONAssert.assertEquals(expected, actual, false);
+	public void assertJsonEqual(String expected, String actual, boolean strict) throws Exception {
+		JSONAssert.assertEquals(expected, actual, strict);
 	}
 
 	/**
 	 * Parse the expected and actual strings as JSON and assert the two
 	 * are "not similar" - i.e. they contain different attribute-value pairs
-	 * regardless of order and formatting.
+	 * regardless of formatting.
+	 *
+	 * <p>Can compare in two modes:
+	 * <ul>
+	 *     <li>Strict checking.  Not extensible, and strict array ordering.</li>
+	 *     <li>Lenient checking.  Extensible, and non-strict array ordering.</li>
+	 * </ul>
+	 * Setting {@code strict} to true enables strict checking, false &mdash; lenient checking.
 	 *
 	 * @param expected the expected JSON content
 	 * @param actual the actual JSON content
-	 * @since 4.1
+	 * @param strict enables strict checking
+	 * @since 4.2
 	 */
-	public void assertJsonNotEqual(String expected, String actual) throws Exception {
-		JSONAssert.assertNotEquals(expected, actual, false);
+	public void assertJsonNotEqual(String expected, String actual, boolean strict) throws Exception {
+		JSONAssert.assertNotEquals(expected, actual, strict);
 	}
 }

@@ -79,8 +79,23 @@ public class ContentResultMatchersTests {
 	}
 
 	@Test
-	public void json() throws Exception {
-		new ContentResultMatchers().json("{\n \"foo\" : \"bar\"         \n}").match(getStubMvcResult());
+	public void json1() throws Exception {
+		new ContentResultMatchers().json("{\n \"foo\" : \"bar\"  \n}").match(getStubMvcResult());
+	}
+
+	@Test
+	public void json2() throws Exception {
+		new ContentResultMatchers().json("{\n \"foo\" : \"bar\"  \n}", false).match(getStubMvcResult());
+	}
+
+	@Test
+	public void json3() throws Exception {
+		new ContentResultMatchers().json("{\n \"foo\":\"bar\",   \"foo array\":[\"foo\",\"bar\"] \n}", true).match(getStubMvcResult());
+	}
+
+	@Test
+	public void json4() throws Exception {
+		new ContentResultMatchers().json("{\n \"foo array\":[\"foo\",\"bar\"], \"foo\":\"bar\" \n}", true).match(getStubMvcResult());
 	}
 
 	@Test(expected=AssertionError.class)
@@ -88,8 +103,17 @@ public class ContentResultMatchersTests {
 		new ContentResultMatchers().json("{\n\"fooo\":\"bar\"\n}").match(getStubMvcResult());
 	}
 
+	@Test(expected=AssertionError.class)
+	public void jsonNoMatch2() throws Exception {
+		new ContentResultMatchers().json("{\n\"fooo\":\"bar\"\n}", false).match(getStubMvcResult());
+	}
 
-	private static final String CONTENT = "{\"foo\":\"bar\"}";
+	@Test(expected=AssertionError.class)
+	public void jsonNoMatch3() throws Exception {
+		new ContentResultMatchers().json("{\"foo\":\"bar\",   \"foo array\":[\"bar\",\"foo\"]}", true).match(getStubMvcResult());
+	}
+
+	private static final String CONTENT = "{\"foo\":\"bar\",\"foo array\":[\"foo\",\"bar\"]}";
 
 	private StubMvcResult getStubMvcResult() throws Exception {
 		MockHttpServletResponse response = new MockHttpServletResponse();
