@@ -40,9 +40,9 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 	@Parameterized.Parameters(name = "server [{0}]")
 	public static Object[][] arguments() {
 		return new Object[][] {
-				/*{new JettyHttpServer()},
+				{new JettyHttpServer()},
 				{new RxNettyHttpServer()},
-				{new ReactorHttpServer()},*/
+				{new ReactorHttpServer()},
 				{new TomcatHttpServer()}
 		};
 	}
