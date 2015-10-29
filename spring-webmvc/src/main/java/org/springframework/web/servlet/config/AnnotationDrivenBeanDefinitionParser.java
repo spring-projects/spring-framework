@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -364,7 +364,11 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 	private RuntimeBeanReference getContentNegotiationManager(Element element, Object source, ParserContext parserContext) {
 		RuntimeBeanReference contentNegotiationManagerRef;
 		if (element.hasAttribute("content-negotiation-manager")) {
-			contentNegotiationManagerRef = new RuntimeBeanReference(element.getAttribute("content-negotiation-manager"));
+			String name = element.getAttribute("content-negotiation-manager");
+			contentNegotiationManagerRef = new RuntimeBeanReference(name);
+			if (!CONTENT_NEGOTIATION_MANAGER_BEAN_NAME.equals(name)) {
+				parserContext.getRegistry().registerAlias(name, CONTENT_NEGOTIATION_MANAGER_BEAN_NAME);
+			}
 		}
 		else {
 			RootBeanDefinition factoryBeanDef = new RootBeanDefinition(ContentNegotiationManagerFactoryBean.class);
@@ -372,10 +376,10 @@ class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
 			factoryBeanDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 			factoryBeanDef.getPropertyValues().add("mediaTypes", getDefaultMediaTypes());
 
-			String beanName = CONTENT_NEGOTIATION_MANAGER_BEAN_NAME;
-			parserContext.getReaderContext().getRegistry().registerBeanDefinition(beanName , factoryBeanDef);
-			parserContext.registerComponent(new BeanComponentDefinition(factoryBeanDef, beanName));
-			contentNegotiationManagerRef = new RuntimeBeanReference(beanName);
+			String name = CONTENT_NEGOTIATION_MANAGER_BEAN_NAME;
+			parserContext.getReaderContext().getRegistry().registerBeanDefinition(name , factoryBeanDef);
+			parserContext.registerComponent(new BeanComponentDefinition(factoryBeanDef, name));
+			contentNegotiationManagerRef = new RuntimeBeanReference(name);
 		}
 		return contentNegotiationManagerRef;
 	}

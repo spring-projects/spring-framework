@@ -119,6 +119,10 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 		this.contentNegotiationManager = contentNegotiationManager;
 	}
 
+	public ContentNegotiationManager getContentNegotiationManager() {
+		return this.contentNegotiationManager;
+	}
+
 	/**
 	 * Indicate whether a {@link HttpServletResponse#SC_NOT_ACCEPTABLE 406 Not Acceptable}
 	 * status code should be returned if no suitable view can be found.
