@@ -18,6 +18,7 @@ package org.springframework.test.web.servlet;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.servlet.DispatcherType;
 import javax.servlet.Filter;
 import javax.servlet.ServletContext;
 
@@ -147,13 +148,17 @@ public final class MockMvc {
 		final MvcResult mvcResult = new DefaultMvcResult(request, response);
 		request.setAttribute(MVC_RESULT_ATTRIBUTE, mvcResult);
 
-		// [SPR-13217] Simulate RequestContextFilter to ensure that RequestAttributes are
-		// populated before filters are invoked.
 		RequestAttributes previousAttributes = RequestContextHolder.getRequestAttributes();
 		RequestContextHolder.setRequestAttributes(new ServletRequestAttributes(request, response));
 
 		MockFilterChain filterChain = new MockFilterChain(this.servlet, this.filters);
 		filterChain.doFilter(request, response);
+
+		if (DispatcherType.ASYNC.equals(request.getDispatcherType()) &&
+				request.getAsyncContext() != null & !request.isAsyncStarted()) {
+
+			request.getAsyncContext().complete();
+		}
 
 		applyDefaultResultActions(mvcResult);
 
