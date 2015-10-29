@@ -25,13 +25,13 @@ import reactor.io.net.http.model.Status;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.reactive.web.http.ServerHttpResponse;
+import org.springframework.http.server.ReactiveServerHttpResponse;
 import org.springframework.util.Assert;
 
 /**
  * @author Stephane Maldini
  */
-public class PublisherReactorServerHttpResponse implements ServerHttpResponse {
+public class PublisherReactorServerHttpResponse implements ReactiveServerHttpResponse {
 
 	private final HttpChannel<?, Buffer> channel;
 
@@ -67,7 +67,7 @@ public class PublisherReactorServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public Publisher<Void> writeWith(Publisher<ByteBuffer> contentPublisher) {
+	public Publisher<Void> addBody(Publisher<ByteBuffer> contentPublisher) {
 		applyHeaders();
 		return this.channel.writeWith(Publishers.map(contentPublisher, Buffer::new));
 	}
