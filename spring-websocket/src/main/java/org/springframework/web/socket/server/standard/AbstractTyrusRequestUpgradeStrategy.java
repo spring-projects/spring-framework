@@ -21,7 +21,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import javax.servlet.ServletException;
@@ -52,6 +52,8 @@ import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.socket.WebSocketExtension;
 import org.springframework.web.socket.server.HandshakeFailureException;
+
+import static org.glassfish.tyrus.spi.WebSocketEngine.UpgradeStatus.SUCCESS;
 
 /**
  * A base class for {@code RequestUpgradeStrategy} implementations on top of
@@ -96,6 +98,7 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 		TyrusServerContainer serverContainer = (TyrusServerContainer) getContainer(servletRequest);
 		TyrusWebSocketEngine engine = (TyrusWebSocketEngine) serverContainer.getWebSocketEngine();
 		Object tyrusEndpoint = null;
+		boolean success;
 
 		try {
 			// Shouldn't matter for processing but must be unique
@@ -107,29 +110,22 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 			RequestContext requestContext = createRequestContext(servletRequest, path, headers);
 			TyrusUpgradeResponse upgradeResponse = new TyrusUpgradeResponse();
 			UpgradeInfo upgradeInfo = engine.upgrade(requestContext, upgradeResponse);
-
-			switch (upgradeInfo.getStatus()) {
-				case SUCCESS:
-					if (logger.isTraceEnabled()) {
-						logger.trace("Successful upgrade: " + upgradeResponse.getHeaders());
-					}
-					handleSuccess(servletRequest, servletResponse, upgradeInfo, upgradeResponse);
-					break;
-				case HANDSHAKE_FAILED:
-					// Should never happen
-					throw new HandshakeFailureException("Unexpected handshake failure: " + request.getURI());
-				case NOT_APPLICABLE:
-					// Should never happen
-					throw new HandshakeFailureException("Unexpected handshake mapping failure: " + request.getURI());
+			success = SUCCESS.equals(upgradeInfo.getStatus());
+			if (success) {
+				if (logger.isTraceEnabled()) {
+					logger.trace("Successful upgrade: " + upgradeResponse.getHeaders());
+				}
+				handleSuccess(servletRequest, servletResponse, upgradeInfo, upgradeResponse);
 			}
 		}
 		catch (Exception ex) {
+			unregisterTyrusEndpoint(engine, tyrusEndpoint);
 			throw new HandshakeFailureException("Error during handshake: " + request.getURI(), ex);
 		}
-		finally {
-			if (tyrusEndpoint != null) {
-				getEndpointHelper().unregister(engine, tyrusEndpoint);
-			}
+
+		unregisterTyrusEndpoint(engine, tyrusEndpoint);
+		if (!success) {
+			throw new HandshakeFailureException("Unexpected handshake failure: " + request.getURI());
 		}
 	}
 
@@ -138,7 +134,7 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 			throws DeploymentException {
 
 		ServerEndpointRegistration endpointConfig = new ServerEndpointRegistration(endpointPath, endpoint);
-		endpointConfig.setSubprotocols(Arrays.asList(protocol));
+		endpointConfig.setSubprotocols(Collections.singletonList(protocol));
 		endpointConfig.setExtensions(extensions);
 		return getEndpointHelper().createdEndpoint(endpointConfig, this.componentProvider, container, engine);
 	}
@@ -157,6 +153,16 @@ public abstract class AbstractTyrusRequestUpgradeStrategy extends AbstractStanda
 		return context;
 	}
 
+	private void unregisterTyrusEndpoint(TyrusWebSocketEngine engine, Object tyrusEndpoint) {
+		if (tyrusEndpoint != null) {
+			try {
+				getEndpointHelper().unregister(engine, tyrusEndpoint);
+			}
+			catch (Throwable ex) {
+				// ignore
+			}
+		}
+	}
 
 	protected abstract TyrusEndpointHelper getEndpointHelper();
 
