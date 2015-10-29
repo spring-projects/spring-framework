@@ -124,6 +124,10 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 		this.contentNegotiationManager = contentNegotiationManager;
 	}
 
+	public ContentNegotiationManager getContentNegotiationManager() {
+		return this.contentNegotiationManager;
+	}
+
 	/**
 	 * Indicate whether the extension of the request path should be used to determine the requested media type,
 	 * in favor of looking at the {@code Accept} header. The default value is {@code true}.

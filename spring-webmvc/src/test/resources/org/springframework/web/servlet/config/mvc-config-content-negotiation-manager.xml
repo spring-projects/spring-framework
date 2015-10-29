@@ -9,6 +9,10 @@
 
 	<mvc:annotation-driven content-negotiation-manager="contentNegotiationManager" />
 
+	<mvc:view-resolvers>
+		<mvc:content-negotiation/>
+	</mvc:view-resolvers>
+
 	<bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
 		<property name="mediaTypes">
 			<value>
