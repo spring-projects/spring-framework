@@ -310,6 +310,20 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals(0, this.response.getContentLength());
 	}
 
+	// SPR-13620
+	@Test
+	public void writeContentInputStreamThrowingNullPointerException() throws Exception {
+		Resource resource = mock(Resource.class);
+		InputStream in = mock(InputStream.class);
+		given(resource.getInputStream()).willReturn(in);
+		given(in.read(any())).willThrow(NullPointerException.class);
+
+		this.handler.writeContent(this.response, resource);
+
+		assertEquals(200, this.response.getStatus());
+		assertEquals(0, this.response.getContentLength());
+	}
+
 
 	private long headerAsLong(String responseHeaderName) {
 		return Long.valueOf(this.response.getHeader(responseHeaderName));

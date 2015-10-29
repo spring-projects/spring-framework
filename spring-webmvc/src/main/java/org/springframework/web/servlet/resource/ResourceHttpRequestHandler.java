@@ -410,6 +410,9 @@ public class ResourceHttpRequestHandler extends WebContentGenerator implements H
 			try {
 				StreamUtils.copy(in, response.getOutputStream());
 			}
+			catch (NullPointerException ex) {
+				// ignore, see SPR-13620
+			}
 			finally {
 				try {
 					in.close();
