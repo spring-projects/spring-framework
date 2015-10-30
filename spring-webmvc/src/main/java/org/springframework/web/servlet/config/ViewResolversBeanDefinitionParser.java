@@ -192,11 +192,24 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 		if (resolverElement.hasAttribute("use-not-acceptable")) {
 			values.add("useNotAcceptableStatusCode", resolverElement.getAttribute("use-not-acceptable"));
 		}
-		String name = AnnotationDrivenBeanDefinitionParser.CONTENT_NEGOTIATION_MANAGER_BEAN_NAME;
-		if (context.getRegistry().containsBeanDefinition(name) || context.getRegistry().isAlias(name)) {
-			values.add("contentNegotiationManager", new RuntimeBeanReference(name));
+		Object manager = getContentNegotiationManager(context);
+		if (manager != null) {
+			values.add("contentNegotiationManager", manager);
 		}
 		return beanDef;
+	}
+
+	private Object getContentNegotiationManager(ParserContext context) {
+		String name = AnnotationDrivenBeanDefinitionParser.HANDLER_MAPPING_BEAN_NAME;
+		if (context.getRegistry().containsBeanDefinition(name)) {
+			BeanDefinition handlerMappingBeanDef = context.getRegistry().getBeanDefinition(name);
+			return handlerMappingBeanDef.getPropertyValues().get("contentNegotiationManager");
+		}
+		name = AnnotationDrivenBeanDefinitionParser.CONTENT_NEGOTIATION_MANAGER_BEAN_NAME;
+		if (context.getRegistry().containsBeanDefinition(name)) {
+			return new RuntimeBeanReference(name);
+		}
+		return null;
 	}
 
 }
