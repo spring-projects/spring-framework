@@ -17,7 +17,6 @@
 package org.springframework.http.client;
 
 import java.io.Closeable;
-import java.io.IOException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ReactiveHttpInputMessage;
@@ -32,23 +31,20 @@ public interface ReactiveClientHttpResponse extends ReactiveHttpInputMessage, Cl
 	/**
 	 * Return the HTTP status code of the response.
 	 * @return the HTTP status as an HttpStatus enum value
-	 * @throws IOException in case of I/O errors
 	 */
-	HttpStatus getStatusCode() throws IOException;
+	HttpStatus getStatusCode();
 
 	/**
 	 * Return the HTTP status code of the response as integer
 	 * @return the HTTP status as an integer
-	 * @throws IOException in case of I/O errors
 	 */
-	int getRawStatusCode() throws IOException;
+	int getRawStatusCode();
 
 	/**
 	 * Return the HTTP status text of the response.
 	 * @return the HTTP status text
-	 * @throws IOException in case of I/O errors
 	 */
-	String getStatusText() throws IOException;
+	String getStatusText();
 
 	/**
 	 * Close this response, freeing any resources created.
