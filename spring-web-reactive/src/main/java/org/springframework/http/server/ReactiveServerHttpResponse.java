@@ -26,12 +26,11 @@ import org.springframework.http.ReactiveHttpOutputMessage;
  *
  * @author Arjen Poutsma
  */
-public interface ReactiveServerHttpResponse
-		extends ReactiveHttpOutputMessage {
+public interface ReactiveServerHttpResponse extends ReactiveHttpOutputMessage {
 
 	/**
 	 * Set the HTTP status code of the response.
-	 * @param status the HTTP status as an HttpStatus enum value
+	 * @param status the HTTP status as an {@link HttpStatus} enum value
 	 */
 	void setStatusCode(HttpStatus status);
 	

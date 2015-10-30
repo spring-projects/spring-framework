@@ -16,8 +16,6 @@
 
 package org.springframework.http.client;
 
-import java.io.Closeable;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ReactiveHttpInputMessage;
 
@@ -30,7 +28,7 @@ public interface ReactiveClientHttpResponse extends ReactiveHttpInputMessage {
 
 	/**
 	 * Return the HTTP status code of the response.
-	 * @return the HTTP status as an HttpStatus enum value
+	 * @return the HTTP status as an {@link HttpStatus} enum value
 	 */
 	HttpStatus getStatusCode();
 
