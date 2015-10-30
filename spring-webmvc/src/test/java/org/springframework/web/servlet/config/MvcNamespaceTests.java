@@ -691,7 +691,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testContentNegotiationManager() throws Exception {
-		loadBeanDefinitions("mvc-config-content-negotiation-manager.xml", 14);
+		loadBeanDefinitions("mvc-config-content-negotiation-manager.xml", 15);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		ContentNegotiationManager manager = mapping.getContentNegotiationManager();
