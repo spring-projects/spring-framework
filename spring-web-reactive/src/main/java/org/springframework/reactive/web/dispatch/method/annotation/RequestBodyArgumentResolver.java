@@ -19,6 +19,7 @@ package org.springframework.reactive.web.dispatch.method.annotation;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -32,7 +33,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ReactiveServerHttpRequest;
 import org.springframework.reactive.codec.decoder.ByteToMessageDecoder;
+import org.springframework.reactive.codec.decoder.JsonObjectDecoder;
 import org.springframework.reactive.web.dispatch.method.HandlerMethodArgumentResolver;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestBody;
 
 /**
@@ -44,25 +47,19 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 	private static final Charset UTF_8 = Charset.forName("UTF-8");
 
 
-	private final List<ByteToMessageDecoder<?>> deserializers;
-
-	private final List<ByteToMessageDecoder<ByteBuffer>> preProcessors;
+	private final List<ByteToMessageDecoder<?>> decoders;
 
 	private final ConversionService conversionService;
 
+	// TODO: remove field
+	private final List<ByteToMessageDecoder<ByteBuffer>> preProcessors = Arrays.asList(new JsonObjectDecoder());
 
-	public RequestBodyArgumentResolver(List<ByteToMessageDecoder<?>> decoders,
-			ConversionService conversionService) {
 
-		this(decoders, conversionService, Collections.EMPTY_LIST);
-	}
-
-	public RequestBodyArgumentResolver(List<ByteToMessageDecoder<?>> decoders,
-			ConversionService service, List<ByteToMessageDecoder<ByteBuffer>> preProcessors) {
-
-		this.deserializers = decoders;
+	public RequestBodyArgumentResolver(List<ByteToMessageDecoder<?>> decoders, ConversionService service) {
+		Assert.notEmpty(decoders, "At least one decoder is required.");
+		Assert.notNull(service, "'conversionService' is required.");
+		this.decoders = decoders;
 		this.conversionService = service;
-		this.preProcessors = preProcessors;
 	}
 
 
@@ -80,10 +77,10 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 		Publisher<ByteBuffer> inputStream = request.getBody();
 		Publisher<?> elementStream = inputStream;
 		ResolvableType elementType = type.hasGenerics() ? type.getGeneric(0) : type;
-		ByteToMessageDecoder<?> decoder = resolveDecoder(request, elementType, mediaType, hints.toArray());
+		ByteToMessageDecoder<?> decoder = resolveDecoder(elementType, mediaType, hints.toArray());
 		if (decoder != null) {
 			List<ByteToMessageDecoder<ByteBuffer>> preProcessors = resolvePreProcessors(
-					request, elementType, mediaType,hints.toArray());
+					elementType, mediaType,hints.toArray());
 
 			for (ByteToMessageDecoder<ByteBuffer> preProcessor : preProcessors) {
 				inputStream = preProcessor.decode(inputStream, elementType, mediaType, hints.toArray());
@@ -103,10 +100,8 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 		return ( mediaTypes.size() > 0 ? mediaTypes.get(0) : MediaType.TEXT_PLAIN);
 	}
 
-	private ByteToMessageDecoder<?> resolveDecoder(ReactiveServerHttpRequest request,
-			ResolvableType type, MediaType mediaType, Object[] hints) {
-
-		for (ByteToMessageDecoder<?> deserializer : this.deserializers) {
+	private ByteToMessageDecoder<?> resolveDecoder(ResolvableType type, MediaType mediaType, Object[] hints) {
+		for (ByteToMessageDecoder<?> deserializer : this.decoders) {
 			if (deserializer.canDecode(type, mediaType, hints)) {
 				return deserializer;
 			}
@@ -114,9 +109,8 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 		return null;
 	}
 
-	private List<ByteToMessageDecoder<ByteBuffer>> resolvePreProcessors(
-			ReactiveServerHttpRequest request, ResolvableType type, MediaType mediaType,
-			Object[] hints) {
+	private List<ByteToMessageDecoder<ByteBuffer>> resolvePreProcessors(ResolvableType type,
+			MediaType mediaType, Object[] hints) {
 
 		List<ByteToMessageDecoder<ByteBuffer>> preProcessors = new ArrayList<>();
 		for (ByteToMessageDecoder<ByteBuffer> preProcessor : this.preProcessors) {

@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 import org.reactivestreams.Publisher;
@@ -35,10 +35,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ReactiveServerHttpRequest;
 import org.springframework.http.server.ReactiveServerHttpResponse;
+import org.springframework.reactive.codec.encoder.JsonObjectEncoder;
 import org.springframework.reactive.codec.encoder.MessageToByteEncoder;
-import org.springframework.reactive.convert.support.DefaultConversionService;
 import org.springframework.reactive.web.dispatch.HandlerResult;
 import org.springframework.reactive.web.dispatch.HandlerResultHandler;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.HandlerMethod;
 
@@ -56,29 +57,21 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 
 
 	private final List<MessageToByteEncoder<?>> serializers;
-	private final List<MessageToByteEncoder<ByteBuffer>> postProcessors;
+
 	private final ConversionService conversionService;
 
 	private int order = 0;
 
+	// TODO: remove field
+	private final List<MessageToByteEncoder<ByteBuffer>> postProcessors = Arrays.asList(new JsonObjectEncoder());
 
-	public ResponseBodyResultHandler(List<MessageToByteEncoder<?>> encoders) {
-		this(encoders, Collections.EMPTY_LIST);
-	}
 
-	public ResponseBodyResultHandler(List<MessageToByteEncoder<?>> encoders,
-			List<MessageToByteEncoder<ByteBuffer>> postProcessors) {
 
-		this(encoders, postProcessors, new DefaultConversionService());
-	}
-
-	public ResponseBodyResultHandler(List<MessageToByteEncoder<?>> encoders,
-			List<MessageToByteEncoder<ByteBuffer>> postProcessors,
-			ConversionService conversionService) {
-
+	public ResponseBodyResultHandler(List<MessageToByteEncoder<?>> encoders, ConversionService service) {
+		Assert.notEmpty(encoders, "At least one encoder is required.");
+		Assert.notNull(service, "'conversionService' is required.");
 		this.serializers = encoders;
-		this.postProcessors = postProcessors;
-		this.conversionService = conversionService;
+		this.conversionService = service;
 	}
 
 
@@ -131,11 +124,11 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 		}
 
 		MessageToByteEncoder<Object> encoder = (MessageToByteEncoder<Object>) resolveEncoder(
-				request, elementType, mediaType, hints.toArray());
+				elementType, mediaType, hints.toArray());
 
 		if (encoder != null) {
 			Publisher<ByteBuffer> outputStream = encoder.encode(elementStream, type, mediaType, hints.toArray());
-			List<MessageToByteEncoder<ByteBuffer>> postProcessors = resolvePostProcessors(request,
+			List<MessageToByteEncoder<ByteBuffer>> postProcessors = resolvePostProcessors(
 					elementType, mediaType, hints.toArray());
 			for (MessageToByteEncoder<ByteBuffer> postProcessor : postProcessors) {
 				outputStream = postProcessor.encode(outputStream, elementType, mediaType, hints.toArray());
@@ -155,9 +148,7 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 		return ( mediaTypes.size() > 0 ? mediaTypes.get(0) : MediaType.TEXT_PLAIN);
 	}
 
-	private MessageToByteEncoder<?> resolveEncoder(ReactiveServerHttpRequest request,
-			ResolvableType type, MediaType mediaType, Object[] hints) {
-
+	private MessageToByteEncoder<?> resolveEncoder(ResolvableType type, MediaType mediaType, Object[] hints) {
 		for (MessageToByteEncoder<?> codec : this.serializers) {
 			if (codec.canEncode(type, mediaType, hints)) {
 				return codec;
@@ -166,9 +157,8 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 		return null;
 	}
 
-	private List<MessageToByteEncoder<ByteBuffer>> resolvePostProcessors(
-			ReactiveServerHttpRequest request, ResolvableType type, MediaType mediaType,
-			Object[] hints) {
+	private List<MessageToByteEncoder<ByteBuffer>> resolvePostProcessors(ResolvableType type,
+			MediaType mediaType, Object[] hints) {
 
 		List<MessageToByteEncoder<ByteBuffer>> postProcessors = new ArrayList<>();
 		for (MessageToByteEncoder<ByteBuffer> postProcessor : this.postProcessors) {
