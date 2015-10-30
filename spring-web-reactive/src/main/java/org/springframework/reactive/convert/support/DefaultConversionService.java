@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.reactive.web.dispatch.method.annotation;
+package org.springframework.reactive.convert.support;
 
 import reactor.core.publisher.convert.DependencyUtils;
 
@@ -28,7 +28,7 @@ import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converte
  * TODO temporary class designed to be replaced by org.springframework.core.convert.support.DefaultConversionService when it will contain Reactive Streams converter
  * @author Sebastien Deleuze
  */
-class DefaultConversionService extends GenericConversionService {
+public class DefaultConversionService extends GenericConversionService {
 
 	public DefaultConversionService() {
 		addDefaultConverters(this);
