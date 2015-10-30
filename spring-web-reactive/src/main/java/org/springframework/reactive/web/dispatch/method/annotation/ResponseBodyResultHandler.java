@@ -16,22 +16,14 @@
 
 package org.springframework.reactive.web.dispatch.method.annotation;
 
-import java.lang.reflect.Type;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 import org.reactivestreams.Publisher;
 import reactor.Publishers;
-import reactor.core.publisher.convert.CompletableFutureConverter;
-import reactor.core.publisher.convert.RxJava1Converter;
-import reactor.core.publisher.convert.RxJava1SingleConverter;
-import reactor.rx.Promise;
-import rx.Observable;
-import rx.Single;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;

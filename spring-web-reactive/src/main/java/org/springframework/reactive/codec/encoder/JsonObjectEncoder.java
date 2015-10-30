@@ -16,22 +16,21 @@
 
 package org.springframework.reactive.codec.encoder;
 
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.springframework.core.ResolvableType;
-import org.springframework.http.MediaType;
-import org.springframework.reactive.codec.decoder.JsonObjectDecoder;
-
-import reactor.core.subscriber.SubscriberBarrier;
-
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 
-import static reactor.Publishers.*;
-
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
+import reactor.core.subscriber.SubscriberBarrier;
 import reactor.core.support.BackpressureUtils;
 import reactor.io.buffer.Buffer;
+
+import org.springframework.core.ResolvableType;
+import org.springframework.http.MediaType;
+import org.springframework.reactive.codec.decoder.JsonObjectDecoder;
+
+import static reactor.Publishers.lift;
 
 /**
  * Encode a byte stream of individual JSON element to a byte stream representing a single

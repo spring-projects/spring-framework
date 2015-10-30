@@ -16,27 +16,32 @@
 
 package org.springframework.reactive.codec.decoder;
 
+import java.nio.ByteBuffer;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.UnmarshalException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.transform.Source;
+import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamSource;
+
 import org.reactivestreams.Publisher;
-import org.springframework.core.ResolvableType;
-import org.springframework.http.MediaType;
-import org.springframework.reactive.codec.CodecException;
-import org.springframework.reactive.codec.encoder.Jaxb2Encoder;
-import org.springframework.reactive.io.ByteBufferPublisherInputStream;
-import org.springframework.util.Assert;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 import reactor.Publishers;
 
-import javax.xml.bind.*;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.transform.Source;
-import javax.xml.transform.sax.SAXSource;
-import javax.xml.transform.stream.StreamSource;
-import java.nio.ByteBuffer;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import org.springframework.core.ResolvableType;
+import org.springframework.http.MediaType;
+import org.springframework.reactive.codec.CodecException;
+import org.springframework.reactive.codec.encoder.Jaxb2Encoder;
+import org.springframework.reactive.io.ByteBufferPublisherInputStream;
+import org.springframework.util.Assert;
 
 /**
  * Decode from a bytes stream of XML elements to a stream of {@code Object} (POJO).

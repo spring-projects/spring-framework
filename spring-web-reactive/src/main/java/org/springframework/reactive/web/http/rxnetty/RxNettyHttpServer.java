@@ -20,7 +20,6 @@ import io.netty.buffer.ByteBuf;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.reactive.web.http.HttpServer;
 import org.springframework.reactive.web.http.HttpServerSupport;
-import org.springframework.reactive.web.http.rxnetty.RequestHandlerAdapter;
 import org.springframework.util.Assert;
 
 

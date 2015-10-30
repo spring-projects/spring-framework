@@ -18,9 +18,7 @@ package org.springframework.reactive.web.http.servlet;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.util.Arrays;
-
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 
