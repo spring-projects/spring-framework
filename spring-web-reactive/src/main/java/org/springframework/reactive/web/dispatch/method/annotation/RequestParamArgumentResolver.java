@@ -17,6 +17,11 @@
 package org.springframework.reactive.web.dispatch.method.annotation;
 
 
+import java.util.Optional;
+
+import org.reactivestreams.Publisher;
+import reactor.Publishers;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.http.server.ReactiveServerHttpRequest;
 import org.springframework.reactive.web.dispatch.method.HandlerMethodArgumentResolver;
@@ -40,11 +45,12 @@ public class RequestParamArgumentResolver implements HandlerMethodArgumentResolv
 
 
 	@Override
-	public Object resolveArgument(MethodParameter param, ReactiveServerHttpRequest request) {
+	public Publisher<Object> resolveArgument(MethodParameter param, ReactiveServerHttpRequest request) {
 		RequestParam annotation = param.getParameterAnnotation(RequestParam.class);
 		String name = (annotation.value().length() != 0 ? annotation.value() : param.getParameterName());
 		UriComponents uriComponents = UriComponentsBuilder.fromUri(request.getURI()).build();
-		return uriComponents.getQueryParams().getFirst(name);
+		String value = uriComponents.getQueryParams().getFirst(name);
+		return Publishers.just(Optional.ofNullable(value));
 	}
 
 }

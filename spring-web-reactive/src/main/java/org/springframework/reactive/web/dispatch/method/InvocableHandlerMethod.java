@@ -19,8 +19,14 @@ package org.springframework.reactive.web.dispatch.method;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+
+import org.reactivestreams.Publisher;
+import reactor.Publishers;
+import reactor.fn.tuple.Tuple;
+import reactor.rx.Streams;
 
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.GenericTypeResolver;
@@ -32,9 +38,6 @@ import org.springframework.web.method.HandlerMethod;
 
 
 /**
- * 90% overlap with the existing one in spring-web except for the different
- * HandlerMethodArgumentResolver contract.
- *
  * @author Rossen Stoyanchev
  */
 public class InvocableHandlerMethod extends HandlerMethod {
@@ -55,53 +58,74 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 
-	public Object invokeForRequest(ReactiveServerHttpRequest request, Object... providedArgs) throws Exception {
-		Object[] args = getMethodArgumentValues(request, providedArgs);
-		if (logger.isTraceEnabled()) {
-			logger.trace("Invoking [" + getBeanType().getSimpleName() + "." +
-					getMethod().getName() + "] method with arguments " + Arrays.asList(args));
-		}
-		Object returnValue = doInvoke(args);
-		if (logger.isTraceEnabled()) {
-			logger.trace("Method [" + getMethod().getName() + "] returned [" + returnValue + "]");
-		}
-		return returnValue;
+	public Publisher<Object> invokeForRequest(ReactiveServerHttpRequest request,
+			Object... providedArgs) {
+
+		List<Publisher<Object>> argPublishers = getMethodArguments(request, providedArgs);
+
+		Publisher<Object[]> argValues = (!argPublishers.isEmpty() ?
+				Streams.zip(argPublishers, this::unwrapOptionalArgValues) : Publishers.just(new Object[0]));
+
+		return Publishers.map(argValues, args -> {
+			if (logger.isTraceEnabled()) {
+				logger.trace("Invoking [" + getBeanType().getSimpleName() + "." +
+						getMethod().getName() + "] method with arguments " +
+						Collections.singletonList(argPublishers));
+			}
+			Object returnValue = null;
+			try {
+				returnValue = doInvoke(args);
+				if (logger.isTraceEnabled()) {
+					logger.trace("Method [" + getMethod().getName() + "] returned [" + returnValue + "]");
+				}
+			}
+			catch (Exception ex) {
+				// TODO: how to best handle error inside map? (also wrapping hides original ex)
+				throw new IllegalStateException(ex);
+			}
+			return returnValue;
+		});
 	}
 
-	private Object[] getMethodArgumentValues(ReactiveServerHttpRequest request, Object... providedArgs) throws Exception {
+	private List<Publisher<Object>> getMethodArguments(ReactiveServerHttpRequest request,
+			Object... providedArgs) {
+
 		MethodParameter[] parameters = getMethodParameters();
-		Object[] args = new Object[parameters.length];
+		List<Publisher<Object>> valuePublishers = new ArrayList<>(parameters.length);
 		for (int i = 0; i < parameters.length; i++) {
 			MethodParameter parameter = parameters[i];
 			parameter.initParameterNameDiscovery(this.parameterNameDiscoverer);
 			GenericTypeResolver.resolveParameterType(parameter, getBean().getClass());
-			args[i] = resolveProvidedArgument(parameter, providedArgs);
-			if (args[i] != null) {
+			Object value = resolveProvidedArgument(parameter, providedArgs);
+			if (value != null) {
+				valuePublishers.add(Publishers.just(value));
 				continue;
 			}
+			boolean resolved = false;
 			for (HandlerMethodArgumentResolver resolver : this.argumentResolvers) {
 				if (resolver.supportsParameter(parameter)) {
 					try {
-						args[i] = resolver.resolveArgument(parameter, request);
+						valuePublishers.add(resolver.resolveArgument(parameter, request));
+						resolved = true;
 						break;
 					}
 					catch (Exception ex) {
-						if (logger.isDebugEnabled()) {
-							logger.debug(getArgumentResolutionErrorMessage("Error resolving argument", i), ex);
-						}
-						throw ex;
+						String msg = buildArgErrorMessage("Error resolving argument", i);
+						valuePublishers.add(Publishers.error(new IllegalStateException(msg, ex)));
+						break;
 					}
 				}
 			}
-			if (args[i] == null) {
-				String msg = getArgumentResolutionErrorMessage("No suitable resolver for argument", i);
-				throw new IllegalStateException(msg);
+			if (!resolved) {
+				String msg = buildArgErrorMessage("No suitable resolver for argument", i);
+				valuePublishers.add(Publishers.error(new IllegalStateException(msg)));
+				break;
 			}
 		}
-		return args;
+		return valuePublishers;
 	}
 
-	private String getArgumentResolutionErrorMessage(String message, int index) {
+	private String buildArgErrorMessage(String message, int index) {
 		MethodParameter param = getMethodParameters()[index];
 		message += " [" + index + "] [type=" + param.getParameterType().getName() + "]";
 		return getDetailedErrorMessage(message);
@@ -123,6 +147,27 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			}
 		}
 		return null;
+	}
+
+	private void unwrapOptionalArgValues(Object[] args) {
+		for (int i = 0; i < args.length; i++) {
+			if (args[i] instanceof Optional) {
+				Optional optional = (Optional) args[i];
+				args[i] = optional.isPresent() ? optional.get() : null;
+			}
+		}
+	}
+
+	private Object[] unwrapOptionalArgValues(Tuple tuple) {
+		Object[] args = new Object[tuple.size()];
+		for (int i = 0; i < tuple.size(); i++) {
+			args[i] = tuple.get(i);
+			if (args[i] instanceof Optional) {
+				Optional optional = (Optional) args[i];
+				args[i] = optional.isPresent() ? optional.get() : null;
+			}
+		}
+		return args;
 	}
 
 	protected Object doInvoke(Object... args) throws Exception {

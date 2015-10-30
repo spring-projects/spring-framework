@@ -181,6 +181,11 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 	}
 
 	@Test
+	public void personCapitalize() throws Exception {
+		capitalizePojo("http://localhost:" + port + "/person-capitalize");
+	}
+	
+	@Test
 	public void completableFutureCapitalize() throws Exception {
 		capitalizePojo("http://localhost:" + port + "/completable-future-capitalize");
 	}
@@ -376,6 +381,13 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 			});
 		}
 
+		@RequestMapping("/person-capitalize")
+		@ResponseBody
+		public Person personCapitalize(@RequestBody Person person) {
+			person.setName(person.getName().toUpperCase());
+			return person;
+		}
+		
 		@RequestMapping("/completable-future-capitalize")
 		@ResponseBody
 		public CompletableFuture<Person> completableFutureCapitalize(@RequestBody CompletableFuture<Person> personFuture) {

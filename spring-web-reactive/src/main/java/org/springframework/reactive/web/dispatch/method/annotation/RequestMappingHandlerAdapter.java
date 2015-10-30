@@ -79,14 +79,8 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 		InvocableHandlerMethod handlerMethod = new InvocableHandlerMethod((HandlerMethod) handler);
 		handlerMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
 
-		try {
-			Object result = handlerMethod.invokeForRequest(request);
-			return Publishers.just(new HandlerResult(handlerMethod, result));
-		}
-		catch (Exception e) {
-			// TODO: remove throws declaration from InvocableHandlerMethod
-			return Publishers.error(e);
-		}
+		Publisher<Object> resultPublisher = handlerMethod.invokeForRequest(request);
+		return Publishers.map(resultPublisher, result -> new HandlerResult(handlerMethod, result));
 	}
 
 }

@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.reactivestreams.Publisher;
+import reactor.Publishers;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
@@ -66,9 +67,7 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
-	public Object resolveArgument(MethodParameter parameter, ReactiveServerHttpRequest request) {
-
+	public Publisher<Object> resolveArgument(MethodParameter parameter, ReactiveServerHttpRequest request) {
 		MediaType mediaType = resolveMediaType(request);
 		ResolvableType type = ResolvableType.forMethodParameter(parameter);
 		List<Object> hints = new ArrayList<>();
@@ -85,12 +84,10 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 			}
 			elementStream = deserializer.decode(inputStream, elementType, mediaType, hints.toArray());
 		}
-		if (conversionService.canConvert(Publisher.class, type.getRawClass())) {
-			return conversionService.convert(elementStream, type.getRawClass());
+		if (this.conversionService.canConvert(Publisher.class, type.getRawClass())) {
+			return Publishers.just(this.conversionService.convert(elementStream, type.getRawClass()));
 		}
-		else {
-			return elementStream;
-		}
+		return Publishers.map(elementStream, element -> element);
 	}
 
 	private MediaType resolveMediaType(ReactiveServerHttpRequest request) {
