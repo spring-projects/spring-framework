@@ -13,28 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.reactive.web.http.rxnetty;
-
-import io.netty.buffer.ByteBuf;
-import io.reactivex.netty.protocol.http.server.HttpServerRequest;
-import org.reactivestreams.Publisher;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.reactive.web.http.ServerHttpRequest;
-import org.springframework.util.Assert;
-
-import reactor.core.publisher.convert.RxJava1Converter;
-import rx.Observable;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 
+import io.netty.buffer.ByteBuf;
+import io.reactivex.netty.protocol.http.server.HttpServerRequest;
+import org.reactivestreams.Publisher;
+import reactor.core.publisher.convert.RxJava1Converter;
+import rx.Observable;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.server.ReactiveServerHttpRequest;
+import org.springframework.util.Assert;
+
 /**
  * @author Rossen Stoyanchev
  * @author Stephane Maldini
  */
-public class RxNettyServerHttpRequest implements ServerHttpRequest {
+public class RxNettyServerHttpRequest implements ReactiveServerHttpRequest {
 
 	private final HttpServerRequest<ByteBuf> request;
 

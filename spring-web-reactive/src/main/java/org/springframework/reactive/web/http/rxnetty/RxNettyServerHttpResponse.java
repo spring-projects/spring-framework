@@ -13,28 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.reactive.web.http.rxnetty;
+
+import java.nio.ByteBuffer;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import org.reactivestreams.Publisher;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.reactive.web.http.ServerHttpResponse;
-import org.springframework.util.Assert;
-
 import reactor.Publishers;
 import reactor.core.publisher.convert.RxJava1Converter;
 import reactor.io.buffer.Buffer;
 import rx.Observable;
 
-import java.nio.ByteBuffer;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.server.ReactiveServerHttpResponse;
+import org.springframework.util.Assert;
 
 /**
  * @author Rossen Stoyanchev
  * @author Stephane Maldini
  */
-public class RxNettyServerHttpResponse implements ServerHttpResponse {
+public class RxNettyServerHttpResponse implements ReactiveServerHttpResponse {
 
 	private final HttpServerResponse<?> response;
 
@@ -70,7 +71,7 @@ public class RxNettyServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public Publisher<Void> writeWith(Publisher<ByteBuffer> contentPublisher) {
+	public Publisher<Void> setBody(Publisher<ByteBuffer> contentPublisher) {
 		applyHeaders();
 		Observable<byte[]> contentObservable = RxJava1Converter.from(contentPublisher).map(content -> new Buffer(content).asBytes());
 		return RxJava1Converter.from(this.response.writeBytes(contentObservable));

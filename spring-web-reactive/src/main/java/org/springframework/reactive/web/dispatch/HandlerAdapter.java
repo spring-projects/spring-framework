@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.reactive.web.dispatch;
 
-import org.springframework.reactive.web.http.ServerHttpRequest;
-import org.springframework.reactive.web.http.ServerHttpResponse;
+import org.springframework.http.server.ReactiveServerHttpRequest;
+import org.springframework.http.server.ReactiveServerHttpResponse;
 
 /**
  * Interface that must be implemented for each handler type to handle an HTTP request.
@@ -52,6 +53,6 @@ public interface HandlerAdapter {
 	 * @throws Exception in case of errors
 	 * @return An {@link HandlerResult} instance
 	 */
-	HandlerResult handle(ServerHttpRequest request, ServerHttpResponse response, Object handler) throws Exception;
+	HandlerResult handle(ReactiveServerHttpRequest request, ReactiveServerHttpResponse response, Object handler) throws Exception;
 
 }

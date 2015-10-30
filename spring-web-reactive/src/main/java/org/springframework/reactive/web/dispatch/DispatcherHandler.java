@@ -13,25 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.reactive.web.dispatch;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
+import reactor.Publishers;
+
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.server.ReactiveServerHttpRequest;
+import org.springframework.http.server.ReactiveServerHttpResponse;
 import org.springframework.reactive.web.http.HttpHandler;
-import org.springframework.reactive.web.http.ServerHttpRequest;
-import org.springframework.reactive.web.http.ServerHttpResponse;
-import reactor.Publishers;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Central dispatcher for HTTP request handlers/controllers. Dispatches to registered
@@ -91,7 +93,7 @@ public class DispatcherHandler implements HttpHandler, ApplicationContextAware {
 
 
 	@Override
-	public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
+	public Publisher<Void> handle(ReactiveServerHttpRequest request, ReactiveServerHttpResponse response) {
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Processing " + request.getMethod() + " request for [" + request.getURI() + "]");
@@ -123,7 +125,7 @@ public class DispatcherHandler implements HttpHandler, ApplicationContextAware {
 
 	}
 
-	protected Object getHandler(ServerHttpRequest request) {
+	protected Object getHandler(ReactiveServerHttpRequest request) {
 		Object handler = null;
 		for (HandlerMapping handlerMapping : this.handlerMappings) {
 			handler = handlerMapping.getHandler(request);

@@ -18,6 +18,8 @@ package org.springframework.reactive.web.http;
 
 import org.reactivestreams.Publisher;
 
+import org.springframework.http.server.ReactiveServerHttpRequest;
+import org.springframework.http.server.ReactiveServerHttpResponse;
 
 /**
  * Interface for handlers that process HTTP requests and generate an HTTP response.
@@ -28,8 +30,8 @@ import org.reactivestreams.Publisher;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
- * @see ServerHttpRequest#getBody()
- * @see ServerHttpResponse#writeWith(Publisher)
+ * @see ReactiveServerHttpRequest#getBody()
+ * @see ReactiveServerHttpResponse#setBody(Publisher)
  */
 public interface HttpHandler {
 
@@ -44,6 +46,6 @@ public interface HttpHandler {
 	 * when the handling is complete (success or error) including the flush of the data on the
 	 * network.
 	 */
-	Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response);
+	Publisher<Void> handle(ReactiveServerHttpRequest request, ReactiveServerHttpResponse response);
 
 }

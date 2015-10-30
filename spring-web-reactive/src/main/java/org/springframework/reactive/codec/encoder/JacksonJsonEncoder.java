@@ -16,18 +16,19 @@
 
 package org.springframework.reactive.codec.encoder;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.reactivestreams.Publisher;
+import reactor.Publishers;
+import reactor.io.buffer.Buffer;
+
 import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 import org.springframework.reactive.codec.CodecException;
 import org.springframework.reactive.codec.decoder.JacksonJsonDecoder;
 import org.springframework.reactive.io.BufferOutputStream;
-import reactor.Publishers;
-import reactor.io.buffer.Buffer;
-
-import java.io.IOException;
-import java.nio.ByteBuffer;
 
 /**
  * Encode from an {@code Object} stream to a byte stream of JSON objects.

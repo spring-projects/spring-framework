@@ -16,15 +16,16 @@
 
 package org.springframework.reactive.io;
 
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscription;
-import org.springframework.util.Assert;
-import reactor.Publishers;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.concurrent.BlockingQueue;
+
+import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscription;
+import reactor.Publishers;
+
+import org.springframework.util.Assert;
 
 /**
  * {@code InputStream} implementation based on a byte array {@link Publisher}.

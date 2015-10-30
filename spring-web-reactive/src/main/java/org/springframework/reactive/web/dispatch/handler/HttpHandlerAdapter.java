@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.reactive.web.dispatch.handler;
 
 import org.reactivestreams.Publisher;
 
+import org.springframework.http.server.ReactiveServerHttpRequest;
+import org.springframework.http.server.ReactiveServerHttpResponse;
 import org.springframework.reactive.web.dispatch.HandlerAdapter;
 import org.springframework.reactive.web.dispatch.HandlerResult;
 import org.springframework.reactive.web.http.HttpHandler;
-import org.springframework.reactive.web.http.ServerHttpRequest;
-import org.springframework.reactive.web.http.ServerHttpResponse;
-
 
 /**
  * Support use of {@link HttpHandler} with
@@ -44,7 +44,7 @@ public class HttpHandlerAdapter implements HandlerAdapter {
 	}
 
 	@Override
-	public HandlerResult handle(ServerHttpRequest request, ServerHttpResponse response, Object handler) {
+	public HandlerResult handle(ReactiveServerHttpRequest request, ReactiveServerHttpResponse response, Object handler) {
 		HttpHandler httpHandler = (HttpHandler)handler;
 		Publisher<Void> completion = httpHandler.handle(request, response);
 		return new HandlerResult(httpHandler, completion);

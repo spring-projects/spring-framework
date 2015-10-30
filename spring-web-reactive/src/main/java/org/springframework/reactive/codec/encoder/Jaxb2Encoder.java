@@ -16,7 +16,19 @@
 
 package org.springframework.reactive.codec.encoder;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.MarshalException;
+import javax.xml.bind.Marshaller;
+
 import org.reactivestreams.Publisher;
+import reactor.Publishers;
+import reactor.io.buffer.Buffer;
+
 import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 import org.springframework.reactive.codec.CodecException;
@@ -24,17 +36,6 @@ import org.springframework.reactive.codec.decoder.Jaxb2Decoder;
 import org.springframework.reactive.io.BufferOutputStream;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
-import reactor.Publishers;
-import reactor.io.buffer.Buffer;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.MarshalException;
-import javax.xml.bind.Marshaller;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * Encode from an {@code Object} stream to a byte stream of XML elements.

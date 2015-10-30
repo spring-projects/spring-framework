@@ -23,14 +23,16 @@ import javax.xml.bind.Unmarshaller;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
+import reactor.io.buffer.Buffer;
+import reactor.rx.Streams;
 
 import org.springframework.http.MediaType;
+import org.springframework.http.server.ReactiveServerHttpRequest;
+import org.springframework.http.server.ReactiveServerHttpResponse;
 import org.springframework.reactive.io.BufferOutputStream;
 import org.springframework.reactive.io.ByteBufferPublisherInputStream;
 
 import static org.junit.Assert.fail;
-import reactor.io.buffer.Buffer;
-import reactor.rx.Streams;
 
 /**
  * @author Arjen Poutsma
@@ -40,8 +42,8 @@ public class XmlHandler implements HttpHandler {
 	private static final Log logger = LogFactory.getLog(XmlHandler.class);
 
 	@Override
-	public Publisher<Void> handle(ServerHttpRequest request,
-			ServerHttpResponse response) {
+	public Publisher<Void> handle(ReactiveServerHttpRequest request,
+			ReactiveServerHttpResponse response) {
 		try {
 			JAXBContext jaxbContext = JAXBContext.newInstance(XmlHandlerIntegrationTests.Person.class);
 			Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
@@ -73,7 +75,7 @@ public class XmlHandler implements HttpHandler {
 			bos.close();
 			buffer.flip();
 
-			return response.writeWith(Streams.just(buffer.byteBuffer()));
+			return response.setBody(Streams.just(buffer.byteBuffer()));
 		}
 		catch (Exception ex) {
 			logger.error(ex, ex);

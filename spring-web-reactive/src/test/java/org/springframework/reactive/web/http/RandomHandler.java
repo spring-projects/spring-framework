@@ -27,6 +27,9 @@ import org.reactivestreams.Subscription;
 import reactor.io.buffer.Buffer;
 import reactor.rx.Streams;
 
+import org.springframework.http.server.ReactiveServerHttpRequest;
+import org.springframework.http.server.ReactiveServerHttpResponse;
+
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -41,7 +44,7 @@ public class RandomHandler implements HttpHandler {
 	private final Random rnd = new Random();
 
 	@Override
-	public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
+	public Publisher<Void> handle(ReactiveServerHttpRequest request, ReactiveServerHttpResponse response) {
 
 		request.getBody().subscribe(new Subscriber<ByteBuffer>() {
 			private Subscription s;
@@ -73,7 +76,7 @@ public class RandomHandler implements HttpHandler {
 		});
 
 		response.getHeaders().setContentLength(RESPONSE_SIZE);
-		return response.writeWith(Streams.just(ByteBuffer.wrap(randomBytes())));
+		return response.setBody(Streams.just(ByteBuffer.wrap(randomBytes())));
 	}
 
 	private byte[] randomBytes() {

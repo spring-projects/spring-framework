@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.reactive.web.dispatch.method.annotation;
 
 import java.util.Arrays;
@@ -32,8 +33,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.server.ReactiveServerHttpRequest;
 import org.springframework.reactive.web.dispatch.HandlerMapping;
-import org.springframework.reactive.web.http.ServerHttpRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -92,7 +93,7 @@ public class RequestMappingHandlerMapping implements HandlerMapping,
 	}
 
 	@Override
-	public Object getHandler(ServerHttpRequest request) {
+	public Object getHandler(ReactiveServerHttpRequest request) {
 		String path = request.getURI().getPath();
 		HttpMethod method = request.getMethod();
 		for (Map.Entry<RequestMappingInfo, HandlerMethod> entry : this.methodMap.entrySet()) {

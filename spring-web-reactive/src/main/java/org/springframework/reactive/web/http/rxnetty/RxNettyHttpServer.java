@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.reactive.web.http.rxnetty;
 
 import io.netty.buffer.ByteBuf;
@@ -20,7 +21,6 @@ import io.netty.buffer.ByteBuf;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.reactive.web.http.HttpServer;
 import org.springframework.reactive.web.http.HttpServerSupport;
-import org.springframework.reactive.web.http.rxnetty.RequestHandlerAdapter;
 import org.springframework.util.Assert;
 
 

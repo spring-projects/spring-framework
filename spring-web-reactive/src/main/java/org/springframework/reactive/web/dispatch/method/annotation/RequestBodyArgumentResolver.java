@@ -16,22 +16,23 @@
 
 package org.springframework.reactive.web.dispatch.method.annotation;
 
-import org.reactivestreams.Publisher;
-import org.springframework.core.MethodParameter;
-import org.springframework.core.ResolvableType;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.reactive.codec.decoder.ByteToMessageDecoder;
-import org.springframework.reactive.web.dispatch.method.HandlerMethodArgumentResolver;
-import org.springframework.reactive.web.http.ServerHttpRequest;
-import org.springframework.web.bind.annotation.RequestBody;
-
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import org.reactivestreams.Publisher;
+
+import org.springframework.core.MethodParameter;
+import org.springframework.core.ResolvableType;
+import org.springframework.core.convert.ConversionService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.server.ReactiveServerHttpRequest;
+import org.springframework.reactive.codec.decoder.ByteToMessageDecoder;
+import org.springframework.reactive.web.dispatch.method.HandlerMethodArgumentResolver;
+import org.springframework.web.bind.annotation.RequestBody;
 
 /**
  * @author Sebastien Deleuze
@@ -66,7 +67,7 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Object resolveArgument(MethodParameter parameter, ServerHttpRequest request) {
+	public Object resolveArgument(MethodParameter parameter, ReactiveServerHttpRequest request) {
 
 		MediaType mediaType = resolveMediaType(request);
 		ResolvableType type = ResolvableType.forMethodParameter(parameter);
@@ -92,14 +93,14 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 		}
 	}
 
-	private MediaType resolveMediaType(ServerHttpRequest request) {
+	private MediaType resolveMediaType(ReactiveServerHttpRequest request) {
 		String acceptHeader = request.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
 		List<MediaType> mediaTypes = MediaType.parseMediaTypes(acceptHeader);
 		MediaType.sortBySpecificityAndQuality(mediaTypes);
 		return ( mediaTypes.size() > 0 ? mediaTypes.get(0) : MediaType.TEXT_PLAIN);
 	}
 
-	private ByteToMessageDecoder<?> resolveDeserializers(ServerHttpRequest request, ResolvableType type,  MediaType mediaType, Object[] hints) {
+	private ByteToMessageDecoder<?> resolveDeserializers(ReactiveServerHttpRequest request, ResolvableType type,  MediaType mediaType, Object[] hints) {
 		for (ByteToMessageDecoder<?> deserializer : this.deserializers) {
 			if (deserializer.canDecode(type, mediaType, hints)) {
 				return deserializer;
@@ -108,7 +109,7 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 		return null;
 	}
 
-	private List<ByteToMessageDecoder<ByteBuffer>> resolvePreProcessors(ServerHttpRequest request, ResolvableType type, MediaType mediaType, Object[] hints) {
+	private List<ByteToMessageDecoder<ByteBuffer>> resolvePreProcessors(ReactiveServerHttpRequest request, ResolvableType type, MediaType mediaType, Object[] hints) {
 		List<ByteToMessageDecoder<ByteBuffer>> preProcessors = new ArrayList<>();
 		for (ByteToMessageDecoder<ByteBuffer> preProcessor : this.preProcessors) {
 			if (preProcessor.canDecode(type, mediaType, hints)) {

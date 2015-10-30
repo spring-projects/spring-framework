@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.reactive.web.dispatch.handler;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.http.server.ReactiveServerHttpRequest;
 import org.springframework.reactive.web.dispatch.HandlerMapping;
-import org.springframework.reactive.web.http.ServerHttpRequest;
-
 
 /**
  * @author Rossen Stoyanchev
@@ -39,7 +39,7 @@ public class SimpleUrlHandlerMapping implements HandlerMapping {
 
 
 	@Override
-	public Object getHandler(ServerHttpRequest request) {
+	public Object getHandler(ReactiveServerHttpRequest request) {
 		return this.handlerMap.get(request.getURI().getPath());
 	}
 

@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.reactive.web.dispatch;
 
-import org.springframework.reactive.web.http.ServerHttpRequest;
+import org.springframework.http.server.ReactiveServerHttpRequest;
 
 /**
  * @author Rossen Stoyanchev
  */
 public interface HandlerMapping {
 
-	Object getHandler(ServerHttpRequest request);
+	Object getHandler(ReactiveServerHttpRequest request);
 
 }
