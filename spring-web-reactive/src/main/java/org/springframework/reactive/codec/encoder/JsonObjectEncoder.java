@@ -33,8 +33,8 @@ import org.springframework.reactive.codec.decoder.JsonObjectDecoder;
 import static reactor.Publishers.lift;
 
 /**
- * Encode a byte stream of individual JSON element to a byte stream representing a single
- * JSON array when if it contains more than one element.
+ * Encode a byte stream of individual JSON element to a byte stream representing
+ * a single JSON array when if it contains more than one element.
  *
  * @author Sebastien Deleuze
  * @author Stephane Maldini
@@ -52,26 +52,35 @@ public class JsonObjectEncoder implements MessageToByteEncoder<ByteBuffer> {
 	@Override
 	public Publisher<ByteBuffer> encode(Publisher<? extends ByteBuffer> messageStream,
 			ResolvableType type, MediaType mediaType, Object... hints) {
+
+		//noinspection Convert2MethodRef
 		return lift(messageStream, bbs -> new JsonEncoderBarrier(bbs));
 	}
 
+
 	private static class JsonEncoderBarrier extends SubscriberBarrier<ByteBuffer, ByteBuffer> {
 
-		private volatile long requested;
 		@SuppressWarnings("rawtypes")
 		static final AtomicLongFieldUpdater<JsonEncoderBarrier> REQUESTED =
 				AtomicLongFieldUpdater.newUpdater(JsonEncoderBarrier.class, "requested");
 
-		private volatile int terminated;
 		static final AtomicIntegerFieldUpdater<JsonEncoderBarrier> TERMINATED =
 				AtomicIntegerFieldUpdater.newUpdater(JsonEncoderBarrier.class, "terminated");
 
-		ByteBuffer prev = null;
-		long count = 0;
+
+		private ByteBuffer prev = null;
+
+		private long count = 0;
+
+		private volatile long requested;
+
+		private volatile int terminated;
+
 
 		public JsonEncoderBarrier(Subscriber<? super ByteBuffer> subscriber) {
 			super(subscriber);
 		}
+
 
 		@Override
 		protected void doRequest(long n) {
@@ -86,17 +95,17 @@ public class JsonObjectEncoder implements MessageToByteEncoder<ByteBuffer> {
 
 		@Override
 		protected void doNext(ByteBuffer next) {
-			count++;
-			if (count == 1) {
-				prev = next;
+			this.count++;
+			if (this.count == 1) {
+				this.prev = next;
 				super.doRequest(1);
 				return;
 			}
 
-			ByteBuffer tmp = prev;
-			prev = next;
+			ByteBuffer tmp = this.prev;
+			this.prev = next;
 			Buffer buffer = new Buffer();
-			if (count == 2) {
+			if (this.count == 2) {
 				buffer.append("[");
 			}
 			buffer.append(tmp);
@@ -104,25 +113,25 @@ public class JsonObjectEncoder implements MessageToByteEncoder<ByteBuffer> {
 			buffer.flip();
 
 			BackpressureUtils.getAndSub(REQUESTED, this, 1L);
-			subscriber.onNext(buffer.byteBuffer());
+			downstream().onNext(buffer.byteBuffer());
 		}
 
 		protected void drainLast(){
 			if(BackpressureUtils.getAndSub(REQUESTED, this, 1L) > 0) {
 				Buffer buffer = new Buffer();
-				buffer.append(prev);
-				if (count > 1) {
+				buffer.append(this.prev);
+				if (this.count > 1) {
 					buffer.append("]");
 				}
 				buffer.flip();
-				subscriber.onNext(buffer.byteBuffer());
+				downstream().onNext(buffer.byteBuffer());
 				super.doComplete();
 			}
 		}
 
 		@Override
 		protected void doComplete() {
-			if(TERMINATED.compareAndSet(this, 0, 1)){
+			if(TERMINATED.compareAndSet(this, 0, 1)) {
 				drainLast();
 			}
 		}

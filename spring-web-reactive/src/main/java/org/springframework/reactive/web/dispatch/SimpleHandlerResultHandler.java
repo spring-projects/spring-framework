@@ -34,6 +34,11 @@ public class SimpleHandlerResultHandler implements Ordered, HandlerResultHandler
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
+
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
 	@Override
 	public int getOrder() {
 		return this.order;
@@ -46,8 +51,10 @@ public class SimpleHandlerResultHandler implements Ordered, HandlerResultHandler
 	}
 
 	@Override
-	public Publisher<Void> handleResult(ReactiveServerHttpRequest request, ReactiveServerHttpResponse response, HandlerResult result) {
-		Publisher<Void> handleComplete = Publishers.completable((Publisher<?>)result.getValue());
-		return Publishers.concat(Publishers.from(Arrays.asList(handleComplete, response.writeHeaders())));
+	public Publisher<Void> handleResult(ReactiveServerHttpRequest request,
+			ReactiveServerHttpResponse response, HandlerResult result) {
+
+		Publisher<Void> completion = Publishers.completable((Publisher<?>)result.getValue());
+		return Publishers.concat(Publishers.from(Arrays.asList(completion, response.writeHeaders())));
 	}
 }

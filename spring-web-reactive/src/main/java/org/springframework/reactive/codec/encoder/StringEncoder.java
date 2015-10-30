@@ -46,7 +46,9 @@ public class StringEncoder implements MessageToByteEncoder<String> {
 	}
 
 	@Override
-	public Publisher<ByteBuffer> encode(Publisher<? extends String> elementStream, ResolvableType type, MediaType mediaType, Object... hints) {
+	public Publisher<ByteBuffer> encode(Publisher<? extends String> elementStream,
+			ResolvableType type, MediaType mediaType, Object... hints) {
+
 		final Charset charset = HintUtils.getHintByClass(Charset.class, hints, DEFAULT_CHARSET);
 		return Publishers.map(elementStream, s -> ByteBuffer.wrap(s.getBytes(charset)));
 	}

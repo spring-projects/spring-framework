@@ -46,7 +46,9 @@ public class ServletServerHttpRequest implements ReactiveServerHttpRequest {
 	private HttpHeaders headers;
 
 
-	public ServletServerHttpRequest(HttpServletRequest servletRequest, Publisher<ByteBuffer> requestBodyPublisher) {
+	public ServletServerHttpRequest(HttpServletRequest servletRequest,
+			Publisher<ByteBuffer> requestBodyPublisher) {
+
 		Assert.notNull(servletRequest, "HttpServletRequest must not be null");
 		this.servletRequest = servletRequest;
 		this.requestBodyPublisher = requestBodyPublisher;
@@ -74,8 +76,8 @@ public class ServletServerHttpRequest implements ReactiveServerHttpRequest {
 	public HttpHeaders getHeaders() {
 		if (this.headers == null) {
 			this.headers = new HttpHeaders();
-			for (Enumeration<?> headerNames = this.servletRequest.getHeaderNames(); headerNames.hasMoreElements(); ) {
-				String headerName = (String) headerNames.nextElement();
+			for (Enumeration<?> names = this.servletRequest.getHeaderNames(); names.hasMoreElements(); ) {
+				String headerName = (String) names.nextElement();
 				for (Enumeration<?> headerValues = this.servletRequest.getHeaders(headerName);
 					 headerValues.hasMoreElements(); ) {
 					String headerValue = (String) headerValues.nextElement();

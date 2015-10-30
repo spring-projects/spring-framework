@@ -21,10 +21,12 @@ import java.nio.ByteBuffer;
 import org.reactivestreams.Publisher;
 
 /**
- * Represents a "reactive" HTTP input message, consisting of {@linkplain #getHeaders() headers}
- * and a readable {@linkplain #getBody() streaming body }.
+ * Represents a "reactive" HTTP input message, consisting of
+ * {@linkplain #getHeaders() headers} and a readable
+ * {@linkplain #getBody() streaming body }.
  *
- * <p>Typically implemented by an HTTP request on the server-side, or a response on the client-side.
+ * <p>Typically implemented by an HTTP request on the server-side, or a response
+ * on the client-side.
  *
  * @author Arjen Poutsma
  */

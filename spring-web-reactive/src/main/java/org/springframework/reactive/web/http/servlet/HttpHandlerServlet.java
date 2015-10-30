@@ -57,17 +57,17 @@ public class HttpHandlerServlet extends HttpServlet {
 			throws ServletException, IOException {
 
 		AsyncContext context = request.startAsync();
-		AsyncContextSynchronizer contextSynchronizer = new AsyncContextSynchronizer(context);
+		AsyncContextSynchronizer synchronizer = new AsyncContextSynchronizer(context);
 
-		RequestBodyPublisher requestPublisher = new RequestBodyPublisher(contextSynchronizer, BUFFER_SIZE);
+		RequestBodyPublisher requestPublisher = new RequestBodyPublisher(synchronizer, BUFFER_SIZE);
 		request.getInputStream().setReadListener(requestPublisher);
 		ServletServerHttpRequest httpRequest = new ServletServerHttpRequest(request, requestPublisher);
 
-		ResponseBodySubscriber responseSubscriber = new ResponseBodySubscriber(contextSynchronizer);
+		ResponseBodySubscriber responseSubscriber = new ResponseBodySubscriber(synchronizer);
 		response.getOutputStream().setWriteListener(responseSubscriber);
 		ServletServerHttpResponse httpResponse = new ServletServerHttpResponse(response, responseSubscriber);
 
-		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber(contextSynchronizer, httpResponse);
+		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber(synchronizer, httpResponse);
 		this.handler.handle(httpRequest, httpResponse).subscribe(resultSubscriber);
 	}
 
@@ -79,7 +79,9 @@ public class HttpHandlerServlet extends HttpServlet {
 		private final ServletServerHttpResponse response;
 
 
-		public HandlerResultSubscriber(AsyncContextSynchronizer synchronizer, ServletServerHttpResponse response) {
+		public HandlerResultSubscriber(AsyncContextSynchronizer synchronizer,
+				ServletServerHttpResponse response) {
+
 			this.synchronizer = synchronizer;
 			this.response = response;
 		}

@@ -43,23 +43,28 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 
 	private static final Charset UTF_8 = Charset.forName("UTF-8");
 
+
 	private final List<ByteToMessageDecoder<?>> deserializers;
+
 	private final List<ByteToMessageDecoder<ByteBuffer>> preProcessors;
+
 	private final ConversionService conversionService;
 
 
-	public RequestBodyArgumentResolver(List<ByteToMessageDecoder<?>> deserializers,
+	public RequestBodyArgumentResolver(List<ByteToMessageDecoder<?>> decoders,
 			ConversionService conversionService) {
-		this(deserializers, conversionService, Collections.EMPTY_LIST);
+
+		this(decoders, conversionService, Collections.EMPTY_LIST);
 	}
 
-	public RequestBodyArgumentResolver(List<ByteToMessageDecoder<?>> deserializers,
-			ConversionService conversionService,
-			List<ByteToMessageDecoder<ByteBuffer>> preProcessors) {
-		this.deserializers = deserializers;
-		this.conversionService = conversionService;
+	public RequestBodyArgumentResolver(List<ByteToMessageDecoder<?>> decoders,
+			ConversionService service, List<ByteToMessageDecoder<ByteBuffer>> preProcessors) {
+
+		this.deserializers = decoders;
+		this.conversionService = service;
 		this.preProcessors = preProcessors;
 	}
+
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
@@ -75,14 +80,15 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 		Publisher<ByteBuffer> inputStream = request.getBody();
 		Publisher<?> elementStream = inputStream;
 		ResolvableType elementType = type.hasGenerics() ? type.getGeneric(0) : type;
-		ByteToMessageDecoder<?> deserializer = resolveDeserializers(request, elementType, mediaType, hints.toArray());
-		if (deserializer != null) {
-			List<ByteToMessageDecoder<ByteBuffer>> preProcessors =
-					resolvePreProcessors(request, elementType, mediaType,hints.toArray());
+		ByteToMessageDecoder<?> decoder = resolveDecoder(request, elementType, mediaType, hints.toArray());
+		if (decoder != null) {
+			List<ByteToMessageDecoder<ByteBuffer>> preProcessors = resolvePreProcessors(
+					request, elementType, mediaType,hints.toArray());
+
 			for (ByteToMessageDecoder<ByteBuffer> preProcessor : preProcessors) {
 				inputStream = preProcessor.decode(inputStream, elementType, mediaType, hints.toArray());
 			}
-			elementStream = deserializer.decode(inputStream, elementType, mediaType, hints.toArray());
+			elementStream = decoder.decode(inputStream, elementType, mediaType, hints.toArray());
 		}
 		if (this.conversionService.canConvert(Publisher.class, type.getRawClass())) {
 			return Publishers.just(this.conversionService.convert(elementStream, type.getRawClass()));
@@ -97,7 +103,9 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 		return ( mediaTypes.size() > 0 ? mediaTypes.get(0) : MediaType.TEXT_PLAIN);
 	}
 
-	private ByteToMessageDecoder<?> resolveDeserializers(ReactiveServerHttpRequest request, ResolvableType type,  MediaType mediaType, Object[] hints) {
+	private ByteToMessageDecoder<?> resolveDecoder(ReactiveServerHttpRequest request,
+			ResolvableType type, MediaType mediaType, Object[] hints) {
+
 		for (ByteToMessageDecoder<?> deserializer : this.deserializers) {
 			if (deserializer.canDecode(type, mediaType, hints)) {
 				return deserializer;
@@ -106,7 +114,10 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 		return null;
 	}
 
-	private List<ByteToMessageDecoder<ByteBuffer>> resolvePreProcessors(ReactiveServerHttpRequest request, ResolvableType type, MediaType mediaType, Object[] hints) {
+	private List<ByteToMessageDecoder<ByteBuffer>> resolvePreProcessors(
+			ReactiveServerHttpRequest request, ResolvableType type, MediaType mediaType,
+			Object[] hints) {
+
 		List<ByteToMessageDecoder<ByteBuffer>> preProcessors = new ArrayList<>();
 		for (ByteToMessageDecoder<ByteBuffer> preProcessor : this.preProcessors) {
 			if (preProcessor.canDecode(type, mediaType, hints)) {
@@ -115,4 +126,5 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 		}
 		return preProcessors;
 	}
+
 }

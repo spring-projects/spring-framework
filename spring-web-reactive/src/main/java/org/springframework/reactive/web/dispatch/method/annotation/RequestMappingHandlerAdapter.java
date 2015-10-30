@@ -19,6 +19,7 @@ package org.springframework.reactive.web.dispatch.method.annotation;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.reactivestreams.Publisher;
@@ -57,12 +58,16 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (this.argumentResolvers == null) {
+
+			List<ByteToMessageDecoder<?>> decoders = Arrays.asList(new ByteBufferDecoder(),
+					new StringDecoder(), new JacksonJsonDecoder());
+
+			List<ByteToMessageDecoder<ByteBuffer>> preProcessors = Collections.singletonList(
+					new JsonObjectDecoder());
+
 			this.argumentResolvers = new ArrayList<>();
 			this.argumentResolvers.add(new RequestParamArgumentResolver());
-			List<ByteToMessageDecoder<?>> deserializers = Arrays.asList(new ByteBufferDecoder(),
-					new StringDecoder(), new JacksonJsonDecoder());
-			List<ByteToMessageDecoder<ByteBuffer>> preProcessors = Arrays.asList(new JsonObjectDecoder());
-			this.argumentResolvers.add(new RequestBodyArgumentResolver(deserializers,
+			this.argumentResolvers.add(new RequestBodyArgumentResolver(decoders,
 					new DefaultConversionService(), preProcessors));
 		}
 	}

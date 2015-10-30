@@ -130,7 +130,8 @@ public class ByteBufferPublisherInputStream extends InputStream {
 			if (this.currentStream != null && this.currentStream.available() > 0) {
 				return this.currentStream;
 			} else {
-				// take() blocks until next or complete() then return null, but that's OK since this is a *blocking* InputStream
+				// take() blocks until next or complete() then return null,
+				// but that's OK since this is a *blocking* InputStream
 				ByteBuffer signal = this.queue.take();
 				if(signal == null){
 					this.completed = true;

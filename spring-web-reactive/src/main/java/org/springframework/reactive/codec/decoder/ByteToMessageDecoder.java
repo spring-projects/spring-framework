@@ -49,6 +49,7 @@ public interface ByteToMessageDecoder<T> {
 	 * @param hints Additional information about how to do decode, optional.
 	 * @return the decoded message stream
 	 */
-	Publisher<T> decode(Publisher<ByteBuffer> inputStream, ResolvableType type, MediaType mediaType, Object... hints);
+	Publisher<T> decode(Publisher<ByteBuffer> inputStream, ResolvableType type,
+			MediaType mediaType, Object... hints);
 
 }

@@ -51,6 +51,7 @@ public interface MessageToByteEncoder<T> {
 	 * @param hints Additional information about how to encode, optional.
 	 * @return the encoded bytes stream
 	 */
-	Publisher<ByteBuffer> encode(Publisher<? extends T> messageStream, ResolvableType type, MediaType mediaType, Object... hints);
+	Publisher<ByteBuffer> encode(Publisher<? extends T> messageStream, ResolvableType type,
+			MediaType mediaType, Object... hints);
 
 }

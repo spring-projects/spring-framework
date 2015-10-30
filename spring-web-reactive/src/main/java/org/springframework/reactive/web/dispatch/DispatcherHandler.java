@@ -72,20 +72,20 @@ public class DispatcherHandler implements HttpHandler, ApplicationContextAware {
 
 	protected void initStrategies(ApplicationContext context) {
 
-		Map<String, HandlerMapping> mappingBeans =
-				BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerMapping.class, true, false);
+		Map<String, HandlerMapping> mappingBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+				context, HandlerMapping.class, true, false);
 
 		this.handlerMappings = new ArrayList<>(mappingBeans.values());
 		AnnotationAwareOrderComparator.sort(this.handlerMappings);
 
-		Map<String, HandlerAdapter> adapterBeans =
-				BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerAdapter.class, true, false);
+		Map<String, HandlerAdapter> adapterBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+				context, HandlerAdapter.class, true, false);
 
 		this.handlerAdapters = new ArrayList<>(adapterBeans.values());
 		AnnotationAwareOrderComparator.sort(this.handlerAdapters);
 
-		Map<String, HandlerResultHandler> beans =
-				BeanFactoryUtils.beansOfTypeIncludingAncestors(context, HandlerResultHandler.class, true, false);
+		Map<String, HandlerResultHandler> beans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
+				context, HandlerResultHandler.class, true, false);
 
 		this.resultHandlers = new ArrayList<>(beans.values());
 		AnnotationAwareOrderComparator.sort(this.resultHandlers);
@@ -94,7 +94,6 @@ public class DispatcherHandler implements HttpHandler, ApplicationContextAware {
 
 	@Override
 	public Publisher<Void> handle(ReactiveServerHttpRequest request, ReactiveServerHttpResponse response) {
-
 		if (logger.isDebugEnabled()) {
 			logger.debug("Processing " + request.getMethod() + " request for [" + request.getURI() + "]");
 		}

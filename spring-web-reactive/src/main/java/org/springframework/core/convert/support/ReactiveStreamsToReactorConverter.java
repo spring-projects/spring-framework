@@ -35,26 +35,30 @@ public final class ReactiveStreamsToReactorConverter implements GenericConverter
 
 	@Override
 	public Set<GenericConverter.ConvertiblePair> getConvertibleTypes() {
-		Set<GenericConverter.ConvertiblePair> convertibleTypes = new LinkedHashSet<>();
-		convertibleTypes.add(new GenericConverter.ConvertiblePair(Publisher.class, Stream.class));
-		convertibleTypes.add(new GenericConverter.ConvertiblePair(Stream.class, Publisher.class));
-		convertibleTypes.add(new GenericConverter.ConvertiblePair(Publisher.class, Promise.class));
-		convertibleTypes.add(new GenericConverter.ConvertiblePair(Promise.class, Publisher.class));
-		return convertibleTypes;
+		Set<GenericConverter.ConvertiblePair> pairs = new LinkedHashSet<>();
+		pairs.add(new GenericConverter.ConvertiblePair(Publisher.class, Stream.class));
+		pairs.add(new GenericConverter.ConvertiblePair(Stream.class, Publisher.class));
+		pairs.add(new GenericConverter.ConvertiblePair(Publisher.class, Promise.class));
+		pairs.add(new GenericConverter.ConvertiblePair(Promise.class, Publisher.class));
+		return pairs;
 	}
 
 	@Override
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-		if (source != null) {
-			if (Stream.class.isAssignableFrom(source.getClass())) {
-				return source;
-			} else if (Stream.class.isAssignableFrom(targetType.getResolvableType().getRawClass())) {
-				return Streams.wrap((Publisher)source);
-			} else if (Promise.class.isAssignableFrom(source.getClass())) {
-				return ((Promise<?>)source);
-			}  else if (Promise.class.isAssignableFrom(targetType.getResolvableType().getRawClass())) {
-				return Streams.wrap((Publisher)source).next();
-			}
+		if (source == null) {
+			return null;
+		}
+		if (Stream.class.isAssignableFrom(source.getClass())) {
+			return source;
+		}
+		else if (Stream.class.isAssignableFrom(targetType.getResolvableType().getRawClass())) {
+			return Streams.wrap((Publisher)source);
+		}
+		else if (Promise.class.isAssignableFrom(source.getClass())) {
+			return source;
+		}
+		else if (Promise.class.isAssignableFrom(targetType.getResolvableType().getRawClass())) {
+			return Streams.wrap((Publisher)source).next();
 		}
 		return null;
 	}

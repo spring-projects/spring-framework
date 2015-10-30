@@ -32,20 +32,22 @@ public class ReactiveStreamsToCompletableFutureConverter implements GenericConve
 
 	@Override
 	public Set<ConvertiblePair> getConvertibleTypes() {
-		Set<GenericConverter.ConvertiblePair> convertibleTypes = new LinkedHashSet<>();
-		convertibleTypes.add(new GenericConverter.ConvertiblePair(Publisher.class, CompletableFuture.class));
-		convertibleTypes.add(new GenericConverter.ConvertiblePair(CompletableFuture.class, Publisher.class));
-		return convertibleTypes;
+		Set<GenericConverter.ConvertiblePair> pairs = new LinkedHashSet<>();
+		pairs.add(new GenericConverter.ConvertiblePair(Publisher.class, CompletableFuture.class));
+		pairs.add(new GenericConverter.ConvertiblePair(CompletableFuture.class, Publisher.class));
+		return pairs;
 	}
 
 	@Override
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-		if (source != null) {
-			if (CompletableFuture.class.isAssignableFrom(source.getClass())) {
-				return reactor.core.publisher.convert.CompletableFutureConverter.from((CompletableFuture)source);
-			} else if (CompletableFuture.class.isAssignableFrom(targetType.getResolvableType().getRawClass())) {
-				return reactor.core.publisher.convert.CompletableFutureConverter.fromSingle((Publisher)source);
-			}
+		if (source == null) {
+			return null;
+		}
+		else if (CompletableFuture.class.isAssignableFrom(source.getClass())) {
+			return reactor.core.publisher.convert.CompletableFutureConverter.from((CompletableFuture) source);
+		}
+		else if (CompletableFuture.class.isAssignableFrom(targetType.getResolvableType().getRawClass())) {
+			return reactor.core.publisher.convert.CompletableFutureConverter.fromSingle((Publisher) source);
 		}
 		return null;
 	}

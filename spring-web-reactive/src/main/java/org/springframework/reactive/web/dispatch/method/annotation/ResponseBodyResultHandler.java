@@ -16,6 +16,7 @@
 
 package org.springframework.reactive.web.dispatch.method.annotation;
 
+import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -61,20 +62,25 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 	private int order = 0;
 
 
-	public ResponseBodyResultHandler(List<MessageToByteEncoder<?>> serializers) {
-		this(serializers, Collections.EMPTY_LIST);
+	public ResponseBodyResultHandler(List<MessageToByteEncoder<?>> encoders) {
+		this(encoders, Collections.EMPTY_LIST);
 	}
 
-	public ResponseBodyResultHandler(List<MessageToByteEncoder<?>> serializers, List<MessageToByteEncoder<ByteBuffer>> postProcessors) {
-		this(serializers, postProcessors, new DefaultConversionService());
+	public ResponseBodyResultHandler(List<MessageToByteEncoder<?>> encoders,
+			List<MessageToByteEncoder<ByteBuffer>> postProcessors) {
+
+		this(encoders, postProcessors, new DefaultConversionService());
 	}
 
-	public ResponseBodyResultHandler(List<MessageToByteEncoder<?>> serializers, List<MessageToByteEncoder<ByteBuffer>>
-	  postProcessors, ConversionService conversionService) {
-		this.serializers = serializers;
+	public ResponseBodyResultHandler(List<MessageToByteEncoder<?>> encoders,
+			List<MessageToByteEncoder<ByteBuffer>> postProcessors,
+			ConversionService conversionService) {
+
+		this.serializers = encoders;
 		this.postProcessors = postProcessors;
 		this.conversionService = conversionService;
 	}
+
 
 	public void setOrder(int order) {
 		this.order = order;
@@ -90,8 +96,8 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 	public boolean supports(HandlerResult result) {
 		Object handler = result.getHandler();
 		if (handler instanceof HandlerMethod) {
-			HandlerMethod handlerMethod = (HandlerMethod) handler;
-			return AnnotatedElementUtils.isAnnotated(handlerMethod.getMethod(), ResponseBody.class.getName());
+			Method method = ((HandlerMethod) handler).getMethod();
+			return AnnotatedElementUtils.isAnnotated(method, ResponseBody.class.getName());
 		}
 		return false;
 	}
@@ -99,8 +105,7 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 	@Override
 	@SuppressWarnings("unchecked")
 	public Publisher<Void> handleResult(ReactiveServerHttpRequest request,
-			ReactiveServerHttpResponse response,
-			HandlerResult result) {
+			ReactiveServerHttpResponse response, HandlerResult result) {
 
 		Object value = result.getValue();
 		HandlerMethod handlerMethod = (HandlerMethod) result.getHandler();
@@ -125,19 +130,22 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 			elementType = type;
 		}
 
-		MessageToByteEncoder<Object> serializer = (MessageToByteEncoder<Object>) resolveSerializer(request, elementType, mediaType, hints.toArray());
-		if (serializer != null) {
-			Publisher<ByteBuffer> outputStream = serializer.encode(elementStream, type, mediaType, hints.toArray());
-			List<MessageToByteEncoder<ByteBuffer>> postProcessors = resolvePostProcessors(request, elementType, mediaType, hints.toArray());
+		MessageToByteEncoder<Object> encoder = (MessageToByteEncoder<Object>) resolveEncoder(
+				request, elementType, mediaType, hints.toArray());
+
+		if (encoder != null) {
+			Publisher<ByteBuffer> outputStream = encoder.encode(elementStream, type, mediaType, hints.toArray());
+			List<MessageToByteEncoder<ByteBuffer>> postProcessors = resolvePostProcessors(request,
+					elementType, mediaType, hints.toArray());
 			for (MessageToByteEncoder<ByteBuffer> postProcessor : postProcessors) {
 				outputStream = postProcessor.encode(outputStream, elementType, mediaType, hints.toArray());
 			}
 			response.getHeaders().setContentType(mediaType);
 			return response.setBody(outputStream);
 		}
-		return Publishers.error(new IllegalStateException(
-				"Return value type '" + returnType.getParameterType().getName() +
-						"' with media type '" + mediaType + "' not supported"));
+		String returnTypeName = returnType.getParameterType().getName();
+		return Publishers.error(new IllegalStateException("Return value type '" + returnTypeName +
+				"' with media type '" + mediaType + "' not supported"));
 	}
 
 	private MediaType resolveMediaType(ReactiveServerHttpRequest request) {
@@ -147,7 +155,9 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 		return ( mediaTypes.size() > 0 ? mediaTypes.get(0) : MediaType.TEXT_PLAIN);
 	}
 
-	private MessageToByteEncoder<?> resolveSerializer(ReactiveServerHttpRequest request, ResolvableType type, MediaType mediaType, Object[] hints) {
+	private MessageToByteEncoder<?> resolveEncoder(ReactiveServerHttpRequest request,
+			ResolvableType type, MediaType mediaType, Object[] hints) {
+
 		for (MessageToByteEncoder<?> codec : this.serializers) {
 			if (codec.canEncode(type, mediaType, hints)) {
 				return codec;
@@ -156,7 +166,10 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 		return null;
 	}
 
-	private List<MessageToByteEncoder<ByteBuffer>> resolvePostProcessors(ReactiveServerHttpRequest request, ResolvableType type, MediaType mediaType, Object[] hints) {
+	private List<MessageToByteEncoder<ByteBuffer>> resolvePostProcessors(
+			ReactiveServerHttpRequest request, ResolvableType type, MediaType mediaType,
+			Object[] hints) {
+
 		List<MessageToByteEncoder<ByteBuffer>> postProcessors = new ArrayList<>();
 		for (MessageToByteEncoder<ByteBuffer> postProcessor : this.postProcessors) {
 			if (postProcessor.canEncode(type, mediaType, hints)) {

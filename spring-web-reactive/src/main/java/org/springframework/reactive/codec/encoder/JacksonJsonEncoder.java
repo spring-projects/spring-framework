@@ -54,7 +54,9 @@ public class JacksonJsonEncoder implements MessageToByteEncoder<Object> {
 	}
 
 	@Override
-	public Publisher<ByteBuffer> encode(Publisher<? extends Object> messageStream, ResolvableType type, MediaType mediaType, Object... hints) {
+	public Publisher<ByteBuffer> encode(Publisher<? extends Object> messageStream,
+			ResolvableType type, MediaType mediaType, Object... hints) {
+
 		return Publishers.map(messageStream, value -> {
 			Buffer buffer = new Buffer();
 			BufferOutputStream outputStream = new BufferOutputStream(buffer);

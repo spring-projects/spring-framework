@@ -47,7 +47,9 @@ public class StringDecoder implements ByteToMessageDecoder<String> {
 	}
 
 	@Override
-	public Publisher<String> decode(Publisher<ByteBuffer> inputStream, ResolvableType type, MediaType mediaType, Object... hints) {
+	public Publisher<String> decode(Publisher<ByteBuffer> inputStream, ResolvableType type,
+			MediaType mediaType, Object... hints) {
+
 		Charset charset = HintUtils.getHintByClass(Charset.class, hints, DEFAULT_CHARSET);
 		return Publishers.map(inputStream, chunk -> new String(new Buffer(chunk).asBytes(), charset));
 	}

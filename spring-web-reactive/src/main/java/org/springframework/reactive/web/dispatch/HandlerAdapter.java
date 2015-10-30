@@ -52,7 +52,6 @@ public interface HandlerAdapter {
 	 * @param handler handler to use. This object must have previously been passed
 	 * to the {@code supports} method of this interface, which must have
 	 * returned {@code true}.
-	 * @throws Exception in case of errors
 	 * @return An {@link HandlerResult} instance
 	 */
 	Publisher<HandlerResult> handle(ReactiveServerHttpRequest request,

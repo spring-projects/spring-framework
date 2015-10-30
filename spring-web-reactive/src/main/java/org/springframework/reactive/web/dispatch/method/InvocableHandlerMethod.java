@@ -64,7 +64,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		List<Publisher<Object>> argPublishers = getMethodArguments(request, providedArgs);
 
 		Publisher<Object[]> argValues = (!argPublishers.isEmpty() ?
-				Streams.zip(argPublishers, this::unwrapOptionalArgValues) : Publishers.just(new Object[0]));
+				Streams.zip(argPublishers, this::unwrapOptionalArgValues) :
+				Publishers.just(new Object[0]));
 
 		return Publishers.map(argValues, args -> {
 			if (logger.isTraceEnabled()) {
@@ -76,7 +77,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			try {
 				returnValue = doInvoke(args);
 				if (logger.isTraceEnabled()) {
-					logger.trace("Method [" + getMethod().getName() + "] returned [" + returnValue + "]");
+					logger.trace("Method [" + getMethod().getName() + "] returned " +
+							"[" + returnValue + "]");
 				}
 			}
 			catch (Exception ex) {

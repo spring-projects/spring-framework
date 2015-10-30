@@ -34,8 +34,11 @@ public class ByteBufferEncoder implements MessageToByteEncoder<ByteBuffer> {
 	}
 
 	@Override
-	public Publisher<ByteBuffer> encode(Publisher<? extends ByteBuffer> messageStream, ResolvableType type, MediaType mediaType, Object... hints) {
-		return (Publisher<ByteBuffer>)messageStream;
+	@SuppressWarnings("unchecked")
+	public Publisher<ByteBuffer> encode(Publisher<? extends ByteBuffer> messageStream,
+			ResolvableType type, MediaType mediaType, Object... hints) {
+
+		return (Publisher<ByteBuffer>) messageStream;
 	}
 
 }

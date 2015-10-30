@@ -34,7 +34,9 @@ public class ByteBufferDecoder implements ByteToMessageDecoder<ByteBuffer> {
 	}
 
 	@Override
-	public Publisher<ByteBuffer> decode(Publisher<ByteBuffer> inputStream, ResolvableType type, MediaType mediaType, Object... hints) {
+	public Publisher<ByteBuffer> decode(Publisher<ByteBuffer> inputStream, ResolvableType type,
+			MediaType mediaType, Object... hints) {
+
 		return inputStream;
 	}
 }

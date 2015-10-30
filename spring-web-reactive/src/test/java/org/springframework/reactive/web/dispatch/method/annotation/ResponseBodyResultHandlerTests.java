@@ -32,22 +32,24 @@ import org.springframework.web.method.HandlerMethod;
  */
 public class ResponseBodyResultHandlerTests {
 
+
 	@Test
 	public void supports() throws NoSuchMethodException {
 		ResponseBodyResultHandler resultHandler = new ResponseBodyResultHandler(Collections.emptyList());
 		TestController controller = new TestController();
 
-		HandlerMethod notAnnotatedMethod = new HandlerMethod(controller, TestController.class.getMethod("notAnnotated"));
-		assertFalse(resultHandler.supports(new HandlerResult(notAnnotatedMethod, null)));
+		HandlerMethod hm = new HandlerMethod(controller,TestController.class.getMethod("notAnnotated"));
+		assertFalse(resultHandler.supports(new HandlerResult(hm, null)));
 
-		HandlerMethod publisherStringMethod = new HandlerMethod(controller, TestController.class.getMethod("publisherString"));
-		assertTrue(resultHandler.supports(new HandlerResult(publisherStringMethod, null)));
+		hm = new HandlerMethod(controller, TestController.class.getMethod("publisherString"));
+		assertTrue(resultHandler.supports(new HandlerResult(hm, null)));
 
-		HandlerMethod publisherVoidMethod = new HandlerMethod(controller, TestController.class.getMethod("publisherVoid"));
-		assertTrue(resultHandler.supports(new HandlerResult(publisherVoidMethod, null)));
+		hm = new HandlerMethod(controller, TestController.class.getMethod("publisherVoid"));
+		assertTrue(resultHandler.supports(new HandlerResult(hm, null)));
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class TestController {
 
 		public Publisher<String> notAnnotated() {

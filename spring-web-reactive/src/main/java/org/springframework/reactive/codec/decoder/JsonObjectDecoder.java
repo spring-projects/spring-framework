@@ -32,13 +32,15 @@ import org.springframework.http.MediaType;
 import org.springframework.reactive.codec.encoder.JsonObjectEncoder;
 
 /**
- * Decode an arbitrary split byte stream representing JSON objects to a byte stream
- * where each chunk is a well-formed JSON object.
+ * Decode an arbitrary split byte stream representing JSON objects to a byte
+ * stream where each chunk is a well-formed JSON object.
  *
- * This class does not do any real parsing or validation. A sequence of bytes is considered a JSON object/array
- * if it contains a matching number of opening and closing braces/brackets.
+ * This class does not do any real parsing or validation. A sequence of byte
+ * is considered a JSON object/array if it contains a matching number of opening
+ * and closing braces/brackets.
  *
- * Based on <a href=https://github.com/netty/netty/blob/master/codec/src/main/java/io/netty/handler/codec/json/JsonObjectDecoder.java">Netty {@code JsonObjectDecoder}</a>
+ * Based on <a href=https://github.com/netty/netty/blob/master/codec/src/main/java/io/netty/handler/codec/json/JsonObjectDecoder.java">
+ * Netty {@code JsonObjectDecoder}</a>
  *
  * @author Sebastien Deleuze
  * @see JsonObjectEncoder
@@ -46,12 +48,18 @@ import org.springframework.reactive.codec.encoder.JsonObjectEncoder;
 public class JsonObjectDecoder implements ByteToMessageDecoder<ByteBuffer> {
 
 	private static final int ST_CORRUPTED = -1;
+
 	private static final int ST_INIT = 0;
+
 	private static final int ST_DECODING_NORMAL = 1;
+
 	private static final int ST_DECODING_ARRAY_STREAM = 2;
 
+
 	private final int maxObjectLength;
+
 	private final boolean streamArrayElements;
+
 
 	public JsonObjectDecoder() {
 		// 1 MB
@@ -66,14 +74,15 @@ public class JsonObjectDecoder implements ByteToMessageDecoder<ByteBuffer> {
 		this(1024 * 1024, streamArrayElements);
 	}
 
+
 	/**
-	 * @param maxObjectLength   maximum number of bytes a JSON object/array may use (including braces and all).
-	 *                             Objects exceeding this length are dropped and an {@link IllegalStateException}
-	 *                             is thrown.
-	 * @param streamArrayElements   if set to true and the "top level" JSON object is an array, each of its entries
-	 *                                  is passed through the pipeline individually and immediately after it was fully
-	 *                                  received, allowing for arrays with "infinitely" many elements.
-	 *
+	 * @param maxObjectLength maximum number of bytes a JSON object/array may
+	 * use (including braces and all). Objects exceeding this length are dropped
+	 * and an {@link IllegalStateException} is thrown.
+	 * @param streamArrayElements if set to true and the "top level" JSON object
+	 * is an array, each of its entries is passed through the pipeline individually
+	 * and immediately after it was fully received, allowing for arrays with
+	 * "infinitely" many elements.
 	 */
 	public JsonObjectDecoder(int maxObjectLength, boolean streamArrayElements) {
 		if (maxObjectLength < 1) {
@@ -90,91 +99,89 @@ public class JsonObjectDecoder implements ByteToMessageDecoder<ByteBuffer> {
 	}
 
 	@Override
-	public Publisher<ByteBuffer> decode(Publisher<ByteBuffer> inputStream, ResolvableType type, MediaType mediaType, Object... hints) {
+	public Publisher<ByteBuffer> decode(Publisher<ByteBuffer> inputStream, ResolvableType type,
+			MediaType mediaType, Object... hints) {
 
 		return Publishers.flatMap(inputStream, new Function<ByteBuffer, Publisher<? extends ByteBuffer>>() {
 
 			int openBraces;
-			int idx;
+			int index;
 			int state;
 			boolean insideString;
-			ByteBuf in;
-			Integer wrtIdx;
+			ByteBuf input;
+			Integer writerIndex;
 
 			@Override
 			public Publisher<? extends ByteBuffer> apply(ByteBuffer b) {
 				List<ByteBuffer> chunks = new ArrayList<>();
-
-				if (in == null) {
-					in = Unpooled.copiedBuffer(b);
-					wrtIdx = in.writerIndex();
+				if (this.input == null) {
+					this.input = Unpooled.copiedBuffer(b);
+					this.writerIndex = this.input.writerIndex();
 				}
 				else {
-					in = Unpooled.copiedBuffer(in, Unpooled.copiedBuffer(b));
-					wrtIdx = in.writerIndex();
+					this.input = Unpooled.copiedBuffer(this.input, Unpooled.copiedBuffer(b));
+					this.writerIndex = this.input.writerIndex();
 				}
-				if (state == ST_CORRUPTED) {
-					in.skipBytes(in.readableBytes());
+				if (this.state == ST_CORRUPTED) {
+					this.input.skipBytes(this.input.readableBytes());
 					return Publishers.error(new IllegalStateException("Corrupted stream"));
 				}
-
-				if (wrtIdx > maxObjectLength) {
+				if (this.writerIndex > maxObjectLength) {
 					// buffer size exceeded maxObjectLength; discarding the complete buffer.
-					in.skipBytes(in.readableBytes());
+					this.input.skipBytes(this.input.readableBytes());
 					reset();
-					return Publishers.error(new IllegalStateException(
-					  "object length exceeds " + maxObjectLength + ": " +
-						wrtIdx +
-						" bytes discarded"));
+					return Publishers.error(new IllegalStateException("object length exceeds " +
+							maxObjectLength + ": " + this.writerIndex + " bytes discarded"));
 				}
-
-				for (/* use current idx */; idx < wrtIdx; idx++) {
-					byte c = in.getByte(idx);
-					if (state == ST_DECODING_NORMAL) {
-						decodeByte(c, in, idx);
+				for (/* use current index */; this.index < this.writerIndex; this.index++) {
+					byte c = this.input.getByte(this.index);
+					if (this.state == ST_DECODING_NORMAL) {
+						decodeByte(c, this.input, this.index);
 
 						// All opening braces/brackets have been closed. That's enough to conclude
 						// that the JSON object/array is complete.
-						if (openBraces == 0) {
-							ByteBuf json = extractObject(in, in.readerIndex(),
-									idx + 1 - in.readerIndex());
+						if (this.openBraces == 0) {
+							ByteBuf json = extractObject(this.input, this.input.readerIndex(),
+									this.index + 1 - this.input.readerIndex());
 							if (json != null) {
 								chunks.add(json.nioBuffer());
 							}
 
 							// The JSON object/array was extracted => discard the bytes from
 							// the input buffer.
-							in.readerIndex(idx + 1);
+							this.input.readerIndex(this.index + 1);
 							// Reset the object state to get ready for the next JSON object/text
 							// coming along the byte stream.
 							reset();
 						}
 					}
-					else if (state == ST_DECODING_ARRAY_STREAM) {
-						decodeByte(c, in, idx);
+					else if (this.state == ST_DECODING_ARRAY_STREAM) {
+						decodeByte(c, this.input, this.index);
 
-						if (!insideString && (openBraces == 1 && c == ',' ||
-								openBraces == 0 && c == ']')) {
+						if (!this.insideString && (this.openBraces == 1 && c == ',' ||
+								this.openBraces == 0 && c == ']')) {
 							// skip leading spaces. No range check is needed and the loop will terminate
-							// because the byte at position idx is not a whitespace.
-							for (int i = in.readerIndex(); Character.isWhitespace(in.getByte(i)); i++) {
-								in.skipBytes(1);
+							// because the byte at position index is not a whitespace.
+							for (int i = this.input.readerIndex(); Character.isWhitespace(this.input.getByte(i)); i++) {
+								this.input.skipBytes(1);
 							}
 
 							// skip trailing spaces.
-							int idxNoSpaces = idx - 1;
-							while (idxNoSpaces >= in.readerIndex() &&
-									Character.isWhitespace(in.getByte(idxNoSpaces))) {
+							int idxNoSpaces = this.index - 1;
+							while (idxNoSpaces >= this.input.readerIndex() &&
+									Character.isWhitespace(this.input.getByte(idxNoSpaces))) {
+
 								idxNoSpaces--;
 							}
 
-							ByteBuf json = extractObject(in, in.readerIndex(),
-									idxNoSpaces + 1 - in.readerIndex());
+							ByteBuf json = extractObject(this.input, this.input.readerIndex(),
+									idxNoSpaces + 1 - this.input.readerIndex());
+
 							if (json != null) {
 								chunks.add(json.nioBuffer());
 							}
 
-							in.readerIndex(idx + 1);
+							this.input.readerIndex(this.index + 1);
 
 							if (c == ']') {
 								reset();
@@ -185,74 +192,73 @@ public class JsonObjectDecoder implements ByteToMessageDecoder<ByteBuffer> {
 					else if (c == '{' || c == '[') {
 						initDecoding(c, streamArrayElements);
 
-						if (state == ST_DECODING_ARRAY_STREAM) {
+						if (this.state == ST_DECODING_ARRAY_STREAM) {
 							// Discard the array bracket
-							in.skipBytes(1);
+							this.input.skipBytes(1);
 						}
 						// Discard leading spaces in front of a JSON object/array.
 					}
 					else if (Character.isWhitespace(c)) {
-						in.skipBytes(1);
+						this.input.skipBytes(1);
 					}
 					else {
-						state = ST_CORRUPTED;
+						this.state = ST_CORRUPTED;
 						return Publishers.error(new IllegalStateException(
-						  "invalid JSON received at byte position " + idx +
-							": " + ByteBufUtil.hexDump(in)));
+								"invalid JSON received at byte position " + this.index + ": " +
+										ByteBufUtil.hexDump(this.input)));
 					}
 				}
 
-				if (in.readableBytes() == 0) {
-					idx = 0;
+				if (this.input.readableBytes() == 0) {
+					this.index = 0;
 				}
 				return Publishers.from(chunks);
 			}
 
 			/**
-			 * Override this method if you want to filter the json objects/arrays that get passed through the pipeline.
+			 * Override this method if you want to filter the json objects/arrays that
+			 * get passed through the pipeline.
 			 */
 			@SuppressWarnings("UnusedParameters")
 			protected ByteBuf extractObject(ByteBuf buffer, int index, int length) {
 				return buffer.slice(index, length).retain();
 			}
 
-			private void decodeByte(byte c, ByteBuf in, int idx) {
-				if ((c == '{' || c == '[') && !insideString) {
-					openBraces++;
+			private void decodeByte(byte c, ByteBuf input, int index) {
+				if ((c == '{' || c == '[') && !this.insideString) {
+					this.openBraces++;
 				}
-				else if ((c == '}' || c == ']') && !insideString) {
-					openBraces--;
+				else if ((c == '}' || c == ']') && !this.insideString) {
+					this.openBraces--;
 				}
 				else if (c == '"') {
 					// start of a new JSON string. It's necessary to detect strings as they may
 					// also contain braces/brackets and that could lead to incorrect results.
-					if (!insideString) {
-						insideString = true;
+					if (!this.insideString) {
+						this.insideString = true;
 						// If the double quote wasn't escaped then this is the end of a string.
 					}
-					else if (in.getByte(idx - 1) != '\\') {
-						insideString = false;
+					else if (input.getByte(index - 1) != '\\') {
+						this.insideString = false;
 					}
 				}
 			}
 
 			private void initDecoding(byte openingBrace, boolean streamArrayElements) {
-				openBraces = 1;
+				this.openBraces = 1;
 				if (openingBrace == '[' && streamArrayElements) {
-					state = ST_DECODING_ARRAY_STREAM;
+					this.state = ST_DECODING_ARRAY_STREAM;
 				}
 				else {
-					state = ST_DECODING_NORMAL;
+					this.state = ST_DECODING_NORMAL;
 				}
 			}
 
 			private void reset() {
-				insideString = false;
-				state = ST_INIT;
-				openBraces = 0;
+				this.insideString = false;
+				this.state = ST_INIT;
+				this.openBraces = 0;
 			}
-
 		});
 	}
-
 }

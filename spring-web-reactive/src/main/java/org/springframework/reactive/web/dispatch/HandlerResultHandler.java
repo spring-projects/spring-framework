@@ -48,6 +48,7 @@ public interface HandlerResultHandler {
 	 * when the handling is complete (success or error) including the flush of the data on the
 	 * network.
 	 */
-	Publisher<Void> handleResult(ReactiveServerHttpRequest request, ReactiveServerHttpResponse response, HandlerResult result);
+	Publisher<Void> handleResult(ReactiveServerHttpRequest request, ReactiveServerHttpResponse response,
+			HandlerResult result);
 
 }

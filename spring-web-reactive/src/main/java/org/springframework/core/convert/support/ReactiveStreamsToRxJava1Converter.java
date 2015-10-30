@@ -36,28 +36,30 @@ public final class ReactiveStreamsToRxJava1Converter implements GenericConverter
 
 	@Override
 	public Set<GenericConverter.ConvertiblePair> getConvertibleTypes() {
-		Set<GenericConverter.ConvertiblePair> convertibleTypes = new LinkedHashSet<>();
-		convertibleTypes.add(new GenericConverter.ConvertiblePair(Publisher.class, Observable.class));
-		convertibleTypes.add(new GenericConverter.ConvertiblePair(Observable.class, Publisher.class));
-		convertibleTypes.add(new GenericConverter.ConvertiblePair(Publisher.class, Single.class));
-		convertibleTypes.add(new GenericConverter.ConvertiblePair(Single.class, Publisher.class));
-		return convertibleTypes;
+		Set<GenericConverter.ConvertiblePair> pairs = new LinkedHashSet<>();
+		pairs.add(new GenericConverter.ConvertiblePair(Publisher.class, Observable.class));
+		pairs.add(new GenericConverter.ConvertiblePair(Observable.class, Publisher.class));
+		pairs.add(new GenericConverter.ConvertiblePair(Publisher.class, Single.class));
+		pairs.add(new GenericConverter.ConvertiblePair(Single.class, Publisher.class));
+		return pairs;
 	}
 
 	@Override
 	public Object convert(Object source, TypeDescriptor sourceType, TypeDescriptor targetType) {
-		if (source != null) {
-			if (Observable.class.isAssignableFrom(source.getClass())) {
-				return RxJava1Converter.from((Observable) source);
-			}
-			else if (Observable.class.isAssignableFrom(targetType.getResolvableType().getRawClass())) {
-				return RxJava1Converter.from((Publisher)source);
-			}
-			else if (Single.class.isAssignableFrom(source.getClass())) {
-				return reactor.core.publisher.convert.RxJava1SingleConverter.from((Single) source);
-			} else if (Single.class.isAssignableFrom(targetType.getResolvableType().getRawClass())) {
-				return reactor.core.publisher.convert.RxJava1SingleConverter.from((Publisher)source);
-			}
+		if (source == null) {
+			return null;
+		}
+		if (Observable.class.isAssignableFrom(source.getClass())) {
+			return RxJava1Converter.from((Observable) source);
+		}
+		else if (Observable.class.isAssignableFrom(targetType.getResolvableType().getRawClass())) {
+			return RxJava1Converter.from((Publisher) source);
+		}
+		else if (Single.class.isAssignableFrom(source.getClass())) {
+			return reactor.core.publisher.convert.RxJava1SingleConverter.from((Single) source);
+		}
+		else if (Single.class.isAssignableFrom(targetType.getResolvableType().getRawClass())) {
+			return reactor.core.publisher.convert.RxJava1SingleConverter.from((Publisher) source);
 		}
 		return null;
 	}

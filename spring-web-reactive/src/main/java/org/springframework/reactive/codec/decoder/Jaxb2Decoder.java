@@ -51,15 +51,19 @@ import org.springframework.util.Assert;
  */
 public class Jaxb2Decoder implements ByteToMessageDecoder<Object> {
 
-	private final ConcurrentMap<Class<?>, JAXBContext> jaxbContexts = new ConcurrentHashMap<Class<?>, JAXBContext>(64);
+	private final ConcurrentMap<Class<?>, JAXBContext> jaxbContexts = new ConcurrentHashMap<>(64);
+
 
 	@Override
 	public boolean canDecode(ResolvableType type, MediaType mediaType, Object... hints) {
-		return mediaType.isCompatibleWith(MediaType.APPLICATION_XML) || mediaType.isCompatibleWith(MediaType.TEXT_XML);
+		return (mediaType.isCompatibleWith(MediaType.APPLICATION_XML) ||
+				mediaType.isCompatibleWith(MediaType.TEXT_XML));
 	}
 
 	@Override
-	public Publisher<Object> decode(Publisher<ByteBuffer> inputStream, ResolvableType type, MediaType mediaType, Object... hints) {
+	public Publisher<Object> decode(Publisher<ByteBuffer> inputStream, ResolvableType type,
+			MediaType mediaType, Object... hints) {
+
 		Class<?> outputClass = type.getRawClass();
 		try {
 			Source source = processSource(new StreamSource(new ByteBufferPublisherInputStream(inputStream)));
@@ -77,7 +81,8 @@ public class Jaxb2Decoder implements ByteToMessageDecoder<Object> {
 			  new CodecException("Could not unmarshal to [" + outputClass + "]: " + ex.getMessage(), ex));
 		}
 		catch (JAXBException ex) {
-			return Publishers.error(new CodecException("Could not instantiate JAXBContext: " + ex.getMessage(), ex));
+			return Publishers.error(new CodecException("Could not instantiate JAXBContext: " +
+					ex.getMessage(), ex));
 		}
 	}
 
@@ -101,12 +106,11 @@ public class Jaxb2Decoder implements ByteToMessageDecoder<Object> {
 	protected final Unmarshaller createUnmarshaller(Class<?> clazz) throws JAXBException {
 		try {
 			JAXBContext jaxbContext = getJaxbContext(clazz);
-			Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-			return unmarshaller;
+			return jaxbContext.createUnmarshaller();
 		}
 		catch (JAXBException ex) {
-			throw new CodecException(
-					"Could not create Unmarshaller for class [" + clazz + "]: " + ex.getMessage(), ex);
+			throw new CodecException("Could not create Unmarshaller for class " +
+					"[" + clazz + "]: " + ex.getMessage(), ex);
 		}
 	}
 
@@ -119,8 +123,8 @@ public class Jaxb2Decoder implements ByteToMessageDecoder<Object> {
 				this.jaxbContexts.putIfAbsent(clazz, jaxbContext);
 			}
 			catch (JAXBException ex) {
-				throw new CodecException(
-						"Could not instantiate JAXBContext for class [" + clazz + "]: " + ex.getMessage(), ex);
+				throw new CodecException("Could not instantiate JAXBContext for class " +
+						"[" + clazz + "]: " + ex.getMessage(), ex);
 			}
 		}
 		return jaxbContext;

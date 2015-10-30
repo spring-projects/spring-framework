@@ -45,15 +45,19 @@ import org.springframework.util.ClassUtils;
  */
 public class Jaxb2Encoder implements MessageToByteEncoder<Object> {
 
-	private final ConcurrentMap<Class<?>, JAXBContext> jaxbContexts = new ConcurrentHashMap<Class<?>, JAXBContext>(64);
+	private final ConcurrentMap<Class<?>, JAXBContext> jaxbContexts = new ConcurrentHashMap<>(64);
+
 
 	@Override
 	public boolean canEncode(ResolvableType type, MediaType mediaType, Object... hints) {
-		return mediaType.isCompatibleWith(MediaType.APPLICATION_XML) || mediaType.isCompatibleWith(MediaType.TEXT_XML);
+		return (mediaType.isCompatibleWith(MediaType.APPLICATION_XML) ||
+				mediaType.isCompatibleWith(MediaType.TEXT_XML));
 	}
 
 	@Override
-	public Publisher<ByteBuffer> encode(Publisher<? extends Object> messageStream, ResolvableType type, MediaType mediaType, Object... hints) {
+	public Publisher<ByteBuffer> encode(Publisher<? extends Object> messageStream, ResolvableType type,
+			MediaType mediaType, Object... hints) {
+
 		return Publishers.map(messageStream, value -> {
 			try {
 				Buffer buffer = new Buffer();
@@ -64,12 +68,12 @@ public class Jaxb2Encoder implements MessageToByteEncoder<Object> {
 				marshaller.marshal(value, outputStream);
 				buffer.flip();
 				return buffer.byteBuffer();
-			} catch (MarshalException ex) {
-				throw new CodecException(
-				  "Could not marshal [" + value + "]: " + ex.getMessage(), ex);
-			} catch (JAXBException ex) {
-				throw new CodecException(
-				  "Could not instantiate JAXBContext: " + ex.getMessage(), ex);
+			}
+			catch (MarshalException ex) {
+				throw new CodecException("Could not marshal [" + value + "]: " + ex.getMessage(), ex);
+			}
+			catch (JAXBException ex) {
+				throw new CodecException("Could not instantiate JAXBContext: " + ex.getMessage(), ex);
 			}
 		});
 	}
@@ -77,12 +81,11 @@ public class Jaxb2Encoder implements MessageToByteEncoder<Object> {
 	protected final Marshaller createMarshaller(Class<?> clazz) {
 		try {
 			JAXBContext jaxbContext = getJaxbContext(clazz);
-			Marshaller marshaller = jaxbContext.createMarshaller();
-			return marshaller;
+			return jaxbContext.createMarshaller();
 		}
 		catch (JAXBException ex) {
-			throw new CodecException(
-					"Could not create Marshaller for class [" + clazz + "]: " + ex.getMessage(), ex);
+			throw new CodecException("Could not create Marshaller for class " +
+					"[" + clazz + "]: " + ex.getMessage(), ex);
 		}
 	}
 
@@ -95,8 +98,8 @@ public class Jaxb2Encoder implements MessageToByteEncoder<Object> {
 				this.jaxbContexts.putIfAbsent(clazz, jaxbContext);
 			}
 			catch (JAXBException ex) {
-				throw new CodecException(
-						"Could not instantiate JAXBContext for class [" + clazz + "]: " + ex.getMessage(), ex);
+				throw new CodecException("Could not instantiate JAXBContext for class " +
+						"[" + clazz + "]: " + ex.getMessage(), ex);
 			}
 		}
 		return jaxbContext;
