@@ -108,21 +108,21 @@ public class DispatcherHandler implements HttpHandler, ApplicationContextAware {
 		}
 
 		HandlerAdapter handlerAdapter = getHandlerAdapter(handler);
+		if (handlerAdapter == null) {
+			return Publishers.error(new IllegalStateException("No HandlerAdapter for " + handler));
+		}
 
-		try {
-			HandlerResult result = handlerAdapter.handle(request, response, handler);
+		Publisher<HandlerResult> resultPublisher = handlerAdapter.handle(request, response, handler);
+
+		return Publishers.concatMap(resultPublisher, result -> {
 			for (HandlerResultHandler resultHandler : resultHandlers) {
 				if (resultHandler.supports(result)) {
 					return resultHandler.handleResult(request, response, result);
 				}
 			}
 			return Publishers.error(new IllegalStateException(
-			  "No HandlerResultHandler for " + result.getValue()));
-		}
-		catch(Exception ex) {
-			return Publishers.error(ex);
-		}
-
+					"No HandlerResultHandler for " + result.getValue()));
+		});
 	}
 
 	protected Object getHandler(ReactiveServerHttpRequest request) {
@@ -142,8 +142,7 @@ public class DispatcherHandler implements HttpHandler, ApplicationContextAware {
 				return handlerAdapter;
 			}
 		}
-		// more specific exception
-		throw new IllegalStateException("No HandlerAdapter for " + handler);
+		return null;
 	}
 
 }

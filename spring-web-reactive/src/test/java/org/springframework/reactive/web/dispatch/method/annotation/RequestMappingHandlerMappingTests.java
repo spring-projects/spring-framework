@@ -52,14 +52,14 @@ public class RequestMappingHandlerMappingTests {
 	}
 
 	@Test
-	public void path() throws NoSuchMethodException {
+	public void path() throws Exception {
 		ReactiveServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "boo");
 		HandlerMethod handler = (HandlerMethod) this.mapping.getHandler(request);
 		assertEquals(TestController.class.getMethod("boo"), handler.getMethod());
 	}
 
 	@Test
-	public void method() throws NoSuchMethodException {
+	public void method() throws Exception {
 		ReactiveServerHttpRequest request = new MockServerHttpRequest(HttpMethod.POST, "foo");
 		HandlerMethod handler = (HandlerMethod) this.mapping.getHandler(request);
 		assertEquals(TestController.class.getMethod("postFoo"), handler.getMethod());

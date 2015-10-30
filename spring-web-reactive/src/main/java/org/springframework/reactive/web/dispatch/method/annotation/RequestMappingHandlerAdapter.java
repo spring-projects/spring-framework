@@ -21,6 +21,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.reactivestreams.Publisher;
+import reactor.Publishers;
+
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.server.ReactiveServerHttpRequest;
 import org.springframework.http.server.ReactiveServerHttpResponse;
@@ -70,15 +73,20 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 	}
 
 	@Override
-	public HandlerResult handle(ReactiveServerHttpRequest request, ReactiveServerHttpResponse response,
-			Object handler) throws Exception {
+	public Publisher<HandlerResult> handle(ReactiveServerHttpRequest request,
+			ReactiveServerHttpResponse response, Object handler) {
 
-		final InvocableHandlerMethod invocable = new InvocableHandlerMethod((HandlerMethod) handler);
-		invocable.setHandlerMethodArgumentResolvers(this.argumentResolvers);
+		InvocableHandlerMethod handlerMethod = new InvocableHandlerMethod((HandlerMethod) handler);
+		handlerMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
 
-		Object result = invocable.invokeForRequest(request);
-
-		return new HandlerResult(invocable, result);
+		try {
+			Object result = handlerMethod.invokeForRequest(request);
+			return Publishers.just(new HandlerResult(handlerMethod, result));
+		}
+		catch (Exception e) {
+			// TODO: remove throws declaration from InvocableHandlerMethod
+			return Publishers.error(e);
+		}
 	}
 
 }

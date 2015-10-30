@@ -17,6 +17,7 @@
 package org.springframework.reactive.web.dispatch.handler;
 
 import org.reactivestreams.Publisher;
+import reactor.Publishers;
 
 import org.springframework.http.server.ReactiveServerHttpRequest;
 import org.springframework.http.server.ReactiveServerHttpResponse;
@@ -44,10 +45,12 @@ public class HttpHandlerAdapter implements HandlerAdapter {
 	}
 
 	@Override
-	public HandlerResult handle(ReactiveServerHttpRequest request, ReactiveServerHttpResponse response, Object handler) {
+	public Publisher<HandlerResult> handle(ReactiveServerHttpRequest request,
+			ReactiveServerHttpResponse response, Object handler) {
+
 		HttpHandler httpHandler = (HttpHandler)handler;
 		Publisher<Void> completion = httpHandler.handle(request, response);
-		return new HandlerResult(httpHandler, completion);
+		return Publishers.just(new HandlerResult(httpHandler, completion));
 	}
 
 }
