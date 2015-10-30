@@ -26,7 +26,7 @@ import org.springframework.http.ReactiveHttpInputMessage;
  *
  * @author Arjen Poutsma
  */
-public interface ReactiveClientHttpResponse extends ReactiveHttpInputMessage, Closeable {
+public interface ReactiveClientHttpResponse extends ReactiveHttpInputMessage {
 
 	/**
 	 * Return the HTTP status code of the response.
@@ -45,11 +45,5 @@ public interface ReactiveClientHttpResponse extends ReactiveHttpInputMessage, Cl
 	 * @return the HTTP status text
 	 */
 	String getStatusText();
-
-	/**
-	 * Close this response, freeing any resources created.
-	 */
-	@Override
-	void close();
 
 }
