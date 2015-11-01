@@ -1174,7 +1174,7 @@ you have a generic type like this:
 ----
 	public interface Sample<T> {
 		void sampleGenericMethod(T param);
-		void sampleGenericCollectionMethod(Collection>T> param);
+		void sampleGenericCollectionMethod(Collection<T> param);
 	}
 ----
 
