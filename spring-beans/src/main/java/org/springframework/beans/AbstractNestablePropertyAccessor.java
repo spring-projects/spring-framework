@@ -678,7 +678,28 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 						Object convertedMapKey = convertIfNecessary(null, null, key, mapKeyType, typeDescriptor);
 						value = map.get(convertedMapKey);
 					}
-					else {
+					else if (value instanceof Iterable) {
+						// Apply index to Iterator in case of other Iterable implementation.
+						Iterable<Object> iterable = (Iterable<Object>) value;
+						int index = Integer.parseInt(key);
+						Iterator<Object> it = iterable.iterator();
+						Object valueFound = null;
+						for (int j = 0; it.hasNext(); j++) {
+							Object elem = it.next();
+							if (j == index) {
+								valueFound = elem;
+								break;
+							}
+						}
+						if (valueFound == null) {
+							throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
+									"Cannot get element with index " + index + " from Iterable, "
+											+ "accessed using property path '" + propertyName + "'");
+						} else {
+							value = valueFound;
+						}
+
+					} else {
 						throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 								"Property referenced in indexed property path '" + propertyName +
 										"' is neither an array nor a List nor a Set nor a Map; returned value was [" + value + "]");

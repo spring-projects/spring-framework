@@ -17,6 +17,7 @@
 package org.springframework.tests.sample.beans;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +47,7 @@ public class IndexedTestBean {
 
 	private SortedMap sortedMap;
 
+	private TestBeans myIterableType;
 
 	public IndexedTestBean() {
 		this(true);
@@ -68,6 +70,7 @@ public class IndexedTestBean {
 		TestBean tb7 = new TestBean("name7", 0);
 		TestBean tbX = new TestBean("nameX", 0);
 		TestBean tbY = new TestBean("nameY", 0);
+		TestBean tbZ = new TestBean("nameZ", 0);
 		this.array = new TestBean[] {tb0, tb1};
 		this.list = new ArrayList<Object>();
 		this.list.add(tb2);
@@ -83,6 +86,7 @@ public class IndexedTestBean {
 		list.add(tbX);
 		list.add(tbY);
 		this.map.put("key4", list);
+		this.myIterableType = new TestBeans(Arrays.asList(tbZ));
 	}
 
 
@@ -140,6 +144,14 @@ public class IndexedTestBean {
 
 	public void setSortedMap(SortedMap sortedMap) {
 		this.sortedMap = sortedMap;
+	}
+
+	public TestBeans getMyIterableType() {
+		return myIterableType;
+	}
+
+	public void setMyIterableType(TestBeans myIterableType) {
+		this.myIterableType = myIterableType;
 	}
 
 }
