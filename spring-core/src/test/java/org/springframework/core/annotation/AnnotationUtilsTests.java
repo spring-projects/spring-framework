@@ -57,9 +57,18 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
  */
 public class AnnotationUtilsTests {
 
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
+
+
+	@Before
+	public void clearCachesBeforeTests() {
+		clearCaches();
+	}
+
 	static void clearCaches() {
 		clearCache("findAnnotationCache", "annotatedInterfaceCache", "metaPresentCache", "synthesizableCache",
-			"attributeAliasesCache", "attributeMethodsCache", "aliasDescriptorCache");
+				"attributeAliasesCache", "attributeMethodsCache", "aliasDescriptorCache");
 	}
 
 	static void clearCache(String... cacheNames) {
@@ -72,15 +81,6 @@ public class AnnotationUtilsTests {
 		return (Map<?, ?>) ReflectionUtils.getField(field, null);
 	}
 
-
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
-
-
-	@Before
-	public void clearCachesBeforeTests() {
-		clearCaches();
-	}
 
 	@Test
 	public void findMethodAnnotationOnLeaf() throws Exception {

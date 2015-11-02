@@ -51,8 +51,8 @@ public @interface SendToUser {
 
 	/**
 	 * One or more destinations to send a message to.
-	 * <p>If left unspecified, a default destination is selected based on
-	 * the destination of the input message being handled.
+	 * <p>If left unspecified, a default destination is selected based on the
+	 * destination of the input message being handled.
 	 * @since 4.2
 	 * @see #value
 	 * @see org.springframework.messaging.simp.annotation.support.SendToMethodReturnValueHandler
@@ -63,8 +63,7 @@ public @interface SendToUser {
 	/**
 	 * Whether messages should be sent to all sessions associated with the user
 	 * or only to the session of the input message being handled.
-	 *
-	 * <p>By default this is set to {@code true} in which case messages are
+	 * <p>By default, this is set to {@code true} in which case messages are
 	 * broadcast to all sessions.
      */
     boolean broadcast() default true;
