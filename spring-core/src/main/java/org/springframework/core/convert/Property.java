@@ -204,7 +204,7 @@ public final class Property {
 		return annotations;
 	}
 
-	private void addAnnotationsToMap(
+	private static void addAnnotationsToMap(
 		Map<Class<? extends Annotation>, Annotation> annotationMap,
 		AnnotatedElement object) {
 		if (object != null) {

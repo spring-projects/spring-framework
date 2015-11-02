@@ -117,7 +117,7 @@ public class DefaultValueStyler implements ValueStyler {
 		return result.toString();
 	}
 
-	private String getCollectionTypeString(Collection<?> value) {
+	private static String getCollectionTypeString(Collection<?> value) {
 		if (value instanceof List) {
 			return LIST;
 		}

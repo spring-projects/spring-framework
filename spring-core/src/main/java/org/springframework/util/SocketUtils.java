@@ -236,7 +236,7 @@ public class SocketUtils {
 		 * @param maxPort the maximum port number
 		 * @return a random port number within the specified range
 		 */
-		private int findRandomPort(int minPort, int maxPort) {
+		private static int findRandomPort(int minPort, int maxPort) {
 			int portRange = maxPort - minPort;
 			return minPort + random.nextInt(portRange);
 		}

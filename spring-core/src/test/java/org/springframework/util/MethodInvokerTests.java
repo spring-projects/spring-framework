@@ -218,7 +218,7 @@ public class MethodInvokerTests {
 		}
 
 		// should handle Regular (exact) and VIP (closest match)
-		private String greet(Regular regular) {
+		private static String greet(Regular regular) {
 			return "regular: " + regular.getGreeting();
 		}
 	}
