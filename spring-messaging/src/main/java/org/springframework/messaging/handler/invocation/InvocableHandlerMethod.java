@@ -31,8 +31,8 @@ import org.springframework.messaging.handler.HandlerMethod;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Invokes the handler method for a given message after resolving its method argument
- * values through registered {@link HandlerMethodArgumentResolver}s.
+ * Provides a method for invoking the handler method for a given message after resolving its
+ * method argument values through registered {@link HandlerMethodArgumentResolver}s.
  *
  * <p>Use {@link #setMessageMethodArgumentResolvers(HandlerMethodArgumentResolver)}
  * to customize the list of argument resolvers.
@@ -94,18 +94,28 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 
 	/**
-	 * Invoke the method with the given message.
-	 * @throws Exception raised if no suitable argument resolver can be found,
-	 * or the method raised an exception
+	 * Invoke the method after resolving its argument values in the context of the given message.
+	 * <p>Argument values are commonly resolved through {@link HandlerMethodArgumentResolver}s.
+	 * The {@code providedArgs} parameter however may supply argument values to be used directly,
+	 * i.e. without argument resolution.
+	 * @param message the current message being processed
+	 * @param providedArgs "given" arguments matched by type, not resolved
+	 * @return the raw value returned by the invoked method
+	 * @exception Exception raised if no suitable argument resolver can be found,
+	 * or if the method raised an exception
 	 */
 	public Object invoke(Message<?> message, Object... providedArgs) throws Exception {
 		Object[] args = getMethodArgumentValues(message, providedArgs);
 		if (logger.isTraceEnabled()) {
-			logger.trace("Resolved arguments: " + Arrays.asList(args));
+			StringBuilder sb = new StringBuilder("Invoking [");
+			sb.append(getBeanType().getSimpleName()).append(".");
+			sb.append(getMethod().getName()).append("] method with arguments ");
+			sb.append(Arrays.asList(args));
+			logger.trace(sb.toString());
 		}
 		Object returnValue = doInvoke(args);
 		if (logger.isTraceEnabled()) {
-			logger.trace("Returned value: " + returnValue);
+			logger.trace("Method [" + getMethod().getName() + "] returned [" + returnValue + "]");
 		}
 		return returnValue;
 	}
@@ -137,8 +147,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				}
 			}
 			if (args[i] == null) {
-				String error = getArgumentResolutionErrorMessage("No suitable resolver for argument", i);
-				throw new IllegalStateException(error);
+				String msg = getArgumentResolutionErrorMessage("No suitable resolver for argument", i);
+				throw new IllegalStateException(msg);
 			}
 		}
 		return args;
@@ -156,10 +166,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * @param message error message to append the HandlerMethod details to
 	 */
 	protected String getDetailedErrorMessage(String message) {
-		return message + "\n" +
-				"HandlerMethod details: \n" +
-				"Controller [" + getBeanType().getName() + "]\n" +
-				"Method [" + getBridgedMethod().toGenericString() + "]\n";
+		StringBuilder sb = new StringBuilder(message).append("\n");
+		sb.append("HandlerMethod details: \n");
+		sb.append("Controller [").append(getBeanType().getName()).append("]\n");
+		sb.append("Method [").append(getBridgedMethod().toGenericString()).append("]\n");
+		return sb.toString();
 	}
 
 	/**

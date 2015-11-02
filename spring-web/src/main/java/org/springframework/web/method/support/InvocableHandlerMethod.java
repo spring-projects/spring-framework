@@ -56,17 +56,17 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 
 	/**
-	 * Create an instance from the given handler and method.
-	 */
-	public InvocableHandlerMethod(Object bean, Method method) {
-		super(bean, method);
-	}
-
-	/**
 	 * Create an instance from a {@code HandlerMethod}.
 	 */
 	public InvocableHandlerMethod(HandlerMethod handlerMethod) {
 		super(handlerMethod);
+	}
+
+	/**
+	 * Create an instance from a bean instance and a method.
+	 */
+	public InvocableHandlerMethod(Object bean, Method method) {
+		super(bean, method);
 	}
 
 	/**
@@ -112,7 +112,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	/**
 	 * Invoke the method after resolving its argument values in the context of the given request.
 	 * <p>Argument values are commonly resolved through {@link HandlerMethodArgumentResolver}s.
-	 * The {@code provideArgs} parameter however may supply argument values to be used directly,
+	 * The {@code providedArgs} parameter however may supply argument values to be used directly,
 	 * i.e. without argument resolution. Examples of provided argument values include a
 	 * {@link WebDataBinder}, a {@link SessionStatus}, or a thrown exception instance.
 	 * Provided argument values are checked before argument resolvers.
@@ -185,7 +185,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
-	 * Adds HandlerMethod details such as the controller type and method signature to the given error message.
+	 * Adds HandlerMethod details such as the controller type and method
+	 * signature to the given error message.
 	 * @param message error message to append the HandlerMethod details to
 	 */
 	protected String getDetailedErrorMessage(String message) {

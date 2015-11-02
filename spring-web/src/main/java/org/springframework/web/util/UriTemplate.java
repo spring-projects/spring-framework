@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,10 +29,11 @@ import java.util.regex.Pattern;
 import org.springframework.util.Assert;
 
 /**
- * Represents a URI template. A URI template is a URI-like String that contains variables enclosed
- * by braces ({@code {}}), which can be expanded to produce an actual URI.
+ * Represents a URI template. A URI template is a URI-like String that contains variables
+ * enclosed by braces ({@code {}}), which can be expanded to produce an actual URI.
  *
- * <p>See {@link #expand(Map)}, {@link #expand(Object[])}, and {@link #match(String)} for example usages.
+ * <p>See {@link #expand(Map)}, {@link #expand(Object[])}, and {@link #match(String)}
+ * for example usages.
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
@@ -47,6 +48,7 @@ public class UriTemplate implements Serializable {
 
 	/** Replaces template variables in the URI template. */
 	private static final String DEFAULT_VARIABLE_PATTERN = "(.*)";
+
 
 	private final UriComponents uriComponents;
 

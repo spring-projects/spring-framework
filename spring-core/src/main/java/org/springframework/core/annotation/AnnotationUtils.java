@@ -309,9 +309,9 @@ public abstract class AnnotationUtils {
 	 * compiler if the supplied element is a {@link Method}.
 	 * <p>Meta-annotations will be searched if the annotation is not
 	 * <em>present</em> on the supplied element.
-	 * @param annotatedElement the element to look for annotations on; never {@code null}
-	 * @param annotationType the annotation type to look for; never {@code null}
-	 * @return the annotations found or an empty set; never {@code null}
+	 * @param annotatedElement the element to look for annotations on
+	 * @param annotationType the annotation type to look for
+	 * @return the annotations found or an empty set (never {@code null})
 	 * @since 4.2
 	 * @see #getRepeatableAnnotations(AnnotatedElement, Class, Class)
 	 * @see #getDeclaredRepeatableAnnotations(AnnotatedElement, Class, Class)
@@ -339,13 +339,13 @@ public abstract class AnnotationUtils {
 	 * compiler if the supplied element is a {@link Method}.
 	 * <p>Meta-annotations will be searched if the annotation is not
 	 * <em>present</em> on the supplied element.
-	 * @param annotatedElement the element to look for annotations on; never {@code null}
-	 * @param annotationType the annotation type to look for; never {@code null}
+	 * @param annotatedElement the element to look for annotations on
+	 * @param annotationType the annotation type to look for
 	 * @param containerAnnotationType the type of the container that holds
 	 * the annotations; may be {@code null} if a container is not supported
 	 * or if it should be looked up via @{@link java.lang.annotation.Repeatable}
 	 * when running on Java 8 or higher
-	 * @return the annotations found or an empty set; never {@code null}
+	 * @return the annotations found or an empty set (never {@code null})
 	 * @since 4.2
 	 * @see #getRepeatableAnnotations(AnnotatedElement, Class)
 	 * @see #getDeclaredRepeatableAnnotations(AnnotatedElement, Class)
@@ -388,9 +388,9 @@ public abstract class AnnotationUtils {
 	 * compiler if the supplied element is a {@link Method}.
 	 * <p>Meta-annotations will be searched if the annotation is not
 	 * <em>present</em> on the supplied element.
-	 * @param annotatedElement the element to look for annotations on; never {@code null}
-	 * @param annotationType the annotation type to look for; never {@code null}
-	 * @return the annotations found or an empty set; never {@code null}
+	 * @param annotatedElement the element to look for annotations on
+	 * @param annotationType the annotation type to look for
+	 * @return the annotations found or an empty set (never {@code null})
 	 * @since 4.2
 	 * @see #getRepeatableAnnotations(AnnotatedElement, Class)
 	 * @see #getRepeatableAnnotations(AnnotatedElement, Class, Class)
@@ -419,13 +419,13 @@ public abstract class AnnotationUtils {
 	 * compiler if the supplied element is a {@link Method}.
 	 * <p>Meta-annotations will be searched if the annotation is not
 	 * <em>present</em> on the supplied element.
-	 * @param annotatedElement the element to look for annotations on; never {@code null}
-	 * @param annotationType the annotation type to look for; never {@code null}
+	 * @param annotatedElement the element to look for annotations on
+	 * @param annotationType the annotation type to look for
 	 * @param containerAnnotationType the type of the container that holds
 	 * the annotations; may be {@code null} if a container is not supported
 	 * or if it should be looked up via @{@link java.lang.annotation.Repeatable}
 	 * when running on Java 8 or higher
-	 * @return the annotations found or an empty set; never {@code null}
+	 * @return the annotations found or an empty set (never {@code null})
 	 * @since 4.2
 	 * @see #getRepeatableAnnotations(AnnotatedElement, Class)
 	 * @see #getRepeatableAnnotations(AnnotatedElement, Class, Class)
@@ -447,15 +447,15 @@ public abstract class AnnotationUtils {
 	 * compiler if the supplied element is a {@link Method}.
 	 * <p>Meta-annotations will be searched if the annotation is not
 	 * <em>present</em> on the supplied element.
-	 * @param annotatedElement the element to look for annotations on; never {@code null}
-	 * @param annotationType the annotation type to look for; never {@code null}
+	 * @param annotatedElement the element to look for annotations on
+	 * @param annotationType the annotation type to look for
 	 * @param containerAnnotationType the type of the container that holds
 	 * the annotations; may be {@code null} if a container is not supported
 	 * or if it should be looked up via @{@link java.lang.annotation.Repeatable}
 	 * when running on Java 8 or higher
 	 * @param declaredMode {@code true} if only declared annotations (i.e.,
 	 * directly or indirectly present) should be considered
-	 * @return the annotations found or an empty set; never {@code null}
+	 * @return the annotations found or an empty set (never {@code null})
 	 * @since 4.2
 	 * @see org.springframework.core.BridgeMethodResolver#findBridgedMethod
 	 * @see java.lang.annotation.Repeatable
@@ -497,8 +497,8 @@ public abstract class AnnotationUtils {
 	public static <A extends Annotation> A findAnnotation(AnnotatedElement annotatedElement, Class<A> annotationType) {
 		// Do NOT store result in the findAnnotationCache since doing so could break
 		// findAnnotation(Class, Class) and findAnnotation(Method, Class).
-		return synthesizeAnnotation(findAnnotation(annotatedElement, annotationType, new HashSet<Annotation>()),
-				annotatedElement);
+		return synthesizeAnnotation(
+				findAnnotation(annotatedElement, annotationType, new HashSet<Annotation>()), annotatedElement);
 	}
 
 	/**
@@ -660,7 +660,7 @@ public abstract class AnnotationUtils {
 	/**
 	 * Perform the actual work for {@link #findAnnotation(AnnotatedElement, Class)},
 	 * honoring the {@code synthesize} flag.
-	 * @param clazz the class to look for annotations on; never {@code null}
+	 * @param clazz the class to look for annotations on
 	 * @param annotationType the type of annotation to look for
 	 * @param synthesize {@code true} if the result should be
 	 * {@linkplain #synthesizeAnnotation(Annotation) synthesized}
@@ -860,7 +860,7 @@ public abstract class AnnotationUtils {
 	/**
 	 * Determine if an annotation of type {@code metaAnnotationType} is
 	 * <em>meta-present</em> on the supplied {@code annotationType}.
-	 * @param annotationType the annotation type to search on; never {@code null}
+	 * @param annotationType the annotation type to search on
 	 * @param metaAnnotationType the type of meta-annotation to search for
 	 * @return {@code true} if such an annotation is meta-present
 	 * @since 4.2.1
@@ -914,7 +914,7 @@ public abstract class AnnotationUtils {
 	 * However, the {@code Map} signature has been preserved for binary compatibility.
 	 * @param annotation the annotation to retrieve the attributes for
 	 * @return the Map of annotation attributes, with attribute names as keys and
-	 * corresponding attribute values as values; never {@code null}
+	 * corresponding attribute values as values (never {@code null})
 	 * @see #getAnnotationAttributes(AnnotatedElement, Annotation)
 	 * @see #getAnnotationAttributes(Annotation, boolean, boolean)
 	 * @see #getAnnotationAttributes(AnnotatedElement, Annotation, boolean, boolean)
@@ -934,7 +934,7 @@ public abstract class AnnotationUtils {
 	 * compatibility with {@link org.springframework.core.type.AnnotationMetadata})
 	 * or to preserve them as Class references
 	 * @return the Map of annotation attributes, with attribute names as keys and
-	 * corresponding attribute values as values; never {@code null}
+	 * corresponding attribute values as values (never {@code null})
 	 * @see #getAnnotationAttributes(Annotation, boolean, boolean)
 	 */
 	public static Map<String, Object> getAnnotationAttributes(Annotation annotation, boolean classValuesAsString) {
@@ -954,7 +954,7 @@ public abstract class AnnotationUtils {
 	 * {@link org.springframework.core.type.AnnotationMetadata}) or to preserve them as
 	 * {@code Annotation} instances
 	 * @return the annotation attributes (a specialized Map) with attribute names as keys
-	 * and corresponding attribute values as values; never {@code null}
+	 * and corresponding attribute values as values (never {@code null})
 	 * @since 3.1.1
 	 */
 	public static AnnotationAttributes getAnnotationAttributes(Annotation annotation, boolean classValuesAsString,
@@ -972,7 +972,7 @@ public abstract class AnnotationUtils {
 	 * may be {@code null} if unknown
 	 * @param annotation the annotation to retrieve the attributes for
 	 * @return the annotation attributes (a specialized Map) with attribute names as keys
-	 * and corresponding attribute values as values; never {@code null}
+	 * and corresponding attribute values as values (never {@code null})
 	 * @since 4.2
 	 * @see #getAnnotationAttributes(AnnotatedElement, Annotation, boolean, boolean)
 	 */
@@ -995,7 +995,7 @@ public abstract class AnnotationUtils {
 	 * {@link org.springframework.core.type.AnnotationMetadata}) or to preserve them as
 	 * {@code Annotation} instances
 	 * @return the annotation attributes (a specialized Map) with attribute names as keys
-	 * and corresponding attribute values as values; never {@code null}
+	 * and corresponding attribute values as values (never {@code null})
 	 * @since 4.2
 	 */
 	public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement annotatedElement,
@@ -1037,7 +1037,7 @@ public abstract class AnnotationUtils {
 	 * @param mergeMode whether the annotation attributes should be created
 	 * using <em>merge mode</em>
 	 * @return the annotation attributes (a specialized Map) with attribute names as keys
-	 * and corresponding attribute values as values; never {@code null}
+	 * and corresponding attribute values as values (never {@code null})
 	 * @since 4.2
 	 * @see #postProcessAnnotationAttributes
 	 */
@@ -1296,7 +1296,7 @@ public abstract class AnnotationUtils {
 	 * {@link Map} that is an ideal candidate for this method's
 	 * {@code attributes} argument.
 	 * @param attributes the map of annotation attributes to synthesize
-	 * @param annotationType the type of annotation to synthesize; never {@code null}
+	 * @param annotationType the type of annotation to synthesize
 	 * @param annotatedElement the element that is annotated with the annotation
 	 * corresponding to the supplied attributes; may be {@code null} if unknown
 	 * @return the synthesized annotation, or {@code null} if the supplied attributes
@@ -1333,7 +1333,7 @@ public abstract class AnnotationUtils {
 	 * {@link #synthesizeAnnotation(Map, Class, AnnotatedElement)},
 	 * supplying an empty map for the source attribute values and {@code null}
 	 * for the {@link AnnotatedElement}.
-	 * @param annotationType the type of annotation to synthesize; never {@code null}
+	 * @param annotationType the type of annotation to synthesize
 	 * @return the synthesized annotation
 	 * @throws IllegalArgumentException if a required attribute is missing
 	 * @throws AnnotationConfigurationException if invalid configuration of
@@ -1422,7 +1422,7 @@ public abstract class AnnotationUtils {
 	 * <p>An empty return value implies that the annotation does not declare
 	 * any attribute aliases.
 	 * @param annotationType the annotation type to find attribute aliases in
-	 * @return a map containing attribute aliases; never {@code null}
+	 * @return a map containing attribute aliases (never {@code null})
 	 * @since 4.2
 	 */
 	static Map<String, List<String>> getAttributeAliasMap(Class<? extends Annotation> annotationType) {
@@ -1499,9 +1499,9 @@ public abstract class AnnotationUtils {
 	/**
 	 * Get the names of the aliased attributes configured via
 	 * {@link AliasFor @AliasFor} for the supplied annotation {@code attribute}.
-	 * @param attribute the attribute to find aliases for; never {@code null}
-	 * @return the names of the aliased attributes; never {@code null}, though
-	 * potentially <em>empty</em>
+	 * @param attribute the attribute to find aliases for
+	 * @return the names of the aliased attributes (never {@code null}, though
+	 * potentially <em>empty</em>)
 	 * @throws IllegalArgumentException if the supplied attribute method is
 	 * {@code null} or not from an annotation
 	 * @throws AnnotationConfigurationException if invalid configuration of
@@ -1549,7 +1549,7 @@ public abstract class AnnotationUtils {
 	 * @param annotationType the type in which to search for attribute methods;
 	 * never {@code null}
 	 * @return all annotation attribute methods in the specified annotation
-	 * type; never {@code null}, though potentially <em>empty</em>
+	 * type (never {@code null}, though potentially <em>empty</em>)
 	 * @since 4.2
 	 */
 	static List<Method> getAttributeMethods(Class<? extends Annotation> annotationType) {
@@ -1575,7 +1575,7 @@ public abstract class AnnotationUtils {
 	 * supplied {@code element}.
 	 * @param element the element to search on
 	 * @param annotationName the fully qualified class name of the annotation
-	 * type to find; never {@code null} or empty
+	 * type to find
 	 * @return the annotation if found; {@code null} otherwise
 	 * @since 4.2
 	 */
@@ -2126,10 +2126,10 @@ public abstract class AnnotationUtils {
 		 * one of the attributes has been declared while simultaneously ensuring
 		 * that at least one of the attributes has been declared.
 		 * @param aliasFor the {@code @AliasFor} annotation from which to retrieve
-		 * the aliased attribute name; never {@code null}
+		 * the aliased attribute name
 		 * @param attribute the attribute that is annotated with {@code @AliasFor},
-		 * used solely for building an exception message; never {@code null}
-		 * @return the name of the aliased attribute, never {@code null} or empty
+		 * used solely for building an exception message
+		 * @return the name of the aliased attribute (never {@code null} or empty)
 		 * @throws AnnotationConfigurationException if invalid configuration of
 		 * {@code @AliasFor} is detected
 		 * @since 4.2

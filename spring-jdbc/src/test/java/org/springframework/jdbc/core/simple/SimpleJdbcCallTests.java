@@ -105,8 +105,7 @@ public class SimpleJdbcCallTests {
 		adder.declareParameters(
 				new SqlParameter("amount", Types.INTEGER),
 				new SqlParameter("custid", Types.INTEGER),
-				new SqlOutParameter("newid",
-				Types.INTEGER));
+				new SqlOutParameter("newid", Types.INTEGER));
 		Number newId = adder.executeObject(Number.class, new MapSqlParameterSource().
 				addValue("amount", 1103).
 				addValue("custid", 3));
@@ -122,8 +121,7 @@ public class SimpleJdbcCallTests {
 		adder.declareParameters(
 				new SqlParameter("amount", Types.INTEGER),
 				new SqlParameter("custid", Types.INTEGER),
-				new SqlOutParameter("newid",
-				Types.INTEGER));
+				new SqlOutParameter("newid", Types.INTEGER));
 		Number newId = adder.executeObject(Number.class, 1103, 3);
 		assertEquals(4, newId.intValue());
 		verifyAddInvoiceWithoutMetaData(false);
@@ -230,12 +228,12 @@ public class SimpleJdbcCallTests {
 		verifyStatement(adder, "{call ADD_INVOICE(AMOUNT => ?, CUSTID => ?, NEWID => ?)}");
 	}
 
+
 	private void verifyStatement(SimpleJdbcCall adder, String expected) {
 		Assert.assertEquals("Incorrect call statement", expected, adder.getCallString());
 	}
 
-	private void initializeAddInvoiceWithoutMetaData(boolean isFunction)
-			throws SQLException {
+	private void initializeAddInvoiceWithoutMetaData(boolean isFunction) throws SQLException {
 		given(databaseMetaData.getDatabaseProductName()).willReturn("MyDB");
 		given(databaseMetaData.getUserName()).willReturn("me");
 		given(databaseMetaData.storesLowerCaseIdentifiers()).willReturn(true);
@@ -313,4 +311,5 @@ public class SimpleJdbcCallTests {
 		verify(proceduresResultSet).close();
 		verify(procedureColumnsResultSet).close();
 	}
+
 }
