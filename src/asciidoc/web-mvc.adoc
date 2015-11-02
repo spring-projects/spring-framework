@@ -1028,12 +1028,20 @@ condition. For example:
 [subs="verbatim,quotes"]
 ----
 	@Controller
-	@RequestMapping(path = "/pets/{petId}", method = RequestMethod.GET, **produces="application/json"**)
+	@RequestMapping(path = "/pets/{petId}", method = RequestMethod.GET, **produces="application/json; charset=UTF-8"**)
 	@ResponseBody
 	public Pet getPet(@PathVariable String petId, Model model) {
 		// implementation omitted
 	}
 ----
+
+[NOTE]
+====
+Be aware that the media type specified in the __produces__ condition can also optionally
+specify a character set. For example, in the code snippet above we specify the same media
+type than the default one configured in `MappingJackson2HttpMessageConverter`, including
+the `UTF-8` charset.
+====
 
 Just like with __consumes__, producible media type expressions can be negated as in
 __!text/plain__ to match to all requests other than those with an __Accept__ header
@@ -3847,7 +3855,7 @@ When writing error information, the status code and the error message set on the
 	@Controller
 	public class ErrorController {
 
-		@RequestMapping(path="/error", produces="application/json")
+		@RequestMapping(path="/error", produces="application/json; charset=UTF-8")
 		@ResponseBody
 		public Map<String, Object> handle(HttpServletRequest request) {
 
