@@ -79,6 +79,7 @@ public class JmsListenerEndpointRegistry implements DisposableBean, SmartLifecyc
 	/**
 	 * Return the ids of the managed {@link MessageListenerContainer} instance(s).
 	 * @see #getListenerContainer(String)
+	 * @since 4.2.3
 	 */
 	public Set<String> getListenerContainerIds() {
 		return Collections.unmodifiableSet(this.listenerContainers.keySet());
