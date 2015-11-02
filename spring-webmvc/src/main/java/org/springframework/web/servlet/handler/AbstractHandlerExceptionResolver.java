@@ -88,7 +88,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * as a fallback for all exceptions; any further HandlerExceptionResolvers in the chain will be
 	 * ignored in this case.
 	 */
-	public void setMappedHandlerClasses(Class<?>[] mappedHandlerClasses) {
+	public void setMappedHandlerClasses(Class<?>... mappedHandlerClasses) {
 		this.mappedHandlerClasses = mappedHandlerClasses;
 	}
 
@@ -115,6 +115,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	public void setPreventResponseCaching(boolean preventResponseCaching) {
 		this.preventResponseCaching = preventResponseCaching;
 	}
+
 
 	/**
 	 * Check whether this resolver is supposed to apply (i.e. if the supplied handler
@@ -219,6 +220,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	protected void preventCaching(HttpServletResponse response) {
 		response.addHeader(HEADER_CACHE_CONTROL, "no-store");
 	}
+
 
 	/**
 	 * Actually resolve the given exception that got thrown during handler execution,
