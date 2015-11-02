@@ -583,11 +583,12 @@ public abstract class AnnotationUtils {
 			}
 
 			if (result != null) {
+				result = synthesizeAnnotation(result, method);
 				findAnnotationCache.put(cacheKey, result);
 			}
 		}
 
-		return synthesizeAnnotation(result, method);
+		return result;
 	}
 
 	private static <A extends Annotation> A searchOnInterfaces(Method method, Class<A> annotationType, Class<?>... ifcs) {
@@ -672,11 +673,12 @@ public abstract class AnnotationUtils {
 		A result = (A) findAnnotationCache.get(cacheKey);
 		if (result == null) {
 			result = findAnnotation(clazz, annotationType, new HashSet<Annotation>());
-			if (result != null) {
+			if (result != null && synthesize) {
+				result = synthesizeAnnotation(result, clazz);
 				findAnnotationCache.put(cacheKey, result);
 			}
 		}
-		return (synthesize ? synthesizeAnnotation(result, clazz) : result);
+		return result;
 	}
 
 	/**
