@@ -14,62 +14,52 @@
  * limitations under the License.
  */
 
-package org.springframework.reactive.web.dispatch.method.annotation;
+package org.springframework.reactive.web.dispatch;
 
-import java.util.Collections;
-
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.reactive.codec.encoder.StringEncoder;
-import org.springframework.reactive.web.dispatch.HandlerResult;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.HandlerMethod;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Sebastien Deleuze
  */
-public class ResponseBodyResultHandlerTests {
-
+public class SimpleHandlerResultHandlerTests {
 
 	@Test
 	public void supports() throws NoSuchMethodException {
-		ResponseBodyResultHandler handler = new ResponseBodyResultHandler(Collections.singletonList(
-				new StringEncoder()), new DefaultConversionService());
+
+		SimpleHandlerResultHandler resultHandler = new SimpleHandlerResultHandler();
 		TestController controller = new TestController();
 
-		HandlerMethod hm = new HandlerMethod(controller,TestController.class.getMethod("notAnnotated"));
+		HandlerMethod hm = new HandlerMethod(controller, TestController.class.getMethod("voidReturnValue"));
 		ResolvableType type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertFalse(handler.supports(new HandlerResult(hm, null, type)));
+		assertFalse(resultHandler.supports(new HandlerResult(hm, null, type)));
 
 		hm = new HandlerMethod(controller, TestController.class.getMethod("publisherString"));
 		type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertTrue(handler.supports(new HandlerResult(hm, null, type)));
+		assertFalse(resultHandler.supports(new HandlerResult(hm, null, type)));
 
 		hm = new HandlerMethod(controller, TestController.class.getMethod("publisherVoid"));
 		type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertTrue(handler.supports(new HandlerResult(hm, null, type)));
+		assertTrue(resultHandler.supports(new HandlerResult(hm, null, type)));
 	}
 
 
 	@SuppressWarnings("unused")
 	private static class TestController {
 
-		public Publisher<String> notAnnotated() {
+		public Publisher<String> voidReturnValue() {
 			return null;
 		}
 
-		@ResponseBody
 		public Publisher<String> publisherString() {
 			return null;
 		}
 
-		@ResponseBody
 		public Publisher<Void> publisherVoid() {
 			return null;
 		}

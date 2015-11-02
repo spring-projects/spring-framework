@@ -16,6 +16,7 @@
 
 package org.springframework.reactive.web.dispatch;
 
+import org.springframework.core.ResolvableType;
 
 /**
  * Represent the result of the invocation of an handler.
@@ -28,10 +29,13 @@ public class HandlerResult {
 
 	private final Object value;
 
+	private final ResolvableType type;
 
-	public HandlerResult(Object handler, Object value) {
+
+	public HandlerResult(Object handler, Object value, ResolvableType type) {
 		this.handler = handler;
 		this.value = value;
+		this.type = type;
 	}
 
 
@@ -43,4 +47,7 @@ public class HandlerResult {
 		return this.value;
 	}
 
+	public ResolvableType getType() {
+		return type;
+	}
 }

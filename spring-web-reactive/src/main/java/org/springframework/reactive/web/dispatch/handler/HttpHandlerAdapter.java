@@ -19,6 +19,7 @@ package org.springframework.reactive.web.dispatch.handler;
 import org.reactivestreams.Publisher;
 import reactor.Publishers;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.http.server.ReactiveServerHttpRequest;
 import org.springframework.http.server.ReactiveServerHttpResponse;
 import org.springframework.reactive.web.dispatch.HandlerAdapter;
@@ -38,6 +39,8 @@ import org.springframework.reactive.web.http.HttpHandler;
  */
 public class HttpHandlerAdapter implements HandlerAdapter {
 
+	private static final ResolvableType PUBLISHER_VOID = ResolvableType.forClassWithGenerics(Publisher.class, Void.class);
+
 
 	@Override
 	public boolean supports(Object handler) {
@@ -50,7 +53,7 @@ public class HttpHandlerAdapter implements HandlerAdapter {
 
 		HttpHandler httpHandler = (HttpHandler)handler;
 		Publisher<Void> completion = httpHandler.handle(request, response);
-		return Publishers.just(new HandlerResult(httpHandler, completion));
+		return Publishers.just(new HandlerResult(httpHandler, completion, PUBLISHER_VOID));
 	}
 
 }

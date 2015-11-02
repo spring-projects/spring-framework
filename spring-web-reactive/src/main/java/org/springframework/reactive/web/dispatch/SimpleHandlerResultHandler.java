@@ -22,6 +22,7 @@ import org.reactivestreams.Publisher;
 import reactor.Publishers;
 
 import org.springframework.core.Ordered;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.server.ReactiveServerHttpRequest;
 import org.springframework.http.server.ReactiveServerHttpResponse;
 
@@ -31,6 +32,8 @@ import org.springframework.http.server.ReactiveServerHttpResponse;
  * @author Sebastien Deleuze
  */
 public class SimpleHandlerResultHandler implements Ordered, HandlerResultHandler {
+
+	private static final ResolvableType PUBLISHER_VOID = ResolvableType.forClassWithGenerics(Publisher.class, Void.class);
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
@@ -46,8 +49,8 @@ public class SimpleHandlerResultHandler implements Ordered, HandlerResultHandler
 
 	@Override
 	public boolean supports(HandlerResult result) {
-		Object value = result.getValue();
-		return value != null && Publisher.class.isAssignableFrom(value.getClass());
+		ResolvableType type = result.getType();
+		return type != null && PUBLISHER_VOID.isAssignableFrom(type);
 	}
 
 	@Override

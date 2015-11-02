@@ -24,6 +24,7 @@ import org.reactivestreams.Publisher;
 import reactor.Publishers;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.server.ReactiveServerHttpRequest;
 import org.springframework.http.server.ReactiveServerHttpResponse;
@@ -91,9 +92,10 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 
 		InvocableHandlerMethod handlerMethod = new InvocableHandlerMethod((HandlerMethod) handler);
 		handlerMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
+		ResolvableType type =  ResolvableType.forMethodParameter(handlerMethod.getReturnType());
 
 		Publisher<Object> resultPublisher = handlerMethod.invokeForRequest(request);
-		return Publishers.map(resultPublisher, result -> new HandlerResult(handlerMethod, result));
+		return Publishers.map(resultPublisher, result -> new HandlerResult(handlerMethod, result, type));
 	}
 
 }
