@@ -37,7 +37,6 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -1277,7 +1276,7 @@ public abstract class AnnotationUtils {
 		DefaultAnnotationAttributeExtractor attributeExtractor =
 				new DefaultAnnotationAttributeExtractor(annotation, annotatedElement);
 		InvocationHandler handler = new SynthesizedAnnotationInvocationHandler(attributeExtractor);
-		return (A) Proxy.newProxyInstance(ClassUtils.getDefaultClassLoader(),
+		return (A) Proxy.newProxyInstance(annotation.getClass().getClassLoader(),
 				new Class<?>[] {(Class<A>) annotationType, SynthesizedAnnotation.class}, handler);
 	}
 
@@ -1323,7 +1322,7 @@ public abstract class AnnotationUtils {
 		MapAnnotationAttributeExtractor attributeExtractor =
 				new MapAnnotationAttributeExtractor(attributes, annotationType, annotatedElement);
 		InvocationHandler handler = new SynthesizedAnnotationInvocationHandler(attributeExtractor);
-		return (A) Proxy.newProxyInstance(ClassUtils.getDefaultClassLoader(),
+		return (A) Proxy.newProxyInstance(annotationType.getClassLoader(),
 				new Class<?>[] {annotationType, SynthesizedAnnotation.class}, handler);
 	}
 
