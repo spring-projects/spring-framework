@@ -359,14 +359,33 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		pathParams = DECODING_URL_PATH_HELPER.decodeRequestString(servletRequest, pathParams);
 		String extInPathParams = StringUtils.getFilenameExtension(pathParams);
 
-		if (!isSafeExtension(ext) || !isSafeExtension(extInPathParams)) {
+		if (!safeExtension(servletRequest, ext) || !safeExtension(servletRequest, extInPathParams)) {
 			headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=f.txt");
 		}
 	}
 
-	private boolean isSafeExtension(String extension) {
-		return (!StringUtils.hasText(extension) ||
-				this.safeExtensions.contains(extension.toLowerCase(Locale.ENGLISH)));
+	@SuppressWarnings("unchecked")
+	private boolean safeExtension(HttpServletRequest request, String extension) {
+		if (!StringUtils.hasText(extension)) {
+			return true;
+		}
+		extension = extension.toLowerCase(Locale.ENGLISH);
+		if (this.safeExtensions.contains(extension)) {
+			return true;
+		}
+		if (extension.equals("html")) {
+			String name = HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE;
+			String pattern = (String) request.getAttribute(name);
+			if (pattern != null && pattern.endsWith(".html")) {
+				return true;
+			}
+			name = HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
+			Set<MediaType> mediaTypes = (Set<MediaType>) request.getAttribute(name);
+			if (!CollectionUtils.isEmpty(mediaTypes) && mediaTypes.contains(MediaType.TEXT_HTML)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 }
