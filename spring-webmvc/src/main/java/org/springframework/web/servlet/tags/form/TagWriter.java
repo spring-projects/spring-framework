@@ -97,6 +97,19 @@ public class TagWriter {
 		this.writer.append(" ").append(attributeName).append("=\"")
 				.append(attributeValue).append("\"");
 	}
+	
+	/**
+	 * Write an empty HTML attribute with the specified name.
+	 * <p>Be sure to write all attributes <strong>before</strong> writing
+	 * any inner text or nested tags.
+	 * @throws IllegalStateException if the opening tag is closed
+	 */
+	public void writeAttribute(String attributeName) throws JspException {
+		if (currentState().isBlockTag()) {
+			throw new IllegalStateException("Cannot write attributes after opening tag is closed.");
+		}
+		this.writer.append(" ").append(attributeName);
+	}
 
 	/**
 	 * Write an HTML attribute if the supplied value is not {@code null}
