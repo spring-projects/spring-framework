@@ -40,6 +40,7 @@ import org.springframework.util.comparator.CompoundComparator;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 3.0
  * @see <a href="http://tools.ietf.org/html/rfc7231#section-3.1.1.1">HTTP 1.1: Semantics
  * and Content, section 3.1.1.1</a>
@@ -80,13 +81,25 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code application/json}.
-	 * */
+	 * @see #APPLICATION_JSON_UTF8
+	 */
 	public final static MediaType APPLICATION_JSON;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_JSON}.
+	 * @see #APPLICATION_JSON_UTF8_VALUE
 	 */
 	public final static String APPLICATION_JSON_VALUE = "application/json";
+
+	/**
+	 * Public constant media type for {@code application/json;charset=UTF-8}.
+	 */
+	public final static MediaType APPLICATION_JSON_UTF8;
+
+	/**
+	 * A String equivalent of {@link MediaType#APPLICATION_JSON_UTF8}.
+	 */
+	public final static String APPLICATION_JSON_UTF8_VALUE = APPLICATION_JSON_VALUE + ";charset=UTF-8";
 
 	/**
 	 * Public constant media type for {@code application/octet-stream}.
@@ -197,6 +210,7 @@ public class MediaType extends MimeType implements Serializable {
 		APPLICATION_ATOM_XML = valueOf(APPLICATION_ATOM_XML_VALUE);
 		APPLICATION_FORM_URLENCODED = valueOf(APPLICATION_FORM_URLENCODED_VALUE);
 		APPLICATION_JSON = valueOf(APPLICATION_JSON_VALUE);
+		APPLICATION_JSON_UTF8 = valueOf(APPLICATION_JSON_UTF8_VALUE);
 		APPLICATION_OCTET_STREAM = valueOf(APPLICATION_OCTET_STREAM_VALUE);
 		APPLICATION_XHTML_XML = valueOf(APPLICATION_XHTML_XML_VALUE);
 		APPLICATION_XML = valueOf(APPLICATION_XML_VALUE);

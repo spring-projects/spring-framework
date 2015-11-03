@@ -1028,7 +1028,7 @@ condition. For example:
 [subs="verbatim,quotes"]
 ----
 	@Controller
-	@RequestMapping(path = "/pets/{petId}", method = RequestMethod.GET, **produces="application/json; charset=UTF-8"**)
+	@RequestMapping(path = "/pets/{petId}", method = RequestMethod.GET, **produces = MediaType.APPLICATION_JSON_UTF8_VALUE**)
 	@ResponseBody
 	public Pet getPet(@PathVariable String petId, Model model) {
 		// implementation omitted
@@ -3855,7 +3855,7 @@ When writing error information, the status code and the error message set on the
 	@Controller
 	public class ErrorController {
 
-		@RequestMapping(path="/error", produces="application/json; charset=UTF-8")
+		@RequestMapping(path = "/error", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 		@ResponseBody
 		public Map<String, Object> handle(HttpServletRequest request) {
 

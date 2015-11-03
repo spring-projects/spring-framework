@@ -63,7 +63,7 @@ public class MappingJackson2HttpMessageConverter extends AbstractJackson2HttpMes
 	 * @see Jackson2ObjectMapperBuilder#json()
 	 */
 	public MappingJackson2HttpMessageConverter(ObjectMapper objectMapper) {
-		super(objectMapper, new MediaType("application", "json", DEFAULT_CHARSET),
+		super(objectMapper, MediaType.APPLICATION_JSON_UTF8,
 				new MediaType("application", "*+json", DEFAULT_CHARSET));
 	}
 
