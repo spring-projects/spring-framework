@@ -36,6 +36,7 @@ import org.springframework.reactive.codec.decoder.Jaxb2Decoder;
 import org.springframework.reactive.io.BufferOutputStream;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.MimeType;
 
 /**
  * Encode from an {@code Object} stream to a byte stream of XML elements.
@@ -43,20 +44,18 @@ import org.springframework.util.ClassUtils;
  * @author Sebastien Deleuze
  * @see Jaxb2Decoder
  */
-public class Jaxb2Encoder implements MessageToByteEncoder<Object> {
+public class Jaxb2Encoder extends AbstractEncoder<Object> {
 
 	private final ConcurrentMap<Class<?>, JAXBContext> jaxbContexts = new ConcurrentHashMap<>(64);
 
 
-	@Override
-	public boolean canEncode(ResolvableType type, MediaType mediaType, Object... hints) {
-		return (mediaType.isCompatibleWith(MediaType.APPLICATION_XML) ||
-				mediaType.isCompatibleWith(MediaType.TEXT_XML));
+	public Jaxb2Encoder() {
+		super(MediaType.APPLICATION_XML, MediaType.TEXT_XML);
 	}
 
 	@Override
 	public Publisher<ByteBuffer> encode(Publisher<? extends Object> messageStream, ResolvableType type,
-			MediaType mediaType, Object... hints) {
+			MimeType mimeType, Object... hints) {
 
 		return Publishers.map(messageStream, value -> {
 			try {

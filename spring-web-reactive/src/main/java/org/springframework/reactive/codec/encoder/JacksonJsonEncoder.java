@@ -18,6 +18,7 @@ package org.springframework.reactive.codec.encoder;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.reactivestreams.Publisher;
@@ -25,10 +26,10 @@ import reactor.Publishers;
 import reactor.io.buffer.Buffer;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.http.MediaType;
 import org.springframework.reactive.codec.CodecException;
 import org.springframework.reactive.codec.decoder.JacksonJsonDecoder;
 import org.springframework.reactive.io.BufferOutputStream;
+import org.springframework.util.MimeType;
 
 /**
  * Encode from an {@code Object} stream to a byte stream of JSON objects.
@@ -36,28 +37,32 @@ import org.springframework.reactive.io.BufferOutputStream;
  * @author Sebastien Deleuze
  * @see JacksonJsonDecoder
  */
-public class JacksonJsonEncoder implements MessageToByteEncoder<Object> {
+public class JacksonJsonEncoder extends AbstractEncoder<Object> {
 
 	private final ObjectMapper mapper;
 
+	private Encoder<ByteBuffer> postProcessor;
+
 	public JacksonJsonEncoder() {
-		this(new ObjectMapper());
+		this(new ObjectMapper(), null);
 	}
 
-	public JacksonJsonEncoder(ObjectMapper mapper) {
+	public JacksonJsonEncoder(Encoder<ByteBuffer> postProcessor) {
+		this(new ObjectMapper(), postProcessor);
+	}
+
+	public JacksonJsonEncoder(ObjectMapper mapper, Encoder<ByteBuffer> postProcessor) {
+		super(new MimeType("application", "json", StandardCharsets.UTF_8),
+				new MimeType("application", "*+json", StandardCharsets.UTF_8));
 		this.mapper = mapper;
+		this.postProcessor = postProcessor;
 	}
 
 	@Override
-	public boolean canEncode(ResolvableType type, MediaType mediaType, Object... hints) {
-		return mediaType.isCompatibleWith(MediaType.APPLICATION_JSON);
-	}
+	public Publisher<ByteBuffer> encode(Publisher<? extends Object> inputStream,
+			ResolvableType type, MimeType mimeType, Object... hints) {
 
-	@Override
-	public Publisher<ByteBuffer> encode(Publisher<? extends Object> messageStream,
-			ResolvableType type, MediaType mediaType, Object... hints) {
-
-		return Publishers.map(messageStream, value -> {
+		Publisher<ByteBuffer> stream = Publishers.map(inputStream, value -> {
 			Buffer buffer = new Buffer();
 			BufferOutputStream outputStream = new BufferOutputStream(buffer);
 			try {
@@ -68,6 +73,7 @@ public class JacksonJsonEncoder implements MessageToByteEncoder<Object> {
 			buffer.flip();
 			return buffer.byteBuffer();
 		});
+		return this.postProcessor == null ? stream : this.postProcessor.encode(stream, type, mimeType, hints);
 	}
 
 }

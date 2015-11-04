@@ -28,8 +28,9 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.http.server.ReactiveServerHttpRequest;
 import org.springframework.http.server.ReactiveServerHttpResponse;
 import org.springframework.reactive.codec.decoder.ByteBufferDecoder;
-import org.springframework.reactive.codec.decoder.ByteToMessageDecoder;
+import org.springframework.reactive.codec.decoder.Decoder;
 import org.springframework.reactive.codec.decoder.JacksonJsonDecoder;
+import org.springframework.reactive.codec.decoder.JsonObjectDecoder;
 import org.springframework.reactive.codec.decoder.StringDecoder;
 import org.springframework.reactive.web.dispatch.HandlerAdapter;
 import org.springframework.reactive.web.dispatch.HandlerResult;
@@ -70,8 +71,8 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 	public void afterPropertiesSet() throws Exception {
 		if (this.argumentResolvers == null) {
 
-			List<ByteToMessageDecoder<?>> decoders = Arrays.asList(new ByteBufferDecoder(),
-					new StringDecoder(), new JacksonJsonDecoder());
+			List<Decoder<?>> decoders = Arrays.asList(new ByteBufferDecoder(),
+					new StringDecoder(), new JacksonJsonDecoder(new JsonObjectDecoder()));
 
 			this.argumentResolvers = new ArrayList<>();
 			this.argumentResolvers.add(new RequestParamArgumentResolver());

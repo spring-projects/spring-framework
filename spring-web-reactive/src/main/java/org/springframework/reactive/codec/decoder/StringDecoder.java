@@ -25,9 +25,8 @@ import reactor.Publishers;
 import reactor.io.buffer.Buffer;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.http.MediaType;
 import org.springframework.reactive.codec.encoder.StringEncoder;
-import org.springframework.reactive.codec.support.HintUtils;
+import org.springframework.util.MimeType;
 
 /**
  * Decode from a bytes stream to a String stream.
@@ -35,22 +34,31 @@ import org.springframework.reactive.codec.support.HintUtils;
  * @author Sebastien Deleuze
  * @see StringEncoder
  */
-public class StringDecoder implements ByteToMessageDecoder<String> {
+public class StringDecoder extends AbstractDecoder<String> {
 
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
+	public StringDecoder() {
+		super(new MimeType("text", "plain", DEFAULT_CHARSET));
+	}
 
 	@Override
-	public boolean canDecode(ResolvableType type, MediaType mediaType, Object... hints) {
-		return mediaType.isCompatibleWith(MediaType.TEXT_PLAIN)
+	public boolean canDecode(ResolvableType type, MimeType mimeType, Object... hints) {
+		return super.canDecode(type, mimeType, hints)
 				&& String.class.isAssignableFrom(type.getRawClass());
 	}
 
 	@Override
 	public Publisher<String> decode(Publisher<ByteBuffer> inputStream, ResolvableType type,
-			MediaType mediaType, Object... hints) {
+			MimeType mimeType, Object... hints) {
 
-		Charset charset = HintUtils.getHintByClass(Charset.class, hints, DEFAULT_CHARSET);
+		Charset charset;
+		if (mimeType != null && mimeType.getCharSet() != null) {
+			charset = mimeType.getCharSet();
+		}
+		else {
+			 charset = DEFAULT_CHARSET;
+		}
 		return Publishers.map(inputStream, chunk -> new String(new Buffer(chunk).asBytes(), charset));
 	}
 

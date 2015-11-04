@@ -17,6 +17,7 @@
 package org.springframework.reactive.codec.encoder;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 
@@ -27,8 +28,8 @@ import reactor.core.support.BackpressureUtils;
 import reactor.io.buffer.Buffer;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.http.MediaType;
 import org.springframework.reactive.codec.decoder.JsonObjectDecoder;
+import org.springframework.util.MimeType;
 
 import static reactor.Publishers.lift;
 
@@ -41,17 +42,16 @@ import static reactor.Publishers.lift;
  *
  * @see JsonObjectDecoder
  */
-public class JsonObjectEncoder implements MessageToByteEncoder<ByteBuffer> {
+public class JsonObjectEncoder extends AbstractEncoder<ByteBuffer> {
 
-
-	@Override
-	public boolean canEncode(ResolvableType type, MediaType mediaType, Object... hints) {
-		return mediaType.isCompatibleWith(MediaType.APPLICATION_JSON);
+	public JsonObjectEncoder() {
+		super(new MimeType("application", "json", StandardCharsets.UTF_8),
+				new MimeType("application", "*+json", StandardCharsets.UTF_8));
 	}
 
 	@Override
 	public Publisher<ByteBuffer> encode(Publisher<? extends ByteBuffer> messageStream,
-			ResolvableType type, MediaType mediaType, Object... hints) {
+			ResolvableType type, MimeType mimeType, Object... hints) {
 
 		//noinspection Convert2MethodRef
 		return lift(messageStream, bbs -> new JsonEncoderBarrier(bbs));

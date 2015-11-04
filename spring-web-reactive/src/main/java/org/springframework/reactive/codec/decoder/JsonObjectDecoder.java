@@ -17,6 +17,7 @@
 package org.springframework.reactive.codec.decoder;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,8 +29,8 @@ import reactor.Publishers;
 import reactor.fn.Function;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.http.MediaType;
 import org.springframework.reactive.codec.encoder.JsonObjectEncoder;
+import org.springframework.util.MimeType;
 
 /**
  * Decode an arbitrary split byte stream representing JSON objects to a byte
@@ -45,7 +46,7 @@ import org.springframework.reactive.codec.encoder.JsonObjectEncoder;
  * @author Sebastien Deleuze
  * @see JsonObjectEncoder
  */
-public class JsonObjectDecoder implements ByteToMessageDecoder<ByteBuffer> {
+public class JsonObjectDecoder extends AbstractDecoder<ByteBuffer> {
 
 	private static final int ST_CORRUPTED = -1;
 
@@ -85,6 +86,8 @@ public class JsonObjectDecoder implements ByteToMessageDecoder<ByteBuffer> {
 	 * "infinitely" many elements.
 	 */
 	public JsonObjectDecoder(int maxObjectLength, boolean streamArrayElements) {
+		super(new MimeType("application", "json", StandardCharsets.UTF_8),
+				new MimeType("application", "*+json", StandardCharsets.UTF_8));
 		if (maxObjectLength < 1) {
 			throw new IllegalArgumentException("maxObjectLength must be a positive int");
 		}
@@ -92,15 +95,9 @@ public class JsonObjectDecoder implements ByteToMessageDecoder<ByteBuffer> {
 		this.streamArrayElements = streamArrayElements;
 	}
 
-
-	@Override
-	public boolean canDecode(ResolvableType type, MediaType mediaType, Object... hints) {
-		return mediaType.isCompatibleWith(MediaType.APPLICATION_JSON);
-	}
-
 	@Override
 	public Publisher<ByteBuffer> decode(Publisher<ByteBuffer> inputStream, ResolvableType type,
-			MediaType mediaType, Object... hints) {
+			MimeType mimeType, Object... hints) {
 
 		return Publishers.flatMap(inputStream, new Function<ByteBuffer, Publisher<? extends ByteBuffer>>() {
 
@@ -261,4 +258,5 @@ public class JsonObjectDecoder implements ByteToMessageDecoder<ByteBuffer> {
 			}
 		});
 	}
+
 }

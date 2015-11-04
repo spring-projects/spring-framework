@@ -18,9 +18,6 @@ package org.springframework.reactive.web.dispatch.method.annotation;
 
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.reactivestreams.Publisher;
@@ -35,42 +32,33 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ReactiveServerHttpRequest;
 import org.springframework.http.server.ReactiveServerHttpResponse;
-import org.springframework.reactive.codec.encoder.JsonObjectEncoder;
-import org.springframework.reactive.codec.encoder.MessageToByteEncoder;
+import org.springframework.reactive.codec.encoder.Encoder;
 import org.springframework.reactive.web.dispatch.HandlerResult;
 import org.springframework.reactive.web.dispatch.HandlerResultHandler;
 import org.springframework.util.Assert;
+import org.springframework.util.MimeType;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.HandlerMethod;
 
 
 /**
- * First version using {@link MessageToByteEncoder}s
- *
  * @author Rossen Stoyanchev
  * @author Stephane Maldini
  * @author Sebastien Deleuze
  */
 public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered {
 
-	private static final Charset UTF_8 = Charset.forName("UTF-8");
-
-
-	private final List<MessageToByteEncoder<?>> serializers;
+	private final List<Encoder<?>> serializers;
 
 	private final ConversionService conversionService;
 
 	private int order = 0;
 
-	// TODO: remove field
-	private final List<MessageToByteEncoder<ByteBuffer>> postProcessors = Arrays.asList(new JsonObjectEncoder());
 
-
-
-	public ResponseBodyResultHandler(List<MessageToByteEncoder<?>> encoders, ConversionService service) {
-		Assert.notEmpty(encoders, "At least one encoder is required.");
+	public ResponseBodyResultHandler(List<Encoder<?>> serializers, ConversionService service) {
+		Assert.notEmpty(serializers, "At least one serializers is required.");
 		Assert.notNull(service, "'conversionService' is required.");
-		this.serializers = encoders;
+		this.serializers = serializers;
 		this.conversionService = service;
 	}
 
@@ -110,9 +98,7 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 
 		ResolvableType type = ResolvableType.forMethodParameter(returnType);
 		MediaType mediaType = resolveMediaType(request);
-		List<Object> hints = new ArrayList<>();
-		hints.add(UTF_8);
-		Publisher<Object> elementStream;
+		Publisher<?> elementStream;
 		ResolvableType elementType;
 		if (conversionService.canConvert(type.getRawClass(), Publisher.class)) {
 			elementStream = conversionService.convert(value, Publisher.class);
@@ -123,17 +109,20 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 			elementType = type;
 		}
 
-		MessageToByteEncoder<Object> encoder = (MessageToByteEncoder<Object>) resolveEncoder(
-				elementType, mediaType, hints.toArray());
+		Encoder<?> serializer = resolveSerializer(elementType, mediaType);
 
-		if (encoder != null) {
-			Publisher<ByteBuffer> outputStream = encoder.encode(elementStream, type, mediaType, hints.toArray());
-			List<MessageToByteEncoder<ByteBuffer>> postProcessors = resolvePostProcessors(
-					elementType, mediaType, hints.toArray());
-			for (MessageToByteEncoder<ByteBuffer> postProcessor : postProcessors) {
-				outputStream = postProcessor.encode(outputStream, elementType, mediaType, hints.toArray());
+		if (serializer != null) {
+			Publisher<ByteBuffer> outputStream = serializer.encode((Publisher)elementStream, type, mediaType);
+			if (mediaType == null || mediaType.isWildcardType() || mediaType.isWildcardSubtype()) {
+				List<MimeType> mimeTypes = serializer.getSupportedMimeTypes();
+				if (!mimeTypes.isEmpty()) {
+					MimeType mimeType = mimeTypes.get(0);
+					mediaType = new MediaType(mimeType.getType(), mimeType.getSubtype(), mimeType.getParameters());
+				}
 			}
-			response.getHeaders().setContentType(mediaType);
+			if (mediaType != null && !mediaType.equals(MediaType.ALL)) {
+				response.getHeaders().setContentType(mediaType);
+			}
 			return response.setBody(outputStream);
 		}
 		String returnTypeName = returnType.getParameterType().getName();
@@ -148,25 +137,13 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 		return ( mediaTypes.size() > 0 ? mediaTypes.get(0) : MediaType.TEXT_PLAIN);
 	}
 
-	private MessageToByteEncoder<?> resolveEncoder(ResolvableType type, MediaType mediaType, Object[] hints) {
-		for (MessageToByteEncoder<?> codec : this.serializers) {
-			if (codec.canEncode(type, mediaType, hints)) {
-				return codec;
+	private Encoder<?> resolveSerializer(ResolvableType type, MediaType mediaType, Object... hints) {
+		for (Encoder<?> serializer : this.serializers) {
+			if (serializer.canEncode(type, mediaType, hints)) {
+				return serializer;
 			}
 		}
 		return null;
-	}
-
-	private List<MessageToByteEncoder<ByteBuffer>> resolvePostProcessors(ResolvableType type,
-			MediaType mediaType, Object[] hints) {
-
-		List<MessageToByteEncoder<ByteBuffer>> postProcessors = new ArrayList<>();
-		for (MessageToByteEncoder<ByteBuffer> postProcessor : this.postProcessors) {
-			if (postProcessor.canEncode(type, mediaType, hints)) {
-				postProcessors.add(postProcessor);
-			}
-		}
-		return postProcessors;
 	}
 
 }

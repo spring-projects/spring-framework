@@ -18,6 +18,7 @@ package org.springframework.reactive.codec.decoder;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
@@ -25,10 +26,10 @@ import org.reactivestreams.Publisher;
 import reactor.Publishers;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.http.MediaType;
 import org.springframework.reactive.codec.CodecException;
 import org.springframework.reactive.codec.encoder.JacksonJsonEncoder;
 import org.springframework.reactive.io.ByteBufferInputStream;
+import org.springframework.util.MimeType;
 
 /**
  * Decode from a bytes stream of JSON objects to a stream of {@code Object} (POJO).
@@ -36,31 +37,36 @@ import org.springframework.reactive.io.ByteBufferInputStream;
  * @author Sebastien Deleuze
  * @see JacksonJsonEncoder
  */
-public class JacksonJsonDecoder implements ByteToMessageDecoder<Object> {
+public class JacksonJsonDecoder extends AbstractDecoder<Object> {
 
 	private final ObjectMapper mapper;
 
+	private Decoder<ByteBuffer> preProcessor;
+
 
 	public JacksonJsonDecoder() {
-		this(new ObjectMapper());
+		this(new ObjectMapper(), null);
 	}
 
-	public JacksonJsonDecoder(ObjectMapper mapper) {
+	public JacksonJsonDecoder(Decoder<ByteBuffer> preProcessor) {
+		this(new ObjectMapper(), preProcessor);
+	}
+
+	public JacksonJsonDecoder(ObjectMapper mapper, Decoder<ByteBuffer> preProcessor) {
+		super(new MimeType("application", "json", StandardCharsets.UTF_8),
+				new MimeType("application", "*+json", StandardCharsets.UTF_8));
 		this.mapper = mapper;
-	}
-
-
-	@Override
-	public boolean canDecode(ResolvableType type, MediaType mediaType, Object... hints) {
-		return mediaType.isCompatibleWith(MediaType.APPLICATION_JSON);
+		this.preProcessor = preProcessor;
 	}
 
 	@Override
 	public Publisher<Object> decode(Publisher<ByteBuffer> inputStream, ResolvableType type,
-			MediaType mediaType, Object... hints) {
+			MimeType mimeType, Object... hints) {
 
 		ObjectReader reader = this.mapper.readerFor(type.getRawClass());
-		return Publishers.map(inputStream, chunk -> {
+		Publisher<ByteBuffer> decodedStream = this.preProcessor == null ? inputStream :
+				this.preProcessor.decode(inputStream, type, mimeType, hints);
+		return Publishers.map(decodedStream, chunk -> {
 			try {
 				return reader.readValue(new ByteBufferInputStream(chunk));
 			}

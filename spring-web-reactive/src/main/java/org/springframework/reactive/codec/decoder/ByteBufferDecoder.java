@@ -21,21 +21,27 @@ import java.nio.ByteBuffer;
 import org.reactivestreams.Publisher;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.http.MediaType;
+import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
 
 /**
  * @author Sebastien Deleuze
  */
-public class ByteBufferDecoder implements ByteToMessageDecoder<ByteBuffer> {
+public class ByteBufferDecoder extends AbstractDecoder<ByteBuffer> {
+
+	public ByteBufferDecoder() {
+		super(MimeTypeUtils.ALL);
+	}
 
 	@Override
-	public boolean canDecode(ResolvableType type, MediaType mediaType, Object... hints) {
-		return ByteBuffer.class.isAssignableFrom(type.getRawClass());
+	public boolean canDecode(ResolvableType type, MimeType mimeType, Object... hints) {
+		return super.canDecode(type, mimeType, hints)
+				&& ByteBuffer.class.isAssignableFrom(type.getRawClass());
 	}
 
 	@Override
 	public Publisher<ByteBuffer> decode(Publisher<ByteBuffer> inputStream, ResolvableType type,
-			MediaType mediaType, Object... hints) {
+			MimeType mimeType, Object... hints) {
 
 		return inputStream;
 	}

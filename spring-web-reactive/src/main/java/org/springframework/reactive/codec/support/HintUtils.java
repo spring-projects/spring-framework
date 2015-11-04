@@ -16,15 +16,15 @@
 
 package org.springframework.reactive.codec.support;
 
-import org.springframework.reactive.codec.decoder.ByteToMessageDecoder;
-import org.springframework.reactive.codec.encoder.MessageToByteEncoder;
+import org.springframework.reactive.codec.decoder.Decoder;
+import org.springframework.reactive.codec.encoder.Encoder;
 
 /**
  * Utility methods for dealing with codec hints.
  *
  * @author Sebastien Deleuze
- * @see MessageToByteEncoder
- * @see ByteToMessageDecoder
+ * @see Encoder
+ * @see Decoder
  */
 public abstract class HintUtils {
 

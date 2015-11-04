@@ -39,7 +39,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutureConverter;
 import org.springframework.core.convert.support.ReactiveStreamsToReactorConverter;
@@ -50,6 +49,7 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.reactive.codec.encoder.ByteBufferEncoder;
 import org.springframework.reactive.codec.encoder.JacksonJsonEncoder;
+import org.springframework.reactive.codec.encoder.JsonObjectEncoder;
 import org.springframework.reactive.codec.encoder.StringEncoder;
 import org.springframework.reactive.web.dispatch.DispatcherHandler;
 import org.springframework.reactive.web.dispatch.SimpleHandlerResultHandler;
@@ -290,7 +290,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		@Bean
 		public ResponseBodyResultHandler responseBodyResultHandler() {
 			return new ResponseBodyResultHandler(Arrays.asList(
-					new ByteBufferEncoder(), new StringEncoder(),new JacksonJsonEncoder()),
+					new ByteBufferEncoder(), new StringEncoder(), new JacksonJsonEncoder(new JsonObjectEncoder())),
 					conversionService());
 		}
 

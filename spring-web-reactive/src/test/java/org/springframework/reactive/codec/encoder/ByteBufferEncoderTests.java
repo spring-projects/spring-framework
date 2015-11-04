@@ -32,7 +32,7 @@ import org.springframework.http.MediaType;
 /**
  * @author Sebastien Deleuze
  */
-public class ByteBufferDecoderEncoder {
+public class ByteBufferEncoderTests {
 
 	private final ByteBufferEncoder encoder = new ByteBufferEncoder();
 
