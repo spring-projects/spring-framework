@@ -45,13 +45,17 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  * created with a default constructor if it is available. Once created, the
  * attributed is populated with request data via data binding and also
  * validation may be applied if the argument is annotated with
- * {@code @javax.validation.Valid}.
+ * {@code @javax.validation.Valid} or {@link Validated}.
+ * From 4.2.1, if {@link ModelAttribute#preventBinding} is {@code true},
+ * this resolver obtain an object from the model.
+ * In other words, binding for request values does not perform.
  *
  * <p>When this handler is created with {@code annotationNotRequired=true},
  * any non-simple type argument and return value is regarded as a model
  * attribute with or without the presence of an {@code @ModelAttribute}.
  *
  * @author Rossen Stoyanchev
+ * @author Kazuki Shimizu
  * @since 3.1
  */
 public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResolver, HandlerMethodReturnValueHandler {
@@ -93,6 +97,9 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 	 * its default if it is available. The model attribute is then populated
 	 * with request values via data binding and optionally validated
 	 * if {@code @java.validation.Valid} is present on the argument.
+	 * From 4.2.1, if {@link ModelAttribute#preventBinding} is {@code true},
+	 * this method return an object which obtain from the model.
+	 * In other words, binding for request values does not perform.
 	 * @throws BindException if data binding and validation result in an error
 	 * and the next method parameter is not of type {@link Errors}.
 	 * @throws Exception if WebDataBinder initialization fails.
@@ -102,6 +109,13 @@ public class ModelAttributeMethodProcessor implements HandlerMethodArgumentResol
 			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
 
 		String name = ModelFactory.getNameForParameter(parameter);
+
+		ModelAttribute modelAttribute = parameter.getParameterAnnotation(ModelAttribute.class);
+		boolean preventBinding = (modelAttribute != null && modelAttribute.preventBinding());
+		if (preventBinding) {
+			return mavContainer.getModel().get(name);
+		}
+
 		Object attribute = (mavContainer.containsAttribute(name) ?
 				mavContainer.getModel().get(name) : createAttribute(name, parameter, binderFactory, webRequest));
 

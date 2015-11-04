@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.ui.Model;
 
 /**
@@ -49,6 +50,7 @@ import org.springframework.ui.Model;
  * access to a {@link Model} argument.
  *
  * @author Juergen Hoeller
+ * @author Kazuki Shimizu
  * @since 2.5
  */
 @Target({ElementType.PARAMETER, ElementType.METHOD})
@@ -57,13 +59,31 @@ import org.springframework.ui.Model;
 public @interface ModelAttribute {
 
 	/**
+	 * Alias for {@link #name}.
+	 */
+	@AliasFor("name")
+	String value() default "";
+
+	/**
 	 * The name of the model attribute to bind to.
 	 * <p>The default model attribute name is inferred from the declared
 	 * attribute type (i.e. the method parameter type or method return type),
 	 * based on the non-qualified class name:
 	 * e.g. "orderAddress" for class "mypackage.OrderAddress",
 	 * or "orderAddressList" for "List&lt;mypackage.OrderAddress&gt;".
+	 * @return 4.2.1
 	 */
-	String value() default "";
+	@AliasFor("value")
+	String name() default "";
+
+	/**
+	 * Indicate whether bind a request parameter.
+	 *
+	 * <p>If {@code true} is specified, request parameters does not bind to model. (default is {@code false})
+	 *
+	 * <p> Note: This attribute is available at the handler method parameter.
+	 * @since 4.2.1
+	 */
+	boolean preventBinding() default false;
 
 }

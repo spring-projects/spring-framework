@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  * {@link BindingResult} attributes are added where missing.
  *
  * @author Rossen Stoyanchev
+ * @author Kazuki Shimizu
  * @since 3.1
  */
 public final class ModelFactory {
@@ -128,7 +129,7 @@ public final class ModelFactory {
 
 		while (!this.modelMethods.isEmpty()) {
 			InvocableHandlerMethod attrMethod = getNextModelMethod(mavContainer).getHandlerMethod();
-			String modelName = attrMethod.getMethodAnnotation(ModelAttribute.class).value();
+			String modelName = attrMethod.getMethodAnnotation(ModelAttribute.class).name();
 			if (mavContainer.containsAttribute(modelName)) {
 				continue;
 			}
@@ -189,7 +190,7 @@ public final class ModelFactory {
 	 */
 	public static String getNameForParameter(MethodParameter parameter) {
 		ModelAttribute annot = parameter.getParameterAnnotation(ModelAttribute.class);
-		String attrName = (annot != null) ? annot.value() : null;
+		String attrName = (annot != null) ? annot.name() : null;
 		return StringUtils.hasText(attrName) ? attrName :  Conventions.getVariableNameForParameter(parameter);
 	}
 
@@ -206,8 +207,8 @@ public final class ModelFactory {
 	 */
 	public static String getNameForReturnValue(Object returnValue, MethodParameter returnType) {
 		ModelAttribute annotation = returnType.getMethodAnnotation(ModelAttribute.class);
-		if (annotation != null && StringUtils.hasText(annotation.value())) {
-			return annotation.value();
+		if (annotation != null && StringUtils.hasText(annotation.name())) {
+			return annotation.name();
 		}
 		else {
 			Method method = returnType.getMethod();
