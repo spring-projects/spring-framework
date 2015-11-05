@@ -846,21 +846,75 @@ configuration. For more information on placeholders, see the javadocs of the
 
 
 [[mvc-ann-requestmapping-suffix-pattern-match]]
-==== Path Pattern Matching By Suffix
-By default Spring MVC automatically performs `".{asterisk}"` suffix pattern matching so
-that a controller mapped to `/person` is also implicitly mapped to `/person.{asterisk}`.
-This allows indicating content types via file extensions, e.g. `/person.pdf`,
-`/person.xml`, etc. A common pitfall however is when the last path segment of the
-mapping is a URI variable, e.g. `/person/{id}`. While a request for `/person/1.json`
-would correctly result in path variable id=1 and extension ".json", when the id
-naturally contains a dot, e.g. `/person/joe@email.com` the result does not match
-expectations. Clearly here ".com" is not a file extension.
+==== Suffix Pattern Matching
+By default Spring MVC performs `".{asterisk}"` suffix pattern matching so that a
+controller mapped to `/person` is also implicitly mapped to `/person.{asterisk}`.
+This makes it easy to request different representations of a resource through the
+URL path (e.g. `/person.pdf`, `/person.xml`).
 
-The proper way to address this is to configure Spring MVC to only do suffix pattern
-matching against file extensions registered for content negotiation purposes.
-For more on this, first see <<mvc-config-content-negotiation>> and then
-<<mvc-config-path-matching>> showing how to enable suffix pattern matching
-along with how to use registered suffix patterns only.
+Suffix pattern matching can be turned off or restricted to a set of path extensions
+explicitly registered for content negotiation purposes. This is generally
+recommended to minimize ambiguity with common request mappings such as
+`/person/{id}` where a dot might not represent a file extension, e.g.
+`/person/joe@email.com` vs `/person/joe@email.com.json`. Furthermore as explained
+in the note below suffix pattern matching as well as content negotiation may be
+used in some circumstances to attempt malicious attacks and there are good
+reasons to restrict them meaningfully.
+
+See <<mvc-config-path-matching>> for suffix pattern matching configuration and
+also <<mvc-config-content-negotiation>> for content negotiation configuration.
+
+
+
+[[mvc-ann-requestmapping-rfd]]
+==== Suffix Suffix Pattern Matching and RFD
+
+Reflected file download (RFD) attack was first described in a
+https://www.trustwave.com/Resources/SpiderLabs-Blog/Reflected-File-Download---A-New-Web-Attack-Vector/[paper by Trustwave]
+in 2014. The attack is similar to XSS in that it relies on input
+(e.g. query parameter, URI variable) being reflected in the response.
+However instead of inserting JavaScript into HTML, an RFD attack relies on the
+browser switching to perform a download and treating the response as an executable
+script if double-clicked based on the file extension (e.g. .bat, .cmd).
+
+In Spring MVC `@ResponseBody` and `ResponseEntity` methods are at risk because
+they can render different content types which clients can request including
+via URL path extensions. Note however that neither disabling suffix pattern matching
+nor disabling the use of path extensions for content negotiation purposes alone
+are effective at preventing RFD attacks.
+
+For comprehensive protection against RFD, prior to rendering the response body
+Spring MVC adds a `Content-Disposition:attachment;filename=f.txt` header to
+suggest a fixed and safe download file filename. This is done only if the URL
+path contains a file extension that is neither whitelisted nor explicitly
+registered for content negotiation purposes. However it may potentially have
+side effects when URLs are typed directly into a browser.
+
+Many common path extensions are whitelisted by
+default. Furthermore REST API calls are typically not meant to be used as URLs
+directly in browsers. Nevertheless applications that use custom
+`HttpMessageConverter` implementations can explicitly register file extensions
+for content negotiation and the Content-Disposition header will not be added
+for such extensions. See <<mvc-config-content-negotiation>>.
+
+[NOTE]
+====
+This was originally introduced as part of work for
+http://pivotal.io/security/cve-2015-5211[CVE-2015-5211].
+Below are additional recommendations from the report:
+
+* Encode rather than escape JSON responses. This is also an OWASP XSS recommendation.
+  For an example of how to do that with Spring see https://github.com/rwinch/spring-jackson-owasp[spring-jackson-owasp].
+* Configure suffix pattern matching to be turned off or restricted to explicitly
+  registered suffixes only.
+* Configure content negotiation with the properties “useJaf” and “ignoreUknownPathExtension”
+  set to false which would result in a 406 response for URLs with unknown extensions.
+  Note however that this may not be an option if URLs are naturally expected to have
+  a dot towards the end.
+* Add `X-Content-Type-Options: nosniff` header to responses. Spring Security 4 does
+  this by default.
+====
+
 
 
 
@@ -4837,26 +4891,19 @@ And in XML use the `<mvc:interceptors>` element:
 
 [[mvc-config-content-negotiation]]
 === Content Negotiation
-You can configure how Spring MVC determines the requested media types from the client
-for request mapping as well as for content negotiation purposes. The available options
-are to check the file extension in the request URI, the "Accept" header, a request
-parameter, as well as to fall back on a default content type. By default, file extension
-in the request URI is checked first and the "Accept" header is checked next.
+You can configure how Spring MVC determines the requested media types from the request.
+The available options are to check the URL path for a file extension, check the
+"Accept" header, a specific query parameter, or to fall back on a default content
+type when nothing is requested. By default the path extension in the request URI
+is checked first and the "Accept" header is checked second.
 
-For file extensions in the request URI, the MVC Java config and the MVC namespace,
-automatically register extensions such as `.json`, `.xml`, `.rss`, and `.atom` if the
-corresponding dependencies such as Jackson, JAXB2, or Rome are present on the classpath.
-Additional extensions may be not need to be registered explicitly if they can be
-discovered via `ServletContext.getMimeType(String)` or the __Java Activation Framework__
-(see `javax.activation.MimetypesFileTypeMap`). You can register more extensions with the
-{api-spring-framework}/web/servlet/mvc/method/annotation/RequestMappingHandlerMapping.html#setUseRegisteredSuffixPatternMatch(boolean)[setUseRegisteredSuffixPatternMatch
-method].
+The MVC Java config and the MVC namespace register `json`, `xml`, `rss`, `atom` by
+default if corresponding dependencies are on the classpath. Additional
+path extension-to-media type mappings may also be registered explicitly and that
+also has the effect of whitelisting them as safe extensions for the purpose of RFD
+attack detection (see <<mvc-ann-requestmapping-rfd>> for more detail).
 
-The introduction of `ContentNegotiationManager` also enables selective suffix pattern
-matching for incoming requests. For more details, see its javadocs.
-
-Below is an example of customizing content negotiation options through the MVC Java
-config:
+Below is an example of customizing content negotiation options through the MVC Java config:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4867,7 +4914,7 @@ config:
 
 		@Override
 		public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
-			configurer.favorPathExtension(false).favorParameter(true);
+			configurer.mediaType("json", MediaType.APPLICATION_JSON);
 		}
 	}
 ----
@@ -4882,8 +4929,6 @@ that in turn can be created with a `ContentNegotiationManagerFactoryBean`:
 	<mvc:annotation-driven content-negotiation-manager="contentNegotiationManager"/>
 
 	<bean id="contentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
-		<property name="favorPathExtension" value="false"/>
-		<property name="favorParameter" value="true"/>
 		<property name="mediaTypes">
 			<value>
 				json=application/json

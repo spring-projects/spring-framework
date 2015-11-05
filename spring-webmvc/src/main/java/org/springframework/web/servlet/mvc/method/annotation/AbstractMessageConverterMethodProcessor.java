@@ -73,7 +73,9 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 	/* Extensions associated with the built-in message converters */
 	private static final Set<String> WHITELISTED_EXTENSIONS = new HashSet<String>(Arrays.asList(
-			"txt", "text", "json", "xml", "atom", "rss", "png", "jpe", "jpeg", "jpg", "gif", "wbmp", "bmp"));
+			"txt", "text", "yml", "properties", "csv",
+			"json", "xml", "atom", "rss",
+			"png", "jpe", "jpeg", "jpg", "gif", "wbmp", "bmp"));
 
 
 	private final ContentNegotiationManager contentNegotiationManager;
