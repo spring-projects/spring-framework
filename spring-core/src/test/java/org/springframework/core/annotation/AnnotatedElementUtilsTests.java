@@ -56,6 +56,7 @@ public class AnnotatedElementUtilsTests {
 	@Rule
 	public final ExpectedException exception = ExpectedException.none();
 
+
 	@Test
 	public void getMetaAnnotationTypesOnNonAnnotatedClass() {
 		assertNull(getMetaAnnotationTypes(NonAnnotatedClass.class, TransactionalComponent.class));
@@ -69,8 +70,7 @@ public class AnnotatedElementUtilsTests {
 
 	@Test
 	public void getMetaAnnotationTypesOnClassWithMetaDepth2() {
-		Set<String> names = getMetaAnnotationTypes(ComposedTransactionalComponentClass.class,
-			ComposedTransactionalComponent.class);
+		Set<String> names = getMetaAnnotationTypes(ComposedTransactionalComponentClass.class, ComposedTransactionalComponent.class);
 		assertEquals(names(TransactionalComponent.class, Transactional.class, Component.class), names);
 	}
 

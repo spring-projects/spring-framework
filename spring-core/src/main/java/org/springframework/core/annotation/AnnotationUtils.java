@@ -121,11 +121,11 @@ public abstract class AnnotationUtils {
 	private static final Map<AnnotationCacheKey, Annotation> findAnnotationCache =
 			new ConcurrentReferenceHashMap<AnnotationCacheKey, Annotation>(256);
 
-	private static final Map<Class<?>, Boolean> annotatedInterfaceCache =
-			new ConcurrentReferenceHashMap<Class<?>, Boolean>(256);
-
 	private static final Map<AnnotationCacheKey, Boolean> metaPresentCache =
 			new ConcurrentReferenceHashMap<AnnotationCacheKey, Boolean>(256);
+
+	private static final Map<Class<?>, Boolean> annotatedInterfaceCache =
+			new ConcurrentReferenceHashMap<Class<?>, Boolean>(256);
 
 	private static final Map<Class<? extends Annotation>, Boolean> synthesizableCache =
 			new ConcurrentReferenceHashMap<Class<? extends Annotation>, Boolean>(256);
@@ -787,7 +787,7 @@ public abstract class AnnotationUtils {
 	 * @see #isAnnotationDeclaredLocally(Class, Class)
 	 */
 	public static Class<?> findAnnotationDeclaringClassForTypes(List<Class<? extends Annotation>> annotationTypes, Class<?> clazz) {
-		Assert.notEmpty(annotationTypes, "The list of annotation types must not be empty");
+		Assert.notEmpty(annotationTypes, "List of annotation types must not be empty");
 		if (clazz == null || Object.class == clazz) {
 			return null;
 		}
@@ -1055,7 +1055,7 @@ public abstract class AnnotationUtils {
 			try {
 				Object value = method.invoke(annotation);
 				Object defaultValue = method.getDefaultValue();
-				if (mergeMode && (defaultValue != null)) {
+				if (mergeMode && defaultValue != null) {
 					if (ObjectUtils.nullSafeEquals(value, defaultValue)) {
 						value = DEFAULT_VALUE_PLACEHOLDER;
 					}
