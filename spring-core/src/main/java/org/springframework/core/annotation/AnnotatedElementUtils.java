@@ -977,7 +977,7 @@ public class AnnotatedElementUtils {
 	 * annotation attributes from lower levels in the annotation hierarchy
 	 * during the {@link #postProcess} phase.
 	 * @since 4.2
-	 * @see AnnotationUtils#getAnnotationAttributes(AnnotatedElement, Annotation, boolean, boolean, boolean)
+	 * @see AnnotationUtils#retrieveAnnotationAttributes(AnnotatedElement, Annotation, boolean, boolean)
 	 * @see AnnotationUtils#postProcessAnnotationAttributes
 	 */
 	private static class MergedAnnotationAttributesProcessor implements Processor<AnnotationAttributes> {
@@ -1003,8 +1003,8 @@ public class AnnotatedElementUtils {
 		public AnnotationAttributes process(AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
 			boolean found = (this.annotationType != null ? annotation.annotationType() == this.annotationType :
 					annotation.annotationType().getName().equals(this.annotationName));
-			return (found ? AnnotationUtils.getAnnotationAttributes(annotatedElement, annotation,
-					this.classValuesAsString, this.nestedAnnotationsAsMap, true) : null);
+			return (found ? AnnotationUtils.retrieveAnnotationAttributes(annotatedElement, annotation,
+					this.classValuesAsString, this.nestedAnnotationsAsMap) : null);
 		}
 
 		@Override

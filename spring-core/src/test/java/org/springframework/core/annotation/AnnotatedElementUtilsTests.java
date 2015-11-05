@@ -94,8 +94,7 @@ public class AnnotatedElementUtilsTests {
 	public void hasMetaAnnotationTypesOnClassWithMetaDepth2() {
 		assertTrue(hasMetaAnnotationTypes(ComposedTransactionalComponentClass.class, TX_NAME));
 		assertTrue(hasMetaAnnotationTypes(ComposedTransactionalComponentClass.class, Component.class.getName()));
-		assertFalse(hasMetaAnnotationTypes(ComposedTransactionalComponentClass.class,
-			ComposedTransactionalComponent.class.getName()));
+		assertFalse(hasMetaAnnotationTypes(ComposedTransactionalComponentClass.class, ComposedTransactionalComponent.class.getName()));
 	}
 
 	@Test
@@ -111,7 +110,7 @@ public class AnnotatedElementUtilsTests {
 	@Test
 	public void isAnnotatedOnSubclassWithMetaDepth0() {
 		assertFalse("isAnnotated() does not search the class hierarchy.",
-			isAnnotated(SubTransactionalComponentClass.class, TransactionalComponent.class.getName()));
+				isAnnotated(SubTransactionalComponentClass.class, TransactionalComponent.class.getName()));
 	}
 
 	@Test
@@ -124,8 +123,7 @@ public class AnnotatedElementUtilsTests {
 	public void isAnnotatedOnClassWithMetaDepth2() {
 		assertTrue(isAnnotated(ComposedTransactionalComponentClass.class, TX_NAME));
 		assertTrue(isAnnotated(ComposedTransactionalComponentClass.class, Component.class.getName()));
-		assertTrue(isAnnotated(ComposedTransactionalComponentClass.class,
-			ComposedTransactionalComponent.class.getName()));
+		assertTrue(isAnnotated(ComposedTransactionalComponentClass.class, ComposedTransactionalComponent.class.getName()));
 	}
 
 	@Test
@@ -167,7 +165,6 @@ public class AnnotatedElementUtilsTests {
 	 * type within the class hierarchy. Such undesirable behavior would cause the
 	 * logic in {@link org.springframework.context.annotation.ProfileCondition}
 	 * to fail.
-	 *
 	 * @see org.springframework.core.env.EnvironmentSystemIntegrationTests#mostSpecificDerivedClassDrivesEnvironment_withDevEnvAndDerivedDevConfigClass
 	 */
 	@Test
@@ -179,7 +176,6 @@ public class AnnotatedElementUtilsTests {
 
 	/**
 	 * Note: this functionality is required by {@link org.springframework.context.annotation.ProfileCondition}.
-	 *
 	 * @see org.springframework.core.env.EnvironmentSystemIntegrationTests
 	 */
 	@Test
@@ -187,7 +183,7 @@ public class AnnotatedElementUtilsTests {
 		MultiValueMap<String, Object> attributes = getAllAnnotationAttributes(TxFromMultipleComposedAnnotations.class, TX_NAME);
 		assertNotNull("Annotation attributes map for @Transactional on TxFromMultipleComposedAnnotations", attributes);
 		assertEquals("value for TxFromMultipleComposedAnnotations.", asList("TxInheritedComposed", "TxComposed"),
-			attributes.get("value"));
+				attributes.get("value"));
 	}
 
 	@Test
@@ -419,12 +415,12 @@ public class AnnotatedElementUtilsTests {
 	public void getMergedAnnotationAttributesWithInvalidConventionBasedComposedAnnotation() {
 		Class<?> element = InvalidConventionBasedComposedContextConfigClass.class;
 		exception.expect(AnnotationConfigurationException.class);
-		exception.expectMessage(either(containsString("attribute [value] and its alias [locations]")).or(
-			containsString("attribute [locations] and its alias [value]")));
+		exception.expectMessage(either(containsString("attribute 'value' and its alias 'locations'")).or(
+				containsString("attribute 'locations' and its alias 'value'")));
 		exception.expectMessage(either(
-			containsString("values of [{duplicateDeclaration}] and [{requiredLocationsDeclaration}]")).or(
-			containsString("values of [{requiredLocationsDeclaration}] and [{duplicateDeclaration}]")));
-		exception.expectMessage(containsString("but only one declaration is permitted"));
+				containsString("values of [{duplicateDeclaration}] and [{requiredLocationsDeclaration}]")).or(
+				containsString("values of [{requiredLocationsDeclaration}] and [{duplicateDeclaration}]")));
+		exception.expectMessage(containsString("but only one is permitted"));
 		getMergedAnnotationAttributes(element, ContextConfig.class);
 	}
 
@@ -432,11 +428,11 @@ public class AnnotatedElementUtilsTests {
 	public void getMergedAnnotationAttributesWithInvalidAliasedComposedAnnotation() {
 		Class<?> element = InvalidAliasedComposedContextConfigClass.class;
 		exception.expect(AnnotationConfigurationException.class);
-		exception.expectMessage(either(containsString("attribute [value] and its alias [locations]")).or(
-			containsString("attribute [locations] and its alias [value]")));
+		exception.expectMessage(either(containsString("attribute 'value' and its alias 'locations'")).or(
+				containsString("attribute 'locations' and its alias 'value'")));
 		exception.expectMessage(either(containsString("values of [{duplicateDeclaration}] and [{test.xml}]")).or(
-			containsString("values of [{test.xml}] and [{duplicateDeclaration}]")));
-		exception.expectMessage(containsString("but only one declaration is permitted"));
+				containsString("values of [{test.xml}] and [{duplicateDeclaration}]")));
+		exception.expectMessage(containsString("but only one is permitted"));
 		getMergedAnnotationAttributes(element, ContextConfig.class);
 	}
 
@@ -493,11 +489,9 @@ public class AnnotatedElementUtilsTests {
 	/**
 	 * <p>{@code AbstractClassWithInheritedAnnotation} declares {@code handleParameterized(T)}; whereas,
 	 * {@code ConcreteClassWithInheritedAnnotation} declares {@code handleParameterized(String)}.
-	 *
-	 * <p>As of Spring 4.2 RC1, {@code AnnotatedElementUtils.processWithFindSemantics()} does not resolve an
+	 * <p>As of Spring 4.2, {@code AnnotatedElementUtils.processWithFindSemantics()} does not resolve an
 	 * <em>equivalent</em> method in {@code AbstractClassWithInheritedAnnotation} for the <em>bridged</em>
 	 * {@code handleParameterized(String)} method.
-	 *
 	 * @since 4.2
 	 */
 	@Test
@@ -517,6 +511,7 @@ public class AnnotatedElementUtilsTests {
 		Method[] methods = StringGenericParameter.class.getMethods();
 		Method bridgeMethod = null;
 		Method bridgedMethod = null;
+
 		for (Method method : methods) {
 			if ("getFor".equals(method.getName()) && !method.getParameterTypes()[0].equals(Integer.class)) {
 				if (method.getReturnType().equals(Object.class)) {
@@ -546,13 +541,13 @@ public class AnnotatedElementUtilsTests {
 		String qualifier = "aliasForQualifier";
 
 		// 1) Find and merge AnnotationAttributes from the annotation hierarchy
-		AnnotationAttributes attributes = findMergedAnnotationAttributes(AliasedTransactionalComponentClass.class,
-			AliasedTransactional.class);
+		AnnotationAttributes attributes = findMergedAnnotationAttributes(
+				AliasedTransactionalComponentClass.class, AliasedTransactional.class);
 		assertNotNull("@AliasedTransactional on AliasedTransactionalComponentClass.", attributes);
 
 		// 2) Synthesize the AnnotationAttributes back into the target annotation
 		AliasedTransactional annotation = AnnotationUtils.synthesizeAnnotation(attributes,
-			AliasedTransactional.class, AliasedTransactionalComponentClass.class);
+				AliasedTransactional.class, AliasedTransactionalComponentClass.class);
 		assertNotNull(annotation);
 
 		// 3) Verify that the AnnotationAttributes and synthesized annotation are equivalent
@@ -573,8 +568,8 @@ public class AnnotatedElementUtilsTests {
 
 	@Test
 	public void findMergedAnnotationForMultipleMetaAnnotationsWithClashingAttributeNames() {
-		final String[] xmlLocations = asArray("test.xml");
-		final String[] propFiles = asArray("test.properties");
+		String[] xmlLocations = asArray("test.xml");
+		String[] propFiles = asArray("test.properties");
 
 		Class<?> element = AliasedComposedContextConfigAndTestPropSourceClass.class;
 
@@ -600,6 +595,7 @@ public class AnnotatedElementUtilsTests {
 		String[] expected = asArray("com.example.app.test");
 		Class<?> element = TestComponentScanClass.class;
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(element, ComponentScan.class);
+
 		assertNotNull("Should find @ComponentScan on " + element, attributes);
 		assertArrayEquals("basePackages for " + element, expected, attributes.getStringArray("basePackages"));
 
@@ -628,9 +624,10 @@ public class AnnotatedElementUtilsTests {
 
 	@Test
 	public void findMergedAnnotationWithLocalAliasesThatConflictWithAttributesInMetaAnnotationByConvention() {
-		final String[] EMPTY = new String[] {};
+		final String[] EMPTY = new String[0];
 		Class<?> element = SpringAppConfigClass.class;
 		ContextConfig contextConfig = findMergedAnnotation(element, ContextConfig.class);
+
 		assertNotNull("Should find @ContextConfig on " + element, contextConfig);
 		assertArrayEquals("locations for " + element, EMPTY, contextConfig.locations());
 		// 'value' in @SpringAppConfig should not override 'value' in @ContextConfig
