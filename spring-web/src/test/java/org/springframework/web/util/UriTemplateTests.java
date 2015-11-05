@@ -143,6 +143,15 @@ public class UriTemplateTests {
 		assertEquals("Invalid match", expected, result);
 	}
 
+	// SPR-13627
+
+	@Test
+	public void matchCustomRegexWithNestedCurlyBraces() throws Exception {
+		UriTemplate template = new UriTemplate("/site.{domain:co.[a-z]{2}}");
+		Map<String, String> result = template.match("/site.co.eu");
+		assertEquals("Invalid match", Collections.singletonMap("domain", "co.eu"), result);
+	}
+
 	@Test
 	public void matchDuplicate() throws Exception {
 		UriTemplate template = new UriTemplate("/order/{c}/{c}/{c}");
