@@ -121,33 +121,33 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 			// if still null
 			if (attributeValue == null) {
 				throw new IllegalArgumentException(String.format(
-					"Attributes map [%s] returned null for required attribute [%s] defined by annotation type [%s].",
-					attributes, attributeName, annotationType.getName()));
+						"Attributes map [%s] returned null for required attribute [%s] defined by annotation type [%s].",
+						attributes, attributeName, annotationType.getName()));
 			}
 
 			// finally, ensure correct type
 			Class<?> requiredReturnType = attributeMethod.getReturnType();
 			Class<? extends Object> actualReturnType = attributeValue.getClass();
+
 			if (!ClassUtils.isAssignable(requiredReturnType, actualReturnType)) {
 				boolean converted = false;
 
 				// Nested map representing a single annotation?
-				if (Annotation.class.isAssignableFrom(requiredReturnType)
-						&& Map.class.isAssignableFrom(actualReturnType)) {
-
-					Class<? extends Annotation> nestedAnnotationType = (Class<? extends Annotation>) requiredReturnType;
+				if (Annotation.class.isAssignableFrom(requiredReturnType) &&
+						Map.class.isAssignableFrom(actualReturnType)) {
+					Class<? extends Annotation> nestedAnnotationType =
+							(Class<? extends Annotation>) requiredReturnType;
 					Map<String, Object> map = (Map<String, Object>) attributeValue;
 					attributes.put(attributeName, synthesizeAnnotation(map, nestedAnnotationType, null));
 					converted = true;
 				}
 
 				// Nested array of maps representing an array of annotations?
-				else if (requiredReturnType.isArray()
-						&& Annotation.class.isAssignableFrom(requiredReturnType.getComponentType())
-						&& actualReturnType.isArray()
-						&& Map.class.isAssignableFrom(actualReturnType.getComponentType())) {
-
-					Class<? extends Annotation> nestedAnnotationType = (Class<? extends Annotation>) requiredReturnType.getComponentType();
+				else if (requiredReturnType.isArray() && actualReturnType.isArray() &&
+						Annotation.class.isAssignableFrom(requiredReturnType.getComponentType()) &&
+						Map.class.isAssignableFrom(actualReturnType.getComponentType())) {
+					Class<? extends Annotation> nestedAnnotationType =
+							(Class<? extends Annotation>) requiredReturnType.getComponentType();
 					Map<String, Object>[] maps = (Map<String, Object>[]) attributeValue;
 					attributes.put(attributeName, synthesizeAnnotationArray(maps, nestedAnnotationType));
 					converted = true;
