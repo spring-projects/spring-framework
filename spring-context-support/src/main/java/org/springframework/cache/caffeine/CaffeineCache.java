@@ -16,6 +16,7 @@
 
 package org.springframework.cache.caffeine;
 
+import java.util.concurrent.Callable;
 import java.util.function.Function;
 
 import com.github.benmanes.caffeine.cache.LoadingCache;
@@ -88,6 +89,12 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 		return super.get(key);
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T get(Object key, final Callable<T> valueLoader) {
+		return (T) fromStoreValue(this.cache.get(key, new LoadFunction(valueLoader)));
+	}
+
 	@Override
 	protected Object lookup(Object key) {
 		return this.cache.getIfPresent(key);
@@ -130,6 +137,25 @@ public class CaffeineCache extends AbstractValueAdaptingCache {
 		public Object apply(Object key) {
 			this.called = true;
 			return toStoreValue(this.value);
+		}
+	}
+
+	private class LoadFunction implements Function<Object, Object> {
+
+		private final Callable<?> valueLoader;
+
+		public LoadFunction(Callable<?> valueLoader) {
+			this.valueLoader = valueLoader;
+		}
+
+		@Override
+		public Object apply(Object o) {
+			try {
+				return toStoreValue(valueLoader.call());
+			}
+			catch (Exception ex) {
+				throw new ValueRetrievalException(o, valueLoader, ex);
+			}
 		}
 	}
 

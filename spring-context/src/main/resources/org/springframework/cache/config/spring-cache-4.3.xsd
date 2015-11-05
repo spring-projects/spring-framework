@@ -261,6 +261,13 @@
 	The SpEL expression used to veto the method caching.]]></xsd:documentation>
 										</xsd:annotation>
 									</xsd:attribute>
+									<xsd:attribute name="sync" type="xsd:boolean" use="optional" default="false">
+										<xsd:annotation>
+											<xsd:documentation><![CDATA[
+	Synchronize the invocation of the underlying method if several threads
+	are attempting to load a value for the same key]]></xsd:documentation>
+										</xsd:annotation>
+									</xsd:attribute>
 								</xsd:extension>
 							</xsd:complexContent>
 						</xsd:complexType>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ public class CacheableOperation extends CacheOperation {
 
 	private String unless;
 
+	private boolean sync;
+
 
 	public String getUnless() {
 		return unless;
@@ -36,11 +38,22 @@ public class CacheableOperation extends CacheOperation {
 		this.unless = unless;
 	}
 
+	public boolean isSync() {
+		return sync;
+	}
+
+	public void setSync(boolean sync) {
+		this.sync = sync;
+	}
+
 	@Override
 	protected StringBuilder getOperationDescription() {
 		StringBuilder sb = super.getOperationDescription();
 		sb.append(" | unless='");
 		sb.append(this.unless);
+		sb.append("'");
+		sb.append(" | sync='");
+		sb.append(this.sync);
 		sb.append("'");
 		return sb;
 	}

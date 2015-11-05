@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
@@ -328,7 +329,34 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		return targetClass;
 	}
 
-	private Object execute(CacheOperationInvoker invoker, CacheOperationContexts contexts) {
+	private Object execute(final CacheOperationInvoker invoker, CacheOperationContexts contexts) {
+		// Special handling of synchronized invocation
+		if (contexts.isSynchronized()) {
+			CacheOperationContext context = contexts.get(CacheableOperation.class).iterator().next();
+			if (isConditionPassing(context, ExpressionEvaluator.NO_RESULT)) {
+				Object key = generateKey(context, ExpressionEvaluator.NO_RESULT);
+				Cache cache = context.getCaches().iterator().next();
+				try {
+					return cache.get(key, new Callable<Object>() {
+						@Override
+						public Object call() throws Exception {
+							return invokeOperation(invoker);
+						}
+					});
+				}
+				catch (Cache.ValueRetrievalException ex) {
+					// The invoker wraps any Throwable in a ThrowableWrapper instance so we
+					// can just make sure that one bubbles up the stack.
+					throw (CacheOperationInvoker.ThrowableWrapper) ex.getCause();
+				}
+			}
+			else {
+				// No caching required, only call the underlying method
+				return invokeOperation(invoker);
+			}
+		}
+
+
 		// Process any early evictions
 		processCacheEvicts(contexts.get(CacheEvictOperation.class), true, ExpressionEvaluator.NO_RESULT);
 
@@ -374,7 +402,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		for (CacheOperationContext context : cachePutContexts) {
 			try {
 				if (!context.isConditionPassing(ExpressionEvaluator.RESULT_UNAVAILABLE)) {
-	                excluded.add(context);
+					excluded.add(context);
 				}
 			}
 			catch (VariableNotAvailableException e) {
@@ -384,7 +412,6 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		}
 		// check if  all puts have been excluded by condition
 		return cachePutContexts.size() != excluded.size();
-
 
 	}
 
@@ -504,17 +531,56 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		private final MultiValueMap<Class<? extends CacheOperation>, CacheOperationContext> contexts =
 				new LinkedMultiValueMap<Class<? extends CacheOperation>, CacheOperationContext>();
 
+		private final boolean sync;
+
 		public CacheOperationContexts(Collection<? extends CacheOperation> operations, Method method,
 				Object[] args, Object target, Class<?> targetClass) {
 
 			for (CacheOperation operation : operations) {
 				this.contexts.add(operation.getClass(), getOperationContext(operation, method, args, target, targetClass));
 			}
+			this.sync = determineSyncFlag(method);
 		}
 
 		public Collection<CacheOperationContext> get(Class<? extends CacheOperation> operationClass) {
 			Collection<CacheOperationContext> result = this.contexts.get(operationClass);
 			return (result != null ? result : Collections.<CacheOperationContext>emptyList());
+		}
+
+		public boolean isSynchronized() {
+			return this.sync;
+		}
+
+		private boolean determineSyncFlag(Method method) {
+			List<CacheOperationContext> cacheOperationContexts = this.contexts.get(CacheableOperation.class);
+			if (cacheOperationContexts == null) { // No @Cacheable operation
+				return false;
+			}
+			boolean syncEnabled = false;
+			for (CacheOperationContext cacheOperationContext : cacheOperationContexts) {
+				if (((CacheableOperation) cacheOperationContext.getOperation()).isSync()) {
+					syncEnabled = true;
+					break;
+				}
+			}
+			if (syncEnabled) {
+				if (this.contexts.size() > 1) {
+					throw new IllegalStateException("@Cacheable(sync = true) cannot be combined with other cache operations on '" + method + "'");
+				}
+				if (cacheOperationContexts.size() > 1) {
+					throw new IllegalStateException("Only one @Cacheable(sync = true) entry is allowed on '" + method + "'");
+				}
+				CacheOperationContext cacheOperationContext = cacheOperationContexts.iterator().next();
+				CacheableOperation operation = (CacheableOperation) cacheOperationContext.getOperation();
+				if (cacheOperationContext.getCaches().size() > 1) {
+					throw new IllegalStateException("@Cacheable(sync = true) only allows a single cache on '" + operation + "'");
+				}
+				if (StringUtils.hasText(operation.getUnless())) {
+					throw new IllegalStateException("@Cacheable(sync = true) does not support unless attribute on '" + operation + "'");
+				}
+				return true;
+			}
+			return false;
 		}
 	}
 

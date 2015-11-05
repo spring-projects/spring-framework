@@ -27,6 +27,7 @@ import org.springframework.cache.annotation.Caching;
 /**
  * @author Costin Leau
  * @author Phillip Webb
+ * @author Stephane Nicoll
  */
 @Cacheable("testCache")
 public class AnnotatedClassCacheableService implements CacheableService<Object> {
@@ -45,7 +46,24 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 	}
 
 	@Override
+	@Cacheable(cacheNames = "testCache", sync = true)
+	public Object cacheSync(Object arg1) {
+		return counter.getAndIncrement();
+	}
+
+	@Override
+	@Cacheable(cacheNames = "testCache", sync = true)
+	public Object cacheSyncNull(Object arg1) {
+		return null;
+	}
+
+	@Override
 	public Object conditional(int field) {
+		return null;
+	}
+
+	@Override
+	public Object conditionalSync(int field) {
 		return null;
 	}
 
@@ -165,6 +183,18 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 
 	@Override
 	public Long throwUnchecked(Object arg1) {
+		throw new UnsupportedOperationException(arg1.toString());
+	}
+
+	@Override
+	@Cacheable(cacheNames = "testCache", sync = true)
+	public Object throwCheckedSync(Object arg1) throws Exception {
+		throw new IOException(arg1.toString());
+	}
+
+	@Override
+	@Cacheable(cacheNames = "testCache", sync = true)
+	public Object throwUncheckedSync(Object arg1) {
 		throw new UnsupportedOperationException(arg1.toString());
 	}
 

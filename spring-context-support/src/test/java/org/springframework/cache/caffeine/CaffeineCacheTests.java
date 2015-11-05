@@ -52,7 +52,7 @@ public class CaffeineCacheTests extends AbstractCacheTests<CaffeineCache> {
 	}
 
 	@Test
-	public void putIfAbsentNullValue() throws Exception {
+	public void testPutIfAbsentNullValue() throws Exception {
 		CaffeineCache cache = getCache();
 
 		Object key = new Object();
@@ -66,4 +66,5 @@ public class CaffeineCacheTests extends AbstractCacheTests<CaffeineCache> {
 		assertEquals(null, wrapper.get());
 		assertEquals(value, cache.get(key).get()); // not changed
 	}
+
 }

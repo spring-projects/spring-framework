@@ -11,7 +11,10 @@
 		<cache:caching cache="testCache">
 			<cache:cacheable method="cache"/>
 			<cache:cacheable method="cacheNull"/>
+			<cache:cacheable method="cacheSync" sync="true"/>
+			<cache:cacheable method="cacheSyncNull" sync="true"/>
 			<cache:cacheable method="conditional" condition="#classField == 3"/>
+			<cache:cacheable method="conditionalSync" sync="true" condition="#classField == 3"/>
 			<cache:cacheable method="unless" unless="#result > 10"/>
 			<cache:cacheable method="key" key="#p0"/>
 			<cache:cacheable method="varArgsKey"/>

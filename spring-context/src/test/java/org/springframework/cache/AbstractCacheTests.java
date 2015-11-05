@@ -16,16 +16,26 @@
 
 package org.springframework.cache;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.UUID;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
+import static org.hamcrest.core.Is.*;
 import static org.junit.Assert.*;
 
 /**
  * @author Stephane Nicoll
  */
 public abstract class AbstractCacheTests<T extends Cache> {
+
+	@Rule
+	public final ExpectedException thrown = ExpectedException.none();
 
 	protected final static String CACHE_NAME = "testCache";
 
@@ -59,7 +69,7 @@ public abstract class AbstractCacheTests<T extends Cache> {
 		assertEquals(value, cache.get(key).get());
 		assertEquals(value, cache.get(key, String.class));
 		assertEquals(value, cache.get(key, Object.class));
-		assertEquals(value, cache.get(key, null));
+		assertEquals(value, cache.get(key, (Class<?>) null));
 
 		cache.put(key, null);
 		assertNotNull(cache.get(key));
@@ -106,6 +116,100 @@ public abstract class AbstractCacheTests<T extends Cache> {
 		assertNull(cache.get("enescu"));
 	}
 
+	@Test
+	public void testCacheGetCallable() {
+		doTestCacheGetCallable("test");
+	}
+
+	@Test
+	public void testCacheGetCallableWithNull() {
+		doTestCacheGetCallable(null);
+	}
+
+	private void doTestCacheGetCallable(Object returnValue) {
+		T cache = getCache();
+
+		String key = createRandomKey();
+
+		assertNull(cache.get(key));
+		Object value = cache.get(key, () -> returnValue );
+		assertEquals(returnValue, value);
+		assertEquals(value, cache.get(key).get());
+	}
+
+	@Test
+	public void testCacheGetCallableNotInvokedWithHit() {
+		doTestCacheGetCallableNotInvokedWithHit("existing");
+	}
+
+	@Test
+	public void testCacheGetCallableNotInvokedWithHitNull() {
+		doTestCacheGetCallableNotInvokedWithHit(null);
+	}
+
+	private void doTestCacheGetCallableNotInvokedWithHit(Object initialValue) {
+		T cache = getCache();
+
+		String key = createRandomKey();
+		cache.put(key, initialValue);
+
+		Object value = cache.get(key, () -> {
+			throw new IllegalStateException("Should not have been invoked");
+		});
+		assertEquals(initialValue, value);
+	}
+
+	@Test
+	public void testCacheGetCallableFail() {
+		T cache = getCache();
+
+		String key = createRandomKey();
+		assertNull(cache.get(key));
+
+		try {
+			cache.get(key, () -> {
+				throw new UnsupportedOperationException("Expected exception");
+			});
+		}
+		catch (Cache.ValueRetrievalException ex) {
+			assertNotNull(ex.getCause());
+			assertEquals(UnsupportedOperationException.class, ex.getCause().getClass());
+		}
+	}
+
+	/**
+	 * Test that a call to get with a Callable concurrently properly synchronize the
+	 * invocations.
+	 */
+	@Test
+	public void testCacheGetSynchronized() throws InterruptedException {
+		T cache = getCache();
+		final AtomicInteger counter = new AtomicInteger();
+		final List<Object> results = new CopyOnWriteArrayList<>();
+		final CountDownLatch latch = new CountDownLatch(10);
+
+		String key = createRandomKey();
+		Runnable run = () -> {
+			try {
+				Integer value = cache.get(key, () -> {
+					Thread.sleep(50); // make sure the thread will overlap
+					return counter.incrementAndGet();
+				});
+				results.add(value);
+			}
+			finally {
+				latch.countDown();
+			}
+		};
+
+		for (int i = 0; i < 10; i++) {
+			new Thread(run).start();
+		}
+		latch.await();
+
+		assertEquals(10, results.size());
+		results.forEach(r -> assertThat(r, is(1))); // Only one method got invoked
+	}
 
 	private String createRandomKey() {
 		return UUID.randomUUID().toString();

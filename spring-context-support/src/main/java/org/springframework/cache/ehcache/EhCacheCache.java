@@ -16,6 +16,8 @@
 
 package org.springframework.cache.ehcache;
 
+import java.util.concurrent.Callable;
+
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
 import net.sf.ehcache.Status;
@@ -62,8 +64,45 @@ public class EhCacheCache implements Cache {
 
 	@Override
 	public ValueWrapper get(Object key) {
-		Element element = this.cache.get(key);
+		Element element = lookup(key);
 		return toValueWrapper(element);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T get(Object key, Callable<T> valueLoader) {
+		Element element = lookup(key);
+		if (element != null) {
+			return (T) element.getObjectValue();
+		}
+		else {
+			this.cache.acquireWriteLockOnKey(key);
+			try {
+				element = lookup(key); // One more attempt with the write lock
+				if (element != null) {
+					return (T) element.getObjectValue();
+				}
+				else {
+					return loadValue(key, valueLoader);
+				}
+			}
+			finally {
+				this.cache.releaseWriteLockOnKey(key);
+			}
+		}
+
+	}
+
+	private <T> T loadValue(Object key, Callable<T> valueLoader) {
+		T value;
+		try {
+			value = valueLoader.call();
+		}
+		catch (Exception ex) {
+			throw new ValueRetrievalException(key, valueLoader, ex);
+		}
+		put(key, value);
+		return value;
 	}
 
 	@Override
@@ -96,6 +135,11 @@ public class EhCacheCache implements Cache {
 	@Override
 	public void clear() {
 		this.cache.removeAll();
+	}
+
+
+	private Element lookup(Object key) {
+		return this.cache.get(key);
 	}
 
 	private ValueWrapper toValueWrapper(Element element) {

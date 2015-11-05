@@ -16,6 +16,8 @@
 
 package org.springframework.cache;
 
+import java.util.concurrent.Callable;
+
 /**
  * Interface that defines common cache operations.
  *
@@ -72,6 +74,23 @@ public interface Cache {
 	 * @see #get(Object)
 	 */
 	<T> T get(Object key, Class<T> type);
+
+	/**
+	 * Return the value to which this cache maps the specified key, obtaining
+	 * that value from {@code valueLoader} if necessary. This method provides
+	 * a simple substitute for the conventional "if cached, return; otherwise
+	 * create, cache and return" pattern.
+	 * <p>If possible, implementations should ensure that the loading operation
+	 * is synchronized so that the specified {@code valueLoader} is only called
+	 * once in case of concurrent access on the same key.
+	 * <p>If the {@code valueLoader} throws an exception, it is wrapped in
+	 * a {@link ValueRetrievalException}
+	 * @param key the key whose associated value is to be returned
+	 * @return the value to which this cache maps the specified key
+	 * @throws ValueRetrievalException if the {@code valueLoader} throws an exception
+	 * @since 4.3
+	 */
+	<T> T get(Object key, Callable<T> valueLoader);
 
 	/**
 	 * Associate the specified value with the specified key in this cache.
@@ -131,6 +150,26 @@ public interface Cache {
 		 * Return the actual value in the cache.
 		 */
 		Object get();
+	}
+
+	/**
+	 * TODO
+	 */
+	@SuppressWarnings("serial")
+	class ValueRetrievalException extends RuntimeException {
+
+		private final Object key;
+
+		public ValueRetrievalException(Object key, Callable<?> loader, Throwable ex) {
+			super(String.format("Value for key '%s' could not " +
+					"be loaded using '%s'", key, loader), ex);
+			this.key = key;
+		}
+
+		public Object getKey() {
+			return key;
+		}
+
 	}
 
 }

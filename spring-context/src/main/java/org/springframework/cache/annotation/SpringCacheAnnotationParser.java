@@ -107,6 +107,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		op.setKeyGenerator(cacheable.keyGenerator());
 		op.setCacheManager(cacheable.cacheManager());
 		op.setCacheResolver(cacheable.cacheResolver());
+		op.setSync(cacheable.sync());
 		op.setName(ae.toString());
 
 		defaultConfig.applyDefault(op);

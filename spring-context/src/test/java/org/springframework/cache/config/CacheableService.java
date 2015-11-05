@@ -29,6 +29,10 @@ public interface CacheableService<T> {
 
 	T cacheNull(Object arg1);
 
+	T cacheSync(Object arg1);
+
+	T cacheSyncNull(Object arg1);
+
 	void invalidate(Object arg1);
 
 	void evictEarly(Object arg1);
@@ -42,6 +46,8 @@ public interface CacheableService<T> {
 	void invalidateEarly(Object arg1, Object arg2);
 
 	T conditional(int field);
+
+	T conditionalSync(int field);
 
 	T unless(int arg);
 
@@ -72,6 +78,10 @@ public interface CacheableService<T> {
 	T throwChecked(Object arg1) throws Exception;
 
 	T throwUnchecked(Object arg1);
+
+	T throwCheckedSync(Object arg1) throws Exception;
+
+	T throwUncheckedSync(Object arg1);
 
 	// multi annotations
 	T multiCache(Object arg1);

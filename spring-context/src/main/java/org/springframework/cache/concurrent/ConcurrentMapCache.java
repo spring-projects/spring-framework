@@ -16,6 +16,7 @@
 
 package org.springframework.cache.concurrent;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -94,6 +95,30 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 	@Override
 	protected Object lookup(Object key) {
 		return this.store.get(key);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T get(Object key, Callable<T> valueLoader) {
+		if (this.store.containsKey(key)) {
+			return (T) get(key).get();
+		}
+		else {
+			synchronized (this.store) {
+				if (this.store.containsKey(key)) {
+					return (T) get(key).get();
+				}
+				T value;
+				try {
+					value = valueLoader.call();
+				}
+				catch (Exception ex) {
+					throw new ValueRetrievalException(key, valueLoader, ex);
+				}
+				put(key, value);
+				return value;
+			}
+		}
 	}
 
 	@Override
