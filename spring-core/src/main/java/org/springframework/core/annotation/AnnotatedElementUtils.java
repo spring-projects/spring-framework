@@ -201,6 +201,9 @@ public class AnnotatedElementUtils {
 		Assert.notNull(element, "AnnotatedElement must not be null");
 		Assert.hasLength(annotationName, "annotationName must not be null or empty");
 
+		if (element.getAnnotations().length == 0) {
+			return false;
+		}
 		return Boolean.TRUE.equals(searchWithGetSemantics(element, annotationName, new SimpleAnnotationProcessor<Boolean>() {
 			@Override
 			public Boolean process(AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
@@ -331,6 +334,9 @@ public class AnnotatedElementUtils {
 	public static AnnotationAttributes getMergedAnnotationAttributes(AnnotatedElement element, String annotationName,
 			boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
 
+		if (element.getAnnotations().length == 0) {
+			return null;
+		}
 		AnnotationAttributes attributes = searchWithGetSemantics(element, annotationName,
 				new MergedAnnotationAttributesProcessor(annotationName, classValuesAsString, nestedAnnotationsAsMap));
 		AnnotationUtils.postProcessAnnotationAttributes(element, attributes, classValuesAsString, nestedAnnotationsAsMap);
