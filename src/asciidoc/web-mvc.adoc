@@ -1059,7 +1059,9 @@ media type. For example:
 ----
 
 Consumable media type expressions can also be negated as in __!text/plain__ to match to
-all requests other than those with __Content-Type__ of __text/plain__.
+all requests other than those with __Content-Type__ of __text/plain__. Also consider
+using constants provided in `MediaType` such as `APPLICATION_JSON_VALUE` and
+`APPLICATION_JSON_UTF8_VALUE`.
 
 [TIP]
 ====
@@ -1099,7 +1101,8 @@ the `UTF-8` charset.
 
 Just like with __consumes__, producible media type expressions can be negated as in
 __!text/plain__ to match to all requests other than those with an __Accept__ header
-value of __text/plain__.
+value of __text/plain__. Also consider using constants provided in `MediaType` such
+as `APPLICATION_JSON_VALUE` and `APPLICATION_JSON_UTF8_VALUE`.
 
 [TIP]
 ====
