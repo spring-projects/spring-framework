@@ -47,16 +47,22 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.ClassUtils;
 
 /**
- * Implementation of {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter}
- * that can read and write XML using JAXB2.
+ * Implementation of {@link org.springframework.http.converter.HttpMessageConverter
+ * HttpMessageConverter} that can read and write XML using JAXB2.
  *
- * <p>This converter can read classes annotated with {@link XmlRootElement} and {@link XmlType},
- * and write classes annotated with with {@link XmlRootElement}, or subclasses thereof.
+ * <p>This converter can read classes annotated with {@link XmlRootElement} and
+ * {@link XmlType}, and write classes annotated with with {@link XmlRootElement},
+ * or subclasses thereof.
+ *
+ * <p>Note that if using Spring's Marshaller/Unmarshaller abstractions from the
+ * {@code spring-oxm} module you should can the
+ * {@link MarshallingHttpMessageConverter} instead.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @author Rossen Stoyanchev
  * @since 3.0
+ * @see MarshallingHttpMessageConverter
  */
 public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessageConverter<Object> {
 
