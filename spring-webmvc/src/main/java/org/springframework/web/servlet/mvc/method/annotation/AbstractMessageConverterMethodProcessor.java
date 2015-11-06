@@ -43,6 +43,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.accept.ContentNegotiationManager;
+import org.springframework.web.accept.ContentNegotiationStrategy;
+import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
@@ -77,10 +79,16 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			"json", "xml", "atom", "rss",
 			"png", "jpe", "jpeg", "jpg", "gif", "wbmp", "bmp"));
 
+	private static final Set<String> WHITELISTED_MEDIA_BASE_TYPES = new HashSet<String>(
+			Arrays.asList("audio", "image", "video"));
+
 
 	private final ContentNegotiationManager contentNegotiationManager;
 
+	private final PathExtensionContentNegotiationStrategy pathStrategy;
+
 	private final Set<String> safeExtensions = new HashSet<String>();
+
 
 
 	/**
@@ -108,8 +116,18 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 		super(converters, requestResponseBodyAdvice);
 		this.contentNegotiationManager = (manager != null ? manager : new ContentNegotiationManager());
+		this.pathStrategy = initPathStrategy(this.contentNegotiationManager);
 		this.safeExtensions.addAll(this.contentNegotiationManager.getAllFileExtensions());
 		this.safeExtensions.addAll(WHITELISTED_EXTENSIONS);
+	}
+
+	private static PathExtensionContentNegotiationStrategy initPathStrategy(ContentNegotiationManager manager) {
+		for (ContentNegotiationStrategy strategy : manager.getStrategies()) {
+			if (strategy instanceof PathExtensionContentNegotiationStrategy) {
+				return (PathExtensionContentNegotiationStrategy) strategy;
+			}
+		}
+		return new PathExtensionContentNegotiationStrategy();
 	}
 
 
@@ -386,7 +404,31 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 				return true;
 			}
 		}
-		return false;
+		return safeMediaTypesForExtension(extension);
+	}
+
+	private boolean safeMediaTypesForExtension(String extension) {
+		List<MediaType> mediaTypes = null;
+		try {
+			mediaTypes = this.pathStrategy.resolveMediaTypeKey(null, extension);
+		}
+		catch (HttpMediaTypeNotAcceptableException e) {
+			// Ignore
+		}
+		if (CollectionUtils.isEmpty(mediaTypes)) {
+			return false;
+		}
+		for (MediaType mediaType : mediaTypes) {
+			if (!safeMediaType(mediaType)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean safeMediaType(MediaType mediaType) {
+		return (WHITELISTED_MEDIA_BASE_TYPES.contains(mediaType.getType()) ||
+				mediaType.getSubtype().endsWith("+xml"));
 	}
 
 }

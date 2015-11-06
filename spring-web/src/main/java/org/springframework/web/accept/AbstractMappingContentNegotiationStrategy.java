@@ -60,7 +60,17 @@ public abstract class AbstractMappingContentNegotiationStrategy
 	public List<MediaType> resolveMediaTypes(NativeWebRequest webRequest)
 			throws HttpMediaTypeNotAcceptableException {
 
-		String key = getMediaTypeKey(webRequest);
+		return resolveMediaTypeKey(webRequest, getMediaTypeKey(webRequest));
+	}
+
+	/**
+	 * An alternative to {@link #resolveMediaTypes(NativeWebRequest)} that accepts
+	 * an already extracted key.
+	 * @since 3.2.16
+	 */
+	public List<MediaType> resolveMediaTypeKey(NativeWebRequest webRequest, String key)
+			throws HttpMediaTypeNotAcceptableException {
+
 		if (StringUtils.hasText(key)) {
 			MediaType mediaType = lookupMediaType(key);
 			if (mediaType != null) {
