@@ -16,8 +16,11 @@
 
 package org.springframework.web.client;
 
+import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -32,9 +35,13 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.AsyncClientHttpRequestExecution;
+import org.springframework.http.client.AsyncClientHttpRequestInterceptor;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.HttpComponentsAsyncClientHttpRequestFactory;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -600,4 +607,47 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 		future.get();
 	}
 
+	@Test
+	public void getAndInterceptResponse() throws Exception {
+		RequestInterceptor interceptor = new RequestInterceptor();
+		template.setInterceptors(Arrays.<AsyncClientHttpRequestInterceptor>asList(interceptor));
+		ListenableFuture<ResponseEntity<String>> future = template.getForEntity(baseUrl + "/get", String.class);
+
+		ResponseEntity<String> response = future.get();
+		assertNotNull(interceptor.response);
+		assertEquals(HttpStatus.OK, interceptor.response.getStatusCode());
+		assertNull(interceptor.exception);
+		assertEquals(helloWorld, response.getBody());
+	}
+
+	@Test
+	public void getAndInterceptError() throws Exception {
+		RequestInterceptor interceptor = new RequestInterceptor();
+		template.setInterceptors(Arrays.<AsyncClientHttpRequestInterceptor>asList(interceptor));
+		ListenableFuture<ResponseEntity<String>> future = template.getForEntity(baseUrl + "/status/notfound", String.class);
+
+		try {
+			future.get();
+			fail("No exception thrown");
+		} catch (ExecutionException ex) {
+		}
+		assertNotNull(interceptor.response);
+		assertEquals(HttpStatus.NOT_FOUND, interceptor.response.getStatusCode());
+		assertNull(interceptor.exception);
+	}
+
+	public static class RequestInterceptor implements AsyncClientHttpRequestInterceptor {
+
+		private ClientHttpResponse response;
+
+		private Throwable exception;
+
+		@Override
+		public ListenableFuture<ClientHttpResponse> interceptRequest(HttpRequest request, byte[] body,
+																	 AsyncClientHttpRequestExecution execution) throws IOException {
+			ListenableFuture<ClientHttpResponse> future = execution.executeAsync(request, body);
+			future.addCallback(resp -> response = resp, ex -> exception = ex);
+			return future;
+		}
+	}
 }

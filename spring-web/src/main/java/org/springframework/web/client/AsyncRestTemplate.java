@@ -41,7 +41,7 @@ import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.http.client.support.AsyncHttpAccessor;
+import org.springframework.http.client.support.InterceptingAsyncHttpAccessor;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.FailureCallback;
@@ -74,7 +74,7 @@ import org.springframework.web.util.UriTemplateHandler;
  * @since 4.0
  * @see RestTemplate
  */
-public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOperations {
+public class AsyncRestTemplate extends InterceptingAsyncHttpAccessor implements AsyncRestOperations {
 
 	private final RestTemplate syncTemplate;
 
