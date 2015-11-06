@@ -172,7 +172,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		Object body = responseEntity.getBody();
 		if (responseEntity instanceof ResponseEntity) {
 			outputMessage.setStatusCode(((ResponseEntity<?>) responseEntity).getStatusCode());
-			if (inputMessage.getMethod() == HttpMethod.GET &&
+			if (inputMessage.getMethod().equals(HttpMethod.GET) &&
 					isResourceNotModified(inputMessage, outputMessage)) {
 				outputMessage.setStatusCode(HttpStatus.NOT_MODIFIED);
 				// Ensure headers are flushed, no body should be written.
@@ -196,7 +196,11 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		long lastModified = outputMessage.getHeaders().getLastModified();
 		boolean notModified = false;
 
-		if (lastModified != -1 && StringUtils.hasLength(eTag)) {
+		if (!ifNoneMatch.isEmpty() && (inputMessage.getHeaders().containsKey(HttpHeaders.IF_UNMODIFIED_SINCE)
+				|| inputMessage.getHeaders().containsKey(HttpHeaders.IF_MATCH))) {
+			// invalid conditional request, do not process
+		}
+		else if (lastModified != -1 && StringUtils.hasLength(eTag)) {
 			notModified = isETagNotModified(ifNoneMatch, eTag) && isTimeStampNotModified(ifModifiedSince, lastModified);
 		}
 		else if (lastModified != -1) {
@@ -213,8 +217,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 			for (String clientETag : ifNoneMatch) {
 				// Compare weak/strong ETags as per https://tools.ietf.org/html/rfc7232#section-2.3
 				if (StringUtils.hasLength(clientETag) &&
-						(clientETag.replaceFirst("^W/", "").equals(etag.replaceFirst("^W/", "")) ||
-								clientETag.equals("*"))) {
+						(clientETag.replaceFirst("^W/", "").equals(etag.replaceFirst("^W/", "")))) {
 					return true;
 				}
 			}
