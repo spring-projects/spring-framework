@@ -1687,6 +1687,32 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		assertArrayEquals(content, response.getContentAsByteArray());
 	}
 
+	@Test
+	public void responseBodyAsTextWithCssExtension() throws Exception {
+		initServlet(new ApplicationContextInitializer<GenericWebApplicationContext>() {
+			@Override
+			public void initialize(GenericWebApplicationContext wac) {
+				ContentNegotiationManagerFactoryBean factoryBean = new ContentNegotiationManagerFactoryBean();
+				factoryBean.afterPropertiesSet();
+				RootBeanDefinition adapterDef = new RootBeanDefinition(RequestMappingHandlerAdapter.class);
+				adapterDef.getPropertyValues().add("contentNegotiationManager", factoryBean.getObject());
+				wac.registerBeanDefinition("handlerAdapter", adapterDef);
+			}
+		}, TextRestController.class);
+
+		byte[] content = "body".getBytes(Charset.forName("ISO-8859-1"));
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/a4.css");
+		request.setContent(content);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		getServlet().service(request, response);
+
+		assertEquals(200, response.getStatus());
+		assertEquals("text/css", response.getContentType());
+		assertNull(response.getHeader("Content-Disposition"));
+		assertArrayEquals(content, response.getContentAsByteArray());
+	}
+
 	/*
 	 * Controllers
 	 */
@@ -3140,6 +3166,11 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		@RequestMapping(value = "/a3", method = RequestMethod.GET, produces = "text/html")
 		public String a3(@RequestBody String body) throws IOException {
+			return body;
+		}
+
+		@RequestMapping(value = "/a4.css", method = RequestMethod.GET)
+		public String a4(@RequestBody String body) {
 			return body;
 		}
 	}
