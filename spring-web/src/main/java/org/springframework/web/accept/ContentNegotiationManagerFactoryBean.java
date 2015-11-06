@@ -80,10 +80,16 @@ public class ContentNegotiationManagerFactoryBean
 	}
 
 	/**
-	 * Add mappings from file extensions to media types represented as strings.
-	 * <p>When this mapping is not set or when an extension is not found, the Java
-	 * Action Framework, if available, may be used if enabled via
-	 * {@link #setFavorPathExtension(boolean)}.
+	 * Add a mapping from a key, extracted from a path extension or a query
+	 * parameter, to a MediaType. This is required in order for the parameter
+	 * strategy to work. Any extensions explicitly registered here are also
+	 * whitelisted for the purpose of Reflected File Download attack detection
+	 * (see Spring Framework reference documentation for more details on RFD
+	 * attack protection).
+	 * <p>The path extension strategy will also try to use
+	 * {@link ServletContext#getMimeType} and JAF (if present) to resolve path
+	 * extensions. To change this behavior see the {@link #useJaf} property.
+	 * @param mediaTypes media type mappings
 	 * @see #addMediaType(String, MediaType)
 	 * @see #addMediaTypes(Map)
 	 */
