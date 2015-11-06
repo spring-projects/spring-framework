@@ -40,29 +40,34 @@ import org.springframework.web.context.ServletContextAware;
  *
  * <table>
  * <tr>
- *     <td>{@link #setFavorPathExtension favorPathExtension}</td>
- *     <td>{@link PathExtensionContentNegotiationStrategy}</td>
- *     <td>Yes</td>
+ *     <th>Property Setter</th>
+ *     <th>Underlying Strategy</th>
+ *     <th>Default Setting</th>
+ * </tr>
+ * <tr>
+ *     <td>{@link #setFavorPathExtension}</td>
+ *     <td>{@link PathExtensionContentNegotiationStrategy Path Extension strategy}</td>
+ *     <td>On</td>
  * </tr>
  * <tr>
  *     <td>{@link #setFavorParameter favorParameter}</td>
- *     <td>{@link ParameterContentNegotiationStrategy}</td>
- *     <td>-</td>
+ *     <td>{@link ParameterContentNegotiationStrategy Parameter strategy}</td>
+ *     <td>Off</td>
  * </tr>
  * <tr>
  *     <td>{@link #setIgnoreAcceptHeader ignoreAcceptHeader}</td>
- *     <td>{@link HeaderContentNegotiationStrategy}</td>
- *     <td>Yes</td>
+ *     <td>{@link HeaderContentNegotiationStrategy Header strategy}</td>
+ *     <td>On</td>
  * </tr>
  * <tr>
  *     <td>{@link #setDefaultContentType defaultContentType}</td>
- *     <td>{@link FixedContentNegotiationStrategy}</td>
- *     <td>-</td>
+ *     <td>{@link FixedContentNegotiationStrategy Fixed content strategy}</td>
+ *     <td>Not set</td>
  * </tr>
  * <tr>
  *     <td>{@link #setDefaultContentTypeStrategy defaultContentTypeStrategy}</td>
  *     <td>{@link ContentNegotiationStrategy}</td>
- *     <td>-</td>
+ *     <td>Not set</td>
  * </tr>
  * </table>
  *
@@ -226,6 +231,7 @@ public class ContentNegotiationManagerFactoryBean
 	/**
 	 * Set a custom {@link ContentNegotiationStrategy} to use to determine
 	 * the content type to use when no content type is requested.
+	 * <p>By default this is not set.
 	 * @see #setDefaultContentType
 	 * @since 4.1.2
 	 */
