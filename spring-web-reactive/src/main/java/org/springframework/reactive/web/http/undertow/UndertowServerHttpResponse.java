@@ -51,7 +51,7 @@ class UndertowServerHttpResponse implements ReactiveServerHttpResponse {
 
 	@Override
 	public void setStatusCode(HttpStatus status) {
-		exchange.setStatusCode(status.value());
+		this.exchange.setStatusCode(status.value());
 	}
 
 	@Override
@@ -103,7 +103,7 @@ class UndertowServerHttpResponse implements ReactiveServerHttpResponse {
 		if (!this.headersWritten) {
 			for (Map.Entry<String, List<String>> entry : this.headers.entrySet()) {
 				String headerName = entry.getKey();
-				exchange.getResponseHeaders()
+				this.exchange.getResponseHeaders()
 						.addAll(HttpString.tryFromString(headerName), entry.getValue());
 
 			}

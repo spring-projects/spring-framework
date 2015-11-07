@@ -55,12 +55,12 @@ class RequestBodyPublisher implements Publisher<ByteBuffer> {
 		if (s == null) {
 			throw SpecificationExceptions.spec_2_13_exception();
 		}
-		if (subscriber != null) {
+		if (this.subscriber != null) {
 			s.onError(new IllegalStateException("Only one subscriber allowed"));
 		}
 
-		subscriber = s;
-		subscriber.onSubscribe(new RequestBodySubscription());
+		this.subscriber = s;
+		this.subscriber.onSubscribe(new RequestBodySubscription());
 	}
 
 	private class RequestBodySubscription
@@ -74,7 +74,7 @@ class RequestBodyPublisher implements Publisher<ByteBuffer> {
 
 		@Override
 		public void cancel() {
-			subscriptionClosed = true;
+			this.subscriptionClosed = true;
 			close();
 		}
 
@@ -82,7 +82,7 @@ class RequestBodyPublisher implements Publisher<ByteBuffer> {
 		public void request(long n) {
 			BackpressureUtils.checkRequest(n, subscriber);
 
-			if (subscriptionClosed) {
+			if (this.subscriptionClosed) {
 				return;
 			}
 
@@ -96,13 +96,13 @@ class RequestBodyPublisher implements Publisher<ByteBuffer> {
 		}
 
 		private void doOnNext(ByteBuffer buffer) {
-			draining = false;
+			this.draining = false;
 			buffer.flip();
 			subscriber.onNext(buffer);
 		}
 
 		private void doOnComplete() {
-			subscriptionClosed = true;
+			this.subscriptionClosed = true;
 			try {
 				subscriber.onComplete();
 			}
@@ -112,7 +112,7 @@ class RequestBodyPublisher implements Publisher<ByteBuffer> {
 		}
 
 		private void doOnError(Throwable t) {
-			subscriptionClosed = true;
+			this.subscriptionClosed = true;
 			try {
 				subscriber.onError(t);
 			}
@@ -122,19 +122,19 @@ class RequestBodyPublisher implements Publisher<ByteBuffer> {
 		}
 
 		private void close() {
-			if (pooledBuffer != null) {
-				safeClose(pooledBuffer);
-				pooledBuffer = null;
+			if (this.pooledBuffer != null) {
+				safeClose(this.pooledBuffer);
+				this.pooledBuffer = null;
 			}
-			if (channel != null) {
-				safeClose(channel);
-				channel = null;
+			if (this.channel != null) {
+				safeClose(this.channel);
+				this.channel = null;
 			}
 		}
 
 		@Override
 		public void run() {
-			if (subscriptionClosed || draining) {
+			if (this.subscriptionClosed || this.draining) {
 				return;
 			}
 
@@ -142,12 +142,12 @@ class RequestBodyPublisher implements Publisher<ByteBuffer> {
 				return;
 			}
 
-			draining = true;
+			this.draining = true;
 
-			if (channel == null) {
-				channel = exchange.getRequestChannel();
+			if (this.channel == null) {
+				this.channel = exchange.getRequestChannel();
 
-				if (channel == null) {
+				if (this.channel == null) {
 					if (exchange.isRequestComplete()) {
 						return;
 					}
@@ -157,21 +157,21 @@ class RequestBodyPublisher implements Publisher<ByteBuffer> {
 					}
 				}
 			}
-			if (pooledBuffer == null) {
-				pooledBuffer = exchange.getConnection().getByteBufferPool().allocate();
+			if (this.pooledBuffer == null) {
+				this.pooledBuffer = exchange.getConnection().getByteBufferPool().allocate();
 			}
 			else {
-				pooledBuffer.getBuffer().clear();
+				this.pooledBuffer.getBuffer().clear();
 			}
 
 			try {
-				ByteBuffer buffer = pooledBuffer.getBuffer();
+				ByteBuffer buffer = this.pooledBuffer.getBuffer();
 				int count;
 				do {
-					count = channel.read(buffer);
+					count = this.channel.read(buffer);
 					if (count == 0) {
-						channel.getReadSetter().set(this);
-						channel.resumeReads();
+						this.channel.getReadSetter().set(this);
+						this.channel.resumeReads();
 					}
 					else if (count == -1) {
 						if (buffer.position() > 0) {
@@ -181,11 +181,11 @@ class RequestBodyPublisher implements Publisher<ByteBuffer> {
 					}
 					else {
 						if (buffer.remaining() == 0) {
-							if (demand == 0) {
-								channel.suspendReads();
+							if (this.demand == 0) {
+								this.channel.suspendReads();
 							}
 							doOnNext(buffer);
-							if (demand > 0) {
+							if (this.demand > 0) {
 								scheduleNextMessage();
 							}
 							break;
@@ -200,12 +200,12 @@ class RequestBodyPublisher implements Publisher<ByteBuffer> {
 
 		@Override
 		public void handleEvent(StreamSourceChannel channel) {
-			if (subscriptionClosed) {
+			if (this.subscriptionClosed) {
 				return;
 			}
 
 			try {
-				ByteBuffer buffer = pooledBuffer.getBuffer();
+				ByteBuffer buffer = this.pooledBuffer.getBuffer();
 				int count;
 				do {
 					count = channel.read(buffer);
@@ -220,11 +220,11 @@ class RequestBodyPublisher implements Publisher<ByteBuffer> {
 					}
 					else {
 						if (buffer.remaining() == 0) {
-							if (demand == 0) {
+							if (this.demand == 0) {
 								channel.suspendReads();
 							}
 							doOnNext(buffer);
-							if (demand > 0) {
+							if (this.demand > 0) {
 								scheduleNextMessage();
 							}
 							break;

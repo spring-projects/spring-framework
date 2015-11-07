@@ -40,7 +40,7 @@ public class UndertowHttpServer extends HttpServerSupport
 
 		HttpHandler handler = new RequestHandlerAdapter(getHttpHandler());
 
-		undertowServer = Undertow.builder()
+		this.undertowServer = Undertow.builder()
 				.addHttpListener(getPort() != -1 ? getPort() : 8080, "localhost")
 				.setHandler(handler)
 				.build();
@@ -49,7 +49,7 @@ public class UndertowHttpServer extends HttpServerSupport
 	@Override
 	public void start() {
 		if (!running) {
-			undertowServer.start();
+			this.undertowServer.start();
 			running = true;
 		}
 
@@ -58,7 +58,7 @@ public class UndertowHttpServer extends HttpServerSupport
 	@Override
 	public void stop() {
 		if (running) {
-			undertowServer.stop();
+			this.undertowServer.stop();
 			running = false;
 		}
 	}

@@ -50,7 +50,7 @@ class RequestHandlerAdapter implements io.undertow.server.HttpHandler {
 				new UndertowServerHttpResponse(exchange, responseBodySubscriber);
 
 		exchange.dispatch();
-		httpHandler.handle(request, response).subscribe(new Subscriber<Void>() {
+		this.httpHandler.handle(request, response).subscribe(new Subscriber<Void>() {
 			@Override
 			public void onSubscribe(Subscription subscription) {
 				subscription.request(Long.MAX_VALUE);

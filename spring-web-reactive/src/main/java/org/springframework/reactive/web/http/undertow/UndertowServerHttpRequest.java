@@ -54,15 +54,15 @@ class UndertowServerHttpRequest implements ReactiveServerHttpRequest {
 
 	@Override
 	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(exchange.getRequestMethod().toString());
+		return HttpMethod.valueOf(this.exchange.getRequestMethod().toString());
 	}
 
 	@Override
 	public URI getURI() {
 		try {
-			StringBuilder uri = new StringBuilder(exchange.getRequestPath());
-			if (StringUtils.hasLength(exchange.getQueryString())) {
-				uri.append('?').append(exchange.getQueryString());
+			StringBuilder uri = new StringBuilder(this.exchange.getRequestPath());
+			if (StringUtils.hasLength(this.exchange.getQueryString())) {
+				uri.append('?').append(this.exchange.getQueryString());
 			}
 			return new URI(uri.toString());
 		}
@@ -75,7 +75,7 @@ class UndertowServerHttpRequest implements ReactiveServerHttpRequest {
 	public HttpHeaders getHeaders() {
 		if (this.headers == null) {
 			this.headers = new HttpHeaders();
-			for (HeaderValues headerValues : exchange.getRequestHeaders()) {
+			for (HeaderValues headerValues : this.exchange.getRequestHeaders()) {
 				for (String value : headerValues) {
 					this.headers.add(headerValues.getHeaderName().toString(), value);
 				}
