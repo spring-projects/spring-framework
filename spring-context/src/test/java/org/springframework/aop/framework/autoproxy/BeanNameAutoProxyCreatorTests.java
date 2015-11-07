@@ -171,7 +171,7 @@ public class BeanNameAutoProxyCreatorTests {
 		assertTrue(((Advised)testBean).isFrozen());
 	}
 
-	private void jdkAssertions(ITestBean tb, int nopInterceptorCount)  {
+	private void jdkAssertions(ITestBean tb, int nopInterceptorCount) {
 		NopInterceptor nop = (NopInterceptor) beanFactory.getBean("nopInterceptor");
 		assertEquals(0, nop.getCount());
 		assertTrue(AopUtils.isJdkDynamicProxy(tb));

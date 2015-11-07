@@ -53,7 +53,7 @@ import static org.mockito.BDDMockito.*;
  *
  * @author Alef Arendsen
  */
-public class SqlLobValueTests  {
+public class SqlLobValueTests {
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();

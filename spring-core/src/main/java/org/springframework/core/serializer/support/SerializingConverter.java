@@ -59,7 +59,7 @@ public class SerializingConverter implements Converter<Object, byte[]> {
 	@Override
 	public byte[] convert(Object source) {
 		ByteArrayOutputStream byteStream = new ByteArrayOutputStream(1024);
-		try  {
+		try {
 			this.serializer.serialize(source, byteStream);
 			return byteStream.toByteArray();
 		}

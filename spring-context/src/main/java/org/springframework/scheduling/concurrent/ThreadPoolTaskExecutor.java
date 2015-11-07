@@ -183,7 +183,7 @@ public class ThreadPoolTaskExecutor extends ExecutorConfigurationSupport
 			ThreadFactory threadFactory, RejectedExecutionHandler rejectedExecutionHandler) {
 
 		BlockingQueue<Runnable> queue = createQueue(this.queueCapacity);
-		ThreadPoolExecutor executor  = new ThreadPoolExecutor(
+		ThreadPoolExecutor executor = new ThreadPoolExecutor(
 				this.corePoolSize, this.maxPoolSize, this.keepAliveSeconds, TimeUnit.SECONDS,
 				queue, threadFactory, rejectedExecutionHandler);
 		if (this.allowCoreThreadTimeOut) {

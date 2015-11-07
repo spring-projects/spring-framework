@@ -104,7 +104,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	 * @throws MalformedURLException if the given URL specification is not valid
 	 * @see java.net.URI#URI(String, String, String)
 	 */
-	public UrlResource(String protocol, String location) throws MalformedURLException  {
+	public UrlResource(String protocol, String location) throws MalformedURLException {
 		this(protocol, location, null);
 	}
 
@@ -120,7 +120,7 @@ public class UrlResource extends AbstractFileResolvingResource {
 	 * @throws MalformedURLException if the given URL specification is not valid
 	 * @see java.net.URI#URI(String, String, String)
 	 */
-	public UrlResource(String protocol, String location, String fragment) throws MalformedURLException  {
+	public UrlResource(String protocol, String location, String fragment) throws MalformedURLException {
 		try {
 			this.uri = new URI(protocol, location, fragment);
 			this.url = this.uri.toURL();

@@ -36,7 +36,7 @@ public class AnnotationBeanConfigurerTests {
 
 	@Test
 	public void testInjection() {
-		AnnotationConfigApplicationContext context = new  AnnotationConfigApplicationContext(Config.class);
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext(Config.class);
 		ShouldBeConfiguredBySpring myObject = new ShouldBeConfiguredBySpring();
 		Assert.assertEquals("Rod", myObject.getName());
 	}

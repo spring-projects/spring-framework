@@ -136,7 +136,7 @@ public class PropertyOrFieldReference extends SpelNodeImpl {
 				// 'simple' object
 				try {
 					if (isWritableProperty(this.name,contextObject, evalContext)) {
-						Object newObject  = result.getTypeDescriptor().getType().newInstance();
+						Object newObject = result.getTypeDescriptor().getType().newInstance();
 						writeProperty(contextObject, evalContext, this.name, newObject);
 						result = readProperty(contextObject, evalContext, this.name);
 					}

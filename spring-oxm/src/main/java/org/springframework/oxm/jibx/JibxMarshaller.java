@@ -224,7 +224,7 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 				bindingName = DEFAULT_BINDING_NAME;
 			}
 			if (logger.isInfoEnabled()) {
-				logger.info("Configured for target package [" + this.targetPackage	+ "] using binding [" + this.bindingName + "]");
+				logger.info("Configured for target package [" + this.targetPackage + "] using binding [" + this.bindingName + "]");
 			}
 			this.bindingFactory = BindingDirectory.getFactory(this.bindingName, this.targetPackage);
 		}

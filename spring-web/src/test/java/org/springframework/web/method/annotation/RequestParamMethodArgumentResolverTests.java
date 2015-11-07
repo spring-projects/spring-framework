@@ -106,8 +106,8 @@ public class RequestParamMethodArgumentResolverTests {
 		paramMultipartFileList = new SynthesizingMethodParameter(method, 4);
 		paramMultipartFileArray = new SynthesizingMethodParameter(method, 5);
 		paramPart = new SynthesizingMethodParameter(method, 6);
-		paramPartList  = new SynthesizingMethodParameter(method, 7);
-		paramPartArray  = new SynthesizingMethodParameter(method, 8);
+		paramPartList = new SynthesizingMethodParameter(method, 7);
+		paramPartArray = new SynthesizingMethodParameter(method, 8);
 		paramMap = new SynthesizingMethodParameter(method, 9);
 		paramStringNotAnnot = new SynthesizingMethodParameter(method, 10);
 		paramStringNotAnnot.initParameterNameDiscovery(paramNameDiscoverer);

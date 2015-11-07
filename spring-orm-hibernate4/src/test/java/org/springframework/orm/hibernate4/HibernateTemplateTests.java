@@ -91,7 +91,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testExecuteWithNewSession()  {
+	public void testExecuteWithNewSession() {
 		given(sessionFactory.getCurrentSession()).willThrow(new HibernateException("no current session"));
 		given(sessionFactory.openSession()).willReturn(session);
 
@@ -99,7 +99,7 @@ public class HibernateTemplateTests {
 		l.add("test");
 		List result = hibernateTemplate.execute(new HibernateCallback<List>() {
 			@Override
-			public List doInHibernate(Session session)  {
+			public List doInHibernate(Session session) {
 				return l;
 			}
 		});
@@ -108,7 +108,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testExecuteWithNewSessionAndFilter()  {
+	public void testExecuteWithNewSessionAndFilter() {
 		given(sessionFactory.getCurrentSession()).willThrow(new HibernateException("no current session"));
 		given(sessionFactory.openSession()).willReturn(session);
 		hibernateTemplate.setFilterNames("myFilter");
@@ -127,7 +127,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testExecuteWithNewSessionAndFilters()  {
+	public void testExecuteWithNewSessionAndFilters() {
 		given(sessionFactory.getCurrentSession()).willThrow(new HibernateException("no current session"));
 		given(sessionFactory.openSession()).willReturn(session);
 		hibernateTemplate.setFilterNames("myFilter", "yourFilter");
@@ -136,7 +136,7 @@ public class HibernateTemplateTests {
 		l.add("test");
 		List result = hibernateTemplate.execute(new HibernateCallback<List>() {
 			@Override
-			public List doInHibernate(Session session)  {
+			public List doInHibernate(Session session) {
 				return l;
 			}
 		});
@@ -153,7 +153,7 @@ public class HibernateTemplateTests {
 		l.add("test");
 		List result = hibernateTemplate.execute(new HibernateCallback<List>() {
 			@Override
-			public List doInHibernate(Session session)  {
+			public List doInHibernate(Session session) {
 				return l;
 			}
 		});
@@ -168,7 +168,7 @@ public class HibernateTemplateTests {
 		l.add("test");
 		List result = hibernateTemplate.execute(new HibernateCallback<List>() {
 			@Override
-			public List doInHibernate(Session session)  {
+			public List doInHibernate(Session session) {
 				return l;
 			}
 		});
@@ -187,7 +187,7 @@ public class HibernateTemplateTests {
 		l.add("test");
 		List result = hibernateTemplate.execute(new HibernateCallback<List>() {
 			@Override
-			public List doInHibernate(Session session)  {
+			public List doInHibernate(Session session) {
 				return l;
 			}
 		});
@@ -231,7 +231,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testExecuteWithCacheQueries()  {
+	public void testExecuteWithCacheQueries() {
 		Query query1 = mock(Query.class);
 		Query query2 = mock(Query.class);
 		Criteria criteria = mock(Criteria.class);
@@ -259,7 +259,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testExecuteWithCacheQueriesAndCacheRegion()  {
+	public void testExecuteWithCacheQueriesAndCacheRegion() {
 		Query query1 = mock(Query.class);
 		Query query2 = mock(Query.class);
 		Criteria criteria = mock(Criteria.class);
@@ -291,7 +291,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testExecuteWithCacheQueriesAndCacheRegionAndNativeSession()  {
+	public void testExecuteWithCacheQueriesAndCacheRegionAndNativeSession() {
 		Query query1 = mock(Query.class);
 		Query query2 = mock(Query.class);
 		Criteria criteria = mock(Criteria.class);
@@ -305,7 +305,7 @@ public class HibernateTemplateTests {
 		hibernateTemplate.setQueryCacheRegion("myRegion");
 		hibernateTemplate.execute(new HibernateCallback<Object>() {
 			@Override
-			public Object doInHibernate(Session sess)  {
+			public Object doInHibernate(Session sess) {
 				assertSame(session, sess);
 				sess.createQuery("some query");
 				sess.getNamedQuery("some query name");
@@ -316,7 +316,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testExecuteWithFetchSizeAndMaxResults()  {
+	public void testExecuteWithFetchSizeAndMaxResults() {
 		Query query1 = mock(Query.class);
 		Query query2 = mock(Query.class);
 		Criteria criteria = mock(Criteria.class);
@@ -335,7 +335,7 @@ public class HibernateTemplateTests {
 		hibernateTemplate.setMaxResults(20);
 		hibernateTemplate.execute(new HibernateCallback<Object>() {
 			@Override
-			public Object doInHibernate(Session sess)  {
+			public Object doInHibernate(Session sess) {
 				sess.createQuery("some query");
 				sess.getNamedQuery("some query name");
 				sess.createCriteria(TestBean.class);
@@ -345,7 +345,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testGet()  {
+	public void testGet() {
 		TestBean tb = new TestBean();
 		given(session.get(TestBean.class, "")).willReturn(tb);
 		Object result = hibernateTemplate.get(TestBean.class, "");
@@ -353,7 +353,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testGetWithEntityName()  {
+	public void testGetWithEntityName() {
 		TestBean tb = new TestBean();
 		given(session.get("myEntity", "")).willReturn(tb);
 		Object result = hibernateTemplate.get("myEntity", "");
@@ -361,7 +361,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testLoad()  {
+	public void testLoad() {
 		TestBean tb = new TestBean();
 		given(session.load(TestBean.class, "")).willReturn(tb);
 		Object result = hibernateTemplate.load(TestBean.class, "");
@@ -369,7 +369,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testLoadWithNotFound()  {
+	public void testLoadWithNotFound() {
 		ObjectNotFoundException onfex = new ObjectNotFoundException("id", TestBean.class.getName());
 		given(session.load(TestBean.class, "id")).willThrow(onfex);
 		try {
@@ -385,7 +385,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testLoadWithEntityName()  {
+	public void testLoadWithEntityName() {
 		TestBean tb = new TestBean();
 		given(session.load("myEntity", "")).willReturn(tb);
 		Object result = hibernateTemplate.load("myEntity", "");
@@ -393,14 +393,14 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testLoadWithObject()  {
+	public void testLoadWithObject() {
 		TestBean tb = new TestBean();
 		hibernateTemplate.load(tb, "");
 		verify(session).load(tb, "");
 	}
 
 	@Test
-	public void testLoadAll()  {
+	public void testLoadAll() {
 		Criteria criteria = mock(Criteria.class);
 		List list = new ArrayList();
 		given(session.createCriteria(TestBean.class)).willReturn(criteria);
@@ -411,7 +411,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testLoadAllWithCacheable()  {
+	public void testLoadAllWithCacheable() {
 		Criteria criteria = mock(Criteria.class);
 		List list = new ArrayList();
 		given(session.createCriteria(TestBean.class)).willReturn(criteria);
@@ -426,7 +426,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testLoadAllWithCacheableAndCacheRegion()  {
+	public void testLoadAllWithCacheableAndCacheRegion() {
 		Criteria criteria = mock(Criteria.class);
 		List list = new ArrayList();
 		given(session.createCriteria(TestBean.class)).willReturn(criteria);
@@ -443,27 +443,27 @@ public class HibernateTemplateTests {
 		verify(criteria).setCacheRegion("myCacheRegion");
 	}
 
-	@Test public void testRefresh()  {
+	@Test public void testRefresh() {
 		TestBean tb = new TestBean();
 		hibernateTemplate.refresh(tb);
 		verify(session).refresh(tb);
 	}
 
-	@Test public void testContains()  {
+	@Test public void testContains() {
 		TestBean tb = new TestBean();
 		given(session.contains(tb)).willReturn(true);
 		assertTrue(hibernateTemplate.contains(tb));
 	}
 
 	@Test
-	public void testEvict()  {
+	public void testEvict() {
 		TestBean tb = new TestBean();
 		hibernateTemplate.evict(tb);
 		verify(session).evict(tb);
 	}
 
 	@Test
-	public void testSave()  {
+	public void testSave() {
 		TestBean tb = new TestBean();
 		given(session.getFlushMode()).willReturn(FlushMode.AUTO);
 		given(session.save(tb)).willReturn(0);
@@ -471,7 +471,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testSaveWithEntityName()  {
+	public void testSaveWithEntityName() {
 		TestBean tb = new TestBean();
 		given(session.getFlushMode()).willReturn(FlushMode.AUTO);
 		given(session.save("myEntity", tb)).willReturn(0);
@@ -479,7 +479,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testUpdate()  {
+	public void testUpdate() {
 		TestBean tb = new TestBean();
 		given(session.getFlushMode()).willReturn(FlushMode.AUTO);
 		hibernateTemplate.update(tb);
@@ -487,7 +487,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testUpdateWithEntityName()  {
+	public void testUpdateWithEntityName() {
 		TestBean tb = new TestBean();
 		given(session.getFlushMode()).willReturn(FlushMode.AUTO);
 		hibernateTemplate.update("myEntity", tb);
@@ -495,7 +495,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testSaveOrUpdate()  {
+	public void testSaveOrUpdate() {
 		TestBean tb = new TestBean();
 		given(session.getFlushMode()).willReturn(FlushMode.AUTO);
 		hibernateTemplate.saveOrUpdate(tb);
@@ -503,7 +503,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testSaveOrUpdateWithFlushModeNever()  {
+	public void testSaveOrUpdateWithFlushModeNever() {
 		TestBean tb = new TestBean();
 		given(session.getFlushMode()).willReturn(FlushMode.MANUAL);
 		try {
@@ -516,7 +516,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testSaveOrUpdateWithEntityName()  {
+	public void testSaveOrUpdateWithEntityName() {
 		TestBean tb = new TestBean();
 
 		given(session.getFlushMode()).willReturn(FlushMode.AUTO);
@@ -525,7 +525,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testReplicate()  {
+	public void testReplicate() {
 		TestBean tb = new TestBean();
 		given(session.getFlushMode()).willReturn(FlushMode.AUTO);
 		hibernateTemplate.replicate(tb, ReplicationMode.LATEST_VERSION);
@@ -533,7 +533,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testReplicateWithEntityName()  {
+	public void testReplicateWithEntityName() {
 		TestBean tb = new TestBean();
 		given(session.getFlushMode()).willReturn(FlushMode.AUTO);
 		hibernateTemplate.replicate("myEntity", tb, ReplicationMode.LATEST_VERSION);
@@ -541,7 +541,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testPersist()  {
+	public void testPersist() {
 		TestBean tb = new TestBean();
 		given(session.getFlushMode()).willReturn(FlushMode.AUTO);
 		hibernateTemplate.persist(tb);
@@ -549,7 +549,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testPersistWithEntityName()  {
+	public void testPersistWithEntityName() {
 		TestBean tb = new TestBean();
 		given(session.getFlushMode()).willReturn(FlushMode.AUTO);
 		hibernateTemplate.persist("myEntity", tb);
@@ -557,7 +557,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testMerge()  {
+	public void testMerge() {
 		TestBean tb = new TestBean();
 		TestBean tbMerged = new TestBean();
 		given(session.getFlushMode()).willReturn(FlushMode.AUTO);
@@ -566,7 +566,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testMergeWithEntityName()  {
+	public void testMergeWithEntityName() {
 		TestBean tb = new TestBean();
 		TestBean tbMerged = new TestBean();
 		given(session.getFlushMode()).willReturn(FlushMode.AUTO);
@@ -575,7 +575,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testDelete()  {
+	public void testDelete() {
 		TestBean tb = new TestBean();
 		given(session.getFlushMode()).willReturn(FlushMode.AUTO);
 		hibernateTemplate.delete(tb);
@@ -583,7 +583,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testDeleteWithEntityName()  {
+	public void testDeleteWithEntityName() {
 		TestBean tb = new TestBean();
 		given(session.getFlushMode()).willReturn(FlushMode.AUTO);
 		hibernateTemplate.delete("myEntity", tb);
@@ -591,7 +591,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testDeleteAll()  {
+	public void testDeleteAll() {
 		TestBean tb1 = new TestBean();
 		TestBean tb2 = new TestBean();
 		given(session.getFlushMode()).willReturn(FlushMode.AUTO);
@@ -604,19 +604,19 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testFlush()  {
+	public void testFlush() {
 		hibernateTemplate.flush();
 		verify(session).flush();
 	}
 
 	@Test
-	public void testClear()  {
+	public void testClear() {
 		hibernateTemplate.clear();
 		verify(session).clear();
 	}
 
 	@Test
-	public void testFind()  {
+	public void testFind() {
 		Query query = mock(Query.class);
 		List list = new ArrayList();
 		given(session.createQuery("some query string")).willReturn(query);
@@ -626,7 +626,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testFindWithParameter()  {
+	public void testFindWithParameter() {
 		Query query = mock(Query.class);
 		List list = new ArrayList();
 		given(session.createQuery("some query string")).willReturn(query);
@@ -638,7 +638,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testFindWithParameters()  {
+	public void testFindWithParameters() {
 		Query query = mock(Query.class);
 		List list = new ArrayList();
 		given(session.createQuery("some query string")).willReturn(query);
@@ -652,7 +652,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testFindWithNamedParameter()  {
+	public void testFindWithNamedParameter() {
 		Query query = mock(Query.class);
 		List list = new ArrayList();
 		given(session.createQuery("some query string")).willReturn(query);
@@ -664,7 +664,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testFindWithNamedParameters()  {
+	public void testFindWithNamedParameters() {
 		Query query = mock(Query.class);
 		List list = new ArrayList();
 		given(session.createQuery("some query string")).willReturn(query);
@@ -680,7 +680,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testFindByValueBean()  {
+	public void testFindByValueBean() {
 		Query query = mock(Query.class);
 		TestBean tb = new TestBean();
 		List list = new ArrayList();
@@ -693,7 +693,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testFindByNamedQuery()  {
+	public void testFindByNamedQuery() {
 		Query query = mock(Query.class);
 		List list = new ArrayList();
 		given(session.getNamedQuery("some query name")).willReturn(query);
@@ -703,7 +703,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testFindByNamedQueryWithParameter()  {
+	public void testFindByNamedQueryWithParameter() {
 		Query query = mock(Query.class);
 		List list = new ArrayList();
 		given(session.getNamedQuery("some query name")).willReturn(query);
@@ -715,7 +715,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testFindByNamedQueryWithParameters()  {
+	public void testFindByNamedQueryWithParameters() {
 		Query query = mock(Query.class);
 		List list = new ArrayList();
 		given(session.getNamedQuery("some query name")).willReturn(query);
@@ -729,7 +729,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testFindByNamedQueryWithNamedParameter()  {
+	public void testFindByNamedQueryWithNamedParameter() {
 		Query query = mock(Query.class);
 		List list = new ArrayList();
 		given(session.getNamedQuery("some query name")).willReturn(query);
@@ -741,7 +741,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testFindByNamedQueryWithNamedParameters()  {
+	public void testFindByNamedQueryWithNamedParameters() {
 		Query query = mock(Query.class);
 		List list = new ArrayList();
 		given(session.getNamedQuery("some query name")).willReturn(query);
@@ -757,7 +757,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testFindByNamedQueryAndValueBean()  {
+	public void testFindByNamedQueryAndValueBean() {
 		Query query = mock(Query.class);
 		TestBean tb = new TestBean();
 		List list = new ArrayList();
@@ -770,7 +770,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testFindWithCacheable()  {
+	public void testFindWithCacheable() {
 		Query query = mock(Query.class);
 		List list = new ArrayList();
 		given(session.createQuery("some query string")).willReturn(query);
@@ -783,7 +783,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testFindWithCacheableAndCacheRegion()  {
+	public void testFindWithCacheableAndCacheRegion() {
 		Query query = mock(Query.class);
 		List list = new ArrayList();
 		given(session.createQuery("some query string")).willReturn(query);
@@ -799,7 +799,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testFindByNamedQueryWithCacheable()  {
+	public void testFindByNamedQueryWithCacheable() {
 		Query query = mock(Query.class);
 		List list = new ArrayList();
 		given(session.getNamedQuery("some query name")).willReturn(query);
@@ -812,7 +812,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testFindByNamedQueryWithCacheableAndCacheRegion()  {
+	public void testFindByNamedQueryWithCacheableAndCacheRegion() {
 		Query query = mock(Query.class);
 		List list = new ArrayList();
 		given(session.getNamedQuery("some query name")).willReturn(query);
@@ -828,7 +828,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testIterate()  {
+	public void testIterate() {
 		Query query = mock(Query.class);
 		Iterator it = Collections.EMPTY_LIST.iterator();
 		given(session.createQuery("some query string")).willReturn(query);
@@ -838,7 +838,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testIterateWithParameter()  {
+	public void testIterateWithParameter() {
 		Query query = mock(Query.class);
 		Iterator it = Collections.EMPTY_LIST.iterator();
 		given(session.createQuery("some query string")).willReturn(query);
@@ -850,7 +850,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testIterateWithParameters()  {
+	public void testIterateWithParameters() {
 		Query query = mock(Query.class);
 		Iterator it = Collections.EMPTY_LIST.iterator();
 		given(session.createQuery("some query string")).willReturn(query);
@@ -864,7 +864,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testBulkUpdate()  {
+	public void testBulkUpdate() {
 		Query query = mock(Query.class);
 		given(session.createQuery("some query string")).willReturn(query);
 		given(query.executeUpdate()).willReturn(5);
@@ -873,7 +873,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testBulkUpdateWithParameter()  {
+	public void testBulkUpdateWithParameter() {
 		Query query = mock(Query.class);
 		given(session.createQuery("some query string")).willReturn(query);
 		given(query.setParameter(0, "myvalue")).willReturn(query);
@@ -884,7 +884,7 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testBulkUpdateWithParameters()  {
+	public void testBulkUpdateWithParameters() {
 		Query query = mock(Query.class);
 		given(session.createQuery("some query string")).willReturn(query);
 		given(query.setParameter(0, "myvalue1")).willReturn(query);
@@ -897,14 +897,14 @@ public class HibernateTemplateTests {
 	}
 
 	@Test
-	public void testExceptions()  {
+	public void testExceptions() {
 		SQLException sqlEx = new SQLException("argh", "27");
 
 		final JDBCConnectionException jcex = new JDBCConnectionException("mymsg", sqlEx);
 		try {
 			hibernateTemplate.execute(new HibernateCallback<Object>() {
 				@Override
-				public Object doInHibernate(Session session)  {
+				public Object doInHibernate(Session session) {
 					throw jcex;
 				}
 			});
@@ -920,7 +920,7 @@ public class HibernateTemplateTests {
 		try {
 			hibernateTemplate.execute(new HibernateCallback<Object>() {
 				@Override
-				public Object doInHibernate(Session session)  {
+				public Object doInHibernate(Session session) {
 					throw sgex;
 				}
 			});
@@ -936,7 +936,7 @@ public class HibernateTemplateTests {
 		try {
 			hibernateTemplate.execute(new HibernateCallback<Object>() {
 				@Override
-				public Object doInHibernate(Session session)  {
+				public Object doInHibernate(Session session) {
 					throw laex;
 				}
 			});
@@ -952,7 +952,7 @@ public class HibernateTemplateTests {
 		try {
 			hibernateTemplate.execute(new HibernateCallback<Object>() {
 				@Override
-				public Object doInHibernate(Session session)  {
+				public Object doInHibernate(Session session) {
 					throw cvex;
 				}
 			});
@@ -968,7 +968,7 @@ public class HibernateTemplateTests {
 		try {
 			hibernateTemplate.execute(new HibernateCallback<Object>() {
 				@Override
-				public Object doInHibernate(Session session)  {
+				public Object doInHibernate(Session session) {
 					throw dex;
 				}
 			});
@@ -984,7 +984,7 @@ public class HibernateTemplateTests {
 		try {
 			hibernateTemplate.execute(new HibernateCallback<Object>() {
 				@Override
-				public Object doInHibernate(Session session)  {
+				public Object doInHibernate(Session session) {
 					throw jdex;
 				}
 			});
@@ -1000,7 +1000,7 @@ public class HibernateTemplateTests {
 		try {
 			hibernateTemplate.execute(new HibernateCallback<Object>() {
 				@Override
-				public Object doInHibernate(Session session)  {
+				public Object doInHibernate(Session session) {
 					throw pvex;
 				}
 			});
@@ -1015,7 +1015,7 @@ public class HibernateTemplateTests {
 		try {
 			hibernateTemplate.execute(new HibernateCallback<Object>() {
 				@Override
-				public Object doInHibernate(Session session)  {
+				public Object doInHibernate(Session session) {
 					throw new PersistentObjectException("");
 				}
 			});
@@ -1028,7 +1028,7 @@ public class HibernateTemplateTests {
 		try {
 			hibernateTemplate.execute(new HibernateCallback<Object>() {
 				@Override
-				public Object doInHibernate(Session session)  {
+				public Object doInHibernate(Session session) {
 					throw new TransientObjectException("");
 				}
 			});
@@ -1042,7 +1042,7 @@ public class HibernateTemplateTests {
 		try {
 			hibernateTemplate.execute(new HibernateCallback<Object>() {
 				@Override
-				public Object doInHibernate(Session session)  {
+				public Object doInHibernate(Session session) {
 					throw odex;
 				}
 			});
@@ -1057,7 +1057,7 @@ public class HibernateTemplateTests {
 		try {
 			hibernateTemplate.execute(new HibernateCallback<Object>() {
 				@Override
-				public Object doInHibernate(Session session)  {
+				public Object doInHibernate(Session session) {
 					throw qex;
 				}
 			});
@@ -1073,7 +1073,7 @@ public class HibernateTemplateTests {
 		try {
 			hibernateTemplate.execute(new HibernateCallback<Object>() {
 				@Override
-				public Object doInHibernate(Session session)  {
+				public Object doInHibernate(Session session) {
 					throw uoex;
 				}
 			});
@@ -1090,7 +1090,7 @@ public class HibernateTemplateTests {
 		try {
 			hibernateTemplate.execute(new HibernateCallback<Object>() {
 				@Override
-				public Object doInHibernate(Session session)  {
+				public Object doInHibernate(Session session) {
 					throw onfe;
 				}
 			});
@@ -1107,7 +1107,7 @@ public class HibernateTemplateTests {
 		try {
 			hibernateTemplate.execute(new HibernateCallback<Object>() {
 				@Override
-				public Object doInHibernate(Session session)  {
+				public Object doInHibernate(Session session) {
 					throw wcex;
 				}
 			});
@@ -1124,7 +1124,7 @@ public class HibernateTemplateTests {
 		try {
 			hibernateTemplate.execute(new HibernateCallback<Object>() {
 				@Override
-				public Object doInHibernate(Session session)  {
+				public Object doInHibernate(Session session) {
 					throw nuex;
 				}
 			});
@@ -1140,7 +1140,7 @@ public class HibernateTemplateTests {
 		try {
 			hibernateTemplate.execute(new HibernateCallback<Object>() {
 				@Override
-				public Object doInHibernate(Session session)  {
+				public Object doInHibernate(Session session) {
 					throw sosex;
 				}
 			});
@@ -1157,7 +1157,7 @@ public class HibernateTemplateTests {
 		try {
 			hibernateTemplate.execute(new HibernateCallback<Object>() {
 				@Override
-				public Object doInHibernate(Session session)  {
+				public Object doInHibernate(Session session) {
 					throw ssex;
 				}
 			});
@@ -1174,7 +1174,7 @@ public class HibernateTemplateTests {
 		try {
 			hibernateTemplate.execute(new HibernateCallback<Object>() {
 				@Override
-				public Object doInHibernate(Session session)  {
+				public Object doInHibernate(Session session) {
 					throw hex;
 				}
 			});

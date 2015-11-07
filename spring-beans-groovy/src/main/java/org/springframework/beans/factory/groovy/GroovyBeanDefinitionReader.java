@@ -469,7 +469,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 						this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(beanName, beanClass);
 					}
 				}
-				else  {
+				else {
 					this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(
 							beanName, beanClass, resolveConstructorArguments(args,1,args.length));
 				}
@@ -483,7 +483,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 		else if (args[0] instanceof Map) {
 			// named constructor arguments
 			if (args.length > 1 && args[1] instanceof Class) {
-				List constructorArgs = resolveConstructorArguments(args, 2, hasClosureArgument ? args.length-1 :  args.length);
+				List constructorArgs = resolveConstructorArguments(args, 2, hasClosureArgument ? args.length-1 : args.length);
 				this.currentBeanDefinition = new GroovyBeanDefinitionWrapper(beanName, (Class)args[1], constructorArgs);
 				Map namedArgs = (Map)args[0];
 				for (Object o : namedArgs.keySet()) {

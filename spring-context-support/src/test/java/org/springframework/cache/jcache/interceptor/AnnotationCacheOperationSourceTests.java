@@ -47,7 +47,7 @@ public class AnnotationCacheOperationSourceTests extends AbstractJCacheTests {
 
 	private final DefaultJCacheOperationSource source = new DefaultJCacheOperationSource();
 
-	private final DefaultListableBeanFactory beanFactory =  new DefaultListableBeanFactory();
+	private final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
 
 
 	@Before

@@ -45,7 +45,7 @@ import org.springframework.jca.endpoint.AbstractMessageEndpointFactory;
  * @see #setTransactionManager
  * @see JmsMessageEndpointManager
  */
-public class JmsMessageEndpointFactory extends AbstractMessageEndpointFactory  {
+public class JmsMessageEndpointFactory extends AbstractMessageEndpointFactory {
 
 	private MessageListener messageListener;
 

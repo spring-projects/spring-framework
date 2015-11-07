@@ -62,7 +62,7 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 
 		super(propertyName, null, null);
 
-		if (beanClass == null)  {
+		if (beanClass == null) {
 			throw new IntrospectionException("Bean class must not be null");
 		}
 		this.beanClass = beanClass;

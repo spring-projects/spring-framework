@@ -289,7 +289,7 @@ public class CachedIntrospectionResults {
 			PropertyDescriptor[] pds = this.beanInfo.getPropertyDescriptors();
 			for (PropertyDescriptor pd : pds) {
 				if (Class.class == beanClass &&
-						("classLoader".equals(pd.getName()) ||  "protectionDomain".equals(pd.getName()))) {
+						("classLoader".equals(pd.getName()) || "protectionDomain".equals(pd.getName()))) {
 					// Ignore Class.getClassLoader() and getProtectionDomain() methods - nobody needs to bind to those
 					continue;
 				}

@@ -428,7 +428,7 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 			return;
 		}
 		if (connect[0] > 0 && connected[1] > 0) {
-			long interval = Math.max(connect[0],  connected[1]);
+			long interval = Math.max(connect[0], connected[1]);
 			this.connection.onWriteInactivity(new WriteInactivityTask(), interval);
 		}
 		if (connect[1] > 0 && connected[0] > 0) {

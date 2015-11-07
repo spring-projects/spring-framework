@@ -280,7 +280,7 @@ public class StompCodecTests {
 	@Test
 	public void encodeFrameWithHeadersThatShouldBeEscaped() {
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.DISCONNECT);
-		headers.addNativeHeader("a:\r\n\\b",  "alpha:bravo\r\n\\");
+		headers.addNativeHeader("a:\r\n\\b", "alpha:bravo\r\n\\");
 
 		Message<byte[]> frame = MessageBuilder.createMessage(new byte[0], headers.getMessageHeaders());
 

@@ -440,12 +440,12 @@ public class MessageBrokerBeanDefinitionParserTests {
 	}
 
 
-	private void testChannel(String channelName, List<Class<? extends  MessageHandler>> subscriberTypes,
+	private void testChannel(String channelName, List<Class<? extends MessageHandler>> subscriberTypes,
 			int interceptorCount) {
 
 		AbstractSubscribableChannel channel = this.appContext.getBean(channelName, AbstractSubscribableChannel.class);
 
-		for (Class<? extends  MessageHandler> subscriberType : subscriberTypes) {
+		for (Class<? extends MessageHandler> subscriberType : subscriberTypes) {
 			MessageHandler subscriber = this.appContext.getBean(subscriberType);
 			assertNotNull("No subsription for " + subscriberType, subscriber);
 			assertTrue(channel.hasSubscription(subscriber));

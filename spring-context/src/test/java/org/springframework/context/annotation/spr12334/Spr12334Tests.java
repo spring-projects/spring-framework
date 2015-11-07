@@ -58,7 +58,7 @@ public class Spr12334Tests {
 		private static boolean scanned = false;
 
 		@Override
-		public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry)  {
+		public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
 			if (scanned) {
 				throw new IllegalStateException("Already scanned");
 			}

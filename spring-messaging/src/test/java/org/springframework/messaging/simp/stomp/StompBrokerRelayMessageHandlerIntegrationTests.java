@@ -476,7 +476,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 		@Override
 		public String toString() {
-			return "command=" + this.command  + ", session=\"" + this.sessionId + "\"";
+			return "command=" + this.command + ", session=\"" + this.sessionId + "\"";
 		}
 	}
 
@@ -518,7 +518,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 
 		@Override
 		protected boolean matchInternal(StompHeaderAccessor headers, Object payload) {
-			if (!this.subscriptionId.equals(headers.getSubscriptionId()) ||  !this.destination.equals(headers.getDestination())) {
+			if (!this.subscriptionId.equals(headers.getSubscriptionId()) || !this.destination.equals(headers.getDestination())) {
 				return false;
 			}
 			if (payload instanceof byte[] && this.payload instanceof byte[]) {

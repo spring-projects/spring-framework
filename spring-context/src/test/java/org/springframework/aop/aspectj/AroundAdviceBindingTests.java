@@ -51,7 +51,7 @@ public class AroundAdviceBindingTests {
 	public void onSetUp() throws Exception {
 		ctx = new ClassPathXmlApplicationContext(getClass().getSimpleName() + ".xml", getClass());
 
-		AroundAdviceBindingTestAspect  aroundAdviceAspect = ((AroundAdviceBindingTestAspect) ctx.getBean("testAspect"));
+		AroundAdviceBindingTestAspect aroundAdviceAspect = ((AroundAdviceBindingTestAspect) ctx.getBean("testAspect"));
 
 		ITestBean injectedTestBean = (ITestBean) ctx.getBean("testBean");
 		assertTrue(AopUtils.isAopProxy(injectedTestBean));

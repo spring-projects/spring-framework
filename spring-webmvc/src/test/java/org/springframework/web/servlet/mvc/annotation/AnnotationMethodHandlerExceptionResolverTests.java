@@ -108,7 +108,7 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 	}
 
 	@Test
-	public void inherited()	{
+	public void inherited() {
 		IOException ex = new IOException();
 		InheritedController controller = new InheritedController();
 		ModelAndView mav = exceptionResolver.resolveException(request, response, controller, ex);
@@ -199,7 +199,7 @@ public class AnnotationMethodHandlerExceptionResolverTests {
 	private static class InheritedController extends SimpleController {
 
 		@Override
-		public String handleIOException(IOException ex, HttpServletRequest request)	{
+		public String handleIOException(IOException ex, HttpServletRequest request) {
 			return "GenericError";
 		}
 	}

@@ -662,7 +662,7 @@ public class GenericConversionServiceTests {
 		}
 	}
 
-	private static class MyStringToIntegerArrayConverter implements Converter<String, Integer[]>	{
+	private static class MyStringToIntegerArrayConverter implements Converter<String, Integer[]> {
 
 		@Override
 		public Integer[] convert(String source) {

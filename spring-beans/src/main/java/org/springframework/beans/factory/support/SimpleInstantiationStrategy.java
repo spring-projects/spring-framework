@@ -77,7 +77,7 @@ public class SimpleInstantiationStrategy implements InstantiationStrategy {
 							});
 						}
 						else {
-							constructorToUse =	clazz.getDeclaredConstructor((Class[]) null);
+							constructorToUse = clazz.getDeclaredConstructor((Class[]) null);
 						}
 						bd.resolvedConstructorOrFactoryMethod = constructorToUse;
 					}

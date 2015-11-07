@@ -1057,7 +1057,7 @@ public class DefaultListableBeanFactoryTests {
 		assertEquals(singletonObject, lbf.getBean("singletonObject"));
 		assertEquals(singletonObject, test.getSpouse());
 
-		Map<?, ?>  beansOfType = lbf.getBeansOfType(TestBean.class, false, true);
+		Map<?, ?> beansOfType = lbf.getBeansOfType(TestBean.class, false, true);
 		assertEquals(2, beansOfType.size());
 		assertTrue(beansOfType.containsValue(test));
 		assertTrue(beansOfType.containsValue(singletonObject));

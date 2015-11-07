@@ -31,7 +31,7 @@ import static org.junit.Assert.*;
  * @author Juergen Hoeller
  * @author Stephane Nicoll
  */
-public class ConcurrentCacheTests  {
+public class ConcurrentCacheTests {
 
 	protected final static String CACHE_NAME = "testCache";
 

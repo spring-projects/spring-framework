@@ -48,7 +48,7 @@ import static org.mockito.BDDMockito.*;
  * @author Thomas Risberg
  * @author Juergen Hoeller
  */
-public class SqlQueryTests  {
+public class SqlQueryTests {
 
 	//FIXME inline?
 	private static final String SELECT_ID =

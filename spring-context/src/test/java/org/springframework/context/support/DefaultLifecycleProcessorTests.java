@@ -592,7 +592,7 @@ public class DefaultLifecycleProcessorTests {
 			return new TestLifecycleBean(null, stoppedBeans);
 		}
 
-		private TestLifecycleBean(CopyOnWriteArrayList<Lifecycle> startedBeans,  CopyOnWriteArrayList<Lifecycle> stoppedBeans) {
+		private TestLifecycleBean(CopyOnWriteArrayList<Lifecycle> startedBeans, CopyOnWriteArrayList<Lifecycle> stoppedBeans) {
 			this.startedBeans = startedBeans;
 			this.stoppedBeans = stoppedBeans;
 		}

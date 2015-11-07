@@ -144,7 +144,7 @@ public class AsyncAnnotationBeanPostProcessor extends AbstractAdvisingBeanPostPr
 			}
 		}
 
-		AsyncAnnotationAdvisor advisor =  new AsyncAnnotationAdvisor(executorToUse, this.exceptionHandler);
+		AsyncAnnotationAdvisor advisor = new AsyncAnnotationAdvisor(executorToUse, this.exceptionHandler);
 		if (this.asyncAnnotationType != null) {
 			advisor.setAsyncAnnotationType(this.asyncAnnotationType);
 		}

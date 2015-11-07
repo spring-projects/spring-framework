@@ -74,7 +74,7 @@ public class ModelResultMatchersTests {
 	}
 
     @Test
-    public void  attributeDoesNotExist() throws Exception {
+    public void attributeDoesNotExist() throws Exception {
         this.matchers.attributeDoesNotExist("bad").match(this.mvcResult);
     }
 

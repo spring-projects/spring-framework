@@ -166,7 +166,7 @@ public abstract class AbstractAopProxyTests {
 		sw.start("Create " + howMany + " proxies");
 		testManyProxies(howMany);
 		sw.stop();
-		assertTrue("Proxy creation was too slow",  sw.getTotalTimeMillis() < 5000);
+		assertTrue("Proxy creation was too slow", sw.getTotalTimeMillis() < 5000);
 	}
 
 	private void testManyProxies(int howMany) {

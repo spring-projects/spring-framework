@@ -285,7 +285,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 				this.discoveredReturningType = ClassUtils.forName(name, getAspectClassLoader());
 			}
 			catch (Throwable ex) {
-				throw new IllegalArgumentException("Returning name '" + name  +
+				throw new IllegalArgumentException("Returning name '" + name +
 						"' is neither a valid argument name nor the fully-qualified name of a Java type on the classpath. " +
 						"Root cause: " + ex);
 			}
@@ -319,7 +319,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 				this.discoveredThrowingType = ClassUtils.forName(name, getAspectClassLoader());
 			}
 			catch (Throwable ex) {
-				throw new IllegalArgumentException("Throwing name '" + name  +
+				throw new IllegalArgumentException("Throwing name '" + name +
 						"' is neither a valid argument name nor the fully-qualified name of a Java type on the classpath. " +
 						"Root cause: " + ex);
 			}

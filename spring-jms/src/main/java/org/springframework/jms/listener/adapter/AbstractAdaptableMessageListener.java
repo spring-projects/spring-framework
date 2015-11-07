@@ -208,7 +208,7 @@ public abstract class AbstractAdaptableMessageListener
 	 * listener method as argument
 	 * @throws MessageConversionException if the message could not be unmarshaled
 	 */
-	protected Object extractMessage(Message message)  {
+	protected Object extractMessage(Message message) {
 		try {
 			MessageConverter converter = getMessageConverter();
 			if (converter != null) {

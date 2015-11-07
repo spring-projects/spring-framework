@@ -84,7 +84,7 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 			// Check for Windows-style path
 			pos = filename.lastIndexOf("\\");
 		}
-		if (pos != -1)  {
+		if (pos != -1) {
 			// Any sort of path separator found...
 			return filename.substring(pos + 1);
 		}

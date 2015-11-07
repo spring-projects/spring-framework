@@ -109,7 +109,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 			String schemaName, String procedureName) throws SQLException {
 
 		this.procedureColumnMetaDataUsed = true;
-		processProcedureColumns(databaseMetaData, catalogName, schemaName,  procedureName);
+		processProcedureColumns(databaseMetaData, catalogName, schemaName, procedureName);
 	}
 
 	@Override
@@ -345,7 +345,7 @@ public class GenericCallMetaDataProvider implements CallMetaDataProvider {
 				String columnName = procs.getString("COLUMN_NAME");
 				int columnType = procs.getInt("COLUMN_TYPE");
 				if (columnName == null && (
-						columnType == DatabaseMetaData.procedureColumnIn  ||
+						columnType == DatabaseMetaData.procedureColumnIn ||
 						columnType == DatabaseMetaData.procedureColumnInOut ||
 						columnType == DatabaseMetaData.procedureColumnOut)) {
 					if (logger.isDebugEnabled()) {

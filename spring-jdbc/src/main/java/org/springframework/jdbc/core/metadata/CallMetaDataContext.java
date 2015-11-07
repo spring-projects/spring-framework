@@ -524,7 +524,7 @@ public class CallMetaDataContext {
 		Map<String, String> callParameterNames = new HashMap<String, String>(this.callParameters.size());
 		for (SqlParameter parameter : this.callParameters) {
 			if (parameter.isInputValueProvided()) {
-				String parameterName =  parameter.getName();
+				String parameterName = parameter.getName();
 				String parameterNameToMatch = this.metaDataProvider.parameterNameToUse(parameterName);
 				if (parameterNameToMatch != null) {
 					callParameterNames.put(parameterNameToMatch.toLowerCase(), parameterName);
@@ -573,7 +573,7 @@ public class CallMetaDataContext {
 		int i = 0;
 		for (SqlParameter parameter : this.callParameters) {
 			if (parameter.isInputValueProvided()) {
-				String parameterName =  parameter.getName();
+				String parameterName = parameter.getName();
 				matchedParameters.put(parameterName, parameterValues[i++]);
 			}
 		}

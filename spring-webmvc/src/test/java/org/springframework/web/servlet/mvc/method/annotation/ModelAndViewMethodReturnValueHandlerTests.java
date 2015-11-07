@@ -88,7 +88,7 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 
 	@Test
 	public void handleRedirectAttributesWithViewReference() throws Exception {
-		RedirectAttributesModelMap redirectAttributes  = new RedirectAttributesModelMap();
+		RedirectAttributesModelMap redirectAttributes = new RedirectAttributesModelMap();
 		mavContainer.setRedirectModel(redirectAttributes);
 
 		ModelAndView mav = new ModelAndView(new RedirectView(), "attrName", "attrValue");
@@ -102,7 +102,7 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 
 	@Test
 	public void handleRedirectAttributesWithViewName() throws Exception {
-		RedirectAttributesModelMap redirectAttributes  = new RedirectAttributesModelMap();
+		RedirectAttributesModelMap redirectAttributes = new RedirectAttributesModelMap();
 		mavContainer.setRedirectModel(redirectAttributes);
 
 		ModelAndView mav = new ModelAndView("redirect:viewName", "attrName", "attrValue");
@@ -116,7 +116,7 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 
 	@Test
 	public void handleRedirectAttributesWithCustomPrefix() throws Exception {
-		RedirectAttributesModelMap redirectAttributes  = new RedirectAttributesModelMap();
+		RedirectAttributesModelMap redirectAttributes = new RedirectAttributesModelMap();
 		mavContainer.setRedirectModel(redirectAttributes);
 
 		ModelAndView mav = new ModelAndView("myRedirect:viewName", "attrName", "attrValue");
@@ -131,7 +131,7 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 
 	@Test
 	public void handleRedirectAttributesWithoutRedirect() throws Exception {
-		RedirectAttributesModelMap redirectAttributes  = new RedirectAttributesModelMap();
+		RedirectAttributesModelMap redirectAttributes = new RedirectAttributesModelMap();
 		mavContainer.setRedirectModel(redirectAttributes);
 
 		ModelAndView mav = new ModelAndView();

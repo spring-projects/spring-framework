@@ -174,7 +174,7 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 	}
 
 	@Test
-	public void postForLocation() throws Exception  {
+	public void postForLocation() throws Exception {
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.setContentType(new MediaType("text", "plain", Charset.forName("ISO-8859-15")));
 		HttpEntity<String> entity = new HttpEntity<String>(helloWorld, entityHeaders);
@@ -184,7 +184,7 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 	}
 
 	@Test
-	public void postForLocationCallback() throws Exception  {
+	public void postForLocationCallback() throws Exception {
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.setContentType(new MediaType("text", "plain", Charset.forName("ISO-8859-15")));
 		HttpEntity<String> entity = new HttpEntity<String>(helloWorld, entityHeaders);
@@ -205,7 +205,7 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 	}
 
 	@Test
-	public void postForLocationCallbackWithLambdas() throws Exception  {
+	public void postForLocationCallbackWithLambdas() throws Exception {
 		HttpHeaders entityHeaders = new HttpHeaders();
 		entityHeaders.setContentType(new MediaType("text", "plain", Charset.forName("ISO-8859-15")));
 		HttpEntity<String> entity = new HttpEntity<String>(helloWorld, entityHeaders);
@@ -218,7 +218,7 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 	}
 
 	@Test
-	public void postForEntity() throws Exception  {
+	public void postForEntity() throws Exception {
 		HttpEntity<String> requestEntity = new HttpEntity<>(helloWorld);
 		Future<ResponseEntity<String>> responseEntityFuture =
 				template.postForEntity(baseUrl + "/{method}", requestEntity, String.class, "post");
@@ -227,7 +227,7 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 	}
 
 	@Test
-	public void postForEntityCallback() throws Exception  {
+	public void postForEntityCallback() throws Exception {
 		HttpEntity<String> requestEntity = new HttpEntity<>(helloWorld);
 		ListenableFuture<ResponseEntity<String>> responseEntityFuture =
 				template.postForEntity(baseUrl + "/{method}", requestEntity, String.class, "post");
@@ -246,7 +246,7 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 	}
 
 	@Test
-	public void postForEntityCallbackWithLambdas() throws Exception  {
+	public void postForEntityCallbackWithLambdas() throws Exception {
 		HttpEntity<String> requestEntity = new HttpEntity<>(helloWorld);
 		ListenableFuture<ResponseEntity<String>> responseEntityFuture =
 				template.postForEntity(baseUrl + "/{method}", requestEntity, String.class, "post");
@@ -257,14 +257,14 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 	}
 
 	@Test
-	public void put() throws Exception  {
+	public void put() throws Exception {
 		HttpEntity<String> requestEntity = new HttpEntity<>(helloWorld);
 		Future<?> responseEntityFuture = template.put(baseUrl + "/{method}", requestEntity, "put");
 		responseEntityFuture.get();
 	}
 
 	@Test
-	public void putCallback() throws Exception  {
+	public void putCallback() throws Exception {
 		HttpEntity<String> requestEntity = new HttpEntity<>(helloWorld);
 		ListenableFuture<?> responseEntityFuture = template.put(baseUrl + "/{method}", requestEntity, "put");
 		responseEntityFuture.addCallback(new ListenableFutureCallback<Object>() {
@@ -282,13 +282,13 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 	}
 
 	@Test
-	public void delete() throws Exception  {
+	public void delete() throws Exception {
 		Future<?> deletedFuture = template.delete(new URI(baseUrl + "/delete"));
 		deletedFuture.get();
 	}
 
 	@Test
-	public void deleteCallback() throws Exception  {
+	public void deleteCallback() throws Exception {
 		ListenableFuture<?> deletedFuture = template.delete(new URI(baseUrl + "/delete"));
 		deletedFuture.addCallback(new ListenableFutureCallback<Object>() {
 			@Override
@@ -305,7 +305,7 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 	}
 
 	@Test
-	public void deleteCallbackWithLambdas() throws Exception  {
+	public void deleteCallbackWithLambdas() throws Exception {
 		ListenableFuture<?> deletedFuture = template.delete(new URI(baseUrl + "/delete"));
 		deletedFuture.addCallback(result -> assertNull(result), ex -> fail(ex.getMessage()));
 		while (!deletedFuture.isDone()) {

@@ -192,7 +192,7 @@ public class WebSocketHandlerRegistrationTests {
 	}
 
 
-	private static class TestWebSocketHandlerRegistration  extends AbstractWebSocketHandlerRegistration<List<Mapping>> {
+	private static class TestWebSocketHandlerRegistration extends AbstractWebSocketHandlerRegistration<List<Mapping>> {
 
 		public TestWebSocketHandlerRegistration(TaskScheduler sockJsTaskScheduler) {
 			super(sockJsTaskScheduler);

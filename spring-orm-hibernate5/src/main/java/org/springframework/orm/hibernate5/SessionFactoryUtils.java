@@ -160,7 +160,7 @@ public abstract class SessionFactoryUtils {
 		}
 		if (ex instanceof ConstraintViolationException) {
 			ConstraintViolationException jdbcEx = (ConstraintViolationException) ex;
-			return new DataIntegrityViolationException(ex.getMessage()  + "; SQL [" + jdbcEx.getSQL() +
+			return new DataIntegrityViolationException(ex.getMessage() + "; SQL [" + jdbcEx.getSQL() +
 					"]; constraint [" + jdbcEx.getConstraintName() + "]", ex);
 		}
 		if (ex instanceof DataException) {

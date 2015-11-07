@@ -109,7 +109,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	@Override
 	public void setEmbeddedValueResolver(StringValueResolver resolver) {
-		this.embeddedValueResolver  = resolver;
+		this.embeddedValueResolver = resolver;
 	}
 
 	@Override

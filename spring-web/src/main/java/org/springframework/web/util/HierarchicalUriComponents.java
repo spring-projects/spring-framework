@@ -673,7 +673,8 @@ final class HierarchicalUriComponents extends UriComponents {
 		@Override
 		public PathComponent encode(String encoding) throws UnsupportedEncodingException {
 			String encodedPath = encodeUriComponent(getPath(),encoding, Type.PATH);
-			return new FullPathComponent(encodedPath);		}
+			return new FullPathComponent(encodedPath);
+		}
 
 		@Override
 		public void verify() {

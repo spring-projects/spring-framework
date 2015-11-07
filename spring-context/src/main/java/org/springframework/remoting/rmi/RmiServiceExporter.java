@@ -299,7 +299,7 @@ public class RmiServiceExporter extends RmiBasedExporter implements Initializing
 			// Already an RMI object bound for the specified service name...
 			unexportObjectSilently();
 			throw new IllegalStateException(
-					"Already an RMI object bound for name '"  + this.serviceName + "': " + ex.toString());
+					"Already an RMI object bound for name '" + this.serviceName + "': " + ex.toString());
 		}
 		catch (RemoteException ex) {
 			// Registry binding failed: let's unexport the RMI object as well.

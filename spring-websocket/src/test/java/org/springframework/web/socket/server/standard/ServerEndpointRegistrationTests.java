@@ -88,6 +88,6 @@ public class ServerEndpointRegistrationTests {
 		}
 	}
 
-	private static class EchoService {	}
+	private static class EchoService { }
 
 }

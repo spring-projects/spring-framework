@@ -48,7 +48,7 @@ import static org.junit.Assert.*;
  * @author Rossen Stoyanchev
  */
 @RunWith(Parameterized.class)
-public class WebSocketIntegrationTests extends  AbstractWebSocketIntegrationTests {
+public class WebSocketIntegrationTests extends AbstractWebSocketIntegrationTests {
 
 	@Parameters(name = "server [{0}], client [{1}]")
 	public static Iterable<Object[]> arguments() {

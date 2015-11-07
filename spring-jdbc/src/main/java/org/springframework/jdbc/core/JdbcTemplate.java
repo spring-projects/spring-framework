@@ -1059,7 +1059,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 		Assert.notNull(action, "Callback object must not be null");
 		if (logger.isDebugEnabled()) {
 			String sql = getSql(csc);
-			logger.debug("Calling stored procedure" + (sql != null ? " [" + sql  + "]" : ""));
+			logger.debug("Calling stored procedure" + (sql != null ? " [" + sql + "]" : ""));
 		}
 
 		Connection con = DataSourceUtils.getConnection(getDataSource());

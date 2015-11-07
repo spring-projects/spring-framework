@@ -224,7 +224,7 @@ public class TransactionInterceptorTests extends AbstractTransactionAspectTests 
 		TransactionInterceptor ti = transactionInterceptorWithTransactionManagerName(
 				"fooTransactionManager", beanFactory);
 
-		PlatformTransactionManager txManager = 	associateTransactionManager(beanFactory, "fooTransactionManager");
+		PlatformTransactionManager txManager = associateTransactionManager(beanFactory, "fooTransactionManager");
 
 		DefaultTransactionAttribute attribute = new DefaultTransactionAttribute();
 		PlatformTransactionManager actual = ti.determineTransactionManager(attribute);

@@ -62,7 +62,7 @@ public interface CallableProcessingInterceptor {
 	 * @param task the task for the current async request
 	 * @throws Exception in case of errors
 	 */
-	<T> void  beforeConcurrentHandling(NativeWebRequest request, Callable<T> task) throws Exception;
+	<T> void beforeConcurrentHandling(NativeWebRequest request, Callable<T> task) throws Exception;
 
 	/**
 	 * Invoked <em>after</em> the start of concurrent handling in the async

@@ -206,7 +206,7 @@ class SpringSessionSynchronization implements TransactionSynchronization, Ordere
 				SessionFactoryUtils.closeSessionOrRegisterDeferredClose(this.sessionHolder.getSession(), this.sessionFactory);
 			}
 		}
-		else  {
+		else {
 			Session session = this.sessionHolder.getSession();
 			if (this.sessionHolder.getPreviousFlushMode() != null) {
 				// In case of pre-bound Session, restore previous flush mode.
