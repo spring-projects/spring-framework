@@ -762,7 +762,7 @@ public abstract class ClassUtils {
 	 */
 	public static Method getMostSpecificMethod(Method method, Class<?> targetClass) {
 		if (method != null && isOverridable(method, targetClass) &&
-				targetClass != null && !targetClass.equals(method.getDeclaringClass())) {
+				targetClass != null && targetClass != method.getDeclaringClass()) {
 			try {
 				if (Modifier.isPublic(method.getModifiers())) {
 					try {
@@ -914,7 +914,7 @@ public abstract class ClassUtils {
 		}
 		if (lhsType.isPrimitive()) {
 			Class<?> resolvedPrimitive = primitiveWrapperTypeMap.get(rhsType);
-			if (resolvedPrimitive != null && lhsType.equals(resolvedPrimitive)) {
+			if (lhsType == resolvedPrimitive) {
 				return true;
 			}
 		}
