@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.TriggerContext;
 import org.springframework.util.ErrorHandler;
@@ -36,6 +35,7 @@ import static org.junit.Assert.*;
 
 /**
  * @author Mark Fisher
+ * @author Serdar Kuzucu
  * @since 3.0
  */
 public class ThreadPoolTaskSchedulerTests {
@@ -66,7 +66,7 @@ public class ThreadPoolTaskSchedulerTests {
 		await(task);
 		assertThreadNamePrefix(task);
 	}
-
+	
 	@Test
 	public void executeFailingRunnableWithoutErrorHandler() {
 		TestTask task = new TestTask(0);
@@ -156,9 +156,32 @@ public class ThreadPoolTaskSchedulerTests {
 		assertThreadNamePrefix(task);
 	}
 
+	@Test
+	public void scheduleOneTimeCallable() throws Exception {
+		TestCallable callable = new TestCallable(1);
+		Future<?> future = scheduler.schedule(callable, new Date());
+		Object result = future.get(1000, TimeUnit.MILLISECONDS);
+		assertNull(result);
+		assertTrue(future.isDone());
+		assertThreadNamePrefix(callable);
+	}
+
 	@Test(expected = ExecutionException.class)
 	public void scheduleOneTimeFailingTaskWithoutErrorHandler() throws Exception {
 		TestTask task = new TestTask(0);
+		Future<?> future = scheduler.schedule(task, new Date());
+		try {
+			future.get(1000, TimeUnit.MILLISECONDS);
+		}
+		catch (ExecutionException e) {
+			assertTrue(future.isDone());
+			throw e;
+		}
+	}
+	
+	@Test(expected = ExecutionException.class)
+	public void scheduleOneTimeFailingCallableWithoutErrorHandler() throws Exception {
+		TestCallable task = new TestCallable(0);
 		Future<?> future = scheduler.schedule(task, new Date());
 		try {
 			future.get(1000, TimeUnit.MILLISECONDS);
@@ -180,10 +203,32 @@ public class ThreadPoolTaskSchedulerTests {
 		assertNull(result);
 		assertNotNull(errorHandler.lastError);
 	}
+	
+	@Test
+	public void scheduleOneTimeFailingCallableWithErrorHandler() throws Exception {
+		TestCallable task = new TestCallable(0);
+		TestErrorHandler errorHandler = new TestErrorHandler(1);
+		scheduler.setErrorHandler(errorHandler);
+		Future<?> future = scheduler.schedule(task, new Date());
+		Object result = future.get(1000, TimeUnit.MILLISECONDS);
+		assertTrue(future.isDone());
+		assertNull(result);
+		assertNotNull(errorHandler.lastError);
+	}
 
 	@Test
 	public void scheduleTriggerTask() throws Exception {
 		TestTask task = new TestTask(3);
+		Future<?> future = scheduler.schedule(task, new TestTrigger(3));
+		Object result = future.get(1000, TimeUnit.MILLISECONDS);
+		assertNull(result);
+		await(task);
+		assertThreadNamePrefix(task);
+	}
+	
+	@Test
+	public void scheduleTriggerTaskWithCallable() throws Exception {
+		TestCallable task = new TestCallable(3);
 		Future<?> future = scheduler.schedule(task, new TestTrigger(3));
 		Object result = future.get(1000, TimeUnit.MILLISECONDS);
 		assertNull(result);
@@ -197,6 +242,13 @@ public class ThreadPoolTaskSchedulerTests {
 			this.scheduleTriggerTask();
 		}
 	}
+	
+	@Test
+	public void scheduleMultipleTriggerTasksWithCallable() throws Exception {
+		for (int i = 0; i < 1000; i++) {
+			this.scheduleTriggerTaskWithCallable();
+		}
+	}
 
 
 	// utility methods
@@ -204,8 +256,16 @@ public class ThreadPoolTaskSchedulerTests {
 	private void assertThreadNamePrefix(TestTask task) {
 		assertEquals(THREAD_NAME_PREFIX, task.lastThread.getName().substring(0, THREAD_NAME_PREFIX.length()));
 	}
+	
+	private void assertThreadNamePrefix(TestCallable task) {
+		assertEquals(THREAD_NAME_PREFIX, task.lastThread.getName().substring(0, THREAD_NAME_PREFIX.length()));
+	}
 
 	private void await(TestTask task) {
+		this.await(task.latch);
+	}
+	
+	private void await(TestCallable task) {
 		this.await(task.latch);
 	}
 
@@ -257,17 +317,26 @@ public class ThreadPoolTaskSchedulerTests {
 		private final int expectedRunCount;
 
 		private final AtomicInteger actualRunCount = new AtomicInteger();
+		
+		private final CountDownLatch latch;
+		
+		private Thread lastThread;
 
 		TestCallable(int expectedRunCount) {
 			this.expectedRunCount = expectedRunCount;
+			this.latch = new CountDownLatch(expectedRunCount);
 		}
 
 		@Override
 		public String call() throws Exception {
+			lastThread = Thread.currentThread();
+			
 			if (actualRunCount.incrementAndGet() > expectedRunCount) {
 				throw new RuntimeException("intentional test failure");
 			}
-			return Thread.currentThread().getName();
+			
+			latch.countDown();
+			return lastThread.getName();
 		}
 	}
 

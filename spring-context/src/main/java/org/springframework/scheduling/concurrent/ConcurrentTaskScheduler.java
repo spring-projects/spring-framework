@@ -17,6 +17,7 @@
 package org.springframework.scheduling.concurrent;
 
 import java.util.Date;
+import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.RejectedExecutionException;
@@ -29,6 +30,7 @@ import javax.enterprise.concurrent.ManagedScheduledExecutorService;
 import org.springframework.core.task.TaskRejectedException;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
+import org.springframework.scheduling.support.CallableWrapperRunnable;
 import org.springframework.scheduling.support.SimpleTriggerContext;
 import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.util.Assert;
@@ -55,6 +57,7 @@ import org.springframework.util.ErrorHandler;
  *
  * @author Juergen Hoeller
  * @author Mark Fisher
+ * @author Serdar Kuzucu
  * @since 3.0
  * @see java.util.concurrent.ScheduledExecutorService
  * @see java.util.concurrent.ScheduledThreadPoolExecutor
@@ -176,6 +179,11 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	}
 
 	@Override
+	public ScheduledFuture<?> schedule(Callable<?> task, Trigger trigger) {
+		return schedule(new CallableWrapperRunnable(task), trigger);
+	}
+
+	@Override
 	public ScheduledFuture<?> schedule(Runnable task, Date startTime) {
 		long initialDelay = startTime.getTime() - System.currentTimeMillis();
 		try {
@@ -184,6 +192,11 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + this.scheduledExecutor + "] did not accept task: " + task, ex);
 		}
+	}
+
+	@Override
+	public ScheduledFuture<?> schedule(Callable<?> task, Date startTime) {
+		return schedule(new CallableWrapperRunnable(task), startTime);
 	}
 
 	@Override
@@ -198,6 +211,11 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	}
 
 	@Override
+	public ScheduledFuture<?> scheduleAtFixedRate(Callable<?> task, Date startTime, long period) {
+		return scheduleAtFixedRate(new CallableWrapperRunnable(task), startTime, period);
+	}
+
+	@Override
 	public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, long period) {
 		try {
 			return this.scheduledExecutor.scheduleAtFixedRate(decorateTask(task, true), 0, period, TimeUnit.MILLISECONDS);
@@ -205,6 +223,11 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + this.scheduledExecutor + "] did not accept task: " + task, ex);
 		}
+	}
+
+	@Override
+	public ScheduledFuture<?> scheduleAtFixedRate(Callable<?> task, long period) {
+		return scheduleAtFixedRate(new CallableWrapperRunnable(task), period);
 	}
 
 	@Override
@@ -219,6 +242,11 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 	}
 
 	@Override
+	public ScheduledFuture<?> scheduleWithFixedDelay(Callable<?> task, Date startTime, long delay) {
+		return scheduleWithFixedDelay(new CallableWrapperRunnable(task), startTime, delay);
+	}
+
+	@Override
 	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, long delay) {
 		try {
 			return this.scheduledExecutor.scheduleWithFixedDelay(decorateTask(task, true), 0, delay, TimeUnit.MILLISECONDS);
@@ -226,6 +254,11 @@ public class ConcurrentTaskScheduler extends ConcurrentTaskExecutor implements T
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + this.scheduledExecutor + "] did not accept task: " + task, ex);
 		}
+	}
+
+	@Override
+	public ScheduledFuture<?> scheduleWithFixedDelay(Callable<?> task, long delay) {
+		return scheduleWithFixedDelay(new CallableWrapperRunnable(task), delay);
 	}
 
 	private Runnable decorateTask(Runnable task, boolean isRepeatingTask) {

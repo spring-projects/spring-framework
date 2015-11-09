@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ScheduledFuture;
 
 import org.junit.Before;
@@ -321,7 +322,17 @@ class TestTaskScheduler implements TaskScheduler {
 	}
 
 	@Override
+	public ScheduledFuture<?> schedule(Callable<?> task, Trigger trigger) {
+		return null;
+	}
+
+	@Override
 	public ScheduledFuture schedule(Runnable task, Date startTime) {
+		return null;
+	}
+
+	@Override
+	public ScheduledFuture<?> schedule(Callable<?> task, Date startTime) {
 		return null;
 	}
 
@@ -331,7 +342,17 @@ class TestTaskScheduler implements TaskScheduler {
 	}
 
 	@Override
+	public ScheduledFuture<?> scheduleAtFixedRate(Callable<?> task, Date startTime, long period) {
+		return null;
+	}
+
+	@Override
 	public ScheduledFuture scheduleAtFixedRate(Runnable task, long period) {
+		return null;
+	}
+
+	@Override
+	public ScheduledFuture<?> scheduleAtFixedRate(Callable<?> task, long period) {
 		return null;
 	}
 
@@ -341,7 +362,17 @@ class TestTaskScheduler implements TaskScheduler {
 	}
 
 	@Override
+	public ScheduledFuture<?> scheduleWithFixedDelay(Callable<?> task, Date startTime, long delay) {
+		return null;
+	}
+
+	@Override
 	public ScheduledFuture scheduleWithFixedDelay(Runnable task, long delay) {
+		return null;
+	}
+
+	@Override
+	public ScheduledFuture<?> scheduleWithFixedDelay(Callable<?> task, long delay) {
 		return null;
 	}
 

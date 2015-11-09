@@ -35,6 +35,7 @@ import org.springframework.lang.UsesJava7;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
+import org.springframework.scheduling.support.CallableWrapperRunnable;
 import org.springframework.scheduling.support.TaskUtils;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -306,6 +307,11 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	}
 
 	@Override
+	public ScheduledFuture<?> schedule(Callable<?> task, Trigger trigger) {
+		return schedule(new CallableWrapperRunnable(task), trigger);
+	}
+
+	@Override
 	public ScheduledFuture<?> schedule(Runnable task, Date startTime) {
 		ScheduledExecutorService executor = getScheduledExecutor();
 		long initialDelay = startTime.getTime() - System.currentTimeMillis();
@@ -315,6 +321,11 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
 		}
+	}
+
+	@Override
+	public ScheduledFuture<?> schedule(Callable<?> task, Date startTime) {
+		return schedule(new CallableWrapperRunnable(task), startTime);
 	}
 
 	@Override
@@ -330,6 +341,11 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	}
 
 	@Override
+	public ScheduledFuture<?> scheduleAtFixedRate(Callable<?> task, Date startTime, long period) {
+		return scheduleAtFixedRate(new CallableWrapperRunnable(task), startTime, period);
+	}
+
+	@Override
 	public ScheduledFuture<?> scheduleAtFixedRate(Runnable task, long period) {
 		ScheduledExecutorService executor = getScheduledExecutor();
 		try {
@@ -338,6 +354,11 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
 		}
+	}
+
+	@Override
+	public ScheduledFuture<?> scheduleAtFixedRate(Callable<?> task, long period) {
+		return scheduleAtFixedRate(new CallableWrapperRunnable(task), period);
 	}
 
 	@Override
@@ -353,6 +374,11 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 	}
 
 	@Override
+	public ScheduledFuture<?> scheduleWithFixedDelay(Callable<?> task, Date startTime, long delay) {
+		return scheduleWithFixedDelay(new CallableWrapperRunnable(task), startTime, delay);
+	}
+
+	@Override
 	public ScheduledFuture<?> scheduleWithFixedDelay(Runnable task, long delay) {
 		ScheduledExecutorService executor = getScheduledExecutor();
 		try {
@@ -361,6 +387,11 @@ public class ThreadPoolTaskScheduler extends ExecutorConfigurationSupport
 		catch (RejectedExecutionException ex) {
 			throw new TaskRejectedException("Executor [" + executor + "] did not accept task: " + task, ex);
 		}
+	}
+
+	@Override
+	public ScheduledFuture<?> scheduleWithFixedDelay(Callable<?> task, long delay) {
+		return scheduleWithFixedDelay(new CallableWrapperRunnable(task), delay);
 	}
 
 
