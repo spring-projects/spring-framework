@@ -41,6 +41,12 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	}
 
 	@Override
+	@Cacheable("testCache")
+	public Long cacheNull(Object arg1) {
+		return null;
+	}
+
+	@Override
 	@CacheEvict("testCache")
 	public void invalidate(Object arg1) {
 	}

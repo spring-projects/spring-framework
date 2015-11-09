@@ -41,6 +41,11 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 	}
 
 	@Override
+	public Object cacheNull(Object arg1) {
+		return null;
+	}
+
+	@Override
 	public Object conditional(int field) {
 		return null;
 	}
