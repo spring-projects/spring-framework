@@ -51,6 +51,10 @@ public abstract class ReflectionUtils {
 	 */
 	private static final String CGLIB_RENAMED_METHOD_PREFIX = "CGLIB$";
 
+	private static final Method[] NO_METHODS = {};
+
+	private static final Field[] NO_FIELDS = {};
+
 	/**
 	 * Cache for {@link Class#getDeclaredMethods()} plus equivalent default methods
 	 * from Java 8 based interfaces, allowing for fast iteration.
@@ -617,7 +621,7 @@ public abstract class ReflectionUtils {
 			else {
 				result = declaredMethods;
 			}
-			declaredMethodsCache.put(clazz, result);
+			declaredMethodsCache.put(clazz, (result.length == 0 ? NO_METHODS : result));
 		}
 		return result;
 	}
@@ -705,7 +709,7 @@ public abstract class ReflectionUtils {
 		Field[] result = declaredFieldsCache.get(clazz);
 		if (result == null) {
 			result = clazz.getDeclaredFields();
-			declaredFieldsCache.put(clazz, result);
+			declaredFieldsCache.put(clazz, (result.length == 0 ? NO_FIELDS : result));
 		}
 		return result;
 	}
