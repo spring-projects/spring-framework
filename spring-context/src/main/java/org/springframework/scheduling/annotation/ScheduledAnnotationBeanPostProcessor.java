@@ -19,7 +19,6 @@ package org.springframework.scheduling.annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
@@ -43,6 +42,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.core.MethodIntrospector;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.scheduling.TaskScheduler;
@@ -54,7 +54,6 @@ import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
 import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.util.ReflectionUtils.MethodCallback;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 
@@ -236,17 +235,15 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 	public Object postProcessAfterInitialization(final Object bean, String beanName) {
 		Class<?> targetClass = AopUtils.getTargetClass(bean);
 		if (!this.nonAnnotatedClasses.contains(targetClass)) {
-			final Set<Method> annotatedMethods = new LinkedHashSet<Method>(1);
-			ReflectionUtils.doWithMethods(targetClass, new MethodCallback() {
-				@Override
-				public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
-					for (Scheduled scheduled :
-							AnnotationUtils.getRepeatableAnnotations(method, Scheduled.class, Schedules.class)) {
-						processScheduled(scheduled, method, bean);
-						annotatedMethods.add(method);
-					}
-				}
-			});
+			Map<Method, Set<Scheduled>> annotatedMethods = MethodIntrospector.selectMethods(targetClass,
+					new MethodIntrospector.MetadataLookup<Set<Scheduled>>() {
+						@Override
+						public Set<Scheduled> inspect(Method method) {
+							Set<Scheduled> scheduledMethods =
+									AnnotationUtils.getRepeatableAnnotations(method, Scheduled.class, Schedules.class);
+							return (!scheduledMethods.isEmpty() ? scheduledMethods : null);
+						}
+					});
 			if (annotatedMethods.isEmpty()) {
 				this.nonAnnotatedClasses.add(targetClass);
 				if (logger.isTraceEnabled()) {
@@ -255,6 +252,12 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 			}
 			else {
 				// Non-empty set of methods
+				for (Map.Entry<Method, Set<Scheduled>> entry : annotatedMethods.entrySet()) {
+					Method method = entry.getKey();
+					for (Scheduled scheduled : entry.getValue()) {
+						processScheduled(scheduled, method, bean);
+					}
+				}
 				if (logger.isDebugEnabled()) {
 					logger.debug(annotatedMethods.size() + " @Scheduled methods processed on bean '" + beanName +
 							"': " + annotatedMethods);
@@ -285,7 +288,7 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 							"@Scheduled method '%s' found on bean target class '%s' but not " +
 							"found in any interface(s) for a dynamic proxy. Either pull the " +
 							"method up to a declared interface or switch to subclass (CGLIB) " +
-							"proxies by setting proxy-target-class/proxyTargetClass to 'true'",
+							"proxies by setting proxy-target-class/proxyTargetClass to 'true'.",
 							method.getName(), method.getDeclaringClass().getSimpleName()));
 				}
 			}

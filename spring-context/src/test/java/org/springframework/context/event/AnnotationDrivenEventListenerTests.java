@@ -61,6 +61,7 @@ import static org.junit.Assert.*;
 
 /**
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  */
 public class AnnotationDrivenEventListenerTests {
 
@@ -230,10 +231,24 @@ public class AnnotationDrivenEventListenerTests {
 	}
 
 	@Test
-	public void eventListenerWorksWithInterfaceProxy() throws Exception {
-		load(ProxyTestBean.class);
+	public void eventListenerWorksWithSimpleInterfaceProxy() throws Exception {
+		load(ScopedProxyTestBean.class);
 
 		SimpleService proxy = this.context.getBean(SimpleService.class);
+		assertTrue("bean should be a proxy", proxy instanceof Advised);
+		this.eventCollector.assertNoEventReceived(proxy.getId());
+
+		TestEvent event = new TestEvent();
+		this.context.publishEvent(event);
+		this.eventCollector.assertEvent(proxy.getId(), event);
+		this.eventCollector.assertTotalEventsCount(1);
+	}
+
+	@Test
+	public void eventListenerWorksWithAnnotatedInterfaceProxy() throws Exception {
+		load(AnnotatedProxyTestBean.class);
+
+		AnnotatedSimpleService proxy = this.context.getBean(AnnotatedSimpleService.class);
 		assertTrue("bean should be a proxy", proxy instanceof Advised);
 		this.eventCollector.assertNoEventReceived(proxy.getId());
 
@@ -260,13 +275,43 @@ public class AnnotationDrivenEventListenerTests {
 	@Test
 	public void asyncProcessingApplied() throws InterruptedException {
 		loadAsync(AsyncEventListener.class);
+
 		String threadName = Thread.currentThread().getName();
 		AnotherTestEvent event = new AnotherTestEvent(this, threadName);
 		AsyncEventListener listener = this.context.getBean(AsyncEventListener.class);
 		this.eventCollector.assertNoEventReceived(listener);
 
 		this.context.publishEvent(event);
+		countDownLatch.await(2, TimeUnit.SECONDS);
+		this.eventCollector.assertEvent(listener, event);
+		this.eventCollector.assertTotalEventsCount(1);
+	}
 
+	@Test
+	public void asyncProcessingAppliedWithInterfaceProxy() throws InterruptedException {
+		doLoad(AsyncConfigurationWithInterfaces.class, SimpleProxyTestBean.class);
+
+		String threadName = Thread.currentThread().getName();
+		AnotherTestEvent event = new AnotherTestEvent(this, threadName);
+		SimpleService listener = this.context.getBean(SimpleService.class);
+		this.eventCollector.assertNoEventReceived(listener);
+
+		this.context.publishEvent(event);
+		countDownLatch.await(2, TimeUnit.SECONDS);
+		this.eventCollector.assertEvent(listener, event);
+		this.eventCollector.assertTotalEventsCount(1);
+	}
+
+	@Test
+	public void asyncProcessingAppliedWithScopedProxy() throws InterruptedException {
+		doLoad(AsyncConfigurationWithInterfaces.class, ScopedProxyTestBean.class);
+
+		String threadName = Thread.currentThread().getName();
+		AnotherTestEvent event = new AnotherTestEvent(this, threadName);
+		SimpleService listener = this.context.getBean(SimpleService.class);
+		this.eventCollector.assertNoEventReceived(listener);
+
+		this.context.publishEvent(event);
 		countDownLatch.await(2, TimeUnit.SECONDS);
 		this.eventCollector.assertEvent(listener, event);
 		this.eventCollector.assertTotalEventsCount(1);
@@ -443,7 +488,6 @@ public class AnnotationDrivenEventListenerTests {
 		public CountDownLatch testCountDownLatch() {
 			return new CountDownLatch(1);
 		}
-
 	}
 
 
@@ -530,7 +574,6 @@ public class AnnotationDrivenEventListenerTests {
 			}
 			return event.content;
 		}
-
 	}
 
 
@@ -560,13 +603,6 @@ public class AnnotationDrivenEventListenerTests {
 	}
 
 
-	@Configuration
-	@Import(BasicConfiguration.class)
-	@EnableAsync(proxyTargetClass = true)
-	static class AsyncConfiguration {
-	}
-
-
 	@Component
 	static class AsyncEventListener extends AbstractTestEventListener {
 
@@ -583,17 +619,89 @@ public class AnnotationDrivenEventListenerTests {
 	}
 
 
+	@Configuration
+	@Import(BasicConfiguration.class)
+	@EnableAsync(proxyTargetClass = true)
+	static class AsyncConfiguration {
+	}
+
+
+	@Configuration
+	@Import(BasicConfiguration.class)
+	@EnableAsync(proxyTargetClass = false)
+	static class AsyncConfigurationWithInterfaces {
+	}
+
+
 	interface SimpleService extends Identifiable {
 
-		@EventListener
 		void handleIt(TestEvent event);
 
+		void handleAsync(AnotherTestEvent event);
+	}
+
+
+	@Component
+	static class SimpleProxyTestBean extends AbstractIdentifiable implements SimpleService {
+
+		@Autowired
+		private EventCollector eventCollector;
+
+		@Autowired
+		private CountDownLatch countDownLatch;
+
+		@EventListener
+		@Override
+		public void handleIt(TestEvent event) {
+			eventCollector.addEvent(this, event);
+		}
+
+		@EventListener
+		@Async
+		public void handleAsync(AnotherTestEvent event) {
+			assertTrue(!Thread.currentThread().getName().equals(event.content));
+			eventCollector.addEvent(this, event);
+			countDownLatch.countDown();
+		}
 	}
 
 
 	@Component
 	@Scope(proxyMode = ScopedProxyMode.INTERFACES)
-	static class ProxyTestBean extends AbstractIdentifiable implements SimpleService {
+	static class ScopedProxyTestBean extends AbstractIdentifiable implements SimpleService {
+
+		@Autowired
+		private EventCollector eventCollector;
+
+		@Autowired
+		private CountDownLatch countDownLatch;
+
+		@EventListener
+		@Override
+		public void handleIt(TestEvent event) {
+			eventCollector.addEvent(this, event);
+		}
+
+		@EventListener
+		@Async
+		public void handleAsync(AnotherTestEvent event) {
+			assertTrue(!Thread.currentThread().getName().equals(event.content));
+			eventCollector.addEvent(this, event);
+			countDownLatch.countDown();
+		}
+	}
+
+
+	interface AnnotatedSimpleService extends Identifiable {
+
+		@EventListener
+		void handleIt(TestEvent event);
+	}
+
+
+	@Component
+	@Scope(proxyMode = ScopedProxyMode.INTERFACES)
+	static class AnnotatedProxyTestBean extends AbstractIdentifiable implements AnnotatedSimpleService {
 
 		@Autowired
 		private EventCollector eventCollector;
@@ -645,7 +753,6 @@ public class AnnotationDrivenEventListenerTests {
 		public void handleTimestamp(Long timestamp) {
 			collectEvent(timestamp);
 		}
-
 	}
 
 

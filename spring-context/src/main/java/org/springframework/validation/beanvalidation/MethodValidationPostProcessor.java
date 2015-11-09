@@ -23,7 +23,7 @@ import javax.validation.ValidatorFactory;
 import org.aopalliance.aop.Advice;
 
 import org.springframework.aop.Pointcut;
-import org.springframework.aop.framework.AbstractAdvisingBeanPostProcessor;
+import org.springframework.aop.framework.autoproxy.AbstractBeanFactoryAwareAdvisingPostProcessor;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.annotation.AnnotationMatchingPointcut;
 import org.springframework.beans.factory.InitializingBean;
@@ -58,7 +58,8 @@ import org.springframework.validation.annotation.Validated;
  * @see org.hibernate.validator.method.MethodValidator
  */
 @SuppressWarnings("serial")
-public class MethodValidationPostProcessor extends AbstractAdvisingBeanPostProcessor implements InitializingBean {
+public class MethodValidationPostProcessor extends AbstractBeanFactoryAwareAdvisingPostProcessor
+		implements InitializingBean {
 
 	private Class<? extends Annotation> validatedAnnotationType = Validated.class;
 
