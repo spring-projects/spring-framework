@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.messaging.handler.HandlerMethodSelector;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 import org.springframework.messaging.handler.invocation.AbstractExceptionHandlerMethodResolver;
 import org.springframework.util.ReflectionUtils.MethodFilter;
@@ -49,32 +49,39 @@ public class AnnotationExceptionHandlerMethodResolver extends AbstractExceptionH
 	}
 
 	private static Map<Class<? extends Throwable>, Method> initExceptionMappings(Class<?> handlerType) {
+		Map<Method, MessageExceptionHandler> methods = MethodIntrospector.selectMethods(handlerType,
+				new MethodIntrospector.MetadataLookup<MessageExceptionHandler>() {
+					@Override
+					public MessageExceptionHandler inspect(Method method) {
+						return AnnotationUtils.findAnnotation(method, MessageExceptionHandler.class);
+					}
+				});
+
 		Map<Class<? extends Throwable>, Method> result = new HashMap<Class<? extends Throwable>, Method>();
-		for (Method method : HandlerMethodSelector.selectMethods(handlerType, EXCEPTION_HANDLER_METHOD_FILTER)) {
-			for (Class<? extends Throwable> exceptionType : getMappedExceptions(method)) {
+		for (Map.Entry<Method, MessageExceptionHandler> entry : methods.entrySet()) {
+			Method method = entry.getKey();
+			List<Class<? extends Throwable>> exceptionTypes = new ArrayList<Class<? extends Throwable>>();
+			exceptionTypes.addAll(Arrays.asList(entry.getValue().value()));
+			if (exceptionTypes.isEmpty()) {
+				exceptionTypes.addAll(getExceptionsFromMethodSignature(method));
+			}
+			for (Class<? extends Throwable> exceptionType : exceptionTypes) {
 				Method oldMethod = result.put(exceptionType, method);
 				if (oldMethod != null && !oldMethod.equals(method)) {
-					throw new IllegalStateException(
-							"Ambiguous @ExceptionHandler method mapped for [" + exceptionType + "]: {" +
-									oldMethod + ", " + method + "}.");
+					throw new IllegalStateException("Ambiguous @ExceptionHandler method mapped for [" +
+							exceptionType + "]: {" + oldMethod + ", " + method + "}");
 				}
 			}
 		}
 		return result;
 	}
 
-	private static List<Class<? extends Throwable>> getMappedExceptions(Method method) {
-		List<Class<? extends Throwable>> result = new ArrayList<Class<? extends Throwable>>();
-		MessageExceptionHandler annot = AnnotationUtils.findAnnotation(method, MessageExceptionHandler.class);
-		result.addAll(Arrays.asList(annot.value()));
-		if (result.isEmpty()) {
-			result.addAll(getExceptionsFromMethodSignature(method));
-		}
-		return result;
-	}
 
-
-	/** A filter for selecting annotated exception handling methods. */
+	/**
+	 * A filter for selecting annotated exception handling methods.
+	 * @deprecated as of Spring 4.2.3, since it isn't used anymore
+	 */
+	@Deprecated
 	public final static MethodFilter EXCEPTION_HANDLER_METHOD_FILTER = new MethodFilter() {
 
 		@Override

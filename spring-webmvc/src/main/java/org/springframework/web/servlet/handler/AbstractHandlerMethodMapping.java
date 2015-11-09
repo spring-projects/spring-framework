@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,15 +33,14 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.MethodIntrospector;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.method.HandlerMethodSelector;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
@@ -197,29 +195,23 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @param handler the bean name of a handler or a handler instance
 	 */
 	protected void detectHandlerMethods(final Object handler) {
-		Class<?> handlerType =
-				(handler instanceof String ? getApplicationContext().getType((String) handler) : handler.getClass());
-
-		// Avoid repeated calls to getMappingForMethod which would rebuild RequestMappingInfo instances
-		final Map<Method, T> mappings = new IdentityHashMap<Method, T>();
+		Class<?> handlerType = (handler instanceof String ?
+				getApplicationContext().getType((String) handler) : handler.getClass());
 		final Class<?> userType = ClassUtils.getUserClass(handlerType);
 
-		Set<Method> methods = HandlerMethodSelector.selectMethods(userType, new MethodFilter() {
-			@Override
-			public boolean matches(Method method) {
-				T mapping = getMappingForMethod(method, userType);
-				if (mapping != null) {
-					mappings.put(method, mapping);
-					return true;
-				}
-				else {
-					return false;
-				}
-			}
-		});
+		Map<Method, T> methods = MethodIntrospector.selectMethods(userType,
+				new MethodIntrospector.MetadataLookup<T>() {
+					@Override
+					public T inspect(Method method) {
+						return getMappingForMethod(method, userType);
+					}
+				});
 
-		for (Method method : methods) {
-			registerHandlerMethod(handler, method, mappings.get(method));
+		if (logger.isDebugEnabled()) {
+			logger.debug(methods.size() + " request handler methods found on " + userType + ": " + methods);
+		}
+		for (Map.Entry<Method, T> entry : methods.entrySet()) {
+			registerHandlerMethod(handler, entry.getKey(), entry.getValue());
 		}
 	}
 
@@ -241,12 +233,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @param mapping the mapping conditions associated with the handler method
 	 * @throws IllegalStateException if another method was already registered
 	 * under the same mapping
-	 * @deprecated as of 4.2. You can now invoke the public methods
-	 * {@link #registerMapping(Object, Object, Method)} and
-	 * {@link #unregisterMapping(Object)} during initialization or at runtime,
-	 * i.e. after initialization is complete.
 	 */
-	@Deprecated
 	protected void registerHandlerMethod(Object handler, Method method, T mapping) {
 		this.mappingRegistry.register(mapping, handler, method);
 	}
@@ -443,7 +430,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			}
 			else {
 				CorsConfiguration corsConfigFromMethod = this.mappingRegistry.getCorsConfiguration(handlerMethod);
-				corsConfig = (corsConfig == null ? corsConfigFromMethod : corsConfig.combine(corsConfigFromMethod));
+				corsConfig = (corsConfig != null ? corsConfig.combine(corsConfigFromMethod) : corsConfigFromMethod);
 			}
 		}
 		return corsConfig;
@@ -470,9 +457,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		private final Map<HandlerMethod, CorsConfiguration> corsLookup =
 				new ConcurrentHashMap<HandlerMethod, CorsConfiguration>();
 
-
 		private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-
 
 		/**
 		 * Return all mappings and handler methods. Not thread-safe.
@@ -521,7 +506,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 
 		public void register(T mapping, Object handler, Method method) {
-
 			this.readWriteLock.writeLock().lock();
 			try {
 				HandlerMethod handlerMethod = createHandlerMethod(handler, method);
@@ -560,8 +544,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			if (handlerMethod != null && !handlerMethod.equals(newHandlerMethod)) {
 				throw new IllegalStateException(
 						"Ambiguous mapping. Cannot map '" +	newHandlerMethod.getBean() + "' method \n" +
-								newHandlerMethod + "\nto " +	mapping + ": There is already '" +
-								handlerMethod.getBean() + "' bean method\n" + handlerMethod + " mapped.");
+						newHandlerMethod + "\nto " + mapping + ": There is already '" +
+						handlerMethod.getBean() + "' bean method\n" + handlerMethod + " mapped.");
 			}
 		}
 
@@ -576,9 +560,10 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		}
 
 		private void addMappingName(String name, HandlerMethod handlerMethod) {
-
-			List<HandlerMethod> oldList = this.nameLookup.containsKey(name) ?
-					this.nameLookup.get(name) : Collections.<HandlerMethod>emptyList();
+			List<HandlerMethod> oldList = this.nameLookup.get(name);
+			if (oldList == null) {
+				oldList = Collections.<HandlerMethod>emptyList();
+			}
 
 			for (HandlerMethod current : oldList) {
 				if (handlerMethod.equals(current)) {
@@ -587,7 +572,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			}
 
 			if (logger.isTraceEnabled()) {
-				logger.trace("Mapping name=" + name);
+				logger.trace("Mapping name '" + name + "'");
 			}
 
 			List<HandlerMethod> newList = new ArrayList<HandlerMethod>(oldList.size() + 1);
@@ -597,7 +582,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 			if (newList.size() > 1) {
 				if (logger.isTraceEnabled()) {
-					logger.trace("Mapping name clash for handlerMethods=" + newList +
+					logger.trace("Mapping name clash for handlerMethods " + newList +
 							". Consider assigning explicit names.");
 				}
 			}
@@ -654,8 +639,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			}
 			this.nameLookup.put(name, newList);
 		}
-
 	}
+
 
 	private static class MappingRegistration<T> {
 
@@ -667,19 +652,14 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 		private final String mappingName;
 
-
-		public MappingRegistration(T mapping, HandlerMethod handlerMethod,
-				List<String> directUrls, String mappingName) {
-
+		public MappingRegistration(T mapping, HandlerMethod handlerMethod, List<String> directUrls, String mappingName) {
 			Assert.notNull(mapping);
 			Assert.notNull(handlerMethod);
-
 			this.mapping = mapping;
 			this.handlerMethod = handlerMethod;
 			this.directUrls = (directUrls != null ? directUrls : Collections.<String>emptyList());
 			this.mappingName = mappingName;
 		}
-
 
 		public T getMapping() {
 			return this.mapping;

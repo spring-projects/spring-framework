@@ -34,20 +34,20 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.MethodParameter;
+import org.springframework.core.MethodIntrospector;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.HandlerMethod;
-import org.springframework.messaging.handler.HandlerMethodSelector;
 import org.springframework.messaging.handler.MessagingAdviceBean;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
@@ -60,6 +60,7 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
  * exceptions raised during message handling.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.0
  * @param <T> the type of the Object that contains information mapping a
  * {@link org.springframework.messaging.handler.HandlerMethod} to incoming messages
@@ -250,22 +251,24 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * so register it with the extracted mapping information.
 	 * @param handler the handler to check, either an instance of a Spring bean name
 	 */
-	protected final void detectHandlerMethods(Object handler) {
+	protected final void detectHandlerMethods(final Object handler) {
 		Class<?> handlerType = (handler instanceof String ?
 				this.applicationContext.getType((String) handler) : handler.getClass());
-
 		final Class<?> userType = ClassUtils.getUserClass(handlerType);
 
-		Set<Method> methods = HandlerMethodSelector.selectMethods(userType, new ReflectionUtils.MethodFilter() {
-			@Override
-			public boolean matches(Method method) {
-				return getMappingForMethod(method, userType) != null;
-			}
-		});
+		Map<Method, T> methods = MethodIntrospector.selectMethods(userType,
+				new MethodIntrospector.MetadataLookup<T>() {
+					@Override
+					public T inspect(Method method) {
+						return getMappingForMethod(method, userType);
+					}
+				});
 
-		for (Method method : methods) {
-			T mapping = getMappingForMethod(method, userType);
-			registerHandlerMethod(handler, method, mapping);
+		if (logger.isDebugEnabled()) {
+			logger.debug(methods.size() + " message handler methods found on " + userType + ": " + methods);
+		}
+		for (Map.Entry<Method, T> entry : methods.entrySet()) {
+			registerHandlerMethod(handler, entry.getKey(), entry.getValue());
 		}
 	}
 
@@ -277,7 +280,6 @@ public abstract class AbstractMethodMessageHandler<T>
 	 */
 	protected abstract T getMappingForMethod(Method method, Class<?> handlerType);
 
-
 	/**
 	 * Register a handler method and its unique mapping.
 	 * @param handler the bean name of the handler or the handler instance
@@ -287,6 +289,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * under the same mapping
 	 */
 	protected void registerHandlerMethod(Object handler, Method method, T mapping) {
+		Assert.notNull(mapping, "Mapping must bot be null");
 		HandlerMethod newHandlerMethod = createHandlerMethod(handler, method);
 		HandlerMethod oldHandlerMethod = this.handlerMethods.get(mapping);
 
