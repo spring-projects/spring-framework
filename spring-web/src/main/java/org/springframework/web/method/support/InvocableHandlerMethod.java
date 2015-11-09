@@ -256,7 +256,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		Class<?> targetBeanClass = targetBean.getClass();
 		if (!methodDeclaringClass.isAssignableFrom(targetBeanClass)) {
 			String msg = "The mapped controller method class '" + methodDeclaringClass.getName() +
-					"' is not an instance of the actual controller bean instance '" +
+					"' is not an instance of the actual controller bean class '" +
 					targetBeanClass.getName() + "'. If the controller requires proxying " +
 					"(e.g. due to @Transactional), please use class-based proxying.";
 			throw new IllegalStateException(getInvocationErrorMessage(msg, args));
@@ -266,7 +266,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	private String getInvocationErrorMessage(String message, Object[] resolvedArgs) {
 		StringBuilder sb = new StringBuilder(getDetailedErrorMessage(message));
 		sb.append("Resolved arguments: \n");
-		for (int i=0; i < resolvedArgs.length; i++) {
+		for (int i = 0; i < resolvedArgs.length; i++) {
 			sb.append("[").append(i).append("] ");
 			if (resolvedArgs[i] == null) {
 				sb.append("[null] \n");

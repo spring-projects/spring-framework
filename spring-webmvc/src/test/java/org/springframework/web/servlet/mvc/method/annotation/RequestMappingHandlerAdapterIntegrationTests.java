@@ -93,7 +93,6 @@ import static org.junit.Assert.assertTrue;
  * specific argument or return value type.
  *
  * @author Rossen Stoyanchev
- *
  * @see HandlerMethodAnnotationDetectionTests
  * @see ServletAnnotationControllerHandlerMethodTests
  */
@@ -143,7 +142,6 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 
 	@Test
 	public void handle() throws Exception {
-
 		Class<?>[] parameterTypes = new Class<?>[] { int.class, String.class, String.class, String.class, Map.class,
 				Date.class, Map.class, String.class, String.class, TestBean.class, Errors.class, TestBean.class,
 				Color.class, HttpServletRequest.class, HttpServletResponse.class, User.class, OtherUser.class,
@@ -218,7 +216,6 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 
 	@Test
 	public void handleRequestBody() throws Exception {
-
 		Class<?>[] parameterTypes = new Class<?>[] { byte[].class };
 
 		request.setMethod("POST");
@@ -236,7 +233,6 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 
 	@Test
 	public void handleAndValidateRequestBody() throws Exception {
-
 		Class<?>[] parameterTypes = new Class<?>[] { TestBean.class, Errors.class };
 
 		request.addHeader("Content-Type", "text/plain; charset=utf-8");
@@ -253,7 +249,6 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 
 	@Test
 	public void handleHttpEntity() throws Exception {
-
 		Class<?>[] parameterTypes = new Class<?>[] { HttpEntity.class };
 
 		request.addHeader("Content-Type", "text/plain; charset=utf-8");
@@ -306,8 +301,9 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		return new InvocableHandlerMethod(handler, method);
 	}
 
+
 	@SuppressWarnings("unused")
-	@SessionAttributes(types=TestBean.class)
+	@SessionAttributes(types = TestBean.class)
 	private static class Handler {
 
 		@InitBinder("dateParam")
@@ -398,7 +394,9 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		}
 	}
 
+
 	private static class StubValidator implements Validator {
+
 		@Override
 		public boolean supports(Class<?> clazz) {
 			return true;
@@ -410,21 +408,27 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		}
 	}
 
+
 	private static class ColorArgumentResolver implements WebArgumentResolver {
+
 		@Override
 		public Object resolveArgument(MethodParameter methodParameter, NativeWebRequest webRequest) throws Exception {
 			return new Color(0);
 		}
 	}
 
+
 	private static class User implements Principal {
+
 		@Override
 		public String getName() {
 			return "user";
 		}
 	}
 
+
 	private static class OtherUser implements Principal {
+
 		@Override
 		public String getName() {
 			return "other user";

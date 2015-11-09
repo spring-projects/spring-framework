@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,10 +32,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.core.MethodIntrospector;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.HandlerMethod;
-import org.springframework.messaging.handler.HandlerMethodSelector;
 import org.springframework.messaging.handler.annotation.support.MessageMethodArgumentResolver;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.AntPathMatcher;
@@ -264,6 +264,7 @@ public class MethodMessageHandlerTests {
 		}
 	}
 
+
 	private static class TestExceptionHandlerMethodResolver extends AbstractExceptionHandlerMethodResolver {
 
 		public TestExceptionHandlerMethodResolver(Class<?> handlerType) {
@@ -272,7 +273,7 @@ public class MethodMessageHandlerTests {
 
 		private static Map<Class<? extends Throwable>, Method> initExceptionMappings(Class<?> handlerType) {
 			Map<Class<? extends Throwable>, Method> result = new HashMap<Class<? extends Throwable>, Method>();
-			for (Method method : HandlerMethodSelector.selectMethods(handlerType, EXCEPTION_HANDLER_METHOD_FILTER)) {
+			for (Method method : MethodIntrospector.selectMethods(handlerType, EXCEPTION_HANDLER_METHOD_FILTER)) {
 				for(Class<? extends Throwable> exception : getExceptionsFromMethodSignature(method)) {
 					result.put(exception, method);
 				}
@@ -281,13 +282,11 @@ public class MethodMessageHandlerTests {
 		}
 
 		public final static MethodFilter EXCEPTION_HANDLER_METHOD_FILTER = new MethodFilter() {
-
 			@Override
 			public boolean matches(Method method) {
 				return method.getName().contains("Exception");
 			}
 		};
-
 	}
 
 }

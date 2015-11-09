@@ -391,12 +391,10 @@ public class AnnotatedElementUtils {
 	 * the result back into an annotation of the specified {@code annotationType}.
 	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both
 	 * within a single annotation and within the annotation hierarchy.
-	 * <p>This method delegates to {@link #findMergedAnnotation(AnnotatedElement, String)}.
 	 * @param element the annotated element
 	 * @param annotationType the annotation type to find
 	 * @return the merged, synthesized {@code Annotation}, or {@code null} if not found
 	 * @since 4.2
-	 * @see #findMergedAnnotation(AnnotatedElement, String)
 	 * @see #findMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
 	 * @see #getMergedAnnotationAttributes(AnnotatedElement, Class)
 	 */
