@@ -402,7 +402,9 @@ public class AnnotatedElementUtils {
 	 */
 	public static <A extends Annotation> A findMergedAnnotation(AnnotatedElement element, Class<A> annotationType) {
 		Assert.notNull(annotationType, "annotationType must not be null");
-		return findMergedAnnotation(element, annotationType.getName());
+		AnnotationAttributes attributes = findMergedAnnotationAttributes(element, annotationType, false, false);
+		return (attributes != null ?
+				AnnotationUtils.synthesizeAnnotation(attributes, annotationType, element) : null);
 	}
 
 	/**
@@ -423,7 +425,9 @@ public class AnnotatedElementUtils {
 	 * @see #findMergedAnnotation(AnnotatedElement, Class)
 	 * @see #findMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
 	 * @see AnnotationUtils#synthesizeAnnotation(Map, Class, AnnotatedElement)
+	 * @deprecated As of Spring Framework 4.2.3, use {@link #findMergedAnnotation(AnnotatedElement, Class)} instead.
 	 */
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public static <A extends Annotation> A findMergedAnnotation(AnnotatedElement element, String annotationName) {
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(element, annotationName, false, false);
@@ -459,13 +463,11 @@ public class AnnotatedElementUtils {
 	 * @since 4.2
 	 * @see #findMergedAnnotation(AnnotatedElement, Class)
 	 * @see #getMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
-	 * @deprecated as of 4.2.3; use {@link #findMergedAnnotation(AnnotatedElement, Class)} instead
 	 */
-	@Deprecated
 	public static AnnotationAttributes findMergedAnnotationAttributes(AnnotatedElement element,
 			Class<? extends Annotation> annotationType, boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
 
-		AnnotationAttributes attributes = searchWithFindSemantics(element, annotationType, null,
+		AnnotationAttributes attributes = searchWithFindSemantics(element, annotationType, annotationType.getName(),
 				new MergedAnnotationAttributesProcessor(annotationType, null, classValuesAsString, nestedAnnotationsAsMap));
 		AnnotationUtils.postProcessAnnotationAttributes(element, attributes, classValuesAsString, nestedAnnotationsAsMap);
 		return attributes;
