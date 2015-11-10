@@ -66,6 +66,7 @@ import org.springframework.context.expression.StandardBeanExpressionResolver;
 import org.springframework.context.weaving.LoadTimeWeaverAware;
 import org.springframework.context.weaving.LoadTimeWeaverAwareProcessor;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.SpringProperties;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
@@ -145,6 +146,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see org.springframework.context.event.SimpleApplicationEventMulticaster
 	 */
 	public static final String APPLICATION_EVENT_MULTICASTER_BEAN_NAME = "applicationEventMulticaster";
+
+	/**
+	 * System property that instructs Spring to suppress the immediate logging bean
+	 * exceptions when a refresh fails.
+	 */
+	public static final String SUPPRESS_BEAN_EXCEPTION_LOGGING_PROPERTY_NAME = "spring.context.suppressbeanexceptionlogging";
 
 
 	static {
@@ -541,7 +548,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 
 			catch (BeansException ex) {
-				logger.warn("Exception encountered during context initialization - cancelling refresh attempt", ex);
+				if (logger.isWarnEnabled() && !SpringProperties.getFlag(SUPPRESS_BEAN_EXCEPTION_LOGGING_PROPERTY_NAME)) {
+					logger.warn("Exception encountered during context initialization - cancelling refresh attempt", ex);
+				}
 
 				// Destroy already created singletons to avoid dangling resources.
 				destroyBeans();
