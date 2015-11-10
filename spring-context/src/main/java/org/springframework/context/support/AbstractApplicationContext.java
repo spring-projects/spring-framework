@@ -1285,7 +1285,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	@Override
 	public boolean isRunning() {
-		return getLifecycleProcessor().isRunning();
+		return (this.lifecycleProcessor != null && this.lifecycleProcessor.isRunning());
 	}
 
 
