@@ -39,18 +39,19 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
  * the JDBC driver. Since we rely on the JDBC driver, this "auto-detection"
  * can only be used for databases that are known to provide accurate meta data.
  * These currently include Derby, MySQL, Microsoft SQL Server, Oracle, DB2,
- * Sybase and PostgreSQL. For any other databases you are required to declare all
- * parameters explicitly. You can of course declare all parameters explicitly even
- * if the database provides the necessary meta data. In that case your declared
- * parameters will take precedence. You can also turn off any meta data processing
- * if you want to use parameter names that do not match what is declared during
- * the stored procedure compilation.
+ * Sybase and PostgreSQL. For any other databases you are required to declare
+ * all parameters explicitly. You can of course declare all parameters
+ * explicitly even if the database provides the necessary meta data. In that
+ * case your declared parameters will take precedence. You can also turn off
+ * any metadata processing if you want to use parameter names that do not
+ * match what is declared during the stored procedure compilation.
  *
  * <p>The actual insert is being handled using Spring's
  * {@link org.springframework.jdbc.core.JdbcTemplate}.
  *
- * <p>Many of the configuration methods return the current instance of the SimpleJdbcCall
- * to provide the ability to chain multiple ones together in a "fluent" interface style.
+ * <p>Many of the configuration methods return the current instance of the
+ * SimpleJdbcCall in order to provide the ability to chain multiple ones
+ * together in a "fluent" interface style.
  *
  * @author Thomas Risberg
  * @author Stephane Nicoll
@@ -61,8 +62,8 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 public class SimpleJdbcCall extends AbstractJdbcCall implements SimpleJdbcCallOperations {
 
 	/**
-	 * Constructor that takes one parameter with the JDBC DataSource to use when creating the
-	 * JdbcTemplate.
+	 * Constructor that takes one parameter with the JDBC DataSource to use when
+	 * creating the underlying JdbcTemplate.
 	 * @param dataSource the {@code DataSource} to use
 	 * @see org.springframework.jdbc.core.JdbcTemplate#setDataSource
 	 */
