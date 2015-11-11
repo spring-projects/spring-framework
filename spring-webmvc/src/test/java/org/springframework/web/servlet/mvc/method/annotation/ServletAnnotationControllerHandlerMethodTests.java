@@ -1655,7 +1655,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		assertEquals(200, response.getStatus());
 		assertEquals("text/html", response.getContentType());
-		assertEquals("attachment;filename=f.txt", response.getHeader("Content-Disposition"));
+		assertEquals("inline;filename=f.txt", response.getHeader("Content-Disposition"));
 		assertArrayEquals(content, response.getContentAsByteArray());
 	}
 
