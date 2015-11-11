@@ -123,7 +123,9 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 
 	@Override
 	public void setContentLength(int len) {
-		this.content.resize(len);
+		if (len > this.content.size()) {
+			this.content.resize(len);
+		}
 		this.contentLength = len;
 	}
 
@@ -134,13 +136,17 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 					Integer.MAX_VALUE + "): " + len);
 		}
 		int lenInt = (int) len;
-		this.content.resize(lenInt);
+		if (lenInt > this.content.size()) {
+			this.content.resize(lenInt);
+		}
 		this.contentLength = lenInt;
 	}
 
 	@Override
 	public void setBufferSize(int size) {
-		this.content.resize(size);
+		if (size > this.content.size()) {
+			this.content.resize(size);
+		}
 	}
 
 	@Override
