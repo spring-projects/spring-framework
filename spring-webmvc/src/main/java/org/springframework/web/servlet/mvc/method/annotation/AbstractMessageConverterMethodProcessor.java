@@ -254,7 +254,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		String extInPathParams = StringUtils.getFilenameExtension(pathParams);
 
 		if (!safeExtension(servletRequest, ext) || !safeExtension(servletRequest, extInPathParams)) {
-			headers.add("Content-Disposition", "attachment;filename=f.txt");
+			headers.add("Content-Disposition", "inline;filename=f.txt");
 		}
 	}
 
