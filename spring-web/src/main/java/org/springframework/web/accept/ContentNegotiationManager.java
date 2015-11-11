@@ -100,6 +100,14 @@ public class ContentNegotiationManager implements ContentNegotiationStrategy, Me
 
 
 	/**
+	 * Return the configured content negotiation strategies.
+	 * @since 3.2.16
+	 */
+	public List<ContentNegotiationStrategy> getStrategies() {
+		return this.contentNegotiationStrategies;
+	}
+
+	/**
 	 * Add MediaTypeFileExtensionResolver instances.
 	 * <p>Note that some {@link ContentNegotiationStrategy} implementations also
 	 * implement {@link MediaTypeFileExtensionResolver} and the class constructor
