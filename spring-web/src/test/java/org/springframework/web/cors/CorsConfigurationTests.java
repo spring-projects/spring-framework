@@ -114,11 +114,16 @@ public class CorsConfigurationTests {
 		other.addAllowedHeader("header1");
 		other.addExposedHeader("header2");
 		other.addAllowedMethod(HttpMethod.PUT.name());
-		config = config.combine(other);
-		assertEquals(Arrays.asList("http://domain.com"), config.getAllowedOrigins());
-		assertEquals(Arrays.asList("header1"), config.getAllowedHeaders());
-		assertEquals(Arrays.asList("header2"), config.getExposedHeaders());
-		assertEquals(Arrays.asList(HttpMethod.PUT.name()), config.getAllowedMethods());
+		CorsConfiguration combinedConfig = config.combine(other);
+		assertEquals(Arrays.asList("http://domain.com"), combinedConfig.getAllowedOrigins());
+		assertEquals(Arrays.asList("header1"), combinedConfig.getAllowedHeaders());
+		assertEquals(Arrays.asList("header2"), combinedConfig.getExposedHeaders());
+		assertEquals(Arrays.asList(HttpMethod.PUT.name()), combinedConfig.getAllowedMethods());
+		combinedConfig = other.combine(config);
+		assertEquals(Arrays.asList("http://domain.com"), combinedConfig.getAllowedOrigins());
+		assertEquals(Arrays.asList("header1"), combinedConfig.getAllowedHeaders());
+		assertEquals(Arrays.asList("header2"), combinedConfig.getExposedHeaders());
+		assertEquals(Arrays.asList(HttpMethod.PUT.name()), combinedConfig.getAllowedMethods());
 	}
 
 	@Test

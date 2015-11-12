@@ -17,7 +17,6 @@
 package org.springframework.web.cors;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -103,7 +102,7 @@ public class CorsConfiguration {
 	}
 
 	private List<String> combine(List<String> source, List<String> other) {
-		if (other == null) {
+		if (other == null || other.contains(ALL)) {
 			return source;
 		}
 		if (source == null || source.contains(ALL)) {
