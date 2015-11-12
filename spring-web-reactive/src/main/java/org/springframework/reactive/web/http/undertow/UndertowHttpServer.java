@@ -27,44 +27,42 @@ import io.undertow.server.HttpHandler;
 /**
  * @author Marek Hawrylczak
  */
-public class UndertowHttpServer extends HttpServerSupport
-		implements InitializingBean, HttpServer {
+public class UndertowHttpServer extends HttpServerSupport implements InitializingBean, HttpServer {
 
-	private Undertow undertowServer;
+	private Undertow server;
 
 	private boolean running;
+
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		Assert.notNull(getHttpHandler());
-
-		HttpHandler handler = new RequestHandlerAdapter(getHttpHandler());
-
-		this.undertowServer = Undertow.builder()
-				.addHttpListener(getPort() != -1 ? getPort() : 8080, "localhost")
-				.setHandler(handler)
-				.build();
+		HttpHandler handler = new UndertowHttpHandlerAdapter(getHttpHandler());
+		int port = (getPort() != -1 ? getPort() : 8080);
+		this.server = Undertow.builder().addHttpListener(port, "localhost")
+				.setHandler(handler).build();
 	}
 
 	@Override
 	public void start() {
-		if (!running) {
-			this.undertowServer.start();
-			running = true;
+		if (!this.running) {
+			this.server.start();
+			this.running = true;
 		}
 
 	}
 
 	@Override
 	public void stop() {
-		if (running) {
-			this.undertowServer.stop();
-			running = false;
+		if (this.running) {
+			this.server.stop();
+			this.running = false;
 		}
 	}
 
 	@Override
 	public boolean isRunning() {
-		return running;
+		return this.running;
 	}
+
 }

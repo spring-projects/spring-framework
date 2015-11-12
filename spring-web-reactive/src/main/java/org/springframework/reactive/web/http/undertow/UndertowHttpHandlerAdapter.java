@@ -16,41 +16,48 @@
 
 package org.springframework.reactive.web.http.undertow;
 
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-
 import org.springframework.http.server.ReactiveServerHttpRequest;
 import org.springframework.http.server.ReactiveServerHttpResponse;
 import org.springframework.reactive.web.http.HttpHandler;
 import org.springframework.util.Assert;
 
 import io.undertow.server.HttpServerExchange;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
+
 /**
  * @author Marek Hawrylczak
+ * @author Rossen Stoyanchev
  */
-class RequestHandlerAdapter implements io.undertow.server.HttpHandler {
+class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandler {
 
-	private final HttpHandler httpHandler;
+	private static Log logger = LogFactory.getLog(UndertowHttpHandlerAdapter.class);
 
-	public RequestHandlerAdapter(HttpHandler httpHandler) {
-		Assert.notNull(httpHandler, "'httpHandler' is required.");
-		this.httpHandler = httpHandler;
+
+	private final HttpHandler delegate;
+
+
+	public UndertowHttpHandlerAdapter(HttpHandler delegate) {
+		Assert.notNull(delegate, "'delegate' is required.");
+		this.delegate = delegate;
 	}
+
 
 	@Override
 	public void handleRequest(HttpServerExchange exchange) throws Exception {
-		RequestBodyPublisher requestBodyPublisher = new RequestBodyPublisher(exchange);
-		ReactiveServerHttpRequest request =
-				new UndertowServerHttpRequest(exchange, requestBodyPublisher);
+		RequestBodyPublisher requestPublisher = new RequestBodyPublisher(exchange);
+		ReactiveServerHttpRequest request = new UndertowServerHttpRequest(exchange, requestPublisher);
 
-		ResponseBodySubscriber responseBodySubscriber = new ResponseBodySubscriber(exchange);
-		ReactiveServerHttpResponse response =
-				new UndertowServerHttpResponse(exchange, responseBodySubscriber);
+		ResponseBodySubscriber responseSubscriber = new ResponseBodySubscriber(exchange);
+		ReactiveServerHttpResponse response = new UndertowServerHttpResponse(exchange, responseSubscriber);
 
 		exchange.dispatch();
-		this.httpHandler.handle(request, response).subscribe(new Subscriber<Void>() {
+
+		this.delegate.handle(request, response).subscribe(new Subscriber<Void>() {
+
 			@Override
 			public void onSubscribe(Subscription subscription) {
 				subscription.request(Long.MAX_VALUE);
@@ -58,14 +65,16 @@ class RequestHandlerAdapter implements io.undertow.server.HttpHandler {
 
 			@Override
 			public void onNext(Void aVoid) {
+				// no op
 			}
 
 			@Override
-			public void onError(Throwable t) {
-				if (!exchange.isResponseStarted() &&
-						exchange.getStatusCode() < INTERNAL_SERVER_ERROR.value()) {
-
-					exchange.setStatusCode(INTERNAL_SERVER_ERROR.value());
+			public void onError(Throwable ex) {
+				if (exchange.isResponseStarted() || exchange.getStatusCode() > 500) {
+					logger.error("Error from request handling. Completing the request.", ex);
+				}
+				else {
+					exchange.setStatusCode(500);
 				}
 				exchange.endExchange();
 			}
@@ -76,4 +85,5 @@ class RequestHandlerAdapter implements io.undertow.server.HttpHandler {
 			}
 		});
 	}
+
 }

@@ -42,83 +42,66 @@ class RequestBodyPublisher implements Publisher<ByteBuffer> {
 
 	private static final AtomicLongFieldUpdater<RequestBodySubscription> DEMAND =
 			AtomicLongFieldUpdater.newUpdater(RequestBodySubscription.class, "demand");
+
+
 	private final HttpServerExchange exchange;
+
 	private Subscriber<? super ByteBuffer> subscriber;
+
 
 	public RequestBodyPublisher(HttpServerExchange exchange) {
 		Assert.notNull(exchange, "'exchange' is required.");
 		this.exchange = exchange;
 	}
 
+
 	@Override
-	public void subscribe(Subscriber<? super ByteBuffer> s) {
-		if (s == null) {
+	public void subscribe(Subscriber<? super ByteBuffer> subscriber) {
+		if (subscriber == null) {
 			throw SpecificationExceptions.spec_2_13_exception();
 		}
 		if (this.subscriber != null) {
-			s.onError(new IllegalStateException("Only one subscriber allowed"));
+			subscriber.onError(new IllegalStateException("Only one subscriber allowed"));
 		}
 
-		this.subscriber = s;
+		this.subscriber = subscriber;
 		this.subscriber.onSubscribe(new RequestBodySubscription());
 	}
 
-	private class RequestBodySubscription
-			implements Subscription, Runnable, ChannelListener<StreamSourceChannel> {
+
+	private class RequestBodySubscription implements Subscription, Runnable,
+			ChannelListener<StreamSourceChannel> {
 
 		volatile long demand;
+
 		private PooledByteBuffer pooledBuffer;
+
 		private StreamSourceChannel channel;
+
 		private boolean subscriptionClosed;
+
 		private boolean draining;
 
-		@Override
-		public void cancel() {
-			this.subscriptionClosed = true;
-			close();
-		}
 
 		@Override
 		public void request(long n) {
 			BackpressureUtils.checkRequest(n, subscriber);
-
 			if (this.subscriptionClosed) {
 				return;
 			}
-
 			BackpressureUtils.getAndAdd(DEMAND, this, n);
 			scheduleNextMessage();
 		}
 
 		private void scheduleNextMessage() {
-			exchange.dispatch(exchange.isInIoThread() ?
-					SameThreadExecutor.INSTANCE : exchange.getIoThread(), this);
+			exchange.dispatch(exchange.isInIoThread() ? SameThreadExecutor.INSTANCE :
+					exchange.getIoThread(), this);
 		}
 
-		private void doOnNext(ByteBuffer buffer) {
-			this.draining = false;
-			buffer.flip();
-			subscriber.onNext(buffer);
-		}
-
-		private void doOnComplete() {
+		@Override
+		public void cancel() {
 			this.subscriptionClosed = true;
-			try {
-				subscriber.onComplete();
-			}
-			finally {
-				close();
-			}
-		}
-
-		private void doOnError(Throwable t) {
-			this.subscriptionClosed = true;
-			try {
-				subscriber.onError(t);
-			}
-			finally {
-				close();
-			}
+			close();
 		}
 
 		private void close() {
@@ -137,7 +120,6 @@ class RequestBodyPublisher implements Publisher<ByteBuffer> {
 			if (this.subscriptionClosed || this.draining) {
 				return;
 			}
-
 			if (0 == BackpressureUtils.getAndSub(DEMAND, this, 1)) {
 				return;
 			}
@@ -152,8 +134,7 @@ class RequestBodyPublisher implements Publisher<ByteBuffer> {
 						return;
 					}
 					else {
-						throw new IllegalStateException(
-								"Another party already acquired the channel!");
+						throw new IllegalStateException("Failed to acquire channel!");
 					}
 				}
 			}
@@ -198,6 +179,32 @@ class RequestBodyPublisher implements Publisher<ByteBuffer> {
 			}
 		}
 
+		private void doOnNext(ByteBuffer buffer) {
+			this.draining = false;
+			buffer.flip();
+			subscriber.onNext(buffer);
+		}
+
+		private void doOnComplete() {
+			this.subscriptionClosed = true;
+			try {
+				subscriber.onComplete();
+			}
+			finally {
+				close();
+			}
+		}
+
+		private void doOnError(Throwable t) {
+			this.subscriptionClosed = true;
+			try {
+				subscriber.onError(t);
+			}
+			finally {
+				close();
+			}
+		}
+
 		@Override
 		public void handleEvent(StreamSourceChannel channel) {
 			if (this.subscriptionClosed) {
@@ -237,4 +244,5 @@ class RequestBodyPublisher implements Publisher<ByteBuffer> {
 			}
 		}
 	}
+
 }

@@ -16,11 +16,6 @@
 
 package org.springframework.reactive.web.http.undertow;
 
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.xnio.ChannelListeners.closingChannelExceptionHandler;
-import static org.xnio.ChannelListeners.flushingChannelListener;
-import static org.xnio.IoUtils.safeClose;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Queue;
@@ -37,30 +32,43 @@ import org.xnio.ChannelListener;
 import org.xnio.channels.StreamSinkChannel;
 import reactor.core.subscriber.BaseSubscriber;
 
+import static org.xnio.ChannelListeners.closingChannelExceptionHandler;
+import static org.xnio.ChannelListeners.flushingChannelListener;
+import static org.xnio.IoUtils.safeClose;
+
 /**
  * @author Marek Hawrylczak
+ * @author Rossen Stoyanchev
  */
 class ResponseBodySubscriber extends BaseSubscriber<ByteBuffer>
 		implements ChannelListener<StreamSinkChannel> {
 
 	private static final Log logger = LogFactory.getLog(ResponseBodySubscriber.class);
 
+
 	private final HttpServerExchange exchange;
-	private final Queue<PooledByteBuffer> buffers;
-	private final AtomicInteger writing = new AtomicInteger();
-	private final AtomicBoolean closing = new AtomicBoolean();
-	private StreamSinkChannel responseChannel;
+
 	private Subscription subscription;
+
+	private final Queue<PooledByteBuffer> buffers;
+
+	private final AtomicInteger writing = new AtomicInteger();
+
+	private final AtomicBoolean closing = new AtomicBoolean();
+
+	private StreamSinkChannel responseChannel;
+
 
 	public ResponseBodySubscriber(HttpServerExchange exchange) {
 		this.exchange = exchange;
 		this.buffers = new ConcurrentLinkedQueue<>();
 	}
 
+
 	@Override
-	public void onSubscribe(Subscription s) {
-		super.onSubscribe(s);
-		this.subscription = s;
+	public void onSubscribe(Subscription subscription) {
+		super.onSubscribe(subscription);
+		this.subscription = subscription;
 		this.subscription.request(1);
 	}
 
@@ -78,6 +86,7 @@ class ResponseBodySubscriber extends BaseSubscriber<ByteBuffer>
 			do {
 				c = this.responseChannel.write(buffer);
 			} while (buffer.hasRemaining() && c > 0);
+
 			if (buffer.hasRemaining()) {
 				this.writing.incrementAndGet();
 				enqueue(buffer);
@@ -102,13 +111,11 @@ class ResponseBodySubscriber extends BaseSubscriber<ByteBuffer>
 
 	private void enqueue(ByteBuffer src) {
 		do {
-			PooledByteBuffer pooledBuffer =
-					this.exchange.getConnection().getByteBufferPool().allocate();
-
-			ByteBuffer dst = pooledBuffer.getBuffer();
+			PooledByteBuffer buffer = this.exchange.getConnection().getByteBufferPool().allocate();
+			ByteBuffer dst = buffer.getBuffer();
 			copy(dst, src);
 			dst.flip();
-			this.buffers.add(pooledBuffer);
+			this.buffers.add(buffer);
 		} while (src.remaining() > 0);
 	}
 
@@ -128,10 +135,12 @@ class ResponseBodySubscriber extends BaseSubscriber<ByteBuffer>
 				do {
 					c = channel.write(buffer);
 				} while (buffer.hasRemaining() && c > 0);
+
 				if (!buffer.hasRemaining()) {
 					safeClose(this.buffers.remove());
 				}
 			} while (!this.buffers.isEmpty() && c > 0);
+
 			if (!this.buffers.isEmpty()) {
 				channel.resumeWrites();
 			}
@@ -152,20 +161,17 @@ class ResponseBodySubscriber extends BaseSubscriber<ByteBuffer>
 	}
 
 	@Override
-	public void onError(Throwable t) {
-		super.onError(t);
-		if (!this.exchange.isResponseStarted() &&
-				this.exchange.getStatusCode() < INTERNAL_SERVER_ERROR.value()) {
-
-			this.exchange.setStatusCode(INTERNAL_SERVER_ERROR.value());
+	public void onError(Throwable ex) {
+		super.onError(ex);
+		logger.error("ResponseBodySubscriber error", ex);
+		if (!this.exchange.isResponseStarted() && this.exchange.getStatusCode() < 500) {
+			this.exchange.setStatusCode(500);
 		}
-		logger.error("ResponseBodySubscriber error", t);
 	}
 
 	@Override
 	public void onComplete() {
 		super.onComplete();
-
 		if (this.responseChannel != null) {
 			this.closing.set(true);
 			closeIfDone();
@@ -185,10 +191,8 @@ class ResponseBodySubscriber extends BaseSubscriber<ByteBuffer>
 			this.responseChannel.shutdownWrites();
 
 			if (!this.responseChannel.flush()) {
-				this.responseChannel.getWriteSetter().set(
-						flushingChannelListener(
-								o -> safeClose(this.responseChannel),
-								closingChannelExceptionHandler()));
+				this.responseChannel.getWriteSetter().set(flushingChannelListener(
+						o -> safeClose(this.responseChannel), closingChannelExceptionHandler()));
 				this.responseChannel.resumeWrites();
 			}
 			this.responseChannel = null;

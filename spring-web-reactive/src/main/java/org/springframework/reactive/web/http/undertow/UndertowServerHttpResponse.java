@@ -23,65 +23,50 @@ import java.util.Map;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ReactiveServerHttpResponse;
+import org.springframework.util.Assert;
 
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HttpString;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
-import reactor.rx.Streams;
 
 /**
  * @author Marek Hawrylczak
+ * @author Rossen Stoyanchev
  */
 class UndertowServerHttpResponse implements ReactiveServerHttpResponse {
-	private final HttpServerExchange exchange;
-	private final HttpHeaders headers;
 
-	private final ResponseBodySubscriber responseBodySubscriber;
+	private final HttpServerExchange exchange;
+
+	private final ResponseBodySubscriber bodySubscriber;
+
+	private final HttpHeaders headers = new HttpHeaders();
 
 	private boolean headersWritten = false;
 
-	public UndertowServerHttpResponse(HttpServerExchange exchange,
-			ResponseBodySubscriber responseBodySubscriber) {
 
+	public UndertowServerHttpResponse(HttpServerExchange exchange, ResponseBodySubscriber body) {
 		this.exchange = exchange;
-		this.responseBodySubscriber = responseBodySubscriber;
-		this.headers = new HttpHeaders();
+		this.bodySubscriber = body;
 	}
+
 
 	@Override
 	public void setStatusCode(HttpStatus status) {
+		Assert.notNull(status);
 		this.exchange.setStatusCode(status.value());
 	}
 
-	@Override
-	public Publisher<Void> setBody(Publisher<ByteBuffer> contentPublisher) {
-		applyHeaders();
-		return s -> s.onSubscribe(new Subscription() {
-			@Override
-			public void request(long n) {
-				Streams.wrap(contentPublisher)
-						.finallyDo(byteBufferSignal -> {
-									if (byteBufferSignal.isOnComplete()) {
-										s.onComplete();
-									}
-									else {
-										s.onError(byteBufferSignal.getThrowable());
-									}
-								}
-						).subscribe(responseBodySubscriber);
-			}
 
-			@Override
-			public void cancel() {
-			}
-		});
+	@Override
+	public Publisher<Void> setBody(Publisher<ByteBuffer> bodyPublisher) {
+		applyHeaders();
+		return (subscriber -> bodyPublisher.subscribe(bodySubscriber));
 	}
 
 	@Override
 	public HttpHeaders getHeaders() {
-		return (this.headersWritten ?
-				HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
+		return (this.headersWritten ? HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
 	}
 
 	@Override
@@ -102,12 +87,12 @@ class UndertowServerHttpResponse implements ReactiveServerHttpResponse {
 	private void applyHeaders() {
 		if (!this.headersWritten) {
 			for (Map.Entry<String, List<String>> entry : this.headers.entrySet()) {
-				String headerName = entry.getKey();
-				this.exchange.getResponseHeaders()
-						.addAll(HttpString.tryFromString(headerName), entry.getValue());
+				HttpString headerName = HttpString.tryFromString(entry.getKey());
+				this.exchange.getResponseHeaders().addAll(headerName, entry.getValue());
 
 			}
 			this.headersWritten = true;
 		}
 	}
+
 }

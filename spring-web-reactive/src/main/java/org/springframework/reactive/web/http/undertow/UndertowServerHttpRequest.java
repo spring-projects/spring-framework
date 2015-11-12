@@ -20,37 +20,32 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.server.ReactiveServerHttpRequest;
-import org.springframework.util.StringUtils;
-
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HeaderValues;
 import org.reactivestreams.Publisher;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.server.ReactiveServerHttpRequest;
+
 /**
  * @author Marek Hawrylczak
+ * @author Rossen Stoyanchev
  */
 class UndertowServerHttpRequest implements ReactiveServerHttpRequest {
 
 	private final HttpServerExchange exchange;
 
-	private final Publisher<ByteBuffer> requestBodyPublisher;
+	private final Publisher<ByteBuffer> body;
 
 	private HttpHeaders headers;
 
-	public UndertowServerHttpRequest(HttpServerExchange exchange,
-			Publisher<ByteBuffer> requestBodyPublisher) {
 
+	public UndertowServerHttpRequest(HttpServerExchange exchange, Publisher<ByteBuffer> body) {
 		this.exchange = exchange;
-		this.requestBodyPublisher = requestBodyPublisher;
+		this.body = body;
 	}
 
-	@Override
-	public Publisher<ByteBuffer> getBody() {
-		return this.requestBodyPublisher;
-	}
 
 	@Override
 	public HttpMethod getMethod() {
@@ -60,11 +55,9 @@ class UndertowServerHttpRequest implements ReactiveServerHttpRequest {
 	@Override
 	public URI getURI() {
 		try {
-			StringBuilder uri = new StringBuilder(this.exchange.getRequestPath());
-			if (StringUtils.hasLength(this.exchange.getQueryString())) {
-				uri.append('?').append(this.exchange.getQueryString());
-			}
-			return new URI(uri.toString());
+			return new URI(this.exchange.getRequestScheme(), null, this.exchange.getHostName(),
+					this.exchange.getHostPort(), this.exchange.getRequestURI(),
+					this.exchange.getQueryString(), null);
 		}
 		catch (URISyntaxException ex) {
 			throw new IllegalStateException("Could not get URI: " + ex.getMessage(), ex);
@@ -83,4 +76,10 @@ class UndertowServerHttpRequest implements ReactiveServerHttpRequest {
 		}
 		return this.headers;
 	}
+
+	@Override
+	public Publisher<ByteBuffer> getBody() {
+		return this.body;
+	}
+
 }
