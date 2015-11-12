@@ -42,6 +42,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
@@ -214,8 +215,12 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 	@Override
 	public Class<?> predictBeanType(Class<?> beanClass, String beanName) {
-		Object cacheKey = getCacheKey(beanClass, beanName);
-		return this.proxyTypes.get(cacheKey);
+		if (this.proxyTypes.isEmpty()) {
+			return null;
+		} else {
+			Object cacheKey = getCacheKey(beanClass, beanName);
+			return this.proxyTypes.get(cacheKey);
+		}
 	}
 
 	@Override
@@ -304,7 +309,11 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	 * @return the cache key for the given class and name
 	 */
 	protected Object getCacheKey(Class<?> beanClass, String beanName) {
-		return beanClass.getName() + "_" + beanName;
+		if (beanName == null || FactoryBean.class.isAssignableFrom(beanClass)) {
+			return beanClass.getName() + "_" + beanName;
+		} else {
+			return beanName;
+		}
 	}
 
 	/**
