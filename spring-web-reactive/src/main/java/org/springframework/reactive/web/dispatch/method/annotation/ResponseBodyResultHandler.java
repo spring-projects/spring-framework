@@ -114,7 +114,7 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 			return Publishers.empty();
 		}
 
-		ResolvableType returnType = result.getType();
+		ResolvableType returnType = result.getValueType();
 
 		List<MediaType> requestedMediaTypes = getAcceptableMediaTypes(request);
 		List<MediaType> producibleMediaTypes = getProducibleMediaTypes(returnType);

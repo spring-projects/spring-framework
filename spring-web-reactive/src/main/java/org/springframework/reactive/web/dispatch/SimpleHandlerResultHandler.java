@@ -49,7 +49,7 @@ public class SimpleHandlerResultHandler implements Ordered, HandlerResultHandler
 
 	@Override
 	public boolean supports(HandlerResult result) {
-		ResolvableType type = result.getType();
+		ResolvableType type = result.getValueType();
 		return type != null && PUBLISHER_VOID.isAssignableFrom(type);
 	}
 

@@ -39,7 +39,8 @@ import org.springframework.reactive.web.http.HttpHandler;
  */
 public class HttpHandlerAdapter implements HandlerAdapter {
 
-	private static final ResolvableType PUBLISHER_VOID = ResolvableType.forClassWithGenerics(Publisher.class, Void.class);
+	private static final ResolvableType PUBLISHER_VOID = ResolvableType.forClassWithGenerics(
+			Publisher.class, Void.class);
 
 
 	@Override

@@ -17,6 +17,7 @@
 package org.springframework.reactive.web.dispatch;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.util.Assert;
 
 /**
  * Represent the result of the invocation of an handler.
@@ -29,13 +30,15 @@ public class HandlerResult {
 
 	private final Object value;
 
-	private final ResolvableType type;
+	private final ResolvableType valueType;
 
 
-	public HandlerResult(Object handler, Object value, ResolvableType type) {
+	public HandlerResult(Object handler, Object value, ResolvableType valueType) {
+		Assert.notNull(handler, "'handler' is required");
+		Assert.notNull(handler, "'valueType' is required");
 		this.handler = handler;
 		this.value = value;
-		this.type = type;
+		this.valueType = valueType;
 	}
 
 
@@ -47,7 +50,8 @@ public class HandlerResult {
 		return this.value;
 	}
 
-	public ResolvableType getType() {
-		return type;
+	public ResolvableType getValueType() {
+		return this.valueType;
 	}
+
 }
