@@ -28,6 +28,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
  * ({@link AutoProxyUtils#ORIGINAL_TARGET_CLASS_ATTRIBUTE}),
  * and participates in an externally enforced target-class mode for any given bean
  * ({@link AutoProxyUtils#PRESERVE_TARGET_CLASS_ATTRIBUTE}).
+ * This post-processor is therefore aligned with {@link AbstractAutoProxyCreator}.
  *
  * @author Juergen Hoeller
  * @since 4.2.3
