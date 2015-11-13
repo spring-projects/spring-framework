@@ -42,10 +42,11 @@ public class StringEncoder extends AbstractEncoder<String> {
 		super(new MimeType("text", "plain", DEFAULT_CHARSET));
 	}
 
+
 	@Override
 	public boolean canEncode(ResolvableType type, MimeType mimeType, Object... hints) {
-		return super.canEncode(type, mimeType, hints)
-				&& String.class.isAssignableFrom(type.getRawClass());
+		Class<?> clazz = type.getRawClass();
+		return (super.canEncode(type, mimeType, hints) && String.class.isAssignableFrom(clazz));
 	}
 
 	@Override

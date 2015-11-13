@@ -30,8 +30,15 @@ public abstract class AbstractEncoder<T> implements Encoder<T> {
 
 	private List<MimeType> supportedMimeTypes = Collections.emptyList();
 
+
 	public AbstractEncoder(MimeType... supportedMimeTypes) {
 		this.supportedMimeTypes = Arrays.asList(supportedMimeTypes);
+	}
+
+
+	@Override
+	public List<MimeType> getSupportedMimeTypes() {
+		return this.supportedMimeTypes;
 	}
 
 	@Override
@@ -42,11 +49,6 @@ public abstract class AbstractEncoder<T> implements Encoder<T> {
 			}
 		}
 		return false;
-	}
-
-	@Override
-	public List<MimeType> getSupportedMimeTypes() {
-		return this.supportedMimeTypes;
 	}
 
 }

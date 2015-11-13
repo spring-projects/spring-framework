@@ -31,6 +31,7 @@ import org.springframework.reactive.codec.encoder.JacksonJsonEncoder;
 import org.springframework.reactive.io.ByteBufferInputStream;
 import org.springframework.util.MimeType;
 
+
 /**
  * Decode from a bytes stream of JSON objects to a stream of {@code Object} (POJO).
  *
@@ -59,16 +60,20 @@ public class JacksonJsonDecoder extends AbstractDecoder<Object> {
 		this.preProcessor = preProcessor;
 	}
 
+
 	@Override
 	public Publisher<Object> decode(Publisher<ByteBuffer> inputStream, ResolvableType type,
 			MimeType mimeType, Object... hints) {
 
 		ObjectReader reader = this.mapper.readerFor(type.getRawClass());
-		Publisher<ByteBuffer> decodedStream = this.preProcessor == null ? inputStream :
-				this.preProcessor.decode(inputStream, type, mimeType, hints);
-		return Publishers.map(decodedStream, chunk -> {
+
+		if (this.preProcessor != null) {
+			inputStream = this.preProcessor.decode(inputStream, type, mimeType, hints);
+		}
+
+		return Publishers.map(inputStream, content -> {
 			try {
-				return reader.readValue(new ByteBufferInputStream(chunk));
+				return reader.readValue(new ByteBufferInputStream(content));
 			}
 			catch (IOException e) {
 				throw new CodecException("Error while reading the data", e);

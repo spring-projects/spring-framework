@@ -53,6 +53,7 @@ public class Jaxb2Encoder extends AbstractEncoder<Object> {
 		super(MediaType.APPLICATION_XML, MediaType.TEXT_XML);
 	}
 
+
 	@Override
 	public Publisher<ByteBuffer> encode(Publisher<? extends Object> messageStream, ResolvableType type,
 			MimeType mimeType, Object... hints) {

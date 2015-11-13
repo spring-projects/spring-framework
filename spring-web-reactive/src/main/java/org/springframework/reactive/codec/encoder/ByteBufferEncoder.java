@@ -29,20 +29,24 @@ import org.springframework.util.MimeTypeUtils;
  */
 public class ByteBufferEncoder extends AbstractEncoder<ByteBuffer> {
 
+
 	public ByteBufferEncoder() {
 		super(MimeTypeUtils.ALL);
 	}
 
+
 	@Override
 	public boolean canEncode(ResolvableType type, MimeType mimeType, Object... hints) {
-		return super.canEncode(type, mimeType, hints)
-				&& ByteBuffer.class.isAssignableFrom(type.getRawClass());
+		Class<?> clazz = type.getRawClass();
+		return (super.canEncode(type, mimeType, hints) && ByteBuffer.class.isAssignableFrom(clazz));
 	}
 
 	@Override
 	public Publisher<ByteBuffer> encode(Publisher<? extends ByteBuffer> inputStream, ResolvableType type,
 			MimeType mimeType, Object... hints) {
 
-		return (Publisher<ByteBuffer>)inputStream;
+		//noinspection unchecked
+		return (Publisher<ByteBuffer>) inputStream;
 	}
+
 }

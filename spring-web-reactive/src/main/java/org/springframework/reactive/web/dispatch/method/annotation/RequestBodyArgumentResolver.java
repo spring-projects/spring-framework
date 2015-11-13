@@ -39,15 +39,15 @@ import org.springframework.web.bind.annotation.RequestBody;
  */
 public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolver {
 
-	private final List<Decoder<?>> deserializers;
+	private final List<Decoder<?>> decoders;
 
 	private final ConversionService conversionService;
 
 
-	public RequestBodyArgumentResolver(List<Decoder<?>> deserializers, ConversionService service) {
-		Assert.notEmpty(deserializers, "At least one deserializer is required.");
+	public RequestBodyArgumentResolver(List<Decoder<?>> decoders, ConversionService service) {
+		Assert.notEmpty(decoders, "At least one decoder is required.");
 		Assert.notNull(service, "'conversionService' is required.");
-		this.deserializers = deserializers;
+		this.decoders = decoders;
 		this.conversionService = service;
 	}
 
@@ -61,16 +61,19 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 	public Publisher<Object> resolveArgument(MethodParameter parameter, ReactiveServerHttpRequest request) {
 		MediaType mediaType = resolveMediaType(request);
 		ResolvableType type = ResolvableType.forMethodParameter(parameter);
-		Publisher<ByteBuffer> inputStream = request.getBody();
-		Publisher<?> elementStream = inputStream;
+		Publisher<ByteBuffer> body = request.getBody();
+		Publisher<?> elementStream = body;
 		ResolvableType elementType = type.hasGenerics() ? type.getGeneric(0) : type;
-		Decoder<?> deserializer = resolveDeserializer(elementType, mediaType);
-		if (deserializer != null) {
-			elementStream = deserializer.decode(inputStream, elementType, mediaType);
+
+		Decoder<?> decoder = resolveDecoder(elementType, mediaType);
+		if (decoder != null) {
+			elementStream = decoder.decode(body, elementType, mediaType);
 		}
+
 		if (this.conversionService.canConvert(Publisher.class, type.getRawClass())) {
 			return Publishers.just(this.conversionService.convert(elementStream, type.getRawClass()));
 		}
+
 		return Publishers.map(elementStream, element -> element);
 	}
 
@@ -81,10 +84,10 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 		return ( mediaTypes.size() > 0 ? mediaTypes.get(0) : MediaType.TEXT_PLAIN);
 	}
 
-	private Decoder<?> resolveDeserializer(ResolvableType type, MediaType mediaType, Object... hints) {
-		for (Decoder<?> deserializer : this.deserializers) {
-			if (deserializer.canDecode(type, mediaType, hints)) {
-				return deserializer;
+	private Decoder<?> resolveDecoder(ResolvableType type, MediaType mediaType, Object... hints) {
+		for (Decoder<?> decoder : this.decoders) {
+			if (decoder.canDecode(type, mediaType, hints)) {
+				return decoder;
 			}
 		}
 		return null;

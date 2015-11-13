@@ -48,17 +48,17 @@ import org.springframework.web.method.HandlerMethod;
  */
 public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered {
 
-	private final List<Encoder<?>> serializers;
+	private final List<Encoder<?>> encoders;
 
 	private final ConversionService conversionService;
 
 	private int order = 0;
 
 
-	public ResponseBodyResultHandler(List<Encoder<?>> serializers, ConversionService service) {
-		Assert.notEmpty(serializers, "At least one serializers is required.");
+	public ResponseBodyResultHandler(List<Encoder<?>> encoders, ConversionService service) {
+		Assert.notEmpty(encoders, "At least one encoders is required.");
 		Assert.notNull(service, "'conversionService' is required.");
-		this.serializers = serializers;
+		this.encoders = encoders;
 		this.conversionService = service;
 	}
 
@@ -89,45 +89,46 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 			ReactiveServerHttpResponse response, HandlerResult result) {
 
 		Object value = result.getValue();
-		HandlerMethod handlerMethod = (HandlerMethod) result.getHandler();
-		MethodParameter returnType = handlerMethod.getReturnValueType(value);
-
 		if (value == null) {
 			return Publishers.empty();
 		}
 
-		ResolvableType type = ResolvableType.forMethodParameter(returnType);
-		MediaType mediaType = resolveMediaType(request);
+		HandlerMethod hm = (HandlerMethod) result.getHandler();
+		ResolvableType returnType = ResolvableType.forMethodParameter(hm.getReturnValueType(value));
+
 		Publisher<?> elementStream;
 		ResolvableType elementType;
-		if (conversionService.canConvert(type.getRawClass(), Publisher.class)) {
-			elementStream = conversionService.convert(value, Publisher.class);
-			elementType = type.getGeneric(0);
+		if (this.conversionService.canConvert(returnType.getRawClass(), Publisher.class)) {
+			elementStream = this.conversionService.convert(value, Publisher.class);
+			elementType = returnType.getGeneric(0);
 		}
 		else {
 			elementStream = Publishers.just(value);
-			elementType = type;
+			elementType = returnType;
 		}
 
-		Encoder<?> serializer = resolveSerializer(elementType, mediaType);
-
-		if (serializer != null) {
-			Publisher<ByteBuffer> outputStream = serializer.encode((Publisher)elementStream, type, mediaType);
-			if (mediaType == null || mediaType.isWildcardType() || mediaType.isWildcardSubtype()) {
-				List<MimeType> mimeTypes = serializer.getSupportedMimeTypes();
-				if (!mimeTypes.isEmpty()) {
-					MimeType mimeType = mimeTypes.get(0);
-					mediaType = new MediaType(mimeType.getType(), mimeType.getSubtype(), mimeType.getParameters());
-				}
-			}
-			if (mediaType != null && !mediaType.equals(MediaType.ALL)) {
-				response.getHeaders().setContentType(mediaType);
-			}
-			return response.setBody(outputStream);
+		MediaType mediaType = resolveMediaType(request);
+		Encoder<?> encoder = resolveEncoder(elementType, mediaType);
+		if (encoder == null) {
+			return Publishers.error(new IllegalStateException(
+					"Return value type '" + returnType +
+							"' with media type '" + mediaType + "' not supported"));
 		}
-		String returnTypeName = returnType.getParameterType().getName();
-		return Publishers.error(new IllegalStateException("Return value type '" + returnTypeName +
-				"' with media type '" + mediaType + "' not supported"));
+
+		Publisher<ByteBuffer> outputStream = encoder.encode((Publisher) elementStream, returnType, mediaType);
+		if (mediaType == null || mediaType.isWildcardType() || mediaType.isWildcardSubtype()) {
+			List<MimeType> mimeTypes = encoder.getSupportedMimeTypes();
+			if (!mimeTypes.isEmpty()) {
+				MimeType mimeType = mimeTypes.get(0);
+				mediaType = new MediaType(mimeType.getType(), mimeType.getSubtype(), mimeType.getParameters());
+			}
+		}
+
+		if (mediaType != null && !mediaType.equals(MediaType.ALL)) {
+			response.getHeaders().setContentType(mediaType);
+		}
+
+		return response.setBody(outputStream);
 	}
 
 	private MediaType resolveMediaType(ReactiveServerHttpRequest request) {
@@ -137,10 +138,10 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 		return ( mediaTypes.size() > 0 ? mediaTypes.get(0) : MediaType.TEXT_PLAIN);
 	}
 
-	private Encoder<?> resolveSerializer(ResolvableType type, MediaType mediaType, Object... hints) {
-		for (Encoder<?> serializer : this.serializers) {
-			if (serializer.canEncode(type, mediaType, hints)) {
-				return serializer;
+	private Encoder<?> resolveEncoder(ResolvableType type, MediaType mediaType, Object... hints) {
+		for (Encoder<?> encoder : this.encoders) {
+			if (encoder.canEncode(type, mediaType, hints)) {
+				return encoder;
 			}
 		}
 		return null;

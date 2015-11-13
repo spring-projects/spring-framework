@@ -26,7 +26,7 @@ import org.springframework.reactive.codec.decoder.Decoder;
 import org.springframework.util.MimeType;
 
 /**
- * Encode from a stream of {@code T} to a bytes stream.
+ * Encode a stream of Objects of type {@code T} into a stream of bytes.
  *
  * @author Sebastien Deleuze
  * @see Decoder
@@ -50,11 +50,11 @@ public interface Encoder<T> {
 	 * @param hints Additional information about how to do decode, optional.
 	 * @return the output stream
 	 */
-	Publisher<ByteBuffer> encode(Publisher<? extends T> inputStream, ResolvableType type, MimeType mimeType, Object... hints);
+	Publisher<ByteBuffer> encode(Publisher<? extends T> inputStream, ResolvableType type,
+			MimeType mimeType, Object... hints);
 
 	/**
-	 * Return the list of {@link MimeType} objects supported by this codec.
-	 * @return the list of supported mime types
+	 * Return the list of mime types this encoder supports.
 	 */
 	List<MimeType> getSupportedMimeTypes();
 

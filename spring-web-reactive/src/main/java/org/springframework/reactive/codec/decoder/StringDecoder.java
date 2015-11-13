@@ -59,7 +59,7 @@ public class StringDecoder extends AbstractDecoder<String> {
 		else {
 			 charset = DEFAULT_CHARSET;
 		}
-		return Publishers.map(inputStream, chunk -> new String(new Buffer(chunk).asBytes(), charset));
+		return Publishers.map(inputStream, content -> new String(new Buffer(content).asBytes(), charset));
 	}
 
 }

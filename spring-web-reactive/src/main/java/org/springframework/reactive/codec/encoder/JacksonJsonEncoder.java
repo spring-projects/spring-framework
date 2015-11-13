@@ -43,6 +43,7 @@ public class JacksonJsonEncoder extends AbstractEncoder<Object> {
 
 	private Encoder<ByteBuffer> postProcessor;
 
+
 	public JacksonJsonEncoder() {
 		this(new ObjectMapper(), null);
 	}
@@ -50,6 +51,7 @@ public class JacksonJsonEncoder extends AbstractEncoder<Object> {
 	public JacksonJsonEncoder(Encoder<ByteBuffer> postProcessor) {
 		this(new ObjectMapper(), postProcessor);
 	}
+
 
 	public JacksonJsonEncoder(ObjectMapper mapper, Encoder<ByteBuffer> postProcessor) {
 		super(new MimeType("application", "json", StandardCharsets.UTF_8),
@@ -67,13 +69,17 @@ public class JacksonJsonEncoder extends AbstractEncoder<Object> {
 			BufferOutputStream outputStream = new BufferOutputStream(buffer);
 			try {
 				this.mapper.writeValue(outputStream, value);
-			} catch (IOException e) {
+			}
+			catch (IOException e) {
 				throw new CodecException("Error while writing the data", e);
 			}
 			buffer.flip();
 			return buffer.byteBuffer();
 		});
-		return this.postProcessor == null ? stream : this.postProcessor.encode(stream, type, mimeType, hints);
+		if (this.postProcessor != null) {
+			stream = this.postProcessor.encode(stream, type, mimeType, hints);
+		};
+		return stream;
 	}
 
 }

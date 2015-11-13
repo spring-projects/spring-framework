@@ -54,9 +54,11 @@ public class Jaxb2Decoder extends AbstractDecoder<Object> {
 
 	private final ConcurrentMap<Class<?>, JAXBContext> jaxbContexts = new ConcurrentHashMap<>(64);
 
+
 	public Jaxb2Decoder() {
 		super(MediaType.APPLICATION_XML, MediaType.TEXT_XML);
 	}
+
 
 	@Override
 	public Publisher<Object> decode(Publisher<ByteBuffer> inputStream, ResolvableType type,
