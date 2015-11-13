@@ -230,7 +230,7 @@ class ConfigurationClassEnhancer {
 
 		@Override
 		public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
-			Field field = obj.getClass().getDeclaredField(BEAN_FACTORY_FIELD);
+			Field field = ReflectionUtils.findField(obj.getClass(), BEAN_FACTORY_FIELD);
 			Assert.state(field != null, "Unable to find generated BeanFactory field");
 			field.set(obj, args[0]);
 
