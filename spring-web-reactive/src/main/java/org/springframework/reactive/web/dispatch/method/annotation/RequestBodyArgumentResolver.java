@@ -25,7 +25,6 @@ import reactor.Publishers;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ReactiveServerHttpRequest;
 import org.springframework.reactive.codec.decoder.Decoder;
@@ -59,7 +58,10 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 
 	@Override
 	public Publisher<Object> resolveArgument(MethodParameter parameter, ReactiveServerHttpRequest request) {
-		MediaType mediaType = resolveMediaType(request);
+		MediaType mediaType = request.getHeaders().getContentType();
+		if (mediaType == null) {
+			mediaType = MediaType.APPLICATION_OCTET_STREAM;
+		}
 		ResolvableType type = ResolvableType.forMethodParameter(parameter);
 		Publisher<ByteBuffer> body = request.getBody();
 		Publisher<?> elementStream = body;
@@ -75,13 +77,6 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 		}
 
 		return Publishers.map(elementStream, element -> element);
-	}
-
-	private MediaType resolveMediaType(ReactiveServerHttpRequest request) {
-		String acceptHeader = request.getHeaders().getFirst(HttpHeaders.CONTENT_TYPE);
-		List<MediaType> mediaTypes = MediaType.parseMediaTypes(acceptHeader);
-		MediaType.sortBySpecificityAndQuality(mediaTypes);
-		return ( mediaTypes.size() > 0 ? mediaTypes.get(0) : MediaType.TEXT_PLAIN);
 	}
 
 	private Decoder<?> resolveDecoder(ResolvableType type, MediaType mediaType, Object... hints) {
