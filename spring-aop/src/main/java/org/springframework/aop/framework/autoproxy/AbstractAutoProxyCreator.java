@@ -42,9 +42,11 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyValues;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link org.springframework.beans.factory.config.BeanPostProcessor} implementation
@@ -125,8 +127,6 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 	private BeanFactory beanFactory;
 
-	private final Map<Object, Boolean> advisedBeans = new ConcurrentHashMap<Object, Boolean>(64);
-
 	private final Set<String> targetSourcedBeans =
 			Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(16));
 
@@ -134,6 +134,8 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 			Collections.newSetFromMap(new ConcurrentHashMap<Object, Boolean>(16));
 
 	private final Map<Object, Class<?>> proxyTypes = new ConcurrentHashMap<Object, Class<?>>(16);
+
+	private final Map<Object, Boolean> advisedBeans = new ConcurrentHashMap<Object, Boolean>(256);
 
 
 	/**
@@ -214,6 +216,9 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 	@Override
 	public Class<?> predictBeanType(Class<?> beanClass, String beanName) {
+		if (this.proxyTypes.isEmpty()) {
+			return null;
+		}
 		Object cacheKey = getCacheKey(beanClass, beanName);
 		return this.proxyTypes.get(cacheKey);
 	}
@@ -299,12 +304,23 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 
 	/**
 	 * Build a cache key for the given bean class and bean name.
+	 * <p>Note: As of 4.2.3, this implementation does not return a concatenated
+	 * class/name String anymore but rather the most efficient cache key possible:
+	 * a plain bean name, prepended with {@link BeanFactory#FACTORY_BEAN_PREFIX}
+	 * in case of a {@code FactoryBean}; or if no bean name specified, then the
+	 * given bean {@code Class} as-is.
 	 * @param beanClass the bean class
 	 * @param beanName the bean name
 	 * @return the cache key for the given class and name
 	 */
 	protected Object getCacheKey(Class<?> beanClass, String beanName) {
-		return beanClass.getName() + "_" + beanName;
+		if (StringUtils.hasLength(beanName)) {
+			return (FactoryBean.class.isAssignableFrom(beanClass) ?
+					BeanFactory.FACTORY_BEAN_PREFIX + beanName : beanName);
+		}
+		else {
+			return beanClass;
+		}
 	}
 
 	/**
@@ -420,7 +436,7 @@ public abstract class AbstractAutoProxyCreator extends ProxyProcessorSupport
 	protected Object createProxy(
 			Class<?> beanClass, String beanName, Object[] specificInterceptors, TargetSource targetSource) {
 
-		if (beanName != null && this.beanFactory instanceof ConfigurableListableBeanFactory) {
+		if (this.beanFactory instanceof ConfigurableListableBeanFactory) {
 			AutoProxyUtils.exposeTargetClass((ConfigurableListableBeanFactory) this.beanFactory, beanName, beanClass);
 		}
 
