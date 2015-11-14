@@ -4506,7 +4506,7 @@ escaping. Modeled after the JSTL c:url tag with backwards compatibility in mind.
 |===
 | Attribute| Required?| Runtime Expression?| Description
 
-| url
+| value
 | true
 | true
 | The URL to build. This value can include template {placeholders} that are replaced
