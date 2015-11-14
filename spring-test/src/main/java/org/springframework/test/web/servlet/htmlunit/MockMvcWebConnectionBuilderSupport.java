@@ -19,13 +19,13 @@ package org.springframework.test.web.servlet.htmlunit;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.gargoylesoftware.htmlunit.WebConnection;
+
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcConfigurer;
 import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
-
-import com.gargoylesoftware.htmlunit.WebConnection;
 
 /**
  * Support class that simplifies the creation of a {@link WebConnection} that
@@ -55,7 +55,7 @@ public abstract class MockMvcWebConnectionBuilderSupport<T extends MockMvcWebCon
 	 * @param mockMvc the {@code MockMvc} instance to use; never {@code null}
 	 */
 	protected MockMvcWebConnectionBuilderSupport(MockMvc mockMvc) {
-		Assert.notNull(mockMvc, "mockMvc must not be null");
+		Assert.notNull(mockMvc, "MockMvc must not be null");
 		this.mockMvc = mockMvc;
 		this.mockMvcRequestMatchers.add(new HostRequestMatcher("localhost"));
 	}
@@ -79,6 +79,7 @@ public abstract class MockMvcWebConnectionBuilderSupport<T extends MockMvcWebCon
 	protected MockMvcWebConnectionBuilderSupport(WebApplicationContext context, MockMvcConfigurer configurer) {
 		this(MockMvcBuilders.webAppContextSetup(context).apply(configurer).build());
 	}
+
 
 	/**
 	 * Set the context path to use.
@@ -146,7 +147,7 @@ public abstract class MockMvcWebConnectionBuilderSupport<T extends MockMvcWebCon
 	 * @see #useMockMvcForHosts(String...)
 	 */
 	protected final WebConnection createConnection(WebConnection defaultConnection) {
-		Assert.notNull(defaultConnection, "defaultConnection must not be null");
+		Assert.notNull(defaultConnection, "Default WebConnection must not be null");
 		MockMvcWebConnection mockMvcWebConnection = new MockMvcWebConnection(this.mockMvc, this.contextPath);
 
 		if (this.alwaysUseMockMvc) {

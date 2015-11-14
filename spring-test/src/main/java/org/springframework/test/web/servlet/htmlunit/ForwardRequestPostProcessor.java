@@ -31,7 +31,7 @@ final class ForwardRequestPostProcessor implements RequestPostProcessor {
 
 
 	public ForwardRequestPostProcessor(String forwardUrl) {
-		Assert.hasText(forwardUrl, "forwardUrl must not be null or empty");
+		Assert.hasText(forwardUrl, "Forward URL must not be null or empty");
 		this.forwardUrl = forwardUrl;
 	}
 

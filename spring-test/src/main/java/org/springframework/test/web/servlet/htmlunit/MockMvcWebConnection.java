@@ -20,17 +20,17 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebConnection;
+import com.gargoylesoftware.htmlunit.WebRequest;
+import com.gargoylesoftware.htmlunit.WebResponse;
+
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.util.Assert;
-
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebConnection;
-import com.gargoylesoftware.htmlunit.WebRequest;
-import com.gargoylesoftware.htmlunit.WebResponse;
 
 /**
  * {@code MockMvcWebConnection} enables {@link MockMvc} to transform a
@@ -86,7 +86,7 @@ public final class MockMvcWebConnection implements WebConnection {
 	 * @param contextPath the contextPath to use
 	 */
 	public MockMvcWebConnection(MockMvc mockMvc, String contextPath) {
-		Assert.notNull(mockMvc, "mockMvc must not be null");
+		Assert.notNull(mockMvc, "MockMvc must not be null");
 		validateContextPath(contextPath);
 
 		this.webClient = new WebClient();
@@ -94,13 +94,19 @@ public final class MockMvcWebConnection implements WebConnection {
 		this.contextPath = contextPath;
 	}
 
+
+	public void setWebClient(WebClient webClient) {
+		Assert.notNull(webClient, "WebClient must not be null");
+		this.webClient = webClient;
+	}
+
+
 	public WebResponse getResponse(WebRequest webRequest) throws IOException {
 		long startTime = System.currentTimeMillis();
 		HtmlUnitRequestBuilder requestBuilder = new HtmlUnitRequestBuilder(this.sessions, this.webClient, webRequest);
 		requestBuilder.setContextPath(this.contextPath);
 
 		MockHttpServletResponse httpServletResponse = getResponse(requestBuilder);
-
 		String forwardedUrl = httpServletResponse.getForwardedUrl();
 		while (forwardedUrl != null) {
 			requestBuilder.setForwardPostProcessor(new ForwardRequestPostProcessor(forwardedUrl));
@@ -111,22 +117,22 @@ public final class MockMvcWebConnection implements WebConnection {
 		return new MockWebResponseBuilder(startTime, webRequest, httpServletResponse).build();
 	}
 
-	public void setWebClient(WebClient webClient) {
-		Assert.notNull(webClient, "webClient must not be null");
-		this.webClient = webClient;
-	}
-
 	private MockHttpServletResponse getResponse(RequestBuilder requestBuilder) throws IOException {
 		ResultActions resultActions;
 		try {
 			resultActions = this.mockMvc.perform(requestBuilder);
 		}
-		catch (Exception e) {
-			throw (IOException) new IOException(e.getMessage()).initCause(e);
+		catch (Exception ex) {
+			throw new IOException(ex);
 		}
 
 		return resultActions.andReturn().getResponse();
 	}
+
+	@Override
+	public void close() {
+	}
+
 
 	/**
 	 * Validate the supplied {@code contextPath}.
