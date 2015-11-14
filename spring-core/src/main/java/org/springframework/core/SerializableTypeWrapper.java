@@ -389,9 +389,9 @@ abstract class SerializableTypeWrapper {
 		public Type getType() {
 			Object result = this.result;
 			if (result == null) {
-				// Lazy invocation of the target method
+				// Lazy invocation of the target method on the provided type
 				result = ReflectionUtils.invokeMethod(this.method, this.provider.getType());
-				// Cache the result for further calls
+				// Cache the result for further calls to getType()
 				this.result = result;
 			}
 			return (result instanceof Type[] ? ((Type[]) result)[this.index] : (Type) result);
@@ -405,7 +405,7 @@ abstract class SerializableTypeWrapper {
 		private void readObject(ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
 			inputStream.defaultReadObject();
 			this.method = ReflectionUtils.findMethod(this.provider.getType().getClass(), this.methodName);
-			Assert.state(this.method.getReturnType() == Type.class || this.method.getReturnType() == Type[].class);
+			Assert.state(Type.class == this.method.getReturnType() || Type[].class == this.method.getReturnType());
 		}
 	}
 

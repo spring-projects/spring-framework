@@ -867,7 +867,7 @@ also <<mvc-config-content-negotiation>> for content negotiation configuration.
 
 
 [[mvc-ann-requestmapping-rfd]]
-==== Suffix Suffix Pattern Matching and RFD
+==== Suffix Pattern Matching and RFD
 
 Reflected file download (RFD) attack was first described in a
 https://www.trustwave.com/Resources/SpiderLabs-Blog/Reflected-File-Download---A-New-Web-Attack-Vector/[paper by Trustwave]
@@ -907,7 +907,7 @@ Below are additional recommendations from the report:
   For an example of how to do that with Spring see https://github.com/rwinch/spring-jackson-owasp[spring-jackson-owasp].
 * Configure suffix pattern matching to be turned off or restricted to explicitly
   registered suffixes only.
-* Configure content negotiation with the properties “useJaf” and “ignoreUknownPathExtension”
+* Configure content negotiation with the properties "useJaf" and "ignoreUnknownPathExtensions"
   set to false which would result in a 406 response for URLs with unknown extensions.
   Note however that this may not be an option if URLs are naturally expected to have
   a dot towards the end.
