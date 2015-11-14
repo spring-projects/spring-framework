@@ -28,7 +28,6 @@ import org.junit.Test;
 import org.springframework.http.converter.json.SpringHandlerInstantiator;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -138,7 +137,6 @@ public class StandaloneMockMvcBuilderTests {
 
 
 	@Controller
-	@SuppressWarnings("unused")
 	private static class PlaceholderController {
 
 		@RequestMapping(value = "${sys.login.ajax}")
@@ -162,7 +160,6 @@ public class StandaloneMockMvcBuilderTests {
 	}
 
 	@Controller
-	@SuppressWarnings("unused")
 	private static class PersonController {
 
 		@RequestMapping(value="/persons")

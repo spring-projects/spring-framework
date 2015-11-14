@@ -85,11 +85,13 @@ public class MockMvcWebConnectionTests {
 	}
 
 	@Test(expected = IllegalArgumentException.class)
+	@SuppressWarnings("resource")
 	public void contextPathDoesNotStartWithSlash() throws IOException {
 		new MockMvcWebConnection(this.mockMvc, "context");
 	}
 
 	@Test(expected = IllegalArgumentException.class)
+	@SuppressWarnings("resource")
 	public void contextPathEndsWithSlash() throws IOException {
 		new MockMvcWebConnection(this.mockMvc, "/context/");
 	}

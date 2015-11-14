@@ -143,7 +143,6 @@ public class JavaConfigTests {
 
 	@Configuration
 	@EnableWebMvc
-	@SuppressWarnings("unused")
 	static class WebConfig extends WebMvcConfigurerAdapter {
 
 		@Autowired
