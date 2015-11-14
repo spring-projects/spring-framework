@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 
-
 /**
  * Wraps a {@link org.springframework.web.socket.WebSocketSession} and guarantees
  * only one thread can send messages at a time.
@@ -45,7 +44,7 @@ import org.springframework.web.socket.WebSocketSession;
  */
 public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorator {
 
-	private static final Log logger = LogFactory.getLog("_" + ConcurrentWebSocketSessionDecorator.class.getName());
+	private static final Log logger = LogFactory.getLog(ConcurrentWebSocketSessionDecorator.class);
 
 
 	private final Queue<WebSocketMessage<?>> buffer = new LinkedBlockingQueue<WebSocketMessage<?>>();

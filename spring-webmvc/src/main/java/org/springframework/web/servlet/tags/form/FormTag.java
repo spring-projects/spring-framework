@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -194,15 +194,18 @@ public class FormTag extends AbstractHtmlElementTag {
 	}
 
 	/**
-	 * Set the value of the '{@code action}' attribute.
+	 * Set the value of the '{@code action}' attribute through a value
+	 * that is to be appended to the current servlet path.
 	 * <p>May be a runtime expression.
+	 * @since 3.2.3
 	 */
-	public void setServletRelativeAction(String servletRelativeaction) {
-		this.servletRelativeAction = (servletRelativeaction != null ? servletRelativeaction : "");
+	public void setServletRelativeAction(String servletRelativeAction) {
+		this.servletRelativeAction = (servletRelativeAction != null ? servletRelativeAction : "");
 	}
 
 	/**
-	 * Get the value of the '{@code action}' attribute.
+	 * Get the servlet-relative value of the '{@code action}' attribute.
+	 * @since 3.2.3
 	 */
 	protected String getServletRelativeAction() {
 		return this.servletRelativeAction;
@@ -333,6 +336,7 @@ public class FormTag extends AbstractHtmlElementTag {
 	protected boolean isMethodBrowserSupported(String method) {
 		return ("get".equalsIgnoreCase(method) || "post".equalsIgnoreCase(method));
 	}
+
 
 	/**
 	 * Writes the opening part of the block	'{@code form}' tag and exposes

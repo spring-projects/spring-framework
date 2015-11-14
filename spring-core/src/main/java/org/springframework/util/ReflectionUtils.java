@@ -102,7 +102,7 @@ public abstract class ReflectionUtils {
 	 * <p>Thrown exceptions are handled via a call to {@link #handleReflectionException(Exception)}.
 	 * @param field the field to set
 	 * @param target the target object on which to set the field
-	 * @param value the value to set; may be {@code null}
+	 * @param value the value to set (may be {@code null})
 	 */
 	public static void setField(Field field, Object target, Object value) {
 		try {
@@ -284,12 +284,11 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Rethrow the given {@link Throwable exception}, which is presumably the
-	 * <em>target exception</em> of an {@link InvocationTargetException}. Should
-	 * only be called if no checked exception is expected to be thrown by the
-	 * target method.
+	 * <em>target exception</em> of an {@link InvocationTargetException}.
+	 * Should only be called if no checked exception is expected to be thrown
+	 * by the target method.
 	 * <p>Rethrows the underlying exception cast to an {@link RuntimeException} or
-	 * {@link Error} if appropriate; otherwise, throws an
-	 * {@link IllegalStateException}.
+	 * {@link Error} if appropriate; otherwise, throws an {@link IllegalStateException}.
 	 * @param ex the exception to rethrow
 	 * @throws RuntimeException the rethrown exception
 	 */
@@ -305,12 +304,11 @@ public abstract class ReflectionUtils {
 
 	/**
 	 * Rethrow the given {@link Throwable exception}, which is presumably the
-	 * <em>target exception</em> of an {@link InvocationTargetException}. Should
-	 * only be called if no checked exception is expected to be thrown by the
-	 * target method.
+	 * <em>target exception</em> of an {@link InvocationTargetException}.
+	 * Should only be called if no checked exception is expected to be thrown
+	 * by the target method.
 	 * <p>Rethrows the underlying exception cast to an {@link Exception} or
-	 * {@link Error} if appropriate; otherwise, throws an
-	 * {@link IllegalStateException}.
+	 * {@link Error} if appropriate; otherwise, throws an {@link IllegalStateException}.
 	 * @param ex the exception to rethrow
 	 * @throws Exception the rethrown exception (in case of a checked exception)
 	 */

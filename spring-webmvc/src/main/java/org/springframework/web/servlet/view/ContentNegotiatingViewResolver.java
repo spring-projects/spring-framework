@@ -30,9 +30,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.OrderComparator;
@@ -124,6 +121,10 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 		this.contentNegotiationManager = contentNegotiationManager;
 	}
 
+	/**
+	 * Return the {@link ContentNegotiationManager} to use to determine requested media types.
+	 * @since 4.1.9
+	 */
 	public ContentNegotiationManager getContentNegotiationManager() {
 		return this.contentNegotiationManager;
 	}
@@ -294,6 +295,7 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 			this.contentNegotiationManager = this.cnManagerFactoryBean.getObject();
 		}
 	}
+
 
 	@Override
 	public View resolveViewName(String viewName, Locale locale) throws Exception {

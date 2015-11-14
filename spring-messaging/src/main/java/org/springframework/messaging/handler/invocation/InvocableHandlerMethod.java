@@ -29,8 +29,8 @@ import org.springframework.messaging.handler.HandlerMethod;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * Invokes the handler method for a given message after resolving its method argument
- * values through registered {@link HandlerMethodArgumentResolver}s.
+ * Provides a method for invoking the handler method for a given message after resolving its
+ * method argument values through registered {@link HandlerMethodArgumentResolver}s.
  *
  * <p>Use {@link #setMessageMethodArgumentResolvers(HandlerMethodArgumentResolver)}
  * to customize the list of argument resolvers.
@@ -92,18 +92,28 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 
 	/**
-	 * Invoke the method with the given message.
-	 * @throws Exception raised if no suitable argument resolver can be found,
-	 * or the method raised an exception
+	 * Invoke the method after resolving its argument values in the context of the given message.
+	 * <p>Argument values are commonly resolved through {@link HandlerMethodArgumentResolver}s.
+	 * The {@code providedArgs} parameter however may supply argument values to be used directly,
+	 * i.e. without argument resolution.
+	 * @param message the current message being processed
+	 * @param providedArgs "given" arguments matched by type, not resolved
+	 * @return the raw value returned by the invoked method
+	 * @exception Exception raised if no suitable argument resolver can be found,
+	 * or if the method raised an exception
 	 */
 	public Object invoke(Message<?> message, Object... providedArgs) throws Exception {
 		Object[] args = getMethodArgumentValues(message, providedArgs);
 		if (logger.isTraceEnabled()) {
-			logger.trace("Resolved arguments: " + Arrays.asList(args));
+			StringBuilder sb = new StringBuilder("Invoking [");
+			sb.append(getBeanType().getSimpleName()).append(".");
+			sb.append(getMethod().getName()).append("] method with arguments ");
+			sb.append(Arrays.asList(args));
+			logger.trace(sb.toString());
 		}
 		Object returnValue = doInvoke(args);
 		if (logger.isTraceEnabled()) {
-			logger.trace("Returned value: " + returnValue);
+			logger.trace("Method [" + getMethod().getName() + "] returned [" + returnValue + "]");
 		}
 		return returnValue;
 	}
@@ -135,8 +145,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				}
 			}
 			if (args[i] == null) {
-				String error = getArgumentResolutionErrorMessage("No suitable resolver for argument", i);
-				throw new IllegalStateException(error);
+				String msg = getArgumentResolutionErrorMessage("No suitable resolver for argument", i);
+				throw new IllegalStateException(msg);
 			}
 		}
 		return args;
@@ -149,7 +159,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	/**
-	 * Adds HandlerMethod details such as the controller type and method signature to the given error message.
+	 * Adds HandlerMethod details such as the controller type and method
+	 * signature to the given error message.
 	 * @param message error message to append the HandlerMethod details to
 	 */
 	protected String getDetailedErrorMessage(String message) {
@@ -219,7 +230,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		Class<?> targetBeanClass = targetBean.getClass();
 		if (!methodDeclaringClass.isAssignableFrom(targetBeanClass)) {
 			String msg = "The mapped controller method class '" + methodDeclaringClass.getName() +
-					"' is not an instance of the actual controller bean instance '" +
+					"' is not an instance of the actual controller bean class '" +
 					targetBeanClass.getName() + "'. If the controller requires proxying " +
 					"(e.g. due to @Transactional), please use class-based proxying.";
 			throw new IllegalStateException(getInvocationErrorMessage(msg, args));
@@ -229,7 +240,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	private String getInvocationErrorMessage(String message, Object[] resolvedArgs) {
 		StringBuilder sb = new StringBuilder(getDetailedErrorMessage(message));
 		sb.append("Resolved arguments: \n");
-		for (int i=0; i < resolvedArgs.length; i++) {
+		for (int i = 0; i < resolvedArgs.length; i++) {
 			sb.append("[").append(i).append("] ");
 			if (resolvedArgs[i] == null) {
 				sb.append("[null] \n");

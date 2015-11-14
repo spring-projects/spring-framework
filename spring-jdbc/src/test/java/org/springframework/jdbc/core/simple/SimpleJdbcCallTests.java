@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -103,8 +103,7 @@ public class SimpleJdbcCallTests {
 		adder.declareParameters(
 				new SqlParameter("amount", Types.INTEGER),
 				new SqlParameter("custid", Types.INTEGER),
-				new SqlOutParameter("newid",
-				Types.INTEGER));
+				new SqlOutParameter("newid", Types.INTEGER));
 		Number newId = adder.executeObject(Number.class, new MapSqlParameterSource().
 				addValue("amount", 1103).
 				addValue("custid", 3));
@@ -120,8 +119,7 @@ public class SimpleJdbcCallTests {
 		adder.declareParameters(
 				new SqlParameter("amount", Types.INTEGER),
 				new SqlParameter("custid", Types.INTEGER),
-				new SqlOutParameter("newid",
-				Types.INTEGER));
+				new SqlOutParameter("newid", Types.INTEGER));
 		Number newId = adder.executeObject(Number.class, 1103, 3);
 		assertEquals(4, newId.intValue());
 		verifyAddInvoiceWithoutMetaData(false);
@@ -193,7 +191,8 @@ public class SimpleJdbcCallTests {
 
 	}
 
-	@Test public void testAddInvoiceFuncWithMetaDataUsingArrayParams() throws Exception {
+	@Test
+	public void testAddInvoiceFuncWithMetaDataUsingArrayParams() throws Exception {
 		initializeAddInvoiceWithMetaData(true);
 		SimpleJdbcCall adder = new SimpleJdbcCall(dataSource).withFunctionName("add_invoice");
 		Number newId = adder.executeFunction(Number.class, 1103, 3);
@@ -203,8 +202,7 @@ public class SimpleJdbcCallTests {
 
 	}
 
-	private void initializeAddInvoiceWithoutMetaData(boolean isFunction)
-			throws SQLException {
+	private void initializeAddInvoiceWithoutMetaData(boolean isFunction) throws SQLException {
 		given(databaseMetaData.getDatabaseProductName()).willReturn("MyDB");
 		given(databaseMetaData.getUserName()).willReturn("me");
 		given(databaseMetaData.storesLowerCaseIdentifiers()).willReturn(true);
@@ -281,6 +279,6 @@ public class SimpleJdbcCallTests {
 		verify(callableStatement).close();
 		verify(proceduresResultSet).close();
 		verify(procedureColumnsResultSet).close();
+	}
 
-}
 }
