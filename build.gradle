@@ -562,8 +562,8 @@ project("spring-orm-hibernate4") {
 		provided(project(":spring-jdbc"))
 		provided(project(":spring-tx"))
 		optional(project(":spring-web"))
-		optional("org.hibernate:hibernate-core:4.2.20.Final")
-		optional("org.hibernate:hibernate-entitymanager:4.2.20.Final")
+		optional("org.hibernate:hibernate-core:4.2.21.Final")
+		optional("org.hibernate:hibernate-entitymanager:4.2.21.Final")
 		optional("javax.servlet:servlet-api:2.5")
 	}
 }
@@ -879,7 +879,7 @@ configure(rootProject) {
 		testCompile("javax.inject:javax.inject:1")
 		testCompile("javax.resource:connector-api:1.5")
 		testCompile("org.aspectj:aspectjweaver:${aspectjVersion}")
-		testCompile("org.hibernate:hibernate-core:4.2.20.Final")
+		testCompile("org.hibernate:hibernate-core:4.2.21.Final")
 		testCompile("hsqldb:hsqldb:${hsqldbVersion}")
 	}
 
