@@ -35,7 +35,8 @@ import org.springframework.cache.CacheManager;
  * <p>Note: This is by no means a sophisticated CacheManager; it comes with no
  * cache configuration options. However, it may be useful for testing or simple
  * caching scenarios. For advanced local caching needs, consider
- * {@link org.springframework.cache.guava.GuavaCacheManager} or
+ * {@link com.github.benmanes.caffeine.cache.CaffeineCacheManager},
+ * {@link org.springframework.cache.guava.GuavaCacheManager}, or
  * {@link org.springframework.cache.ehcache.EhCacheCacheManager}.
  *
  * @author Juergen Hoeller
