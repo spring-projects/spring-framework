@@ -42,12 +42,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-
 /**
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
-public class Jaxb2RootElementHttpMessageConverterTest {
+public class Jaxb2RootElementHttpMessageConverterTests {
 
 	private Jaxb2RootElementHttpMessageConverter converter;
 
@@ -183,6 +182,7 @@ public class Jaxb2RootElementHttpMessageConverterTest {
 				outputMessage.getBodyAsString(Charset.forName("UTF-8")));
 	}
 
+
 	@XmlRootElement
 	public static class RootElement {
 
@@ -191,16 +191,16 @@ public class Jaxb2RootElementHttpMessageConverterTest {
 
 		@XmlElement(required=false)
 		public String external;
-
 	}
+
 
 	@XmlType
 	public static class Type {
 
 		@XmlAttribute
 		public String s = "Hello World";
-
 	}
+
 
 	public static class RootElementSubclass extends RootElement {
 	}
