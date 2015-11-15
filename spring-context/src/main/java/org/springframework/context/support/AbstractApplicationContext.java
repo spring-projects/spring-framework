@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -483,7 +483,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			}
 
 			catch (BeansException ex) {
-				logger.warn("Exception encountered during context initialization - cancelling refresh attempt", ex);
+				if (logger.isWarnEnabled()) {
+					logger.warn("Exception encountered during context initialization - " +
+							"cancelling refresh attempt: " + ex);
+				}
 
 				// Destroy already created singletons to avoid dangling resources.
 				destroyBeans();
@@ -884,11 +887,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		for (ApplicationListener<?> listener : getApplicationListeners()) {
 			getApplicationEventMulticaster().addApplicationListener(listener);
 		}
+
 		// Do not initialize FactoryBeans here: We need to leave all regular beans
 		// uninitialized to let post-processors apply to them!
 		String[] listenerBeanNames = getBeanNamesForType(ApplicationListener.class, true, false);
-		for (String lisName : listenerBeanNames) {
-			getApplicationEventMulticaster().addApplicationListenerBean(lisName);
+		for (String listenerBeanName : listenerBeanNames) {
+			getApplicationEventMulticaster().addApplicationListenerBean(listenerBeanName);
 		}
 	}
 
@@ -1287,7 +1291,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	public boolean isRunning() {
-		return getLifecycleProcessor().isRunning();
+		return (this.lifecycleProcessor != null && this.lifecycleProcessor.isRunning());
 	}
 
 
