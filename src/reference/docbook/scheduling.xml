@@ -311,11 +311,11 @@ public class TaskExecutorExample {
       <para>Spring provides two implementations of the
       <interfacename>Trigger</interfacename> interface. The most interesting
       one is the <classname>CronTrigger</classname>. It enables the scheduling
-      of tasks based on cron expressions. For example the following task is
+      of tasks based on cron expressions. For example, the following task is
       being scheduled to run 15 minutes past each hour but only during the
       9-to-5 "business hours" on weekdays.</para>
 
-      <programlisting language="java">scheduler.schedule(task, new CronTrigger("* 15 9-17 * * MON-FRI"));</programlisting>
+      <programlisting language="java">scheduler.schedule(task, new CronTrigger("0 15 9-17 * * MON-FRI"));</programlisting>
 
       <para>The other out-of-the-box implementation is a
       <classname>PeriodicTrigger</classname> that accepts a fixed period, an
@@ -331,7 +331,7 @@ public class TaskExecutorExample {
       custom trigger implementations to be used interchangeably. Such a
       component could take advantage of dependency injection so that such
       <interfacename>Triggers</interfacename> could be configured
-      externally.</para>
+      externally and therefore easily modified or extended.</para>
     </section>
 
     <section xml:id="scheduling-task-scheduler-implementations">
