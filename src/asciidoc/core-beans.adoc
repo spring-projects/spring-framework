@@ -4625,7 +4625,7 @@ demonstrated in the following example.
 		</bean>
 
 		<bean class="example.SimpleMovieCatalog">
-			**_<qualifier type="example.Genre" value="Comedy"/>**
+			**<qualifier type="example.Genre" value="Comedy"/>**
 			<!-- inject any dependencies required by this bean -->
 		</bean>
 
