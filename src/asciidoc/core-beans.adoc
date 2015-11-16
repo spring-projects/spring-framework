@@ -4427,7 +4427,7 @@ The corresponding bean definitions appear as follows.
 
 		<context:annotation-config/>
 
-		<bean class="example.SimpleMovieCatalog" **primary=true**>
+		<bean class="example.SimpleMovieCatalog" **primary="true"**>
 			<!-- inject any dependencies required by this bean -->
 		</bean>
 
