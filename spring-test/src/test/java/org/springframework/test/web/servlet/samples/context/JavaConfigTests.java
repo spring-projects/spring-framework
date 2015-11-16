@@ -119,7 +119,6 @@ public class JavaConfigTests {
 		assertNotNull(parent);
 		assertTrue(parent instanceof WebApplicationContext);
 		WebApplicationContext root = (WebApplicationContext) parent;
-		assertFalse(root.getBeansOfType(String.class).containsKey("bar"));
 
 		ServletContext childServletContext = wac.getServletContext();
 		assertNotNull(childServletContext);

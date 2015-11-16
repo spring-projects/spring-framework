@@ -173,8 +173,8 @@ public final class MockMvc {
 			}
 
 			@Override
-			public ResultActions andDo(ResultHandler printer) throws Exception {
-				printer.handle(mvcResult);
+			public ResultActions andDo(ResultHandler handler) throws Exception {
+				handler.handle(mvcResult);
 				return this;
 			}
 
