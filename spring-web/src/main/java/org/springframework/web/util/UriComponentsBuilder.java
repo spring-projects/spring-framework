@@ -584,8 +584,9 @@ public class UriComponentsBuilder implements Cloneable {
 	}
 
 	/**
-	 * Append the given path segments to the existing path of this builder.
-	 * Each given path segment may contain URI template variables.
+	 * Append path segments to the existing path. Each path segment may contain
+	 * URI template variables and should not contain any slashes.
+	 * Use {@code path("/")} subsequently to ensure a trailing slash.
 	 * @param pathSegments the URI path segments
 	 * @return this UriComponentsBuilder
 	 */
