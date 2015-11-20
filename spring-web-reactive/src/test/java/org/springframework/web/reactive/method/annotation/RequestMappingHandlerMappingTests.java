@@ -32,7 +32,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.reactive.method.annotation.RequestMappingHandlerMapping;
 
 import static org.junit.Assert.assertEquals;
 
@@ -43,6 +42,7 @@ public class RequestMappingHandlerMappingTests {
 
 	private RequestMappingHandlerMapping mapping;
 
+
 	@Before
 	public void setup() {
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
@@ -51,6 +51,7 @@ public class RequestMappingHandlerMappingTests {
 		wac.refresh();
 		this.mapping = (RequestMappingHandlerMapping)wac.getBean("handlerMapping");
 	}
+
 
 	@Test
 	public void path() throws Exception {
@@ -68,21 +69,12 @@ public class RequestMappingHandlerMappingTests {
 		request = new MockServerHttpRequest(HttpMethod.GET, "foo");
 		handler = (HandlerMethod) this.mapping.getHandler(request);
 		assertEquals(TestController.class.getMethod("getFoo"), handler.getMethod());
-
-		request = new MockServerHttpRequest(HttpMethod.PUT, "foo");
-		handler = (HandlerMethod) this.mapping.getHandler(request);
-		assertEquals(TestController.class.getMethod("foo"), handler.getMethod());
 	}
 
 
 	@Controller
 	@SuppressWarnings("unused")
 	private static class TestController {
-
-		@RequestMapping("foo")
-		public String foo() {
-			return "foo";
-		}
 
 		@RequestMapping(path = "foo", method = RequestMethod.POST)
 		public String postFoo() {
@@ -106,7 +98,11 @@ public class RequestMappingHandlerMappingTests {
 
 	}
 
-	private static class MockServerHttpRequest implements ReactiveServerHttpRequest{
+
+	/**
+	 * TODO: this is more widely needed.
+	 */
+	private static class MockServerHttpRequest implements ReactiveServerHttpRequest {
 
 		private HttpMethod method;
 
