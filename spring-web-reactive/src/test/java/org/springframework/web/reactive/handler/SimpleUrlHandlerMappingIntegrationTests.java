@@ -55,7 +55,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.registerSingleton("hm", TestHandlerMapping.class);
 		wac.registerSingleton("ha", HttpHandlerAdapter.class);
-		wac.registerSingleton("hhrh", SimpleHandlerResultHandler.class);
+		wac.registerSingleton("rh", SimpleHandlerResultHandler.class);
 		wac.refresh();
 
 		DispatcherHandler dispatcherHandler = new DispatcherHandler();
