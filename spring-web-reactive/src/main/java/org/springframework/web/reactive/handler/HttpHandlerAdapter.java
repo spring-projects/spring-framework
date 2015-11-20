@@ -24,11 +24,11 @@ import org.springframework.http.server.ReactiveServerHttpRequest;
 import org.springframework.http.server.ReactiveServerHttpResponse;
 import org.springframework.web.reactive.HandlerAdapter;
 import org.springframework.web.reactive.HandlerResult;
-import org.springframework.web.reactive.HttpHandler;
+import org.springframework.http.server.ReactiveHttpHandler;
 import org.springframework.web.reactive.DispatcherHandler;
 
 /**
- * Support use of {@link HttpHandler} with
+ * Support use of {@link ReactiveHttpHandler} with
  * {@link DispatcherHandler
  * DispatcherHandler} (which implements the same contract).
  * The use of {@code DispatcherHandler} this way enables routing requests to
@@ -46,14 +46,14 @@ public class HttpHandlerAdapter implements HandlerAdapter {
 
 	@Override
 	public boolean supports(Object handler) {
-		return HttpHandler.class.isAssignableFrom(handler.getClass());
+		return ReactiveHttpHandler.class.isAssignableFrom(handler.getClass());
 	}
 
 	@Override
 	public Publisher<HandlerResult> handle(ReactiveServerHttpRequest request,
 			ReactiveServerHttpResponse response, Object handler) {
 
-		HttpHandler httpHandler = (HttpHandler)handler;
+		ReactiveHttpHandler httpHandler = (ReactiveHttpHandler)handler;
 		Publisher<Void> completion = httpHandler.handle(request, response);
 		return Publishers.just(new HandlerResult(httpHandler, completion, PUBLISHER_VOID));
 	}

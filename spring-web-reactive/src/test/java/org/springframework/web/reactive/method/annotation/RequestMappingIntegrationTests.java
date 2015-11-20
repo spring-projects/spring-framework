@@ -53,8 +53,8 @@ import org.springframework.reactive.codec.encoder.JsonObjectEncoder;
 import org.springframework.reactive.codec.encoder.StringEncoder;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.handler.SimpleHandlerResultHandler;
-import org.springframework.web.reactive.AbstractHttpHandlerIntegrationTests;
-import org.springframework.web.reactive.HttpHandler;
+import org.springframework.http.server.AbstractHttpHandlerIntegrationTests;
+import org.springframework.http.server.ReactiveHttpHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -76,7 +76,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 
 	@Override
-	protected HttpHandler createHttpHandler() {
+	protected ReactiveHttpHandler createHttpHandler() {
 		this.wac = new AnnotationConfigWebApplicationContext();
 		this.wac.register(FrameworkConfig.class, ApplicationConfig.class);
 		this.wac.refresh();

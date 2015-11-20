@@ -31,6 +31,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.server.ReactiveHttpHandler;
 import org.springframework.http.server.ReactiveServerHttpRequest;
 import org.springframework.http.server.ReactiveServerHttpResponse;
 
@@ -52,7 +53,7 @@ import org.springframework.http.server.ReactiveServerHttpResponse;
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  */
-public class DispatcherHandler implements HttpHandler, ApplicationContextAware {
+public class DispatcherHandler implements ReactiveHttpHandler, ApplicationContextAware {
 
 	private static final Log logger = LogFactory.getLog(DispatcherHandler.class);
 

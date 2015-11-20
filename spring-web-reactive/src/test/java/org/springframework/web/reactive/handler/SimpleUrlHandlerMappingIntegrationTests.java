@@ -32,8 +32,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.ReactiveServerHttpRequest;
 import org.springframework.http.server.ReactiveServerHttpResponse;
 import org.springframework.web.reactive.DispatcherHandler;
-import org.springframework.web.reactive.AbstractHttpHandlerIntegrationTests;
-import org.springframework.web.reactive.HttpHandler;
+import org.springframework.http.server.AbstractHttpHandlerIntegrationTests;
+import org.springframework.http.server.ReactiveHttpHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 
@@ -50,7 +50,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 
 
 	@Override
-	protected HttpHandler createHttpHandler() {
+	protected ReactiveHttpHandler createHttpHandler() {
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.registerSingleton("hm", TestHandlerMapping.class);
@@ -100,7 +100,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 		}
 	}
 
-	private static class FooHandler implements HttpHandler {
+	private static class FooHandler implements ReactiveHttpHandler {
 
 		@Override
 		public Publisher<Void> handle(ReactiveServerHttpRequest request, ReactiveServerHttpResponse response) {
@@ -108,7 +108,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 		}
 	}
 
-	private static class BarHandler implements HttpHandler {
+	private static class BarHandler implements ReactiveHttpHandler {
 
 		@Override
 		public Publisher<Void> handle(ReactiveServerHttpRequest request, ReactiveServerHttpResponse response) {
