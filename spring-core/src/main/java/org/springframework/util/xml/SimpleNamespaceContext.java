@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,13 +63,16 @@ public class SimpleNamespaceContext implements NamespaceContext {
 
 	@Override
 	public String getPrefix(String namespaceUri) {
-		List<?> prefixes = getPrefixesInternal(namespaceUri);
-		return prefixes.isEmpty() ? null : (String) prefixes.get(0);
+		Assert.notNull(namespaceUri, "namespaceUri is null");
+		List<String> prefixes = getPrefixesList(namespaceUri);
+		return prefixes.isEmpty() ? null : prefixes.get(0);
 	}
 
 	@Override
 	public Iterator<String> getPrefixes(String namespaceUri) {
-		return getPrefixesInternal(namespaceUri).iterator();
+		Assert.notNull(namespaceUri, "namespaceUri is null");
+		List<String> prefixes = getPrefixesList(namespaceUri);
+		return Collections.unmodifiableList(prefixes).iterator();
 	}
 
 	/**
@@ -106,13 +109,25 @@ public class SimpleNamespaceContext implements NamespaceContext {
 		}
 		else {
 			prefixToNamespaceUri.put(prefix, namespaceUri);
-			getPrefixesInternal(namespaceUri).add(prefix);
+			addPrefixToNamespaceUri(prefix, namespaceUri);
 		}
+	}
+
+	private void addPrefixToNamespaceUri(String prefix, String namespaceUri) {
+		List<String> prefixes = new ArrayList<String>();
+		if (namespaceUriToPrefixes.containsKey(namespaceUri)) {
+			prefixes = getPrefixesList(namespaceUri);
+		}
+		else {
+			namespaceUriToPrefixes.put(namespaceUri, prefixes);
+		}
+		prefixes.add(prefix);
 	}
 
 	/** Removes all declared prefixes. */
 	public void clear() {
 		prefixToNamespaceUri.clear();
+		namespaceUriToPrefixes.clear();
 	}
 
 	/**
@@ -124,7 +139,7 @@ public class SimpleNamespaceContext implements NamespaceContext {
 		return prefixToNamespaceUri.keySet().iterator();
 	}
 
-	private List<String> getPrefixesInternal(String namespaceUri) {
+	private List<String> getPrefixesList(String namespaceUri) {
 		if (defaultNamespaceUri.equals(namespaceUri)) {
 			return Collections.singletonList(XMLConstants.DEFAULT_NS_PREFIX);
 		}
@@ -134,13 +149,11 @@ public class SimpleNamespaceContext implements NamespaceContext {
 		else if (XMLConstants.XMLNS_ATTRIBUTE_NS_URI.equals(namespaceUri)) {
 			return Collections.singletonList(XMLConstants.XMLNS_ATTRIBUTE);
 		}
+		else if (namespaceUriToPrefixes.containsKey(namespaceUri)) {
+			return namespaceUriToPrefixes.get(namespaceUri);
+		}
 		else {
-			List<String> list = namespaceUriToPrefixes.get(namespaceUri);
-			if (list == null) {
-				list = new ArrayList<String>();
-				namespaceUriToPrefixes.put(namespaceUri, list);
-			}
-			return list;
+			return new ArrayList<String>();
 		}
 	}
 
@@ -155,8 +168,18 @@ public class SimpleNamespaceContext implements NamespaceContext {
 		}
 		else {
 			String namespaceUri = prefixToNamespaceUri.remove(prefix);
-			List<String> prefixes = getPrefixesInternal(namespaceUri);
-			prefixes.remove(prefix);
+			removePrefixFromNamespaceUri(prefix, namespaceUri);
 		}
 	}
+
+	private void removePrefixFromNamespaceUri(String prefix, String namespaceUri) {
+		if (namespaceUriToPrefixes.containsKey(namespaceUri)) {
+			List<String> prefixes = getPrefixesList(namespaceUri);
+			prefixes.remove(prefix);
+			if (prefixes.isEmpty()) {
+				namespaceUriToPrefixes.remove(namespaceUri);
+			}
+		}
+	}
+
 }
