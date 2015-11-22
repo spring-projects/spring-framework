@@ -26,6 +26,7 @@ import org.junit.Test;
 import reactor.rx.Stream;
 import reactor.rx.Streams;
 
+import org.springframework.core.codec.support.JacksonJsonEncoder;
 import org.springframework.http.MediaType;
 import org.springframework.reactive.codec.Pojo;
 

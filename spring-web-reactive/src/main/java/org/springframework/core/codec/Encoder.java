@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.reactive.codec.encoder;
+package org.springframework.core.codec;
 
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -22,7 +22,6 @@ import java.util.List;
 import org.reactivestreams.Publisher;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.reactive.codec.decoder.Decoder;
 import org.springframework.util.MimeType;
 
 /**

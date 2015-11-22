@@ -28,6 +28,7 @@ import reactor.rx.Stream;
 import reactor.rx.Streams;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.support.JacksonJsonDecoder;
 import org.springframework.http.MediaType;
 import org.springframework.reactive.codec.Pojo;
 

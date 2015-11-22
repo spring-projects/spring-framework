@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.reactive.codec.decoder;
+package org.springframework.core.codec.support;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -29,7 +29,6 @@ import reactor.Publishers;
 import reactor.fn.Function;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.reactive.codec.encoder.JsonObjectEncoder;
 import org.springframework.util.MimeType;
 
 /**

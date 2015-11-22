@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.reactive.codec;
+package org.springframework.core.codec;
 
 import org.springframework.core.NestedRuntimeException;
 

@@ -23,11 +23,10 @@ import org.reactivestreams.Publisher;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.reactive.codec.encoder.StringEncoder;
+import org.springframework.core.codec.support.StringEncoder;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.reactive.method.annotation.ResponseBodyResultHandler;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

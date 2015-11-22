@@ -23,10 +23,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import org.reactivestreams.Publisher;
 import reactor.rx.Streams;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.support.StringEncoder;
 import org.springframework.http.MediaType;
 
 /**

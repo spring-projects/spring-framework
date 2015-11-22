@@ -27,6 +27,7 @@ import reactor.rx.Stream;
 import reactor.rx.Streams;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.support.ByteBufferEncoder;
 import org.springframework.http.MediaType;
 
 /**

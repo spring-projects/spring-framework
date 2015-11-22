@@ -14,24 +14,25 @@
  * limitations under the License.
  */
 
-package org.springframework.reactive.codec.decoder;
+package org.springframework.core.codec.support;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.Encoder;
 import org.springframework.util.MimeType;
 
 /**
  * @author Sebastien Deleuze
  */
-public abstract class AbstractDecoder<T> implements Decoder<T> {
+public abstract class AbstractEncoder<T> implements Encoder<T> {
 
 	private List<MimeType> supportedMimeTypes = Collections.emptyList();
 
 
-	public AbstractDecoder(MimeType... supportedMimeTypes) {
+	public AbstractEncoder(MimeType... supportedMimeTypes) {
 		this.supportedMimeTypes = Arrays.asList(supportedMimeTypes);
 	}
 
@@ -42,7 +43,7 @@ public abstract class AbstractDecoder<T> implements Decoder<T> {
 	}
 
 	@Override
-	public boolean canDecode(ResolvableType type, MimeType mimeType, Object... hints) {
+	public boolean canEncode(ResolvableType type, MimeType mimeType, Object... hints) {
 		for (MimeType supportedMimeType : this.supportedMimeTypes) {
 			if (supportedMimeType.isCompatibleWith(mimeType)) {
 				return true;

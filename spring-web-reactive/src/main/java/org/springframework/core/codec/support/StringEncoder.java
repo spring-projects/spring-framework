@@ -14,39 +14,52 @@
  * limitations under the License.
  */
 
-package org.springframework.reactive.codec.encoder;
+package org.springframework.core.codec.support;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.reactivestreams.Publisher;
+import reactor.Publishers;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.util.MimeType;
-import org.springframework.util.MimeTypeUtils;
 
 /**
+ * Encode from a String stream to a bytes stream.
+ *
  * @author Sebastien Deleuze
+ * @see StringDecoder
  */
-public class ByteBufferEncoder extends AbstractEncoder<ByteBuffer> {
+public class StringEncoder extends AbstractEncoder<String> {
+
+	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
 
-	public ByteBufferEncoder() {
-		super(MimeTypeUtils.ALL);
+	public StringEncoder() {
+		super(new MimeType("text", "plain", DEFAULT_CHARSET));
 	}
 
 
 	@Override
 	public boolean canEncode(ResolvableType type, MimeType mimeType, Object... hints) {
 		Class<?> clazz = type.getRawClass();
-		return (super.canEncode(type, mimeType, hints) && ByteBuffer.class.isAssignableFrom(clazz));
+		return (super.canEncode(type, mimeType, hints) && String.class.isAssignableFrom(clazz));
 	}
 
 	@Override
-	public Publisher<ByteBuffer> encode(Publisher<? extends ByteBuffer> inputStream, ResolvableType type,
-			MimeType mimeType, Object... hints) {
+	public Publisher<ByteBuffer> encode(Publisher<? extends String> elementStream,
+			ResolvableType type, MimeType mimeType, Object... hints) {
 
-		//noinspection unchecked
-		return (Publisher<ByteBuffer>) inputStream;
+		Charset charset;
+		if (mimeType != null && mimeType.getCharSet() != null) {
+			charset = mimeType.getCharSet();
+		}
+		else {
+			 charset = DEFAULT_CHARSET;
+		}
+		return Publishers.map(elementStream, s -> ByteBuffer.wrap(s.getBytes(charset)));
 	}
 
 }

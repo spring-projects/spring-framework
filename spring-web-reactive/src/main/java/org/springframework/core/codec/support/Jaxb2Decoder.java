@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.reactive.codec.decoder;
+package org.springframework.core.codec.support;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,12 +37,11 @@ import org.xml.sax.helpers.XMLReaderFactory;
 import reactor.Publishers;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.http.MediaType;
-import org.springframework.reactive.codec.CodecException;
-import org.springframework.reactive.codec.encoder.Jaxb2Encoder;
-import org.springframework.reactive.io.ByteBufferPublisherInputStream;
+import org.springframework.core.codec.CodecException;
+import org.springframework.util.ByteBufferPublisherInputStream;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
 
 /**
  * Decode from a bytes stream of XML elements to a stream of {@code Object} (POJO).
@@ -56,7 +55,7 @@ public class Jaxb2Decoder extends AbstractDecoder<Object> {
 
 
 	public Jaxb2Decoder() {
-		super(MediaType.APPLICATION_XML, MediaType.TEXT_XML);
+		super(MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML);
 	}
 
 

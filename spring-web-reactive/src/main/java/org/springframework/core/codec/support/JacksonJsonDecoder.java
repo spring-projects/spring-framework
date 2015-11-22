@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.reactive.codec.decoder;
+package org.springframework.core.codec.support;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -26,9 +26,9 @@ import org.reactivestreams.Publisher;
 import reactor.Publishers;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.reactive.codec.CodecException;
-import org.springframework.reactive.codec.encoder.JacksonJsonEncoder;
-import org.springframework.reactive.io.ByteBufferInputStream;
+import org.springframework.core.codec.CodecException;
+import org.springframework.core.codec.Decoder;
+import org.springframework.util.ByteBufferInputStream;
 import org.springframework.util.MimeType;
 
 

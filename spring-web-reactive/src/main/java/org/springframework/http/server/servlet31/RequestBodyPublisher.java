@@ -19,6 +19,7 @@ package org.springframework.http.server.servlet31;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicLong;
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;
 
@@ -28,7 +29,7 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 
-import org.springframework.reactive.util.DemandCounter;
+import org.springframework.util.Assert;
 
 /**
  * @author Arjen Poutsma
@@ -163,6 +164,55 @@ public class RequestBodyPublisher implements ReadListener, Publisher<ByteBuffer>
 			cancelled = true;
 			synchronizer.readComplete();
 			demand.reset();
+		}
+	}
+
+
+	/**
+	 * Small utility class for keeping track of Reactive Streams demand.
+	 */
+	private static final class DemandCounter {
+
+		private final AtomicLong demand = new AtomicLong();
+
+		/**
+		 * Increases the demand by the given number
+		 * @param n the positive number to increase demand by
+		 * @return the increased demand
+		 * @see org.reactivestreams.Subscription#request(long)
+		 */
+		public long increase(long n) {
+			Assert.isTrue(n > 0, "'n' must be higher than 0");
+			return demand.updateAndGet(d -> d != Long.MAX_VALUE ? d + n : Long.MAX_VALUE);
+		}
+
+		/**
+		 * Decreases the demand by one.
+		 * @return the decremented demand
+		 */
+		public long decrement() {
+			return demand.updateAndGet(d -> d != Long.MAX_VALUE ? d - 1 : Long.MAX_VALUE);
+		}
+
+		/**
+		 * Indicates whether this counter has demand, i.e. whether it is higher than 0.
+		 * @return {@code true} if this counter has demand; {@code false} otherwise
+		 */
+		public boolean hasDemand() {
+			return this.demand.get() > 0;
+		}
+
+		/**
+		 * Resets this counter to 0.
+		 * @see org.reactivestreams.Subscription#cancel()
+		 */
+		public void reset() {
+			this.demand.set(0);
+		}
+
+		@Override
+		public String toString() {
+			return demand.toString();
 		}
 	}
 }

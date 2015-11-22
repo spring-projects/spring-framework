@@ -14,41 +14,38 @@
  * limitations under the License.
  */
 
-package org.springframework.reactive.codec.encoder;
+package org.springframework.core.codec.support;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.nio.ByteBuffer;
+
+import org.reactivestreams.Publisher;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
 
 /**
  * @author Sebastien Deleuze
  */
-public abstract class AbstractEncoder<T> implements Encoder<T> {
-
-	private List<MimeType> supportedMimeTypes = Collections.emptyList();
+public class ByteBufferDecoder extends AbstractDecoder<ByteBuffer> {
 
 
-	public AbstractEncoder(MimeType... supportedMimeTypes) {
-		this.supportedMimeTypes = Arrays.asList(supportedMimeTypes);
+	public ByteBufferDecoder() {
+		super(MimeTypeUtils.ALL);
 	}
 
 
 	@Override
-	public List<MimeType> getSupportedMimeTypes() {
-		return this.supportedMimeTypes;
+	public boolean canDecode(ResolvableType type, MimeType mimeType, Object... hints) {
+		Class<?> clazz = type.getRawClass();
+		return (super.canDecode(type, mimeType, hints) && ByteBuffer.class.isAssignableFrom(clazz));
 	}
 
 	@Override
-	public boolean canEncode(ResolvableType type, MimeType mimeType, Object... hints) {
-		for (MimeType supportedMimeType : this.supportedMimeTypes) {
-			if (supportedMimeType.isCompatibleWith(mimeType)) {
-				return true;
-			}
-		}
-		return false;
+	public Publisher<ByteBuffer> decode(Publisher<ByteBuffer> inputStream, ResolvableType type,
+			MimeType mimeType, Object... hints) {
+
+		return inputStream;
 	}
 
 }

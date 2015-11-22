@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.reactive.codec.encoder;
+package org.springframework.core.codec.support;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -22,36 +22,34 @@ import java.nio.charset.StandardCharsets;
 
 import org.reactivestreams.Publisher;
 import reactor.Publishers;
+import reactor.io.buffer.Buffer;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.reactive.codec.decoder.StringDecoder;
 import org.springframework.util.MimeType;
 
 /**
- * Encode from a String stream to a bytes stream.
+ * Decode from a bytes stream to a String stream.
  *
  * @author Sebastien Deleuze
- * @see StringDecoder
+ * @see StringEncoder
  */
-public class StringEncoder extends AbstractEncoder<String> {
+public class StringDecoder extends AbstractDecoder<String> {
 
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-
-	public StringEncoder() {
+	public StringDecoder() {
 		super(new MimeType("text", "plain", DEFAULT_CHARSET));
 	}
 
-
 	@Override
-	public boolean canEncode(ResolvableType type, MimeType mimeType, Object... hints) {
-		Class<?> clazz = type.getRawClass();
-		return (super.canEncode(type, mimeType, hints) && String.class.isAssignableFrom(clazz));
+	public boolean canDecode(ResolvableType type, MimeType mimeType, Object... hints) {
+		return super.canDecode(type, mimeType, hints)
+				&& String.class.isAssignableFrom(type.getRawClass());
 	}
 
 	@Override
-	public Publisher<ByteBuffer> encode(Publisher<? extends String> elementStream,
-			ResolvableType type, MimeType mimeType, Object... hints) {
+	public Publisher<String> decode(Publisher<ByteBuffer> inputStream, ResolvableType type,
+			MimeType mimeType, Object... hints) {
 
 		Charset charset;
 		if (mimeType != null && mimeType.getCharSet() != null) {
@@ -60,7 +58,7 @@ public class StringEncoder extends AbstractEncoder<String> {
 		else {
 			 charset = DEFAULT_CHARSET;
 		}
-		return Publishers.map(elementStream, s -> ByteBuffer.wrap(s.getBytes(charset)));
+		return Publishers.map(inputStream, content -> new String(new Buffer(content).asBytes(), charset));
 	}
 
 }

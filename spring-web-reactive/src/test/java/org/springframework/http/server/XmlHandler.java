@@ -27,8 +27,8 @@ import reactor.io.buffer.Buffer;
 import reactor.rx.Streams;
 
 import org.springframework.http.MediaType;
-import org.springframework.reactive.io.BufferOutputStream;
-import org.springframework.reactive.io.ByteBufferPublisherInputStream;
+import org.springframework.util.BufferOutputStream;
+import org.springframework.util.ByteBufferPublisherInputStream;
 
 import static org.junit.Assert.fail;
 

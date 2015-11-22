@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.reactive.io;
+package org.springframework.util;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,8 +24,6 @@ import java.util.concurrent.BlockingQueue;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
 import reactor.Publishers;
-
-import org.springframework.util.Assert;
 
 /**
  * {@code InputStream} implementation based on a byte array {@link Publisher}.

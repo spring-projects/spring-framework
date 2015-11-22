@@ -26,6 +26,8 @@ import reactor.io.buffer.Buffer;
 import reactor.rx.Stream;
 import reactor.rx.Streams;
 
+import org.springframework.core.codec.support.JsonObjectEncoder;
+
 /**
  * @author Sebastien Deleuze
  */

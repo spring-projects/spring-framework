@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.reactive.io;
+package org.springframework.util;
 
 import java.io.IOException;
 import java.io.InputStream;

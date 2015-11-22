@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.reactive.codec.encoder;
+package org.springframework.core.codec.support;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -30,13 +30,12 @@ import reactor.Publishers;
 import reactor.io.buffer.Buffer;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.http.MediaType;
-import org.springframework.reactive.codec.CodecException;
-import org.springframework.reactive.codec.decoder.Jaxb2Decoder;
-import org.springframework.reactive.io.BufferOutputStream;
+import org.springframework.core.codec.CodecException;
+import org.springframework.util.BufferOutputStream;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
 
 /**
  * Encode from an {@code Object} stream to a byte stream of XML elements.
@@ -50,7 +49,7 @@ public class Jaxb2Encoder extends AbstractEncoder<Object> {
 
 
 	public Jaxb2Encoder() {
-		super(MediaType.APPLICATION_XML, MediaType.TEXT_XML);
+		super(MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML);
 	}
 
 
