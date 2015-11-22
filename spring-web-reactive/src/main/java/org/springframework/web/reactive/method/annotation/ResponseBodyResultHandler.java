@@ -20,9 +20,12 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.reactivestreams.Publisher;
 import reactor.Publishers;
@@ -35,13 +38,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.ReactiveServerHttpRequest;
 import org.springframework.http.server.ReactiveServerHttpResponse;
 import org.springframework.reactive.codec.encoder.Encoder;
-import org.springframework.web.reactive.HandlerResult;
-import org.springframework.web.reactive.HandlerResultHandler;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.reactive.HandlerResult;
+import org.springframework.web.reactive.HandlerResultHandler;
 
 
 /**
@@ -53,11 +56,13 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 
 	private static final MediaType MEDIA_TYPE_APPLICATION = new MediaType("application");
 
-	private final List<MediaType> allSupportedMediaTypes;
-
 	private final List<Encoder<?>> encoders;
 
 	private final ConversionService conversionService;
+
+	private final List<MediaType> allMediaTypes;
+
+	private final Map<Encoder<?>, List<MediaType>> mediaTypesByEncoder;
 
 	private int order = 0;
 
@@ -66,21 +71,37 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 		Assert.notEmpty(encoders, "At least one encoders is required.");
 		Assert.notNull(service, "'conversionService' is required.");
 		this.encoders = encoders;
-		this.allSupportedMediaTypes = getAllSupportedMediaTypes(encoders);
 		this.conversionService = service;
+		this.allMediaTypes = getAllMediaTypes(encoders);
+		this.mediaTypesByEncoder = getMediaTypesByEncoder(encoders);
 	}
 
-	private static List<MediaType> getAllSupportedMediaTypes(List<Encoder<?>> encoders) {
-		Set<MediaType> allSupportedMediaTypes = new LinkedHashSet<>();
-		for (Encoder<?> encoder : encoders) {
-			for (MimeType mimeType : encoder.getSupportedMimeTypes()) {
-				allSupportedMediaTypes.add(
-						new MediaType(mimeType.getType(), mimeType.getSubtype(), mimeType.getParameters()));
-			}
-		}
-		List<MediaType> result = new ArrayList<>(allSupportedMediaTypes);
+	private static List<MediaType> getAllMediaTypes(List<Encoder<?>> encoders) {
+		Set<MediaType> set = new LinkedHashSet<>();
+		encoders.forEach(encoder -> set.addAll(toMediaTypes(encoder.getSupportedMimeTypes())));
+		List<MediaType> result = new ArrayList<>(set);
 		MediaType.sortBySpecificity(result);
 		return Collections.unmodifiableList(result);
+	}
+
+	private static Map<Encoder<?>, List<MediaType>> getMediaTypesByEncoder(List<Encoder<?>> encoders) {
+		Map<Encoder<?>, List<MediaType>> result = new HashMap<>(encoders.size());
+		encoders.forEach(encoder -> result.put(encoder, toMediaTypes(encoder.getSupportedMimeTypes())));
+		return Collections.unmodifiableMap(result);
+	}
+
+	/**
+	 * TODO: MediaType static method
+	 */
+	private static List<MediaType> toMediaTypes(List<MimeType> mimeTypes) {
+		return mimeTypes.stream().map(ResponseBodyResultHandler::toMediaType).collect(Collectors.toList());
+	}
+
+	/**
+	 * TODO: MediaType constructor
+	 */
+	private static MediaType toMediaType(MimeType mimeType) {
+		return new MediaType(mimeType.getType(), mimeType.getSubtype(), mimeType.getParameters());
 	}
 
 
@@ -120,8 +141,7 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 		List<MediaType> producibleMediaTypes = getProducibleMediaTypes(returnType);
 
 		if (producibleMediaTypes.isEmpty()) {
-			Publishers.error(new IllegalArgumentException(
-					"No encoder found for return value of type: " + returnType));
+			producibleMediaTypes.add(MediaType.ALL);
 		}
 
 		Set<MediaType> compatibleMediaTypes = new LinkedHashSet<>();
@@ -169,7 +189,7 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 			}
 		}
 
-		return Publishers.error(new HttpMediaTypeNotAcceptableException(this.allSupportedMediaTypes));
+		return Publishers.error(new HttpMediaTypeNotAcceptableException(this.allMediaTypes));
 	}
 
 	private List<MediaType> getAcceptableMediaTypes(ReactiveServerHttpRequest request) {
@@ -178,19 +198,10 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 	}
 
 	private List<MediaType> getProducibleMediaTypes(ResolvableType type) {
-		List<MediaType> result = new ArrayList<>();
-		for (Encoder<?> encoder : this.encoders) {
-			if (encoder.canEncode(type, null)) {
-				for (MimeType mimeType : encoder.getSupportedMimeTypes()) {
-					result.add(new MediaType(mimeType.getType(), mimeType.getSubtype(),
-							mimeType.getParameters()));
-				}
-			}
-		}
-		if (result.isEmpty()) {
-			result.add(MediaType.ALL);
-		}
-		return result;
+		return this.encoders.stream()
+				.filter(encoder -> encoder.canEncode(type, null))
+				.flatMap(encoder -> this.mediaTypesByEncoder.get(encoder).stream())
+				.collect(Collectors.toList());
 	}
 
 	/**
