@@ -45,7 +45,7 @@ inside the message and theme tags.
 | false
 | true
 | The value of the argument.
-
+|===
 
 
 
@@ -324,7 +324,7 @@ inside the url tag.
 | false
 | true
 | The value of the parameter.
-
+|===
 
 
 
