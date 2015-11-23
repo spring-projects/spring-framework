@@ -66,27 +66,6 @@ public class EhCacheCacheTests extends AbstractCacheTests<EhCacheCache> {
 	protected Ehcache getNativeCache() {
 		return nativeCache;
 	}
-	@Test
-	public void testCachePut() throws Exception {
-		Object key = "enescu";
-		Object value = "george";
-
-		assertNull(cache.get(key));
-		assertNull(cache.get(key, String.class));
-		assertNull(cache.get(key, Object.class));
-
-		cache.put(key, value);
-		assertEquals(value, cache.get(key).get());
-		assertEquals(value, cache.get(key, String.class));
-		assertEquals(value, cache.get(key, Object.class));
-		assertEquals(value, cache.get(key, null));
-
-		cache.put(key, null);
-		assertNotNull(cache.get(key));
-		assertNull(cache.get(key).get());
-		assertNull(cache.get(key, String.class));
-		assertNull(cache.get(key, Object.class));
-	}
 
 	@Test
 	public void testExpiredElements() throws Exception {
