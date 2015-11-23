@@ -43,7 +43,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * @author Stephane Nicoll
  */
-public class JCacheEhCacheTests extends AbstractAnnotationTests {
+public class JCacheEhCacheAnnotationTests extends AbstractAnnotationTests {
 
 	private CacheManager jCacheManager;
 

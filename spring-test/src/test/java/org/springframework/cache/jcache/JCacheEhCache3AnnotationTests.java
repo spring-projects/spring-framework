@@ -20,13 +20,13 @@ import javax.cache.Caching;
 import javax.cache.spi.CachingProvider;
 
 /**
- * Just here to be run against EHCache 3, whereas the original JCacheEhCacheTests
+ * Just here to be run against EHCache 3, whereas the original JCacheEhCacheAnnotationTests
  * runs against EhCache 2.x with the EhCache-JCache add-on.
  *
  * @author Juergen Hoeller
  * @since 4.2.1
  */
-public class JCacheEhCache3Tests extends JCacheEhCacheTests {
+public class JCacheEhCache3AnnotationTests extends JCacheEhCacheAnnotationTests {
 
 	@Override
 	protected CachingProvider getCachingProvider() {
