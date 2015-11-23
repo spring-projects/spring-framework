@@ -16,6 +16,7 @@
 
 package org.springframework.format.datetime.standard;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,6 +24,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -334,6 +336,15 @@ public class DateTimeFormattingTests {
 		assertTrue(binder.getBindingResult().getFieldValue("instant").toString().startsWith("2009-10-31"));
 	}
 
+	@Test
+	public void testBindDurationFromString() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("duration", "PT1M");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertEquals(Duration.of(1, ChronoUnit.MINUTES),
+				binder.getBindingResult().getFieldValue("duration"));
+	}
 
 	public static class DateTimeBean {
 
@@ -365,6 +376,8 @@ public class DateTimeFormattingTests {
 		private LocalDateTime isoDateTime;
 
 		private Instant instant;
+
+		private Duration duration;
 
 		private final List<DateTimeBean> children = new ArrayList<DateTimeBean>();
 
@@ -454,6 +467,14 @@ public class DateTimeFormattingTests {
 
 		public void setInstant(Instant instant) {
 			this.instant = instant;
+		}
+
+		public Duration getDuration() {
+			return duration;
+		}
+
+		public void setDuration(Duration duration) {
+			this.duration = duration;
 		}
 
 		public List<DateTimeBean> getChildren() {

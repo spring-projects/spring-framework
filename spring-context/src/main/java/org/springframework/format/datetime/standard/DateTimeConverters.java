@@ -16,6 +16,7 @@
 
 package org.springframework.format.datetime.standard;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -73,6 +74,7 @@ final class DateTimeConverters {
 		registry.addConverter(new CalendarToInstantConverter());
 		registry.addConverter(new LongToInstantConverter());
 		registry.addConverter(new InstantToLongConverter());
+		registry.addConverter(new StringToDurationConverter());
 	}
 
 	private static ZonedDateTime calendarToZonedDateTime(Calendar source) {
@@ -269,4 +271,12 @@ final class DateTimeConverters {
 		}
 	}
 
+	@UsesJava8
+	private static class StringToDurationConverter implements Converter<String, Duration> {
+
+		@Override
+		public Duration convert(String source) {
+			return Duration.parse(source);
+		}
+	}
 }
