@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
@@ -122,6 +123,11 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	}
 
 	@Override
+	public void flushBuffer() throws IOException {
+		// do not flush the underlying response as the content as not been copied to it yet
+	}
+
+	@Override
 	public void setContentLength(int len) {
 		if (len > this.content.size()) {
 			this.content.resize(len);
@@ -178,7 +184,7 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	 * Return an {@link InputStream} to the cached content.
 	 * @since 4.2
 	 */
-	public InputStream getContentInputStream(){
+	public InputStream getContentInputStream() {
 		return this.content.getInputStream();
 	}
 
@@ -186,7 +192,7 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	 * Return the current size of the cached content.
 	 * @since 4.2
 	 */
-	public int getContentSize(){
+	public int getContentSize() {
 		return this.content.size();
 	}
 
@@ -207,12 +213,15 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	protected void copyBodyToResponse(boolean complete) throws IOException {
 		if (this.content.size() > 0) {
 			HttpServletResponse rawResponse = (HttpServletResponse) getResponse();
-			if ((complete || this.contentLength != null) && !rawResponse.isCommitted()){
+			if ((complete || this.contentLength != null) && !rawResponse.isCommitted()) {
 				rawResponse.setContentLength(complete ? this.content.size() : this.contentLength);
 				this.contentLength = null;
 			}
 			this.content.writeTo(rawResponse.getOutputStream());
 			this.content.reset();
+			if (complete) {
+				super.flushBuffer();
+			}
 		}
 	}
 
