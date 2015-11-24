@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,14 @@
 
 package org.springframework.format.datetime.standard;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
+import java.time.Period;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -182,6 +184,8 @@ public class DateTimeFormatterRegistrar implements FormatterRegistrar {
 				new TemporalAccessorParser(OffsetTime.class, timeFormatter));
 
 		registry.addFormatterForFieldType(Instant.class, new InstantFormatter());
+		registry.addFormatterForFieldType(Period.class, new PeriodFormatter());
+		registry.addFormatterForFieldType(Duration.class, new DurationFormatter());
 
 		registry.addFormatterForFieldAnnotation(new Jsr310DateTimeFormatAnnotationFormatterFactory());
 	}

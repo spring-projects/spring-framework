@@ -16,10 +16,12 @@
 
 package org.springframework.format.datetime.standard;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.Period;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -334,6 +336,24 @@ public class DateTimeFormattingTests {
 		assertTrue(binder.getBindingResult().getFieldValue("instant").toString().startsWith("2009-10-31"));
 	}
 
+	@Test
+	public void testBindPeriod() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("period", "P6Y3M1D");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertTrue(binder.getBindingResult().getFieldValue("period").toString().equals("P6Y3M1D"));
+	}
+
+	@Test
+	public void testBindDuration() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("duration", "PT8H6M12.345S");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertTrue(binder.getBindingResult().getFieldValue("duration").toString().equals("PT8H6M12.345S"));
+	}
+
 
 	public static class DateTimeBean {
 
@@ -365,6 +385,10 @@ public class DateTimeFormattingTests {
 		private LocalDateTime isoDateTime;
 
 		private Instant instant;
+
+		private Period period;
+
+		private Duration duration;
 
 		private final List<DateTimeBean> children = new ArrayList<DateTimeBean>();
 
@@ -454,6 +478,22 @@ public class DateTimeFormattingTests {
 
 		public void setInstant(Instant instant) {
 			this.instant = instant;
+		}
+
+		public Period getPeriod() {
+			return period;
+		}
+
+		public void setPeriod(Period period) {
+			this.period = period;
+		}
+
+		public Duration getDuration() {
+			return duration;
+		}
+
+		public void setDuration(Duration duration) {
+			this.duration = duration;
 		}
 
 		public List<DateTimeBean> getChildren() {
