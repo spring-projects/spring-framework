@@ -4194,6 +4194,29 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("value1",stringify(expression.getValue(mapArray)));
 		assertEquals("Ljava/lang/Object",getAst().getExitDescriptor());
 	}
+	
+	@Test
+	public void plusNeedingCheckcast_SPR12426() {
+		expression = parser.parseExpression("object + ' world'");
+		Object v = expression.getValue(new FooObject());
+		assertEquals("hello world",v);
+		assertCanCompile(expression);
+		assertEquals("hello world",v);		
+		
+		expression = parser.parseExpression("object + ' world'");
+		v = expression.getValue(new FooString());
+		assertEquals("hello world",v);
+		assertCanCompile(expression);
+		assertEquals("hello world",v);		
+	}
+	
+	public static class FooObject {
+		public Object getObject() { return "hello"; }
+	}
+
+	public static class FooString {
+		public String getObject() { return "hello"; }
+	}
 
 	@Test
 	public void mixingItUp_propertyAccessIndexerOpLtTernaryRootNull() throws Exception {

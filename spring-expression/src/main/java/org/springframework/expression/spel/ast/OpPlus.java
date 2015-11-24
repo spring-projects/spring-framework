@@ -198,7 +198,7 @@ public class OpPlus extends Operator {
 		else {
 			cf.enterCompilationScope();
 			operand.generateCode(mv,cf);
-			if (cf.lastDescriptor() != "Ljava/lang/String") {
+			if (!"Ljava/lang/String".equals(cf.lastDescriptor())) {
 				mv.visitTypeInsn(CHECKCAST, "java/lang/String");
 			}
 			cf.exitCompilationScope();
