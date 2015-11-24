@@ -14,35 +14,20 @@
  * limitations under the License.
  */
 
-package org.springframework.http.server;
+package org.springframework.http.server.support;
 
 
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.Lifecycle;
 import org.springframework.http.server.ReactiveHttpHandler;
 
 /**
  * @author Rossen Stoyanchev
  */
-public class HttpServerSupport {
+public interface HttpServer extends InitializingBean, Lifecycle {
 
-	private int port = -1;
+	void setPort(int port);
 
-	private ReactiveHttpHandler httpHandler;
-
-
-	public void setPort(int port) {
-		this.port = port;
-	}
-
-	public int getPort() {
-		return this.port;
-	}
-
-	public void setHandler(ReactiveHttpHandler handler) {
-		this.httpHandler = handler;
-	}
-
-	public ReactiveHttpHandler getHttpHandler() {
-		return this.httpHandler;
-	}
+	void setHandler(ReactiveHttpHandler handler);
 
 }

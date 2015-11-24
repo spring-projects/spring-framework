@@ -14,59 +14,54 @@
  * limitations under the License.
  */
 
-package org.springframework.http.server;
-
-import io.netty.buffer.ByteBuf;
+package org.springframework.http.server.support;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
-import org.springframework.http.server.rxnetty.RxNettyHttpHandlerAdapter;
+import org.springframework.http.server.undertow.UndertowHttpHandlerAdapter;
 
+import io.undertow.Undertow;
+import io.undertow.server.HttpHandler;
 
 /**
- * @author Rossen Stoyanchev
+ * @author Marek Hawrylczak
  */
-public class RxNettyHttpServer extends HttpServerSupport implements InitializingBean, HttpServer {
+public class UndertowHttpServer extends HttpServerSupport implements InitializingBean, HttpServer {
 
-	private RxNettyHttpHandlerAdapter rxNettyHandler;
-
-	private io.reactivex.netty.protocol.http.server.HttpServer<ByteBuf, ByteBuf> rxNettyServer;
+	private Undertow server;
 
 	private boolean running;
 
 
 	@Override
-	public boolean isRunning() {
-		return this.running;
-	}
-
-
-	@Override
 	public void afterPropertiesSet() throws Exception {
-
 		Assert.notNull(getHttpHandler());
-		this.rxNettyHandler = new RxNettyHttpHandlerAdapter(getHttpHandler());
-
-		this.rxNettyServer = (getPort() != -1 ?
-				io.reactivex.netty.protocol.http.server.HttpServer.newServer(getPort()) :
-				io.reactivex.netty.protocol.http.server.HttpServer.newServer());
+		HttpHandler handler = new UndertowHttpHandlerAdapter(getHttpHandler());
+		int port = (getPort() != -1 ? getPort() : 8080);
+		this.server = Undertow.builder().addHttpListener(port, "localhost")
+				.setHandler(handler).build();
 	}
-
 
 	@Override
 	public void start() {
 		if (!this.running) {
+			this.server.start();
 			this.running = true;
-			this.rxNettyServer.start(this.rxNettyHandler);
 		}
+
 	}
 
 	@Override
 	public void stop() {
 		if (this.running) {
+			this.server.stop();
 			this.running = false;
-			this.rxNettyServer.shutdown();
 		}
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.running;
 	}
 
 }
