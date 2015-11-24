@@ -144,23 +144,22 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 		return ClassUtils.getConstructorIfAvailable(targetClass, sourceClass);
 	}
 
-	private static boolean hasToMethodOrFactoryMethodOrConstructor(Class<?> targetClass,
-			Class<?> sourceClass) {
+	private static boolean hasToMethodOrFactoryMethodOrConstructor(Class<?> targetClass, Class<?> sourceClass) {
 		return (hasToMethod(targetClass, sourceClass) ||
 				hasFactoryMethod(targetClass, sourceClass) ||
 				hasFactoryConstructor(targetClass, sourceClass));
 	}
 
 	static boolean hasToMethod(Class<?> targetClass, Class<?> sourceClass) {
-		return getToMethod(targetClass, sourceClass) != null;
+		return (getToMethod(targetClass, sourceClass) != null);
 	}
 
 	static boolean hasFactoryMethod(Class<?> targetClass, Class<?> sourceClass) {
-		return getFactoryMethod(targetClass, sourceClass) != null;
+		return (getFactoryMethod(targetClass, sourceClass) != null);
 	}
 
 	static boolean hasFactoryConstructor(Class<?> targetClass, Class<?> sourceClass) {
-		return getFactoryConstructor(targetClass, sourceClass) != null;
+		return (getFactoryConstructor(targetClass, sourceClass) != null);
 	}
 
 }
