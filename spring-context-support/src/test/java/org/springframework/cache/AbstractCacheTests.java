@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 
 package org.springframework.cache;
+
+import java.util.UUID;
 
 import org.junit.Test;
 
@@ -45,7 +47,7 @@ public abstract class AbstractCacheTests<T extends Cache> {
 	public void testCachePut() throws Exception {
 		T cache = getCache();
 
-		Object key = "enescu";
+		String key = createRandomKey();
 		Object value = "george";
 
 		assertNull(cache.get(key));
@@ -69,7 +71,7 @@ public abstract class AbstractCacheTests<T extends Cache> {
 	public void testCachePutIfAbsent() throws Exception {
 		T cache = getCache();
 
-		Object key = new Object();
+		String key = createRandomKey();
 		Object value = "initialValue";
 
 		assertNull(cache.get(key));
@@ -83,7 +85,7 @@ public abstract class AbstractCacheTests<T extends Cache> {
 	public void testCacheRemove() throws Exception {
 		T cache = getCache();
 
-		Object key = "enescu";
+		String key = createRandomKey();
 		Object value = "george";
 
 		assertNull(cache.get(key));
@@ -102,4 +104,9 @@ public abstract class AbstractCacheTests<T extends Cache> {
 		assertNull(cache.get("vlaicu"));
 		assertNull(cache.get("enescu"));
 	}
+
+	private String createRandomKey() {
+		return UUID.randomUUID().toString();
+	}
+
 }
