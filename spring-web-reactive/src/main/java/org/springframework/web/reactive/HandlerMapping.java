@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive;
 
+import org.reactivestreams.Publisher;
+
 import org.springframework.http.server.ReactiveServerHttpRequest;
 
 /**
@@ -23,6 +25,6 @@ import org.springframework.http.server.ReactiveServerHttpRequest;
  */
 public interface HandlerMapping {
 
-	Object getHandler(ReactiveServerHttpRequest request);
+	Publisher<Object> getHandler(ReactiveServerHttpRequest request);
 
 }

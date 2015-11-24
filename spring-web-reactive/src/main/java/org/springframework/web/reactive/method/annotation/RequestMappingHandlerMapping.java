@@ -27,6 +27,8 @@ import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.reactivestreams.Publisher;
+import reactor.Publishers;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -92,15 +94,16 @@ public class RequestMappingHandlerMapping implements HandlerMapping,
 	}
 
 	@Override
-	public Object getHandler(ReactiveServerHttpRequest request) {
+	public Publisher<Object> getHandler(ReactiveServerHttpRequest request) {
 		for (Map.Entry<RequestMappingInfo, HandlerMethod> entry : this.methodMap.entrySet()) {
 			RequestMappingInfo info = entry.getKey();
 			if (info.matchesRequest(request)) {
+				HandlerMethod handlerMethod = entry.getValue();
 				if (logger.isDebugEnabled()) {
 					logger.debug("Mapped " + request.getMethod() + " " +
-							request.getURI().getPath() + " to [" + entry.getValue() + "]");
+							request.getURI().getPath() + " to [" + handlerMethod + "]");
 				}
-				return entry.getValue();
+				return Publishers.just(handlerMethod);
 			}
 		}
 		return null;

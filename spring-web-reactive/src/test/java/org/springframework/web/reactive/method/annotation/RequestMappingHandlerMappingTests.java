@@ -19,10 +19,13 @@ package org.springframework.web.reactive.method.annotation;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
+import reactor.rx.Streams;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -34,6 +37,7 @@ import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Sebastien Deleuze
@@ -56,19 +60,29 @@ public class RequestMappingHandlerMappingTests {
 	@Test
 	public void path() throws Exception {
 		ReactiveServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "boo");
-		HandlerMethod handler = (HandlerMethod) this.mapping.getHandler(request);
-		assertEquals(TestController.class.getMethod("boo"), handler.getMethod());
+		Publisher<?> handlerPublisher = this.mapping.getHandler(request);
+		HandlerMethod handlerMethod = toHandlerMethod(handlerPublisher);
+		assertEquals(TestController.class.getMethod("boo"), handlerMethod.getMethod());
 	}
 
 	@Test
 	public void method() throws Exception {
 		ReactiveServerHttpRequest request = new MockServerHttpRequest(HttpMethod.POST, "foo");
-		HandlerMethod handler = (HandlerMethod) this.mapping.getHandler(request);
-		assertEquals(TestController.class.getMethod("postFoo"), handler.getMethod());
+		Publisher<?> handlerPublisher = this.mapping.getHandler(request);
+		HandlerMethod handlerMethod = toHandlerMethod(handlerPublisher);
+		assertEquals(TestController.class.getMethod("postFoo"), handlerMethod.getMethod());
 
 		request = new MockServerHttpRequest(HttpMethod.GET, "foo");
-		handler = (HandlerMethod) this.mapping.getHandler(request);
-		assertEquals(TestController.class.getMethod("getFoo"), handler.getMethod());
+		handlerPublisher = this.mapping.getHandler(request);
+		handlerMethod = toHandlerMethod(handlerPublisher);
+		assertEquals(TestController.class.getMethod("getFoo"), handlerMethod.getMethod());
+	}
+
+	private HandlerMethod toHandlerMethod(Publisher<?> handlerPublisher) throws InterruptedException {
+		assertNotNull(handlerPublisher);
+		List<?> handlerList = Streams.wrap(handlerPublisher).toList().await(5, TimeUnit.SECONDS);
+		assertEquals(1, handlerList.size());
+		return (HandlerMethod) handlerList.get(0);
 	}
 
 

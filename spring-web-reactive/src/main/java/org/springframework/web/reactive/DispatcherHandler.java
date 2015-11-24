@@ -98,41 +98,33 @@ public class DispatcherHandler implements ReactiveHttpHandler, ApplicationContex
 			logger.debug("Processing " + request.getMethod() + " request for [" + request.getURI() + "]");
 		}
 
-		Object handler = getHandler(request);
-		if (handler == null) {
+		Publisher<Object> handlerPublisher = getHandler(request);
+		if (handlerPublisher == null) {
 			// No exception handling mechanism yet
 			response.setStatusCode(HttpStatus.NOT_FOUND);
 			response.writeHeaders();
 			return Publishers.empty();
 		}
 
-		HandlerAdapter handlerAdapter = getHandlerAdapter(handler);
-		if (handlerAdapter == null) {
-			return Publishers.error(new IllegalStateException("No HandlerAdapter for " + handler));
-		}
-
-		Publisher<HandlerResult> resultPublisher = handlerAdapter.handle(request, response, handler);
+		Publisher<HandlerResult> resultPublisher = Publishers.concatMap(handlerPublisher, handler -> {
+			HandlerAdapter handlerAdapter = getHandlerAdapter(handler);
+			return handlerAdapter.handle(request, response, handler);
+		});
 
 		return Publishers.concatMap(resultPublisher, result -> {
-			for (HandlerResultHandler resultHandler : resultHandlers) {
-				if (resultHandler.supports(result)) {
-					return resultHandler.handleResult(request, response, result);
-				}
-			}
-			return Publishers.error(new IllegalStateException(
-					"No HandlerResultHandler for " + result.getValue()));
+			HandlerResultHandler handler = getResultHandler(result);
+			return handler.handleResult(request, response, result);
 		});
 	}
 
-	protected Object getHandler(ReactiveServerHttpRequest request) {
-		Object handler = null;
+	protected Publisher<Object> getHandler(ReactiveServerHttpRequest request) {
 		for (HandlerMapping handlerMapping : this.handlerMappings) {
-			handler = handlerMapping.getHandler(request);
-			if (handler != null) {
-				break;
+			Publisher<Object> handlerPublisher = handlerMapping.getHandler(request);
+			if (handlerPublisher != null) {
+				return handlerPublisher;
 			}
 		}
-		return handler;
+		return null;
 	}
 
 	protected HandlerAdapter getHandlerAdapter(Object handler) {
@@ -141,7 +133,16 @@ public class DispatcherHandler implements ReactiveHttpHandler, ApplicationContex
 				return handlerAdapter;
 			}
 		}
-		return null;
+		throw new IllegalStateException("No HandlerAdapter: " + handler);
+	}
+
+	protected HandlerResultHandler getResultHandler(HandlerResult handlerResult) {
+		for (HandlerResultHandler resultHandler : resultHandlers) {
+			if (resultHandler.supports(handlerResult)) {
+				return resultHandler;
+			}
+		}
+		throw new IllegalStateException("No HandlerResultHandler: " + handlerResult.getValue());
 	}
 
 }
