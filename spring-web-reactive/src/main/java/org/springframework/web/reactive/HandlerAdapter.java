@@ -52,7 +52,7 @@ public interface HandlerAdapter {
 	 * @param handler handler to use. This object must have previously been passed
 	 * to the {@code supports} method of this interface, which must have
 	 * returned {@code true}.
-	 * @return An {@link HandlerResult} instance
+	 * @return A {@link Publisher} object that produces a single {@link HandlerResult} element
 	 */
 	Publisher<HandlerResult> handle(ReactiveServerHttpRequest request,
 			ReactiveServerHttpResponse response, Object handler);
