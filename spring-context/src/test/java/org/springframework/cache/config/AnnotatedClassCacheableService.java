@@ -16,6 +16,7 @@
 
 package org.springframework.cache.config;
 
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.cache.annotation.CacheEvict;
@@ -162,12 +163,12 @@ public class AnnotatedClassCacheableService implements CacheableService<Object> 
 
 	@Override
 	public Long throwChecked(Object arg1) throws Exception {
-		throw new UnsupportedOperationException(arg1.toString());
+		throw new IOException(arg1.toString());
 	}
 
 	@Override
 	public Long throwUnchecked(Object arg1) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException(arg1.toString());
 	}
 
 	// multi annotations

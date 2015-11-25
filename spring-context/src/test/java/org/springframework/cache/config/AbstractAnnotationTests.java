@@ -16,6 +16,7 @@
 
 package org.springframework.cache.config;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -290,6 +291,7 @@ public abstract class AbstractAnnotationTests {
 			service.throwChecked(arg);
 			fail("Excepted exception");
 		} catch (Exception ex) {
+			assertEquals("Wrong exception type", IOException.class, ex.getClass());
 			assertEquals(arg, ex.getMessage());
 		}
 	}
@@ -299,9 +301,8 @@ public abstract class AbstractAnnotationTests {
 			service.throwUnchecked(Long.valueOf(1));
 			fail("Excepted exception");
 		} catch (RuntimeException ex) {
-			assertTrue("Excepted different exception type and got " + ex.getClass(),
-					ex instanceof UnsupportedOperationException);
-			// expected
+			assertEquals("Wrong exception type", UnsupportedOperationException.class, ex.getClass());
+			assertEquals("1", ex.getMessage());
 		}
 	}
 
