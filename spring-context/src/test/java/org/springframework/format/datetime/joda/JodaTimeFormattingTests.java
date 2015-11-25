@@ -24,10 +24,12 @@ import java.util.Locale;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Duration;
 import org.joda.time.Instant;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
+import org.joda.time.Period;
 import org.joda.time.chrono.ISOChronology;
 import org.junit.After;
 import org.junit.Before;
@@ -457,6 +459,24 @@ public class JodaTimeFormattingTests {
 		assertNotNull(date);
 	}
 
+	@Test
+	public void testBindPeriod() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("period", "P6Y3M1D");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertTrue(binder.getBindingResult().getFieldValue("period").toString().equals("P6Y3M1D"));
+	}
+
+	@Test
+	public void testBindDuration() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("duration", "PT72.345S");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertTrue(binder.getBindingResult().getFieldValue("duration").toString().equals("PT72.345S"));
+	}
+
 
 	@SuppressWarnings("unused")
 	private static class JodaTimeBean {
@@ -514,6 +534,10 @@ public class JodaTimeFormattingTests {
 
 		@DateTimeFormat(iso=ISO.DATE_TIME)
 		private Instant mutableDateTimeAnnotated;
+
+		private Period period;
+
+		private Duration duration;
 
 		private final List<JodaTimeBean> children = new ArrayList<JodaTimeBean>();
 
@@ -676,6 +700,22 @@ public class JodaTimeFormattingTests {
 
 		public void setMutableDateTimeAnnotated(Instant mutableDateTimeAnnotated) {
 			this.mutableDateTimeAnnotated = mutableDateTimeAnnotated;
+		}
+
+		public Period getPeriod() {
+			return period;
+		}
+
+		public void setPeriod(Period period) {
+			this.period = period;
+		}
+
+		public Duration getDuration() {
+			return duration;
+		}
+
+		public void setDuration(Duration duration) {
+			this.duration = duration;
 		}
 
 		public List<JodaTimeBean> getChildren() {

@@ -22,9 +22,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
+import org.joda.time.Period;
 import org.joda.time.ReadableInstant;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -119,9 +121,9 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 	 * the {@link #setDateStyle(String) dateStyle} and
 	 * {@link #setUseIsoFormat(boolean) useIsoFormat} properties will be ignored.
 	 * @param formatter the formatter to use
+	 * @since 3.2
 	 * @see #setTimeFormatter
 	 * @see #setDateTimeFormatter
-	 * @since 3.2
 	 */
 	public void setDateFormatter(DateTimeFormatter formatter) {
 		this.formatters.put(Type.DATE, formatter);
@@ -133,9 +135,9 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 	 * the {@link #setTimeStyle(String) timeStyle} and
 	 * {@link #setUseIsoFormat(boolean) useIsoFormat} properties will be ignored.
 	 * @param formatter the formatter to use
+	 * @since 3.2
 	 * @see #setDateFormatter
 	 * @see #setDateTimeFormatter
-	 * @since 3.2
 	 */
 	public void setTimeFormatter(DateTimeFormatter formatter) {
 		this.formatters.put(Type.TIME, formatter);
@@ -148,9 +150,9 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 	 * the {@link #setDateTimeStyle(String) dateTimeStyle} and
 	 * {@link #setUseIsoFormat(boolean) useIsoFormat} properties will be ignored.
 	 * @param formatter the formatter to use
+	 * @since 3.2
 	 * @see #setDateFormatter
 	 * @see #setTimeFormatter
-	 * @since 3.2
 	 */
 	public void setDateTimeFormatter(DateTimeFormatter formatter) {
 		this.formatters.put(Type.DATE_TIME, formatter);
@@ -193,6 +195,9 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 					new DateTimeParser(dateTimeFormatter),
 					Date.class, Calendar.class);
 		}
+
+		registry.addFormatterForFieldType(Period.class, new PeriodFormatter());
+		registry.addFormatterForFieldType(Duration.class, new DurationFormatter());
 
 		registry.addFormatterForFieldAnnotation(new JodaDateTimeFormatAnnotationFormatterFactory());
 	}
