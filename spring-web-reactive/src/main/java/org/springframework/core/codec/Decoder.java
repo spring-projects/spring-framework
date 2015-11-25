@@ -22,7 +22,6 @@ import java.util.List;
 import org.reactivestreams.Publisher;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.Encoder;
 import org.springframework.util.MimeType;
 
 /**

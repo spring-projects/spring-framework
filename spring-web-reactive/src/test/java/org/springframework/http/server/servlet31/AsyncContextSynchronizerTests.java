@@ -21,8 +21,6 @@ import javax.servlet.AsyncContext;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.http.server.servlet31.AsyncContextSynchronizer;
-
 import static org.mockito.BDDMockito.mock;
 import static org.mockito.BDDMockito.verify;
 

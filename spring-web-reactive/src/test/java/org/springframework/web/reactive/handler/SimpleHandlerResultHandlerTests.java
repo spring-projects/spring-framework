@@ -24,7 +24,6 @@ import org.reactivestreams.Publisher;
 import org.springframework.core.ResolvableType;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
-import org.springframework.web.reactive.handler.SimpleHandlerResultHandler;
 
 /**
  * @author Sebastien Deleuze
