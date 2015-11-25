@@ -16,6 +16,7 @@
 
 package org.springframework.cache.config;
 
+import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.cache.annotation.CacheEvict;
@@ -166,7 +167,7 @@ public class DefaultCacheableService implements CacheableService<Long> {
 	@Override
 	@Cacheable("testCache")
 	public Long throwChecked(Object arg1) throws Exception {
-		throw new Exception(arg1.toString());
+		throw new IOException(arg1.toString());
 	}
 
 	@Override
