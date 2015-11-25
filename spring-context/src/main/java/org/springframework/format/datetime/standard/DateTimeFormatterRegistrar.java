@@ -21,9 +21,11 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.MonthDay;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.Period;
+import java.time.YearMonth;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -52,7 +54,7 @@ import org.springframework.lang.UsesJava8;
 @UsesJava8
 public class DateTimeFormatterRegistrar implements FormatterRegistrar {
 
-	private static enum Type {DATE, TIME, DATE_TIME}
+	private enum Type {DATE, TIME, DATE_TIME}
 
 
 	/**
@@ -186,6 +188,8 @@ public class DateTimeFormatterRegistrar implements FormatterRegistrar {
 		registry.addFormatterForFieldType(Instant.class, new InstantFormatter());
 		registry.addFormatterForFieldType(Period.class, new PeriodFormatter());
 		registry.addFormatterForFieldType(Duration.class, new DurationFormatter());
+		registry.addFormatterForFieldType(YearMonth.class, new YearMonthFormatter());
+		registry.addFormatterForFieldType(MonthDay.class, new MonthDayFormatter());
 
 		registry.addFormatterForFieldAnnotation(new Jsr310DateTimeFormatAnnotationFormatterFactory());
 	}

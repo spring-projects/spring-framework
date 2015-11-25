@@ -29,7 +29,9 @@ import org.joda.time.Instant;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
+import org.joda.time.MonthDay;
 import org.joda.time.Period;
+import org.joda.time.YearMonth;
 import org.joda.time.chrono.ISOChronology;
 import org.junit.After;
 import org.junit.Before;
@@ -68,7 +70,6 @@ public class JodaTimeFormattingTests {
 	private void setUp(JodaTimeFormatterRegistrar registrar) {
 		conversionService = new FormattingConversionService();
 		DefaultConversionService.addDefaultConverters(conversionService);
-
 		registrar.registerFormatters(conversionService);
 
 		JodaTimeBean bean = new JodaTimeBean();
@@ -477,6 +478,24 @@ public class JodaTimeFormattingTests {
 		assertTrue(binder.getBindingResult().getFieldValue("duration").toString().equals("PT72.345S"));
 	}
 
+	@Test
+	public void testBindYearMonth() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("yearMonth", "2007-12");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertTrue(binder.getBindingResult().getFieldValue("yearMonth").toString().equals("2007-12"));
+	}
+
+	@Test
+	public void testBindMonthDay() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("monthDay", "--12-03");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertTrue(binder.getBindingResult().getFieldValue("monthDay").toString().equals("--12-03"));
+	}
+
 
 	@SuppressWarnings("unused")
 	private static class JodaTimeBean {
@@ -538,6 +557,10 @@ public class JodaTimeFormattingTests {
 		private Period period;
 
 		private Duration duration;
+
+		private YearMonth yearMonth;
+
+		private MonthDay monthDay;
 
 		private final List<JodaTimeBean> children = new ArrayList<JodaTimeBean>();
 
@@ -716,6 +739,22 @@ public class JodaTimeFormattingTests {
 
 		public void setDuration(Duration duration) {
 			this.duration = duration;
+		}
+
+		public YearMonth getYearMonth() {
+			return yearMonth;
+		}
+
+		public void setYearMonth(YearMonth yearMonth) {
+			this.yearMonth = yearMonth;
+		}
+
+		public MonthDay getMonthDay() {
+			return monthDay;
+		}
+
+		public void setMonthDay(MonthDay monthDay) {
+			this.monthDay = monthDay;
 		}
 
 		public List<JodaTimeBean> getChildren() {

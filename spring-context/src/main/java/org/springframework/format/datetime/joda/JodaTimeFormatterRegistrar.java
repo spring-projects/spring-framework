@@ -26,8 +26,10 @@ import org.joda.time.Duration;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
+import org.joda.time.MonthDay;
 import org.joda.time.Period;
 import org.joda.time.ReadableInstant;
+import org.joda.time.YearMonth;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
@@ -56,7 +58,7 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
  */
 public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 
-	private static enum Type {DATE, TIME, DATE_TIME}
+	private enum Type {DATE, TIME, DATE_TIME}
 
 
 	/**
@@ -198,6 +200,8 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 
 		registry.addFormatterForFieldType(Period.class, new PeriodFormatter());
 		registry.addFormatterForFieldType(Duration.class, new DurationFormatter());
+		registry.addFormatterForFieldType(YearMonth.class, new YearMonthFormatter());
+		registry.addFormatterForFieldType(MonthDay.class, new MonthDayFormatter());
 
 		registry.addFormatterForFieldAnnotation(new JodaDateTimeFormatAnnotationFormatterFactory());
 	}
