@@ -19,6 +19,7 @@ package org.springframework.web.reactive;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,7 +31,6 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ReactiveHttpHandler;
 import org.springframework.http.server.ReactiveServerHttpRequest;
 import org.springframework.http.server.ReactiveServerHttpResponse;
@@ -76,6 +76,7 @@ public class DispatcherHandler implements ReactiveHttpHandler, ApplicationContex
 				context, HandlerMapping.class, true, false);
 
 		this.handlerMappings = new ArrayList<>(mappingBeans.values());
+		this.handlerMappings.add(new NotFoundHandlerMapping());
 		AnnotationAwareOrderComparator.sort(this.handlerMappings);
 
 		Map<String, HandlerAdapter> adapterBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(
@@ -98,13 +99,9 @@ public class DispatcherHandler implements ReactiveHttpHandler, ApplicationContex
 			logger.debug("Processing " + request.getMethod() + " request for [" + request.getURI() + "]");
 		}
 
-		Publisher<Object> handlerPublisher = getHandler(request);
-		if (handlerPublisher == null) {
-			// No exception handling mechanism yet
-			response.setStatusCode(HttpStatus.NOT_FOUND);
-			response.writeHeaders();
-			return Publishers.empty();
-		}
+		Publisher<HandlerMapping> mappings = Publishers.from(this.handlerMappings);
+		Publisher<Object> handlerPublisher = Publishers.concatMap(mappings, m -> m.getHandler(request));
+		handlerPublisher = first(handlerPublisher);
 
 		Publisher<HandlerResult> resultPublisher = Publishers.concatMap(handlerPublisher, handler -> {
 			HandlerAdapter handlerAdapter = getHandlerAdapter(handler);
@@ -115,16 +112,6 @@ public class DispatcherHandler implements ReactiveHttpHandler, ApplicationContex
 			HandlerResultHandler handler = getResultHandler(result);
 			return handler.handleResult(request, response, result);
 		});
-	}
-
-	protected Publisher<Object> getHandler(ReactiveServerHttpRequest request) {
-		for (HandlerMapping handlerMapping : this.handlerMappings) {
-			Publisher<Object> handlerPublisher = handlerMapping.getHandler(request);
-			if (handlerPublisher != null) {
-				return handlerPublisher;
-			}
-		}
-		return null;
 	}
 
 	protected HandlerAdapter getHandlerAdapter(Object handler) {
@@ -143,6 +130,23 @@ public class DispatcherHandler implements ReactiveHttpHandler, ApplicationContex
 			}
 		}
 		throw new IllegalStateException("No HandlerResultHandler: " + handlerResult.getValue());
+	}
+
+
+	private static <E> Publisher<E> first(Publisher<E> source) {
+		return Publishers.lift(source, (e, subscriber) -> {
+			subscriber.onNext(e);
+			subscriber.onComplete();
+		});
+	}
+
+	private static class NotFoundHandlerMapping implements HandlerMapping {
+
+		@Override
+		public Publisher<Object> getHandler(ReactiveServerHttpRequest request) {
+			return Publishers.error(new HandlerNotFoundException(request.getMethod(),
+					request.getURI().getPath(), request.getHeaders()));
+		}
 	}
 
 }

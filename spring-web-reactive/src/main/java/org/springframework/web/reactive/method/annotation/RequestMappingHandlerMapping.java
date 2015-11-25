@@ -28,19 +28,19 @@ import java.util.TreeSet;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
-import reactor.Publishers;
+import reactor.core.publisher.PublisherFactory;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.server.ReactiveServerHttpRequest;
-import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.HandlerMethodSelector;
+import org.springframework.web.reactive.HandlerMapping;
 
 
 /**
@@ -95,18 +95,21 @@ public class RequestMappingHandlerMapping implements HandlerMapping,
 
 	@Override
 	public Publisher<Object> getHandler(ReactiveServerHttpRequest request) {
-		for (Map.Entry<RequestMappingInfo, HandlerMethod> entry : this.methodMap.entrySet()) {
-			RequestMappingInfo info = entry.getKey();
-			if (info.matchesRequest(request)) {
-				HandlerMethod handlerMethod = entry.getValue();
-				if (logger.isDebugEnabled()) {
-					logger.debug("Mapped " + request.getMethod() + " " +
-							request.getURI().getPath() + " to [" + handlerMethod + "]");
+		return PublisherFactory.create(subscriber -> {
+			for (Map.Entry<RequestMappingInfo, HandlerMethod> entry : this.methodMap.entrySet()) {
+				RequestMappingInfo info = entry.getKey();
+				if (info.matchesRequest(request)) {
+					HandlerMethod handlerMethod = entry.getValue();
+					if (logger.isDebugEnabled()) {
+						logger.debug("Mapped " + request.getMethod() + " " +
+								request.getURI().getPath() + " to [" + handlerMethod + "]");
+					}
+					subscriber.onNext(handlerMethod);
+					break;
 				}
-				return Publishers.just(handlerMethod);
 			}
-		}
-		return null;
+			subscriber.onComplete();
+		});
 	}
 
 
