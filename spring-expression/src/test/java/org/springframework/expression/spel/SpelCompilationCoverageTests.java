@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.junit.Test;
+
 import org.springframework.asm.MethodVisitor;
 import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
@@ -1040,7 +1041,8 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		try {
 			assertEquals(42,expression.getValue(ctx));
 			fail();
-		} catch (SpelEvaluationException see) {
+		}
+		catch (SpelEvaluationException see) {
 			assertTrue(see.getCause() instanceof ClassCastException);
 		}
 
@@ -1055,7 +1057,8 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		try {
 			assertEquals('4',expression.getValue(ctx));
 			fail();
-		} catch (SpelEvaluationException see) {
+		}
+		catch (SpelEvaluationException see) {
 			assertTrue(see.getCause() instanceof ClassCastException);
 		}
 	}
@@ -3683,7 +3686,8 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		try {
 			assertEquals(2,expression.getValue(strings));
 			fail();
-		} catch (SpelEvaluationException see) {
+		}
+		catch (SpelEvaluationException see) {
 			assertTrue(see.getCause() instanceof ClassCastException);
 		}
 		SpelCompiler.revertToInterpreted(expression);
@@ -3714,7 +3718,8 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		try {
 			expression.getValue(tc);
 			fail();
-		} catch (SpelEvaluationException see) {
+		}
+		catch (SpelEvaluationException see) {
 			assertTrue(see.getCause() instanceof ClassCastException);
 		}
 
@@ -3726,7 +3731,8 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		try {
 			expression.getValue(new Integer(42));
 			fail();
-		} catch (SpelEvaluationException see) {
+		}
+		catch (SpelEvaluationException see) {
 			// java.lang.Integer cannot be cast to java.lang.String
 			assertTrue(see.getCause() instanceof ClassCastException);
 		}
@@ -4210,14 +4216,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("hello world",v);		
 	}
 	
-	public static class FooObject {
-		public Object getObject() { return "hello"; }
-	}
-
-	public static class FooString {
-		public String getObject() { return "hello"; }
-	}
-
 	@Test
 	public void mixingItUp_propertyAccessIndexerOpLtTernaryRootNull() throws Exception {
 		Payload payload = new Payload();
@@ -4497,23 +4495,90 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals(3,expression.getValue(root));
 	}
 
-	// ---
+
+	// helper methods
+
+	private SpelNodeImpl getAst() {
+		SpelExpression spelExpression = (SpelExpression)expression;
+		SpelNode ast = spelExpression.getAST();
+		return (SpelNodeImpl)ast;
+	}
+
+	private String stringify(Object object) {
+		StringBuilder s = new StringBuilder();
+		if (object instanceof List) {
+			List<?> ls = (List<?>)object;
+			for (Object l: ls) {
+				s.append(l);
+				s.append(" ");
+			}
+		}
+		else if (object instanceof Object[]) {
+			Object[] os = (Object[])object;
+			for (Object o: os) {
+				s.append(o);
+				s.append(" ");
+			}
+		}
+		else if (object instanceof int[]) {
+			int[] is = (int[])object;
+			for (int i: is) {
+				s.append(i);
+				s.append(" ");
+			}
+		}
+		else {
+			s.append(object.toString());
+		}
+		return s.toString().trim();
+	}
+
+	private void assertCanCompile(Expression expression) {
+		assertTrue(SpelCompiler.compile(expression));
+	}
+
+	private void assertCantCompile(Expression expression) {
+		assertFalse(SpelCompiler.compile(expression));
+	}
+
+	private Expression parse(String expression) {
+		return parser.parseExpression(expression);
+	}
+
+	private void assertGetValueFail(Expression expression) {
+		try {
+			Object o = expression.getValue();
+			fail("Calling getValue on the expression should have failed but returned "+o);
+		}
+		catch (Exception ex) {
+			// success!
+		}
+	}
+
+
+	// helper classes
 
 	public static interface Message<T> {
+
 		MessageHeaders getHeaders();
+
 		@SuppressWarnings("rawtypes")
 		List getList();
+
 		int[] getIa();
 	}
 
 	public static class MyMessage implements Message<String> {
+
 		public MessageHeaders getHeaders() {
 			MessageHeaders mh = new MessageHeaders();
 			mh.put("command", "wibble");
 			mh.put("command2", "wobble");
 			return mh;
 		}
+
 		public int[] getIa() { return new int[]{5,3}; }
+
 		@SuppressWarnings({ "rawtypes", "unchecked" })
 		public List getList() {
 			List l = new ArrayList();
@@ -4532,9 +4597,11 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	@SuppressWarnings("serial")
-	public static class MessageHeaders extends HashMap<String,Object> {	}
+	public static class MessageHeaders extends HashMap<String,Object> {
+	}
 
 	public static class GenericMessageTestHelper<T> {
+
 		private T payload;
 
 		GenericMessageTestHelper(T value) {
@@ -4548,6 +4615,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 	// This test helper has a bound on the type variable
 	public static class GenericMessageTestHelper2<T extends Number> {
+
 		private T payload;
 
 		GenericMessageTestHelper2(T value) {
@@ -4616,7 +4684,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		}
 	}
 
-
 	static class CompilableMapAccessor implements CompilablePropertyAccessor {
 
 		@Override
@@ -4670,26 +4737,8 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			}
 			mv.visitLdcInsn(propertyName);
 			mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "get","(Ljava/lang/Object;)Ljava/lang/Object;",true);
-
-//			if (method == null) {
-//				try {
-//					method = Payload2.class.getDeclaredMethod("getField", String.class);
-//				} catch (Exception e) {}
-//			}
-//			String descriptor = codeflow.lastDescriptor();
-//			String memberDeclaringClassSlashedDescriptor = method.getDeclaringClass().getName().replace('.','/');
-//			if (descriptor == null) {
-//				codeflow.loadTarget(mv);
-//			}
-//			if (descriptor == null || !memberDeclaringClassSlashedDescriptor.equals(descriptor.substring(1))) {
-//				mv.visitTypeInsn(CHECKCAST, memberDeclaringClassSlashedDescriptor);
-//			}
-//			mv.visitLdcInsn(propertyReference.getName());
-//			mv.visitMethodInsn(INVOKEVIRTUAL, memberDeclaringClassSlashedDescriptor, method.getName(),CodeFlow.createDescriptor(method));
-//			   6:	invokeinterface	#6,  2; //InterfaceMethod java/util/Map.get:(Ljava/lang/Object;)Ljava/lang/Object;
 		}
 	}
-
 
 	/**
 	 * Exception thrown from {@code read} in order to reset a cached
@@ -4712,68 +4761,22 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 
-	// helpers
-
-	private SpelNodeImpl getAst() {
-		SpelExpression spelExpression = (SpelExpression)expression;
-		SpelNode ast = spelExpression.getAST();
-		return (SpelNodeImpl)ast;
-	}
-
-	private String stringify(Object object) {
-		StringBuilder s = new StringBuilder();
-		if (object instanceof List) {
-			List<?> ls = (List<?>)object;
-			for (Object l: ls) {
-				s.append(l);
-				s.append(" ");
-			}
-		}
-		else if (object instanceof Object[]) {
-			Object[] os = (Object[])object;
-			for (Object o: os) {
-				s.append(o);
-				s.append(" ");
-			}
-		}
-		else if (object instanceof int[]) {
-			int[] is = (int[])object;
-			for (int i: is) {
-				s.append(i);
-				s.append(" ");
-			}
-		}
-		else {
-			s.append(object.toString());
-		}
-		return s.toString().trim();
-	}
-
-	private void assertCanCompile(Expression expression) {
-		assertTrue(SpelCompiler.compile(expression));
-	}
-
-	private void assertCantCompile(Expression expression) {
-		assertFalse(SpelCompiler.compile(expression));
-	}
-
-	private Expression parse(String expression) {
-		return parser.parseExpression(expression);
-	}
-
-	private void assertGetValueFail(Expression expression) {
-		try {
-			Object o = expression.getValue();
-			fail("Calling getValue on the expression should have failed but returned "+o);
-		} catch (Exception ex) {
-			// success!
-		}
-	}
-
 	// test classes
 
+	public static class FooObject {
+
+		public Object getObject() { return "hello"; }
+	}
+
+	public static class FooString {
+
+		public String getObject() { return "hello"; }
+	}
+
 	public static class Payload {
+
 		Two[] DR = new Two[]{new Two()};
+
 		public Two holder = new Two();
 
 		public Two[] getDR() {
@@ -4782,12 +4785,15 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	public static class Payload2 {
+
 		String var1 = "abc";
 		String var2 = "def";
+
 		public Object getField(String name) {
 			if (name.equals("var1")) {
 				return var1;
-			} else if (name.equals("var2")) {
+			}
+			else if (name.equals("var2")) {
 				return var2;
 			}
 			return null;
@@ -4795,11 +4801,14 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	public static class Payload2Holder {
+
 		public Payload2 payload2 = new Payload2();
 	}
 
 	public static class Two {
+
 		Three three = new Three();
+
 		public Three getThree() {
 			return three;
 		}
@@ -4809,19 +4818,23 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	public static class Three {
+
 		double four = 0.04d;
+
 		public double getFour() {
 			return four;
 		}
 	}
 
 	public static class TestClass1 {
+
 		public int index1 = 1;
 		public int index2 = 3;
 		public String word = "abcd";
 	}
 
 	public static class TestClass4 {
+
 		public boolean a,b;
 		public boolean gettrue() { return true; }
 		public boolean getfalse() { return false; }
@@ -4830,6 +4843,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	public static class TestClass10 {
+
 		public String s = null;
 
 		public void reset() {
@@ -4870,6 +4884,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	public static class TestClass5 {
+
 		public int i = 0;
 		public String s = null;
 		public static int _i = 0;
@@ -5083,6 +5098,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	public static class TestClass6 {
+
 		public String orange = "value1";
 		public static String apple = "value2";
 
@@ -5098,7 +5114,9 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	public static class TestClass7 {
+
 		public static String property;
+
 		static {
 			String s = "UK 123";
 			StringTokenizer st = new StringTokenizer(s);
@@ -5114,6 +5132,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	public static class TestClass8 {
+
 		public int i;
 		public String s;
 		public double d;
@@ -5202,6 +5221,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 	@SuppressWarnings("unused")
 	private static class TestClass9 {
+
 		public TestClass9(int i) {}
 	}
 
@@ -5214,6 +5234,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		  HttpServlet3RequestFactory outer = new HttpServlet3RequestFactory();
 		  return outer.new Servlet3SecurityContextHolderAwareRequestWrapper();
 	  }
+
 	  // private class Servlet3SecurityContextHolderAwareRequestWrapper extends SecurityContextHolderAwareRequestWrapper
 	  private class Servlet3SecurityContextHolderAwareRequestWrapper extends SecurityContextHolderAwareRequestWrapper {
 	  }
@@ -5224,6 +5245,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	public static class HttpServletRequestWrapper {
+
 		public String getServletPath() {
 			return "wibble";
 		}
@@ -5244,6 +5266,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	}
 
 	public static class SomeCompareMethod2 {
+
 		public static int negate(int i1) {
 			return -i1;
 		}
@@ -5312,10 +5335,10 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 			}
 			return total;
 		}
-
 	}
 
 	public static class DelegatingStringFormat {
+
 		public static String format(String s, Object... args) {
 			return String.format(s, args);
 		}
