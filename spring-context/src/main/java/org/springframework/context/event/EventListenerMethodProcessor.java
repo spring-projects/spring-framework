@@ -72,8 +72,8 @@ public class EventListenerMethodProcessor implements SmartInitializingSingleton,
 	@Override
 	public void afterSingletonsInstantiated() {
 		List<EventListenerFactory> factories = getEventListenerFactories();
-		String[] allBeanNames = this.applicationContext.getBeanNamesForType(Object.class);
-		for (String beanName : allBeanNames) {
+		String[] beanNames = this.applicationContext.getBeanNamesForType(Object.class);
+		for (String beanName : beanNames) {
 			if (!ScopedProxyUtils.isScopedTarget(beanName)) {
 				Class<?> type = null;
 				try {

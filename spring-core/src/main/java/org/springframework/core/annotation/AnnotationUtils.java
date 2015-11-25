@@ -456,8 +456,8 @@ public abstract class AnnotationUtils {
 	private static <A extends Annotation> Set<A> getRepeatableAnnotations(AnnotatedElement annotatedElement,
 			Class<A> annotationType, Class<? extends Annotation> containerAnnotationType, boolean declaredMode) {
 
-		Assert.notNull(annotatedElement, "annotatedElement must not be null");
-		Assert.notNull(annotationType, "annotationType must not be null");
+		Assert.notNull(annotatedElement, "AnnotatedElement must not be null");
+		Assert.notNull(annotationType, "Annotation type must not be null");
 
 		try {
 			if (annotatedElement instanceof Method) {
@@ -488,6 +488,11 @@ public abstract class AnnotationUtils {
 	 * @since 4.2
 	 */
 	public static <A extends Annotation> A findAnnotation(AnnotatedElement annotatedElement, Class<A> annotationType) {
+		Assert.notNull(annotatedElement, "AnnotatedElement must not be null");
+		if (annotationType == null) {
+			return null;
+		}
+
 		// Do NOT store result in the findAnnotationCache since doing so could break
 		// findAnnotation(Class, Class) and findAnnotation(Method, Class).
 		return synthesizeAnnotation(
@@ -506,7 +511,6 @@ public abstract class AnnotationUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	private static <A extends Annotation> A findAnnotation(AnnotatedElement annotatedElement, Class<A> annotationType, Set<Annotation> visited) {
-		Assert.notNull(annotatedElement, "AnnotatedElement must not be null");
 		try {
 			Annotation[] anns = annotatedElement.getDeclaredAnnotations();
 			for (Annotation ann : anns) {
@@ -546,6 +550,11 @@ public abstract class AnnotationUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <A extends Annotation> A findAnnotation(Method method, Class<A> annotationType) {
+		Assert.notNull(method, "Method must not be null");
+		if (annotationType == null) {
+			return null;
+		}
+
 		AnnotationCacheKey cacheKey = new AnnotationCacheKey(method, annotationType);
 		A result = (A) findAnnotationCache.get(cacheKey);
 
@@ -663,6 +672,11 @@ public abstract class AnnotationUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	private static <A extends Annotation> A findAnnotation(Class<?> clazz, Class<A> annotationType, boolean synthesize) {
+		Assert.notNull(clazz, "Class must not be null");
+		if (annotationType == null) {
+			return null;
+		}
+
 		AnnotationCacheKey cacheKey = new AnnotationCacheKey(clazz, annotationType);
 		A result = (A) findAnnotationCache.get(cacheKey);
 		if (result == null) {
@@ -686,8 +700,6 @@ public abstract class AnnotationUtils {
 	 */
 	@SuppressWarnings("unchecked")
 	private static <A extends Annotation> A findAnnotation(Class<?> clazz, Class<A> annotationType, Set<Annotation> visited) {
-		Assert.notNull(clazz, "Class must not be null");
-
 		try {
 			Annotation[] anns = clazz.getDeclaredAnnotations();
 			for (Annotation ann : anns) {
@@ -862,6 +874,11 @@ public abstract class AnnotationUtils {
 	 */
 	public static boolean isAnnotationMetaPresent(Class<? extends Annotation> annotationType,
 			Class<? extends Annotation> metaAnnotationType) {
+
+		Assert.notNull(annotationType, "Annotation type must not be null");
+		if (metaAnnotationType == null) {
+			return false;
+		}
 
 		AnnotationCacheKey cacheKey = new AnnotationCacheKey(annotationType, metaAnnotationType);
 		Boolean metaPresent = metaPresentCache.get(cacheKey);
@@ -1760,8 +1777,7 @@ public abstract class AnnotationUtils {
 				return false;
 			}
 			AnnotationCacheKey otherKey = (AnnotationCacheKey) other;
-			return (this.element.equals(otherKey.element) &&
-					ObjectUtils.nullSafeEquals(this.annotationType, otherKey.annotationType));
+			return (this.element.equals(otherKey.element) && this.annotationType.equals(otherKey.annotationType));
 		}
 
 		@Override
