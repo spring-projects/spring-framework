@@ -35,7 +35,9 @@ import org.junit.rules.ExpectedException;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanInitializationException;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.PayloadApplicationEvent;
@@ -55,6 +57,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
@@ -238,6 +241,9 @@ public class AnnotationDrivenEventListenerTests {
 		assertTrue("bean should be a proxy", proxy instanceof Advised);
 		this.eventCollector.assertNoEventReceived(proxy.getId());
 
+		this.context.publishEvent(new ContextRefreshedEvent(this.context));
+		this.eventCollector.assertNoEventReceived(proxy.getId());
+
 		TestEvent event = new TestEvent();
 		this.context.publishEvent(event);
 		this.eventCollector.assertEvent(proxy.getId(), event);
@@ -250,6 +256,9 @@ public class AnnotationDrivenEventListenerTests {
 
 		AnnotatedSimpleService proxy = this.context.getBean(AnnotatedSimpleService.class);
 		assertTrue("bean should be a proxy", proxy instanceof Advised);
+		this.eventCollector.assertNoEventReceived(proxy.getId());
+
+		this.context.publishEvent(new ContextRefreshedEvent(this.context));
 		this.eventCollector.assertNoEventReceived(proxy.getId());
 
 		TestEvent event = new TestEvent();
@@ -266,10 +275,47 @@ public class AnnotationDrivenEventListenerTests {
 		assertTrue("bean should be a cglib proxy", AopUtils.isCglibProxy(proxy));
 		this.eventCollector.assertNoEventReceived(proxy.getId());
 
+		this.context.publishEvent(new ContextRefreshedEvent(this.context));
+		this.eventCollector.assertNoEventReceived(proxy.getId());
+
 		TestEvent event = new TestEvent();
 		this.context.publishEvent(event);
 		this.eventCollector.assertEvent(proxy.getId(), event);
 		this.eventCollector.assertTotalEventsCount(1);
+	}
+
+	@Test
+	public void eventListenerWorksWithCustomScope() throws Exception {
+		load(CustomScopeTestBean.class);
+		CustomScope customScope = new CustomScope();
+		this.context.getBeanFactory().registerScope("custom", customScope);
+
+		CustomScopeTestBean proxy = this.context.getBean(CustomScopeTestBean.class);
+		assertTrue("bean should be a cglib proxy", AopUtils.isCglibProxy(proxy));
+		this.eventCollector.assertNoEventReceived(proxy.getId());
+
+		this.context.publishEvent(new ContextRefreshedEvent(this.context));
+		this.eventCollector.assertNoEventReceived(proxy.getId());
+
+		customScope.active = false;
+		this.context.publishEvent(new ContextRefreshedEvent(this.context));
+		customScope.active = true;
+		this.eventCollector.assertNoEventReceived(proxy.getId());
+
+		TestEvent event = new TestEvent();
+		this.context.publishEvent(event);
+		this.eventCollector.assertEvent(proxy.getId(), event);
+		this.eventCollector.assertTotalEventsCount(1);
+
+		try {
+			customScope.active = false;
+			this.context.publishEvent(new TestEvent());
+			fail("Should have thrown IllegalStateException");
+		}
+		catch (BeanCreationException ex) {
+			// expected
+			assertTrue(ex.getCause() instanceof IllegalStateException);
+		}
 	}
 
 	@Test
@@ -725,6 +771,17 @@ public class AnnotationDrivenEventListenerTests {
 
 
 	@Component
+	@Scope(scopeName = "custom", proxyMode = ScopedProxyMode.TARGET_CLASS)
+	static class CustomScopeTestBean extends AbstractTestEventListener {
+
+		@EventListener
+		public void handleIt(TestEvent event) {
+			collectEvent(event);
+		}
+	}
+
+
+	@Component
 	static class GenericEventListener extends AbstractTestEventListener {
 
 		@EventListener
@@ -776,6 +833,42 @@ public class AnnotationDrivenEventListenerTests {
 		@EventListener
 		public void handleSecond(String payload) {
 			order.add("second");
+		}
+	}
+
+
+	private static class CustomScope implements org.springframework.beans.factory.config.Scope {
+
+		public boolean active = true;
+
+		private Object instance = null;
+
+		@Override
+		public Object get(String name, ObjectFactory<?> objectFactory) {
+			Assert.state(this.active, "Not active");
+			if (this.instance == null) {
+				this.instance = objectFactory.getObject();
+			}
+			return this.instance;
+		}
+
+		@Override
+		public Object remove(String name) {
+			return null;
+		}
+
+		@Override
+		public void registerDestructionCallback(String name, Runnable callback) {
+		}
+
+		@Override
+		public Object resolveContextualObject(String key) {
+			return null;
+		}
+
+		@Override
+		public String getConversationId() {
+			return null;
 		}
 	}
 
