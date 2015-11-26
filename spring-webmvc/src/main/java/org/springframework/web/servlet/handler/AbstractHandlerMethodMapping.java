@@ -196,7 +196,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	protected abstract T getMappingForMethod(Method method, Class<?> handlerType);
 
 	/**
-	 * Register a handler method and its unique mapping.
+	 * Register a handler method and its unique mapping. Invoked at startup for
+	 * each detected handler method.
 	 * @param handler the bean name of the handler or the handler instance
 	 * @param method the method to register
 	 * @param mapping the mapping conditions associated with the handler method
@@ -346,7 +347,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			return bestMatch.handlerMethod;
 		}
 		else {
-			return handleNoMatch(handlerMethods.keySet(), lookupPath, request);
+			return handleNoMatch(this.handlerMethods.keySet(), lookupPath, request);
 		}
 	}
 

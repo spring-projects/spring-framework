@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ import org.springframework.format.annotation.DateTimeFormat.ISO;
  */
 public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 
-	private static enum Type {DATE, TIME, DATE_TIME}
+	private enum Type {DATE, TIME, DATE_TIME}
 
 
 	/**
@@ -119,9 +119,9 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 	 * the {@link #setDateStyle(String) dateStyle} and
 	 * {@link #setUseIsoFormat(boolean) useIsoFormat} properties will be ignored.
 	 * @param formatter the formatter to use
+	 * @since 3.2
 	 * @see #setTimeFormatter
 	 * @see #setDateTimeFormatter
-	 * @since 3.2
 	 */
 	public void setDateFormatter(DateTimeFormatter formatter) {
 		this.formatters.put(Type.DATE, formatter);
@@ -133,9 +133,9 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 	 * the {@link #setTimeStyle(String) timeStyle} and
 	 * {@link #setUseIsoFormat(boolean) useIsoFormat} properties will be ignored.
 	 * @param formatter the formatter to use
+	 * @since 3.2
 	 * @see #setDateFormatter
 	 * @see #setDateTimeFormatter
-	 * @since 3.2
 	 */
 	public void setTimeFormatter(DateTimeFormatter formatter) {
 		this.formatters.put(Type.TIME, formatter);
@@ -148,9 +148,9 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 	 * the {@link #setDateTimeStyle(String) dateTimeStyle} and
 	 * {@link #setUseIsoFormat(boolean) useIsoFormat} properties will be ignored.
 	 * @param formatter the formatter to use
+	 * @since 3.2
 	 * @see #setDateFormatter
 	 * @see #setTimeFormatter
-	 * @since 3.2
 	 */
 	public void setDateTimeFormatter(DateTimeFormatter formatter) {
 		this.formatters.put(Type.DATE_TIME, formatter);
