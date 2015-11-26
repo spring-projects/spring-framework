@@ -41,7 +41,7 @@ configure(allprojects) { project ->
 	ext.hamcrestVersion      = "1.3"
 	ext.hibernate3Version    = "3.6.10.Final"
 	ext.hibernate4Version    = "4.3.11.Final"
-	ext.hibernate5Version    = "5.0.3.Final"
+	ext.hibernate5Version    = "5.0.4.Final"
 	ext.hibval4Version       = "4.3.2.Final"
 	ext.hibval5Version       = "5.2.2.Final"
 	ext.hsqldbVersion        = "2.3.3"
@@ -72,9 +72,9 @@ configure(allprojects) { project ->
 	ext.testngVersion        = "6.9.9"
 	ext.tiles2Version        = "2.2.2"
 	ext.tiles3Version        = "3.0.5"
-	ext.tomcatVersion        = "8.0.28"
+	ext.tomcatVersion        = "8.0.29"
 	ext.tyrusVersion         = "1.3.5"  // constrained by WebLogic 12.1.3 support
-	ext.undertowVersion      = "1.3.5.Final"
+	ext.undertowVersion      = "1.3.6.Final"
 	ext.woodstoxVersion      = "5.0.1"
 	ext.xmlunitVersion       = "1.6"
 	ext.xstreamVersion       = "1.4.8"
@@ -856,6 +856,7 @@ project("spring-orm-hibernate5") {
 		optional("org.hibernate:hibernate-core:${hibernate5Version}")
 		optional("org.hibernate:hibernate-entitymanager:${hibernate5Version}")
 		optional("javax.servlet:javax.servlet-api:3.0.1")
+		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
 		optional("aopalliance:aopalliance:1.0")
 	}
 }
