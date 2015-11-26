@@ -89,19 +89,17 @@ public class AutowiredConfigurationTests {
 		assertThat(context.getBean(TestBean.class).getName(), equalTo(""));
 	}
 
-	/**
-	 * {@link Autowired} constructors are not supported on {@link Configuration} classes
-	 * due to CGLIB constraints
-	 */
-	@Test(expected = BeanCreationException.class)
-	public void testAutowiredConfigurationConstructorsAreNotSupported() {
-		DefaultListableBeanFactory context = new DefaultListableBeanFactory();
-		new XmlBeanDefinitionReader(context).loadBeanDefinitions(
+	@Test
+	public void testAutowiredConfigurationConstructorsAreSupported() {
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(
 				new ClassPathResource("annotation-config.xml", AutowiredConstructorConfig.class));
-		GenericApplicationContext ctx = new GenericApplicationContext(context);
+		GenericApplicationContext ctx = new GenericApplicationContext(factory);
 		ctx.registerBeanDefinition("config1", new RootBeanDefinition(AutowiredConstructorConfig.class));
 		ctx.registerBeanDefinition("config2", new RootBeanDefinition(ColorConfig.class));
-		ctx.refresh(); // should throw
+		ctx.refresh();
+		assertSame(ctx.getBean(AutowiredConstructorConfig.class).colour,
+				ctx.getBean(Colour.class));
 	}
 
 	@Test
