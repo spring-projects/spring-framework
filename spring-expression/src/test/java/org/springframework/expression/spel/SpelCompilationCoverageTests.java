@@ -1,5 +1,5 @@
 /*
- * Copyright 2014-2015 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1172,7 +1172,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertFalse((Boolean)expression.getValue());
 	}
 
-
 	@Test
 	public void opGt() throws Exception {
 		expression = parse("3.0d > 4.0d");
@@ -1318,7 +1317,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertTrue((Boolean)expression.getValue(tc7));
 		assertCanCompile(expression);
 		assertTrue((Boolean)expression.getValue(tc7));
-
 
 		expression = parse("3.0d == 4.0d");
 		assertCanCompile(expression);
@@ -1669,43 +1667,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals(3L,expression.getValue());
 		assertCanCompile(expression);
 		assertEquals(3L,expression.getValue());
-	}
-
-	public class PayloadX {
-		public int valueI = 120;
-		public Integer valueIB = 120;
-		public Integer valueIB58 = 58;
-		public Integer valueIB60 = 60;
-		public long valueJ = 120L;
-		public Long valueJB = 120L;
-		public Long valueJB58 = 58L;
-		public Long valueJB60 = 60L;
-		public double valueD = 120D;
-		public Double valueDB = 120D;
-		public Double valueDB58 = 58D;
-		public Double valueDB60 = 60D;
-		public float valueF = 120F;
-		public Float valueFB = 120F;
-		public Float valueFB58 = 58F;
-		public Float valueFB60 = 60F;
-		public byte valueB = (byte)120;
-		public byte valueB18 = (byte)18;
-		public byte valueB20 = (byte)20;
-		public Byte valueBB = (byte)120;
-		public Byte valueBB18 = (byte)18;
-		public Byte valueBB20 = (byte)20;
-		public char valueC = (char)120;
-		public Character valueCB = (char)120;
-		public short valueS = (short)120;
-		public short valueS18 = (short)18;
-		public short valueS20 = (short)20;
-		public Short valueSB = (short)120;
-		public Short valueSB18 = (short)18;
-		public Short valueSB20 = (short)20;
-		public PayloadX payload;
-		public PayloadX() {
-			payload = this;
-		}
 	}
 
 	@Test
@@ -2154,16 +2115,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("objectobject",expression.getValue(new Greeter()));
 		assertCanCompile(expression);
 		assertEquals("objectobject",expression.getValue(new Greeter()));
-	}
-
-	public static class Greeter {
-		public String getWorld() {
-			return "world";
-		}
-
-		public Object getObject() {
-			return "object";
-		}
 	}
 
 	@Test
@@ -2994,17 +2945,17 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 	@Test
 	public void failsWhenSettingContextForExpression_SPR12326() {
-	    SpelExpressionParser parser = new SpelExpressionParser(new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE, this
-	            .getClass().getClassLoader()));
-	    Person3 person = new Person3("foo", 1);
-	    SpelExpression expression = parser.parseRaw("#it?.age?.equals([0])");
-	    StandardEvaluationContext context = new StandardEvaluationContext(new Object[] { 1 });
-	    context.setVariable("it", person);
-	    expression.setEvaluationContext(context);
-	    assertTrue(expression.getValue(Boolean.class));
-	    assertTrue(expression.getValue(Boolean.class));
-	    assertCanCompile(expression);
-	    assertTrue(expression.getValue(Boolean.class));
+		SpelExpressionParser parser = new SpelExpressionParser(
+				new SpelParserConfiguration(SpelCompilerMode.IMMEDIATE, getClass().getClassLoader()));
+		Person3 person = new Person3("foo", 1);
+		SpelExpression expression = parser.parseRaw("#it?.age?.equals([0])");
+		StandardEvaluationContext context = new StandardEvaluationContext(new Object[] { 1 });
+		context.setVariable("it", person);
+		expression.setEvaluationContext(context);
+		assertTrue(expression.getValue(Boolean.class));
+		assertTrue(expression.getValue(Boolean.class));
+		assertCanCompile(expression);
+		assertTrue(expression.getValue(Boolean.class));
 	}
 
 	@Test
@@ -3110,40 +3061,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		context.setVariable("it", person2);
 		assertTrue((Boolean)ex.getValue(context));
 		assertTrue((Boolean)ex.getValue(context));
-	}
-
-	public class Person {
-
-	    private int age;
-
-	    public Person(int age) {
-	        this.age = age;
-	    }
-
-	    public int getAge() {
-	        return age;
-	    }
-
-	    public void setAge(int age) {
-	        this.age = age;
-	    }
-	}
-
-	public class Person3 {
-
-	    private int age;
-
-	    public Person3(String name, int age) {
-	        this.age = age;
-	    }
-
-	    public int getAge() {
-	        return age;
-	    }
-
-	    public void setAge(int age) {
-	        this.age = age;
-	    }
 	}
 
 	@Test
@@ -3668,7 +3585,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertCantCompile(expression); // method takes a string and we are passing an Integer
 	}
 
-
 	@Test
 	public void errorHandling() throws Exception {
 		TestClass5 tc = new TestClass5();
@@ -3834,7 +3750,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals(0.04d,expression.getValue(payload));
 		assertEquals("D",getAst().getExitDescriptor());
 	}
-
 
 	@Test
 	public void mixingItUp_indexerOpEqTernary() throws Exception {
@@ -4200,22 +4115,22 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("value1",stringify(expression.getValue(mapArray)));
 		assertEquals("Ljava/lang/Object",getAst().getExitDescriptor());
 	}
-	
+
 	@Test
 	public void plusNeedingCheckcast_SPR12426() {
 		expression = parser.parseExpression("object + ' world'");
 		Object v = expression.getValue(new FooObject());
 		assertEquals("hello world",v);
 		assertCanCompile(expression);
-		assertEquals("hello world",v);		
-		
+		assertEquals("hello world",v);
+
 		expression = parser.parseExpression("object + ' world'");
 		v = expression.getValue(new FooString());
 		assertEquals("hello world",v);
 		assertCanCompile(expression);
-		assertEquals("hello world",v);		
+		assertEquals("hello world",v);
 	}
-	
+
 	@Test
 	public void mixingItUp_propertyAccessIndexerOpLtTernaryRootNull() throws Exception {
 		Payload payload = new Payload();
@@ -4558,7 +4473,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 	// helper classes
 
-	public static interface Message<T> {
+	public interface Message<T> {
 
 		MessageHeaders getHeaders();
 
@@ -4763,6 +4678,17 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 	// test classes
 
+	public static class Greeter {
+
+		public String getWorld() {
+			return "world";
+		}
+
+		public Object getObject() {
+			return "object";
+		}
+	}
+
 	public static class FooObject {
 
 		public Object getObject() { return "hello"; }
@@ -4805,6 +4731,40 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		public Payload2 payload2 = new Payload2();
 	}
 
+	public class Person {
+
+		private int age;
+
+		public Person(int age) {
+			this.age = age;
+		}
+
+		public int getAge() {
+			return age;
+		}
+
+		public void setAge(int age) {
+			this.age = age;
+		}
+	}
+
+	public class Person3 {
+
+		private int age;
+
+		public Person3(String name, int age) {
+			this.age = age;
+		}
+
+		public int getAge() {
+			return age;
+		}
+
+		public void setAge(int age) {
+			this.age = age;
+		}
+	}
+
 	public static class Two {
 
 		Three three = new Three();
@@ -4823,6 +4783,44 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		public double getFour() {
 			return four;
+		}
+	}
+
+	public class PayloadX {
+
+		public int valueI = 120;
+		public Integer valueIB = 120;
+		public Integer valueIB58 = 58;
+		public Integer valueIB60 = 60;
+		public long valueJ = 120L;
+		public Long valueJB = 120L;
+		public Long valueJB58 = 58L;
+		public Long valueJB60 = 60L;
+		public double valueD = 120D;
+		public Double valueDB = 120D;
+		public Double valueDB58 = 58D;
+		public Double valueDB60 = 60D;
+		public float valueF = 120F;
+		public Float valueFB = 120F;
+		public Float valueFB58 = 58F;
+		public Float valueFB60 = 60F;
+		public byte valueB = (byte)120;
+		public byte valueB18 = (byte)18;
+		public byte valueB20 = (byte)20;
+		public Byte valueBB = (byte)120;
+		public Byte valueBB18 = (byte)18;
+		public Byte valueBB20 = (byte)20;
+		public char valueC = (char)120;
+		public Character valueCB = (char)120;
+		public short valueS = (short)120;
+		public short valueS18 = (short)18;
+		public short valueS20 = (short)20;
+		public Short valueSB = (short)120;
+		public Short valueSB18 = (short)18;
+		public Short valueSB20 = (short)20;
+		public PayloadX payload;
+		public PayloadX() {
+			payload = this;
 		}
 	}
 
@@ -5094,7 +5092,6 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 				}
 			}
 		}
-
 	}
 
 	public static class TestClass6 {
@@ -5159,65 +5156,65 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		}
 	}
 
-    public static class Obj {
+	public static class Obj {
 
-        private final String param1;
+		private final String param1;
 
-        public Obj(String param1){
-            this.param1 = param1;
-        }
-    }
+		public Obj(String param1){
+			this.param1 = param1;
+		}
+	}
 
-    public static class Obj2 {
+	public static class Obj2 {
 
-        public final String output;
+		public final String output;
 
-        public Obj2(String... params){
-        	StringBuilder b = new StringBuilder();
-        	for (String param: params) {
-        		b.append(param);
-        	}
-        	output = b.toString();
-        }
-    }
+		public Obj2(String... params){
+			StringBuilder b = new StringBuilder();
+			for (String param: params) {
+				b.append(param);
+			}
+			output = b.toString();
+		}
+	}
 
-    public static class Obj3 {
+	public static class Obj3 {
 
-        public final String output;
+		public final String output;
 
-        public Obj3(int... params) {
-        	StringBuilder b = new StringBuilder();
-        	for (int param: params) {
-        		b.append(Integer.toString(param));
-        	}
-        	output = b.toString();
-        }
-  
-        public Obj3(String s, Float f, int... ints) {
-        	StringBuilder b = new StringBuilder();
-        	b.append(s);
-        	b.append(":");
-        	b.append(Float.toString(f));
-        	b.append(":");
-        	for (int param: ints) {
-        		b.append(Integer.toString(param));
-        	}
-        	output = b.toString();
-        }
-    }
+		public Obj3(int... params) {
+			StringBuilder b = new StringBuilder();
+			for (int param: params) {
+				b.append(Integer.toString(param));
+			}
+			output = b.toString();
+		}
 
-    public static class Obj4 {
+		public Obj3(String s, Float f, int... ints) {
+			StringBuilder b = new StringBuilder();
+			b.append(s);
+			b.append(":");
+			b.append(Float.toString(f));
+			b.append(":");
+			for (int param: ints) {
+				b.append(Integer.toString(param));
+			}
+			output = b.toString();
+		}
+	}
 
-        public final String output;
+	public static class Obj4 {
 
-        public Obj4(int[] params) {
-        	StringBuilder b = new StringBuilder();
-        	for (int param: params) {
-        		b.append(Integer.toString(param));
-        	}
-        	output = b.toString();
-        }
-    }
+		public final String output;
+
+		public Obj4(int[] params) {
+			StringBuilder b = new StringBuilder();
+			for (int param: params) {
+				b.append(Integer.toString(param));
+			}
+			output = b.toString();
+		}
+	}
 
 	@SuppressWarnings("unused")
 	private static class TestClass9 {
@@ -5230,14 +5227,14 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 	// final class HttpServlet3RequestFactory implements HttpServletRequestFactory
 	static class HttpServlet3RequestFactory {
 
-	  static Servlet3SecurityContextHolderAwareRequestWrapper getOne() {
-		  HttpServlet3RequestFactory outer = new HttpServlet3RequestFactory();
-		  return outer.new Servlet3SecurityContextHolderAwareRequestWrapper();
-	  }
+		static Servlet3SecurityContextHolderAwareRequestWrapper getOne() {
+			HttpServlet3RequestFactory outer = new HttpServlet3RequestFactory();
+			return outer.new Servlet3SecurityContextHolderAwareRequestWrapper();
+		}
 
-	  // private class Servlet3SecurityContextHolderAwareRequestWrapper extends SecurityContextHolderAwareRequestWrapper
-	  private class Servlet3SecurityContextHolderAwareRequestWrapper extends SecurityContextHolderAwareRequestWrapper {
-	  }
+		// private class Servlet3SecurityContextHolderAwareRequestWrapper extends SecurityContextHolderAwareRequestWrapper
+		private class Servlet3SecurityContextHolderAwareRequestWrapper extends SecurityContextHolderAwareRequestWrapper {
+		}
 	}
 
 	// public class SecurityContextHolderAwareRequestWrapper extends HttpServletRequestWrapper

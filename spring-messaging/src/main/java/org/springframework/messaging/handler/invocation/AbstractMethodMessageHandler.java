@@ -314,7 +314,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * under the same mapping
 	 */
 	protected void registerHandlerMethod(Object handler, Method method, T mapping) {
-		Assert.notNull(mapping, "Mapping must bot be null");
+		Assert.notNull(mapping, "Mapping must not be null");
 		HandlerMethod newHandlerMethod = createHandlerMethod(handler, method);
 		HandlerMethod oldHandlerMethod = this.handlerMethods.get(mapping);
 
