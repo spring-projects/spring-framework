@@ -34,14 +34,14 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
- * Abstract annotation test (containing several reusable methods).
+ * Abstract cache annotation tests (containing several reusable methods).
  *
  * @author Costin Leau
  * @author Chris Beams
  * @author Phillip Webb
  * @author Stephane Nicoll
  */
-public abstract class AbstractAnnotationTests {
+public abstract class AbstractCacheAnnotationTests {
 
 	protected ConfigurableApplicationContext ctx;
 
@@ -72,7 +72,7 @@ public abstract class AbstractAnnotationTests {
 	}
 
 	@After
-	public void tearDown() {
+	public void close() {
 		if (ctx != null) {
 			ctx.close();
 		}
@@ -128,7 +128,8 @@ public abstract class AbstractAnnotationTests {
 		assertSame(r1, r2);
 		try {
 			service.evictEarly(o1);
-		} catch (RuntimeException ex) {
+		}
+		catch (RuntimeException ex) {
 			// expected
 		}
 
@@ -147,7 +148,8 @@ public abstract class AbstractAnnotationTests {
 		assertSame(r1, r2);
 		try {
 			service.evictWithException(o1);
-		} catch (RuntimeException ex) {
+		}
+		catch (RuntimeException ex) {
 			// expected
 		}
 		// exception occurred, eviction skipped, data should still be in the cache
@@ -179,7 +181,8 @@ public abstract class AbstractAnnotationTests {
 
 		try {
 			service.invalidateEarly(o1, null);
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			// expected
 		}
 		Object r3 = service.cache(o1);
@@ -290,7 +293,8 @@ public abstract class AbstractAnnotationTests {
 		try {
 			service.throwChecked(arg);
 			fail("Excepted exception");
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			assertEquals("Wrong exception type", IOException.class, ex.getClass());
 			assertEquals(arg, ex.getMessage());
 		}
@@ -300,7 +304,8 @@ public abstract class AbstractAnnotationTests {
 		try {
 			service.throwUnchecked(Long.valueOf(1));
 			fail("Excepted exception");
-		} catch (RuntimeException ex) {
+		}
+		catch (RuntimeException ex) {
 			assertEquals("Wrong exception type", UnsupportedOperationException.class, ex.getClass());
 			assertEquals("1", ex.getMessage());
 		}
@@ -623,7 +628,8 @@ public abstract class AbstractAnnotationTests {
 			Object param = new Object();
 			cs.unknownCustomKeyGenerator(param);
 			fail("should have failed with NoSuchBeanDefinitionException");
-		} catch (NoSuchBeanDefinitionException e) {
+		}
+		catch (NoSuchBeanDefinitionException ex) {
 			// expected
 		}
 	}
@@ -645,7 +651,8 @@ public abstract class AbstractAnnotationTests {
 			Object param = new Object();
 			cs.unknownCustomCacheManager(param);
 			fail("should have failed with NoSuchBeanDefinitionException");
-		} catch (NoSuchBeanDefinitionException e) {
+		}
+		catch (NoSuchBeanDefinitionException ex) {
 			// expected
 		}
 	}

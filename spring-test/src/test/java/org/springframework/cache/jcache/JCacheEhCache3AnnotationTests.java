@@ -24,7 +24,6 @@ import javax.cache.spi.CachingProvider;
  * runs against EhCache 2.x with the EhCache-JCache add-on.
  *
  * @author Juergen Hoeller
- * @since 4.2.1
  */
 public class JCacheEhCache3AnnotationTests extends JCacheEhCacheAnnotationTests {
 

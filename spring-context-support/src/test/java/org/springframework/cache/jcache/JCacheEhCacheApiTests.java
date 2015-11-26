@@ -30,7 +30,7 @@ import org.springframework.cache.AbstractCacheTests;
 /**
  * @author Stephane Nicoll
  */
-public class JCacheEhCacheTests extends AbstractCacheTests<JCacheCache> {
+public class JCacheEhCacheApiTests extends AbstractCacheTests<JCacheCache> {
 
 	private CacheManager cacheManager;
 
@@ -38,18 +38,26 @@ public class JCacheEhCacheTests extends AbstractCacheTests<JCacheCache> {
 
 	private JCacheCache cache;
 
+
 	@Before
-	public void setUp() {
+	public void setup() {
 		this.cacheManager = getCachingProvider().getCacheManager();
 		this.cacheManager.createCache(CACHE_NAME, new MutableConfiguration<>());
 		this.nativeCache = this.cacheManager.getCache(CACHE_NAME);
 		this.cache = new JCacheCache(this.nativeCache);
 	}
 
-	@After
-	public void shutdownCacheManager() {
-		this.cacheManager.close();
+	protected CachingProvider getCachingProvider() {
+		return Caching.getCachingProvider();
 	}
+
+	@After
+	public void shutdown() {
+		if (this.cacheManager != null) {
+			this.cacheManager.close();
+		}
+	}
+
 
 	@Override
 	protected JCacheCache getCache() {
@@ -59,10 +67,6 @@ public class JCacheEhCacheTests extends AbstractCacheTests<JCacheCache> {
 	@Override
 	protected Object getNativeCache() {
 		return this.nativeCache;
-	}
-
-	protected CachingProvider getCachingProvider() {
-		return Caching.getCachingProvider();
 	}
 
 }

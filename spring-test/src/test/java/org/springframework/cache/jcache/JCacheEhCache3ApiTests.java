@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.config;
+package org.springframework.cache.jcache;
 
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.support.GenericXmlApplicationContext;
+import javax.cache.Caching;
+import javax.cache.spi.CachingProvider;
 
 /**
- * @author Costin Leau
- * @author Chris Beams
+ * Just here to be run against EHCache 3, whereas the original JCacheEhCacheAnnotationTests
+ * runs against EhCache 2.x with the EhCache-JCache add-on.
+ *
+ * @author Stephane Nicoll
  */
-public class AnnotationTests extends AbstractAnnotationTests {
+public class JCacheEhCache3ApiTests extends JCacheEhCacheApiTests {
 
 	@Override
-	protected ConfigurableApplicationContext getApplicationContext() {
-		return new GenericXmlApplicationContext(
-				"/org/springframework/cache/config/annotationDrivenCacheConfig.xml");
+	protected CachingProvider getCachingProvider() {
+		return Caching.getCachingProvider("org.ehcache.jsr107.EhcacheCachingProvider");
 	}
 
 }

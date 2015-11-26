@@ -33,6 +33,7 @@ public abstract class AbstractCacheTests<T extends Cache> {
 
 	protected abstract Object getNativeCache();
 
+
 	@Test
 	public void testCacheName() throws Exception {
 		assertEquals(CACHE_NAME, getCache().getName());
@@ -104,6 +105,7 @@ public abstract class AbstractCacheTests<T extends Cache> {
 		assertNull(cache.get("vlaicu"));
 		assertNull(cache.get("enescu"));
 	}
+
 
 	private String createRandomKey() {
 		return UUID.randomUUID().toString();
