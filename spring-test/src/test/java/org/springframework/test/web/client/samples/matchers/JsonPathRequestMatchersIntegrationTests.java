@@ -78,7 +78,6 @@ public class JsonPathRequestMatchersIntegrationTests {
 			.andExpect(content().contentType("application/json;charset=UTF-8"))
 			.andExpect(jsonPath("$.composers[?(@.name == 'Edvard Grieeeeeeg')]").doesNotExist())
 			.andExpect(jsonPath("$.composers[?(@.name == 'Robert Schuuuuuuman')]").doesNotExist())
-			.andExpect(jsonPath("$.composers[-1]").doesNotExist())
 			.andExpect(jsonPath("$.composers[4]").doesNotExist())
 			.andRespond(withSuccess());
 	}
