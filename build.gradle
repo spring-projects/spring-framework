@@ -47,12 +47,12 @@ configure(allprojects) { project ->
 	ext.openJpaVersion       = "2.2.2"  // 2.3.0 not Java 8 compatible (based on ASM 4)
 	ext.protobufVersion      = "2.6.1"
 	ext.reactorVersion       = "1.1.6.RELEASE"
-	ext.slf4jVersion         = "1.7.12"
+	ext.slf4jVersion         = "1.7.13"
 	ext.snakeYamlVersion     = "1.16"
 	ext.snifferVersion       = "1.11"
 	ext.tiles2Version        = "2.2.2"
 	ext.tiles3Version        = "3.0.5"
-	ext.tomcatVersion        = "8.0.28"
+	ext.tomcatVersion        = "8.0.29"
 	ext.tyrusVersion         = "1.3.5"  // constrained by WebLogic 12.1.3 support
 	ext.undertowVersion      = "1.1.9.Final"
 	ext.woodstoxVersion      = "4.4.1"
