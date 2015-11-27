@@ -245,7 +245,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractHttpM
 	 * @param object the object to write to the output message.
 	 */
 	protected void writePrefix(JsonGenerator generator, Object object) throws IOException {
-
 	}
 
 	/**
@@ -254,7 +253,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractHttpM
 	 * @param object the object to write to the output message.
 	 */
 	protected void writeSuffix(JsonGenerator generator, Object object) throws IOException {
-
 	}
 
 	/**
@@ -271,11 +269,10 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractHttpM
 	 *   }
 	 * }
 	 * </pre>
-	 * @param type the type to return the java type for
+	 * @param type the generic type to return the Jackson JavaType for
 	 * @param contextClass a context class for the target type, for example a class
-	 * in which the target type appears in a method signature, can be {@code null}
-	 * signature, can be {@code null}
-	 * @return the java type
+	 * in which the target type appears in a method signature (can be {@code null})
+	 * @return the Jackson JavaType
 	 */
 	protected JavaType getJavaType(Type type, Class<?> contextClass) {
 		return this.objectMapper.getTypeFactory().constructType(type, contextClass);
