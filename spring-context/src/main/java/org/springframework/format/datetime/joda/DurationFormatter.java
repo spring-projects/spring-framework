@@ -31,7 +31,7 @@ import org.springframework.format.Formatter;
  * @since 4.2.4
  * @see Duration#parse
  */
-public class DurationFormatter implements Formatter<Duration> {
+class DurationFormatter implements Formatter<Duration> {
 
 	@Override
 	public Duration parse(String text, Locale locale) throws ParseException {

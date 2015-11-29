@@ -31,7 +31,7 @@ import org.springframework.format.Formatter;
  * @since 4.2.4
  * @see YearMonth#parse
  */
-public class YearMonthFormatter implements Formatter<YearMonth> {
+class YearMonthFormatter implements Formatter<YearMonth> {
 
 	@Override
 	public YearMonth parse(String text, Locale locale) throws ParseException {

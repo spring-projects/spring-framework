@@ -32,7 +32,7 @@ import org.springframework.lang.UsesJava8;
  * @see YearMonth#parse
  */
 @UsesJava8
-public class YearMonthFormatter implements Formatter<YearMonth> {
+class YearMonthFormatter implements Formatter<YearMonth> {
 
 	@Override
 	public YearMonth parse(String text, Locale locale) throws ParseException {

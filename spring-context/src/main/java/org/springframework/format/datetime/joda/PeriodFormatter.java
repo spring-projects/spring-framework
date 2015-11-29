@@ -31,7 +31,7 @@ import org.springframework.format.Formatter;
  * @since 4.2.4
  * @see Period#parse
  */
-public class PeriodFormatter implements Formatter<Period> {
+class PeriodFormatter implements Formatter<Period> {
 
 	@Override
 	public Period parse(String text, Locale locale) throws ParseException {

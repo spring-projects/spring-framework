@@ -32,7 +32,7 @@ import org.springframework.lang.UsesJava8;
  * @see MonthDay#parse
  */
 @UsesJava8
-public class MonthDayFormatter implements Formatter<MonthDay> {
+class MonthDayFormatter implements Formatter<MonthDay> {
 
 	@Override
 	public MonthDay parse(String text, Locale locale) throws ParseException {

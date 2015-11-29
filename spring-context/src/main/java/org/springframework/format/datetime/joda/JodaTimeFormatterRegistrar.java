@@ -38,6 +38,7 @@ import org.springframework.format.FormatterRegistry;
 import org.springframework.format.Parser;
 import org.springframework.format.Printer;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
+import org.springframework.util.ClassUtils;
 
 /**
  * Configures Joda-Time's formatting system for use with Spring.
@@ -60,6 +61,14 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 
 	private enum Type {DATE, TIME, DATE_TIME}
 
+
+	/**
+	 * Strictly speaking, this should not be necessary since we formally require JodaTime 2.x.
+	 * However, since Joda-Time formatters are being registered automatically, we defensively
+	 * adapt to Joda-Time 1.x when encountered on the classpath. To be removed in Spring 5.0.
+	 */
+	private static final boolean jodaTime2Available = ClassUtils.isPresent(
+			"org.joda.time.YearMonth", JodaTimeFormatterRegistrar.class.getClassLoader());
 
 	/**
 	 * User defined formatters.
@@ -200,8 +209,9 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 
 		registry.addFormatterForFieldType(Period.class, new PeriodFormatter());
 		registry.addFormatterForFieldType(Duration.class, new DurationFormatter());
-		registry.addFormatterForFieldType(YearMonth.class, new YearMonthFormatter());
-		registry.addFormatterForFieldType(MonthDay.class, new MonthDayFormatter());
+		if (jodaTime2Available) {
+			JodaTime2Delegate.registerAdditionalFormatters(registry);
+		}
 
 		registry.addFormatterForFieldAnnotation(new JodaDateTimeFormatAnnotationFormatterFactory());
 	}
@@ -228,6 +238,18 @@ public class JodaTimeFormatterRegistrar implements FormatterRegistrar {
 
 		for (Class<?> fieldType : fieldTypes) {
 			registry.addFormatterForFieldType(fieldType, printer, parser);
+		}
+	}
+
+
+	/**
+	 * Inner class to avoid a hard dependency on Joda-Time 2.x.
+	 */
+	private static class JodaTime2Delegate {
+
+		public static void registerAdditionalFormatters(FormatterRegistry registry) {
+			registry.addFormatterForFieldType(YearMonth.class, new YearMonthFormatter());
+			registry.addFormatterForFieldType(MonthDay.class, new MonthDayFormatter());
 		}
 	}
 

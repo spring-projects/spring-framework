@@ -33,7 +33,7 @@ import org.springframework.lang.UsesJava8;
  * @see Period#parse
  */
 @UsesJava8
-public class PeriodFormatter implements Formatter<Period> {
+class PeriodFormatter implements Formatter<Period> {
 
 	@Override
 	public Period parse(String text, Locale locale) throws ParseException {

@@ -31,7 +31,7 @@ import org.springframework.format.Formatter;
  * @since 4.2.4
  * @see MonthDay#parse
  */
-public class MonthDayFormatter implements Formatter<MonthDay> {
+class MonthDayFormatter implements Formatter<MonthDay> {
 
 	@Override
 	public MonthDay parse(String text, Locale locale) throws ParseException {
