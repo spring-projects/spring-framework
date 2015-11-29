@@ -617,7 +617,7 @@ public class DefaultConversionServiceTests {
 
 	@Test
 	public void convertArrayToArray() {
-		Integer[] result = conversionService.convert(new String[] { "1", "2", "3" }, Integer[].class);
+		Integer[] result = conversionService.convert(new String[] {"1", "2", "3"}, Integer[].class);
 		assertEquals(new Integer(1), result[0]);
 		assertEquals(new Integer(2), result[1]);
 		assertEquals(new Integer(3), result[2]);
@@ -625,7 +625,7 @@ public class DefaultConversionServiceTests {
 
 	@Test
 	public void convertArrayToPrimitiveArray() {
-		int[] result = conversionService.convert(new String[] { "1", "2", "3" }, int[].class);
+		int[] result = conversionService.convert(new String[] {"1", "2", "3"}, int[].class);
 		assertEquals(1, result[0]);
 		assertEquals(2, result[1]);
 		assertEquals(3, result[2]);
@@ -633,14 +633,14 @@ public class DefaultConversionServiceTests {
 
 	@Test
 	public void convertArrayToWrapperArray() {
-		byte[] byteArray = new byte[] { 1, 2, 3 };
+		byte[] byteArray = new byte[] {1, 2, 3};
 		Byte[] converted = conversionService.convert(byteArray, Byte[].class);
-		assertTrue(Arrays.equals(converted, new Byte[] { 1, 2, 3 }));
+		assertThat(converted, equalTo(new Byte[] {1, 2, 3}));
 	}
 
 	@Test
 	public void convertArrayToArrayAssignable() {
-		int[] result = conversionService.convert(new int[] { 1, 2, 3 }, int[].class);
+		int[] result = conversionService.convert(new int[] {1, 2, 3}, int[].class);
 		assertEquals(1, result[0]);
 		assertEquals(2, result[1]);
 		assertEquals(3, result[2]);
@@ -845,7 +845,7 @@ public class DefaultConversionServiceTests {
 	}
 
 	@Test(expected = ConverterNotFoundException.class)
-	public void convertObjectToObjectNoValueOFMethodOrConstructor() {
+	public void convertObjectToObjectNoValueOfMethodOrConstructor() {
 		conversionService.convert(new Long(3), SSN.class);
 	}
 
@@ -857,27 +857,27 @@ public class DefaultConversionServiceTests {
 
 	@Test
 	public void convertObjectToObjectFinderMethodWithNull() {
-		TestEntity e = (TestEntity) conversionService.convert(null,
+		TestEntity entity = (TestEntity) conversionService.convert(null,
 				TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(TestEntity.class));
-		assertNull(e);
+		assertNull(entity);
 	}
 
 	@Test
 	public void convertObjectToObjectFinderMethodWithIdConversion() {
-		TestEntity e = conversionService.convert("1", TestEntity.class);
-		assertEquals(new Long(1), e.getId());
+		TestEntity entity = conversionService.convert("1", TestEntity.class);
+		assertEquals(new Long(1), entity.getId());
 	}
 
 	@Test
 	public void convertCharArrayToString() throws Exception {
-		String converted = conversionService.convert(new char[] { 'a', 'b', 'c' }, String.class);
+		String converted = conversionService.convert(new char[] {'a', 'b', 'c'}, String.class);
 		assertThat(converted, equalTo("a,b,c"));
 	}
 
 	@Test
 	public void convertStringToCharArray() throws Exception {
 		char[] converted = conversionService.convert("a,b,c", char[].class);
-		assertThat(converted, equalTo(new char[] { 'a', 'b', 'c' }));
+		assertThat(converted, equalTo(new char[] {'a', 'b', 'c'}));
 	}
 
 	@Test
@@ -958,6 +958,7 @@ public class DefaultConversionServiceTests {
 		watch.stop();
 		// System.out.println(watch.prettyPrint());
 	}
+
 
 	@SuppressWarnings("serial")
 	public static class CustomNumber extends Number {

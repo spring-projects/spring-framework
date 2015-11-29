@@ -20,12 +20,14 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.ConditionalGenericConverter;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ConcurrentReferenceHashMap;
 import org.springframework.util.ReflectionUtils;
 
 /**
@@ -60,6 +62,19 @@ import org.springframework.util.ReflectionUtils;
  */
 final class ObjectToObjectConverter implements ConditionalGenericConverter {
 
+	// Cache for the latest to-method resolved on a given Class
+	private static final Map<Class<?>, Method> toMethodCache =
+			new ConcurrentReferenceHashMap<Class<?>, Method>(16);
+
+	// Cache for the latest factory-method resolved on a given Class
+	private static final Map<Class<?>, Method> factoryMethodCache =
+			new ConcurrentReferenceHashMap<Class<?>, Method>(16);
+
+	// Cache for the latest factory-constructor resolved on a given Class
+	private static final Map<Class<?>, Constructor<?>> factoryConstructorCache =
+			new ConcurrentReferenceHashMap<Class<?>, Constructor<?>>(16);
+
+
 	@Override
 	public Set<ConvertiblePair> getConvertibleTypes() {
 		return Collections.singleton(new ConvertiblePair(Object.class, Object.class));
@@ -67,7 +82,7 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 
 	@Override
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		if (sourceType.getType().equals(targetType.getType())) {
+		if (sourceType.getType() == targetType.getType()) {
 			// no conversion required
 			return false;
 		}
@@ -113,35 +128,56 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 
 		// If sourceClass is Number and targetClass is Integer, then the following message
 		// format should expand to:
-		// No toInteger() method exists on java.lang.Number, and no static
-		// valueOf/of/from(java.lang.Number) method or Integer(java.lang.Number)
-		// constructor exists on java.lang.Integer.
+		// No toInteger() method exists on java.lang.Number, and no static valueOf/of/from(java.lang.Number)
+		// method or Integer(java.lang.Number) constructor exists on java.lang.Integer.
 		String message = String.format(
-			"No to%3$s() method exists on %1$s, and no static valueOf/of/from(%1$s) method or %3$s(%1$s) constructor exists on %2$s.",
-			sourceClass.getName(), targetClass.getName(), targetClass.getSimpleName());
+				"No to%3$s() method exists on %1$s, and no static valueOf/of/from(%1$s) method or %3$s(%1$s) constructor exists on %2$s.",
+				sourceClass.getName(), targetClass.getName(), targetClass.getSimpleName());
 
 		throw new IllegalStateException(message);
 	}
 
 
 	private static Method getToMethod(Class<?> targetClass, Class<?> sourceClass) {
-		Method method = ClassUtils.getMethodIfAvailable(sourceClass, "to" + targetClass.getSimpleName());
-		return (method != null && targetClass.equals(method.getReturnType()) ? method : null);
+		Method method = toMethodCache.get(sourceClass);
+		if (method == null || !ClassUtils.isAssignable(targetClass, method.getReturnType())) {
+			method = ClassUtils.getMethodIfAvailable(sourceClass, "to" + targetClass.getSimpleName());
+			if (method == null || !ClassUtils.isAssignable(targetClass, method.getReturnType())) {
+				return null;
+			}
+			toMethodCache.put(sourceClass, method);
+		}
+		return method;
 	}
 
 	private static Method getFactoryMethod(Class<?> targetClass, Class<?> sourceClass) {
-		Method method = ClassUtils.getStaticMethod(targetClass, "valueOf", sourceClass);
-		if (method == null) {
-			method = ClassUtils.getStaticMethod(targetClass, "of", sourceClass);
+		Method method = factoryMethodCache.get(targetClass);
+		if (method == null || method.getParameterTypes()[0] != sourceClass) {
+			method = ClassUtils.getStaticMethod(targetClass, "valueOf", sourceClass);
 			if (method == null) {
-				method = ClassUtils.getStaticMethod(targetClass, "from", sourceClass);
+				method = ClassUtils.getStaticMethod(targetClass, "of", sourceClass);
+				if (method == null) {
+					method = ClassUtils.getStaticMethod(targetClass, "from", sourceClass);
+					if (method == null) {
+						return null;
+					}
+				}
 			}
+			factoryMethodCache.put(targetClass, method);
 		}
 		return method;
 	}
 
 	private static Constructor<?> getFactoryConstructor(Class<?> targetClass, Class<?> sourceClass) {
-		return ClassUtils.getConstructorIfAvailable(targetClass, sourceClass);
+		Constructor<?> ctor = factoryConstructorCache.get(targetClass);
+		if (ctor == null || ctor.getParameterTypes()[0] != sourceClass) {
+			ctor = ClassUtils.getConstructorIfAvailable(targetClass, sourceClass);
+			if (ctor == null) {
+				return null;
+			}
+			factoryConstructorCache.put(targetClass, ctor);
+		}
+		return ctor;
 	}
 
 	private static boolean hasToMethodOrFactoryMethodOrConstructor(Class<?> targetClass, Class<?> sourceClass) {
