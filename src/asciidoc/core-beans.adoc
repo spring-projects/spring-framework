@@ -1397,10 +1397,17 @@ so-called __inner bean__.
 	</bean>
 ----
 
-An inner bean definition does not require a defined id or name; the container ignores
-these values. It also ignores the `scope` flag. Inner beans are __always__ anonymous and
-they are __always__ created with the outer bean. It is __not__ possible to inject inner
-beans into collaborating beans other than into the enclosing bean.
+An inner bean definition does not require a defined id or name; if specified, the container
+does not use such a value as an identifier. The container also ignores the `scope` flag on
+creation: Inner beans are __always__ anonymous and they are __always__ created with the outer
+bean. It is __not__ possible to inject inner beans into collaborating beans other than into
+the enclosing bean or to access them independently.
+
+As a corner case, it is possible to receive destruction callbacks from a custom scope, e.g.
+for a request-scoped inner bean contained within a singleton bean: The creation of the inner
+bean instance will be tied to its containing bean, but destruction callbacks allow it to
+participate in the request scope's lifecycle. This is not a common scenario; inner beans
+typically simply share their containing bean's scope.
 
 
 [[beans-collection-elements]]

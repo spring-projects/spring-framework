@@ -2549,39 +2549,6 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
-	public void testDestroyMethodOnInnerBeanAsCustomScope() {
-		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		RootBeanDefinition innerBd = new RootBeanDefinition(BeanWithDestroyMethod.class);
-		innerBd.setScope("custom");
-		innerBd.setDestroyMethodName("close");
-		RootBeanDefinition bd = new RootBeanDefinition(BeanWithDestroyMethod.class);
-		bd.setDestroyMethodName("close");
-		bd.getPropertyValues().add("inner", innerBd);
-		lbf.registerBeanDefinition("test", bd);
-		BeanWithDestroyMethod.closeCount = 0;
-		lbf.preInstantiateSingletons();
-		lbf.destroySingletons();
-		assertEquals("Destroy methods not invoked", 1, BeanWithDestroyMethod.closeCount);
-	}
-
-	@Test
-	public void testDestroyMethodOnInnerBeanAsCustomScopeWithinPrototype() {
-		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		RootBeanDefinition innerBd = new RootBeanDefinition(BeanWithDestroyMethod.class);
-		innerBd.setScope("custom");
-		innerBd.setDestroyMethodName("close");
-		RootBeanDefinition bd = new RootBeanDefinition(BeanWithDestroyMethod.class);
-		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
-		bd.setDestroyMethodName("close");
-		bd.getPropertyValues().add("inner", innerBd);
-		lbf.registerBeanDefinition("test", bd);
-		BeanWithDestroyMethod.closeCount = 0;
-		Object prototypeInstance = lbf.getBean("test");
-		lbf.destroyBean("test", prototypeInstance);
-		assertEquals("Destroy methods not invoked", 1, BeanWithDestroyMethod.closeCount);
-	}
-
-	@Test
 	public void testFindTypeOfSingletonFactoryMethodOnBeanInstance() {
 		findTypeOfPrototypeFactoryMethodOnBeanInstance(true);
 	}

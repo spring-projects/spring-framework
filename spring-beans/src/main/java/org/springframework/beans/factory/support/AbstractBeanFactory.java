@@ -1251,14 +1251,15 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
 				// Set default singleton scope, if not configured before.
 				if (!StringUtils.hasLength(mbd.getScope())) {
-					mbd.setScope(BeanDefinition.SCOPE_SINGLETON);
+					mbd.setScope(RootBeanDefinition.SCOPE_SINGLETON);
 				}
 
-				// Check for a mismatch between an inner bean's scope and its containing
-				// bean's scope: For example, a bean contained in a non-singleton bean
-				// cannot be a singleton itself. Let's correct this on the fly here.
-				if (containingBd != null && !mbd.isPrototype() && !mbd.getScope().equals(containingBd.getScope())) {
-					mbd.setScope(containingBd.isSingleton() ? BeanDefinition.SCOPE_PROTOTYPE : containingBd.getScope());
+				// A bean contained in a non-singleton bean cannot be a singleton itself.
+				// Let's correct this on the fly here, since this might be the result of
+				// parent-child merging for the outer bean, in which case the original inner bean
+				// definition will not have inherited the merged outer bean's singleton status.
+				if (containingBd != null && !containingBd.isSingleton() && mbd.isSingleton()) {
+					mbd.setScope(containingBd.getScope());
 				}
 
 				// Only cache the merged bean definition if we're already about to create an

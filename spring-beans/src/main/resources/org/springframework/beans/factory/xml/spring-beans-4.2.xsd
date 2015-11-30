@@ -31,8 +31,8 @@
 	(or an ancestor factory).
 
 	As alternative to bean references, "inner bean definitions" can be used.
-	Singleton flags of such inner bean definitions are effectively ignored:
-	inner beans are typically anonymous prototypes.
+	Such inner beans do not have an independent lifecycle; they are typically
+	anonymous nested objects that share the scope of their containing bean.
 
 	There is also support for lists, sets, maps, and java.util.Properties
 	as bean property types or constructor argument types.
@@ -310,10 +310,10 @@
 	service objects. Further scopes, such as "request" or "session", might
 	be supported by extended bean factories (e.g. in a web environment).
 
-	Inner bean definitions inherit the singleton status of their containing
-	bean definition, unless explicitly specified: The inner bean will be a
+	Inner bean definitions inherit the scope of their containing bean
+	definition, unless explicitly specified: The inner bean will be a
 	singleton if the containing bean is a singleton, and a prototype if
-	the containing bean has any other scope.
+	the containing bean is a prototype, etc.
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
