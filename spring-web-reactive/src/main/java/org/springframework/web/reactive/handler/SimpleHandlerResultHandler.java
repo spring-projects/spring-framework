@@ -23,21 +23,34 @@ import reactor.Publishers;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.http.server.ReactiveServerHttpRequest;
 import org.springframework.http.server.ReactiveServerHttpResponse;
+import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
 
 /**
- * Supports {@link HandlerResult} with a {@code Publisher<Void>} value.
+ * Supports {@link HandlerResult} with a {@code void} or {@code Publisher<Void>} value.
+ * An optional {link ConversionService} can be used to support types that can be converted to
+ * {@code Publisher<Void>}, like {@code Observable<Void>} or {@code CompletableFuture<Void>}.
  *
  * @author Sebastien Deleuze
  */
 public class SimpleHandlerResultHandler implements Ordered, HandlerResultHandler {
 
-	private static final ResolvableType PUBLISHER_VOID = ResolvableType.forClassWithGenerics(Publisher.class, Void.class);
-
 	private int order = Ordered.LOWEST_PRECEDENCE;
+
+	private ConversionService conversionService;
+
+
+	public SimpleHandlerResultHandler() {
+	}
+
+	public SimpleHandlerResultHandler(ConversionService conversionService) {
+		Assert.notNull(conversionService, "'conversionService' is required.");
+		this.conversionService = conversionService;
+	}
 
 
 	public void setOrder(int order) {
@@ -52,14 +65,24 @@ public class SimpleHandlerResultHandler implements Ordered, HandlerResultHandler
 	@Override
 	public boolean supports(HandlerResult result) {
 		ResolvableType type = result.getValueType();
-		return type != null && PUBLISHER_VOID.isAssignableFrom(type);
+		return type != null && Void.TYPE.equals(type.getRawClass()) ||
+				(Void.class.isAssignableFrom(type.getGeneric(0).getRawClass()) && isConvertibleToPublisher(type));
+	}
+
+	private boolean isConvertibleToPublisher(ResolvableType type) {
+		return Publisher.class.isAssignableFrom(type.getRawClass()) ||
+				((this.conversionService != null) && this.conversionService.canConvert(type.getRawClass(), Publisher.class));
 	}
 
 	@Override
 	public Publisher<Void> handleResult(ReactiveServerHttpRequest request,
 			ReactiveServerHttpResponse response, HandlerResult result) {
 
-		Publisher<Void> completion = Publishers.completable((Publisher<?>)result.getValue());
+		Object value = result.getValue();
+		if (Void.TYPE.equals(result.getValueType().getRawClass())) {
+			return response.writeHeaders();
+		}
+		Publisher<Void> completion = (value instanceof Publisher ? (Publisher<Void>)value : this.conversionService.convert(value, Publisher.class));
 		return Publishers.concat(Publishers.from(Arrays.asList(completion, response.writeHeaders())));
 	}
 }

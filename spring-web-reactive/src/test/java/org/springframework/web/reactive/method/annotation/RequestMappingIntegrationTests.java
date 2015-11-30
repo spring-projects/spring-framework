@@ -197,16 +197,18 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 	}
 
 	@Test
-	public void create() throws Exception {
-		RestTemplate restTemplate = new RestTemplate();
-		URI url = new URI("http://localhost:" + this.port + "/create");
-		RequestEntity<List<Person>> request = RequestEntity.post(url)
-				.contentType(MediaType.APPLICATION_JSON)
-				.body(Arrays.asList(new Person("Robert"), new Person("Marie")));
-		ResponseEntity<Void> response = restTemplate.exchange(request, Void.class);
+	public void publisherCreate() throws Exception {
+		create("http://localhost:" + this.port + "/publisher-create");
+	}
 
-		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertEquals(2, this.wac.getBean(TestController.class).persons.size());
+	@Test
+	public void streamCreate() throws Exception {
+		create("http://localhost:" + this.port + "/stream-create");
+	}
+
+	@Test
+	public void observableCreate() throws Exception {
+		create("http://localhost:" + this.port + "/observable-create");
 	}
 
 
@@ -259,6 +261,18 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		assertEquals("MARIE", results.get(1).getName());
 	}
 
+	private void create(String requestUrl) throws Exception {
+		RestTemplate restTemplate = new RestTemplate();
+		URI url = new URI(requestUrl);
+		RequestEntity<List<Person>> request = RequestEntity.post(url)
+				.contentType(MediaType.APPLICATION_JSON)
+				.body(Arrays.asList(new Person("Robert"), new Person("Marie")));
+		ResponseEntity<Void> response = restTemplate.exchange(request, Void.class);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertEquals(2, this.wac.getBean(TestController.class).persons.size());
+	}
+
 
 	@Configuration
 	@SuppressWarnings("unused")
@@ -295,7 +309,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@Bean
 		public SimpleHandlerResultHandler simpleHandlerResultHandler() {
-			return new SimpleHandlerResultHandler();
+			return new SimpleHandlerResultHandler(conversionService());
 		}
 
 	}
@@ -448,9 +462,19 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 			});
 		}
 
-		@RequestMapping("/create")
-		public Publisher<Void> create(@RequestBody Stream<Person> personStream) {
+		@RequestMapping("/publisher-create")
+		public Publisher<Void> publisherCreate(@RequestBody Publisher<Person> personStream) {
+			return Streams.wrap(personStream).toList().onSuccess(persons::addAll).after();
+		}
+
+		@RequestMapping("/stream-create")
+		public Promise<Void> streamCreate(@RequestBody Stream<Person> personStream) {
 			return personStream.toList().onSuccess(persons::addAll).after();
+		}
+
+		@RequestMapping("/observable-create")
+		public Observable<Void> observableCreate(@RequestBody Observable<Person> personStream) {
+			return personStream.toList().doOnNext(p -> persons.addAll(p)).flatMap(document -> Observable.empty());
 		}
 
 		//TODO add mixed and T request mappings tests
