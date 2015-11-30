@@ -185,6 +185,14 @@ public class UriTemplateTests {
 		assertTrue(template.matches("/search?query=foo#bar"));
 	}
 
+	// SPR-13705
+
+	@Test
+	public void matchesWithSlashAtTheEnd() {
+		UriTemplate uriTemplate = new UriTemplate("/test/");
+		assertTrue(uriTemplate.matches("/test/"));
+	}
+
 	@Test
 	public void expandWithDollar() {
 		UriTemplate template = new UriTemplate("/{a}");
