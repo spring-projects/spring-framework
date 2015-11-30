@@ -17,9 +17,11 @@
 package org.springframework.core.convert;
 
 /**
- * Thrown when a suitable converter could not be found in a conversion service.
+ * Exception to be thrown when a suitable converter could not be found
+ * in a given conversion service.
  *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  */
 @SuppressWarnings("serial")
