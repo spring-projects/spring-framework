@@ -1055,7 +1055,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		String scopeName = mbd.getScope();
 		Scope scope = this.scopes.get(scopeName);
 		if (scope == null) {
-			throw new IllegalStateException("No Scope SPI registered for scope '" + scopeName + "'");
+			throw new IllegalStateException("No Scope SPI registered for scope name '" + scopeName + "'");
 		}
 		Object bean = scope.remove(beanName);
 		if (bean != null) {
@@ -1578,7 +1578,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				// A bean with a custom scope...
 				Scope scope = this.scopes.get(mbd.getScope());
 				if (scope == null) {
-					throw new IllegalStateException("No Scope registered for scope '" + mbd.getScope() + "'");
+					throw new IllegalStateException("No Scope registered for scope name '" + mbd.getScope() + "'");
 				}
 				scope.registerDestructionCallback(beanName,
 						new DisposableBeanAdapter(bean, beanName, mbd, getBeanPostProcessors(), acc));
