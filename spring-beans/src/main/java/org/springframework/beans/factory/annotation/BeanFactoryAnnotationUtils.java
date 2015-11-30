@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.beans.factory.annotation;
 
 import java.lang.reflect.Method;
-import java.util.Map;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -77,20 +76,19 @@ public class BeanFactoryAnnotationUtils {
 	 * @throws NoSuchBeanDefinitionException if no matching bean of type {@code T} found
 	 */
 	private static <T> T qualifiedBeanOfType(ConfigurableListableBeanFactory bf, Class<T> beanType, String qualifier) {
-		Map<String, T> candidateBeans = BeanFactoryUtils.beansOfTypeIncludingAncestors(bf, beanType);
-		T matchingBean = null;
-		for (Map.Entry<String, T> entry : candidateBeans.entrySet()) {
-			String beanName = entry.getKey();
+		String[] candidateBeans = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(bf, beanType);
+		String matchingBean = null;
+		for (String beanName : candidateBeans) {
 			if (isQualifierMatch(qualifier, beanName, bf)) {
 				if (matchingBean != null) {
 					throw new NoSuchBeanDefinitionException(qualifier, "No unique " + beanType.getSimpleName() +
 							" bean found for qualifier '" + qualifier + "'");
 				}
-				matchingBean = entry.getValue();
+				matchingBean = beanName;
 			}
 		}
 		if (matchingBean != null) {
-			return matchingBean;
+			return bf.getBean(matchingBean, beanType);
 		}
 		else if (bf.containsBean(qualifier)) {
 			// Fallback: target bean at least found by bean name - probably a manually registered singleton.
