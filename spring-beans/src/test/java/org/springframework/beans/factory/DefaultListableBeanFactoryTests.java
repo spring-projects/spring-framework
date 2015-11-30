@@ -2511,10 +2511,74 @@ public class DefaultListableBeanFactoryTests {
 				return bean;
 			}
 		});
-		BeanWithDestroyMethod.closed = false;
+		BeanWithDestroyMethod.closeCount = 0;
 		lbf.preInstantiateSingletons();
 		lbf.destroySingletons();
-		assertTrue("Destroy method invoked", BeanWithDestroyMethod.closed);
+		assertEquals("Destroy methods invoked", 1, BeanWithDestroyMethod.closeCount);
+	}
+
+	@Test
+	public void testDestroyMethodOnInnerBean() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition innerBd = new RootBeanDefinition(BeanWithDestroyMethod.class);
+		innerBd.setDestroyMethodName("close");
+		RootBeanDefinition bd = new RootBeanDefinition(BeanWithDestroyMethod.class);
+		bd.setDestroyMethodName("close");
+		bd.getPropertyValues().add("inner", innerBd);
+		lbf.registerBeanDefinition("test", bd);
+		BeanWithDestroyMethod.closeCount = 0;
+		lbf.preInstantiateSingletons();
+		lbf.destroySingletons();
+		assertEquals("Destroy methods invoked", 2, BeanWithDestroyMethod.closeCount);
+	}
+
+	@Test
+	public void testDestroyMethodOnInnerBeanAsPrototype() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition innerBd = new RootBeanDefinition(BeanWithDestroyMethod.class);
+		innerBd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		innerBd.setDestroyMethodName("close");
+		RootBeanDefinition bd = new RootBeanDefinition(BeanWithDestroyMethod.class);
+		bd.setDestroyMethodName("close");
+		bd.getPropertyValues().add("inner", innerBd);
+		lbf.registerBeanDefinition("test", bd);
+		BeanWithDestroyMethod.closeCount = 0;
+		lbf.preInstantiateSingletons();
+		lbf.destroySingletons();
+		assertEquals("Destroy methods invoked", 1, BeanWithDestroyMethod.closeCount);
+	}
+
+	@Test
+	public void testDestroyMethodOnInnerBeanAsCustomScope() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition innerBd = new RootBeanDefinition(BeanWithDestroyMethod.class);
+		innerBd.setScope("custom");
+		innerBd.setDestroyMethodName("close");
+		RootBeanDefinition bd = new RootBeanDefinition(BeanWithDestroyMethod.class);
+		bd.setDestroyMethodName("close");
+		bd.getPropertyValues().add("inner", innerBd);
+		lbf.registerBeanDefinition("test", bd);
+		BeanWithDestroyMethod.closeCount = 0;
+		lbf.preInstantiateSingletons();
+		lbf.destroySingletons();
+		assertEquals("Destroy methods not invoked", 1, BeanWithDestroyMethod.closeCount);
+	}
+
+	@Test
+	public void testDestroyMethodOnInnerBeanAsCustomScopeWithinPrototype() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition innerBd = new RootBeanDefinition(BeanWithDestroyMethod.class);
+		innerBd.setScope("custom");
+		innerBd.setDestroyMethodName("close");
+		RootBeanDefinition bd = new RootBeanDefinition(BeanWithDestroyMethod.class);
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bd.setDestroyMethodName("close");
+		bd.getPropertyValues().add("inner", innerBd);
+		lbf.registerBeanDefinition("test", bd);
+		BeanWithDestroyMethod.closeCount = 0;
+		Object prototypeInstance = lbf.getBean("test");
+		lbf.destroyBean("test", prototypeInstance);
+		assertEquals("Destroy methods not invoked", 1, BeanWithDestroyMethod.closeCount);
 	}
 
 	@Test
@@ -2780,7 +2844,7 @@ public class DefaultListableBeanFactoryTests {
 
 	@Test(timeout = 1000)
 	public void testRegistrationOfManyBeanDefinitionsIsFastEnough() {
-		// Assume.group(TestGroup.PERFORMANCE);
+		Assume.group(TestGroup.PERFORMANCE);
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("b", new RootBeanDefinition(B.class));
 		// bf.getBean("b");
@@ -2792,7 +2856,7 @@ public class DefaultListableBeanFactoryTests {
 
 	@Test(timeout = 1000)
 	public void testRegistrationOfManySingletonsIsFastEnough() {
-		// Assume.group(TestGroup.PERFORMANCE);
+		Assume.group(TestGroup.PERFORMANCE);
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.registerBeanDefinition("b", new RootBeanDefinition(B.class));
 		// bf.getBean("b");
@@ -2913,10 +2977,16 @@ public class DefaultListableBeanFactoryTests {
 
 	public static class BeanWithDestroyMethod {
 
-		private static boolean closed;
+		private static int closeCount = 0;
+
+		private BeanWithDestroyMethod inner;
+
+		public void setInner(BeanWithDestroyMethod inner) {
+			this.inner = inner;
+		}
 
 		public void close() {
-			closed = true;
+			closeCount++;
 		}
 	}
 
