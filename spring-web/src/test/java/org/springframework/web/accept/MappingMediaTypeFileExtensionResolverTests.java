@@ -51,12 +51,8 @@ public class MappingMediaTypeFileExtensionResolverTests {
 		assertTrue(extensions.isEmpty());
 	}
 
-	/**
-	 * Unit test for SPR-13747 - ensures that reverse lookup of media type from media
-	 * type key is case-insensitive.
-	 * 
-	 * @author Melissa Hartsock
-	 */
+	// SPR-13747
+
 	@Test
 	public void lookupMediaTypeCaseInsensitive() {
 		Map<String, MediaType> mapping = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
