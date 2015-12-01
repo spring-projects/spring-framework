@@ -63,7 +63,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		List<Publisher<Object>> argPublishers = getMethodArguments(request, providedArgs);
 
 		Publisher<Object[]> argValues = (!argPublishers.isEmpty() ?
-				Publishers.zip(argPublishers, this::unwrapOptionalArgValues) :
+				Publishers.<Tuple, Object[]>zip(argPublishers, this::unwrapOptionalArgValues) :
 				Publishers.just(new Object[0]));
 
 		return Publishers.map(argValues, args -> {
