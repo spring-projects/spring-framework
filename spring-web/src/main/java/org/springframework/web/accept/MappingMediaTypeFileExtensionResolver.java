@@ -99,6 +99,7 @@ public class MappingMediaTypeFileExtensionResolver implements MediaTypeFileExten
 	 * @return a MediaType for the key or {@code null}
 	 */
 	protected MediaType lookupMediaType(String extension) {
+		extension = extension.toLowerCase(Locale.ENGLISH);
 		return this.mediaTypes.get(extension);
 	}
 
