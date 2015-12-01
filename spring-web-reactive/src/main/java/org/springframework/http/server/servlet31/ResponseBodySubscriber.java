@@ -25,7 +25,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import reactor.io.buffer.Buffer;
 
 import org.springframework.util.Assert;
 
@@ -88,9 +87,10 @@ public class ResponseBodySubscriber implements WriteListener, Subscriber<ByteBuf
 
 		if (ready) {
 			if (this.buffer != null) {
-				output.write(new Buffer(this.buffer).asBytes());
+				byte[] bytes = new byte[this.buffer.remaining()];
+				this.buffer.get(bytes);
 				this.buffer = null;
-
+				output.write(bytes);
 				if (!subscriberComplete) {
 					this.subscription.request(1);
 				}
