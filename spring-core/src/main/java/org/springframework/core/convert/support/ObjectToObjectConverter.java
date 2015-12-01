@@ -18,7 +18,9 @@ package org.springframework.core.convert.support;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -37,10 +39,10 @@ import org.springframework.util.ReflectionUtils;
  *
  * <h3>Conversion Algorithm</h3>
  * <ol>
- * <li>Invoke a {@code to[targetType.simpleName]()} method on the source object
- * that has a return type equal to {@code targetType}, if such a method exists.
- * For example, {@code org.example.Bar Foo#toBar()} is a method that follows this
- * convention.
+ * <li>Invoke a non-static {@code to[targetType.simpleName]()} method on the
+ * source object that has a return type equal to {@code targetType}, if such
+ * a method exists. For example, {@code org.example.Bar Foo#toBar()} is a
+ * method that follows this convention.
  * <li>Otherwise invoke a <em>static</em> {@code valueOf(sourceType)} or Java
  * 8 style <em>static</em> {@code of(sourceType)} or {@code from(sourceType)}
  * method on the {@code targetType}, if such a method exists.
@@ -63,16 +65,8 @@ import org.springframework.util.ReflectionUtils;
 final class ObjectToObjectConverter implements ConditionalGenericConverter {
 
 	// Cache for the latest to-method resolved on a given Class
-	private static final Map<Class<?>, Method> toMethodCache =
-			new ConcurrentReferenceHashMap<Class<?>, Method>(16);
-
-	// Cache for the latest factory-method resolved on a given Class
-	private static final Map<Class<?>, Method> factoryMethodCache =
-			new ConcurrentReferenceHashMap<Class<?>, Method>(16);
-
-	// Cache for the latest factory-constructor resolved on a given Class
-	private static final Map<Class<?>, Constructor<?>> factoryConstructorCache =
-			new ConcurrentReferenceHashMap<Class<?>, Constructor<?>>(16);
+	private static final Map<Class<?>, Member> conversionMemberCache =
+			new ConcurrentReferenceHashMap<Class<?>, Member>(32);
 
 
 	@Override
@@ -82,13 +76,8 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 
 	@Override
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		if (sourceType.getType() == targetType.getType()) {
-			// no conversion required
-			return false;
-		}
-		return (String.class == targetType.getType() ?
-				hasFactoryConstructor(String.class, sourceType.getType()) :
-				hasToMethodOrFactoryMethodOrConstructor(targetType.getType(), sourceType.getType()));
+		return (sourceType.getType() != targetType.getType() &&
+				hasConversionMethodOrConstructor(targetType.getType(), sourceType.getType()));
 	}
 
 	@Override
@@ -98,25 +87,22 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 		}
 		Class<?> sourceClass = sourceType.getType();
 		Class<?> targetClass = targetType.getType();
+		Member member = getValidatedMember(targetClass, sourceClass);
+
 		try {
-			// Do not invoke a toString() method
-			if (String.class != targetClass) {
-				Method method = getToMethod(targetClass, sourceClass);
-				if (method != null) {
-					ReflectionUtils.makeAccessible(method);
+			if (member instanceof Method) {
+				Method method = (Method) member;
+				ReflectionUtils.makeAccessible(method);
+				if (!Modifier.isStatic(method.getModifiers())) {
 					return method.invoke(source);
 				}
+				else {
+					return method.invoke(null, source);
+				}
 			}
-
-			Method method = getFactoryMethod(targetClass, sourceClass);
-			if (method != null) {
-				ReflectionUtils.makeAccessible(method);
-				return method.invoke(null, source);
-			}
-
-			Constructor<?> constructor = getFactoryConstructor(targetClass, sourceClass);
-			if (constructor != null) {
-				return constructor.newInstance(source);
+			else if (member instanceof Constructor) {
+				Constructor<?> ctor = (Constructor) member;
+				return ctor.newInstance(source);
 			}
 		}
 		catch (InvocationTargetException ex) {
@@ -126,76 +112,89 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 			throw new ConversionFailedException(sourceType, targetType, source, ex);
 		}
 
-		// If sourceClass is Number and targetClass is Integer, then the following message
-		// format should expand to:
+		// If sourceClass is Number and targetClass is Integer, the following message should expand to:
 		// No toInteger() method exists on java.lang.Number, and no static valueOf/of/from(java.lang.Number)
 		// method or Integer(java.lang.Number) constructor exists on java.lang.Integer.
-		String message = String.format(
-				"No to%3$s() method exists on %1$s, and no static valueOf/of/from(%1$s) method or %3$s(%1$s) constructor exists on %2$s.",
-				sourceClass.getName(), targetClass.getName(), targetClass.getSimpleName());
-
-		throw new IllegalStateException(message);
+		throw new IllegalStateException(String.format("No to%3$s() method exists on %1$s, " +
+				"and no static valueOf/of/from(%1$s) method or %3$s(%1$s) constructor exists on %2$s.",
+				sourceClass.getName(), targetClass.getName(), targetClass.getSimpleName()));
 	}
 
 
-	private static Method getToMethod(Class<?> targetClass, Class<?> sourceClass) {
-		Method method = toMethodCache.get(sourceClass);
-		if (method == null || !ClassUtils.isAssignable(targetClass, method.getReturnType())) {
-			method = ClassUtils.getMethodIfAvailable(sourceClass, "to" + targetClass.getSimpleName());
-			if (method == null || !ClassUtils.isAssignable(targetClass, method.getReturnType())) {
-				return null;
-			}
-			toMethodCache.put(sourceClass, method);
+
+	static boolean hasConversionMethodOrConstructor(Class<?> targetClass, Class<?> sourceClass) {
+		return (getValidatedMember(targetClass, sourceClass) != null);
+	}
+
+	private static Member getValidatedMember(Class<?> targetClass, Class<?> sourceClass) {
+		Member member = conversionMemberCache.get(targetClass);
+		if (isApplicable(member, sourceClass)) {
+			return member;
 		}
-		return method;
-	}
 
-	private static Method getFactoryMethod(Class<?> targetClass, Class<?> sourceClass) {
-		Method method = factoryMethodCache.get(targetClass);
-		if (method == null || method.getParameterTypes()[0] != sourceClass) {
-			method = ClassUtils.getStaticMethod(targetClass, "valueOf", sourceClass);
-			if (method == null) {
-				method = ClassUtils.getStaticMethod(targetClass, "of", sourceClass);
-				if (method == null) {
-					method = ClassUtils.getStaticMethod(targetClass, "from", sourceClass);
-					if (method == null) {
-						return null;
-					}
+		member = determineToMethod(targetClass, sourceClass);
+		if (member == null) {
+			member = determineFactoryMethod(targetClass, sourceClass);
+			if (member == null) {
+				member = determineFactoryConstructor(targetClass, sourceClass);
+				if (member == null) {
+					return null;
 				}
 			}
-			factoryMethodCache.put(targetClass, method);
+		}
+
+		conversionMemberCache.put(targetClass, member);
+		return member;
+	}
+
+	private static boolean isApplicable(Member member, Class<?> sourceClass) {
+		if (member instanceof Method) {
+			Method method = (Method) member;
+			return (!Modifier.isStatic(method.getModifiers()) ?
+					ClassUtils.isAssignable(method.getDeclaringClass(), sourceClass) :
+					method.getParameterTypes()[0] == sourceClass);
+		}
+		else if (member instanceof Constructor) {
+			Constructor<?> ctor = (Constructor) member;
+			return (ctor.getParameterTypes()[0] == sourceClass);
+		}
+		else {
+			return false;
+		}
+	}
+
+	private static Method determineToMethod(Class<?> targetClass, Class<?> sourceClass) {
+		if (String.class == targetClass || String.class == sourceClass) {
+			// Do not accept a toString() method or any to methods on String itself
+			return null;
+		}
+
+		Method method = ClassUtils.getMethodIfAvailable(sourceClass, "to" + targetClass.getSimpleName());
+		return (method != null && !Modifier.isStatic(method.getModifiers()) &&
+				ClassUtils.isAssignable(targetClass, method.getReturnType()) ? method : null);
+	}
+
+	private static Method determineFactoryMethod(Class<?> targetClass, Class<?> sourceClass) {
+		if (String.class == targetClass) {
+			// Do not accept the String.valueOf(Object) method
+			return null;
+		}
+
+		Method method = ClassUtils.getStaticMethod(targetClass, "valueOf", sourceClass);
+		if (method == null) {
+			method = ClassUtils.getStaticMethod(targetClass, "of", sourceClass);
+			if (method == null) {
+				method = ClassUtils.getStaticMethod(targetClass, "from", sourceClass);
+				if (method == null) {
+					return null;
+				}
+			}
 		}
 		return method;
 	}
 
-	private static Constructor<?> getFactoryConstructor(Class<?> targetClass, Class<?> sourceClass) {
-		Constructor<?> ctor = factoryConstructorCache.get(targetClass);
-		if (ctor == null || ctor.getParameterTypes()[0] != sourceClass) {
-			ctor = ClassUtils.getConstructorIfAvailable(targetClass, sourceClass);
-			if (ctor == null) {
-				return null;
-			}
-			factoryConstructorCache.put(targetClass, ctor);
-		}
-		return ctor;
-	}
-
-	private static boolean hasToMethodOrFactoryMethodOrConstructor(Class<?> targetClass, Class<?> sourceClass) {
-		return (hasToMethod(targetClass, sourceClass) ||
-				hasFactoryMethod(targetClass, sourceClass) ||
-				hasFactoryConstructor(targetClass, sourceClass));
-	}
-
-	static boolean hasToMethod(Class<?> targetClass, Class<?> sourceClass) {
-		return (getToMethod(targetClass, sourceClass) != null);
-	}
-
-	static boolean hasFactoryMethod(Class<?> targetClass, Class<?> sourceClass) {
-		return (getFactoryMethod(targetClass, sourceClass) != null);
-	}
-
-	static boolean hasFactoryConstructor(Class<?> targetClass, Class<?> sourceClass) {
-		return (getFactoryConstructor(targetClass, sourceClass) != null);
+	private static Constructor<?> determineFactoryConstructor(Class<?> targetClass, Class<?> sourceClass) {
+		return ClassUtils.getConstructorIfAvailable(targetClass, sourceClass);
 	}
 
 }
