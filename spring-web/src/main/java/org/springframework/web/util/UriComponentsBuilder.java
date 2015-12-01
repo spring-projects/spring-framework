@@ -605,8 +605,9 @@ public class UriComponentsBuilder implements Cloneable {
 	 * be parsed unambiguously. Such values should be substituted for URI
 	 * variables to enable correct parsing:
 	 * <pre class="code">
-	 * String uriString = &quot;/hotels/42?filter={value}&quot;;
-	 * UriComponentsBuilder.fromUriString(uriString).buildAndExpand(&quot;hot&amp;cold&quot;);
+	 * UriComponentsBuilder.fromUriString(&quot;/hotels/42&quot;)
+	 * 	.query(&quot;filter={value}&quot;)
+	 * 	.buildAndExpand(&quot;hot&amp;cold&quot;);
 	 * </pre>
 	 * @param query the query string
 	 * @return this UriComponentsBuilder
