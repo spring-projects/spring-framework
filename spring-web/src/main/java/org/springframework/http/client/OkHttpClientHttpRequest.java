@@ -46,8 +46,7 @@ import org.springframework.util.concurrent.SettableListenableFuture;
  * @author Arjen Poutsma
  * @since 4.2
  */
-class OkHttpClientHttpRequest extends AbstractBufferingAsyncClientHttpRequest
-		implements ClientHttpRequest {
+class OkHttpClientHttpRequest extends AbstractBufferingAsyncClientHttpRequest implements ClientHttpRequest {
 
 	private final OkHttpClient client;
 
@@ -74,8 +73,8 @@ class OkHttpClientHttpRequest extends AbstractBufferingAsyncClientHttpRequest
 	}
 
 	@Override
-	protected ListenableFuture<ClientHttpResponse> executeInternal(HttpHeaders headers,
-			byte[] content) throws IOException {
+	protected ListenableFuture<ClientHttpResponse> executeInternal(HttpHeaders headers, byte[] content)
+			throws IOException {
 
 		MediaType contentType = getContentType(headers);
 		RequestBody body = (content.length > 0 ? RequestBody.create(contentType, content) : null);
