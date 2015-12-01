@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,10 +57,10 @@ public class TypeMismatchException extends PropertyAccessException {
 	 */
 	public TypeMismatchException(PropertyChangeEvent propertyChangeEvent, Class<?> requiredType, Throwable cause) {
 		super(propertyChangeEvent,
-				"Failed to convert property value of type '" +
-				ClassUtils.getDescriptiveType(propertyChangeEvent.getNewValue()) + "'" +
+				"Failed to convert property value of type [" +
+				ClassUtils.getDescriptiveType(propertyChangeEvent.getNewValue()) + "]" +
 				(requiredType != null ?
-				 " to required type '" + ClassUtils.getQualifiedName(requiredType) + "'" : "") +
+				 " to required type [" + ClassUtils.getQualifiedName(requiredType) + "]" : "") +
 				(propertyChangeEvent.getPropertyName() != null ?
 				 " for property '" + propertyChangeEvent.getPropertyName() + "'" : ""),
 				cause);
@@ -84,8 +84,8 @@ public class TypeMismatchException extends PropertyAccessException {
 	 * @param cause the root cause (may be {@code null})
 	 */
 	public TypeMismatchException(Object value, Class<?> requiredType, Throwable cause) {
-		super("Failed to convert value of type '" + ClassUtils.getDescriptiveType(value) + "'" +
-				(requiredType != null ? " to required type '" + ClassUtils.getQualifiedName(requiredType) + "'" : ""),
+		super("Failed to convert value of type [" + ClassUtils.getDescriptiveType(value) + "]" +
+				(requiredType != null ? " to required type [" + ClassUtils.getQualifiedName(requiredType) + "]" : ""),
 				cause);
 		this.value = value;
 		this.requiredType = requiredType;
@@ -93,7 +93,7 @@ public class TypeMismatchException extends PropertyAccessException {
 
 
 	/**
-	 * Return the offending value (may be {@code null})
+	 * Return the offending value (may be {@code null}).
 	 */
 	@Override
 	public Object getValue() {
