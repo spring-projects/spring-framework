@@ -57,7 +57,14 @@ public class FixedVersionStrategyTests {
 
 	@Test
 	public void addVersion() throws Exception {
-		assertEquals(this.version + "/" + this.path, this.strategy.addVersion(this.path, this.version));
+		assertEquals(this.version + "/" + this.path, this.strategy.addVersion("/" + this.path, this.version));
+	}
+
+	// SPR-13727
+	@Test
+	public void addVersionRelativePath() throws Exception {
+		String relativePath = "../" + this.path;
+		assertEquals(relativePath, this.strategy.addVersion(relativePath, this.version));
 	}
 
 }
