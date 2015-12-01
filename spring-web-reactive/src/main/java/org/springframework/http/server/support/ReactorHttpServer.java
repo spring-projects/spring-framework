@@ -21,7 +21,7 @@ import reactor.io.net.ReactiveNet;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
-import org.springframework.http.server.reactor.ReactorHttpHandlerAdapter;
+import org.springframework.http.server.reactor.HttpHandlerChannelHandler;
 
 /**
  * @author Stephane Maldini
@@ -29,7 +29,7 @@ import org.springframework.http.server.reactor.ReactorHttpHandlerAdapter;
 public class ReactorHttpServer extends HttpServerSupport
 		implements InitializingBean, HttpServer {
 
-	private ReactorHttpHandlerAdapter reactorHandler;
+	private HttpHandlerChannelHandler reactorHandler;
 
 	private reactor.io.net.http.HttpServer<Buffer, Buffer> reactorServer;
 
@@ -44,7 +44,7 @@ public class ReactorHttpServer extends HttpServerSupport
 	public void afterPropertiesSet() throws Exception {
 
 		Assert.notNull(getHttpHandler());
-		this.reactorHandler = new ReactorHttpHandlerAdapter(getHttpHandler());
+		this.reactorHandler = new HttpHandlerChannelHandler(getHttpHandler());
 
 		this.reactorServer = (getPort() != -1 ? ReactiveNet.httpServer(getPort()) :
 				ReactiveNet.httpServer());

@@ -37,11 +37,11 @@ import org.springframework.http.server.ReactiveHttpHandler;
  * @author Rossen Stoyanchev
  */
 @WebServlet(asyncSupported = true)
-public class Servlet31HttpHandlerAdapter extends HttpServlet {
+public class HttpHandlerServlet extends HttpServlet {
 
 	private static final int BUFFER_SIZE = 8192;
 
-	private static Log logger = LogFactory.getLog(Servlet31HttpHandlerAdapter.class);
+	private static Log logger = LogFactory.getLog(HttpHandlerServlet.class);
 
 
 	private ReactiveHttpHandler handler;

@@ -32,15 +32,15 @@ import org.reactivestreams.Subscription;
  * @author Marek Hawrylczak
  * @author Rossen Stoyanchev
  */
-public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandler {
+public class HttpHandlerHttpHandler implements io.undertow.server.HttpHandler {
 
-	private static Log logger = LogFactory.getLog(UndertowHttpHandlerAdapter.class);
+	private static Log logger = LogFactory.getLog(HttpHandlerHttpHandler.class);
 
 
 	private final ReactiveHttpHandler delegate;
 
 
-	public UndertowHttpHandlerAdapter(ReactiveHttpHandler delegate) {
+	public HttpHandlerHttpHandler(ReactiveHttpHandler delegate) {
 		Assert.notNull(delegate, "'delegate' is required.");
 		this.delegate = delegate;
 	}

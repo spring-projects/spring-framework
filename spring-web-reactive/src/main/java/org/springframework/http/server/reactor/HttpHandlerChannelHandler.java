@@ -16,7 +16,6 @@
 package org.springframework.http.server.reactor;
 
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.convert.DependencyUtils;
 import reactor.io.buffer.Buffer;
 import reactor.io.net.ReactiveChannelHandler;
 import reactor.io.net.http.HttpChannel;
@@ -27,30 +26,22 @@ import org.springframework.util.Assert;
 /**
  * @author Stephane Maldini
  */
-public class ReactorHttpHandlerAdapter
+public class HttpHandlerChannelHandler
 		implements ReactiveChannelHandler<Buffer, Buffer, HttpChannel<Buffer, Buffer>> {
 
 	private final ReactiveHttpHandler httpHandler;
 
 
-	public ReactorHttpHandlerAdapter(ReactiveHttpHandler httpHandler) {
+	public HttpHandlerChannelHandler(ReactiveHttpHandler httpHandler) {
 		Assert.notNull(httpHandler, "'httpHandler' is required.");
 		this.httpHandler = httpHandler;
 	}
 
 	@Override
 	public Publisher<Void> apply(HttpChannel<Buffer, Buffer> channel) {
-		final PublisherReactorServerHttpRequest adaptedRequest;
-		final PublisherReactorServerHttpResponse adaptedResponse;
-
-		if(DependencyUtils.hasReactorStream()){
-			adaptedRequest = new ReactorServerHttpRequest(channel);
-			adaptedResponse = new ReactorServerHttpResponse(channel);
-		}
-		else{
-			adaptedRequest = new PublisherReactorServerHttpRequest(channel);
-			adaptedResponse = new PublisherReactorServerHttpResponse(channel);
-		}
+		ReactorServerHttpRequest adaptedRequest = new ReactorServerHttpRequest(channel);
+		ReactorServerHttpResponse adaptedResponse = new ReactorServerHttpResponse(channel);
 		return this.httpHandler.handle(adaptedRequest, adaptedResponse);
 	}
+
 }

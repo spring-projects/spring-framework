@@ -18,7 +18,7 @@ package org.springframework.http.server.support;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
-import org.springframework.http.server.undertow.UndertowHttpHandlerAdapter;
+import org.springframework.http.server.undertow.HttpHandlerHttpHandler;
 
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
@@ -36,7 +36,7 @@ public class UndertowHttpServer extends HttpServerSupport implements Initializin
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		Assert.notNull(getHttpHandler());
-		HttpHandler handler = new UndertowHttpHandlerAdapter(getHttpHandler());
+		HttpHandler handler = new HttpHandlerHttpHandler(getHttpHandler());
 		int port = (getPort() != -1 ? getPort() : 8080);
 		this.server = Undertow.builder().addHttpListener(port, "localhost")
 				.setHandler(handler).build();

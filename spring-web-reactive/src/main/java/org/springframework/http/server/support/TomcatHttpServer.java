@@ -25,7 +25,7 @@ import org.apache.catalina.startup.Tomcat;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 import org.springframework.util.SocketUtils;
-import org.springframework.http.server.servlet31.Servlet31HttpHandlerAdapter;
+import org.springframework.http.server.servlet31.HttpHandlerServlet;
 
 
 /**
@@ -54,7 +54,7 @@ public class TomcatHttpServer extends HttpServerSupport implements InitializingB
 		this.tomcatServer.setPort(getPort());
 
 		Assert.notNull(getHttpHandler());
-		Servlet31HttpHandlerAdapter servlet = new Servlet31HttpHandlerAdapter();
+		HttpHandlerServlet servlet = new HttpHandlerServlet();
 		servlet.setHandler(getHttpHandler());
 
 		File base = new File(System.getProperty("java.io.tmpdir"));

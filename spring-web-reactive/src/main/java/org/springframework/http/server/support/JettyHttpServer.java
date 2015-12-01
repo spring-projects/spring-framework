@@ -24,7 +24,7 @@ import org.eclipse.jetty.servlet.ServletHolder;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
 import org.springframework.util.SocketUtils;
-import org.springframework.http.server.servlet31.Servlet31HttpHandlerAdapter;
+import org.springframework.http.server.servlet31.HttpHandlerServlet;
 
 /**
  * @author Rossen Stoyanchev
@@ -51,7 +51,7 @@ public class JettyHttpServer extends HttpServerSupport implements InitializingBe
 		this.jettyServer = new Server();
 
 		Assert.notNull(getHttpHandler());
-		Servlet31HttpHandlerAdapter servlet = new Servlet31HttpHandlerAdapter();
+		HttpHandlerServlet servlet = new HttpHandlerServlet();
 		servlet.setHandler(getHttpHandler());
 		ServletHolder servletHolder = new ServletHolder(servlet);
 

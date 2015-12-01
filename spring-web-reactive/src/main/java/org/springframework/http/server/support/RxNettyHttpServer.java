@@ -20,7 +20,7 @@ import io.netty.buffer.ByteBuf;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.util.Assert;
-import org.springframework.http.server.rxnetty.RxNettyHttpHandlerAdapter;
+import org.springframework.http.server.rxnetty.HttpHandlerRequestHandler;
 
 
 /**
@@ -28,7 +28,7 @@ import org.springframework.http.server.rxnetty.RxNettyHttpHandlerAdapter;
  */
 public class RxNettyHttpServer extends HttpServerSupport implements InitializingBean, HttpServer {
 
-	private RxNettyHttpHandlerAdapter rxNettyHandler;
+	private HttpHandlerRequestHandler rxNettyHandler;
 
 	private io.reactivex.netty.protocol.http.server.HttpServer<ByteBuf, ByteBuf> rxNettyServer;
 
@@ -45,7 +45,7 @@ public class RxNettyHttpServer extends HttpServerSupport implements Initializing
 	public void afterPropertiesSet() throws Exception {
 
 		Assert.notNull(getHttpHandler());
-		this.rxNettyHandler = new RxNettyHttpHandlerAdapter(getHttpHandler());
+		this.rxNettyHandler = new HttpHandlerRequestHandler(getHttpHandler());
 
 		this.rxNettyServer = (getPort() != -1 ?
 				io.reactivex.netty.protocol.http.server.HttpServer.newServer(getPort()) :

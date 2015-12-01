@@ -30,12 +30,12 @@ import org.springframework.util.Assert;
 /**
  * @author Rossen Stoyanchev
  */
-public class RxNettyHttpHandlerAdapter implements RequestHandler<ByteBuf, ByteBuf> {
+public class HttpHandlerRequestHandler implements RequestHandler<ByteBuf, ByteBuf> {
 
 	private final ReactiveHttpHandler httpHandler;
 
 
-	public RxNettyHttpHandlerAdapter(ReactiveHttpHandler httpHandler) {
+	public HttpHandlerRequestHandler(ReactiveHttpHandler httpHandler) {
 		Assert.notNull(httpHandler, "'httpHandler' is required.");
 		this.httpHandler = httpHandler;
 	}
