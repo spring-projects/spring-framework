@@ -26,7 +26,6 @@ import java.util.Optional;
 import org.reactivestreams.Publisher;
 import reactor.Publishers;
 import reactor.fn.tuple.Tuple;
-import reactor.rx.Streams;
 
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.GenericTypeResolver;
@@ -64,7 +63,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		List<Publisher<Object>> argPublishers = getMethodArguments(request, providedArgs);
 
 		Publisher<Object[]> argValues = (!argPublishers.isEmpty() ?
-				Streams.zip(argPublishers, this::unwrapOptionalArgValues) :
+				Publishers.zip(argPublishers, this::unwrapOptionalArgValues) :
 				Publishers.just(new Object[0]));
 
 		return Publishers.map(argValues, args -> {
