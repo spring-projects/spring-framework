@@ -433,6 +433,7 @@ public class SubProtocolWebSocketHandler
 				}
 			}
 			finally {
+				this.lastSessionCheckTime = currentTime;
 				this.sessionCheckLock.unlock();
 			}
 		}
