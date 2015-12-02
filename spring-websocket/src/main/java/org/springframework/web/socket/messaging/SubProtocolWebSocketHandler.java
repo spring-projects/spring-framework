@@ -52,22 +52,20 @@ import org.springframework.web.socket.sockjs.transport.session.StreamingSockJsSe
 
 /**
  * An implementation of {@link WebSocketHandler} that delegates incoming WebSocket
- * messages to a {@link SubProtocolHandler} along with a {@link MessageChannel} to
- * which the sub-protocol handler can send messages from WebSocket clients to
- * the application.
- * <p>
- * Also an implementation of {@link MessageHandler} that finds the WebSocket
- * session associated with the {@link Message} and passes it, along with the message,
- * to the sub-protocol handler to send messages from the application back to the
- * client.
+ * messages to a {@link SubProtocolHandler} along with a {@link MessageChannel} to which
+ * the sub-protocol handler can send messages from WebSocket clients to the application.
+ *
+ * <p>Also an implementation of {@link MessageHandler} that finds the WebSocket session
+ * associated with the {@link Message} and passes it, along with the message, to the
+ * sub-protocol handler to send messages from the application back to the client.
  *
  * @author Rossen Stoyanchev
  * @author Andy Wilkinson
  * @author Artem Bilan
  * @since 4.0
  */
-public class SubProtocolWebSocketHandler implements WebSocketHandler,
-		SubProtocolCapable, MessageHandler, SmartLifecycle {
+public class SubProtocolWebSocketHandler
+		implements WebSocketHandler, SubProtocolCapable, MessageHandler, SmartLifecycle {
 
 	/**
 	 * Sessions connected to this handler use a sub-protocol. Hence we expect to
@@ -109,9 +107,14 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 	private volatile boolean running = false;
 
 
+	/**
+	 * Create a new {@code SubProtocolWebSocketHandler} for the given inbound and outbound channels.
+	 * @param clientInboundChannel the inbound {@code MessageChannel}
+	 * @param clientOutboundChannel the outbound {@code MessageChannel}
+	 */
 	public SubProtocolWebSocketHandler(MessageChannel clientInboundChannel, SubscribableChannel clientOutboundChannel) {
-		Assert.notNull(clientInboundChannel, "ClientInboundChannel must not be null");
-		Assert.notNull(clientOutboundChannel, "ClientOutboundChannel must not be null");
+		Assert.notNull(clientInboundChannel, "Inbound MessageChannel must not be null");
+		Assert.notNull(clientOutboundChannel, "Outbound MessageChannel must not be null");
 		this.clientInboundChannel = clientInboundChannel;
 		this.clientOutboundChannel = clientOutboundChannel;
 	}
@@ -125,7 +128,7 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 	public void setProtocolHandlers(List<SubProtocolHandler> protocolHandlers) {
 		this.protocolHandlerLookup.clear();
 		this.protocolHandlers.clear();
-		for (SubProtocolHandler handler: protocolHandlers) {
+		for (SubProtocolHandler handler : protocolHandlers) {
 			addProtocolHandler(handler);
 		}
 	}
@@ -133,7 +136,6 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 	public List<SubProtocolHandler> getProtocolHandlers() {
 		return new ArrayList<SubProtocolHandler>(this.protocolHandlers);
 	}
-
 
 	/**
 	 * Register a sub-protocol handler.
@@ -174,7 +176,7 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 	}
 
 	/**
-	 * @return the default sub-protocol handler to use
+	 * Return the default sub-protocol handler to use.
 	 */
 	public SubProtocolHandler getDefaultProtocolHandler() {
 		return this.defaultProtocolHandler;
@@ -187,22 +189,43 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 		return new ArrayList<String>(this.protocolHandlerLookup.keySet());
 	}
 
-
+	/**
+	 * Specify the send-time limit (milliseconds).
+	 * @see ConcurrentWebSocketSessionDecorator
+	 */
 	public void setSendTimeLimit(int sendTimeLimit) {
 		this.sendTimeLimit = sendTimeLimit;
 	}
 
+	/**
+	 * Return the send-time limit (milliseconds).
+	 */
 	public int getSendTimeLimit() {
 		return this.sendTimeLimit;
 	}
 
+	/**
+	 * Specify the buffer-size limit (number of bytes).
+	 * @see ConcurrentWebSocketSessionDecorator
+	 */
 	public void setSendBufferSizeLimit(int sendBufferSizeLimit) {
 		this.sendBufferSizeLimit = sendBufferSizeLimit;
 	}
 
+	/**
+	 * Return the buffer-size limit (number of bytes).
+	 */
 	public int getSendBufferSizeLimit() {
-		return sendBufferSizeLimit;
+		return this.sendBufferSizeLimit;
 	}
+
+	/**
+	 * Return a String describing internal state and counters.
+	 */
+	public String getStatsInfo() {
+		return this.stats.toString();
+	}
+
 
 	@Override
 	public boolean isAutoStartup() {
@@ -220,14 +243,6 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 			return this.running;
 		}
 	}
-
-	/**
-	 * Return a String describing internal state and counters.
-	 */
-	public String getStatsInfo() {
-		return this.stats.toString();
-	}
-
 
 	@Override
 	public final void start() {
@@ -261,6 +276,7 @@ public class SubProtocolWebSocketHandler implements WebSocketHandler,
 			callback.run();
 		}
 	}
+
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
