@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import static org.junit.Assert.*;
  * Test fixture for {@link MappingMediaTypeFileExtensionResolver}.
  *
  * @author Rossen Stoyanchev
+ * @author Melissa Hartsock
  */
 public class MappingMediaTypeFileExtensionResolverTests {
 
@@ -49,6 +50,19 @@ public class MappingMediaTypeFileExtensionResolverTests {
 		List<String> extensions = resolver.resolveFileExtensions(MediaType.TEXT_HTML);
 
 		assertTrue(extensions.isEmpty());
+	}
+
+	/**
+	 * Unit test for SPR-13747 - ensures that reverse lookup of media type from media
+	 * type key is case-insensitive.
+	 */
+	@Test
+	public void lookupMediaTypeCaseInsensitive() {
+		Map<String, MediaType> mapping = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
+		MappingMediaTypeFileExtensionResolver resolver = new MappingMediaTypeFileExtensionResolver(mapping);
+		MediaType mediaType = resolver.lookupMediaType("JSON");
+
+		assertEquals(mediaType, MediaType.APPLICATION_JSON);
 	}
 
 }
