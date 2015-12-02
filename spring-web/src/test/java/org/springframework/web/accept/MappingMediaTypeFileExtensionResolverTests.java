@@ -29,6 +29,7 @@ import static org.junit.Assert.*;
  * Test fixture for {@link MappingMediaTypeFileExtensionResolver}.
  *
  * @author Rossen Stoyanchev
+ * @author Melissa Hartsock
  */
 public class MappingMediaTypeFileExtensionResolverTests {
 
@@ -51,8 +52,10 @@ public class MappingMediaTypeFileExtensionResolverTests {
 		assertTrue(extensions.isEmpty());
 	}
 
-	// SPR-13747
-
+	/**
+	 * Unit test for SPR-13747 - ensures that reverse lookup of media type from media
+	 * type key is case-insensitive.
+	 */
 	@Test
 	public void lookupMediaTypeCaseInsensitive() {
 		Map<String, MediaType> mapping = Collections.singletonMap("json", MediaType.APPLICATION_JSON);
@@ -61,4 +64,5 @@ public class MappingMediaTypeFileExtensionResolverTests {
 
 		assertEquals(mediaType, MediaType.APPLICATION_JSON);
 	}
+
 }

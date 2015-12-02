@@ -95,13 +95,11 @@ public class MappingMediaTypeFileExtensionResolver implements MediaTypeFileExten
 	}
 
 	/**
-	 * Use this method for a reverse, case-insensitive MediaType lookup.
-	 * @param extension the extension to look up
-	 * @return a MediaType for the key or {@code null}
+	 * Use this method for a reverse lookup from extension to MediaType.
+	 * @return a MediaType for the key, or {@code null} if none found
 	 */
 	protected MediaType lookupMediaType(String extension) {
-		extension = extension.toLowerCase(Locale.ENGLISH);
-		return this.mediaTypes.get(extension);
+		return this.mediaTypes.get(extension.toLowerCase(Locale.ENGLISH));
 	}
 
 }
