@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,6 +123,13 @@ public class MockHttpServletResponseTests {
 	}
 
 	@Test
+	public void contentLengthIntHeader() {
+		response.addIntHeader("Content-Length", 66);
+		assertEquals(66, response.getContentLength());
+		assertEquals("66", response.getHeader("Content-Length"));
+	}
+
+	@Test
 	public void httpHeaderNameCasingIsPreserved() throws Exception {
 		final String headerName = "Header1";
 		response.addHeader(headerName, "value1");
@@ -221,20 +228,14 @@ public class MockHttpServletResponseTests {
 		assertEquals(redirectUrl, response.getRedirectedUrl());
 	}
 
-	/**
-	 * SPR-10414
-	 */
-	@Test
+	@Test  // SPR-10414
 	public void modifyStatusAfterSendError() throws IOException {
 		response.sendError(HttpServletResponse.SC_NOT_FOUND);
 		response.setStatus(HttpServletResponse.SC_OK);
 		assertEquals(response.getStatus(),HttpServletResponse.SC_NOT_FOUND);
 	}
 
-	/**
-	 * SPR-10414
-	 */
-	@Test
+	@Test  // SPR-10414
 	@SuppressWarnings("deprecation")
 	public void modifyStatusMessageAfterSendError() throws IOException {
 		response.sendError(HttpServletResponse.SC_NOT_FOUND);
