@@ -142,6 +142,13 @@ public class MockHttpServletResponseTests {
 	}
 
 	@Test
+	public void contentLengthIntHeader() {
+		response.addIntHeader("Content-Length", 66);
+		assertEquals(66, response.getContentLength());
+		assertEquals("66", response.getHeader("Content-Length"));
+	}
+
+	@Test
 	public void httpHeaderNameCasingIsPreserved() throws Exception {
 		final String headerName = "Header1";
 		response.addHeader(headerName, "value1");

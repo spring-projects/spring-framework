@@ -556,7 +556,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 			return true;
 		}
 		else if (CONTENT_LENGTH_HEADER.equalsIgnoreCase(name)) {
-			setContentLength(Integer.parseInt((String) value));
+			setContentLength(Integer.parseInt(value.toString()));
 			return true;
 		}
 		else {
