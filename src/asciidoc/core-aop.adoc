@@ -2716,7 +2716,7 @@ can do so directly in the annotation:
 	}
 ----
 
-Spring will now look for a bean definition named " `account`" and use that as the
+Spring will now look for a bean definition named "account" and use that as the
 definition to configure new `Account` instances.
 
 You can also use autowiring to avoid having to specify a dedicated bean definition at
