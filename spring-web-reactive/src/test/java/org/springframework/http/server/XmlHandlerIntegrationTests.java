@@ -23,6 +23,7 @@ import org.junit.Test;
 
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -31,7 +32,7 @@ import org.springframework.web.client.RestTemplate;
 public class XmlHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	@Override
-	protected ReactiveHttpHandler createHttpHandler() {
+	protected HttpHandler createHttpHandler() {
 		return new XmlHandler();
 	}
 

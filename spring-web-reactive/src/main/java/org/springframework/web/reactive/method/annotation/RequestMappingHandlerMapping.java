@@ -34,7 +34,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.http.server.ReactiveServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -94,7 +94,7 @@ public class RequestMappingHandlerMapping implements HandlerMapping,
 	}
 
 	@Override
-	public Publisher<Object> getHandler(ReactiveServerHttpRequest request) {
+	public Publisher<Object> getHandler(ServerHttpRequest request) {
 		return PublisherFactory.create(subscriber -> {
 			for (Map.Entry<RequestMappingInfo, HandlerMethod> entry : this.methodMap.entrySet()) {
 				RequestMappingInfo info = entry.getKey();
@@ -143,7 +143,7 @@ public class RequestMappingHandlerMapping implements HandlerMapping,
 			return this.methods;
 		}
 
-		public boolean matchesRequest(ReactiveServerHttpRequest request) {
+		public boolean matchesRequest(ServerHttpRequest request) {
 			String httpMethod = request.getMethod().name();
 			return request.getURI().getPath().equals(getPath()) &&
 					(getMethods().isEmpty() || getMethods().contains(RequestMethod.valueOf(httpMethod)));

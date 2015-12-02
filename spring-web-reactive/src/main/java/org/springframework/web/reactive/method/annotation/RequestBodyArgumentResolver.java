@@ -26,7 +26,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.MediaType;
-import org.springframework.http.server.ReactiveServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.core.codec.Decoder;
 import org.springframework.web.reactive.method.HandlerMethodArgumentResolver;
 import org.springframework.util.Assert;
@@ -57,7 +57,7 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 	}
 
 	@Override
-	public Publisher<Object> resolveArgument(MethodParameter parameter, ReactiveServerHttpRequest request) {
+	public Publisher<Object> resolveArgument(MethodParameter parameter, ServerHttpRequest request) {
 		MediaType mediaType = request.getHeaders().getContentType();
 		if (mediaType == null) {
 			mediaType = MediaType.APPLICATION_OCTET_STREAM;

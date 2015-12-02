@@ -23,7 +23,7 @@ import org.reactivestreams.Publisher;
 import reactor.Publishers;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.http.server.ReactiveServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.reactive.method.HandlerMethodArgumentResolver;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriComponents;
@@ -45,7 +45,7 @@ public class RequestParamArgumentResolver implements HandlerMethodArgumentResolv
 
 
 	@Override
-	public Publisher<Object> resolveArgument(MethodParameter param, ReactiveServerHttpRequest request) {
+	public Publisher<Object> resolveArgument(MethodParameter param, ServerHttpRequest request) {
 		RequestParam annotation = param.getParameterAnnotation(RequestParam.class);
 		String name = (annotation.value().length() != 0 ? annotation.value() : param.getParameterName());
 		UriComponents uriComponents = UriComponentsBuilder.fromUri(request.getURI()).build();

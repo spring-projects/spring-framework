@@ -24,8 +24,8 @@ import reactor.Publishers;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.http.server.ReactiveServerHttpRequest;
-import org.springframework.http.server.ReactiveServerHttpResponse;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
@@ -75,8 +75,8 @@ public class SimpleHandlerResultHandler implements Ordered, HandlerResultHandler
 	}
 
 	@Override
-	public Publisher<Void> handleResult(ReactiveServerHttpRequest request,
-			ReactiveServerHttpResponse response, HandlerResult result) {
+	public Publisher<Void> handleResult(ServerHttpRequest request,
+			ServerHttpResponse response, HandlerResult result) {
 
 		Object value = result.getValue();
 		if (Void.TYPE.equals(result.getValueType().getRawClass())) {

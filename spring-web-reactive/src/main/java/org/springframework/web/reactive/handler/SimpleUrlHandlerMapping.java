@@ -20,10 +20,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.reactivestreams.Publisher;
-import reactor.Publishers;
 import reactor.core.publisher.PublisherFactory;
 
-import org.springframework.http.server.ReactiveServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.reactive.HandlerMapping;
 
 /**
@@ -43,7 +42,7 @@ public class SimpleUrlHandlerMapping implements HandlerMapping {
 
 
 	@Override
-	public Publisher<Object> getHandler(ReactiveServerHttpRequest request) {
+	public Publisher<Object> getHandler(ServerHttpRequest request) {
 		return PublisherFactory.create(subscriber -> {
 			String path = request.getURI().getPath();
 			Object handler = this.handlerMap.get(path);

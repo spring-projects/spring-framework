@@ -14,41 +14,35 @@
  * limitations under the License.
  */
 
-package org.springframework.web.reactive;
+package org.springframework.http.server.reactive;
 
 import org.reactivestreams.Publisher;
 
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
-
 /**
- * Process the {@link HandlerResult}, usually returned by an {@link HandlerAdapter}.
+ * Interface for handlers that process HTTP requests and generate an HTTP response.
+ * This handler is designed to be called when the HTTP headers have been received, making
+ * the HTTP request body available as stream. The HTTP response body can also be written
+ * as a stream.
  *
+ * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @see ServerHttpRequest#getBody()
+ * @see ServerHttpResponse#setBody(Publisher)
  */
-public interface HandlerResultHandler {
+public interface HttpHandler {
 
 	/**
-	 * Given a handler instance, return whether or not this {@code HandlerResultHandler}
-	 * can support it.
-	 *
-	 * @param result result object to check
-	 * @return whether or not this object can use the given result
-	 */
-	boolean supports(HandlerResult result);
-
-	/**
-	 * Process the given result in an asynchronous non blocking way, by eventually modifying
-	 * response headers, or writing some data stream into the response.
+	 * Process the given request, generating a response in an asynchronous non blocking way.
 	 * Implementations should not throw exceptions but signal them via the returned
 	 * {@code Publisher<Void>}.
 	 *
+	 * @param request current HTTP request, the body can be processed as a data stream.
+	 * @param response current HTTP response, the body can be provided as a data stream.
 	 * @return A {@code Publisher<Void>} used to signal the demand, and receive a notification
 	 * when the handling is complete (success or error) including the flush of the data on the
 	 * network.
 	 */
-	Publisher<Void> handleResult(ServerHttpRequest request, ServerHttpResponse response,
-			HandlerResult result);
+	Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response);
 
 }

@@ -26,8 +26,8 @@ import reactor.Publishers;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.http.server.ReactiveServerHttpRequest;
-import org.springframework.http.server.ReactiveServerHttpResponse;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.core.codec.support.ByteBufferDecoder;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.support.JacksonJsonDecoder;
@@ -87,8 +87,8 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 	}
 
 	@Override
-	public Publisher<HandlerResult> handle(ReactiveServerHttpRequest request,
-			ReactiveServerHttpResponse response, Object handler) {
+	public Publisher<HandlerResult> handle(ServerHttpRequest request,
+			ServerHttpResponse response, Object handler) {
 
 		InvocableHandlerMethod handlerMethod = new InvocableHandlerMethod((HandlerMethod) handler);
 		handlerMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);

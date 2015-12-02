@@ -14,26 +14,17 @@
  * limitations under the License.
  */
 
-package org.springframework.web.reactive;
+package org.springframework.http.server.reactive;
 
 import org.reactivestreams.Publisher;
 
-import org.springframework.http.server.reactive.ServerHttpRequest;
-
 /**
- * Interface to be implemented by objects that define a mapping between
- * requests and handler objects.
- *
  * @author Rossen Stoyanchev
- * @author Sebastien Deleuze
  */
-public interface HandlerMapping {
+public interface HttpFilter {
 
-	/**
-	 * Return a handler for this request.
-	 * @param request current HTTP request
-	 * @return A {@link Publisher} object that produces a single handler element
-	 */
-	Publisher<Object> getHandler(ServerHttpRequest request);
+
+	Publisher<Void> filter(ServerHttpRequest request, ServerHttpResponse response,
+			HttpFilterChain chain);
 
 }

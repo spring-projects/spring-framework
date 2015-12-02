@@ -14,26 +14,20 @@
  * limitations under the License.
  */
 
-package org.springframework.web.reactive;
+package org.springframework.http.server.reactive.boot;
 
-import org.reactivestreams.Publisher;
 
-import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.Lifecycle;
+import org.springframework.http.server.reactive.HttpHandler;
 
 /**
- * Interface to be implemented by objects that define a mapping between
- * requests and handler objects.
- *
  * @author Rossen Stoyanchev
- * @author Sebastien Deleuze
  */
-public interface HandlerMapping {
+public interface HttpServer extends InitializingBean, Lifecycle {
 
-	/**
-	 * Return a handler for this request.
-	 * @param request current HTTP request
-	 * @return A {@link Publisher} object that produces a single handler element
-	 */
-	Publisher<Object> getHandler(ServerHttpRequest request);
+	void setPort(int port);
+
+	void setHandler(HttpHandler handler);
 
 }

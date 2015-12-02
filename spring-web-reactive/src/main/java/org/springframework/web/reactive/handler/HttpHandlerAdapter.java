@@ -20,15 +20,15 @@ import org.reactivestreams.Publisher;
 import reactor.Publishers;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.http.server.ReactiveServerHttpRequest;
-import org.springframework.http.server.ReactiveServerHttpResponse;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.reactive.HandlerAdapter;
 import org.springframework.web.reactive.HandlerResult;
-import org.springframework.http.server.ReactiveHttpHandler;
+import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.web.reactive.DispatcherHandler;
 
 /**
- * Support use of {@link ReactiveHttpHandler} with
+ * Support use of {@link HttpHandler} with
  * {@link DispatcherHandler
  * DispatcherHandler} (which implements the same contract).
  * The use of {@code DispatcherHandler} this way enables routing requests to
@@ -46,14 +46,14 @@ public class HttpHandlerAdapter implements HandlerAdapter {
 
 	@Override
 	public boolean supports(Object handler) {
-		return ReactiveHttpHandler.class.isAssignableFrom(handler.getClass());
+		return HttpHandler.class.isAssignableFrom(handler.getClass());
 	}
 
 	@Override
-	public Publisher<HandlerResult> handle(ReactiveServerHttpRequest request,
-			ReactiveServerHttpResponse response, Object handler) {
+	public Publisher<HandlerResult> handle(ServerHttpRequest request,
+			ServerHttpResponse response, Object handler) {
 
-		ReactiveHttpHandler httpHandler = (ReactiveHttpHandler)handler;
+		HttpHandler httpHandler = (HttpHandler)handler;
 		Publisher<Void> completion = httpHandler.handle(request, response);
 		return Publishers.just(new HandlerResult(httpHandler, completion, PUBLISHER_VOID));
 	}

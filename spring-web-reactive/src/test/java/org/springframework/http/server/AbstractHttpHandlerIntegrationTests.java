@@ -21,12 +21,13 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import org.springframework.http.server.support.HttpServer;
-import org.springframework.http.server.support.JettyHttpServer;
-import org.springframework.http.server.support.ReactorHttpServer;
-import org.springframework.http.server.support.RxNettyHttpServer;
-import org.springframework.http.server.support.TomcatHttpServer;
-import org.springframework.http.server.support.UndertowHttpServer;
+import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.http.server.reactive.boot.HttpServer;
+import org.springframework.http.server.reactive.boot.JettyHttpServer;
+import org.springframework.http.server.reactive.boot.ReactorHttpServer;
+import org.springframework.http.server.reactive.boot.RxNettyHttpServer;
+import org.springframework.http.server.reactive.boot.TomcatHttpServer;
+import org.springframework.http.server.reactive.boot.UndertowHttpServer;
 import org.springframework.util.SocketUtils;
 
 
@@ -60,7 +61,7 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 		this.server.start();
 	}
 
-	protected abstract ReactiveHttpHandler createHttpHandler();
+	protected abstract HttpHandler createHttpHandler();
 
 	@After
 	public void tearDown() throws Exception {

@@ -19,7 +19,7 @@ package org.springframework.web.reactive.method;
 import org.reactivestreams.Publisher;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.http.server.ReactiveServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 
 
 /**
@@ -34,7 +34,7 @@ public interface HandlerMethodArgumentResolver {
 	 * does not allow publishing null values, if the value may be {@code null}
 	 * use {@link java.util.Optional#ofNullable(Object)} to wrap it.
 	 */
-	Publisher<Object> resolveArgument(MethodParameter parameter, ReactiveServerHttpRequest request);
+	Publisher<Object> resolveArgument(MethodParameter parameter, ServerHttpRequest request);
 
 
 }

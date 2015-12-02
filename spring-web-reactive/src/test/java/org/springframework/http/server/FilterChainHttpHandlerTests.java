@@ -24,6 +24,13 @@ import org.reactivestreams.Publisher;
 import reactor.Publishers;
 import reactor.rx.Streams;
 
+import org.springframework.http.server.reactive.FilterChainHttpHandler;
+import org.springframework.http.server.reactive.HttpFilter;
+import org.springframework.http.server.reactive.HttpFilterChain;
+import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -33,15 +40,15 @@ import static org.mockito.Mockito.mock;
  */
 public class FilterChainHttpHandlerTests {
 
-	private ReactiveServerHttpRequest request;
+	private ServerHttpRequest request;
 
-	private ReactiveServerHttpResponse response;
+	private ServerHttpResponse response;
 
 
 	@Before
 	public void setUp() throws Exception {
-		this.request = mock(ReactiveServerHttpRequest.class);
-		this.response = mock(ReactiveServerHttpResponse.class);
+		this.request = mock(ServerHttpRequest.class);
+		this.response = mock(ServerHttpResponse.class);
 	}
 
 	@Test
@@ -90,7 +97,7 @@ public class FilterChainHttpHandlerTests {
 	}
 
 
-	private static class TestFilter implements ReactiveHttpFilter {
+	private static class TestFilter implements HttpFilter {
 
 		private boolean invoked;
 
@@ -100,15 +107,15 @@ public class FilterChainHttpHandlerTests {
 		}
 
 		@Override
-		public Publisher<Void> filter(ReactiveServerHttpRequest req, ReactiveServerHttpResponse res,
-				ReactiveHttpFilterChain chain) {
+		public Publisher<Void> filter(ServerHttpRequest req, ServerHttpResponse res,
+				HttpFilterChain chain) {
 
 			this.invoked = true;
 			return doFilter(req, res, chain);
 		}
 
-		public Publisher<Void> doFilter(ReactiveServerHttpRequest req, ReactiveServerHttpResponse res,
-				ReactiveHttpFilterChain chain) {
+		public Publisher<Void> doFilter(ServerHttpRequest req, ServerHttpResponse res,
+				HttpFilterChain chain) {
 
 			return chain.filter(req, res);
 		}
@@ -117,14 +124,14 @@ public class FilterChainHttpHandlerTests {
 	private static class ShortcircuitingFilter extends TestFilter {
 
 		@Override
-		public Publisher<Void> doFilter(ReactiveServerHttpRequest req, ReactiveServerHttpResponse res,
-				ReactiveHttpFilterChain chain) {
+		public Publisher<Void> doFilter(ServerHttpRequest req, ServerHttpResponse res,
+				HttpFilterChain chain) {
 
 			return Publishers.empty();
 		}
 	}
 
-	private static class StubHandler implements ReactiveHttpHandler {
+	private static class StubHandler implements HttpHandler {
 
 		private boolean invoked;
 
@@ -133,7 +140,7 @@ public class FilterChainHttpHandlerTests {
 		}
 
 		@Override
-		public Publisher<Void> handle(ReactiveServerHttpRequest req, ReactiveServerHttpResponse res) {
+		public Publisher<Void> handle(ServerHttpRequest req, ServerHttpResponse res) {
 			this.invoked = true;
 			return Publishers.empty();
 		}

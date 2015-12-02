@@ -31,7 +31,7 @@ import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
-import org.springframework.http.server.ReactiveServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.method.HandlerMethod;
 
@@ -57,7 +57,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 
-	public Publisher<Object> invokeForRequest(ReactiveServerHttpRequest request,
+	public Publisher<Object> invokeForRequest(ServerHttpRequest request,
 			Object... providedArgs) {
 
 		List<Publisher<Object>> argPublishers = getMethodArguments(request, providedArgs);
@@ -88,7 +88,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		});
 	}
 
-	private List<Publisher<Object>> getMethodArguments(ReactiveServerHttpRequest request,
+	private List<Publisher<Object>> getMethodArguments(ServerHttpRequest request,
 			Object... providedArgs) {
 
 		MethodParameter[] parameters = getMethodParameters();

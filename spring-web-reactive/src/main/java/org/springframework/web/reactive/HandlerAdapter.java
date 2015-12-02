@@ -18,8 +18,8 @@ package org.springframework.web.reactive;
 
 import org.reactivestreams.Publisher;
 
-import org.springframework.http.server.ReactiveServerHttpRequest;
-import org.springframework.http.server.ReactiveServerHttpResponse;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 
 /**
  * Interface that must be implemented for each handler type to handle an HTTP request.
@@ -54,7 +54,7 @@ public interface HandlerAdapter {
 	 * returned {@code true}.
 	 * @return A {@link Publisher} object that produces a single {@link HandlerResult} element
 	 */
-	Publisher<HandlerResult> handle(ReactiveServerHttpRequest request,
-			ReactiveServerHttpResponse response, Object handler);
+	Publisher<HandlerResult> handle(ServerHttpRequest request, ServerHttpResponse response,
+			Object handler);
 
 }

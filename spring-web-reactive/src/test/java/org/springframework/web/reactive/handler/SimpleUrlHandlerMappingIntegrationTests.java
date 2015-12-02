@@ -30,16 +30,14 @@ import reactor.rx.Streams;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.ReactiveServerHttpRequest;
-import org.springframework.http.server.ReactiveServerHttpResponse;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestClientException;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.http.server.AbstractHttpHandlerIntegrationTests;
-import org.springframework.http.server.ReactiveHttpHandler;
+import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.support.StaticWebApplicationContext;
-import org.springframework.web.reactive.method.annotation.RequestMappingHandlerMapping;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -54,7 +52,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 
 
 	@Override
-	protected ReactiveHttpHandler createHttpHandler() {
+	protected HttpHandler createHttpHandler() {
 
 		StaticWebApplicationContext wac = new StaticWebApplicationContext();
 		wac.registerSingleton("hm", TestHandlerMapping.class);
@@ -122,18 +120,18 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 		}
 	}
 
-	private static class FooHandler implements ReactiveHttpHandler {
+	private static class FooHandler implements HttpHandler {
 
 		@Override
-		public Publisher<Void> handle(ReactiveServerHttpRequest request, ReactiveServerHttpResponse response) {
+		public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 			return response.setBody(Streams.just(Buffer.wrap("foo").byteBuffer()));
 		}
 	}
 
-	private static class BarHandler implements ReactiveHttpHandler {
+	private static class BarHandler implements HttpHandler {
 
 		@Override
-		public Publisher<Void> handle(ReactiveServerHttpRequest request, ReactiveServerHttpResponse response) {
+		public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 			return response.setBody(Streams.just(Buffer.wrap("bar").byteBuffer()));
 		}
 	}
