@@ -381,8 +381,7 @@ public final class ResolvableType implements Serializable {
 			return NONE;
 		}
 		if (this.superType == null) {
-			this.superType = forType(SerializableTypeWrapper.forGenericSuperclass(resolved),
-					asVariableResolver());
+			this.superType = forType(SerializableTypeWrapper.forGenericSuperclass(resolved), asVariableResolver());
 		}
 		return this.superType;
 	}
@@ -399,8 +398,7 @@ public final class ResolvableType implements Serializable {
 			return EMPTY_TYPES_ARRAY;
 		}
 		if (this.interfaces == null) {
-			this.interfaces = forTypes(SerializableTypeWrapper.forGenericInterfaces(resolved),
-					asVariableResolver());
+			this.interfaces = forTypes(SerializableTypeWrapper.forGenericInterfaces(resolved), asVariableResolver());
 		}
 		return this.interfaces;
 	}
@@ -1102,11 +1100,11 @@ public final class ResolvableType implements Serializable {
 	 */
 	public static ResolvableType forMethodParameter(MethodParameter methodParameter, ResolvableType implementationType) {
 		Assert.notNull(methodParameter, "MethodParameter must not be null");
-		implementationType = (implementationType == null ? forType(methodParameter.getContainingClass()) : implementationType);
+		implementationType = (implementationType != null ? implementationType :
+				forType(methodParameter.getContainingClass()));
 		ResolvableType owner = implementationType.as(methodParameter.getDeclaringClass());
-		return forType(null, new MethodParameterTypeProvider(methodParameter),
-				owner.asVariableResolver()).getNested(methodParameter.getNestingLevel(),
-				methodParameter.typeIndexesPerLevel);
+		return forType(null, new MethodParameterTypeProvider(methodParameter), owner.asVariableResolver()).
+				getNested(methodParameter.getNestingLevel(), methodParameter.typeIndexesPerLevel);
 	}
 
 	/**
@@ -1125,12 +1123,25 @@ public final class ResolvableType implements Serializable {
 	}
 
 	/**
+	 * Resolve the top-level parameter type of the given {@code MethodParameter}.
+	 * @param methodParameter the method parameter to resolve
+	 * @since 4.1.9
+	 * @see MethodParameter#setParameterType
+	 */
+	static void resolveMethodParameter(MethodParameter methodParameter) {
+		Assert.notNull(methodParameter, "MethodParameter must not be null");
+		ResolvableType owner = forType(methodParameter.getContainingClass()).as(methodParameter.getDeclaringClass());
+		methodParameter.setParameterType(
+				forType(null, new MethodParameterTypeProvider(methodParameter), owner.asVariableResolver()).resolve());
+	}
+
+	/**
 	 * Return a {@link ResolvableType} as a array of the specified {@code componentType}.
 	 * @param componentType the component type
 	 * @return a {@link ResolvableType} as an array of the specified component type
 	 */
 	public static ResolvableType forArrayComponent(ResolvableType componentType) {
-		Assert.notNull(componentType, "componentType must not be null");
+		Assert.notNull(componentType, "Component type must not be null");
 		Class<?> arrayClass = Array.newInstance(componentType.resolve(), 0).getClass();
 		return new ResolvableType(arrayClass, null, null, componentType);
 	}
@@ -1220,7 +1231,7 @@ public final class ResolvableType implements Serializable {
 	/**
 	 * Strategy interface used to resolve {@link TypeVariable}s.
 	 */
-	static interface VariableResolver extends Serializable {
+	interface VariableResolver extends Serializable {
 
 		/**
 		 * Return the source of the resolver (used for hashCode and equals).
@@ -1230,7 +1241,7 @@ public final class ResolvableType implements Serializable {
 		/**
 		 * Resolve the specified variable.
 		 * @param variable the variable to resolve
-		 * @return the resolved variable or {@code null}
+		 * @return the resolved variable, or {@code null} if not found
 		 */
 		ResolvableType resolveVariable(TypeVariable<?> variable);
 	}
@@ -1362,7 +1373,7 @@ public final class ResolvableType implements Serializable {
 		/**
 		 * The various kinds of bounds.
 		 */
-		static enum Kind {UPPER, LOWER}
+		enum Kind {UPPER, LOWER}
 	}
 
 }
