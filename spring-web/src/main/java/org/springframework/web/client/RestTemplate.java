@@ -187,7 +187,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * @since 3.2.7
 	 */
 	public RestTemplate(List<HttpMessageConverter<?>> messageConverters) {
-		Assert.notEmpty(messageConverters, "'messageConverters' must not be empty");
+		Assert.notEmpty(messageConverters, "At least one HttpMessageConverter required");
 		this.messageConverters.addAll(messageConverters);
 	}
 
@@ -197,7 +197,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * <p>These converters are used to convert from and to HTTP requests and responses.
 	 */
 	public void setMessageConverters(List<HttpMessageConverter<?>> messageConverters) {
-		Assert.notEmpty(messageConverters, "'messageConverters' must not be empty");
+		Assert.notEmpty(messageConverters, "At least one HttpMessageConverter required");
 		// Take getMessageConverters() List as-is when passed in here
 		if (this.messageConverters != messageConverters) {
 			this.messageConverters.clear();
@@ -217,7 +217,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * <p>By default, RestTemplate uses a {@link DefaultResponseErrorHandler}.
 	 */
 	public void setErrorHandler(ResponseErrorHandler errorHandler) {
-		Assert.notNull(errorHandler, "'errorHandler' must not be null");
+		Assert.notNull(errorHandler, "ResponseErrorHandler must not be null");
 		this.errorHandler = errorHandler;
 	}
 
@@ -579,7 +579,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 		}
 		catch (IOException ex) {
 			throw new ResourceAccessException("I/O error on " + method.name() +
-					" request for \"" + url + "\":" + ex.getMessage(), ex);
+					" request for \"" + url + "\": " + ex.getMessage(), ex);
 		}
 		finally {
 			if (response != null) {
@@ -692,8 +692,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 				if (!allSupportedMediaTypes.isEmpty()) {
 					MediaType.sortBySpecificity(allSupportedMediaTypes);
 					if (logger.isDebugEnabled()) {
-						logger.debug("Setting request Accept header to " +
-								allSupportedMediaTypes);
+						logger.debug("Setting request Accept header to " + allSupportedMediaTypes);
 					}
 					request.getHeaders().setAccept(allSupportedMediaTypes);
 				}
