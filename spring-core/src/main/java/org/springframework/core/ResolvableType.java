@@ -1368,7 +1368,7 @@ public class ResolvableType implements Serializable {
 		/**
 		 * Resolve the specified variable.
 		 * @param variable the variable to resolve
-		 * @return the resolved variable or {@code null}
+		 * @return the resolved variable, or {@code null} if not found
 		 */
 		ResolvableType resolveVariable(TypeVariable<?> variable);
 	}
