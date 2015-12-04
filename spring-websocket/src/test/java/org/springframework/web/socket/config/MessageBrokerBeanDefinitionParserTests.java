@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.hamcrest.Matchers;
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
@@ -99,13 +98,7 @@ import static org.junit.Assert.*;
  */
 public class MessageBrokerBeanDefinitionParserTests {
 
-	private GenericWebApplicationContext appContext;
-
-
-	@Before
-	public void setup() {
-		this.appContext = new GenericWebApplicationContext();
-	}
+	private final GenericWebApplicationContext appContext = new GenericWebApplicationContext();
 
 
 	@Test
@@ -231,7 +224,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertNotNull(this.appContext.getBean("webSocketScopeConfigurer", CustomScopeConfigurer.class));
 
 		DirectFieldAccessor subscriptionRegistryAccessor = new DirectFieldAccessor(brokerMessageHandler.getSubscriptionRegistry());
-		String pathSeparator = (String)new DirectFieldAccessor(subscriptionRegistryAccessor.getPropertyValue("pathMatcher")).getPropertyValue("pathSeparator");
+		String pathSeparator = (String) new DirectFieldAccessor(subscriptionRegistryAccessor.getPropertyValue("pathMatcher")).getPropertyValue("pathSeparator");
 		assertEquals(".", pathSeparator);
 	}
 
@@ -355,7 +348,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertEquals(MimeTypeUtils.APPLICATION_JSON, ((DefaultContentTypeResolver) resolver).getDefaultMimeType());
 
 		DirectFieldAccessor handlerAccessor = new DirectFieldAccessor(annotationMethodMessageHandler);
-		String pathSeparator = (String)new DirectFieldAccessor(handlerAccessor.getPropertyValue("pathMatcher")).getPropertyValue("pathSeparator");
+		String pathSeparator = (String) new DirectFieldAccessor(handlerAccessor.getPropertyValue("pathMatcher")).getPropertyValue("pathSeparator");
 		assertEquals(".", pathSeparator);
 	}
 

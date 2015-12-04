@@ -74,7 +74,7 @@ import static org.junit.Assert.*;
  */
 public class HandlersBeanDefinitionParserTests {
 
-	private GenericWebApplicationContext appContext = new GenericWebApplicationContext();
+	private final GenericWebApplicationContext appContext = new GenericWebApplicationContext();
 
 
 	@Test
