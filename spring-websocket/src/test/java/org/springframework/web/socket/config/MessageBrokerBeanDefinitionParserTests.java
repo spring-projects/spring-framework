@@ -86,16 +86,8 @@ import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Test fixture for MessageBrokerBeanDefinitionParser.
@@ -192,7 +184,8 @@ public class MessageBrokerBeanDefinitionParserTests {
 		interceptors = defaultSockJsService.getHandshakeInterceptors();
 		assertThat(interceptors, contains(instanceOf(FooTestInterceptor.class),
 				instanceOf(BarTestInterceptor.class), instanceOf(OriginHandshakeInterceptor.class)));
-		assertEquals(Arrays.asList("http://mydomain3.com", "http://mydomain4.com"), defaultSockJsService.getAllowedOrigins());
+		assertTrue(defaultSockJsService.getAllowedOrigins().contains("http://mydomain3.com"));
+		assertTrue(defaultSockJsService.getAllowedOrigins().contains("http://mydomain4.com"));
 
 		SimpUserRegistry userRegistry = this.appContext.getBean(SimpUserRegistry.class);
 		assertNotNull(userRegistry);
@@ -478,8 +471,8 @@ public class MessageBrokerBeanDefinitionParserTests {
 		return (handler instanceof WebSocketHandlerDecorator) ?
 				((WebSocketHandlerDecorator) handler).getLastHandler() : handler;
 	}
-
 }
+
 
 class CustomArgumentResolver implements HandlerMethodArgumentResolver {
 
@@ -494,6 +487,7 @@ class CustomArgumentResolver implements HandlerMethodArgumentResolver {
 	}
 }
 
+
 class CustomReturnValueHandler implements HandlerMethodReturnValueHandler {
 
 	@Override
@@ -507,6 +501,7 @@ class CustomReturnValueHandler implements HandlerMethodReturnValueHandler {
 	}
 }
 
+
 class TestWebSocketHandlerDecoratorFactory implements WebSocketHandlerDecoratorFactory {
 
 	@Override
@@ -514,6 +509,7 @@ class TestWebSocketHandlerDecoratorFactory implements WebSocketHandlerDecoratorF
 		return new TestWebSocketHandlerDecorator(handler);
 	}
 }
+
 
 class TestWebSocketHandlerDecorator extends WebSocketHandlerDecorator {
 
@@ -528,6 +524,6 @@ class TestWebSocketHandlerDecorator extends WebSocketHandlerDecorator {
 	}
 }
 
-class TestStompErrorHandler extends StompSubProtocolErrorHandler {
 
+class TestStompErrorHandler extends StompSubProtocolErrorHandler {
 }
