@@ -45,7 +45,6 @@ import org.springframework.web.socket.sockjs.transport.handler.WebSocketTranspor
  */
 class WebSocketNamespaceUtils {
 
-
 	public static RuntimeBeanReference registerHandshakeHandler(Element element, ParserContext context, Object source) {
 		RuntimeBeanReference handlerRef;
 		Element handlerElem = DomUtils.getChildElementByTagName(element, "handshake-handler");
@@ -94,7 +93,6 @@ class WebSocketNamespaceUtils {
 			}
 			else if (handshakeHandler != null) {
 				RuntimeBeanReference handshakeHandlerRef = new RuntimeBeanReference(handshakeHandler.getAttribute("ref"));
-
 				RootBeanDefinition transportHandler = new RootBeanDefinition(WebSocketTransportHandler.class);
 				transportHandler.setSource(source);
 				transportHandler.getConstructorArgumentValues().addIndexedArgumentValue(0, handshakeHandlerRef);
@@ -106,7 +104,9 @@ class WebSocketNamespaceUtils {
 			String allowedOriginsAttribute = element.getAttribute("allowed-origins");
 			List<String> allowedOrigins = Arrays.asList(StringUtils.tokenizeToStringArray(allowedOriginsAttribute, ","));
 			sockJsServiceDef.getPropertyValues().add("allowedOrigins", allowedOrigins);
-			interceptors.add(new OriginHandshakeInterceptor(allowedOrigins));
+			RootBeanDefinition originHandshakeInterceptor = new RootBeanDefinition(OriginHandshakeInterceptor.class);
+			originHandshakeInterceptor.getPropertyValues().add("allowedOrigins", allowedOrigins);
+			interceptors.add(originHandshakeInterceptor);
 			sockJsServiceDef.getPropertyValues().add("handshakeInterceptors", interceptors);
 
 			String attrValue = sockJsElement.getAttribute("name");
@@ -174,7 +174,7 @@ class WebSocketNamespaceUtils {
 		ManagedList<? super Object> beans = new ManagedList<Object>();
 		if (parentElement != null) {
 			beans.setSource(context.extractSource(parentElement));
-			for (Element beanElement : DomUtils.getChildElementsByTagName(parentElement, new String[] {"bean", "ref"})) {
+			for (Element beanElement : DomUtils.getChildElementsByTagName(parentElement, "bean", "ref")) {
 				beans.add(context.getDelegate().parsePropertySubElement(beanElement, null));
 			}
 		}
