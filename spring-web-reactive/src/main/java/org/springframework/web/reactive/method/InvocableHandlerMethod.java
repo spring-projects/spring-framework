@@ -19,21 +19,28 @@ package org.springframework.web.reactive.method;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.reactivestreams.Publisher;
 import reactor.Publishers;
 import reactor.fn.tuple.Tuple;
+import reactor.rx.Streams;
 
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
+import org.springframework.core.ResolvableType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.reactive.HandlerResult;
 
 
 /**
@@ -41,7 +48,12 @@ import org.springframework.web.method.HandlerMethod;
  */
 public class InvocableHandlerMethod extends HandlerMethod {
 
-	private List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<>();
+	public static final Publisher<Object[]> NO_ARGS = Publishers.just(new Object[0]);
+
+	private final static Object NO_VALUE = new Object();
+
+
+	private List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
 
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
@@ -52,179 +64,132 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 
 	public void setHandlerMethodArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-		this.argumentResolvers.clear();
-		this.argumentResolvers.addAll(resolvers);
+		this.resolvers.clear();
+		this.resolvers.addAll(resolvers);
+	}
+
+	@Override
+	protected Method getBridgedMethod() {
+		return super.getBridgedMethod();
 	}
 
 
-	public Publisher<Object> invokeForRequest(ServerHttpRequest request,
-			Object... providedArgs) {
+	/**
+	 *
+	 * @param request
+	 * @param providedArgs
+	 * @return Publisher that produces a single HandlerResult or an error signal;
+	 * never throws an exception.
+	 */
+	public Publisher<HandlerResult> invokeForRequest(ServerHttpRequest request, Object... providedArgs) {
 
-		List<Publisher<Object>> argPublishers = getMethodArguments(request, providedArgs);
-
-		Publisher<Object[]> argValues = (!argPublishers.isEmpty() ?
-				Publishers.zip(argPublishers, this::unwrapOptionalArgValues) :
-				Publishers.just(new Object[0]));
-
-		return Publishers.map(argValues, args -> {
-			if (logger.isTraceEnabled()) {
-				logger.trace("Invoking [" + getBeanType().getSimpleName() + "." +
-						getMethod().getName() + "] method with arguments " +
-						Collections.singletonList(argPublishers));
+		Publisher<Object[]> argsPublisher = NO_ARGS;
+		try {
+			if (!ObjectUtils.isEmpty(getMethodParameters())) {
+				List<Publisher<Object>> publishers = resolveArguments(request, providedArgs);
+				argsPublisher = Publishers.zip(publishers, this::initArgs);
+				argsPublisher = first(argsPublisher);
 			}
-			Object returnValue = null;
+		}
+		catch (Throwable ex) {
+			return Publishers.error(ex);
+		}
+
+		return Publishers.concatMap(argsPublisher, args -> {
 			try {
-				returnValue = doInvoke(args);
-				if (logger.isTraceEnabled()) {
-					logger.trace("Method [" + getMethod().getName() + "] returned " +
-							"[" + returnValue + "]");
-				}
+				Object value = doInvoke(args);
+
+				HandlerMethod handlerMethod = InvocableHandlerMethod.this;
+				ResolvableType type =  ResolvableType.forMethodParameter(handlerMethod.getReturnType());
+				HandlerResult handlerResult = new HandlerResult(handlerMethod, value, type);
+
+				return Publishers.just(handlerResult);
 			}
-			catch (Exception ex) {
-				// TODO: how to best handle error inside map? (also wrapping hides original ex)
-				throw new IllegalStateException(ex);
+			catch (InvocationTargetException ex) {
+				return Publishers.error(ex.getTargetException());
 			}
-			return returnValue;
+			catch (Throwable ex) {
+				String s = getInvocationErrorMessage(args);
+				return Publishers.error(new IllegalStateException(s));
+			}
 		});
 	}
 
-	private List<Publisher<Object>> getMethodArguments(ServerHttpRequest request,
-			Object... providedArgs) {
-
-		MethodParameter[] parameters = getMethodParameters();
-		List<Publisher<Object>> valuePublishers = new ArrayList<>(parameters.length);
-		for (int i = 0; i < parameters.length; i++) {
-			MethodParameter parameter = parameters[i];
-			parameter.initParameterNameDiscovery(this.parameterNameDiscoverer);
-			GenericTypeResolver.resolveParameterType(parameter, getBean().getClass());
-			Object value = resolveProvidedArgument(parameter, providedArgs);
-			if (value != null) {
-				valuePublishers.add(Publishers.just(value));
-				continue;
-			}
-			boolean resolved = false;
-			for (HandlerMethodArgumentResolver resolver : this.argumentResolvers) {
-				if (resolver.supportsParameter(parameter)) {
+	private List<Publisher<Object>> resolveArguments(ServerHttpRequest request, Object... providedArgs) {
+		return Stream.of(getMethodParameters())
+				.map(parameter -> {
+					parameter.initParameterNameDiscovery(this.parameterNameDiscoverer);
+					GenericTypeResolver.resolveParameterType(parameter, getBean().getClass());
+					if (!ObjectUtils.isEmpty(providedArgs)) {
+						for (Object providedArg : providedArgs) {
+							if (parameter.getParameterType().isInstance(providedArg)) {
+								return Publishers.just(providedArg);
+							}
+						}
+					}
+					HandlerMethodArgumentResolver resolver = this.resolvers.stream()
+							.filter(r -> r.supportsParameter(parameter))
+							.findFirst()
+							.orElseThrow(() -> getArgError("No resolver for ", parameter, null));
 					try {
-						valuePublishers.add(resolver.resolveArgument(parameter, request));
-						resolved = true;
-						break;
+						Publisher<Object> publisher = resolver.resolveArgument(parameter, request);
+						publisher = mapError(publisher, ex -> getArgError("Error resolving ", parameter, ex));
+						return Streams.wrap(publisher).defaultIfEmpty(NO_VALUE);
 					}
 					catch (Exception ex) {
-						String msg = buildArgErrorMessage("Error resolving argument", i);
-						valuePublishers.add(Publishers.error(new IllegalStateException(msg, ex)));
-						break;
+						throw getArgError("Error resolving ", parameter, ex);
 					}
-				}
-			}
-			if (!resolved) {
-				String msg = buildArgErrorMessage("No suitable resolver for argument", i);
-				valuePublishers.add(Publishers.error(new IllegalStateException(msg)));
-				break;
-			}
+				})
+				.collect(Collectors.toList());
+	}
+
+	private IllegalStateException getArgError(String message, MethodParameter param, Throwable cause) {
+		return new IllegalStateException(message +
+				"argument [" + param.getParameterIndex() + "] " +
+				"of type [" + param.getParameterType().getName() + "] " +
+				"on method [" + getBridgedMethod().toGenericString() + "]", cause);
+	}
+
+	private Object doInvoke(Object[] args) throws Exception {
+		if (logger.isTraceEnabled()) {
+			String target = getBeanType().getSimpleName() + "." + getMethod().getName();
+			logger.trace("Invoking [" + target + "] method with arguments " + Arrays.toString(args));
 		}
-		return valuePublishers;
-	}
-
-	private String buildArgErrorMessage(String message, int index) {
-		MethodParameter param = getMethodParameters()[index];
-		message += " [" + index + "] [type=" + param.getParameterType().getName() + "]";
-		return getDetailedErrorMessage(message);
-	}
-
-	protected String getDetailedErrorMessage(String message) {
-		return message + "\n" + "HandlerMethod details: \n" +
-				"Controller [" + getBeanType().getName() + "]\n" +
-				"Method [" + getBridgedMethod().toGenericString() + "]\n";
-	}
-
-	private Object resolveProvidedArgument(MethodParameter parameter, Object... providedArgs) {
-		if (providedArgs == null) {
-			return null;
-		}
-		for (Object providedArg : providedArgs) {
-			if (parameter.getParameterType().isInstance(providedArg)) {
-				return providedArg;
-			}
-		}
-		return null;
-	}
-
-	private void unwrapOptionalArgValues(Object[] args) {
-		for (int i = 0; i < args.length; i++) {
-			if (args[i] instanceof Optional) {
-				Optional optional = (Optional) args[i];
-				args[i] = optional.isPresent() ? optional.get() : null;
-			}
-		}
-	}
-
-	private Object[] unwrapOptionalArgValues(Tuple tuple) {
-		Object[] args = new Object[tuple.size()];
-		for (int i = 0; i < tuple.size(); i++) {
-			args[i] = tuple.get(i);
-			if (args[i] instanceof Optional) {
-				Optional optional = (Optional) args[i];
-				args[i] = optional.isPresent() ? optional.get() : null;
-			}
-		}
-		return args;
-	}
-
-	protected Object doInvoke(Object... args) throws Exception {
 		ReflectionUtils.makeAccessible(getBridgedMethod());
-		try {
-			return getBridgedMethod().invoke(getBean(), args);
+		Object returnValue = getBridgedMethod().invoke(getBean(), args);
+		if (logger.isTraceEnabled()) {
+			String target = getBeanType().getSimpleName() + "." + getMethod().getName();
+			logger.trace("Method [" + target + "] returned [" + returnValue + "]");
 		}
-		catch (IllegalArgumentException ex) {
-			assertTargetBean(getBridgedMethod(), getBean(), args);
-			throw new IllegalStateException(getInvocationErrorMessage(ex.getMessage(), args), ex);
-		}
-		catch (InvocationTargetException ex) {
-			// Unwrap for HandlerExceptionResolvers ...
-			Throwable targetException = ex.getTargetException();
-			if (targetException instanceof RuntimeException) {
-				throw (RuntimeException) targetException;
-			}
-			else if (targetException instanceof Error) {
-				throw (Error) targetException;
-			}
-			else if (targetException instanceof Exception) {
-				throw (Exception) targetException;
-			}
-			else {
-				String msg = getInvocationErrorMessage("Failed to invoke controller method", args);
-				throw new IllegalStateException(msg, targetException);
-			}
-		}
+		return returnValue;
 	}
 
-	private void assertTargetBean(Method method, Object targetBean, Object[] args) {
-		Class<?> methodDeclaringClass = method.getDeclaringClass();
-		Class<?> targetBeanClass = targetBean.getClass();
-		if (!methodDeclaringClass.isAssignableFrom(targetBeanClass)) {
-			String msg = "The mapped controller method class '" + methodDeclaringClass.getName() +
-					"' is not an instance of the actual controller bean instance '" +
-					targetBeanClass.getName() + "'. If the controller requires proxying " +
-					"(e.g. due to @Transactional), please use class-based proxying.";
-			throw new IllegalStateException(getInvocationErrorMessage(msg, args));
-		}
+	private String getInvocationErrorMessage(Object[] args) {
+		String argumentDetails = IntStream.range(0, args.length)
+				.mapToObj(i -> (args[i] != null ?
+						"[" + i + "][type=" + args[i].getClass().getName() + "][value=" + args[i] + "]" :
+						"[" + i + "][null]"))
+				.collect(Collectors.joining(",", " ", " "));
+		return "Failed to invoke controller with resolved arguments:" + argumentDetails +
+				"on method [" + getBridgedMethod().toGenericString() + "]";
 	}
 
-	private String getInvocationErrorMessage(String message, Object[] resolvedArgs) {
-		StringBuilder sb = new StringBuilder(getDetailedErrorMessage(message));
-		sb.append("Resolved arguments: \n");
-		for (int i=0; i < resolvedArgs.length; i++) {
-			sb.append("[").append(i).append("] ");
-			if (resolvedArgs[i] == null) {
-				sb.append("[null] \n");
-			}
-			else {
-				sb.append("[type=").append(resolvedArgs[i].getClass().getName()).append("] ");
-				sb.append("[value=").append(resolvedArgs[i]).append("]\n");
-			}
-		}
-		return sb.toString();
+	private Object[] initArgs(Tuple tuple) {
+		return Stream.of(tuple.toArray()).map(o -> o != NO_VALUE ? o : null).toArray();
+	}
+
+
+	private static <E> Publisher<E> first(Publisher<E> source) {
+		return Publishers.lift(source, (e, subscriber) -> {
+			subscriber.onNext(e);
+			subscriber.onComplete();
+		});
+	}
+
+	private static <E> Publisher<E> mapError(Publisher<E> source, Function<Throwable, Throwable> function) {
+		return Publishers.lift(source, null, (throwable, subscriber) -> {
+			subscriber.onError(function.apply(throwable));
+		}, null);
 	}
 
 }

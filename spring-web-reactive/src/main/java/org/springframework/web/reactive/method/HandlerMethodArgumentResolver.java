@@ -27,14 +27,18 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
  */
 public interface HandlerMethodArgumentResolver {
 
+
 	boolean supportsParameter(MethodParameter parameter);
 
 	/**
-	 * The returned Publisher must produce a single value. As Reactive Streams
-	 * does not allow publishing null values, if the value may be {@code null}
-	 * use {@link java.util.Optional#ofNullable(Object)} to wrap it.
+	 * The returned Publisher is expected to produce a single value -- i.e. the
+	 * value to use to invoke the handler method. Any additional values will be
+	 * ignored.
+	 *
+	 * <p>The publisher may also produce zero values if the argument does not
+	 * resolve to any value which will result in passing {@code null} as the
+	 * argument value.
 	 */
 	Publisher<Object> resolveArgument(MethodParameter parameter, ServerHttpRequest request);
-
 
 }

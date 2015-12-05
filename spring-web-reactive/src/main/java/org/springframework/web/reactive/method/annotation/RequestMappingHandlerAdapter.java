@@ -92,10 +92,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 
 		InvocableHandlerMethod handlerMethod = new InvocableHandlerMethod((HandlerMethod) handler);
 		handlerMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
-		ResolvableType type =  ResolvableType.forMethodParameter(handlerMethod.getReturnType());
-
-		Publisher<Object> resultPublisher = handlerMethod.invokeForRequest(request);
-		return Publishers.map(resultPublisher, result -> new HandlerResult(handlerMethod, result, type));
+		return handlerMethod.invokeForRequest(request);
 	}
 
 }

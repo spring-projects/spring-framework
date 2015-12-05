@@ -50,7 +50,7 @@ public class RequestParamArgumentResolver implements HandlerMethodArgumentResolv
 		String name = (annotation.value().length() != 0 ? annotation.value() : param.getParameterName());
 		UriComponents uriComponents = UriComponentsBuilder.fromUri(request.getURI()).build();
 		String value = uriComponents.getQueryParams().getFirst(name);
-		return Publishers.just(Optional.ofNullable(value));
+		return (value != null ? Publishers.just(value) : Publishers.empty());
 	}
 
 }
