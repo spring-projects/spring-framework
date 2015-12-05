@@ -283,6 +283,7 @@ public class StringUtilsTests {
 		assertEquals("myfile.", StringUtils.getFilename("mypath/myfile."));
 		assertEquals("myfile.txt", StringUtils.getFilename("myfile.txt"));
 		assertEquals("myfile.txt", StringUtils.getFilename("mypath/myfile.txt"));
+		assertEquals("myfile.txt", StringUtils.getFilename("mypath\\myfile.txt"));
 	}
 
 	@Test
