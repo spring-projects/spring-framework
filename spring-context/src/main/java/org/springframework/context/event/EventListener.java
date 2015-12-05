@@ -39,8 +39,8 @@ import org.springframework.core.annotation.AliasFor;
  *
  * <p>Processing of {@code @EventListener} annotations is performed via the
  * {@link EventListenerMethodProcessor} which is registered automatically
- * when using Java config or manually via the {@code <context:annotation-driven/>}
- * element when using XML config.
+ * when using Java config or manually via the {@code <context:annotation-config/>}
+ * or {@code <context:component-scan/>} element when using XML config.
  *
  * <p>Annotated methods may have a non-{@code void} return type. When they do,
  * the result of the method invocation is sent as a new event. If the return type
