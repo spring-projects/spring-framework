@@ -536,7 +536,8 @@ public abstract class StringUtils {
 		if (path == null) {
 			return null;
 		}
-		int separatorIndex = path.lastIndexOf(FOLDER_SEPARATOR);
+		int separatorIndex = Math.max(path.lastIndexOf(FOLDER_SEPARATOR),
+				path.lastIndexOf(WINDOWS_FOLDER_SEPARATOR));
 		return (separatorIndex != -1 ? path.substring(separatorIndex + 1) : path);
 	}
 
