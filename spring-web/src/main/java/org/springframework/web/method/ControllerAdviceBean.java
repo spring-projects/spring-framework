@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,9 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
  * Encapsulates information about an {@linkplain ControllerAdvice @ControllerAdvice}
  * Spring-managed bean without necessarily requiring it to be instantiated.
  *
- * <p>The {@link #findAnnotatedBeans(ApplicationContext)} method can be used to discover
- * such beans. However, an {@code ControllerAdviceBean} may be created from
- * any object, including ones without an {@code @ControllerAdvice}.
+ * <p>The {@link #findAnnotatedBeans(ApplicationContext)} method can be used to
+ * discover such beans. However, a {@code ControllerAdviceBean} may be created
+ * from any object, including ones without an {@code @ControllerAdvice}.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -42,13 +42,24 @@ public class ControllerAdviceBean implements Ordered {
 
 	private final Object bean;
 
-	private final int order;
-
 	private final BeanFactory beanFactory;
+
+	private final int order;
 
 
 	/**
-	 * Create an instance using the given bean name.
+	 * Create a {@code ControllerAdviceBean} using the given bean instance.
+	 * @param bean the bean instance
+	 */
+	public ControllerAdviceBean(Object bean) {
+		Assert.notNull(bean, "Bean must not be null");
+		this.bean = bean;
+		this.order = initOrderFromBean(bean);
+		this.beanFactory = null;
+	}
+
+	/**
+	 * Create a {@code ControllerAdviceBean} using the given bean name.
 	 * @param beanName the name of the bean
 	 * @param beanFactory a BeanFactory that can be used later to resolve the bean
 	 */
@@ -66,29 +77,19 @@ public class ControllerAdviceBean implements Ordered {
 		this.order = initOrderFromBeanType(this.beanFactory.getType(beanName));
 	}
 
-	/**
-	 * Create an instance using the given bean instance.
-	 * @param bean the bean
-	 */
-	public ControllerAdviceBean(Object bean) {
-		Assert.notNull(bean, "Bean must not be null");
-		this.bean = bean;
-		this.order = initOrderFromBean(bean);
-		this.beanFactory = null;
-	}
-
 
 	/**
 	 * Returns the order value extracted from the {@link ControllerAdvice}
-	 * annotation or {@link Ordered#LOWEST_PRECEDENCE} otherwise.
+	 * annotation, or {@link Ordered#LOWEST_PRECEDENCE} otherwise.
 	 */
 	public int getOrder() {
 		return this.order;
 	}
 
 	/**
-	 * Returns the type of the contained bean.
-	 * If the bean type is a CGLIB-generated class, the original, user-defined class is returned.
+	 * Return the type of the contained bean.
+	 * <p>If the bean type is a CGLIB-generated class, the original
+	 * user-defined class is returned.
 	 */
 	public Class<?> getBeanType() {
 		Class<?> clazz = (this.bean instanceof String ?
