@@ -27,6 +27,7 @@ import javax.servlet.http.HttpSession;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.ContentCachingRequestWrapper;
+import org.springframework.web.util.WebUtils;
 
 /**
  * Base class for {@code Filter}s that perform logging operations before and after a request
@@ -86,7 +87,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 
 	/**
 	 * Set whether the query string should be included in the log message.
-	 * <p>Should be configured using an {@code &lt;init-param&gt;} for parameter name
+	 * <p>Should be configured using an {@code <init-param>} for parameter name
 	 * "includeQueryString" in the filter definition in {@code web.xml}.
 	 */
 	public void setIncludeQueryString(boolean includeQueryString) {
@@ -103,7 +104,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 	/**
 	 * Set whether the client address and session id should be included in the
 	 * log message.
-	 * <p>Should be configured using an {@code &lt;init-param&gt;} for parameter name
+	 * <p>Should be configured using an {@code <init-param>} for parameter name
 	 * "includeClientInfo" in the filter definition in {@code web.xml}.
 	 */
 	public void setIncludeClientInfo(boolean includeClientInfo) {
@@ -120,7 +121,7 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 
 	/**
 	 * Set whether the request payload (body) should be included in the log message.
-	 * <p>Should be configured using an {@code &lt;init-param&gt;} for parameter name
+	 * <p>Should be configured using an {@code <init-param>} for parameter name
 	 * "includePayload" in the filter definition in {@code web.xml}.
 	 */
 
@@ -270,21 +271,23 @@ public abstract class AbstractRequestLoggingFilter extends OncePerRequestFilter 
 				msg.append(";user=").append(user);
 			}
 		}
-		if (isIncludePayload() && request instanceof ContentCachingRequestWrapper) {
-			ContentCachingRequestWrapper wrapper = (ContentCachingRequestWrapper) request;
-			byte[] buf = wrapper.getContentAsByteArray();
-			if (buf.length > 0) {
-				int length = Math.min(buf.length, getMaxPayloadLength());
-				String payload;
-				try {
-					payload = new String(buf, 0, length, wrapper.getCharacterEncoding());
+		if (isIncludePayload()) {
+			ContentCachingRequestWrapper wrapper =
+					WebUtils.getNativeRequest(request, ContentCachingRequestWrapper.class);
+			if (wrapper != null) {
+				byte[] buf = wrapper.getContentAsByteArray();
+				if (buf.length > 0) {
+					int length = Math.min(buf.length, getMaxPayloadLength());
+					String payload;
+					try {
+						payload = new String(buf, 0, length, wrapper.getCharacterEncoding());
+					}
+					catch (UnsupportedEncodingException ex) {
+						payload = "[unknown]";
+					}
+					msg.append(";payload=").append(payload);
 				}
-				catch (UnsupportedEncodingException e) {
-					payload = "[unknown]";
-				}
-				msg.append(";payload=").append(payload);
 			}
-
 		}
 		msg.append(suffix);
 		return msg.toString();
