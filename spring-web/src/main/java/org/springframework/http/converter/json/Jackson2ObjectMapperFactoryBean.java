@@ -94,13 +94,13 @@ import org.springframework.context.ApplicationContextAware;
  * &lt;bean class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean">
  *   &lt;property name="featuresToEnable">
  *     &lt;array>
- *       &lt;util:constant static-field="com.fasterxml.jackson.databind.SerializationFeature$WRAP_ROOT_VALUE"/>
- *       &lt;util:constant static-field="com.fasterxml.jackson.databind.SerializationFeature$CLOSE_CLOSEABLE"/>
+ *       &lt;util:constant static-field="com.fasterxml.jackson.databind.SerializationFeature.WRAP_ROOT_VALUE"/>
+ *       &lt;util:constant static-field="com.fasterxml.jackson.databind.SerializationFeature.CLOSE_CLOSEABLE"/>
  *     &lt;/array>
  *   &lt;/property>
  *   &lt;property name="featuresToDisable">
  *     &lt;array>
- *       &lt;util:constant static-field="com.fasterxml.jackson.databind.MapperFeature$USE_ANNOTATIONS"/>
+ *       &lt;util:constant static-field="com.fasterxml.jackson.databind.MapperFeature.USE_ANNOTATIONS"/>
  *     &lt;/array>
  *   &lt;/property>
  * &lt;/bean>
@@ -370,8 +370,9 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	}
 
 	/**
-	 * Customize the construction of Jackson handlers ({@link JsonSerializer}, {@link JsonDeserializer},
-	 * {@link KeyDeserializer}, {@code TypeResolverBuilder} and {@code TypeIdResolver}).
+	 * Customize the construction of Jackson handlers
+	 * ({@link JsonSerializer}, {@link JsonDeserializer}, {@link KeyDeserializer},
+	 * {@code TypeResolverBuilder} and {@code TypeIdResolver}).
 	 * @since 4.1.3
 	 * @see Jackson2ObjectMapperFactoryBean#setApplicationContext(ApplicationContext)
 	 */
@@ -380,8 +381,9 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	}
 
 	/**
-	 * Set the builder {@link ApplicationContext} in order to autowire Jackson handlers ({@link JsonSerializer},
-	 * {@link JsonDeserializer}, {@link KeyDeserializer}, {@code TypeResolverBuilder} and {@code TypeIdResolver}).
+	 * Set the builder {@link ApplicationContext} in order to autowire Jackson handlers
+	 * ({@link JsonSerializer}, {@link JsonDeserializer}, {@link KeyDeserializer},
+	 * {@code TypeResolverBuilder} and {@code TypeIdResolver}).
 	 * @since 4.1.3
 	 * @see Jackson2ObjectMapperBuilder#applicationContext(ApplicationContext)
 	 * @see SpringHandlerInstantiator
