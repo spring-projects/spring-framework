@@ -23,9 +23,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Resource;
 
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -632,7 +635,20 @@ public class AnnotatedElementUtilsTests {
 		assertArrayEquals("locations for " + element, EMPTY, contextConfig.locations());
 		// 'value' in @SpringAppConfig should not override 'value' in @ContextConfig
 		assertArrayEquals("value for " + element, EMPTY, contextConfig.value());
-		assertArrayEquals("classes for " + element, new Class<?>[] { Number.class }, contextConfig.classes());
+		assertArrayEquals("classes for " + element, new Class<?>[] {Number.class}, contextConfig.classes());
+	}
+
+	@Test
+	public void javaLangAnnotationTypeViaFindMergedAnnotation() throws Exception {
+		Constructor<?> deprecatedCtor = Date.class.getConstructor(String.class);
+		assertEquals(deprecatedCtor.getAnnotation(Deprecated.class), findMergedAnnotation(deprecatedCtor, Deprecated.class));
+		assertEquals(Date.class.getAnnotation(Deprecated.class), findMergedAnnotation(Date.class, Deprecated.class));
+	}
+
+	@Test
+	public void javaxAnnotationTypeViaFindMergedAnnotation() throws Exception {
+		assertEquals(ResourceHolder.class.getAnnotation(Resource.class), findMergedAnnotation(ResourceHolder.class, Resource.class));
+		assertEquals(SpringAppConfigClass.class.getAnnotation(Resource.class), findMergedAnnotation(SpringAppConfigClass.class, Resource.class));
 	}
 
 
@@ -685,7 +701,7 @@ public class AnnotatedElementUtilsTests {
 	// -------------------------------------------------------------------------
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.TYPE, ElementType.METHOD })
+	@Target({ElementType.TYPE, ElementType.METHOD})
 	@Inherited
 	@interface Transactional {
 
@@ -697,7 +713,7 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target({ ElementType.TYPE, ElementType.METHOD })
+	@Target({ElementType.TYPE, ElementType.METHOD})
 	@Inherited
 	@interface AliasedTransactional {
 
@@ -849,7 +865,7 @@ public class AnnotatedElementUtilsTests {
 		String[] value() default {};
 	}
 
-	@ImplicitAliasesContextConfig(xmlFiles = { "A.xml", "B.xml" })
+	@ImplicitAliasesContextConfig(xmlFiles = {"A.xml", "B.xml"})
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ComposedImplicitAliasesContextConfig {
 	}
@@ -938,7 +954,7 @@ public class AnnotatedElementUtilsTests {
 		String pattern();
 	}
 
-	@ComponentScan(excludeFilters = { @Filter(pattern = "*Test"), @Filter(pattern = "*Tests") })
+	@ComponentScan(excludeFilters = {@Filter(pattern = "*Test"), @Filter(pattern = "*Tests")})
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface TestComponentScan {
 
@@ -1037,7 +1053,7 @@ public class AnnotatedElementUtilsTests {
 		}
 	}
 
-	public static interface GenericParameter<T> {
+	public interface GenericParameter<T> {
 
 		T getFor(Class<T> cls);
 	}
@@ -1057,23 +1073,23 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	@Transactional
-	public static interface InheritedAnnotationInterface {
+	public interface InheritedAnnotationInterface {
 	}
 
-	public static interface SubInheritedAnnotationInterface extends InheritedAnnotationInterface {
+	public interface SubInheritedAnnotationInterface extends InheritedAnnotationInterface {
 	}
 
-	public static interface SubSubInheritedAnnotationInterface extends SubInheritedAnnotationInterface {
+	public interface SubSubInheritedAnnotationInterface extends SubInheritedAnnotationInterface {
 	}
 
 	@Order
-	public static interface NonInheritedAnnotationInterface {
+	public interface NonInheritedAnnotationInterface {
 	}
 
-	public static interface SubNonInheritedAnnotationInterface extends NonInheritedAnnotationInterface {
+	public interface SubNonInheritedAnnotationInterface extends NonInheritedAnnotationInterface {
 	}
 
-	public static interface SubSubNonInheritedAnnotationInterface extends SubNonInheritedAnnotationInterface {
+	public interface SubSubNonInheritedAnnotationInterface extends SubNonInheritedAnnotationInterface {
 	}
 
 	@ConventionBasedComposedContextConfig(locations = "explicitDeclaration")
@@ -1142,6 +1158,10 @@ public class AnnotatedElementUtilsTests {
 
 	@SpringAppConfig(Number.class)
 	static class SpringAppConfigClass {
+	}
+
+	@Resource(name = "x")
+	static class ResourceHolder {
 	}
 
 }

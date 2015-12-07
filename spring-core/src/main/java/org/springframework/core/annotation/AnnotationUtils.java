@@ -514,7 +514,7 @@ public abstract class AnnotationUtils {
 		try {
 			Annotation[] anns = annotatedElement.getDeclaredAnnotations();
 			for (Annotation ann : anns) {
-				if (ann.annotationType().equals(annotationType)) {
+				if (ann.annotationType() == annotationType) {
 					return (A) ann;
 				}
 			}
@@ -703,7 +703,7 @@ public abstract class AnnotationUtils {
 		try {
 			Annotation[] anns = clazz.getDeclaredAnnotations();
 			for (Annotation ann : anns) {
-				if (ann.annotationType().equals(annotationType)) {
+				if (ann.annotationType() == annotationType) {
 					return (A) ann;
 				}
 			}
@@ -828,7 +828,7 @@ public abstract class AnnotationUtils {
 		Assert.notNull(clazz, "Class must not be null");
 		try {
 			for (Annotation ann : clazz.getDeclaredAnnotations()) {
-				if (ann.annotationType().equals(annotationType)) {
+				if (ann.annotationType() == annotationType) {
 					return true;
 				}
 			}
@@ -1360,7 +1360,8 @@ public abstract class AnnotationUtils {
 		if (annotation == null) {
 			return null;
 		}
-		if (annotation instanceof SynthesizedAnnotation) {
+		if (annotation instanceof SynthesizedAnnotation || (Proxy.isProxyClass(annotation.getClass()) &&
+				Proxy.getInvocationHandler(annotation) instanceof SynthesizedAnnotationInvocationHandler)) {
 			return annotation;
 		}
 
@@ -1372,8 +1373,9 @@ public abstract class AnnotationUtils {
 		DefaultAnnotationAttributeExtractor attributeExtractor =
 				new DefaultAnnotationAttributeExtractor(annotation, annotatedElement);
 		InvocationHandler handler = new SynthesizedAnnotationInvocationHandler(attributeExtractor);
-		return (A) Proxy.newProxyInstance(annotation.getClass().getClassLoader(),
-				new Class<?>[] {(Class<A>) annotationType, SynthesizedAnnotation.class}, handler);
+		Class<?>[] exposedInterfaces = (canExposeSynthesizedMarker(annotationType) ?
+				new Class<?>[] {annotationType, SynthesizedAnnotation.class} : new Class<?>[] {annotationType});
+		return (A) Proxy.newProxyInstance(annotation.getClass().getClassLoader(), exposedInterfaces, handler);
 	}
 
 	/**
@@ -1418,8 +1420,9 @@ public abstract class AnnotationUtils {
 		MapAnnotationAttributeExtractor attributeExtractor =
 				new MapAnnotationAttributeExtractor(attributes, annotationType, annotatedElement);
 		InvocationHandler handler = new SynthesizedAnnotationInvocationHandler(attributeExtractor);
-		return (A) Proxy.newProxyInstance(annotationType.getClassLoader(),
-				new Class<?>[] {annotationType, SynthesizedAnnotation.class}, handler);
+		Class<?>[] exposedInterfaces = (canExposeSynthesizedMarker(annotationType) ?
+				new Class<?>[] {annotationType, SynthesizedAnnotation.class} : new Class<?>[] {annotationType});
+		return (A) Proxy.newProxyInstance(annotationType.getClassLoader(), exposedInterfaces, handler);
 	}
 
 	/**
@@ -1539,8 +1542,21 @@ public abstract class AnnotationUtils {
 		}
 
 		attributeAliasesCache.put(annotationType, map);
-
 		return map;
+	}
+
+	/**
+	 * Check whether we can expose our {@link SynthesizedAnnotation} marker for the given annotation type.
+	 * @param annotationType the annotation type that we are about to create a synthesized proxy for
+	 */
+	private static boolean canExposeSynthesizedMarker(Class<? extends Annotation> annotationType) {
+		try {
+			return (Class.forName(SynthesizedAnnotation.class.getName(), false, annotationType.getClassLoader()) ==
+					SynthesizedAnnotation.class);
+		}
+		catch (ClassNotFoundException ex) {
+			return false;
+		}
 	}
 
 	/**
@@ -1629,7 +1645,7 @@ public abstract class AnnotationUtils {
 	static String getAttributeOverrideName(Method attribute, Class<? extends Annotation> metaAnnotationType) {
 		Assert.notNull(attribute, "attribute must not be null");
 		Assert.notNull(metaAnnotationType, "metaAnnotationType must not be null");
-		Assert.isTrue(!Annotation.class.equals(metaAnnotationType),
+		Assert.isTrue(Annotation.class != metaAnnotationType,
 				"metaAnnotationType must not be [java.lang.annotation.Annotation]");
 
 		AliasDescriptor descriptor = AliasDescriptor.from(attribute);
@@ -1931,7 +1947,7 @@ public abstract class AnnotationUtils {
 			this.sourceAnnotationType = (Class<? extends Annotation>) declaringClass;
 			this.sourceAttributeName = this.sourceAttribute.getName();
 
-			this.aliasedAnnotationType = (Annotation.class.equals(aliasFor.annotation()) ?
+			this.aliasedAnnotationType = (Annotation.class == aliasFor.annotation() ?
 					this.sourceAnnotationType : aliasFor.annotation());
 			this.aliasedAttributeName = getAliasedAttributeName(aliasFor, this.sourceAttribute);
 			try {
@@ -1945,7 +1961,7 @@ public abstract class AnnotationUtils {
 				throw new AnnotationConfigurationException(msg, ex);
 			}
 
-			this.isAliasPair = this.sourceAnnotationType.equals(this.aliasedAnnotationType);
+			this.isAliasPair = (this.sourceAnnotationType == this.aliasedAnnotationType);
 		}
 
 		private void validate() {
@@ -1979,7 +1995,7 @@ public abstract class AnnotationUtils {
 
 			Class<?> returnType = this.sourceAttribute.getReturnType();
 			Class<?> aliasedReturnType = this.aliasedAttribute.getReturnType();
-			if (!returnType.equals(aliasedReturnType)) {
+			if (returnType != aliasedReturnType) {
 				String msg = String.format("Misconfigured aliases: attribute [%s] in annotation [%s] " +
 						"and attribute [%s] in annotation [%s] must declare the same return type.",
 						this.sourceAttributeName, this.sourceAnnotationType.getName(), this.aliasedAttributeName,
@@ -2030,7 +2046,7 @@ public abstract class AnnotationUtils {
 		 * @see #isAliasFor
 		 */
 		private boolean isOverrideFor(Class<? extends Annotation> metaAnnotationType) {
-			return this.aliasedAnnotationType.equals(metaAnnotationType);
+			return (this.aliasedAnnotationType == metaAnnotationType);
 		}
 
 		/**
@@ -2087,7 +2103,7 @@ public abstract class AnnotationUtils {
 
 		public String getAttributeOverrideName(Class<? extends Annotation> metaAnnotationType) {
 			Assert.notNull(metaAnnotationType, "metaAnnotationType must not be null");
-			Assert.isTrue(!Annotation.class.equals(metaAnnotationType),
+			Assert.isTrue(Annotation.class != metaAnnotationType,
 					"metaAnnotationType must not be [java.lang.annotation.Annotation]");
 
 			// Search the attribute override hierarchy, starting with the current attribute
