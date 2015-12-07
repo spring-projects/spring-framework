@@ -296,7 +296,7 @@ public class AnnotatedElementUtils {
 	 */
 	public static <A extends Annotation> A getMergedAnnotation(AnnotatedElement element, Class<A> annotationType) {
 		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, annotationType);
-		return (attributes != null ? AnnotationUtils.synthesizeAnnotation(attributes, annotationType, element) : null);
+		return AnnotationUtils.synthesizeAnnotation(attributes, annotationType, element);
 	}
 
 	/**
@@ -401,8 +401,7 @@ public class AnnotatedElementUtils {
 	public static <A extends Annotation> A findMergedAnnotation(AnnotatedElement element, Class<A> annotationType) {
 		Assert.notNull(annotationType, "annotationType must not be null");
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(element, annotationType, false, false);
-		return (attributes != null ?
-				AnnotationUtils.synthesizeAnnotation(attributes, annotationType, element) : null);
+		return AnnotationUtils.synthesizeAnnotation(attributes, annotationType, element);
 	}
 
 	/**
@@ -429,8 +428,7 @@ public class AnnotatedElementUtils {
 	@SuppressWarnings("unchecked")
 	public static <A extends Annotation> A findMergedAnnotation(AnnotatedElement element, String annotationName) {
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(element, annotationName, false, false);
-		return (attributes != null ?
-				AnnotationUtils.synthesizeAnnotation(attributes, (Class<A>) attributes.annotationType(), element) : null);
+		return AnnotationUtils.synthesizeAnnotation(attributes, (Class<A>) attributes.annotationType(), element);
 	}
 
 	/**
