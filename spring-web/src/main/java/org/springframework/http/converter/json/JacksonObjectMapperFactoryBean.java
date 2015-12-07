@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -67,13 +67,13 @@ import org.springframework.beans.factory.InitializingBean;
  * &lt;bean class="org.springframework.web.context.support.JacksonObjectMapperFactoryBean">
  * 	&lt;property name="featuresToEnable">
  * 		&lt;array>
- * 			&lt;util:constant static-field="org.codehaus.jackson.map.SerializationConfig$Feature.WRAP_ROOT_VALUE"/>
- * 			&lt;util:constant static-field="org.codehaus.jackson.map.SerializationConfig$Feature.CLOSE_CLOSEABLE"/>
+ * 			&lt;util:constant static-field="org.codehaus.jackson.map.SerializationConfig.Feature.WRAP_ROOT_VALUE"/>
+ * 			&lt;util:constant static-field="org.codehaus.jackson.map.SerializationConfig.Feature.CLOSE_CLOSEABLE"/>
  * 		&lt;/array>
  * 	&lt;/property>
  * 	&lt;property name="featuresToDisable">
  * 		&lt;array>
- * 			&lt;util:constant static-field="org.codehaus.jackson.map.DeserializationConfig$Feature.USE_ANNOTATIONS"/>
+ * 			&lt;util:constant static-field="org.codehaus.jackson.map.DeserializationConfig.Feature.USE_ANNOTATIONS"/>
  * 		&lt;/array>
  * 	&lt;/property>
  * &lt;/bean>
