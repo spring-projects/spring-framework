@@ -27,13 +27,13 @@ import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.rx.Streams;
 
+import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
 
 import static org.junit.Assert.assertEquals;
@@ -49,7 +49,7 @@ public class RequestMappingHandlerMappingTests {
 
 	@Before
 	public void setup() {
-		StaticWebApplicationContext wac = new StaticWebApplicationContext();
+		StaticApplicationContext wac = new StaticApplicationContext();
 		wac.registerSingleton("handlerMapping", RequestMappingHandlerMapping.class);
 		wac.registerSingleton("controller", TestController.class);
 		wac.refresh();

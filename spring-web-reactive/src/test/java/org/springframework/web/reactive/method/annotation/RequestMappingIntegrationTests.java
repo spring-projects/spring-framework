@@ -33,10 +33,15 @@ import reactor.rx.Streams;
 import rx.Observable;
 import rx.Single;
 
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.support.ByteBufferEncoder;
+import org.springframework.core.codec.support.JacksonJsonEncoder;
+import org.springframework.core.codec.support.JsonObjectEncoder;
+import org.springframework.core.codec.support.StringEncoder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutureConverter;
@@ -46,12 +51,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.core.codec.support.ByteBufferEncoder;
-import org.springframework.core.codec.support.JacksonJsonEncoder;
-import org.springframework.core.codec.support.JsonObjectEncoder;
-import org.springframework.core.codec.support.StringEncoder;
-import org.springframework.web.reactive.DispatcherHandler;
-import org.springframework.web.reactive.handler.SimpleHandlerResultHandler;
 import org.springframework.http.server.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.stereotype.Controller;
@@ -60,7 +59,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
+import org.springframework.web.reactive.DispatcherHandler;
+import org.springframework.web.reactive.handler.SimpleHandlerResultHandler;
 
 import static org.junit.Assert.assertEquals;
 
@@ -71,12 +71,12 @@ import static org.junit.Assert.assertEquals;
  */
 public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
-	private AnnotationConfigWebApplicationContext wac;
+	private AnnotationConfigApplicationContext wac;
 
 
 	@Override
 	protected HttpHandler createHttpHandler() {
-		this.wac = new AnnotationConfigWebApplicationContext();
+		this.wac = new AnnotationConfigApplicationContext();
 		this.wac.register(FrameworkConfig.class, ApplicationConfig.class);
 		this.wac.refresh();
 
@@ -474,7 +474,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@RequestMapping("/observable-create")
 		public Observable<Void> observableCreate(@RequestBody Observable<Person> personStream) {
-			return personStream.toList().doOnNext(p -> persons.addAll(p)).flatMap(document -> Observable.empty());
+			return personStream.toList().doOnNext(persons::addAll).flatMap(document -> Observable.empty());
 		}
 
 		//TODO add mixed and T request mappings tests
