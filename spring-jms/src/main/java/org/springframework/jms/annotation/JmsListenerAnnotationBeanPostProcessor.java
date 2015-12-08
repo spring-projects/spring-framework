@@ -226,10 +226,19 @@ public class JmsListenerAnnotationBeanPostProcessor
 		return bean;
 	}
 
+	/**
+	 * Process the given {@link JmsListener} annotation on the given method,
+	 * registering a corresponding endpoint for the given bean instance.
+	 * @param jmsListener the annotation to process
+	 * @param mostSpecificMethod the annotated method
+	 * @param bean the instance to invoke the method on
+	 * @see #createMethodJmsListenerEndpoint()
+	 * @see JmsListenerEndpointRegistrar#registerEndpoint
+	 */
 	protected void processJmsListener(JmsListener jmsListener, Method mostSpecificMethod, Object bean) {
 		Method invocableMethod = MethodIntrospector.selectInvocableMethod(mostSpecificMethod, bean.getClass());
 
-		MethodJmsListenerEndpoint endpoint = new MethodJmsListenerEndpoint();
+		MethodJmsListenerEndpoint endpoint = createMethodJmsListenerEndpoint();
 		endpoint.setBean(bean);
 		endpoint.setMethod(invocableMethod);
 		endpoint.setMostSpecificMethod(mostSpecificMethod);
@@ -262,6 +271,17 @@ public class JmsListenerAnnotationBeanPostProcessor
 		}
 
 		this.registrar.registerEndpoint(endpoint, factory);
+	}
+
+	/**
+	 * Instantiate an empty {@link MethodJmsListenerEndpoint} for further
+	 * configuration with provided parameters in {@link #processJmsListener}.
+	 * @return a new {@code MethodJmsListenerEndpoint} or subclass thereof
+	 * @since 4.1.9
+	 * @see MethodJmsListenerEndpoint#createMessageListenerInstance()
+	 */
+	protected MethodJmsListenerEndpoint createMethodJmsListenerEndpoint() {
+		return new MethodJmsListenerEndpoint();
 	}
 
 	private String getEndpointId(JmsListener jmsListener) {
