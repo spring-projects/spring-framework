@@ -35,7 +35,9 @@ import org.junit.rules.ExpectedException;
 
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanInitializationException;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.PayloadApplicationEvent;
@@ -55,12 +57,14 @@ import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  */
 public class AnnotationDrivenEventListenerTests {
 
@@ -230,11 +234,31 @@ public class AnnotationDrivenEventListenerTests {
 	}
 
 	@Test
-	public void eventListenerWorksWithInterfaceProxy() throws Exception {
-		load(ProxyTestBean.class);
+	public void eventListenerWorksWithSimpleInterfaceProxy() throws Exception {
+		load(ScopedProxyTestBean.class);
 
 		SimpleService proxy = this.context.getBean(SimpleService.class);
 		assertTrue("bean should be a proxy", proxy instanceof Advised);
+		this.eventCollector.assertNoEventReceived(proxy.getId());
+
+		this.context.publishEvent(new ContextRefreshedEvent(this.context));
+		this.eventCollector.assertNoEventReceived(proxy.getId());
+
+		TestEvent event = new TestEvent();
+		this.context.publishEvent(event);
+		this.eventCollector.assertEvent(proxy.getId(), event);
+		this.eventCollector.assertTotalEventsCount(1);
+	}
+
+	@Test
+	public void eventListenerWorksWithAnnotatedInterfaceProxy() throws Exception {
+		load(AnnotatedProxyTestBean.class);
+
+		AnnotatedSimpleService proxy = this.context.getBean(AnnotatedSimpleService.class);
+		assertTrue("bean should be a proxy", proxy instanceof Advised);
+		this.eventCollector.assertNoEventReceived(proxy.getId());
+
+		this.context.publishEvent(new ContextRefreshedEvent(this.context));
 		this.eventCollector.assertNoEventReceived(proxy.getId());
 
 		TestEvent event = new TestEvent();
@@ -251,6 +275,9 @@ public class AnnotationDrivenEventListenerTests {
 		assertTrue("bean should be a cglib proxy", AopUtils.isCglibProxy(proxy));
 		this.eventCollector.assertNoEventReceived(proxy.getId());
 
+		this.context.publishEvent(new ContextRefreshedEvent(this.context));
+		this.eventCollector.assertNoEventReceived(proxy.getId());
+
 		TestEvent event = new TestEvent();
 		this.context.publishEvent(event);
 		this.eventCollector.assertEvent(proxy.getId(), event);
@@ -258,15 +285,79 @@ public class AnnotationDrivenEventListenerTests {
 	}
 
 	@Test
+	public void eventListenerWorksWithCustomScope() throws Exception {
+		load(CustomScopeTestBean.class);
+		CustomScope customScope = new CustomScope();
+		this.context.getBeanFactory().registerScope("custom", customScope);
+
+		CustomScopeTestBean proxy = this.context.getBean(CustomScopeTestBean.class);
+		assertTrue("bean should be a cglib proxy", AopUtils.isCglibProxy(proxy));
+		this.eventCollector.assertNoEventReceived(proxy.getId());
+
+		this.context.publishEvent(new ContextRefreshedEvent(this.context));
+		this.eventCollector.assertNoEventReceived(proxy.getId());
+
+		customScope.active = false;
+		this.context.publishEvent(new ContextRefreshedEvent(this.context));
+		customScope.active = true;
+		this.eventCollector.assertNoEventReceived(proxy.getId());
+
+		TestEvent event = new TestEvent();
+		this.context.publishEvent(event);
+		this.eventCollector.assertEvent(proxy.getId(), event);
+		this.eventCollector.assertTotalEventsCount(1);
+
+		try {
+			customScope.active = false;
+			this.context.publishEvent(new TestEvent());
+			fail("Should have thrown IllegalStateException");
+		}
+		catch (BeanCreationException ex) {
+			// expected
+			assertTrue(ex.getCause() instanceof IllegalStateException);
+		}
+	}
+
+	@Test
 	public void asyncProcessingApplied() throws InterruptedException {
 		loadAsync(AsyncEventListener.class);
+
 		String threadName = Thread.currentThread().getName();
 		AnotherTestEvent event = new AnotherTestEvent(this, threadName);
 		AsyncEventListener listener = this.context.getBean(AsyncEventListener.class);
 		this.eventCollector.assertNoEventReceived(listener);
 
 		this.context.publishEvent(event);
+		countDownLatch.await(2, TimeUnit.SECONDS);
+		this.eventCollector.assertEvent(listener, event);
+		this.eventCollector.assertTotalEventsCount(1);
+	}
 
+	@Test
+	public void asyncProcessingAppliedWithInterfaceProxy() throws InterruptedException {
+		doLoad(AsyncConfigurationWithInterfaces.class, SimpleProxyTestBean.class);
+
+		String threadName = Thread.currentThread().getName();
+		AnotherTestEvent event = new AnotherTestEvent(this, threadName);
+		SimpleService listener = this.context.getBean(SimpleService.class);
+		this.eventCollector.assertNoEventReceived(listener);
+
+		this.context.publishEvent(event);
+		countDownLatch.await(2, TimeUnit.SECONDS);
+		this.eventCollector.assertEvent(listener, event);
+		this.eventCollector.assertTotalEventsCount(1);
+	}
+
+	@Test
+	public void asyncProcessingAppliedWithScopedProxy() throws InterruptedException {
+		doLoad(AsyncConfigurationWithInterfaces.class, ScopedProxyTestBean.class);
+
+		String threadName = Thread.currentThread().getName();
+		AnotherTestEvent event = new AnotherTestEvent(this, threadName);
+		SimpleService listener = this.context.getBean(SimpleService.class);
+		this.eventCollector.assertNoEventReceived(listener);
+
+		this.context.publishEvent(event);
 		countDownLatch.await(2, TimeUnit.SECONDS);
 		this.eventCollector.assertEvent(listener, event);
 		this.eventCollector.assertTotalEventsCount(1);
@@ -443,7 +534,6 @@ public class AnnotationDrivenEventListenerTests {
 		public CountDownLatch testCountDownLatch() {
 			return new CountDownLatch(1);
 		}
-
 	}
 
 
@@ -530,7 +620,6 @@ public class AnnotationDrivenEventListenerTests {
 			}
 			return event.content;
 		}
-
 	}
 
 
@@ -560,13 +649,6 @@ public class AnnotationDrivenEventListenerTests {
 	}
 
 
-	@Configuration
-	@Import(BasicConfiguration.class)
-	@EnableAsync(proxyTargetClass = true)
-	static class AsyncConfiguration {
-	}
-
-
 	@Component
 	static class AsyncEventListener extends AbstractTestEventListener {
 
@@ -583,17 +665,89 @@ public class AnnotationDrivenEventListenerTests {
 	}
 
 
+	@Configuration
+	@Import(BasicConfiguration.class)
+	@EnableAsync(proxyTargetClass = true)
+	static class AsyncConfiguration {
+	}
+
+
+	@Configuration
+	@Import(BasicConfiguration.class)
+	@EnableAsync(proxyTargetClass = false)
+	static class AsyncConfigurationWithInterfaces {
+	}
+
+
 	interface SimpleService extends Identifiable {
 
-		@EventListener
 		void handleIt(TestEvent event);
 
+		void handleAsync(AnotherTestEvent event);
+	}
+
+
+	@Component
+	static class SimpleProxyTestBean extends AbstractIdentifiable implements SimpleService {
+
+		@Autowired
+		private EventCollector eventCollector;
+
+		@Autowired
+		private CountDownLatch countDownLatch;
+
+		@EventListener
+		@Override
+		public void handleIt(TestEvent event) {
+			eventCollector.addEvent(this, event);
+		}
+
+		@EventListener
+		@Async
+		public void handleAsync(AnotherTestEvent event) {
+			assertTrue(!Thread.currentThread().getName().equals(event.content));
+			eventCollector.addEvent(this, event);
+			countDownLatch.countDown();
+		}
 	}
 
 
 	@Component
 	@Scope(proxyMode = ScopedProxyMode.INTERFACES)
-	static class ProxyTestBean extends AbstractIdentifiable implements SimpleService {
+	static class ScopedProxyTestBean extends AbstractIdentifiable implements SimpleService {
+
+		@Autowired
+		private EventCollector eventCollector;
+
+		@Autowired
+		private CountDownLatch countDownLatch;
+
+		@EventListener
+		@Override
+		public void handleIt(TestEvent event) {
+			eventCollector.addEvent(this, event);
+		}
+
+		@EventListener
+		@Async
+		public void handleAsync(AnotherTestEvent event) {
+			assertTrue(!Thread.currentThread().getName().equals(event.content));
+			eventCollector.addEvent(this, event);
+			countDownLatch.countDown();
+		}
+	}
+
+
+	interface AnnotatedSimpleService extends Identifiable {
+
+		@EventListener
+		void handleIt(TestEvent event);
+	}
+
+
+	@Component
+	@Scope(proxyMode = ScopedProxyMode.INTERFACES)
+	static class AnnotatedProxyTestBean extends AbstractIdentifiable implements AnnotatedSimpleService {
 
 		@Autowired
 		private EventCollector eventCollector;
@@ -608,6 +762,17 @@ public class AnnotationDrivenEventListenerTests {
 	@Component
 	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 	static class CglibProxyTestBean extends AbstractTestEventListener {
+
+		@EventListener
+		public void handleIt(TestEvent event) {
+			collectEvent(event);
+		}
+	}
+
+
+	@Component
+	@Scope(scopeName = "custom", proxyMode = ScopedProxyMode.TARGET_CLASS)
+	static class CustomScopeTestBean extends AbstractTestEventListener {
 
 		@EventListener
 		public void handleIt(TestEvent event) {
@@ -645,7 +810,6 @@ public class AnnotationDrivenEventListenerTests {
 		public void handleTimestamp(Long timestamp) {
 			collectEvent(timestamp);
 		}
-
 	}
 
 
@@ -669,6 +833,42 @@ public class AnnotationDrivenEventListenerTests {
 		@EventListener
 		public void handleSecond(String payload) {
 			order.add("second");
+		}
+	}
+
+
+	private static class CustomScope implements org.springframework.beans.factory.config.Scope {
+
+		public boolean active = true;
+
+		private Object instance = null;
+
+		@Override
+		public Object get(String name, ObjectFactory<?> objectFactory) {
+			Assert.state(this.active, "Not active");
+			if (this.instance == null) {
+				this.instance = objectFactory.getObject();
+			}
+			return this.instance;
+		}
+
+		@Override
+		public Object remove(String name) {
+			return null;
+		}
+
+		@Override
+		public void registerDestructionCallback(String name, Runnable callback) {
+		}
+
+		@Override
+		public Object resolveContextualObject(String key) {
+			return null;
+		}
+
+		@Override
+		public String getConversationId() {
+			return null;
 		}
 	}
 

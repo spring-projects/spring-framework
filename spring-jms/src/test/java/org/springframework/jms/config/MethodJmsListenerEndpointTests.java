@@ -71,12 +71,6 @@ import static org.mockito.BDDMockito.*;
  */
 public class MethodJmsListenerEndpointTests {
 
-	@Rule
-	public final TestName name = new TestName();
-
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
 	private final DefaultMessageHandlerMethodFactory factory = new DefaultMessageHandlerMethodFactory();
 
 	private final DefaultMessageListenerContainer container = new DefaultMessageListenerContainer();
@@ -84,10 +78,18 @@ public class MethodJmsListenerEndpointTests {
 	private final JmsEndpointSampleBean sample = new JmsEndpointSampleBean();
 
 
+	@Rule
+	public final TestName name = new TestName();
+
+	@Rule
+	public final ExpectedException thrown = ExpectedException.none();
+
+
 	@Before
 	public void setup() {
 		initializeFactory(factory);
 	}
+
 
 	@Test
 	public void createMessageListenerNoFactory() {
@@ -401,8 +403,10 @@ public class MethodJmsListenerEndpointTests {
 		listener.onMessage(createSimpleJmsTextMessage("test"), session);  // Message<String> as Message<Integer>
 	}
 
+
 	private MessagingMessageListenerAdapter createInstance(
 			DefaultMessageHandlerMethodFactory factory, Method method, MessageListenerContainer container) {
+
 		MethodJmsListenerEndpoint endpoint = new MethodJmsListenerEndpoint();
 		endpoint.setBean(sample);
 		endpoint.setMethod(method);
@@ -410,8 +414,7 @@ public class MethodJmsListenerEndpointTests {
 		return endpoint.createMessageListener(container);
 	}
 
-	private MessagingMessageListenerAdapter createInstance(
-			DefaultMessageHandlerMethodFactory factory, Method method) {
+	private MessagingMessageListenerAdapter createInstance(DefaultMessageHandlerMethodFactory factory, Method method) {
 		return createInstance(factory, method, new SimpleMessageListenerContainer());
 	}
 
@@ -575,8 +578,8 @@ public class MethodJmsListenerEndpointTests {
 
 	@SuppressWarnings("serial")
 	static class MyBean implements Serializable {
-		private String name;
 
+		private String name;
 	}
 
 }

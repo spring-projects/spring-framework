@@ -51,6 +51,7 @@ import org.springframework.util.ReflectionUtils;
  * {@link GenericArrayType#getGenericComponentType()}) will be automatically wrapped.
  *
  * @author Phillip Webb
+ * @author Juergen Hoeller
  * @since 4.0
  */
 abstract class SerializableTypeWrapper {
@@ -210,7 +211,7 @@ abstract class SerializableTypeWrapper {
 
 
 	/**
-	 * {@link Serializable} {@link InvocationHandler} used by the Proxied {@link Type}.
+	 * {@link Serializable} {@link InvocationHandler} used by the proxied {@link Type}.
 	 * Provides serialization support and enhances any methods that return {@code Type}
 	 * or {@code Type[]}.
 	 */
@@ -373,21 +374,27 @@ abstract class SerializableTypeWrapper {
 
 		private final int index;
 
-		private transient Object result;
+		private transient Method method;
+
+		private transient volatile Object result;
 
 		public MethodInvokeTypeProvider(TypeProvider provider, Method method, int index) {
 			this.provider = provider;
 			this.methodName = method.getName();
 			this.index = index;
-			this.result = ReflectionUtils.invokeMethod(method, provider.getType());
+			this.method = method;
 		}
 
 		@Override
 		public Type getType() {
-			if (this.result instanceof Type || this.result == null) {
-				return (Type) this.result;
+			Object result = this.result;
+			if (result == null) {
+				// Lazy invocation of the target method on the provided type
+				result = ReflectionUtils.invokeMethod(this.method, this.provider.getType());
+				// Cache the result for further calls to getType()
+				this.result = result;
 			}
-			return ((Type[])this.result)[this.index];
+			return (result instanceof Type[] ? ((Type[]) result)[this.index] : (Type) result);
 		}
 
 		@Override
@@ -397,8 +404,8 @@ abstract class SerializableTypeWrapper {
 
 		private void readObject(ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
 			inputStream.defaultReadObject();
-			Method method = ReflectionUtils.findMethod(this.provider.getType().getClass(), this.methodName);
-			this.result = ReflectionUtils.invokeMethod(method, this.provider.getType());
+			this.method = ReflectionUtils.findMethod(this.provider.getType().getClass(), this.methodName);
+			Assert.state(Type.class == this.method.getReturnType() || Type[].class == this.method.getReturnType());
 		}
 	}
 

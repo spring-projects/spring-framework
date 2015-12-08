@@ -43,6 +43,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.accept.ContentNegotiationManager;
+import org.springframework.web.accept.ContentNegotiationStrategy;
+import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
@@ -73,12 +75,20 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 	/* Extensions associated with the built-in message converters */
 	private static final Set<String> WHITELISTED_EXTENSIONS = new HashSet<String>(Arrays.asList(
-			"txt", "text", "json", "xml", "atom", "rss", "png", "jpe", "jpeg", "jpg", "gif", "wbmp", "bmp"));
+			"txt", "text", "yml", "properties", "csv",
+			"json", "xml", "atom", "rss",
+			"png", "jpe", "jpeg", "jpg", "gif", "wbmp", "bmp"));
+
+	private static final Set<String> WHITELISTED_MEDIA_BASE_TYPES = new HashSet<String>(
+			Arrays.asList("audio", "image", "video"));
 
 
 	private final ContentNegotiationManager contentNegotiationManager;
 
+	private final PathExtensionContentNegotiationStrategy pathStrategy;
+
 	private final Set<String> safeExtensions = new HashSet<String>();
+
 
 
 	/**
@@ -106,8 +116,18 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 		super(converters, requestResponseBodyAdvice);
 		this.contentNegotiationManager = (manager != null ? manager : new ContentNegotiationManager());
+		this.pathStrategy = initPathStrategy(this.contentNegotiationManager);
 		this.safeExtensions.addAll(this.contentNegotiationManager.getAllFileExtensions());
 		this.safeExtensions.addAll(WHITELISTED_EXTENSIONS);
+	}
+
+	private static PathExtensionContentNegotiationStrategy initPathStrategy(ContentNegotiationManager manager) {
+		for (ContentNegotiationStrategy strategy : manager.getStrategies()) {
+			if (strategy instanceof PathExtensionContentNegotiationStrategy) {
+				return (PathExtensionContentNegotiationStrategy) strategy;
+			}
+		}
+		return new PathExtensionContentNegotiationStrategy();
 	}
 
 
@@ -360,7 +380,7 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		String extInPathParams = StringUtils.getFilenameExtension(pathParams);
 
 		if (!safeExtension(servletRequest, ext) || !safeExtension(servletRequest, extInPathParams)) {
-			headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=f.txt");
+			headers.add(HttpHeaders.CONTENT_DISPOSITION, "inline;filename=f.txt");
 		}
 	}
 
@@ -373,19 +393,42 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		if (this.safeExtensions.contains(extension)) {
 			return true;
 		}
+		String pattern = (String) request.getAttribute(HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE);
+		if (pattern != null && pattern.endsWith("." + extension)) {
+			return true;
+		}
 		if (extension.equals("html")) {
-			String name = HandlerMapping.BEST_MATCHING_PATTERN_ATTRIBUTE;
-			String pattern = (String) request.getAttribute(name);
-			if (pattern != null && pattern.endsWith(".html")) {
-				return true;
-			}
-			name = HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
+			String name = HandlerMapping.PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE;
 			Set<MediaType> mediaTypes = (Set<MediaType>) request.getAttribute(name);
 			if (!CollectionUtils.isEmpty(mediaTypes) && mediaTypes.contains(MediaType.TEXT_HTML)) {
 				return true;
 			}
 		}
-		return false;
+		return safeMediaTypesForExtension(extension);
+	}
+
+	private boolean safeMediaTypesForExtension(String extension) {
+		List<MediaType> mediaTypes = null;
+		try {
+			mediaTypes = this.pathStrategy.resolveMediaTypeKey(null, extension);
+		}
+		catch (HttpMediaTypeNotAcceptableException e) {
+			// Ignore
+		}
+		if (CollectionUtils.isEmpty(mediaTypes)) {
+			return false;
+		}
+		for (MediaType mediaType : mediaTypes) {
+			if (!safeMediaType(mediaType)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean safeMediaType(MediaType mediaType) {
+		return (WHITELISTED_MEDIA_BASE_TYPES.contains(mediaType.getType()) ||
+				mediaType.getSubtype().endsWith("+xml"));
 	}
 
 }

@@ -353,7 +353,7 @@ class PostProcessorRegistrationDelegate {
 
 		private final AbstractApplicationContext applicationContext;
 
-		private final Map<String, Boolean> singletonNames = new ConcurrentHashMap<String, Boolean>(64);
+		private final Map<String, Boolean> singletonNames = new ConcurrentHashMap<String, Boolean>(256);
 
 		public ApplicationListenerDetector(AbstractApplicationContext applicationContext) {
 			this.applicationContext = applicationContext;

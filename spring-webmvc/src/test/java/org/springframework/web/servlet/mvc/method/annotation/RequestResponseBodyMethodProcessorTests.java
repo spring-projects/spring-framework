@@ -644,7 +644,7 @@ public class RequestResponseBodyMethodProcessorTests {
 		String header = servletResponse.getHeader("Content-Disposition");
 		if (expectContentDisposition) {
 			assertEquals("Expected 'Content-Disposition' header. Use case: '" + comment + "'",
-					"attachment;filename=f.txt", header);
+					"inline;filename=f.txt", header);
 		}
 		else {
 			assertNull("Did not expect 'Content-Disposition' header. Use case: '" + comment + "'", header);

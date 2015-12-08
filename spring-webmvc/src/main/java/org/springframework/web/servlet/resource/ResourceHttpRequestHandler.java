@@ -574,7 +574,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 				out.write(buffer, 0, (int) bytesToCopy);
 				bytesToCopy = 0;
 			}
-			if (bytesRead < buffer.length) {
+			if (bytesRead == -1) {
 				break;
 			}
 		}

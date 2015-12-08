@@ -101,7 +101,6 @@ public class AsyncControllerJavaConfigTests {
 
 	@Configuration
 	@EnableWebMvc
-	@SuppressWarnings("unused")
 	static class WebConfig extends WebMvcConfigurerAdapter {
 
 		@Override
@@ -122,7 +121,6 @@ public class AsyncControllerJavaConfigTests {
 	}
 
 	@RestController
-	@SuppressWarnings("unused")
 	static class AsyncController {
 
 		@RequestMapping(path = "/callable")

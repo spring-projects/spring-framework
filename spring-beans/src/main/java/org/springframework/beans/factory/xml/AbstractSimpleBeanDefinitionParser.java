@@ -90,7 +90,7 @@ import org.springframework.util.StringUtils;
  * <pre class="code">&lt;util:properties location="jdbc.properties"/&gt;</pre>
  *
  * <p>The observant reader will notice that the sole attribute on the
- * {@code &lt;util:properties/&gt;} element matches the
+ * {@code <util:properties/>} element matches the
  * {@link org.springframework.beans.factory.config.PropertiesFactoryBean#setLocation(org.springframework.core.io.Resource)}
  * method name on the {@code PropertiesFactoryBean} (the general
  * usage thus illustrated holds true for any number of attributes).

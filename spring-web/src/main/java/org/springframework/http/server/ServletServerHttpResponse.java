@@ -138,6 +138,11 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 		private static final long serialVersionUID = 3410708522401046302L;
 
 		@Override
+		public boolean containsKey(Object key) {
+			return (super.containsKey(key) || (get(key) != null));
+		}
+
+		@Override
 		public String getFirst(String headerName) {
 			String value = servletResponse.getHeader(headerName);
 			if (value != null) {

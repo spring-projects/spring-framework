@@ -83,7 +83,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
 	private transient final Map<Class<?>, LifecycleMetadata> lifecycleMetadataCache =
-			new ConcurrentHashMap<Class<?>, LifecycleMetadata>(64);
+			new ConcurrentHashMap<Class<?>, LifecycleMetadata>(256);
 
 
 	/**

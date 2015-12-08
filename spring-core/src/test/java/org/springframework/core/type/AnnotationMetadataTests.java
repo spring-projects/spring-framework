@@ -194,7 +194,7 @@ public class AnnotationMetadataTests {
 
 	private void assertMetaAnnotationOverrides(AnnotationMetadata metadata) {
 		AnnotationAttributes attributes = (AnnotationAttributes) metadata.getAnnotationAttributes(
-			TestComponentScan.class.getName(), false);
+				TestComponentScan.class.getName(), false);
 		String[] basePackages = attributes.getStringArray("basePackages");
 		assertThat("length of basePackages[]", basePackages.length, is(1));
 		assertThat("basePackages[0]", basePackages[0], is("org.example.componentscan"));

@@ -22,10 +22,9 @@ import java.util.concurrent.Executor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.aop.framework.AbstractAdvisingBeanPostProcessor;
+import org.springframework.aop.framework.autoproxy.AbstractBeanFactoryAwareAdvisingPostProcessor;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.core.task.TaskExecutor;
@@ -62,12 +61,13 @@ import org.springframework.util.Assert;
  * @see ScheduledAnnotationBeanPostProcessor
  */
 @SuppressWarnings("serial")
-public class AsyncAnnotationBeanPostProcessor extends AbstractAdvisingBeanPostProcessor implements BeanFactoryAware {
+public class AsyncAnnotationBeanPostProcessor extends AbstractBeanFactoryAwareAdvisingPostProcessor {
 
 	/**
 	 * The default name of the {@link TaskExecutor} bean to pick up: "taskExecutor".
 	 * <p>Note that the initial lookup happens by type; this is just the fallback
 	 * in case of multiple executor beans found in the context.
+	 * @since 4.2
 	 */
 	public static final String DEFAULT_TASK_EXECUTOR_BEAN_NAME = "taskExecutor";
 
@@ -119,6 +119,8 @@ public class AsyncAnnotationBeanPostProcessor extends AbstractAdvisingBeanPostPr
 
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
+		super.setBeanFactory(beanFactory);
+
 		Executor executorToUse = this.executor;
 		if (executorToUse == null) {
 			try {
@@ -129,17 +131,16 @@ public class AsyncAnnotationBeanPostProcessor extends AbstractAdvisingBeanPostPr
 			}
 			catch (NoUniqueBeanDefinitionException ex) {
 				try {
-					executorToUse = beanFactory.getBean(DEFAULT_TASK_EXECUTOR_BEAN_NAME, TaskExecutor.class);
+					executorToUse = beanFactory.getBean(DEFAULT_TASK_EXECUTOR_BEAN_NAME, Executor.class);
 				}
 				catch (NoSuchBeanDefinitionException ex2) {
-					throw new IllegalStateException("More than one TaskExecutor bean exists within the context, " +
-							"and none is named 'taskExecutor'. Mark one of them as primary or name it " +
-							"'taskExecutor' (possibly as an alias); or specify the AsyncConfigurer interface " +
-							"and implement getAsyncExecutor() accordingly.", ex);
+					logger.info("More than one TaskExecutor bean found within the context, and none is " +
+							"named 'taskExecutor'. Mark one of them as primary or name it 'taskExecutor' " +
+							"(possibly as an alias) in order to use it for async annotation processing.");
 				}
 			}
 			catch (NoSuchBeanDefinitionException ex) {
-				logger.debug("Could not find default TaskExecutor bean", ex);
+				logger.info("No TaskExecutor bean found for async annotation processing.");
 				// Giving up -> falling back to default executor within the advisor...
 			}
 		}

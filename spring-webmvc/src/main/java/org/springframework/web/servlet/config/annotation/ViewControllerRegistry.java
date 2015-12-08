@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
@@ -42,6 +43,8 @@ public class ViewControllerRegistry {
 
 	private int order = 1;
 
+	private ApplicationContext applicationContext;
+
 
 	/**
 	 * Map a view controller to the given URL path (or pattern) in order to render
@@ -49,6 +52,7 @@ public class ViewControllerRegistry {
 	 */
 	public ViewControllerRegistration addViewController(String urlPath) {
 		ViewControllerRegistration registration = new ViewControllerRegistration(urlPath);
+		registration.setApplicationContext(this.applicationContext);
 		this.registrations.add(registration);
 		return registration;
 	}
@@ -61,6 +65,7 @@ public class ViewControllerRegistry {
 	 */
 	public RedirectViewControllerRegistration addRedirectViewController(String urlPath, String redirectUrl) {
 		RedirectViewControllerRegistration registration = new RedirectViewControllerRegistration(urlPath, redirectUrl);
+		registration.setApplicationContext(this.applicationContext);
 		this.redirectRegistrations.add(registration);
 		return registration;
 	}
@@ -72,6 +77,7 @@ public class ViewControllerRegistry {
 	 */
 	public void addStatusController(String urlPath, HttpStatus statusCode) {
 		ViewControllerRegistration registration = new ViewControllerRegistration(urlPath);
+		registration.setApplicationContext(this.applicationContext);
 		registration.setStatusCode(statusCode);
 		registration.getViewController().setStatusOnly(true);
 		this.registrations.add(registration);
@@ -85,6 +91,10 @@ public class ViewControllerRegistry {
 	 */
 	public void setOrder(int order) {
 		this.order = order;
+	}
+
+	protected void setApplicationContext(ApplicationContext applicationContext) {
+		this.applicationContext = applicationContext;
 	}
 
 

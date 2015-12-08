@@ -129,13 +129,13 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	private ConfigurableListableBeanFactory beanFactory;
 
 	private final Set<String> lookupMethodsChecked =
-			Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(64));
+			Collections.newSetFromMap(new ConcurrentHashMap<String, Boolean>(256));
 
 	private final Map<Class<?>, Constructor<?>[]> candidateConstructorsCache =
-			new ConcurrentHashMap<Class<?>, Constructor<?>[]>(64);
+			new ConcurrentHashMap<Class<?>, Constructor<?>[]>(256);
 
 	private final Map<String, InjectionMetadata> injectionMetadataCache =
-			new ConcurrentHashMap<String, InjectionMetadata>(64);
+			new ConcurrentHashMap<String, InjectionMetadata>(256);
 
 
 	/**
@@ -441,10 +441,12 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 	}
 
 	private AnnotationAttributes findAutowiredAnnotation(AccessibleObject ao) {
-		for (Class<? extends Annotation> type : this.autowiredAnnotationTypes) {
-			AnnotationAttributes attributes = AnnotatedElementUtils.getMergedAnnotationAttributes(ao, type);
-			if (attributes != null) {
-				return attributes;
+		if (ao.getAnnotations().length > 0) {
+			for (Class<? extends Annotation> type : this.autowiredAnnotationTypes) {
+				AnnotationAttributes attributes = AnnotatedElementUtils.getMergedAnnotationAttributes(ao, type);
+				if (attributes != null) {
+					return attributes;
+				}
 			}
 		}
 		return null;

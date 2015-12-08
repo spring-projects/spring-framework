@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.hamcrest.Matchers;
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
@@ -86,16 +85,8 @@ import org.springframework.web.socket.sockjs.transport.TransportType;
 import org.springframework.web.socket.sockjs.transport.handler.DefaultSockJsService;
 import org.springframework.web.socket.sockjs.transport.handler.WebSocketTransportHandler;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.*;
 
 /**
  * Test fixture for MessageBrokerBeanDefinitionParser.
@@ -107,13 +98,7 @@ import static org.junit.Assert.fail;
  */
 public class MessageBrokerBeanDefinitionParserTests {
 
-	private GenericWebApplicationContext appContext;
-
-
-	@Before
-	public void setup() {
-		this.appContext = new GenericWebApplicationContext();
-	}
+	private final GenericWebApplicationContext appContext = new GenericWebApplicationContext();
 
 
 	@Test
@@ -192,7 +177,8 @@ public class MessageBrokerBeanDefinitionParserTests {
 		interceptors = defaultSockJsService.getHandshakeInterceptors();
 		assertThat(interceptors, contains(instanceOf(FooTestInterceptor.class),
 				instanceOf(BarTestInterceptor.class), instanceOf(OriginHandshakeInterceptor.class)));
-		assertEquals(Arrays.asList("http://mydomain3.com", "http://mydomain4.com"), defaultSockJsService.getAllowedOrigins());
+		assertTrue(defaultSockJsService.getAllowedOrigins().contains("http://mydomain3.com"));
+		assertTrue(defaultSockJsService.getAllowedOrigins().contains("http://mydomain4.com"));
 
 		SimpUserRegistry userRegistry = this.appContext.getBean(SimpUserRegistry.class);
 		assertNotNull(userRegistry);
@@ -238,7 +224,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertNotNull(this.appContext.getBean("webSocketScopeConfigurer", CustomScopeConfigurer.class));
 
 		DirectFieldAccessor subscriptionRegistryAccessor = new DirectFieldAccessor(brokerMessageHandler.getSubscriptionRegistry());
-		String pathSeparator = (String)new DirectFieldAccessor(subscriptionRegistryAccessor.getPropertyValue("pathMatcher")).getPropertyValue("pathSeparator");
+		String pathSeparator = (String) new DirectFieldAccessor(subscriptionRegistryAccessor.getPropertyValue("pathMatcher")).getPropertyValue("pathSeparator");
 		assertEquals(".", pathSeparator);
 	}
 
@@ -362,7 +348,7 @@ public class MessageBrokerBeanDefinitionParserTests {
 		assertEquals(MimeTypeUtils.APPLICATION_JSON, ((DefaultContentTypeResolver) resolver).getDefaultMimeType());
 
 		DirectFieldAccessor handlerAccessor = new DirectFieldAccessor(annotationMethodMessageHandler);
-		String pathSeparator = (String)new DirectFieldAccessor(handlerAccessor.getPropertyValue("pathMatcher")).getPropertyValue("pathSeparator");
+		String pathSeparator = (String) new DirectFieldAccessor(handlerAccessor.getPropertyValue("pathMatcher")).getPropertyValue("pathSeparator");
 		assertEquals(".", pathSeparator);
 	}
 
@@ -478,8 +464,8 @@ public class MessageBrokerBeanDefinitionParserTests {
 		return (handler instanceof WebSocketHandlerDecorator) ?
 				((WebSocketHandlerDecorator) handler).getLastHandler() : handler;
 	}
-
 }
+
 
 class CustomArgumentResolver implements HandlerMethodArgumentResolver {
 
@@ -494,6 +480,7 @@ class CustomArgumentResolver implements HandlerMethodArgumentResolver {
 	}
 }
 
+
 class CustomReturnValueHandler implements HandlerMethodReturnValueHandler {
 
 	@Override
@@ -507,6 +494,7 @@ class CustomReturnValueHandler implements HandlerMethodReturnValueHandler {
 	}
 }
 
+
 class TestWebSocketHandlerDecoratorFactory implements WebSocketHandlerDecoratorFactory {
 
 	@Override
@@ -514,6 +502,7 @@ class TestWebSocketHandlerDecoratorFactory implements WebSocketHandlerDecoratorF
 		return new TestWebSocketHandlerDecorator(handler);
 	}
 }
+
 
 class TestWebSocketHandlerDecorator extends WebSocketHandlerDecorator {
 
@@ -528,6 +517,6 @@ class TestWebSocketHandlerDecorator extends WebSocketHandlerDecorator {
 	}
 }
 
-class TestStompErrorHandler extends StompSubProtocolErrorHandler {
 
+class TestStompErrorHandler extends StompSubProtocolErrorHandler {
 }

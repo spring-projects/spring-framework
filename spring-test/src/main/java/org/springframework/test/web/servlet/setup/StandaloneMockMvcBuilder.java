@@ -342,6 +342,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 		StaticRequestMappingHandlerMapping hm = config.getHandlerMapping();
 		hm.setServletContext(wac.getServletContext());
 		hm.setApplicationContext(wac);
+		hm.afterPropertiesSet();
 		hm.registerHandlers(this.controllers);
 		wac.addBean("requestMappingHandlerMapping", hm);
 

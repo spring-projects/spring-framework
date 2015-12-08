@@ -16,12 +16,12 @@
 
 package org.springframework.test.web.servlet.htmlunit;
 
+import com.gargoylesoftware.htmlunit.WebClient;
+
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcConfigurer;
 import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
-
-import com.gargoylesoftware.htmlunit.WebClient;
 
 /**
  * {@code MockMvcWebClientBuilder} simplifies the creation of an HtmlUnit
@@ -56,6 +56,7 @@ public class MockMvcWebClientBuilder extends MockMvcWebConnectionBuilderSupport<
 	protected MockMvcWebClientBuilder(WebApplicationContext context, MockMvcConfigurer configurer) {
 		super(context, configurer);
 	}
+
 
 	/**
 	 * Create a new {@code MockMvcWebClientBuilder} based on the supplied
@@ -104,7 +105,7 @@ public class MockMvcWebClientBuilder extends MockMvcWebConnectionBuilderSupport<
 	 * @see #build()
 	 */
 	public MockMvcWebClientBuilder withDelegate(WebClient webClient) {
-		Assert.notNull(webClient, "webClient must not be null");
+		Assert.notNull(webClient, "WebClient must not be null");
 		webClient.setWebConnection(createConnection(webClient.getWebConnection()));
 		this.webClient = webClient;
 		return this;

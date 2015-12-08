@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -172,7 +172,7 @@ public class ModelAttributeMethodProcessorTests {
 	}
 
 	@Test
-	public void resovleArgumentValidation() throws Exception {
+	public void resolveArgumentValidation() throws Exception {
 		String name = "attrName";
 		Object target = new TestBean();
 		mavContainer.addAttribute(name, target);
@@ -187,7 +187,7 @@ public class ModelAttributeMethodProcessorTests {
 		assertTrue(dataBinder.isValidateInvoked());
 	}
 
-	@Test(expected=BindException.class)
+	@Test(expected = BindException.class)
 	public void resovleArgumentBindException() throws Exception {
 		String name = "testBean";
 		Object target = new TestBean();
@@ -203,9 +203,7 @@ public class ModelAttributeMethodProcessorTests {
 		verify(binderFactory).createBinder(webRequest, target, name);
 	}
 
-	// SPR-9378
-
-	@Test
+	@Test  // SPR-9378
 	public void resolveArgumentOrdering() throws Exception {
 		String name = "testBean";
 		Object testBean = new TestBean(name);
@@ -241,6 +239,7 @@ public class ModelAttributeMethodProcessorTests {
 		assertSame(testBean, mavContainer.getModel().get("testBean"));
 	}
 
+
 	private static class StubRequestDataBinder extends WebRequestDataBinder {
 
 		private boolean bindInvoked;
@@ -273,30 +272,30 @@ public class ModelAttributeMethodProcessorTests {
 		public void validate(Object... validationHints) {
 			validateInvoked = true;
 		}
-
-
 	}
 
-	@Target({ METHOD, FIELD, CONSTRUCTOR, PARAMETER })
+
+	@Target({METHOD, FIELD, CONSTRUCTOR, PARAMETER})
 	@Retention(RUNTIME)
 	public @interface Valid {
 	}
 
+
 	@SessionAttributes(types=TestBean.class)
 	private static class ModelAttributeHandler {
+
 		@SuppressWarnings("unused")
-		public void modelAttribute(@ModelAttribute("attrName") @Valid TestBean annotatedAttr,
-								   Errors errors,
-								   int intArg,
-								   @ModelAttribute TestBean defaultNameAttr,
-								   TestBean notAnnotatedAttr) {
+		public void modelAttribute(@ModelAttribute("attrName") @Valid TestBean annotatedAttr, Errors errors,
+				int intArg, @ModelAttribute TestBean defaultNameAttr, TestBean notAnnotatedAttr) {
 		}
 	}
+
 
 	@ModelAttribute("modelAttrName")
 	private String annotatedReturnValue() {
 		return null;
 	}
+
 
 	@SuppressWarnings("unused")
 	private TestBean notAnnotatedReturnValue() {

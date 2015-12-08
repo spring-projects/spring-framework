@@ -78,12 +78,13 @@ public class CommonsMultipartFile implements MultipartFile, Serializable {
 			// Should never happen.
 			return "";
 		}
+
 		// Check for Unix-style path
-		int pos = filename.lastIndexOf("/");
-		if (pos == -1) {
-			// Check for Windows-style path
-			pos = filename.lastIndexOf("\\");
-		}
+		int unixSep = filename.lastIndexOf("/");
+		// Check for Windows-style path
+		int winSep = filename.lastIndexOf("\\");
+		// Cut off at latest possible point
+		int pos = (winSep > unixSep ? winSep : unixSep);
 		if (pos != -1)  {
 			// Any sort of path separator found...
 			return filename.substring(pos + 1);

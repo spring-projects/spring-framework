@@ -1676,7 +1676,8 @@ public class ClassWriter extends ClassVisitor {
      */
     protected String getCommonSuperClass(final String type1, final String type2) {
         Class<?> c, d;
-        ClassLoader classLoader = getClass().getClassLoader();
+        // SPRING PATCH: PREFER APPLICATION CLASSLOADER
+        ClassLoader classLoader = getClassLoader();
         try {
             c = Class.forName(type1.replace('/', '.'), false, classLoader);
             d = Class.forName(type2.replace('/', '.'), false, classLoader);
@@ -1697,6 +1698,17 @@ public class ClassWriter extends ClassVisitor {
             } while (!c.isAssignableFrom(d));
             return c.getName().replace('.', '/');
         }
+    }
+
+    // SPRING PATCH: PREFER THREAD CONTEXT CLASSLOADER FOR APPLICATION CLASSES
+    protected ClassLoader getClassLoader() {
+        ClassLoader classLoader = null;
+        try {
+            classLoader = Thread.currentThread().getContextClassLoader();
+        } catch (Throwable ex) {
+            // Cannot access thread context ClassLoader - falling back...
+        }
+        return (classLoader != null ? classLoader : getClass().getClassLoader());
     }
 
     /**

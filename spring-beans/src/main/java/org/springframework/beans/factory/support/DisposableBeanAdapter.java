@@ -37,12 +37,13 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.DestructionAwareBeanPostProcessor;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Adapter that implements the {@link DisposableBean} and {@link Runnable} interfaces
- * performing various destruction steps on a given bean instance:
+ * Adapter that implements the {@link DisposableBean} and {@link Runnable}
+ * interfaces performing various destruction steps on a given bean instance:
  * <ul>
  * <li>DestructionAwareBeanPostProcessors;
  * <li>the bean implementing DisposableBean itself;
@@ -218,7 +219,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 	 */
 	private List<DestructionAwareBeanPostProcessor> filterPostProcessors(List<BeanPostProcessor> postProcessors) {
 		List<DestructionAwareBeanPostProcessor> filteredPostProcessors = null;
-		if (postProcessors != null && !postProcessors.isEmpty()) {
+		if (!CollectionUtils.isEmpty(postProcessors)) {
 			filteredPostProcessors = new ArrayList<DestructionAwareBeanPostProcessor>(postProcessors.size());
 			for (BeanPostProcessor postProcessor : postProcessors) {
 				if (postProcessor instanceof DestructionAwareBeanPostProcessor) {
@@ -237,7 +238,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 
 	@Override
 	public void destroy() {
-		if (this.beanPostProcessors != null && !this.beanPostProcessors.isEmpty()) {
+		if (!CollectionUtils.isEmpty(this.beanPostProcessors)) {
 			for (DestructionAwareBeanPostProcessor processor : this.beanPostProcessors) {
 				processor.postProcessBeforeDestruction(this.bean, this.beanName);
 			}

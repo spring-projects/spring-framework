@@ -14,23 +14,33 @@
  * limitations under the License.
  */
 
-package org.springframework.cache.jcache;
+package org.springframework.format.datetime.joda;
 
-import javax.cache.Caching;
-import javax.cache.spi.CachingProvider;
+import java.text.ParseException;
+import java.util.Locale;
+
+import org.joda.time.Period;
+
+import org.springframework.format.Formatter;
 
 /**
- * Just here to be run against EHCache 3, whereas the original JCacheEhCacheTests
- * runs against EhCache 2.x with the EhCache-JCache add-on.
+ * {@link Formatter} implementation for a Joda-Time {@link Period},
+ * following Joda-Time's parsing rules for a Period.
  *
  * @author Juergen Hoeller
- * @since 4.2.1
+ * @since 4.2.4
+ * @see Period#parse
  */
-public class JCacheEhCache3Tests extends JCacheEhCacheTests {
+class PeriodFormatter implements Formatter<Period> {
 
 	@Override
-	protected CachingProvider getCachingProvider() {
-		return Caching.getCachingProvider("org.ehcache.jsr107.EhcacheCachingProvider");
+	public Period parse(String text, Locale locale) throws ParseException {
+		return Period.parse(text);
+	}
+
+	@Override
+	public String print(Period object, Locale locale) {
+		return object.toString();
 	}
 
 }

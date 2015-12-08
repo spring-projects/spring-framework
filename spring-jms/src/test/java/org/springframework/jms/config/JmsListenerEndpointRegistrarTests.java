@@ -30,9 +30,6 @@ import static org.junit.Assert.*;
  */
 public class JmsListenerEndpointRegistrarTests {
 
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
 	private final JmsListenerEndpointRegistrar registrar = new JmsListenerEndpointRegistrar();
 
 	private final JmsListenerEndpointRegistry registry = new JmsListenerEndpointRegistry();
@@ -40,11 +37,16 @@ public class JmsListenerEndpointRegistrarTests {
 	private final JmsListenerContainerTestFactory containerFactory = new JmsListenerContainerTestFactory();
 
 
+	@Rule
+	public final ExpectedException thrown = ExpectedException.none();
+
+
 	@Before
 	public void setup() {
 		registrar.setEndpointRegistry(registry);
 		registrar.setBeanFactory(new StaticListableBeanFactory());
 	}
+
 
 	@Test
 	public void registerNullEndpoint() {

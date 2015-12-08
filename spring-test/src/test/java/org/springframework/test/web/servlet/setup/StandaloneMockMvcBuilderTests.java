@@ -50,9 +50,10 @@ import static org.junit.Assert.*;
  */
 public class StandaloneMockMvcBuilderTests {
 
-	@Test  // SPR-10825
-	public void placeHoldersInRequestMapping() throws Exception {
+	// SPR-10825
 
+	@Test
+	public void placeHoldersInRequestMapping() throws Exception {
 		TestStandaloneMockMvcBuilder builder = new TestStandaloneMockMvcBuilder(new PlaceholderController());
 		builder.addPlaceHolderValue("sys.login.ajax", "/foo");
 		builder.build();
@@ -66,7 +67,29 @@ public class StandaloneMockMvcBuilderTests {
 		assertEquals("handleWithPlaceholders", ((HandlerMethod) chain.getHandler()).getMethod().getName());
 	}
 
-	@Test  // SPR-12553
+	// SPR-13637
+
+	@Test
+	public void suffixPatternMatch() throws Exception {
+		TestStandaloneMockMvcBuilder builder = new TestStandaloneMockMvcBuilder(new PersonController());
+		builder.setUseSuffixPatternMatch(false);
+		builder.build();
+
+		RequestMappingHandlerMapping hm = builder.wac.getBean(RequestMappingHandlerMapping.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/persons");
+		HandlerExecutionChain chain = hm.getHandler(request);
+		assertNotNull(chain);
+		assertEquals("persons", ((HandlerMethod) chain.getHandler()).getMethod().getName());
+
+		request = new MockHttpServletRequest("GET", "/persons.xml");
+		chain = hm.getHandler(request);
+		assertNull(chain);
+	}
+
+	// SPR-12553
+
+	@Test
 	public void applicationContextAttribute() {
 		TestStandaloneMockMvcBuilder builder = new TestStandaloneMockMvcBuilder(new PlaceholderController());
 		builder.addPlaceHolderValue("sys.login.ajax", "/foo");
@@ -100,7 +123,9 @@ public class StandaloneMockMvcBuilderTests {
 		builder.addFilter(new ContinueFilter(), (String) null);
 	}
 
-	@Test  // SPR-13375
+	// SPR-13375
+
+	@Test
 	@SuppressWarnings("rawtypes")
 	public void springHandlerInstantiator() {
 		TestStandaloneMockMvcBuilder builder = new TestStandaloneMockMvcBuilder(new PersonController());
@@ -136,6 +161,12 @@ public class StandaloneMockMvcBuilderTests {
 
 	@Controller
 	private static class PersonController {
+
+		@RequestMapping(value="/persons")
+		public String persons() {
+			return null;
+		}
+
 		@RequestMapping(value="/forward")
 		public String forward() {
 			return "forward:/persons";
@@ -143,9 +174,11 @@ public class StandaloneMockMvcBuilderTests {
 	}
 
 	private class ContinueFilter extends OncePerRequestFilter {
+
 		@Override
 		protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 				FilterChain filterChain) throws ServletException, IOException {
+
 			filterChain.doFilter(request, response);
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,7 +100,13 @@ public abstract class AbstractVersionStrategy implements VersionStrategy {
 
 		@Override
 		public String addVersion(String path, String version) {
-			return (this.prefix.endsWith("/") || path.startsWith("/") ? this.prefix + path : this.prefix + "/" + path);
+			if (path.startsWith(".")) {
+				return path;
+			}
+			else {
+				return (this.prefix.endsWith("/") || path.startsWith("/") ?
+						this.prefix + path : this.prefix + "/" + path);
+			}
 		}
 	}
 
@@ -118,7 +124,7 @@ public abstract class AbstractVersionStrategy implements VersionStrategy {
 			Matcher matcher = pattern.matcher(requestPath);
 			if (matcher.find()) {
 				String match = matcher.group(1);
-				return match.contains("-") ? match.substring(match.lastIndexOf("-") + 1) : match;
+				return (match.contains("-") ? match.substring(match.lastIndexOf("-") + 1) : match);
 			}
 			else {
 				return null;
@@ -134,7 +140,7 @@ public abstract class AbstractVersionStrategy implements VersionStrategy {
 		public String addVersion(String requestPath, String version) {
 			String baseFilename = StringUtils.stripFilenameExtension(requestPath);
 			String extension = StringUtils.getFilenameExtension(requestPath);
-			return baseFilename + "-" + version + "." + extension;
+			return (baseFilename + "-" + version + "." + extension);
 		}
 	}
 

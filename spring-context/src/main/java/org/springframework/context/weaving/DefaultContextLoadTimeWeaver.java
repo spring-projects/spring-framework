@@ -39,7 +39,7 @@ import org.springframework.instrument.classloading.websphere.WebSphereLoadTimeWe
  *
  * <p>Typically registered for the default bean name
  * "{@code loadTimeWeaver}"; the most convenient way to achieve this is
- * Spring's {@code &lt;context:load-time-weaver&gt;} XML tag.
+ * Spring's {@code <context:load-time-weaver>} XML tag.
  *
  * <p>This class implements a runtime environment check for obtaining the
  * appropriate weaver implementation: As of Spring 4.0, it detects Oracle WebLogic 10,

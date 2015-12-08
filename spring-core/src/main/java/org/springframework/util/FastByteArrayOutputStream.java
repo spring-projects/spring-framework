@@ -263,7 +263,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 	 */
 	public void resize(int targetCapacity) {
 		Assert.isTrue(targetCapacity >= size(), "New capacity must not be smaller than current size");
-		if (buffers.peekFirst() == null) {
+		if (this.buffers.peekFirst() == null) {
 			this.nextBlockSize = targetCapacity - size();
 		}
 		else if (size() == targetCapacity && this.buffers.getFirst().length == targetCapacity) {

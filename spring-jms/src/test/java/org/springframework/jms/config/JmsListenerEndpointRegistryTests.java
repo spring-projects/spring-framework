@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,17 +21,18 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 /**
- *
  * @author Stephane Nicoll
  */
 public class JmsListenerEndpointRegistryTests {
 
-	@Rule
-	public final ExpectedException thrown = ExpectedException.none();
-
 	private final JmsListenerEndpointRegistry registry = new JmsListenerEndpointRegistry();
 
 	private final JmsListenerContainerTestFactory containerFactory = new JmsListenerContainerTestFactory();
+
+
+	@Rule
+	public final ExpectedException thrown = ExpectedException.none();
+
 
 	@Test
 	public void createWithNullEndpoint() {
@@ -58,6 +59,7 @@ public class JmsListenerEndpointRegistryTests {
 		thrown.expect(IllegalStateException.class);
 		registry.registerListenerContainer(createEndpoint("test", "queue"), containerFactory);
 	}
+
 
 	private SimpleJmsListenerEndpoint createEndpoint(String id, String destinationName) {
 		SimpleJmsListenerEndpoint endpoint = new SimpleJmsListenerEndpoint();

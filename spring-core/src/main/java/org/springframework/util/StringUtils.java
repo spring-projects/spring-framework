@@ -527,7 +527,7 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Extract the filename from the given path,
+	 * Extract the filename from the given Java resource path,
 	 * e.g. {@code "mypath/myfile.txt" -> "myfile.txt"}.
 	 * @param path the file path (may be {@code null})
 	 * @return the extracted filename, or {@code null} if none
@@ -541,7 +541,7 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Extract the filename extension from the given path,
+	 * Extract the filename extension from the given Java resource path,
 	 * e.g. "mypath/myfile.txt" -> "txt".
 	 * @param path the file path (may be {@code null})
 	 * @return the extracted filename extension, or {@code null} if none
@@ -562,7 +562,7 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Strip the filename extension from the given path,
+	 * Strip the filename extension from the given Java resource path,
 	 * e.g. "mypath/myfile.txt" -> "mypath/myfile".
 	 * @param path the file path (may be {@code null})
 	 * @return the path with stripped filename extension,
@@ -584,7 +584,7 @@ public abstract class StringUtils {
 	}
 
 	/**
-	 * Apply the given relative path to the given path,
+	 * Apply the given relative path to the given Java resource path,
 	 * assuming standard Java folder separation (i.e. "/" separators).
 	 * @param path the path to start from (usually a full file path)
 	 * @param relativePath the relative path to apply

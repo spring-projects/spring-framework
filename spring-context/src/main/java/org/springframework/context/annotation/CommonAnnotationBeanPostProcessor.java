@@ -179,7 +179,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	private transient BeanFactory beanFactory;
 
 	private transient final Map<String, InjectionMetadata> injectionMetadataCache =
-			new ConcurrentHashMap<String, InjectionMetadata>(64);
+			new ConcurrentHashMap<String, InjectionMetadata>(256);
 
 
 	/**

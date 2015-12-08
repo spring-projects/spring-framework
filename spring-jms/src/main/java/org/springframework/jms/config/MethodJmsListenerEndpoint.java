@@ -39,6 +39,7 @@ import org.springframework.util.StringUtils;
  * an incoming message for this endpoint.
  *
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  * @since 4.1
  */
 public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
@@ -46,6 +47,8 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 	private Object bean;
 
 	private Method method;
+
+	private Method mostSpecificMethod;
 
 	private MessageHandlerMethodFactory messageHandlerMethodFactory;
 
@@ -72,6 +75,29 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 
 	public Method getMethod() {
 		return this.method;
+	}
+
+	/**
+	 * Set the most specific method known for this endpoint's declaration.
+	 * <p>In case of a proxy, this will be the method on the target class
+	 * (if annotated itself, that is, if not just annotated in an interface).
+	 * @since 4.2.3
+	 */
+	public void setMostSpecificMethod(Method mostSpecificMethod) {
+		this.mostSpecificMethod = mostSpecificMethod;
+	}
+
+	public Method getMostSpecificMethod() {
+		if (this.mostSpecificMethod != null) {
+			return this.mostSpecificMethod;
+		}
+		else if (AopUtils.isAopProxy(this.bean)) {
+			Class<?> target = AopProxyUtils.ultimateTargetClass(this.bean);
+			return AopUtils.getMostSpecificMethod(getMethod(), target);
+		}
+		else {
+			return getMethod();
+		}
 	}
 
 	/**
@@ -134,8 +160,8 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 		if (ann != null) {
 			Object[] destinations = ann.value();
 			if (destinations.length != 1) {
-				throw new IllegalStateException("Invalid @" + SendTo.class.getSimpleName() + " annotation on '"
-						+ specificMethod + "' one destination must be set (got " + Arrays.toString(destinations) + ")");
+				throw new IllegalStateException("Invalid @" + SendTo.class.getSimpleName() + " annotation on '" +
+						specificMethod + "' one destination must be set (got " + Arrays.toString(destinations) + ")");
 			}
 			return resolve((String) destinations[0]);
 		}
@@ -153,16 +179,6 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 		return value;
 	}
 
-
-	private Method getMostSpecificMethod() {
-		if (AopUtils.isAopProxy(this.bean)) {
-			Class<?> target = AopProxyUtils.ultimateTargetClass(this.bean);
-			return AopUtils.getMostSpecificMethod(getMethod(), target);
-		}
-		else {
-			return getMethod();
-		}
-	}
 
 	@Override
 	protected StringBuilder getEndpointDescription() {

@@ -36,29 +36,34 @@ import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
  *
  * <table>
  * <tr>
+ *     <th>Configurer Property</th>
+ *     <th>Underlying Strategy</th>
+ *     <th>Default Setting</th>
+ * </tr>
+ * <tr>
  *     <td>{@link #favorPathExtension}</td>
- *     <td>{@link PathExtensionContentNegotiationStrategy}</td>
- *     <td>Yes</td>
+ *     <td>{@link PathExtensionContentNegotiationStrategy Path Extension strategy}</td>
+ *     <td>On</td>
  * </tr>
  * <tr>
  *     <td>{@link #favorParameter}</td>
- *     <td>{@link ParameterContentNegotiationStrategy}</td>
- *     <td>-</td>
+ *     <td>{@link ParameterContentNegotiationStrategy Parameter strategy}</td>
+ *     <td>Off</td>
  * </tr>
  * <tr>
  *     <td>{@link #ignoreAcceptHeader}</td>
- *     <td>{@link HeaderContentNegotiationStrategy}</td>
- *     <td>Yes</td>
+ *     <td>{@link HeaderContentNegotiationStrategy Header strategy}</td>
+ *     <td>On</td>
  * </tr>
  * <tr>
  *     <td>{@link #defaultContentType}</td>
- *     <td>{@link FixedContentNegotiationStrategy}</td>
- *     <td>-</td>
+ *     <td>{@link FixedContentNegotiationStrategy Fixed content strategy}</td>
+ *     <td>Not set</td>
  * </tr>
  * <tr>
  *     <td>{@link #defaultContentTypeStrategy}</td>
  *     <td>{@link ContentNegotiationStrategy}</td>
- *     <td>-</td>
+ *     <td>Not set</td>
  * </tr>
  * </table>
  *
@@ -109,9 +114,13 @@ public class ContentNegotiationConfigurer {
 	/**
 	 * Add a mapping from a key, extracted from a path extension or a query
 	 * parameter, to a MediaType. This is required in order for the parameter
-	 * strategy to work. The path extension strategy will also try
-	 * {@link ServletContext#getMimeType} and JAF if it is present and is not
-	 * suppressed via {@link #useJaf}.
+	 * strategy to work. Any extensions explicitly registered here are also
+	 * whitelisted for the purpose of Reflected File Download attack detection
+	 * (see Spring Framework reference documentation for more details on RFD
+	 * attack protection).
+	 * <p>The path extension strategy will also try to use
+	 * {@link ServletContext#getMimeType} and JAF (if present) to resolve path
+	 * extensions. To change this behavior see the {@link #useJaf} property.
 	 * @param extension the key to look up
 	 * @param mediaType the media type
 	 * @see #mediaTypes(Map)
@@ -211,6 +220,7 @@ public class ContentNegotiationConfigurer {
 	/**
 	 * Set a custom {@link ContentNegotiationStrategy} to use to determine
 	 * the content type to use when no content type is requested.
+	 * <p>By default this is not set.
 	 * @see #defaultContentType
 	 * @since 4.1.2
 	 */

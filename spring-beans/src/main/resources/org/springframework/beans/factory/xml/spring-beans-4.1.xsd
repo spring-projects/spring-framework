@@ -31,8 +31,8 @@
 	(or an ancestor factory).
 
 	As alternative to bean references, "inner bean definitions" can be used.
-	Singleton flags of such inner bean definitions are effectively ignored:
-	inner beans are typically anonymous prototypes.
+	Such inner beans do not have an independent lifecycle; they are typically
+	anonymous nested objects that share the scope of their containing bean.
 
 	There is also support for lists, sets, maps, and java.util.Properties
 	as bean property types or constructor argument types.
@@ -113,16 +113,19 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The default 'lazy-init' value; see the documentation for the
-	'lazy-init' attribute of the 'bean' element.
+	'lazy-init' attribute of the 'bean' element. The default is "default",
+	indicating inheritance from outer 'beans' sections in case of nesting,
+	otherwise falling back to "false".
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
 			<xsd:attribute name="default-merge" default="default" type="defaultable-boolean">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
-	The default 'merge' value; see the documentation for the
-	'merge' attribute of the various collection elements. The default
-	is 'false'.
+	The default 'merge' value; see the documentation for the 'merge'
+	attribute of the various collection elements. The default is "default",
+	indicating inheritance from outer 'beans' sections in case of nesting,
+	otherwise falling back to "false".
 					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
@@ -130,7 +133,9 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The default 'autowire' value; see the documentation for the
-	'autowire' attribute of the 'bean' element. The default is 'default'.
+	'autowire' attribute of the 'bean' element. The default is "default",
+	indicating inheritance from outer 'beans' sections in case of nesting,
+	otherwise falling back to "no" (i.e. no externally driven autowiring).
 					]]></xsd:documentation>
 				</xsd:annotation>
 				<xsd:simpleType>
@@ -305,10 +310,10 @@
 	service objects. Further scopes, such as "request" or "session", might
 	be supported by extended bean factories (e.g. in a web environment).
 
-	Inner bean definitions inherit the singleton status of their containing
-	bean definition, unless explicitly specified: The inner bean will be a
+	Inner bean definitions inherit the scope of their containing bean
+	definition, unless explicitly specified: The inner bean will be a
 	singleton if the containing bean is a singleton, and a prototype if
-	the containing bean has any other scope.
+	the containing bean is a prototype, etc.
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
@@ -328,13 +333,15 @@
 		<xsd:attribute name="lazy-init" default="default" type="defaultable-boolean">
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
-	Indicates whether or not this bean is to be lazily initialized.
-	If false, it will be instantiated on startup by bean factories
-	that perform eager initialization of singletons. The default is
-	"false".
+	Indicates whether this bean is to be lazily initialized. If "false",
+	it will be instantiated on startup by bean factories that perform eager
+	initialization of singletons. The effective default is "false".
 
 	Note: This attribute will not be inherited by child bean definitions.
-	Hence, it needs to be specified per concrete bean definition.
+	Hence, it needs to be specified per concrete bean definition. It can be
+	shared through the 'default-lazy-init' attribute at the 'beans' level
+	and potentially inherited from outer 'beans' defaults in case of nested
+	'beans' sections (e.g. with different profiles).
 				]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
@@ -344,7 +351,7 @@
 	Controls whether bean properties are "autowired".
 	This is an automagical process in which bean references don't need
 	to be coded explicitly in the XML bean definition file, but rather the
-	Spring container works out dependencies.
+	Spring container works out dependencies. The effective default is "no".
 
 	There are 4 modes:
 
@@ -379,7 +386,10 @@
 	elements, always override autowiring.
 
 	Note: This attribute will not be inherited by child bean definitions.
-	Hence, it needs to be specified per concrete bean definition.
+	Hence, it needs to be specified per concrete bean definition. It can be
+	shared through the 'default-autowire' attribute at the 'beans' level
+	and potentially inherited from outer 'beans' defaults in case of nested
+	'beans' sections (e.g. with different profiles).
 				]]></xsd:documentation>
 			</xsd:annotation>
 			<xsd:simpleType>
