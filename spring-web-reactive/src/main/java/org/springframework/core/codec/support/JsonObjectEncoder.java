@@ -112,7 +112,7 @@ public class JsonObjectEncoder extends AbstractEncoder<ByteBuffer> {
 			buffer.flip();
 
 			BackpressureUtils.getAndSub(REQUESTED, this, 1L);
-			downstream().onNext(buffer.byteBuffer());
+			subscriber.onNext(buffer.byteBuffer());
 		}
 
 		protected void drainLast(){
@@ -123,7 +123,7 @@ public class JsonObjectEncoder extends AbstractEncoder<ByteBuffer> {
 					buffer.append("]");
 				}
 				buffer.flip();
-				downstream().onNext(buffer.byteBuffer());
+				subscriber.onNext(buffer.byteBuffer());
 				super.doComplete();
 			}
 		}
