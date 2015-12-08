@@ -19,10 +19,19 @@ import org.reactivestreams.Publisher;
 
 
 /**
+ * Represents a chain of {@link HttpFilter}s allowing each {@link HttpFilter} to
+ * delegate to the next in the chain.
+ *
  * @author Rossen Stoyanchev
  */
 public interface HttpFilterChain {
 
+	/**
+	 *
+	 * @param request current HTTP request.
+	 * @param response current HTTP response.
+	 * @return Publisher to indicate when request handling is complete.
+	 */
 	Publisher<Void> filter(ServerHttpRequest request, ServerHttpResponse response);
 
 }

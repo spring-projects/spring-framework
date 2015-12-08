@@ -19,11 +19,27 @@ package org.springframework.http.server.reactive;
 import org.reactivestreams.Publisher;
 
 /**
+ * Contract for interception-style, chained processing of HTTP requests.
+ *
+ * <p>Filters may be used to implement cross-cutting, application-agnostic
+ * requirements such as security, timeouts, and others.
+ *
+ * <p>{@link FilterChainHttpHandler} provides a way of constructing a chain of
+ * {@link HttpFilter}s followed by a target {@link HttpHandler}.
+ *
  * @author Rossen Stoyanchev
+ * @see FilterChainHttpHandler
  */
 public interface HttpFilter {
 
-
+	/**
+	 * Process the given request and optionally delegate to the next HttpFilter.
+	 *
+	 * @param request current HTTP request.
+	 * @param response current HTTP response.
+	 * @param chain provides a way to delegate to the next HttpFilter.
+	 * @return Publisher to indicate when request processing is complete.
+	 */
 	Publisher<Void> filter(ServerHttpRequest request, ServerHttpResponse response,
 			HttpFilterChain chain);
 

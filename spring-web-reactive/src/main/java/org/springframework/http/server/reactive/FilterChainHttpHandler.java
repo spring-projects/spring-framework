@@ -24,8 +24,8 @@ import org.reactivestreams.Publisher;
 import org.springframework.util.Assert;
 
 /**
- * An {@link HttpHandler} decorator that delegates to a list of
- * {@link HttpFilter}s and the target {@link HttpHandler}.
+ * {@link HttpHandler} that delegates to a chain of {@link HttpFilter}s followed
+ * by a target {@link HttpHandler}.
  *
  * @author Rossen Stoyanchev
  */
