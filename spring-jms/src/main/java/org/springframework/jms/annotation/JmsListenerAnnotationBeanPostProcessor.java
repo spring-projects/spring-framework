@@ -209,7 +209,7 @@ public class JmsListenerAnnotationBeanPostProcessor
 			if (annotatedMethods.isEmpty()) {
 				this.nonAnnotatedClasses.add(bean.getClass());
 				if (logger.isTraceEnabled()) {
-					logger.trace("No @JmsListener annotations found on bean class: " + bean.getClass());
+					logger.trace("No @JmsListener annotations found on bean type: " + bean.getClass());
 				}
 			}
 			else {
@@ -243,7 +243,7 @@ public class JmsListenerAnnotationBeanPostProcessor
 			}
 		}
 
-		MethodJmsListenerEndpoint endpoint = new MethodJmsListenerEndpoint();
+		MethodJmsListenerEndpoint endpoint = createMethodJmsListenerEndpoint();
 		endpoint.setBean(bean);
 		endpoint.setMethod(method);
 		endpoint.setMessageHandlerMethodFactory(this.messageHandlerMethodFactory);
@@ -267,13 +267,24 @@ public class JmsListenerAnnotationBeanPostProcessor
 				factory = this.beanFactory.getBean(containerFactoryBeanName, JmsListenerContainerFactory.class);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
-				throw new BeanInitializationException("Could not register jms listener endpoint on [" +
-						method + "], no " + JmsListenerContainerFactory.class.getSimpleName() + " with id '" +
-						containerFactoryBeanName + "' was found in the application context", ex);
+				throw new BeanInitializationException("Could not register JMS listener endpoint on [" +
+						method + "], no " + JmsListenerContainerFactory.class.getSimpleName() +
+						" with id '" + containerFactoryBeanName + "' was found in the application context", ex);
 			}
 		}
 
 		this.registrar.registerEndpoint(endpoint, factory);
+	}
+
+	/**
+	 * Instantiate an empty {@link MethodJmsListenerEndpoint} for further
+	 * configuration with provided parameters in {@link #processJmsListener}.
+	 * @return a new {@code MethodJmsListenerEndpoint} or subclass thereof
+	 * @since 4.1.9
+	 * @see MethodJmsListenerEndpoint#createMessageListenerInstance()
+	 */
+	protected MethodJmsListenerEndpoint createMethodJmsListenerEndpoint() {
+		return new MethodJmsListenerEndpoint();
 	}
 
 	private String getEndpointId(JmsListener jmsListener) {

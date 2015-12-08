@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 
 
 	/**
-	 * Set the object instance that should manage this endpoint.
+	 * Set the actual bean instance to invoke this endpoint method on.
 	 */
 	public void setBean(Object bean) {
 		this.bean = bean;
@@ -60,7 +60,7 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 	}
 
 	/**
-	 * Set the method to invoke to process a message managed by this endpoint.
+	 * Set the method to invoke for processing a message managed by this endpoint.
 	 */
 	public void setMethod(Method method) {
 		this.method = method;
@@ -110,6 +110,7 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 
 	/**
 	 * Create an empty {@link MessagingMessageListenerAdapter} instance.
+	 * @return a new {@code MessagingMessageListenerAdapter} or subclass thereof
 	 */
 	protected MessagingMessageListenerAdapter createMessageListenerInstance() {
 		return new MessagingMessageListenerAdapter();
@@ -121,8 +122,8 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 		if (ann != null) {
 			Object[] destinations = ann.value();
 			if (destinations.length != 1) {
-				throw new IllegalStateException("Invalid @" + SendTo.class.getSimpleName() + " annotation on '"
-						+ specificMethod + "' one destination must be set (got " + Arrays.toString(destinations) + ")");
+				throw new IllegalStateException("Invalid @" + SendTo.class.getSimpleName() + " annotation on '" +
+						specificMethod + "' one destination must be set (got " + Arrays.toString(destinations) + ")");
 			}
 			return (String) destinations[0];
 		}
