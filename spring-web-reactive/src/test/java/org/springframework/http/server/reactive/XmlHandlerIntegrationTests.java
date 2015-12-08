@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.server;
+package org.springframework.http.server.reactive;
 
 import java.net.URI;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -23,7 +23,6 @@ import org.junit.Test;
 
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.web.client.RestTemplate;
 
 /**

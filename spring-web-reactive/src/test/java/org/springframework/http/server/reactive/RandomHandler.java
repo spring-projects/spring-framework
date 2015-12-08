@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.server;
+package org.springframework.http.server.reactive;
 
 import java.nio.ByteBuffer;
 import java.util.Random;
@@ -26,10 +26,6 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.io.buffer.Buffer;
 import reactor.rx.Streams;
-
-import org.springframework.http.server.reactive.HttpHandler;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 
 import static org.junit.Assert.assertEquals;
 

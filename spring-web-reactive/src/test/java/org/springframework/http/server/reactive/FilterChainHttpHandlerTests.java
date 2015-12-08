@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.http.server;
+package org.springframework.http.server.reactive;
 
 
 import java.util.concurrent.TimeUnit;
@@ -23,13 +23,6 @@ import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.Publishers;
 import reactor.rx.Streams;
-
-import org.springframework.http.server.reactive.FilterChainHttpHandler;
-import org.springframework.http.server.reactive.HttpFilter;
-import org.springframework.http.server.reactive.HttpFilterChain;
-import org.springframework.http.server.reactive.HttpHandler;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

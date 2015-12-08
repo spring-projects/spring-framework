@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.server;
+package org.springframework.http.server.reactive;
 
 import org.junit.After;
 import org.junit.Before;

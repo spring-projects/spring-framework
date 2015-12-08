@@ -21,7 +21,6 @@ import java.util.List;
 
 import org.reactivestreams.Publisher;
 
-import org.springframework.util.Assert;
 
 /**
  * {@link HttpHandler} that delegates to a chain of {@link HttpFilter}s followed
@@ -29,17 +28,14 @@ import org.springframework.util.Assert;
  *
  * @author Rossen Stoyanchev
  */
-public class FilterChainHttpHandler implements HttpHandler {
+public class FilterChainHttpHandler extends HttpHandlerDecorator {
 
 	private final List<HttpFilter> filters;
 
-	private final HttpHandler targetHandler;
-
 
 	public FilterChainHttpHandler(HttpHandler targetHandler, HttpFilter... filters) {
-		Assert.notNull(targetHandler, "'targetHandler' is required.");
+		super(targetHandler);
 		this.filters = (filters != null ? Arrays.asList(filters) : Collections.emptyList());
-		this.targetHandler = targetHandler;
 	}
 
 
@@ -60,7 +56,7 @@ public class FilterChainHttpHandler implements HttpHandler {
 				return filter.filter(request, response, this);
 			}
 			else {
-				return targetHandler.handle(request, response);
+				return getDelegate().handle(request, response);
 			}
 		}
 	}

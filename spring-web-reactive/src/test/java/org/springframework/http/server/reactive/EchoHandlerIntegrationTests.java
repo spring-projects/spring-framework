@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.server;
+package org.springframework.http.server.reactive;
 
 import java.net.URI;
 import java.util.Random;

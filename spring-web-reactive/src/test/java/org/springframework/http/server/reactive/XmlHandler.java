@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.http.server;
+package org.springframework.http.server.reactive;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
@@ -27,9 +27,6 @@ import reactor.io.buffer.Buffer;
 import reactor.rx.Streams;
 
 import org.springframework.http.MediaType;
-import org.springframework.http.server.reactive.HttpHandler;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.BufferOutputStream;
 import org.springframework.util.ByteBufferPublisherInputStream;
 
