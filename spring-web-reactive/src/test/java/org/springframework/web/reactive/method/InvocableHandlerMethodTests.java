@@ -23,8 +23,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
@@ -49,9 +47,6 @@ import static org.mockito.Mockito.when;
 @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
 public class InvocableHandlerMethodTests {
 
-	private static Log logger = LogFactory.getLog(InvocableHandlerMethodTests.class);
-
-
 	private ServerHttpRequest request;
 
 
@@ -66,9 +61,10 @@ public class InvocableHandlerMethodTests {
 		InvocableHandlerMethod hm = createHandlerMethod("noArgs");
 
 		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.request);
-		Object value = awaitValue(publisher);
+		List<HandlerResult> values = Streams.wrap(publisher).toList().await(5, TimeUnit.SECONDS);
 
-		assertEquals("success", value);
+		assertEquals(1, values.size());
+		assertEquals("success", values.get(0).getValue());
 	}
 
 	@Test
@@ -78,9 +74,10 @@ public class InvocableHandlerMethodTests {
 		hm.setHandlerMethodArgumentResolvers(Collections.singletonList(new RequestParamArgumentResolver()));
 
 		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.request);
-		Object value = awaitValue(publisher);
+		List<HandlerResult> values = Streams.wrap(publisher).toList().await(5, TimeUnit.SECONDS);
 
-		assertEquals("success:null", value);
+		assertEquals(1, values.size());
+		assertEquals("success:null", values.get(0).getValue());
 	}
 
 	@Test
@@ -89,9 +86,10 @@ public class InvocableHandlerMethodTests {
 		addResolver(hm, Publishers.just("value1"));
 
 		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.request);
-		Object value = awaitValue(publisher);
+		List<HandlerResult> values = Streams.wrap(publisher).toList().await(5, TimeUnit.SECONDS);
 
-		assertEquals("success:value1", value);
+		assertEquals(1, values.size());
+		assertEquals("success:value1", values.get(0).getValue());
 	}
 
 	@Test
@@ -100,12 +98,10 @@ public class InvocableHandlerMethodTests {
 		addResolver(hm, Publishers.from(Arrays.asList("value1", "value2", "value3")));
 
 		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.request);
-		List<Signal<HandlerResult>> signals = awaitSignals(publisher);
+		List<HandlerResult> values = Streams.wrap(publisher).toList().await(5, TimeUnit.SECONDS);
 
-		assertEquals("Expected only one value: " + signals.toString(), 2, signals.size());
-		assertEquals(Signal.Type.NEXT, signals.get(0).getType());
-		assertEquals(Signal.Type.COMPLETE, signals.get(1).getType());
-		assertEquals("success:value1", signals.get(0).get().getValue());
+		assertEquals(1, values.size());
+		assertEquals("success:value1", values.get(0).getValue());
 	}
 
 	@Test
@@ -191,28 +187,10 @@ public class InvocableHandlerMethodTests {
 		handlerMethod.setHandlerMethodArgumentResolvers(Collections.singletonList(resolver));
 	}
 
-	private Object awaitValue(Publisher<HandlerResult> publisher) throws Exception {
-		Object object = awaitSignal(publisher, Signal.Type.NEXT).get();
-		assertEquals(HandlerResult.class, object.getClass());
-		return ((HandlerResult) object).getValue();
-	}
-
-	private Throwable awaitErrorSignal(Publisher<HandlerResult> publisher) throws Exception {
-		return awaitSignal(publisher, Signal.Type.ERROR).getThrowable();
-	}
-
-	@SuppressWarnings("unchecked")
-	private Signal<HandlerResult> awaitSignal(Publisher<HandlerResult> publisher, Signal.Type type) throws Exception {
-		Signal<HandlerResult> signal = awaitSignals(publisher).get(0);
-		if (!type.equals(signal.getType()) && signal.isOnError()) {
-			logger.error("Unexpected error: ", signal.getThrowable());
-		}
-		assertEquals("Unexpected signal: " + signal, type, signal.getType());
-		return signal;
-	}
-
-	private List<Signal<HandlerResult>> awaitSignals(Publisher<HandlerResult> publisher) throws InterruptedException {
-		return Streams.wrap(publisher).materialize().toList().await(5, TimeUnit.SECONDS);
+	private Throwable awaitErrorSignal(Publisher<?> publisher) throws Exception {
+		Signal<?> signal = Streams.wrap(publisher).materialize().toList().await(5, TimeUnit.SECONDS).get(0);
+		assertEquals("Unexpected signal: " + signal, Signal.Type.ERROR, signal.getType());
+		return signal.getThrowable();
 	}
 
 
