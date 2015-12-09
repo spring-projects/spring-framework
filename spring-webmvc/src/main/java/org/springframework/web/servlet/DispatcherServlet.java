@@ -1137,9 +1137,8 @@ public class DispatcherServlet extends FrameworkServlet {
 					"] in DispatcherServlet with name '" + getServletName() + "'");
 		}
 		if (this.throwExceptionIfNoHandlerFound) {
-			ServletServerHttpRequest sshr = new ServletServerHttpRequest(request);
-			throw new NoHandlerFoundException(
-					sshr.getMethod().name(), sshr.getServletRequest().getRequestURI(), sshr.getHeaders());
+			throw new NoHandlerFoundException(request.getMethod(), getRequestUri(request),
+					new ServletServerHttpRequest(request).getHeaders());
 		}
 		else {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);

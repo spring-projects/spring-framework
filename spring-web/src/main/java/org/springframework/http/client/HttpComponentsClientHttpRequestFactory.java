@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,8 +114,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 */
 	public void setConnectTimeout(int timeout) {
 		Assert.isTrue(timeout >= 0, "Timeout must be a non-negative value");
-		this.requestConfig = cloneRequestConfig()
-				.setConnectTimeout(timeout).build();
+		this.requestConfig = cloneRequestConfig().setConnectTimeout(timeout).build();
 		setLegacyConnectionTimeout(getHttpClient(), timeout);
 	}
 
@@ -136,8 +135,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	@SuppressWarnings("deprecation")
 	private void setLegacyConnectionTimeout(HttpClient client, int timeout) {
 		if (org.apache.http.impl.client.AbstractHttpClient.class.isInstance(client)) {
-			client.getParams().setIntParameter(
-					org.apache.http.params.CoreConnectionPNames.CONNECTION_TIMEOUT, timeout);
+			client.getParams().setIntParameter(org.apache.http.params.CoreConnectionPNames.CONNECTION_TIMEOUT, timeout);
 		}
 	}
 
@@ -151,8 +149,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 * @see RequestConfig#getConnectionRequestTimeout()
 	 */
 	public void setConnectionRequestTimeout(int connectionRequestTimeout) {
-		this.requestConfig = cloneRequestConfig()
-				.setConnectionRequestTimeout(connectionRequestTimeout).build();
+		this.requestConfig = cloneRequestConfig().setConnectionRequestTimeout(connectionRequestTimeout).build();
 	}
 
 	/**
@@ -165,8 +162,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	 */
 	public void setReadTimeout(int timeout) {
 		Assert.isTrue(timeout >= 0, "Timeout must be a non-negative value");
-		this.requestConfig = cloneRequestConfig()
-				.setSocketTimeout(timeout).build();
+		this.requestConfig = cloneRequestConfig().setSocketTimeout(timeout).build();
 		setLegacySocketTimeout(getHttpClient(), timeout);
 	}
 
@@ -180,13 +176,8 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	@SuppressWarnings("deprecation")
 	private void setLegacySocketTimeout(HttpClient client, int timeout) {
 		if (org.apache.http.impl.client.AbstractHttpClient.class.isInstance(client)) {
-			client.getParams().setIntParameter(
-					org.apache.http.params.CoreConnectionPNames.SO_TIMEOUT, timeout);
+			client.getParams().setIntParameter(org.apache.http.params.CoreConnectionPNames.SO_TIMEOUT, timeout);
 		}
-	}
-
-	private RequestConfig.Builder cloneRequestConfig() {
-		return this.requestConfig != null ? RequestConfig.copy(this.requestConfig) : RequestConfig.custom();
 	}
 
 	/**
@@ -209,6 +200,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		if (context == null) {
 			context = HttpClientContext.create();
 		}
+
 		// Request configuration not set in the context
 		if (context.getAttribute(HttpClientContext.REQUEST_CONFIG) == null) {
 			// Use request configuration given by the user, when available
@@ -223,12 +215,18 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 				context.setAttribute(HttpClientContext.REQUEST_CONFIG, config);
 			}
 		}
+
 		if (this.bufferRequestBody) {
 			return new HttpComponentsClientHttpRequest(client, httpRequest, context);
 		}
 		else {
 			return new HttpComponentsStreamingClientHttpRequest(client, httpRequest, context);
 		}
+	}
+
+
+	private RequestConfig.Builder cloneRequestConfig() {
+		return (this.requestConfig != null ? RequestConfig.copy(this.requestConfig) : RequestConfig.custom());
 	}
 
 	/**
@@ -241,20 +239,20 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		switch (httpMethod) {
 			case GET:
 				return new HttpGet(uri);
-			case DELETE:
-				return new HttpDelete(uri);
 			case HEAD:
 				return new HttpHead(uri);
-			case OPTIONS:
-				return new HttpOptions(uri);
 			case POST:
 				return new HttpPost(uri);
 			case PUT:
 				return new HttpPut(uri);
-			case TRACE:
-				return new HttpTrace(uri);
 			case PATCH:
 				return new HttpPatch(uri);
+			case DELETE:
+				return new HttpDelete(uri);
+			case OPTIONS:
+				return new HttpOptions(uri);
+			case TRACE:
+				return new HttpTrace(uri);
 			default:
 				throw new IllegalArgumentException("Invalid HTTP method: " + httpMethod);
 		}
@@ -312,4 +310,5 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 			return "DELETE";
 		}
 	}
+
 }
