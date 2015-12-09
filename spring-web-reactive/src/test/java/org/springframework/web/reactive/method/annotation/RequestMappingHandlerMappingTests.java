@@ -17,8 +17,6 @@
 package org.springframework.web.reactive.method.annotation;
 
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -28,8 +26,8 @@ import org.reactivestreams.Publisher;
 import reactor.rx.Streams;
 
 import org.springframework.context.support.StaticApplicationContext;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -59,7 +57,7 @@ public class RequestMappingHandlerMappingTests {
 
 	@Test
 	public void path() throws Exception {
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, "boo");
+		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("boo"));
 		Publisher<?> handlerPublisher = this.mapping.getHandler(request);
 		HandlerMethod handlerMethod = toHandlerMethod(handlerPublisher);
 		assertEquals(TestController.class.getMethod("boo"), handlerMethod.getMethod());
@@ -67,12 +65,12 @@ public class RequestMappingHandlerMappingTests {
 
 	@Test
 	public void method() throws Exception {
-		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.POST, "foo");
+		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.POST, new URI("foo"));
 		Publisher<?> handlerPublisher = this.mapping.getHandler(request);
 		HandlerMethod handlerMethod = toHandlerMethod(handlerPublisher);
 		assertEquals(TestController.class.getMethod("postFoo"), handlerMethod.getMethod());
 
-		request = new MockServerHttpRequest(HttpMethod.GET, "foo");
+		request = new MockServerHttpRequest(HttpMethod.GET, new URI("foo"));
 		handlerPublisher = this.mapping.getHandler(request);
 		handlerMethod = toHandlerMethod(handlerPublisher);
 		assertEquals(TestController.class.getMethod("getFoo"), handlerMethod.getMethod());
@@ -110,46 +108,6 @@ public class RequestMappingHandlerMappingTests {
 			return "boo";
 		}
 
-	}
-
-
-	/**
-	 * TODO: this is more widely needed.
-	 */
-	private static class MockServerHttpRequest implements ServerHttpRequest {
-
-		private HttpMethod method;
-
-		private URI uri;
-
-		public MockServerHttpRequest(HttpMethod method, String path) {
-			this.method = method;
-			try {
-				this.uri = new URI(path);
-			} catch (URISyntaxException ex) {
-				throw new IllegalStateException("Could not get URI: " + ex.getMessage(), ex);
-			}
-		}
-
-		@Override
-		public Publisher<ByteBuffer> getBody() {
-			return null;
-		}
-
-		@Override
-		public HttpMethod getMethod() {
-			return this.method;
-		}
-
-		@Override
-		public URI getURI() {
-			return this.uri;
-		}
-
-		@Override
-		public HttpHeaders getHeaders() {
-			return null;
-		}
 	}
 
 }
