@@ -30,14 +30,14 @@ import org.springframework.core.annotation.AliasFor;
  * in a class) can be cached.
  *
  * <p>Each time an advised method is invoked, caching behavior will be applied,
- * checking whether the method has been already invoked for the given arguments. A
- * sensible default simply uses the method parameters to compute the key, but a SpEL
- * expression can be provided via the {@link #key} attribute, or a custom
- * {@link org.springframework.cache.interceptor.KeyGenerator KeyGenerator} implementation
- * can replace the default one (see {@link #keyGenerator}).
+ * checking whether the method has been already invoked for the given arguments.
+ * A sensible default simply uses the method parameters to compute the key, but
+ * a SpEL expression can be provided via the {@link #key} attribute, or a custom
+ * {@link org.springframework.cache.interceptor.KeyGenerator} implementation can
+ * replace the default one (see {@link #keyGenerator}).
  *
- * <p>If no value is found in the cache for the computed key, the method is invoked
- * and the returned value is used as the cache value.
+ * <p>If no value is found in the cache for the computed key, the target method
+ * will be invoked and the returned value stored in the associated cache.
  *
  * @author Costin Leau
  * @author Phillip Webb
@@ -89,7 +89,8 @@ public @interface Cacheable {
 	String key() default "";
 
 	/**
-	 * The bean name of the custom {@link org.springframework.cache.interceptor.KeyGenerator} to use.
+	 * The bean name of the custom {@link org.springframework.cache.interceptor.KeyGenerator}
+	 * to use.
 	 * <p>Mutually exclusive with the {@link #key} attribute.
 	 * @see CacheConfig#keyGenerator
 	 */
@@ -106,7 +107,8 @@ public @interface Cacheable {
 	String cacheManager() default "";
 
 	/**
-	 * The bean name of the custom {@link org.springframework.cache.interceptor.CacheResolver} to use.
+	 * The bean name of the custom {@link org.springframework.cache.interceptor.CacheResolver}
+	 * to use.
 	 * @see CacheConfig#cacheResolver
 	 */
 	String cacheResolver() default "";
