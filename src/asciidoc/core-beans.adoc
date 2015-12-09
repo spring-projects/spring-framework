@@ -8138,8 +8138,8 @@ available to the context so one can use them for conditional event processing:
 
 | __argument name__
 | evaluation context
-| Name of any of the method argument. If for some reason the names are not available
-  (ex: no debug information), the argument names are also available under the `#a<#arg>`
+| Name of any of the method arguments. If for some reason the names are not available
+  (e.g. no debug information), the argument names are also available under the `#a<#arg>`
   where __#arg__ stands for the argument index (starting from 0).
 | `#iban` or `#a0` (one can also use `#p0` or `#p<#arg>` notation as an alias).
 |===
