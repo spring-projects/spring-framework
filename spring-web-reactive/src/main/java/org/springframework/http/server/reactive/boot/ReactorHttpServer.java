@@ -16,6 +16,7 @@
 
 package org.springframework.http.server.reactive.boot;
 
+import reactor.core.support.ReactiveState;
 import reactor.io.buffer.Buffer;
 import reactor.io.net.ReactiveNet;
 
@@ -27,7 +28,7 @@ import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
  * @author Stephane Maldini
  */
 public class ReactorHttpServer extends HttpServerSupport
-		implements InitializingBean, HttpServer {
+		implements InitializingBean, HttpServer, ReactiveState.FeedbackLoop, ReactiveState.ActiveUpstream {
 
 	private ReactorHttpHandlerAdapter reactorHandler;
 
@@ -48,6 +49,26 @@ public class ReactorHttpServer extends HttpServerSupport
 
 		this.reactorServer = (getPort() != -1 ? ReactiveNet.httpServer(getPort()) :
 				ReactiveNet.httpServer());
+	}
+
+	@Override
+	public Object delegateInput() {
+		return reactorServer;
+	}
+
+	@Override
+	public Object delegateOutput() {
+		return reactorServer;
+	}
+
+	@Override
+	public boolean isStarted() {
+		return running;
+	}
+
+	@Override
+	public boolean isTerminated() {
+		return !running;
 	}
 
 	@Override
