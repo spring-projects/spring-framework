@@ -48,7 +48,7 @@ configure(allprojects) { project ->
 	ext.htmlunitVersion      = "2.19"
 	ext.httpasyncVersion     = "4.1.1"
 	ext.httpclientVersion    = "4.5.1"
-	ext.jackson2Version      = "2.6.3"
+	ext.jackson2Version      = "2.6.4"
 	ext.jasperreportsVersion = "6.2.0"
 	ext.javamailVersion      = "1.5.4"
 	ext.jettyVersion         = "9.3.6.v20151106"
@@ -628,7 +628,7 @@ project("spring-jdbc") {
 		compile(project(":spring-tx"))
 		optional(project(":spring-context"))  // for JndiDataSourceLookup
 		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
-		optional("com.mchange:c3p0:0.9.5.1")
+		optional("com.mchange:c3p0:0.9.5.2")
 		optional("org.hsqldb:hsqldb:${hsqldbVersion}")
 		optional("com.h2database:h2:1.4.190")
 		optional("org.apache.derby:derby:10.12.1.1")
@@ -649,7 +649,7 @@ project("spring-context-support") {
 		optional("javax.cache:cache-api:1.0.0")
 		optional("com.google.guava:guava:${guavaVersion}")
 		optional("net.sf.ehcache:ehcache:${ehcacheVersion}")
-		optional("org.quartz-scheduler:quartz:2.2.1")
+		optional("org.quartz-scheduler:quartz:2.2.2")
 		optional("org.codehaus.fabric3.api:commonj:1.1.0")
 		optional("org.apache.velocity:velocity:1.7")
 		optional("org.freemarker:freemarker:${freemarkerVersion}")
