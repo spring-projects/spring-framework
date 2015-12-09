@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,18 +142,21 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 		}
 	}
 
-	private boolean isFormPost(HttpServletRequest request) {
-		return (request.getContentType() != null && request.getContentType().contains(FORM_CONTENT_TYPE) &&
+
+
+	private static boolean isFormPost(HttpServletRequest request) {
+		String contentType = request.getContentType();
+		return (contentType != null && contentType.contains(FORM_CONTENT_TYPE) &&
 				METHOD_POST.equalsIgnoreCase(request.getMethod()));
 	}
 
 	/**
 	 * Use {@link javax.servlet.ServletRequest#getParameterMap()} to reconstruct the
 	 * body of a form 'POST' providing a predictable outcome as opposed to reading
-	 * from the body, which can fail if any other code has used ServletRequest
-	 * to access a parameter thus causing the input stream to be "consumed".
+	 * from the body, which can fail if any other code has used the ServletRequest
+	 * to access a parameter, thus causing the input stream to be "consumed".
 	 */
-	private InputStream getBodyFromServletRequestParameters(HttpServletRequest request) throws IOException {
+	private static InputStream getBodyFromServletRequestParameters(HttpServletRequest request) throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(1024);
 		Writer writer = new OutputStreamWriter(bos, FORM_CHARSET);
 

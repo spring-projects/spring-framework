@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -160,19 +160,23 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory 
 		if (this.readTimeout >= 0) {
 			connection.setReadTimeout(this.readTimeout);
 		}
+
 		connection.setDoInput(true);
+
 		if ("GET".equals(httpMethod)) {
 			connection.setInstanceFollowRedirects(true);
 		}
 		else {
 			connection.setInstanceFollowRedirects(false);
 		}
-		if ("PUT".equals(httpMethod) || "POST".equals(httpMethod) || "PATCH".equals(httpMethod)) {
+
+		if ("POST".equals(httpMethod) || "PUT".equals(httpMethod) || "PATCH".equals(httpMethod)) {
 			connection.setDoOutput(true);
 		}
 		else {
 			connection.setDoOutput(false);
 		}
+
 		connection.setRequestMethod(httpMethod);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,49 +42,48 @@ class InterceptingClientHttpRequest extends AbstractBufferingClientHttpRequest {
 
 	private URI uri;
 
+
 	protected InterceptingClientHttpRequest(ClientHttpRequestFactory requestFactory,
-			List<ClientHttpRequestInterceptor> interceptors,
-			URI uri,
-			HttpMethod method) {
+			List<ClientHttpRequestInterceptor> interceptors, URI uri, HttpMethod method) {
+
 		this.requestFactory = requestFactory;
 		this.interceptors = interceptors;
 		this.method = method;
 		this.uri = uri;
 	}
 
+
 	public HttpMethod getMethod() {
-		return method;
+		return this.method;
 	}
 
 	public URI getURI() {
-		return uri;
+		return this.uri;
 	}
 
 	@Override
 	protected final ClientHttpResponse executeInternal(HttpHeaders headers, byte[] bufferedOutput) throws IOException {
-		RequestExecution requestExecution = new RequestExecution();
-
+		InterceptingRequestExecution requestExecution = new InterceptingRequestExecution();
 		return requestExecution.execute(this, bufferedOutput);
 	}
 
-	private class RequestExecution implements ClientHttpRequestExecution {
+
+	private class InterceptingRequestExecution implements ClientHttpRequestExecution {
 
 		private final Iterator<ClientHttpRequestInterceptor> iterator;
 
-		private RequestExecution() {
+		public InterceptingRequestExecution() {
 			this.iterator = interceptors.iterator();
 		}
 
 		public ClientHttpResponse execute(HttpRequest request, byte[] body) throws IOException {
-			if (iterator.hasNext()) {
-				ClientHttpRequestInterceptor nextInterceptor = iterator.next();
+			if (this.iterator.hasNext()) {
+				ClientHttpRequestInterceptor nextInterceptor = this.iterator.next();
 				return nextInterceptor.intercept(request, body, this);
 			}
 			else {
 				ClientHttpRequest delegate = requestFactory.createRequest(request.getURI(), request.getMethod());
-
 				delegate.getHeaders().putAll(request.getHeaders());
-
 				if (body.length > 0) {
 					StreamUtils.copy(body, delegate.getBody());
 				}

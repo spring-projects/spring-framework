@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -234,7 +234,7 @@ public class JibxMarshaller extends AbstractMarshaller implements InitializingBe
 
 
 	public boolean supports(Class<?> clazz) {
-		Assert.notNull(clazz, "'clazz' must not be null");
+		Assert.notNull(clazz, "Class must not be null");
 		if (this.targetClass != null) {
 			return this.targetClass.equals(clazz);
 		}

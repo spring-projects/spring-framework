@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,9 +43,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 
 /**
- * {@link org.springframework.http.client.ClientHttpRequestFactory} implementation that uses
- * <a href="http://hc.apache.org/httpcomponents-client-ga/httpclient/">Apache HttpComponents HttpClient</a>
- * to create requests.
+ * {@link org.springframework.http.client.ClientHttpRequestFactory} implementation that
+ * uses <a href="http://hc.apache.org/httpcomponents-client-ga/">Apache HttpComponents
+ * HttpClient</a> to create requests.
  *
  * <p>Allows to use a pre-configured {@link HttpClient} instance -
  * potentially with authentication, HTTP connection pooling, etc.
@@ -144,20 +144,20 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		switch (httpMethod) {
 			case GET:
 				return new HttpGet(uri);
-			case DELETE:
-				return new HttpDelete(uri);
 			case HEAD:
 				return new HttpHead(uri);
-			case OPTIONS:
-				return new HttpOptions(uri);
 			case POST:
 				return new HttpPost(uri);
 			case PUT:
 				return new HttpPut(uri);
-			case TRACE:
-				return new HttpTrace(uri);
 			case PATCH:
 				return new HttpPatch(uri);
+			case DELETE:
+				return new HttpDelete(uri);
+			case OPTIONS:
+				return new HttpOptions(uri);
+			case TRACE:
+				return new HttpTrace(uri);
 			default:
 				throw new IllegalArgumentException("Invalid HTTP method: " + httpMethod);
 		}
@@ -182,6 +182,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	protected HttpContext createHttpContext(HttpMethod httpMethod, URI uri) {
 		return null;
 	}
+
 
 	/**
 	 * Shutdown hook that closes the underlying

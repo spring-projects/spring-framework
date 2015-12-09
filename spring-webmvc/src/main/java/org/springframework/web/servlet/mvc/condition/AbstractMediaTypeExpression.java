@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.springframework.http.MediaType;
 import org.springframework.web.HttpMediaTypeException;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -40,34 +41,36 @@ abstract class AbstractMediaTypeExpression implements Comparable<AbstractMediaTy
 
 	private final boolean isNegated;
 
+
 	AbstractMediaTypeExpression(String expression) {
 		if (expression.startsWith("!")) {
-			isNegated = true;
+			this.isNegated = true;
 			expression = expression.substring(1);
 		}
 		else {
-			isNegated = false;
+			this.isNegated = false;
 		}
 		this.mediaType = MediaType.parseMediaType(expression);
 	}
 
 	AbstractMediaTypeExpression(MediaType mediaType, boolean negated) {
 		this.mediaType = mediaType;
-		isNegated = negated;
+		this.isNegated = negated;
 	}
 
 	public MediaType getMediaType() {
-		return mediaType;
+		return this.mediaType;
 	}
 
 	public boolean isNegated() {
-		return isNegated;
+		return this.isNegated;
 	}
+
 
 	public final boolean match(HttpServletRequest request) {
 		try {
 			boolean match = matchMediaType(request);
-			return !isNegated ? match : !match;
+			return (!this.isNegated ? match : !match);
 		}
 		catch (HttpMediaTypeException ex) {
 			return false;
@@ -75,6 +78,7 @@ abstract class AbstractMediaTypeExpression implements Comparable<AbstractMediaTy
 	}
 
 	protected abstract boolean matchMediaType(HttpServletRequest request) throws HttpMediaTypeException;
+
 
 	public int compareTo(AbstractMediaTypeExpression other) {
 		return MediaType.SPECIFICITY_COMPARATOR.compare(this.getMediaType(), other.getMediaType());
@@ -87,23 +91,23 @@ abstract class AbstractMediaTypeExpression implements Comparable<AbstractMediaTy
 		}
 		if (obj != null && getClass().equals(obj.getClass())) {
 			AbstractMediaTypeExpression other = (AbstractMediaTypeExpression) obj;
-			return (this.mediaType.equals(other.mediaType)) && (this.isNegated == other.isNegated);
+			return (this.mediaType.equals(other.mediaType) && this.isNegated == other.isNegated);
 		}
 		return false;
 	}
 
 	@Override
 	public int hashCode() {
-		return mediaType.hashCode();
+		return this.mediaType.hashCode();
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		if (isNegated) {
+		if (this.isNegated) {
 			builder.append('!');
 		}
-		builder.append(mediaType.toString());
+		builder.append(this.mediaType.toString());
 		return builder.toString();
 	}
 
