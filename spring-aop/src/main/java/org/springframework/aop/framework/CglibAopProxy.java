@@ -922,7 +922,7 @@ class CglibAopProxy implements AopProxy, Serializable {
 			if (aa == null || ba == null) {
 				return (aa == ba);
 			}
-			return aa.getClass().equals(ba.getClass());
+			return (aa.getClass() == ba.getClass());
 		}
 
 		private boolean equalsPointcuts(Advisor a, Advisor b) {

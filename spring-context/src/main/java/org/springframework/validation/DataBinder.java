@@ -184,7 +184,7 @@ public class DataBinder implements PropertyEditorRegistry, TypeConverter {
 	 * @param objectName the name of the target object
 	 */
 	public DataBinder(Object target, String objectName) {
-		if (target != null && target.getClass().equals(javaUtilOptionalClass)) {
+		if (target != null && target.getClass() == javaUtilOptionalClass) {
 			this.target = OptionalUnwrapper.unwrap(target);
 		}
 		else {

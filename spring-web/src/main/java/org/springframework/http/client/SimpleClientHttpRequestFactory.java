@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,6 +136,7 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 		HttpURLConnection connection = openConnection(uri.toURL(), this.proxy);
 		prepareConnection(connection, httpMethod.name());
+
 		if (this.bufferRequestBody) {
 			return new SimpleBufferingClientHttpRequest(connection, this.outputStreaming);
 		}
@@ -146,20 +147,23 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 
 	/**
 	 * {@inheritDoc}
-	 * <p>Setting the {@link #setTaskExecutor(org.springframework.core.task.AsyncListenableTaskExecutor) taskExecutor} property
-	 * is required before calling this method.
+	 * <p>Setting the {@link #setTaskExecutor taskExecutor} property is required before calling this method.
 	 */
 	@Override
 	public AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod) throws IOException {
-		Assert.state(this.taskExecutor != null, "Asynchronous execution requires an AsyncTaskExecutor to be set");
+		Assert.state(this.taskExecutor != null,
+				"Asynchronous execution requires an AsyncTaskExecutor to be set");
+
 		HttpURLConnection connection = openConnection(uri.toURL(), this.proxy);
 		prepareConnection(connection, httpMethod.name());
+
 		if (this.bufferRequestBody) {
-			return new SimpleBufferingAsyncClientHttpRequest(connection, this.outputStreaming, this.taskExecutor);
+			return new SimpleBufferingAsyncClientHttpRequest(
+					connection, this.outputStreaming, this.taskExecutor);
 		}
 		else {
-			return new SimpleStreamingAsyncClientHttpRequest(connection, this.chunkSize,
-					this.outputStreaming, this.taskExecutor);
+			return new SimpleStreamingAsyncClientHttpRequest(
+					connection, this.chunkSize, this.outputStreaming, this.taskExecutor);
 		}
 	}
 
@@ -192,20 +196,24 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 		if (this.readTimeout >= 0) {
 			connection.setReadTimeout(this.readTimeout);
 		}
+
 		connection.setDoInput(true);
+
 		if ("GET".equals(httpMethod)) {
 			connection.setInstanceFollowRedirects(true);
 		}
 		else {
 			connection.setInstanceFollowRedirects(false);
 		}
-		if ("PUT".equals(httpMethod) || "POST".equals(httpMethod) ||
+
+		if ("POST".equals(httpMethod) || "PUT".equals(httpMethod) ||
 				"PATCH".equals(httpMethod) || "DELETE".equals(httpMethod)) {
 			connection.setDoOutput(true);
 		}
 		else {
 			connection.setDoOutput(false);
 		}
+
 		connection.setRequestMethod(httpMethod);
 	}
 

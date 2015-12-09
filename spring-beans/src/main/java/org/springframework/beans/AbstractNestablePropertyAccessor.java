@@ -203,7 +203,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	 */
 	public void setWrappedInstance(Object object, String nestedPath, Object rootObject) {
 		Assert.notNull(object, "Target object must not be null");
-		if (object.getClass().equals(javaUtilOptionalClass)) {
+		if (object.getClass() == javaUtilOptionalClass) {
 			this.object = OptionalUnwrapper.unwrap(object);
 		}
 		else {
@@ -834,7 +834,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		PropertyTokenHolder tokens = getPropertyNameTokens(nestedProperty);
 		String canonicalName = tokens.canonicalName;
 		Object value = getPropertyValue(tokens);
-		if (value == null || (value.getClass().equals(javaUtilOptionalClass) && OptionalUnwrapper.isEmpty(value))) {
+		if (value == null || (value.getClass() == javaUtilOptionalClass && OptionalUnwrapper.isEmpty(value))) {
 			if (isAutoGrowNestedPaths()) {
 				value = setDefaultValue(tokens);
 			}
@@ -846,7 +846,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		// Lookup cached sub-PropertyAccessor, create new one if not found.
 		AbstractNestablePropertyAccessor nestedPa = this.nestedPropertyAccessors.get(canonicalName);
 		if (nestedPa == null || nestedPa.getWrappedInstance() !=
-				(value.getClass().equals(javaUtilOptionalClass) ? OptionalUnwrapper.unwrap(value) : value)) {
+				(value.getClass() == javaUtilOptionalClass ? OptionalUnwrapper.unwrap(value) : value)) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Creating new nested " + getClass().getSimpleName() + " for property '" + canonicalName + "'");
 			}

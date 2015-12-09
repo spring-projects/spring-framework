@@ -190,12 +190,14 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 		HttpClient client = getHttpClient();
 		Assert.state(client != null, "Synchronous execution requires an HttpClient to be set");
+
 		HttpUriRequest httpRequest = createHttpUriRequest(httpMethod, uri);
 		postProcessHttpRequest(httpRequest);
 		HttpContext context = createHttpContext(httpMethod, uri);
 		if (context == null) {
 			context = HttpClientContext.create();
 		}
+
 		// Request configuration not set in the context
 		if (context.getAttribute(HttpClientContext.REQUEST_CONFIG) == null) {
 			// Use request configuration given by the user, when available
@@ -210,6 +212,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 				context.setAttribute(HttpClientContext.REQUEST_CONFIG, config);
 			}
 		}
+
 		if (this.bufferRequestBody) {
 			return new HttpComponentsClientHttpRequest(client, httpRequest, context);
 		}
@@ -285,20 +288,20 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		switch (httpMethod) {
 			case GET:
 				return new HttpGet(uri);
-			case DELETE:
-				return new HttpDelete(uri);
 			case HEAD:
 				return new HttpHead(uri);
-			case OPTIONS:
-				return new HttpOptions(uri);
 			case POST:
 				return new HttpPost(uri);
 			case PUT:
 				return new HttpPut(uri);
-			case TRACE:
-				return new HttpTrace(uri);
 			case PATCH:
 				return new HttpPatch(uri);
+			case DELETE:
+				return new HttpDelete(uri);
+			case OPTIONS:
+				return new HttpOptions(uri);
+			case TRACE:
+				return new HttpTrace(uri);
 			default:
 				throw new IllegalArgumentException("Invalid HTTP method: " + httpMethod);
 		}

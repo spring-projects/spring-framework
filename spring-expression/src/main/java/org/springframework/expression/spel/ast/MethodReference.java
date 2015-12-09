@@ -376,7 +376,7 @@ public class MethodReference extends SpelNodeImpl {
 		}
 
 		public boolean isSuitable(Object value, TypeDescriptor target, List<TypeDescriptor> argumentTypes) {
-			return ((this.staticClass == null || this.staticClass.equals(value)) &&
+			return ((this.staticClass == null || this.staticClass == value) &&
 					this.target.equals(target) && this.argumentTypes.equals(argumentTypes));
 		}
 
