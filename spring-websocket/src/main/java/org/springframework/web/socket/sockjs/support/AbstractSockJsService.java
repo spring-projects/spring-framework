@@ -544,7 +544,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 
 		@Override
 		public void handle(ServerHttpRequest request, ServerHttpResponse response) throws IOException {
-			if (HttpMethod.GET.equals(request.getMethod())) {
+			if (HttpMethod.GET == request.getMethod()) {
 				addNoCacheHeaders(response);
 				if (checkOrigin(request, response)) {
 					response.getHeaders().setContentType(new MediaType("application", "json", UTF8_CHARSET));
@@ -554,7 +554,7 @@ public abstract class AbstractSockJsService implements SockJsService, CorsConfig
 				}
 
 			}
-			else if (HttpMethod.OPTIONS.equals(request.getMethod())) {
+			else if (HttpMethod.OPTIONS == request.getMethod()) {
 				if (checkOrigin(request, response)) {
 					addCacheHeaders(response);
 					response.setStatusCode(HttpStatus.NO_CONTENT);

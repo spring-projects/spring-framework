@@ -106,7 +106,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 	 * @since 4.0.2
 	 */
 	public HttpMethod getHttpMethod() {
-		return HttpMethod.valueOf(getRequest().getMethod());
+		return HttpMethod.resolve(getRequest().getMethod());
 	}
 
 	@Override

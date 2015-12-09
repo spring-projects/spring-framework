@@ -247,8 +247,8 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 
 		try {
 			HttpMethod supportedMethod = transportType.getHttpMethod();
-			if (!supportedMethod.equals(request.getMethod())) {
-				if (HttpMethod.OPTIONS.equals(request.getMethod()) && transportType.supportsCors()) {
+			if (supportedMethod != request.getMethod()) {
+				if (HttpMethod.OPTIONS == request.getMethod() && transportType.supportsCors()) {
 					if (checkOrigin(request, response, HttpMethod.OPTIONS, supportedMethod)) {
 						response.setStatusCode(HttpStatus.NO_CONTENT);
 						addCacheHeaders(response);

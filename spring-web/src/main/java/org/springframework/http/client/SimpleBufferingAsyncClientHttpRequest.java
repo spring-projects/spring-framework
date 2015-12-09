@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,7 +57,7 @@ final class SimpleBufferingAsyncClientHttpRequest extends AbstractBufferingAsync
 
 	@Override
 	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(this.connection.getRequestMethod());
+		return HttpMethod.resolve(this.connection.getRequestMethod());
 	}
 
 	@Override
@@ -78,8 +78,8 @@ final class SimpleBufferingAsyncClientHttpRequest extends AbstractBufferingAsync
 			@Override
 			public ClientHttpResponse call() throws Exception {
 				SimpleBufferingClientHttpRequest.addHeaders(connection, headers);
-				// JDK < 1.8 doesn't support getOutputStream with HTTP DELETE
-				if (HttpMethod.DELETE.equals(getMethod()) && bufferedOutput.length == 0) {
+				// JDK <1.8 doesn't support getOutputStream with HTTP DELETE
+				if (HttpMethod.DELETE == getMethod() && bufferedOutput.length == 0) {
 					connection.setDoOutput(false);
 				}
 				if (connection.getDoOutput() && outputStreaming) {

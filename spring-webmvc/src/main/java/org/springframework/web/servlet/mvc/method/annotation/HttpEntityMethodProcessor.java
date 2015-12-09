@@ -19,7 +19,6 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.net.URI;
 import java.util.List;
 
 import org.springframework.core.MethodParameter;
@@ -122,9 +121,8 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 		Object body = readWithMessageConverters(webRequest, parameter, paramType);
 		if (RequestEntity.class == parameter.getParameterType()) {
-			URI url = inputMessage.getURI();
-			HttpMethod httpMethod = inputMessage.getMethod();
-			return new RequestEntity<Object>(body, inputMessage.getHeaders(), httpMethod, url);
+			return new RequestEntity<Object>(body, inputMessage.getHeaders(),
+					inputMessage.getMethod(), inputMessage.getURI());
 		}
 		else {
 			return new HttpEntity<Object>(body, inputMessage.getHeaders());
@@ -172,8 +170,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		Object body = responseEntity.getBody();
 		if (responseEntity instanceof ResponseEntity) {
 			outputMessage.setStatusCode(((ResponseEntity<?>) responseEntity).getStatusCode());
-			if (inputMessage.getMethod().equals(HttpMethod.GET) &&
-					isResourceNotModified(inputMessage, outputMessage)) {
+			if (HttpMethod.GET == inputMessage.getMethod() && isResourceNotModified(inputMessage, outputMessage)) {
 				outputMessage.setStatusCode(HttpStatus.NOT_MODIFIED);
 				// Ensure headers are flushed, no body should be written.
 				outputMessage.flush();

@@ -144,7 +144,7 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	protected boolean isEligibleForEtag(HttpServletRequest request, HttpServletResponse response,
 			int responseStatusCode, InputStream inputStream) {
 
-		if (responseStatusCode >= 200 && responseStatusCode < 300 && HttpMethod.GET.name().equals(request.getMethod())) {
+		if (responseStatusCode >= 200 && responseStatusCode < 300 && HttpMethod.GET.matches(request.getMethod())) {
 			String cacheControl = null;
 			if (servlet3Present) {
 				cacheControl = response.getHeader(HEADER_CACHE_CONTROL);

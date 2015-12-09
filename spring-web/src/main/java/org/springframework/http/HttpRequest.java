@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package org.springframework.http;
 import java.net.URI;
 
 /**
- * Represents an HTTP request message, consisting of {@linkplain #getMethod() method}
- * and {@linkplain #getURI() uri}.
+ * Represents an HTTP request message, consisting of
+ * {@linkplain #getMethod() method} and {@linkplain #getURI() uri}.
  *
  * @author Arjen Poutsma
  * @since 3.1
@@ -29,13 +29,14 @@ public interface HttpRequest extends HttpMessage {
 
 	/**
 	 * Return the HTTP method of the request.
-	 * @return the HTTP method as an HttpMethod enum value
+	 * @return the HTTP method as an HttpMethod enum value, or {@code null}
+	 * if not resolvable (e.g. in case of a non-standard HTTP method)
 	 */
 	HttpMethod getMethod();
 
 	/**
 	 * Return the URI of the request.
-	 * @return the URI of the request
+	 * @return the URI of the request (never {@code null})
 	 */
 	URI getURI();
 

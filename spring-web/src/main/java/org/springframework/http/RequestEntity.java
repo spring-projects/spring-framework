@@ -20,7 +20,6 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
-import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
@@ -104,8 +103,6 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 */
 	public RequestEntity(T body, MultiValueMap<String, String> headers, HttpMethod method, URI url) {
 		super(body, headers);
-		Assert.notNull(method, "'method' is required");
-		Assert.notNull(url, "'url' is required");
 		this.method = method;
 		this.url = url;
 	}
