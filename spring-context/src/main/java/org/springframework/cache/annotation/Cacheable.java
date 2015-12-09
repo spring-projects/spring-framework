@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,17 +24,18 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation indicating that a method (or all the methods on a class) can be cached.
+ * Annotation indicating that the result of invoking a method (or all methods
+ * in a class) can be cached.
  *
- * <p>Each time a targeted method is invoked, a caching behavior will be applied,
- * checking whether the method has been already executed for the given arguments. A
- * sensible default simply uses the method parameters to compute the key but a SpEL
- * expression can be provided ({@link #key()}) or a custom
- * {@link org.springframework.cache.interceptor.KeyGenerator KeyGenerator} implementation
- * can replace the default one ({@link #keyGenerator()}).
+ * <p>Each time an advised method is invoked, caching behavior will be applied,
+ * checking whether the method has been already invoked for the given arguments.
+ * A sensible default simply uses the method parameters to compute the key, but
+ * a SpEL expression can be provided via the {@link #key} attribute, or a custom
+ * {@link org.springframework.cache.interceptor.KeyGenerator} implementation can
+ * replace the default one (see {@link #keyGenerator}).
  *
- * <p>If no value is found in the cache for the computed key, the method is executed
- * and the returned instance is used as the cache value.
+ * <p>If no value is found in the cache for the computed key, the target method
+ * will be invoked and the returned value stored in the associated cache.
  *
  * @author Costin Leau
  * @author Phillip Webb
@@ -49,22 +50,37 @@ import java.lang.annotation.Target;
 public @interface Cacheable {
 
 	/**
-	 * Name of the caches in which the update takes place.
-	 * <p>May be used to determine the target cache (or caches), matching the
-	 * qualifier value (or the bean name(s)) of (a) specific bean definition.
+	 * Names of the caches in which method invocation results are stored.
+	 * <p>Names may be used to determine the target cache (or caches), matching
+	 * the qualifier value or bean name of a specific bean definition.
+	 * @see CacheConfig#cacheNames
 	 */
 	String[] value() default {};
 
 	/**
-	 * Spring Expression Language (SpEL) attribute for computing the key dynamically.
-	 * <p>Default is "", meaning all method parameters are considered as a key, unless
-	 * a custom {@link #keyGenerator()} has been set.
+	 * Spring Expression Language (SpEL) expression for computing the key dynamically.
+	 * <p>Default is {@code ""}, meaning all method parameters are considered as a key,
+	 * unless a custom {@link #keyGenerator} has been configured.
+	 * <p>The SpEL expression evaluates again a dedicated context that provides the
+	 * following meta-data:
+	 * <ul>
+	 * <li>{@code #root.method}, {@code #root.target} and {@code #root.caches} for a
+	 * reference to the {@link java.lang.reflect.Method method}, target object and
+	 * affected cache(s) respectively.</li>
+	 * <li>Shortcuts for the method name ({@code #root.methodName}) and target class
+	 * ({@code #root.targetClass}) are also available.
+	 * <li>Method arguments can be accessed by index. For instance the second argument
+	 * can be access via {@code #root.args[1]}, {@code #p1} or {@code #a1}. Arguments
+	 * can also be accessed by name if that information is available.</li>
+	 * </ul>
 	 */
 	String key() default "";
 
 	/**
-	 * The bean name of the custom {@link org.springframework.cache.interceptor.KeyGenerator} to use.
-	 * <p>Mutually exclusive with the {@link #key()} attribute.
+	 * The bean name of the custom {@link org.springframework.cache.interceptor.KeyGenerator}
+	 * to use.
+	 * <p>Mutually exclusive with the {@link #key} attribute.
+	 * @see CacheConfig#keyGenerator
 	 */
 	String keyGenerator() default "";
 
@@ -72,28 +88,58 @@ public @interface Cacheable {
 	 * The bean name of the custom {@link org.springframework.cache.CacheManager} to use to
 	 * create a default {@link org.springframework.cache.interceptor.CacheResolver} if none
 	 * is set already.
-	 * <p>Mutually exclusive with the {@link #cacheResolver()}  attribute.
+	 * <p>Mutually exclusive with the {@link #cacheResolver}  attribute.
 	 * @see org.springframework.cache.interceptor.SimpleCacheResolver
+	 * @see CacheConfig#cacheManager
 	 */
 	String cacheManager() default "";
 
 	/**
-	 * The bean name of the custom {@link org.springframework.cache.interceptor.CacheResolver} to use.
+	 * The bean name of the custom {@link org.springframework.cache.interceptor.CacheResolver}
+	 * to use.
+	 * @see CacheConfig#cacheResolver
 	 */
 	String cacheResolver() default "";
 
 	/**
-	 * Spring Expression Language (SpEL) attribute used for conditioning the method caching.
-	 * <p>Default is "", meaning the method is always cached.
+	 * Spring Expression Language (SpEL) expression used for making the method
+	 * caching conditional.
+	 * <p>Default is {@code ""}, meaning the method result is always cached.
+	 * <p>The SpEL expression evaluates again a dedicated context that provides the
+	 * following meta-data:
+	 * <ul>
+	 * <li>{@code #root.method}, {@code #root.target} and {@code #root.caches} for a
+	 * reference to the {@link java.lang.reflect.Method method}, target object and
+	 * affected cache(s) respectively.</li>
+	 * <li>Shortcuts for the method name ({@code #root.methodName}) and target class
+	 * ({@code #root.targetClass}) are also available.
+	 * <li>Method arguments can be accessed by index. For instance the second argument
+	 * can be access via {@code #root.args[1]}, {@code #p1} or {@code #a1}. Arguments
+	 * can also be accessed by name if that information is available.</li>
+	 * </ul>
 	 */
 	String condition() default "";
 
 	/**
-	 * Spring Expression Language (SpEL) attribute used to veto method caching.
-	 * <p>Unlike {@link #condition()}, this expression is evaluated after the method
-	 * has been called and can therefore refer to the {@code result}. Default is "",
-	 * meaning that caching is never vetoed.
+	 * Spring Expression Language (SpEL) expression used to veto method caching.
+	 * <p>Unlike {@link #condition}, this expression is evaluated after the method
+	 * has been called and can therefore refer to the {@code result}.
+	 * <p>Default is {@code ""}, meaning that caching is never vetoed.
+	 * <p>The SpEL expression evaluates again a dedicated context that provides the
+	 * following meta-data:
+	 * <ul>
+	 * <li>{@code #result} for a reference to the result of the method invocation.</li>
+	 * <li>{@code #root.method}, {@code #root.target} and {@code #root.caches} for a
+	 * reference to the {@link java.lang.reflect.Method method}, target object and
+	 * affected cache(s) respectively.</li>
+	 * <li>Shortcuts for the method name ({@code #root.methodName}) and target class
+	 * ({@code #root.targetClass}) are also available.
+	 * <li>Method arguments can be accessed by index. For instance the second argument
+	 * can be access via {@code #root.args[1]}, {@code #p1} or {@code #a1}. Arguments
+	 * can also be accessed by name if that information is available.</li>
+	 * </ul>
 	 * @since 3.2
 	 */
 	String unless() default "";
+
 }
