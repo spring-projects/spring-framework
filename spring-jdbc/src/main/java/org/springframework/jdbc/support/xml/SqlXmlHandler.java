@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
 import javax.xml.transform.Source;
 
 import org.w3c.dom.Document;
@@ -112,7 +111,7 @@ public interface SqlXmlHandler {
 	 * database and driver.
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnName the column name to use
-	 * @return the content as character stream
+	 * @return the content as character stream, or {@code null} in case of SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.ResultSet#getSQLXML
 	 * @see java.sql.SQLXML#getCharacterStream
@@ -126,7 +125,7 @@ public interface SqlXmlHandler {
 	 * database and driver.
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnIndex the column index to use
-	 * @return the content as character stream
+	 * @return the content as character stream, or {@code null} in case of SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.ResultSet#getSQLXML
 	 * @see java.sql.SQLXML#getCharacterStream
@@ -141,7 +140,7 @@ public interface SqlXmlHandler {
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnName the column name to use
 	 * @param sourceClass the implementation class to be used
-	 * @return the content as character stream
+	 * @return the content as character stream, or {@code null} in case of SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.ResultSet#getSQLXML
 	 * @see java.sql.SQLXML#getSource
@@ -156,7 +155,7 @@ public interface SqlXmlHandler {
 	 * @param rs the ResultSet to retrieve the content from
 	 * @param columnIndex the column index to use
 	 * @param sourceClass the implementation class to be used
-	 * @return the content as character stream
+	 * @return the content as character stream, or {@code null} in case of SQL NULL
 	 * @throws SQLException if thrown by JDBC methods
 	 * @see java.sql.ResultSet#getSQLXML
 	 * @see java.sql.SQLXML#getSource
