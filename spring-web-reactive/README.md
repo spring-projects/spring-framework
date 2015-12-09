@@ -8,6 +8,10 @@ Spring Reactive JAR dependency is available from Spring snapshot repository:
  - GroupId: `org.springframework.reactive`
  - ArtifactId: `spring-reactive`
  - Version: `0.1.0.BUILD-SNAPSHOT`
+ 
+## Sample application
+[Spring Reactive Playground] is a sample application based on Spring Reactive and on MongoDB,
+Couchbase and PostgreSQL Reactive database drivers.
 
 ## Building from Source
 Spring Reactive uses a [Gradle][]-based build system. In the instructions
@@ -36,6 +40,7 @@ Feel free to send us your feedback on the [issue tracker][]; [Pull requests][] a
 The Spring Reactive is released under version 2.0 of the [Apache License][].
 
 
+[Spring Reactive Playground]: https://github.com/sdeleuze/spring-reactive-playground
 [Gradle]: http://gradle.org
 [Bamboo Spring Reactive build]: https://build.spring.io/browse/SR-PUB
 [Git]: http://help.github.com/set-up-git-redirect
