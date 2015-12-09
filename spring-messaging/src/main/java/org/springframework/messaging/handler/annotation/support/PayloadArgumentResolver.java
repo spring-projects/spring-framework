@@ -97,7 +97,7 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 			if (ann == null || ann.required()) {
 				String paramName = getParameterName(parameter);
 				BindingResult bindingResult = new BeanPropertyBindingResult(payload, paramName);
-				bindingResult.addError(new ObjectError(paramName, "@Payload param is required"));
+				bindingResult.addError(new ObjectError(paramName, "Payload value must not be empty"));
 				throw new MethodArgumentNotValidException(message, parameter, bindingResult);
 			}
 			else {
