@@ -306,7 +306,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 	protected List<HandlerMethodArgumentResolver> initArgumentResolvers() {
 		ConfigurableBeanFactory beanFactory = (getApplicationContext() instanceof ConfigurableApplicationContext ?
-						((ConfigurableApplicationContext) getApplicationContext()).getBeanFactory() : null);
+				((ConfigurableApplicationContext) getApplicationContext()).getBeanFactory() : null);
 
 		List<HandlerMethodArgumentResolver> resolvers = new ArrayList<HandlerMethodArgumentResolver>();
 
@@ -411,6 +411,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	/**
 	 * Resolve placeholder values in the given array of destinations.
 	 * @return a new array with updated destinations
+	 * @since 4.2
 	 */
 	protected String[] resolveEmbeddedValuesInDestinations(String[] destinations) {
 		if (this.valueResolver == null) {
