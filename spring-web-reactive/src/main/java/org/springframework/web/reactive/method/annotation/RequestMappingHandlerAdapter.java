@@ -26,6 +26,7 @@ import reactor.Publishers;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.core.codec.support.ByteBufferDecoder;
@@ -33,6 +34,7 @@ import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.support.JacksonJsonDecoder;
 import org.springframework.core.codec.support.JsonObjectDecoder;
 import org.springframework.core.codec.support.StringDecoder;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.reactive.HandlerAdapter;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.method.HandlerMethodArgumentResolver;
@@ -45,9 +47,9 @@ import org.springframework.web.method.HandlerMethod;
  */
 public class RequestMappingHandlerAdapter implements HandlerAdapter, InitializingBean {
 
-	private List<HandlerMethodArgumentResolver> argumentResolvers;
+	private final List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<>();
 
-	private ConversionService conversionService;
+	private ConversionService conversionService = new DefaultConversionService();
 
 
 	public void setArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
@@ -70,12 +72,11 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		if (this.argumentResolvers == null) {
+		if (ObjectUtils.isEmpty(this.argumentResolvers)) {
 
 			List<Decoder<?>> decoders = Arrays.asList(new ByteBufferDecoder(),
 					new StringDecoder(), new JacksonJsonDecoder(new JsonObjectDecoder()));
 
-			this.argumentResolvers = new ArrayList<>();
 			this.argumentResolvers.add(new RequestParamArgumentResolver());
 			this.argumentResolvers.add(new RequestBodyArgumentResolver(decoders, this.conversionService));
 		}

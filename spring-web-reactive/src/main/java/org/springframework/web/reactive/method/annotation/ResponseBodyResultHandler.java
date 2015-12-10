@@ -135,10 +135,20 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 			return Publishers.empty();
 		}
 
+		Publisher<?> publisher;
+		ResolvableType elementType;
 		ResolvableType returnType = result.getValueType();
+		if (this.conversionService.canConvert(returnType.getRawClass(), Publisher.class)) {
+			publisher = this.conversionService.convert(value, Publisher.class);
+			elementType = returnType.getGeneric(0);
+		}
+		else {
+			publisher = Publishers.just(value);
+			elementType = returnType;
+		}
 
 		List<MediaType> requestedMediaTypes = getAcceptableMediaTypes(request);
-		List<MediaType> producibleMediaTypes = getProducibleMediaTypes(returnType);
+		List<MediaType> producibleMediaTypes = getProducibleMediaTypes(elementType);
 
 		if (producibleMediaTypes.isEmpty()) {
 			producibleMediaTypes.add(MediaType.ALL);
@@ -172,16 +182,6 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 		}
 
 		if (selectedMediaType != null) {
-			Publisher<?> publisher;
-			ResolvableType elementType;
-			if (this.conversionService.canConvert(returnType.getRawClass(), Publisher.class)) {
-				publisher = this.conversionService.convert(value, Publisher.class);
-				elementType = returnType.getGeneric(0);
-			}
-			else {
-				publisher = Publishers.just(value);
-				elementType = returnType;
-			}
 			Encoder<?> encoder = resolveEncoder(elementType, selectedMediaType);
 			if (encoder != null) {
 				response.getHeaders().setContentType(selectedMediaType);

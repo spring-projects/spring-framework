@@ -16,13 +16,25 @@
 package org.springframework.http.server.reactive;
 
 
+import java.util.Arrays;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.log4j.spi.LoggerFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.Publishers;
+import reactor.core.publisher.PublisherFactory;
+import reactor.fn.timer.Timer;
 import reactor.rx.Streams;
+
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.util.ObjectUtils;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -32,6 +44,9 @@ import static org.mockito.Mockito.mock;
  * @author Rossen Stoyanchev
  */
 public class FilterChainHttpHandlerTests {
+
+	private static Log logger = LogFactory.getLog(FilterChainHttpHandlerTests.class);
+
 
 	private ServerHttpRequest request;
 
@@ -89,10 +104,24 @@ public class FilterChainHttpHandlerTests {
 		assertFalse(handler.invoked());
 	}
 
+	@Test
+	public void asyncFilter() throws Exception {
+		StubHandler handler = new StubHandler();
+		AsyncFilter filter = new AsyncFilter();
+		FilterChainHttpHandler filterHandler = new FilterChainHttpHandler(handler, filter);
+
+		Publisher<Void> voidPublisher = filterHandler.handle(this.request, this.response);
+		Streams.wrap(voidPublisher).toList().await(10, TimeUnit.SECONDS);
+
+		assertTrue(filter.invoked());
+		assertTrue(handler.invoked());
+	}
+
+
 
 	private static class TestFilter implements HttpFilter {
 
-		private boolean invoked;
+		private volatile boolean invoked;
 
 
 		public boolean invoked() {
@@ -124,9 +153,25 @@ public class FilterChainHttpHandlerTests {
 		}
 	}
 
+	private static class AsyncFilter extends TestFilter {
+
+		@Override
+		public Publisher<Void> doFilter(ServerHttpRequest req, ServerHttpResponse res, HttpFilterChain chain) {
+			return Publishers.concatMap(doAsyncWork(), asyncResult -> {
+				logger.debug("Async result: " + asyncResult);
+				return chain.filter(req, res);
+			});
+		}
+
+		private Publisher<String> doAsyncWork() {
+			return Publishers.just("123");
+		}
+	}
+
+
 	private static class StubHandler implements HttpHandler {
 
-		private boolean invoked;
+		private volatile boolean invoked;
 
 		public boolean invoked() {
 			return this.invoked;
@@ -134,6 +179,7 @@ public class FilterChainHttpHandlerTests {
 
 		@Override
 		public Publisher<Void> handle(ServerHttpRequest req, ServerHttpResponse res) {
+			logger.trace("StubHandler invoked.");
 			this.invoked = true;
 			return Publishers.empty();
 		}

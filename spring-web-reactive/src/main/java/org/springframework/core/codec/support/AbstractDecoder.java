@@ -44,6 +44,9 @@ public abstract class AbstractDecoder<T> implements Decoder<T> {
 
 	@Override
 	public boolean canDecode(ResolvableType type, MimeType mimeType, Object... hints) {
+		if (mimeType == null) {
+			return true;
+		}
 		for (MimeType supportedMimeType : this.supportedMimeTypes) {
 			if (supportedMimeType.isCompatibleWith(mimeType)) {
 				return true;

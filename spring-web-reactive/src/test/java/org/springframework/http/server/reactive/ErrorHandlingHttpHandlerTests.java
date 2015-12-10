@@ -115,25 +115,24 @@ public class ErrorHandlingHttpHandlerTests {
 
 	private static class TestHttpHandler implements HttpHandler {
 
-		private final Throwable exception;
+		private final RuntimeException exception;
 
 		private final boolean raise;
 
 
-		public TestHttpHandler(Throwable exception) {
+		public TestHttpHandler(RuntimeException exception) {
 			this(exception, false);
 		}
 
-		public TestHttpHandler(Throwable exception, boolean raise) {
+		public TestHttpHandler(RuntimeException exception, boolean raise) {
 			this.exception = exception;
 			this.raise = raise;
-			assertTrue(exception instanceof RuntimeException || !this.raise);
 		}
 
 		@Override
 		public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 			if (this.raise) {
-				throw (RuntimeException) exception;
+				throw this.exception;
 			}
 			return Publishers.error(this.exception);
 		}

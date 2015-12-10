@@ -44,6 +44,9 @@ public abstract class AbstractEncoder<T> implements Encoder<T> {
 
 	@Override
 	public boolean canEncode(ResolvableType type, MimeType mimeType, Object... hints) {
+		if (mimeType == null) {
+			return true;
+		}
 		for (MimeType supportedMimeType : this.supportedMimeTypes) {
 			if (supportedMimeType.isCompatibleWith(mimeType)) {
 				return true;
