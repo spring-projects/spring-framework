@@ -110,8 +110,7 @@ public class PropertySourceTests {
 					ps.toString(),
 					equalTo(String.format("%s [name='%s']",
 							ps.getClass().getSimpleName(),
-							name,
-							map.size())));
+							name)));
 		} finally {
 			logger.setLevel(original);
 		}
