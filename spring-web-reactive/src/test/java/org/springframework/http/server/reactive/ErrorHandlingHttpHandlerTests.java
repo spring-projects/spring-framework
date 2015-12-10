@@ -53,7 +53,7 @@ public class ErrorHandlingHttpHandlerTests {
 
 	@Test
 	public void handleErrorSignal() throws Exception {
-		HttpExceptionHandler exceptionHandler = new UnresolvedExceptionHandler();
+		HttpExceptionHandler exceptionHandler = new HttpStatusExceptionHandler(HttpStatus.INTERNAL_SERVER_ERROR);
 		HttpHandler targetHandler = new TestHttpHandler(new IllegalStateException("boo"));
 		HttpHandler handler = new ErrorHandlingHttpHandler(targetHandler, exceptionHandler);
 
