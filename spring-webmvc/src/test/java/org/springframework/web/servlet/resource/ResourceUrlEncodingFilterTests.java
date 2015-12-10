@@ -89,6 +89,33 @@ public class ResourceUrlEncodingFilterTests {
 		});
 	}
 
+	// SPR-13757
+	@Test
+	public void encodeContextPathUrlWithoutSuffix() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/context");
+		request.setContextPath("/context");
+		request.setAttribute(ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR, this.resourceUrlProvider);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		this.filter.doFilterInternal(request, response, (request1, response1) -> {
+			String result = ((HttpServletResponse) response1).encodeURL("/context/resources/bar.css");
+			assertEquals("/context/resources/bar-11e16cf79faee7ac698c805cf28248d2.css", result);
+		});
+	}
+
+	@Test
+	public void encodeContextPathUrlWithSuffix() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/context/");
+		request.setContextPath("/context");
+		request.setAttribute(ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR, this.resourceUrlProvider);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		this.filter.doFilterInternal(request, response, (request1, response1) -> {
+			String result = ((HttpServletResponse) response1).encodeURL("/context/resources/bar.css");
+			assertEquals("/context/resources/bar-11e16cf79faee7ac698c805cf28248d2.css", result);
+		});
+	}
+
 	// SPR-13018
 	@Test
 	public void encodeEmptyURLWithContext() throws Exception {

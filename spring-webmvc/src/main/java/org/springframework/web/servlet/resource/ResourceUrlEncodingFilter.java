@@ -95,6 +95,13 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 				String requestUri = urlProvider.getPathHelper().getRequestUri(this.request);
 				String lookupPath = urlProvider.getPathHelper().getLookupPathForRequest(this.request);
 				this.indexLookupPath = requestUri.lastIndexOf(lookupPath);
+
+				if ("/".equals(lookupPath) && !"/".equals(requestUri)) {
+					String contextPath = urlProvider.getPathHelper().getContextPath(this.request);
+					if (requestUri.equals(contextPath)) {
+						this.indexLookupPath = requestUri.length();
+					}
+				}
 			}
 		}
 
