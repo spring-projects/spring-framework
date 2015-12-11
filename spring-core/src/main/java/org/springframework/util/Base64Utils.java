@@ -18,7 +18,6 @@ package org.springframework.util;
 
 import java.nio.charset.Charset;
 import java.util.Base64;
-
 import javax.xml.bind.DatatypeConverter;
 
 import org.springframework.lang.UsesJava8;
@@ -106,6 +105,7 @@ public abstract class Base64Utils {
 	 * @return the encoded byte array (or {@code null} if the input was {@code null})
 	 * @throws IllegalStateException if Base64 encoding between byte arrays is not
 	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
+	 * @since 4.2.4
 	 */
 	public static byte[] encodeUrlSafe(byte[] src) {
 		assertDelegateAvailable();
@@ -119,6 +119,7 @@ public abstract class Base64Utils {
 	 * @return the original byte array (or {@code null} if the input was {@code null})
 	 * @throws IllegalStateException if Base64 encoding between byte arrays is not
 	 * supported, i.e. neither Java 8 nor Apache Commons Codec is present at runtime
+	 * @since 4.2.4
 	 */
 	public static byte[] decodeUrlSafe(byte[] src) {
 		assertDelegateAvailable();
@@ -252,9 +253,11 @@ public abstract class Base64Utils {
 
 	static class CommonsCodecBase64Delegate implements Base64Delegate {
 
-		private final org.apache.commons.codec.binary.Base64 base64 = new org.apache.commons.codec.binary.Base64();
+		private final org.apache.commons.codec.binary.Base64 base64 =
+				new org.apache.commons.codec.binary.Base64();
 
-		private final org.apache.commons.codec.binary.Base64 base64UrlSafe = new org.apache.commons.codec.binary.Base64(0, null, true);
+		private final org.apache.commons.codec.binary.Base64 base64UrlSafe =
+				new org.apache.commons.codec.binary.Base64(0, null, true);
 
 		@Override
 		public byte[] encode(byte[] src) {

@@ -54,9 +54,9 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 
 	private static class ResourceUrlEncodingResponseWrapper extends HttpServletResponseWrapper {
 
-		private HttpServletRequest request;
+		private final HttpServletRequest request;
 
-		/* Cache the index of the path within the DispatcherServlet mapping. */
+		/* Cache the index of the path within the DispatcherServlet mapping */
 		private Integer indexLookupPath;
 
 		public ResourceUrlEncodingResponseWrapper(HttpServletRequest request, HttpServletResponse wrapped) {
@@ -71,6 +71,7 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 				logger.debug("Request attribute exposing ResourceUrlProvider not found");
 				return super.encodeURL(url);
 			}
+
 			initIndexLookupPath(resourceUrlProvider);
 			if (url.length() >= this.indexLookupPath) {
 				String prefix = url.substring(0, this.indexLookupPath);
@@ -82,12 +83,13 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 					return super.encodeURL(prefix + lookupPath + suffix);
 				}
 			}
+
 			return super.encodeURL(url);
 		}
 
 		private ResourceUrlProvider getResourceUrlProvider() {
-			String name = ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR;
-			return (ResourceUrlProvider) this.request.getAttribute(name);
+			return (ResourceUrlProvider) this.request.getAttribute(
+					ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR);
 		}
 
 		private void initIndexLookupPath(ResourceUrlProvider urlProvider) {
@@ -107,7 +109,7 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 
 		private int getQueryParamsIndex(String url) {
 			int index = url.indexOf("?");
-			return index > 0 ? index : url.length();
+			return (index > 0 ? index : url.length());
 		}
 	}
 
