@@ -55,6 +55,17 @@ public class Base64UtilsTests {
 		assertArrayEquals(jdkDelegate.encode(bytes), commonsDelegate.encode(bytes));
 		assertArrayEquals(bytes, jdkDelegate.decode(jdkDelegate.encode(bytes)));
 		assertArrayEquals(bytes, commonsDelegate.decode(commonsDelegate.encode(bytes)));
+
+		bytes = new byte[] { (byte) 0xfb, (byte) 0xf0 };
+		assertArrayEquals("+/A=".getBytes(), jdkDelegate.encode(bytes));
+		assertArrayEquals("+/A=".getBytes(), commonsDelegate.encode(bytes));
+		assertArrayEquals(bytes, jdkDelegate.decode(jdkDelegate.encode(bytes)));
+		assertArrayEquals(bytes, commonsDelegate.decode(commonsDelegate.encode(bytes)));
+
+		assertArrayEquals("-_A=".getBytes(), jdkDelegate.encodeUrlSafe(bytes));
+		assertArrayEquals("-_A".getBytes(), commonsDelegate.encodeUrlSafe(bytes)); // no padding with commons and URL safe
+		assertArrayEquals(bytes, jdkDelegate.decodeUrlSafe(jdkDelegate.encodeUrlSafe(bytes)));
+		assertArrayEquals(bytes, commonsDelegate.decodeUrlSafe(commonsDelegate.encodeUrlSafe(bytes)));
 	}
 
 	@Test
@@ -79,6 +90,17 @@ public class Base64UtilsTests {
 		assertEquals(Base64Utils.encodeToString(bytes), DatatypeConverter.printBase64Binary(bytes));
 		assertArrayEquals(bytes, Base64Utils.decodeFromString(Base64Utils.encodeToString(bytes)));
 		assertArrayEquals(bytes, DatatypeConverter.parseBase64Binary(DatatypeConverter.printBase64Binary(bytes)));
+
+	}
+
+	@Test
+	public void encodeDecodeUrlSafe() {
+		byte[] bytes = new byte[] { (byte) 0xfb, (byte) 0xf0 };
+		assertArrayEquals("-_A=".getBytes(), Base64Utils.encodeUrlSafe(bytes));
+		assertArrayEquals(bytes, Base64Utils.decodeUrlSafe(Base64Utils.encodeUrlSafe(bytes)));
+
+		assertEquals("-_A=", Base64Utils.encodeToUrlSafeString(bytes));
+		assertArrayEquals(bytes, Base64Utils.decodeFromUrlSafeString(Base64Utils.encodeToUrlSafeString(bytes)));
 	}
 
 }
