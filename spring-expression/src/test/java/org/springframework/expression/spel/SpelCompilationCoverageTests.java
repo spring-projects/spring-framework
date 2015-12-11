@@ -2008,6 +2008,103 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertTrue(expression.getValue(Boolean.class));
 	}
 
+
+	/**
+	 * Test variants of using T(...) and static/non-static method/property/field references.
+	 */
+	@Test
+	public void constructorReference_SPR13781() {
+		// Static field access on a T() referenced type
+		expression = parser.parseExpression("T(java.util.Locale).ENGLISH");
+		assertEquals("en",expression.getValue().toString());
+		assertCanCompile(expression);
+		assertEquals("en",expression.getValue().toString());
+
+		// The actual expression from the bug report. It fails if the ENGLISH reference fails
+		// to pop the type reference for Locale off the stack (if it isn't popped then
+		// toLowerCase() will be called with a Locale parameter). In this situation the
+		// code generation for ENGLISH should notice there is something on the stack that
+		// is not required and pop it off.
+		expression = parser.parseExpression("#userId.toString().toLowerCase(T(java.util.Locale).ENGLISH)");
+		StandardEvaluationContext context =
+				new StandardEvaluationContext();
+		context.setVariable("userId", "RoDnEy");
+		assertEquals("rodney",expression.getValue(context));
+		assertCanCompile(expression);
+		assertEquals("rodney",expression.getValue(context));
+
+		// Property access on a class object
+		expression = parser.parseExpression("T(String).name");
+		assertEquals("java.lang.String",expression.getValue());
+		assertCanCompile(expression);
+		assertEquals("java.lang.String",expression.getValue());
+
+		// Now the type reference isn't on the stack, and needs loading
+		context = new StandardEvaluationContext(String.class);
+		expression = parser.parseExpression("name");
+		assertEquals("java.lang.String",expression.getValue(context));
+		assertCanCompile(expression);
+		assertEquals("java.lang.String",expression.getValue(context));
+
+		expression = parser.parseExpression("T(String).getName()");
+		assertEquals("java.lang.String",expression.getValue());
+		assertCanCompile(expression);
+		assertEquals("java.lang.String",expression.getValue());
+		
+		// These tests below verify that the chain of static accesses (either method/property or field)
+		// leave the right thing on top of the stack for processing by any outer consuming code.
+		// Here the consuming code is the String.valueOf() function.  If the wrong thing were on
+		// the stack (for example if the compiled code for static methods wasn't popping the 
+		// previous thing off the stack) the valueOf() would operate on the wrong value.
+
+		String shclass = StaticsHelper.class.getName();
+		// Basic chain: property access then method access
+		expression = parser.parseExpression("T(String).valueOf(T(String).name.valueOf(1))");
+		assertEquals("1",expression.getValue());
+		assertCanCompile(expression);
+		assertEquals("1",expression.getValue());
+
+		// chain of statics ending with static method
+		expression = parser.parseExpression("T(String).valueOf(T("+shclass+").methoda().methoda().methodb())");
+		assertEquals("mb",expression.getValue());
+		assertCanCompile(expression);
+		assertEquals("mb",expression.getValue());
+
+		// chain of statics ending with static field
+		expression = parser.parseExpression("T(String).valueOf(T("+shclass+").fielda.fielda.fieldb)");
+		assertEquals("fb",expression.getValue());
+		assertCanCompile(expression);
+		assertEquals("fb",expression.getValue());
+
+		// chain of statics ending with static property access
+		expression = parser.parseExpression("T(String).valueOf(T("+shclass+").propertya.propertya.propertyb)");
+		assertEquals("pb",expression.getValue());
+		assertCanCompile(expression);
+		assertEquals("pb",expression.getValue());
+
+		// variety chain
+		expression = parser.parseExpression("T(String).valueOf(T("+shclass+").fielda.methoda().propertya.fieldb)");
+		assertEquals("fb",expression.getValue());
+		assertCanCompile(expression);
+		assertEquals("fb",expression.getValue());
+
+		expression = parser.parseExpression("T(String).valueOf(fielda.fieldb)");
+		assertEquals("fb",expression.getValue(StaticsHelper.sh));
+		assertCanCompile(expression);
+		assertEquals("fb",expression.getValue(StaticsHelper.sh));
+		
+		expression = parser.parseExpression("T(String).valueOf(propertya.propertyb)");
+		assertEquals("pb",expression.getValue(StaticsHelper.sh));
+		assertCanCompile(expression);
+		assertEquals("pb",expression.getValue(StaticsHelper.sh));
+
+		expression = parser.parseExpression("T(String).valueOf(methoda().methodb())");
+		assertEquals("mb",expression.getValue(StaticsHelper.sh));
+		assertCanCompile(expression);
+		assertEquals("mb",expression.getValue(StaticsHelper.sh));
+		
+	}
+	
 	@Test
 	public void constructorReference_SPR12326() {
 		String type = this.getClass().getName();
@@ -4353,4 +4450,29 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		}
 	}
 
+	public static class StaticsHelper {
+		static StaticsHelper sh = new StaticsHelper();
+		public static StaticsHelper methoda() {
+			return sh;
+		}
+		public static String methodb() {
+			return "mb";
+		}
+		
+		public static StaticsHelper getPropertya() {
+			return sh;
+		}
+
+		public static String getPropertyb() {
+			return "pb";
+		}
+		
+
+		public static StaticsHelper fielda = sh;
+		public static String fieldb = "fb";
+		
+		public String toString() {
+			return "sh";
+		}
+	}
 }
