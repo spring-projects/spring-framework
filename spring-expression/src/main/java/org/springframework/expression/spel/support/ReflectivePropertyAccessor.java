@@ -685,6 +685,12 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 				if (descriptor == null || !memberDeclaringClassSlashedDescriptor.equals(descriptor.substring(1))) {
 					mv.visitTypeInsn(CHECKCAST, memberDeclaringClassSlashedDescriptor);
 				}
+			} else {
+				if (descriptor != null) {
+					// A static field/method call will not consume what is on the stack,
+					// it needs to be popped off.
+					mv.visitInsn(POP);
+				}
 			}
 			if (this.member instanceof Field) {
 				mv.visitFieldInsn(isStatic ? GETSTATIC : GETFIELD, memberDeclaringClassSlashedDescriptor,
