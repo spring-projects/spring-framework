@@ -37,7 +37,7 @@ configure(allprojects) { project ->
 	ext.freemarkerVersion    = "2.3.23"
 	ext.groovyVersion        = "2.4.5"
 	ext.gsonVersion          = "2.5"
-	ext.guavaVersion         = "18.0"
+	ext.guavaVersion         = "19.0"
 	ext.hamcrestVersion      = "1.3"
 	ext.hibernate3Version    = "3.6.10.Final"
 	ext.hibernate4Version    = "4.3.11.Final"
@@ -74,7 +74,7 @@ configure(allprojects) { project ->
 	ext.tiles3Version        = "3.0.5"
 	ext.tomcatVersion        = "8.0.30"
 	ext.tyrusVersion         = "1.3.5"  // constrained by WebLogic 12.1.3 support
-	ext.undertowVersion      = "1.3.9.Final"
+	ext.undertowVersion      = "1.3.10.Final"
 	ext.woodstoxVersion      = "5.0.1"
 	ext.xmlunitVersion       = "1.6"
 	ext.xstreamVersion       = "1.4.8"
