@@ -287,7 +287,7 @@ public class MethodReference extends SpelNodeImpl {
 			throw new IllegalStateException("No applicable cached executor found: " + executorToCheck);
 		}
 
-		ReflectiveMethodExecutor methodExecutor = (ReflectiveMethodExecutor)executorToCheck.get();
+		ReflectiveMethodExecutor methodExecutor = (ReflectiveMethodExecutor) executorToCheck.get();
 		Method method = methodExecutor.getMethod();
 		boolean isStaticMethod = Modifier.isStatic(method.getModifiers());
 		String descriptor = cf.lastDescriptor();
@@ -297,7 +297,8 @@ public class MethodReference extends SpelNodeImpl {
 				// Nothing on the stack but something is needed
 				cf.loadTarget(mv);
 			}
-		} else {
+		}
+		else {
 			if (isStaticMethod) {
 				// Something on the stack when nothing is needed
 				mv.visitInsn(POP);
@@ -308,22 +309,18 @@ public class MethodReference extends SpelNodeImpl {
 			CodeFlow.insertBoxIfNecessary(mv, descriptor.charAt(0));
 		}
 
-		boolean itf = method.getDeclaringClass().isInterface();
-		String methodDeclaringClassSlashedDescriptor = null;
-		if (Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
-			methodDeclaringClassSlashedDescriptor = method.getDeclaringClass().getName().replace('.', '/');
-		}
-		else {
-			methodDeclaringClassSlashedDescriptor = methodExecutor.getPublicDeclaringClass().getName().replace('.', '/');			
-		}
+		String classDesc = (Modifier.isPublic(method.getDeclaringClass().getModifiers()) ?
+				method.getDeclaringClass().getName().replace('.', '/') :
+				methodExecutor.getPublicDeclaringClass().getName().replace('.', '/'));
 		if (!isStaticMethod) {
-			if (descriptor == null || !descriptor.substring(1).equals(methodDeclaringClassSlashedDescriptor)) {
-				CodeFlow.insertCheckCast(mv, "L"+ methodDeclaringClassSlashedDescriptor);
+			if (descriptor == null || !descriptor.substring(1).equals(classDesc)) {
+				CodeFlow.insertCheckCast(mv, "L" + classDesc);
 			}
 		}
-		generateCodeForArguments(mv, cf, method, children);		
-		mv.visitMethodInsn(isStaticMethod ? INVOKESTATIC : INVOKEVIRTUAL,
-				methodDeclaringClassSlashedDescriptor, method.getName(), CodeFlow.createSignatureDescriptor(method), itf);
+
+		generateCodeForArguments(mv, cf, method, this.children);
+		mv.visitMethodInsn((isStaticMethod ? INVOKESTATIC : INVOKEVIRTUAL), classDesc, method.getName(),
+				CodeFlow.createSignatureDescriptor(method), method.getDeclaringClass().isInterface());
 		cf.pushDescriptor(this.exitTypeDescriptor);
 	}
 

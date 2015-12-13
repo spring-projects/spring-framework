@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -165,7 +165,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 					return new TypedValue(value, invoker.typeDescriptor.narrow(value));
 				}
 				catch (Exception ex) {
-					throw new AccessException("Unable to access property '" + name + "' through getter", ex);
+					throw new AccessException("Unable to access property '" + name + "' through getter method", ex);
 				}
 			}
 		}
@@ -187,12 +187,12 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 					return new TypedValue(value, invoker.typeDescriptor.narrow(value));
 				}
 				catch (Exception ex) {
-					throw new AccessException("Unable to access field: " + name, ex);
+					throw new AccessException("Unable to access field '" + name + "'", ex);
 				}
 			}
 		}
 
-		throw new AccessException("Neither getter nor field found for property '" + name + "'");
+		throw new AccessException("Neither getter method nor field found for property '" + name + "'");
 	}
 
 	@Override
@@ -240,7 +240,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 						newValue, TypeDescriptor.forObject(newValue), typeDescriptor);
 			}
 			catch (EvaluationException evaluationException) {
-				throw new AccessException("Type conversion failure",evaluationException);
+				throw new AccessException("Type conversion failure", evaluationException);
 			}
 		}
 		CacheKey cacheKey = new CacheKey(type, name, target instanceof Class);
@@ -262,7 +262,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 					return;
 				}
 				catch (Exception ex) {
-					throw new AccessException("Unable to access property '" + name + "' through setter", ex);
+					throw new AccessException("Unable to access property '" + name + "' through setter method", ex);
 				}
 			}
 		}
@@ -283,12 +283,12 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 					return;
 				}
 				catch (Exception ex) {
-					throw new AccessException("Unable to access field: " + name, ex);
+					throw new AccessException("Unable to access field '" + name + "'", ex);
 				}
 			}
 		}
 
-		throw new AccessException("Neither setter nor field found for property '" + name + "'");
+		throw new AccessException("Neither setter method nor field found for property '" + name + "'");
 	}
 
 	private TypeDescriptor getTypeDescriptor(EvaluationContext context, Object target, String name) {
@@ -469,11 +469,11 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		InvokerPair invocationTarget = this.readerCache.get(cacheKey);
 
 		if (invocationTarget == null || invocationTarget.member instanceof Method) {
-			Method method = (Method) (invocationTarget==null?null:invocationTarget.member);
+			Method method = (Method) (invocationTarget != null ? invocationTarget.member : null);
 			if (method == null) {
 				method = findGetterForProperty(name, type, target);
 				if (method != null) {
-					invocationTarget = new InvokerPair(method,new TypeDescriptor(new MethodParameter(method,-1)));
+					invocationTarget = new InvokerPair(method, new TypeDescriptor(new MethodParameter(method, -1)));
 					ReflectionUtils.makeAccessible(method);
 					this.readerCache.put(cacheKey, invocationTarget);
 				}
@@ -497,6 +497,7 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 				return new OptimalPropertyAccessor(invocationTarget);
 			}
 		}
+
 		return this;
 	}
 
@@ -577,16 +578,8 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		OptimalPropertyAccessor(InvokerPair target) {
 			this.member = target.member;
 			this.typeDescriptor = target.typeDescriptor;
-			if (this.member instanceof Field) {
-				Field field = (Field) this.member;
-				this.needsToBeMadeAccessible = (!Modifier.isPublic(field.getModifiers()) ||
-						!Modifier.isPublic(field.getDeclaringClass().getModifiers())) && !field.isAccessible();
-			}
-			else {
-				Method method = (Method) this.member;
-				this.needsToBeMadeAccessible = ((!Modifier.isPublic(method.getModifiers()) ||
-						!Modifier.isPublic(method.getDeclaringClass().getModifiers())) && !method.isAccessible());
-			}
+			this.needsToBeMadeAccessible = (!Modifier.isPublic(this.member.getModifiers()) ||
+					!Modifier.isPublic(this.member.getDeclaringClass().getModifiers()));
 		}
 
 		@Override
@@ -599,10 +592,12 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 			if (target == null) {
 				return false;
 			}
+
 			Class<?> type = (target instanceof Class ? (Class<?>) target : target.getClass());
 			if (type.isArray()) {
 				return false;
 			}
+
 			if (this.member instanceof Method) {
 				Method method = (Method) this.member;
 				String getterName = "get" + StringUtils.capitalize(name);
@@ -621,30 +616,31 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		@Override
 		public TypedValue read(EvaluationContext context, Object target, String name) throws AccessException {
 			if (this.member instanceof Method) {
+				Method method = (Method) this.member;
 				try {
-					if (this.needsToBeMadeAccessible) {
-						ReflectionUtils.makeAccessible((Method) this.member);
+					if (this.needsToBeMadeAccessible && !method.isAccessible()) {
+						method.setAccessible(true);
 					}
-					Object value = ((Method) this.member).invoke(target);
+					Object value = method.invoke(target);
 					return new TypedValue(value, this.typeDescriptor.narrow(value));
 				}
 				catch (Exception ex) {
-					throw new AccessException("Unable to access property '" + name + "' through getter", ex);
+					throw new AccessException("Unable to access property '" + name + "' through getter method", ex);
 				}
 			}
-			if (this.member instanceof Field) {
+			else {
+				Field field = (Field) this.member;
 				try {
-					if (this.needsToBeMadeAccessible) {
-						ReflectionUtils.makeAccessible((Field) this.member);
+					if (this.needsToBeMadeAccessible && !field.isAccessible()) {
+						field.setAccessible(true);
 					}
-					Object value = ((Field) this.member).get(target);
+					Object value = field.get(target);
 					return new TypedValue(value, this.typeDescriptor.narrow(value));
 				}
 				catch (Exception ex) {
-					throw new AccessException("Unable to access field: " + name, ex);
+					throw new AccessException("Unable to access field '" + name + "'", ex);
 				}
 			}
-			throw new AccessException("Neither getter nor field found for property '" + name + "'");
 		}
 
 		@Override
@@ -665,11 +661,11 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 
 		@Override
 		public Class<?> getPropertyType() {
-			if (this.member instanceof Field) {
-				return ((Field) this.member).getType();
+			if (this.member instanceof Method) {
+				return ((Method) this.member).getReturnType();
 			}
 			else {
-				return ((Method) this.member).getReturnType();
+				return ((Field) this.member).getType();
 			}
 		}
 
@@ -677,28 +673,31 @@ public class ReflectivePropertyAccessor implements PropertyAccessor {
 		public void generateCode(String propertyName, MethodVisitor mv, CodeFlow cf) {
 			boolean isStatic = Modifier.isStatic(this.member.getModifiers());
 			String descriptor = cf.lastDescriptor();
-			String memberDeclaringClassSlashedDescriptor = this.member.getDeclaringClass().getName().replace('.', '/');
+			String classDesc = this.member.getDeclaringClass().getName().replace('.', '/');
+
 			if (!isStatic) {
 				if (descriptor == null) {
 					cf.loadTarget(mv);
 				}
-				if (descriptor == null || !memberDeclaringClassSlashedDescriptor.equals(descriptor.substring(1))) {
-					mv.visitTypeInsn(CHECKCAST, memberDeclaringClassSlashedDescriptor);
+				if (descriptor == null || !classDesc.equals(descriptor.substring(1))) {
+					mv.visitTypeInsn(CHECKCAST, classDesc);
 				}
-			} else {
+			}
+			else {
 				if (descriptor != null) {
 					// A static field/method call will not consume what is on the stack,
 					// it needs to be popped off.
 					mv.visitInsn(POP);
 				}
 			}
-			if (this.member instanceof Field) {
-				mv.visitFieldInsn(isStatic ? GETSTATIC : GETFIELD, memberDeclaringClassSlashedDescriptor,
-						this.member.getName(), CodeFlow.toJvmDescriptor(((Field) this.member).getType()));
+
+			if (this.member instanceof Method) {
+				mv.visitMethodInsn((isStatic ? INVOKESTATIC : INVOKEVIRTUAL), classDesc, this.member.getName(),
+						CodeFlow.createSignatureDescriptor((Method) this.member), false);
 			}
 			else {
-				mv.visitMethodInsn(isStatic ? INVOKESTATIC : INVOKEVIRTUAL, memberDeclaringClassSlashedDescriptor,
-						this.member.getName(), CodeFlow.createSignatureDescriptor((Method) this.member),false);
+				mv.visitFieldInsn((isStatic ? GETSTATIC : GETFIELD), classDesc, this.member.getName(),
+						CodeFlow.toJvmDescriptor(((Field) this.member).getType()));
 			}
 		}
 	}
