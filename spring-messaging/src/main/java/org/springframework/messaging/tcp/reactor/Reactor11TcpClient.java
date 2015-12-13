@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,6 @@ import org.springframework.messaging.tcp.TcpOperations;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.ListenableFuture;
 
-
 /**
  * An implementation of {@link org.springframework.messaging.tcp.TcpOperations}
  * based on the TCP client support of the Reactor project.
@@ -70,33 +69,23 @@ public class Reactor11TcpClient<P> implements TcpOperations<P> {
 	 * A constructor that creates a {@link reactor.net.netty.tcp.NettyTcpClient} with
 	 * a {@link reactor.event.dispatch.SynchronousDispatcher} as a result of which
 	 * network I/O is handled in Netty threads.
-	 *
 	 * <p>Also see the constructor accepting a pre-configured Reactor
 	 * {@link reactor.net.tcp.TcpClient}.
-	 *
 	 * @param host the host to connect to
 	 * @param port the port to connect to
 	 * @param codec the codec to use for encoding and decoding the TCP stream
 	 */
 	public Reactor11TcpClient(String host, int port, Codec<Buffer, Message<P>, Message<P>> codec) {
-
-		// Revisit in 1.1: is Environment still required w/ sync dispatcher?
 		this.environment = new Environment(new SynchronousDispatcherConfigReader());
-
 		this.tcpClient = new TcpClientSpec<Message<P>, Message<P>>(REACTOR_TCP_CLIENT_TYPE)
-				.env(this.environment)
-				.codec(codec)
-				.connect(host, port)
-				.get();
+				.env(this.environment).codec(codec).connect(host, port).get();
 	}
 
 	/**
 	 * A constructor with a pre-configured {@link reactor.net.tcp.TcpClient}.
-	 *
 	 * <p><strong>NOTE:</strong> if the client is configured with a thread-creating
 	 * dispatcher, you are responsible for shutting down the {@link reactor.core.Environment}
 	 * instance with which the client is configured.
-	 *
 	 * @param tcpClient the TcpClient to use
 	 */
 	public Reactor11TcpClient(TcpClient<Message<P>, Message<P>> tcpClient) {
@@ -108,7 +97,6 @@ public class Reactor11TcpClient<P> implements TcpOperations<P> {
 
 	@Override
 	public ListenableFuture<Void> connect(TcpConnectionHandler<P> connectionHandler) {
-
 		Promise<NetChannel<Message<P>, Message<P>>> promise = this.tcpClient.open();
 		composeConnectionHandling(promise, connectionHandler);
 
@@ -125,7 +113,6 @@ public class Reactor11TcpClient<P> implements TcpOperations<P> {
 			final ReconnectStrategy reconnectStrategy) {
 
 		Assert.notNull(reconnectStrategy, "ReconnectStrategy must not be null");
-
 		Reconnect reconnect = new Reconnect() {
 			@Override
 			public Tuple2<InetSocketAddress, Long> reconnect(InetSocketAddress address, int attempt) {
@@ -162,8 +149,8 @@ public class Reactor11TcpClient<P> implements TcpOperations<P> {
 						connection
 								.when(Throwable.class, new Consumer<Throwable>() {
 									@Override
-									public void accept(Throwable t) {
-										connectionHandler.handleFailure(t);
+									public void accept(Throwable ex) {
+										connectionHandler.handleFailure(ex);
 									}
 								})
 								.consume(new Consumer<Message<P>>() {
@@ -201,9 +188,9 @@ public class Reactor11TcpClient<P> implements TcpOperations<P> {
 		}
 	}
 
+
 	/**
 	 * A ConfigurationReader that enforces the use of a SynchronousDispatcher.
-	 *
 	 * <p>The {@link reactor.core.configuration.PropertiesConfigurationReader} used by
 	 * default automatically creates other dispatchers with thread pools that are
 	 * not needed.

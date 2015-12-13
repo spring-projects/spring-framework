@@ -56,21 +56,20 @@ abstract class AbstractPromiseToListenableFutureAdapter<S, T> implements Listena
 				try {
 					registry.success(adapt(result));
 				}
-				catch (Throwable t) {
-					registry.failure(t);
+				catch (Throwable ex) {
+					registry.failure(ex);
 				}
 			}
 		});
 
 		this.promise.onError(new Consumer<Throwable>() {
 			@Override
-			public void accept(Throwable t) {
-				registry.failure(t);
+			public void accept(Throwable ex) {
+				registry.failure(ex);
 			}
 		});
 	}
 
-	protected abstract T adapt(S result);
 
 	@Override
 	public T get() throws InterruptedException {
@@ -112,5 +111,8 @@ abstract class AbstractPromiseToListenableFutureAdapter<S, T> implements Listena
 		this.registry.addSuccessCallback(successCallback);
 		this.registry.addFailureCallback(failureCallback);
 	}
+
+
+	protected abstract T adapt(S result);
 
 }

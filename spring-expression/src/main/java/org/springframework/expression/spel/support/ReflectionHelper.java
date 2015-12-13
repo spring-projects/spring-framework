@@ -238,11 +238,13 @@ public class ReflectionHelper {
 	 * @return true if some kind of conversion occurred on the argument
 	 * @throws SpelEvaluationException if there is a problem with conversion
 	 */
-	public static boolean convertAllArguments(TypeConverter converter, Object[] arguments, Method method) throws SpelEvaluationException {
-		Integer varargsPosition = method.isVarArgs() ? method.getParameterTypes().length-1:null;
+	public static boolean convertAllArguments(TypeConverter converter, Object[] arguments, Method method)
+			throws SpelEvaluationException {
+
+		Integer varargsPosition = (method.isVarArgs() ? method.getParameterTypes().length - 1 : null);
 		return convertArguments(converter, arguments, method, varargsPosition);
 	}
-	
+
 	/**
 	 * Takes an input set of argument values and converts them to the types specified as the
 	 * required parameter types. The arguments are converted 'in-place' in the input array.
