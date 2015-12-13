@@ -143,12 +143,14 @@ public class SubProtocolWebSocketHandler
 	public void addProtocolHandler(SubProtocolHandler handler) {
 		List<String> protocols = handler.getSupportedProtocols();
 		if (CollectionUtils.isEmpty(protocols)) {
-			logger.error("No sub-protocols for " + handler + ".");
+			if (logger.isErrorEnabled()) {
+				logger.error("No sub-protocols for " + handler);
+			}
 			return;
 		}
-		for (String protocol: protocols) {
+		for (String protocol : protocols) {
 			SubProtocolHandler replaced = this.protocolHandlerLookup.put(protocol, handler);
-			if ((replaced != null) && (replaced != handler) ) {
+			if (replaced != null && replaced != handler) {
 				throw new IllegalStateException("Can't map " + handler +
 						" to protocol '" + protocol + "'. Already mapped to " + replaced + ".");
 			}
@@ -316,9 +318,12 @@ public class SubProtocolWebSocketHandler
 	public void handleMessage(Message<?> message) throws MessagingException {
 		String sessionId = resolveSessionId(message);
 		if (sessionId == null) {
-			logger.error("Couldn't find sessionId in " + message);
+			if (logger.isErrorEnabled()) {
+				logger.error("Couldn't find session id in " + message);
+			}
 			return;
 		}
+
 		WebSocketSessionHolder holder = this.sessions.get(sessionId);
 		if (holder == null) {
 			if (logger.isDebugEnabled()) {
@@ -327,6 +332,7 @@ public class SubProtocolWebSocketHandler
 			}
 			return;
 		}
+
 		WebSocketSession session = holder.getSession();
 		try {
 			findProtocolHandler(session).handleMessageToClient(session, message);
@@ -344,9 +350,11 @@ public class SubProtocolWebSocketHandler
 				logger.debug("Failure while closing session " + sessionId + ".", secondException);
 			}
 		}
-		catch (Exception e) {
+		catch (Exception ex) {
 			// Could be part of normal workflow (e.g. browser tab closed)
-			logger.debug("Failed to send message to client in " + session + ": " + message, e);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Failed to send message to client in " + session + ": " + message, ex);
+			}
 		}
 	}
 
