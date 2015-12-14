@@ -131,27 +131,37 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 
 	@Override
 	public boolean hasAnnotatedMethods(String annotationName) {
-		Method[] methods = getIntrospectedClass().getDeclaredMethods();
-		for (Method method : methods) {
-			if (!method.isBridge() && method.getAnnotations().length > 0 &&
-					AnnotatedElementUtils.isAnnotated(method, annotationName)) {
-				return true;
+		try {
+			Method[] methods = getIntrospectedClass().getDeclaredMethods();
+			for (Method method : methods) {
+				if (!method.isBridge() && method.getAnnotations().length > 0 &&
+						AnnotatedElementUtils.isAnnotated(method, annotationName)) {
+					return true;
+				}
 			}
+			return false;
 		}
-		return false;
+		catch (Throwable ex) {
+			throw new IllegalStateException("Failed to introspect annotated methods on " + getIntrospectedClass(), ex);
+		}
 	}
 
 	@Override
 	public Set<MethodMetadata> getAnnotatedMethods(String annotationName) {
-		Method[] methods = getIntrospectedClass().getDeclaredMethods();
-		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>();
-		for (Method method : methods) {
-			if (!method.isBridge() && method.getAnnotations().length > 0 &&
-					AnnotatedElementUtils.isAnnotated(method, annotationName)) {
-				annotatedMethods.add(new StandardMethodMetadata(method, this.nestedAnnotationsAsMap));
+		try {
+			Method[] methods = getIntrospectedClass().getDeclaredMethods();
+			Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>();
+			for (Method method : methods) {
+				if (!method.isBridge() && method.getAnnotations().length > 0 &&
+						AnnotatedElementUtils.isAnnotated(method, annotationName)) {
+					annotatedMethods.add(new StandardMethodMetadata(method, this.nestedAnnotationsAsMap));
+				}
 			}
+			return annotatedMethods;
 		}
-		return annotatedMethods;
+		catch (Throwable ex) {
+			throw new IllegalStateException("Failed to introspect annotated methods on " + getIntrospectedClass(), ex);
+		}
 	}
 
 }
