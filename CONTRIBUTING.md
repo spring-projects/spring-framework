@@ -13,8 +13,15 @@ request; this will save time for everyone!_
 Not sure what a pull request is, or how to submit one? Take a look at GitHub's
 excellent [help documentation][] first.
 
+### Check and/or Discuss on Stack Overflow first
 
-### Search JIRA first; create an issue if necessary
+If you're unsure why something doesn't work or wondering if there is a better
+way of doing something please check on Stack Overflow first. If necessary start
+a discussion and do the necessary homework. Before creating a ticket in the
+Spring Framework issue tracker you should have a reasinably good sense that
+there there is a problem or a missing feature.
+
+### Search JIRA; create an issue if necessary
 
 Is there already an issue that addresses your concern? Do a bit of searching
 in our [JIRA issue tracker][] to see if you can find something similar. If you
