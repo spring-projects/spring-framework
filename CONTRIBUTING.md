@@ -16,10 +16,11 @@ excellent [help documentation][] first.
 ### Search Stack Overflow first; discuss if necessary
 
 If you're unsure why something doesn't work or wondering if there is a better
-way of doing something please check on Stack Overflow first. If necessary start
-a discussion and do the necessary homework. Before creating a ticket in the
-Spring Framework issue tracker you should have a reasinably good sense that
-there there is a problem or a missing feature.
+way of doing something please check on Stack Overflow first. This is the
+official list of [Spring project tags](https://spring.io/questions).
+If necessary start a discussion and do the necessary homework. Before
+creating a ticket in the Spring Framework issue tracker you should have a
+reasinably good sense that there there is a problem or a missing feature.
 
 ### Search JIRA; create an issue if necessary
 
