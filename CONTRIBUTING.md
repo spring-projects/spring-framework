@@ -13,7 +13,7 @@ request; this will save time for everyone!_
 Not sure what a pull request is, or how to submit one? Take a look at GitHub's
 excellent [help documentation][] first.
 
-### Check and/or Discuss on Stack Overflow first
+### Search and discuss on Stack Overflow first
 
 If you're unsure why something doesn't work or wondering if there is a better
 way of doing something please check on Stack Overflow first. If necessary start
