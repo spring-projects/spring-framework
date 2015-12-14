@@ -163,7 +163,7 @@ public class AnnotatedElementUtils {
 					new HashSet<AnnotatedElement>(), 0);
 		}
 		catch (Throwable ex) {
-			throw new IllegalStateException("Failed to introspect annotations: " + element, ex);
+			throw new IllegalStateException("Failed to introspect annotations on " + element, ex);
 		}
 	}
 

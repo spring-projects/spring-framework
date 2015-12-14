@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,25 +126,35 @@ public class StandardAnnotationMetadata extends StandardClassMetadata implements
 
 	@Override
 	public boolean hasAnnotatedMethods(String annotationType) {
-		Method[] methods = getIntrospectedClass().getDeclaredMethods();
-		for (Method method : methods) {
-			if (!method.isBridge() && AnnotatedElementUtils.isAnnotated(method, annotationType)) {
-				return true;
+		try {
+			Method[] methods = getIntrospectedClass().getDeclaredMethods();
+			for (Method method : methods) {
+				if (!method.isBridge() && AnnotatedElementUtils.isAnnotated(method, annotationType)) {
+					return true;
+				}
 			}
+			return false;
 		}
-		return false;
+		catch (Throwable ex) {
+			throw new IllegalStateException("Failed to introspect annotated methods on " + getIntrospectedClass(), ex);
+		}
 	}
 
 	@Override
 	public Set<MethodMetadata> getAnnotatedMethods(String annotationType) {
-		Method[] methods = getIntrospectedClass().getDeclaredMethods();
-		Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>();
-		for (Method method : methods) {
-			if (!method.isBridge() && AnnotatedElementUtils.isAnnotated(method, annotationType)) {
-				annotatedMethods.add(new StandardMethodMetadata(method, this.nestedAnnotationsAsMap));
+		try {
+			Method[] methods = getIntrospectedClass().getDeclaredMethods();
+			Set<MethodMetadata> annotatedMethods = new LinkedHashSet<MethodMetadata>();
+			for (Method method : methods) {
+				if (!method.isBridge() && AnnotatedElementUtils.isAnnotated(method, annotationType)) {
+					annotatedMethods.add(new StandardMethodMetadata(method, this.nestedAnnotationsAsMap));
+				}
 			}
+			return annotatedMethods;
 		}
-		return annotatedMethods;
+		catch (Throwable ex) {
+			throw new IllegalStateException("Failed to introspect annotated methods on " + getIntrospectedClass(), ex);
+		}
 	}
 
 }
