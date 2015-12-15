@@ -16,25 +16,15 @@
 package org.springframework.http.server.reactive;
 
 
-import java.util.Arrays;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.log4j.spi.LoggerFactory;
 import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.Publishers;
-import reactor.core.publisher.PublisherFactory;
-import reactor.fn.timer.Timer;
 import reactor.rx.Streams;
-
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.util.ObjectUtils;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
