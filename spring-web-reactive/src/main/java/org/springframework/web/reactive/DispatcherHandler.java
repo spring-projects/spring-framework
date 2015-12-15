@@ -19,11 +19,14 @@ package org.springframework.web.reactive;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
 import reactor.Publishers;
+import reactor.fn.BiConsumer;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -63,10 +66,28 @@ public class DispatcherHandler implements HttpHandler, ApplicationContextAware {
 
 	private List<HandlerResultHandler> resultHandlers;
 
+	private Function<Throwable, Throwable> errorMapper = new DispatcherHandlerExceptionMapper();
+
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		initStrategies(applicationContext);
+	}
+
+	/**
+	 * Configure a function to map error signals from the {@code DispatcherHandler}.
+	 * <p>By default this is set to {@link DispatcherHandlerExceptionMapper}.
+	 * @param errorMapper the function
+	 */
+	public void setErrorMapper(Function<Throwable, Throwable> errorMapper) {
+		this.errorMapper = errorMapper;
+	}
+
+	/**
+	 * Return the configured function for mapping exceptions.
+	 */
+	public Function<Throwable, Throwable> getErrorMapper() {
+		return this.errorMapper;
 	}
 
 	protected void initStrategies(ApplicationContext context) {
@@ -107,10 +128,12 @@ public class DispatcherHandler implements HttpHandler, ApplicationContextAware {
 			return handlerAdapter.handle(request, response, handler);
 		});
 
-		return Publishers.concatMap(resultPublisher, result -> {
+		Publisher<Void> completionPublisher = Publishers.concatMap(resultPublisher, result -> {
 			HandlerResultHandler handler = getResultHandler(result);
 			return handler.handleResult(request, response, result);
 		});
+
+		return mapError(completionPublisher, this.errorMapper);
 	}
 
 	protected HandlerAdapter getHandlerAdapter(Object handler) {
@@ -137,6 +160,15 @@ public class DispatcherHandler implements HttpHandler, ApplicationContextAware {
 			subscriber.onNext(e);
 			subscriber.onComplete();
 		});
+	}
+
+	private static <E> Publisher<E> mapError(Publisher<E> source, Function<Throwable, Throwable> function) {
+		return Publishers.lift(source, null, new BiConsumer<Throwable, Subscriber<? super E>>() {
+			@Override
+			public void accept(Throwable throwable, Subscriber<? super E> subscriber) {
+				subscriber.onError(function.apply(throwable));
+			}
+		}, null);
 	}
 
 	private static class NotFoundHandlerMapping implements HandlerMapping {

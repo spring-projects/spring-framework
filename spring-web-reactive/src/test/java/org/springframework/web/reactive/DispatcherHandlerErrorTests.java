@@ -37,6 +37,7 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.ResponseStatusException;
 import org.springframework.http.server.reactive.ErrorHandlingHttpHandler;
 import org.springframework.http.server.reactive.FilterChainHttpHandler;
 import org.springframework.http.server.reactive.HttpExceptionHandler;
@@ -58,6 +59,7 @@ import org.springframework.web.reactive.method.annotation.ResponseBodyResultHand
 
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 
@@ -101,7 +103,9 @@ public class DispatcherHandlerErrorTests {
 		Publisher<Void> publisher = this.dispatcherHandler.handle(this.request, this.response);
 		Throwable ex = awaitErrorSignal(publisher);
 
-		assertEquals(HandlerNotFoundException.class, ex.getClass());
+		assertEquals(ResponseStatusException.class, ex.getClass());
+		assertNotNull(ex.getCause());
+		assertEquals(HandlerNotFoundException.class, ex.getCause().getClass());
 	}
 
 	@Test
@@ -155,7 +159,9 @@ public class DispatcherHandlerErrorTests {
 		Publisher<Void> publisher = this.dispatcherHandler.handle(this.request, this.response);
 		Throwable ex = awaitErrorSignal(publisher);
 
-		assertEquals(HttpMediaTypeNotAcceptableException.class, ex.getClass());
+		assertEquals(ResponseStatusException.class, ex.getClass());
+		assertNotNull(ex.getCause());
+		assertEquals(HttpMediaTypeNotAcceptableException.class, ex.getCause().getClass());
 	}
 
 	@Test
