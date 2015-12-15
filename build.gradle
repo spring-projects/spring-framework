@@ -574,7 +574,7 @@ project("spring-oxm") {
 	dependencies {
 		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
-		optional("org.codehaus.castor:castor-xml:1.3.3")  {
+		optional("org.codehaus.castor:castor-xml:1.4.0")  {
 			exclude group: 'stax', module: 'stax-api'
 			exclude group: "org.springframework", module: "spring-context"
 		}
