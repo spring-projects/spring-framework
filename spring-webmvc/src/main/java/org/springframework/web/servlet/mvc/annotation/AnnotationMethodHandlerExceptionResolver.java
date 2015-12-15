@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,15 +80,17 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @since 3.0
- *
  * @deprecated as of Spring 3.2, in favor of
  * {@link org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver ExceptionHandlerExceptionResolver}
  */
 @Deprecated
 public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExceptionResolver {
 
-	// dummy method placeholder
-	private static final Method NO_METHOD_FOUND = ClassUtils.getMethodIfAvailable(System.class, "currentTimeMillis", (Class<?>[]) null);
+	/**
+	 * Arbitrary {@link Method} reference, indicating no method found in the cache.
+	 */
+	private static final Method NO_METHOD_FOUND = ClassUtils.getMethodIfAvailable(System.class, "currentTimeMillis");
+
 
 	private final Map<Class<?>, Map<Class<? extends Throwable>, Method>> exceptionHandlerCache =
 			new ConcurrentHashMap<Class<?>, Map<Class<? extends Throwable>, Method>>(64);
@@ -233,8 +235,8 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 	}
 
 	/**
-	 * Uses the {@link DepthComparator} to find the best matching method
-	 * @return the best matching method or {@code null}.
+	 * Uses the {@link ExceptionDepthComparator} to find the best matching method.
+	 * @return the best matching method, or {@code null} if none found
 	 */
 	private Method getBestMatchingMethod(
 			Map<Class<? extends Throwable>, Method> resolverMethods, Exception thrownException) {
