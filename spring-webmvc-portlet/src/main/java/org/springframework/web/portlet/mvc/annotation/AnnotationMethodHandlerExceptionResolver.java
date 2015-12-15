@@ -75,9 +75,11 @@ import org.springframework.web.servlet.View;
  */
 public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExceptionResolver {
 
-	// dummy method placeholder
-	private static final Method NO_METHOD_FOUND =
-			ClassUtils.getMethodIfAvailable(System.class, "currentTimeMillis", (Class<?>[]) null);
+	/**
+	 * Arbitrary {@link Method} reference, indicating no method found in the cache.
+	 */
+	private static final Method NO_METHOD_FOUND = ClassUtils.getMethodIfAvailable(System.class, "currentTimeMillis");
+
 
 	private final Map<Class<?>, Map<Class<? extends Throwable>, Method>> exceptionHandlerCache =
 			new ConcurrentHashMap<Class<?>, Map<Class<? extends Throwable>, Method>>(64);
@@ -210,7 +212,7 @@ public class AnnotationMethodHandlerExceptionResolver extends AbstractHandlerExc
 
 	/**
 	 * Uses the {@link ExceptionDepthComparator} to find the best matching method.
-	 * @return the best matching method or {@code null}.
+	 * @return the best matching method, or {@code null} if none found
 	 */
 	private Method getBestMatchingMethod(
 			Map<Class<? extends Throwable>, Method> resolverMethods, Exception thrownException) {
