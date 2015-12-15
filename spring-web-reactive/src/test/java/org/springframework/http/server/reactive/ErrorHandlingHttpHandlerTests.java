@@ -31,7 +31,6 @@ import org.springframework.http.HttpStatus;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rossen Stoyanchev
@@ -53,7 +52,7 @@ public class ErrorHandlingHttpHandlerTests {
 
 	@Test
 	public void handleErrorSignal() throws Exception {
-		HttpExceptionHandler exceptionHandler = new HttpStatusExceptionHandler(HttpStatus.INTERNAL_SERVER_ERROR);
+		HttpExceptionHandler exceptionHandler = new InternalServerErrorExceptionHandler();
 		HttpHandler targetHandler = new TestHttpHandler(new IllegalStateException("boo"));
 		HttpHandler handler = new ErrorHandlingHttpHandler(targetHandler, exceptionHandler);
 
@@ -68,7 +67,7 @@ public class ErrorHandlingHttpHandlerTests {
 		HttpExceptionHandler[] exceptionHandlers = new HttpExceptionHandler[] {
 				new UnresolvedExceptionHandler(),
 				new UnresolvedExceptionHandler(),
-				new HttpStatusExceptionHandler(HttpStatus.INTERNAL_SERVER_ERROR),
+				new InternalServerErrorExceptionHandler(),
 				new UnresolvedExceptionHandler()
 		};
 		HttpHandler targetHandler = new TestHttpHandler(new IllegalStateException("boo"));
@@ -95,7 +94,7 @@ public class ErrorHandlingHttpHandlerTests {
 
 	@Test
 	public void thrownExceptionBecomesErrorSignal() throws Exception {
-		HttpExceptionHandler exceptionHandler = new HttpStatusExceptionHandler(HttpStatus.INTERNAL_SERVER_ERROR);
+		HttpExceptionHandler exceptionHandler = new InternalServerErrorExceptionHandler();
 		HttpHandler targetHandler = new TestHttpHandler(new IllegalStateException("boo"), true);
 		HttpHandler handler = new ErrorHandlingHttpHandler(targetHandler, exceptionHandler);
 
@@ -145,22 +144,6 @@ public class ErrorHandlingHttpHandlerTests {
 		@Override
 		public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response, Throwable ex) {
 			return Publishers.error(ex);
-		}
-	}
-
-	/** Set the response status to the given HttpStatus. */
-	private static class HttpStatusExceptionHandler implements HttpExceptionHandler {
-
-		private final HttpStatus status;
-
-		public HttpStatusExceptionHandler(HttpStatus status) {
-			this.status = status;
-		}
-
-		@Override
-		public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response, Throwable ex) {
-			response.setStatusCode(this.status);
-			return Publishers.empty();
 		}
 	}
 
