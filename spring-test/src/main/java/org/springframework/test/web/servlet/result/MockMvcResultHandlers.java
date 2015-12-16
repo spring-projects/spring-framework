@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,6 @@ import org.springframework.util.CollectionUtils;
  */
 public abstract class MockMvcResultHandlers {
 
-
-	private MockMvcResultHandlers() {
-	}
-
 	/**
 	 * Print {@link MvcResult} details to the "standard" output stream.
 	 */
@@ -43,18 +39,18 @@ public abstract class MockMvcResultHandlers {
 	}
 
 
-	/** An {@link PrintingResultHandler} that writes to the "standard" output stream */
+	/**
+	 * A {@link PrintingResultHandler} that writes to the "standard" output stream.
+	 */
 	private static class ConsolePrintingResultHandler extends PrintingResultHandler {
 
 		public ConsolePrintingResultHandler() {
 			super(new ResultValuePrinter() {
-
 				@Override
 				public void printHeading(String heading) {
 					System.out.println();
 					System.out.println(String.format("%20s:", heading));
 				}
-
 				@Override
 				public void printValue(String label, Object value) {
 					if (value != null && value.getClass().isArray()) {
@@ -65,4 +61,5 @@ public abstract class MockMvcResultHandlers {
 			});
 		}
 	}
+
 }
