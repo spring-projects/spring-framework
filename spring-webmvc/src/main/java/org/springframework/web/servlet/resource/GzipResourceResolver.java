@@ -27,7 +27,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.Resource;
 
-
 /**
  * A {@code ResourceResolver} that delegates to the chain to locate a resource
  * and then attempts to find a variation with the ".gz" extension.
@@ -41,7 +40,6 @@ import org.springframework.core.io.Resource;
  * @since 4.1
  */
 public class GzipResourceResolver extends AbstractResourceResolver {
-
 
 	@Override
 	protected Resource resolveResourceInternal(HttpServletRequest request, String requestPath,
@@ -58,8 +56,8 @@ public class GzipResourceResolver extends AbstractResourceResolver {
 				return gzipped;
 			}
 		}
-		catch (IOException e) {
-			logger.trace("No gzipped resource for [" + resource.getFilename() + "]", e);
+		catch (IOException ex) {
+			logger.trace("No gzipped resource for [" + resource.getFilename() + "]", ex);
 		}
 
 		return resource;
@@ -67,7 +65,7 @@ public class GzipResourceResolver extends AbstractResourceResolver {
 
 	private boolean isGzipAccepted(HttpServletRequest request) {
 		String value = request.getHeader("Accept-Encoding");
-		return ((value != null) && value.toLowerCase().contains("gzip"));
+		return (value != null && value.toLowerCase().contains("gzip"));
 	}
 
 	@Override
@@ -84,12 +82,10 @@ public class GzipResourceResolver extends AbstractResourceResolver {
 
 		private final Resource gzipped;
 
-
 		public GzippedResource(Resource original) throws IOException {
 			this.original = original;
 			this.gzipped = original.createRelative(original.getFilename() + ".gz");
 		}
-
 
 		public InputStream getInputStream() throws IOException {
 			return this.gzipped.getInputStream();

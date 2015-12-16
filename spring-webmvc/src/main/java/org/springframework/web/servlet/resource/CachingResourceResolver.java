@@ -42,14 +42,16 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 
 	private final Cache cache;
 
+
 	public CachingResourceResolver(CacheManager cacheManager, String cacheName) {
 		this(cacheManager.getCache(cacheName));
 	}
 
 	public CachingResourceResolver(Cache cache) {
-		Assert.notNull(cache, "'cache' is required");
+		Assert.notNull(cache, "Cache is required");
 		this.cache = cache;
 	}
+
 
 	/**
 	 * Return the configured {@code Cache}.
@@ -57,6 +59,7 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 	public Cache getCache() {
 		return this.cache;
 	}
+
 
 	@Override
 	protected Resource resolveResourceInternal(HttpServletRequest request, String requestPath,
@@ -67,7 +70,7 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 
 		if (resource != null) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Found match");
+				logger.trace("Found match: " + resource);
 			}
 			return resource;
 		}
@@ -75,7 +78,7 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 		resource = chain.resolveResource(request, requestPath, locations);
 		if (resource != null) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Putting resolved resource in cache");
+				logger.trace("Putting resolved resource in cache: " + resource);
 			}
 			this.cache.put(key, resource);
 		}
@@ -104,7 +107,7 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 
 		if (resolvedUrlPath != null) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Found match");
+				logger.trace("Found match: \"" + resolvedUrlPath + "\"");
 			}
 			return resolvedUrlPath;
 		}
@@ -112,7 +115,7 @@ public class CachingResourceResolver extends AbstractResourceResolver {
 		resolvedUrlPath = chain.resolveUrlPath(resourceUrlPath, locations);
 		if (resolvedUrlPath != null) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Putting resolved resource URL path in cache");
+				logger.trace("Putting resolved resource URL path in cache: \"" + resolvedUrlPath + "\"");
 			}
 			this.cache.put(key, resolvedUrlPath);
 		}

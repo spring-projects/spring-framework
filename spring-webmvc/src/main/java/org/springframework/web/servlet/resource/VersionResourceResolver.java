@@ -22,7 +22,6 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.Resource;
@@ -56,7 +55,9 @@ import org.springframework.util.StringUtils;
  */
 public class VersionResourceResolver extends AbstractResourceResolver {
 
-	public static final String RESOURCE_VERSION_ATTRIBUTE = VersionResourceResolver.class.getName() + ".resourceVersion";
+	public static final String RESOURCE_VERSION_ATTRIBUTE =
+			VersionResourceResolver.class.getName() + ".resourceVersion";
+
 
 	private AntPathMatcher pathMatcher = new AntPathMatcher();
 
@@ -149,14 +150,14 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		String candidateVersion = versionStrategy.extractVersion(requestPath);
 		if (StringUtils.isEmpty(candidateVersion)) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("No version found in path=\"" + requestPath + "\"");
+				logger.trace("No version found in path \"" + requestPath + "\"");
 			}
 			return null;
 		}
 
 		String simplePath = versionStrategy.removeVersion(requestPath, candidateVersion);
 		if (logger.isTraceEnabled()) {
-			logger.trace("Extracted version from path, re-resolving without version, path=\"" + simplePath + "\"");
+			logger.trace("Extracted version from path, re-resolving without version: \"" + simplePath + "\"");
 		}
 
 		Resource baseResource = chain.resolveResource(request, simplePath, locations);
@@ -167,17 +168,17 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		String actualVersion = versionStrategy.getResourceVersion(baseResource);
 		if (candidateVersion.equals(actualVersion)) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("resource matches extracted version");
+				logger.trace("Resource matches extracted version: "+ candidateVersion);
 			}
 			if (request != null) {
-				request.setAttribute(VersionResourceResolver.RESOURCE_VERSION_ATTRIBUTE, candidateVersion);
+				request.setAttribute(RESOURCE_VERSION_ATTRIBUTE, candidateVersion);
 			}
 			return baseResource;
 		}
 		else {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Potential resource found for [" + requestPath + "], but version [" +
-						candidateVersion + "] doesn't match.");
+				logger.trace("Potential resource found for \"" + requestPath + "\", but version [" +
+						candidateVersion + "] does not match");
 			}
 			return null;
 		}
@@ -192,12 +193,12 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 				return null;
 			}
 			if (logger.isTraceEnabled()) {
-				logger.trace("Getting the original resource to determine version");
+				logger.trace("Getting the original resource to determine version for path \"" + resourceUrlPath + "\"");
 			}
 			Resource resource = chain.resolveResource(null, baseUrl, locations);
 			String version = versionStrategy.getResourceVersion(resource);
 			if (logger.isTraceEnabled()) {
-				logger.trace("Version=" + version);
+				logger.trace("Determined version [" + version + "] for " + resource);
 			}
 			return versionStrategy.addVersion(baseUrl, version);
 		}

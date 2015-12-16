@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,24 +41,25 @@ public abstract class AbstractResourceResolver implements ResourceResolver {
 			List<? extends Resource> locations, ResourceResolverChain chain) {
 
 		if (logger.isTraceEnabled()) {
-			logger.trace("Resolving resource: requestPath=\"" + requestPath + "\"");
+			logger.trace("Resolving resource for request path \"" + requestPath + "\"");
 		}
 		return resolveResourceInternal(request, requestPath, locations, chain);
 	}
-
-	protected abstract Resource resolveResourceInternal(HttpServletRequest request, String requestPath,
-			List<? extends Resource> locations, ResourceResolverChain chain);
 
 	@Override
 	public String resolveUrlPath(String resourceUrlPath, List<? extends Resource> locations,
 			ResourceResolverChain chain) {
 
 		if (logger.isTraceEnabled()) {
-			logger.trace("Resolving public URL for path=\"" + resourceUrlPath + "\"");
+			logger.trace("Resolving public URL for resource path \"" + resourceUrlPath + "\"");
 		}
 
 		return resolveUrlPathInternal(resourceUrlPath, locations, chain);
 	}
+
+
+	protected abstract Resource resolveResourceInternal(HttpServletRequest request, String requestPath,
+			List<? extends Resource> locations, ResourceResolverChain chain);
 
 	protected abstract String resolveUrlPathInternal(String resourceUrlPath,
 			List<? extends Resource> locations, ResourceResolverChain chain);
