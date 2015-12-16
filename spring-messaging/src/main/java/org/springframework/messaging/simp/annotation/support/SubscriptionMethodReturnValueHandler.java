@@ -50,7 +50,7 @@ import org.springframework.util.Assert;
  */
 public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
-	private static Log logger = LogFactory.getLog(SubscriptionMethodReturnValueHandler.class);
+	private static final Log logger = LogFactory.getLog(SubscriptionMethodReturnValueHandler.class);
 
 
 	private final MessageSendingOperations<String> messagingTemplate;
