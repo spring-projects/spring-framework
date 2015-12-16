@@ -19,7 +19,7 @@ package org.springframework.web.servlet.resource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -55,7 +55,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
-	private final Map<String, ResourceHttpRequestHandler> handlerMap = new HashMap<String, ResourceHttpRequestHandler>();
+	private final Map<String, ResourceHttpRequestHandler> handlerMap = new LinkedHashMap<String, ResourceHttpRequestHandler>();
 
 	private boolean autodetect = true;
 

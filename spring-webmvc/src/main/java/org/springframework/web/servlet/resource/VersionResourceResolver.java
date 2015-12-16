@@ -19,9 +19,10 @@ package org.springframework.web.servlet.resource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.Resource;
@@ -60,7 +61,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	private AntPathMatcher pathMatcher = new AntPathMatcher();
 
 	/** Map from path pattern -> VersionStrategy */
-	private final Map<String, VersionStrategy> versionStrategyMap = new HashMap<String, VersionStrategy>();
+	private final Map<String, VersionStrategy> versionStrategyMap = new LinkedHashMap<String, VersionStrategy>();
 
 
 	/**
@@ -209,17 +210,17 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	 */
 	protected VersionStrategy getStrategyForPath(String requestPath) {
 		String path = "/".concat(requestPath);
-        List<String> matchingPatterns = new ArrayList<String>();
+		List<String> matchingPatterns = new ArrayList<String>();
 		for (String pattern : this.versionStrategyMap.keySet()) {
 			if (this.pathMatcher.match(pattern, path)) {
-                matchingPatterns.add(pattern);
+				matchingPatterns.add(pattern);
 			}
 		}
-        if (!matchingPatterns.isEmpty()) {
-            Comparator<String> comparator = this.pathMatcher.getPatternComparator(path);
-            Collections.sort(matchingPatterns, comparator);
-            return this.versionStrategyMap.get(matchingPatterns.get(0));
-        }
+		if (!matchingPatterns.isEmpty()) {
+			Comparator<String> comparator = this.pathMatcher.getPatternComparator(path);
+			Collections.sort(matchingPatterns, comparator);
+			return this.versionStrategyMap.get(matchingPatterns.get(0));
+		}
 		return null;
 	}
 

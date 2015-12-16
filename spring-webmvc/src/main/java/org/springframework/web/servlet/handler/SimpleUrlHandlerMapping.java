@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.handler;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -55,7 +55,7 @@ import org.springframework.util.CollectionUtils;
  */
 public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 
-	private final Map<String, Object> urlMap = new HashMap<String, Object>();
+	private final Map<String, Object> urlMap = new LinkedHashMap<String, Object>();
 
 
 	/**
