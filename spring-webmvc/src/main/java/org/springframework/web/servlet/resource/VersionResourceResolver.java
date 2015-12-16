@@ -19,7 +19,7 @@ package org.springframework.web.servlet.resource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -58,7 +58,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	private AntPathMatcher pathMatcher = new AntPathMatcher();
 
 	/** Map from path pattern -> VersionStrategy */
-	private final Map<String, VersionStrategy> versionStrategyMap = new HashMap<String, VersionStrategy>();
+	private final Map<String, VersionStrategy> versionStrategyMap = new LinkedHashMap<String, VersionStrategy>();
 
 
 	/**
@@ -146,14 +146,14 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		String candidateVersion = versionStrategy.extractVersion(requestPath);
 		if (StringUtils.isEmpty(candidateVersion)) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("No version found in path=\"" + requestPath + "\"");
+				logger.trace("No version found in path \"" + requestPath + "\"");
 			}
 			return null;
 		}
 
 		String simplePath = versionStrategy.removeVersion(requestPath, candidateVersion);
 		if (logger.isTraceEnabled()) {
-			logger.trace("Extracted version from path, re-resolving without version, path=\"" + simplePath + "\"");
+			logger.trace("Extracted version from path, re-resolving without version: \"" + simplePath + "\"");
 		}
 
 		Resource baseResource = chain.resolveResource(request, simplePath, locations);
@@ -164,14 +164,14 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		String actualVersion = versionStrategy.getResourceVersion(baseResource);
 		if (candidateVersion.equals(actualVersion)) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("resource matches extracted version");
+				logger.trace("Resource matches extracted version ["+ candidateVersion + "]");
 			}
 			return baseResource;
 		}
 		else {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Potential resource found for [" + requestPath + "], but version [" +
-						candidateVersion + "] doesn't match.");
+				logger.trace("Potential resource found for \"" + requestPath + "\", but version [" +
+						candidateVersion + "] does not match");
 			}
 			return null;
 		}
@@ -186,12 +186,12 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 				return null;
 			}
 			if (logger.isTraceEnabled()) {
-				logger.trace("Getting the original resource to determine version");
+				logger.trace("Getting the original resource to determine version for path \"" + resourceUrlPath + "\"");
 			}
 			Resource resource = chain.resolveResource(null, baseUrl, locations);
 			String version = versionStrategy.getResourceVersion(resource);
 			if (logger.isTraceEnabled()) {
-				logger.trace("Version=" + version);
+				logger.trace("Determined version [" + version + "] for " + resource);
 			}
 			return versionStrategy.addVersion(baseUrl, version);
 		}
@@ -204,17 +204,17 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	 */
 	protected VersionStrategy getStrategyForPath(String requestPath) {
 		String path = "/".concat(requestPath);
-        List<String> matchingPatterns = new ArrayList<String>();
+		List<String> matchingPatterns = new ArrayList<String>();
 		for (String pattern : this.versionStrategyMap.keySet()) {
 			if (this.pathMatcher.match(pattern, path)) {
-                matchingPatterns.add(pattern);
+				matchingPatterns.add(pattern);
 			}
 		}
-        if (!matchingPatterns.isEmpty()) {
-            Comparator<String> comparator = this.pathMatcher.getPatternComparator(path);
-            Collections.sort(matchingPatterns, comparator);
-            return this.versionStrategyMap.get(matchingPatterns.get(0));
-        }
+		if (!matchingPatterns.isEmpty()) {
+			Comparator<String> comparator = this.pathMatcher.getPatternComparator(path);
+			Collections.sort(matchingPatterns, comparator);
+			return this.versionStrategyMap.get(matchingPatterns.get(0));
+		}
 		return null;
 	}
 
