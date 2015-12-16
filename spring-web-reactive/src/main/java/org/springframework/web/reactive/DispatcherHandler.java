@@ -173,10 +173,13 @@ public class DispatcherHandler implements HttpHandler, ApplicationContextAware {
 
 	private static class NotFoundHandlerMapping implements HandlerMapping {
 
+		@SuppressWarnings("ThrowableInstanceNeverThrown")
+		private static final Exception HANDLER_NOT_FOUND_EXCEPTION = new HandlerNotFoundException();
+
+
 		@Override
 		public Publisher<Object> getHandler(ServerHttpRequest request) {
-			return Publishers.error(new HandlerNotFoundException(request.getMethod(),
-					request.getURI().getPath(), request.getHeaders()));
+			return Publishers.error(HANDLER_NOT_FOUND_EXCEPTION);
 		}
 	}
 
