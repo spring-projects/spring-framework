@@ -165,7 +165,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * URL path to expose for public use.
 	 * @param request the current request
 	 * @param requestUrl the request URL path to resolve
-	 * @return the resolved public URL path or {@code null} if unresolved
+	 * @return the resolved public URL path, or {@code null} if unresolved
 	 */
 	public final String getForRequestUrl(HttpServletRequest request, String requestUrl) {
 		if (logger.isTraceEnabled()) {
@@ -177,7 +177,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		String suffix = requestUrl.substring(suffixIndex);
 		String lookupPath = requestUrl.substring(prefixIndex, suffixIndex);
 		String resolvedLookupPath = getForLookupPath(lookupPath);
-		return (resolvedLookupPath != null) ? prefix + resolvedLookupPath + suffix : null;
+		return (resolvedLookupPath != null ? prefix + resolvedLookupPath + suffix : null);
 	}
 
 	private int getLookupPathIndex(HttpServletRequest request) {

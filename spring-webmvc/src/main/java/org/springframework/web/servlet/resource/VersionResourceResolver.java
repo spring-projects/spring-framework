@@ -168,7 +168,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		String actualVersion = versionStrategy.getResourceVersion(baseResource);
 		if (candidateVersion.equals(actualVersion)) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Resource matches extracted version: "+ candidateVersion);
+				logger.trace("Resource matches extracted version ["+ candidateVersion + "]");
 			}
 			if (request != null) {
 				request.setAttribute(RESOURCE_VERSION_ATTRIBUTE, candidateVersion);
