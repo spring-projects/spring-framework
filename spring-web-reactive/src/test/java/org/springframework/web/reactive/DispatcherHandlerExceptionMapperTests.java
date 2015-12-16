@@ -20,8 +20,6 @@ import java.util.Collections;
 import org.junit.Before;
 import org.junit.Test;
 
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.ResponseStatusException;
@@ -45,7 +43,7 @@ public class DispatcherHandlerExceptionMapperTests {
 
 	@Test
 	public void handlerNotFound() throws Exception {
-		Throwable ex = new HandlerNotFoundException(HttpMethod.GET, "/path", new HttpHeaders());
+		Throwable ex = new HandlerNotFoundException();
 		ex = this.mapper.apply(ex);
 
 		assertEquals(ResponseStatusException.class, ex.getClass());
