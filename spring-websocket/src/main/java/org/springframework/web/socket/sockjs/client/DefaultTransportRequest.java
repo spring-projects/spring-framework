@@ -45,7 +45,7 @@ import org.springframework.web.socket.sockjs.transport.TransportType;
  */
 class DefaultTransportRequest implements TransportRequest {
 
-	private static Log logger = LogFactory.getLog(DefaultTransportRequest.class);
+	private static final Log logger = LogFactory.getLog(DefaultTransportRequest.class);
 
 
 	private final SockJsUrlInfo sockJsUrlInfo;
@@ -72,10 +72,10 @@ class DefaultTransportRequest implements TransportRequest {
 	public DefaultTransportRequest(SockJsUrlInfo sockJsUrlInfo, HttpHeaders handshakeHeaders,
 			Transport transport, TransportType serverTransportType, SockJsMessageCodec codec) {
 
-		Assert.notNull(sockJsUrlInfo, "'sockJsUrlInfo' is required");
-		Assert.notNull(transport, "'transport' is required");
-		Assert.notNull(serverTransportType, "'transportType' is required");
-		Assert.notNull(codec, "'codec' is required");
+		Assert.notNull(sockJsUrlInfo, "SockJsUrlInfo is required");
+		Assert.notNull(transport, "Transport is required");
+		Assert.notNull(serverTransportType, "TransportType is required");
+		Assert.notNull(codec, "SockJsMessageCodec is required");
 		this.sockJsUrlInfo = sockJsUrlInfo;
 		this.handshakeHeaders = (handshakeHeaders != null ? handshakeHeaders : new HttpHeaders());
 		this.transport = transport;
