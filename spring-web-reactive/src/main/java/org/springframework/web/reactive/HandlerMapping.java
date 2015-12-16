@@ -16,7 +16,7 @@
 
 package org.springframework.web.reactive;
 
-import org.reactivestreams.Publisher;
+import reactor.Mono;
 
 import org.springframework.http.server.reactive.ServerHttpRequest;
 
@@ -32,8 +32,8 @@ public interface HandlerMapping {
 	/**
 	 * Return a handler for this request.
 	 * @param request current HTTP request
-	 * @return A {@link Publisher} object that produces a single handler element
+	 * @return A {@link Mono} object that produces a single handler element
 	 */
-	Publisher<Object> getHandler(ServerHttpRequest request);
+	Mono<Object> getHandler(ServerHttpRequest request);
 
 }

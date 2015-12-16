@@ -22,7 +22,8 @@ import java.util.function.Function;
 import javax.servlet.http.HttpServletResponse;
 
 import org.reactivestreams.Publisher;
-import reactor.Publishers;
+import reactor.Flux;
+import reactor.Mono;
 
 import org.springframework.http.ExtendedHttpHeaders;
 import org.springframework.http.HttpHeaders;
@@ -38,13 +39,13 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 
 	private final HttpServletResponse response;
 
-	private final Function<Publisher<ByteBuffer>, Publisher<Void>> responseBodyWriter;
+	private final Function<Publisher<ByteBuffer>, Mono<Void>> responseBodyWriter;
 
 	private final HttpHeaders headers;
 
 
 	public ServletServerHttpResponse(HttpServletResponse response,
-			Function<Publisher<ByteBuffer>, Publisher<Void>> responseBodyWriter) {
+			Function<Publisher<ByteBuffer>, Mono<Void>> responseBodyWriter) {
 
 		Assert.notNull(response, "'response' must not be null");
 		Assert.notNull(responseBodyWriter, "'responseBodyWriter' must not be null");
@@ -69,11 +70,11 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public Publisher<Void> setBody(final Publisher<ByteBuffer> publisher) {
-		return Publishers.lift(publisher, new WriteWithOperator<>(this::setBodyInternal));
+	public Mono<Void> setBody(final Publisher<ByteBuffer> publisher) {
+		return Flux.from(publisher).lift(new WriteWithOperator<>(this::setBodyInternal)).after();
 	}
 
-	protected Publisher<Void> setBodyInternal(Publisher<ByteBuffer> publisher) {
+	protected Mono<Void> setBodyInternal(Publisher<ByteBuffer> publisher) {
 		return this.responseBodyWriter.apply(publisher);
 	}
 

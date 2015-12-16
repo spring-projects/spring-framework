@@ -22,7 +22,7 @@ import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.reactivestreams.Publisher;
-import reactor.Publishers;
+import reactor.Flux;
 import reactor.io.buffer.Buffer;
 
 import org.springframework.core.ResolvableType;
@@ -61,10 +61,10 @@ public class JacksonJsonEncoder extends AbstractEncoder<Object> {
 	}
 
 	@Override
-	public Publisher<ByteBuffer> encode(Publisher<? extends Object> inputStream,
+	public Flux<ByteBuffer> encode(Publisher<? extends Object> inputStream,
 			ResolvableType type, MimeType mimeType, Object... hints) {
 
-		Publisher<ByteBuffer> stream = Publishers.map(inputStream, value -> {
+		Flux<ByteBuffer> stream = Flux.from(inputStream).map(value -> {
 			Buffer buffer = new Buffer();
 			BufferOutputStream outputStream = new BufferOutputStream(buffer);
 			try {

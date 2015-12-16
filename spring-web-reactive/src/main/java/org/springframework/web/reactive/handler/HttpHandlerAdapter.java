@@ -17,7 +17,7 @@
 package org.springframework.web.reactive.handler;
 
 import org.reactivestreams.Publisher;
-import reactor.Publishers;
+import reactor.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -50,12 +50,12 @@ public class HttpHandlerAdapter implements HandlerAdapter {
 	}
 
 	@Override
-	public Publisher<HandlerResult> handle(ServerHttpRequest request,
+	public Mono<HandlerResult> handle(ServerHttpRequest request,
 			ServerHttpResponse response, Object handler) {
 
 		HttpHandler httpHandler = (HttpHandler)handler;
-		Publisher<Void> completion = httpHandler.handle(request, response);
-		return Publishers.just(new HandlerResult(httpHandler, completion, PUBLISHER_VOID));
+		Mono<Void> completion = httpHandler.handle(request, response);
+		return Mono.just(new HandlerResult(httpHandler, completion, PUBLISHER_VOID));
 	}
 
 }

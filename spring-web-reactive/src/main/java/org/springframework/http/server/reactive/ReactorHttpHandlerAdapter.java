@@ -15,14 +15,11 @@
  */
 package org.springframework.http.server.reactive;
 
-import org.reactivestreams.Publisher;
+import reactor.Mono;
 import reactor.io.buffer.Buffer;
 import reactor.io.net.ReactiveChannelHandler;
 import reactor.io.net.http.HttpChannel;
 
-import org.springframework.http.server.reactive.HttpHandler;
-import org.springframework.http.server.reactive.ReactorServerHttpRequest;
-import org.springframework.http.server.reactive.ReactorServerHttpResponse;
 import org.springframework.util.Assert;
 
 /**
@@ -40,7 +37,7 @@ public class ReactorHttpHandlerAdapter
 	}
 
 	@Override
-	public Publisher<Void> apply(HttpChannel<Buffer, Buffer> channel) {
+	public Mono<Void> apply(HttpChannel<Buffer, Buffer> channel) {
 		ReactorServerHttpRequest adaptedRequest = new ReactorServerHttpRequest(channel);
 		ReactorServerHttpResponse adaptedResponse = new ReactorServerHttpResponse(channel);
 		return this.httpHandler.handle(adaptedRequest, adaptedResponse);

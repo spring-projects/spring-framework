@@ -21,11 +21,10 @@ import java.util.Random;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import reactor.Mono;
 import reactor.io.buffer.Buffer;
-import reactor.rx.Streams;
 
 import static org.junit.Assert.assertEquals;
 
@@ -41,7 +40,7 @@ public class RandomHandler implements HttpHandler {
 	private final Random rnd = new Random();
 
 	@Override
-	public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
+	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 
 		request.getBody().subscribe(new Subscriber<ByteBuffer>() {
 			private Subscription s;
@@ -73,7 +72,7 @@ public class RandomHandler implements HttpHandler {
 		});
 
 		response.getHeaders().setContentLength(RESPONSE_SIZE);
-		return response.setBody(Streams.just(ByteBuffer.wrap(randomBytes())));
+		return response.setBody(Mono.just(ByteBuffer.wrap(randomBytes())));
 	}
 
 	private byte[] randomBytes() {

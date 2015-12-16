@@ -18,7 +18,8 @@ package org.springframework.http.server.reactive;
 import java.nio.ByteBuffer;
 
 import org.reactivestreams.Publisher;
-import reactor.Publishers;
+import reactor.Flux;
+import reactor.Mono;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -50,9 +51,9 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public Publisher<Void> setBody(Publisher<ByteBuffer> body) {
+	public Mono<Void> setBody(Publisher<ByteBuffer> body) {
 		this.body = body;
-		return Publishers.concatMap(body, b -> Publishers.empty());
+		return Flux.from(body).after();
 	}
 
 	public Publisher<ByteBuffer> getBody() {

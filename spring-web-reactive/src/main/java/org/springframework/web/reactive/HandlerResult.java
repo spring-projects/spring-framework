@@ -17,10 +17,8 @@
 package org.springframework.web.reactive;
 
 import java.util.function.Function;
-import java.util.logging.Handler;
 
-import org.reactivestreams.Publisher;
-import reactor.Publishers;
+import reactor.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.util.Assert;
@@ -40,7 +38,7 @@ public class HandlerResult {
 
 	private final Throwable error;
 
-	private Function<Throwable, Publisher<HandlerResult>> exceptionMapper;
+	private Function<Throwable, Mono<HandlerResult>> exceptionMapper;
 
 
 	public HandlerResult(Object handler, Object result, ResolvableType resultType) {
@@ -95,12 +93,12 @@ public class HandlerResult {
 	 * that results in an error.
 	 * @param function the exception resolving function
 	 */
-	public HandlerResult setExceptionMapper(Function<Throwable, Publisher<HandlerResult>> function) {
+	public HandlerResult setExceptionMapper(Function<Throwable, Mono<HandlerResult>> function) {
 		this.exceptionMapper = function;
 		return this;
 	}
 
-	public Function<Throwable, Publisher<HandlerResult>> getExceptionMapper() {
+	public Function<Throwable, Mono<HandlerResult>> getExceptionMapper() {
 		return this.exceptionMapper;
 	}
 

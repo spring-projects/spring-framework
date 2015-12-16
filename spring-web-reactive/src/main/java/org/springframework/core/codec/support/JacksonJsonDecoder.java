@@ -23,7 +23,7 @@ import java.nio.charset.StandardCharsets;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import org.reactivestreams.Publisher;
-import reactor.Publishers;
+import reactor.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
@@ -62,16 +62,17 @@ public class JacksonJsonDecoder extends AbstractDecoder<Object> {
 
 
 	@Override
-	public Publisher<Object> decode(Publisher<ByteBuffer> inputStream, ResolvableType type,
+	public Flux<Object> decode(Publisher<ByteBuffer> inputStream, ResolvableType type,
 			MimeType mimeType, Object... hints) {
 
 		ObjectReader reader = this.mapper.readerFor(type.getRawClass());
 
+		Flux<ByteBuffer> stream = Flux.from(inputStream);
 		if (this.preProcessor != null) {
-			inputStream = this.preProcessor.decode(inputStream, type, mimeType, hints);
+			stream = this.preProcessor.decode(inputStream, type, mimeType, hints);
 		}
 
-		return Publishers.map(inputStream, content -> {
+		return stream.map(content -> {
 			try {
 				return reader.readValue(new ByteBufferInputStream(content));
 			}

@@ -21,7 +21,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.reactivestreams.Publisher;
-import reactor.Publishers;
+import reactor.Flux;
 import reactor.io.buffer.Buffer;
 
 import org.springframework.core.ResolvableType;
@@ -48,7 +48,7 @@ public class StringDecoder extends AbstractDecoder<String> {
 	}
 
 	@Override
-	public Publisher<String> decode(Publisher<ByteBuffer> inputStream, ResolvableType type,
+	public Flux<String> decode(Publisher<ByteBuffer> inputStream, ResolvableType type,
 			MimeType mimeType, Object... hints) {
 
 		Charset charset;
@@ -58,7 +58,7 @@ public class StringDecoder extends AbstractDecoder<String> {
 		else {
 			 charset = DEFAULT_CHARSET;
 		}
-		return Publishers.map(inputStream, content -> new String(new Buffer(content).asBytes(), charset));
+		return Flux.from(inputStream).map(content -> new String(new Buffer(content).asBytes(), charset));
 	}
 
 }

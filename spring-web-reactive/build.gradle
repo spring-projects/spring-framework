@@ -20,9 +20,9 @@ group = 'org.springframework.reactive'
 
 repositories {
 	mavenCentral()
-	mavenLocal()
 	maven { url 'https://oss.jfrog.org/libs-snapshot' }  // RxNetty 0.5.x snapshots
 	maven { url 'http://repo.spring.io/snapshot' }  // Reactor snapshot
+	mavenLocal()
 }
 
 configurations.all {
@@ -32,7 +32,7 @@ configurations.all {
 
 ext {
 	springVersion = '4.2.3.RELEASE'
-	reactorVersion = '2.1.0.BUILD-SNAPSHOT'
+	reactorVersion = '2.5.0.BUILD-SNAPSHOT'
 	tomcatVersion = '8.0.28'
 	jettyVersion = '9.3.5.v20151012'
 }

@@ -16,15 +16,11 @@
 package org.springframework.http.server.reactive;
 
 
-import java.util.concurrent.TimeUnit;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
-import org.reactivestreams.Publisher;
-import reactor.Publishers;
-import reactor.rx.Streams;
+import reactor.Mono;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -57,8 +53,7 @@ public class FilterChainHttpHandlerTests {
 		TestFilter filter3 = new TestFilter();
 		FilterChainHttpHandler filterHandler = new FilterChainHttpHandler(handler, filter1, filter2, filter3);
 
-		Publisher<Void> voidPublisher = filterHandler.handle(this.request, this.response);
-		Streams.wrap(voidPublisher).toList().await(10, TimeUnit.SECONDS);
+		filterHandler.handle(this.request, this.response).get();
 
 		assertTrue(filter1.invoked());
 		assertTrue(filter2.invoked());
@@ -71,8 +66,7 @@ public class FilterChainHttpHandlerTests {
 		StubHandler handler = new StubHandler();
 		FilterChainHttpHandler filterHandler = new FilterChainHttpHandler(handler);
 
-		Publisher<Void> voidPublisher = filterHandler.handle(this.request, this.response);
-		Streams.wrap(voidPublisher).toList().await(10, TimeUnit.SECONDS);
+		filterHandler.handle(this.request, this.response).get();
 
 		assertTrue(handler.invoked());
 	}
@@ -85,8 +79,7 @@ public class FilterChainHttpHandlerTests {
 		TestFilter filter3 = new TestFilter();
 		FilterChainHttpHandler filterHandler = new FilterChainHttpHandler(handler, filter1, filter2, filter3);
 
-		Publisher<Void> voidPublisher = filterHandler.handle(this.request, this.response);
-		Streams.wrap(voidPublisher).toList().await(10, TimeUnit.SECONDS);
+		filterHandler.handle(this.request, this.response).get();
 
 		assertTrue(filter1.invoked());
 		assertTrue(filter2.invoked());
@@ -100,8 +93,7 @@ public class FilterChainHttpHandlerTests {
 		AsyncFilter filter = new AsyncFilter();
 		FilterChainHttpHandler filterHandler = new FilterChainHttpHandler(handler, filter);
 
-		Publisher<Void> voidPublisher = filterHandler.handle(this.request, this.response);
-		Streams.wrap(voidPublisher).toList().await(10, TimeUnit.SECONDS);
+		filterHandler.handle(this.request, this.response).get();
 
 		assertTrue(filter.invoked());
 		assertTrue(handler.invoked());
@@ -119,14 +111,14 @@ public class FilterChainHttpHandlerTests {
 		}
 
 		@Override
-		public Publisher<Void> filter(ServerHttpRequest req, ServerHttpResponse res,
+		public Mono<Void> filter(ServerHttpRequest req, ServerHttpResponse res,
 				HttpFilterChain chain) {
 
 			this.invoked = true;
 			return doFilter(req, res, chain);
 		}
 
-		public Publisher<Void> doFilter(ServerHttpRequest req, ServerHttpResponse res,
+		public Mono<Void> doFilter(ServerHttpRequest req, ServerHttpResponse res,
 				HttpFilterChain chain) {
 
 			return chain.filter(req, res);
@@ -136,25 +128,25 @@ public class FilterChainHttpHandlerTests {
 	private static class ShortcircuitingFilter extends TestFilter {
 
 		@Override
-		public Publisher<Void> doFilter(ServerHttpRequest req, ServerHttpResponse res,
+		public Mono<Void> doFilter(ServerHttpRequest req, ServerHttpResponse res,
 				HttpFilterChain chain) {
 
-			return Publishers.empty();
+			return Mono.empty();
 		}
 	}
 
 	private static class AsyncFilter extends TestFilter {
 
 		@Override
-		public Publisher<Void> doFilter(ServerHttpRequest req, ServerHttpResponse res, HttpFilterChain chain) {
-			return Publishers.concatMap(doAsyncWork(), asyncResult -> {
+		public Mono<Void> doFilter(ServerHttpRequest req, ServerHttpResponse res, HttpFilterChain chain) {
+			return doAsyncWork().then(asyncResult -> {
 				logger.debug("Async result: " + asyncResult);
 				return chain.filter(req, res);
 			});
 		}
 
-		private Publisher<String> doAsyncWork() {
-			return Publishers.just("123");
+		private Mono<String> doAsyncWork() {
+			return Mono.just("123");
 		}
 	}
 
@@ -168,10 +160,10 @@ public class FilterChainHttpHandlerTests {
 		}
 
 		@Override
-		public Publisher<Void> handle(ServerHttpRequest req, ServerHttpResponse res) {
+		public Mono<Void> handle(ServerHttpRequest req, ServerHttpResponse res) {
 			logger.trace("StubHandler invoked.");
 			this.invoked = true;
-			return Publishers.empty();
+			return Mono.empty();
 		}
 	}
 

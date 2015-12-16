@@ -18,8 +18,7 @@ package org.springframework.http.server.reactive;
 import java.util.Arrays;
 import java.util.List;
 
-import org.reactivestreams.Publisher;
-import reactor.Publishers;
+import reactor.Mono;
 
 import org.springframework.util.Assert;
 
@@ -44,13 +43,13 @@ public class ErrorHandlingHttpHandler extends HttpHandlerDecorator {
 
 
 	@Override
-	public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-		Publisher<Void> publisher;
+	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
+		Mono<Void> publisher;
 		try {
 			publisher = getDelegate().handle(request, response);
 		}
 		catch (Throwable ex) {
-			publisher = Publishers.error(ex);
+			publisher = Mono.error(ex);
 		}
 		for (HttpExceptionHandler handler : this.exceptionHandlers) {
 			publisher = applyExceptionHandler(publisher, handler, request, response);
@@ -58,12 +57,10 @@ public class ErrorHandlingHttpHandler extends HttpHandlerDecorator {
 		return publisher;
 	}
 
-	private static Publisher<Void> applyExceptionHandler(Publisher<Void> publisher,
+	private static Mono<Void> applyExceptionHandler(Mono<Void> publisher,
 			HttpExceptionHandler handler, ServerHttpRequest request, ServerHttpResponse response) {
 
-		return Publishers.onErrorResumeNext(publisher, ex -> {
-			return handler.handle(request, response, ex);
-		});
+		return publisher.flux().onErrorResumeWith(ex -> handler.handle(request, response, ex)).after();
 	}
 
 }

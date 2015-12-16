@@ -15,8 +15,7 @@
  */
 package org.springframework.web.reactive;
 
-import org.reactivestreams.Publisher;
-import reactor.Publishers;
+import reactor.Mono;
 
 import org.springframework.http.server.reactive.HttpExceptionHandler;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -32,12 +31,12 @@ public class ResponseStatusExceptionHandler implements HttpExceptionHandler {
 
 
 	@Override
-	public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response, Throwable ex) {
+	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response, Throwable ex) {
 		if (ex instanceof ResponseStatusException) {
 			response.setStatusCode(((ResponseStatusException) ex).getHttpStatus());
-			return Publishers.empty();
+			return Mono.empty();
 		}
-		return Publishers.error(ex);
+		return Mono.error(ex);
 	}
 
 }

@@ -27,8 +27,8 @@ import java.util.TreeSet;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.reactivestreams.Publisher;
-import reactor.core.publisher.PublisherFactory;
+import reactor.Flux;
+import reactor.Mono;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
@@ -94,8 +94,8 @@ public class RequestMappingHandlerMapping implements HandlerMapping,
 	}
 
 	@Override
-	public Publisher<Object> getHandler(ServerHttpRequest request) {
-		return PublisherFactory.create(subscriber -> {
+	public Mono<Object> getHandler(ServerHttpRequest request) {
+		return Flux.create(subscriber -> {
 			for (Map.Entry<RequestMappingInfo, HandlerMethod> entry : this.methodMap.entrySet()) {
 				RequestMappingInfo info = entry.getKey();
 				if (info.matchesRequest(request)) {
@@ -109,7 +109,7 @@ public class RequestMappingHandlerMapping implements HandlerMapping,
 				}
 			}
 			subscriber.onComplete();
-		});
+		}).next();
 	}
 
 

@@ -27,14 +27,12 @@ import org.junit.Test;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import reactor.Publishers;
-import reactor.core.publisher.PublisherFactory;
+import reactor.Flux;
 import reactor.core.subscriber.SubscriberBarrier;
 import reactor.rx.Streams;
 import reactor.rx.stream.Signal;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
@@ -58,8 +56,8 @@ public class WriteWithOperatorTests {
 	@Test
 	public void errorBeforeFirstItem() throws Exception {
 		IllegalStateException error = new IllegalStateException("boo");
-		Publisher<Void> completion = Publishers.lift(Publishers.error(error), this.operator);
-		List<Signal<Void>> signals = Streams.wrap(completion).materialize().toList().await(5, TimeUnit.SECONDS);
+		Publisher<Void> completion = Flux.<String>error(error).lift(this.operator);
+		List<Signal<Void>> signals = Streams.from(completion).materialize().toList().get();
 
 		assertEquals(1, signals.size());
 		assertSame("Unexpected signal: " + signals.get(0), error, signals.get(0).getThrowable());
@@ -67,8 +65,8 @@ public class WriteWithOperatorTests {
 
 	@Test
 	public void completionBeforeFirstItem() throws Exception {
-		Publisher<Void> completion = Publishers.lift(Publishers.empty(), this.operator);
-		List<Signal<Void>> signals = Streams.wrap(completion).materialize().toList().await(5, TimeUnit.SECONDS);
+		Publisher<Void> completion = Flux.<String>empty().lift(this.operator);
+		List<Signal<Void>> signals = Streams.from(completion).materialize().toList().get();
 
 		assertEquals(1, signals.size());
 		assertTrue("Unexpected signal: " + signals.get(0), signals.get(0).isOnComplete());
@@ -79,8 +77,8 @@ public class WriteWithOperatorTests {
 
 	@Test
 	public void writeOneItem() throws Exception {
-		Publisher<Void> completion = Publishers.lift(Publishers.just("one"), this.operator);
-		List<Signal<Void>> signals = Streams.wrap(completion).materialize().toList().await(5, TimeUnit.SECONDS);
+		Publisher<Void> completion = Flux.just("one").lift(this.operator);
+		List<Signal<Void>> signals = Streams.from(completion).materialize().toList().get();
 
 		assertEquals(1, signals.size());
 		assertTrue("Unexpected signal: " + signals.get(0), signals.get(0).isOnComplete());
@@ -94,8 +92,8 @@ public class WriteWithOperatorTests {
 	@Test
 	public void writeMultipleItems() throws Exception {
 		List<String> items = Arrays.asList("one", "two", "three");
-		Publisher<Void> completion = Publishers.lift(Publishers.from(items), this.operator);
-		List<Signal<Void>> signals = Streams.wrap(completion).materialize().consumeAsList().await(5, TimeUnit.SECONDS);
+		Publisher<Void> completion = Flux.fromIterable(items).lift(this.operator);
+		List<Signal<Void>> signals = Streams.from(completion).materialize().toList().get();
 
 		assertEquals(1, signals.size());
 		assertTrue("Unexpected signal: " + signals.get(0), signals.get(0).isOnComplete());
@@ -110,15 +108,15 @@ public class WriteWithOperatorTests {
 	@Test
 	public void errorAfterMultipleItems() throws Exception {
 		IllegalStateException error = new IllegalStateException("boo");
-		Publisher<String> publisher = PublisherFactory.create(subscriber -> {
+		Flux<String> publisher = Flux.create(subscriber -> {
 			int i = subscriber.context().incrementAndGet();
 			subscriber.onNext(String.valueOf(i));
 			if (i == 3) {
 				subscriber.onError(error);
 			}
 		}, subscriber -> new AtomicInteger());
-		Publisher<Void> completion = Publishers.lift(publisher, this.operator);
-		List<Signal<Void>> signals = Streams.wrap(completion).materialize().toList().await(5, TimeUnit.SECONDS);
+		Publisher<Void> completion = publisher.lift(this.operator);
+		List<Signal<Void>> signals = Streams.from(completion).materialize().toList().get();
 
 		assertEquals(1, signals.size());
 		assertSame("Unexpected signal: " + signals.get(0), error, signals.get(0).getThrowable());

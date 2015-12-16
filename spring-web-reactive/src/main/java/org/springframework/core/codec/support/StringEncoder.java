@@ -21,7 +21,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.reactivestreams.Publisher;
-import reactor.Publishers;
+import reactor.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.util.MimeType;
@@ -49,7 +49,7 @@ public class StringEncoder extends AbstractEncoder<String> {
 	}
 
 	@Override
-	public Publisher<ByteBuffer> encode(Publisher<? extends String> elementStream,
+	public Flux<ByteBuffer> encode(Publisher<? extends String> elementStream,
 			ResolvableType type, MimeType mimeType, Object... hints) {
 
 		Charset charset;
@@ -59,7 +59,7 @@ public class StringEncoder extends AbstractEncoder<String> {
 		else {
 			 charset = DEFAULT_CHARSET;
 		}
-		return Publishers.map(elementStream, s -> ByteBuffer.wrap(s.getBytes(charset)));
+		return Flux.from(elementStream).map(s -> ByteBuffer.wrap(s.getBytes(charset)));
 	}
 
 }

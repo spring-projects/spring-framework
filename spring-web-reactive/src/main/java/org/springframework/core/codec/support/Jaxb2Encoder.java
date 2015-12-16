@@ -26,7 +26,7 @@ import javax.xml.bind.MarshalException;
 import javax.xml.bind.Marshaller;
 
 import org.reactivestreams.Publisher;
-import reactor.Publishers;
+import reactor.Flux;
 import reactor.io.buffer.Buffer;
 
 import org.springframework.core.ResolvableType;
@@ -54,10 +54,10 @@ public class Jaxb2Encoder extends AbstractEncoder<Object> {
 
 
 	@Override
-	public Publisher<ByteBuffer> encode(Publisher<? extends Object> messageStream, ResolvableType type,
+	public Flux<ByteBuffer> encode(Publisher<? extends Object> messageStream, ResolvableType type,
 			MimeType mimeType, Object... hints) {
 
-		return Publishers.map(messageStream, value -> {
+		return Flux.from(messageStream).map(value -> {
 			try {
 				Buffer buffer = new Buffer();
 				BufferOutputStream outputStream = new BufferOutputStream(buffer);

@@ -49,8 +49,8 @@ public class StringDecoderTests {
 	@Test
 	public void decode() throws InterruptedException {
 		Stream<ByteBuffer> source = Streams.just(Buffer.wrap("foo").byteBuffer(), Buffer.wrap("bar").byteBuffer());
-		List<String> results = Streams.wrap(decoder.decode(source,
-				ResolvableType.forClassWithGenerics(Publisher.class, String.class), null)).toList().await();
+		List<String> results = Streams.from(decoder.decode(source,
+				ResolvableType.forClassWithGenerics(Publisher.class, String.class), null)).toList().get();
 		assertEquals(2, results.size());
 		assertEquals("foo", results.get(0));
 		assertEquals("bar", results.get(1));

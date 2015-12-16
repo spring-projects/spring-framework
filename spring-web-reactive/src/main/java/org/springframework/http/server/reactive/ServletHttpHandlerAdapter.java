@@ -36,6 +36,7 @@ import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import reactor.Mono;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
@@ -73,7 +74,7 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 
 		ResponseBodySubscriber responseBodySubscriber = new ResponseBodySubscriber(synchronizer);
 		ServletServerHttpResponse response = new ServletServerHttpResponse(servletResponse,
-				publisher -> subscriber -> publisher.subscribe(responseBodySubscriber));
+				publisher -> Mono.from(subscriber -> publisher.subscribe(responseBodySubscriber)));
 		servletResponse.getOutputStream().setWriteListener(responseBodySubscriber);
 
 		HandlerResultSubscriber resultSubscriber = new HandlerResultSubscriber(synchronizer, response);

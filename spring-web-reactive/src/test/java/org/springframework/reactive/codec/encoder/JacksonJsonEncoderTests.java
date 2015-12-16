@@ -46,11 +46,11 @@ public class JacksonJsonEncoderTests {
 	@Test
 	public void write() throws InterruptedException {
 		Stream<Pojo> source = Streams.just(new Pojo("foofoo", "barbar"), new Pojo("foofoofoo", "barbarbar"));
-		List<String> results = Streams.wrap(encoder.encode(source, null, null)).map(chunk -> {
+		List<String> results = Streams.from(encoder.encode(source, null, null)).map(chunk -> {
 			byte[] b = new byte[chunk.remaining()];
 			chunk.get(b);
 			return new String(b, StandardCharsets.UTF_8);
-		}).toList().await();
+		}).toList().get();
 		assertEquals(2, results.size());
 		assertEquals("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}", results.get(0));
 		assertEquals("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}", results.get(1));

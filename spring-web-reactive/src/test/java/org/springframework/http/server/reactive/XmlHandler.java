@@ -22,7 +22,7 @@ import javax.xml.bind.Unmarshaller;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.reactivestreams.Publisher;
+import reactor.Mono;
 import reactor.io.buffer.Buffer;
 import reactor.rx.Streams;
 
@@ -40,7 +40,7 @@ public class XmlHandler implements HttpHandler {
 	private static final Log logger = LogFactory.getLog(XmlHandler.class);
 
 	@Override
-	public Publisher<Void> handle(ServerHttpRequest request,
+	public Mono<Void> handle(ServerHttpRequest request,
 			ServerHttpResponse response) {
 		try {
 			JAXBContext jaxbContext = JAXBContext.newInstance(XmlHandlerIntegrationTests.Person.class);

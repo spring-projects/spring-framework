@@ -22,8 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
-import org.reactivestreams.Publisher;
-import reactor.Publishers;
+import reactor.Mono;
 import reactor.io.buffer.Buffer;
 import reactor.rx.Streams;
 
@@ -136,7 +135,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 	private static class FooHandler implements HttpHandler {
 
 		@Override
-		public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
+		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 			return response.setBody(Streams.just(Buffer.wrap("foo").byteBuffer()));
 		}
 	}
@@ -144,7 +143,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 	private static class BarHandler implements HttpHandler {
 
 		@Override
-		public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
+		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 			return response.setBody(Streams.just(Buffer.wrap("bar").byteBuffer()));
 		}
 	}
@@ -152,9 +151,9 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 	private static class HeaderSettingHandler implements HttpHandler {
 
 		@Override
-		public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
+		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 			response.getHeaders().add("foo", "bar");
-			return Publishers.empty();
+			return Mono.empty();
 		}
 	}
 

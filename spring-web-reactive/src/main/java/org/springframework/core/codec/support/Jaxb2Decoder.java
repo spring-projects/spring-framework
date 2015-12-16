@@ -34,7 +34,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
-import reactor.Publishers;
+import reactor.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
@@ -60,7 +60,7 @@ public class Jaxb2Decoder extends AbstractDecoder<Object> {
 
 
 	@Override
-	public Publisher<Object> decode(Publisher<ByteBuffer> inputStream, ResolvableType type,
+	public Flux<Object> decode(Publisher<ByteBuffer> inputStream, ResolvableType type,
 			MimeType mimeType, Object... hints) {
 
 		Class<?> outputClass = type.getRawClass();
@@ -68,19 +68,19 @@ public class Jaxb2Decoder extends AbstractDecoder<Object> {
 			Source source = processSource(new StreamSource(new ByteBufferPublisherInputStream(inputStream)));
 			Unmarshaller unmarshaller = createUnmarshaller(outputClass);
 			if (outputClass.isAnnotationPresent(XmlRootElement.class)) {
-				return Publishers.just(unmarshaller.unmarshal(source));
+				return Flux.just(unmarshaller.unmarshal(source));
 			}
 			else {
 				JAXBElement<?> jaxbElement = unmarshaller.unmarshal(source, outputClass);
-				return Publishers.just(jaxbElement.getValue());
+				return Flux.just(jaxbElement.getValue());
 			}
 		}
 		catch (UnmarshalException ex) {
-			return Publishers.error(
+			return Flux.error(
 			  new CodecException("Could not unmarshal to [" + outputClass + "]: " + ex.getMessage(), ex));
 		}
 		catch (JAXBException ex) {
-			return Publishers.error(new CodecException("Could not instantiate JAXBContext: " +
+			return Flux.error(new CodecException("Could not instantiate JAXBContext: " +
 					ex.getMessage(), ex));
 		}
 	}

@@ -23,10 +23,8 @@ import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import reactor.Publishers;
-import reactor.fn.BiConsumer;
+import reactor.Flux;
+import reactor.Mono;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
@@ -114,42 +112,25 @@ public class DispatcherHandler implements HttpHandler, ApplicationContextAware {
 
 
 	@Override
-	public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
+	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Processing " + request.getMethod() + " request for [" + request.getURI() + "]");
 		}
-
-		Publisher<HandlerMapping> mappings = Publishers.from(this.handlerMappings);
-		Publisher<Object> handlerPublisher = Publishers.concatMap(mappings, m -> m.getHandler(request));
-		handlerPublisher = first(handlerPublisher);
-
-		Publisher<HandlerResult> resultPublisher = Publishers.concatMap(handlerPublisher, handler -> {
-			HandlerAdapter handlerAdapter = getHandlerAdapter(handler);
-			return handlerAdapter.handle(request, response, handler);
-		});
-
-		Publisher<Void> completionPublisher = Publishers.concatMap(resultPublisher, result -> {
-			Publisher<Void> publisher;
-			if (result.hasError()) {
-				publisher = Publishers.error(result.getError());
-			}
-			else {
-				HandlerResultHandler handler = getResultHandler(result);
-				publisher = handler.handleResult(request, response, result);
-			}
-			if (result.hasExceptionMapper()) {
-				return Publishers.onErrorResumeNext(publisher, ex -> {
-					return Publishers.concatMap(result.getExceptionMapper().apply(ex),
-							errorResult -> {
-								HandlerResultHandler handler = getResultHandler(errorResult);
-								return handler.handleResult(request, response, errorResult);
-							});
-				});
-			}
-			return publisher;
-		});
-
-		return mapError(completionPublisher, this.errorMapper);
+		return Flux.fromIterable(this.handlerMappings)
+				.concatMap(m -> m.getHandler(request))
+				.next()
+				.then(handler -> getHandlerAdapter(handler).handle(request, response, handler))
+				.then(result -> {
+					Mono<Void> publisher = (result.hasError() ? Mono.error(result.getError()) :
+							getResultHandler(result).handleResult(request, response, result));
+					if (result.hasExceptionMapper()) {
+						return publisher
+								.otherwise(ex -> result.getExceptionMapper().apply(ex)
+								.then(errorResult -> getResultHandler(errorResult).handleResult(request, response, errorResult)));
+					}
+					return publisher;
+				})
+				.otherwise(ex -> Mono.error(this.errorMapper.apply(ex)));
 	}
 
 	protected HandlerAdapter getHandlerAdapter(Object handler) {
@@ -171,22 +152,6 @@ public class DispatcherHandler implements HttpHandler, ApplicationContextAware {
 	}
 
 
-	private static <E> Publisher<E> first(Publisher<E> source) {
-		return Publishers.lift(source, (e, subscriber) -> {
-			subscriber.onNext(e);
-			subscriber.onComplete();
-		});
-	}
-
-	private static <E> Publisher<E> mapError(Publisher<E> source, Function<Throwable, Throwable> function) {
-		return Publishers.lift(source, null, new BiConsumer<Throwable, Subscriber<? super E>>() {
-			@Override
-			public void accept(Throwable throwable, Subscriber<? super E> subscriber) {
-				subscriber.onError(function.apply(throwable));
-			}
-		}, null);
-	}
-
 	private static class NotFoundHandlerMapping implements HandlerMapping {
 
 		@SuppressWarnings("ThrowableInstanceNeverThrown")
@@ -194,8 +159,8 @@ public class DispatcherHandler implements HttpHandler, ApplicationContextAware {
 
 
 		@Override
-		public Publisher<Object> getHandler(ServerHttpRequest request) {
-			return Publishers.error(HANDLER_NOT_FOUND_EXCEPTION);
+		public Mono<Object> getHandler(ServerHttpRequest request) {
+			return Mono.error(HANDLER_NOT_FOUND_EXCEPTION);
 		}
 	}
 

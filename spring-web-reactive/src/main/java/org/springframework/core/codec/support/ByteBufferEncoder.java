@@ -19,6 +19,7 @@ package org.springframework.core.codec.support;
 import java.nio.ByteBuffer;
 
 import org.reactivestreams.Publisher;
+import reactor.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.util.MimeType;
@@ -42,11 +43,11 @@ public class ByteBufferEncoder extends AbstractEncoder<ByteBuffer> {
 	}
 
 	@Override
-	public Publisher<ByteBuffer> encode(Publisher<? extends ByteBuffer> inputStream, ResolvableType type,
+	public Flux<ByteBuffer> encode(Publisher<? extends ByteBuffer> inputStream, ResolvableType type,
 			MimeType mimeType, Object... hints) {
 
 		//noinspection unchecked
-		return (Publisher<ByteBuffer>) inputStream;
+		return Flux.from((Publisher<ByteBuffer>)inputStream);
 	}
 
 }

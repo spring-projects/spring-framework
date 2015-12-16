@@ -16,11 +16,7 @@
 
 package org.springframework.http.server.reactive;
 
-import org.reactivestreams.Publisher;
-
-import org.springframework.http.server.reactive.HttpHandler;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
+import reactor.Mono;
 
 /**
  * @author Arjen Poutsma
@@ -28,7 +24,7 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 public class EchoHandler implements HttpHandler {
 
 	@Override
-	public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
+	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 		return response.setBody(request.getBody());
 	}
 }

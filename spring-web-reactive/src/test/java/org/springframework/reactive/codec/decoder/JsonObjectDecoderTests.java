@@ -37,11 +37,11 @@ public class JsonObjectDecoderTests {
 	public void decodeSingleChunkToJsonObject() throws InterruptedException {
 		JsonObjectDecoder decoder = new JsonObjectDecoder();
 		Stream<ByteBuffer> source = Streams.just(Buffer.wrap("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}").byteBuffer());
-		List<String> results = Streams.wrap(decoder.decode(source, null, null)).map(chunk -> {
+		List<String> results = Streams.from(decoder.decode(source, null, null)).map(chunk -> {
 					byte[] b = new byte[chunk.remaining()];
 					chunk.get(b);
 					return new String(b, StandardCharsets.UTF_8);
-				}).toList().await();
+				}).toList().get();
 		assertEquals(1, results.size());
 		assertEquals("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}", results.get(0));
 	}
@@ -50,11 +50,11 @@ public class JsonObjectDecoderTests {
 	public void decodeMultipleChunksToJsonObject() throws InterruptedException {
 		JsonObjectDecoder decoder = new JsonObjectDecoder();
 		Stream<ByteBuffer> source = Streams.just(Buffer.wrap("{\"foo\": \"foofoo\"").byteBuffer(), Buffer.wrap(", \"bar\": \"barbar\"}").byteBuffer());
-		List<String> results = Streams.wrap(decoder.decode(source, null, null)).map(chunk -> {
+		List<String> results = Streams.from(decoder.decode(source, null, null)).map(chunk -> {
 					byte[] b = new byte[chunk.remaining()];
 					chunk.get(b);
 					return new String(b, StandardCharsets.UTF_8);
-				}).toList().await();
+				}).toList().get();
 		assertEquals(1, results.size());
 		assertEquals("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}", results.get(0));
 	}
@@ -63,11 +63,11 @@ public class JsonObjectDecoderTests {
 	public void decodeSingleChunkToArray() throws InterruptedException {
 		JsonObjectDecoder decoder = new JsonObjectDecoder();
 		Stream<ByteBuffer> source = Streams.just(Buffer.wrap("[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]").byteBuffer());
-		List<String> results = Streams.wrap(decoder.decode(source, null, null)).map(chunk -> {
+		List<String> results = Streams.from(decoder.decode(source, null, null)).map(chunk -> {
 					byte[] b = new byte[chunk.remaining()];
 					chunk.get(b);
 					return new String(b, StandardCharsets.UTF_8);
-				}).toList().await();
+				}).toList().get();
 		assertEquals(2, results.size());
 		assertEquals("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}", results.get(0));
 		assertEquals("{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}", results.get(1));
@@ -77,11 +77,11 @@ public class JsonObjectDecoderTests {
 	public void decodeMultipleChunksToArray() throws InterruptedException {
 		JsonObjectDecoder decoder = new JsonObjectDecoder();
 		Stream<ByteBuffer> source = Streams.just(Buffer.wrap("[{\"foo\": \"foofoo\", \"bar\"").byteBuffer(), Buffer.wrap(": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]").byteBuffer());
-		List<String> results = Streams.wrap(decoder.decode(source, null, null)).map(chunk -> {
+		List<String> results = Streams.from(decoder.decode(source, null, null)).map(chunk -> {
 					byte[] b = new byte[chunk.remaining()];
 					chunk.get(b);
 					return new String(b, StandardCharsets.UTF_8);
-				}).toList().await();
+				}).toList().get();
 		assertEquals(2, results.size());
 		assertEquals("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}", results.get(0));
 		assertEquals("{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}", results.get(1));

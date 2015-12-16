@@ -19,6 +19,7 @@ package org.springframework.http;
 import java.nio.ByteBuffer;
 
 import org.reactivestreams.Publisher;
+import reactor.Mono;
 
 /**
  * A "reactive" HTTP output message that accepts output as a {@link Publisher}.
@@ -37,6 +38,6 @@ public interface ReactiveHttpOutputMessage extends HttpMessage {
 	 * @param body the body content publisher
 	 * @return a publisher that indicates completion or error.
 	 */
-	Publisher<Void> setBody(Publisher<ByteBuffer> body);
+	Mono<Void> setBody(Publisher<ByteBuffer> body);
 
 }

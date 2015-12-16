@@ -25,6 +25,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.reactivestreams.Publisher;
+import reactor.Flux;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -46,14 +47,14 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 
 	private HttpHeaders headers;
 
-	private final Publisher<ByteBuffer> requestBodyPublisher;
+	private final Flux<ByteBuffer> requestBodyPublisher;
 
 
 	public ServletServerHttpRequest(HttpServletRequest request, Publisher<ByteBuffer> body) {
 		Assert.notNull(request, "'request' must not be null.");
 		Assert.notNull(body, "'body' must not be null.");
 		this.request = request;
-		this.requestBodyPublisher = body;
+		this.requestBodyPublisher = Flux.from(body);
 	}
 
 
@@ -126,7 +127,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	}
 
 	@Override
-	public Publisher<ByteBuffer> getBody() {
+	public Flux<ByteBuffer> getBody() {
 		return this.requestBodyPublisher;
 	}
 

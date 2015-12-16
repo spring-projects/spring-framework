@@ -19,7 +19,8 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 import org.reactivestreams.Publisher;
-import reactor.Publishers;
+import reactor.Flux;
+import reactor.Mono;
 import reactor.io.buffer.Buffer;
 import reactor.io.net.http.HttpChannel;
 import reactor.io.net.http.model.Status;
@@ -64,12 +65,12 @@ public class ReactorServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public Publisher<Void> setBody(Publisher<ByteBuffer> publisher) {
-		return Publishers.lift(publisher, new WriteWithOperator<>(this::setBodyInternal));
+	public Mono<Void> setBody(Publisher<ByteBuffer> publisher) {
+		return Flux.from(publisher).lift(new WriteWithOperator<>(this::setBodyInternal)).after();
 	}
 
-	protected Publisher<Void> setBodyInternal(Publisher<ByteBuffer> publisher) {
-		return getReactorChannel().writeWith(Publishers.map(publisher, Buffer::new));
+	protected Mono<Void> setBodyInternal(Publisher<ByteBuffer> publisher) {
+		return Mono.from(getReactorChannel().writeWith(Flux.from(publisher).map(Buffer::new)));
 	}
 
 

@@ -19,12 +19,11 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
-import reactor.Publishers;
+import reactor.Mono;
 import reactor.rx.Streams;
 import reactor.rx.stream.Signal;
 
@@ -154,7 +153,7 @@ public class DispatcherHandlerErrorTests {
 	public void notAcceptable() throws Exception {
 		this.request.setUri(new URI("/request-body"));
 		this.request.getHeaders().setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-		this.request.setBody(Publishers.just(ByteBuffer.wrap("body".getBytes("UTF-8"))));
+		this.request.setBody(Mono.just(ByteBuffer.wrap("body".getBytes("UTF-8"))));
 
 		Publisher<Void> publisher = this.dispatcherHandler.handle(this.request, this.response);
 		Throwable ex = awaitErrorSignal(publisher);
@@ -167,12 +166,14 @@ public class DispatcherHandlerErrorTests {
 	@Test
 	public void requestBodyError() throws Exception {
 		this.request.setUri(new URI("/request-body"));
-		this.request.setBody(Publishers.error(EXCEPTION));
+		this.request.setBody(Mono.error(EXCEPTION));
 
 		Publisher<Void> publisher = this.dispatcherHandler.handle(this.request, this.response);
 		Throwable ex = awaitErrorSignal(publisher);
 
+		ex.printStackTrace();
 		assertSame(EXCEPTION, ex);
+
 	}
 
 	@Test
@@ -183,7 +184,7 @@ public class DispatcherHandlerErrorTests {
 		HttpHandler httpHandler = new ErrorHandlingHttpHandler(this.dispatcherHandler, exceptionHandler);
 		Publisher<Void> publisher = httpHandler.handle(this.request, this.response);
 
-		Streams.wrap(publisher).toList().await(5, TimeUnit.SECONDS);
+		Streams.from(publisher).toList().get();
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatus());
 	}
 
@@ -196,13 +197,13 @@ public class DispatcherHandlerErrorTests {
 		httpHandler = new ErrorHandlingHttpHandler(httpHandler, new ServerError500ExceptionHandler());
 		Publisher<Void> publisher = httpHandler.handle(this.request, this.response);
 
-		Streams.wrap(publisher).toList().await(5, TimeUnit.SECONDS);
+		Streams.from(publisher).toList().get();
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatus());
 	}
 
 
 	private Throwable awaitErrorSignal(Publisher<?> publisher) throws Exception {
-		Signal<?> signal = Streams.wrap(publisher).materialize().toList().await(5, TimeUnit.SECONDS).get(0);
+		Signal<?> signal = Streams.from(publisher).materialize().toList().get().get(0);
 		assertEquals("Unexpected signal: " + signal, Signal.Type.ERROR, signal.getType());
 		return signal.getThrowable();
 	}
@@ -245,7 +246,7 @@ public class DispatcherHandlerErrorTests {
 		@RequestMapping("/error-signal")
 		@ResponseBody
 		public Publisher<String> errorSignal() {
-			return Publishers.error(EXCEPTION);
+			return Mono.error(EXCEPTION);
 		}
 
 		@RequestMapping("/raise-exception")
@@ -261,7 +262,7 @@ public class DispatcherHandlerErrorTests {
 		@RequestMapping("/request-body")
 		@ResponseBody
 		public Publisher<String> requestBody(@RequestBody Publisher<String> body) {
-			return Publishers.map(body, s -> "hello " + s);
+			return Mono.from(body).map(s -> "hello " + s);
 		}
 	}
 
@@ -271,16 +272,16 @@ public class DispatcherHandlerErrorTests {
 	private static class ServerError500ExceptionHandler implements HttpExceptionHandler {
 
 		@Override
-		public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response, Throwable ex) {
+		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response, Throwable ex) {
 			response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-			return Publishers.empty();
+			return Mono.empty();
 		}
 	}
 
 	private static class TestHttpFilter implements HttpFilter {
 
 		@Override
-		public Publisher<Void> filter(ServerHttpRequest req, ServerHttpResponse res, HttpFilterChain chain) {
+		public Mono<Void> filter(ServerHttpRequest req, ServerHttpResponse res, HttpFilterChain chain) {
 			return chain.filter(req, res);
 		}
 	}

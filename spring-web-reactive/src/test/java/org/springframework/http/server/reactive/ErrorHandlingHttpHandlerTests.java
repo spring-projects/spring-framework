@@ -17,12 +17,11 @@ package org.springframework.http.server.reactive;
 
 
 import java.net.URI;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
-import reactor.Publishers;
+import reactor.Mono;
 import reactor.rx.Streams;
 import reactor.rx.stream.Signal;
 
@@ -56,8 +55,7 @@ public class ErrorHandlingHttpHandlerTests {
 		HttpHandler targetHandler = new TestHttpHandler(new IllegalStateException("boo"));
 		HttpHandler handler = new ErrorHandlingHttpHandler(targetHandler, exceptionHandler);
 
-		Publisher<Void> publisher = handler.handle(this.request, this.response);
-		Streams.wrap(publisher).toList().await(5, TimeUnit.SECONDS);
+		handler.handle(this.request, this.response).get();
 
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatus());
 	}
@@ -73,8 +71,7 @@ public class ErrorHandlingHttpHandlerTests {
 		HttpHandler targetHandler = new TestHttpHandler(new IllegalStateException("boo"));
 		HttpHandler httpHandler = new ErrorHandlingHttpHandler(targetHandler, exceptionHandlers);
 
-		Publisher<Void> publisher = httpHandler.handle(this.request, this.response);
-		Streams.wrap(publisher).toList().await(5, TimeUnit.SECONDS);
+		httpHandler.handle(this.request, this.response).get();
 
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatus());
 	}
@@ -98,15 +95,14 @@ public class ErrorHandlingHttpHandlerTests {
 		HttpHandler targetHandler = new TestHttpHandler(new IllegalStateException("boo"), true);
 		HttpHandler handler = new ErrorHandlingHttpHandler(targetHandler, exceptionHandler);
 
-		Publisher<Void> publisher = handler.handle(this.request, this.response);
-		Streams.wrap(publisher).toList().await(5, TimeUnit.SECONDS);
+		handler.handle(this.request, this.response).get();
 
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatus());
 	}
 
 
 	private Throwable awaitErrorSignal(Publisher<?> publisher) throws Exception {
-		Signal<?> signal = Streams.wrap(publisher).materialize().toList().await(5, TimeUnit.SECONDS).get(0);
+		Signal<?> signal = Streams.from(publisher).materialize().toList().get().get(0);
 		assertEquals("Unexpected signal: " + signal, Signal.Type.ERROR, signal.getType());
 		return signal.getThrowable();
 	}
@@ -129,11 +125,11 @@ public class ErrorHandlingHttpHandlerTests {
 		}
 
 		@Override
-		public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
+		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 			if (this.raise) {
 				throw this.exception;
 			}
-			return Publishers.error(this.exception);
+			return Mono.error(this.exception);
 		}
 	}
 
@@ -142,8 +138,8 @@ public class ErrorHandlingHttpHandlerTests {
 	private static class UnresolvedExceptionHandler implements HttpExceptionHandler {
 
 		@Override
-		public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response, Throwable ex) {
-			return Publishers.error(ex);
+		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response, Throwable ex) {
+			return Mono.error(ex);
 		}
 	}
 

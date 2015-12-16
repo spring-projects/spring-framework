@@ -22,7 +22,8 @@ import java.util.List;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import org.reactivestreams.Publisher;
-import reactor.Publishers;
+import reactor.Flux;
+import reactor.Mono;
 import reactor.core.publisher.convert.RxJava1Converter;
 import rx.Observable;
 
@@ -66,14 +67,14 @@ public class RxNettyServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public Publisher<Void> setBody(Publisher<ByteBuffer> publisher) {
-		return Publishers.lift(publisher, new WriteWithOperator<>(this::setBodyInternal));
+	public Mono<Void> setBody(Publisher<ByteBuffer> publisher) {
+		return Flux.from(publisher).lift(new WriteWithOperator<>(this::setBodyInternal)).after();
 	}
 
-	protected Publisher<Void> setBodyInternal(Publisher<ByteBuffer> publisher) {
+	protected Mono<Void> setBodyInternal(Publisher<ByteBuffer> publisher) {
 		Observable<byte[]> content = RxJava1Converter.from(publisher).map(this::toBytes);
 		Observable<Void> completion = getRxNettyResponse().writeBytes(content);
-		return RxJava1Converter.from(completion);
+		return RxJava1Converter.from(completion).after();
 	}
 
 	private byte[] toBytes(ByteBuffer buffer) {

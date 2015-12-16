@@ -23,7 +23,8 @@ import java.util.function.Function;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HttpString;
 import org.reactivestreams.Publisher;
-import reactor.Publishers;
+import reactor.Flux;
+import reactor.Mono;
 
 import org.springframework.http.ExtendedHttpHeaders;
 import org.springframework.http.HttpHeaders;
@@ -40,13 +41,13 @@ public class UndertowServerHttpResponse implements ServerHttpResponse {
 
 	private final HttpServerExchange exchange;
 
-	private final Function<Publisher<ByteBuffer>, Publisher<Void>> responseBodyWriter;
+	private final Function<Publisher<ByteBuffer>, Mono<Void>> responseBodyWriter;
 
 	private final HttpHeaders headers;
 
 
 	public UndertowServerHttpResponse(HttpServerExchange exchange,
-			Function<Publisher<ByteBuffer>, Publisher<Void>> responseBodyWriter) {
+			Function<Publisher<ByteBuffer>, Mono<Void>> responseBodyWriter) {
 
 		Assert.notNull(exchange, "'exchange' is required.");
 		Assert.notNull(responseBodyWriter, "'responseBodyWriter' must not be null");
@@ -72,11 +73,11 @@ public class UndertowServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public Publisher<Void> setBody(Publisher<ByteBuffer> publisher) {
-		return Publishers.lift(publisher, new WriteWithOperator<>(this::setBodyInternal));
+	public Mono<Void> setBody(Publisher<ByteBuffer> publisher) {
+		return Flux.from(publisher).lift(new WriteWithOperator<>(this::setBodyInternal)).after();
 	}
 
-	protected Publisher<Void> setBodyInternal(Publisher<ByteBuffer> publisher) {
+	protected Mono<Void> setBodyInternal(Publisher<ByteBuffer> publisher) {
 		return this.responseBodyWriter.apply(publisher);
 	}
 

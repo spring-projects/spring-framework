@@ -18,7 +18,6 @@ package org.springframework.web.reactive.method.annotation;
 
 import java.net.URI;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -78,7 +77,7 @@ public class RequestMappingHandlerMappingTests {
 
 	private HandlerMethod toHandlerMethod(Publisher<?> handlerPublisher) throws InterruptedException {
 		assertNotNull(handlerPublisher);
-		List<?> handlerList = Streams.wrap(handlerPublisher).toList().await(5, TimeUnit.SECONDS);
+		List<?> handlerList = Streams.from(handlerPublisher).toList().get();
 		assertEquals(1, handlerList.size());
 		return (HandlerMethod) handlerList.get(0);
 	}

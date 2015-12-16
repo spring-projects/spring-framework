@@ -28,7 +28,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.reactivestreams.Publisher;
-import reactor.Publishers;
+import reactor.Mono;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
@@ -127,12 +127,12 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Publisher<Void> handleResult(ServerHttpRequest request,
+	public Mono<Void> handleResult(ServerHttpRequest request,
 			ServerHttpResponse response, HandlerResult result) {
 
 		Object value = result.getResult();
 		if (value == null) {
-			return Publishers.empty();
+			return Mono.empty();
 		}
 
 		Publisher<?> publisher;
@@ -143,7 +143,7 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 			elementType = returnType.getGeneric(0);
 		}
 		else {
-			publisher = Publishers.just(value);
+			publisher = Mono.just(value);
 			elementType = returnType;
 		}
 
@@ -163,7 +163,7 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 			}
 		}
 		if (compatibleMediaTypes.isEmpty()) {
-			return Publishers.error(new HttpMediaTypeNotAcceptableException(producibleMediaTypes));
+			return Mono.error(new HttpMediaTypeNotAcceptableException(producibleMediaTypes));
 		}
 
 		List<MediaType> mediaTypes = new ArrayList<>(compatibleMediaTypes);
@@ -189,7 +189,7 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 			}
 		}
 
-		return Publishers.error(new HttpMediaTypeNotAcceptableException(this.allMediaTypes));
+		return Mono.error(new HttpMediaTypeNotAcceptableException(this.allMediaTypes));
 	}
 
 	private List<MediaType> getAcceptableMediaTypes(ServerHttpRequest request) {

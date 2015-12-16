@@ -49,8 +49,8 @@ public class ByteBufferDecoderTests {
 		ByteBuffer fooBuffer = Buffer.wrap("foo").byteBuffer();
 		ByteBuffer barBuffer = Buffer.wrap("bar").byteBuffer();
 		Stream<ByteBuffer> source = Streams.just(fooBuffer, barBuffer);
-		List<ByteBuffer> results = Streams.wrap(decoder.decode(source,
-				ResolvableType.forClassWithGenerics(Publisher.class, ByteBuffer.class), null)).toList().await();
+		List<ByteBuffer> results = Streams.from(decoder.decode(source,
+				ResolvableType.forClassWithGenerics(Publisher.class, ByteBuffer.class), null)).toList().get();
 		assertEquals(2, results.size());
 		assertEquals(fooBuffer, results.get(0));
 		assertEquals(barBuffer, results.get(1));

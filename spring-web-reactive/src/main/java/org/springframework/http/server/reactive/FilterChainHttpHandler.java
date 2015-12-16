@@ -19,8 +19,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.reactivestreams.Publisher;
-
+import reactor.Mono;
 
 /**
  * {@link HttpHandler} that delegates to a chain of {@link HttpFilter}s followed
@@ -40,7 +39,7 @@ public class FilterChainHttpHandler extends HttpHandlerDecorator {
 
 
 	@Override
-	public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
+	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 		return new DefaultHttpFilterChain().filter(request, response);
 	}
 
@@ -50,7 +49,7 @@ public class FilterChainHttpHandler extends HttpHandlerDecorator {
 		private int index;
 
 		@Override
-		public Publisher<Void> filter(ServerHttpRequest request, ServerHttpResponse response) {
+		public Mono<Void> filter(ServerHttpRequest request, ServerHttpResponse response) {
 			if (this.index < filters.size()) {
 				HttpFilter filter = filters.get(this.index++);
 				return filter.filter(request, response, this);

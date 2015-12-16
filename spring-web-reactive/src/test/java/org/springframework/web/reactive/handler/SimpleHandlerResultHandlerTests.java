@@ -28,7 +28,7 @@ import rx.Observable;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutureConverter;
-import org.springframework.core.convert.support.ReactiveStreamsToReactorConverter;
+import org.springframework.core.convert.support.ReactiveStreamsToReactorStreamConverter;
 import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converter;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
@@ -75,7 +75,7 @@ public class SimpleHandlerResultHandlerTests {
 
 		GenericConversionService conversionService = new GenericConversionService();
 		conversionService.addConverter(new ReactiveStreamsToCompletableFutureConverter());
-		conversionService.addConverter(new ReactiveStreamsToReactorConverter());
+		conversionService.addConverter(new ReactiveStreamsToReactorStreamConverter());
 		conversionService.addConverter(new ReactiveStreamsToRxJava1Converter());
 		SimpleHandlerResultHandler resultHandler = new SimpleHandlerResultHandler(conversionService);
 		TestController controller = new TestController();

@@ -60,7 +60,7 @@ public class ResponseStatusExceptionHandlerTests {
 		Throwable ex = new ResponseStatusException(HttpStatus.BAD_REQUEST);
 		Publisher<Void> publisher = this.handler.handle(this.request, this.response, ex);
 
-		Streams.wrap(publisher).toList().await(5, TimeUnit.SECONDS);
+		Streams.from(publisher).toList().get();
 		assertEquals(HttpStatus.BAD_REQUEST, this.response.getStatus());
 	}
 
@@ -69,7 +69,7 @@ public class ResponseStatusExceptionHandlerTests {
 		Throwable ex = new IllegalStateException();
 		Publisher<Void> publisher = this.handler.handle(this.request, this.response, ex);
 
-		List<Signal<Void>> signals = Streams.wrap(publisher).materialize().toList().await(5, TimeUnit.SECONDS);
+		List<Signal<Void>> signals = Streams.from(publisher).materialize().toList().get();
 		assertEquals(1, signals.size());
 		assertTrue(signals.get(0).hasError());
 		assertSame(ex, signals.get(0).getThrowable());

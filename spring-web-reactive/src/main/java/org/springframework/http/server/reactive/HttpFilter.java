@@ -17,6 +17,7 @@
 package org.springframework.http.server.reactive;
 
 import org.reactivestreams.Publisher;
+import reactor.Mono;
 
 /**
  * Contract for interception-style, chained processing of HTTP requests.
@@ -40,7 +41,7 @@ public interface HttpFilter {
 	 * @param chain provides a way to delegate to the next HttpFilter.
 	 * @return Publisher to indicate when request processing is complete.
 	 */
-	Publisher<Void> filter(ServerHttpRequest request, ServerHttpResponse response,
+	Mono<Void> filter(ServerHttpRequest request, ServerHttpResponse response,
 			HttpFilterChain chain);
 
 }

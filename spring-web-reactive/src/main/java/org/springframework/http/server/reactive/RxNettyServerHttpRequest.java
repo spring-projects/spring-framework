@@ -23,6 +23,7 @@ import java.nio.ByteBuffer;
 import io.netty.buffer.ByteBuf;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import org.reactivestreams.Publisher;
+import reactor.Flux;
 import reactor.core.publisher.convert.RxJava1Converter;
 import rx.Observable;
 
@@ -85,7 +86,7 @@ public class RxNettyServerHttpRequest implements ServerHttpRequest {
 	}
 
 	@Override
-	public Publisher<ByteBuffer> getBody() {
+	public Flux<ByteBuffer> getBody() {
 		Observable<ByteBuffer> content = this.getRxNettyRequest().getContent().map(ByteBuf::nioBuffer);
 		content = content.concatWith(Observable.empty()); // See GH issue #58
 		return RxJava1Converter.from(content);

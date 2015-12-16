@@ -45,12 +45,12 @@ public class StringEncoderTests {
 
 	@Test
 	public void write() throws InterruptedException {
-		List<String> results = Streams.wrap(encoder.encode(Streams.just("foo"), null, null))
+		List<String> results = Streams.from(encoder.encode(Streams.just("foo"), null, null))
 				.map(chunk -> {
 					byte[] b = new byte[chunk.remaining()];
 					chunk.get(b);
 					return new String(b, StandardCharsets.UTF_8);
-				}).toList().await();
+				}).toList().get();
 		assertEquals(1, results.size());
 		assertEquals("foo", results.get(0));
 	}

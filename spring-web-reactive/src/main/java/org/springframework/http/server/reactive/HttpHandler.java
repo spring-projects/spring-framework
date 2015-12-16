@@ -16,7 +16,7 @@
 
 package org.springframework.http.server.reactive;
 
-import org.reactivestreams.Publisher;
+import reactor.Mono;
 
 /**
  * Contract for handling HTTP requests in a non-blocking way.
@@ -35,6 +35,6 @@ public interface HttpHandler {
 	 * @param response current HTTP response.
 	 * @return Publisher to indicate when request handling is complete.
 	 */
-	Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response);
+	Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response);
 
 }

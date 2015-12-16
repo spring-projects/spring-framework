@@ -21,12 +21,12 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
-import reactor.Publishers;
+import reactor.Flux;
+import reactor.Mono;
 import reactor.rx.Streams;
 import reactor.rx.stream.Signal;
 
@@ -61,7 +61,7 @@ public class InvocableHandlerMethodTests {
 		InvocableHandlerMethod hm = createHandlerMethod("noArgs");
 
 		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.request);
-		List<HandlerResult> values = Streams.wrap(publisher).toList().await(5, TimeUnit.SECONDS);
+		List<HandlerResult> values = Streams.from(publisher).toList().get();
 
 		assertEquals(1, values.size());
 		assertEquals("success", values.get(0).getResult());
@@ -74,7 +74,7 @@ public class InvocableHandlerMethodTests {
 		hm.setHandlerMethodArgumentResolvers(Collections.singletonList(new RequestParamArgumentResolver()));
 
 		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.request);
-		List<HandlerResult> values = Streams.wrap(publisher).toList().await(5, TimeUnit.SECONDS);
+		List<HandlerResult> values = Streams.from(publisher).toList().get();
 
 		assertEquals(1, values.size());
 		assertEquals("success:null", values.get(0).getResult());
@@ -83,10 +83,10 @@ public class InvocableHandlerMethodTests {
 	@Test
 	public void resolveArgToOneValue() throws Exception {
 		InvocableHandlerMethod hm = createHandlerMethod("singleArg", String.class);
-		addResolver(hm, Publishers.just("value1"));
+		addResolver(hm, Mono.just("value1"));
 
 		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.request);
-		List<HandlerResult> values = Streams.wrap(publisher).toList().await(5, TimeUnit.SECONDS);
+		List<HandlerResult> values = Streams.from(publisher).toList().get();
 
 		assertEquals(1, values.size());
 		assertEquals("success:value1", values.get(0).getResult());
@@ -95,10 +95,10 @@ public class InvocableHandlerMethodTests {
 	@Test
 	public void resolveArgToMultipleValues() throws Exception {
 		InvocableHandlerMethod hm = createHandlerMethod("singleArg", String.class);
-		addResolver(hm, Publishers.from(Arrays.asList("value1", "value2", "value3")));
+		addResolver(hm, Flux.fromIterable(Arrays.asList("value1", "value2", "value3")));
 
 		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.request);
-		List<HandlerResult> values = Streams.wrap(publisher).toList().await(5, TimeUnit.SECONDS);
+		List<HandlerResult> values = Streams.from(publisher).toList().get();
 
 		assertEquals(1, values.size());
 		assertEquals("success:value1", values.get(0).getResult());
@@ -137,7 +137,7 @@ public class InvocableHandlerMethodTests {
 	@Test
 	public void resolveArgumentWithErrorSignal() throws Exception {
 		InvocableHandlerMethod hm = createHandlerMethod("singleArg", String.class);
-		addResolver(hm, Publishers.error(new IllegalStateException("boo")));
+		addResolver(hm, Mono.error(new IllegalStateException("boo")));
 
 		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.request);
 		Throwable ex = awaitErrorSignal(publisher);
@@ -151,7 +151,7 @@ public class InvocableHandlerMethodTests {
 	@Test
 	public void illegalArgumentExceptionIsWrappedWithHelpfulDetails() throws Exception {
 		InvocableHandlerMethod hm = createHandlerMethod("singleArg", String.class);
-		addResolver(hm, Publishers.just(1));
+		addResolver(hm, Mono.just(1));
 
 		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.request);
 		Throwable ex = awaitErrorSignal(publisher);
@@ -183,12 +183,12 @@ public class InvocableHandlerMethodTests {
 	private void addResolver(InvocableHandlerMethod handlerMethod, Publisher<Object> resolvedValue) {
 		HandlerMethodArgumentResolver resolver = mock(HandlerMethodArgumentResolver.class);
 		when(resolver.supportsParameter(any())).thenReturn(true);
-		when(resolver.resolveArgument(any(), any())).thenReturn(resolvedValue);
+		when(resolver.resolveArgument(any(), any())).thenReturn(Mono.from(resolvedValue));
 		handlerMethod.setHandlerMethodArgumentResolvers(Collections.singletonList(resolver));
 	}
 
 	private Throwable awaitErrorSignal(Publisher<?> publisher) throws Exception {
-		Signal<?> signal = Streams.wrap(publisher).materialize().toList().await(5, TimeUnit.SECONDS).get(0);
+		Signal<?> signal = Streams.from(publisher).materialize().toList().get().get(0);
 		assertEquals("Unexpected signal: " + signal, Signal.Type.ERROR, signal.getType());
 		return signal.getThrowable();
 	}

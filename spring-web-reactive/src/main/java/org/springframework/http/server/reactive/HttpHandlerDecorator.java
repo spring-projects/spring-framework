@@ -15,7 +15,7 @@
  */
 package org.springframework.http.server.reactive;
 
-import org.reactivestreams.Publisher;
+import reactor.Mono;
 
 import org.springframework.util.Assert;
 
@@ -40,7 +40,7 @@ public class HttpHandlerDecorator implements HttpHandler {
 
 
 	@Override
-	public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
+	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 		return this.delegate.handle(request, response);
 	}
 

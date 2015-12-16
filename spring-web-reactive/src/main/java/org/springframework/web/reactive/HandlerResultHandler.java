@@ -16,7 +16,7 @@
 
 package org.springframework.web.reactive;
 
-import org.reactivestreams.Publisher;
+import reactor.Mono;
 
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -42,13 +42,13 @@ public interface HandlerResultHandler {
 	 * Process the given result in an asynchronous non blocking way, by eventually modifying
 	 * response headers, or writing some data stream into the response.
 	 * Implementations should not throw exceptions but signal them via the returned
-	 * {@code Publisher<Void>}.
+	 * {@code Mono<Void>}.
 	 *
-	 * @return A {@code Publisher<Void>} used to signal the demand, and receive a notification
+	 * @return A {@code Mono<Void>} used to signal the demand, and receive a notification
 	 * when the handling is complete (success or error) including the flush of the data on the
 	 * network.
 	 */
-	Publisher<Void> handleResult(ServerHttpRequest request, ServerHttpResponse response,
+	Mono<Void> handleResult(ServerHttpRequest request, ServerHttpResponse response,
 			HandlerResult result);
 
 }

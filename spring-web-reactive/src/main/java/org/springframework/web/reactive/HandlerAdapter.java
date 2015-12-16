@@ -17,6 +17,7 @@
 package org.springframework.web.reactive;
 
 import org.reactivestreams.Publisher;
+import reactor.Mono;
 
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -54,7 +55,7 @@ public interface HandlerAdapter {
 	 * returned {@code true}.
 	 * @return A {@link Publisher} object that produces a single {@link HandlerResult} element
 	 */
-	Publisher<HandlerResult> handle(ServerHttpRequest request, ServerHttpResponse response,
+	Mono<HandlerResult> handle(ServerHttpRequest request, ServerHttpResponse response,
 			Object handler);
 
 }

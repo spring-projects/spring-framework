@@ -19,6 +19,7 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 
 import org.reactivestreams.Publisher;
+import reactor.Flux;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -34,7 +35,7 @@ public class MockServerHttpRequest implements ServerHttpRequest {
 
 	private HttpHeaders headers = new HttpHeaders();
 
-	private Publisher<ByteBuffer> body;
+	private Flux<ByteBuffer> body;
 
 
 	public MockServerHttpRequest(HttpMethod httpMethod, URI uri) {
@@ -43,7 +44,7 @@ public class MockServerHttpRequest implements ServerHttpRequest {
 	}
 
 	public MockServerHttpRequest(Publisher<ByteBuffer> body, HttpMethod httpMethod, URI uri) {
-		this.body = body;
+		this.body = Flux.from(body);
 		this.httpMethod = httpMethod;
 		this.uri = uri;
 	}
@@ -77,11 +78,11 @@ public class MockServerHttpRequest implements ServerHttpRequest {
 	}
 
 	@Override
-	public Publisher<ByteBuffer> getBody() {
+	public Flux<ByteBuffer> getBody() {
 		return this.body;
 	}
 
 	public void setBody(Publisher<ByteBuffer> body) {
-		this.body = body;
+		this.body = Flux.from(body);
 	}
 }

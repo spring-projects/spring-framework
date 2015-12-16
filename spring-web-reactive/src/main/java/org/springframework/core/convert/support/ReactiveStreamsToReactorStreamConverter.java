@@ -31,7 +31,7 @@ import org.springframework.core.convert.converter.GenericConverter;
  * @author Stephane Maldini
  * @author Sebastien Deleuze
  */
-public final class ReactiveStreamsToReactorConverter implements GenericConverter {
+public final class ReactiveStreamsToReactorStreamConverter implements GenericConverter {
 
 	@Override
 	public Set<GenericConverter.ConvertiblePair> getConvertibleTypes() {
@@ -52,13 +52,13 @@ public final class ReactiveStreamsToReactorConverter implements GenericConverter
 			return source;
 		}
 		else if (Stream.class.isAssignableFrom(targetType.getResolvableType().getRawClass())) {
-			return Streams.wrap((Publisher)source);
+			return Streams.from((Publisher)source);
 		}
 		else if (Promise.class.isAssignableFrom(source.getClass())) {
 			return source;
 		}
 		else if (Promise.class.isAssignableFrom(targetType.getResolvableType().getRawClass())) {
-			return Streams.wrap((Publisher)source).next();
+			return Streams.from((Publisher)source).promise();
 		}
 		return null;
 	}

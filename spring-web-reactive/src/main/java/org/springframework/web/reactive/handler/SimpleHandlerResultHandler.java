@@ -17,7 +17,7 @@
 package org.springframework.web.reactive.handler;
 
 import org.reactivestreams.Publisher;
-import reactor.Publishers;
+import reactor.Mono;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
@@ -74,17 +74,17 @@ public class SimpleHandlerResultHandler implements Ordered, HandlerResultHandler
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Publisher<Void> handleResult(ServerHttpRequest request,
+	public Mono<Void> handleResult(ServerHttpRequest request,
 			ServerHttpResponse response, HandlerResult result) {
 
 		Object value = result.getResult();
 
 		if (Void.TYPE.equals(result.getResultType().getRawClass())) {
-			return Publishers.empty();
+			return Mono.empty();
 		}
 
-		return (value instanceof Publisher ? (Publisher<Void>)value :
-				this.conversionService.convert(value, Publisher.class));
+		return (value instanceof Mono ? (Mono<Void>)value :
+				Mono.from(this.conversionService.convert(value, Publisher.class)));
 	}
 
 }

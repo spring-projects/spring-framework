@@ -15,7 +15,7 @@
  */
 package org.springframework.http.server.reactive;
 
-import org.reactivestreams.Publisher;
+import reactor.Mono;
 
 /**
  * A contract for resolving exceptions from HTTP request handling.
@@ -38,6 +38,6 @@ public interface HttpExceptionHandler {
 	 * @param ex the exception to handle
 	 * @return Publisher to indicate when exception handling is complete.
 	 */
-	Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response, Throwable ex);
+	Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response, Throwable ex);
 
 }

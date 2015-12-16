@@ -15,8 +15,7 @@
  */
 package org.springframework.http.server.reactive;
 
-import org.reactivestreams.Publisher;
-import reactor.Publishers;
+import reactor.Mono;
 
 import org.springframework.http.HttpStatus;
 
@@ -29,9 +28,9 @@ public class InternalServerErrorExceptionHandler implements HttpExceptionHandler
 
 
 	@Override
-	public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response, Throwable ex) {
+	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response, Throwable ex) {
 		response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-		return Publishers.empty();
+		return Mono.empty();
 	}
 
 }

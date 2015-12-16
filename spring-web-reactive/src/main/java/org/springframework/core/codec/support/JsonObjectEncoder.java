@@ -23,14 +23,13 @@ import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
+import reactor.Flux;
 import reactor.core.subscriber.SubscriberBarrier;
 import reactor.core.support.BackpressureUtils;
 import reactor.io.buffer.Buffer;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.util.MimeType;
-
-import static reactor.Publishers.lift;
 
 /**
  * Encode a byte stream of individual JSON element to a byte stream representing
@@ -49,11 +48,11 @@ public class JsonObjectEncoder extends AbstractEncoder<ByteBuffer> {
 	}
 
 	@Override
-	public Publisher<ByteBuffer> encode(Publisher<? extends ByteBuffer> messageStream,
+	public Flux<ByteBuffer> encode(Publisher<? extends ByteBuffer> messageStream,
 			ResolvableType type, MimeType mimeType, Object... hints) {
 
 		//noinspection Convert2MethodRef
-		return lift(messageStream, bbs -> new JsonEncoderBarrier(bbs));
+		return Flux.from(messageStream).lift(bbs -> new JsonEncoderBarrier(bbs));
 	}
 
 

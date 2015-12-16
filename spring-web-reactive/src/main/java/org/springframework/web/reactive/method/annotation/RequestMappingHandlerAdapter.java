@@ -25,8 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.reactivestreams.Publisher;
-import reactor.Publishers;
+import reactor.Flux;
+import reactor.Mono;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.codec.Decoder;
@@ -106,7 +106,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 	}
 
 	@Override
-	public Publisher<HandlerResult> handle(ServerHttpRequest request,
+	public Mono<HandlerResult> handle(ServerHttpRequest request,
 			ServerHttpResponse response, Object handler) {
 
 		HandlerMethod handlerMethod = (HandlerMethod) handler;
@@ -114,20 +114,18 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 		InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
 		invocable.setHandlerMethodArgumentResolvers(this.argumentResolvers);
 
-		Publisher<HandlerResult> publisher = invocable.invokeForRequest(request);
+		Flux<HandlerResult> publisher = invocable.invokeForRequest(request).flux();
+		publisher = publisher.onErrorResumeWith(ex -> Mono.just(new HandlerResult(handler, ex)));
 
-		publisher = Publishers.onErrorResumeNext(publisher, ex -> {
-			return Publishers.just(new HandlerResult(handler, ex));
-		});
 
-		publisher = Publishers.map(publisher,
+		publisher = publisher.map(
 				result -> result.setExceptionMapper(
-						ex -> mapException((Exception) ex, handlerMethod, request, response)));
+						ex -> mapException(ex, handlerMethod, request, response)));
 
-		return publisher;
+		return publisher.next();
 	}
 
-	private Publisher<HandlerResult> mapException(Throwable ex, HandlerMethod handlerMethod,
+	private Mono<HandlerResult> mapException(Throwable ex, HandlerMethod handlerMethod,
 			ServerHttpRequest request, ServerHttpResponse response) {
 
 		if (ex instanceof Exception) {
@@ -147,7 +145,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 				}
 			}
 		}
-		return Publishers.error(ex);
+		return Mono.error(ex);
 	}
 
 	protected InvocableHandlerMethod findExceptionHandler(HandlerMethod handlerMethod, Exception exception) {

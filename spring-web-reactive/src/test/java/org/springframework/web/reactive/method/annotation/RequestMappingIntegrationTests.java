@@ -25,10 +25,9 @@ import java.util.concurrent.CompletableFuture;
 
 import org.junit.Test;
 import org.reactivestreams.Publisher;
-import reactor.Publishers;
+import reactor.Mono;
 import reactor.io.buffer.Buffer;
 import reactor.rx.Promise;
-import reactor.rx.Promises;
 import reactor.rx.Stream;
 import reactor.rx.Streams;
 import rx.Observable;
@@ -46,7 +45,7 @@ import org.springframework.core.codec.support.StringEncoder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutureConverter;
-import org.springframework.core.convert.support.ReactiveStreamsToReactorConverter;
+import org.springframework.core.convert.support.ReactiveStreamsToReactorStreamConverter;
 import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -321,7 +320,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 			// TODO: test failures with DefaultConversionService
 			GenericConversionService service = new GenericConversionService();
 			service.addConverter(new ReactiveStreamsToCompletableFutureConverter());
-			service.addConverter(new ReactiveStreamsToReactorConverter());
+			service.addConverter(new ReactiveStreamsToReactorStreamConverter());
 			service.addConverter(new ReactiveStreamsToRxJava1Converter());
 			return service;
 		}
@@ -398,7 +397,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		@RequestMapping("/promise")
 		@ResponseBody
 		public Promise<Person> promiseResponseBody() {
-			return Promises.success(new Person("Robert"));
+			return Promise.success(new Person("Robert"));
 		}
 
 		@RequestMapping("/list")
@@ -428,7 +427,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		@RequestMapping("/publisher-capitalize")
 		@ResponseBody
 		public Publisher<Person> publisherCapitalize(@RequestBody Publisher<Person> persons) {
-			return Streams.wrap(persons).map(person -> {
+			return Streams.from(persons).map(person -> {
 				person.setName(person.getName().toUpperCase());
 				return person;
 			});
@@ -482,20 +481,20 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		@RequestMapping("/promise-capitalize")
 		@ResponseBody
 		public Promise<Person> promiseCapitalize(@RequestBody Promise<Person> personFuture) {
-			return personFuture.map(person -> {
+			return Streams.from(personFuture.map(person -> {
 				person.setName(person.getName().toUpperCase());
 				return person;
-			});
+			})).promise();
 		}
 
 		@RequestMapping("/publisher-create")
 		public Publisher<Void> publisherCreate(@RequestBody Publisher<Person> personStream) {
-			return Streams.wrap(personStream).toList().onSuccess(persons::addAll).after();
+			return Streams.from(personStream).toList().doOnSuccess(persons::addAll).after();
 		}
 
 		@RequestMapping("/stream-create")
-		public Promise<Void> streamCreate(@RequestBody Stream<Person> personStream) {
-			return personStream.toList().onSuccess(persons::addAll).after();
+		public Publisher<Void> streamCreate(@RequestBody Stream<Person> personStream) {
+			return Streams.from(personStream.toList().doOnSuccess(persons::addAll).after()).promise();
 		}
 
 		@RequestMapping("/observable-create")
@@ -512,7 +511,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		@RequestMapping("/error-signal")
 		@ResponseBody
 		public Publisher<String> handleWithError() {
-			return Publishers.error(new IllegalStateException("Boo"));
+			return Mono.error(new IllegalStateException("Boo"));
 		}
 
 		@ExceptionHandler

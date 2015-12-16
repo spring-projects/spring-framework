@@ -15,8 +15,7 @@
  */
 package org.springframework.http.server.reactive;
 
-import org.reactivestreams.Publisher;
-
+import reactor.Mono;
 
 /**
  * Represents a chain of {@link HttpFilter}s allowing each {@link HttpFilter} to
@@ -32,6 +31,6 @@ public interface HttpFilterChain {
 	 * @param response current HTTP response.
 	 * @return Publisher to indicate when request handling is complete.
 	 */
-	Publisher<Void> filter(ServerHttpRequest request, ServerHttpResponse response);
+	Mono<Void> filter(ServerHttpRequest request, ServerHttpResponse response);
 
 }

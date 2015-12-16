@@ -19,8 +19,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 
-import org.reactivestreams.Publisher;
-import reactor.Publishers;
+import reactor.Flux;
 import reactor.io.buffer.Buffer;
 import reactor.io.net.http.HttpChannel;
 
@@ -82,8 +81,8 @@ public class ReactorServerHttpRequest implements ServerHttpRequest {
 	}
 
 	@Override
-	public Publisher<ByteBuffer> getBody() {
-		return Publishers.map(this.channel.input(), Buffer::byteBuffer);
+	public Flux<ByteBuffer> getBody() {
+		return Flux.from(this.channel.input()).map(Buffer::byteBuffer);
 	}
 
 }

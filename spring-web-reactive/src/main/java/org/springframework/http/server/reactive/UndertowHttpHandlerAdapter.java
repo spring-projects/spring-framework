@@ -35,7 +35,8 @@ import org.reactivestreams.Subscription;
 import org.xnio.ChannelListener;
 import org.xnio.channels.StreamSinkChannel;
 import org.xnio.channels.StreamSourceChannel;
-import reactor.core.error.SpecificationExceptions;
+import reactor.Mono;
+import reactor.core.error.Exceptions;
 import reactor.core.subscriber.BaseSubscriber;
 import reactor.core.support.BackpressureUtils;
 
@@ -72,7 +73,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 		ResponseBodySubscriber responseBodySubscriber = new ResponseBodySubscriber(exchange);
 		ServerHttpResponse response = new UndertowServerHttpResponse(exchange,
-				publisher -> subscriber -> publisher.subscribe(responseBodySubscriber));
+				publisher -> Mono.from(subscriber -> publisher.subscribe(responseBodySubscriber)));
 
 		exchange.dispatch();
 
@@ -126,7 +127,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 		@Override
 		public void subscribe(Subscriber<? super ByteBuffer> subscriber) {
 			if (subscriber == null) {
-				throw SpecificationExceptions.spec_2_13_exception();
+				throw Exceptions.spec_2_13_exception();
 			}
 			if (this.subscriber != null) {
 				subscriber.onError(new IllegalStateException("Only one subscriber allowed"));

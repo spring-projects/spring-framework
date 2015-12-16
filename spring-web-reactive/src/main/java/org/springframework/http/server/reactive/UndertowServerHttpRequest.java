@@ -23,6 +23,7 @@ import java.nio.ByteBuffer;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HeaderValues;
 import org.reactivestreams.Publisher;
+import reactor.Flux;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -42,14 +43,14 @@ public class UndertowServerHttpRequest implements ServerHttpRequest {
 
 	private HttpHeaders headers;
 
-	private final Publisher<ByteBuffer> body;
+	private final Flux<ByteBuffer> body;
 
 
 	public UndertowServerHttpRequest(HttpServerExchange exchange, Publisher<ByteBuffer> body) {
 		Assert.notNull(exchange, "'exchange' is required.");
 		Assert.notNull(exchange, "'body' is required.");
 		this.exchange = exchange;
-		this.body = body;
+		this.body = Flux.from(body);
 	}
 
 
@@ -91,7 +92,7 @@ public class UndertowServerHttpRequest implements ServerHttpRequest {
 	}
 
 	@Override
-	public Publisher<ByteBuffer> getBody() {
+	public Flux<ByteBuffer> getBody() {
 		return this.body;
 	}
 

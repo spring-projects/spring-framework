@@ -25,7 +25,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import org.reactivestreams.Publisher;
-import reactor.Publishers;
+import reactor.Flux;
 import reactor.fn.Function;
 
 import org.springframework.core.ResolvableType;
@@ -95,10 +95,10 @@ public class JsonObjectDecoder extends AbstractDecoder<ByteBuffer> {
 	}
 
 	@Override
-	public Publisher<ByteBuffer> decode(Publisher<ByteBuffer> inputStream, ResolvableType type,
+	public Flux<ByteBuffer> decode(Publisher<ByteBuffer> inputStream, ResolvableType type,
 			MimeType mimeType, Object... hints) {
 
-		return Publishers.flatMap(inputStream, new Function<ByteBuffer, Publisher<? extends ByteBuffer>>() {
+		return Flux.from(inputStream).flatMap(new Function<ByteBuffer, Publisher<? extends ByteBuffer>>() {
 
 			int openBraces;
 			int index;
@@ -120,13 +120,13 @@ public class JsonObjectDecoder extends AbstractDecoder<ByteBuffer> {
 				}
 				if (this.state == ST_CORRUPTED) {
 					this.input.skipBytes(this.input.readableBytes());
-					return Publishers.error(new IllegalStateException("Corrupted stream"));
+					return Flux.error(new IllegalStateException("Corrupted stream"));
 				}
 				if (this.writerIndex > maxObjectLength) {
 					// buffer size exceeded maxObjectLength; discarding the complete buffer.
 					this.input.skipBytes(this.input.readableBytes());
 					reset();
-					return Publishers.error(new IllegalStateException("object length exceeds " +
+					return Flux.error(new IllegalStateException("object length exceeds " +
 							maxObjectLength + ": " + this.writerIndex + " bytes discarded"));
 				}
 				for (/* use current index */; this.index < this.writerIndex; this.index++) {
@@ -199,7 +199,7 @@ public class JsonObjectDecoder extends AbstractDecoder<ByteBuffer> {
 					}
 					else {
 						this.state = ST_CORRUPTED;
-						return Publishers.error(new IllegalStateException(
+						return Flux.error(new IllegalStateException(
 								"invalid JSON received at byte position " + this.index + ": " +
 										ByteBufUtil.hexDump(this.input)));
 					}
@@ -208,7 +208,7 @@ public class JsonObjectDecoder extends AbstractDecoder<ByteBuffer> {
 				if (this.input.readableBytes() == 0) {
 					this.index = 0;
 				}
-				return Publishers.from(chunks);
+				return Flux.fromIterable(chunks);
 			}
 
 			/**

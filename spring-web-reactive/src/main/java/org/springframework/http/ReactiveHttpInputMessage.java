@@ -19,6 +19,7 @@ package org.springframework.http;
 import java.nio.ByteBuffer;
 
 import org.reactivestreams.Publisher;
+import reactor.Flux;
 
 /**
  * An "reactive" HTTP input message that exposes the input as {@link Publisher}.
@@ -34,6 +35,6 @@ public interface ReactiveHttpInputMessage extends HttpMessage {
 	 * Return the body of the message as a {@link Publisher}.
 	 * @return the body content publisher
 	 */
-	Publisher<ByteBuffer> getBody();
+	Flux<ByteBuffer> getBody();
 
 }
