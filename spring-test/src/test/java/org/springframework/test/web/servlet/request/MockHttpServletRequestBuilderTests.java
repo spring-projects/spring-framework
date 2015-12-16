@@ -39,6 +39,8 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
 
@@ -250,6 +252,21 @@ public class MockHttpServletRequestBuilderTests {
 
 		assertArrayEquals(new String[] {null}, parameterMap.get("foo"));
 		assertEquals("foo", request.getQueryString());
+	}
+
+	// SPR-13801
+
+	@Test
+	public void requestParameterFromMultiValueMap() throws Exception {
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+		params.add("foo", "bar");
+		params.add("foo", "baz");
+		this.builder = new MockHttpServletRequestBuilder(HttpMethod.POST, "/foo");
+		this.builder.params(params);
+
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+
+		assertArrayEquals(new String[] {"bar", "baz"}, request.getParameterMap().get("foo"));
 	}
 
 	@Test

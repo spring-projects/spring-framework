@@ -152,6 +152,21 @@ public class MockHttpServletRequestBuilder
 	}
 
 	/**
+	 * Add request parameters to the {@link MockHttpServletRequest} for example
+	 * such as when testing a form submission. If called more than once, the new
+	 * values are added.
+	 * @param params the parameters to add
+	 */
+	public MockHttpServletRequestBuilder params(MultiValueMap<String, String> params) {
+		for (String name : params.keySet()) {
+			for (String value : params.get(name)) {
+				this.parameters.add(name, value);
+			}
+		}
+		return this;
+	}
+
+	/**
 	 * Add a header to the request. Values are always added.
 	 * @param name the header name
 	 * @param values one or more header values
