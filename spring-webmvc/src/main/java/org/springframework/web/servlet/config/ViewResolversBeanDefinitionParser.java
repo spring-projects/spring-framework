@@ -39,7 +39,6 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 import org.springframework.web.servlet.view.groovy.GroovyMarkupViewResolver;
 import org.springframework.web.servlet.view.script.ScriptTemplateViewResolver;
 import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
-import org.springframework.web.servlet.view.velocity.VelocityViewResolver;
 
 /**
  * Parse the {@code view-resolvers} MVC namespace element and register
@@ -69,6 +68,7 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 	public static final String VIEW_RESOLVER_BEAN_NAME = "mvcViewResolver";
 
 
+	@SuppressWarnings("deprecation")
 	public BeanDefinition parse(Element element, ParserContext context) {
 		Object source = context.extractSource(element);
 		context.pushContainingComponent(new CompositeComponentDefinition(element.getTagName(), source));
@@ -100,7 +100,7 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 				addUrlBasedViewResolverProperties(resolverElement, resolverBeanDef);
 			}
 			else if ("velocity".equals(name)) {
-				resolverBeanDef = new RootBeanDefinition(VelocityViewResolver.class);
+				resolverBeanDef = new RootBeanDefinition(org.springframework.web.servlet.view.velocity.VelocityViewResolver.class);
 				resolverBeanDef.getPropertyValues().add("suffix", ".vm");
 				addUrlBasedViewResolverProperties(resolverElement, resolverBeanDef);
 			}

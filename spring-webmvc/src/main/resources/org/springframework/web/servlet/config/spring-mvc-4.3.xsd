@@ -1022,16 +1022,6 @@
 							]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:element>
-					<xsd:element name="velocity" type="urlViewResolverType">
-						<xsd:annotation>
-							<xsd:documentation><![CDATA[
-	Register a VelocityViewResolver.
-	By default, ".vm" is configured as a view name suffix.
-	To configure Velocity you must also add a top-level <mvc:velocity-configurer> element
-	or declare a VelocityConfigurer bean.
-							]]></xsd:documentation>
-						</xsd:annotation>
-					</xsd:element>
 					<xsd:element name="groovy" type="urlViewResolverType">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
@@ -1167,24 +1157,6 @@
 					</xsd:complexType>
 				</xsd:element>
 			</xsd:sequence>
-		</xsd:complexType>
-	</xsd:element>
-
-	<xsd:element name="velocity-configurer">
-		<xsd:annotation>
-			<xsd:documentation><![CDATA[
-	Configure Velocity for view resolution by registering a VelocityConfigurer bean.
-	This is a shortcut alternative to declaring a VelocityConfigurer bean directly.
-			]]></xsd:documentation>
-		</xsd:annotation>
-		<xsd:complexType>
-			<xsd:attribute name="resource-loader-path" type="xsd:string" use="required">
-				<xsd:annotation>
-					<xsd:documentation><![CDATA[
-	The Velocity resource loader path via a Spring resource location.
-					]]></xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
 
