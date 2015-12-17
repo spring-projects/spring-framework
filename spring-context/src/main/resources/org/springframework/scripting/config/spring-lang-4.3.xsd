@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<xsd:schema xmlns="http://www.springframework.org/schema/lang"
+			xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			xmlns:beans="http://www.springframework.org/schema/beans"
+			targetNamespace="http://www.springframework.org/schema/lang"
+			elementFormDefault="qualified"
+			attributeFormDefault="unqualified">
+
+	<xsd:annotation>
+		<xsd:documentation><![CDATA[
+	Defines the elements used in the Spring Framework's dynamic language
+	support, which allows bean definitions that are backed by classes
+	written in a language other than Java.
+		]]></xsd:documentation>
+	</xsd:annotation>
+
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-4.3.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool-4.3.xsd"/>
+
+	<xsd:element name="defaults">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	Default settings for any scripted beans registered within this context.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:attributeGroup ref="defaultableAttributes"/>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="groovy">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	A Spring bean backed by a Groovy class definition.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="customizableScriptType">
+					<xsd:attributeGroup ref="defaultableAttributes"/>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="bsh">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	A Spring bean backed by a BeanShell script.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="dynamicScriptType">
+					<xsd:attributeGroup ref="vanillaScriptAttributes"/>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+	</xsd:element>
+
+	<xsd:element name="std">
+		<xsd:annotation>
+			<xsd:documentation><![CDATA[
+	A Spring bean backed by a standard JSR-223 based script.
+	Supports JavaScript, Groovy, JRuby and other JSR-223 compliant engines.
+			]]></xsd:documentation>
+		</xsd:annotation>
+		<xsd:complexType>
+			<xsd:complexContent>
+				<xsd:extension base="dynamicScriptType">
+					<xsd:attribute name="engine" type="xsd:string">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+	The name of the script engine (if not inferred from the file extension).
+				]]></xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
+					<xsd:attributeGroup ref="vanillaScriptAttributes"/>
+				</xsd:extension>
+			</xsd:complexContent>
+		</xsd:complexType>
+	</xsd:element>
+
+	<!-- Script Types -->
+	<xsd:complexType name="simpleScriptType">
+		<xsd:complexContent>
+			<xsd:extension base="beans:identifiedType">
+				<xsd:sequence>
+					<xsd:element name="inline-script" minOccurs="0" maxOccurs="1">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+	The source code for the dynamic language-backed bean.
+							]]></xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+					<xsd:element name="property" type="beans:propertyType" minOccurs="0" maxOccurs="unbounded">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+	Dynamic language-backed bean definitions can have zero or more properties.
+	Property elements correspond to JavaBean setter methods exposed
+	by the bean classes. Spring supports primitives, references to other
+	beans in the same or related factories, lists, maps and properties.
+							]]></xsd:documentation>
+						</xsd:annotation>
+					</xsd:element>
+				</xsd:sequence>
+				<xsd:attribute name="script-source" type="xsd:string">
+					<xsd:annotation>
+						<xsd:documentation source="java:org.springframework.core.io.Resource"><![CDATA[
+	The resource containing the script for the dynamic language-backed bean.
+
+	Examples might be '/WEB-INF/scripts/Anais.groovy', 'classpath:Nin.bsh', etc.
+						]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="name" type="xsd:string">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	The name of this scripted bean as an alias or replacement for the id.
+						]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="scope" type="xsd:string">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	The scope of this scripted bean: typically "singleton" (one shared instance,
+	which will be returned by all calls to getBean with the given id), or
+	"prototype" (independent instance resulting from each call to getBean).
+	Default is "singleton".
+
+	Singletons are most commonly used, and are ideal for multi-threaded
+	service objects. Further scopes, such as "request" or "session", might
+	be supported by extended bean factories (e.g. in a web environment).
+						]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="autowire" default="default">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	The autowire mode for the scripted bean.
+	Analogous to the 'autowire' attribute on a standard bean definition.
+						]]></xsd:documentation>
+					</xsd:annotation>
+					<xsd:simpleType>
+						<xsd:restriction base="xsd:NMTOKEN">
+							<xsd:enumeration value="default"/>
+							<xsd:enumeration value="no"/>
+							<xsd:enumeration value="byName"/>
+							<xsd:enumeration value="byType"/>
+						</xsd:restriction>
+					</xsd:simpleType>
+				</xsd:attribute>
+				<xsd:attribute name="depends-on" type="xsd:string">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	The names of the beans that this bean depends on being initialized.
+	The bean factory will guarantee that these beans get initialized
+	before this bean.
+
+	Note that dependencies are normally expressed through bean properties.
+	This property should just be necessary for other kinds of dependencies
+	like statics (*ugh*) or database preparation on startup.
+						]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="init-method" type="xsd:string">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	The name of an initialization method defined on the scripted bean.
+	Analogous to the 'init-method' attribute on a standard bean definition.
+						]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+				<xsd:attribute name="destroy-method" type="xsd:string">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	The name of a destruction method defined on the scripted bean.
+	Analogous to the 'destroy-method' attribute on a standard bean definition.
+						]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+	<xsd:complexType name="dynamicScriptType">
+		<xsd:complexContent>
+			<xsd:extension base="simpleScriptType">
+				<xsd:attribute name="script-interfaces">
+					<xsd:annotation>
+						<xsd:documentation source="java:java.lang.Class"><![CDATA[
+	The Java interfaces that the dynamic language-backed object is to expose; comma-delimited.
+						]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+	<xsd:complexType name="customizableScriptType">
+		<xsd:complexContent>
+			<xsd:extension base="simpleScriptType">
+				<xsd:attribute name="customizer-ref">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	Reference to a GroovyObjectCustomizer or similar customizer bean.
+						]]></xsd:documentation>
+					</xsd:annotation>
+				</xsd:attribute>
+			</xsd:extension>
+		</xsd:complexContent>
+	</xsd:complexType>
+
+	<xsd:attributeGroup name="vanillaScriptAttributes">
+		<xsd:attribute name="refresh-check-delay" type="xsd:long">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	The delay (in milliseconds) between checks for updated sources when
+	using the refreshable beans feature.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+	</xsd:attributeGroup>
+
+	<xsd:attributeGroup name="defaultableAttributes">
+		<xsd:attribute name="proxy-target-class" type="xsd:boolean">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Flag to tell the bean factory that if this bean is proxied it should be done using the target class type, 
+	not its interfaces. A refreshable script is normally proxied, so often this is useful in conjunction with
+	refresh-check-delay. Defaults to false requiring no additional library dependencies, but hiding behavior
+	in the bean that is not defined in an interface.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attributeGroup ref="vanillaScriptAttributes"></xsd:attributeGroup>
+	</xsd:attributeGroup>
+
+</xsd:schema>
