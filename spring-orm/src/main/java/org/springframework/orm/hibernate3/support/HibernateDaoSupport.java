@@ -23,8 +23,6 @@ import org.hibernate.SessionFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.dao.support.DaoSupport;
-import org.springframework.orm.hibernate3.HibernateTemplate;
-import org.springframework.orm.hibernate3.SessionFactoryUtils;
 
 /**
  * Convenient super class for Hibernate-based data access objects.
@@ -56,10 +54,12 @@ import org.springframework.orm.hibernate3.SessionFactoryUtils;
  * @see #setSessionFactory
  * @see #getHibernateTemplate
  * @see org.springframework.orm.hibernate3.HibernateTemplate
+ * @deprecated as of Spring 4.3, in favor of Hibernate 4.x/5.x
  */
+@Deprecated
 public abstract class HibernateDaoSupport extends DaoSupport {
 
-	private HibernateTemplate hibernateTemplate;
+	private org.springframework.orm.hibernate3.HibernateTemplate hibernateTemplate;
 
 
 	/**
@@ -83,8 +83,8 @@ public abstract class HibernateDaoSupport extends DaoSupport {
 	 * @return the new HibernateTemplate instance
 	 * @see #setSessionFactory
 	 */
-	protected HibernateTemplate createHibernateTemplate(SessionFactory sessionFactory) {
-		return new HibernateTemplate(sessionFactory);
+	protected org.springframework.orm.hibernate3.HibernateTemplate createHibernateTemplate(SessionFactory sessionFactory) {
+		return new org.springframework.orm.hibernate3.HibernateTemplate(sessionFactory);
 	}
 
 	/**
@@ -99,7 +99,7 @@ public abstract class HibernateDaoSupport extends DaoSupport {
 	 * as an alternative to specifying a SessionFactory.
 	 * @see #setSessionFactory
 	 */
-	public final void setHibernateTemplate(HibernateTemplate hibernateTemplate) {
+	public final void setHibernateTemplate(org.springframework.orm.hibernate3.HibernateTemplate hibernateTemplate) {
 		this.hibernateTemplate = hibernateTemplate;
 	}
 
@@ -113,7 +113,7 @@ public abstract class HibernateDaoSupport extends DaoSupport {
 	 * {@code new HibernateTemplate(getSessionFactory())}, in which case
 	 * you're allowed to customize the settings on the resulting instance.
 	 */
-	public final HibernateTemplate getHibernateTemplate() {
+	public final org.springframework.orm.hibernate3.HibernateTemplate getHibernateTemplate() {
 	  return this.hibernateTemplate;
 	}
 
@@ -141,7 +141,7 @@ public abstract class HibernateDaoSupport extends DaoSupport {
 	 * @throws DataAccessResourceFailureException if the Session couldn't be created
 	 * @throws IllegalStateException if no thread-bound Session found and allowCreate=false
 	 * @see org.springframework.orm.hibernate3.SessionFactoryUtils#getSession(SessionFactory, boolean)
-	 * @deprecated as of Spring 3.2.7, in favor of {@link HibernateTemplate} usage
+	 * @deprecated as of Spring 3.2.7, in favor of {@link org.springframework.orm.hibernate3.HibernateTemplate} usage
 	 */
 	@Deprecated
 	protected final Session getSession() throws DataAccessResourceFailureException, IllegalStateException {
@@ -166,15 +166,15 @@ public abstract class HibernateDaoSupport extends DaoSupport {
 	 * @throws DataAccessResourceFailureException if the Session couldn't be created
 	 * @throws IllegalStateException if no thread-bound Session found and allowCreate=false
 	 * @see org.springframework.orm.hibernate3.SessionFactoryUtils#getSession(SessionFactory, boolean)
-	 * @deprecated as of Spring 3.2.7, in favor of {@link HibernateTemplate} usage
+	 * @deprecated as of Spring 3.2.7, in favor of {@link org.springframework.orm.hibernate3.HibernateTemplate} usage
 	 */
 	@Deprecated
 	protected final Session getSession(boolean allowCreate)
 			throws DataAccessResourceFailureException, IllegalStateException {
 
 		return (!allowCreate ?
-			SessionFactoryUtils.getSession(getSessionFactory(), false) :
-				SessionFactoryUtils.getSession(
+				org.springframework.orm.hibernate3.SessionFactoryUtils.getSession(getSessionFactory(), false) :
+				org.springframework.orm.hibernate3.SessionFactoryUtils.getSession(
 						getSessionFactory(),
 						this.hibernateTemplate.getEntityInterceptor(),
 						this.hibernateTemplate.getJdbcExceptionTranslator()));
@@ -192,7 +192,7 @@ public abstract class HibernateDaoSupport extends DaoSupport {
 	 * @param ex HibernateException that occurred
 	 * @return the corresponding DataAccessException instance
 	 * @see org.springframework.orm.hibernate3.SessionFactoryUtils#convertHibernateAccessException
-	 * @deprecated as of Spring 3.2.7, in favor of {@link HibernateTemplate} usage
+	 * @deprecated as of Spring 3.2.7, in favor of {@link org.springframework.orm.hibernate3.HibernateTemplate} usage
 	 */
 	@Deprecated
 	protected final DataAccessException convertHibernateAccessException(HibernateException ex) {
@@ -206,11 +206,11 @@ public abstract class HibernateDaoSupport extends DaoSupport {
 	 * {@link #getSession} and {@link #convertHibernateAccessException}.
 	 * @param session the Session to close
 	 * @see org.springframework.orm.hibernate3.SessionFactoryUtils#releaseSession
-	 * @deprecated as of Spring 3.2.7, in favor of {@link HibernateTemplate} usage
+	 * @deprecated as of Spring 3.2.7, in favor of {@link org.springframework.orm.hibernate3.HibernateTemplate} usage
 	 */
 	@Deprecated
 	protected final void releaseSession(Session session) {
-		SessionFactoryUtils.releaseSession(session, getSessionFactory());
+		org.springframework.orm.hibernate3.SessionFactoryUtils.releaseSession(session, getSessionFactory());
 	}
 
 }

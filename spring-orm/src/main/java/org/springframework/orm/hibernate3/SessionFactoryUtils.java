@@ -100,7 +100,9 @@ import org.springframework.util.Assert;
  * @see HibernateTransactionManager
  * @see org.springframework.transaction.jta.JtaTransactionManager
  * @see org.springframework.transaction.support.TransactionSynchronizationManager
+ * @deprecated as of Spring 4.3, in favor of Hibernate 4.x/5.x
  */
+@Deprecated
 public abstract class SessionFactoryUtils {
 
 	/**

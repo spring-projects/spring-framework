@@ -41,7 +41,9 @@ import org.hibernate.transaction.TransactionManagerLookup;
  * @since 1.2
  * @see LocalSessionFactoryBean#setJtaTransactionManager
  * @see org.springframework.transaction.jta.JtaTransactionManager#setTransactionManager
+ * @deprecated as of Spring 4.3, in favor of Hibernate 4.x/5.x
  */
+@Deprecated
 public class LocalTransactionManagerLookup implements TransactionManagerLookup {
 
 	private final TransactionManager transactionManager;

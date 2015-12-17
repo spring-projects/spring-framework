@@ -37,7 +37,9 @@ import org.springframework.util.Assert;
  * @since 1.2
  * @see HibernateTransactionManager
  * @see SessionFactoryUtils
+ * @deprecated as of Spring 4.3, in favor of Hibernate 4.x/5.x
  */
+@Deprecated
 public class SessionHolder extends ResourceHolderSupport {
 
 	private static final Object DEFAULT_KEY = new Object();

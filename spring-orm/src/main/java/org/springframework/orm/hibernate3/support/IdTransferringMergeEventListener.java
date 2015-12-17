@@ -48,7 +48,9 @@ import org.hibernate.persister.entity.EntityPersister;
  * @author Juergen Hoeller
  * @since 1.2
  * @see org.springframework.orm.hibernate3.LocalSessionFactoryBean#setEventListeners(java.util.Map)
+ * @deprecated as of Spring 4.3, in favor of Hibernate 4.x/5.x
  */
+@Deprecated
 @SuppressWarnings({"serial", "rawtypes", "deprecation"})
 public class IdTransferringMergeEventListener extends DefaultMergeEventListener {
 

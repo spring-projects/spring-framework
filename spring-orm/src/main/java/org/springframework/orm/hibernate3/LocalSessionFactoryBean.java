@@ -102,7 +102,9 @@ import org.springframework.util.StringUtils;
  * @see #setJtaTransactionManager
  * @see org.hibernate.SessionFactory#getCurrentSession()
  * @see HibernateTransactionManager
+ * @deprecated as of Spring 4.3, in favor of Hibernate 4.x/5.x
  */
+@Deprecated
 public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implements BeanClassLoaderAware {
 
 	private static final ThreadLocal<DataSource> configTimeDataSourceHolder =

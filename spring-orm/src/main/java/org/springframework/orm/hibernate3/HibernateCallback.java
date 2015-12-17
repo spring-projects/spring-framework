@@ -40,7 +40,9 @@ import org.hibernate.Session;
  * @since 1.2
  * @see HibernateTemplate
  * @see HibernateTransactionManager
+ * @deprecated as of Spring 4.3, in favor of Hibernate 4.x/5.x
  */
+@Deprecated
 public interface HibernateCallback<T> {
 
 	/**

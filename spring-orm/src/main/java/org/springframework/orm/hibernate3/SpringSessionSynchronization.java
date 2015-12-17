@@ -42,7 +42,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  * @since 1.2
  * @see SessionFactoryUtils
  * @see org.springframework.transaction.jta.JtaTransactionManager
+ * @deprecated as of Spring 4.3, in favor of Hibernate 4.x/5.x
  */
+@Deprecated
 class SpringSessionSynchronization implements TransactionSynchronization, Ordered {
 
 	private final SessionHolder sessionHolder;
