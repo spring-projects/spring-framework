@@ -42,6 +42,7 @@ import freemarker.ext.servlet.HttpRequestParametersHashModel;
 import freemarker.ext.servlet.HttpSessionHashModel;
 import freemarker.ext.servlet.ServletContextHashModel;
 import freemarker.template.Configuration;
+import freemarker.template.DefaultObjectWrapperBuilder;
 import freemarker.template.ObjectWrapper;
 import freemarker.template.SimpleHash;
 import freemarker.template.Template;
@@ -186,10 +187,10 @@ public class FreeMarkerView extends AbstractTemplateView {
 	 * {@link ObjectWrapper#DEFAULT_WRAPPER default wrapper} if none specified.
 	 * @see freemarker.template.Configuration#getObjectWrapper()
 	 */
-	@SuppressWarnings("deprecation")
 	protected ObjectWrapper getObjectWrapper() {
 		ObjectWrapper ow = getConfiguration().getObjectWrapper();
-		return (ow != null ? ow : ObjectWrapper.DEFAULT_WRAPPER);
+		return (ow != null ? ow :
+				new DefaultObjectWrapperBuilder(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS).build());
 	}
 
 	/**

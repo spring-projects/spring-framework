@@ -75,7 +75,7 @@ import org.springframework.util.StringUtils;
  * <li><a href="https://github.com/FasterXML/jackson-datatype-joda">jackson-datatype-joda</a>: support for Joda-Time types</li>
  * </ul>
  *
- * <p>Tested against Jackson 2.4, 2.5, 2.6; compatible with Jackson 2.0 and higher.
+ * <p>Compatible with Jackson 2.6 and higher, as of Spring 4.3.
  *
  * @author Sebastien Deleuze
  * @author Juergen Hoeller
@@ -561,7 +561,6 @@ public class Jackson2ObjectMapperBuilder {
 	 * settings. This can be applied to any number of {@code ObjectMappers}.
 	 * @param objectMapper the ObjectMapper to configure
 	 */
-	@SuppressWarnings("deprecation")
 	public void configure(ObjectMapper objectMapper) {
 		Assert.notNull(objectMapper, "ObjectMapper must not be null");
 
@@ -609,13 +608,11 @@ public class Jackson2ObjectMapperBuilder {
 		}
 
 		if (this.filters != null) {
-			// Deprecated as of Jackson 2.6, but just in favor of a fluent variant.
-			objectMapper.setFilters(this.filters);
+			objectMapper.setFilterProvider(this.filters);
 		}
 
 		for (Class<?> target : this.mixIns.keySet()) {
-			// Deprecated as of Jackson 2.5, but just in favor of a fluent variant.
-			objectMapper.addMixInAnnotations(target, this.mixIns.get(target));
+			objectMapper.addMixIn(target, this.mixIns.get(target));
 		}
 
 		if (!this.serializers.isEmpty() || !this.deserializers.isEmpty()) {
@@ -720,15 +717,7 @@ public class Jackson2ObjectMapperBuilder {
 				objectMapper.registerModule(BeanUtils.instantiate(javaTimeModule));
 			}
 			catch (ClassNotFoundException ex) {
-				// jackson-datatype-jsr310 not available or older than 2.6
-				try {
-					Class<? extends Module> jsr310Module = (Class<? extends Module>)
-							ClassUtils.forName("com.fasterxml.jackson.datatype.jsr310.JSR310Module", this.moduleClassLoader);
-					objectMapper.registerModule(BeanUtils.instantiate(jsr310Module));
-				}
-				catch (ClassNotFoundException ex2) {
-					// OK, jackson-datatype-jsr310 not available at all...
-				}
+				// jackson-datatype-jsr310 not available
 			}
 		}
 

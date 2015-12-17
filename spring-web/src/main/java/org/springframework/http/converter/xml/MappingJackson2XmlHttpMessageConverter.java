@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import org.springframework.util.Assert;
  *
  * <p>The default constructor uses the default configuration provided by {@link Jackson2ObjectMapperBuilder}.
  *
- * <p>Compatible with Jackson 2.1 and higher.
+ * <p>Compatible with Jackson 2.6 and higher, as of Spring 4.3.
  *
  * @author Sebastien Deleuze
  * @since 4.1
@@ -72,4 +72,5 @@ public class MappingJackson2XmlHttpMessageConverter extends AbstractJackson2Http
 		Assert.isAssignable(XmlMapper.class, objectMapper.getClass());
 		super.setObjectMapper(objectMapper);
 	}
+
 }

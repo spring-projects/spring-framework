@@ -50,7 +50,7 @@ import org.springframework.util.MimeType;
  * <li>{@link DeserializationFeature#FAIL_ON_UNKNOWN_PROPERTIES} is disabled</li>
  * </ul>
  *
- * <p>Compatible with Jackson 2.1 and higher.
+ * <p>Compatible with Jackson 2.6 and higher, as of Spring 4.3.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -58,11 +58,6 @@ import org.springframework.util.MimeType;
  * @since 4.0
  */
 public class MappingJackson2MessageConverter extends AbstractMessageConverter {
-
-	// Check for Jackson 2.3's overloaded canDeserialize/canSerialize variants with cause reference
-	private static final boolean jackson23Available =
-			ClassUtils.hasMethod(ObjectMapper.class, "canDeserialize", JavaType.class, AtomicReference.class);
-
 
 	private ObjectMapper objectMapper;
 
@@ -146,7 +141,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 			return false;
 		}
 		JavaType javaType = this.objectMapper.constructType(targetClass);
-		if (!jackson23Available || !logger.isWarnEnabled()) {
+		if (!logger.isWarnEnabled()) {
 			return (this.objectMapper.canDeserialize(javaType) && supportsMimeType(message.getHeaders()));
 		}
 		AtomicReference<Throwable> causeRef = new AtomicReference<Throwable>();
@@ -168,7 +163,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 
 	@Override
 	protected boolean canConvertTo(Object payload, MessageHeaders headers) {
-		if (!jackson23Available || !logger.isWarnEnabled()) {
+		if (!logger.isWarnEnabled()) {
 			return (this.objectMapper.canSerialize(payload.getClass()) && supportsMimeType(headers));
 		}
 		AtomicReference<Throwable> causeRef = new AtomicReference<Throwable>();
@@ -195,7 +190,6 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	protected Object convertFromInternal(Message<?> message, Class<?> targetClass, Object conversionHint) {
 		JavaType javaType = this.objectMapper.constructType(targetClass);
 		Object payload = message.getPayload();
@@ -204,7 +198,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 		try {
 			if (payload instanceof byte[]) {
 				if (view != null) {
-					return this.objectMapper.readerWithView(view).withType(javaType).readValue((byte[]) payload);
+					return this.objectMapper.readerWithView(view).forType(javaType).readValue((byte[]) payload);
 				}
 				else {
 					return this.objectMapper.readValue((byte[]) payload, javaType);
@@ -212,7 +206,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 			}
 			else {
 				if (view != null) {
-					return this.objectMapper.readerWithView(view).withType(javaType).readValue(payload.toString());
+					return this.objectMapper.readerWithView(view).forType(javaType).readValue(payload.toString());
 				}
 				else {
 					return this.objectMapper.readValue(payload.toString(), javaType);
