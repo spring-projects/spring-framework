@@ -22,7 +22,6 @@ include "spring-tx"
 include "spring-web"
 include "spring-webmvc"
 include "spring-webmvc-portlet"
-include "spring-webmvc-tiles2"
 include "spring-websocket"
 include "spring-framework-bom"
 
