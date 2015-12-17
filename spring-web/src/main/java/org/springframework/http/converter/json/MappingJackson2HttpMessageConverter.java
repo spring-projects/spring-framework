@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,14 +24,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.MediaType;
 
 /**
- * Implementation of {@link org.springframework.http.converter.HttpMessageConverter HttpMessageConverter} that
- * can read and write JSON using <a href="http://wiki.fasterxml.com/JacksonHome">Jackson 2.x's</a> {@link ObjectMapper}.
+ * Implementation of {@link org.springframework.http.converter.HttpMessageConverter} that can read and
+ * write JSON using <a href="http://wiki.fasterxml.com/JacksonHome">Jackson 2.x's</a> {@link ObjectMapper}.
  *
- * <p>This converter can be used to bind to typed beans, or untyped {@link java.util.HashMap HashMap} instances.
+ * <p>This converter can be used to bind to typed beans, or untyped {@code HashMap} instances.
  *
  * <p>By default, this converter supports {@code application/json} and {@code application/*+json}
- * with {@code UTF-8} character set.
- * This can be overridden by setting the {@link #setSupportedMediaTypes supportedMediaTypes} property.
+ * with {@code UTF-8} character set. This can be overridden by setting the
+ * {@link #setSupportedMediaTypes supportedMediaTypes} property.
  *
  * <p>The default constructor uses the default configuration provided by {@link Jackson2ObjectMapperBuilder}.
  *

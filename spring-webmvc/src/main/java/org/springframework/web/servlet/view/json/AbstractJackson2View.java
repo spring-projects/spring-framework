@@ -123,12 +123,6 @@ public abstract class AbstractJackson2View extends AbstractView {
 	}
 
 	/**
-	 * Set the attribute in the model that should be rendered by this view.
-	 * When set, all other model attributes will be ignored.
-	 */
-	public abstract void setModelKey(String modelKey);
-
-	/**
 	 * Disables caching of the generated JSON.
 	 * <p>Default is {@code true}, which will prevent the client from caching the generated JSON.
 	 */
@@ -188,22 +182,12 @@ public abstract class AbstractJackson2View extends AbstractView {
 	}
 
 	/**
-	 * Filter out undesired attributes from the given model.
-	 * The return value can be either another {@link Map} or a single value object.
-	 * @param model the model, as passed on to {@link #renderMergedOutputModel}
-	 * @return the value to be rendered
-	 */
-	protected abstract Object filterModel(Map<String, Object> model);
-
-	/**
 	 * Write the actual JSON content to the stream.
 	 * @param stream the output stream to use
 	 * @param object the value to be rendered, as returned from {@link #filterModel}
 	 * @throws IOException if writing failed
 	 */
-	protected void writeContent(OutputStream stream, Object object)
-			throws IOException {
-
+	protected void writeContent(OutputStream stream, Object object) throws IOException {
 		JsonGenerator generator = this.objectMapper.getFactory().createGenerator(stream, this.encoding);
 
 		writePrefix(generator, object);
@@ -230,13 +214,27 @@ public abstract class AbstractJackson2View extends AbstractView {
 		generator.flush();
 	}
 
+
+	/**
+	 * Set the attribute in the model that should be rendered by this view.
+	 * When set, all other model attributes will be ignored.
+	 */
+	public abstract void setModelKey(String modelKey);
+
+	/**
+	 * Filter out undesired attributes from the given model.
+	 * The return value can be either another {@link Map} or a single value object.
+	 * @param model the model, as passed on to {@link #renderMergedOutputModel}
+	 * @return the value to be rendered
+	 */
+	protected abstract Object filterModel(Map<String, Object> model);
+
 	/**
 	 * Write a prefix before the main content.
 	 * @param generator the generator to use for writing content.
 	 * @param object the object to write to the output message.
 	 */
 	protected void writePrefix(JsonGenerator generator, Object object) throws IOException {
-
 	}
 
 	/**
@@ -245,7 +243,6 @@ public abstract class AbstractJackson2View extends AbstractView {
 	 * @param object the object to write to the output message.
 	 */
 	protected void writeSuffix(JsonGenerator generator, Object object) throws IOException {
-
 	}
 
 }
