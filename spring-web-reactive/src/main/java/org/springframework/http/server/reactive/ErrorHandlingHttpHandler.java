@@ -20,8 +20,6 @@ import java.util.List;
 
 import org.reactivestreams.Publisher;
 import reactor.Publishers;
-import reactor.core.publisher.convert.RxJava1Converter;
-import rx.Observable;
 
 import org.springframework.util.Assert;
 
@@ -31,6 +29,7 @@ import org.springframework.util.Assert;
  * sequentially until one of them completes successfully.
  *
  * @author Rossen Stoyanchev
+ * @author Stephane Maldini
  */
 public class ErrorHandlingHttpHandler extends HttpHandlerDecorator {
 
@@ -62,12 +61,9 @@ public class ErrorHandlingHttpHandler extends HttpHandlerDecorator {
 	private static Publisher<Void> applyExceptionHandler(Publisher<Void> publisher,
 			HttpExceptionHandler handler, ServerHttpRequest request, ServerHttpResponse response) {
 
-		// see https://github.com/reactor/reactor/issues/580
-
-		Observable<Void> observable = RxJava1Converter.from(publisher).onErrorResumeNext(ex -> {
-			return RxJava1Converter.from(handler.handle(request, response, ex));
+		return Publishers.onErrorResumeNext(publisher, ex -> {
+			return handler.handle(request, response, ex);
 		});
-		return RxJava1Converter.from(observable);
 	}
 
 }
