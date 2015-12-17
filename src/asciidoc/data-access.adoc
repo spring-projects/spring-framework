@@ -334,8 +334,8 @@ the `HibernateTransactionManager` needs a reference to the `SessionFactory`.
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
 ----
-	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
-		<property name="dataSource" ref="dataSource" />
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"/>
 		<property name="mappingResources">
 			<list>
 				<value>org/springframework/samples/petclinic/hibernate/petclinic.hbm.xml</value>
@@ -348,8 +348,8 @@ the `HibernateTransactionManager` needs a reference to the `SessionFactory`.
 		</property>
 	</bean>
 
-	<bean id="txManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
-		<property name="sessionFactory" ref="sessionFactory" />
+	<bean id="txManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory"/>
 	</bean>
 ----
 
@@ -2074,12 +2074,11 @@ the root exception. These exceptions wrap the original exception so there is nev
 risk that one might lose any information as to what might have gone wrong.
 
 In addition to JDBC exceptions, Spring can also wrap Hibernate-specific exceptions,
-converting them from proprietary, checked exceptions (in the case of versions of
-Hibernate prior to Hibernate 3.0), to a set of focused runtime exceptions (the same is
-true for JDO and JPA exceptions). This allows one to handle most persistence exceptions,
-which are non-recoverable, only in the appropriate layers, without having annoying
-boilerplate catch-and-throw blocks and exception declarations in one's DAOs. (One can
-still trap and handle exceptions anywhere one needs to though.) As mentioned above, JDBC
+converting them to a set of focused runtime exceptions (the same is true for JDO and
+JPA exceptions). This allows one to handle most persistence exceptions, which are
+non-recoverable, only in the appropriate layers, without having annoying boilerplate
+catch-and-throw blocks and exception declarations in one's DAOs. (One can still trap
+and handle exceptions anywhere one needs to though.) As mentioned above, JDBC
 exceptions (including database-specific dialects) are also converted to the same
 hierarchy, meaning that one can perform some operations with JDBC within a consistent
 programming model.
@@ -5107,7 +5106,7 @@ exception hierarchies.
 
 [[orm-hibernate]]
 === Hibernate
-We will start with a coverage of http://www.hibernate.org/[Hibernate 3] in a Spring
+We will start with a coverage of http://www.hibernate.org/[Hibernate 5] in a Spring
 environment, using it to demonstrate the approach that Spring takes towards integrating
 O/R mappers. This section will cover many issues in detail and show different variations
 of DAO implementations and transaction demarcation. Most of these patterns can be
@@ -5116,7 +5115,7 @@ chapter will then cover the other ORM technologies, showing briefer examples the
 
 [NOTE]
 ====
-As of Spring 4.0, Spring requires Hibernate 3.6 or later.
+As of Spring 4.0, Spring requires Hibernate 3.6 or later. We recommend Hibernate 5.0+.
 ====
 
 
@@ -5145,7 +5144,7 @@ JDBC `DataSource` and a Hibernate `SessionFactory` on top of it:
 			<property name="password" value=""/>
 		</bean>
 
-		<bean id="mySessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+		<bean id="mySessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
 			<property name="dataSource" ref="myDataSource"/>
 			<property name="mappingResources">
 				<list>
@@ -5181,8 +5180,8 @@ is typically not common outside of an EJB context.
 
 
 [[orm-hibernate-straight]]
-==== Implementing DAOs based on plain Hibernate 3 API
-Hibernate 3 has a feature called contextual sessions, wherein Hibernate itself manages
+==== Implementing DAOs based on plain Hibernate API
+Hibernate has a feature called contextual sessions, wherein Hibernate itself manages
 one current `Session` per transaction. This is roughly equivalent to Spring's
 synchronization of one Hibernate `Session` per transaction. A corresponding DAO
 implementation resembles the following example, based on the plain Hibernate API:
@@ -5251,7 +5250,7 @@ the return of the current `Session` associated with the ongoing JTA transaction,
 This behavior applies regardless of whether you are using Spring's
 `JtaTransactionManager`, EJB container managed transactions (CMTs), or JTA.
 
-In summary: you can implement DAOs based on the plain Hibernate 3 API, while still being
+In summary: you can implement DAOs based on the plain Hibernate API, while still being
 able to participate in Spring-managed transactions.
 
 
@@ -5296,7 +5295,7 @@ XML, for a simple service class:
 		<!-- SessionFactory, DataSource, etc. omitted -->
 
 		<bean id="transactionManager"
-				class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+				class="org.springframework.orm.hibernate5.HibernateTransactionManager">
 			<property name="sessionFactory" ref="sessionFactory"/>
 		</bean>
 
@@ -5398,7 +5397,7 @@ provide is the TransactionManager implementation and a "<tx:annotation-driven/>"
 		<!-- SessionFactory, DataSource, etc. omitted -->
 
 		<bean id="transactionManager"
-				class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+				class="org.springframework.orm.hibernate5.HibernateTransactionManager">
 			<property name="sessionFactory" ref="sessionFactory"/>
 		</bean>
 
@@ -5429,7 +5428,7 @@ and an example for a business method implementation:
 ----
 	<beans>
 
-		<bean id="myTxManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+		<bean id="myTxManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
 			<property name="sessionFactory" ref="mySessionFactory"/>
 		</bean>
 
@@ -5509,7 +5508,7 @@ long as it is using `JtaTransactionManager` as the strategy.
 		<jee:jndi-lookup id="dataSource2" jndi-name="java:comp/env/jdbc/myds2"/>
 
 		<bean id="mySessionFactory1"
-				class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+				class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
 			<property name="dataSource" ref="myDataSource1"/>
 			<property name="mappingResources">
 				<list>
@@ -5525,7 +5524,7 @@ long as it is using `JtaTransactionManager` as the strategy.
 		</bean>
 
 		<bean id="mySessionFactory2"
-				class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+				class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
 			<property name="dataSource" ref="myDataSource2"/>
 			<property name="mappingResources">
 				<list>
