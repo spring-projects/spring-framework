@@ -873,7 +873,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 				new HibernateCallback<Object>() {
 					@Override
 					public Object doInHibernate(Session session) throws HibernateException, SQLException {
-						@SuppressWarnings("deprecation")
 						Connection con = session.connection();
 						DatabaseMetadata metadata = new DatabaseMetadata(con, dialect);
 						String[] sql = getConfiguration().generateSchemaUpdateScript(dialect, metadata);
@@ -919,7 +918,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 				new HibernateCallback<Object>() {
 					@Override
 					public Object doInHibernate(Session session) throws HibernateException, SQLException {
-						@SuppressWarnings("deprecation")
 						Connection con = session.connection();
 						DatabaseMetadata metadata = new DatabaseMetadata(con, dialect, false);
 						getConfiguration().validateSchema(dialect, metadata);
@@ -957,7 +955,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 			new HibernateCallback<Object>() {
 				@Override
 				public Object doInHibernate(Session session) throws HibernateException, SQLException {
-					@SuppressWarnings("deprecation")
 					Connection con = session.connection();
 					String[] sql = getConfiguration().generateDropSchemaScript(dialect);
 					executeSchemaScript(con, sql);
@@ -995,7 +992,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 				new HibernateCallback<Object>() {
 					@Override
 					public Object doInHibernate(Session session) throws HibernateException, SQLException {
-						@SuppressWarnings("deprecation")
 						Connection con = session.connection();
 						String[] sql = getConfiguration().generateSchemaCreationScript(dialect);
 						executeSchemaScript(con, sql);

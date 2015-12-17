@@ -513,7 +513,6 @@ public abstract class SessionFactoryUtils {
 	 * @param entityInterceptor Hibernate entity interceptor, or {@code null} if none
 	 * @return the new Session
 	 */
-	@SuppressWarnings("deprecation")
 	public static Session getNewSession(SessionFactory sessionFactory, Interceptor entityInterceptor) {
 		Assert.notNull(sessionFactory, "No SessionFactory specified");
 

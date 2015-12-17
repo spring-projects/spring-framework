@@ -17,7 +17,6 @@
 package org.springframework.jms.config;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import javax.jms.JMSException;

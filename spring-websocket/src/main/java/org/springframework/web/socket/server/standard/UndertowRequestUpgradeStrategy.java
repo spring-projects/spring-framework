@@ -17,9 +17,7 @@
 package org.springframework.web.socket.server.standard;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -32,6 +30,14 @@ import javax.websocket.Encoder;
 import javax.websocket.Endpoint;
 import javax.websocket.Extension;
 import javax.websocket.server.ServerEndpointConfig;
+
+import org.springframework.http.server.ServerHttpRequest;
+import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
+import org.springframework.web.socket.server.HandshakeFailureException;
+
+import org.xnio.StreamConnection;
 
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.HttpUpgradeListener;
@@ -52,13 +58,6 @@ import io.undertow.websockets.jsr.handshake.JsrHybi07Handshake;
 import io.undertow.websockets.jsr.handshake.JsrHybi08Handshake;
 import io.undertow.websockets.jsr.handshake.JsrHybi13Handshake;
 import io.undertow.websockets.spi.WebSocketHttpExchange;
-import org.xnio.StreamConnection;
-
-import org.springframework.http.server.ServerHttpRequest;
-import org.springframework.http.server.ServerHttpResponse;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.web.socket.server.HandshakeFailureException;
 
 /**
  * A WebSocket {@code RequestUpgradeStrategy} for use with WildFly and its

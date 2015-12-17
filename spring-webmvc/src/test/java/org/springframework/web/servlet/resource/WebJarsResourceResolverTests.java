@@ -29,10 +29,6 @@ import org.springframework.mock.web.test.MockHttpServletRequest;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 /**
  * Unit tests for

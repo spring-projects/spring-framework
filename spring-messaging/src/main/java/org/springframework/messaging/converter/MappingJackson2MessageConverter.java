@@ -38,7 +38,6 @@ import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
 
 /**
@@ -271,7 +270,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 			return extractViewClass((JsonView) conversionHint, conversionHint);
 		}
 		else if (conversionHint instanceof Class) {
-			return (Class) conversionHint;
+			return (Class<?>) conversionHint;
 		}
 
 		// No JSON view specified...

@@ -51,7 +51,7 @@ import org.hibernate.persister.entity.EntityPersister;
  * @deprecated as of Spring 4.3, in favor of Hibernate 4.x/5.x
  */
 @Deprecated
-@SuppressWarnings({"serial", "rawtypes", "deprecation"})
+@SuppressWarnings({"serial", "rawtypes"})
 public class IdTransferringMergeEventListener extends DefaultMergeEventListener {
 
 	/**

@@ -107,7 +107,6 @@ import org.springframework.util.Assert;
  * @deprecated as of Spring 4.3, in favor of Hibernate 4.x/5.x
  */
 @Deprecated
-@SuppressWarnings("deprecation")
 public class HibernateTemplate extends HibernateAccessor implements HibernateOperations {
 
 	private boolean allowCreate = true;

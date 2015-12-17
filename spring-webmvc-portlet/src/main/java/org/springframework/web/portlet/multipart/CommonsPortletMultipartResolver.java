@@ -146,7 +146,6 @@ public class CommonsPortletMultipartResolver extends CommonsFileUploadSupport
 	 * @return the parsing result
 	 * @throws MultipartException if multipart resolution failed.
 	 */
-	@SuppressWarnings("unchecked")
 	protected MultipartParsingResult parseRequest(ActionRequest request) throws MultipartException {
 		String encoding = determineEncoding(request);
 		FileUpload fileUpload = prepareFileUpload(encoding);

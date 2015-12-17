@@ -477,7 +477,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	protected void doBegin(Object transaction, TransactionDefinition definition) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
 
@@ -710,7 +709,6 @@ public class HibernateTransactionManager extends AbstractPlatformTransactionMana
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	protected void doCleanupAfterCompletion(Object transaction) {
 		HibernateTransactionObject txObject = (HibernateTransactionObject) transaction;
 

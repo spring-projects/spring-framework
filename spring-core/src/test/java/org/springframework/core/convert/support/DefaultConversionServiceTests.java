@@ -561,9 +561,9 @@ public class DefaultConversionServiceTests {
 	}
 
 	@Test
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public void convertObjectToCollection() {
-		List<String> result = (List<String>) conversionService.convert(3L, List.class);
+		List result = conversionService.convert(3L, List.class);
 		assertEquals(1, result.size());
 		assertEquals(3L, result.get(0));
 	}

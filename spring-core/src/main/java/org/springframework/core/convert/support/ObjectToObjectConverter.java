@@ -101,7 +101,7 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 				}
 			}
 			else if (member instanceof Constructor) {
-				Constructor<?> ctor = (Constructor) member;
+				Constructor<?> ctor = (Constructor<?>) member;
 				return ctor.newInstance(source);
 			}
 		}
@@ -155,7 +155,7 @@ final class ObjectToObjectConverter implements ConditionalGenericConverter {
 					method.getParameterTypes()[0] == sourceClass);
 		}
 		else if (member instanceof Constructor) {
-			Constructor<?> ctor = (Constructor) member;
+			Constructor<?> ctor = (Constructor<?>) member;
 			return (ctor.getParameterTypes()[0] == sourceClass);
 		}
 		else {
