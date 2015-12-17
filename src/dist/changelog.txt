@@ -3,6 +3,25 @@ SPRING FRAMEWORK CHANGELOG
 http://www.spring.io
 
 
+Changes in version 3.2.16 (2015-12-17)
+-------------------------------------
+
+fixed Jdbc4SqlXmlHandler should return null instead of NPE (SPR-13782)
+fixed AbstractApplicationContext.isRunning throws IllegalStateException when called too early (SPR-13667)
+fixed CommonsMultipartFile.getOriginalFilename() does not strip file path properly (SPR-13662)
+fixed Content-Disposition added for @ResponseBody methods explicitly mapped to ".html" or other extensions (SPR-13629)
+fixed AbstractJdbcCall's compiled variable should be declared as volatile (SPR-13617)
+fixed Content-Disposition header causes download in browser for Spring Boot Actuator endpoints (SPR-13587)
+improved support for Microsoft SQL Server driver version 4 and above (SPR-13772)
+improved BeanFactoryAnnotationUtils.qualifiedBeanOfType should not instantiate all beans of given type before checking qualifier (SPR-13741)
+improved BeansException warn logging after startup failure (SPR-13663)
+improved Content-Disposition with fixed file name "f.txt" so that it's less confusing (SPR-13643)
+improved CallMetaDataContext to avoid NPE for anonymous SqlParameter (SPR-13628)
+improved Content-Disposition header to be skipped when status != 2xx (SPR-13588)
+improved documentation of Jackson2ObjectMapperFactoryBean (SPR-13765)
+improved fix cron trigger example in reference documentation (SPR-10474)
+
+
 Changes in version 3.2.15 (2015-10-15)
 -------------------------------------
 
