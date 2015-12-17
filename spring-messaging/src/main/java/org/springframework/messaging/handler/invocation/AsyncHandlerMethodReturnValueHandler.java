@@ -17,7 +17,6 @@
 package org.springframework.messaging.handler.invocation;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.messaging.Message;
 import org.springframework.util.concurrent.ListenableFuture;
 
 /**

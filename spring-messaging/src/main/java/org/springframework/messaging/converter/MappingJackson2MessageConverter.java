@@ -277,7 +277,7 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 			return extractViewClass((JsonView) conversionHint, conversionHint);
 		}
 		else if (conversionHint instanceof Class) {
-			return (Class) conversionHint;
+			return (Class<?>) conversionHint;
 		}
 
 		// No JSON view specified...

@@ -100,7 +100,6 @@ public class ServletWrappingPortletContext implements PortletContext {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Set<String> getResourcePaths(String path) {
 		return this.servletContext.getResourcePaths(path);
 	}
@@ -116,7 +115,6 @@ public class ServletWrappingPortletContext implements PortletContext {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Enumeration<String> getAttributeNames() {
 		return this.servletContext.getAttributeNames();
 	}
@@ -127,7 +125,6 @@ public class ServletWrappingPortletContext implements PortletContext {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
 	public Enumeration<String> getInitParameterNames() {
 		return this.servletContext.getInitParameterNames();
 	}
