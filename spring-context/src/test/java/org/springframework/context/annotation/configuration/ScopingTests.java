@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +31,9 @@ import org.springframework.aop.scope.ScopedObject;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ConfigurationClassPostProcessor;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.context.support.GenericApplicationContext;
@@ -79,8 +79,7 @@ public class ScopingTests {
 			beanFactory.registerScope(SCOPE, customScope);
 		}
 		beanFactory.registerBeanDefinition("config", new RootBeanDefinition(configClass));
-		GenericApplicationContext ctx = new GenericApplicationContext(beanFactory);
-		ctx.addBeanFactoryPostProcessor(new ConfigurationClassPostProcessor());
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(beanFactory);
 		ctx.refresh();
 		return ctx;
 	}
@@ -222,13 +221,6 @@ public class ScopingTests {
 		assertSame(spouse.getName(), spouseFromBF.getName());
 	}
 
-	@Test
-	public void testScopedConfigurationBeanDefinitionCount() throws Exception {
-		// count the beans
-		// 6 @Beans + 1 Configuration + 2 scoped proxy + 1 importRegistry + 1 enhanced config post processor
-		assertEquals(11, ctx.getBeanDefinitionCount());
-	}
-
 
 	static class Foo {
 
@@ -365,7 +357,7 @@ public class ScopingTests {
 
 		@Override
 		public void registerDestructionCallback(String name, Runnable callback) {
-			// do nothing
+			throw new IllegalStateException("Not supposed to be called");
 		}
 
 		@Override

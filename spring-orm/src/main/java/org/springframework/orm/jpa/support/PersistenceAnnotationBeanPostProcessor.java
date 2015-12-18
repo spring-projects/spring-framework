@@ -375,6 +375,11 @@ public class PersistenceAnnotationBeanPostProcessor
 		EntityManagerFactoryUtils.closeEntityManager(emToClose);
 	}
 
+	@Override
+	public boolean requiresDestruction(Object bean) {
+		return this.extendedEntityManagersToClose.containsKey(bean);
+	}
+
 
 	private InjectionMetadata findPersistenceMetadata(String beanName, final Class<?> clazz, PropertyValues pvs) {
 		// Fall back to class name as cache key, for backwards compatibility with custom callers.

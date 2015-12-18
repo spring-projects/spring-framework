@@ -136,7 +136,7 @@ public class InitDestroyAnnotationBeanPostProcessor
 			throw new BeanCreationException(beanName, "Invocation of init method failed", ex.getTargetException());
 		}
 		catch (Throwable ex) {
-			throw new BeanCreationException(beanName, "Couldn't invoke init method", ex);
+			throw new BeanCreationException(beanName, "Failed to invoke init method", ex);
 		}
 		return bean;
 	}
@@ -162,8 +162,13 @@ public class InitDestroyAnnotationBeanPostProcessor
 			}
 		}
 		catch (Throwable ex) {
-			logger.error("Couldn't invoke destroy method on bean with name '" + beanName + "'", ex);
+			logger.error("Failed to invoke destroy method on bean with name '" + beanName + "'", ex);
 		}
+	}
+
+	@Override
+	public boolean requiresDestruction(Object bean) {
+		return findLifecycleMetadata(bean.getClass()).hasDestroyMethods();
 	}
 
 
@@ -308,17 +313,23 @@ public class InitDestroyAnnotationBeanPostProcessor
 		}
 
 		public void invokeDestroyMethods(Object target, String beanName) throws Throwable {
-			Collection<LifecycleElement> destroyMethodsToIterate =
+			Collection<LifecycleElement> destroyMethodsToUse =
 					(this.checkedDestroyMethods != null ? this.checkedDestroyMethods : this.destroyMethods);
-			if (!destroyMethodsToIterate.isEmpty()) {
+			if (!destroyMethodsToUse.isEmpty()) {
 				boolean debug = logger.isDebugEnabled();
-				for (LifecycleElement element : destroyMethodsToIterate) {
+				for (LifecycleElement element : destroyMethodsToUse) {
 					if (debug) {
 						logger.debug("Invoking destroy method on bean '" + beanName + "': " + element.getMethod());
 					}
 					element.invoke(target);
 				}
 			}
+		}
+
+		public boolean hasDestroyMethods() {
+			Collection<LifecycleElement> destroyMethodsToUse =
+					(this.checkedDestroyMethods != null ? this.checkedDestroyMethods : this.destroyMethods);
+			return !destroyMethodsToUse.isEmpty();
 		}
 	}
 
