@@ -138,7 +138,7 @@ public class ContentCachingResponseWrapper extends HttpServletResponseWrapper {
 	// Overrides Servlet 3.1 setContentLengthLong(long) at runtime
 	public void setContentLengthLong(long len) {
 		if (len > Integer.MAX_VALUE) {
-			throw new IllegalArgumentException("Content-Length exceeds ShallowEtagHeaderFilter's maximum (" +
+			throw new IllegalArgumentException("Content-Length exceeds ContentCachingResponseWrapper's maximum (" +
 					Integer.MAX_VALUE + "): " + len);
 		}
 		int lenInt = (int) len;
