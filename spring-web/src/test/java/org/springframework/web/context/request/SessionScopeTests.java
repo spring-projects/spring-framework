@@ -172,6 +172,11 @@ public class SessionScopeTests {
 		@Override
 		public void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException {
 		}
+
+		@Override
+		public boolean requiresDestruction(Object bean) {
+			return true;
+		}
 	}
 
 
@@ -194,6 +199,11 @@ public class SessionScopeTests {
 			if (bean instanceof BeanNameAware) {
 				((BeanNameAware) bean).setBeanName(null);
 			}
+		}
+
+		@Override
+		public boolean requiresDestruction(Object bean) {
+			return true;
 		}
 	}
 
