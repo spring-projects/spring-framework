@@ -16,8 +16,8 @@
 
 package org.springframework.cache.caffeine;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.CacheLoader;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -29,9 +29,9 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
+ * @author Ben Manes
  * @author Juergen Hoeller
  * @author Stephane Nicoll
- * @author Ben Manes
  */
 public class CaffeineCacheManagerTests {
 
@@ -138,7 +138,7 @@ public class CaffeineCacheManagerTests {
 		CaffeineCacheManager cm = new CaffeineCacheManager("c1");
 		Cache cache1 = cm.getCache("c1");
 
-		CacheLoader<Object,Object> loader = mockCacheLoader();
+		CacheLoader<Object, Object> loader = mockCacheLoader();
 		cm.setCacheLoader(loader);
 		Cache cache1x = cm.getCache("c1");
 		assertTrue(cache1x != cache1);

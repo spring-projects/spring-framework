@@ -18,10 +18,10 @@ package org.springframework.cache.caffeine;
 
 import java.util.function.Function;
 
+import com.github.benmanes.caffeine.cache.LoadingCache;
+
 import org.springframework.cache.support.AbstractValueAdaptingCache;
 import org.springframework.util.Assert;
-
-import com.github.benmanes.caffeine.cache.LoadingCache;
 
 /**
  * Spring {@link org.springframework.cache.Cache} adapter implementation
@@ -29,10 +29,10 @@ import com.github.benmanes.caffeine.cache.LoadingCache;
  *
  * <p>Requires Caffeine 2.0 or higher.
  *
+ * @author Ben Manes
  * @author Juergen Hoeller
  * @author Stephane Nicoll
- * @author Ben Manes
- * @since 4.0
+ * @since 4.3
  */
 public class CaffeineCache extends AbstractValueAdaptingCache {
 

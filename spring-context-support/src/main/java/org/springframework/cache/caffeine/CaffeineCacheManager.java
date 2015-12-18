@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,13 +23,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.github.benmanes.caffeine.cache.CacheLoader;
+import com.github.benmanes.caffeine.cache.Caffeine;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
-
-import com.github.benmanes.caffeine.cache.CacheLoader;
-import com.github.benmanes.caffeine.cache.Caffeine;
 
 /**
  * {@link CacheManager} implementation that lazily builds {@link CaffeineCache}
@@ -43,10 +43,10 @@ import com.github.benmanes.caffeine.cache.Caffeine;
  *
  * <p>Requires Caffeine 2.0 or higher.
  *
+ * @author Ben Manes
  * @author Juergen Hoeller
  * @author Stephane Nicoll
- * @author Ben Manes
- * @since 4.0
+ * @since 4.3
  * @see CaffeineCache
  */
 public class CaffeineCacheManager implements CacheManager {
@@ -101,7 +101,7 @@ public class CaffeineCacheManager implements CacheManager {
 	 * Set the Caffeine to use for building each individual
 	 * {@link CaffeineCache} instance.
 	 * @see #createNativeCaffeineCache
-	 * @see com.github.benmanes.caffeine.cache.CacheBuilder#build()
+	 * @see com.github.benmanes.caffeine.cache.Caffeine#build()
 	 */
 	public void setCaffeine(Caffeine<Object, Object> cacheBuilder) {
 		Assert.notNull(cacheBuilder, "Caffeine must not be null");

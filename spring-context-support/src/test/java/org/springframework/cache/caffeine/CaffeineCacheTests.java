@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,12 +26,13 @@ import org.springframework.cache.Cache;
 import static org.junit.Assert.*;
 
 /**
- * @author Stephane Nicoll
  * @author Ben Manes
+ * @author Stephane Nicoll
  */
 public class CaffeineCacheTests extends AbstractCacheTests<CaffeineCache> {
 
 	private com.github.benmanes.caffeine.cache.Cache<Object, Object> nativeCache;
+
 	private CaffeineCache cache;
 
 	@Before
