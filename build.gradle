@@ -28,6 +28,7 @@ configure(allprojects) { project ->
 	version = qualifyVersionIfNecessary(version)
 
 	ext.aspectjVersion       = "1.8.7"
+	ext.caffeineVersion      = "2.0.1"
 	ext.eclipselinkVersion   = "2.4.2"
 	ext.ehcacheVersion       = "2.10.1"
 	ext.ehcachejcacheVersion = "1.0.1"
@@ -647,6 +648,7 @@ project("spring-context-support") {
 		optional("javax.mail:javax.mail-api:${javamailVersion}")
 		optional("javax.cache:cache-api:1.0.0")
 		optional("com.google.guava:guava:${guavaVersion}")
+		optional("com.github.ben-manes.caffeine:caffeine:${caffeineVersion}")
 		optional("net.sf.ehcache:ehcache:${ehcacheVersion}")
 		optional("org.quartz-scheduler:quartz:2.2.2")
 		optional("org.codehaus.fabric3.api:commonj:1.1.0")

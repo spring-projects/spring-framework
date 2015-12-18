@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,10 @@ import org.springframework.cache.CacheManager;
  * <p>Note: This is by no means a sophisticated CacheManager; it comes with no
  * cache configuration options. However, it may be useful for testing or simple
  * caching scenarios. For advanced local caching needs, consider
- * {@link org.springframework.cache.guava.GuavaCacheManager} or
- * {@link org.springframework.cache.ehcache.EhCacheCacheManager}.
+ * {@link org.springframework.cache.jcache.JCacheCacheManager},
+ * {@link org.springframework.cache.ehcache.EhCacheCacheManager},
+ * {@link com.github.benmanes.caffeine.cache.CaffeineCacheManager} or
+ * {@link org.springframework.cache.guava.GuavaCacheManager}.
  *
  * @author Juergen Hoeller
  * @since 3.1
