@@ -95,6 +95,26 @@ public abstract class AbstractController extends WebContentGenerator implements 
 
 
 	/**
+	 * Create a new AbstractController which supports
+	 * HTTP methods GET, HEAD and POST by default.
+	 */
+	public AbstractController() {
+		this(true);
+	}
+
+	/**
+	 * Create a new AbstractController.
+	 * @param restrictDefaultSupportedMethods {@code true} if this
+	 * controller should support HTTP methods GET, HEAD and POST by default,
+	 * or {@code false} if it should be unrestricted
+	 * @since 4.3
+	 */
+	public AbstractController(boolean restrictDefaultSupportedMethods) {
+		super(restrictDefaultSupportedMethods);
+	}
+
+
+	/**
 	 * Set if controller execution should be synchronized on the session,
 	 * to serialize parallel invocations from the same client.
 	 * <p>More specifically, the execution of the {@code handleRequestInternal}

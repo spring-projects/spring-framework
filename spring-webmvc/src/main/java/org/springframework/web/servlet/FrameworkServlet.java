@@ -838,7 +838,8 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	protected void service(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		if (HttpMethod.PATCH.matches(request.getMethod())) {
+		HttpMethod httpMethod = HttpMethod.resolve(request.getMethod());
+		if (HttpMethod.PATCH == httpMethod || httpMethod == null) {
 			processRequest(request, response);
 		}
 		else {

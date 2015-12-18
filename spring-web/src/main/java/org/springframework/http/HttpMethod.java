@@ -61,7 +61,7 @@ public enum HttpMethod {
 	 * @since 4.2.4
 	 */
 	public boolean matches(String method) {
-		return name().equals(method);
+		return (this == resolve(method));
 	}
 
 }
