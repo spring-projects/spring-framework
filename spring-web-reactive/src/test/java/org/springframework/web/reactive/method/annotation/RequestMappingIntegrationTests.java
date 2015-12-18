@@ -25,6 +25,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.junit.Test;
 import org.reactivestreams.Publisher;
+import reactor.Publishers;
 import reactor.io.buffer.Buffer;
 import reactor.rx.Promise;
 import reactor.rx.Promises;
