@@ -23,7 +23,6 @@ import javax.inject.Provider;
 
 import org.junit.Test;
 
-import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -90,7 +89,7 @@ public class AutowiredConfigurationTests {
 	}
 
 	@Test
-	public void testAutowiredConfigurationConstructorsAreSupported() {
+	public void testAutowiredSingleConstructorSupported() {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(
 				new ClassPathResource("annotation-config.xml", AutowiredConstructorConfig.class));
@@ -98,8 +97,19 @@ public class AutowiredConfigurationTests {
 		ctx.registerBeanDefinition("config1", new RootBeanDefinition(AutowiredConstructorConfig.class));
 		ctx.registerBeanDefinition("config2", new RootBeanDefinition(ColorConfig.class));
 		ctx.refresh();
-		assertSame(ctx.getBean(AutowiredConstructorConfig.class).colour,
-				ctx.getBean(Colour.class));
+		assertSame(ctx.getBean(AutowiredConstructorConfig.class).colour, ctx.getBean(Colour.class));
+	}
+
+	@Test
+	public void testAutowiredAnnotatedConstructorSupported() {
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(
+				new ClassPathResource("annotation-config.xml", MultipleConstructorConfig.class));
+		GenericApplicationContext ctx = new GenericApplicationContext(factory);
+		ctx.registerBeanDefinition("config1", new RootBeanDefinition(MultipleConstructorConfig.class));
+		ctx.registerBeanDefinition("config2", new RootBeanDefinition(ColorConfig.class));
+		ctx.refresh();
+		assertSame(ctx.getBean(MultipleConstructorConfig.class).colour, ctx.getBean(Colour.class));
 	}
 
 	@Test
@@ -223,9 +233,25 @@ public class AutowiredConfigurationTests {
 
 		Colour colour;
 
-		@Autowired
+		// @Autowired
 		AutowiredConstructorConfig(Colour colour) {
 			this.colour = colour;
+		}
+	}
+
+
+	@Configuration
+	static class MultipleConstructorConfig {
+
+		Colour colour;
+
+		@Autowired
+		MultipleConstructorConfig(Colour colour) {
+			this.colour = colour;
+		}
+
+		MultipleConstructorConfig(String test) {
+			this.colour = new Colour(test);
 		}
 	}
 

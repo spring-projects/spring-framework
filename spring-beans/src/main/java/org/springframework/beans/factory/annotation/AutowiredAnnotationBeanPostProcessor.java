@@ -271,6 +271,19 @@ public class AutowiredAnnotationBeanPostProcessor extends InstantiationAwareBean
 					Constructor<?> defaultConstructor = null;
 					for (Constructor<?> candidate : rawCandidates) {
 						AnnotationAttributes ann = findAutowiredAnnotation(candidate);
+						if (ann == null) {
+							Class<?> userClass = ClassUtils.getUserClass(beanClass);
+							if (userClass != beanClass) {
+								try {
+									Constructor<?> superCtor =
+											userClass.getDeclaredConstructor(candidate.getParameterTypes());
+									ann = findAutowiredAnnotation(superCtor);
+								}
+								catch (NoSuchMethodException ex) {
+									// Simply proceed, no equivalent superclass constructor found...
+								}
+							}
+						}
 						if (ann != null) {
 							if (requiredConstructor != null) {
 								throw new BeanCreationException(beanName,
