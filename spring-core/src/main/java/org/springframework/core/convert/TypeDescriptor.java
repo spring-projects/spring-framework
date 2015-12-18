@@ -468,7 +468,7 @@ public class TypeDescriptor implements Serializable {
 			return false;
 		}
 		for (Annotation ann : getAnnotations()) {
-			if (!other.hasAnnotation(ann.annotationType())) {
+			if (!ann.equals(other.getAnnotation(ann.annotationType()))) {
 				return false;
 			}
 		}
