@@ -262,6 +262,25 @@ public class CollectionToCollectionConverterTests {
 	}
 
 
+	public ArrayList<Integer> scalarListTarget;
+
+	public List<Integer> emptyListTarget;
+
+	public LinkedList<Integer> emptyListDifferentTarget;
+
+	public List<List<List<Integer>>> objectToCollection;
+
+	public List<String> strings;
+
+	public List<?> list = Collections.emptyList();
+
+	public Collection<?> wildcardCollection = Collections.emptyList();
+
+	public List<Resource> resources;
+
+	public EnumSet<MyEnum> enumSet;
+
+
 	public static abstract class BaseResource implements Resource {
 
 		@Override
@@ -330,25 +349,6 @@ public class CollectionToCollectionConverterTests {
 	}
 
 
-	public static enum MyEnum {A, B, C}
-
-
-	public ArrayList<Integer> scalarListTarget;
-
-	public List<Integer> emptyListTarget;
-
-	public LinkedList<Integer> emptyListDifferentTarget;
-
-	public List<List<List<Integer>>> objectToCollection;
-
-	public List<String> strings;
-
-	public List<?> list = Collections.emptyList();
-
-	public Collection<?> wildcardCollection = Collections.emptyList();
-
-	public List<Resource> resources;
-
-	public EnumSet<MyEnum> enumSet;
+	public enum MyEnum {A, B, C}
 
 }
