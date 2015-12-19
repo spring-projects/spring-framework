@@ -70,7 +70,7 @@ import org.springframework.test.context.web.ServletTestExecutionListener;
  * and specify your runner of choice via {@link RunWith @RunWith(...)}.</li>
  * </ul>
  *
- * <p><strong>NOTE:</strong> As of Spring Framework 4.1, this class requires JUnit 4.9 or higher.
+ * <p><strong>NOTE:</strong> As of Spring Framework 4.3, this class requires JUnit 4.12 or higher.
  *
  * @author Sam Brannen
  * @since 2.5

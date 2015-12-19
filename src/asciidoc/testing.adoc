@@ -3623,8 +3623,8 @@ be automatically rolled back by the `TransactionalTestExecutionListener` (see
 [[testcontext-junit4-runner]]
 ===== Spring JUnit Runner
 
-The __Spring TestContext Framework__ offers full integration with JUnit 4.9+ through a
-custom runner (supported on JUnit 4.9 through 4.12). By annotating test classes with
+The __Spring TestContext Framework__ offers full integration with JUnit 4 through a
+custom runner (supported on JUnit 4.12 or higher). By annotating test classes with
 `@RunWith(SpringJUnit4ClassRunner.class)`, developers can implement standard JUnit-based
 unit and integration tests and simultaneously reap the benefits of the TestContext
 framework such as support for loading application contexts, dependency injection of test
@@ -3657,7 +3657,7 @@ public class SimpleTest {
 ===== Spring JUnit Rules
 
 The `org.springframework.test.context.junit4.rules` package provides the following JUnit
-rules.
+4 rules (supported on JUnit 4.12 or higher).
 
 * `SpringClassRule`
 * `SpringMethodRule`
@@ -3701,14 +3701,14 @@ public class IntegrationTest {
 ===== JUnit support classes
 
 The `org.springframework.test.context.junit4` package provides the following support
-classes for JUnit-based test cases.
+classes for JUnit-based test cases (supported on JUnit 4.12 or higher).
 
 * `AbstractJUnit4SpringContextTests`
 * `AbstractTransactionalJUnit4SpringContextTests`
 
 `AbstractJUnit4SpringContextTests` is an abstract base test class that integrates the
 __Spring TestContext Framework__ with explicit `ApplicationContext` testing support in
-a JUnit 4.9+ environment. When you extend `AbstractJUnit4SpringContextTests`, you can
+a JUnit 4 environment. When you extend `AbstractJUnit4SpringContextTests`, you can
 access a `protected` `applicationContext` instance variable that can be used to perform
 explicit bean lookups or to test the state of the context as a whole.
 

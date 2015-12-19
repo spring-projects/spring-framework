@@ -73,7 +73,7 @@ import org.springframework.transaction.annotation.Transactional;
  * and specify your runner of choice via {@link org.junit.runner.RunWith @RunWith(...)}.</li>
  * </ul>
  *
- * <p><strong>NOTE:</strong> As of Spring Framework 4.1, this class requires JUnit 4.9 or higher.
+ * <p><strong>NOTE:</strong> As of Spring Framework 4.3, this class requires JUnit 4.12 or higher.
  *
  * @author Sam Brannen
  * @author Juergen Hoeller

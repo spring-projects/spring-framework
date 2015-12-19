@@ -622,3 +622,11 @@ public @interface MyTestConfig {
   support for date header formatting via the `getDateHeader` and `setDateHeader`
   methods.
 
+
+
+[[new-in-4.3]]
+== New Features and Enhancements in Spring Framework 4.3
+
+=== Testing Improvements
+
+* The JUnit support in the _Spring TestContext Framework_ now requires JUnit 4.12 or higher.
