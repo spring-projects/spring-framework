@@ -38,6 +38,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.type.filter.TypeFilter;
 
 /**
@@ -92,6 +93,8 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	private String[] annotatedPackages;
 
 	private String[] packagesToScan;
+
+	private AsyncTaskExecutor bootstrapExecutor;
 
 	private ResourcePatternResolver resourcePatternResolver = new PathMatchingResourcePatternResolver();
 
@@ -298,6 +301,23 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 		this.packagesToScan = packagesToScan;
 	}
 
+	/**
+	 * Specify an asynchronous executor for background bootstrapping,
+	 * e.g. a {@link org.springframework.core.task.SimpleAsyncTaskExecutor}.
+	 * <p>{@code SessionFactory} initialization will then switch into background
+	 * bootstrap mode, with a {@code SessionFactory} proxy immediately returned for
+	 * injection purposes instead of waiting for Hibernate's bootstrapping to complete.
+	 * However, note that the first actual call to a {@code SessionFactory} method will
+	 * then block until Hibernate's bootstrapping completed, if not ready by then.
+	 * For maximum benefit, make sure to avoid early {@code SessionFactory} calls
+	 * in init methods of related beans, even for metadata introspection purposes.
+	 * @see LocalSessionFactoryBuilder#buildSessionFactory(AsyncTaskExecutor)
+	 * @since 4.3
+	 */
+	public void setBootstrapExecutor(AsyncTaskExecutor bootstrapExecutor) {
+		this.bootstrapExecutor = bootstrapExecutor;
+	}
+
 	@Override
 	public void setResourceLoader(ResourceLoader resourceLoader) {
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
@@ -413,7 +433,8 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 * @see LocalSessionFactoryBuilder#buildSessionFactory
 	 */
 	protected SessionFactory buildSessionFactory(LocalSessionFactoryBuilder sfb) {
-		return sfb.buildSessionFactory();
+		return (this.bootstrapExecutor != null ? sfb.buildSessionFactory(this.bootstrapExecutor) :
+				sfb.buildSessionFactory());
 	}
 
 	/**

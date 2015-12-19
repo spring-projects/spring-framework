@@ -17,9 +17,16 @@
 package org.springframework.orm.hibernate5;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Collections;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import javax.persistence.AttributeConverter;
 import javax.persistence.Converter;
 import javax.persistence.Embeddable;
@@ -30,15 +37,18 @@ import javax.transaction.TransactionManager;
 
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
+import org.hibernate.SessionFactory;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
+import org.hibernate.engine.spi.SessionFactoryImplementor;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternUtils;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
@@ -261,6 +271,81 @@ public class LocalSessionFactoryBuilder extends Configuration {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Build the Hibernate {@code SessionFactory} through background bootstrapping,
+	 * using the given executor for a parallel initialization phase
+	 * (e.g. a {@link org.springframework.core.task.SimpleAsyncTaskExecutor}).
+	 * <p>{@code SessionFactory} initialization will then switch into background
+	 * bootstrap mode, with a {@code SessionFactory} proxy immediately returned for
+	 * injection purposes instead of waiting for Hibernate's bootstrapping to complete.
+	 * However, note that the first actual call to a {@code SessionFactory} method will
+	 * then block until Hibernate's bootstrapping completed, if not ready by then.
+	 * For maximum benefit, make sure to avoid early {@code SessionFactory} calls
+	 * in init methods of related beans, even for metadata introspection purposes.
+	 * @since 4.3
+	 * @see #buildSessionFactory()
+	 */
+	public SessionFactory buildSessionFactory(AsyncTaskExecutor bootstrapExecutor) {
+		Assert.notNull(bootstrapExecutor, "AsyncTaskExecutor must not be null");
+		return (SessionFactory) Proxy.newProxyInstance(this.resourcePatternResolver.getClassLoader(),
+				new Class<?>[] {SessionFactoryImplementor.class},
+				new BootstrapSessionFactoryInvocationHandler(bootstrapExecutor));
+	}
+
+
+	/**
+	 * Proxy invocation handler for background bootstrapping, only enforcing
+	 * a fully initialized target {@code SessionFactory} when actually needed.
+	 */
+	private class BootstrapSessionFactoryInvocationHandler implements InvocationHandler {
+
+		private final Future<SessionFactory> sessionFactoryFuture;
+
+		public BootstrapSessionFactoryInvocationHandler(AsyncTaskExecutor bootstrapExecutor) {
+			this.sessionFactoryFuture = bootstrapExecutor.submit(new Callable<SessionFactory>() {
+				@Override
+				public SessionFactory call() throws Exception {
+					return buildSessionFactory();
+				}
+			});
+		}
+
+		@Override
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+			try {
+				if (method.getName().equals("equals")) {
+					// Only consider equal when proxies are identical.
+					return (proxy == args[0]);
+				}
+				else if (method.getName().equals("hashCode")) {
+					// Use hashCode of EntityManagerFactory proxy.
+					return System.identityHashCode(proxy);
+				}
+				else if (method.getName().equals("getProperties")) {
+					return getProperties();
+				}
+				// Regular delegation to the target SessionFactory,
+				// enforcing its full initialization...
+				return method.invoke(getSessionFactory(), args);
+			}
+			catch (InvocationTargetException ex) {
+				throw ex.getTargetException();
+			}
+		}
+
+		private SessionFactory getSessionFactory() {
+			try {
+				return this.sessionFactoryFuture.get();
+			}
+			catch (InterruptedException ex) {
+				throw new IllegalStateException("Interrupted during initialization of Hibernate SessionFactory", ex);
+			}
+			catch (ExecutionException ex) {
+				throw new IllegalStateException("Failed to asynchronously initialize Hibernate SessionFactory", ex);
+			}
+		}
 	}
 
 }
