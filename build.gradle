@@ -7,6 +7,7 @@ buildscript {
 		classpath("org.asciidoctor:asciidoctor-gradle-plugin:1.5.2")
 		classpath("io.spring.gradle:docbook-reference-plugin:0.3.1")
 		classpath("ws.antonov.gradle.plugins:gradle-plugin-protobuf:0.9.1")
+		classpath("com.github.ben-manes:gradle-versions-plugin:0.11.3")
 	}
 }
 
@@ -84,6 +85,7 @@ configure(allprojects) { project ->
 	apply plugin: "propdeps"
 	apply plugin: "java"
 	apply plugin: "test-source-set-dependencies"
+	apply plugin: "com.github.ben-manes.versions"
 	apply from: "${gradleScriptDir}/ide.gradle"
 
 	configurations {
