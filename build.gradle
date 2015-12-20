@@ -28,7 +28,7 @@ configure(allprojects) { project ->
 	version = qualifyVersionIfNecessary(version)
 
 	ext.aspectjVersion       = "1.8.7"
-	ext.caffeineVersion      = "2.0.1"
+	ext.caffeineVersion      = "2.0.3"
 	ext.eclipselinkVersion   = "2.4.2"
 	ext.ehcacheVersion       = "2.10.1"
 	ext.ehcachejcacheVersion = "1.0.1"
