@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -81,6 +81,8 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	public static final String DEFAULT_COOKIE_NAME = CookieLocaleResolver.class.getName() + ".LOCALE";
 
 
+	private boolean languageTagCompliant = false;
+
 	private Locale defaultLocale;
 
 	private TimeZone defaultTimeZone;
@@ -92,6 +94,30 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	 */
 	public CookieLocaleResolver() {
 		setCookieName(DEFAULT_COOKIE_NAME);
+	}
+
+
+	/**
+	 * Specify whether this resolver's cookies should be compliant with BCP 47
+	 * language tags instead of Java's legacy locale specification format.
+	 * The default is {@code false}.
+	 * <p>Note: This mode requires JDK 7 or higher. Set this flag to {@code true}
+	 * for BCP 47 compliance on JDK 7+ only.
+	 * @since 4.3
+	 * @see Locale#forLanguageTag(String)
+	 * @see Locale#toLanguageTag()
+	 */
+	public void setLanguageTagCompliant(boolean languageTagCompliant) {
+		this.languageTagCompliant = languageTagCompliant;
+	}
+
+	/**
+	 * Return whether this resolver's cookies should be compliant with BCP 47
+	 * language tags instead of Java's legacy locale specification format.
+	 * @since 4.3
+	 */
+	public boolean isLanguageTagCompliant() {
+		return this.languageTagCompliant;
 	}
 
 	/**
@@ -111,6 +137,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 
 	/**
 	 * Set a fixed TimeZone that this resolver will return if no cookie found.
+	 * @since 4.0
 	 */
 	public void setDefaultTimeZone(TimeZone defaultTimeZone) {
 		this.defaultTimeZone = defaultTimeZone;
@@ -119,6 +146,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	/**
 	 * Return the fixed TimeZone that this resolver will return if no cookie found,
 	 * if any.
+	 * @since 4.0
 	 */
 	protected TimeZone getDefaultTimeZone() {
 		return this.defaultTimeZone;
@@ -161,7 +189,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 					localePart = value.substring(0, spaceIndex);
 					timeZonePart = value.substring(spaceIndex + 1);
 				}
-				locale = (!"-".equals(localePart) ? StringUtils.parseLocaleString(localePart) : null);
+				locale = (!"-".equals(localePart) ? parseLocaleValue(localePart) : null);
 				if (timeZonePart != null) {
 					timeZone = StringUtils.parseTimeZoneString(timeZonePart);
 				}
@@ -171,7 +199,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 				}
 			}
 			request.setAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME,
-					(locale != null ? locale: determineDefaultLocale(request)));
+					(locale != null ? locale : determineDefaultLocale(request)));
 			request.setAttribute(TIME_ZONE_REQUEST_ATTRIBUTE_NAME,
 					(timeZone != null ? timeZone : determineDefaultTimeZone(request)));
 		}
@@ -191,17 +219,44 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 			if (localeContext instanceof TimeZoneAwareLocaleContext) {
 				timeZone = ((TimeZoneAwareLocaleContext) localeContext).getTimeZone();
 			}
-			addCookie(response, (locale != null ? locale : "-") + (timeZone != null ? ' ' + timeZone.getID() : ""));
+			addCookie(response,
+					(locale != null ? toLocaleValue(locale) : "-") + (timeZone != null ? ' ' + timeZone.getID() : ""));
 		}
 		else {
 			removeCookie(response);
 		}
 		request.setAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME,
-				(locale != null ? locale: determineDefaultLocale(request)));
+				(locale != null ? locale : determineDefaultLocale(request)));
 		request.setAttribute(TIME_ZONE_REQUEST_ATTRIBUTE_NAME,
 				(timeZone != null ? timeZone : determineDefaultTimeZone(request)));
 	}
 
+
+	/**
+	 * Parse the given locale value coming from an incoming cookie.
+	 * <p>The default implementation calls {@link StringUtils#parseLocaleString(String)}
+	 * or JDK 7's {@link Locale#forLanguageTag(String)}, depending on the
+	 * {@link #setLanguageTagCompliant "languageTagCompliant"} configuration property.
+	 * @param locale the locale value to parse
+	 * @return the corresponding {@code Locale} instance
+	 * @since 4.3
+	 */
+	protected Locale parseLocaleValue(String locale) {
+		return (isLanguageTagCompliant() ? Locale.forLanguageTag(locale) : StringUtils.parseLocaleString(locale));
+	}
+
+	/**
+	 * Render the given locale as a text value for inclusion in a cookie.
+	 * <p>The default implementation calls {@link Locale#toString()}
+	 * or JDK 7's {@link Locale#toLanguageTag()}, depending on the
+	 * {@link #setLanguageTagCompliant "languageTagCompliant"} configuration property.
+	 * @param locale the locale to stringify
+	 * @return a String representation for the given locale
+	 * @since 4.3
+	 */
+	protected String toLocaleValue(Locale locale) {
+		return (isLanguageTagCompliant() ? locale.toLanguageTag() : locale.toString());
+	}
 
 	/**
 	 * Determine the default locale for the given request,

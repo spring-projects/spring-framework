@@ -16,6 +16,7 @@
 
 package org.springframework.web.servlet.i18n;
 
+import java.util.Locale;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -53,6 +54,8 @@ public class LocaleChangeInterceptor extends HandlerInterceptorAdapter {
 	private String[] httpMethods;
 
 	private boolean ignoreInvalidLocale = false;
+
+	private boolean languageTagCompliant = false;
 
 
 	/**
@@ -104,6 +107,29 @@ public class LocaleChangeInterceptor extends HandlerInterceptorAdapter {
 		return this.ignoreInvalidLocale;
 	}
 
+	/**
+	 * Specify whether to parse request parameter values as BCP 47 language tags
+	 * instead of Java's legacy locale specification format.
+	 * The default is {@code false}.
+	 * <p>Note: This mode requires JDK 7 or higher. Set this flag to {@code true}
+	 * for BCP 47 compliance on JDK 7+ only.
+	 * @since 4.3
+	 * @see Locale#forLanguageTag(String)
+	 * @see Locale#toLanguageTag()
+	 */
+	public void setLanguageTagCompliant(boolean languageTagCompliant) {
+		this.languageTagCompliant = languageTagCompliant;
+	}
+
+	/**
+	 * Return whether to use BCP 47 language tags instead of Java's legacy
+	 * locale specification format.
+	 * @since 4.3
+	 */
+	public boolean isLanguageTagCompliant() {
+		return this.languageTagCompliant;
+	}
+
 
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
@@ -118,7 +144,7 @@ public class LocaleChangeInterceptor extends HandlerInterceptorAdapter {
 							"No LocaleResolver found: not in a DispatcherServlet request?");
 				}
 				try {
-					localeResolver.setLocale(request, response, StringUtils.parseLocaleString(newLocale));
+					localeResolver.setLocale(request, response, parseLocaleValue(newLocale));
 				}
 				catch (IllegalArgumentException ex) {
 					if (isIgnoreInvalidLocale()) {
@@ -145,6 +171,19 @@ public class LocaleChangeInterceptor extends HandlerInterceptorAdapter {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Parse the given locale value as coming from a request parameter.
+	 * <p>The default implementation calls {@link StringUtils#parseLocaleString(String)}
+	 * or JDK 7's {@link Locale#forLanguageTag(String)}, depending on the
+	 * {@link #setLanguageTagCompliant "languageTagCompliant"} configuration property.
+	 * @param locale the locale value to parse
+	 * @return the corresponding {@code Locale} instance
+	 * @since 4.3
+	 */
+	protected Locale parseLocaleValue(String locale) {
+		return (isLanguageTagCompliant() ? Locale.forLanguageTag(locale) : StringUtils.parseLocaleString(locale));
 	}
 
 }
