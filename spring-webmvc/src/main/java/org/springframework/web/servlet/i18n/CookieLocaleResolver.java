@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.context.i18n.LocaleContext;
 import org.springframework.context.i18n.SimpleLocaleContext;
 import org.springframework.context.i18n.TimeZoneAwareLocaleContext;
+import org.springframework.lang.UsesJava7;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.LocaleContextResolver;
 import org.springframework.web.servlet.LocaleResolver;
@@ -241,6 +242,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	 * @return the corresponding {@code Locale} instance
 	 * @since 4.3
 	 */
+	@UsesJava7
 	protected Locale parseLocaleValue(String locale) {
 		return (isLanguageTagCompliant() ? Locale.forLanguageTag(locale) : StringUtils.parseLocaleString(locale));
 	}
@@ -254,6 +256,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	 * @return a String representation for the given locale
 	 * @since 4.3
 	 */
+	@UsesJava7
 	protected String toLocaleValue(Locale locale) {
 		return (isLanguageTagCompliant() ? locale.toLanguageTag() : locale.toString());
 	}
