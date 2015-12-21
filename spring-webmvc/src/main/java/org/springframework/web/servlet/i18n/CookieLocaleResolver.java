@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -111,6 +111,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 
 	/**
 	 * Set a fixed TimeZone that this resolver will return if no cookie found.
+	 * @since 4.0
 	 */
 	public void setDefaultTimeZone(TimeZone defaultTimeZone) {
 		this.defaultTimeZone = defaultTimeZone;
@@ -119,6 +120,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 	/**
 	 * Return the fixed TimeZone that this resolver will return if no cookie found,
 	 * if any.
+	 * @since 4.0
 	 */
 	protected TimeZone getDefaultTimeZone() {
 		return this.defaultTimeZone;
@@ -171,7 +173,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 				}
 			}
 			request.setAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME,
-					(locale != null ? locale: determineDefaultLocale(request)));
+					(locale != null ? locale : determineDefaultLocale(request)));
 			request.setAttribute(TIME_ZONE_REQUEST_ATTRIBUTE_NAME,
 					(timeZone != null ? timeZone : determineDefaultTimeZone(request)));
 		}
@@ -197,7 +199,7 @@ public class CookieLocaleResolver extends CookieGenerator implements LocaleConte
 			removeCookie(response);
 		}
 		request.setAttribute(LOCALE_REQUEST_ATTRIBUTE_NAME,
-				(locale != null ? locale: determineDefaultLocale(request)));
+				(locale != null ? locale : determineDefaultLocale(request)));
 		request.setAttribute(TIME_ZONE_REQUEST_ATTRIBUTE_NAME,
 				(timeZone != null ? timeZone : determineDefaultTimeZone(request)));
 	}
