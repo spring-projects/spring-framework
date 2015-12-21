@@ -627,6 +627,12 @@ public @interface MyTestConfig {
 [[new-in-4.3]]
 == New Features and Enhancements in Spring Framework 4.3
 
+=== Core Container Improvements
+
+* It is no longer necessary to specify the `@Autowired` annotation if the target
+  bean only define one constructor.
+
+
 === Testing Improvements
 
 * The JUnit support in the _Spring TestContext Framework_ now requires JUnit 4.12 or higher.

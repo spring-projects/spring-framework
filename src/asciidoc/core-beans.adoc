@@ -4168,7 +4168,40 @@ references and values even when you use the class outside of a container.
 [[beans-autowired-annotation]]
 === @Autowired
 
-As expected, you can apply the `@Autowired` annotation to "traditional" setter methods:
+[NOTE]
+====
+JSR 330's `@Inject` annotation can be used in place of Spring's `@Autowired` annotation
+in the examples below. See <<beans-standard-annotations,here>> for more details.
+====
+
+You can apply the `@Autowired` annotation to constructors:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	public class MovieRecommender {
+
+		private final CustomerPreferenceDao customerPreferenceDao;
+
+		@Autowired
+		public MovieRecommender(CustomerPreferenceDao customerPreferenceDao) {
+			this.customerPreferenceDao = customerPreferenceDao;
+		}
+
+		// ...
+
+	}
+----
+
+[NOTE]
+====
+As of Spring Framework 4.3, the `@Autowired` constructor is no longer necessary if the
+target bean only defines one constructor. If several constructors are available, at
+least one must be annotated to teach the container which one it has to use.
+====
+
+As expected, you can also apply the `@Autowired` annotation to "traditional" setter
+methods:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4186,12 +4219,6 @@ As expected, you can apply the `@Autowired` annotation to "traditional" setter m
 
 	}
 ----
-
-[NOTE]
-====
-JSR 330's `@Inject` annotation can be used in place of Spring's `@Autowired` annotation
-in the examples below. See <<beans-standard-annotations,here>> for more details.
-====
 
 You can also apply the annotation to methods with arbitrary names and/or multiple
 arguments:
@@ -4217,17 +4244,17 @@ arguments:
 	}
 ----
 
-You can apply `@Autowired` to constructors and fields:
+You can apply `@Autowired` to fields as well and even mix it with constructors:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 	public class MovieRecommender {
 
+		private final CustomerPreferenceDao customerPreferenceDao;
+
 		@Autowired
 		private MovieCatalog movieCatalog;
-
-		private CustomerPreferenceDao customerPreferenceDao;
 
 		@Autowired
 		public MovieRecommender(CustomerPreferenceDao customerPreferenceDao) {
