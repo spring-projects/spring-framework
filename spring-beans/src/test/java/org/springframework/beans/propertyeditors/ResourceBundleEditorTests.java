@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2006 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,9 +28,10 @@ import static org.junit.Assert.*;
  * @author Rick Evans
  * @author Chris Beams
  */
-public final class ResourceBundleEditorTests {
+public class ResourceBundleEditorTests {
 
 	private static final String BASE_NAME = ResourceBundleEditorTests.class.getName();
+
 	private static final String MESSAGE_KEY = "punk";
 
 
@@ -94,25 +95,25 @@ public final class ResourceBundleEditorTests {
 		assertEquals("ned", string);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSetAsTextWithNull() throws Exception {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		editor.setAsText(null);
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSetAsTextWithEmptyString() throws Exception {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		editor.setAsText("");
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSetAsTextWithWhiteSpaceString() throws Exception {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		editor.setAsText("   ");
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testSetAsTextWithJustSeparatorString() throws Exception {
 		ResourceBundleEditor editor = new ResourceBundleEditor();
 		editor.setAsText("_");
