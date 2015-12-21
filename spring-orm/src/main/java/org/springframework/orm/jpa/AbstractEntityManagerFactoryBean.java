@@ -366,7 +366,6 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		// application-managed EntityManager proxy that automatically joins
 		// existing transactions.
 		this.entityManagerFactory = createEntityManagerFactoryProxy(this.nativeEntityManagerFactory);
-		System.out.println("Returning: " + System.currentTimeMillis());
 	}
 
 	private EntityManagerFactory buildNativeEntityManagerFactory() {
@@ -381,7 +380,6 @@ public abstract class AbstractEntityManagerFactoryBean implements
 		if (logger.isInfoEnabled()) {
 			logger.info("Initialized JPA EntityManagerFactory for persistence unit '" + getPersistenceUnitName() + "'");
 		}
-		System.out.println("Done: " + System.currentTimeMillis());
 		return emf;
 	}
 
@@ -481,15 +479,16 @@ public abstract class AbstractEntityManagerFactoryBean implements
 			return this.nativeEntityManagerFactory;
 		}
 		else {
-			System.out.println("Requested: " + System.currentTimeMillis());
 			try {
 				return this.nativeEntityManagerFactoryFuture.get();
 			}
 			catch (InterruptedException ex) {
-				throw new IllegalStateException("Interrupted during initialization of native EntityManagerFactory", ex);
+				throw new IllegalStateException("Interrupted during initialization of native EntityManagerFactory: " +
+						ex.getMessage());
 			}
 			catch (ExecutionException ex) {
-				throw new IllegalStateException("Failed to asynchronously initialize native EntityManagerFactory", ex);
+				throw new IllegalStateException("Failed to asynchronously initialize native EntityManagerFactory: " +
+						ex.getMessage(), ex.getCause());
 			}
 		}
 	}
