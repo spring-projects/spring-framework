@@ -6788,8 +6788,12 @@ work on the configuration class itself since it is being created as a bean insta
 	@Configuration
 	public class RepositoryConfig {
 
+		private final DataSource dataSource;
+
 		@Autowired
-		private DataSource dataSource;
+		public RepositoryConfig(DataSource dataSource) {
+			this.dataSource = dataSource;
+		}
 
 		@Bean
 		public AccountRepository accountRepository() {
@@ -6816,6 +6820,14 @@ work on the configuration class itself since it is being created as a bean insta
 		transferService.transfer(100.00, "A123", "C456");
 	}
 ----
+
+[TIP]
+====
+Constructor injection in `@Configuration` classes is only supported as of Spring
+Framework 4.3. Note also that there is no need to specify `@Autowired` if the target
+bean defines only one constructor; in the example above, `@Autowired` is not necessary
+on the `RepositoryConfig` constructor.
+====
 
 .[[beans-java-injecting-imported-beans-fq]]Fully-qualifying imported beans for ease of navigation
 --
