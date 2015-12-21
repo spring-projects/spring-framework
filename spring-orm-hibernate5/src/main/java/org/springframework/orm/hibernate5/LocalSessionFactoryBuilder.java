@@ -38,6 +38,8 @@ import javax.transaction.TransactionManager;
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
 import org.hibernate.SessionFactory;
+import org.hibernate.boot.MetadataSources;
+import org.hibernate.boot.registry.BootstrapServiceRegistryBuilder;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
@@ -116,6 +118,20 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * @param resourceLoader the ResourceLoader to load application classes from
 	 */
 	public LocalSessionFactoryBuilder(DataSource dataSource, ResourceLoader resourceLoader) {
+		this(dataSource, resourceLoader, new MetadataSources(new BootstrapServiceRegistryBuilder().build()));
+	}
+
+	/**
+	 * Create a new LocalSessionFactoryBuilder for the given DataSource.
+	 * @param dataSource the JDBC DataSource that the resulting Hibernate SessionFactory should be using
+	 * (may be {@code null})
+	 * @param resourceLoader the ResourceLoader to load application classes from
+	 * @param metadataSources the Hibernate MetadataSources service to use (e.g. reusing an existing one)
+	 * @since 4.3
+	 */
+	public LocalSessionFactoryBuilder(DataSource dataSource, ResourceLoader resourceLoader, MetadataSources metadataSources) {
+		super(metadataSources);
+
 		getProperties().put(Environment.CURRENT_SESSION_CONTEXT_CLASS, SpringSessionContext.class.getName());
 		if (dataSource != null) {
 			getProperties().put(Environment.DATASOURCE, dataSource);
@@ -298,6 +314,7 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	/**
 	 * Proxy invocation handler for background bootstrapping, only enforcing
 	 * a fully initialized target {@code SessionFactory} when actually needed.
+	 * @since 4.3
 	 */
 	private class BootstrapSessionFactoryInvocationHandler implements InvocationHandler {
 
