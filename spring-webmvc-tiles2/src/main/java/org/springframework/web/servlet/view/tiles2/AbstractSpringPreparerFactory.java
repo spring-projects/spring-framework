@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.view.tiles3;
+package org.springframework.web.servlet.view.tiles2;
 
 import org.apache.tiles.TilesException;
+import org.apache.tiles.context.TilesRequestContext;
+import org.apache.tiles.preparer.PreparerFactory;
 import org.apache.tiles.preparer.ViewPreparer;
-import org.apache.tiles.preparer.factory.PreparerFactory;
-import org.apache.tiles.request.Request;
 
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -29,20 +29,25 @@ import org.springframework.web.servlet.DispatcherServlet;
  * interface, obtaining the current Spring WebApplicationContext and delegating to
  * {@link #getPreparer(String, org.springframework.web.context.WebApplicationContext)}.
  *
+ * <p><b>NOTE: Tiles 2 support is deprecated in favor of Tiles 3 and will be removed
+ * as of Spring Framework 5.0.</b>.
+ *
  * @author Juergen Hoeller
- * @since 3.2
+ * @since 2.5
  * @see #getPreparer(String, org.springframework.web.context.WebApplicationContext)
  * @see SimpleSpringPreparerFactory
  * @see SpringBeanPreparerFactory
+ * @deprecated as of Spring 4.2, in favor of Tiles 3
  */
+@Deprecated
 public abstract class AbstractSpringPreparerFactory implements PreparerFactory {
 
 	@Override
-	public ViewPreparer getPreparer(String name, Request context) {
-		WebApplicationContext webApplicationContext = (WebApplicationContext) context.getContext("request").get(
+	public ViewPreparer getPreparer(String name, TilesRequestContext context) throws TilesException {
+		WebApplicationContext webApplicationContext = (WebApplicationContext) context.getRequestScope().get(
 				DispatcherServlet.WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 		if (webApplicationContext == null) {
-			webApplicationContext = (WebApplicationContext) context.getContext("application").get(
+			webApplicationContext = (WebApplicationContext) context.getApplicationContext().getApplicationScope().get(
 					WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE);
 			if (webApplicationContext == null) {
 				throw new IllegalStateException("No WebApplicationContext found: no ContextLoaderListener registered?");

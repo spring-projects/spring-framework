@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.view.tiles3;
+package org.springframework.web.servlet.view.tiles2;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.tiles.TilesException;
+import org.apache.tiles.preparer.NoSuchPreparerException;
 import org.apache.tiles.preparer.PreparerException;
 import org.apache.tiles.preparer.ViewPreparer;
-import org.apache.tiles.preparer.factory.NoSuchPreparerException;
 
 import org.springframework.web.context.WebApplicationContext;
 
@@ -32,10 +32,15 @@ import org.springframework.web.context.WebApplicationContext;
  * creating them through the Spring ApplicationContext in order to apply
  * Spring container callbacks and configured Spring BeanPostProcessors.
  *
+ * <p><b>NOTE: Tiles 2 support is deprecated in favor of Tiles 3 and will be removed
+ * as of Spring Framework 5.0.</b>.
+ *
  * @author Juergen Hoeller
- * @since 3.2
+ * @since 2.5
  * @see SpringBeanPreparerFactory
+ * @deprecated as of Spring 4.2, in favor of Tiles 3
  */
+@Deprecated
 public class SimpleSpringPreparerFactory extends AbstractSpringPreparerFactory {
 
 	/** Cache of shared ViewPreparer instances: bean name -> bean instance */

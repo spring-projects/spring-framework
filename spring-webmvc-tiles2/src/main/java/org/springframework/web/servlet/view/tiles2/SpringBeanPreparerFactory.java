@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2009 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.servlet.view.tiles3;
+package org.springframework.web.servlet.view.tiles2;
 
 import org.apache.tiles.TilesException;
 import org.apache.tiles.preparer.ViewPreparer;
@@ -28,10 +28,15 @@ import org.springframework.web.context.WebApplicationContext;
  * the control of the Spring application context in this case, allowing
  * for the use of scoped beans etc.
  *
+ * <p><b>NOTE: Tiles 2 support is deprecated in favor of Tiles 3 and will be removed
+ * as of Spring Framework 5.0.</b>.
+ *
  * @author Juergen Hoeller
- * @since 3.2
+ * @since 2.5
  * @see SimpleSpringPreparerFactory
+ * @deprecated as of Spring 4.2, in favor of Tiles 3
  */
+@Deprecated
 public class SpringBeanPreparerFactory extends AbstractSpringPreparerFactory {
 
 	@Override

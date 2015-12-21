@@ -71,6 +71,7 @@ configure(allprojects) { project ->
 	ext.snakeyamlVersion     = "1.16"
 	ext.snifferVersion       = "1.14"
 	ext.testngVersion        = "6.9.10"
+	ext.tiles2Version        = "2.2.2"
 	ext.tiles3Version        = "3.0.5"
 	ext.tomcatVersion        = "8.0.30"
 	ext.tyrusVersion         = "1.3.5"  // constrained by WebLogic 12.1.3 support
@@ -942,6 +943,38 @@ project("spring-webmvc") {
 		testCompile("org.jruby:jruby:${jrubyVersion}")
 		testCompile("org.python:jython-standalone:2.5.3")
 		testCompile("org.webjars:underscorejs:1.8.3")
+	}
+}
+
+project("spring-webmvc-tiles2") {
+	description = "Spring Framework Tiles2 Integration"
+	merge.into = project(":spring-webmvc")
+
+	dependencies {
+		provided(project(":spring-context"))
+		provided(project(":spring-web"))
+		provided("javax.servlet:javax.servlet-api:3.0.1")
+		optional("javax.servlet.jsp:javax.servlet.jsp-api:2.2.1")
+		optional("javax.servlet.jsp.jstl:javax.servlet.jsp.jstl-api:1.2.1")
+		optional("org.apache.tiles:tiles-api:${tiles2Version}")
+		optional("org.apache.tiles:tiles-core:${tiles2Version}") {
+			exclude group: "org.slf4j", module: "jcl-over-slf4j"
+		}
+		optional("org.apache.tiles:tiles-servlet:${tiles2Version}") {
+			exclude group: "org.slf4j", module: "jcl-over-slf4j"
+		}
+		optional("org.apache.tiles:tiles-jsp:${tiles2Version}") {
+			exclude group: "org.slf4j", module: "jcl-over-slf4j"
+		}
+		optional("org.apache.tiles:tiles-el:${tiles2Version}") {
+			exclude group: "org.slf4j", module: "jcl-over-slf4j"
+		}
+		optional("org.apache.tiles:tiles-extras:${tiles2Version}") {
+			exclude group: "org.slf4j", module: "jcl-over-slf4j"
+			exclude group: "org.apache.velocity", module: "velocity-tools"
+			exclude group: "org.springframework", module: "spring-web"
+		}
+		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 	}
 }
 
