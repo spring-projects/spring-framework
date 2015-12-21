@@ -61,8 +61,8 @@ import org.springframework.util.StringUtils;
  *    &lt;/property&gt;
  * &lt;/bean&gt;</pre>
  *
- * <p>Please note that this {@link java.beans.PropertyEditor} is
- * <b>not</b> registered by default with any of the Spring infrastructure.
+ * <p>Please note that this {@link java.beans.PropertyEditor} is <b>not</b>
+ * registered by default with any of the Spring infrastructure.
  *
  * <p>Thanks to David Leal Valmana for the suggestion and initial prototype.
  *
@@ -89,7 +89,7 @@ public class ResourceBundleEditor extends PropertyEditorSupport {
 			setValue(ResourceBundle.getBundle(name));
 		}
 		else {
-			// Tge basename potentially has locale information
+			// The name potentially contains locale information
 			String baseName = name.substring(0, separator);
 			if (!StringUtils.hasText(baseName)) {
 				throw new IllegalArgumentException("Invalid ResourceBundle name: '" + text + "'");
