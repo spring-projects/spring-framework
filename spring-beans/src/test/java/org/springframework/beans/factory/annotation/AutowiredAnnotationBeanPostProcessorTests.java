@@ -24,6 +24,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -1827,6 +1828,18 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertNotNull(bf.getBean(FooBar.class));
 	}
 
+	@Test
+	public void testSingleConstructorWithProvidedArgument() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(ProvidedArgumentBean.class);
+		bd.getConstructorArgumentValues().addGenericArgumentValue(Collections.singletonList("value"));
+		bf.registerBeanDefinition("beanWithArgs", bd);
+		assertNotNull(bf.getBean(ProvidedArgumentBean.class));
+	}
+
 
 	public static class ResourceInjectionBean {
 
@@ -2917,6 +2930,13 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		@Override
 		public boolean isSingleton() {
 			return true;
+		}
+	}
+
+
+	public static class ProvidedArgumentBean {
+
+		public ProvidedArgumentBean(String[] args) {
 		}
 	}
 
