@@ -632,6 +632,9 @@ public @interface MyTestConfig {
 * It is no longer necessary to specify the `@Autowired` annotation if the target
   bean only define one constructor.
 * `@Configuration` classes support constructor injection.
+* SpEL expressions in caches-related annotations can now refer to beans (i.e.
+  `@beanName.method()`). The same applies for the `condition` attribute of
+  `@EventListener`.
 
 
 === Testing Improvements
