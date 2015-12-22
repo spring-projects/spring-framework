@@ -705,7 +705,8 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 
 		private EvaluationContext createEvaluationContext(Object result) {
 			return evaluator.createEvaluationContext(
-					this.caches, this.metadata.method, this.args, this.target, this.metadata.targetClass, result);
+					this.caches, this.metadata.method, this.args, this.target, this.metadata.targetClass,
+					result, applicationContext);
 		}
 
 		protected Collection<? extends Cache> getCaches() {
