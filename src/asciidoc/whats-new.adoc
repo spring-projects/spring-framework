@@ -276,7 +276,7 @@ Spring 4.1 also improves its own caching abstraction significantly:
   common settings to be shared at the class level **without** enabling any cache operation.
 * Better exception handling of cached methods using `CacheErrorHandler`
 
-Spring 4.1 also has a breaking change in the `CacheInterface` as a new `putIfAbsent`
+Spring 4.1 also has a breaking change in the `Cache` interface as a new `putIfAbsent`
 method has been added.
 
 === Web Improvements
@@ -632,9 +632,23 @@ public @interface MyTestConfig {
 * It is no longer necessary to specify the `@Autowired` annotation if the target
   bean only define one constructor.
 * `@Configuration` classes support constructor injection.
+* Any SpEL expression used to specify the `condition` of an `@EventListener` can
+  now refer to beans (i.e. `@beanName.method()`).
+
+=== Caching Improvements
+
+Spring 4.3 allows concurrent calls on a given key to be synchronized so that the
+value is only computed once. This is an opt-in feature that should be enabled via
+the new `sync` attribute on `@Cacheable`. This features introduces a breaking
+change in the `Cache` interface as a `get(Object key, Callable<T> valueLoader)`
+method has been added.
+
+Spring 4.3 also improves the caching abstraction as follows:
+
 * SpEL expressions in caches-related annotations can now refer to beans (i.e.
-  `@beanName.method()`). The same applies for the `condition` attribute of
-  `@EventListener`.
+  `@beanName.method()`).
+* `ConcurrentMapCacheManager` and `ConcurrentMapCache` now support the serialization
+  of cache entries via a new `storeByValue` attribute.
 
 
 === Testing Improvements
