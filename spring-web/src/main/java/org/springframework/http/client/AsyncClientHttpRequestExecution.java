@@ -22,21 +22,28 @@ import org.springframework.util.concurrent.ListenableFuture;
 import java.io.IOException;
 
 /**
- * The execution context of asynchronous client http request.
+ * Represents the context of a client-side HTTP request execution.
+ *
+ * <p>Used to invoke the next interceptor in the interceptor chain, or - if the
+ * calling interceptor is last - execute the request itself.
  *
  * @author Jakub Narloch
+ * @author Rossen Stoyanchev
+ * @since 4.3
  * @see AsyncClientHttpRequestInterceptor
  */
 public interface AsyncClientHttpRequestExecution {
 
     /**
-     * Resumes the request execution by invoking next interceptor in the chain or executing the
-     * request to the remote service.
+     * Resume the request execution by invoking next interceptor in the chain
+     * or executing the request to the remote service.
      *
      * @param request the http request, containing the http method and headers
      * @param body    the body of the request
      * @return the future
      * @throws IOException in case of I/O errors
      */
-    ListenableFuture<ClientHttpResponse> executeAsync(HttpRequest request, byte[] body) throws IOException;
+    ListenableFuture<ClientHttpResponse> executeAsync(HttpRequest request, byte[] body)
+            throws IOException;
+
 }

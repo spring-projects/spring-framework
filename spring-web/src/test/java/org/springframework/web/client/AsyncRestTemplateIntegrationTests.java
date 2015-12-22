@@ -18,9 +18,10 @@ package org.springframework.web.client;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
@@ -43,12 +44,20 @@ import org.springframework.http.client.AsyncClientHttpRequestExecution;
 import org.springframework.http.client.AsyncClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.HttpComponentsAsyncClientHttpRequestFactory;
+import org.springframework.http.client.support.HttpRequestWrapper;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Arjen Poutsma
@@ -610,8 +619,8 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 	@Test
 	public void getAndInterceptResponse() throws Exception {
 		RequestInterceptor interceptor = new RequestInterceptor();
-		template.setInterceptors(Arrays.<AsyncClientHttpRequestInterceptor>asList(interceptor));
-		ListenableFuture<ResponseEntity<String>> future = template.getForEntity(baseUrl + "/get", String.class);
+		template.setInterceptors(Collections.singletonList(interceptor));
+		ListenableFuture<ResponseEntity<String>> future = template.getForEntity("/get", String.class);
 
 		ResponseEntity<String> response = future.get();
 		assertNotNull(interceptor.response);
@@ -623,28 +632,44 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 	@Test
 	public void getAndInterceptError() throws Exception {
 		RequestInterceptor interceptor = new RequestInterceptor();
-		template.setInterceptors(Arrays.<AsyncClientHttpRequestInterceptor>asList(interceptor));
-		ListenableFuture<ResponseEntity<String>> future = template.getForEntity(baseUrl + "/status/notfound", String.class);
+		template.setInterceptors(Collections.singletonList(interceptor));
+		ListenableFuture<ResponseEntity<String>> future = template.getForEntity("/status/notfound", String.class);
 
 		try {
 			future.get();
 			fail("No exception thrown");
 		} catch (ExecutionException ex) {
+			// expected
 		}
 		assertNotNull(interceptor.response);
 		assertEquals(HttpStatus.NOT_FOUND, interceptor.response.getStatusCode());
 		assertNull(interceptor.exception);
 	}
 
-	public static class RequestInterceptor implements AsyncClientHttpRequestInterceptor {
 
-		private ClientHttpResponse response;
+	private static class RequestInterceptor implements AsyncClientHttpRequestInterceptor {
 
-		private Throwable exception;
+		private volatile ClientHttpResponse response;
+
+		private volatile Throwable exception;
 
 		@Override
-		public ListenableFuture<ClientHttpResponse> interceptRequest(HttpRequest request, byte[] body,
-																	 AsyncClientHttpRequestExecution execution) throws IOException {
+		public ListenableFuture<ClientHttpResponse> intercept(HttpRequest request, byte[] body,
+				AsyncClientHttpRequestExecution execution) throws IOException {
+
+			request = new HttpRequestWrapper(request) {
+
+				@Override
+				public URI getURI() {
+					try {
+						return new URI(baseUrl + super.getURI().toString());
+					}
+					catch (URISyntaxException ex) {
+						throw new IllegalStateException(ex);
+					}
+				}
+			};
+
 			ListenableFuture<ClientHttpResponse> future = execution.executeAsync(request, body);
 			future.addCallback(resp -> response = resp, ex -> exception = ex);
 			return future;

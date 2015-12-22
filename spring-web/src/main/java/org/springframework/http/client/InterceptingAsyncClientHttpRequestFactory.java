@@ -16,17 +16,18 @@
 
 package org.springframework.http.client;
 
-import org.springframework.http.HttpMethod;
-
-import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.http.HttpMethod;
+
 /**
- * The intercepting request factory.
+ * Wrapper for a {@link AsyncClientHttpRequestFactory} that has support for
+ * {@link AsyncClientHttpRequestInterceptor}s.
  *
  * @author Jakub Narloch
+ * @since 4.3
  * @see InterceptingAsyncClientHttpRequest
  */
 public class InterceptingAsyncClientHttpRequestFactory implements AsyncClientHttpRequestFactory {
@@ -35,22 +36,25 @@ public class InterceptingAsyncClientHttpRequestFactory implements AsyncClientHtt
 
     private List<AsyncClientHttpRequestInterceptor> interceptors;
 
+
     /**
-     * Creates new instance of {@link InterceptingAsyncClientHttpRequestFactory} with delegated request factory and
-     * list of interceptors.
+     * Create new instance of {@link InterceptingAsyncClientHttpRequestFactory}
+     * with delegated request factory and list of interceptors.
      *
-     * @param delegate     the delegated request factory
-     * @param interceptors the list of interceptors.
+     * @param delegate the request factory to delegate to
+     * @param interceptors the list of interceptors to use
      */
-    public InterceptingAsyncClientHttpRequestFactory(AsyncClientHttpRequestFactory delegate, List<AsyncClientHttpRequestInterceptor> interceptors) {
+    public InterceptingAsyncClientHttpRequestFactory(AsyncClientHttpRequestFactory delegate,
+            List<AsyncClientHttpRequestInterceptor> interceptors) {
 
         this.delegate = delegate;
-        this.interceptors = interceptors != null ? interceptors : Collections.<AsyncClientHttpRequestInterceptor>emptyList();
+        this.interceptors = (interceptors != null ? interceptors :
+                Collections.<AsyncClientHttpRequestInterceptor>emptyList());
     }
 
     @Override
-    public AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod) throws IOException {
-
-        return new InterceptingAsyncClientHttpRequest(delegate, interceptors, uri, httpMethod);
+    public AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod method) {
+        return new InterceptingAsyncClientHttpRequest(this.delegate, this.interceptors, uri, method);
     }
+
 }

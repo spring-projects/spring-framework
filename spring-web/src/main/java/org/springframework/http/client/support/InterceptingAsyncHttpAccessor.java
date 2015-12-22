@@ -19,30 +19,27 @@ package org.springframework.http.client.support;
 import org.springframework.http.client.AsyncClientHttpRequestFactory;
 import org.springframework.http.client.AsyncClientHttpRequestInterceptor;
 import org.springframework.http.client.InterceptingAsyncClientHttpRequestFactory;
+import org.springframework.util.CollectionUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The HTTP accessor that extends the base {@link AsyncHttpAccessor} with request intercepting functionality.
+ * The HTTP accessor that extends the base {@link AsyncHttpAccessor} with request
+ * intercepting functionality.
  *
  * @author Jakub Narloch
+ * @author Rossen Stoyanchev
+ * @since 4.3
  */
 public abstract class InterceptingAsyncHttpAccessor extends AsyncHttpAccessor {
 
-    private List<AsyncClientHttpRequestInterceptor> interceptors = new ArrayList<AsyncClientHttpRequestInterceptor>();
+    private List<AsyncClientHttpRequestInterceptor> interceptors =
+            new ArrayList<AsyncClientHttpRequestInterceptor>();
+
 
     /**
-     * Retrieves the list of interceptors.
-     *
-     * @return the list of interceptors
-     */
-    public List<AsyncClientHttpRequestInterceptor> getInterceptors() {
-        return interceptors;
-    }
-
-    /**
-     * Sets the list of interceptors.
+     * Sets the request interceptors that this accessor should use.
      *
      * @param interceptors the list of interceptors
      */
@@ -50,12 +47,22 @@ public abstract class InterceptingAsyncHttpAccessor extends AsyncHttpAccessor {
         this.interceptors = interceptors;
     }
 
+    /**
+     * Return the request interceptor that this accessor uses.
+     */
+    public List<AsyncClientHttpRequestInterceptor> getInterceptors() {
+        return this.interceptors;
+    }
+
     @Override
     public AsyncClientHttpRequestFactory getAsyncRequestFactory() {
-        AsyncClientHttpRequestFactory asyncRequestFactory = super.getAsyncRequestFactory();
-        if(interceptors.isEmpty()) {
-            return asyncRequestFactory;
+        AsyncClientHttpRequestFactory delegate = super.getAsyncRequestFactory();
+        if (!CollectionUtils.isEmpty(getInterceptors())) {
+            return new InterceptingAsyncClientHttpRequestFactory(delegate, getInterceptors());
         }
-        return new InterceptingAsyncClientHttpRequestFactory(asyncRequestFactory, getInterceptors());
+        else {
+            return delegate;
+        }
     }
+
 }

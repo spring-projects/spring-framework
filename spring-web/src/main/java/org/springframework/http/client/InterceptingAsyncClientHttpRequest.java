@@ -16,24 +16,23 @@
 
 package org.springframework.http.client;
 
+import java.io.IOException;
+import java.net.URI;
+import java.util.Iterator;
+import java.util.List;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRequest;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.concurrent.ListenableFuture;
-import org.springframework.util.concurrent.ListenableFutureAdapter;
-
-import java.io.IOException;
-import java.net.URI;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 /**
- * A {@link AsyncClientHttpRequest} wrapper that enriches it proceeds the actual request execution with calling
- * the registered interceptors.
+ * An {@link AsyncClientHttpRequest} wrapper that enriches it proceeds the actual
+ * request execution with calling the registered interceptors.
  *
  * @author Jakub Narloch
+ * @author Rossen Stoyanchev
  * @see InterceptingAsyncClientHttpRequestFactory
  */
 class InterceptingAsyncClientHttpRequest extends AbstractBufferingAsyncClientHttpRequest {
@@ -46,6 +45,7 @@ class InterceptingAsyncClientHttpRequest extends AbstractBufferingAsyncClientHtt
 
     private HttpMethod httpMethod;
 
+
     /**
      * Creates new instance of {@link InterceptingAsyncClientHttpRequest}.
      *
@@ -55,8 +55,7 @@ class InterceptingAsyncClientHttpRequest extends AbstractBufferingAsyncClientHtt
      * @param httpMethod     the HTTP method
      */
     public InterceptingAsyncClientHttpRequest(AsyncClientHttpRequestFactory requestFactory,
-                                              List<AsyncClientHttpRequestInterceptor> interceptors, URI uri,
-                                              HttpMethod httpMethod) {
+            List<AsyncClientHttpRequestInterceptor> interceptors, URI uri, HttpMethod httpMethod) {
 
         this.requestFactory = requestFactory;
         this.interceptors = interceptors;
@@ -64,8 +63,11 @@ class InterceptingAsyncClientHttpRequest extends AbstractBufferingAsyncClientHtt
         this.httpMethod = httpMethod;
     }
 
+
     @Override
-    protected ListenableFuture<ClientHttpResponse> executeInternal(HttpHeaders headers, byte[] body) throws IOException {
+    protected ListenableFuture<ClientHttpResponse> executeInternal(HttpHeaders headers, byte[] body)
+            throws IOException {
+
         return new AsyncRequestExecution().executeAsync(this, body);
     }
 
@@ -79,37 +81,37 @@ class InterceptingAsyncClientHttpRequest extends AbstractBufferingAsyncClientHtt
         return uri;
     }
 
+
     private class AsyncRequestExecution implements AsyncClientHttpRequestExecution {
 
-        private Iterator<AsyncClientHttpRequestInterceptor> nextInterceptor = interceptors.iterator();
+        private Iterator<AsyncClientHttpRequestInterceptor> iterator;
+
+        public AsyncRequestExecution() {
+            this.iterator = interceptors.iterator();
+        }
 
         @Override
-        public ListenableFuture<ClientHttpResponse> executeAsync(HttpRequest request, byte[] body) throws IOException {
-            if (nextInterceptor.hasNext()) {
-                AsyncClientHttpRequestInterceptor interceptor = nextInterceptor.next();
-                ListenableFuture<ClientHttpResponse> future = interceptor.interceptRequest(request, body, this);
-                return new IdentityListenableFutureAdapter<ClientHttpResponse>(future);
+        public ListenableFuture<ClientHttpResponse> executeAsync(HttpRequest request, byte[] body)
+                throws IOException {
+
+            if (this.iterator.hasNext()) {
+                AsyncClientHttpRequestInterceptor interceptor = this.iterator.next();
+                return interceptor.intercept(request, body, this);
             }
             else {
-                AsyncClientHttpRequest req = requestFactory.createAsyncRequest(uri, httpMethod);
-                req.getHeaders().putAll(getHeaders());
+                URI theUri = request.getURI();
+                HttpMethod theMethod = request.getMethod();
+                HttpHeaders theHeaders = request.getHeaders();
+
+                AsyncClientHttpRequest delegate = requestFactory.createAsyncRequest(theUri, theMethod);
+                delegate.getHeaders().putAll(theHeaders);
                 if (body.length > 0) {
-                    StreamUtils.copy(body, req.getBody());
+                    StreamUtils.copy(body, delegate.getBody());
                 }
-                return req.executeAsync();
+
+                return delegate.executeAsync();
             }
         }
     }
 
-    private static class IdentityListenableFutureAdapter<T> extends ListenableFutureAdapter<T, T> {
-
-        protected IdentityListenableFutureAdapter(ListenableFuture<T> adaptee) {
-            super(adaptee);
-        }
-
-        @Override
-        protected T adapt(T adapteeResult) throws ExecutionException {
-            return adapteeResult;
-        }
-    }
 }
