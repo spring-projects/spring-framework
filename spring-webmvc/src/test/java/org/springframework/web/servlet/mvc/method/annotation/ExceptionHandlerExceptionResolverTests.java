@@ -19,7 +19,7 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -34,7 +34,6 @@ import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.ClassUtils;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -44,7 +43,11 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.ModelAndView;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test fixture with {@link ExceptionHandlerExceptionResolver}.
@@ -54,6 +57,7 @@ import static org.junit.Assert.*;
  * @author Kazuki Shimizu
  * @since 3.1
  */
+@SuppressWarnings("unused")
 public class ExceptionHandlerExceptionResolverTests {
 
 	private static int RESOLVER_COUNT;
@@ -83,6 +87,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 
+	@SuppressWarnings("ConstantConditions")
 	@Test
 	public void nullHandler() {
 		Object handler = null;
@@ -94,7 +99,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	@Test
 	public void setCustomArgumentResolvers() throws Exception {
 		HandlerMethodArgumentResolver resolver = new ServletRequestMethodArgumentResolver();
-		this.resolver.setCustomArgumentResolvers(Arrays.asList(resolver));
+		this.resolver.setCustomArgumentResolvers(Collections.singletonList(resolver));
 		this.resolver.afterPropertiesSet();
 
 		assertTrue(this.resolver.getArgumentResolvers().getResolvers().contains(resolver));
@@ -104,7 +109,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	@Test
 	public void setArgumentResolvers() throws Exception {
 		HandlerMethodArgumentResolver resolver = new ServletRequestMethodArgumentResolver();
-		this.resolver.setArgumentResolvers(Arrays.asList(resolver));
+		this.resolver.setArgumentResolvers(Collections.singletonList(resolver));
 		this.resolver.afterPropertiesSet();
 
 		assertMethodProcessorCount(1, HANDLER_COUNT);
@@ -113,7 +118,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	@Test
 	public void setCustomReturnValueHandlers() {
 		HandlerMethodReturnValueHandler handler = new ViewNameMethodReturnValueHandler();
-		this.resolver.setCustomReturnValueHandlers(Arrays.asList(handler));
+		this.resolver.setCustomReturnValueHandlers(Collections.singletonList(handler));
 		this.resolver.afterPropertiesSet();
 
 		assertTrue(this.resolver.getReturnValueHandlers().getHandlers().contains(handler));
@@ -123,7 +128,7 @@ public class ExceptionHandlerExceptionResolverTests {
 	@Test
 	public void setReturnValueHandlers() {
 		HandlerMethodReturnValueHandler handler = new ModelMethodProcessor();
-		this.resolver.setReturnValueHandlers(Arrays.asList(handler));
+		this.resolver.setReturnValueHandlers(Collections.singletonList(handler));
 		this.resolver.afterPropertiesSet();
 
 		assertMethodProcessorCount(RESOLVER_COUNT, 1);
