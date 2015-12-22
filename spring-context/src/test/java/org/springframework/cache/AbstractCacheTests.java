@@ -211,7 +211,7 @@ public abstract class AbstractCacheTests<T extends Cache> {
 		results.forEach(r -> assertThat(r, is(1))); // Only one method got invoked
 	}
 
-	private String createRandomKey() {
+	protected String createRandomKey() {
 		return UUID.randomUUID().toString();
 	}
 

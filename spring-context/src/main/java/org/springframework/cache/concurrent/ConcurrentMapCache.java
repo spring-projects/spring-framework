@@ -16,11 +16,15 @@
 
 package org.springframework.cache.concurrent;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.springframework.cache.support.AbstractValueAdaptingCache;
+import org.springframework.core.serializer.support.SerializationDelegate;
 import org.springframework.util.Assert;
 
 /**
@@ -38,6 +42,7 @@ import org.springframework.util.Assert;
  *
  * @author Costin Leau
  * @author Juergen Hoeller
+ * @author Stephane Nicoll
  * @since 3.1
  */
 public class ConcurrentMapCache extends AbstractValueAdaptingCache {
@@ -45,6 +50,8 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 	private final String name;
 
 	private final ConcurrentMap<Object, Object> store;
+
+	private final SerializationDelegate serialization;
 
 
 	/**
@@ -74,13 +81,40 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 	 * (adapting them to an internal null holder value)
 	 */
 	public ConcurrentMapCache(String name, ConcurrentMap<Object, Object> store, boolean allowNullValues) {
+		this(name, store, allowNullValues, null);
+	}
+
+	/**
+	 * Create a new ConcurrentMapCache with the specified name and the
+	 * given internal {@link ConcurrentMap} to use. If the
+	 * {@link SerializationDelegate} is specified,
+	 * {@link #isStoreByValue() store-by-value} is enabled
+	 * @param name the name of the cache
+	 * @param store the ConcurrentMap to use as an internal store
+	 * @param allowNullValues whether to allow {@code null} values
+	 * (adapting them to an internal null holder value)
+	 * @param serialization the {@link SerializationDelegate} to use
+	 * to serialize cache entry or {@code null} to store the reference
+	 */
+	protected ConcurrentMapCache(String name, ConcurrentMap<Object, Object> store,
+			boolean allowNullValues, SerializationDelegate serialization) {
+
 		super(allowNullValues);
 		Assert.notNull(name, "Name must not be null");
 		Assert.notNull(store, "Store must not be null");
 		this.name = name;
 		this.store = store;
+		this.serialization = serialization;
 	}
 
+	/**
+	 * Return whether this cache stores a copy of each entry ({@code true}) or
+	 * a reference ({@code false}, default). If store by value is enabled, each
+	 * entry in the cache must be serializable.
+	 */
+	public final boolean isStoreByValue() {
+		return this.serialization != null;
+	}
 
 	@Override
 	public final String getName() {
@@ -140,6 +174,61 @@ public class ConcurrentMapCache extends AbstractValueAdaptingCache {
 	@Override
 	public void clear() {
 		this.store.clear();
+	}
+
+	@Override
+	protected Object toStoreValue(Object userValue) {
+		Object storeValue = super.toStoreValue(userValue);
+		if (this.serialization != null) {
+			try {
+				return serializeValue(storeValue);
+			}
+			catch (Exception ex) {
+				throw new IllegalArgumentException("Failed to serialize cache value '"
+						+ userValue + "'. Does it implement Serializable?", ex);
+			}
+		}
+		else {
+			return storeValue;
+		}
+	}
+
+	private Object serializeValue(Object storeValue) throws IOException {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		try {
+			this.serialization.serialize(storeValue, out);
+			return out.toByteArray();
+		}
+		finally {
+			out.close();
+		}
+	}
+
+	@Override
+	protected Object fromStoreValue(Object storeValue) {
+		if (this.serialization != null) {
+			try {
+				return super.fromStoreValue(deserializeValue(storeValue));
+			}
+			catch (Exception ex) {
+				throw new IllegalArgumentException("Failed to deserialize cache value '" +
+						storeValue + "'", ex);
+			}
+		}
+		else {
+			return super.fromStoreValue(storeValue);
+		}
+
+	}
+
+	private Object deserializeValue(Object storeValue) throws IOException {
+		ByteArrayInputStream in = new ByteArrayInputStream((byte[]) storeValue);
+		try {
+			return this.serialization.deserialize(in);
+		}
+		finally {
+			in.close();
+		}
 	}
 
 }

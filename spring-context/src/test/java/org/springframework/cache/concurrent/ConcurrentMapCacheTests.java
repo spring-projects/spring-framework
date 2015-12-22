@@ -16,13 +16,19 @@
 
 package org.springframework.cache.concurrent;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.junit.Before;
-import org.junit.Ignore;
+import org.junit.Test;
 
 import org.springframework.cache.AbstractCacheTests;
+import org.springframework.core.serializer.support.SerializationDelegate;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Costin Leau
@@ -51,6 +57,55 @@ public class ConcurrentMapCacheTests extends AbstractCacheTests<ConcurrentMapCac
 	@Override
 	protected ConcurrentMap<Object, Object> getNativeCache() {
 		return this.nativeCache;
+	}
+
+	@Test
+	public void testIsStoreByReferenceByDefault() {
+		assertFalse(this.cache.isStoreByValue());
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testSerializer() {
+		ConcurrentMapCache serializeCache = createCacheWithStoreByValue();
+		assertTrue(serializeCache.isStoreByValue());
+
+		Object key = createRandomKey();
+		List<String> content = new ArrayList<>();
+		content.addAll(Arrays.asList("one", "two", "three"));
+		serializeCache.put(key, content);
+		content.remove(0);
+		List<String> entry = (List<String>) serializeCache.get(key).get();
+		assertEquals(3, entry.size());
+		assertEquals("one", entry.get(0));
+	}
+
+	@Test
+	public void testNonSerializableContent() {
+		ConcurrentMapCache serializeCache = createCacheWithStoreByValue();
+
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("Failed to serialize");
+		thrown.expectMessage(this.cache.getClass().getName());
+		serializeCache.put(createRandomKey(), this.cache);
+	}
+
+	@Test
+	public void testInvalidSerializedContent() {
+		ConcurrentMapCache serializeCache = createCacheWithStoreByValue();
+
+		String key = createRandomKey();
+		this.nativeCache.put(key, "Some garbage");
+		thrown.expect(IllegalArgumentException.class);
+		thrown.expectMessage("Failed to deserialize");
+		thrown.expectMessage("Some garbage");
+		serializeCache.get(key);
+	}
+
+
+	private ConcurrentMapCache createCacheWithStoreByValue() {
+		return new ConcurrentMapCache(CACHE_NAME, nativeCache, true,
+				new SerializationDelegate(ConcurrentMapCacheTests.class.getClassLoader()));
 	}
 
 }
