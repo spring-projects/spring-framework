@@ -650,6 +650,9 @@ Spring 4.3 also improves the caching abstraction as follows:
 * `ConcurrentMapCacheManager` and `ConcurrentMapCache` now support the serialization
   of cache entries via a new `storeByValue` attribute.
 
+=== Web Improvements
+
+* New `@RestControllerAdvice` annotation combines `@ControllerAdvice` with `@ResponseBody`.
 
 === Testing Improvements
 

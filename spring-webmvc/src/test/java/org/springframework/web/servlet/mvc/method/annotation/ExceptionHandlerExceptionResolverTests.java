@@ -37,6 +37,7 @@ import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.ModelMethodProcessor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -330,30 +331,27 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 
-	@ControllerAdvice
+	@RestControllerAdvice
 	@Order(1)
 	static class TestExceptionResolver {
 
 		@ExceptionHandler
-		@ResponseBody
 		public String handleException(IllegalStateException ex) {
 			return "TestExceptionResolver: " + ClassUtils.getShortName(ex.getClass());
 		}
 
 		@ExceptionHandler(ArrayIndexOutOfBoundsException.class)
-		@ResponseBody
 		public String handleWithHandlerMethod(HandlerMethod handlerMethod) {
 			return "HandlerMethod: " + handlerMethod.getMethod().getName();
 		}
 	}
 
 
-	@ControllerAdvice
+	@RestControllerAdvice
 	@Order(2)
 	static class AnotherTestExceptionResolver {
 
 		@ExceptionHandler({IllegalStateException.class, IllegalAccessException.class})
-		@ResponseBody
 		public String handleException(Exception ex) {
 			return "AnotherTestExceptionResolver: " + ClassUtils.getShortName(ex.getClass());
 		}
@@ -373,36 +371,33 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 
-	@ControllerAdvice("java.lang")
+	@RestControllerAdvice("java.lang")
 	@Order(1)
 	static class NotCalledTestExceptionResolver {
 
 		@ExceptionHandler
-		@ResponseBody
 		public String handleException(IllegalStateException ex) {
 			return "NotCalledTestExceptionResolver: " + ClassUtils.getShortName(ex.getClass());
 		}
 	}
 
 
-	@ControllerAdvice("org.springframework.web.servlet.mvc.method.annotation")
+	@RestControllerAdvice("org.springframework.web.servlet.mvc.method.annotation")
 	@Order(2)
 	static class BasePackageTestExceptionResolver {
 
 		@ExceptionHandler
-		@ResponseBody
 		public String handleException(IllegalStateException ex) {
 			return "BasePackageTestExceptionResolver: " + ClassUtils.getShortName(ex.getClass());
 		}
 	}
 
 
-	@ControllerAdvice
+	@RestControllerAdvice
 	@Order(3)
 	static class DefaultTestExceptionResolver {
 
 		@ExceptionHandler
-		@ResponseBody
 		public String handleException(IllegalStateException ex) {
 			return "DefaultTestExceptionResolver: " + ClassUtils.getShortName(ex.getClass());
 		}

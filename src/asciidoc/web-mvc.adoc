@@ -1495,8 +1495,9 @@ is a stereotype annotation that combines `@ResponseBody` and `@Controller`. More
 that, it gives more meaning to your Controller and also may carry additional semantics
 in future releases of the framework.
 
-As with regular ++@Controller++s, a `@RestController` may be assisted by a
-`@ControllerAdvice` Bean. See the <<mvc-ann-controller-advice>> section for more details.
+As with regular ++@Controller++s, a `@RestController` may be assisted by
+`@ControllerAdvice` or `@RestControllerAdvice` beans. See the <<mvc-ann-controller-advice>>
+section for more details.
 
 [[mvc-ann-httpentity]]
 ==== Using HttpEntity
@@ -1975,7 +1976,7 @@ which case they apply to matching controllers. This provides an alternative to u
 
 
 [[mvc-ann-controller-advice]]
-==== Advising controllers with @ControllerAdvice
+==== Advising controllers with @ControllerAdvice and @RestControllerAdvice
 
 The `@ControllerAdvice` annotation is a component annotation allowing implementation
 classes to be auto-detected through classpath scanning. It is automatically enabled when
@@ -1986,8 +1987,10 @@ Classes annotated with `@ControllerAdvice` can contain `@ExceptionHandler`,
 `@RequestMapping` methods across all controller hierarchies as opposed to the controller
 hierarchy within which they are declared.
 
-The `@ControllerAdvice` annotation can also target a subset of controllers with its
-attributes:
+`@RestControllerAdvice` is an alternative where `@ExceptionHandler` methods
+assume `@ResponseBody` semantics by default.
+
+Both `@ControllerAdvice` and `@RestControllerAdvice` can target a subset of controllers:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
