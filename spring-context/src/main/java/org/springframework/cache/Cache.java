@@ -152,8 +152,11 @@ public interface Cache {
 		Object get();
 	}
 
+
 	/**
-	 * TODO
+	 * Wrapper exception to be thrown from {@link #get(Object, Callable)}
+	 * in case of the value loader callback failing with an exception.
+	 * @since 4.3
 	 */
 	@SuppressWarnings("serial")
 	class ValueRetrievalException extends RuntimeException {
@@ -167,7 +170,7 @@ public interface Cache {
 		}
 
 		public Object getKey() {
-			return key;
+			return this.key;
 		}
 
 	}
