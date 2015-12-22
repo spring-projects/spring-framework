@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.aop.aspectj.annotation;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -65,7 +66,8 @@ import org.springframework.util.comparator.InstanceComparator;
  * @author Phillip Webb
  * @since 2.0
  */
-public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFactory {
+@SuppressWarnings("serial")
+public class ReflectiveAspectJAdvisorFactory extends AbstractAspectJAdvisorFactory implements Serializable {
 
 	private static final Comparator<Method> METHOD_COMPARATOR;
 

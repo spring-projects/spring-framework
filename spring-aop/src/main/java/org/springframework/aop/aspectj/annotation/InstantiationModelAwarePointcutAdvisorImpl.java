@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.springframework.aop.aspectj.annotation;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.lang.reflect.Method;
 
 import org.aopalliance.aop.Advice;
@@ -37,26 +40,33 @@ import org.springframework.aop.support.Pointcuts;
  * @author Juergen Hoeller
  * @since 2.0
  */
+@SuppressWarnings("serial")
 class InstantiationModelAwarePointcutAdvisorImpl
-		implements InstantiationModelAwarePointcutAdvisor, AspectJPrecedenceInformation {
+		implements InstantiationModelAwarePointcutAdvisor, AspectJPrecedenceInformation, Serializable {
 
 	private final AspectJExpressionPointcut declaredPointcut;
 
-	private Pointcut pointcut;
+	private final Class<?> declaringClass;
 
-	private final MetadataAwareAspectInstanceFactory aspectInstanceFactory;
+	private final String methodName;
 
-	private final Method method;
+	private final Class<?>[] parameterTypes;
 
-	private final boolean lazy;
+	private transient Method aspectJAdviceMethod;
 
 	private final AspectJAdvisorFactory atAspectJAdvisorFactory;
 
+	private final MetadataAwareAspectInstanceFactory aspectInstanceFactory;
+
+	private final int declarationOrder;
+
+	private final String aspectName;
+
+	private final Pointcut pointcut;
+
+	private final boolean lazy;
+
 	private Advice instantiatedAdvice;
-
-	private int declarationOrder;
-
-	private String aspectName;
 
 	private Boolean isBeforeAdvice;
 
@@ -67,7 +77,10 @@ class InstantiationModelAwarePointcutAdvisorImpl
 			MetadataAwareAspectInstanceFactory aif, Method method, int declarationOrderInAspect, String aspectName) {
 
 		this.declaredPointcut = ajexp;
-		this.method = method;
+		this.declaringClass = method.getDeclaringClass();
+		this.methodName = method.getName();
+		this.parameterTypes = method.getParameterTypes();
+		this.aspectJAdviceMethod = method;
 		this.atAspectJAdvisorFactory = af;
 		this.aspectInstanceFactory = aif;
 		this.declarationOrder = declarationOrderInAspect;
@@ -86,9 +99,9 @@ class InstantiationModelAwarePointcutAdvisorImpl
 		}
 		else {
 			// A singleton aspect.
-			this.instantiatedAdvice = instantiateAdvice(this.declaredPointcut);
-			this.pointcut = declaredPointcut;
+			this.pointcut = this.declaredPointcut;
 			this.lazy = false;
+			this.instantiatedAdvice = instantiateAdvice(this.declaredPointcut);
 		}
 	}
 
@@ -142,8 +155,8 @@ class InstantiationModelAwarePointcutAdvisorImpl
 
 
 	private Advice instantiateAdvice(AspectJExpressionPointcut pcut) {
-		return this.atAspectJAdvisorFactory.getAdvice(
-				this.method, pcut, this.aspectInstanceFactory, this.declarationOrder, this.aspectName);
+		return this.atAspectJAdvisorFactory.getAdvice(this.aspectJAdviceMethod, pcut,
+				this.aspectInstanceFactory, this.declarationOrder, this.aspectName);
 	}
 
 	public MetadataAwareAspectInstanceFactory getAspectInstanceFactory() {
@@ -191,7 +204,7 @@ class InstantiationModelAwarePointcutAdvisorImpl
 	 */
 	private void determineAdviceType() {
 		AspectJAnnotation<?> aspectJAnnotation =
-				AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(this.method);
+				AbstractAspectJAdvisorFactory.findAspectJAnnotationOnMethod(this.aspectJAdviceMethod);
 		if (aspectJAnnotation == null) {
 			this.isBeforeAdvice = false;
 			this.isAfterAdvice = false;
@@ -220,9 +233,19 @@ class InstantiationModelAwarePointcutAdvisorImpl
 	@Override
 	public String toString() {
 		return "InstantiationModelAwarePointcutAdvisor: expression [" + getDeclaredPointcut().getExpression() +
-			"]; advice method [" + this.method + "]; perClauseKind=" +
+			"]; advice method [" + this.aspectJAdviceMethod + "]; perClauseKind=" +
 			this.aspectInstanceFactory.getAspectMetadata().getAjType().getPerClause().getKind();
 
+	}
+
+	private void readObject(ObjectInputStream inputStream) throws IOException, ClassNotFoundException {
+		inputStream.defaultReadObject();
+		try {
+			this.aspectJAdviceMethod = this.declaringClass.getMethod(this.methodName, this.parameterTypes);
+		}
+		catch (NoSuchMethodException ex) {
+			throw new IllegalStateException("Failed to find advice method on deserialization", ex);
+		}
 	}
 
 
