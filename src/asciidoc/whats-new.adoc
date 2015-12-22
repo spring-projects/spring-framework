@@ -653,6 +653,7 @@ Spring 4.3 also improves the caching abstraction as follows:
 === Web Improvements
 
 * New `@RestControllerAdvice` annotation combines `@ControllerAdvice` with `@ResponseBody`.
+* `AsyncRestTemplate` supports request interception.
 
 === Testing Improvements
 
