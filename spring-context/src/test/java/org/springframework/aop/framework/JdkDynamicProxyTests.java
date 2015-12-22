@@ -63,7 +63,7 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests implements Seria
 	public void testProxyIsJustInterface() throws Throwable {
 		TestBean raw = new TestBean();
 		raw.setAge(32);
-		AdvisedSupport pc = new AdvisedSupport(new Class<?>[] {ITestBean.class});
+		AdvisedSupport pc = new AdvisedSupport(ITestBean.class);
 		pc.setTarget(raw);
 		JdkDynamicAopProxy aop = new JdkDynamicAopProxy(pc);
 
@@ -78,7 +78,7 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests implements Seria
 		final int age = 25;
 		MethodInterceptor mi = (invocation -> age);
 
-		AdvisedSupport pc = new AdvisedSupport(new Class<?>[] {ITestBean.class});
+		AdvisedSupport pc = new AdvisedSupport(ITestBean.class);
 		pc.addAdvice(mi);
 		AopProxy aop = createAopProxy(pc);
 
@@ -97,7 +97,7 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests implements Seria
 			}
 		};
 
-		AdvisedSupport pc = new AdvisedSupport(new Class<?>[] {ITestBean.class, IOther.class});
+		AdvisedSupport pc = new AdvisedSupport(ITestBean.class, IOther.class);
 		pc.addAdvice(ExposeInvocationInterceptor.INSTANCE);
 		TrapTargetInterceptor tii = new TrapTargetInterceptor() {
 			@Override
@@ -129,7 +129,7 @@ public class JdkDynamicProxyTests extends AbstractAopProxyTests implements Seria
 
 	@Test
 	public void testEqualsAndHashCodeDefined() throws Exception {
-		AdvisedSupport as = new AdvisedSupport(new Class<?>[]{Named.class});
+		AdvisedSupport as = new AdvisedSupport(Named.class);
 		as.setTarget(new Person());
 		JdkDynamicAopProxy aopProxy = new JdkDynamicAopProxy(as);
 		Named proxy = (Named) aopProxy.getProxy();

@@ -54,7 +54,7 @@ class InstantiationModelAwarePointcutAdvisorImpl
 
 	private transient Method aspectJAdviceMethod;
 
-	private final AspectJAdvisorFactory atAspectJAdvisorFactory;
+	private final AspectJAdvisorFactory aspectJAdvisorFactory;
 
 	private final MetadataAwareAspectInstanceFactory aspectInstanceFactory;
 
@@ -73,28 +73,30 @@ class InstantiationModelAwarePointcutAdvisorImpl
 	private Boolean isAfterAdvice;
 
 
-	public InstantiationModelAwarePointcutAdvisorImpl(AspectJAdvisorFactory af, AspectJExpressionPointcut ajexp,
-			MetadataAwareAspectInstanceFactory aif, Method method, int declarationOrderInAspect, String aspectName) {
+	public InstantiationModelAwarePointcutAdvisorImpl(AspectJExpressionPointcut declaredPointcut,
+			Method aspectJAdviceMethod, AspectJAdvisorFactory aspectJAdvisorFactory,
+			MetadataAwareAspectInstanceFactory aspectInstanceFactory, int declarationOrder, String aspectName) {
 
-		this.declaredPointcut = ajexp;
-		this.declaringClass = method.getDeclaringClass();
-		this.methodName = method.getName();
-		this.parameterTypes = method.getParameterTypes();
-		this.aspectJAdviceMethod = method;
-		this.atAspectJAdvisorFactory = af;
-		this.aspectInstanceFactory = aif;
-		this.declarationOrder = declarationOrderInAspect;
+		this.declaredPointcut = declaredPointcut;
+		this.declaringClass = aspectJAdviceMethod.getDeclaringClass();
+		this.methodName = aspectJAdviceMethod.getName();
+		this.parameterTypes = aspectJAdviceMethod.getParameterTypes();
+		this.aspectJAdviceMethod = aspectJAdviceMethod;
+		this.aspectJAdvisorFactory = aspectJAdvisorFactory;
+		this.aspectInstanceFactory = aspectInstanceFactory;
+		this.declarationOrder = declarationOrder;
 		this.aspectName = aspectName;
 
-		if (aif.getAspectMetadata().isLazilyInstantiated()) {
+		if (aspectInstanceFactory.getAspectMetadata().isLazilyInstantiated()) {
 			// Static part of the pointcut is a lazy type.
-			Pointcut preInstantiationPointcut =
-					Pointcuts.union(aif.getAspectMetadata().getPerClausePointcut(), this.declaredPointcut);
+			Pointcut preInstantiationPointcut = Pointcuts.union(
+					aspectInstanceFactory.getAspectMetadata().getPerClausePointcut(), this.declaredPointcut);
 
 			// Make it dynamic: must mutate from pre-instantiation to post-instantiation state.
 			// If it's not a dynamic pointcut, it may be optimized out
 			// by the Spring AOP infrastructure after the first evaluation.
-			this.pointcut = new PerTargetInstantiationModelPointcut(this.declaredPointcut, preInstantiationPointcut, aif);
+			this.pointcut = new PerTargetInstantiationModelPointcut(
+					this.declaredPointcut, preInstantiationPointcut, aspectInstanceFactory);
 			this.lazy = true;
 		}
 		else {
@@ -155,7 +157,7 @@ class InstantiationModelAwarePointcutAdvisorImpl
 
 
 	private Advice instantiateAdvice(AspectJExpressionPointcut pcut) {
-		return this.atAspectJAdvisorFactory.getAdvice(this.aspectJAdviceMethod, pcut,
+		return this.aspectJAdvisorFactory.getAdvice(this.aspectJAdviceMethod, pcut,
 				this.aspectInstanceFactory, this.declarationOrder, this.aspectName);
 	}
 
@@ -279,7 +281,7 @@ class InstantiationModelAwarePointcutAdvisorImpl
 		}
 
 		@Override
-		public boolean matches(Method method, Class<?> targetClass, Object[] args) {
+		public boolean matches(Method method, Class<?> targetClass, Object... args) {
 			// This can match only on declared pointcut.
 			return (isAspectMaterialized() && this.declaredPointcut.matches(method, targetClass));
 		}
