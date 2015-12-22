@@ -43,6 +43,13 @@ import org.springframework.aop.support.ComposablePointcut;
 public class AspectMetadata {
 
 	/**
+	 * The name of this aspect as defined to Spring (the bean name) -
+	 * allows us to determine if two pieces of advice come from the
+	 * same aspect and hence their relative precedence.
+	 */
+	private final String aspectName;
+
+	/**
 	 * AspectJ reflection information (AspectJ 5 / Java 5 specific).
 	 */
 	private final AjType<?> ajType;
@@ -53,13 +60,6 @@ public class AspectMetadata {
 	 * case of a singleton, otherwise an AspectJExpressionPointcut.
 	 */
 	private final Pointcut perClausePointcut;
-
-	/**
-	 * The name of this aspect as defined to Spring (the bean name) -
-	 * allows us to determine if two pieces of advice come from the
-	 * same aspect and hence their relative precedence.
-	 */
-	private String aspectName;
 
 
 	/**
@@ -83,10 +83,10 @@ public class AspectMetadata {
 		if (ajType == null) {
 			throw new IllegalArgumentException("Class '" + aspectClass.getName() + "' is not an @AspectJ aspect");
 		}
-		this.ajType = ajType;
-		if (this.ajType.getDeclarePrecedence().length > 0) {
+		if (ajType.getDeclarePrecedence().length > 0) {
 			throw new IllegalArgumentException("DeclarePrecendence not presently supported in Spring AOP");
 		}
+		this.ajType = ajType;
 
 		switch (this.ajType.getPerClause().getKind()) {
 			case SINGLETON :

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,6 +88,7 @@ public final class ProxyFactoryBeanTests {
 
 	private BeanFactory factory;
 
+
 	@Before
 	public void setUp() throws Exception {
 		DefaultListableBeanFactory parent = new DefaultListableBeanFactory();
@@ -96,6 +97,7 @@ public final class ProxyFactoryBeanTests {
 		new XmlBeanDefinitionReader((BeanDefinitionRegistry) this.factory).loadBeanDefinitions(
 				new ClassPathResource(CONTEXT, getClass()));
 	}
+
 
 	@Test
 	public void testIsDynamicProxyWhenInterfaceSpecified() {
@@ -157,7 +159,7 @@ public final class ProxyFactoryBeanTests {
 		catch (BeanCreationException ex) {
 			// Root cause of the problem must be an AOP exception
 			AopConfigException aex = (AopConfigException) ex.getCause();
-			assertTrue(aex.getMessage().indexOf("interceptorNames") != -1);
+			assertTrue(aex.getMessage().contains("interceptorNames"));
 		}
 	}
 
@@ -329,13 +331,6 @@ public final class ProxyFactoryBeanTests {
 		}
 		catch (Exception thrown) {
 			assertTrue(thrown == ex);
-		}
-	}
-
-	public static class DependsOnITestBean {
-		public final ITestBean tb;
-		public DependsOnITestBean(ITestBean tb) {
-			this.tb = tb;
 		}
 	}
 
@@ -711,6 +706,8 @@ public final class ProxyFactoryBeanTests {
 		ITestBean proxy = (ITestBean) fb.getObject();
 		assertTrue(AopUtils.isJdkDynamicProxy(proxy));
 	}
+
+
 	/**
 	 * Fires only on void methods. Saves list of methods intercepted.
 	 */
@@ -733,7 +730,7 @@ public final class ProxyFactoryBeanTests {
 			});
 			setPointcut(new DynamicMethodMatcherPointcut() {
 				@Override
-				public boolean matches(Method m, Class<?> targetClass, Object[] args) {
+				public boolean matches(Method m, Class<?> targetClass, Object... args) {
 					return m.getReturnType() == Void.TYPE;
 				}
 			});
@@ -741,10 +738,20 @@ public final class ProxyFactoryBeanTests {
 	}
 
 
+	public static class DependsOnITestBean {
+
+		public final ITestBean tb;
+
+		public DependsOnITestBean(ITestBean tb) {
+			this.tb = tb;
+		}
+	}
+
 	/**
 	 * Aspect interface
 	 */
 	public interface AddedGlobalInterface {
+
 		int globalsAdded();
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,7 +113,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Create a AdvisedSupport instance with the given parameters.
 	 * @param interfaces the proxied interfaces
 	 */
-	public AdvisedSupport(Class<?>[] interfaces) {
+	public AdvisedSupport(Class<?>... interfaces) {
 		this();
 		setInterfaces(interfaces);
 	}

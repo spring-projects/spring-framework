@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ public class AspectJAfterThrowingAdvice extends AbstractAspectJAdvice implements
 		super(aspectJBeforeAdviceMethod, pointcut, aif);
 	}
 
+
 	@Override
 	public boolean isBeforeAdvice() {
 		return false;
@@ -57,11 +58,11 @@ public class AspectJAfterThrowingAdvice extends AbstractAspectJAdvice implements
 		try {
 			return mi.proceed();
 		}
-		catch (Throwable t) {
-			if (shouldInvokeOnThrowing(t)) {
-				invokeAdviceMethod(getJoinPointMatch(), null, t);
+		catch (Throwable ex) {
+			if (shouldInvokeOnThrowing(ex)) {
+				invokeAdviceMethod(getJoinPointMatch(), null, ex);
 			}
-			throw t;
+			throw ex;
 		}
 	}
 
@@ -69,8 +70,8 @@ public class AspectJAfterThrowingAdvice extends AbstractAspectJAdvice implements
 	 * In AspectJ semantics, after throwing advice that specifies a throwing clause
 	 * is only invoked if the thrown exception is a subtype of the given throwing type.
 	 */
-	private boolean shouldInvokeOnThrowing(Throwable t) {
-		return getDiscoveredThrowingType().isAssignableFrom(t.getClass());
+	private boolean shouldInvokeOnThrowing(Throwable ex) {
+		return getDiscoveredThrowingType().isAssignableFrom(ex.getClass());
 	}
 
 }

@@ -40,6 +40,7 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implement
 		super(aspectJBeforeAdviceMethod, pointcut, aif);
 	}
 
+
 	@Override
 	public boolean isBeforeAdvice() {
 		return false;
@@ -61,6 +62,7 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implement
 			invokeAdviceMethod(getJoinPointMatch(), returnValue, null);
 		}
 	}
+
 
 	/**
 	 * Following AspectJ semantics, if a returning clause was specified, then the

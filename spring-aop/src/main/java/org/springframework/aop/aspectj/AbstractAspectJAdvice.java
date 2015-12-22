@@ -135,7 +135,7 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 	 */
 	private int joinPointStaticPartArgumentIndex = -1;
 
-	private Map<String, Integer> argumentBindings = null;
+	private Map<String, Integer> argumentBindings;
 
 	private boolean argumentsIntrospected = false;
 
@@ -250,17 +250,17 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 						this.argumentNames[i] + "' that is not a valid Java identifier");
 			}
 		}
-		if (argumentNames != null) {
-			if (aspectJAdviceMethod.getParameterTypes().length == argumentNames.length + 1) {
+		if (this.argumentNames != null) {
+			if (this.aspectJAdviceMethod.getParameterTypes().length == this.argumentNames.length + 1) {
 				// May need to add implicit join point arg name...
-				Class<?> firstArgType = aspectJAdviceMethod.getParameterTypes()[0];
+				Class<?> firstArgType = this.aspectJAdviceMethod.getParameterTypes()[0];
 				if (firstArgType == JoinPoint.class ||
 						firstArgType == ProceedingJoinPoint.class ||
 						firstArgType == JoinPoint.StaticPart.class) {
-					String[] oldNames = argumentNames;
-					argumentNames = new String[oldNames.length + 1];
-					argumentNames[0] = "THIS_JOIN_POINT";
-					System.arraycopy(oldNames, 0, argumentNames, 1, oldNames.length);
+					String[] oldNames = this.argumentNames;
+					this.argumentNames = new String[oldNames.length + 1];
+					this.argumentNames[0] = "THIS_JOIN_POINT";
+					System.arraycopy(oldNames, 0, this.argumentNames, 1, oldNames.length);
 				}
 			}
 		}
@@ -456,8 +456,8 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 
 		int numExpectedArgumentNames = this.aspectJAdviceMethod.getParameterTypes().length;
 		if (this.argumentNames.length != numExpectedArgumentNames) {
-			throw new IllegalStateException("Expecting to find " + numExpectedArgumentNames
-					+ " arguments to bind by name in advice, but actually found " +
+			throw new IllegalStateException("Expecting to find " + numExpectedArgumentNames +
+					" arguments to bind by name in advice, but actually found " +
 					this.argumentNames.length + " arguments.");
 		}
 
@@ -471,8 +471,8 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		// specified, and find the discovered argument types.
 		if (this.returningName != null) {
 			if (!this.argumentBindings.containsKey(this.returningName)) {
-				throw new IllegalStateException("Returning argument name '"
-						+ this.returningName + "' was not bound in advice arguments");
+				throw new IllegalStateException("Returning argument name '" + this.returningName +
+						"' was not bound in advice arguments");
 			}
 			else {
 				Integer index = this.argumentBindings.get(this.returningName);
@@ -482,8 +482,8 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		}
 		if (this.throwingName != null) {
 			if (!this.argumentBindings.containsKey(this.throwingName)) {
-				throw new IllegalStateException("Throwing argument name '"
-						+ this.throwingName + "' was not bound in advice arguments");
+				throw new IllegalStateException("Throwing argument name '" + this.throwingName +
+						"' was not bound in advice arguments");
 			}
 			else {
 				Integer index = this.argumentBindings.get(this.throwingName);
@@ -581,10 +581,9 @@ public abstract class AbstractAspectJAdvice implements Advice, AspectJPrecedence
 		}
 
 		if (numBound != this.adviceInvocationArgumentCount) {
-			throw new IllegalStateException("Required to bind " + this.adviceInvocationArgumentCount
-					+ " arguments, but only bound " + numBound + " (JoinPointMatch " +
-					(jpMatch == null ? "was NOT" : "WAS") +
-					" bound in invocation)");
+			throw new IllegalStateException("Required to bind " + this.adviceInvocationArgumentCount +
+					" arguments, but only bound " + numBound + " (JoinPointMatch " +
+					(jpMatch == null ? "was NOT" : "WAS") + " bound in invocation)");
 		}
 
 		return adviceInvocationArgs;
