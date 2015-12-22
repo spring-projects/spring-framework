@@ -302,7 +302,7 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 				}
 			}
 
-			Runnable runnable = new ScheduledMethodRunnable(bean, method);
+			Runnable runnable = createRunnable(method, bean);
 			boolean processedSchedule = false;
 			String errorMessage =
 					"Exactly one of the 'cron', 'fixedDelay(String)', or 'fixedRate(String)' attributes is required";
@@ -404,6 +404,10 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 			throw new IllegalStateException(
 					"Encountered invalid @Scheduled method '" + method.getName() + "': " + ex.getMessage());
 		}
+	}
+
+	protected Runnable createRunnable(Method method, Object bean) {
+		return new ScheduledMethodRunnable(bean, method);
 	}
 
 
