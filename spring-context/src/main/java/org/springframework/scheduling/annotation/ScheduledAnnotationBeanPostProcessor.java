@@ -17,7 +17,6 @@
 package org.springframework.scheduling.annotation;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -53,7 +52,6 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
 import org.springframework.util.Assert;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 
@@ -274,35 +272,8 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 			Assert.isTrue(method.getParameterTypes().length == 0,
 					"Only no-arg methods may be annotated with @Scheduled");
 
-			if (AopUtils.isJdkDynamicProxy(bean)) {
-				try {
-					// Found a @Scheduled method on the target class for this JDK proxy ->
-					// is it also present on the proxy itself?
-					method = bean.getClass().getMethod(method.getName(), method.getParameterTypes());
-				}
-				catch (SecurityException ex) {
-					ReflectionUtils.handleReflectionException(ex);
-				}
-				catch (NoSuchMethodException ex) {
-					throw new IllegalStateException(String.format(
-							"@Scheduled method '%s' found on bean target class '%s' but not " +
-							"found in any interface(s) for a dynamic proxy. Either pull the " +
-							"method up to a declared interface or switch to subclass (CGLIB) " +
-							"proxies by setting proxy-target-class/proxyTargetClass to 'true'.",
-							method.getName(), method.getDeclaringClass().getSimpleName()));
-				}
-			}
-			else if (AopUtils.isCglibProxy(bean)) {
-				// Common problem: private methods end up in the proxy instance, not getting delegated.
-				if (Modifier.isPrivate(method.getModifiers())) {
-					throw new IllegalStateException(String.format(
-							"@Scheduled method '%s' found on CGLIB proxy for target class '%s' but cannot " +
-							"be delegated to target bean. Switch its visibility to package or protected.",
-							method.getName(), method.getDeclaringClass().getSimpleName()));
-				}
-			}
-
-			Runnable runnable = new ScheduledMethodRunnable(bean, method);
+			Method invocableMethod = AopUtils.selectInvocableMethod(method, bean.getClass());
+			Runnable runnable = new ScheduledMethodRunnable(bean, invocableMethod);
 			boolean processedSchedule = false;
 			String errorMessage =
 					"Exactly one of the 'cron', 'fixedDelay(String)', or 'fixedRate(String)' attributes is required";

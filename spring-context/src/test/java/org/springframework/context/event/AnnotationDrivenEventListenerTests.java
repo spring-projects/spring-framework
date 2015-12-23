@@ -285,6 +285,17 @@ public class AnnotationDrivenEventListenerTests {
 	}
 
 	@Test
+	public void privateMethodOnCglibProxyFails() throws Exception {
+		try {
+			load(CglibProxyWithPrivateMethod.class);
+			fail("Should have thrown BeanInitializationException");
+		}
+		catch (BeanInitializationException ex) {
+			assertTrue(ex.getCause() instanceof IllegalStateException);
+		}
+	}
+
+	@Test
 	public void eventListenerWorksWithCustomScope() throws Exception {
 		load(CustomScopeTestBean.class);
 		CustomScope customScope = new CustomScope();
@@ -785,6 +796,17 @@ public class AnnotationDrivenEventListenerTests {
 
 		@EventListener
 		public void handleIt(TestEvent event) {
+			collectEvent(event);
+		}
+	}
+
+
+	@Component
+	@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
+	static class CglibProxyWithPrivateMethod extends AbstractTestEventListener {
+
+		@EventListener
+		private void handleIt(TestEvent event) {
 			collectEvent(event);
 		}
 	}

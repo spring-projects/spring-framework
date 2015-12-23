@@ -111,22 +111,26 @@ public abstract class MethodIntrospector {
 	 * @param targetType the target type to search methods on
 	 * (typically an interface-based JDK proxy)
 	 * @return a corresponding invocable method on the target type
+	 * @throws IllegalStateException if the given method is not invocable on the given
+	 * target type (typically due to a proxy mismatch)
 	 */
 	public static Method selectInvocableMethod(Method method, Class<?> targetType) {
 		if (method.getDeclaringClass().isAssignableFrom(targetType)) {
 			return method;
 		}
 		try {
+			String methodName = method.getName();
+			Class<?>[] parameterTypes = method.getParameterTypes();
 			for (Class<?> ifc : targetType.getInterfaces()) {
 				try {
-					return ifc.getMethod(method.getName(), method.getParameterTypes());
+					return ifc.getMethod(methodName, parameterTypes);
 				}
 				catch (NoSuchMethodException ex) {
 					// Alright, not on this interface then...
 				}
 			}
 			// A final desperate attempt on the proxy class itself...
-			return targetType.getMethod(method.getName(), method.getParameterTypes());
+			return targetType.getMethod(methodName, parameterTypes);
 		}
 		catch (NoSuchMethodException ex) {
 			throw new IllegalStateException(String.format(

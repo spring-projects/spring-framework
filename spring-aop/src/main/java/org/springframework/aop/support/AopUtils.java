@@ -18,6 +18,7 @@ package org.springframework.aop.support;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -34,6 +35,7 @@ import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.SpringProxy;
 import org.springframework.aop.TargetClassAware;
 import org.springframework.core.BridgeMethodResolver;
+import org.springframework.core.MethodIntrospector;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
@@ -110,6 +112,30 @@ public abstract class AopUtils {
 			result = (isCglibProxy(candidate) ? candidate.getClass().getSuperclass() : candidate.getClass());
 		}
 		return result;
+	}
+
+	/**
+	 * Select an invocable method on the target type: either the given method itself
+	 * if actually exposed on the target type, or otherwise a corresponding method
+	 * on one of the target type's interfaces or on the target type itself.
+	 * @param method the method to check
+	 * @param targetType the target type to search methods on (typically an AOP proxy)
+	 * @return a corresponding invocable method on the target type
+	 * @throws IllegalStateException if the given method is not invocable on the given
+	 * target type (typically due to a proxy mismatch)
+	 * @since 4.3
+	 * @see MethodIntrospector#selectInvocableMethod(Method, Class)
+	 */
+	public static Method selectInvocableMethod(Method method, Class<?> targetType) {
+		Method methodToUse = MethodIntrospector.selectInvocableMethod(method, targetType);
+		if (Modifier.isPrivate(methodToUse.getModifiers()) && !Modifier.isStatic(methodToUse.getModifiers()) &&
+				SpringProxy.class.isAssignableFrom(targetType)) {
+			throw new IllegalStateException(String.format(
+					"Need to invoke method '%s' found on proxy for target class '%s' but cannot " +
+					"be delegated to target bean. Switch its visibility to package or protected.",
+					method.getName(), method.getDeclaringClass().getSimpleName()));
+		}
+		return methodToUse;
 	}
 
 	/**

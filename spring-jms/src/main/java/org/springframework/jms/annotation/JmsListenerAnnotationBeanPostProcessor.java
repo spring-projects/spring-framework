@@ -236,7 +236,7 @@ public class JmsListenerAnnotationBeanPostProcessor
 	 * @see JmsListenerEndpointRegistrar#registerEndpoint
 	 */
 	protected void processJmsListener(JmsListener jmsListener, Method mostSpecificMethod, Object bean) {
-		Method invocableMethod = MethodIntrospector.selectInvocableMethod(mostSpecificMethod, bean.getClass());
+		Method invocableMethod = AopUtils.selectInvocableMethod(mostSpecificMethod, bean.getClass());
 
 		MethodJmsListenerEndpoint endpoint = createMethodJmsListenerEndpoint();
 		endpoint.setBean(bean);
