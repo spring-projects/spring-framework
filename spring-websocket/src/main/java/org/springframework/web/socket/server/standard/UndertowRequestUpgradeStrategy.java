@@ -60,21 +60,20 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.socket.server.HandshakeFailureException;
 
-
 /**
- * RequestUpgradeStrategy for WildFly and its underlying Undertow web
- * server. Also compatible with embedded Undertow usage.
+ * A WebSocket {@code RequestUpgradeStrategy} for WildFly and its underlying
+ * Undertow web server. Also compatible with embedded Undertow usage.
  *
- * <p>Compatible with Undertow 1.0 to 1.3 and also 1.3.5+ - as included in
- * WildFly 8.x, 9 and 10.
+ * <p>Designed for Undertow 1.3.5+ as of Spring Framework 4.3, with a fallback
+ * strategy for Undertow 1.0 to 1.3 - as included in WildFly 8.x, 9 and 10.
  *
  * @author Rossen Stoyanchev
  * @since 4.0.1
  */
 public class UndertowRequestUpgradeStrategy extends AbstractStandardUpgradeStrategy {
 
-	private static final boolean HAS_DO_UPGRADE = ClassUtils.hasMethod(ServerWebSocketContainer.class,
-			"doUpgrade", (Class<?>[]) null);
+	private static final boolean HAS_DO_UPGRADE = ClassUtils.hasMethod(ServerWebSocketContainer.class, "doUpgrade",
+			HttpServletRequest.class, HttpServletResponse.class, ServerEndpointConfig.class, Map.class);
 
 	private static final FallbackStrategy FALLBACK_STRATEGY = (HAS_DO_UPGRADE ? null : new FallbackStrategy());
 
@@ -108,8 +107,7 @@ public class UndertowRequestUpgradeStrategy extends AbstractStandardUpgradeStrat
 			endpointConfig.setExtensions(selectedExtensions);
 
 			try {
-				getContainer(servletRequest).doUpgrade(servletRequest, servletResponse,
-						endpointConfig, pathParams);
+				getContainer(servletRequest).doUpgrade(servletRequest, servletResponse, endpointConfig, pathParams);
 			}
 			catch (ServletException ex) {
 				throw new HandshakeFailureException(
@@ -121,8 +119,7 @@ public class UndertowRequestUpgradeStrategy extends AbstractStandardUpgradeStrat
 			}
 		}
 		else {
-			FALLBACK_STRATEGY.upgradeInternal(request, response, selectedProtocol,
-					selectedExtensions, endpoint);
+			FALLBACK_STRATEGY.upgradeInternal(request, response, selectedProtocol, selectedExtensions, endpoint);
 		}
 	}
 
@@ -195,9 +192,7 @@ public class UndertowRequestUpgradeStrategy extends AbstractStandardUpgradeStrat
 			}
 		}
 
-
 		private final Set<WebSocketChannel> peerConnections;
-
 
 		public FallbackStrategy() {
 			if (exchangeConstructorWithPeerConnections) {
@@ -207,7 +202,6 @@ public class UndertowRequestUpgradeStrategy extends AbstractStandardUpgradeStrat
 				this.peerConnections = null;
 			}
 		}
-
 
 		@Override
 		public String[] getSupportedVersions() {
