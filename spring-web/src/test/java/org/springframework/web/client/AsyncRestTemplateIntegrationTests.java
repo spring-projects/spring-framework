@@ -599,25 +599,20 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 		template.setInterceptors(Collections.singletonList(interceptor));
 		ListenableFuture<ResponseEntity<String>> future = template.getForEntity("/get", String.class);
 
-		ResponseEntity<String> response = future.get();
+		interceptor.latch.await(5, TimeUnit.SECONDS);
 		assertNotNull(interceptor.response);
 		assertEquals(HttpStatus.OK, interceptor.response.getStatusCode());
 		assertNull(interceptor.exception);
-		assertEquals(helloWorld, response.getBody());
+		assertEquals(helloWorld, future.get().getBody());
 	}
 
 	@Test
 	public void getAndInterceptError() throws Exception {
 		RequestInterceptor interceptor = new RequestInterceptor();
 		template.setInterceptors(Collections.singletonList(interceptor));
-		ListenableFuture<ResponseEntity<String>> future = template.getForEntity("/status/notfound", String.class);
+		template.getForEntity("/status/notfound", String.class);
 
-		try {
-			future.get();
-			fail("No exception thrown");
-		} catch (ExecutionException ex) {
-			// expected
-		}
+		interceptor.latch.await(5, TimeUnit.SECONDS);
 		assertNotNull(interceptor.response);
 		assertEquals(HttpStatus.NOT_FOUND, interceptor.response.getStatusCode());
 		assertNull(interceptor.exception);
@@ -631,6 +626,8 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 
 
 	private static class RequestInterceptor implements AsyncClientHttpRequestInterceptor {
+
+		private final CountDownLatch latch = new CountDownLatch(1);
 
 		private volatile ClientHttpResponse response;
 
@@ -654,7 +651,15 @@ public class AsyncRestTemplateIntegrationTests extends AbstractJettyServerTestCa
 			};
 
 			ListenableFuture<ClientHttpResponse> future = execution.executeAsync(request, body);
-			future.addCallback(resp -> response = resp, ex -> exception = ex);
+			future.addCallback(
+					resp -> {
+						response = resp;
+						this.latch.countDown();
+					},
+					ex -> {
+						exception = ex;
+						this.latch.countDown();
+					});
 			return future;
 		}
 	}
