@@ -98,56 +98,59 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 	}
 
 	CacheableOperation parseCacheableAnnotation(AnnotatedElement ae, DefaultCacheConfig defaultConfig, Cacheable cacheable) {
-		CacheableOperation op = new CacheableOperation();
+		CacheableOperation.Builder opBuilder = new CacheableOperation.Builder();
 
-		op.setCacheNames(cacheable.cacheNames());
-		op.setCondition(cacheable.condition());
-		op.setUnless(cacheable.unless());
-		op.setKey(cacheable.key());
-		op.setKeyGenerator(cacheable.keyGenerator());
-		op.setCacheManager(cacheable.cacheManager());
-		op.setCacheResolver(cacheable.cacheResolver());
-		op.setSync(cacheable.sync());
-		op.setName(ae.toString());
+		opBuilder.setCacheNames(cacheable.cacheNames());
+		opBuilder.setCondition(cacheable.condition());
+		opBuilder.setUnless(cacheable.unless());
+		opBuilder.setKey(cacheable.key());
+		opBuilder.setKeyGenerator(cacheable.keyGenerator());
+		opBuilder.setCacheManager(cacheable.cacheManager());
+		opBuilder.setCacheResolver(cacheable.cacheResolver());
+		opBuilder.setSync(cacheable.sync());
+		opBuilder.setName(ae.toString());
 
-		defaultConfig.applyDefault(op);
+		defaultConfig.applyDefault(opBuilder);
+		CacheableOperation op = opBuilder.build();
 		validateCacheOperation(ae, op);
 
 		return op;
 	}
 
 	CacheEvictOperation parseEvictAnnotation(AnnotatedElement ae, DefaultCacheConfig defaultConfig, CacheEvict cacheEvict) {
-		CacheEvictOperation op = new CacheEvictOperation();
+		CacheEvictOperation.Builder opBuilder = new CacheEvictOperation.Builder();
 
-		op.setCacheNames(cacheEvict.cacheNames());
-		op.setCondition(cacheEvict.condition());
-		op.setKey(cacheEvict.key());
-		op.setKeyGenerator(cacheEvict.keyGenerator());
-		op.setCacheManager(cacheEvict.cacheManager());
-		op.setCacheResolver(cacheEvict.cacheResolver());
-		op.setCacheWide(cacheEvict.allEntries());
-		op.setBeforeInvocation(cacheEvict.beforeInvocation());
-		op.setName(ae.toString());
+		opBuilder.setCacheNames(cacheEvict.cacheNames());
+		opBuilder.setCondition(cacheEvict.condition());
+		opBuilder.setKey(cacheEvict.key());
+		opBuilder.setKeyGenerator(cacheEvict.keyGenerator());
+		opBuilder.setCacheManager(cacheEvict.cacheManager());
+		opBuilder.setCacheResolver(cacheEvict.cacheResolver());
+		opBuilder.setCacheWide(cacheEvict.allEntries());
+		opBuilder.setBeforeInvocation(cacheEvict.beforeInvocation());
+		opBuilder.setName(ae.toString());
 
-		defaultConfig.applyDefault(op);
+		defaultConfig.applyDefault(opBuilder);
+		CacheEvictOperation op = opBuilder.build();
 		validateCacheOperation(ae, op);
 
 		return op;
 	}
 
 	CacheOperation parsePutAnnotation(AnnotatedElement ae, DefaultCacheConfig defaultConfig, CachePut cachePut) {
-		CachePutOperation op = new CachePutOperation();
+		CachePutOperation.Builder opBuilder = new CachePutOperation.Builder();
 
-		op.setCacheNames(cachePut.cacheNames());
-		op.setCondition(cachePut.condition());
-		op.setUnless(cachePut.unless());
-		op.setKey(cachePut.key());
-		op.setKeyGenerator(cachePut.keyGenerator());
-		op.setCacheManager(cachePut.cacheManager());
-		op.setCacheResolver(cachePut.cacheResolver());
-		op.setName(ae.toString());
+		opBuilder.setCacheNames(cachePut.cacheNames());
+		opBuilder.setCondition(cachePut.condition());
+		opBuilder.setUnless(cachePut.unless());
+		opBuilder.setKey(cachePut.key());
+		opBuilder.setKeyGenerator(cachePut.keyGenerator());
+		opBuilder.setCacheManager(cachePut.cacheManager());
+		opBuilder.setCacheResolver(cachePut.cacheResolver());
+		opBuilder.setName(ae.toString());
 
-		defaultConfig.applyDefault(op);
+		defaultConfig.applyDefault(opBuilder);
+		CachePutOperation op = opBuilder.build();
 		validateCacheOperation(ae, op);
 
 		return op;
@@ -278,7 +281,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		 * Apply the defaults to the specified {@link CacheOperation}.
 		 * @param operation the operation to update
 		 */
-		public void applyDefault(CacheOperation operation) {
+		public void applyDefault(CacheOperation.Builder operation) {
 			if (operation.getCacheNames().isEmpty() && this.cacheNames != null) {
 				operation.setCacheNames(this.cacheNames);
 			}

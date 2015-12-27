@@ -25,36 +25,53 @@ package org.springframework.cache.interceptor;
  */
 public class CacheableOperation extends CacheOperation {
 
-	private String unless;
+    private final String unless;
 
-	private boolean sync;
+    private boolean sync;
+
+    public CacheableOperation(CacheableOperation.Builder b) {
+        super(b);
+        this.unless = b.unless;
+        this.sync = b.sync;
+    }
+
+    public String getUnless() {
+        return unless;
+    }
+
+    public boolean isSync() {
+        return sync;
+    }
 
 
-	public String getUnless() {
-		return unless;
-	}
+    @Override
+    protected StringBuilder getOperationDescription() {
+        StringBuilder sb = super.getOperationDescription();
+        sb.append(" | unless='");
+        sb.append(this.unless);
+        sb.append("'");
+        sb.append(" | sync='");
+        sb.append(this.sync);
+        sb.append("'");
+        return sb;
+    }
 
-	public void setUnless(String unless) {
-		this.unless = unless;
-	}
+    public static class Builder extends CacheOperation.Builder {
 
-	public boolean isSync() {
-		return sync;
-	}
+        private String unless;
+        private boolean sync;
 
-	public void setSync(boolean sync) {
-		this.sync = sync;
-	}
+        public void setUnless(String unless) {
+            this.unless = unless;
+        }
 
-	@Override
-	protected StringBuilder getOperationDescription() {
-		StringBuilder sb = super.getOperationDescription();
-		sb.append(" | unless='");
-		sb.append(this.unless);
-		sb.append("'");
-		sb.append(" | sync='");
-		sb.append(this.sync);
-		sb.append("'");
-		return sb;
-	}
+        public void setSync(boolean sync) {
+            this.sync = sync;
+        }
+
+        @Override
+        public CacheableOperation build() {
+            return new CacheableOperation(this);
+        }
+    }
 }
