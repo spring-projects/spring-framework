@@ -25,23 +25,36 @@ package org.springframework.cache.interceptor;
  */
 public class CachePutOperation extends CacheOperation {
 
-	private String unless;
+    private final String unless;
 
+    public CachePutOperation(CachePutOperation.Builder b) {
+        super(b);
+        this.unless = b.unless;
+    }
 
 	public String getUnless() {
 		return this.unless;
 	}
 
-	public void setUnless(String unless) {
-		this.unless = unless;
-	}
+    public static class Builder extends CacheOperation.Builder {
 
-	@Override
-	protected StringBuilder getOperationDescription() {
-		StringBuilder sb = super.getOperationDescription();
-		sb.append(" | unless='");
-		sb.append(this.unless);
-		sb.append("'");
-		return sb;
-	}
+        private String unless;
+
+        public void setUnless(String unless) {
+            this.unless = unless;
+        }
+
+        @Override
+        protected StringBuilder getOperationDescription() {
+            StringBuilder sb = super.getOperationDescription();
+            sb.append(" | unless='");
+            sb.append(this.unless);
+            sb.append("'");
+            return sb;
+        }
+
+        public CachePutOperation build() {
+            return new CachePutOperation(this);
+        }
+    }
 }

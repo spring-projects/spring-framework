@@ -107,7 +107,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			String name = prop.merge(opElement, parserContext.getReaderContext());
 			TypedStringValue nameHolder = new TypedStringValue(name);
 			nameHolder.setSource(parserContext.extractSource(opElement));
-			CacheableOperation op = prop.merge(opElement, parserContext.getReaderContext(), new CacheableOperation());
+			CacheableOperation.Builder op = prop.merge(opElement, parserContext.getReaderContext(), new CacheableOperation.Builder());
 			op.setUnless(getAttributeValue(opElement, "unless", ""));
 			op.setSync(Boolean.valueOf(getAttributeValue(opElement, "sync", "false")));
 
@@ -116,7 +116,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 				col = new ArrayList<CacheOperation>(2);
 				cacheOpMap.put(nameHolder, col);
 			}
-			col.add(op);
+			col.add(op.build());
 		}
 
 		List<Element> evictCacheMethods = DomUtils.getChildElementsByTagName(definition, CACHE_EVICT_ELEMENT);
@@ -125,7 +125,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			String name = prop.merge(opElement, parserContext.getReaderContext());
 			TypedStringValue nameHolder = new TypedStringValue(name);
 			nameHolder.setSource(parserContext.extractSource(opElement));
-			CacheEvictOperation op = prop.merge(opElement, parserContext.getReaderContext(), new CacheEvictOperation());
+			CacheEvictOperation.Builder op = prop.merge(opElement, parserContext.getReaderContext(), new CacheEvictOperation.Builder());
 
 			String wide = opElement.getAttribute("all-entries");
 			if (StringUtils.hasText(wide)) {
@@ -142,7 +142,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 				col = new ArrayList<CacheOperation>(2);
 				cacheOpMap.put(nameHolder, col);
 			}
-			col.add(op);
+			col.add(op.build());
 		}
 
 		List<Element> putCacheMethods = DomUtils.getChildElementsByTagName(definition, CACHE_PUT_ELEMENT);
@@ -151,7 +151,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			String name = prop.merge(opElement, parserContext.getReaderContext());
 			TypedStringValue nameHolder = new TypedStringValue(name);
 			nameHolder.setSource(parserContext.extractSource(opElement));
-			CachePutOperation op = prop.merge(opElement, parserContext.getReaderContext(), new CachePutOperation());
+			CachePutOperation.Builder op = prop.merge(opElement, parserContext.getReaderContext(), new CachePutOperation.Builder());
 			op.setUnless(getAttributeValue(opElement, "unless", ""));
 
 			Collection<CacheOperation> col = cacheOpMap.get(nameHolder);
@@ -159,7 +159,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 				col = new ArrayList<CacheOperation>(2);
 				cacheOpMap.put(nameHolder, col);
 			}
-			col.add(op);
+			col.add(op.build());
 		}
 
 		RootBeanDefinition attributeSourceDefinition = new RootBeanDefinition(NameMatchCacheOperationSource.class);
@@ -208,7 +208,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			}
 		}
 
-		<T extends CacheOperation> T merge(Element element, ReaderContext readerCtx, T op) {
+		<T extends CacheOperation.Builder> T merge(Element element, ReaderContext readerCtx, T op) {
 			String cache = element.getAttribute("cache");
 
 			// sanity check
