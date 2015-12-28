@@ -22,6 +22,7 @@ import java.util.function.Function;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 
 import org.springframework.cache.support.AbstractValueAdaptingCache;
+import org.springframework.lang.UsesJava8;
 import org.springframework.util.Assert;
 
 /**
@@ -35,6 +36,7 @@ import org.springframework.util.Assert;
  * @author Stephane Nicoll
  * @since 4.3
  */
+@UsesJava8
 public class CaffeineCache extends AbstractValueAdaptingCache {
 
 	private final String name;
