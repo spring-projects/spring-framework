@@ -42,6 +42,7 @@ import org.springframework.test.web.servlet.RequestBuilder;
  * @author Greg Turnquist
  * @author Sebastien Deleuze
  * @author Sam Brannen
+ * @author Kamill Sokol
  * @since 3.2
  */
 public abstract class MockMvcRequestBuilders {
@@ -175,7 +176,7 @@ public abstract class MockMvcRequestBuilders {
 
 	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a request with the given HTTP method.
-	 * @param httpMethod the HTTP method
+	 * @param httpMethod the HTTP method (GET, POST, etc)
 	 * @param urlTemplate a URL template; the resulting URL will be encoded
 	 * @param urlVariables zero or more URL variables
 	 */
@@ -186,10 +187,31 @@ public abstract class MockMvcRequestBuilders {
 	/**
 	 * Create a {@link MockHttpServletRequestBuilder} for a request with the given HTTP method.
 	 * @param httpMethod the HTTP method (GET, POST, etc)
+	 * @param urlTemplate a URL template; the resulting URL will be encoded
+	 * @param urlVariables zero or more URL variables
+	 * @since 4.3
+	 */
+	public static MockHttpServletRequestBuilder request(String httpMethod, String urlTemplate, Object... urlVariables) {
+		return new MockHttpServletRequestBuilder(httpMethod, urlTemplate, urlVariables);
+	}
+
+	/**
+	 * Create a {@link MockHttpServletRequestBuilder} for a request with the given HTTP method.
+	 * @param httpMethod the HTTP method (GET, POST, etc)
 	 * @param uri the URL
 	 * @since 4.0.3
 	 */
 	public static MockHttpServletRequestBuilder request(HttpMethod httpMethod, URI uri) {
+		return new MockHttpServletRequestBuilder(httpMethod, uri);
+	}
+
+	/**
+	 * Create a {@link MockHttpServletRequestBuilder} for a request with the given HTTP method.
+	 * @param httpMethod the HTTP method (GET, POST, etc)
+	 * @param uri the URL
+	 * @since 4.3
+	 */
+	public static MockHttpServletRequestBuilder request(String httpMethod, URI uri) {
 		return new MockHttpServletRequestBuilder(httpMethod, uri);
 	}
 
