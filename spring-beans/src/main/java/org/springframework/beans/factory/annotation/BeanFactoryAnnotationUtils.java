@@ -26,6 +26,7 @@ import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.AutowireCandidateQualifier;
 import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -113,6 +114,7 @@ public class BeanFactoryAnnotationUtils {
 		if (bf.containsBean(beanName)) {
 			try {
 				BeanDefinition bd = bf.getMergedBeanDefinition(beanName);
+				// Explicit qualifier metadata on bean definition? (typically in XML definition)
 				if (bd instanceof AbstractBeanDefinition) {
 					AbstractBeanDefinition abd = (AbstractBeanDefinition) bd;
 					AutowireCandidateQualifier candidate = abd.getQualifier(Qualifier.class.getName());
@@ -121,13 +123,22 @@ public class BeanFactoryAnnotationUtils {
 						return true;
 					}
 				}
+				// Corresponding qualifier on factory method? (typically in configuration class)
 				if (bd instanceof RootBeanDefinition) {
 					Method factoryMethod = ((RootBeanDefinition) bd).getResolvedFactoryMethod();
 					if (factoryMethod != null) {
-						Qualifier targetAnnotation = factoryMethod.getAnnotation(Qualifier.class);
-						if (targetAnnotation != null && qualifier.equals(targetAnnotation.value())) {
-							return true;
+						Qualifier targetAnnotation = AnnotationUtils.getAnnotation(factoryMethod, Qualifier.class);
+						if (targetAnnotation != null) {
+							return qualifier.equals(targetAnnotation.value());
 						}
+					}
+				}
+				// Corresponding qualifier on bean implementation class? (for custom user types)
+				Class<?> beanType = bf.getType(beanName);
+				if (beanType != null) {
+					Qualifier targetAnnotation = AnnotationUtils.getAnnotation(beanType, Qualifier.class);
+					if (targetAnnotation != null) {
+						return qualifier.equals(targetAnnotation.value());
 					}
 				}
 			}
