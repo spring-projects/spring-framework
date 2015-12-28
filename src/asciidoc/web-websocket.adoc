@@ -932,7 +932,7 @@ The example below shows how to create a SockJS client and connect to a SockJS en
 [subs="verbatim,quotes"]
 ----
   List<Transport> transports = new ArrayList<>(2);
-  transports.add(new WebSocketTransport(StandardWebSocketClient()));
+  transports.add(new WebSocketTransport(new StandardWebSocketClient()));
   transports.add(new RestTemplateXhrTransport());
 
   SockJsClient sockJsClient = new SockJsClient(transports);
