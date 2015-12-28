@@ -638,4 +638,17 @@ public class AntPathMatcherTests {
 				"/*.html.hotel.*", pathMatcher.combine("/*.html", "hotel.*"));
 	}
 
+	@Test
+	public void testMatch_Nulls() {
+		assertFalse(pathMatcher.match("/test", null));
+		assertFalse(pathMatcher.match("/", null));
+		assertFalse(pathMatcher.match("", null));
+		assertFalse(pathMatcher.match(null, null));
+	}
+
+	@Test
+	public void testIsPattern_Null() {
+		assertFalse(pathMatcher.isPattern(null));
+	}
+
 }

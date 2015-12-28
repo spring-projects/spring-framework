@@ -161,7 +161,7 @@ public class AntPathMatcher implements PathMatcher {
 
 	@Override
 	public boolean isPattern(String path) {
-		return (path.indexOf('*') != -1 || path.indexOf('?') != -1);
+		return path != null && (path.indexOf('*') != -1 || path.indexOf('?') != -1);
 	}
 
 	@Override
@@ -183,7 +183,7 @@ public class AntPathMatcher implements PathMatcher {
 	 * @return {@code true} if the supplied {@code path} matched, {@code false} if it didn't
 	 */
 	protected boolean doMatch(String pattern, String path, boolean fullMatch, Map<String, String> uriTemplateVariables) {
-		if (path.startsWith(this.pathSeparator) != pattern.startsWith(this.pathSeparator)) {
+		if (path == null || pattern == null || path.startsWith(this.pathSeparator) != pattern.startsWith(this.pathSeparator)) {
 			return false;
 		}
 

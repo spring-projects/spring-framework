@@ -31,6 +31,18 @@ public class MockMvcResultMatchersTests {
 				.match(getRedirectedUrlStubMvcResult("/resource/1"));
 	}
 
+	@Test( expected = java.lang.AssertionError.class )
+	public void testFailRedirect() throws Exception {
+		MockMvcResultMatchers.redirectedUrl("/resource/2")
+				.match(getRedirectedUrlStubMvcResult("/resource/1"));
+	}
+
+	@Test( expected = java.lang.AssertionError.class )
+	public void testFailRedirect_NotRedirect() throws Exception {
+		MockMvcResultMatchers.redirectedUrl("/resource/1")
+				.match(getForwardedUrlStubMvcResult("/resource/1"));
+	}
+
 	@Test
 	public void testRedirectPattern() throws Exception {
 		MockMvcResultMatchers.redirectedUrlPattern("/resource/*")
@@ -43,10 +55,28 @@ public class MockMvcResultMatchersTests {
 				.match(getRedirectedUrlStubMvcResult("/resource/1"));
 	}
 
+	@Test( expected = java.lang.AssertionError.class)
+	public void testFailRedirectPattern_NotRedirect() throws Exception {
+		MockMvcResultMatchers.redirectedUrlPattern("/resource/")
+				.match(getForwardedUrlStubMvcResult("/resource/1"));
+	}
+
 	@Test
 	public void testForward() throws Exception {
 		MockMvcResultMatchers.forwardedUrl("/api/resource/1")
 				.match(getForwardedUrlStubMvcResult("/api/resource/1"));
+	}
+
+	@Test( expected = java.lang.AssertionError.class )
+	public void testFailForward() throws Exception {
+		MockMvcResultMatchers.forwardedUrl("/api/resource/2")
+				.match(getForwardedUrlStubMvcResult("/api/resource/1"));
+	}
+
+	@Test( expected = java.lang.AssertionError.class )
+	public void testFailForward_NotForward() throws Exception {
+		MockMvcResultMatchers.forwardedUrl("/api/resource/1")
+				.match(getRedirectedUrlStubMvcResult("/api/resource/1"));
 	}
 
 	@Test
@@ -59,6 +89,18 @@ public class MockMvcResultMatchersTests {
 	public void testForwardPattern() throws Exception {
 		MockMvcResultMatchers.forwardedUrlPattern("/api/**/?")
 				.match(getForwardedUrlStubMvcResult("/api/resource/1"));
+	}
+
+	@Test( expected = java.lang.AssertionError.class )
+	public void testFailForwardPattern() throws Exception {
+		MockMvcResultMatchers.forwardedUrlPattern("/api/resource/")
+				.match(getForwardedUrlStubMvcResult("/api/resource/1"));
+	}
+
+	@Test( expected = java.lang.AssertionError.class )
+	public void testFailForwardPattern_NotForward() throws Exception {
+		MockMvcResultMatchers.forwardedUrlPattern("/api/resource/")
+				.match(getRedirectedUrlStubMvcResult("/api/resource/1"));
 	}
 
 	private StubMvcResult getRedirectedUrlStubMvcResult(String redirectUrl) throws Exception {
