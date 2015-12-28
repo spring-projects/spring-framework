@@ -28,17 +28,17 @@ public class HandlerResult {
 
 	private final Object handler;
 
-	private final Object value;
+	private final Object result;
 
-	private final ResolvableType valueType;
+	private final ResolvableType resultType;
 
 
-	public HandlerResult(Object handler, Object value, ResolvableType valueType) {
+	public HandlerResult(Object handler, Object result, ResolvableType resultType) {
 		Assert.notNull(handler, "'handler' is required");
-		Assert.notNull(handler, "'valueType' is required");
+		Assert.notNull(handler, "'resultType' is required");
 		this.handler = handler;
-		this.value = value;
-		this.valueType = valueType;
+		this.result = result;
+		this.resultType = resultType;
 	}
 
 
@@ -46,12 +46,12 @@ public class HandlerResult {
 		return this.handler;
 	}
 
-	public Object getValue() {
-		return this.value;
+	public Object getResult() {
+		return this.result;
 	}
 
-	public ResolvableType getValueType() {
-		return this.valueType;
+	public ResolvableType getResultType() {
+		return this.resultType;
 	}
 
 }

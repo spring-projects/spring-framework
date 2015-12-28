@@ -130,14 +130,14 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 	public Publisher<Void> handleResult(ServerHttpRequest request,
 			ServerHttpResponse response, HandlerResult result) {
 
-		Object value = result.getValue();
+		Object value = result.getResult();
 		if (value == null) {
 			return Publishers.empty();
 		}
 
 		Publisher<?> publisher;
 		ResolvableType elementType;
-		ResolvableType returnType = result.getValueType();
+		ResolvableType returnType = result.getResultType();
 		if (this.conversionService.canConvert(returnType.getRawClass(), Publisher.class)) {
 			publisher = this.conversionService.convert(value, Publisher.class);
 			elementType = returnType.getGeneric(0);

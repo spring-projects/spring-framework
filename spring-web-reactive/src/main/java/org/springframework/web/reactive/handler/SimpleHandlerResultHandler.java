@@ -64,7 +64,7 @@ public class SimpleHandlerResultHandler implements Ordered, HandlerResultHandler
 
 	@Override
 	public boolean supports(HandlerResult result) {
-		ResolvableType type = result.getValueType();
+		ResolvableType type = result.getResultType();
 		return type != null && Void.TYPE.equals(type.getRawClass()) ||
 				(Void.class.isAssignableFrom(type.getGeneric(0).getRawClass()) && isConvertibleToPublisher(type));
 	}
@@ -78,8 +78,8 @@ public class SimpleHandlerResultHandler implements Ordered, HandlerResultHandler
 	public Publisher<Void> handleResult(ServerHttpRequest request,
 			ServerHttpResponse response, HandlerResult result) {
 
-		Object value = result.getValue();
-		if (Void.TYPE.equals(result.getValueType().getRawClass())) {
+		Object value = result.getResult();
+		if (Void.TYPE.equals(result.getResultType().getRawClass())) {
 			return response.writeHeaders();
 		}
 		Publisher<Void> completion = (value instanceof Publisher ? (Publisher<Void>)value : this.conversionService.convert(value, Publisher.class));

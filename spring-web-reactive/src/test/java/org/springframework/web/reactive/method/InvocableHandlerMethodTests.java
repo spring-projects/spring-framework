@@ -64,7 +64,7 @@ public class InvocableHandlerMethodTests {
 		List<HandlerResult> values = Streams.wrap(publisher).toList().await(5, TimeUnit.SECONDS);
 
 		assertEquals(1, values.size());
-		assertEquals("success", values.get(0).getValue());
+		assertEquals("success", values.get(0).getResult());
 	}
 
 	@Test
@@ -77,7 +77,7 @@ public class InvocableHandlerMethodTests {
 		List<HandlerResult> values = Streams.wrap(publisher).toList().await(5, TimeUnit.SECONDS);
 
 		assertEquals(1, values.size());
-		assertEquals("success:null", values.get(0).getValue());
+		assertEquals("success:null", values.get(0).getResult());
 	}
 
 	@Test
@@ -89,7 +89,7 @@ public class InvocableHandlerMethodTests {
 		List<HandlerResult> values = Streams.wrap(publisher).toList().await(5, TimeUnit.SECONDS);
 
 		assertEquals(1, values.size());
-		assertEquals("success:value1", values.get(0).getValue());
+		assertEquals("success:value1", values.get(0).getResult());
 	}
 
 	@Test
@@ -101,7 +101,7 @@ public class InvocableHandlerMethodTests {
 		List<HandlerResult> values = Streams.wrap(publisher).toList().await(5, TimeUnit.SECONDS);
 
 		assertEquals(1, values.size());
-		assertEquals("success:value1", values.get(0).getValue());
+		assertEquals("success:value1", values.get(0).getResult());
 	}
 
 	@Test
