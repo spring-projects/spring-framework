@@ -23,7 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.rx.Streams;
-import reactor.rx.action.Signal;
+import reactor.rx.stream.Signal;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;

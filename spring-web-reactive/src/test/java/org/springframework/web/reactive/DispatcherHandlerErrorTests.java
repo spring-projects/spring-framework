@@ -26,7 +26,7 @@ import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.Publishers;
 import reactor.rx.Streams;
-import reactor.rx.action.Signal;
+import reactor.rx.stream.Signal;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
