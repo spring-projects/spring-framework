@@ -45,7 +45,7 @@ dependencies {
 	compile "commons-logging:commons-logging:1.2"
 
 	optional 'io.reactivex:rxjava:1.1.0'
-	optional "io.reactivex:rxnetty:0.5.0-SNAPSHOT"
+	optional "io.reactivex:rxnetty-http:0.5.0-SNAPSHOT"
 	optional "com.fasterxml.jackson.core:jackson-databind:2.6.2"
 	optional "io.projectreactor:reactor-stream:${reactorVersion}"
 	optional "io.projectreactor:reactor-net:${reactorVersion}"
