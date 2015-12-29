@@ -21,7 +21,6 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.io.buffer.Buffer;
@@ -32,12 +31,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
+import org.springframework.http.server.reactive.ErrorHandlingHttpHandler;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.DispatcherHandler;
+import org.springframework.web.reactive.ResponseStatusExceptionHandler;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -62,7 +63,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 
 		DispatcherHandler dispatcherHandler = new DispatcherHandler();
 		dispatcherHandler.setApplicationContext(wac);
-		return dispatcherHandler;
+		return new ErrorHandlingHttpHandler(dispatcherHandler, new ResponseStatusExceptionHandler());
 	}
 
 	@Test
@@ -91,10 +92,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 		assertArrayEquals("bar".getBytes(UTF_8), response.getBody());
 	}
 
-	// TODO: remove @Ignore after 404 default handling
-
 	@Test
-	@Ignore
 	public void testNotFound() throws Exception {
 
 		RestTemplate restTemplate = new RestTemplate();
