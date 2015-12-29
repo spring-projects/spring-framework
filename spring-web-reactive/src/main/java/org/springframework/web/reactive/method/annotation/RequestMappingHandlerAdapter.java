@@ -16,30 +16,35 @@
 
 package org.springframework.web.reactive.method.annotation;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.Publishers;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.Decoder;
+import org.springframework.core.codec.support.ByteBufferDecoder;
+import org.springframework.core.codec.support.JacksonJsonDecoder;
+import org.springframework.core.codec.support.JsonObjectDecoder;
+import org.springframework.core.codec.support.StringDecoder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.core.codec.support.ByteBufferDecoder;
-import org.springframework.core.codec.Decoder;
-import org.springframework.core.codec.support.JacksonJsonDecoder;
-import org.springframework.core.codec.support.JsonObjectDecoder;
-import org.springframework.core.codec.support.StringDecoder;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.method.annotation.ExceptionHandlerMethodResolver;
 import org.springframework.web.reactive.HandlerAdapter;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.method.HandlerMethodArgumentResolver;
 import org.springframework.web.reactive.method.InvocableHandlerMethod;
-import org.springframework.web.method.HandlerMethod;
 
 
 /**
@@ -47,16 +52,29 @@ import org.springframework.web.method.HandlerMethod;
  */
 public class RequestMappingHandlerAdapter implements HandlerAdapter, InitializingBean {
 
+	private static Log logger = LogFactory.getLog(RequestMappingHandlerAdapter.class);
+
+
 	private final List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<>();
 
 	private ConversionService conversionService = new DefaultConversionService();
 
+	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache =
+			new ConcurrentHashMap<Class<?>, ExceptionHandlerMethodResolver>(64);
 
+
+	/**
+	 * Configure the complete list of supported argument types thus overriding
+	 * the resolvers that would otherwise be configured by default.
+	 */
 	public void setArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
 		this.argumentResolvers.clear();
 		this.argumentResolvers.addAll(resolvers);
 	}
 
+	/**
+	 * Return the configured argument resolvers.
+	 */
 	public List<HandlerMethodArgumentResolver> getArgumentResolvers() {
 		return this.argumentResolvers;
 	}
@@ -91,9 +109,59 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 	public Publisher<HandlerResult> handle(ServerHttpRequest request,
 			ServerHttpResponse response, Object handler) {
 
-		InvocableHandlerMethod handlerMethod = new InvocableHandlerMethod((HandlerMethod) handler);
-		handlerMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
-		return handlerMethod.invokeForRequest(request);
+		HandlerMethod handlerMethod = (HandlerMethod) handler;
+
+		InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
+		invocable.setHandlerMethodArgumentResolvers(this.argumentResolvers);
+
+		Publisher<HandlerResult> publisher = invocable.invokeForRequest(request);
+
+		publisher = Publishers.onErrorResumeNext(publisher, ex -> {
+			return Publishers.just(new HandlerResult(handler, ex));
+		});
+
+		publisher = Publishers.map(publisher,
+				result -> result.setExceptionMapper(
+						ex -> mapException((Exception) ex, handlerMethod, request, response)));
+
+		return publisher;
+	}
+
+	private Publisher<HandlerResult> mapException(Throwable ex, HandlerMethod handlerMethod,
+			ServerHttpRequest request, ServerHttpResponse response) {
+
+		if (ex instanceof Exception) {
+			InvocableHandlerMethod invocable = findExceptionHandler(handlerMethod, (Exception) ex);
+			if (invocable != null) {
+				try {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Invoking @ExceptionHandler method: " + invocable);
+					}
+					invocable.setHandlerMethodArgumentResolvers(getArgumentResolvers());
+					return invocable.invokeForRequest(request, response, ex);
+				}
+				catch (Exception invocationEx) {
+					if (logger.isErrorEnabled()) {
+						logger.error("Failed to invoke @ExceptionHandler method: " + invocable, invocationEx);
+					}
+				}
+			}
+		}
+		return Publishers.error(ex);
+	}
+
+	protected InvocableHandlerMethod findExceptionHandler(HandlerMethod handlerMethod, Exception exception) {
+		if (handlerMethod == null) {
+			return null;
+		}
+		Class<?> handlerType = handlerMethod.getBeanType();
+		ExceptionHandlerMethodResolver resolver = this.exceptionHandlerCache.get(handlerType);
+		if (resolver == null) {
+			resolver = new ExceptionHandlerMethodResolver(handlerType);
+			this.exceptionHandlerCache.put(handlerType, resolver);
+		}
+		Method method = resolver.resolveMethod(exception);
+		return (method != null ? new InvocableHandlerMethod(handlerMethod.getBean(), method) : null);
 	}
 
 }

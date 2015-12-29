@@ -28,7 +28,6 @@ import rx.Observable;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 
 /**
@@ -72,10 +71,12 @@ public class RxNettyServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public Publisher<Void> setBody(Publisher<ByteBuffer> publisher) {
-		applyHeaders();
-		Observable<byte[]> observable = RxJava1Converter.from(publisher).map(
-				content -> new Buffer(content).asBytes());
-		return RxJava1Converter.from(this.response.writeBytes(observable));
+		return Publishers.lift(publisher, new WriteWithOperator<>(writePublisher -> {
+			applyHeaders();
+			Observable<byte[]> observable = RxJava1Converter.from(writePublisher)
+					.map(buffer -> new Buffer(buffer).asBytes());
+			return RxJava1Converter.from(this.response.writeBytes(observable));
+		}));
 	}
 
 	private void applyHeaders() {

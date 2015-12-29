@@ -31,7 +31,7 @@ import reactor.Publishers;
 import reactor.core.publisher.PublisherFactory;
 import reactor.core.subscriber.SubscriberBarrier;
 import reactor.rx.Streams;
-import reactor.rx.action.Signal;
+import reactor.rx.stream.Signal;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

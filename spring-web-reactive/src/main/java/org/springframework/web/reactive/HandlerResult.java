@@ -16,11 +16,17 @@
 
 package org.springframework.web.reactive;
 
+import java.util.function.Function;
+import java.util.logging.Handler;
+
+import org.reactivestreams.Publisher;
+import reactor.Publishers;
+
 import org.springframework.core.ResolvableType;
 import org.springframework.util.Assert;
 
 /**
- * Represent the result of the invocation of an handler.
+ * Represent the result of the invocation of a handler.
  *
  * @author Rossen Stoyanchev
  */
@@ -32,6 +38,10 @@ public class HandlerResult {
 
 	private final ResolvableType resultType;
 
+	private final Throwable error;
+
+	private Function<Throwable, Publisher<HandlerResult>> exceptionMapper;
+
 
 	public HandlerResult(Object handler, Object result, ResolvableType resultType) {
 		Assert.notNull(handler, "'handler' is required");
@@ -39,6 +49,16 @@ public class HandlerResult {
 		this.handler = handler;
 		this.result = result;
 		this.resultType = resultType;
+		this.error = null;
+	}
+
+	public HandlerResult(Object handler, Throwable error) {
+		Assert.notNull(handler, "'handler' is required");
+		Assert.notNull(error, "'error' is required");
+		this.handler = handler;
+		this.result = null;
+		this.resultType = null;
+		this.error = error;
 	}
 
 
@@ -52,6 +72,40 @@ public class HandlerResult {
 
 	public ResolvableType getResultType() {
 		return this.resultType;
+	}
+
+	public Throwable getError() {
+		return this.error;
+	}
+
+	/**
+	 * Whether handler invocation produced a result or failed with an error.
+	 * <p>If {@code true} the {@link #getError()} returns the error while
+	 * {@link #getResult()} and {@link #getResultType()} return {@code null}
+	 * and vice versa.
+	 * @return whether this instance contains a result or an error.
+	 */
+	public boolean hasError() {
+		return (this.error != null);
+	}
+
+	/**
+	 * Configure a function for selecting an alternate {@code HandlerResult} in
+	 * case of an {@link #hasError() error result} or in case of an async result
+	 * that results in an error.
+	 * @param function the exception resolving function
+	 */
+	public HandlerResult setExceptionMapper(Function<Throwable, Publisher<HandlerResult>> function) {
+		this.exceptionMapper = function;
+		return this;
+	}
+
+	public Function<Throwable, Publisher<HandlerResult>> getExceptionMapper() {
+		return this.exceptionMapper;
+	}
+
+	public boolean hasExceptionMapper() {
+		return (this.exceptionMapper != null);
 	}
 
 }

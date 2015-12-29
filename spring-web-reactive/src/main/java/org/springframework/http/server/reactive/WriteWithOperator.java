@@ -97,7 +97,7 @@ public class WriteWithOperator<T> implements Function<Subscriber<? super Void>, 
 				else if (this.beforeFirstEmission) {
 					this.item = item;
 					this.beforeFirstEmission = false;
-					writeFunction.apply(this).subscribe(downstream());
+					writeFunction.apply(this).subscribe(new DownstreamBridge(downstream()));
 				}
 				else {
 					subscription.cancel();
@@ -139,7 +139,7 @@ public class WriteWithOperator<T> implements Function<Subscriber<? super Void>, 
 				else if (this.beforeFirstEmission) {
 					this.completed = true;
 					this.beforeFirstEmission = false;
-					writeFunction.apply(this).subscribe(downstream());
+					writeFunction.apply(this).subscribe(new DownstreamBridge(downstream()));
 				}
 				else {
 					this.completed = true;
@@ -148,10 +148,10 @@ public class WriteWithOperator<T> implements Function<Subscriber<? super Void>, 
 		}
 
 		@Override
-		public void subscribe(Subscriber<? super T> subscriber) {
+		public void subscribe(Subscriber<? super T> writeSubscriber) {
 			synchronized (this) {
 				Assert.isNull(this.writeSubscriber, "Only one writeSubscriber supported.");
-				this.writeSubscriber = subscriber;
+				this.writeSubscriber = writeSubscriber;
 
 				if (this.error != null || this.completed) {
 					this.writeSubscriber.onSubscribe(NO_OP_SUBSCRIPTION);
@@ -184,7 +184,7 @@ public class WriteWithOperator<T> implements Function<Subscriber<? super Void>, 
 
 		@Override
 		protected void doRequest(long n) {
-			if (this.readyToWrite) {
+			if (readyToWrite) {
 				super.doRequest(n);
 				return;
 			}
@@ -201,6 +201,34 @@ public class WriteWithOperator<T> implements Function<Subscriber<? super Void>, 
 					super.doRequest(n);
 				}
 			}
+		}
+	}
+
+	private class DownstreamBridge implements Subscriber<Void> {
+
+		private final Subscriber<? super Void> downstream;
+
+		public DownstreamBridge(Subscriber<? super Void> downstream) {
+			this.downstream = downstream;
+		}
+
+		@Override
+		public void onSubscribe(Subscription subscription) {
+			subscription.request(Long.MAX_VALUE);
+		}
+
+		@Override
+		public void onNext(Void aVoid) {
+		}
+
+		@Override
+		public void onError(Throwable ex) {
+			this.downstream.onError(ex);
+		}
+
+		@Override
+		public void onComplete() {
+			this.downstream.onComplete();
 		}
 	}
 

@@ -62,6 +62,10 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		super(handlerMethod);
 	}
 
+	public InvocableHandlerMethod(Object bean, Method method) {
+		super(bean, method);
+	}
+
 
 	public void setHandlerMethodArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
 		this.resolvers.clear();
@@ -75,9 +79,10 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 
 	/**
-	 *
-	 * @param request
-	 * @param providedArgs
+	 * Invoke the method and return a Publisher for the return value.
+	 * @param request the current request
+	 * @param providedArgs optional list of argument values to check by type
+	 * (via {@code instanceof}) for resolving method arguments.
 	 * @return Publisher that produces a single HandlerResult or an error signal;
 	 * never throws an exception.
 	 */
@@ -98,11 +103,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		return Publishers.concatMap(argsPublisher, args -> {
 			try {
 				Object value = doInvoke(args);
-
-				HandlerMethod handlerMethod = InvocableHandlerMethod.this;
-				ResolvableType type =  ResolvableType.forMethodParameter(handlerMethod.getReturnType());
-				HandlerResult handlerResult = new HandlerResult(handlerMethod, value, type);
-
+				ResolvableType type =  ResolvableType.forMethodParameter(getReturnType());
+				HandlerResult handlerResult = new HandlerResult(this, value, type);
 				return Publishers.just(handlerResult);
 			}
 			catch (InvocationTargetException ex) {
@@ -187,9 +189,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	}
 
 	private static <E> Publisher<E> mapError(Publisher<E> source, Function<Throwable, Throwable> function) {
-		return Publishers.lift(source, null, (throwable, subscriber) -> {
-			subscriber.onError(function.apply(throwable));
-		}, null);
+		return Publishers.lift(source, null,
+				(throwable, subscriber) -> subscriber.onError(function.apply(throwable)), null);
 	}
 
 }

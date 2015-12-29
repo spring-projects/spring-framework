@@ -38,6 +38,7 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
 import org.xnio.ChannelListener;
 import org.xnio.channels.StreamSinkChannel;
+import reactor.Publishers;
 import reactor.core.subscriber.BaseSubscriber;
 
 import static org.xnio.ChannelListeners.closingChannelExceptionHandler;
@@ -74,13 +75,6 @@ public class UndertowServerHttpResponse implements ServerHttpResponse {
 		this.exchange.setStatusCode(status.value());
 	}
 
-
-	@Override
-	public Publisher<Void> setBody(Publisher<ByteBuffer> bodyPublisher) {
-		applyHeaders();
-		return (subscriber -> bodyPublisher.subscribe(bodySubscriber));
-	}
-
 	@Override
 	public HttpHeaders getHeaders() {
 		return (this.headersWritten ? HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
@@ -110,6 +104,14 @@ public class UndertowServerHttpResponse implements ServerHttpResponse {
 			}
 			this.headersWritten = true;
 		}
+	}
+
+	@Override
+	public Publisher<Void> setBody(Publisher<ByteBuffer> publisher) {
+		return Publishers.lift(publisher, new WriteWithOperator<>(writePublisher -> {
+			applyHeaders();
+			return (subscriber -> writePublisher.subscribe(bodySubscriber));
+		}));
 	}
 
 

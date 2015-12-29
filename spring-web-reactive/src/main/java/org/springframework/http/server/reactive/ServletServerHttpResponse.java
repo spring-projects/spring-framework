@@ -83,9 +83,11 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public Publisher<Void> setBody(final Publisher<ByteBuffer> contentPublisher) {
-		applyHeaders();
-		return (s -> contentPublisher.subscribe(subscriber));
+	public Publisher<Void> setBody(final Publisher<ByteBuffer> publisher) {
+		return Publishers.lift(publisher, new WriteWithOperator<>(writePublisher -> {
+			applyHeaders();
+			return (s -> writePublisher.subscribe(subscriber));
+		}));
 	}
 
 	private void applyHeaders() {

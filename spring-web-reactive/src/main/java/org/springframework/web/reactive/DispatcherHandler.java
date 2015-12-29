@@ -129,8 +129,24 @@ public class DispatcherHandler implements HttpHandler, ApplicationContextAware {
 		});
 
 		Publisher<Void> completionPublisher = Publishers.concatMap(resultPublisher, result -> {
-			HandlerResultHandler handler = getResultHandler(result);
-			return handler.handleResult(request, response, result);
+			Publisher<Void> publisher;
+			if (result.hasError()) {
+				publisher = Publishers.error(result.getError());
+			}
+			else {
+				HandlerResultHandler handler = getResultHandler(result);
+				publisher = handler.handleResult(request, response, result);
+			}
+			if (result.hasExceptionMapper()) {
+				return Publishers.onErrorResumeNext(publisher, ex -> {
+					return Publishers.concatMap(result.getExceptionMapper().apply(ex),
+							errorResult -> {
+								HandlerResultHandler handler = getResultHandler(errorResult);
+								return handler.handleResult(request, response, errorResult);
+							});
+				});
+			}
+			return publisher;
 		});
 
 		return mapError(completionPublisher, this.errorMapper);

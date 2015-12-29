@@ -55,6 +55,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -120,6 +121,30 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		ResponseEntity<String> response = restTemplate.exchange(request, String.class);
 
 		assertEquals("Hello!", response.getBody());
+	}
+
+	@Test
+	public void handleWithThrownException() throws Exception {
+
+		RestTemplate restTemplate = new RestTemplate();
+
+		URI url = new URI("http://localhost:" + port + "/thrown-exception");
+		RequestEntity<Void> request = RequestEntity.get(url).build();
+		ResponseEntity<String> response = restTemplate.exchange(request, String.class);
+
+		assertEquals("Recovered from error: Boo", response.getBody());
+	}
+
+	@Test
+	public void handleWithErrorSignal() throws Exception {
+
+		RestTemplate restTemplate = new RestTemplate();
+
+		URI url = new URI("http://localhost:" + port + "/error-signal");
+		RequestEntity<Void> request = RequestEntity.get(url).build();
+		ResponseEntity<String> response = restTemplate.exchange(request, String.class);
+
+		assertEquals("Recovered from error: Boo", response.getBody());
 	}
 
 	@Test
@@ -476,6 +501,24 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		@RequestMapping("/observable-create")
 		public Observable<Void> observableCreate(@RequestBody Observable<Person> personStream) {
 			return personStream.toList().doOnNext(persons::addAll).flatMap(document -> Observable.empty());
+		}
+
+		@RequestMapping("/thrown-exception")
+		@ResponseBody
+		public Publisher<String> handleAndThrowException() {
+			throw new IllegalStateException("Boo");
+		}
+
+		@RequestMapping("/error-signal")
+		@ResponseBody
+		public Publisher<String> handleWithError() {
+			return Publishers.error(new IllegalStateException("Boo"));
+		}
+
+		@ExceptionHandler
+		@ResponseBody
+		public Publisher<String> handleException(IllegalStateException ex) {
+			return Streams.just("Recovered from error: " + ex.getMessage());
 		}
 
 		//TODO add mixed and T request mappings tests
