@@ -495,8 +495,8 @@ public abstract class AnnotationUtils {
 
 		// Do NOT store result in the findAnnotationCache since doing so could break
 		// findAnnotation(Class, Class) and findAnnotation(Method, Class).
-		return synthesizeAnnotation(
-				findAnnotation(annotatedElement, annotationType, new HashSet<Annotation>()), annotatedElement);
+		A ann = findAnnotation(annotatedElement, annotationType, new HashSet<Annotation>());
+		return synthesizeAnnotation(ann, annotatedElement);
 	}
 
 	/**
@@ -1360,8 +1360,7 @@ public abstract class AnnotationUtils {
 		if (annotation == null) {
 			return null;
 		}
-		if (annotation instanceof SynthesizedAnnotation || (Proxy.isProxyClass(annotation.getClass()) &&
-				Proxy.getInvocationHandler(annotation) instanceof SynthesizedAnnotationInvocationHandler)) {
+		if (annotation instanceof SynthesizedAnnotation) {
 			return annotation;
 		}
 
@@ -1373,8 +1372,10 @@ public abstract class AnnotationUtils {
 		DefaultAnnotationAttributeExtractor attributeExtractor =
 				new DefaultAnnotationAttributeExtractor(annotation, annotatedElement);
 		InvocationHandler handler = new SynthesizedAnnotationInvocationHandler(attributeExtractor);
-		Class<?>[] exposedInterfaces = (canExposeSynthesizedMarker(annotationType) ?
-				new Class<?>[] {annotationType, SynthesizedAnnotation.class} : new Class<?>[] {annotationType});
+
+		// Can always expose Spring's SynthesizedAnnotation marker since we explicitly check for a
+		// synthesizable annotation before (which needs to declare @AliasFor from the same package)
+		Class<?>[] exposedInterfaces = new Class<?>[] {annotationType, SynthesizedAnnotation.class};
 		return (A) Proxy.newProxyInstance(annotation.getClass().getClassLoader(), exposedInterfaces, handler);
 	}
 
