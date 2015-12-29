@@ -1985,16 +1985,14 @@ public abstract class AnnotationUtils {
 			if (this.isAliasPair) {
 				AliasFor mirrorAliasFor = this.aliasedAttribute.getAnnotation(AliasFor.class);
 				if (mirrorAliasFor == null) {
-					String msg = String.format(
-							"Attribute [%s] in annotation [%s] must be declared as an @AliasFor [%s].",
+					String msg = String.format("Attribute [%s] in annotation [%s] must be declared as an @AliasFor [%s].",
 							this.aliasedAttributeName, this.sourceAnnotationType.getName(), this.sourceAttributeName);
 					throw new AnnotationConfigurationException(msg);
 				}
 
 				String mirrorAliasedAttributeName = getAliasedAttributeName(mirrorAliasFor, this.aliasedAttribute);
 				if (!this.sourceAttributeName.equals(mirrorAliasedAttributeName)) {
-					String msg = String.format(
-							"Attribute [%s] in annotation [%s] must be declared as an @AliasFor [%s], not [%s].",
+					String msg = String.format("Attribute [%s] in annotation [%s] must be declared as an @AliasFor [%s], not [%s].",
 							this.aliasedAttributeName, this.sourceAnnotationType.getName(), this.sourceAttributeName,
 							mirrorAliasedAttributeName);
 					throw new AnnotationConfigurationException(msg);
@@ -2156,12 +2154,13 @@ public abstract class AnnotationUtils {
 
 			// Ensure user did not declare both 'value' and 'attribute' in @AliasFor
 			if (attributeDeclared && valueDeclared) {
-				throw new AnnotationConfigurationException(String.format(
-						"In @AliasFor declared on attribute [%s] in annotation [%s], attribute 'attribute' and its " +
-						"alias 'value' are present with values of [%s] and [%s], but only one is permitted.",
-						attribute.getName(), attribute.getDeclaringClass().getName(), attributeName, value));
+				String msg = String.format("In @AliasFor declared on attribute [%s] in annotation [%s], attribute 'attribute' " +
+						"and its alias 'value' are present with values of [%s] and [%s], but only one is permitted.",
+						attribute.getName(), attribute.getDeclaringClass().getName(), attributeName, value);
+				throw new AnnotationConfigurationException(msg);
 			}
 
+			// Either explicit attribute name or pointing to same-named attribute by default
 			attributeName = (attributeDeclared ? attributeName : value);
 			return (StringUtils.hasText(attributeName) ? attributeName.trim() : attribute.getName());
 		}
