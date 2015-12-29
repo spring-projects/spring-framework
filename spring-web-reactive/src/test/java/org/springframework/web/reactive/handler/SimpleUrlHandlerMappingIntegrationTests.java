@@ -23,6 +23,7 @@ import java.util.Map;
 
 import org.junit.Test;
 import org.reactivestreams.Publisher;
+import reactor.Publishers;
 import reactor.io.buffer.Buffer;
 import reactor.rx.Streams;
 
@@ -67,7 +68,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 	}
 
 	@Test
-	public void testFoo() throws Exception {
+	public void testFooHandler() throws Exception {
 
 		RestTemplate restTemplate = new RestTemplate();
 
@@ -80,7 +81,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 	}
 
 	@Test
-	public void testBar() throws Exception {
+	public void testBarHandler() throws Exception {
 
 		RestTemplate restTemplate = new RestTemplate();
 
@@ -90,6 +91,19 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
 		assertArrayEquals("bar".getBytes(UTF_8), response.getBody());
+	}
+
+	@Test
+	public void testHeaderSettingHandler() throws Exception {
+
+		RestTemplate restTemplate = new RestTemplate();
+
+		URI url = new URI("http://localhost:" + port + "/header");
+		RequestEntity<Void> request = RequestEntity.get(url).build();
+		ResponseEntity<byte[]> response = restTemplate.exchange(request, byte[].class);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertEquals("bar", response.getHeaders().getFirst("foo"));
 	}
 
 	@Test
@@ -114,6 +128,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 			Map<String, Object> map = new HashMap<>();
 			map.put("/foo", new FooHandler());
 			map.put("/bar", new BarHandler());
+			map.put("/header", new HeaderSettingHandler());
 			setHandlers(map);
 		}
 	}
@@ -131,6 +146,15 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 		@Override
 		public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 			return response.setBody(Streams.just(Buffer.wrap("bar").byteBuffer()));
+		}
+	}
+
+	private static class HeaderSettingHandler implements HttpHandler {
+
+		@Override
+		public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
+			response.getHeaders().add("foo", "bar");
+			return Publishers.empty();
 		}
 	}
 

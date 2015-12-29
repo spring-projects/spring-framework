@@ -19,15 +19,10 @@ package org.springframework.http.server.reactive;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
-import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.util.Assert;
 
 import io.undertow.connector.PooledByteBuffer;
 import io.undertow.server.HttpServerExchange;
@@ -40,6 +35,11 @@ import org.xnio.ChannelListener;
 import org.xnio.channels.StreamSinkChannel;
 import reactor.Publishers;
 import reactor.core.subscriber.BaseSubscriber;
+
+import org.springframework.http.ExtendedHttpHeaders;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.util.Assert;
 
 import static org.xnio.ChannelListeners.closingChannelExceptionHandler;
 import static org.xnio.ChannelListeners.flushingChannelListener;
@@ -58,14 +58,19 @@ public class UndertowServerHttpResponse implements ServerHttpResponse {
 
 	private final ResponseBodySubscriber bodySubscriber = new ResponseBodySubscriber();
 
-	private final HttpHeaders headers = new HttpHeaders();
-
-	private boolean headersWritten = false;
+	private final HttpHeaders headers;
 
 
 	public UndertowServerHttpResponse(HttpServerExchange exchange) {
 		Assert.notNull(exchange, "'exchange' is required.");
 		this.exchange = exchange;
+		this.headers = initHttpHeaders();
+	}
+
+	private HttpHeaders initHttpHeaders() {
+		ExtendedHttpHeaders headers = new ExtendedHttpHeaders();
+		headers.registerChangeListener(new UndertowHeaderChangeListener());
+		return headers;
 	}
 
 
@@ -77,43 +82,33 @@ public class UndertowServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public HttpHeaders getHeaders() {
-		return (this.headersWritten ? HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
-	}
-
-	@Override
-	public Publisher<Void> writeHeaders() {
-		applyHeaders();
-		return s -> s.onSubscribe(new Subscription() {
-			@Override
-			public void request(long n) {
-				s.onComplete();
-			}
-
-			@Override
-			public void cancel() {
-			}
-		});
-	}
-
-	private void applyHeaders() {
-		if (!this.headersWritten) {
-			for (Map.Entry<String, List<String>> entry : this.headers.entrySet()) {
-				HttpString headerName = HttpString.tryFromString(entry.getKey());
-				this.exchange.getResponseHeaders().addAll(headerName, entry.getValue());
-
-			}
-			this.headersWritten = true;
-		}
+		return this.headers;
 	}
 
 	@Override
 	public Publisher<Void> setBody(Publisher<ByteBuffer> publisher) {
-		return Publishers.lift(publisher, new WriteWithOperator<>(writePublisher -> {
-			applyHeaders();
-			return (subscriber -> writePublisher.subscribe(bodySubscriber));
-		}));
+		return Publishers.lift(publisher, new WriteWithOperator<>(writePublisher ->
+				(subscriber -> writePublisher.subscribe(bodySubscriber))));
 	}
 
+
+	private class UndertowHeaderChangeListener implements ExtendedHttpHeaders.HeaderChangeListener {
+
+		@Override
+		public void headerAdded(String name, String value) {
+			exchange.getResponseHeaders().add(HttpString.tryFromString(name), value);
+		}
+
+		@Override
+		public void headerPut(String key, List<String> values) {
+			exchange.getResponseHeaders().putAll(HttpString.tryFromString(key), values);
+		}
+
+		@Override
+		public void headerRemoved(String key) {
+			exchange.getResponseHeaders().remove(key);
+		}
+	}
 
 	private class ResponseBodySubscriber extends BaseSubscriber<ByteBuffer>
 			implements ChannelListener<StreamSinkChannel> {
@@ -266,4 +261,5 @@ public class UndertowServerHttpResponse implements ServerHttpResponse {
 			}
 		}
 	}
+
 }

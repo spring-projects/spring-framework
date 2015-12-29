@@ -16,8 +16,6 @@
 
 package org.springframework.http.server.reactive;
 
-import org.reactivestreams.Publisher;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ReactiveHttpOutputMessage;
 
@@ -34,11 +32,4 @@ public interface ServerHttpResponse extends ReactiveHttpOutputMessage {
 	 */
 	void setStatusCode(HttpStatus status);
 	
-	/**
-	 * Write the response headers. This method must be invoked to send responses without body.
-	 * @return A {@code Publisher<Void>} used to signal the demand, and receive a notification
-	 * when the handling is complete (success or error) including the flush of the data on the
-	 * network.
-	 */
-	Publisher<Void> writeHeaders();
 }

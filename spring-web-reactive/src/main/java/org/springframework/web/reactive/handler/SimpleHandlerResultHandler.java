@@ -16,8 +16,6 @@
 
 package org.springframework.web.reactive.handler;
 
-import java.util.Arrays;
-
 import org.reactivestreams.Publisher;
 import reactor.Publishers;
 
@@ -74,15 +72,19 @@ public class SimpleHandlerResultHandler implements Ordered, HandlerResultHandler
 				((this.conversionService != null) && this.conversionService.canConvert(type.getRawClass(), Publisher.class));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public Publisher<Void> handleResult(ServerHttpRequest request,
 			ServerHttpResponse response, HandlerResult result) {
 
 		Object value = result.getResult();
+
 		if (Void.TYPE.equals(result.getResultType().getRawClass())) {
-			return response.writeHeaders();
+			return Publishers.empty();
 		}
-		Publisher<Void> completion = (value instanceof Publisher ? (Publisher<Void>)value : this.conversionService.convert(value, Publisher.class));
-		return Publishers.concat(Publishers.from(Arrays.asList(completion, response.writeHeaders())));
+
+		return (value instanceof Publisher ? (Publisher<Void>)value :
+				this.conversionService.convert(value, Publisher.class));
 	}
+
 }

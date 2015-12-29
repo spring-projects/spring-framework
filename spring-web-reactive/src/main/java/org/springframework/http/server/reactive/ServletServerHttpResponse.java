@@ -18,9 +18,7 @@ package org.springframework.http.server.reactive;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.util.List;
-import java.util.Map;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.WriteListener;
 import javax.servlet.http.HttpServletResponse;
@@ -32,9 +30,9 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.Publishers;
 
+import org.springframework.http.ExtendedHttpHeaders;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 
 /**
@@ -51,14 +49,18 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 
 	private final ResponseBodySubscriber subscriber;
 
-	private boolean headersWritten = false;
-
 
 	public ServletServerHttpResponse(HttpServletResponse response, ServletAsyncContextSynchronizer synchronizer) {
 		Assert.notNull(response, "'response' must not be null");
 		this.response = response;
-		this.headers = new HttpHeaders();
+		this.headers = initHttpHeaders();
 		this.subscriber = new ResponseBodySubscriber(synchronizer);
+	}
+
+	private HttpHeaders initHttpHeaders() {
+		ExtendedHttpHeaders headers = new ExtendedHttpHeaders();
+		headers.registerChangeListener(new ServletHeaderChangeListener());
+		return headers;
 	}
 
 
@@ -69,7 +71,7 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public HttpHeaders getHeaders() {
-		return (this.headersWritten ? HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
+		return this.headers;
 	}
 
 	WriteListener getWriteListener() {
@@ -77,39 +79,32 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public Publisher<Void> writeHeaders() {
-		applyHeaders();
-		return Publishers.empty();
-	}
-
-	@Override
 	public Publisher<Void> setBody(final Publisher<ByteBuffer> publisher) {
-		return Publishers.lift(publisher, new WriteWithOperator<>(writePublisher -> {
-			applyHeaders();
-			return (s -> writePublisher.subscribe(subscriber));
-		}));
+		return Publishers.lift(publisher, new WriteWithOperator<>(writePublisher ->
+				(s -> writePublisher.subscribe(subscriber))));
 	}
 
-	private void applyHeaders() {
-		if (!this.headersWritten) {
-			for (Map.Entry<String, List<String>> entry : this.headers.entrySet()) {
-				String headerName = entry.getKey();
-				for (String headerValue : entry.getValue()) {
-					this.response.addHeader(headerName, headerValue);
-				}
+
+	private class ServletHeaderChangeListener implements ExtendedHttpHeaders.HeaderChangeListener {
+
+		@Override
+		public void headerAdded(String name, String value) {
+			response.addHeader(name, value);
+		}
+
+		@Override
+		public void headerPut(String key, List<String> values) {
+			// We can only add but not remove
+			for (String value : values) {
+				response.addHeader(key, value);
 			}
-			MediaType contentType = this.headers.getContentType();
-			if (this.response.getContentType() == null && contentType != null) {
-				this.response.setContentType(contentType.toString());
-			}
-			Charset charset = (contentType != null ? contentType.getCharSet() : null);
-			if (this.response.getCharacterEncoding() == null && charset != null) {
-				this.response.setCharacterEncoding(charset.name());
-			}
-			this.headersWritten = true;
+		}
+
+		@Override
+		public void headerRemoved(String key) {
+			// No Servlet support for removing headers
 		}
 	}
-
 
 	private static class ResponseBodySubscriber implements WriteListener, Subscriber<ByteBuffer> {
 

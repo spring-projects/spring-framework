@@ -78,7 +78,9 @@ public class RxNettyServerHttpRequest implements ServerHttpRequest {
 
 	@Override
 	public Publisher<ByteBuffer> getBody() {
-		Observable<ByteBuffer> bytesContent = this.request.getContent().map(ByteBuf::nioBuffer);
+		Observable<ByteBuffer> bytesContent = this.request.getContent()
+				.concatWith(Observable.empty())
+				.map(ByteBuf::nioBuffer);
 		return RxJava1Converter.from(bytesContent);
 	}
 

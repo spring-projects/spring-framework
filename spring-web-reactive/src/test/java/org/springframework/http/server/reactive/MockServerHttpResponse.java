@@ -50,11 +50,6 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public Publisher<Void> writeHeaders() {
-		return Publishers.empty();
-	}
-
-	@Override
 	public Publisher<Void> setBody(Publisher<ByteBuffer> body) {
 		this.body = body;
 		return Publishers.concatMap(body, b -> Publishers.empty());

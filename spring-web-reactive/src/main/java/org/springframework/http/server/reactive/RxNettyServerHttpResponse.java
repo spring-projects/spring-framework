@@ -17,15 +17,16 @@
 package org.springframework.http.server.reactive;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import org.reactivestreams.Publisher;
 import reactor.Publishers;
 import reactor.core.publisher.convert.RxJava1Converter;
-import reactor.io.buffer.Buffer;
 import rx.Observable;
 
+import org.springframework.http.ExtendedHttpHeaders;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
@@ -40,13 +41,17 @@ public class RxNettyServerHttpResponse implements ServerHttpResponse {
 
 	private final HttpHeaders headers;
 
-	private boolean headersWritten = false;
-
 
 	public RxNettyServerHttpResponse(HttpServerResponse<?> response) {
 		Assert.notNull("'response', response must not be null.");
 		this.response = response;
-		this.headers = new HttpHeaders();
+		this.headers = initHttpHeaders();
+	}
+
+	private HttpHeaders initHttpHeaders() {
+		ExtendedHttpHeaders headers = new ExtendedHttpHeaders();
+		headers.registerChangeListener(new RxNettyHeaderChangeListener());
+		return headers;
 	}
 
 
@@ -57,36 +62,42 @@ public class RxNettyServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public HttpHeaders getHeaders() {
-		return (this.headersWritten ? HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
-	}
-
-	@Override
-	public Publisher<Void> writeHeaders() {
-		if (this.headersWritten) {
-			return Publishers.empty();
-		}
-		applyHeaders();
-		return RxJava1Converter.from(this.response.sendHeaders());
+		return this.headers;
 	}
 
 	@Override
 	public Publisher<Void> setBody(Publisher<ByteBuffer> publisher) {
 		return Publishers.lift(publisher, new WriteWithOperator<>(writePublisher -> {
-			applyHeaders();
 			Observable<byte[]> observable = RxJava1Converter.from(writePublisher)
-					.map(buffer -> new Buffer(buffer).asBytes());
+					.map(buffer -> {
+						byte[] bytes = new byte[buffer.remaining()];
+						buffer.get(bytes);
+						return bytes;
+					});
 			return RxJava1Converter.from(this.response.writeBytes(observable));
 		}));
 	}
 
-	private void applyHeaders() {
-		if (!this.headersWritten) {
-			for (String name : this.headers.keySet()) {
-				for (String value : this.headers.get(name)) {
-					this.response.addHeader(name, value);
-				}
+
+	private class RxNettyHeaderChangeListener implements ExtendedHttpHeaders.HeaderChangeListener {
+
+		@Override
+		public void headerAdded(String name, String value) {
+			response.addHeader(name, value);
+		}
+
+		@Override
+		public void headerPut(String key, List<String> values) {
+			response.removeHeader(key);
+			for (String value : values) {
+				response.addHeader(key, value);
 			}
-			this.headersWritten = true;
+		}
+
+		@Override
+		public void headerRemoved(String key) {
+			response.removeHeader(key);
 		}
 	}
+
 }

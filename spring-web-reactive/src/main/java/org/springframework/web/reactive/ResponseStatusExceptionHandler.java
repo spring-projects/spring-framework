@@ -35,7 +35,7 @@ public class ResponseStatusExceptionHandler implements HttpExceptionHandler {
 	public Publisher<Void> handle(ServerHttpRequest request, ServerHttpResponse response, Throwable ex) {
 		if (ex instanceof ResponseStatusException) {
 			response.setStatusCode(((ResponseStatusException) ex).getHttpStatus());
-			return response.writeHeaders();
+			return Publishers.empty();
 		}
 		return Publishers.error(ex);
 	}
