@@ -1945,11 +1945,18 @@ public abstract class AnnotationUtils {
 
 			this.sourceAttribute = sourceAttribute;
 			this.sourceAnnotationType = (Class<? extends Annotation>) declaringClass;
-			this.sourceAttributeName = this.sourceAttribute.getName();
+			this.sourceAttributeName = sourceAttribute.getName();
 
 			this.aliasedAnnotationType = (Annotation.class == aliasFor.annotation() ?
 					this.sourceAnnotationType : aliasFor.annotation());
-			this.aliasedAttributeName = getAliasedAttributeName(aliasFor, this.sourceAttribute);
+			this.aliasedAttributeName = getAliasedAttributeName(aliasFor, sourceAttribute);
+			if (this.aliasedAnnotationType == this.sourceAnnotationType &&
+					this.aliasedAttributeName.equals(this.sourceAttributeName)) {
+				String msg = String.format("@AliasFor declaration on attribute [%s] in annotation [%s] points to " +
+						"itself. Specify 'annotation' to point to a same-named attribute on a meta-annotation.",
+						sourceAttribute.getName(), declaringClass.getName());
+				throw new AnnotationConfigurationException(msg);
+			}
 			try {
 				this.aliasedAttribute = this.aliasedAnnotationType.getDeclaredMethod(this.aliasedAttributeName);
 			}
@@ -2124,30 +2131,23 @@ public abstract class AnnotationUtils {
 			return AliasDescriptor.from(this.aliasedAttribute);
 		}
 
-		@Override
-		public String toString() {
-			return String.format("%s: @%s(%s) is an alias for @%s(%s)", getClass().getSimpleName(),
-				this.sourceAnnotationType.getSimpleName(), this.sourceAttributeName,
-				this.aliasedAnnotationType.getSimpleName(), this.aliasedAttributeName);
-		}
-
 		/**
 		 * Get the name of the aliased attribute configured via the supplied
-		 * {@link AliasFor @AliasFor} annotation on the supplied {@code attribute}.
+		 * {@link AliasFor @AliasFor} annotation on the supplied {@code attribute},
+		 * or the original attribute if no aliased one specified (indicating that
+		 * the reference goes to a same-named attribute on a meta-annotation).
 		 * <p>This method returns the value of either the {@code attribute}
 		 * or {@code value} attribute of {@code @AliasFor}, ensuring that only
 		 * one of the attributes has been declared while simultaneously ensuring
 		 * that at least one of the attributes has been declared.
 		 * @param aliasFor the {@code @AliasFor} annotation from which to retrieve
 		 * the aliased attribute name
-		 * @param attribute the attribute that is annotated with {@code @AliasFor},
-		 * used solely for building an exception message
+		 * @param attribute the attribute that is annotated with {@code @AliasFor}
 		 * @return the name of the aliased attribute (never {@code null} or empty)
 		 * @throws AnnotationConfigurationException if invalid configuration of
 		 * {@code @AliasFor} is detected
-		 * @since 4.2
 		 */
-		private static String getAliasedAttributeName(AliasFor aliasFor, Method attribute) {
+		private String getAliasedAttributeName(AliasFor aliasFor, Method attribute) {
 			String attributeName = aliasFor.attribute();
 			String value = aliasFor.value();
 			boolean attributeDeclared = StringUtils.hasText(attributeName);
@@ -2156,22 +2156,20 @@ public abstract class AnnotationUtils {
 			// Ensure user did not declare both 'value' and 'attribute' in @AliasFor
 			if (attributeDeclared && valueDeclared) {
 				throw new AnnotationConfigurationException(String.format(
-					"In @AliasFor declared on attribute [%s] in annotation [%s], attribute 'attribute' and its " +
-					"alias 'value' are present with values of [%s] and [%s], but only one is permitted.",
-					attribute.getName(), attribute.getDeclaringClass().getName(), attributeName, value));
+						"In @AliasFor declared on attribute [%s] in annotation [%s], attribute 'attribute' and its " +
+						"alias 'value' are present with values of [%s] and [%s], but only one is permitted.",
+						attribute.getName(), attribute.getDeclaringClass().getName(), attributeName, value));
 			}
 
 			attributeName = (attributeDeclared ? attributeName : value);
+			return (StringUtils.hasText(attributeName) ? attributeName.trim() : attribute.getName());
+		}
 
-			// Ensure user declared either 'value' or 'attribute' in @AliasFor
-			if (!StringUtils.hasText(attributeName)) {
-				String msg = String.format(
-						"@AliasFor declaration on attribute [%s] in annotation [%s] is missing required 'attribute' value.",
-						attribute.getName(), attribute.getDeclaringClass().getName());
-				throw new AnnotationConfigurationException(msg);
-			}
-
-			return attributeName.trim();
+		@Override
+		public String toString() {
+			return String.format("%s: @%s(%s) is an alias for @%s(%s)", getClass().getSimpleName(),
+					this.sourceAnnotationType.getSimpleName(), this.sourceAttributeName,
+					this.aliasedAnnotationType.getSimpleName(), this.aliasedAttributeName);
 		}
 	}
 
