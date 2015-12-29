@@ -98,6 +98,35 @@ public class AnnotatedElementUtils {
 
 
 	/**
+	 * Build an adapted {@link AnnotatedElement} for the given annotations,
+	 * typically for use with other methods on {@link AnnotatedElementUtils}.
+	 * @param annotations the annotations to expose through the {@code AnnotatedElement}
+	 * @since 4.3
+	 */
+	public static AnnotatedElement forAnnotations(final Annotation... annotations) {
+		return new AnnotatedElement() {
+			@Override
+			@SuppressWarnings("unchecked")
+			public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
+				for (Annotation ann : annotations) {
+					if (ann.annotationType() == annotationClass) {
+						return (T) ann;
+					}
+				}
+				return null;
+			}
+			@Override
+			public Annotation[] getAnnotations() {
+				return annotations;
+			}
+			@Override
+			public Annotation[] getDeclaredAnnotations() {
+				return annotations;
+			}
+		};
+	}
+
+	/**
 	 * Get the fully qualified class names of all meta-annotation types
 	 * <em>present</em> on the annotation (of the specified {@code annotationType})
 	 * on the supplied {@link AnnotatedElement}.

@@ -17,6 +17,8 @@
 package org.springframework.context.annotation.configuration;
 
 import java.io.IOException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.Optional;
 import javax.inject.Provider;
@@ -35,6 +37,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.tests.sample.beans.Colour;
@@ -116,6 +119,20 @@ public class AutowiredConfigurationTests {
 	public void testValueInjection() {
 		ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
 				"ValueInjectionTests.xml", AutowiredConfigurationTests.class);
+		doTestValueInjection(context);
+	}
+
+	@Test
+	public void testValueInjectionWithMetaAnnotation() {
+		AnnotationConfigApplicationContext context =
+				new AnnotationConfigApplicationContext(ValueConfigWithMetaAnnotation.class);
+		doTestValueInjection(context);
+	}
+
+	@Test
+	public void testValueInjectionWithAliasedMetaAnnotation() {
+		AnnotationConfigApplicationContext context =
+				new AnnotationConfigApplicationContext(ValueConfigWithAliasedMetaAnnotation.class);
 		doTestValueInjection(context);
 	}
 
@@ -275,6 +292,73 @@ public class AutowiredConfigurationTests {
 		private String name2;
 
 		@Value("#{systemProperties[myProp]}")
+		public void setName2(String name) {
+			this.name2 = name;
+		}
+
+		@Bean @Scope("prototype")
+		public TestBean testBean() {
+			return new TestBean(name);
+		}
+
+		@Bean @Scope("prototype")
+		public TestBean testBean2() {
+			return new TestBean(name2);
+		}
+	}
+
+
+	@Value("#{systemProperties[myProp]}")
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface MyProp {
+	}
+
+
+	@Configuration
+	@Scope("prototype")
+	static class ValueConfigWithMetaAnnotation {
+
+		@MyProp
+		private String name;
+
+		private String name2;
+
+		@MyProp
+		public void setName2(String name) {
+			this.name2 = name;
+		}
+
+		@Bean @Scope("prototype")
+		public TestBean testBean() {
+			return new TestBean(name);
+		}
+
+		@Bean @Scope("prototype")
+		public TestBean testBean2() {
+			return new TestBean(name2);
+		}
+	}
+
+
+	@Value("")
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface AliasedProp {
+
+		@AliasFor(annotation = Value.class)
+		String value();
+	}
+
+
+	@Configuration
+	@Scope("prototype")
+	static class ValueConfigWithAliasedMetaAnnotation {
+
+		@AliasedProp("#{systemProperties[myProp]}")
+		private String name;
+
+		private String name2;
+
+		@AliasedProp("#{systemProperties[myProp]}")
 		public void setName2(String name) {
 			this.name2 = name;
 		}
