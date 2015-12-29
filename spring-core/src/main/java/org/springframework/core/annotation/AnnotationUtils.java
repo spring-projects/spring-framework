@@ -495,8 +495,8 @@ public abstract class AnnotationUtils {
 
 		// Do NOT store result in the findAnnotationCache since doing so could break
 		// findAnnotation(Class, Class) and findAnnotation(Method, Class).
-		return synthesizeAnnotation(
-				findAnnotation(annotatedElement, annotationType, new HashSet<Annotation>()), annotatedElement);
+		A ann = findAnnotation(annotatedElement, annotationType, new HashSet<Annotation>());
+		return synthesizeAnnotation(ann, annotatedElement);
 	}
 
 	/**
@@ -1360,8 +1360,7 @@ public abstract class AnnotationUtils {
 		if (annotation == null) {
 			return null;
 		}
-		if (annotation instanceof SynthesizedAnnotation || (Proxy.isProxyClass(annotation.getClass()) &&
-				Proxy.getInvocationHandler(annotation) instanceof SynthesizedAnnotationInvocationHandler)) {
+		if (annotation instanceof SynthesizedAnnotation) {
 			return annotation;
 		}
 
@@ -1373,8 +1372,10 @@ public abstract class AnnotationUtils {
 		DefaultAnnotationAttributeExtractor attributeExtractor =
 				new DefaultAnnotationAttributeExtractor(annotation, annotatedElement);
 		InvocationHandler handler = new SynthesizedAnnotationInvocationHandler(attributeExtractor);
-		Class<?>[] exposedInterfaces = (canExposeSynthesizedMarker(annotationType) ?
-				new Class<?>[] {annotationType, SynthesizedAnnotation.class} : new Class<?>[] {annotationType});
+
+		// Can always expose Spring's SynthesizedAnnotation marker since we explicitly check for a
+		// synthesizable annotation before (which needs to declare @AliasFor from the same package)
+		Class<?>[] exposedInterfaces = new Class<?>[] {annotationType, SynthesizedAnnotation.class};
 		return (A) Proxy.newProxyInstance(annotation.getClass().getClassLoader(), exposedInterfaces, handler);
 	}
 
@@ -1945,11 +1946,11 @@ public abstract class AnnotationUtils {
 
 			this.sourceAttribute = sourceAttribute;
 			this.sourceAnnotationType = (Class<? extends Annotation>) declaringClass;
-			this.sourceAttributeName = this.sourceAttribute.getName();
+			this.sourceAttributeName = sourceAttribute.getName();
 
 			this.aliasedAnnotationType = (Annotation.class == aliasFor.annotation() ?
 					this.sourceAnnotationType : aliasFor.annotation());
-			this.aliasedAttributeName = getAliasedAttributeName(aliasFor, this.sourceAttribute);
+			this.aliasedAttributeName = getAliasedAttributeName(aliasFor, sourceAttribute);
 			try {
 				this.aliasedAttribute = this.aliasedAnnotationType.getDeclaredMethod(this.aliasedAttributeName);
 			}
@@ -1977,16 +1978,14 @@ public abstract class AnnotationUtils {
 			if (this.isAliasPair) {
 				AliasFor mirrorAliasFor = this.aliasedAttribute.getAnnotation(AliasFor.class);
 				if (mirrorAliasFor == null) {
-					String msg = String.format(
-							"Attribute [%s] in annotation [%s] must be declared as an @AliasFor [%s].",
+					String msg = String.format("Attribute [%s] in annotation [%s] must be declared as an @AliasFor [%s].",
 							this.aliasedAttributeName, this.sourceAnnotationType.getName(), this.sourceAttributeName);
 					throw new AnnotationConfigurationException(msg);
 				}
 
 				String mirrorAliasedAttributeName = getAliasedAttributeName(mirrorAliasFor, this.aliasedAttribute);
 				if (!this.sourceAttributeName.equals(mirrorAliasedAttributeName)) {
-					String msg = String.format(
-							"Attribute [%s] in annotation [%s] must be declared as an @AliasFor [%s], not [%s].",
+					String msg = String.format("Attribute [%s] in annotation [%s] must be declared as an @AliasFor [%s], not [%s].",
 							this.aliasedAttributeName, this.sourceAnnotationType.getName(), this.sourceAttributeName,
 							mirrorAliasedAttributeName);
 					throw new AnnotationConfigurationException(msg);
@@ -2124,13 +2123,6 @@ public abstract class AnnotationUtils {
 			return AliasDescriptor.from(this.aliasedAttribute);
 		}
 
-		@Override
-		public String toString() {
-			return String.format("%s: @%s(%s) is an alias for @%s(%s)", getClass().getSimpleName(),
-				this.sourceAnnotationType.getSimpleName(), this.sourceAttributeName,
-				this.aliasedAnnotationType.getSimpleName(), this.aliasedAttributeName);
-		}
-
 		/**
 		 * Get the name of the aliased attribute configured via the supplied
 		 * {@link AliasFor @AliasFor} annotation on the supplied {@code attribute}.
@@ -2145,9 +2137,8 @@ public abstract class AnnotationUtils {
 		 * @return the name of the aliased attribute (never {@code null} or empty)
 		 * @throws AnnotationConfigurationException if invalid configuration of
 		 * {@code @AliasFor} is detected
-		 * @since 4.2
 		 */
-		private static String getAliasedAttributeName(AliasFor aliasFor, Method attribute) {
+		private String getAliasedAttributeName(AliasFor aliasFor, Method attribute) {
 			String attributeName = aliasFor.attribute();
 			String value = aliasFor.value();
 			boolean attributeDeclared = StringUtils.hasText(attributeName);
@@ -2155,10 +2146,10 @@ public abstract class AnnotationUtils {
 
 			// Ensure user did not declare both 'value' and 'attribute' in @AliasFor
 			if (attributeDeclared && valueDeclared) {
-				throw new AnnotationConfigurationException(String.format(
-					"In @AliasFor declared on attribute [%s] in annotation [%s], attribute 'attribute' and its " +
-					"alias 'value' are present with values of [%s] and [%s], but only one is permitted.",
-					attribute.getName(), attribute.getDeclaringClass().getName(), attributeName, value));
+				String msg = String.format("In @AliasFor declared on attribute [%s] in annotation [%s], attribute 'attribute' " +
+						"and its alias 'value' are present with values of [%s] and [%s], but only one is permitted.",
+						attribute.getName(), attribute.getDeclaringClass().getName(), attributeName, value);
+				throw new AnnotationConfigurationException(msg);
 			}
 
 			attributeName = (attributeDeclared ? attributeName : value);
@@ -2172,6 +2163,13 @@ public abstract class AnnotationUtils {
 			}
 
 			return attributeName.trim();
+		}
+
+		@Override
+		public String toString() {
+			return String.format("%s: @%s(%s) is an alias for @%s(%s)", getClass().getSimpleName(),
+					this.sourceAnnotationType.getSimpleName(), this.sourceAttributeName,
+					this.aliasedAnnotationType.getSimpleName(), this.aliasedAttributeName);
 		}
 	}
 
