@@ -16,34 +16,19 @@
 
 package org.springframework.http.server.reactive;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
-import io.undertow.connector.PooledByteBuffer;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HttpString;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscription;
-import org.xnio.ChannelListener;
-import org.xnio.channels.StreamSinkChannel;
 import reactor.Publishers;
-import reactor.core.subscriber.BaseSubscriber;
 
 import org.springframework.http.ExtendedHttpHeaders;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
-
-import static org.xnio.ChannelListeners.closingChannelExceptionHandler;
-import static org.xnio.ChannelListeners.flushingChannelListener;
-import static org.xnio.IoUtils.safeClose;
 
 /**
  * Adapt {@link ServerHttpResponse} to the Undertow {@link HttpServerExchange}.
@@ -53,19 +38,20 @@ import static org.xnio.IoUtils.safeClose;
  */
 public class UndertowServerHttpResponse implements ServerHttpResponse {
 
-	private static final Log logger = LogFactory.getLog(UndertowServerHttpResponse.class);
-
-
 	private final HttpServerExchange exchange;
+
+	private final Function<Publisher<ByteBuffer>, Publisher<Void>> responseBodyWriter;
 
 	private final HttpHeaders headers;
 
-	private final ResponseBodySubscriber bodySubscriber = new ResponseBodySubscriber();
 
+	public UndertowServerHttpResponse(HttpServerExchange exchange,
+			Function<Publisher<ByteBuffer>, Publisher<Void>> responseBodyWriter) {
 
-	public UndertowServerHttpResponse(HttpServerExchange exchange) {
 		Assert.notNull(exchange, "'exchange' is required.");
+		Assert.notNull(responseBodyWriter, "'responseBodyWriter' must not be null");
 		this.exchange = exchange;
+		this.responseBodyWriter = responseBodyWriter;
 		this.headers = new ExtendedHttpHeaders(new UndertowHeaderChangeListener());
 	}
 
@@ -90,8 +76,8 @@ public class UndertowServerHttpResponse implements ServerHttpResponse {
 		return Publishers.lift(publisher, new WriteWithOperator<>(this::setBodyInternal));
 	}
 
-	protected Publisher<Void> setBodyInternal(Publisher<ByteBuffer> writePublisher) {
-		return subscriber -> writePublisher.subscribe(bodySubscriber);
+	protected Publisher<Void> setBodyInternal(Publisher<ByteBuffer> publisher) {
+		return this.responseBodyWriter.apply(publisher);
 	}
 
 
@@ -112,158 +98,6 @@ public class UndertowServerHttpResponse implements ServerHttpResponse {
 		@Override
 		public void headerRemoved(String key) {
 			getUndertowExchange().getResponseHeaders().remove(key);
-		}
-	}
-
-	private class ResponseBodySubscriber extends BaseSubscriber<ByteBuffer>
-			implements ChannelListener<StreamSinkChannel> {
-
-		private Subscription subscription;
-
-		private final Queue<PooledByteBuffer> buffers = new ConcurrentLinkedQueue<>();
-
-		private final AtomicInteger writing = new AtomicInteger();
-
-		private final AtomicBoolean closing = new AtomicBoolean();
-
-		private StreamSinkChannel responseChannel;
-
-
-		@Override
-		public void onSubscribe(Subscription subscription) {
-			super.onSubscribe(subscription);
-			this.subscription = subscription;
-			this.subscription.request(1);
-		}
-
-		@Override
-		public void onNext(ByteBuffer buffer) {
-			super.onNext(buffer);
-
-			if (this.responseChannel == null) {
-				this.responseChannel = exchange.getResponseChannel();
-			}
-
-			this.writing.incrementAndGet();
-			try {
-				int c;
-				do {
-					c = this.responseChannel.write(buffer);
-				} while (buffer.hasRemaining() && c > 0);
-
-				if (buffer.hasRemaining()) {
-					this.writing.incrementAndGet();
-					enqueue(buffer);
-					this.responseChannel.getWriteSetter().set(this);
-					this.responseChannel.resumeWrites();
-				}
-				else {
-					this.subscription.request(1);
-				}
-
-			}
-			catch (IOException ex) {
-				onError(ex);
-			}
-			finally {
-				this.writing.decrementAndGet();
-				if (this.closing.get()) {
-					closeIfDone();
-				}
-			}
-		}
-
-		private void enqueue(ByteBuffer src) {
-			do {
-				PooledByteBuffer buffer = exchange.getConnection().getByteBufferPool().allocate();
-				ByteBuffer dst = buffer.getBuffer();
-				copy(dst, src);
-				dst.flip();
-				this.buffers.add(buffer);
-			} while (src.remaining() > 0);
-		}
-
-		private void copy(ByteBuffer dst, ByteBuffer src) {
-			int n = Math.min(dst.capacity(), src.remaining());
-			for (int i = 0; i < n; i++) {
-				dst.put(src.get());
-			}
-		}
-
-		@Override
-		public void handleEvent(StreamSinkChannel channel) {
-			try {
-				int c;
-				do {
-					ByteBuffer buffer = this.buffers.peek().getBuffer();
-					do {
-						c = channel.write(buffer);
-					} while (buffer.hasRemaining() && c > 0);
-
-					if (!buffer.hasRemaining()) {
-						safeClose(this.buffers.remove());
-					}
-				} while (!this.buffers.isEmpty() && c > 0);
-
-				if (!this.buffers.isEmpty()) {
-					channel.resumeWrites();
-				}
-				else {
-					this.writing.decrementAndGet();
-
-					if (this.closing.get()) {
-						closeIfDone();
-					}
-					else {
-						this.subscription.request(1);
-					}
-				}
-			}
-			catch (IOException ex) {
-				onError(ex);
-			}
-		}
-
-		@Override
-		public void onError(Throwable ex) {
-			super.onError(ex);
-			logger.error("ResponseBodySubscriber error", ex);
-			if (!exchange.isResponseStarted() && exchange.getStatusCode() < 500) {
-				exchange.setStatusCode(500);
-			}
-		}
-
-		@Override
-		public void onComplete() {
-			super.onComplete();
-			if (this.responseChannel != null) {
-				this.closing.set(true);
-				closeIfDone();
-			}
-		}
-
-		private void closeIfDone() {
-			if (this.writing.get() == 0) {
-				if (this.closing.compareAndSet(true, false)) {
-					closeChannel();
-				}
-			}
-		}
-
-		private void closeChannel() {
-			try {
-				this.responseChannel.shutdownWrites();
-
-				if (!this.responseChannel.flush()) {
-					this.responseChannel.getWriteSetter().set(flushingChannelListener(
-							o -> safeClose(this.responseChannel), closingChannelExceptionHandler()));
-					this.responseChannel.resumeWrites();
-				}
-				this.responseChannel = null;
-			}
-			catch (IOException ex) {
-				onError(ex);
-			}
 		}
 	}
 

@@ -16,18 +16,12 @@
 
 package org.springframework.http.server.reactive;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.List;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.WriteListener;
+import java.util.function.Function;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.reactivestreams.Subscription;
 import reactor.Publishers;
 
 import org.springframework.http.ExtendedHttpHeaders;
@@ -42,21 +36,21 @@ import org.springframework.util.Assert;
  */
 public class ServletServerHttpResponse implements ServerHttpResponse {
 
-	private static final Log logger = LogFactory.getLog(ServletServerHttpResponse.class);
-
-
 	private final HttpServletResponse response;
+
+	private final Function<Publisher<ByteBuffer>, Publisher<Void>> responseBodyWriter;
 
 	private final HttpHeaders headers;
 
-	private final ResponseBodySubscriber subscriber;
 
+	public ServletServerHttpResponse(HttpServletResponse response,
+			Function<Publisher<ByteBuffer>, Publisher<Void>> responseBodyWriter) {
 
-	public ServletServerHttpResponse(HttpServletResponse response, ServletAsyncContextSynchronizer synchronizer) {
 		Assert.notNull(response, "'response' must not be null");
+		Assert.notNull(responseBodyWriter, "'responseBodyWriter' must not be null");
 		this.response = response;
+		this.responseBodyWriter = responseBodyWriter;
 		this.headers = new ExtendedHttpHeaders(new ServletHeaderChangeListener());
-		this.subscriber = new ResponseBodySubscriber(synchronizer);
 	}
 
 
@@ -74,17 +68,13 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 		return this.headers;
 	}
 
-	WriteListener getWriteListener() {
-		return this.subscriber;
-	}
-
 	@Override
 	public Publisher<Void> setBody(final Publisher<ByteBuffer> publisher) {
 		return Publishers.lift(publisher, new WriteWithOperator<>(this::setBodyInternal));
 	}
 
 	protected Publisher<Void> setBodyInternal(Publisher<ByteBuffer> publisher) {
-		return s -> publisher.subscribe(subscriber);
+		return this.responseBodyWriter.apply(publisher);
 	}
 
 
@@ -106,86 +96,6 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 		@Override
 		public void headerRemoved(String key) {
 			// No Servlet support for removing headers
-		}
-	}
-
-
-	private static class ResponseBodySubscriber implements WriteListener, Subscriber<ByteBuffer> {
-
-		private final ServletAsyncContextSynchronizer synchronizer;
-
-		private Subscription subscription;
-
-		private ByteBuffer buffer;
-
-		private volatile boolean subscriberComplete = false;
-
-
-		public ResponseBodySubscriber(ServletAsyncContextSynchronizer synchronizer) {
-			this.synchronizer = synchronizer;
-		}
-
-
-		@Override
-		public void onSubscribe(Subscription subscription) {
-			this.subscription = subscription;
-			this.subscription.request(1);
-		}
-
-		@Override
-		public void onNext(ByteBuffer bytes) {
-
-			Assert.isNull(buffer);
-
-			this.buffer = bytes;
-			try {
-				onWritePossible();
-			}
-			catch (IOException e) {
-				onError(e);
-			}
-		}
-
-		@Override
-		public void onComplete() {
-			logger.debug("Complete buffer: " + (buffer == null));
-
-			this.subscriberComplete = true;
-
-			if (buffer == null) {
-				this.synchronizer.writeComplete();
-			}
-		}
-
-		@Override
-		public void onWritePossible() throws IOException {
-			ServletOutputStream output = this.synchronizer.getOutputStream();
-
-			boolean ready = output.isReady();
-			logger.debug("Output: " + ready + " buffer: " + (buffer == null));
-
-			if (ready) {
-				if (this.buffer != null) {
-					byte[] bytes = new byte[this.buffer.remaining()];
-					this.buffer.get(bytes);
-					this.buffer = null;
-					output.write(bytes);
-					if (!subscriberComplete) {
-						this.subscription.request(1);
-					}
-					else {
-						this.synchronizer.writeComplete();
-					}
-				}
-				else {
-					this.subscription.request(1);
-				}
-			}
-		}
-
-		@Override
-		public void onError(Throwable t) {
-			logger.error("ResponseBodySubscriber error", t);
 		}
 	}
 
