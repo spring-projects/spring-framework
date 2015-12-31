@@ -43,6 +43,8 @@ import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.StringUtils;
 
 /**
+ * Adapt {@link ServerHttpRequest} to the Servlet {@link HttpServletRequest}.
+ *
  * @author Rossen Stoyanchev
  */
 public class ServletServerHttpRequest implements ServerHttpRequest {
@@ -52,44 +54,55 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	private static final Log logger = LogFactory.getLog(ServletServerHttpRequest.class);
 
 
-	private final HttpServletRequest servletRequest;
+	private final HttpServletRequest request;
+
+	private URI uri;
 
 	private HttpHeaders headers;
 
 	private final RequestBodyPublisher requestBodyPublisher;
 
 
-	public ServletServerHttpRequest(HttpServletRequest servletRequest, ServletAsyncContextSynchronizer synchronizer) {
-		Assert.notNull(servletRequest, "HttpServletRequest must not be null");
-		this.servletRequest = servletRequest;
+	public ServletServerHttpRequest(HttpServletRequest request, ServletAsyncContextSynchronizer synchronizer) {
+		Assert.notNull(request, "'request' must not be null.");
+		this.request = request;
 		this.requestBodyPublisher = new RequestBodyPublisher(synchronizer, BUFFER_SIZE);
 	}
 
 
+	public HttpServletRequest getServletRequest() {
+		return this.request;
+	}
+
 	@Override
 	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(this.servletRequest.getMethod());
+		return HttpMethod.valueOf(getServletRequest().getMethod());
 	}
 
 	@Override
 	public URI getURI() {
-		try {
-			return new URI(this.servletRequest.getScheme(), null, this.servletRequest.getServerName(),
-					this.servletRequest.getServerPort(), this.servletRequest.getRequestURI(),
-					this.servletRequest.getQueryString(), null);
+		if (this.uri == null) {
+			try {
+				this.uri = new URI(getServletRequest().getScheme(), null,
+						getServletRequest().getServerName(),
+						getServletRequest().getServerPort(),
+						getServletRequest().getRequestURI(),
+						getServletRequest().getQueryString(), null);
+			}
+			catch (URISyntaxException ex) {
+				throw new IllegalStateException("Could not get HttpServletRequest URI: " + ex.getMessage(), ex);
+			}
 		}
-		catch (URISyntaxException ex) {
-			throw new IllegalStateException("Could not get HttpServletRequest URI: " + ex.getMessage(), ex);
-		}
+		return this.uri;
 	}
 
 	@Override
 	public HttpHeaders getHeaders() {
 		if (this.headers == null) {
 			this.headers = new HttpHeaders();
-			for (Enumeration<?> names = this.servletRequest.getHeaderNames(); names.hasMoreElements(); ) {
+			for (Enumeration<?> names = getServletRequest().getHeaderNames(); names.hasMoreElements(); ) {
 				String headerName = (String) names.nextElement();
-				for (Enumeration<?> headerValues = this.servletRequest.getHeaders(headerName);
+				for (Enumeration<?> headerValues = getServletRequest().getHeaders(headerName);
 					 headerValues.hasMoreElements(); ) {
 					String headerValue = (String) headerValues.nextElement();
 					this.headers.add(headerName, headerValue);
@@ -98,14 +111,14 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 			// HttpServletRequest exposes some headers as properties: we should include those if not already present
 			MediaType contentType = this.headers.getContentType();
 			if (contentType == null) {
-				String requestContentType = this.servletRequest.getContentType();
+				String requestContentType = getServletRequest().getContentType();
 				if (StringUtils.hasLength(requestContentType)) {
 					contentType = MediaType.parseMediaType(requestContentType);
 					this.headers.setContentType(contentType);
 				}
 			}
 			if (contentType != null && contentType.getCharSet() == null) {
-				String requestEncoding = this.servletRequest.getCharacterEncoding();
+				String requestEncoding = getServletRequest().getCharacterEncoding();
 				if (StringUtils.hasLength(requestEncoding)) {
 					Charset charSet = Charset.forName(requestEncoding);
 					Map<String, String> params = new LinkedCaseInsensitiveMap<>();
@@ -116,7 +129,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 				}
 			}
 			if (this.headers.getContentLength() == -1) {
-				int requestContentLength = this.servletRequest.getContentLength();
+				int requestContentLength = getServletRequest().getContentLength();
 				if (requestContentLength != -1) {
 					this.headers.setContentLength(requestContentLength);
 				}

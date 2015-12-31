@@ -21,10 +21,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Extension of HttpHeaders (to be merged into HttpHeaders) that allows the
- * registration of {@link HeaderChangeListener}. For use with HTTP response
- * implementations that can keep track of changes made headers and keep the
- * underlying server headers always in sync.
+ * Variant of HttpHeaders (to be merged into HttpHeaders) that supports the
+ * registration of {@link HeaderChangeListener}s.
+ *
+ * <p>For use with HTTP server response implementations that wish to propagate
+ * header header changes to the underlying runtime as they occur.
  *
  * @author Rossen Stoyanchev
  */
@@ -33,7 +34,10 @@ public class ExtendedHttpHeaders extends HttpHeaders {
 	private final List<HeaderChangeListener> listeners = new ArrayList<>(1);
 
 
-	public void registerChangeListener(HeaderChangeListener listener) {
+	public ExtendedHttpHeaders() {
+	}
+
+	public ExtendedHttpHeaders(HeaderChangeListener listener) {
 		this.listeners.add(listener);
 	}
 
@@ -48,7 +52,7 @@ public class ExtendedHttpHeaders extends HttpHeaders {
 
 	@Override
 	public void set(String name, String value) {
-		List<String> values = new LinkedList<String>();
+		List<String> values = new LinkedList<>();
 		values.add(value);
 		put(name, values);
 	}

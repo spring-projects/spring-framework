@@ -46,6 +46,8 @@ import static org.xnio.ChannelListeners.flushingChannelListener;
 import static org.xnio.IoUtils.safeClose;
 
 /**
+ * Adapt {@link ServerHttpResponse} to the Undertow {@link HttpServerExchange}.
+ *
  * @author Marek Hawrylczak
  * @author Rossen Stoyanchev
  */
@@ -56,28 +58,26 @@ public class UndertowServerHttpResponse implements ServerHttpResponse {
 
 	private final HttpServerExchange exchange;
 
-	private final ResponseBodySubscriber bodySubscriber = new ResponseBodySubscriber();
-
 	private final HttpHeaders headers;
+
+	private final ResponseBodySubscriber bodySubscriber = new ResponseBodySubscriber();
 
 
 	public UndertowServerHttpResponse(HttpServerExchange exchange) {
 		Assert.notNull(exchange, "'exchange' is required.");
 		this.exchange = exchange;
-		this.headers = initHttpHeaders();
+		this.headers = new ExtendedHttpHeaders(new UndertowHeaderChangeListener());
 	}
 
-	private HttpHeaders initHttpHeaders() {
-		ExtendedHttpHeaders headers = new ExtendedHttpHeaders();
-		headers.registerChangeListener(new UndertowHeaderChangeListener());
-		return headers;
-	}
 
+	public HttpServerExchange getUndertowExchange() {
+		return this.exchange;
+	}
 
 	@Override
 	public void setStatusCode(HttpStatus status) {
 		Assert.notNull(status);
-		this.exchange.setStatusCode(status.value());
+		getUndertowExchange().setStatusCode(status.value());
 	}
 
 	@Override
@@ -87,8 +87,11 @@ public class UndertowServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public Publisher<Void> setBody(Publisher<ByteBuffer> publisher) {
-		return Publishers.lift(publisher, new WriteWithOperator<>(writePublisher ->
-				(subscriber -> writePublisher.subscribe(bodySubscriber))));
+		return Publishers.lift(publisher, new WriteWithOperator<>(this::setBodyInternal));
+	}
+
+	protected Publisher<Void> setBodyInternal(Publisher<ByteBuffer> writePublisher) {
+		return subscriber -> writePublisher.subscribe(bodySubscriber);
 	}
 
 
@@ -96,17 +99,19 @@ public class UndertowServerHttpResponse implements ServerHttpResponse {
 
 		@Override
 		public void headerAdded(String name, String value) {
-			exchange.getResponseHeaders().add(HttpString.tryFromString(name), value);
+			HttpString headerName = HttpString.tryFromString(name);
+			getUndertowExchange().getResponseHeaders().add(headerName, value);
 		}
 
 		@Override
 		public void headerPut(String key, List<String> values) {
-			exchange.getResponseHeaders().putAll(HttpString.tryFromString(key), values);
+			HttpString headerName = HttpString.tryFromString(key);
+			getUndertowExchange().getResponseHeaders().putAll(headerName, values);
 		}
 
 		@Override
 		public void headerRemoved(String key) {
-			exchange.getResponseHeaders().remove(key);
+			getUndertowExchange().getResponseHeaders().remove(key);
 		}
 	}
 

@@ -36,6 +36,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 
 /**
+ * Adapt {@link ServerHttpResponse} to the Servlet {@link HttpServletResponse}.
+ *
  * @author Rossen Stoyanchev
  */
 public class ServletServerHttpResponse implements ServerHttpResponse {
@@ -53,20 +55,18 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 	public ServletServerHttpResponse(HttpServletResponse response, ServletAsyncContextSynchronizer synchronizer) {
 		Assert.notNull(response, "'response' must not be null");
 		this.response = response;
-		this.headers = initHttpHeaders();
+		this.headers = new ExtendedHttpHeaders(new ServletHeaderChangeListener());
 		this.subscriber = new ResponseBodySubscriber(synchronizer);
 	}
 
-	private HttpHeaders initHttpHeaders() {
-		ExtendedHttpHeaders headers = new ExtendedHttpHeaders();
-		headers.registerChangeListener(new ServletHeaderChangeListener());
-		return headers;
-	}
 
+	public HttpServletResponse getServletResponse() {
+		return this.response;
+	}
 
 	@Override
 	public void setStatusCode(HttpStatus status) {
-		this.response.setStatus(status.value());
+		getServletResponse().setStatus(status.value());
 	}
 
 	@Override
@@ -80,8 +80,11 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public Publisher<Void> setBody(final Publisher<ByteBuffer> publisher) {
-		return Publishers.lift(publisher, new WriteWithOperator<>(writePublisher ->
-				(s -> writePublisher.subscribe(subscriber))));
+		return Publishers.lift(publisher, new WriteWithOperator<>(this::setBodyInternal));
+	}
+
+	protected Publisher<Void> setBodyInternal(Publisher<ByteBuffer> publisher) {
+		return s -> publisher.subscribe(subscriber);
 	}
 
 
@@ -89,14 +92,14 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 
 		@Override
 		public void headerAdded(String name, String value) {
-			response.addHeader(name, value);
+			getServletResponse().addHeader(name, value);
 		}
 
 		@Override
 		public void headerPut(String key, List<String> values) {
 			// We can only add but not remove
 			for (String value : values) {
-				response.addHeader(key, value);
+				getServletResponse().addHeader(key, value);
 			}
 		}
 
@@ -105,6 +108,7 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 			// No Servlet support for removing headers
 		}
 	}
+
 
 	private static class ResponseBodySubscriber implements WriteListener, Subscriber<ByteBuffer> {
 

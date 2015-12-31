@@ -21,11 +21,9 @@ import java.nio.ByteBuffer;
 import org.reactivestreams.Publisher;
 
 /**
- * Represents a "reactive" HTTP output message, consisting of
- * {@linkplain #getHeaders() headers} and the capability to add a
- * {@linkplain #setBody(Publisher) body}.
+ * A "reactive" HTTP output message that accepts output as a {@link Publisher}.
  *
- * <p>Typically implemented by an HTTP request on the client-side, or a response
+ * <p>Typically implemented by an HTTP request on the client-side or a response
  * on the server-side.
  *
  * @author Arjen Poutsma
@@ -33,12 +31,11 @@ import org.reactivestreams.Publisher;
 public interface ReactiveHttpOutputMessage extends HttpMessage {
 
 	/**
-	 * Sets the body of this message to the given publisher of {@link ByteBuffer}s.
-	 * The publisher will be used to write to the underlying HTTP layer with
-	 * asynchronously, given pull demand by this layer.
+	 * Set the body of the message to the given {@link Publisher} which will be
+	 * used to write to the underlying HTTP layer.
 	 *
-	 * @param body the body to use
-	 * @return a publisher that indicates completion
+	 * @param body the body content publisher
+	 * @return a publisher that indicates completion or error.
 	 */
 	Publisher<Void> setBody(Publisher<ByteBuffer> body);
 

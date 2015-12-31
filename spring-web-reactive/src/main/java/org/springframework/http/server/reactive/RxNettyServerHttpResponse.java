@@ -32,6 +32,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 
 /**
+ * Adapt {@link ServerHttpResponse} to the RxNetty {@link HttpServerResponse}.
+ *
  * @author Rossen Stoyanchev
  * @author Stephane Maldini
  */
@@ -45,19 +47,17 @@ public class RxNettyServerHttpResponse implements ServerHttpResponse {
 	public RxNettyServerHttpResponse(HttpServerResponse<?> response) {
 		Assert.notNull("'response', response must not be null.");
 		this.response = response;
-		this.headers = initHttpHeaders();
+		this.headers = new ExtendedHttpHeaders(new RxNettyHeaderChangeListener());
 	}
 
-	private HttpHeaders initHttpHeaders() {
-		ExtendedHttpHeaders headers = new ExtendedHttpHeaders();
-		headers.registerChangeListener(new RxNettyHeaderChangeListener());
-		return headers;
-	}
 
+	public HttpServerResponse<?> getRxNettyResponse() {
+		return this.response;
+	}
 
 	@Override
 	public void setStatusCode(HttpStatus status) {
-		this.response.setStatus(HttpResponseStatus.valueOf(status.value()));
+		getRxNettyResponse().setStatus(HttpResponseStatus.valueOf(status.value()));
 	}
 
 	@Override
@@ -67,15 +67,19 @@ public class RxNettyServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public Publisher<Void> setBody(Publisher<ByteBuffer> publisher) {
-		return Publishers.lift(publisher, new WriteWithOperator<>(writePublisher -> {
-			Observable<byte[]> observable = RxJava1Converter.from(writePublisher)
-					.map(buffer -> {
-						byte[] bytes = new byte[buffer.remaining()];
-						buffer.get(bytes);
-						return bytes;
-					});
-			return RxJava1Converter.from(this.response.writeBytes(observable));
-		}));
+		return Publishers.lift(publisher, new WriteWithOperator<>(this::setBodyInternal));
+	}
+
+	protected Publisher<Void> setBodyInternal(Publisher<ByteBuffer> publisher) {
+		Observable<byte[]> content = RxJava1Converter.from(publisher).map(this::toBytes);
+		Observable<Void> completion = getRxNettyResponse().writeBytes(content);
+		return RxJava1Converter.from(completion);
+	}
+
+	private byte[] toBytes(ByteBuffer buffer) {
+		byte[] bytes = new byte[buffer.remaining()];
+		buffer.get(bytes);
+		return bytes;
 	}
 
 
@@ -83,20 +87,20 @@ public class RxNettyServerHttpResponse implements ServerHttpResponse {
 
 		@Override
 		public void headerAdded(String name, String value) {
-			response.addHeader(name, value);
+			getRxNettyResponse().addHeader(name, value);
 		}
 
 		@Override
 		public void headerPut(String key, List<String> values) {
-			response.removeHeader(key);
+			getRxNettyResponse().removeHeader(key);
 			for (String value : values) {
-				response.addHeader(key, value);
+				getRxNettyResponse().addHeader(key, value);
 			}
 		}
 
 		@Override
 		public void headerRemoved(String key) {
-			response.removeHeader(key);
+			getRxNettyResponse().removeHeader(key);
 		}
 	}
 

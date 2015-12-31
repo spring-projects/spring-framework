@@ -36,12 +36,13 @@ import reactor.core.support.BackpressureUtils;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.Assert;
 
 import static org.xnio.IoUtils.safeClose;
 
 /**
+ * Adapt {@link ServerHttpRequest} to the Underow {@link HttpServerExchange}.
+ *
  * @author Marek Hawrylczak
  * @author Rossen Stoyanchev
  */
@@ -49,9 +50,11 @@ public class UndertowServerHttpRequest implements ServerHttpRequest {
 
 	private final HttpServerExchange exchange;
 
-	private final Publisher<ByteBuffer> body = new RequestBodyPublisher();
+	private URI uri;
 
 	private HttpHeaders headers;
+
+	private final Publisher<ByteBuffer> body = new RequestBodyPublisher();
 
 
 	public UndertowServerHttpRequest(HttpServerExchange exchange) {
@@ -60,31 +63,38 @@ public class UndertowServerHttpRequest implements ServerHttpRequest {
 	}
 
 
+	public HttpServerExchange getUndertowExchange() {
+		return this.exchange;
+	}
+
 	@Override
 	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(this.exchange.getRequestMethod().toString());
+		return HttpMethod.valueOf(this.getUndertowExchange().getRequestMethod().toString());
 	}
 
 	@Override
 	public URI getURI() {
-		try {
-			return new URI(this.exchange.getRequestScheme(), null, this.exchange.getHostName(),
-					this.exchange.getHostPort(), this.exchange.getRequestURI(),
-					this.exchange.getQueryString(), null);
+		if (this.uri == null) {
+			try {
+				return new URI(this.getUndertowExchange().getRequestScheme(), null,
+						this.getUndertowExchange().getHostName(),
+						this.getUndertowExchange().getHostPort(),
+						this.getUndertowExchange().getRequestURI(),
+						this.getUndertowExchange().getQueryString(), null);
+			}
+			catch (URISyntaxException ex) {
+				throw new IllegalStateException("Could not get URI: " + ex.getMessage(), ex);
+			}
 		}
-		catch (URISyntaxException ex) {
-			throw new IllegalStateException("Could not get URI: " + ex.getMessage(), ex);
-		}
+		return this.uri;
 	}
 
 	@Override
 	public HttpHeaders getHeaders() {
 		if (this.headers == null) {
 			this.headers = new HttpHeaders();
-			for (HeaderValues headerValues : this.exchange.getRequestHeaders()) {
-				for (String value : headerValues) {
-					this.headers.add(headerValues.getHeaderName().toString(), value);
-				}
+			for (HeaderValues values : this.getUndertowExchange().getRequestHeaders()) {
+				this.headers.put(values.getHeaderName().toString(), values);
 			}
 		}
 		return this.headers;

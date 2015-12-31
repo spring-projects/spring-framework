@@ -31,12 +31,16 @@ import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 
 /**
+ * Adapt {@link ServerHttpRequest} to the RxNetty {@link HttpServerRequest}.
+ *
  * @author Rossen Stoyanchev
  * @author Stephane Maldini
  */
 public class RxNettyServerHttpRequest implements ServerHttpRequest {
 
 	private final HttpServerRequest<ByteBuf> request;
+
+	private URI uri;
 
 	private HttpHeaders headers;
 
@@ -47,44 +51,44 @@ public class RxNettyServerHttpRequest implements ServerHttpRequest {
 	}
 
 
+	public HttpServerRequest<ByteBuf> getRxNettyRequest() {
+		return this.request;
+	}
+
+	@Override
+	public HttpMethod getMethod() {
+		return HttpMethod.valueOf(this.getRxNettyRequest().getHttpMethod().name());
+	}
+
+	@Override
+	public URI getURI() {
+		if (this.uri == null) {
+			try {
+				this.uri = new URI(this.getRxNettyRequest().getUri());
+			}
+			catch (URISyntaxException ex) {
+				throw new IllegalStateException("Could not get URI: " + ex.getMessage(), ex);
+			}
+		}
+		return this.uri;
+	}
+
 	@Override
 	public HttpHeaders getHeaders() {
 		if (this.headers == null) {
 			this.headers = new HttpHeaders();
-			for (String name : this.request.getHeaderNames()) {
-				for (String value : this.request.getAllHeaderValues(name)) {
-					this.headers.add(name, value);
-				}
+			for (String name : this.getRxNettyRequest().getHeaderNames()) {
+				this.headers.put(name, this.getRxNettyRequest().getAllHeaderValues(name));
 			}
 		}
 		return this.headers;
 	}
 
 	@Override
-	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(this.request.getHttpMethod().name());
-	}
-
-	@Override
-	public URI getURI() {
-		try {
-			return new URI(this.request.getUri());
-		}
-		catch (URISyntaxException ex) {
-			throw new IllegalStateException("Could not get URI: " + ex.getMessage(), ex);
-		}
-
-	}
-
-	@Override
 	public Publisher<ByteBuffer> getBody() {
-		Observable<ByteBuffer> bytesContent = this.request.getContent()
-				.concatWith(Observable.empty())
-				.map(ByteBuf::nioBuffer);
-		return RxJava1Converter.from(bytesContent);
+		Observable<ByteBuffer> content = this.getRxNettyRequest().getContent().map(ByteBuf::nioBuffer);
+		content = content.concatWith(Observable.empty()); // See GH issue #58
+		return RxJava1Converter.from(content);
 	}
 
-	public Observable<ByteBuffer> asObservable() {
-		return this.request.getContent().map(ByteBuf::nioBuffer);
-	}
 }

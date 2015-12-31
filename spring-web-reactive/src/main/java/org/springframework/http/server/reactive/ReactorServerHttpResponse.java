@@ -30,6 +30,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 
 /**
+ * Adapt {@link ServerHttpResponse} to the Reactor Net {@link HttpChannel}.
+ *
  * @author Stephane Maldini
  * @author Rossen Stoyanchev
  */
@@ -41,21 +43,19 @@ public class ReactorServerHttpResponse implements ServerHttpResponse {
 
 
 	public ReactorServerHttpResponse(HttpChannel<?, Buffer> response) {
-		Assert.notNull("'response', response must not be null.");
+		Assert.notNull("'response' must not be null.");
 		this.channel = response;
-		this.headers = initHttpHeaders();
+		this.headers = new ExtendedHttpHeaders(new ReactorHeaderChangeListener());
 	}
 
-	private HttpHeaders initHttpHeaders() {
-		ExtendedHttpHeaders headers = new ExtendedHttpHeaders();
-		headers.registerChangeListener(new ReactorHeaderChangeListener());
-		return headers;
-	}
 
+	public HttpChannel<?, Buffer> getReactorChannel() {
+		return this.channel;
+	}
 
 	@Override
 	public void setStatusCode(HttpStatus status) {
-		this.channel.responseStatus(Status.valueOf(status.value()));
+		getReactorChannel().responseStatus(Status.valueOf(status.value()));
 	}
 
 	@Override
@@ -65,8 +65,11 @@ public class ReactorServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public Publisher<Void> setBody(Publisher<ByteBuffer> publisher) {
-		return Publishers.lift(publisher, new WriteWithOperator<>(writePublisher ->
-				this.channel.writeWith(Publishers.map(writePublisher, Buffer::new))));
+		return Publishers.lift(publisher, new WriteWithOperator<>(this::setBodyInternal));
+	}
+
+	protected Publisher<Void> setBodyInternal(Publisher<ByteBuffer> publisher) {
+		return getReactorChannel().writeWith(Publishers.map(publisher, Buffer::new));
 	}
 
 
@@ -74,18 +77,18 @@ public class ReactorServerHttpResponse implements ServerHttpResponse {
 
 		@Override
 		public void headerAdded(String name, String value) {
-			channel.responseHeaders().add(name, value);
+			getReactorChannel().responseHeaders().add(name, value);
 		}
 
 		@Override
 		public void headerPut(String key, List<String> values) {
-			channel.responseHeaders().remove(key);
-			channel.responseHeaders().add(key, values);
+			getReactorChannel().responseHeaders().remove(key);
+			getReactorChannel().responseHeaders().add(key, values);
 		}
 
 		@Override
 		public void headerRemoved(String key) {
-			channel.responseHeaders().remove(key);
+			getReactorChannel().responseHeaders().remove(key);
 		}
 	}
 
