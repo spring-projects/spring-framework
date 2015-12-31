@@ -1475,9 +1475,14 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 					logger.debug("Bean currently in creation on FactoryBean type check: " + ex);
 				}
 			}
+			else if (mbd.isLazyInit()) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Bean creation exception on lazy FactoryBean type check: " + ex);
+				}
+			}
 			else {
 				if (logger.isWarnEnabled()) {
-					logger.warn("Bean creation exception on FactoryBean type check: " + ex);
+					logger.warn("Bean creation exception on non-lazy FactoryBean type check: " + ex);
 				}
 			}
 			onSuppressedException(ex);
