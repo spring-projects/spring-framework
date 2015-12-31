@@ -2469,7 +2469,7 @@ The following example shows how to configure an interceptor:
 [subs="verbatim,quotes"]
 ----
 	<beans>
-		<bean id="handlerMapping" class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">
+		<bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping">
 			<property name="interceptors">
 				<bean class="example.MyInterceptor"/>
 			</property>
