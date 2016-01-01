@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,19 +19,24 @@ package org.springframework.web.portlet;
 import javax.portlet.PortletContext;
 import javax.portlet.PortletException;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.mock.web.portlet.MockPortletConfig;
 import org.springframework.mock.web.portlet.MockPortletContext;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Mark Fisher
  */
-public class GenericPortletBeanTests extends TestCase {
+public class GenericPortletBeanTests {
 
-	public void testInitParameterSet() throws Exception {
-		PortletContext portletContext = new MockPortletContext();
-		MockPortletConfig portletConfig = new MockPortletConfig(portletContext);
+	private final PortletContext portletContext = new MockPortletContext();
+
+	private final MockPortletConfig portletConfig = new MockPortletConfig(portletContext);
+
+	@Test
+	public void initParameterSet() throws Exception {
 		String testValue = "testValue";
 		portletConfig.addInitParameter("testParam", testValue);
 		TestPortletBean portletBean = new TestPortletBean();
@@ -41,18 +46,16 @@ public class GenericPortletBeanTests extends TestCase {
 		assertEquals(testValue, portletBean.getTestParam());
 	}
 
-	public void testInitParameterNotSet() throws Exception {
-		PortletContext portletContext = new MockPortletContext();
-		MockPortletConfig portletConfig = new MockPortletConfig(portletContext);
+	@Test
+	public void initParameterNotSet() throws Exception {
 		TestPortletBean portletBean = new TestPortletBean();
 		assertNull(portletBean.getTestParam());
 		portletBean.init(portletConfig);
 		assertNull(portletBean.getTestParam());
 	}
 
-	public void testMultipleInitParametersSet() throws Exception {
-		PortletContext portletContext = new MockPortletContext();
-		MockPortletConfig portletConfig = new MockPortletConfig(portletContext);
+	@Test
+	public void multipleInitParametersSet() throws Exception {
 		String testValue = "testValue";
 		String anotherValue = "anotherValue";
 		portletConfig.addInitParameter("testParam", testValue);
@@ -68,9 +71,8 @@ public class GenericPortletBeanTests extends TestCase {
 		assertEquals(anotherValue, portletBean.getAnotherParam());
 	}
 
-	public void testMultipleInitParametersOnlyOneSet() throws Exception {
-		PortletContext portletContext = new MockPortletContext();
-		MockPortletConfig portletConfig = new MockPortletConfig(portletContext);
+	@Test
+	public void multipleInitParametersOnlyOneSet() throws Exception {
 		String testValue = "testValue";
 		portletConfig.addInitParameter("testParam", testValue);
 		portletConfig.addInitParameter("unknownParam", "unknownValue");
@@ -83,9 +85,8 @@ public class GenericPortletBeanTests extends TestCase {
 		assertNull(portletBean.getAnotherParam());
 	}
 
-	public void testRequiredInitParameterSet() throws Exception {
-		PortletContext portletContext = new MockPortletContext();
-		MockPortletConfig portletConfig = new MockPortletConfig(portletContext);
+	@Test
+	public void requiredInitParameterSet() throws Exception {
 		String testParam = "testParam";
 		String testValue = "testValue";
 		portletConfig.addInitParameter(testParam, testValue);
@@ -97,9 +98,8 @@ public class GenericPortletBeanTests extends TestCase {
 		assertEquals(testValue, portletBean.getTestParam());
 	}
 
-	public void testRequiredInitParameterNotSet() throws Exception {
-		PortletContext portletContext = new MockPortletContext();
-		MockPortletConfig portletConfig = new MockPortletConfig(portletContext);
+	@Test
+	public void requiredInitParameterNotSet() throws Exception {
 		String testParam = "testParam";
 		TestPortletBean portletBean = new TestPortletBean();
 		portletBean.addRequiredProperty(testParam);
@@ -113,9 +113,8 @@ public class GenericPortletBeanTests extends TestCase {
 		}
 	}
 
-	public void testRequiredInitParameterNotSetOtherParameterNotSet() throws Exception {
-		PortletContext portletContext = new MockPortletContext();
-		MockPortletConfig portletConfig = new MockPortletConfig(portletContext);
+	@Test
+	public void requiredInitParameterNotSetOtherParameterNotSet() throws Exception {
 		String testParam = "testParam";
 		String testValue = "testValue";
 		portletConfig.addInitParameter(testParam, testValue);
@@ -132,9 +131,8 @@ public class GenericPortletBeanTests extends TestCase {
 		assertNull(portletBean.getTestParam());
 	}
 
-	public void testUnknownRequiredInitParameter() throws Exception {
-		PortletContext portletContext = new MockPortletContext();
-		MockPortletConfig portletConfig = new MockPortletConfig(portletContext);
+	@Test
+	public void unknownRequiredInitParameter() throws Exception {
 		String testParam = "testParam";
 		String testValue = "testValue";
 		portletConfig.addInitParameter(testParam, testValue);
@@ -152,6 +150,7 @@ public class GenericPortletBeanTests extends TestCase {
 	}
 
 
+	@SuppressWarnings("unused")
 	private static class TestPortletBean extends GenericPortletBean {
 
 		private String testParam;

@@ -84,7 +84,7 @@ public class JsonpPollingTransportHandler extends AbstractHttpSendingTransportHa
 		// We already validated the parameter above...
 		String callback = getCallbackParam(request);
 
-		return new DefaultSockJsFrameFormat(callback + "(\"%s\");\r\n") {
+		return new DefaultSockJsFrameFormat("/**/" + callback + "(\"%s\");\r\n") {
 			@Override
 			protected String preProcessContent(String content) {
 				return JavaScriptUtils.javaScriptEscape(content);

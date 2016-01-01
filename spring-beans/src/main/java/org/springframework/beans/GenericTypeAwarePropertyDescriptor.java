@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,8 @@ final class GenericTypeAwarePropertyDescriptor extends PropertyDescriptor {
 				Set<Method> ambiguousCandidates = new HashSet<Method>();
 				for (Method method : beanClass.getMethods()) {
 					if (method.getName().equals(writeMethodToUse.getName()) &&
-							!method.equals(writeMethodToUse) && !method.isBridge()) {
+							!method.equals(writeMethodToUse) && !method.isBridge() &&
+							method.getParameterTypes().length == writeMethodToUse.getParameterTypes().length) {
 						ambiguousCandidates.add(method);
 					}
 				}

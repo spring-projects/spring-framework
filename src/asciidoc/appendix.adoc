@@ -1,18 +1,23 @@
 [[spring-appendices]]
 = Appendices
 
-[[migration-4.0]]
-== Migrating to Spring Framework 4.0
-Migration guides for upgrading from previous releases of the Spring Framework are now
-provided as a Wiki page. For details please refer to
-https://github.com/spring-projects/spring-framework/wiki/Migrating-from-earlier-versions-of-the-spring-framework
+[[migration-4.x]]
+== Migrating to Spring Framework 4.x
+Migration guides for upgrading from previous releases of the Spring Framework are now provided as a
+{wiki-spring-framework}/Migrating-from-earlier-versions-of-the-spring-framework[Wiki page].
+
+
+[[annotation-programming-model]]
+== Spring Annotation Programming Model
+Spring's annotation programming model is documented in the
+{wiki-spring-framework}/Spring-Annotation-Programming-Model[Spring Framework Wiki].
 
 
 [[classic-spring]]
 == Classic Spring Usage
 This appendix discusses some classic Spring usage patterns as a reference for developers
 maintaining legacy Spring applications. These usage patterns no longer reflect the
-recommended way of using these features and the current recommended usage is covered in
+recommended way of using these features, and the current recommended usage is covered in
 the respective sections of the reference manual.
 
 
@@ -21,17 +26,17 @@ the respective sections of the reference manual.
 === Classic ORM usage
 This section documents the classic usage patterns that you might encounter in a legacy
 Spring application. For the currently recommended usage patterns, please refer to the
-<<orm>> chapter.
+<<orm,ORM>> chapter.
 
 
 
 [[classic-spring-hibernate]]
 ==== Hibernate
-For the currently recommended usage patterns for Hibernate see <<orm-hibernate>>
+For the currently recommended usage patterns for Hibernate see <<orm-hibernate>>.
 
 
 [[orm-hibernate-template]]
-===== the HibernateTemplate
+===== The HibernateTemplate
 
 The basic programming model for templating looks as follows, for methods that can be
 part of any custom data access object or business service. There are no restrictions on
@@ -171,180 +176,6 @@ within the callback. Note that you can often defer the corresponding checks and 
 throwing of application exceptions to after the callback, which still allows working
 with `HibernateTemplate`. In general, the `HibernateTemplate` class' convenience methods
 are simpler and more convenient for many scenarios.
-
-
-
-[[classic-spring-jdo]]
-==== JDO
-For the currently recommended usage patterns for JDO see <<orm-jdo>>
-
-
-[[orm-jdo-template]]
-===== JdoTemplate and `JdoDaoSupport`
-
-Each JDO-based DAO will then receive the `PersistenceManagerFactory` through dependency
-injection. Such a DAO could be coded against plain JDO API, working with the given
-`PersistenceManagerFactory`, but will usually rather be used with the Spring Framework's
-`JdoTemplate`:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<beans>
-
-		<bean id="myProductDao" class="product.ProductDaoImpl">
-			<property name="persistenceManagerFactory" ref="myPmf"/>
-		</bean>
-
-	</beans>
-----
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public class ProductDaoImpl implements ProductDao {
-
-		private JdoTemplate jdoTemplate;
-
-		public void setPersistenceManagerFactory(PersistenceManagerFactory pmf) {
-			this.jdoTemplate = new JdoTemplate(pmf);
-		}
-
-		public Collection loadProductsByCategory(final String category) throws DataAccessException {
-			return (Collection) this.jdoTemplate.execute(new JdoCallback() {
-				public Object doInJdo(PersistenceManager pm) throws JDOException {
-					Query query = pm.newQuery(Product.class, "category = pCategory");
-					query.declareParameters("String pCategory");
-					List result = query.execute(category);
-					// do some further stuff with the result list
-					return result;
-				}
-			});
-		}
-
-	}
-----
-
-A callback implementation can effectively be used for any JDO data access. `JdoTemplate`
-will ensure that `PersistenceManager` s are properly opened and closed, and
-automatically participate in transactions. The template instances are thread-safe and
-reusable, they can thus be kept as instance variables of the surrounding class. For
-simple single-step actions such as a single `find`, `load`, `makePersistent`, or
-`delete` call, `JdoTemplate` offers alternative convenience methods that can replace
-such one line callback implementations. Furthermore, Spring provides a convenient
-`JdoDaoSupport` base class that provides a `setPersistenceManagerFactory(..)` method for
-receiving a `PersistenceManagerFactory`, and `getPersistenceManagerFactory()` and
-`getJdoTemplate()` for use by subclasses. In combination, this allows for very simple
-DAO implementations for typical requirements:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public class ProductDaoImpl extends JdoDaoSupport implements ProductDao {
-
-		public Collection loadProductsByCategory(String category) throws DataAccessException {
-			return getJdoTemplate().find(Product.class,
-					"category = pCategory", "String category", new Object[] {category});
-		}
-
-	}
-----
-
-As alternative to working with Spring's `JdoTemplate`, you can also code Spring-based
-DAOs at the JDO API level, explicitly opening and closing a `PersistenceManager`. As
-elaborated in the corresponding Hibernate section, the main advantage of this approach
-is that your data access code is able to throw checked exceptions. `JdoDaoSupport`
-offers a variety of support methods for this scenario, for fetching and releasing a
-transactional `PersistenceManager` as well as for converting exceptions.
-
-
-
-[[classic-spring-jpa]]
-==== JPA
-For the currently recommended usage patterns for JPA see <<orm-jpa>>
-
-
-[[orm-jpa-template]]
-===== JpaTemplate and `JpaDaoSupport`
-
-Each JPA-based DAO will then receive a `EntityManagerFactory` via dependency injection.
-Such a DAO can be coded against plain JPA and work with the given `EntityManagerFactory`
-or through Spring's `JpaTemplate`:
-
-[source,xml,indent=0]
-[subs="verbatim,quotes"]
-----
-	<beans>
-
-		<bean id="myProductDao" class="product.ProductDaoImpl">
-			<property name="entityManagerFactory" ref="myEmf"/>
-		</bean>
-
-	</beans>
-----
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public class JpaProductDao implements ProductDao {
-
-		private JpaTemplate jpaTemplate;
-
-		public void setEntityManagerFactory(EntityManagerFactory emf) {
-			this.jpaTemplate = new JpaTemplate(emf);
-		}
-
-		public Collection loadProductsByCategory(final String category) throws DataAccessException {
-			return (Collection) this.jpaTemplate.execute(new JpaCallback() {
-				public Object doInJpa(EntityManager em) throws PersistenceException {
-					Query query = em.createQuery("from Product as p where p.category = :category");
-					query.setParameter("category", category);
-					List result = query.getResultList();
-					// do some further processing with the result list
-					return result;
-				}
-			});
-		}
-
-	}
-----
-
-The `JpaCallback` implementation allows any type of JPA data access. The `JpaTemplate`
-will ensure that `EntityManager` s are properly opened and closed and automatically
-participate in transactions. Moreover, the `JpaTemplate` properly handles exceptions,
-making sure resources are cleaned up and the appropriate transactions rolled back. The
-template instances are thread-safe and reusable and they can be kept as instance
-variable of the enclosing class. Note that `JpaTemplate` offers single-step actions such
-as find, load, merge, etc along with alternative convenience methods that can replace
-one line callback implementations.
-
-Furthermore, Spring provides a convenient `JpaDaoSupport` base class that provides the
-`get/setEntityManagerFactory` and `getJpaTemplate()` to be used by subclasses:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public class ProductDaoImpl extends JpaDaoSupport implements ProductDao {
-
-		public Collection loadProductsByCategory(String category) throws DataAccessException {
-			Map<String, String> params = new HashMap<String, String>();
-			params.put("category", category);
-			return getJpaTemplate().findByNamedParams("from Product as p where p.category = :category", params);
-		}
-
-	}
-----
-
-Besides working with Spring's `JpaTemplate`, one can also code Spring-based DAOs against
-the JPA, doing one's own explicit `EntityManager` handling. As also elaborated in the
-corresponding Hibernate section, the main advantage of this approach is that your data
-access code is able to throw checked exceptions. `JpaDaoSupport` offers a variety of
-support methods for this scenario, for retrieving and releasing a transaction
-`EntityManager`, as well as for converting exceptions.
-
-__JpaTemplate mainly exists as a sibling of JdoTemplate and HibernateTemplate, offering
-the same style for people used to it.__
-
 
 
 
@@ -2378,13 +2209,13 @@ developer's intent (__'inject this constant value'__), and it just reads better.
 
 [[xsd-config-body-schemas-util-frfb]]
 ====== Setting a bean property or constructor arg from a field value
-http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html[`FieldRetrievingFactoryBean`]
+{api-spring-framework}/beans/factory/config/FieldRetrievingFactoryBean.html[`FieldRetrievingFactoryBean`]
 is a `FactoryBean` which retrieves a `static` or non-static field value. It is typically
 used for retrieving `public` `static` `final` constants, which may then be used to set a
 property value or constructor arg for another bean.
 
 Find below an example which shows how a `static` field is exposed, by using the
-http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html#setStaticField(java.lang.String)[`staticField`]
+{api-spring-framework}/beans/factory/config/FieldRetrievingFactoryBean.html#setStaticField(java.lang.String)[`staticField`]
 property:
 
 [source,xml,indent=0]
@@ -2424,7 +2255,7 @@ to be specified for the bean reference:
 
 It is also possible to access a non-static (instance) field of another bean, as
 described in the API documentation for the
-http://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/beans/factory/config/FieldRetrievingFactoryBean.html[`FieldRetrievingFactoryBean`]
+{api-spring-framework}/beans/factory/config/FieldRetrievingFactoryBean.html[`FieldRetrievingFactoryBean`]
 class.
 
 Injecting enum values into beans as either property or constructor arguments is very

@@ -72,6 +72,7 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  *
  * <pre class="code">
  * &#064;Configuration
+ * &#064;EnableScheduling
  * &#064;ComponentScan(basePackages="com.myco.tasks")
  * public class AppConfig {
  * }</pre>

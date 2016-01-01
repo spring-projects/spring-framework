@@ -23,27 +23,41 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import org.springframework.context.ApplicationEvent;
+import org.springframework.core.annotation.AliasFor;
 
 /**
- * Annotation that marks a method to listen for application events. The
- * method should have one and only one parameter that reflects the event
- * type to listen to. Events can be {@link ApplicationEvent} instances
- * as well as arbitrary objects.
+ * Annotation that marks a method as a listener for application events.
+ *
+ * <p>If an annotated method supports a single event type, the method may
+ * declare a single parameter that reflects the event type to listen to.
+ * If an annotated method supports multiple event types, this annotation
+ * may refer to one or more supported event types using the {@code classes}
+ * attribute. See the {@link #classes} javadoc for further details.
+ *
+ * <p>Events can be {@link ApplicationEvent} instances as well as arbitrary
+ * objects.
  *
  * <p>Processing of {@code @EventListener} annotations is performed via
- * {@link EventListenerMethodProcessor} that is registered automatically
- * when using Java config or via the {@code <context:annotation-driven/>}
- * XML element.
+ * the internal {@link EventListenerMethodProcessor} bean which gets
+ * registered automatically when using Java config or manually via the
+ * {@code <context:annotation-config/>} or {@code <context:component-scan/>}
+ * element when using XML config.
  *
  * <p>Annotated methods may have a non-{@code void} return type. When they
- * do, the result of the method invocation is sent as a new event. It is
- * also possible to defined the order in which listeners for a certain
- * event are invoked. To do so, add a regular {code @Order} annotation
- * alongside this annotation.
+ * do, the result of the method invocation is sent as a new event. If the
+ * return type is either an array or a collection, each element is sent
+ * as a new individual event.
  *
- * <p>While it is possible to define any arbitrary exception types, checked
- * exceptions will be wrapped in a {@link java.lang.reflect.UndeclaredThrowableException}
- * as the caller only handles runtime exceptions.
+ * <p>It is also possible to define the order in which listeners for a
+ * certain event are to be invoked. To do so, add Spring's common
+ * {@link org.springframework.core.annotation.Order @Order} annotation
+ * alongside this event listener annotation.
+ *
+ * <p>While it is possible for an event listener to declare that it
+ * throws arbitrary exception types, any checked exceptions thrown
+ * from an event listener will be wrapped in an
+ * {@link java.lang.reflect.UndeclaredThrowableException}
+ * since the event publisher can only handle runtime exceptions.
  *
  * @author Stephane Nicoll
  * @since 4.2
@@ -55,8 +69,24 @@ import org.springframework.context.ApplicationEvent;
 public @interface EventListener {
 
 	/**
-	 * Spring Expression Language (SpEL) attribute used for making the event
-	 * handling conditional.
+	 * Alias for {@link #classes}.
+	 */
+	@AliasFor("classes")
+	Class<?>[] value() default {};
+
+	/**
+	 * The event classes that this listener handles.
+	 * <p>If this attribute is specified with a single value, the
+	 * annotated method may optionally accept a single parameter.
+	 * However, if this attribute is specified with multiple values,
+	 * the annotated method must <em>not</em> declare any parameters.
+	 */
+	@AliasFor("value")
+	Class<?>[] classes() default {};
+
+	/**
+	 * Spring Expression Language (SpEL) attribute used for making the
+	 * event handling conditional.
 	 * <p>Default is "", meaning the event is always handled.
 	 */
 	String condition() default "";

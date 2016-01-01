@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import java.util.Map;
 
 import groovy.lang.DelegatingMetaClass;
 import groovy.lang.GroovyObject;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.aop.support.AopUtils;
@@ -91,8 +90,56 @@ public class GroovyScriptFactoryTests {
 	}
 
 	@Test
+	public void testStaticScriptUsingJsr223() throws Exception {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovyContextWithJsr223.xml", getClass());
+
+		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Calculator.class)).contains("calculator"));
+		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("messenger"));
+
+		Calculator calc = (Calculator) ctx.getBean("calculator");
+		Messenger messenger = (Messenger) ctx.getBean("messenger");
+
+		assertFalse("Shouldn't get proxy when refresh is disabled", AopUtils.isAopProxy(calc));
+		assertFalse("Shouldn't get proxy when refresh is disabled", AopUtils.isAopProxy(messenger));
+
+		assertFalse("Scripted object should not be instance of Refreshable", calc instanceof Refreshable);
+		assertFalse("Scripted object should not be instance of Refreshable", messenger instanceof Refreshable);
+
+		assertEquals(calc, calc);
+		assertEquals(messenger, messenger);
+		assertTrue(!messenger.equals(calc));
+		assertTrue(messenger.hashCode() != calc.hashCode());
+		assertTrue(!messenger.toString().equals(calc.toString()));
+
+		String desiredMessage = "Hello World!";
+		assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
+
+		assertTrue(ctx.getBeansOfType(Calculator.class).values().contains(calc));
+		assertTrue(ctx.getBeansOfType(Messenger.class).values().contains(messenger));
+	}
+
+	@Test
 	public void testStaticPrototypeScript() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovyContext.xml", getClass());
+		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
+		ConfigurableMessenger messenger2 = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
+
+		assertFalse("Shouldn't get proxy when refresh is disabled", AopUtils.isAopProxy(messenger));
+		assertFalse("Scripted object should not be instance of Refreshable", messenger instanceof Refreshable);
+
+		assertNotSame(messenger, messenger2);
+		assertSame(messenger.getClass(), messenger2.getClass());
+		assertEquals("Hello World!", messenger.getMessage());
+		assertEquals("Hello World!", messenger2.getMessage());
+		messenger.setMessage("Bye World!");
+		messenger2.setMessage("Byebye World!");
+		assertEquals("Bye World!", messenger.getMessage());
+		assertEquals("Byebye World!", messenger2.getMessage());
+	}
+
+	@Test
+	public void testStaticPrototypeScriptUsingJsr223() throws Exception {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovyContextWithJsr223.xml", getClass());
 		ConfigurableMessenger messenger = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
 		ConfigurableMessenger messenger2 = (ConfigurableMessenger) ctx.getBean("messengerPrototype");
 
@@ -124,8 +171,36 @@ public class GroovyScriptFactoryTests {
 	}
 
 	@Test
+	public void testStaticScriptWithInstanceUsingJsr223() throws Exception {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovyContextWithJsr223.xml", getClass());
+		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("messengerInstance"));
+		Messenger messenger = (Messenger) ctx.getBean("messengerInstance");
+
+		assertFalse("Shouldn't get proxy when refresh is disabled", AopUtils.isAopProxy(messenger));
+		assertFalse("Scripted object should not be instance of Refreshable", messenger instanceof Refreshable);
+
+		String desiredMessage = "Hello World!";
+		assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
+		assertTrue(ctx.getBeansOfType(Messenger.class).values().contains(messenger));
+	}
+
+	@Test
 	public void testStaticScriptWithInlineDefinedInstance() throws Exception {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovyContext.xml", getClass());
+		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("messengerInstanceInline"));
+		Messenger messenger = (Messenger) ctx.getBean("messengerInstanceInline");
+
+		assertFalse("Shouldn't get proxy when refresh is disabled", AopUtils.isAopProxy(messenger));
+		assertFalse("Scripted object should not be instance of Refreshable", messenger instanceof Refreshable);
+
+		String desiredMessage = "Hello World!";
+		assertEquals("Message is incorrect", desiredMessage, messenger.getMessage());
+		assertTrue(ctx.getBeansOfType(Messenger.class).values().contains(messenger));
+	}
+
+	@Test
+	public void testStaticScriptWithInlineDefinedInstanceUsingJsr223() throws Exception {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovyContextWithJsr223.xml", getClass());
 		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("messengerInstanceInline"));
 		Messenger messenger = (Messenger) ctx.getBean("messengerInstanceInline");
 
@@ -311,8 +386,6 @@ public class GroovyScriptFactoryTests {
 		}
 	}
 
-	@Ignore
-	// see http://build.springframework.org/browse/SPR-TRUNKQUICK-908
 	@Test
 	public void testResourceScriptFromTag() throws Exception {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
@@ -407,6 +480,49 @@ public class GroovyScriptFactoryTests {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd.xml", getClass());
 		Map<?, Messenger> beans = ctx.getBeansOfType(Messenger.class);
 		assertEquals(4, beans.size());
+	}
+
+	@Test
+	public void testJsr223FromTag() throws Exception {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd-jsr223.xml", getClass());
+		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("messenger"));
+		Messenger messenger = (Messenger) ctx.getBean("messenger");
+		assertFalse(AopUtils.isAopProxy(messenger));
+		assertEquals("Hello World!", messenger.getMessage());
+	}
+
+	@Test
+	public void testJsr223FromTagWithInterface() throws Exception {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd-jsr223.xml", getClass());
+		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("messengerWithInterface"));
+		Messenger messenger = (Messenger) ctx.getBean("messengerWithInterface");
+		assertFalse(AopUtils.isAopProxy(messenger));
+	}
+
+	@Test
+	public void testRefreshableJsr223FromTag() throws Exception {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd-jsr223.xml", getClass());
+		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("refreshableMessenger"));
+		Messenger messenger = (Messenger) ctx.getBean("refreshableMessenger");
+		assertTrue(AopUtils.isAopProxy(messenger));
+		assertTrue(messenger instanceof Refreshable);
+		assertEquals("Hello World!", messenger.getMessage());
+	}
+
+	@Test
+	public void testInlineJsr223FromTag() throws Exception {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd-jsr223.xml", getClass());
+		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("inlineMessenger"));
+		Messenger messenger = (Messenger) ctx.getBean("inlineMessenger");
+		assertFalse(AopUtils.isAopProxy(messenger));
+	}
+
+	@Test
+	public void testInlineJsr223FromTagWithInterface() throws Exception {
+		ApplicationContext ctx = new ClassPathXmlApplicationContext("groovy-with-xsd-jsr223.xml", getClass());
+		assertTrue(Arrays.asList(ctx.getBeanNamesForType(Messenger.class)).contains("inlineMessengerWithInterface"));
+		Messenger messenger = (Messenger) ctx.getBean("inlineMessengerWithInterface");
+		assertFalse(AopUtils.isAopProxy(messenger));
 	}
 
 	/**

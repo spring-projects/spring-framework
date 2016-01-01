@@ -6,7 +6,7 @@
 	<bean id="portletMultipartResolver" class="org.springframework.web.portlet.multipart.CommonsPortletMultipartResolver"/>
 
 	<bean id="portletContextAwareBean" class="org.springframework.web.portlet.context.PortletContextAwareBean"/>
-	
+
 	<bean id="portletConfigAwareBean" class="org.springframework.web.portlet.context.PortletConfigAwareBean"/>
 
 </beans>

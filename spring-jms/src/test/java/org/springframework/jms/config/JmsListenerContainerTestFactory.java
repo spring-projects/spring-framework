@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,25 +17,30 @@
 package org.springframework.jms.config;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
- *
  * @author Stephane Nicoll
  */
 public class JmsListenerContainerTestFactory implements JmsListenerContainerFactory<MessageListenerTestContainer> {
 
-	private final List<MessageListenerTestContainer> listenerContainers =
-			new ArrayList<MessageListenerTestContainer>();
+	private final Map<String, MessageListenerTestContainer> listenerContainers =
+			new LinkedHashMap<>();
 
 	public List<MessageListenerTestContainer> getListenerContainers() {
-		return listenerContainers;
+		return new ArrayList<>(this.listenerContainers.values());
+	}
+
+	public MessageListenerTestContainer getListenerContainer(String id) {
+		return this.listenerContainers.get(id);
 	}
 
 	@Override
 	public MessageListenerTestContainer createListenerContainer(JmsListenerEndpoint endpoint) {
 		MessageListenerTestContainer container = new MessageListenerTestContainer(endpoint);
-		this.listenerContainers.add(container);
+		this.listenerContainers.put(endpoint.getId(), container);
 		return container;
 	}
 

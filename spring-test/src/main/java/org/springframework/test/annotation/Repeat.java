@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,13 +36,19 @@ import static java.lang.annotation.RetentionPolicy.*;
  * @author Rod Johnson
  * @author Sam Brannen
  * @since 2.0
- * @see Timed
+ * @see org.springframework.test.annotation.Timed
+ * @see org.springframework.test.context.junit4.SpringJUnit4ClassRunner
+ * @see org.springframework.test.context.junit4.rules.SpringMethodRule
+ * @see org.springframework.test.context.junit4.statements.SpringRepeat
  */
 @Documented
 @Retention(RUNTIME)
 @Target({ METHOD, ANNOTATION_TYPE })
 public @interface Repeat {
 
+	/**
+	 * The number of times that the annotated test method should be repeated.
+	 */
 	int value() default 1;
 
 }

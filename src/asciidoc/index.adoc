@@ -1,6 +1,16 @@
 = Spring Framework Reference Documentation
 Rod Johnson; Juergen Hoeller; Keith Donald; Colin Sampaleanu; Rob Harrop; Thomas Risberg; Alef Arendsen; Darren Davison; Dmitriy Kopylenko; Mark Pollack; Thierry Templier; Erwin Vervaet; Portia Tung; Ben Hale; Adrian Colyer; John Lewis; Costin Leau; Mark Fisher; Sam Brannen; Ramnivas Laddad; Arjen Poutsma; Chris Beams; Tareq Abedrabbo; Andy Clement; Dave Syer; Oliver Gierke; Rossen Stoyanchev; Phillip Webb; Rob Winch; Brian Clozel; Stephane Nicoll; Sebastien Deleuze
 
+:doc-root: http://docs.spring.io
+
+:api-spring-framework: {doc-root}/spring-framework/docs/{spring-version}/javadoc-api/org/springframework
+:wiki-spring-framework: https://github.com/spring-projects/spring-framework/wiki
+
+:doc-spring-security: {doc-root}/spring-security/site/docs/current/reference
+:doc-spring-amqp: {doc-root}/spring-amqp/docs/current/reference
+:doc-spring-boot: {doc-root}/spring-boot/docs/current/reference
+:doc-spring-gemfire: {doc-root}/spring-gemfire/docs/current/reference
+
 
 include::overview.adoc[]
 

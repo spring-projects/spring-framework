@@ -165,4 +165,12 @@ public abstract class WebMvcConfigurerAdapter implements WebMvcConfigurer {
 	public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>This implementation is empty.
+	 */
+	@Override
+	public void addCorsMappings(CorsRegistry registry) {
+	}
+
 }

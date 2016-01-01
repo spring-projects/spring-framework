@@ -16,16 +16,19 @@
 
 package org.springframework.jmx.export.assembler;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 import org.springframework.jmx.JmxTestBean;
 
 /**
  * @author Rob Harrop
  */
-public abstract class AbstractAutodetectTests extends TestCase {
+public abstract class AbstractAutodetectTests {
 
-	public void testAutodetect() throws Exception {
+	@Test
+	public void autodetect() throws Exception {
 		JmxTestBean bean = new JmxTestBean();
 
 		AutodetectCapableMBeanInfoAssembler assembler = getAssembler();

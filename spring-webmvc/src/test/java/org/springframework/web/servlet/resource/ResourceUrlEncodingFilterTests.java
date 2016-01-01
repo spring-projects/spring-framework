@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,6 +85,67 @@ public class ResourceUrlEncodingFilterTests {
 			public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
 				String result = ((HttpServletResponse)response).encodeURL("/context/resources/bar.css");
 				assertEquals("/context/resources/bar-11e16cf79faee7ac698c805cf28248d2.css", result);
+			}
+		});
+	}
+
+	// SPR-13757
+	@Test
+	public void encodeContextPathUrlWithoutSuffix() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/context");
+		request.setContextPath("/context");
+		request.setAttribute(ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR, this.resourceUrlProvider);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		this.filter.doFilterInternal(request, response, (request1, response1) -> {
+			String result = ((HttpServletResponse) response1).encodeURL("/context/resources/bar.css");
+			assertEquals("/context/resources/bar-11e16cf79faee7ac698c805cf28248d2.css", result);
+		});
+	}
+
+	@Test
+	public void encodeContextPathUrlWithSuffix() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/context/");
+		request.setContextPath("/context");
+		request.setAttribute(ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR, this.resourceUrlProvider);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		this.filter.doFilterInternal(request, response, (request1, response1) -> {
+			String result = ((HttpServletResponse) response1).encodeURL("/context/resources/bar.css");
+			assertEquals("/context/resources/bar-11e16cf79faee7ac698c805cf28248d2.css", result);
+		});
+	}
+
+	// SPR-13018
+	@Test
+	public void encodeEmptyURLWithContext() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/context/foo");
+		request.setContextPath("/context");
+		request.setAttribute(ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR, this.resourceUrlProvider);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		this.filter.doFilterInternal(request, response, new FilterChain() {
+			@Override
+			public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
+				String result = ((HttpServletResponse)response).encodeURL("?foo=1");
+				assertEquals("?foo=1", result);
+			}
+		});
+	}
+
+	// SPR-13374
+	@Test
+	public void encodeURLWithRequestParams() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo");
+		request.setContextPath("/");
+		request.setAttribute(ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR, this.resourceUrlProvider);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		this.filter.doFilterInternal(request, response, new FilterChain() {
+			@Override
+			public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
+				String result = ((HttpServletResponse)response).encodeURL("/resources/bar.css?foo=bar&url=http://example.org");
+				assertEquals("/resources/bar-11e16cf79faee7ac698c805cf28248d2.css?foo=bar&url=http://example.org", result);
 			}
 		});
 	}

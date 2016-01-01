@@ -26,6 +26,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
@@ -258,7 +259,7 @@ public class HandlerMethod {
 	/**
 	 * A MethodParameter with HandlerMethod-specific behavior.
 	 */
-	private class HandlerMethodParameter extends MethodParameter {
+	protected class HandlerMethodParameter extends SynthesizingMethodParameter {
 
 		public HandlerMethodParameter(int index) {
 			super(HandlerMethod.this.bridgedMethod, index);

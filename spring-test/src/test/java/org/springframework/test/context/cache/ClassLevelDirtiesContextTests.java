@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.JUnitCore;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
@@ -33,12 +32,12 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.junit4.TrackingRunListener;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 
 import static org.junit.Assert.*;
 import static org.springframework.test.context.cache.ContextCacheTestUtils.*;
+import static org.springframework.test.context.junit4.JUnitTestingUtils.*;
 
 /**
  * JUnit 4 based integration test which verifies correct {@linkplain ContextCache
@@ -55,24 +54,6 @@ public class ClassLevelDirtiesContextTests {
 	private static final AtomicInteger cacheHits = new AtomicInteger(0);
 	private static final AtomicInteger cacheMisses = new AtomicInteger(0);
 
-
-	private static final void runTestClassAndAssertStats(Class<?> testClass, int expectedTestCount) {
-		final int expectedTestFailureCount = 0;
-		final int expectedTestStartedCount = expectedTestCount;
-		final int expectedTestFinishedCount = expectedTestCount;
-
-		TrackingRunListener listener = new TrackingRunListener();
-		JUnitCore jUnitCore = new JUnitCore();
-		jUnitCore.addListener(listener);
-		jUnitCore.run(testClass);
-
-		assertEquals("Verifying number of failures for test class [" + testClass + "].", expectedTestFailureCount,
-			listener.getTestFailureCount());
-		assertEquals("Verifying number of tests started for test class [" + testClass + "].", expectedTestStartedCount,
-			listener.getTestStartedCount());
-		assertEquals("Verifying number of tests finished for test class [" + testClass + "].",
-			expectedTestFinishedCount, listener.getTestFinishedCount());
-	}
 
 	@BeforeClass
 	public static void verifyInitialCacheState() {
@@ -150,7 +131,11 @@ public class ClassLevelDirtiesContextTests {
 			0, cacheHits.incrementAndGet(), cacheMisses.get());
 	}
 
-	private void assertBehaviorForCleanTestCase() {
+	private void runTestClassAndAssertStats(Class<?> testClass, int expectedTestCount) throws Exception {
+		runTestsAndAssertCounters(testClass, expectedTestCount, 0, expectedTestCount, 0, 0);
+	}
+
+	private void assertBehaviorForCleanTestCase() throws Exception {
 		runTestClassAndAssertStats(CleanTestCase.class, 1);
 		assertContextCacheStatistics("after clean test class", 1, cacheHits.get(), cacheMisses.incrementAndGet());
 	}

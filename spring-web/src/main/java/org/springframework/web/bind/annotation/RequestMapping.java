@@ -23,6 +23,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.concurrent.Callable;
 
+import org.springframework.core.annotation.AliasFor;
+
 /**
  * Annotation for mapping web requests onto specific handler classes and/or
  * handler methods. Provides a consistent style between Servlet and Portlet
@@ -38,8 +40,8 @@ import java.util.concurrent.Callable;
  * details see the note on the new support classes added in Spring MVC 3.1
  * further below.
  *
- * <p>Handler methods which are annotated with this annotation are allowed
- * to have very flexible signatures. They may have arguments of the following
+ * <p>Handler methods which are annotated with this annotation are allowed to
+ * have very flexible signatures. They may have parameters of the following
  * types, in arbitrary order (except for validation results, which need to
  * follow right after the corresponding command object, if desired):
  * <ul>
@@ -161,7 +163,7 @@ import java.util.concurrent.Callable;
  * context path, and the literal part of the servlet mapping.
  * </ul>
  *
- * <p><strong>Note:</strong> JDK 1.8's {@code java.util.Optional} is supported
+ * <p><strong>Note:</strong> Java 8's {@code java.util.Optional} is supported
  * as a method parameter type with annotations that provide a {@code required}
  * attribute (e.g. {@code @RequestParam}, {@code @RequestHeader}, etc.). The use
  * of {@code java.util.Optional} in those cases is equivalent to having
@@ -172,8 +174,8 @@ import java.util.concurrent.Callable;
  * <li>A {@code ModelAndView} object (Servlet MVC or Portlet MVC),
  * with the model implicitly enriched with command objects and the results
  * of {@link ModelAttribute @ModelAttribute} annotated reference data accessor methods.
- * <li>A {@link org.springframework.ui.Model Model} object, with the view name
- * implicitly determined through a {@link org.springframework.web.servlet.RequestToViewNameTranslator}
+ * <li>A {@link org.springframework.ui.Model Model} object, with the view name implicitly
+ * determined through a {@link org.springframework.web.servlet.RequestToViewNameTranslator}
  * and the model implicitly enriched with command objects and the results
  * of {@link ModelAttribute @ModelAttribute} annotated reference data accessor methods.
  * <li>A {@link java.util.Map} object for exposing a model,
@@ -298,7 +300,7 @@ public @interface RequestMapping {
 
 	/**
 	 * The primary mapping expressed by this annotation.
-	 * <p>In a Servlet environment this is an alias for {@link #path()}.
+	 * <p>In a Servlet environment this is an alias for {@link #path}.
 	 * For example {@code @RequestMapping("/foo")} is equivalent to
 	 * {@code @RequestMapping(path="/foo")}.
 	 * <p>In a Portlet environment this is the mapped portlet modes
@@ -307,6 +309,7 @@ public @interface RequestMapping {
 	 * When used at the type level, all method-level mappings inherit
 	 * this primary mapping, narrowing it for a specific handler method.
 	 */
+	@AliasFor("path")
 	String[] value() default {};
 
 	/**
@@ -321,6 +324,7 @@ public @interface RequestMapping {
 	 * @see org.springframework.web.bind.annotation.ValueConstants#DEFAULT_NONE
 	 * @since 4.2
 	 */
+	@AliasFor("value")
 	String[] path() default {};
 
 	/**
@@ -410,8 +414,11 @@ public @interface RequestMapping {
 	 * <pre class="code">
 	 * produces = "text/plain"
 	 * produces = {"text/plain", "application/*"}
+	 * produces = "application/json; charset=UTF-8"
 	 * </pre>
-	 * Expressions can be negated by using the "!" operator, as in "!text/plain", which matches
+	 * <p>It affects the actual content type written, for example to produce a JSON response
+	 * with UTF-8 encoding, {@code "application/json; charset=UTF-8"} should be used.
+	 * <p>Expressions can be negated by using the "!" operator, as in "!text/plain", which matches
 	 * all requests with a {@code Accept} other than "text/plain".
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used at the type level, all method-level mappings override

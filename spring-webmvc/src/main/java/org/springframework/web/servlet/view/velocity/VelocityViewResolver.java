@@ -40,7 +40,9 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * @see #setDateToolAttribute
  * @see #setNumberToolAttribute
  * @see VelocityView
+ * @deprecated as of Spring 4.3, in favor of FreeMarker
  */
+@Deprecated
 public class VelocityViewResolver extends AbstractTemplateViewResolver {
 
 	private String dateToolAttribute;
@@ -106,7 +108,7 @@ public class VelocityViewResolver extends AbstractTemplateViewResolver {
 		super.initApplicationContext();
 
 		if (this.toolboxConfigLocation != null) {
-			if (VelocityView.class.equals(getViewClass())) {
+			if (VelocityView.class == getViewClass()) {
 				logger.info("Using VelocityToolboxView instead of default VelocityView " +
 						"due to specified toolboxConfigLocation");
 				setViewClass(VelocityToolboxView.class);

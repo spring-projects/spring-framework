@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ import org.springframework.util.StringUtils;
 
 /**
  * Utility methods for working with transactions and data access related beans
- * within the <em>Spring TestContext Framework</em>. Mainly for internal use
- * within the framework.
+ * within the <em>Spring TestContext Framework</em>.
+ * <p>Mainly for internal use within the framework.
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
@@ -146,6 +146,8 @@ public abstract class TestContextTransactionUtils {
 	 * @return the transaction manager to use, or {@code null} if not found
 	 * @throws BeansException if an error occurs while retrieving an explicitly
 	 * named transaction manager
+	 * @throws IllegalStateException if more than one TransactionManagementConfigurer
+	 * exists in the ApplicationContext
 	 */
 	public static PlatformTransactionManager retrieveTransactionManager(TestContext testContext, String name) {
 		Assert.notNull(testContext, "TestContext must not be null");

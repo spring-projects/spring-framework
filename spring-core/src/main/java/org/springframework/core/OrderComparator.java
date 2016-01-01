@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,23 +24,31 @@ import java.util.List;
 import org.springframework.util.ObjectUtils;
 
 /**
- * {@link Comparator} implementation for {@link Ordered} objects,
- * sorting by order value ascending (resp. by priority descending).
+ * {@link Comparator} implementation for {@link Ordered} objects, sorting
+ * by order value ascending, respectively by priority descending.
  *
- * <p>Non-{@code Ordered} objects are treated as greatest order
- * values, thus ending up at the end of the list, in arbitrary order
- * (just like same order values of {@code Ordered} objects).
+ * <h3>Same Order Objects</h3>
+ * <p>Objects that have the same order value will be sorted with arbitrary
+ * ordering with respect to other objects with the same order value.
+ *
+ * <h3>Non-ordered Objects</h3>
+ * <p>Any object that does not provide its own order value is implicitly
+ * assigned a value of {@link Ordered#LOWEST_PRECEDENCE}, thus ending up
+ * at the end of a sorted collection in arbitrary order with respect to
+ * other objects with the same order value.
  *
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 07.04.2003
  * @see Ordered
+ * @see org.springframework.core.annotation.AnnotationAwareOrderComparator
  * @see java.util.Collections#sort(java.util.List, java.util.Comparator)
  * @see java.util.Arrays#sort(Object[], java.util.Comparator)
  */
 public class OrderComparator implements Comparator<Object> {
 
 	/**
-	 * Shared default instance of OrderComparator.
+	 * Shared default instance of {@code OrderComparator}.
 	 */
 	public static final OrderComparator INSTANCE = new OrderComparator();
 

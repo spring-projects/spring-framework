@@ -16,6 +16,8 @@
 
 package org.springframework.aop.framework;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
 
@@ -25,6 +27,7 @@ import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.SingletonTargetSource;
 import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 /**
  * Utility methods for AOP proxy factories.
@@ -41,11 +44,11 @@ public abstract class AopProxyUtils {
 
 	/**
 	 * Determine the ultimate target class of the given bean instance, traversing
-	 * not only a top-level proxy but any number of nested proxies as well -
+	 * not only a top-level proxy but any number of nested proxies as well &mdash;
 	 * as long as possible without side effects, that is, just for singleton targets.
 	 * @param candidate the instance to check (might be an AOP proxy)
-	 * @return the target class (or the plain class of the given object as fallback;
-	 * never {@code null})
+	 * @return the ultimate target class (or the plain class of the given
+	 * object as fallback; never {@code null})
 	 * @see org.springframework.aop.TargetClassAware#getTargetClass()
 	 * @see Advised#getTargetSource()
 	 */
@@ -159,6 +162,40 @@ public abstract class AopProxyUtils {
 	 */
 	public static boolean equalsAdvisors(AdvisedSupport a, AdvisedSupport b) {
 		return Arrays.equals(a.getAdvisors(), b.getAdvisors());
+	}
+
+
+	/**
+	 * Adapt the given arguments to the target signature in the given method,
+	 * if necessary: in particular, if a given vararg argument array does not
+	 * match the array type of the declared vararg parameter in the method.
+	 * @param method the target method
+	 * @param arguments the given arguments
+	 * @return a cloned argument array, or the original if no adaptation is needed
+	 * @since 4.2.3
+	 */
+	static Object[] adaptArgumentsIfNecessary(Method method, Object... arguments) {
+		if (method.isVarArgs() && !ObjectUtils.isEmpty(arguments)) {
+			Class<?>[] paramTypes = method.getParameterTypes();
+			if (paramTypes.length == arguments.length) {
+				int varargIndex = paramTypes.length - 1;
+				Class<?> varargType = paramTypes[varargIndex];
+				if (varargType.isArray()) {
+					Object varargArray = arguments[varargIndex];
+					if (varargArray instanceof Object[] && !varargType.isInstance(varargArray)) {
+						Object[] newArguments = new Object[arguments.length];
+						System.arraycopy(arguments, 0, newArguments, 0, varargIndex);
+						Class<?> targetElementType = varargType.getComponentType();
+						int varargLength = Array.getLength(varargArray);
+						Object newVarargArray = Array.newInstance(targetElementType, varargLength);
+						System.arraycopy(varargArray, 0, newVarargArray, 0, varargLength);
+						newArguments[varargIndex] = newVarargArray;
+						return newArguments;
+					}
+				}
+			}
+		}
+		return arguments;
 	}
 
 }

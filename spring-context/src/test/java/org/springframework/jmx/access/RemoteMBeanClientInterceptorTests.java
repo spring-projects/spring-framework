@@ -26,6 +26,8 @@ import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
 
+import org.junit.After;
+
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 import org.springframework.util.SocketUtils;
@@ -78,6 +80,7 @@ public class RemoteMBeanClientInterceptorTests extends MBeanClientInterceptorTes
 		return this.connector.getMBeanServerConnection();
 	}
 
+	@After
 	@Override
 	public void tearDown() throws Exception {
 		if (this.connector != null) {

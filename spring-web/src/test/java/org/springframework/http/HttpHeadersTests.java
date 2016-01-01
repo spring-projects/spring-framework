@@ -30,28 +30,24 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import org.hamcrest.Matchers;
+
+import org.junit.Test;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
-import org.junit.Before;
-import org.junit.Test;
 
 /**
  * Unit tests for {@link org.springframework.http.HttpHeaders}.
+ *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  */
 public class HttpHeadersTests {
 
-	private HttpHeaders headers;
-
-
-	@Before
-	public void setUp() {
-		headers = new HttpHeaders();
-	}
+	private final HttpHeaders headers = new HttpHeaders();
 
 
 	@Test
@@ -67,7 +63,7 @@ public class HttpHeadersTests {
 	}
 
 	@Test  // SPR-9655
-	public void acceptiPlanet() {
+	public void acceptIPlanet() {
 		headers.add("Accept", "text/html");
 		headers.add("Accept", "text/plain");
 		List<MediaType> expected = Arrays.asList(new MediaType("text", "html"), new MediaType("text", "plain"));
@@ -171,7 +167,7 @@ public class HttpHeadersTests {
 		assertEquals("Invalid Date header", "Thu, 18 Dec 2008 10:20:00 GMT", headers.getFirst("date"));
 
 		// RFC 850
-		headers.set("Date", "Thursday, 18-Dec-08 11:20:00 CET");
+		headers.set("Date", "Thu, 18 Dec 2008 10:20:00 GMT");
 		assertEquals("Invalid Date header", date, headers.getDate());
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,12 +33,13 @@ import org.springframework.web.method.annotation.AbstractNamedValueMethodArgumen
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
- * Resolves method arguments annotated with an {@link MatrixVariable @PathParam}.
+ * Resolves method arguments annotated with {@link MatrixVariable @MatrixVariable}.
  *
  * <p>If the method parameter is of type Map and no name is specified, then it will
  * by resolved by the {@link MatrixVariableMapMethodArgumentResolver} instead.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 3.2
  */
 public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver {
@@ -53,8 +54,8 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueMeth
 			return false;
 		}
 		if (Map.class.isAssignableFrom(parameter.getParameterType())) {
-			String paramName = parameter.getParameterAnnotation(MatrixVariable.class).value();
-			return StringUtils.hasText(paramName);
+			String variableName = parameter.getParameterAnnotation(MatrixVariable.class).name();
+			return StringUtils.hasText(variableName);
 		}
 		return true;
 	}
@@ -62,7 +63,7 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueMeth
 	@Override
 	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
 		MatrixVariable annotation = parameter.getParameterAnnotation(MatrixVariable.class);
-		return new PathParamNamedValueInfo(annotation);
+		return new MatrixVariableNamedValueInfo(annotation);
 	}
 
 	@Override
@@ -120,10 +121,10 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueMeth
 	}
 
 
-	private static class PathParamNamedValueInfo extends NamedValueInfo {
+	private static class MatrixVariableNamedValueInfo extends NamedValueInfo {
 
-		private PathParamNamedValueInfo(MatrixVariable annotation) {
-			super(annotation.value(), annotation.required(), annotation.defaultValue());
+		private MatrixVariableNamedValueInfo(MatrixVariable annotation) {
+			super(annotation.name(), annotation.required(), annotation.defaultValue());
 		}
 	}
 }

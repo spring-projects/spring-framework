@@ -372,15 +372,31 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 		}
 	}
 
-	private String getStringOrNull(ResourceBundle bundle, String key) {
-		try {
-			return bundle.getString(key);
+	/**
+	 * Efficiently retrieve the String value for the specified key,
+	 * or return {@code null} if not found.
+	 * <p>As of 4.2, the default implementation checks {@code containsKey}
+	 * before it attempts to call {@code getString} (which would require
+	 * catching {@code MissingResourceException} for key not found).
+	 * <p>Can be overridden in subclasses.
+	 * @param bundle the ResourceBundle to perform the lookup in
+	 * @param key the key to look up
+	 * @return the associated value, or {@code null} if none
+	 * @since 4.2
+	 * @see ResourceBundle#getString(String)
+	 * @see ResourceBundle#containsKey(String)
+	 */
+	protected String getStringOrNull(ResourceBundle bundle, String key) {
+		if (bundle.containsKey(key)) {
+			try {
+				return bundle.getString(key);
+			}
+			catch (MissingResourceException ex){
+				// Assume key not found for some other reason
+				// -> do NOT throw the exception to allow for checking parent message source.
+			}
 		}
-		catch (MissingResourceException ex) {
-			// Assume key not found
-			// -> do NOT throw the exception to allow for checking parent message source.
-			return null;
-		}
+		return null;
 	}
 
 	/**

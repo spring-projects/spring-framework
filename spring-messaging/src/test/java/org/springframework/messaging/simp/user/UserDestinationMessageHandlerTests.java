@@ -25,9 +25,7 @@ import java.nio.charset.Charset;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 
 import org.springframework.messaging.Message;
 import org.springframework.messaging.StubMessageChannel;
@@ -50,16 +48,15 @@ public class UserDestinationMessageHandlerTests {
 
 	private UserDestinationMessageHandler handler;
 
-	private UserSessionRegistry registry;
+	private SimpUserRegistry registry;
 
-	@Mock
 	private SubscribableChannel brokerChannel;
 
 
 	@Before
 	public void setup() {
-		MockitoAnnotations.initMocks(this);
-		this.registry = new DefaultUserSessionRegistry();
+		this.registry = mock(SimpUserRegistry.class);
+		this.brokerChannel = mock(SubscribableChannel.class);
 		UserDestinationResolver resolver = new DefaultUserDestinationResolver(this.registry);
 		this.handler = new UserDestinationMessageHandler(new StubMessageChannel(), this.brokerChannel, resolver);
 	}
@@ -91,7 +88,9 @@ public class UserDestinationMessageHandlerTests {
 
 	@Test
 	public void handleMessage() {
-		this.registry.registerSessionId("joe", "123");
+		TestSimpUser simpUser = new TestSimpUser("joe");
+		simpUser.addSessions(new TestSimpSession("123"));
+		when(this.registry.getUser("joe")).thenReturn(simpUser);
 		given(this.brokerChannel.send(Mockito.any(Message.class))).willReturn(true);
 		this.handler.handleMessage(createWith(SimpMessageType.MESSAGE, "joe", "123", "/user/joe/queue/foo"));
 
@@ -105,7 +104,7 @@ public class UserDestinationMessageHandlerTests {
 
 	@Test
 	public void handleMessageWithoutActiveSession() {
-		this.handler.setUserDestinationBroadcast("/topic/unresolved");
+		this.handler.setBroadcastDestination("/topic/unresolved");
 		given(this.brokerChannel.send(Mockito.any(Message.class))).willReturn(true);
 		this.handler.handleMessage(createWith(SimpMessageType.MESSAGE, "joe", "123", "/user/joe/queue/foo"));
 
@@ -126,9 +125,11 @@ public class UserDestinationMessageHandlerTests {
 	@Test
 	public void handleMessageFromBrokerWithActiveSession() {
 
-		this.registry.registerSessionId("joe", "123");
+		TestSimpUser simpUser = new TestSimpUser("joe");
+		simpUser.addSessions(new TestSimpSession("123"));
+		when(this.registry.getUser("joe")).thenReturn(simpUser);
 
-		this.handler.setUserDestinationBroadcast("/topic/unresolved");
+		this.handler.setBroadcastDestination("/topic/unresolved");
 		given(this.brokerChannel.send(Mockito.any(Message.class))).willReturn(true);
 
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.MESSAGE);
@@ -152,7 +153,7 @@ public class UserDestinationMessageHandlerTests {
 
 	@Test
 	public void handleMessageFromBrokerWithoutActiveSession() {
-		this.handler.setUserDestinationBroadcast("/topic/unresolved");
+		this.handler.setBroadcastDestination("/topic/unresolved");
 		given(this.brokerChannel.send(Mockito.any(Message.class))).willReturn(true);
 
 		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.MESSAGE);

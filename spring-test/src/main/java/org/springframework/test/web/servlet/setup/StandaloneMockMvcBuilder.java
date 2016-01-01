@@ -65,20 +65,20 @@ import org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 /**
- * A MockMvcBuilder that accepts {@code @Controller} registrations thus allowing
- * full control over the instantiation and the initialization of controllers and
- * their dependencies similar to plain unit tests, and also making it possible
- * to test one controller at a time.
+ * A {@code MockMvcBuilder} that accepts {@code @Controller} registrations
+ * thus allowing full control over the instantiation and initialization of
+ * controllers and their dependencies similar to plain unit tests, and also
+ * making it possible to test one controller at a time.
  *
  * <p>This builder creates the minimum infrastructure required by the
  * {@link DispatcherServlet} to serve requests with annotated controllers and
- * also provides methods to customize it. The resulting configuration and
- * customizations possible are equivalent to using the MVC Java config except
+ * also provides methods for customization. The resulting configuration and
+ * customization options are equivalent to using MVC Java config except
  * using builder style methods.
  *
  * <p>To configure view resolution, either select a "fixed" view to use for every
- * performed request (see {@link #setSingleView(View)}) or provide a list of
- * {@code ViewResolver}'s, see {@link #setViewResolvers(ViewResolver...)}.
+ * request performed (see {@link #setSingleView(View)}) or provide a list of
+ * {@code ViewResolver}s (see {@link #setViewResolvers(ViewResolver...)}).
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -342,6 +342,7 @@ public class StandaloneMockMvcBuilder extends AbstractMockMvcBuilder<StandaloneM
 		StaticRequestMappingHandlerMapping hm = config.getHandlerMapping();
 		hm.setServletContext(wac.getServletContext());
 		hm.setApplicationContext(wac);
+		hm.afterPropertiesSet();
 		hm.registerHandlers(this.controllers);
 		wac.addBean("requestMappingHandlerMapping", hm);
 

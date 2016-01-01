@@ -27,8 +27,9 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.springframework.test.util.AssertionErrors.*;
 
 /**
- * Factory for response cookie assertions. An instance of this class is
- * typically accessed via {@link MockMvcResultMatchers#cookie()}.
+ * Factory for response cookie assertions.
+ * <p>An instance of this class is typically accessed via
+ * {@link MockMvcResultMatchers#cookie}.
  *
  * @author Rossen Stoyanchev
  * @author Thomas Bruyelle

@@ -41,17 +41,18 @@ import static org.mockito.BDDMockito.*;
  * @author Phillip Webb
  * @author Nicholas Williams
  * @author Stephane Nicoll
+ * @author Juergen Hoeller
  */
 public class PathResourceTests {
 
-	private static final String TEST_DIR = platformPath("src/test/resources/org/"
-			+ "springframework/core/io");
+	private static final String TEST_DIR =
+			platformPath("src/test/resources/org/springframework/core/io");
 
-	private static final String TEST_FILE = platformPath("src/test/resources/org/"
-			+ "springframework/core/io/example.properties");
+	private static final String TEST_FILE =
+			platformPath("src/test/resources/org/springframework/core/io/example.properties");
 
-	private static final String NON_EXISTING_FILE = platformPath("src/test/resources/org/"
-			+ "springframework/core/io/doesnotexist.properties");
+	private static final String NON_EXISTING_FILE =
+			platformPath("src/test/resources/org/springframework/core/io/doesnotexist.properties");
 
 
 	private static String platformPath(String string) {
@@ -223,7 +224,7 @@ public class PathResourceTests {
 	public void lastModified() throws Exception {
 		PathResource resource = new PathResource(TEST_FILE);
 		File file = new File(TEST_FILE);
-		assertThat(resource.lastModified(), equalTo(file.lastModified()));
+		assertThat(resource.lastModified() / 1000, equalTo(file.lastModified() / 1000));
 	}
 
 	@Test

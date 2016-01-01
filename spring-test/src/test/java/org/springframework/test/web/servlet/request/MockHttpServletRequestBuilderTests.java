@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 package org.springframework.test.web.servlet.request;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,6 +31,7 @@ import javax.servlet.http.Cookie;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -36,27 +39,30 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockServletContext;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
 
 import static org.junit.Assert.*;
 
 /**
- * Tests building a MockHttpServletRequest with {@link MockHttpServletRequestBuilder}.
+ * Unit tests for building a {@link MockHttpServletRequest} with
+ * {@link MockHttpServletRequestBuilder}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class MockHttpServletRequestBuilderTests {
 
-	private MockHttpServletRequestBuilder builder;
+	private final ServletContext servletContext = new MockServletContext();
 
-	private ServletContext servletContext;
+	private MockHttpServletRequestBuilder builder;
 
 
 	@Before
 	public void setUp() {
 		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/foo/bar");
-		servletContext = new MockServletContext();
 	}
 
 	@Test
@@ -87,6 +93,16 @@ public class MockHttpServletRequestBuilderTests {
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
 		assertEquals("/foo%20bar", request.getRequestURI());
+	}
+
+	// SPR-13435
+
+	@Test
+	public void requestUriWithDoubleSlashes() throws URISyntaxException {
+		this.builder = new MockHttpServletRequestBuilder(HttpMethod.GET, new URI("/test//currentlyValid/0"));
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+
+		assertEquals("/test//currentlyValid/0", request.getRequestURI());
 	}
 
 	@Test
@@ -238,6 +254,21 @@ public class MockHttpServletRequestBuilderTests {
 		assertEquals("foo", request.getQueryString());
 	}
 
+	// SPR-13801
+
+	@Test
+	public void requestParameterFromMultiValueMap() throws Exception {
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+		params.add("foo", "bar");
+		params.add("foo", "baz");
+		this.builder = new MockHttpServletRequestBuilder(HttpMethod.POST, "/foo");
+		this.builder.params(params);
+
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+
+		assertArrayEquals(new String[] {"bar", "baz"}, request.getParameterMap().get("foo"));
+	}
+
 	@Test
 	public void acceptHeader() {
 		this.builder.accept(MediaType.TEXT_HTML, MediaType.APPLICATION_XML);
@@ -352,6 +383,12 @@ public class MockHttpServletRequestBuilderTests {
 		assertEquals("bar", cookies[0].getValue());
 		assertEquals("baz", cookies[1].getName());
 		assertEquals("qux", cookies[1].getValue());
+	}
+
+	@Test
+	public void noCookies() {
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+		assertNull(request.getCookies());
 	}
 
 	@Test

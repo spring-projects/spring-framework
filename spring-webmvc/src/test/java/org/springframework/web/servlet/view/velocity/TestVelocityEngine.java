@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ import org.apache.velocity.exception.ResourceNotFoundException;
  * @author Juergen Hoeller
  * @since 09.10.2004
  */
-public class TestVelocityEngine extends VelocityEngine {
+class TestVelocityEngine extends VelocityEngine {
 
-	private final Map templates = new HashMap();
+	private final Map<String, Template> templates = new HashMap<>();
 
 
 	public TestVelocityEngine() {
@@ -46,7 +46,7 @@ public class TestVelocityEngine extends VelocityEngine {
 
 	@Override
 	public Template getTemplate(String name) throws ResourceNotFoundException {
-		Template template = (Template) this.templates.get(name);
+		Template template = this.templates.get(name);
 		if (template == null) {
 			throw new ResourceNotFoundException("No template registered for name [" + name + "]");
 		}

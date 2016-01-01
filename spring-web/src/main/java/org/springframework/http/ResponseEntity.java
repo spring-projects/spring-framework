@@ -321,14 +321,14 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		B location(URI location);
 
 		/**
-		 * Set the caching directives for the resource, as specified by the
+		 * Set the caching directives for the resource, as specified by the HTTP 1.1
 		 * {@code Cache-Control} header.
 		 * <p>A {@code CacheControl} instance can be built like
 		 * {@code CacheControl.maxAge(3600).cachePublic().noTransform()}.
-		 * @param cacheControl the instance that builds cache related HTTP response headers
+		 * @param cacheControl a builder for cache-related HTTP response headers
 		 * @return this builder
-		 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2">RFC-7234 Section 5.2</a>
 		 * @since 4.2
+		 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2">RFC-7234 Section 5.2</a>
 		 */
 		B cacheControl(CacheControl cacheControl);
 
@@ -421,6 +421,14 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 
 		@Override
 		public BodyBuilder eTag(String eTag) {
+			if (eTag != null) {
+				if (!eTag.startsWith("\"") && !eTag.startsWith("W/\"")) {
+					eTag = "\"" + eTag;
+				}
+				if (!eTag.endsWith("\"")) {
+					eTag = eTag + "\"";
+				}
+			}
 			this.headers.setETag(eTag);
 			return this;
 		}

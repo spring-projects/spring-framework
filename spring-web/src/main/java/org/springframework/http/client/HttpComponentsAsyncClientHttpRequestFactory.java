@@ -40,6 +40,7 @@ import org.springframework.util.Assert;
  * HttpAsyncClient 4.0</a> to create requests.
  *
  * @author Arjen Poutsma
+ * @author Stephane Nicoll
  * @since 4.0
  * @see HttpAsyncClient
  */
@@ -64,7 +65,7 @@ public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsC
 	 */
 	public HttpComponentsAsyncClientHttpRequestFactory(CloseableHttpAsyncClient httpAsyncClient) {
 		super();
-		Assert.notNull(httpAsyncClient, "'httpAsyncClient' must not be null");
+		Assert.notNull(httpAsyncClient, "HttpAsyncClient must not be null");
 		this.httpAsyncClient = httpAsyncClient;
 	}
 
@@ -78,7 +79,7 @@ public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsC
 			CloseableHttpClient httpClient, CloseableHttpAsyncClient httpAsyncClient) {
 
 		super(httpClient);
-		Assert.notNull(httpAsyncClient, "'httpAsyncClient' must not be null");
+		Assert.notNull(httpAsyncClient, "HttpAsyncClient must not be null");
 		this.httpAsyncClient = httpAsyncClient;
 	}
 
@@ -122,18 +123,20 @@ public class HttpComponentsAsyncClientHttpRequestFactory extends HttpComponentsC
         if (context == null) {
             context = HttpClientContext.create();
         }
-        // Request configuration not set in the context
-        if (context.getAttribute(HttpClientContext.REQUEST_CONFIG) == null) {
-            // Use request configuration given by the user, when available
-            RequestConfig config = null;
-            if (httpRequest instanceof Configurable) {
-                config = ((Configurable) httpRequest).getConfig();
-            }
-            if (config == null) {
-                config = RequestConfig.DEFAULT;
-            }
-            context.setAttribute(HttpClientContext.REQUEST_CONFIG, config);
-        }
+		// Request configuration not set in the context
+		if (context.getAttribute(HttpClientContext.REQUEST_CONFIG) == null) {
+			// Use request configuration given by the user, when available
+			RequestConfig config = null;
+			if (httpRequest instanceof Configurable) {
+				config = ((Configurable) httpRequest).getConfig();
+			}
+			if (config == null) {
+				config = createRequestConfig(asyncClient);
+			}
+			if (config != null) {
+				context.setAttribute(HttpClientContext.REQUEST_CONFIG, config);
+			}
+		}
 		return new HttpComponentsAsyncClientHttpRequest(asyncClient, httpRequest, context);
 	}
 

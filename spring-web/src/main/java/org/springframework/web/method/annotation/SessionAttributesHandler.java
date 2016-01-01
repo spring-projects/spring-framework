@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,8 +70,8 @@ public class SessionAttributesHandler {
 
 		SessionAttributes annotation = AnnotationUtils.findAnnotation(handlerType, SessionAttributes.class);
 		if (annotation != null) {
-			this.attributeNames.addAll(Arrays.asList(annotation.value()));
-			this.attributeTypes.addAll(Arrays.<Class<?>>asList(annotation.types()));
+			this.attributeNames.addAll(Arrays.asList(annotation.names()));
+			this.attributeTypes.addAll(Arrays.asList(annotation.types()));
 		}
 
 		for (String attributeName : this.attributeNames) {

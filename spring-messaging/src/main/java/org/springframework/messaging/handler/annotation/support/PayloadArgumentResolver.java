@@ -23,6 +23,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.converter.MessageConversionException;
 import org.springframework.messaging.converter.MessageConverter;
+import org.springframework.messaging.converter.SmartMessageConverter;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver;
 import org.springframework.util.Assert;
@@ -85,37 +86,39 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 	}
 
 	@Override
-	public Object resolveArgument(MethodParameter param, Message<?> message) throws Exception {
-		Payload ann = param.getParameterAnnotation(Payload.class);
-		if (ann != null && StringUtils.hasText(ann.value())) {
+	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
+		Payload ann = parameter.getParameterAnnotation(Payload.class);
+		if (ann != null && StringUtils.hasText(ann.expression())) {
 			throw new IllegalStateException("@Payload SpEL expressions not supported by this resolver");
 		}
 
 		Object payload = message.getPayload();
 		if (isEmptyPayload(payload)) {
 			if (ann == null || ann.required()) {
-				String paramName = getParameterName(param);
+				String paramName = getParameterName(parameter);
 				BindingResult bindingResult = new BeanPropertyBindingResult(payload, paramName);
-				bindingResult.addError(new ObjectError(paramName, "@Payload param is required"));
-				throw new MethodArgumentNotValidException(message, param, bindingResult);
+				bindingResult.addError(new ObjectError(paramName, "Payload value must not be empty"));
+				throw new MethodArgumentNotValidException(message, parameter, bindingResult);
 			}
 			else {
 				return null;
 			}
 		}
 
-		Class<?> targetClass = param.getParameterType();
+		Class<?> targetClass = parameter.getParameterType();
 		if (ClassUtils.isAssignable(targetClass, payload.getClass())) {
-			validate(message, param, payload);
+			validate(message, parameter, payload);
 			return payload;
 		}
 		else {
-			payload = this.converter.fromMessage(message, targetClass);
+			payload = (this.converter instanceof SmartMessageConverter ?
+					((SmartMessageConverter) this.converter).fromMessage(message, targetClass, parameter) :
+					this.converter.fromMessage(message, targetClass));
 			if (payload == null) {
 				throw new MessageConversionException(message,
 						"No converter found to convert to " + targetClass + ", message=" + message);
 			}
-			validate(message, param, payload);
+			validate(message, parameter, payload);
 			return payload;
 		}
 	}

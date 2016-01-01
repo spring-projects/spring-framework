@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,12 @@ import org.springframework.web.client.support.RestGatewaySupport;
  *
  * <p>Below is an example:
  * <pre class="code">
+ * import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+ * import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+ * import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+ *
+ * ...
+ *
  * RestTemplate restTemplate = new RestTemplate()
  * MockRestServiceServer mockServer = MockRestServiceServer.createServer(restTemplate);
  *

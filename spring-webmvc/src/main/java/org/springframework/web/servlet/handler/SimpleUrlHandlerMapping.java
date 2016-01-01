@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.web.servlet.handler;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -41,11 +41,10 @@ import org.springframework.util.CollectionUtils;
  * If the path doesn't begin with a slash, one is prepended.
  *
  * <p>Supports direct matches (given "/test" -> registered "/test") and "*"
- * matches (given "/test" -> registered "/t*"). Note that the default is
- * to map within the current servlet mapping if applicable; see the
- * {@link #setAlwaysUseFullPath "alwaysUseFullPath"} property for details.
- * For details on the pattern options, see the
- * {@link org.springframework.util.AntPathMatcher} javadoc.
+ * pattern matches (given "/test" -> registered "/t*"). Note that the default
+ * is to map within the current servlet mapping if applicable; see the
+ * {@link #setAlwaysUseFullPath "alwaysUseFullPath"} property. For details on the
+ * pattern options, see the {@link org.springframework.util.AntPathMatcher} javadoc.
 
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -55,7 +54,7 @@ import org.springframework.util.CollectionUtils;
  */
 public class SimpleUrlHandlerMapping extends AbstractUrlHandlerMapping {
 
-	private final Map<String, Object> urlMap = new HashMap<String, Object>();
+	private final Map<String, Object> urlMap = new LinkedHashMap<String, Object>();
 
 
 	/**

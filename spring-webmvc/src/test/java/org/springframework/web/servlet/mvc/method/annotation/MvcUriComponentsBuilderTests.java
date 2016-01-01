@@ -229,6 +229,14 @@ public class MvcUriComponentsBuilderTests {
 		assertThat(uriComponents.toUriString(), endsWith("/something/else"));
 	}
 
+ 	@Test
+	public void testFromMethodCallOnSubclass() {
+		UriComponents uriComponents = fromMethodCall(on(ExtendedController.class).myMethod(null)).build();
+
+		assertThat(uriComponents.toUriString(), startsWith("http://localhost"));
+		assertThat(uriComponents.toUriString(), endsWith("/extended/else"));
+	}
+
 	@Test
 	public void testFromMethodCallWithTypeLevelUriVars() {
 		UriComponents uriComponents = fromMethodCall(on(
@@ -304,7 +312,7 @@ public class MvcUriComponentsBuilderTests {
 
 		String mappingName = "PAC#getAddressesForCountry";
 		String url = MvcUriComponentsBuilder.fromMappingName(mappingName).arg(0, "DE").buildAndExpand(123);
-		assertEquals("http://example.org:9999/base/people/123/addresses/DE", url);
+		assertEquals("/base/people/123/addresses/DE", url);
 	}
 
 	@Test
@@ -416,6 +424,11 @@ public class MvcUriComponentsBuilderTests {
 				@RequestParam List<Integer> items, @RequestParam Integer limit) {
 			return null;
 		}
+	}
+
+	@RequestMapping("/extended")
+	static class ExtendedController extends ControllerWithMethods {
+
 	}
 
 	@RequestMapping("/user/{userId}/contacts")

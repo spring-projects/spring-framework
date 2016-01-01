@@ -27,6 +27,7 @@ import org.junit.Test;
 
 import org.springframework.aop.scope.ScopedObject;
 import org.springframework.aop.scope.ScopedProxyUtils;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.FactoryBean;
@@ -426,6 +427,28 @@ public class ConfigurationClassPostProcessorTests {
 		RepositoryInjectionBean bean = (RepositoryInjectionBean) beanFactory.getBean("annotatedBean");
 		assertEquals("Repository<String>", bean.stringRepository.toString());
 		assertEquals("Repository<Integer>", bean.integerRepository.toString());
+		assertTrue(AopUtils.isCglibProxy(bean.stringRepository));
+		assertTrue(AopUtils.isCglibProxy(bean.integerRepository));
+	}
+
+	@Test
+	public void genericsBasedInjectionWithScopedProxyUsingAsm() {
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(beanFactory);
+		beanFactory.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(RepositoryInjectionBean.class.getName());
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		beanFactory.registerBeanDefinition("annotatedBean", bd);
+		beanFactory.registerBeanDefinition("configClass", new RootBeanDefinition(ScopedProxyRepositoryConfiguration.class.getName()));
+		ConfigurationClassPostProcessor pp = new ConfigurationClassPostProcessor();
+		pp.postProcessBeanFactory(beanFactory);
+		beanFactory.freezeConfiguration();
+
+		RepositoryInjectionBean bean = (RepositoryInjectionBean) beanFactory.getBean("annotatedBean");
+		assertEquals("Repository<String>", bean.stringRepository.toString());
+		assertEquals("Repository<Integer>", bean.integerRepository.toString());
+		assertTrue(AopUtils.isCglibProxy(bean.stringRepository));
+		assertTrue(AopUtils.isCglibProxy(bean.integerRepository));
 	}
 
 	@Test
@@ -783,11 +806,18 @@ public class ConfigurationClassPostProcessorTests {
 		}
 	}
 
+	@Retention(RetentionPolicy.RUNTIME)
+	@Scope(scopeName = "prototype")
+	public @interface PrototypeScoped {
+
+		ScopedProxyMode proxyMode() default ScopedProxyMode.TARGET_CLASS;
+	}
+
 	@Configuration
 	public static class ScopedProxyRepositoryConfiguration {
 
 		@Bean
-		@Scope(value = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
+		@Scope(scopeName = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
 		public Repository<String> stringRepo() {
 			return new Repository<String>() {
 				@Override
@@ -798,7 +828,7 @@ public class ConfigurationClassPostProcessorTests {
 		}
 
 		@Bean
-		@Scope(value = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)
+		@PrototypeScoped
 		public Repository<Integer> integerRepo() {
 			return new Repository<Integer>() {
 				@Override

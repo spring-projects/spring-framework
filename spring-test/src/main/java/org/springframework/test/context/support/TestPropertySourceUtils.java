@@ -29,7 +29,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.MapPropertySource;
@@ -97,15 +96,16 @@ public abstract class TestPropertySourceUtils {
 			annotationType.getName(), testClass.getName()));
 
 		while (descriptor != null) {
-			AnnotationAttributes annAttrs = descriptor.getAnnotationAttributes();
+			TestPropertySource testPropertySource = descriptor.synthesizeAnnotation();
 			Class<?> rootDeclaringClass = descriptor.getRootDeclaringClass();
 
 			if (logger.isTraceEnabled()) {
-				logger.trace(String.format("Retrieved @TestPropertySource attributes [%s] for declaring class [%s].",
-					annAttrs, rootDeclaringClass.getName()));
+				logger.trace(String.format("Retrieved @TestPropertySource [%s] for declaring class [%s].",
+					testPropertySource, rootDeclaringClass.getName()));
 			}
 
-			TestPropertySourceAttributes attributes = new TestPropertySourceAttributes(rootDeclaringClass, annAttrs);
+			TestPropertySourceAttributes attributes = new TestPropertySourceAttributes(rootDeclaringClass,
+				testPropertySource);
 			if (logger.isTraceEnabled()) {
 				logger.trace("Resolved TestPropertySource attributes: " + attributes);
 			}

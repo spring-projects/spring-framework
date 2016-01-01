@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,6 +54,7 @@ public class BeanValidationPostProcessorTests {
 			assertTrue(ex.getRootCause().getMessage().contains("testBean"));
 			assertTrue(ex.getRootCause().getMessage().contains("invalid"));
 		}
+		ac.close();
 	}
 
 	@Test
@@ -65,6 +66,7 @@ public class BeanValidationPostProcessorTests {
 		bd.getPropertyValues().add("testBean", new TestBean());
 		ac.registerBeanDefinition("bean", bd);
 		ac.refresh();
+		ac.close();
 	}
 
 	@Test
@@ -76,6 +78,7 @@ public class BeanValidationPostProcessorTests {
 		ac.registerBeanDefinition("capp", new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class));
 		ac.registerBeanDefinition("bean", new RootBeanDefinition(AfterInitConstraintBean.class));
 		ac.refresh();
+		ac.close();
 	}
 
 	@Test
@@ -94,6 +97,7 @@ public class BeanValidationPostProcessorTests {
 			assertTrue(ex.getRootCause().getMessage().contains("stringValue"));
 			assertTrue(ex.getRootCause().getMessage().contains("invalid"));
 		}
+		ac.close();
 	}
 
 	@Test
@@ -105,6 +109,7 @@ public class BeanValidationPostProcessorTests {
 		bd.getPropertyValues().add("stringValue", "ss");
 		ac.registerBeanDefinition("bean", bd);
 		ac.refresh();
+		ac.close();
 	}
 
 

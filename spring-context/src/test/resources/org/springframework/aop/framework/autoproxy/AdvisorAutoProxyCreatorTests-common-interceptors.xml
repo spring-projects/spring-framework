@@ -12,7 +12,7 @@
 
 	<bean id="aapc"
 		class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator">
-		
+	
 		<!-- This common interceptor will be applied always,
 		before custom lockable advisor -->
 		<property name="interceptorNames">
@@ -30,18 +30,17 @@
 		class="test.mixin.LockMixinAdvisor"
 		scope="prototype"
 	/>
-	
+
 	<bean id="test1"
 		class="org.springframework.tests.sample.beans.TestBean">
 		<property name="age"><value>4</value></property>
 	</bean>
-	
+
 	<bean id="test2"
 		class="org.springframework.tests.sample.beans.TestBean">
 		<property name="age"><value>4</value></property>
 	</bean>
-	
 
-</beans>		
-	
-	
+
+</beans>	
+

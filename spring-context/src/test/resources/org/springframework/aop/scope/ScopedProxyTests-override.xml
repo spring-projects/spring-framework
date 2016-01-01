@@ -7,7 +7,7 @@
 
 	<bean id="testBean" class="org.springframework.tests.sample.beans.TestBean" scope="request">
     <aop:scoped-proxy proxy-target-class="false"/>
-    <property name="age" value="99"/> 
+    <property name="age" value="99"/>
   </bean>
 
   <bean class="org.springframework.beans.factory.config.PropertyOverrideConfigurer">

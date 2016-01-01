@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,32 +17,32 @@
 package org.springframework.http.converter;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.util.FileCopyUtils;
 
+import static org.hamcrest.core.Is.*;
+import static org.hamcrest.core.IsInstanceOf.*;
 import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
+ * @author Kazuki Shimizu
  */
 public class ResourceHttpMessageConverterTests {
 
-	private ResourceHttpMessageConverter converter;
+	private final ResourceHttpMessageConverter converter = new ResourceHttpMessageConverter();
 
-	@Before
-	public void setUp() {
-		converter = new ResourceHttpMessageConverter();
-	}
 
 	@Test
 	public void canRead() {
@@ -60,7 +60,19 @@ public class ResourceHttpMessageConverterTests {
 		byte[] body = FileCopyUtils.copyToByteArray(getClass().getResourceAsStream("logo.jpg"));
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);
 		inputMessage.getHeaders().setContentType(MediaType.IMAGE_JPEG);
-		converter.read(Resource.class, inputMessage);
+		Resource actualResource = converter.read(Resource.class, inputMessage);
+		assertThat(FileCopyUtils.copyToByteArray(actualResource.getInputStream()), is(body));
+	}
+
+	@Test  // SPR-13443
+	public void readWithInputStreamResource() throws IOException {
+		try (InputStream body = getClass().getResourceAsStream("logo.jpg") ) {
+			MockHttpInputMessage inputMessage = new MockHttpInputMessage(body);
+			inputMessage.getHeaders().setContentType(MediaType.IMAGE_JPEG);
+			Resource actualResource = converter.read(InputStreamResource.class, inputMessage);
+			assertThat(actualResource, instanceOf(InputStreamResource.class));
+			assertThat(actualResource.getInputStream(), is(body));
+		}
 	}
 
 	@Test
@@ -73,9 +85,7 @@ public class ResourceHttpMessageConverterTests {
 		assertEquals("Invalid content-length", body.getFile().length(), outputMessage.getHeaders().getContentLength());
 	}
 
-	// SPR-10848
-
-	@Test
+	@Test  // SPR-10848
 	public void writeByteArrayNullMediaType() throws IOException {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		byte[] byteArray = {1, 2, 3};

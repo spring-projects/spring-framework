@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 package org.springframework.beans.factory.config;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.Reader;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Collection;
@@ -35,13 +35,14 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.parser.ParserException;
+import org.yaml.snakeyaml.reader.UnicodeReader;
 
 import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
- * Base class for Yaml factories.
+ * Base class for YAML factories.
  *
  * @author Dave Syer
  * @since 4.1
@@ -64,7 +65,6 @@ public abstract class YamlProcessor {
 	 * some of the documents in a YAML resource. In YAML documents are
 	 * separated by <code>---<code> lines, and each document is converted
 	 * to properties before the match is made. E.g.
-	 *
 	 * <pre class="code">
 	 * environment: dev
 	 * url: http://dev.bar.com
@@ -74,11 +74,9 @@ public abstract class YamlProcessor {
 	 * url:http://foo.bar.com
 	 * name: My Cool App
 	 * </pre>
-	 *
 	 * when mapped with
 	 * <code>documentMatchers = YamlProcessor.mapMatcher({"environment": "prod"})</code>
 	 * would end up as
-	 *
 	 * <pre class="code">
 	 * environment=prod
 	 * url=http://foo.bar.com
@@ -102,9 +100,9 @@ public abstract class YamlProcessor {
 	}
 
 	/**
-	 * Method to use for resolving resources. Each resource will be converted to a Map, so
-	 * this property is used to decide which map entries to keep in the final output from
-	 * this factory.
+	 * Method to use for resolving resources. Each resource will be converted to a Map,
+	 * so this property is used to decide which map entries to keep in the final output
+	 * from this factory.
 	 * @param resolutionMethod the resolution method to set (defaults to
 	 * {@link ResolutionMethod#OVERRIDE}).
 	 */
@@ -126,9 +124,9 @@ public abstract class YamlProcessor {
 	 * Provide an opportunity for subclasses to process the Yaml parsed from the supplied
 	 * resources. Each resource is parsed in turn and the documents inside checked against
 	 * the {@link #setDocumentMatchers(DocumentMatcher...) matchers}. If a document
-	 * matches it is passed into the callback, along with its representation as
-	 * Properties. Depending on the {@link #setResolutionMethod(ResolutionMethod)} not all
-	 * of the documents will be parsed.
+	 * matches it is passed into the callback, along with its representation as Properties.
+	 * Depending on the {@link #setResolutionMethod(ResolutionMethod)} not all of the
+	 * documents will be parsed.
 	 * @param callback a callback to delegate to once matching documents are found
 	 * @see #createYaml()
 	 */
@@ -152,12 +150,12 @@ public abstract class YamlProcessor {
 	private boolean process(MatchCallback callback, Yaml yaml, Resource resource) {
 		int count = 0;
 		try {
-			if (this.logger.isDebugEnabled()) {
-				this.logger.debug("Loading from YAML: " + resource);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Loading from YAML: " + resource);
 			}
-			InputStream stream = resource.getInputStream();
+			Reader reader = new UnicodeReader(resource.getInputStream());
 			try {
-				for (Object object : yaml.loadAll(stream)) {
+				for (Object object : yaml.loadAll(reader)) {
 					if (object != null && process(asMap(object), callback)) {
 						count++;
 						if (this.resolutionMethod == ResolutionMethod.FIRST_FOUND) {
@@ -165,13 +163,13 @@ public abstract class YamlProcessor {
 						}
 					}
 				}
-				if (this.logger.isDebugEnabled()) {
-					this.logger.debug("Loaded " + count + " document" + (count > 1 ? "s" : "") +
+				if (logger.isDebugEnabled()) {
+					logger.debug("Loaded " + count + " document" + (count > 1 ? "s" : "") +
 							" from YAML resource: " + resource);
 				}
 			}
 			finally {
-				stream.close();
+				reader.close();
 			}
 		}
 		catch (IOException ex) {
@@ -185,8 +183,8 @@ public abstract class YamlProcessor {
 				this.resolutionMethod != ResolutionMethod.OVERRIDE_AND_IGNORE) {
 			throw new IllegalStateException(ex);
 		}
-		if (this.logger.isWarnEnabled()) {
-			this.logger.warn("Could not load map from " + resource + ": " + ex.getMessage());
+		if (logger.isWarnEnabled()) {
+			logger.warn("Could not load map from " + resource + ": " + ex.getMessage());
 		}
 	}
 
@@ -223,8 +221,8 @@ public abstract class YamlProcessor {
 		properties.putAll(getFlattenedMap(map));
 
 		if (this.documentMatchers.isEmpty()) {
-			if (this.logger.isDebugEnabled()) {
-				this.logger.debug("Merging document (no matchers set)" + map);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Merging document (no matchers set): " + map);
 			}
 			callback.process(properties, map);
 			return true;
@@ -235,8 +233,8 @@ public abstract class YamlProcessor {
 			MatchStatus match = matcher.matches(properties);
 			result = MatchStatus.getMostSpecific(match, result);
 			if (match == MatchStatus.FOUND) {
-				if (this.logger.isDebugEnabled()) {
-					this.logger.debug("Matched document with document matcher: " + properties);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Matched document with document matcher: " + properties);
 				}
 				callback.process(properties, map);
 				return true;
@@ -244,14 +242,16 @@ public abstract class YamlProcessor {
 		}
 
 		if (result == MatchStatus.ABSTAIN && this.matchDefault) {
-			if (this.logger.isDebugEnabled()) {
-				this.logger.debug("Matched document with default matcher: " + map);
+			if (logger.isDebugEnabled()) {
+				logger.debug("Matched document with default matcher: " + map);
 			}
 			callback.process(properties, map);
 			return true;
 		}
 
-		this.logger.debug("Unmatched document");
+		if (logger.isDebugEnabled()) {
+			logger.debug("Unmatched document: " + map);
+		}
 		return false;
 	}
 
@@ -302,7 +302,7 @@ public abstract class YamlProcessor {
 				}
 			}
 			else {
-				result.put(key, value == null ? "" : value);
+				result.put(key, value != null ? value : "");
 			}
 		}
 	}
@@ -330,7 +330,7 @@ public abstract class YamlProcessor {
 		/**
 		 * Test if the given properties match.
 		 * @param properties the properties to test
-		 * @return the status of the match.
+		 * @return the status of the match
 		 */
 		MatchStatus matches(Properties properties);
 	}
@@ -392,7 +392,8 @@ public abstract class YamlProcessor {
 	 */
 	protected static class StrictMapAppenderConstructor extends Constructor {
 
-		public 	StrictMapAppenderConstructor() {
+		// Declared as public for use in subclasses
+		public StrictMapAppenderConstructor() {
 			super();
 		}
 
@@ -400,9 +401,10 @@ public abstract class YamlProcessor {
 		protected Map<Object, Object> constructMapping(MappingNode node) {
 			try {
 				return super.constructMapping(node);
-			} catch (IllegalStateException e) {
+			}
+			catch (IllegalStateException ex) {
 				throw new ParserException("while parsing MappingNode",
-						node.getStartMark(), e.getMessage(), node.getEndMark());
+						node.getStartMark(), ex.getMessage(), node.getEndMark());
 			}
 		}
 
@@ -413,7 +415,7 @@ public abstract class YamlProcessor {
 				@Override
 				public Object put(Object key, Object value) {
 					if (delegate.containsKey(key)) {
-						throw new IllegalStateException("duplicate key: " + key);
+						throw new IllegalStateException("Duplicate key: " + key);
 					}
 					return delegate.put(key, value);
 				}
@@ -423,7 +425,6 @@ public abstract class YamlProcessor {
 				}
 			};
 		}
-
 	}
 
 }

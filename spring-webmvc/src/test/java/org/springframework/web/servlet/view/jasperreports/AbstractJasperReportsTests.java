@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
-import org.junit.Before;
+
 import org.junit.BeforeClass;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -52,9 +52,13 @@ public abstract class AbstractJasperReportsTests {
 			"org.eclipse.jdt.internal.compiler.Compiler", AbstractJasperReportsTests.class.getClassLoader());
 
 
-	protected MockHttpServletRequest request;
+	protected final MockHttpServletResponse response = new MockHttpServletResponse();
 
-	protected MockHttpServletResponse response;
+	protected final MockHttpServletRequest request = new MockHttpServletRequest();
+	{
+		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
+		request.addPreferredLocale(Locale.GERMAN);
+	}
 
 
 	@BeforeClass
@@ -62,14 +66,6 @@ public abstract class AbstractJasperReportsTests {
 		Assume.canLoadNativeDirFonts();
 	}
 
-	@Before
-	public void setUp() {
-		request = new MockHttpServletRequest();
-		response = new MockHttpServletResponse();
-
-		request.setAttribute(DispatcherServlet.LOCALE_RESOLVER_ATTRIBUTE, new AcceptHeaderLocaleResolver());
-		request.addPreferredLocale(Locale.GERMAN);
-	}
 
 	protected Map<String, Object> getModel() {
 		Map<String, Object> model = new HashMap<String, Object>();

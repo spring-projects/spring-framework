@@ -8,7 +8,7 @@
 		<property name="age"><value>33</value></property>
 		<property name="name"><value>Rod</value></property>
 	</bean>
-	
-	
+
+
 
 </beans>

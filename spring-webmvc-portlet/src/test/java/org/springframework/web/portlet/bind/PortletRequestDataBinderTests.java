@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.beans.propertyeditors.StringArrayPropertyEditor;
@@ -32,15 +32,20 @@ import org.springframework.tests.sample.beans.ITestBean;
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.validation.BindingResult;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Mark Fisher
  */
-public class PortletRequestDataBinderTests extends TestCase {
+public class PortletRequestDataBinderTests {
 
-	public void testSimpleBind() {
-		TestBean bean = new TestBean();
+	private final MockPortletRequest request = new MockPortletRequest();
 
-		MockPortletRequest request = new MockPortletRequest();
+	private final TestBean bean = new TestBean();
+
+	@Test
+	public void simpleBind() {
+
 		request.addParameter("age", "35");
 		request.addParameter("name", "test");
 
@@ -51,11 +56,10 @@ public class PortletRequestDataBinderTests extends TestCase {
 		assertEquals("test", bean.getName());
 	}
 
-	public void testNestedBind() {
-		TestBean bean = new TestBean();
+	@Test
+	public void nestedBind() {
 		bean.setSpouse(new TestBean());
 
-		MockPortletRequest request = new MockPortletRequest();
 		request.addParameter("spouse.name", "test");
 
 		PortletRequestDataBinder binder = new PortletRequestDataBinder(bean);
@@ -65,9 +69,8 @@ public class PortletRequestDataBinderTests extends TestCase {
 		assertEquals("test", bean.getSpouse().getName());
 	}
 
-	public void testNestedBindWithPropertyEditor() {
-		TestBean bean = new TestBean();
-
+	@Test
+	public void nestedBindWithPropertyEditor() {
 		PortletRequestDataBinder binder = new PortletRequestDataBinder(bean);
 		binder.registerCustomEditor(ITestBean.class, new PropertyEditorSupport() {
 			@Override
@@ -76,7 +79,6 @@ public class PortletRequestDataBinderTests extends TestCase {
 			}
 		});
 
-		MockPortletRequest request = new MockPortletRequest();
 		request.addParameter("spouse", "test");
 		request.addParameter("spouse.age", "32");
 		binder.bind(request);
@@ -86,11 +88,10 @@ public class PortletRequestDataBinderTests extends TestCase {
 		assertEquals(32, bean.getSpouse().getAge());
 	}
 
-	public void testBindingMismatch() {
-		TestBean bean = new TestBean();
+	@Test
+	public void bindingMismatch() {
 		bean.setAge(30);
 
-		MockPortletRequest request = new MockPortletRequest();
 		request.addParameter("age", "zzz");
 
 		PortletRequestDataBinder binder = new PortletRequestDataBinder(bean);
@@ -102,10 +103,8 @@ public class PortletRequestDataBinderTests extends TestCase {
 		assertEquals(30, bean.getAge());
 	}
 
-	public void testBindingStringWithCommaSeparatedValue() throws Exception {
-	  TestBean bean = new TestBean();
-
-		MockPortletRequest request = new MockPortletRequest();
+	@Test
+	public void bindingStringWithCommaSeparatedValue() throws Exception {
 		request.addParameter("stringArray", "test1,test2");
 
 		PortletRequestDataBinder binder = new PortletRequestDataBinder(bean);
@@ -116,10 +115,8 @@ public class PortletRequestDataBinderTests extends TestCase {
 		assertEquals("test1,test2", bean.getStringArray()[0]);
 	}
 
-	public void testBindingStringArrayWithSplitting() {
-		TestBean bean = new TestBean();
-
-		MockPortletRequest request = new MockPortletRequest();
+	@Test
+	public void bindingStringArrayWithSplitting() {
 		request.addParameter("stringArray", "test1,test2");
 
 		PortletRequestDataBinder binder = new PortletRequestDataBinder(bean);
@@ -132,10 +129,8 @@ public class PortletRequestDataBinderTests extends TestCase {
 		assertEquals("test2", bean.getStringArray()[1]);
 	}
 
-	public void testBindingList() {
-		TestBean bean = new TestBean();
-
-		MockPortletRequest request = new MockPortletRequest();
+	@Test
+	public void bindingList() {
 		request.addParameter("someList[0]", "test1");
 		request.addParameter("someList[1]", "test2");
 
@@ -148,10 +143,8 @@ public class PortletRequestDataBinderTests extends TestCase {
 		assertEquals("test2", bean.getSomeList().get(1));
 	}
 
-	public void testBindingMap() {
-		TestBean bean = new TestBean();
-
-		MockPortletRequest request = new MockPortletRequest();
+	@Test
+	public void bindingMap() {
 		request.addParameter("someMap['key1']", "val1");
 		request.addParameter("someMap['key2']", "val2");
 
@@ -164,14 +157,13 @@ public class PortletRequestDataBinderTests extends TestCase {
 		assertEquals("val2", bean.getSomeMap().get("key2"));
 	}
 
-	public void testBindingSet() {
-		TestBean bean = new TestBean();
+	@Test
+	public void bindingSet() {
 		Set<TestBean> set = new LinkedHashSet<TestBean>(2);
 		set.add(new TestBean("test1"));
 		set.add(new TestBean("test2"));
 		bean.setSomeSet(set);
 
-		MockPortletRequest request = new MockPortletRequest();
 		request.addParameter("someSet[0].age", "35");
 		request.addParameter("someSet[1].age", "36");
 
@@ -192,12 +184,11 @@ public class PortletRequestDataBinderTests extends TestCase {
 		assertEquals(36, bean2.getAge());
 	}
 
-	public void testBindingDate() throws Exception {
-		TestBean bean = new TestBean();
+	@Test
+	public void bindingDate() throws Exception {
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");
 		Date expected = dateFormat.parse("06-03-2006");
 
-		MockPortletRequest request = new MockPortletRequest();
 		request.addParameter("date", "06-03-2006");
 
 		PortletRequestDataBinder binder = new PortletRequestDataBinder(bean);
@@ -207,12 +198,11 @@ public class PortletRequestDataBinderTests extends TestCase {
 		assertEquals(expected, bean.getDate());
 	}
 
-	public void testBindingFailsWhenMissingRequiredParam() {
-		TestBean bean = new TestBean();
+	@Test
+	public void bindingFailsWhenMissingRequiredParam() {
 		PortletRequestDataBinder binder = new PortletRequestDataBinder(bean);
 		binder.setRequiredFields(new String[] {"age", "name"});
 
-		MockPortletRequest request = new MockPortletRequest();
 		request.addParameter("age", "35");
 		binder.bind(request);
 
@@ -221,12 +211,11 @@ public class PortletRequestDataBinderTests extends TestCase {
 		assertEquals("required", error.getFieldError("name").getCode());
 	}
 
-	public void testBindingExcludesDisallowedParam() {
-		TestBean bean = new TestBean();
+	@Test
+	public void bindingExcludesDisallowedParam() {
 		PortletRequestDataBinder binder = new PortletRequestDataBinder(bean);
 		binder.setAllowedFields(new String[] {"age"});
 
-		MockPortletRequest request = new MockPortletRequest();
 		request.addParameter("age", "35");
 		request.addParameter("name", "test");
 		binder.bind(request);

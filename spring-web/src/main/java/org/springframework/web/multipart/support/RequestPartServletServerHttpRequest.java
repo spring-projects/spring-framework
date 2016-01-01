@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,11 @@ package org.springframework.web.multipart.support;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.ClassUtils;
@@ -29,6 +31,8 @@ import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.util.WebUtils;
+
 
 /**
  * {@link ServerHttpRequest} implementation that accesses one part of a multipart
@@ -79,8 +83,9 @@ public class RequestPartServletServerHttpRequest extends ServletServerHttpReques
 	}
 
 	private static MultipartHttpServletRequest asMultipartRequest(HttpServletRequest request) {
-		if (request instanceof MultipartHttpServletRequest) {
-			return (MultipartHttpServletRequest) request;
+		MultipartHttpServletRequest unwrapped = WebUtils.getNativeRequest(request, MultipartHttpServletRequest.class);
+		if (unwrapped != null) {
+			return unwrapped;
 		}
 		else if (ClassUtils.hasMethod(HttpServletRequest.class, "getParts")) {
 			// Servlet 3.0 available ..
@@ -89,10 +94,12 @@ public class RequestPartServletServerHttpRequest extends ServletServerHttpReques
 		throw new IllegalArgumentException("Expected MultipartHttpServletRequest: is a MultipartResolver configured?");
 	}
 
+
 	@Override
 	public HttpHeaders getHeaders() {
 		return this.headers;
 	}
+
 
 	@Override
 	public InputStream getBody() throws IOException {
@@ -111,9 +118,21 @@ public class RequestPartServletServerHttpRequest extends ServletServerHttpReques
 			}
 			else {
 				String paramValue = this.multipartRequest.getParameter(this.partName);
-				return new ByteArrayInputStream(paramValue.getBytes(FORM_CHARSET));
+				return new ByteArrayInputStream(paramValue.getBytes(determineEncoding()));
 			}
 		}
+	}
+
+	private String determineEncoding() {
+		MediaType contentType = getHeaders().getContentType();
+		if (contentType != null) {
+			Charset charset = contentType.getCharSet();
+			if (charset != null) {
+				return charset.name();
+			}
+		}
+		String encoding = this.multipartRequest.getCharacterEncoding();
+		return (encoding != null ? encoding : FORM_CHARSET);
 	}
 
 }

@@ -21,14 +21,16 @@ import java.io.OutputStream;
 
 /**
  * Represents a HTTP output message that allows for setting a streaming body.
+ * Note that such messages typically do not support {@link #getBody()} access.
  *
  * @author Arjen Poutsma
  * @since 4.0
+ * @see #setBody
  */
 public interface StreamingHttpOutputMessage extends HttpOutputMessage {
 
 	/**
-	 * Sets the streaming body for this message.
+	 * Set the streaming body for this message.
 	 * @param body the streaming body
 	 */
 	void setBody(Body body);
@@ -42,7 +44,7 @@ public interface StreamingHttpOutputMessage extends HttpOutputMessage {
 	interface Body {
 
 		/**
-		 * Writes this body to the given {@link OutputStream}.
+		 * Write this body to the given {@link OutputStream}.
 		 * @param outputStream the output stream to write to
 		 * @throws IOException in case of errors
 		 */

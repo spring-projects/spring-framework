@@ -20,7 +20,9 @@ import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -46,16 +48,19 @@ import static org.junit.Assert.*;
  */
 public class EnableSchedulingTests {
 
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
+
+
 	@Before
 	public void setUp() {
 		Assume.group(TestGroup.PERFORMANCE);
 	}
 
+
 	@Test
 	public void withFixedRateTask() throws InterruptedException {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(FixedRateTaskConfig.class);
-		ctx.refresh();
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(FixedRateTaskConfig.class);
 
 		Thread.sleep(100);
 		assertThat(ctx.getBean(AtomicInteger.class).get(), greaterThanOrEqualTo(10));
@@ -63,7 +68,8 @@ public class EnableSchedulingTests {
 	}
 
 
-	@EnableScheduling @Configuration
+	@Configuration
+	@EnableScheduling
 	static class FixedRateTaskConfig {
 
 		@Bean
@@ -71,7 +77,7 @@ public class EnableSchedulingTests {
 			return new AtomicInteger();
 		}
 
-		@Scheduled(fixedRate=10)
+		@Scheduled(fixedRate = 10)
 		public void task() {
 			counter().incrementAndGet();
 		}
@@ -80,9 +86,7 @@ public class EnableSchedulingTests {
 
 	@Test
 	public void withSubclass() throws InterruptedException {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(FixedRateTaskConfigSubclass.class);
-		ctx.refresh();
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(FixedRateTaskConfigSubclass.class);
 
 		Thread.sleep(100);
 		assertThat(ctx.getBean(AtomicInteger.class).get(), greaterThanOrEqualTo(10));
@@ -97,9 +101,7 @@ public class EnableSchedulingTests {
 
 	@Test
 	public void withExplicitScheduler() throws InterruptedException {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(ExplicitSchedulerConfig.class);
-		ctx.refresh();
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ExplicitSchedulerConfig.class);
 
 		Thread.sleep(100);
 		assertThat(ctx.getBean(AtomicInteger.class).get(), greaterThanOrEqualTo(10));
@@ -108,7 +110,8 @@ public class EnableSchedulingTests {
 	}
 
 
-	@EnableScheduling @Configuration
+	@Configuration
+	@EnableScheduling
 	static class ExplicitSchedulerConfig {
 
 		String threadName;
@@ -125,7 +128,7 @@ public class EnableSchedulingTests {
 			return new AtomicInteger();
 		}
 
-		@Scheduled(fixedRate=10)
+		@Scheduled(fixedRate = 10)
 		public void task() {
 			threadName = Thread.currentThread().getName();
 			counter().incrementAndGet();
@@ -133,25 +136,18 @@ public class EnableSchedulingTests {
 	}
 
 
-	@Test(expected=IllegalStateException.class)
+	@Test
+	@SuppressWarnings("resource")
 	public void withExplicitSchedulerAmbiguity_andSchedulingEnabled() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(AmbiguousExplicitSchedulerConfig.class);
-		try {
-			ctx.refresh();
-		} catch (IllegalStateException ex) {
-			assertThat(ex.getMessage(), startsWith("More than one TaskScheduler"));
-			throw ex;
-		}
-		finally {
-			ctx.close();
-		}
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage(startsWith("More than one TaskScheduler bean exists within the context"));
+		new AnnotationConfigApplicationContext(AmbiguousExplicitSchedulerConfig.class);
 	}
 
-	@EnableScheduling @Configuration
-	static class AmbiguousExplicitSchedulerConfig {
 
-		String threadName;
+	@Configuration
+	@EnableScheduling
+	static class AmbiguousExplicitSchedulerConfig {
 
 		@Bean
 		public TaskScheduler taskScheduler1() {
@@ -167,24 +163,16 @@ public class EnableSchedulingTests {
 			return scheduler;
 		}
 
-		@Bean
-		public AtomicInteger counter() {
-			return new AtomicInteger();
-		}
-
-		@Scheduled(fixedRate=10)
+		@Scheduled(fixedRate = 10)
 		public void task() {
-			threadName = Thread.currentThread().getName();
-			counter().incrementAndGet();
 		}
 	}
 
 
 	@Test
 	public void withExplicitScheduledTaskRegistrar() throws InterruptedException {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(ExplicitScheduledTaskRegistrarConfig.class);
-		ctx.refresh();
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
+				ExplicitScheduledTaskRegistrarConfig.class);
 
 		Thread.sleep(100);
 		assertThat(ctx.getBean(AtomicInteger.class).get(), greaterThanOrEqualTo(10));
@@ -193,7 +181,8 @@ public class EnableSchedulingTests {
 	}
 
 
-	@EnableScheduling @Configuration
+	@Configuration
+	@EnableScheduling
 	static class ExplicitScheduledTaskRegistrarConfig implements SchedulingConfigurer {
 
 		String threadName;
@@ -217,7 +206,7 @@ public class EnableSchedulingTests {
 			return new AtomicInteger();
 		}
 
-		@Scheduled(fixedRate=10)
+		@Scheduled(fixedRate = 10)
 		public void task() {
 			threadName = Thread.currentThread().getName();
 			counter().incrementAndGet();
@@ -231,15 +220,13 @@ public class EnableSchedulingTests {
 		public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
 			taskRegistrar.setScheduler(taskScheduler1());
 		}
-
 	}
 
 
 	@Test
 	public void withAmbiguousTaskSchedulers_butNoActualTasks() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(SchedulingEnabled_withAmbiguousTaskSchedulers_butNoActualTasks.class);
-		ctx.refresh();
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
+			SchedulingEnabled_withAmbiguousTaskSchedulers_butNoActualTasks.class);
 		ctx.close();
 	}
 
@@ -264,19 +251,12 @@ public class EnableSchedulingTests {
 	}
 
 
-	@Test(expected=IllegalStateException.class)
+	@Test
+	@SuppressWarnings("resource")
 	public void withAmbiguousTaskSchedulers_andSingleTask() {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(SchedulingEnabled_withAmbiguousTaskSchedulers_andSingleTask.class);
-		try {
-			ctx.refresh();
-		} catch (IllegalStateException ex) {
-			assertThat(ex.getMessage(), startsWith("More than one TaskScheduler exists within the context"));
-			throw ex;
-		}
-		finally {
-			ctx.close();
-		}
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage(startsWith("More than one TaskScheduler bean exists within the context"));
+		new AnnotationConfigApplicationContext(SchedulingEnabled_withAmbiguousTaskSchedulers_andSingleTask.class);
 	}
 
 
@@ -284,7 +264,7 @@ public class EnableSchedulingTests {
 	@EnableScheduling
 	static class SchedulingEnabled_withAmbiguousTaskSchedulers_andSingleTask {
 
-		@Scheduled(fixedRate=10L)
+		@Scheduled(fixedRate = 10L)
 		public void task() {
 		}
 
@@ -303,19 +283,20 @@ public class EnableSchedulingTests {
 		}
 	}
 
+
 	@Test
 	public void withAmbiguousTaskSchedulers_andSingleTask_disambiguatedByScheduledTaskRegistrarBean() throws InterruptedException {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(SchedulingEnabled_withAmbiguousTaskSchedulers_andSingleTask_disambiguatedByScheduledTaskRegistrar.class);
-		ctx.refresh();
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
+				SchedulingEnabled_withAmbiguousTaskSchedulers_andSingleTask_disambiguatedByScheduledTaskRegistrar.class);
+
 		Thread.sleep(20);
-		ThreadAwareWorker worker = ctx.getBean(ThreadAwareWorker.class);
+		assertThat(ctx.getBean(ThreadAwareWorker.class).executedByThread, startsWith("explicitScheduler2-"));
 		ctx.close();
-		assertThat(worker.executedByThread, startsWith("explicitScheduler2-"));
 	}
 
 
 	static class ThreadAwareWorker {
+
 		String executedByThread;
 	}
 
@@ -324,7 +305,7 @@ public class EnableSchedulingTests {
 	@EnableScheduling
 	static class SchedulingEnabled_withAmbiguousTaskSchedulers_andSingleTask_disambiguatedByScheduledTaskRegistrar implements SchedulingConfigurer {
 
-		@Scheduled(fixedRate=10)
+		@Scheduled(fixedRate = 10)
 		public void task() {
 			worker().executedByThread = Thread.currentThread().getName();
 		}
@@ -357,13 +338,12 @@ public class EnableSchedulingTests {
 
 	@Test
 	public void withAmbiguousTaskSchedulers_andSingleTask_disambiguatedBySchedulerNameAttribute() throws InterruptedException {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(SchedulingEnabled_withAmbiguousTaskSchedulers_andSingleTask_disambiguatedBySchedulerNameAttribute.class);
-		ctx.refresh();
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
+				SchedulingEnabled_withAmbiguousTaskSchedulers_andSingleTask_disambiguatedBySchedulerNameAttribute.class);
+
 		Thread.sleep(20);
-		ThreadAwareWorker worker = ctx.getBean(ThreadAwareWorker.class);
+		assertThat(ctx.getBean(ThreadAwareWorker.class).executedByThread, startsWith("explicitScheduler2-"));
 		ctx.close();
-		assertThat(worker.executedByThread, startsWith("explicitScheduler2-"));
 	}
 
 
@@ -371,7 +351,7 @@ public class EnableSchedulingTests {
 	@EnableScheduling
 	static class SchedulingEnabled_withAmbiguousTaskSchedulers_andSingleTask_disambiguatedBySchedulerNameAttribute implements SchedulingConfigurer {
 
-		@Scheduled(fixedRate=10)
+		@Scheduled(fixedRate = 10)
 		public void task() {
 			worker().executedByThread = Thread.currentThread().getName();
 		}
@@ -404,13 +384,12 @@ public class EnableSchedulingTests {
 
 	@Test
 	public void withTaskAddedVia_configureTasks() throws InterruptedException {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(SchedulingEnabled_withTaskAddedVia_configureTasks.class);
-		ctx.refresh();
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
+				SchedulingEnabled_withTaskAddedVia_configureTasks.class);
+
 		Thread.sleep(20);
-		ThreadAwareWorker worker = ctx.getBean(ThreadAwareWorker.class);
+		assertThat(ctx.getBean(ThreadAwareWorker.class).executedByThread, startsWith("taskScheduler-"));
 		ctx.close();
-		assertThat(worker.executedByThread, startsWith("taskScheduler-"));
 	}
 
 
@@ -445,9 +424,7 @@ public class EnableSchedulingTests {
 
 	@Test
 	public void withTriggerTask() throws InterruptedException {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(TriggerTaskConfig.class);
-		ctx.refresh();
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(TriggerTaskConfig.class);
 
 		Thread.sleep(100);
 		assertThat(ctx.getBean(AtomicInteger.class).get(), greaterThan(1));
@@ -484,22 +461,24 @@ public class EnableSchedulingTests {
 		}
 	}
 
+
 	@Test
 	public void withInitiallyDelayedFixedRateTask() throws InterruptedException {
-		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(FixedRateTaskConfig_withInitialDelay.class);
-		ctx.refresh();
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
+				FixedRateTaskConfig_withInitialDelay.class);
 
 		Thread.sleep(1950);
 		AtomicInteger counter = ctx.getBean(AtomicInteger.class);
 		ctx.close();
 
-		assertThat(counter.get(), greaterThan(0)); // the @Scheduled method was called
-		assertThat(counter.get(), lessThanOrEqualTo(10)); // but not more than times the delay allows
+		// The @Scheduled method should have been called at least once but
+		// not more times than the delay allows.
+		assertThat(counter.get(), both(greaterThan(0)).and(lessThanOrEqualTo(10)));
 	}
 
 
-	@EnableScheduling @Configuration
+	@Configuration
+	@EnableScheduling
 	static class FixedRateTaskConfig_withInitialDelay {
 
 		@Bean
@@ -507,7 +486,7 @@ public class EnableSchedulingTests {
 			return new AtomicInteger();
 		}
 
-		@Scheduled(initialDelay=1000, fixedRate=100)
+		@Scheduled(initialDelay = 1000, fixedRate = 100)
 		public void task() {
 			counter().incrementAndGet();
 		}

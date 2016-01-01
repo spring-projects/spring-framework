@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,8 +48,8 @@ public interface BeanPostProcessor {
 	 * The returned bean instance may be a wrapper around the original.
 	 * @param bean the new bean instance
 	 * @param beanName the name of the bean
-	 * @return the bean instance to use, either the original or a wrapped one; if
-	 * {@code null}, no subsequent BeanPostProcessors will be invoked
+	 * @return the bean instance to use, either the original or a wrapped one;
+	 * if {@code null}, no subsequent BeanPostProcessors will be invoked
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet
 	 */
@@ -69,8 +69,8 @@ public interface BeanPostProcessor {
 	 * in contrast to all other BeanPostProcessor callbacks.
 	 * @param bean the new bean instance
 	 * @param beanName the name of the bean
-	 * @return the bean instance to use, either the original or a wrapped one; if
-	 * {@code null}, no subsequent BeanPostProcessors will be invoked
+	 * @return the bean instance to use, either the original or a wrapped one;
+	 * if {@code null}, no subsequent BeanPostProcessors will be invoked
 	 * @throws org.springframework.beans.BeansException in case of errors
 	 * @see org.springframework.beans.factory.InitializingBean#afterPropertiesSet
 	 * @see org.springframework.beans.factory.FactoryBean

@@ -17,7 +17,6 @@
 package org.springframework.messaging.simp.user;
 
 import static org.springframework.messaging.simp.SimpMessageHeaderAccessor.*;
-import static org.springframework.messaging.support.MessageHeaderAccessor.getAccessor;
 
 import java.util.Arrays;
 import java.util.List;
@@ -108,7 +107,7 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 	 * <p>By default this is not set.
 	 * @param destination the target destination.
 	 */
-	public void setUserDestinationBroadcast(String destination) {
+	public void setBroadcastDestination(String destination) {
 		this.broadcastHandler = (StringUtils.hasText(destination) ?
 				new BroadcastHandler(this.messagingTemplate, destination) : null);
 	}
@@ -116,7 +115,7 @@ public class UserDestinationMessageHandler implements MessageHandler, SmartLifec
 	/**
 	 * Return the configured destination for unresolved messages.
 	 */
-	public String getUserDestinationBroadcast() {
+	public String getBroadcastDestination() {
 		return (this.broadcastHandler != null ? this.broadcastHandler.getBroadcastDestination() : null);
 	}
 

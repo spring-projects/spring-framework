@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -44,6 +45,7 @@ import org.springframework.web.multipart.MultipartFile;
  * methods - without any custom processing on our side.
  *
  * @author Juergen Hoeller
+ * @author Rossen Stoyanchev
  * @since 3.1
  */
 public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpServletRequest {
@@ -51,6 +53,11 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 	private static final String CONTENT_DISPOSITION = "content-disposition";
 
 	private static final String FILENAME_KEY = "filename=";
+
+	private static final String FILENAME_WITH_CHARSET_KEY = "filename*=";
+
+	private static final Charset US_ASCII = Charset.forName("us-ascii");
+
 
 	private Set<String> multipartParameterNames;
 
@@ -86,7 +93,11 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 			this.multipartParameterNames = new LinkedHashSet<String>(parts.size());
 			MultiValueMap<String, MultipartFile> files = new LinkedMultiValueMap<String, MultipartFile>(parts.size());
 			for (Part part : parts) {
-				String filename = extractFilename(part.getHeader(CONTENT_DISPOSITION));
+				String disposition = part.getHeader(CONTENT_DISPOSITION);
+				String filename = extractFilename(disposition);
+				if (filename == null) {
+					filename = extractFilenameWithCharset(disposition);
+				}
 				if (filename != null) {
 					files.add(part.getName(), new StandardMultipartFile(part, filename));
 				}
@@ -102,15 +113,18 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 	}
 
 	private String extractFilename(String contentDisposition) {
+		return extractFilename(contentDisposition, FILENAME_KEY);
+	}
+
+	private String extractFilename(String contentDisposition, String key) {
 		if (contentDisposition == null) {
 			return null;
 		}
-		// TODO: can only handle the typical case at the moment
-		int startIndex = contentDisposition.indexOf(FILENAME_KEY);
+		int startIndex = contentDisposition.indexOf(key);
 		if (startIndex == -1) {
 			return null;
 		}
-		String filename = contentDisposition.substring(startIndex + FILENAME_KEY.length());
+		String filename = contentDisposition.substring(startIndex + key.length());
 		if (filename.startsWith("\"")) {
 			int endIndex = filename.indexOf("\"", 1);
 			if (endIndex != -1) {
@@ -121,6 +135,33 @@ public class StandardMultipartHttpServletRequest extends AbstractMultipartHttpSe
 			int endIndex = filename.indexOf(";");
 			if (endIndex != -1) {
 				return filename.substring(0, endIndex);
+			}
+		}
+		return filename;
+	}
+
+	private String extractFilenameWithCharset(String contentDisposition) {
+		String filename = extractFilename(contentDisposition, FILENAME_WITH_CHARSET_KEY);
+		if (filename == null) {
+			return null;
+		}
+		int index = filename.indexOf("'");
+		if (index != -1) {
+			Charset charset = null;
+			try {
+				charset = Charset.forName(filename.substring(0, index));
+			}
+			catch (IllegalArgumentException ex) {
+				// ignore
+			}
+			filename = filename.substring(index + 1);
+			// Skip language information..
+			index = filename.indexOf("'");
+			if (index != -1) {
+				filename = filename.substring(index + 1);
+			}
+			if (charset != null) {
+				filename = new String(filename.getBytes(US_ASCII), charset);
 			}
 		}
 		return filename;

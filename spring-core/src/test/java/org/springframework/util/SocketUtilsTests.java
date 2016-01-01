@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,11 @@
 
 package org.springframework.util;
 
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.util.SortedSet;
+import javax.net.ServerSocketFactory;
 
 import org.junit.Test;
 
@@ -27,6 +31,7 @@ import static org.springframework.util.SocketUtils.*;
  * Unit tests for {@link SocketUtils}.
  *
  * @author Sam Brannen
+ * @author Gary Russell
  */
 public class SocketUtilsTests {
 
@@ -58,6 +63,19 @@ public class SocketUtilsTests {
 	public void findAvailableTcpPort() {
 		int port = SocketUtils.findAvailableTcpPort();
 		assertPortInRange(port, PORT_RANGE_MIN, PORT_RANGE_MAX);
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void findAvailableTcpPortWhenPortOnLoopbackInterfaceIsNotAvailable() throws Exception {
+		int port = SocketUtils.findAvailableTcpPort();
+		ServerSocket socket = ServerSocketFactory.getDefault().createServerSocket(port, 1, InetAddress.getByName("localhost"));
+		try {
+			// will only look for the exact port, since random.nextInt(1) always returns 0
+			SocketUtils.findAvailableTcpPort(port, port + 1);
+		}
+		finally {
+			socket.close();
+		}
 	}
 
 	@Test
@@ -125,6 +143,19 @@ public class SocketUtilsTests {
 	public void findAvailableUdpPort() {
 		int port = SocketUtils.findAvailableUdpPort();
 		assertPortInRange(port, PORT_RANGE_MIN, PORT_RANGE_MAX);
+	}
+
+	@Test(expected = IllegalStateException.class)
+	public void findAvailableUdpPortWhenPortOnLoopbackInterfaceIsNotAvailable() throws Exception {
+		int port = SocketUtils.findAvailableUdpPort();
+		DatagramSocket socket = new DatagramSocket(port, InetAddress.getByName("localhost"));
+		try {
+			// will only look for the exact port, since random.nextInt(1) always returns 0
+			SocketUtils.findAvailableUdpPort(port, port + 1);
+		}
+		finally {
+			socket.close();
+		}
 	}
 
 	@Test

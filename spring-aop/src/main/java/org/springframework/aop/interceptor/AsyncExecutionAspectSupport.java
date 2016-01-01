@@ -18,9 +18,13 @@ package org.springframework.aop.interceptor;
 
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
+import java.util.function.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,9 +35,11 @@ import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.support.TaskExecutorAdapter;
-import org.springframework.util.Assert;
+import org.springframework.lang.UsesJava8;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * Base class for asynchronous method execution aspects, such as
@@ -51,6 +57,11 @@ import org.springframework.util.StringUtils;
  * @since 3.1.2
  */
 public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
+
+	// Java 8's CompletableFuture type present?
+	private static final boolean completableFuturePresent = ClassUtils.isPresent(
+			"java.util.concurrent.CompletableFuture", AsyncExecutionInterceptor.class.getClassLoader());
+
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -125,8 +136,10 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 			Executor executorToUse = this.defaultExecutor;
 			String qualifier = getExecutorQualifier(method);
 			if (StringUtils.hasLength(qualifier)) {
-				Assert.notNull(this.beanFactory, "BeanFactory must be set on " + getClass().getSimpleName() +
-						" to access qualified executor '" + qualifier + "'");
+				if (this.beanFactory == null) {
+					throw new IllegalStateException("BeanFactory must be set on " + getClass().getSimpleName() +
+							" to access qualified executor '" + qualifier + "'");
+				}
 				executorToUse = BeanFactoryAnnotationUtils.qualifiedBeanOfType(
 						this.beanFactory, Executor.class, qualifier);
 			}
@@ -153,9 +166,35 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	protected abstract String getExecutorQualifier(Method method);
 
 	/**
+	 * Delegate for actually executing the given task with the chosen executor.
+	 * @param task the task to execute
+	 * @param executor the chosen executor
+	 * @param returnType the declared return type (potentially a {@link Future} variant)
+	 * @return the execution result (potentially a corresponding {@link Future} handle)
+	 */
+	protected Object doSubmit(Callable<Object> task, AsyncTaskExecutor executor, Class<?> returnType) {
+		if (completableFuturePresent) {
+			Future<Object> result = CompletableFutureDelegate.processCompletableFuture(returnType, task, executor);
+			if (result != null) {
+				return result;
+			}
+		}
+		if (ListenableFuture.class.isAssignableFrom(returnType)) {
+			return ((AsyncListenableTaskExecutor) executor).submitListenable(task);
+		}
+		else if (Future.class.isAssignableFrom(returnType)) {
+			return executor.submit(task);
+		}
+		else {
+			executor.submit(task);
+			return null;
+		}
+	}
+
+	/**
 	 * Handles a fatal error thrown while asynchronously invoking the specified
 	 * {@link Method}.
-	 * <p>If the return type of the method is a {@link java.util.concurrent.Future} object, the original
+	 * <p>If the return type of the method is a {@link Future} object, the original
 	 * exception can be propagated by just throwing it at the higher level. However,
 	 * for all other cases, the exception will not be transmitted back to the client.
 	 * In that later case, the current {@link AsyncUncaughtExceptionHandler} will be
@@ -177,6 +216,31 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 				logger.error("Exception handler for async method '" + method.toGenericString() +
 						"' threw unexpected exception itself", ex2);
 			}
+		}
+	}
+
+
+	/**
+	 * Inner class to avoid a hard dependency on Java 8.
+	 */
+	@UsesJava8
+	private static class CompletableFutureDelegate {
+
+		public static <T> Future<T> processCompletableFuture(Class<?> returnType, final Callable<T> task, Executor executor) {
+			if (!CompletableFuture.class.isAssignableFrom(returnType)) {
+				return null;
+			}
+			return CompletableFuture.supplyAsync(new Supplier<T>() {
+				@Override
+				public T get() {
+					try {
+						return task.call();
+					}
+					catch (Throwable ex) {
+						throw new CompletionException(ex);
+					}
+				}
+			}, executor);
 		}
 	}
 

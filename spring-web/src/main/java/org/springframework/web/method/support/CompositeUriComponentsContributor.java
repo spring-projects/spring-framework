@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,16 +117,16 @@ public class CompositeUriComponentsContributor implements UriComponentsContribut
 	public void contributeMethodArgument(MethodParameter parameter, Object value,
 			UriComponentsBuilder builder, Map<String, Object> uriVariables, ConversionService conversionService) {
 
-		for (Object c : this.contributors) {
-			if (c instanceof UriComponentsContributor) {
-				UriComponentsContributor contributor = (UriComponentsContributor) c;
-				if (contributor.supportsParameter(parameter)) {
-					contributor.contributeMethodArgument(parameter, value, builder, uriVariables, conversionService);
+		for (Object contributor : this.contributors) {
+			if (contributor instanceof UriComponentsContributor) {
+				UriComponentsContributor ucc = (UriComponentsContributor) contributor;
+				if (ucc.supportsParameter(parameter)) {
+					ucc.contributeMethodArgument(parameter, value, builder, uriVariables, conversionService);
 					break;
 				}
 			}
-			else if (c instanceof HandlerMethodArgumentResolver) {
-				if (((HandlerMethodArgumentResolver) c).supportsParameter(parameter)) {
+			else if (contributor instanceof HandlerMethodArgumentResolver) {
+				if (((HandlerMethodArgumentResolver) contributor).supportsParameter(parameter)) {
 					break;
 				}
 			}

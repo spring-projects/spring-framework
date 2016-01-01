@@ -33,7 +33,7 @@ class GroovyCalculator implements Calculator {
 	   return x + y;
 	}
 }
-		 </lang:inline-script>
+		</lang:inline-script>
 	</lang:groovy>
 
 	<lang:groovy id="customizer">

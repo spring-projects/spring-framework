@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,9 @@
 package org.springframework.web;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashSet;
+import java.util.EnumSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import javax.servlet.ServletException;
 
@@ -105,11 +106,14 @@ public class HttpRequestMethodNotSupportedException extends ServletException {
 	 * Return the actually supported HTTP methods, if known, as {@link HttpMethod} instances.
 	 */
 	public Set<HttpMethod> getSupportedHttpMethods() {
-		Set<HttpMethod> supportedMethods = new LinkedHashSet<HttpMethod>();
+		List<HttpMethod> supportedMethods = new LinkedList<HttpMethod>();
 		for (String value : this.supportedMethods) {
-			supportedMethods.add(HttpMethod.valueOf(value));
+			HttpMethod resolved = HttpMethod.resolve(value);
+			if (resolved != null) {
+				supportedMethods.add(resolved);
+			}
 		}
-		return Collections.unmodifiableSet(supportedMethods);
+		return EnumSet.copyOf(supportedMethods);
 	}
 
 }

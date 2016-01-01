@@ -29,7 +29,9 @@ import org.springframework.dao.UncategorizedDataAccessException;
  * @author Juergen Hoeller
  * @since 1.2
  * @see SessionFactoryUtils#convertHibernateAccessException
+ * @deprecated as of Spring 4.3, in favor of Hibernate 4.x/5.x
  */
+@Deprecated
 @SuppressWarnings("serial")
 public class HibernateJdbcException extends UncategorizedDataAccessException {
 

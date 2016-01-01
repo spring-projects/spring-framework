@@ -20,12 +20,14 @@ import java.awt.Color;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
 import java.time.ZoneId;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Currency;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -37,6 +39,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -244,37 +247,32 @@ public class DefaultConversionServiceTests {
 	@Test
 	public void testStringToEnumSet() throws Exception {
 		assertEquals(EnumSet.of(Foo.BAR), conversionService.convert("BAR", TypeDescriptor.valueOf(String.class),
-			new TypeDescriptor(getClass().getField("enumSet"))));
-	}
-
-	public EnumSet<Foo> enumSet;
-
-
-	public enum Foo {
-		BAR, BAZ
-	}
-
-	public enum SubFoo {
-
-		BAR {
-			@Override
-			String s() {
-				return "x";
-			}
-		},
-		BAZ {
-			@Override
-			String s() {
-				return "y";
-			}
-		};
-
-		abstract String s();
+				new TypeDescriptor(getClass().getField("enumSet"))));
 	}
 
 	@Test
 	public void testStringToLocale() {
 		assertEquals(Locale.ENGLISH, conversionService.convert("en", Locale.class));
+	}
+
+	@Test
+	public void testStringToCharset() {
+		assertEquals(Charset.forName("UTF-8"), conversionService.convert("UTF-8", Charset.class));
+	}
+
+	@Test
+	public void testCharsetToString() {
+		assertEquals("UTF-8", conversionService.convert(Charset.forName("UTF-8"), String.class));
+	}
+
+	@Test
+	public void testStringToCurrency() {
+		assertEquals(Currency.getInstance("EUR"), conversionService.convert("EUR", Currency.class));
+	}
+
+	@Test
+	public void testCurrencyToString() {
+		assertEquals("USD", conversionService.convert(Currency.getInstance("USD"), String.class));
 	}
 
 	@Test
@@ -315,25 +313,21 @@ public class DefaultConversionServiceTests {
 
 	@Test
 	public void convertArrayToCollectionInterface() {
-		List<?> result = conversionService.convert(new String[] { "1", "2", "3" }, List.class);
+		List<?> result = conversionService.convert(new String[] {"1", "2", "3"}, List.class);
 		assertEquals("1", result.get(0));
 		assertEquals("2", result.get(1));
 		assertEquals("3", result.get(2));
 	}
 
-	public List<Integer> genericList = new ArrayList<Integer>();
-
 	@Test
 	public void convertArrayToCollectionGenericTypeConversion() throws Exception {
 		@SuppressWarnings("unchecked")
-		List<Integer> result = (List<Integer>) conversionService.convert(new String[] { "1", "2", "3" }, TypeDescriptor
+		List<Integer> result = (List<Integer>) conversionService.convert(new String[] {"1", "2", "3"}, TypeDescriptor
 				.valueOf(String[].class), new TypeDescriptor(getClass().getDeclaredField("genericList")));
 		assertEquals(new Integer("1"), result.get(0));
 		assertEquals(new Integer("2"), result.get(1));
 		assertEquals(new Integer("3"), result.get(2));
 	}
-
-	public Stream<Integer> genericStream;
 
 	@Test
 	public void convertArrayToStream() throws Exception {
@@ -350,7 +344,7 @@ public class DefaultConversionServiceTests {
 		ConverterRegistry registry = (conversionService);
 		registry.addConverter(new ColorConverter());
 		@SuppressWarnings("unchecked")
-		List<Color> colors = (List<Color>) conversionService.convert(new String[] { "ffffff", "#000000" },
+		List<Color> colors = (List<Color>) conversionService.convert(new String[] {"ffffff", "#000000"},
 				TypeDescriptor.valueOf(String[].class),
 				new TypeDescriptor(new MethodParameter(getClass().getMethod("handlerMethod", List.class), 0)));
 		assertEquals(2, colors.size());
@@ -358,18 +352,9 @@ public class DefaultConversionServiceTests {
 		assertEquals(Color.BLACK, colors.get(1));
 	}
 
-	public class ColorConverter implements Converter<String, Color> {
-		@Override
-		public Color convert(String source) { if (!source.startsWith("#")) source = "#" + source; return Color.decode(source); }
-	}
-
-	public void handlerMethod(List<Color> color) {
-
-	}
-
 	@Test
 	public void convertArrayToCollectionImpl() {
-		LinkedList<?> result = conversionService.convert(new String[] { "1", "2", "3" }, LinkedList.class);
+		LinkedList<?> result = conversionService.convert(new String[] {"1", "2", "3"}, LinkedList.class);
 		assertEquals("1", result.get(0));
 		assertEquals("2", result.get(1));
 		assertEquals("3", result.get(2));
@@ -377,7 +362,7 @@ public class DefaultConversionServiceTests {
 
 	@Test(expected = ConversionFailedException.class)
 	public void convertArrayToAbstractCollection() {
-		conversionService.convert(new String[] { "1", "2", "3" }, AbstractList.class);
+		conversionService.convert(new String[]{"1", "2", "3"}, AbstractList.class);
 	}
 
 	public static enum FooEnum {
@@ -386,13 +371,13 @@ public class DefaultConversionServiceTests {
 
 	@Test
 	public void convertArrayToString() {
-		String result = conversionService.convert(new String[] { "1", "2", "3" }, String.class);
+		String result = conversionService.convert(new String[] {"1", "2", "3"}, String.class);
 		assertEquals("1,2,3", result);
 	}
 
 	@Test
 	public void convertArrayToStringWithElementConversion() {
-		String result = conversionService.convert(new Integer[] { 1, 2, 3 }, String.class);
+		String result = conversionService.convert(new Integer[] {1, 2, 3}, String.class);
 		assertEquals("1,2,3", result);
 	}
 
@@ -437,21 +422,21 @@ public class DefaultConversionServiceTests {
 
 	@Test
 	public void convertArrayToObject() {
-		Object[] array = new Object[] { 3L };
+		Object[] array = new Object[] {3L};
 		Object result = conversionService.convert(array, Long.class);
 		assertEquals(3L, result);
 	}
 
 	@Test
 	public void convertArrayToObjectWithElementConversion() {
-		String[] array = new String[] { "3" };
+		String[] array = new String[] {"3"};
 		Integer result = conversionService.convert(array, Integer.class);
 		assertEquals(new Integer(3), result);
 	}
 
 	@Test
 	public void convertArrayToObjectAssignableTargetType() {
-		Long[] array = new Long[] { 3L };
+		Long[] array = new Long[] {3L};
 		Long[] result = (Long[]) conversionService.convert(array, Object.class);
 		assertArrayEquals(array, result);
 	}
@@ -576,9 +561,9 @@ public class DefaultConversionServiceTests {
 	}
 
 	@Test
-	@SuppressWarnings({ "cast", "unchecked" })
+	@SuppressWarnings("rawtypes")
 	public void convertObjectToCollection() {
-		List<String> result = (List<String>) conversionService.convert(3L, List.class);
+		List result = conversionService.convert(3L, List.class);
 		assertEquals(1, result.size());
 		assertEquals(3L, result.get(0));
 	}
@@ -594,7 +579,7 @@ public class DefaultConversionServiceTests {
 
 	@Test
 	public void convertArrayToArray() {
-		Integer[] result = conversionService.convert(new String[] { "1", "2", "3" }, Integer[].class);
+		Integer[] result = conversionService.convert(new String[] {"1", "2", "3"}, Integer[].class);
 		assertEquals(new Integer(1), result[0]);
 		assertEquals(new Integer(2), result[1]);
 		assertEquals(new Integer(3), result[2]);
@@ -602,7 +587,7 @@ public class DefaultConversionServiceTests {
 
 	@Test
 	public void convertArrayToPrimitiveArray() {
-		int[] result = conversionService.convert(new String[] { "1", "2", "3" }, int[].class);
+		int[] result = conversionService.convert(new String[] {"1", "2", "3"}, int[].class);
 		assertEquals(1, result[0]);
 		assertEquals(2, result[1]);
 		assertEquals(3, result[2]);
@@ -610,14 +595,14 @@ public class DefaultConversionServiceTests {
 
 	@Test
 	public void convertArrayToWrapperArray() {
-		byte[] byteArray = new byte[] { 1, 2, 3 };
+		byte[] byteArray = new byte[] {1, 2, 3};
 		Byte[] converted = conversionService.convert(byteArray, Byte[].class);
-		assertTrue(Arrays.equals(converted, new Byte[] { 1, 2, 3 }));
+		assertThat(converted, equalTo(new Byte[]{1, 2, 3}));
 	}
 
 	@Test
 	public void convertArrayToArrayAssignable() {
-		int[] result = conversionService.convert(new int[] { 1, 2, 3 }, int[].class);
+		int[] result = conversionService.convert(new int[] {1, 2, 3}, int[].class);
 		assertEquals(1, result[0]);
 		assertEquals(2, result[1]);
 		assertEquals(3, result[2]);
@@ -670,7 +655,7 @@ public class DefaultConversionServiceTests {
 	}
 
 	@Test
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public void convertCollectionToCollectionSpecialCaseSourceImpl() throws Exception {
 		Map map = new LinkedHashMap();
 		map.put("1", "1");
@@ -697,8 +682,6 @@ public class DefaultConversionServiceTests {
 		assertEquals(new Integer(9), integers.get(1));
 	}
 
-	public Map<Integer, FooEnum> genericMap = new HashMap<Integer, FooEnum>();
-
 	@Test
 	public void convertMapToMap() throws Exception {
 		Map<String, String> foo = new HashMap<String, String>();
@@ -712,7 +695,7 @@ public class DefaultConversionServiceTests {
 	}
 
 	@Test
-	@SuppressWarnings({ "rawtypes" })
+	@SuppressWarnings("rawtypes")
 	public void convertHashMapValuesToList() {
 		Map<String, Integer> hashMap = new LinkedHashMap<String, Integer>();
 		hashMap.put("1", 1);
@@ -802,6 +785,11 @@ public class DefaultConversionServiceTests {
 	}
 
 	@Test
+	public void convertStringToTimezone() {
+		assertEquals("GMT+02:00", conversionService.convert("GMT+2", TimeZone.class).getID());
+	}
+
+	@Test
 	public void convertObjectToStringWithJavaTimeOfMethodPresent() {
 		assertTrue(conversionService.convert(ZoneId.of("GMT+1"), String.class).startsWith("GMT+"));
 	}
@@ -817,7 +805,7 @@ public class DefaultConversionServiceTests {
 	}
 
 	@Test(expected = ConverterNotFoundException.class)
-	public void convertObjectToObjectNoValueOFMethodOrConstructor() {
+	public void convertObjectToObjectNoValueOfMethodOrConstructor() {
 		conversionService.convert(new Long(3), SSN.class);
 	}
 
@@ -829,27 +817,27 @@ public class DefaultConversionServiceTests {
 
 	@Test
 	public void convertObjectToObjectFinderMethodWithNull() {
-		TestEntity e = (TestEntity) conversionService.convert(null,
+		TestEntity entity = (TestEntity) conversionService.convert(null,
 				TypeDescriptor.valueOf(String.class), TypeDescriptor.valueOf(TestEntity.class));
-		assertNull(e);
+		assertNull(entity);
 	}
 
 	@Test
 	public void convertObjectToObjectFinderMethodWithIdConversion() {
-		TestEntity e = conversionService.convert("1", TestEntity.class);
-		assertEquals(new Long(1), e.getId());
+		TestEntity entity = conversionService.convert("1", TestEntity.class);
+		assertEquals(new Long(1), entity.getId());
 	}
 
 	@Test
 	public void convertCharArrayToString() throws Exception {
-		String converted = conversionService.convert(new char[] { 'a', 'b', 'c' }, String.class);
+		String converted = conversionService.convert(new char[] {'a', 'b', 'c'}, String.class);
 		assertThat(converted, equalTo("a,b,c"));
 	}
 
 	@Test
 	public void convertStringToCharArray() throws Exception {
 		char[] converted = conversionService.convert("a,b,c", char[].class);
-		assertThat(converted, equalTo(new char[] { 'a', 'b', 'c' }));
+		assertThat(converted, equalTo(new char[]{'a', 'b', 'c'}));
 	}
 
 	@Test
@@ -861,14 +849,14 @@ public class DefaultConversionServiceTests {
 			}
 		});
 		char[] converted = conversionService.convert("abc", char[].class);
-		assertThat(converted, equalTo(new char[] { 'a', 'b', 'c' }));
+		assertThat(converted, equalTo(new char[] {'a', 'b', 'c'}));
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
 	public void multidimensionalArrayToListConversionShouldConvertEntriesCorrectly() {
-		String[][] grid = new String[][] { new String[] { "1", "2", "3", "4" }, new String[] { "5", "6", "7", "8" },
-				new String[] { "9", "10", "11", "12" } };
+		String[][] grid = new String[][] {new String[] {"1", "2", "3", "4"}, new String[] {"5", "6", "7", "8"},
+				new String[] {"9", "10", "11", "12"}};
 		List<String[]> converted = conversionService.convert(grid, List.class);
 		String[][] convertedBack = conversionService.convert(converted, String[][].class);
 		assertArrayEquals(grid, convertedBack);
@@ -877,16 +865,15 @@ public class DefaultConversionServiceTests {
 	@Test
 	public void convertCannotOptimizeArray() {
 		conversionService.addConverter(new Converter<Byte, Byte>() {
-
 			@Override
 			public Byte convert(Byte source) {
 				return (byte) (source + 1);
 			}
 		});
-		byte[] byteArray = new byte[] { 1, 2, 3 };
+		byte[] byteArray = new byte[] {1, 2, 3};
 		byte[] converted = conversionService.convert(byteArray, byte[].class);
 		assertNotSame(byteArray, converted);
-		assertTrue(Arrays.equals(new byte[] { 2, 3, 4 }, converted));
+		assertTrue(Arrays.equals(new byte[] {2, 3, 4}, converted));
 	}
 
 	@Test
@@ -930,6 +917,61 @@ public class DefaultConversionServiceTests {
 		watch.stop();
 		// System.out.println(watch.prettyPrint());
 	}
+
+
+	// test fields and helpers
+
+	public List<Integer> genericList = new ArrayList<Integer>();
+
+	public Stream<Integer> genericStream;
+
+	public Map<Integer, FooEnum> genericMap = new HashMap<Integer, FooEnum>();
+
+	public EnumSet<Foo> enumSet;
+
+	public Object assignableTarget;
+
+
+	public void handlerMethod(List<Color> color) {
+	}
+
+
+	public enum Foo {
+
+		BAR, BAZ
+	}
+
+
+	public enum SubFoo {
+
+		BAR {
+			@Override
+			String s() {
+				return "x";
+			}
+		},
+		BAZ {
+			@Override
+			String s() {
+				return "y";
+			}
+		};
+
+		abstract String s();
+	}
+
+
+	public class ColorConverter implements Converter<String, Color> {
+
+		@Override
+		public Color convert(String source) {
+			if (!source.startsWith("#")) {
+				source = "#" + source;
+			}
+			return Color.decode(source);
+		}
+	}
+
 
 	@SuppressWarnings("serial")
 	public static class CustomNumber extends Number {
@@ -991,14 +1033,11 @@ public class DefaultConversionServiceTests {
 	}
 
 
-	public Object assignableTarget;
-
-
 	private static class SSN {
 
 		static int constructorCount = 0;
-		static int toStringCount = 0;
 
+		static int toStringCount = 0;
 
 		static void reset() {
 			constructorCount = 0;

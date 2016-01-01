@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
+import org.springframework.context.Lifecycle;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.ServerHttpRequest;
@@ -59,7 +60,7 @@ import org.springframework.web.socket.sockjs.support.AbstractSockJsService;
  * @author Sebastien Deleuze
  * @since 4.0
  */
-public class TransportHandlingSockJsService extends AbstractSockJsService implements SockJsServiceConfig {
+public class TransportHandlingSockJsService extends AbstractSockJsService implements SockJsServiceConfig, Lifecycle {
 
 	private static final boolean jackson2Present = ClassUtils.isPresent(
 			"com.fasterxml.jackson.databind.ObjectMapper", TransportHandlingSockJsService.class.getClassLoader());
@@ -74,6 +75,8 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 	private final Map<String, SockJsSession> sessions = new ConcurrentHashMap<String, SockJsSession>();
 
 	private ScheduledFuture<?> sessionCleanupTask;
+
+	private boolean running;
 
 
 	/**
@@ -152,6 +155,36 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 
 
 	@Override
+	public void start() {
+		if (!isRunning()) {
+			this.running = true;
+			for (TransportHandler handler : this.handlers.values()) {
+				if (handler instanceof Lifecycle) {
+					((Lifecycle) handler).start();
+				}
+			}
+		}
+	}
+
+	@Override
+	public void stop() {
+		if (isRunning()) {
+			this.running = false;
+			for (TransportHandler handler : this.handlers.values()) {
+				if (handler instanceof Lifecycle) {
+					((Lifecycle) handler).stop();
+				}
+			}
+		}
+	}
+
+	@Override
+	public boolean isRunning() {
+		return this.running;
+	}
+
+
+	@Override
 	protected void handleRawWebSocketRequest(ServerHttpRequest request, ServerHttpResponse response,
 			WebSocketHandler handler) throws IOException {
 
@@ -214,8 +247,8 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 
 		try {
 			HttpMethod supportedMethod = transportType.getHttpMethod();
-			if (!supportedMethod.equals(request.getMethod())) {
-				if (HttpMethod.OPTIONS.equals(request.getMethod()) && transportType.supportsCors()) {
+			if (supportedMethod != request.getMethod()) {
+				if (HttpMethod.OPTIONS == request.getMethod() && transportType.supportsCors()) {
 					if (checkOrigin(request, response, HttpMethod.OPTIONS, supportedMethod)) {
 						response.setStatusCode(HttpStatus.NO_CONTENT);
 						addCacheHeaders(response);
@@ -289,13 +322,21 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 
 	@Override
 	protected boolean validateRequest(String serverId, String sessionId, String transport) {
-		if (!getAllowedOrigins().contains("*") && !TransportType.fromValue(transport).supportsOrigin()) {
-			if (logger.isWarnEnabled()) {
-				logger.warn("Origin check has been enabled, but transport " + transport + " does not support it");
-			}
+		if (!super.validateRequest(serverId, sessionId, transport)) {
 			return false;
 		}
-		return super.validateRequest(serverId, sessionId, transport);
+
+		if (!this.allowedOrigins.contains("*")) {
+			TransportType transportType = TransportType.fromValue(transport);
+			if (transportType == null || !transportType.supportsOrigin()) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Origin check enabled but transport '" + transport + "' does not support it.");
+				}
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	private SockJsSession createSockJsSession(String sessionId, SockJsSessionFactory sessionFactory,

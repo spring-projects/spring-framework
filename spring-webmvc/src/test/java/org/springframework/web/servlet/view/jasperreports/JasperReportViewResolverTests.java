@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,17 +18,20 @@ package org.springframework.web.servlet.view.jasperreports;
 
 import java.util.Locale;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.web.servlet.view.velocity.VelocityView;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Rob Harrop
  */
-public class JasperReportViewResolverTests extends TestCase {
+public class JasperReportViewResolverTests {
 
-	public void testResolveView() throws Exception {
+	@Test
+	public void resolveView() throws Exception {
 		StaticApplicationContext ctx = new StaticApplicationContext();
 
 		String prefix = "org/springframework/ui/jasperreports/";
@@ -41,36 +44,36 @@ public class JasperReportViewResolverTests extends TestCase {
 		viewResolver.setSuffix(suffix);
 		viewResolver.setApplicationContext(ctx);
 
-		AbstractJasperReportsView view =
-				(AbstractJasperReportsView) viewResolver.resolveViewName(viewName, Locale.ENGLISH);
+		AbstractJasperReportsView view = (AbstractJasperReportsView) viewResolver.resolveViewName(viewName,
+			Locale.ENGLISH);
 		assertNotNull("View should not be null", view);
 		assertEquals("Incorrect URL", prefix + viewName + suffix, view.getUrl());
 	}
 
-	public void testSetIncorrectViewClass() {
-		try {
-			new JasperReportsViewResolver().setViewClass(VelocityView.class);
-			fail("Should not be able to set view class to a class that does not extend AbstractJasperReportsView");
-		}
-		catch (IllegalArgumentException ex) {
-			// success
-		}
+	@Test(expected = IllegalArgumentException.class)
+	public void setIncorrectViewClass() {
+		// Should not be able to set view class to a class that does not extend
+		// AbstractJasperReportsView.
+		new JasperReportsViewResolver().setViewClass(VelocityView.class);
 	}
 
-	public void testWithViewNamesAndEndsWithPattern() throws Exception {
-		doViewNamesTest(new String[]{"DataSource*"});
+	@Test
+	public void withViewNamesAndEndsWithPattern() throws Exception {
+		doViewNamesTest("DataSource*");
 	}
 
-	public void testWithViewNamesAndStartsWithPattern() throws Exception {
-		doViewNamesTest(new String[]{"*Report"});
+	@Test
+	public void withViewNamesAndStartsWithPattern() throws Exception {
+		doViewNamesTest("*Report");
 	}
 
-	public void testWithViewNamesAndStatic() throws Exception {
-		doViewNamesTest(new String[]{"DataSourceReport"});
+	@Test
+	public void withViewNamesAndStatic() throws Exception {
+		doViewNamesTest("DataSourceReport");
 	}
 
-	private void doViewNamesTest(String[] viewNames) throws Exception {
-		 StaticApplicationContext ctx = new StaticApplicationContext();
+	private void doViewNamesTest(String... viewNames) throws Exception {
+		StaticApplicationContext ctx = new StaticApplicationContext();
 
 		String prefix = "org/springframework/ui/jasperreports/";
 		String suffix = ".jasper";
@@ -83,10 +86,11 @@ public class JasperReportViewResolverTests extends TestCase {
 		viewResolver.setViewNames(viewNames);
 		viewResolver.setApplicationContext(ctx);
 
-		AbstractJasperReportsView view =
-				(AbstractJasperReportsView) viewResolver.resolveViewName(viewName, Locale.ENGLISH);
+		AbstractJasperReportsView view = (AbstractJasperReportsView) viewResolver.resolveViewName(viewName,
+			Locale.ENGLISH);
 		assertNotNull("View should not be null", view);
 		assertEquals("Incorrect URL", prefix + viewName + suffix, view.getUrl());
 		assertNull(viewResolver.resolveViewName("foo", Locale.ENGLISH));
 	}
+
 }

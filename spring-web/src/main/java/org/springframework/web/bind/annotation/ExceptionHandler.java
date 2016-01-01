@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import java.lang.annotation.Target;
  * handler methods. Provides consistent style between Servlet and Portlet
  * environments, with the semantics adapting to the concrete environment.
  *
- * <p>Handler methods which are annotated with this annotation are allowed
- * to have very flexible signatures. They may have arguments of the following
+ * <p>Handler methods which are annotated with this annotation are allowed to
+ * have very flexible signatures. They may have parameters of the following
  * types, in arbitrary order:
  * <ul>
  * <li>An exception argument: declared as a general Exception or as a more
@@ -48,8 +48,9 @@ import java.lang.annotation.Target;
  * As a consequence, such an argument will never be {@code null}.
  * <i>Note that session access may not be thread-safe, in particular in a
  * Servlet environment: Consider switching the
- * {@link org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter#setSynchronizeOnSession "synchronizeOnSession"}
- * flag to "true" if multiple requests are allowed to access a session concurrently.</i>
+ * {@link org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter#setSynchronizeOnSession
+ * "synchronizeOnSession"} flag to "true" if multiple requests are allowed to
+ * access a session concurrently.</i>
  * <li>{@link org.springframework.web.context.request.WebRequest} or
  * {@link org.springframework.web.context.request.NativeWebRequest}.
  * Allows for generic request parameter access as well as request/session
@@ -64,13 +65,17 @@ import java.lang.annotation.Target;
  * <li>{@link java.io.OutputStream} / {@link java.io.Writer} for generating
  * the response's content. This will be the raw OutputStream/Writer as
  * exposed by the Servlet/Portlet API.
+ * <li>{@link org.springframework.ui.Model} as an alternative to returning
+ * a model map from the handler method. Note that the provided model is not
+ * pre-populated with regular model attributes and therefore always empty,
+ * as a convenience for preparing the model for an exception-specific view.
  * </ul>
  *
  * <p>The following return types are supported for handler methods:
  * <ul>
  * <li>A {@code ModelAndView} object (Servlet MVC or Portlet MVC).
- * <li>A {@link org.springframework.ui.Model Model} object, with the view name
- * implicitly determined through a {@link org.springframework.web.servlet.RequestToViewNameTranslator}.
+ * <li>A {@link org.springframework.ui.Model} object, with the view name implicitly
+ * determined through a {@link org.springframework.web.servlet.RequestToViewNameTranslator}.
  * <li>A {@link java.util.Map} object for exposing a model,
  * with the view name implicitly determined through a
  * {@link org.springframework.web.servlet.RequestToViewNameTranslator}.

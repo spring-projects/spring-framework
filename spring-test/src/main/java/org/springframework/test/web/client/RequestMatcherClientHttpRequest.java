@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ class RequestMatcherClientHttpRequest extends MockAsyncClientHttpRequest impleme
 		this.requestMatchers.add(requestMatcher);
 	}
 
+
 	@Override
 	public ResponseActions andExpect(RequestMatcher requestMatcher) {
 		Assert.notNull(requestMatcher, "RequestMatcher is required");
@@ -61,22 +62,19 @@ class RequestMatcherClientHttpRequest extends MockAsyncClientHttpRequest impleme
 
 	@Override
 	public ClientHttpResponse executeInternal() throws IOException {
-
 		if (this.requestMatchers.isEmpty()) {
 			throw new AssertionError("No request expectations to execute");
 		}
 
 		if (this.responseCreator == null) {
-			throw new AssertionError("No ResponseCreator was set up. Add it after request expectations, "
-					+ "e.g. MockRestServiceServer.expect(requestTo(\"/foo\")).andRespond(withSuccess())");
+			throw new AssertionError("No ResponseCreator was set up. Add it after request expectations, " +
+					"e.g. MockRestServiceServer.expect(requestTo(\"/foo\")).andRespond(withSuccess())");
 		}
 
 		for (RequestMatcher requestMatcher : this.requestMatchers) {
 			requestMatcher.match(this);
 		}
-
 		setResponse(this.responseCreator.createResponse(this));
-
 		return super.executeInternal();
 	}
 

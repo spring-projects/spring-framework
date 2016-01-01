@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,13 +38,13 @@ public class ResponseBodyTests {
 
 	@Test
 	public void json() throws Exception {
-
 		standaloneSetup(new PersonController()).build()
-			.perform(get("/person/Lee").accept(MediaType.APPLICATION_JSON))
+				.perform(get("/person/Lee").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(content().contentType("application/json;charset=UTF-8"))
 				.andExpect(jsonPath("$.name").value("Lee"));
 	}
+
 
 	@Controller
 	private class PersonController {
@@ -52,8 +52,7 @@ public class ResponseBodyTests {
 		@RequestMapping(value="/person/{name}")
 		@ResponseBody
 		public Person get(@PathVariable String name) {
-			Person person = new Person(name);
-			return person;
+			return new Person(name);
 		}
 	}
 

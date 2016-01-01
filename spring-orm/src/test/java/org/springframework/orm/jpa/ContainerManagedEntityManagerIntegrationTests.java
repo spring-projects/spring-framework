@@ -60,6 +60,7 @@ public class ContainerManagedEntityManagerIntegrationTests extends AbstractEntit
 		assertSame(in2, dex.getCause());
 	}
 
+	@SuppressWarnings("unchecked")
 	public void testEntityManagerProxyIsProxy() {
 		EntityManager em = createContainerManagedEntityManager();
 		assertTrue(Proxy.isProxyClass(em.getClass()));

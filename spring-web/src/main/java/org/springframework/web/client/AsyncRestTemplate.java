@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.http.client.support.AsyncHttpAccessor;
+import org.springframework.http.client.support.InterceptingAsyncHttpAccessor;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.FailureCallback;
@@ -49,7 +49,8 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureAdapter;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.util.concurrent.SuccessCallback;
-import org.springframework.web.util.UriTemplate;
+import org.springframework.web.util.DefaultUriTemplateHandler;
+import org.springframework.web.util.UriTemplateHandler;
 
 /**
  * <strong>Spring's central class for asynchronous client-side HTTP access.</strong>
@@ -62,13 +63,18 @@ import org.springframework.web.util.UriTemplate;
  * {@linkplain #setMessageConverters(List) message converters} with this
  * {@code RestTemplate}.
  *
+ * <p><strong>Note:</strong> by default {@code AsyncRestTemplate} relies on
+ * standard JDK facilities to establish HTTP connections. You can switch to use
+ * a different HTTP library such as Apache HttpComponents, Netty, and OkHttp by
+ * using a constructor accepting an {@link AsyncClientHttpRequestFactory}.
+ *
  * <p>For more information, please refer to the {@link RestTemplate} API documentation.
  *
  * @author Arjen Poutsma
  * @since 4.0
  * @see RestTemplate
  */
-public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOperations {
+public class AsyncRestTemplate extends InterceptingAsyncHttpAccessor implements AsyncRestOperations {
 
 	private final RestTemplate syncTemplate;
 
@@ -115,7 +121,9 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	 * @param asyncRequestFactory the asynchronous request factory
 	 * @param syncRequestFactory the synchronous request factory
 	 */
-	public AsyncRestTemplate(AsyncClientHttpRequestFactory asyncRequestFactory, ClientHttpRequestFactory syncRequestFactory) {
+	public AsyncRestTemplate(
+			AsyncClientHttpRequestFactory asyncRequestFactory, ClientHttpRequestFactory syncRequestFactory) {
+
 		this(asyncRequestFactory, new RestTemplate(syncRequestFactory));
 	}
 
@@ -126,7 +134,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	 * @param restTemplate the synchronous template to use
 	 */
 	public AsyncRestTemplate(AsyncClientHttpRequestFactory requestFactory, RestTemplate restTemplate) {
-		Assert.notNull(restTemplate, "'restTemplate' must not be null");
+		Assert.notNull(restTemplate, "RestTemplate must not be null");
 		this.syncTemplate = restTemplate;
 		setAsyncRequestFactory(requestFactory);
 	}
@@ -141,9 +149,27 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 		this.syncTemplate.setErrorHandler(errorHandler);
 	}
 
-	/** Return the error handler. */
+	/**
+	 * Return the error handler.
+	 */
 	public ResponseErrorHandler getErrorHandler() {
 		return this.syncTemplate.getErrorHandler();
+	}
+
+	/**
+	 * Set a custom {@link UriTemplateHandler} for expanding URI templates.
+	 * <p>By default, RestTemplate uses {@link DefaultUriTemplateHandler}.
+	 * @param handler the URI template handler to use
+	 */
+	public void setUriTemplateHandler(UriTemplateHandler handler) {
+		this.syncTemplate.setUriTemplateHandler(handler);
+	}
+
+	/**
+	 * Return the configured URI template handler.
+	 */
+	public UriTemplateHandler getUriTemplateHandler() {
+		return this.syncTemplate.getUriTemplateHandler();
 	}
 
 	@Override
@@ -163,7 +189,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	 * Return the message body converters.
 	 */
 	public List<HttpMessageConverter<?>> getMessageConverters() {
-		return syncTemplate.getMessageConverters();
+		return this.syncTemplate.getMessageConverters();
 	}
 
 
@@ -214,6 +240,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 		ResponseExtractor<HttpHeaders> headersExtractor = headersExtractor();
 		return execute(url, HttpMethod.HEAD, null, headersExtractor);
 	}
+
 
 	// POST
 
@@ -493,7 +520,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	public <T> ListenableFuture<T> execute(String url, HttpMethod method, AsyncRequestCallback requestCallback,
 			ResponseExtractor<T> responseExtractor, Object... urlVariables) throws RestClientException {
 
-		URI expanded = new UriTemplate(url).expand(urlVariables);
+		URI expanded = getUriTemplateHandler().expand(url, urlVariables);
 		return doExecute(expanded, method, requestCallback, responseExtractor);
 	}
 
@@ -501,7 +528,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 	public <T> ListenableFuture<T> execute(String url, HttpMethod method, AsyncRequestCallback requestCallback,
 			ResponseExtractor<T> responseExtractor, Map<String, ?> urlVariables) throws RestClientException {
 
-		URI expanded = new UriTemplate(url).expand(urlVariables);
+		URI expanded = getUriTemplateHandler().expand(url, urlVariables);
 		return doExecute(expanded, method, requestCallback, responseExtractor);
 	}
 
@@ -639,7 +666,7 @@ public class AsyncRestTemplate extends AsyncHttpAccessor implements AsyncRestOpe
 				}
 				return convertResponse(response);
 			}
-			catch (IOException ex) {
+			catch (Throwable ex) {
 				throw new ExecutionException(ex);
 			}
 			finally {

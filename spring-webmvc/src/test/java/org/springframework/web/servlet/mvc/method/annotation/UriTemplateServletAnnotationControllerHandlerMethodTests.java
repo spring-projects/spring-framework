@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -397,8 +397,8 @@ public class UriTemplateServletAnnotationControllerHandlerMethodTests extends Ab
 		public void handle(@PathVariable("hotel") String hotel,
 				@PathVariable int booking,
 				@PathVariable String other,
-				@MatrixVariable(value="q", pathVar="hotel") int qHotel,
-				@MatrixVariable(value="q", pathVar="other") int qOther,
+				@MatrixVariable(name = "q", pathVar = "hotel") int qHotel,
+				@MatrixVariable(name = "q", pathVar = "other") int qOther,
 				Writer writer) throws IOException {
 			assertEquals("Invalid path variable value", "42", hotel);
 			assertEquals("Invalid path variable value", 21, booking);

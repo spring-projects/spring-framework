@@ -91,7 +91,6 @@ public class ListenableFutureCallbackRegistry<T> {
 	 * @param callback the failure callback to add
 	 * @since 4.1
 	 */
-	@SuppressWarnings("unchecked")
 	public void addFailureCallback(FailureCallback callback) {
 		Assert.notNull(callback, "'callback' must not be null");
 		synchronized (this.mutex) {

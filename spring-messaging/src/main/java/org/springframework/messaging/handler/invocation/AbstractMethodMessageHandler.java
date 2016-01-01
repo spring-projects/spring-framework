@@ -33,22 +33,23 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.MethodIntrospector;
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.HandlerMethod;
-import org.springframework.messaging.handler.HandlerMethodSelector;
 import org.springframework.messaging.handler.MessagingAdviceBean;
-import org.springframework.messaging.handler.annotation.support.AnnotationExceptionHandlerMethodResolver;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.ReflectionUtils;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 
 /**
  * Abstract base class for HandlerMethod-based message handling. Provides most of
@@ -59,12 +60,26 @@ import org.springframework.util.ReflectionUtils;
  * exceptions raised during message handling.
  *
  * @author Rossen Stoyanchev
+ * @author Juergen Hoeller
  * @since 4.0
  * @param <T> the type of the Object that contains information mapping a
  * {@link org.springframework.messaging.handler.HandlerMethod} to incoming messages
  */
 public abstract class AbstractMethodMessageHandler<T>
 		implements MessageHandler, ApplicationContextAware, InitializingBean {
+
+	/**
+	 * Bean name prefix for target beans behind scoped proxies. Used to exclude those
+	 * targets from handler method detection, in favor of the corresponding proxies.
+	 * <p>We're not checking the autowire-candidate status here, which is how the
+	 * proxy target filtering problem is being handled at the autowiring level,
+	 * since autowire-candidate may have been turned to {@code false} for other
+	 * reasons, while still expecting the bean to be eligible for handler methods.
+	 * <p>Originally defined in {@link org.springframework.aop.scope.ScopedProxyUtils}
+	 * but duplicated here to avoid a hard dependency on the spring-aop module.
+	 */
+	private static final String SCOPED_TARGET_NAME_PREFIX = "scopedTarget.";
+
 
 	protected final Log logger = LogFactory.getLog(getClass());
 
@@ -216,8 +231,20 @@ public abstract class AbstractMethodMessageHandler<T>
 		}
 
 		for (String beanName : this.applicationContext.getBeanNamesForType(Object.class)) {
-			if (isHandler(this.applicationContext.getType(beanName))){
-				detectHandlerMethods(beanName);
+			if (!beanName.startsWith(SCOPED_TARGET_NAME_PREFIX)) {
+				Class<?> beanType = null;
+				try {
+					beanType = getApplicationContext().getType(beanName);
+				}
+				catch (Throwable ex) {
+					// An unresolvable bean type, probably from a lazy bean - let's ignore it.
+					if (logger.isDebugEnabled()) {
+						logger.debug("Could not resolve target class for bean with name '" + beanName + "'", ex);
+					}
+				}
+				if (beanType != null && isHandler(beanType)) {
+					detectHandlerMethods(beanName);
+				}
 			}
 		}
 	}
@@ -249,22 +276,24 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * so register it with the extracted mapping information.
 	 * @param handler the handler to check, either an instance of a Spring bean name
 	 */
-	protected final void detectHandlerMethods(Object handler) {
+	protected final void detectHandlerMethods(final Object handler) {
 		Class<?> handlerType = (handler instanceof String ?
 				this.applicationContext.getType((String) handler) : handler.getClass());
-
 		final Class<?> userType = ClassUtils.getUserClass(handlerType);
 
-		Set<Method> methods = HandlerMethodSelector.selectMethods(userType, new ReflectionUtils.MethodFilter() {
-			@Override
-			public boolean matches(Method method) {
-				return getMappingForMethod(method, userType) != null;
-			}
-		});
+		Map<Method, T> methods = MethodIntrospector.selectMethods(userType,
+				new MethodIntrospector.MetadataLookup<T>() {
+					@Override
+					public T inspect(Method method) {
+						return getMappingForMethod(method, userType);
+					}
+				});
 
-		for (Method method : methods) {
-			T mapping = getMappingForMethod(method, userType);
-			registerHandlerMethod(handler, method, mapping);
+		if (logger.isDebugEnabled()) {
+			logger.debug(methods.size() + " message handler methods found on " + userType + ": " + methods);
+		}
+		for (Map.Entry<Method, T> entry : methods.entrySet()) {
+			registerHandlerMethod(handler, entry.getKey(), entry.getValue());
 		}
 	}
 
@@ -276,7 +305,6 @@ public abstract class AbstractMethodMessageHandler<T>
 	 */
 	protected abstract T getMappingForMethod(Method method, Class<?> handlerType);
 
-
 	/**
 	 * Register a handler method and its unique mapping.
 	 * @param handler the bean name of the handler or the handler instance
@@ -286,6 +314,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * under the same mapping
 	 */
 	protected void registerHandlerMethod(Object handler, Method method, T mapping) {
+		Assert.notNull(mapping, "Mapping must not be null");
 		HandlerMethod newHandlerMethod = createHandlerMethod(handler, method);
 		HandlerMethod oldHandlerMethod = this.handlerMethods.get(mapping);
 
@@ -333,18 +362,8 @@ public abstract class AbstractMethodMessageHandler<T>
 	 * (e.g. to support "global" {@code @MessageExceptionHandler}).
 	 * @since 4.2
 	 */
-	protected void initMessagingAdviceCache(List<MessagingAdviceBean> beans) {
-		if (beans == null) {
-			return;
-		}
-		for (MessagingAdviceBean bean : beans) {
-			Class<?> beanType = bean.getBeanType();
-			AnnotationExceptionHandlerMethodResolver resolver = new AnnotationExceptionHandlerMethodResolver(beanType);
-			if (resolver.hasExceptionMappings()) {
-				this.exceptionHandlerAdviceCache.put(bean, resolver);
-				logger.info("Detected @MessageExceptionHandler methods in " + bean);
-			}
-		}
+	protected void registerExceptionHandlerAdvice(MessagingAdviceBean bean, AbstractExceptionHandlerMethodResolver resolver) {
+		this.exceptionHandlerAdviceCache.put(bean, resolver);
 	}
 
 
@@ -437,7 +456,7 @@ public abstract class AbstractMethodMessageHandler<T>
 		for (T mapping : mappingsToCheck) {
 			T match = getMatchingMapping(mapping, message);
 			if (match != null) {
-				matches.add(new Match(match, handlerMethods.get(mapping)));
+				matches.add(new Match(match, this.handlerMethods.get(mapping)));
 			}
 		}
 	}
@@ -470,16 +489,26 @@ public abstract class AbstractMethodMessageHandler<T>
 		try {
 			Object returnValue = invocable.invoke(message);
 			MethodParameter returnType = handlerMethod.getReturnType();
-			if (void.class.equals(returnType.getParameterType())) {
+			if (void.class == returnType.getParameterType()) {
 				return;
 			}
-			this.returnValueHandlers.handleReturnValue(returnValue, returnType, message);
+			if (this.returnValueHandlers.isAsyncReturnValue(returnValue, returnType)) {
+				ListenableFuture<?> future = this.returnValueHandlers.toListenableFuture(returnValue, returnType);
+				if (future != null) {
+					future.addCallback(new ReturnValueListenableFutureCallback(invocable, message));
+				}
+			}
+			else {
+				this.returnValueHandlers.handleReturnValue(returnValue, returnType, message);
+			}
 		}
 		catch (Exception ex) {
 			processHandlerMethodException(handlerMethod, ex, message);
 		}
 		catch (Throwable ex) {
-			logger.error("Error while processing message " + message, ex);
+			if (logger.isErrorEnabled()) {
+				logger.error("Error while processing message " + message, ex);
+			}
 		}
 	}
 
@@ -494,9 +523,9 @@ public abstract class AbstractMethodMessageHandler<T>
 			logger.debug("Invoking " + invocable.getShortLogMessage());
 		}
 		try {
-			Object returnValue = invocable.invoke(message, ex);
+			Object returnValue = invocable.invoke(message, ex, handlerMethod);
 			MethodParameter returnType = invocable.getReturnType();
-			if (void.class.equals(returnType.getParameterType())) {
+			if (void.class == returnType.getParameterType()) {
 				return;
 			}
 			this.returnValueHandlers.handleReturnValue(returnValue, returnType, message);
@@ -547,9 +576,7 @@ public abstract class AbstractMethodMessageHandler<T>
 	}
 
 	protected void handleNoMatch(Set<T> ts, String lookupDestination, Message<?> message) {
-		if (logger.isDebugEnabled()) {
-			logger.debug("No matching methods.");
-		}
+		logger.debug("No matching methods.");
 	}
 
 	@Override
@@ -592,6 +619,40 @@ public abstract class AbstractMethodMessageHandler<T>
 		@Override
 		public int compare(Match match1, Match match2) {
 			return this.comparator.compare(match1.mapping, match2.mapping);
+		}
+	}
+
+	private class ReturnValueListenableFutureCallback implements ListenableFutureCallback<Object> {
+
+		private final InvocableHandlerMethod handlerMethod;
+
+		private final Message<?> message;
+
+
+		public ReturnValueListenableFutureCallback(InvocableHandlerMethod handlerMethod, Message<?> message) {
+			this.handlerMethod = handlerMethod;
+			this.message = message;
+		}
+
+		@Override
+		public void onSuccess(Object result) {
+			try {
+				MethodParameter returnType = this.handlerMethod.getAsyncReturnValueType(result);
+				returnValueHandlers.handleReturnValue(result, returnType, this.message);
+			}
+			catch (Throwable ex) {
+				handleFailure(ex);
+			}
+		}
+
+		@Override
+		public void onFailure(Throwable ex) {
+			handleFailure(ex);
+		}
+
+		private void handleFailure(Throwable ex) {
+			Exception cause = (ex instanceof Exception ? (Exception) ex : new RuntimeException(ex));
+			processHandlerMethodException(this.handlerMethod, cause, this.message);
 		}
 	}
 

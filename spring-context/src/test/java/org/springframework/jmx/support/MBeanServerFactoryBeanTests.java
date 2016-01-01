@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2009 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,31 +18,39 @@ package org.springframework.jmx.support;
 
 import java.lang.management.ManagementFactory;
 import java.util.List;
+
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import org.springframework.util.MBeanTestUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Phillip Webb
  */
-public class MBeanServerFactoryBeanTests extends TestCase {
+public class MBeanServerFactoryBeanTests {
 
-	@Override
-	protected void setUp() throws Exception {
+
+	@Before
+	public void setUp() throws Exception {
 		MBeanTestUtils.resetMBeanServers();
 	}
 
-	@Override
-	protected void tearDown() throws Exception {
+
+	@After
+	public void tearDown() throws Exception {
 		MBeanTestUtils.resetMBeanServers();
 	}
 
-	public void testGetObject() throws Exception {
+	@Test
+	public void getObject() throws Exception {
 		MBeanServerFactoryBean bean = new MBeanServerFactoryBean();
 		bean.afterPropertiesSet();
 		try {
@@ -54,7 +62,8 @@ public class MBeanServerFactoryBeanTests extends TestCase {
 		}
 	}
 
-	public void testDefaultDomain() throws Exception {
+	@Test
+	public void defaultDomain() throws Exception {
 		MBeanServerFactoryBean bean = new MBeanServerFactoryBean();
 		bean.setDefaultDomain("foo");
 		bean.afterPropertiesSet();
@@ -67,7 +76,8 @@ public class MBeanServerFactoryBeanTests extends TestCase {
 		}
 	}
 
-	public void testWithLocateExistingAndExistingServer() {
+	@Test
+	public void withLocateExistingAndExistingServer() {
 		MBeanServer server = MBeanServerFactory.createMBeanServer();
 		try {
 			MBeanServerFactoryBean bean = new MBeanServerFactoryBean();
@@ -86,7 +96,8 @@ public class MBeanServerFactoryBeanTests extends TestCase {
 		}
 	}
 
-	public void testWithLocateExistingAndFallbackToPlatformServer() {
+	@Test
+	public void withLocateExistingAndFallbackToPlatformServer() {
 		MBeanServerFactoryBean bean = new MBeanServerFactoryBean();
 		bean.setLocateExistingServerIfPossible(true);
 		bean.afterPropertiesSet();
@@ -98,7 +109,8 @@ public class MBeanServerFactoryBeanTests extends TestCase {
 		}
 	}
 
-	public void testWithEmptyAgentIdAndFallbackToPlatformServer() {
+	@Test
+	public void withEmptyAgentIdAndFallbackToPlatformServer() {
 		MBeanServerFactoryBean bean = new MBeanServerFactoryBean();
 		bean.setAgentId("");
 		bean.afterPropertiesSet();
@@ -110,11 +122,13 @@ public class MBeanServerFactoryBeanTests extends TestCase {
 		}
 	}
 
-	public void testCreateMBeanServer() throws Exception {
+	@Test
+	public void createMBeanServer() throws Exception {
 		testCreation(true, "The server should be available in the list");
 	}
 
-	public void testNewMBeanServer() throws Exception {
+	@Test
+	public void newMBeanServer() throws Exception {
 		testCreation(false, "The server should not be available in the list");
 	}
 

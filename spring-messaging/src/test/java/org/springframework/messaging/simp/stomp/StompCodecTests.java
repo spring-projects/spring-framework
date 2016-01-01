@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -176,16 +176,30 @@ public class StompCodecTests {
 		Buffer buffer = Buffer.wrap(frame1 + frame2);
 
 		final List<Message<byte[]>> messages = new ArrayList<Message<byte[]>>();
-		new Reactor2StompCodec().decoder(new Consumer<Message<byte[]>>() {
-			@Override
-			public void accept(Message<byte[]> message) {
-				messages.add(message);
-			}
-		}).apply(buffer);
+		new Reactor2StompCodec().decoder(messages::add).apply(buffer);
 
 		assertEquals(2, messages.size());
 		assertEquals(StompCommand.SEND, StompHeaderAccessor.wrap(messages.get(0)).getCommand());
 		assertEquals(StompCommand.DISCONNECT, StompHeaderAccessor.wrap(messages.get(1)).getCommand());
+	}
+
+	// SPR-13111
+
+	@Test
+	public void decodeFrameWithHeaderWithEmptyValue() {
+		String accept = "accept-version:1.1\n";
+		String valuelessKey = "key:\n";
+
+		Message<byte[]> frame = decode("CONNECT\n" + accept + valuelessKey + "\n\0");
+		StompHeaderAccessor headers = StompHeaderAccessor.wrap(frame);
+
+		assertEquals(StompCommand.CONNECT, headers.getCommand());
+
+		assertEquals(2, headers.toNativeHeaderMap().size());
+		assertEquals("1.1", headers.getFirstNativeHeader("accept-version"));
+		assertEquals("", headers.getFirstNativeHeader("key"));
+
+		assertEquals(0, frame.getPayload().length);
 	}
 
 	@Test
@@ -234,12 +248,7 @@ public class StompCodecTests {
 		Buffer buffer = Buffer.wrap(frame);
 
 		final List<Message<byte[]>> messages = new ArrayList<Message<byte[]>>();
-		new Reactor2StompCodec().decoder(new Consumer<Message<byte[]>>() {
-			@Override
-			public void accept(Message<byte[]> message) {
-				messages.add(message);
-			}
-		}).apply(buffer);
+		new Reactor2StompCodec().decoder(messages::add).apply(buffer);
 
 		assertEquals(1, messages.size());
 		assertEquals(SimpMessageType.HEARTBEAT, StompHeaderAccessor.wrap(messages.get(0)).getMessageType());

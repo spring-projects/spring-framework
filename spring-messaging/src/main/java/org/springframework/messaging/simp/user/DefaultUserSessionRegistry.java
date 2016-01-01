@@ -29,7 +29,11 @@ import org.springframework.util.Assert;
  *
  * @author Rossen Stoyanchev
  * @since 4.0
+ * @deprecated as of 4.2 this class is no longer used, see deprecation notes
+ * on {@link UserSessionRegistry} for more details.
  */
+@Deprecated
+@SuppressWarnings({"deprecation", "unused"})
 public class DefaultUserSessionRegistry implements UserSessionRegistry {
 
 	// userId -> sessionId

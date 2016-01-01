@@ -19,34 +19,41 @@ package org.springframework.messaging.simp.user;
 import java.util.Set;
 
 /**
- * A registry for looking up active user sessions. For use when resolving user
- * destinations.
+ * A contract for adding and removing user sessions.
+ *
+ * <p>As of 4.2, this interface is replaced by {@link SimpUserRegistry},
+ * exposing methods to return all registered users as well as to provide
+ * more extensive information for each user.
  *
  * @author Rossen Stoyanchev
  * @since 4.0
- * @see DefaultUserDestinationResolver
+ * @deprecated in favor of {@link SimpUserRegistry} in combination with
+ * {@link org.springframework.context.ApplicationListener} listening for
+ * {@link org.springframework.web.socket.messaging.AbstractSubProtocolEvent} events.
  */
+@Deprecated
 public interface UserSessionRegistry {
 
 	/**
-	 * Return the active session id's for the user.
-	 * @param user the user
-	 * @return a set with 0 or more session id's, never {@code null}.
+	 * Return the active session ids for the user.
+	 * The returned set is a snapshot that will never be modified.
+	 * @param userName the user to look up
+	 * @return a set with 0 or more session ids, never {@code null}.
 	 */
-	Set<String> getSessionIds(String user);
+	Set<String> getSessionIds(String userName);
 
 	/**
 	 * Register an active session id for a user.
-	 * @param user the user
+	 * @param userName the user name
 	 * @param sessionId the session id
 	 */
-	void registerSessionId(String user, String sessionId);
+	void registerSessionId(String userName, String sessionId);
 
 	/**
 	 * Unregister an active session id for a user.
-	 * @param user the user
+	 * @param userName the user name
 	 * @param sessionId the session id
 	 */
-	void unregisterSessionId(String user, String sessionId);
+	void unregisterSessionId(String userName, String sessionId);
 
 }

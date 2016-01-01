@@ -153,6 +153,13 @@ class WebMvcConfigurerComposite implements WebMvcConfigurer {
 		return selectSingleInstance(candidates, Validator.class);
 	}
 
+	@Override
+	public void addCorsMappings(CorsRegistry registry) {
+		for (WebMvcConfigurer delegate : this.delegates) {
+			delegate.addCorsMappings(registry);
+		}
+	}
+
 	private <T> T selectSingleInstance(List<T> instances, Class<T> instanceType) {
 		if (instances.size() > 1) {
 			throw new IllegalStateException(

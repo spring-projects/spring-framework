@@ -19,15 +19,14 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
@@ -57,7 +56,6 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  * @since 3.1
  */
 public class RequestResponseBodyMethodProcessor extends AbstractMessageConverterMethodProcessor {
-
 
 	/**
 	 * Basic constructor with converters only. Suitable for resolving
@@ -126,6 +124,7 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 
 		Object arg = readWithMessageConverters(webRequest, parameter, parameter.getGenericParameterType());
 		String name = Conventions.getVariableNameForParameter(parameter);
+
 		WebDataBinder binder = binderFactory.createBinder(webRequest, arg, name);
 		if (arg != null) {
 			validateIfApplicable(binder, parameter);
@@ -134,15 +133,16 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 			}
 		}
 		mavContainer.addAttribute(BindingResult.MODEL_KEY_PREFIX + name, binder.getBindingResult());
+
 		return arg;
 	}
 
 	@Override
 	protected <T> Object readWithMessageConverters(NativeWebRequest webRequest, MethodParameter methodParam,
-			Type paramType) throws IOException, HttpMediaTypeNotSupportedException {
+			Type paramType) throws IOException, HttpMediaTypeNotSupportedException, HttpMessageNotReadableException {
 
 		HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
-		HttpInputMessage inputMessage = new ServletServerHttpRequest(servletRequest);
+		ServletServerHttpRequest inputMessage = new ServletServerHttpRequest(servletRequest);
 
 		Object arg = readWithMessageConverters(inputMessage, methodParam, paramType);
 		if (arg == null) {
@@ -151,14 +151,13 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 						methodParam.getMethod().toGenericString());
 			}
 		}
-
 		return arg;
 	}
 
 	@Override
 	public void handleReturnValue(Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest)
-			throws IOException, HttpMediaTypeNotAcceptableException {
+			throws IOException, HttpMediaTypeNotAcceptableException, HttpMessageNotWritableException {
 
 		mavContainer.setRequestHandled(true);
 

@@ -27,6 +27,7 @@ import java.util.stream.Stream;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.lang.UsesJava8;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
@@ -200,7 +201,7 @@ public class TypeDescriptor implements Serializable {
 	/**
 	 * Cast this {@link TypeDescriptor} to a superclass or implemented interface
 	 * preserving annotations and nested type context.
-	 * @param superType the super type to cast to (can be {@code null}
+	 * @param superType the super type to cast to (can be {@code null})
 	 * @return a new TypeDescriptor for the up-cast type
 	 * @throws IllegalArgumentException if this type is not assignable to the super-type
 	 * @since 3.2
@@ -237,6 +238,8 @@ public class TypeDescriptor implements Serializable {
 
 	/**
 	 * Determine if this type descriptor has the specified annotation.
+	 * <p>As of Spring Framework 4.2, this method supports arbitrary levels
+	 * of meta-annotations.
 	 * @param annotationType the annotation type
 	 * @return <tt>true</tt> if the annotation is present
 	 */
@@ -245,19 +248,24 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	/**
-	 * Obtain the annotation associated with this type descriptor of the specified type.
+	 * Obtain the annotation of the specified {@code annotationType} that is on this type descriptor.
+	 * <p>As of Spring Framework 4.2, this method supports arbitrary levels of meta-annotations.
 	 * @param annotationType the annotation type
 	 * @return the annotation, or {@code null} if no such annotation exists on this type descriptor
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends Annotation> T getAnnotation(Class<T> annotationType) {
+		// Search in annotations that are "present" (i.e., locally declared or inherited)
+		// NOTE: this unfortunately favors inherited annotations over locally declared composed annotations.
 		for (Annotation annotation : getAnnotations()) {
-			if (annotation.annotationType().equals(annotationType)) {
+			if (annotation.annotationType() == annotationType) {
 				return (T) annotation;
 			}
 		}
-		for (Annotation metaAnn : getAnnotations()) {
-			T ann = metaAnn.annotationType().getAnnotation(annotationType);
+
+		// Search in annotation hierarchy
+		for (Annotation composedAnnotation : getAnnotations()) {
+			T ann = AnnotationUtils.findAnnotation(composedAnnotation.annotationType(), annotationType);
 			if (ann != null) {
 				return ann;
 			}
@@ -460,7 +468,7 @@ public class TypeDescriptor implements Serializable {
 			return false;
 		}
 		for (Annotation ann : getAnnotations()) {
-			if (other.getAnnotation(ann.annotationType()) == null) {
+			if (!ann.equals(other.getAnnotation(ann.annotationType()))) {
 				return false;
 			}
 		}
@@ -666,7 +674,7 @@ public class TypeDescriptor implements Serializable {
 	private static TypeDescriptor nested(TypeDescriptor typeDescriptor, int nestingLevel) {
 		ResolvableType nested = typeDescriptor.resolvableType;
 		for (int i = 0; i < nestingLevel; i++) {
-			if (Object.class.equals(nested.getType())) {
+			if (Object.class == nested.getType()) {
 				// Could be a collection type but we don't know about its element type,
 				// so let's just assume there is an element type of type Object...
 			}

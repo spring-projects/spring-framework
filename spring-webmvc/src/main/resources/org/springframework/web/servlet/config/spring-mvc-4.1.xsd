@@ -471,10 +471,39 @@
 			<xsd:element name="resolvers" type="resource-resolvers" minOccurs="0" maxOccurs="1"/>
 			<xsd:element name="transformers" type="resource-transformers" minOccurs="0" maxOccurs="1"/>
 		</xsd:sequence>
-		<xsd:attribute name="resource-cache" type="xsd:boolean" use="required"/>
-		<xsd:attribute name="auto-registration" type="xsd:boolean" default="true" use="optional"/>
-		<xsd:attribute name="cache-manager" type="xsd:string" use="optional"/>
-		<xsd:attribute name="cache-name" type="xsd:string" use="optional"/>
+		<xsd:attribute name="resource-cache" type="xsd:boolean" use="required">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Whether the resource chain should cache resource resolution.
+	Note that the resource content itself won't be cached, but rather Resource instances.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="auto-registration" type="xsd:boolean" default="true" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Whether to register automatically ResourceResolvers and ResourceTransformers.
+	Setting this property to "false" means that it gives developers full control over the registration process.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="cache-manager" type="xsd:string" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	The name of the Cache Manager to cache resource resolution. By default, a ConcurrentCacheMap will be used.
+	Since Resources aren't serializable and can be dependent on the application host, one should not use a
+	distributed cache but rather an in-memory cache.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="cache-name" type="xsd:string" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+    The cache name to use in the configured cache manager.
+    Will use "spring-resource-chain-cache" by default.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
 	</xsd:complexType>
 
 	<xsd:element name="resources">

@@ -10,7 +10,7 @@
 			</list>
 		</property>
 	</bean>
-	
+
 	<bean id="aapc.quickTargetSourceCreator"
 		class="org.springframework.aop.framework.autoproxy.target.QuickTargetSourceCreator"/>
 
@@ -18,27 +18,27 @@
 		<property name="name"><value>Rod</value></property>
 		<property name="spouse"><ref local="wife"/></property>
 	</bean>
-	
+
 	<bean id="wife" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name"><value>Kerry</value></property>
 	</bean>
-	
+
 	<!-- Prefix means it will be pooled -->
 	<bean id=":test" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name"><value>Rod</value></property>
 		<property name="spouse"><ref local="wife"/></property>
 	</bean>
-	
+
 	<!-- Prefix means it will be thread local -->
 	<bean name="%test" scope="prototype" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name"><value>Rod</value></property>
 		<property name="spouse"><ref local="wife"/></property>
 	</bean>
-	
+
 	<!-- Prefix means it will be a prototype target source -->
 	<bean name="!test" scope="prototype" class="org.springframework.tests.sample.beans.TestBean">
 		<property name="name"><value>Rod</value></property>
 		<property name="spouse"><ref local="wife"/></property>
 	</bean>
 
-</beans>		
+</beans>	

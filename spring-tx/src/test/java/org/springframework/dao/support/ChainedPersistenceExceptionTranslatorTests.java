@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,26 +16,30 @@
 
 package org.springframework.dao.support;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.dao.support.DataAccessUtilsTests.MapPersistenceExceptionTranslator;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Rod Johnson
  * @since 2.0
  */
-public class ChainedPersistenceExceptionTranslatorTests extends TestCase {
+public class ChainedPersistenceExceptionTranslatorTests {
 
-	public void testEmpty() {
+	@Test
+	public void empty() {
 		ChainedPersistenceExceptionTranslator pet = new ChainedPersistenceExceptionTranslator();
 		//MapPersistenceExceptionTranslator mpet = new MapPersistenceExceptionTranslator();
 		RuntimeException in = new RuntimeException("in");
 		assertSame(in, DataAccessUtils.translateIfNecessary(in, pet));
 	}
 
-	public void testExceptionTranslationWithTranslation() {
+	@Test
+	public void exceptionTranslationWithTranslation() {
 		MapPersistenceExceptionTranslator mpet1 = new MapPersistenceExceptionTranslator();
 		RuntimeException in1 = new RuntimeException("in");
 		InvalidDataAccessApiUsageException out1 = new InvalidDataAccessApiUsageException("out");

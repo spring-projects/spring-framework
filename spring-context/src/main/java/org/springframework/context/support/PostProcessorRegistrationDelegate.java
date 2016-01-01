@@ -179,6 +179,10 @@ class PostProcessorRegistrationDelegate {
 			nonOrderedPostProcessors.add(beanFactory.getBean(postProcessorName, BeanFactoryPostProcessor.class));
 		}
 		invokeBeanFactoryPostProcessors(nonOrderedPostProcessors, beanFactory);
+
+		// Clear cached merged bean definitions since the post-processors might have
+		// modified the original metadata, e.g. replacing placeholders in values...
+		beanFactory.clearMetadataCache();
 	}
 
 	public static void registerBeanPostProcessors(
@@ -343,13 +347,14 @@ class PostProcessorRegistrationDelegate {
 	 * BeanPostProcessor that detects beans which implement the ApplicationListener interface.
 	 * This catches beans that can't reliably be detected by getBeanNamesForType.
 	 */
-	private static class ApplicationListenerDetector implements MergedBeanDefinitionPostProcessor, DestructionAwareBeanPostProcessor {
+	private static class ApplicationListenerDetector
+			implements DestructionAwareBeanPostProcessor, MergedBeanDefinitionPostProcessor {
 
 		private static final Log logger = LogFactory.getLog(ApplicationListenerDetector.class);
 
 		private final AbstractApplicationContext applicationContext;
 
-		private final Map<String, Boolean> singletonNames = new ConcurrentHashMap<String, Boolean>(64);
+		private final Map<String, Boolean> singletonNames = new ConcurrentHashMap<String, Boolean>(256);
 
 		public ApplicationListenerDetector(AbstractApplicationContext applicationContext) {
 			this.applicationContext = applicationContext;
@@ -397,6 +402,11 @@ class PostProcessorRegistrationDelegate {
 				multicaster.removeApplicationListener((ApplicationListener<?>) bean);
 				multicaster.removeApplicationListenerBean(beanName);
 			}
+		}
+
+		@Override
+		public boolean requiresDestruction(Object bean) {
+			return (bean instanceof ApplicationListener);
 		}
 	}
 

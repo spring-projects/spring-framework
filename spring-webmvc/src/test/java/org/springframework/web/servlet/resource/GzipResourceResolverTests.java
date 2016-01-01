@@ -149,4 +149,21 @@ public class GzipResourceResolverTests {
 		assertFalse("Expected " + resolved + " to *not* be of type " + EncodedResource.class,
 				resolved instanceof EncodedResource);
 	}
+
+	// SPR-13149
+	@Test
+	public void resolveWithNullRequest() throws IOException {
+
+		String file = "js/foo.js";
+		String gzFile = file+".gz";
+		Resource gzResource = new ClassPathResource("test/"+gzFile, getClass());
+
+		// resolved resource is now cached in CachingResourceResolver
+		Resource resolved = resolver.resolveResource(null, file, locations);
+
+		assertEquals(gzResource.getDescription(), resolved.getDescription());
+		assertEquals(new ClassPathResource("test/" + file).getFilename(), resolved.getFilename());
+		assertTrue("Expected " + resolved + " to be of type " + EncodedResource.class,
+				resolved instanceof EncodedResource);
+	}
 }

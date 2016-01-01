@@ -56,7 +56,7 @@
 <lang:inline-script><![CDATA[
 int count;
 void onApplicationEvent (org.springframework.context.ApplicationEvent event) { count++; System.out.println(event); }
-String getMessage() { return "count=" + count; } 
+String getMessage() { return "count=" + count; }
 ]]></lang:inline-script>
 </lang:bsh>
 

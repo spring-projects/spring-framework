@@ -293,6 +293,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 		// Type-based argument resolution
 		resolvers.add(new ServletRequestMethodArgumentResolver());
 		resolvers.add(new ServletResponseMethodArgumentResolver());
+		resolvers.add(new ModelMethodProcessor());
 
 		// Custom arguments
 		if (getCustomArgumentResolvers() != null) {

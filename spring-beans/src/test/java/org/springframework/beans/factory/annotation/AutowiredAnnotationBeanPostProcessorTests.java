@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -553,6 +554,38 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertSame(tb, bean.getTestBean3());
 		assertSame(tb, bean.getTestBean4());
 		assertSame(ntb, bean.getNestedTestBean());
+		assertSame(bf, bean.getBeanFactory());
+	}
+
+	@Test
+	public void testConstructorResourceInjectionWithNull() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerResolvableDependency(BeanFactory.class, bf);
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(ConstructorResourceInjectionBean.class);
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		TestBean tb = new TestBean();
+		bf.registerSingleton("testBean", tb);
+		bf.registerBeanDefinition("nestedTestBean", new RootBeanDefinition(NullNestedTestBeanFactoryBean.class));
+		bf.registerSingleton("nestedTestBean2", new NestedTestBean());
+
+		ConstructorResourceInjectionBean bean = (ConstructorResourceInjectionBean) bf.getBean("annotatedBean");
+		assertSame(tb, bean.getTestBean());
+		assertSame(tb, bean.getTestBean2());
+		assertSame(tb, bean.getTestBean3());
+		assertSame(tb, bean.getTestBean4());
+		assertNull(bean.getNestedTestBean());
+		assertSame(bf, bean.getBeanFactory());
+
+		bean = (ConstructorResourceInjectionBean) bf.getBean("annotatedBean");
+		assertSame(tb, bean.getTestBean());
+		assertSame(tb, bean.getTestBean2());
+		assertSame(tb, bean.getTestBean3());
+		assertSame(tb, bean.getTestBean4());
+		assertNull(bean.getNestedTestBean());
 		assertSame(bf, bean.getBeanFactory());
 	}
 
@@ -1795,6 +1828,18 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertNotNull(bf.getBean(FooBar.class));
 	}
 
+	@Test
+	public void testSingleConstructorWithProvidedArgument() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(ProvidedArgumentBean.class);
+		bd.getConstructorArgumentValues().addGenericArgumentValue(Collections.singletonList("value"));
+		bf.registerBeanDefinition("beanWithArgs", bd);
+		assertNotNull(bf.getBean(ProvidedArgumentBean.class));
+	}
+
 
 	public static class ResourceInjectionBean {
 
@@ -2866,6 +2911,32 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		@Autowired
 		public void setObj(MyCallable obj) {
 			super.setObj(obj);
+		}
+	}
+
+
+	public static class NullNestedTestBeanFactoryBean implements FactoryBean<NestedTestBean> {
+
+		@Override
+		public NestedTestBean getObject() {
+			return null;
+		}
+
+		@Override
+		public Class<?> getObjectType() {
+			return NestedTestBean.class;
+		}
+
+		@Override
+		public boolean isSingleton() {
+			return true;
+		}
+	}
+
+
+	public static class ProvidedArgumentBean {
+
+		public ProvidedArgumentBean(String[] args) {
 		}
 	}
 

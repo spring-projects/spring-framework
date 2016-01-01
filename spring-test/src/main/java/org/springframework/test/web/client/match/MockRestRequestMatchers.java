@@ -36,11 +36,12 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.springframework.test.util.AssertionErrors.*;
 
 /**
- * Static, factory methods for {@link RequestMatcher} classes. Typically used to
+ * Static factory methods for {@link RequestMatcher} classes. Typically used to
  * provide input for {@link MockRestServiceServer#expect(RequestMatcher)}.
  *
- * <p><strong>Eclipse users:</strong> Consider adding this class as a Java editor
- * favorite. To navigate, open the Preferences and type "favorites".
+ * <h3>Eclipse Users</h3>
+ * <p>Consider adding this class as a Java editor favorite. To navigate to
+ * this setting, open the Preferences and type "favorites".
  *
  * @author Craig Walls
  * @author Rossen Stoyanchev
@@ -166,8 +167,8 @@ public abstract class MockRestRequestMatchers {
 	}
 
 	/**
-	 * Access to request body matchers using a <a
-	 * href="http://goessner.net/articles/JsonPath/">JSONPath</a> expression to
+	 * Access to request body matchers using a
+	 * <a href="https://github.com/jayway/JsonPath">JsonPath</a> expression to
 	 * inspect a specific subset of the body. The JSON path expression can be a
 	 * parameterized string using formatting specifiers as defined in
 	 * {@link String#format(String, Object...)}.
@@ -179,8 +180,8 @@ public abstract class MockRestRequestMatchers {
 	}
 
 	/**
-	 * Access to request body matchers using a <a
-	 * href="http://goessner.net/articles/JsonPath/">JSONPath</a> expression to
+	 * Access to request body matchers using a
+	 * <a href="https://github.com/jayway/JsonPath">JsonPath</a> expression to
 	 * inspect a specific subset of the body and a Hamcrest match for asserting
 	 * the value found at the JSON path.
 	 * @param expression the JSON path expression

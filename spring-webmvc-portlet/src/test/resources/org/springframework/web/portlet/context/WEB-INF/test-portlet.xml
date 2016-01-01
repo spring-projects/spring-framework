@@ -4,9 +4,9 @@
 <beans>
 
 	<import resource="classpath:/org/springframework/web/portlet/context/WEB-INF/test-servlet.xml"/>
-	
+
 	<bean id="portletContextAwareBean" class="org.springframework.web.portlet.context.PortletContextAwareBean"/>
-	
+
 	<bean id="portletConfigAwareBean" class="org.springframework.web.portlet.context.PortletConfigAwareBean"/>
 
 </beans>

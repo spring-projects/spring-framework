@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.messaging.support.MessageHeaderInitializer;
@@ -44,11 +45,12 @@ import org.springframework.util.Assert;
  * input message. The message is then sent directly back to the connected client.
  *
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 4.0
  */
 public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturnValueHandler {
 
-	private static Log logger = LogFactory.getLog(SubscriptionMethodReturnValueHandler.class);
+	private static final Log logger = LogFactory.getLog(SubscriptionMethodReturnValueHandler.class);
 
 
 	private final MessageSendingOperations<String> messagingTemplate;
@@ -102,23 +104,26 @@ public class SubscriptionMethodReturnValueHandler implements HandlerMethodReturn
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 		String subscriptionId = SimpMessageHeaderAccessor.getSubscriptionId(headers);
 
-		Assert.state(subscriptionId != null,
-				"No subscriptionId in message=" + message + ", method=" + returnType.getMethod());
+		if (subscriptionId == null) {
+			throw new IllegalStateException(
+					"No subscriptionId in " + message + " returned by: " + returnType.getMethod());
+		}
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("Reply to @SubscribeMapping: " + returnValue);
 		}
-
-		this.messagingTemplate.convertAndSend(destination, returnValue, createHeaders(sessionId, subscriptionId));
+		this.messagingTemplate.convertAndSend(
+				destination, returnValue, createHeaders(sessionId, subscriptionId, returnType));
 	}
 
-	private MessageHeaders createHeaders(String sessionId, String subscriptionId) {
+	private MessageHeaders createHeaders(String sessionId, String subscriptionId, MethodParameter returnType) {
 		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
 		if (getHeaderInitializer() != null) {
 			getHeaderInitializer().initHeaders(headerAccessor);
 		}
 		headerAccessor.setSessionId(sessionId);
 		headerAccessor.setSubscriptionId(subscriptionId);
+		headerAccessor.setHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER, returnType);
 		headerAccessor.setLeaveMutable(true);
 		return headerAccessor.getMessageHeaders();
 	}

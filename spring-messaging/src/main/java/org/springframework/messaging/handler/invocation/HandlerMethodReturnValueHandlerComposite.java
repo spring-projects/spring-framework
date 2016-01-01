@@ -26,6 +26,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
+import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * A HandlerMethodReturnValueHandler that wraps and delegates to others.
@@ -33,7 +34,7 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 4.0
  */
-public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodReturnValueHandler {
+public class HandlerMethodReturnValueHandlerComposite implements AsyncHandlerMethodReturnValueHandler {
 
 	private static final Log logger = LogFactory.getLog(HandlerMethodReturnValueHandlerComposite.class);
 
@@ -98,6 +99,20 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 			logger.trace("Processing return value with " + handler);
 		}
 		handler.handleReturnValue(returnValue, returnType, message);
+	}
+
+	@Override
+	public boolean isAsyncReturnValue(Object returnValue, MethodParameter returnType) {
+		HandlerMethodReturnValueHandler handler = getReturnValueHandler(returnType);
+		return (handler != null && handler instanceof AsyncHandlerMethodReturnValueHandler &&
+				((AsyncHandlerMethodReturnValueHandler) handler).isAsyncReturnValue(returnValue, returnType));
+	}
+
+	@Override
+	public ListenableFuture<?> toListenableFuture(Object returnValue, MethodParameter returnType) {
+		HandlerMethodReturnValueHandler handler = getReturnValueHandler(returnType);
+		Assert.isTrue(handler != null && handler instanceof AsyncHandlerMethodReturnValueHandler);
+		return ((AsyncHandlerMethodReturnValueHandler) handler).toListenableFuture(returnValue, returnType);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,7 +59,6 @@ import static org.junit.Assert.*;
  * @author Rob Harrop
  * @author Arjen Poutsma
  * @author Chris Beams
- *
  * @since 10.06.2003
  */
 public class CustomEditorTests {
@@ -302,8 +301,8 @@ public class CustomEditorTests {
 
 	@Test
 	public void testCustomBooleanEditorWithSpecialTrueAndFalseStrings() throws Exception {
-		final String trueString = "pechorin";
-		final String falseString = "nash";
+		String trueString = "pechorin";
+		String falseString = "nash";
 
 		CustomBooleanEditor editor = new CustomBooleanEditor(trueString, falseString, false);
 
@@ -320,6 +319,14 @@ public class CustomEditorTests {
 		editor.setAsText(falseString.toUpperCase());
 		assertFalse(((Boolean) editor.getValue()).booleanValue());
 		assertEquals(falseString, editor.getAsText());
+
+		try {
+			editor.setAsText(null);
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
 	}
 
 	@Test
@@ -423,7 +430,7 @@ public class CustomEditorTests {
 		assertTrue("Correct bigDecimal value", new BigDecimal("4.5").equals(tb.getBigDecimal()));
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testCustomNumberEditorCtorWithNullNumberType() throws Exception {
 		new CustomNumberEditor(null, true);
 	}
@@ -543,7 +550,7 @@ public class CustomEditorTests {
 		assertNull(cb.getMyCharacter());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testCharacterEditorSetAsTextWithStringLongerThanOneCharacter() throws Exception {
 		PropertyEditor charEditor = new CharacterEditor(false);
 		charEditor.setAsText("ColdWaterCanyon");
@@ -562,7 +569,7 @@ public class CustomEditorTests {
 		assertEquals(" ", charEditor.getAsText());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testCharacterEditorSetAsTextWithNullNotAllowingEmptyAsNull() throws Exception {
 		PropertyEditor charEditor = new CharacterEditor(false);
 		charEditor.setAsText(null);
@@ -583,7 +590,7 @@ public class CustomEditorTests {
 		assertEquals("", classEditor.getAsText());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testClassEditorWithNonExistentClass() throws Exception {
 		PropertyEditor classEditor = new ClassEditor();
 		classEditor.setAsText("hairdresser.on.Fire");
@@ -685,26 +692,40 @@ public class CustomEditorTests {
 	@Test
 	public void testCustomBooleanEditor() {
 		CustomBooleanEditor editor = new CustomBooleanEditor(false);
+
 		editor.setAsText("true");
 		assertEquals(Boolean.TRUE, editor.getValue());
 		assertEquals("true", editor.getAsText());
+
 		editor.setAsText("false");
 		assertEquals(Boolean.FALSE, editor.getValue());
 		assertEquals("false", editor.getAsText());
+
 		editor.setValue(null);
 		assertEquals(null, editor.getValue());
 		assertEquals("", editor.getAsText());
+
+		try {
+			editor.setAsText(null);
+			fail("Should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
+			// expected
+		}
 	}
 
 	@Test
 	public void testCustomBooleanEditorWithEmptyAsNull() {
 		CustomBooleanEditor editor = new CustomBooleanEditor(true);
+
 		editor.setAsText("true");
 		assertEquals(Boolean.TRUE, editor.getValue());
 		assertEquals("true", editor.getAsText());
+
 		editor.setAsText("false");
 		assertEquals(Boolean.FALSE, editor.getValue());
 		assertEquals("false", editor.getAsText());
+
 		editor.setValue(null);
 		assertEquals(null, editor.getValue());
 		assertEquals("", editor.getAsText());
@@ -750,7 +771,7 @@ public class CustomEditorTests {
 		}
 		catch (IllegalArgumentException ex) {
 			// expected
-			assertTrue(ex.getMessage().indexOf("10") != -1);
+			assertTrue(ex.getMessage().contains("10"));
 		}
 	}
 

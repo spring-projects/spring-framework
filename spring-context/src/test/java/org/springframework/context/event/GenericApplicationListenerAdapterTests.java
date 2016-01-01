@@ -66,6 +66,12 @@ public class GenericApplicationListenerAdapterTests extends AbstractApplicationE
 		supportsEventType(true, StringEventListener.class, eventType);
 	}
 
+	@Test // or if the event provides its precise type
+	public void genericListenerStrictTypeAndResolvableTypeProvider() {
+		ResolvableType eventType = new SmartGenericTestEvent<>(this, "foo").getResolvableType();
+		supportsEventType(true, StringEventListener.class, eventType);
+	}
+
 	@Test // Demonstrates it works if we actually use the subtype
 	public void genericListenerStrictTypeEventSubType() {
 		StringEvent stringEvent = new StringEvent(this, "test");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,12 @@ package org.springframework.web.servlet.tags.form;
 
 import javax.servlet.jsp.tagext.Tag;
 
+import org.junit.Test;
+
 import org.springframework.tests.sample.beans.TestBean;
 import org.springframework.validation.BeanPropertyBindingResult;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Rob Harrop
@@ -45,7 +49,8 @@ public class TextareaTagTests extends AbstractFormTagTests {
 		this.tag.setPageContext(getPageContext());
 	}
 
-	public void testSimpleBind() throws Exception {
+	@Test
+	public void simpleBind() throws Exception {
 		this.tag.setPath("name");
 		this.tag.setReadonly(true);
 
@@ -56,7 +61,8 @@ public class TextareaTagTests extends AbstractFormTagTests {
 		assertBlockTagContains(output, "Rob");
 	}
 
-	public void testSimpleBindWithDynamicAttributes() throws Exception {
+	@Test
+	public void simpleBindWithDynamicAttributes() throws Exception {
 		String dynamicAttribute1 = "attr1";
 		String dynamicAttribute2 = "attr2";
 
@@ -74,7 +80,8 @@ public class TextareaTagTests extends AbstractFormTagTests {
 		assertBlockTagContains(output, "Rob");
 	}
 
-	public void testComplexBind() throws Exception {
+	@Test
+	public void complexBind() throws Exception {
 		String onselect = "doSelect()";
 
 		this.tag.setPath("spouse.name");
@@ -87,7 +94,8 @@ public class TextareaTagTests extends AbstractFormTagTests {
 		assertAttributeNotPresent(output, "readonly");
 	}
 
-	public void testSimpleBindWithHtmlEscaping() throws Exception {
+	@Test
+	public void simpleBindWithHtmlEscaping() throws Exception {
 		final String NAME = "Rob \"I Love Mangos\" Harrop";
 		final String HTML_ESCAPED_NAME = "Rob &quot;I Love Mangos&quot; Harrop";
 
@@ -101,7 +109,8 @@ public class TextareaTagTests extends AbstractFormTagTests {
 		assertBlockTagContains(output, HTML_ESCAPED_NAME);
 	}
 
-	public void testCustomBind() throws Exception {
+	@Test
+	public void customBind() throws Exception {
 		BeanPropertyBindingResult result = new BeanPropertyBindingResult(createTestBean(), "testBean");
 		result.getPropertyAccessor().registerCustomEditor(Float.class, new SimpleFloatEditor());
 		exposeBindingResult(result);

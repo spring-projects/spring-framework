@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,25 +46,25 @@ public class XhrTransportTests {
 	public void infoResponse() throws Exception {
 		TestXhrTransport transport = new TestXhrTransport();
 		transport.infoResponseToReturn = new ResponseEntity<>("body", HttpStatus.OK);
-		assertEquals("body", transport.executeInfoRequest(new URI("http://example.com/info")));
+		assertEquals("body", transport.executeInfoRequest(new URI("http://example.com/info"), null));
 	}
 
 	@Test(expected = HttpServerErrorException.class)
 	public void infoResponseError() throws Exception {
 		TestXhrTransport transport = new TestXhrTransport();
 		transport.infoResponseToReturn = new ResponseEntity<>("body", HttpStatus.BAD_REQUEST);
-		assertEquals("body", transport.executeInfoRequest(new URI("http://example.com/info")));
+		assertEquals("body", transport.executeInfoRequest(new URI("http://example.com/info"), null));
 	}
 
 	@Test
 	public void sendMessage() throws Exception {
 		HttpHeaders requestHeaders = new HttpHeaders();
 		requestHeaders.set("foo", "bar");
+		requestHeaders.setContentType(MediaType.APPLICATION_JSON);
 		TestXhrTransport transport = new TestXhrTransport();
-		transport.setRequestHeaders(requestHeaders);
 		transport.sendMessageResponseToReturn = new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		URI url = new URI("http://example.com");
-		transport.executeSendRequest(url, new TextMessage("payload"));
+		transport.executeSendRequest(url, requestHeaders, new TextMessage("payload"));
 		assertEquals(2, transport.actualSendRequestHeaders.size());
 		assertEquals("bar", transport.actualSendRequestHeaders.getFirst("foo"));
 		assertEquals(MediaType.APPLICATION_JSON, transport.actualSendRequestHeaders.getContentType());
@@ -75,9 +75,10 @@ public class XhrTransportTests {
 		TestXhrTransport transport = new TestXhrTransport();
 		transport.sendMessageResponseToReturn = new ResponseEntity<>(HttpStatus.BAD_REQUEST);
 		URI url = new URI("http://example.com");
-		transport.executeSendRequest(url, new TextMessage("payload"));
+		transport.executeSendRequest(url, null, new TextMessage("payload"));
 	}
 
+	@SuppressWarnings("deprecation")
 	@Test
 	public void connect() throws Exception {
 		HttpHeaders handshakeHeaders = new HttpHeaders();
@@ -101,6 +102,7 @@ public class XhrTransportTests {
 		verify(request).addTimeoutTask(captor.capture());
 		verify(request).getTransportUrl();
 		verify(request).getHandshakeHeaders();
+		verify(request).getHttpRequestHeaders();
 		verifyNoMoreInteractions(request);
 
 		assertEquals(2, transport.actualHandshakeHeaders.size());
@@ -127,7 +129,7 @@ public class XhrTransportTests {
 
 
 		@Override
-		protected ResponseEntity<String> executeInfoRequestInternal(URI infoUrl) {
+		protected ResponseEntity<String> executeInfoRequestInternal(URI infoUrl, HttpHeaders headers) {
 			return this.infoResponseToReturn;
 		}
 

@@ -18,7 +18,6 @@ package org.springframework.jms.annotation;
 
 import java.lang.reflect.Method;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,6 +36,7 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.core.MethodIntrospector;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.jms.config.JmsListenerConfigUtils;
@@ -48,14 +48,13 @@ import org.springframework.messaging.handler.annotation.support.DefaultMessageHa
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
 import org.springframework.util.Assert;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
  * Bean post-processor that registers methods annotated with {@link JmsListener}
  * to be invoked by a JMS message listener container created under the cover
- * by a {@link org.springframework.jms.config.JmsListenerContainerFactory} according
- * to the parameters of the annotation.
+ * by a {@link org.springframework.jms.config.JmsListenerContainerFactory}
+ * according to the attributes of the annotation.
  *
  * <p>Annotated methods can use flexible arguments as defined by {@link JmsListener}.
  *
@@ -63,10 +62,10 @@ import org.springframework.util.StringUtils;
  * {@code <jms:annotation-driven>} XML element, and also by the {@link EnableJms}
  * annotation.
  *
- * <p>Auto-detect any {@link JmsListenerConfigurer} instances in the container,
+ * <p>Autodetects any {@link JmsListenerConfigurer} instances in the container,
  * allowing for customization of the registry to be used, the default container
- * factory or for fine-grained control over endpoints registration. See
- * {@link EnableJms} Javadoc for complete usage details.
+ * factory or for fine-grained control over endpoints registration. See the
+ * {@link EnableJms} javadocs for complete usage details.
  *
  * @author Stephane Nicoll
  * @author Juergen Hoeller
@@ -194,26 +193,30 @@ public class JmsListenerAnnotationBeanPostProcessor
 	@Override
 	public Object postProcessAfterInitialization(final Object bean, String beanName) throws BeansException {
 		if (!this.nonAnnotatedClasses.contains(bean.getClass())) {
-			final Set<Method> annotatedMethods = new LinkedHashSet<Method>(1);
 			Class<?> targetClass = AopUtils.getTargetClass(bean);
-			ReflectionUtils.doWithMethods(targetClass, new ReflectionUtils.MethodCallback() {
-				@Override
-				public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
-					JmsListener jmsListener = AnnotationUtils.getAnnotation(method, JmsListener.class);
-					if (jmsListener != null) {
-						processJmsListener(jmsListener, method, bean);
-						annotatedMethods.add(method);
-					}
-				}
-			});
+			Map<Method, Set<JmsListener>> annotatedMethods = MethodIntrospector.selectMethods(targetClass,
+					new MethodIntrospector.MetadataLookup<Set<JmsListener>>() {
+						@Override
+						public Set<JmsListener> inspect(Method method) {
+							Set<JmsListener> listenerMethods =
+									AnnotationUtils.getRepeatableAnnotations(method, JmsListener.class, JmsListeners.class);
+							return (!listenerMethods.isEmpty() ? listenerMethods : null);
+						}
+					});
 			if (annotatedMethods.isEmpty()) {
 				this.nonAnnotatedClasses.add(bean.getClass());
 				if (logger.isTraceEnabled()) {
-					logger.trace("No @JmsListener annotations found on bean class: " + bean.getClass());
+					logger.trace("No @JmsListener annotations found on bean type: " + bean.getClass());
 				}
 			}
 			else {
 				// Non-empty set of methods
+				for (Map.Entry<Method, Set<JmsListener>> entry : annotatedMethods.entrySet()) {
+					Method method = entry.getKey();
+					for (JmsListener listener : entry.getValue()) {
+						processJmsListener(listener, method, bean);
+					}
+				}
 				if (logger.isDebugEnabled()) {
 					logger.debug(annotatedMethods.size() + " @JmsListener methods processed on bean '" + beanName +
 							"': " + annotatedMethods);
@@ -223,29 +226,22 @@ public class JmsListenerAnnotationBeanPostProcessor
 		return bean;
 	}
 
-	protected void processJmsListener(JmsListener jmsListener, Method method, Object bean) {
-		if (AopUtils.isJdkDynamicProxy(bean)) {
-			try {
-				// Found a @JmsListener method on the target class for this JDK proxy ->
-				// is it also present on the proxy itself?
-				method = bean.getClass().getMethod(method.getName(), method.getParameterTypes());
-			}
-			catch (SecurityException ex) {
-				ReflectionUtils.handleReflectionException(ex);
-			}
-			catch (NoSuchMethodException ex) {
-				throw new IllegalStateException(String.format(
-						"@JmsListener method '%s' found on bean target class '%s', " +
-						"but not found in any interface(s) for bean JDK proxy. Either " +
-						"pull the method up to an interface or switch to subclass (CGLIB) " +
-						"proxies by setting proxy-target-class/proxyTargetClass " +
-						"attribute to 'true'", method.getName(), method.getDeclaringClass().getSimpleName()));
-			}
-		}
+	/**
+	 * Process the given {@link JmsListener} annotation on the given method,
+	 * registering a corresponding endpoint for the given bean instance.
+	 * @param jmsListener the annotation to process
+	 * @param mostSpecificMethod the annotated method
+	 * @param bean the instance to invoke the method on
+	 * @see #createMethodJmsListenerEndpoint()
+	 * @see JmsListenerEndpointRegistrar#registerEndpoint
+	 */
+	protected void processJmsListener(JmsListener jmsListener, Method mostSpecificMethod, Object bean) {
+		Method invocableMethod = AopUtils.selectInvocableMethod(mostSpecificMethod, bean.getClass());
 
-		MethodJmsListenerEndpoint endpoint = new MethodJmsListenerEndpoint();
+		MethodJmsListenerEndpoint endpoint = createMethodJmsListenerEndpoint();
 		endpoint.setBean(bean);
-		endpoint.setMethod(method);
+		endpoint.setMethod(invocableMethod);
+		endpoint.setMostSpecificMethod(mostSpecificMethod);
 		endpoint.setMessageHandlerMethodFactory(this.messageHandlerMethodFactory);
 		endpoint.setBeanFactory(this.beanFactory);
 		endpoint.setId(getEndpointId(jmsListener));
@@ -268,13 +264,24 @@ public class JmsListenerAnnotationBeanPostProcessor
 				factory = this.beanFactory.getBean(containerFactoryBeanName, JmsListenerContainerFactory.class);
 			}
 			catch (NoSuchBeanDefinitionException ex) {
-				throw new BeanInitializationException("Could not register jms listener endpoint on [" +
-						method + "], no " + JmsListenerContainerFactory.class.getSimpleName() + " with id '" +
-						containerFactoryBeanName + "' was found in the application context", ex);
+				throw new BeanInitializationException("Could not register JMS listener endpoint on [" +
+						mostSpecificMethod + "], no " + JmsListenerContainerFactory.class.getSimpleName() +
+						" with id '" + containerFactoryBeanName + "' was found in the application context", ex);
 			}
 		}
 
 		this.registrar.registerEndpoint(endpoint, factory);
+	}
+
+	/**
+	 * Instantiate an empty {@link MethodJmsListenerEndpoint} for further
+	 * configuration with provided parameters in {@link #processJmsListener}.
+	 * @return a new {@code MethodJmsListenerEndpoint} or subclass thereof
+	 * @since 4.1.9
+	 * @see MethodJmsListenerEndpoint#createMessageListenerInstance()
+	 */
+	protected MethodJmsListenerEndpoint createMethodJmsListenerEndpoint() {
+		return new MethodJmsListenerEndpoint();
 	}
 
 	private String getEndpointId(JmsListener jmsListener) {
@@ -282,7 +289,7 @@ public class JmsListenerAnnotationBeanPostProcessor
 			return resolve(jmsListener.id());
 		}
 		else {
-			return "org.springframework.jms.JmsListenerEndpointContainer#" + counter.getAndIncrement();
+			return "org.springframework.jms.JmsListenerEndpointContainer#" + this.counter.getAndIncrement();
 		}
 	}
 

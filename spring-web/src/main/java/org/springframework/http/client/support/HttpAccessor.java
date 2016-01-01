@@ -50,7 +50,8 @@ public abstract class HttpAccessor {
 
 
 	/**
-	 * Set the request factory that this accessor uses for obtaining {@link ClientHttpRequest HttpRequests}.
+	 * Set the request factory that this accessor uses for obtaining
+	 * {@link ClientHttpRequest HttpRequests}.
 	 */
 	public void setRequestFactory(ClientHttpRequestFactory requestFactory) {
 		Assert.notNull(requestFactory, "'requestFactory' must not be null");

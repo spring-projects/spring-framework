@@ -71,7 +71,7 @@ public class CheckboxTag extends AbstractSingleCheckedElementTag {
 		Object boundValue = getBoundValue();
 		Class<?> valueType = getBindStatus().getValueType();
 
-		if (Boolean.class.equals(valueType) || boolean.class.equals(valueType)) {
+		if (Boolean.class == valueType || boolean.class == valueType) {
 			// the concrete type may not be a Boolean - can be String
 			if (boundValue instanceof String) {
 				boundValue = Boolean.valueOf((String) boundValue);

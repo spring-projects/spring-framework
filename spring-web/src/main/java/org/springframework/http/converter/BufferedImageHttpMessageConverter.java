@@ -129,7 +129,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 
 	@Override
 	public boolean canRead(Class<?> clazz, MediaType mediaType) {
-		return (BufferedImage.class.equals(clazz) && isReadable(mediaType));
+		return (BufferedImage.class == clazz && isReadable(mediaType));
 	}
 
 	private boolean isReadable(MediaType mediaType) {
@@ -142,7 +142,7 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 
 	@Override
 	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
-		return (BufferedImage.class.equals(clazz) && isWritable(mediaType));
+		return (BufferedImage.class == clazz && isWritable(mediaType));
 	}
 
 	private boolean isWritable(MediaType mediaType) {

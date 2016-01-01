@@ -84,18 +84,6 @@ model and corresponding services:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	public interface RemoteAccountService extends Remote {
-
-		public void insertAccount(Account account) throws RemoteException;
-
-		public List<Account> getAccounts(String name) throws RemoteException;
-
-	}
-----
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
 	// the implementation doing nothing at the moment
 	public class AccountServiceImpl implements AccountService {
 
@@ -573,7 +561,7 @@ annotation for expressing such dependencies on Spring-managed beans.
 	}
 ----
 
-Our `AccountServletEndpoint` needs to run in the same web application as the Spring
+Our `AccountServiceEndpoint` needs to run in the same web application as the Spring
 context to allow for access to Spring's facilities. This is the case by default in Java
 EE 5 environments, using the standard contract for JAX-WS servlet endpoint deployment.
 See Java EE 5 web service tutorials for details.
@@ -888,18 +876,11 @@ proxy will take care of forwarding the call to the server-side object via JMS.
 	}
 ----
 
-You may also wish to investigate the support provided by the
-http://lingo.codehaus.org/[Lingo] project, which (to quote the homepage blurb) "__... is
-a lightweight POJO based remoting and messaging library based on the Spring Framework's
-remoting libraries which extends it to support JMS.__"
-
-
-
 
 [[remoting-amqp]]
 === AMQP
-Refer to the http://docs.spring.io/spring-amqp/reference/html/amqp.html#remoting[Spring
-AMQP Reference Document 'Spring Remoting with AMQP' section] for more information.
+Refer to the {doc-spring-amqp}/html/_reference.html#remoting[Spring AMQP Reference Document
+'Spring Remoting with AMQP' section] for more information.
 
 
 
@@ -1023,33 +1004,33 @@ RestTemplate has an asynchronous counter-part: see <<rest-async-resttemplate>>.
 | HTTP Method | RestTemplate Method
 
 | DELETE
-| {javadoc-baseurl}/org/springframework/web/client/RestTemplate.html#delete(String,%20Object...)[delete]
+| {api-spring-framework}/web/client/RestTemplate.html#delete(String,%20Object...)[delete]
 
 | GET
-| {javadoc-baseurl}/org/springframework/web/client/RestTemplate.html#getForObject(String,%20Class,%20Object...)[getForObject]
-  {javadoc-baseurl}/org/springframework/web/client/RestTemplate.html#getForEntity(String,%20Class,%20Object...)[getForEntity]
+| {api-spring-framework}/web/client/RestTemplate.html#getForObject(String,%20Class,%20Object...)[getForObject]
+  {api-spring-framework}/web/client/RestTemplate.html#getForEntity(String,%20Class,%20Object...)[getForEntity]
 
 | HEAD
-| {javadoc-baseurl}/org/springframework/web/client/RestTemplate.html#headForHeaders(String,%20Object...)[headForHeaders(String
+| {api-spring-framework}/web/client/RestTemplate.html#headForHeaders(String,%20Object...)[headForHeaders(String
   url, String... urlVariables)]
 
 | OPTIONS
-| {javadoc-baseurl}/org/springframework/web/client/RestTemplate.html#optionsForAllow(String,%20Object...)[optionsForAllow(String
+| {api-spring-framework}/web/client/RestTemplate.html#optionsForAllow(String,%20Object...)[optionsForAllow(String
   url, String... urlVariables)]
 
 | POST
-| {javadoc-baseurl}/org/springframework/web/client/RestTemplate.html#postForLocation(String,%20Object,%20Object...)[postForLocation(String
+| {api-spring-framework}/web/client/RestTemplate.html#postForLocation(String,%20Object,%20Object...)[postForLocation(String
   url, Object request, String... urlVariables)]
-  {javadoc-baseurl}/org/springframework/web/client/RestTemplate.html#postForObject(java.lang.String,%20java.lang.Object,%20java.lang.Class,%20java.lang.String...)[postForObject(String
+  {api-spring-framework}/web/client/RestTemplate.html#postForObject(java.lang.String,%20java.lang.Object,%20java.lang.Class,%20java.lang.String...)[postForObject(String
   url, Object request, Class<T> responseType, String... uriVariables)]
 
 | PUT
-| {javadoc-baseurl}/org/springframework/web/client/RestTemplate.html#put(String,%20Object,%20Object...)[put(String
+| {api-spring-framework}/web/client/RestTemplate.html#put(String,%20Object,%20Object...)[put(String
   url, Object request, String...urlVariables)]
 
 | PATCH and others
-| {javadoc-baseurl}/org/springframework/web/client/RestTemplate.html#exchange(java.lang.String,%20org.springframework.http.HttpMethod,%20org.springframework.http.HttpEntity,%20java.lang.Class,%20java.lang.Object...)[exchange]
-  {javadoc-baseurl}/org/springframework/web/client/RestTemplate.html#execute(java.lang.String,%20org.springframework.http.HttpMethod,%20org.springframework.web.client.RequestCallback,%20org.springframework.web.client.ResponseExtractor,%20java.lang.Object...)[execute]
+| {api-spring-framework}/web/client/RestTemplate.html#exchange(java.lang.String,%20org.springframework.http.HttpMethod,%20org.springframework.http.HttpEntity,%20java.lang.Class,%20java.lang.Object...)[exchange]
+  {api-spring-framework}/web/client/RestTemplate.html#execute(java.lang.String,%20org.springframework.http.HttpMethod,%20org.springframework.web.client.RequestCallback,%20org.springframework.web.client.ResponseExtractor,%20java.lang.Object...)[execute]
 |===
 
 The names of `RestTemplate` methods follow a naming convention, the first part indicates
@@ -1270,9 +1251,9 @@ to serialize only a subset of the object properties. For example:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	JacksonSerializationValue jsv = new JacksonSerializationValue(new User("eric", "7!jd#h23"),
-		User.WithoutPasswordView.class);
-	HttpEntity<JacksonSerializationValue> entity = new HttpEntity<JacksonSerializationValue>(jsv);
+	MappingJacksonValue value = new MappingJacksonValue(new User("eric", "7!jd#h23"));
+	value.setSerializationView(User.WithoutPasswordView.class);
+	HttpEntity<MappingJacksonValue> entity = new HttpEntity<MappingJacksonValue>(value);
 	String s = template.postForObject("http://example.com/user", entity, String.class);
 ----
 
@@ -1393,7 +1374,7 @@ needs: multiple threads may be blocked, waiting for remote HTTP responses.
 `AsyncRestTemplate` and <<rest-resttemplate>>'s APIs are very similar; see
 <<rest-overview-of-resttemplate-methods-tbl>>. The main difference between those APIs is
 that `AsyncRestTemplate` returns
-{javadoc-baseurl}/org/springframework/util/concurrent/ListenableFuture.html[`ListenableFuture`]
+{api-spring-framework}/util/concurrent/ListenableFuture.html[`ListenableFuture`]
 wrappers as opposed to concrete results.
 
 The previous `RestTemplate` example translates to:
@@ -1409,7 +1390,7 @@ The previous `RestTemplate` example translates to:
 	ResponseEntity<String> entity = futureEntity.get();
 ----
 
-{javadoc-baseurl}/org/springframework/util/concurrent/ListenableFuture.html[`ListenableFuture`]
+{api-spring-framework}/util/concurrent/ListenableFuture.html[`ListenableFuture`]
 accepts completion callbacks:
 
 [source,java,indent=0]
@@ -1435,18 +1416,18 @@ accepts completion callbacks:
 [NOTE]
 ====
 The default `AsyncRestTemplate` constructor registers a
-{javadoc-baseurl}/org/springframework/core/task/SimpleAsyncTaskExecutor.html[`SimpleAsyncTaskExecutor`
+{api-spring-framework}/core/task/SimpleAsyncTaskExecutor.html[`SimpleAsyncTaskExecutor`
 ] for executing HTTP requests.
 When dealing with a large number of short-lived requests, a thread-pooling TaskExecutor
 implementation like
-{javadoc-baseurl}/org/springframework/scheduling/concurrent/ThreadPoolTaskExecutor.html[`ThreadPoolTaskExecutor`]
+{api-spring-framework}/scheduling/concurrent/ThreadPoolTaskExecutor.html[`ThreadPoolTaskExecutor`]
 may be a good choice.
 ====
 
 See the
-{javadoc-baseurl}/org/springframework/util/concurrent/ListenableFuture.html[`ListenableFuture` javadocs]
+{api-spring-framework}/util/concurrent/ListenableFuture.html[`ListenableFuture` javadocs]
 and
-{javadoc-baseurl}/org/springframework/web/client/AsyncRestTemplate.html[`AsyncRestTemplate` javadocs]
+{api-spring-framework}/web/client/AsyncRestTemplate.html[`AsyncRestTemplate` javadocs]
 for more details.
 
 
@@ -1873,11 +1854,11 @@ takes a reference to a standard `ConnectionFactory` that would typically come fr
 ===== CachingConnectionFactory
 The `CachingConnectionFactory` extends the functionality of `SingleConnectionFactory`
 and adds the caching of Sessions, MessageProducers, and MessageConsumers. The initial
-cache size is set to 1, use the property `SessionCacheSize` to increase the number of
+cache size is set to 1, use the property `sessionCacheSize` to increase the number of
 cached sessions. Note that the number of actual cached sessions will be more than that
 number as sessions are cached based on their acknowledgment mode, so there can be up to
-4 cached session instances when `SessionCacheSize` is set to one, one for each
-`AcknowledgementMode`. MessageProducers and MessageConsumers are cached within their
+4 cached session instances when `sessionCacheSize` is set to one, one for each
+acknowledgment mode. MessageProducers and MessageConsumers are cached within their
 owning session and also take into account the unique properties of the producers and
 consumers when caching. MessageProducers are cached based on their destination.
 MessageConsumers are cached based on a key composed of the destination, selector,
@@ -1963,17 +1944,29 @@ to runtime demands or for participation in externally managed transactions.
 Compatibility-wise, it stays very close to the spirit of the standalone JMS
 specification - but is generally not compatible with Java EE's JMS restrictions.
 
+[NOTE]
+====
+While `SimpleMessageListenerContainer` does not allow for the participation in externally
+managed transactions, it does support native JMS transactions: simply switch the
+'sessionTransacted' flag to 'true' or, in the namespace, set the 'acknowledge' attribute
+to 'transacted': Exceptions thrown from your listener will lead to a rollback then, with
+the message getting redelivered. Alternatively, consider using 'CLIENT_ACKNOWLEDGE' mode
+which provides redelivery in case of an exception as well but does not use transacted
+Sessions and therefore does not include any other Session operations (such as sending
+response messages) in the transaction protocol.
+====
+
 
 [[jms-mdp-default]]
 ===== DefaultMessageListenerContainer
 This message listener container is the one used in most cases. In contrast to
-`SimpleMessageListenerContainer`, this container variant does allow for dynamic adaption
+`SimpleMessageListenerContainer`, this container variant allows for dynamic adaptation
 to runtime demands and is able to participate in externally managed transactions. Each
 received message is registered with an XA transaction when configured with a
 `JtaTransactionManager`; so processing may take advantage of XA transaction semantics.
 This listener container strikes a good balance between low requirements on the JMS
-provider, advanced functionality such as transaction participation, and compatibility
-with Java EE environments.
+provider, advanced functionality such as the participation in externally managed
+transactions, and compatibility with Java EE environments.
 
 The cache level of the container can be customized. Note that when no caching is enabled,
 a new connection and a new session is created for each message reception. Combining this
@@ -1984,6 +1977,21 @@ This container also has recoverable capabilities when the broker goes down. By d
 a simple `BackOff` implementation retries every 5 seconds. It is possible to specify
 a custom `BackOff` implementation for more fine-grained recovery options, see
 `ExponentialBackOff` for an example.
+
+[NOTE]
+====
+Like its sibling `SimpleMessageListenerContainer`, `DefaultMessageListenerContainer`
+supports native JMS transactions and also allows for customizing the acknowledgment mode.
+This is strongly recommended over externally managed transactions if feasible for your
+scenario: that is, if you can live with occasional duplicate messages in case of the
+JVM dying. Custom duplicate message detection steps in your business logic may cover
+such situations, e.g. in the form of a business entity existence check or a protocol
+table check. Any such arrangements will be significantly more efficient than the
+alternative: wrapping your entire processing with an XA transaction (through configuring
+your `DefaultMessageListenerContainer` with an `JtaTransactionManager`), covering the
+reception of the JMS message as well as the execution of the business logic in your
+message listener (including database operations etc).
+====
 
 
 [[jms-tx]]
@@ -2010,7 +2018,7 @@ use of a JTA transaction manager as well as a properly XA-configured ConnectionF
 Reusing code across a managed and unmanaged transactional environment can be confusing
 when using the JMS API to create a `Session` from a `Connection`. This is because the
 JMS API has only one factory method to create a `Session` and it requires values for the
-transaction and acknowledgement modes. In a managed environment, setting these values is
+transaction and acknowledgment modes. In a managed environment, setting these values is
 the responsibility of the environment's transactional infrastructure, so these values
 are ignored by the vendor's wrapper to the JMS Connection. When using the `JmsTemplate`
 in an unmanaged environment you can specify these values through the use of the
@@ -2594,7 +2602,13 @@ what the <<jms-receiving-async-message-listener-adapter, `MessageListenerAdapter
 provides).
 
 The annotated endpoint infrastructure creates a message listener container
-behind the scenes for each annotated method, using a `JmsListenerContainerFactory`.
+behind the scenes for each annotated method, using a `JmsListenerContainerFactory`. Such
+container is not registered against the application context but can be easily
+located for management purposes using the `JmsListenerEndpointRegistry` bean.
+
+TIP: `@JmsListener` is a _repeatable_ annotation so it is possible to associate several
+JMS destinations to the same method by adding additional `@JmsListener` declaration on
+it. For pre Java8 use cases, you can use `@JmsListeners`.
 
 [[jms-annotated-support]]
 ==== Enable listener endpoint annotations
@@ -2758,8 +2772,8 @@ annotate the payload with `@Valid` and configure the necessary validator as foll
 	}
 ----
 
-[[jms-annotated-reply]]
-==== Reply management
+[[jms-annotated-response]]
+==== Response management
 
 The existing support in <<jms-receiving-async-message-listener-adapter,MessageListenerAdapter>>
 already allows your method to have a non-`void` return type. When that's the case, the result of
@@ -2769,7 +2783,7 @@ the listener. That default destination can now be set using the `@SendTo` annota
 messaging abstraction.
 
 Assuming our `processOrder` method should now return an `OrderStatus`, it is possible to write it
-as follow to automatically send a reply:
+as follow to automatically send a response:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -2798,6 +2812,26 @@ If you need to set additional headers in a transport-independent manner, you cou
             	.build();
 	}
 ----
+
+If you need to compute the response destination at runtime, you can encapsulate your response
+in a `JmsResponse` instance that also provides the destination to use at runtime. The previous
+example can be rewritten as follows:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@JmsListener(destination = "myDestination")
+	public JmsResponse<Message<OrderStatus>> processOrder(Order order) {
+    	// order processing
+    	Message<OrderStatus> response = MessageBuilder
+        	    .withPayload(status)
+            	.setHeader("code", 1234)
+            	.build();
+		return JmsResponse.forQueue(response, "status");
+	}
+----
+
+
 
 [[jms-namespace]]
 === JMS Namespace Support
@@ -5694,14 +5728,13 @@ For more information on Spring's transaction facilities, see the chapter entitle
 
 .Library dependencies
 ****
-The following additional jars to be on the classpath of your application in order to be
-able to use the Spring Framework's email library.
+The following JAR needs to be on the classpath of your application in order to use
+the Spring Framework's email library.
 
-* The https://java.net/projects/javamail/pages/Home[JavaMail] `mail.jar` library
-* The http://www.oracle.com/technetwork/java/jaf11-139815.html[JAF]
-  `activation.jar` library
+* The https://java.net/projects/javamail/pages/Home[JavaMail] library
 
-All of these libraries are freely available on the web.
+This library is freely available on the web -- for example, in Maven Central as
+`com.sun.mail:javax.mail`.
 ****
 
 The Spring Framework provides a helpful utility library for sending email that shields
@@ -6184,26 +6217,27 @@ Spring distribution. In all likelihood, you shouldn't ever need to implement you
   This implementation does not reuse any threads, rather it starts up a new thread
   for each invocation. However, it does support a concurrency limit which will block
   any invocations that are over the limit until a slot has been freed up. If you
-  re looking for true pooling, keep scrolling further down the page.
+  are looking for true pooling, see the discussions of `SimpleThreadPoolTaskExecutor`
+  and `ThreadPoolTaskExecutor` below.
 * `SyncTaskExecutor`
   This implementation doesn't execute invocations asynchronously. Instead, each
   invocation takes place in the calling thread. It is primarily used in situations
   where multi-threading isn't necessary such as simple test cases.
 * `ConcurrentTaskExecutor`
   This implementation is an adapter for a `java.util.concurrent.Executor` object.
-  There is an alternative, `ThreadPoolTaskExecutor, that exposes the `Executor`
+  There is an alternative, `ThreadPoolTaskExecutor`, that exposes the `Executor`
   configuration parameters as bean properties. It is rare to need to use the
-  `ConcurrentTaskExecutor` but if the <<threadPoolTaskExecutor, `ThreadPoolTaskExecutor`>>
-  isn't flexible enough for your needs, the `ConcurrentTaskExecutor` is an alternative.
+  `ConcurrentTaskExecutor`, but if the `ThreadPoolTaskExecutor` isn't flexible
+  enough for your needs, the `ConcurrentTaskExecutor` is an alternative.
 * `SimpleThreadPoolTaskExecutor`
   This implementation is actually a subclass of Quartz's `SimpleThreadPool` which
   listens to Spring's lifecycle callbacks. This is typically used when you have a
   thread pool that may need to be shared by both Quartz and non-Quartz components.
 * `ThreadPoolTaskExecutor`
   This implementation is the most commonly used one. It exposes bean properties for
-  configuring a java.util.concurrent.ThreadPoolExecutor` and wraps it in a `TaskExecutor`.
+  configuring a `java.util.concurrent.ThreadPoolExecutor` and wraps it in a `TaskExecutor`.
   If you need to adapt to a different kind of `java.util.concurrent.Executor`, it is
-  recommended that you use a <<concurrentTaskExecutor, `ConcurrentTaskExecutor`>> instead.
+  recommended that you use a `ConcurrentTaskExecutor` instead.
 * `WorkManagerTaskExecutor`
 
 +
@@ -6216,11 +6250,10 @@ Application Server implementations.
 
 +
 
-This implementation uses the CommonJ WorkManager as its backing implementation and is
-the central convenience class for setting up a CommonJ WorkManager reference in a Spring
-context. Similar to the <<simpleThreadPoolTaskExecutor, `SimpleThreadPoolTaskExecutor`>>,
-this class implements the WorkManager interface and therefore can be used directly as a
-WorkManager as well.
+This implementation uses the CommonJ `WorkManager` as its backing implementation and is
+the central convenience class for setting up a CommonJ `WorkManager` reference in a Spring
+context. Similar to the `SimpleThreadPoolTaskExecutor`, this class implements the
+`WorkManager` interface and therefore can be used directly as a `WorkManager` as well.
 
 
 
@@ -6371,13 +6404,13 @@ default). Here you can see what methods are available for `Trigger` implementati
 
 Spring provides two implementations of the `Trigger` interface. The most interesting one
 is the `CronTrigger`. It enables the scheduling of tasks based on cron expressions. For
-example the following task is being scheduled to run 15 minutes past each hour but only
+example, the following task is being scheduled to run 15 minutes past each hour but only
 during the 9-to-5 "business hours" on weekdays.
 
 [source,java,indent=0]
 [subs="verbatim"]
 ----
-	scheduler.schedule(task, new CronTrigger("* 15 9-17 * * MON-FRI"));
+	scheduler.schedule(task, new CronTrigger("0 15 9-17 * * MON-FRI"));
 ----
 
 The other out-of-the-box implementation is a `PeriodicTrigger` that accepts a fixed
@@ -6389,7 +6422,7 @@ fixed-delay, those methods should be used directly whenever possible. The value 
 the `Trigger` abstraction. For example, it may be convenient to allow periodic triggers,
 cron-based triggers, and even custom trigger implementations to be used interchangeably.
 Such a component could take advantage of dependency injection so that such `Triggers`
-could be configured externally.
+could be configured externally and therefore easily modified or extended.
 
 
 
@@ -7014,7 +7047,7 @@ seconds and one every morning at 6 AM. To finalize everything, we need to set up
 More properties are available for the `SchedulerFactoryBean` for you to set, such as the
 calendars used by the job details, properties to customize Quartz with, etc. Have a look
 at the
-{javadoc-baseurl}/org/springframework/scheduling/quartz/SchedulerFactoryBean.html[`SchedulerFactoryBean`
+{api-spring-framework}/scheduling/quartz/SchedulerFactoryBean.html[`SchedulerFactoryBean`
 javadocs] for more information.
 
 
@@ -7133,7 +7166,7 @@ container. Using the dynamic-language-backed beans with a plain `BeanFactory`
 implementation is supported, but you have to manage the plumbing of the Spring internals
 to do so.
 
-For more information on schema-based configuration, see <<xsd-config>>.
+For more information on schema-based configuration, see <<xsd-configuration>>.
 ====
 
 [source,xml,indent=0]
@@ -8051,8 +8084,8 @@ in the Spring Framework.
 Find below links to further resources about the various dynamic languages described in
 this chapter.
 
-* The http://jruby.codehaus.org/[JRuby] homepage
-* The http://groovy.codehaus.org/[Groovy] homepage
+* The http://jruby.org/[JRuby] homepage
+* The http://www.groovy-lang.org/[Groovy] homepage
 * The http://www.beanshell.org/[BeanShell] homepage
 
 
@@ -8127,6 +8160,7 @@ materialized by the `org.springframework.cache.Cache` and
 There are <<cache-store-configuration,a few implementations>> of that abstraction
 available out of the box: JDK `java.util.concurrent.ConcurrentMap` based caches,
 http://ehcache.org/[EhCache], Gemfire cache,
+https://github.com/ben-manes/caffeine/wiki[Caffeine],
 https://code.google.com/p/guava-libraries/wiki/CachesExplained[Guava caches] and
 JSR-107 compliant caches. See <<cache-plug>> for more information on plugging in
 other cache stores/providers.
@@ -8270,13 +8304,13 @@ do yourself a favor and read <<expressions>>:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(value="books", **key="#isbn"**)
+	@Cacheable(cacheNames="books", **key="#isbn"**)
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 
-	@Cacheable(value="books", **key="#isbn.rawNumber"**)
+	@Cacheable(cacheNames="books", **key="#isbn.rawNumber"**)
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 
-	@Cacheable(value="books", **key="T(someType).hash(#isbn)"**)
+	@Cacheable(cacheNames="books", **key="T(someType).hash(#isbn)"**)
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 ----
 
@@ -8290,7 +8324,7 @@ this, specify the name of the `KeyGenerator` bean implementation to use:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(value="books", **keyGenerator="myKeyGenerator"**)
+	@Cacheable(cacheNames="books", **keyGenerator="myKeyGenerator"**)
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 ----
 
@@ -8324,7 +8358,7 @@ to set the `cacheManager` to use per operation:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(value="books", **cacheManager="anotherCacheManager"**)
+	@Cacheable(cacheNames="books", **cacheManager="anotherCacheManager"**)
 	public Book findBook(ISBN isbn) {...}
 ----
 
@@ -8366,7 +8400,7 @@ only if the argument `name` has a length shorter than 32:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(value="book", **condition="#name.length < 32"**)
+	@Cacheable(cacheNames="book", **condition="#name.length < 32"**)
 	public Book findBook(String name)
 ----
 
@@ -8378,7 +8412,7 @@ only want to cache paperback books:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(value="book", condition="#name.length < 32", **unless="#result.hardback"**)
+	@Cacheable(cacheNames="book", condition="#name.length < 32", **unless="#result.hardback"**)
 	public Book findBook(String name)
 ----
 
@@ -8429,10 +8463,10 @@ conditional computations:
 
 | __argument name__
 | evaluation context
-| Name of any of the method argument. If for some reason the names are not available
-  (ex: no debug information), the argument names are also available under the `a<#arg>`
+| Name of any of the method arguments. If for some reason the names are not available
+  (e.g. no debug information), the argument names are also available under the `#a<#arg>`
   where __#arg__ stands for the argument index (starting from 0).
-| `iban` or `a0` (one can also use `p0` or `p<#arg>` notation as an alias).
+| `#iban` or `#a0` (one can also use `#p0` or `#p<#arg>` notation as an alias).
 
 | result
 | evaluation context
@@ -8455,7 +8489,7 @@ than method flow optimization:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@CachePut(value="book", key="#isbn")
+	@CachePut(cacheNames="book", key="#isbn")
 	public Book updateBook(ISBN isbn, BookDescriptor descriptor)
 ----
 
@@ -8489,7 +8523,7 @@ rather then just an entry one (based on the key):
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@CacheEvict(value="books", **allEntries=true**)
+	@CacheEvict(cacheNames="books", **allEntries=true**)
 	public void loadBooks(InputStream batch)
 ----
 
@@ -8528,7 +8562,7 @@ this case, `@Caching`. `@Caching` allows multiple nested `@Cacheable`, `@CachePu
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Caching(evict = { @CacheEvict("primary"), @CacheEvict(value="secondary", key="#p0") })
+	@Caching(evict = { @CacheEvict("primary"), @CacheEvict(cacheNames="secondary", key="#p0") })
 	public Book importBooks(String deposit, Date date)
 ----
 
@@ -8610,7 +8644,7 @@ application through AOP. The configuration is intentionally similar with that of
 [NOTE]
 ====
 Advanced customizations using Java config require to implement `CachingConfigurer`, refer
-to {javadoc-baseurl}/org/springframework/cache/annotation/CachingConfigurer.html[the
+to {api-spring-framework}/cache/annotation/CachingConfigurer.html[the
 javadoc for more details].
 ====
 
@@ -8748,7 +8782,7 @@ that is annotations that can annotate other annotations. To wit, let us replace 
 ----
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target({ElementType.METHOD})
-	@Cacheable(value="books", key="#isbn")
+	@Cacheable(cacheNames="books", key="#isbn")
 	public @interface SlowService {
 	}
 ----
@@ -8759,7 +8793,7 @@ Above, we have defined our own `SlowService` annotation which itself is annotate
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(value="books", key="#isbn")
+	@Cacheable(cacheNames="books", key="#isbn")
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 ----
 
@@ -8841,7 +8875,7 @@ possible to customize the factory per cache operation:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@CacheResult(value="books", *cacheResolverFactory=MyCacheResolverFactory.class*)
+	@CacheResult(cacheNames="books", *cacheResolverFactory=MyCacheResolverFactory.class*)
 	public Book findBook(ISBN isbn)
 ----
 
@@ -8862,7 +8896,7 @@ abstraction and the other with JCache:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@Cacheable(value="books", **key="#isbn"**)
+	@Cacheable(cacheNames="books", **key="#isbn"**)
 	public Book findBook(ISBN isbn, boolean checkWarehouse, boolean includeUsed)
 
 	@CacheResult(cacheName="books")
@@ -8963,7 +8997,7 @@ we did in the example above by defining the target cache through the `cache:defi
 
 [[cache-store-configuration]]
 === Configuring the cache storage
-Out of the box, the cache abstraction provides several storages integration. To use
+Out of the box, the cache abstraction provides several storage integration. To use
 them, one needs to simply declare an appropriate `CacheManager` - an entity that
 controls and manages ++Cache++s and can be used to retrieve these for storage.
 
@@ -9021,6 +9055,42 @@ This setup bootstraps the ehcache library inside Spring IoC (through the `ehcach
 is then wired into the dedicated `CacheManager` implementation. Note the entire
 ehcache-specific configuration is read from `ehcache.xml`.
 
+[[cache-store-configuration-caffeine]]
+==== Caffeine Cache
+
+Caffeine is a Java 8 rewrite of Guava's cache and its implementation is located under
+`org.springframework.cache.caffeine` package and provides access to several features
+of Caffeine.
+
+Configuring a `CacheManager` that creates the cache on demand is straightforward:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean id="cacheManager"
+	      class="org.springframework.cache.caffeine.CaffeineCacheManager"/>
+----
+
+It is also possible to provide the caches to use explicitly. In that case, only those
+will be made available by the manager:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean id="cacheManager" class="org.springframework.cache.caffeine.CaffeineCacheManager">
+		<property name="caches">
+			<set>
+				<value>default</value>
+				<value>books</value>
+			</set>
+		</property>
+	</bean>
+----
+
+The Caffeine `CacheManager` also supports customs `Caffeine` and `CacheLoader`. See
+the https://github.com/ben-manes/caffeine/wiki[Caffeine documentation] for more
+information about those.
+
 [[cache-store-configuration-guava]]
 ==== Guava Cache
 
@@ -9063,8 +9133,7 @@ GemFire is a memory-oriented/disk-backed, elastically scalable, continuously ava
 active (with built-in pattern-based subscription notifications), globally replicated
 database and provides fully-featured edge caching. For further information on how to use
 GemFire as a CacheManager (and more), please refer to the
-http://docs.spring.io/spring-gemfire/docs/current/reference/htmlsingle/[Spring Data GemFire
-reference documentation].
+{doc-spring-gemfire}/html/[Spring Data GemFire reference documentation].
 
 [[cache-store-configuration-jsr107]]
 ==== JSR-107 Cache

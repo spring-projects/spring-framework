@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.aop.aspectj;
 
+import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
@@ -32,13 +33,16 @@ import org.springframework.util.TypeUtils;
  * @author Ramnivas Laddad
  * @since 2.0
  */
-public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implements AfterReturningAdvice, AfterAdvice {
+@SuppressWarnings("serial")
+public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice
+		implements AfterReturningAdvice, AfterAdvice, Serializable {
 
 	public AspectJAfterReturningAdvice(
 			Method aspectJBeforeAdviceMethod, AspectJExpressionPointcut pointcut, AspectInstanceFactory aif) {
 
 		super(aspectJBeforeAdviceMethod, pointcut, aif);
 	}
+
 
 	@Override
 	public boolean isBeforeAdvice() {
@@ -61,6 +65,7 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implement
 			invokeAdviceMethod(getJoinPointMatch(), returnValue, null);
 		}
 	}
+
 
 	/**
 	 * Following AspectJ semantics, if a returning clause was specified, then the
@@ -93,7 +98,7 @@ public class AspectJAfterReturningAdvice extends AbstractAspectJAdvice implement
 		if (returnValue != null) {
 			return ClassUtils.isAssignableValue(type, returnValue);
 		}
-		else if (type.equals(Object.class) && method.getReturnType().equals(void.class)) {
+		else if (Object.class == type && void.class == method.getReturnType()) {
 			return true;
 		}
 		else{

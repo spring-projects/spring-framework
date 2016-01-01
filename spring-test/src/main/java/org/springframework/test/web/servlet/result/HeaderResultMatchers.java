@@ -24,12 +24,19 @@ import org.springframework.test.web.servlet.ResultMatcher;
 import static org.hamcrest.MatcherAssert.*;
 import static org.springframework.test.util.AssertionErrors.*;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+
 /**
- * Factory for response header assertions. An instance of this
- * class is usually accessed via {@link MockMvcResultMatchers#header()}.
+ * Factory for response header assertions.
+ * <p>An instance of this class is usually accessed via
+ * {@link MockMvcResultMatchers#header}.
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Brian Clozel
  * @since 3.2
  */
 public class HeaderResultMatchers {
@@ -91,6 +98,28 @@ public class HeaderResultMatchers {
 			public void match(MvcResult result) {
 				assertTrue("Response does not contain header " + name, result.getResponse().containsHeader(name));
 				assertEquals("Response header " + name, value, Long.parseLong(result.getResponse().getHeader(name)));
+			}
+		};
+	}
+
+	/**
+	 * Assert the primary value of the named response header as a date String,
+	 * using the preferred date format described in RFC 7231.
+	 * <p>The {@link ResultMatcher} returned by this method throws an {@link AssertionError}
+	 * if the response does not contain the specified header, or if the supplied
+	 * {@code value} does not match the primary value.
+	 *
+	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
+	 * @since 4.2
+	 */
+	public ResultMatcher dateValue(final String name, final long value) {
+		return new ResultMatcher() {
+			@Override
+			public void match(MvcResult result) {
+				SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
+				format.setTimeZone(TimeZone.getTimeZone("GMT"));
+				assertTrue("Response does not contain header " + name, result.getResponse().containsHeader(name));
+				assertEquals("Response header " + name, format.format(new Date(value)), result.getResponse().getHeader(name));
 			}
 		};
 	}

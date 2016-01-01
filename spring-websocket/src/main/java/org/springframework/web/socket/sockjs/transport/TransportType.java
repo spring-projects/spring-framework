@@ -50,13 +50,8 @@ public enum TransportType {
 	HTML_FILE("htmlfile", HttpMethod.GET, "cors", "jsessionid", "no_cache");
 
 
-	private final String value;
-
-	private final HttpMethod httpMethod;
-
-	private final List<String> headerHints;
-
 	private static final Map<String, TransportType> TRANSPORT_TYPES;
+
 	static {
 		Map<String, TransportType> transportTypes = new HashMap<String, TransportType>();
 		for (TransportType type : values()) {
@@ -65,8 +60,19 @@ public enum TransportType {
 		TRANSPORT_TYPES = Collections.unmodifiableMap(transportTypes);
 	}
 
+	public static TransportType fromValue(String value) {
+		return TRANSPORT_TYPES.get(value);
+	}
 
-	private TransportType(String value, HttpMethod httpMethod, String... headerHints) {
+
+	private final String value;
+
+	private final HttpMethod httpMethod;
+
+	private final List<String> headerHints;
+
+
+	TransportType(String value, HttpMethod httpMethod, String... headerHints) {
 		this.value = value;
 		this.httpMethod = httpMethod;
 		this.headerHints = Arrays.asList(headerHints);
@@ -77,15 +83,16 @@ public enum TransportType {
 		return this.value;
 	}
 
-	/**
-	 * The HTTP method for this transport.
-	 */
 	public HttpMethod getHttpMethod() {
 		return this.httpMethod;
 	}
 
 	public boolean sendsNoCacheInstruction() {
 		return this.headerHints.contains("no_cache");
+	}
+
+	public boolean sendsSessionCookie() {
+		return this.headerHints.contains("jsessionid");
 	}
 
 	public boolean supportsCors() {
@@ -96,13 +103,6 @@ public enum TransportType {
 		return this.headerHints.contains("cors") || this.headerHints.contains("origin");
 	}
 
-	public boolean sendsSessionCookie() {
-		return this.headerHints.contains("jsessionid");
-	}
-
-	public static TransportType fromValue(String value) {
-		return TRANSPORT_TYPES.get(value);
-	}
 
 	@Override
 	public String toString() {

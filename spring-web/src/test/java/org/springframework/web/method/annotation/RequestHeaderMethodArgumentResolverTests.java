@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.web.bind.ServletRequestBindingException;
@@ -55,18 +56,20 @@ public class RequestHeaderMethodArgumentResolverTests {
 
 	private NativeWebRequest webRequest;
 
+
 	@Before
+	@SuppressWarnings("resource")
 	public void setUp() throws Exception {
 		GenericWebApplicationContext context = new GenericWebApplicationContext();
 		context.refresh();
 		resolver = new RequestHeaderMethodArgumentResolver(context.getBeanFactory());
 
 		Method method = getClass().getMethod("params", String.class, String[].class, String.class, String.class, Map.class);
-		paramNamedDefaultValueStringHeader = new MethodParameter(method, 0);
-		paramNamedValueStringArray = new MethodParameter(method, 1);
-		paramSystemProperty = new MethodParameter(method, 2);
-		paramContextPath = new MethodParameter(method, 3);
-		paramNamedValueMap = new MethodParameter(method, 4);
+		paramNamedDefaultValueStringHeader = new SynthesizingMethodParameter(method, 0);
+		paramNamedValueStringArray = new SynthesizingMethodParameter(method, 1);
+		paramSystemProperty = new SynthesizingMethodParameter(method, 2);
+		paramContextPath = new SynthesizingMethodParameter(method, 3);
+		paramNamedValueMap = new SynthesizingMethodParameter(method, 4);
 
 		servletRequest = new MockHttpServletRequest();
 		webRequest = new ServletWebRequest(servletRequest, new MockHttpServletResponse());
@@ -79,6 +82,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 	public void teardown() {
 		RequestContextHolder.resetRequestAttributes();
 	}
+
 
 	@Test
 	public void supportsParameter() {
@@ -141,10 +145,11 @@ public class RequestHeaderMethodArgumentResolverTests {
 		resolver.resolveArgument(paramNamedValueStringArray, null, webRequest, null);
 	}
 
-	public void params(@RequestHeader(value = "name", defaultValue = "bar") String param1,
+
+	public void params(@RequestHeader(name = "name", defaultValue = "bar") String param1,
 					   @RequestHeader("name") String[] param2,
-					   @RequestHeader(value = "name", defaultValue="#{systemProperties.systemProperty}") String param3,
-					   @RequestHeader(value = "name", defaultValue="#{request.contextPath}") String param4,
+					   @RequestHeader(name = "name", defaultValue="#{systemProperties.systemProperty}") String param3,
+					   @RequestHeader(name = "name", defaultValue="#{request.contextPath}") String param4,
 					   @RequestHeader("name") Map<?, ?> unsupported) {
 	}
 

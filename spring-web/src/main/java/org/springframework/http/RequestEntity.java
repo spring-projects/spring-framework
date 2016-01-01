@@ -20,7 +20,6 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
-import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.ObjectUtils;
 
@@ -33,14 +32,14 @@ import org.springframework.util.ObjectUtils;
  * {@link org.springframework.web.client.RestTemplate#exchange(RequestEntity, Class) exchange()}:
  * <pre class="code">
  * MyRequest body = ...
- * RequestEntity&lt;MyRequest&gt; request = RequestEntity.post(new URI(&quot;http://example.com/bar&quot;).accept(MediaType.APPLICATION_JSON).body(body);
+ * RequestEntity&lt;MyRequest&gt; request = RequestEntity.post(new URI(&quot;http://example.com/bar&quot;)).accept(MediaType.APPLICATION_JSON).body(body);
  * ResponseEntity&lt;MyResponse&gt; response = template.exchange(request, MyResponse.class);
  * </pre>
  *
  * <p>If you would like to provide a URI template with variables, consider using
  * {@link org.springframework.web.util.UriTemplate}:
  * <pre class="code">
- * URI uri = new UriTemplate(&quot;http://example.com/{foo}&quot;").expand(&quot;bar&quot;);
+ * URI uri = new UriTemplate(&quot;http://example.com/{foo}&quot;).expand(&quot;bar&quot;);
  * RequestEntity&lt;MyRequest&gt; request = RequestEntity.post(uri).accept(MediaType.APPLICATION_JSON).body(body);
  * </pre>
  *
@@ -104,8 +103,6 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 */
 	public RequestEntity(T body, MultiValueMap<String, String> headers, HttpMethod method, URI url) {
 		super(body, headers);
-		Assert.notNull(method, "'method' is required");
-		Assert.notNull(url, "'url' is required");
 		this.method = method;
 		this.url = url;
 	}

@@ -42,6 +42,7 @@ import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.GenericHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.web.util.DefaultUriTemplateHandler;
 
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
@@ -255,6 +256,35 @@ public class RestTemplateTests {
 		assertEquals("Invalid Accept header", textPlain.toString(), requestHeaders.getFirst("Accept"));
 		assertEquals("Invalid Content-Type header", textPlain, result.getHeaders().getContentType());
 		assertEquals("Invalid status code", HttpStatus.OK, result.getStatusCode());
+
+		verify(response).close();
+	}
+
+	@Test
+	public void getForObjectWithCustomUriTemplateHandler() throws Exception {
+
+		DefaultUriTemplateHandler uriTemplateHandler = new DefaultUriTemplateHandler();
+		uriTemplateHandler.setParsePath(true);
+		template.setUriTemplateHandler(uriTemplateHandler);
+
+		URI expectedUri = new URI("http://example.com/hotels/1/pic/pics%2Flogo.png/size/150x150");
+		given(requestFactory.createRequest(expectedUri, HttpMethod.GET)).willReturn(request);
+
+		given(request.getHeaders()).willReturn(new HttpHeaders());
+		given(request.execute()).willReturn(response);
+		given(errorHandler.hasError(response)).willReturn(false);
+
+		given(response.getStatusCode()).willReturn(HttpStatus.OK);
+		given(response.getHeaders()).willReturn(new HttpHeaders());
+		given(response.getBody()).willReturn(null);
+
+		Map<String, String> uriVariables = new HashMap<String, String>(2);
+		uriVariables.put("hotel", "1");
+		uriVariables.put("publicpath", "pics/logo.png");
+		uriVariables.put("scale", "150x150");
+
+		String url = "http://example.com/hotels/{hotel}/pic/{publicpath}/size/{scale}";
+		template.getForObject(url, String.class, uriVariables);
 
 		verify(response).close();
 	}

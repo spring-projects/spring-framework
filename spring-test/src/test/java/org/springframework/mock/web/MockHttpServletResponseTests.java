@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import static org.junit.Assert.*;
  * @author Rossen Stoyanchev
  * @author Rob Winch
  * @author Sam Brannen
+ * @author Brian Clozel
  * @since 19.02.2006
  */
 public class MockHttpServletResponseTests {
@@ -90,9 +91,7 @@ public class MockHttpServletResponseTests {
 		assertEquals("UTF-8", response.getCharacterEncoding());
 	}
 
-	// SPR-12677
-
-	@Test
+	@Test  // SPR-12677
 	public void contentTypeHeaderWithMoreComplexCharsetSyntax() {
 		String contentType = "test/plain;charset=\"utf-8\";foo=\"charset=bar\";foocharset=bar;foo=bar";
 		response.setHeader("Content-Type", contentType);
@@ -135,6 +134,13 @@ public class MockHttpServletResponseTests {
 	@Test
 	public void contentLengthHeader() {
 		response.addHeader("Content-Length", "66");
+		assertEquals(66, response.getContentLength());
+		assertEquals("66", response.getHeader("Content-Length"));
+	}
+
+	@Test
+	public void contentLengthIntHeader() {
+		response.addIntHeader("Content-Length", 66);
 		assertEquals(66, response.getContentLength());
 		assertEquals("66", response.getHeader("Content-Length"));
 	}
@@ -238,20 +244,43 @@ public class MockHttpServletResponseTests {
 		assertEquals(redirectUrl, response.getRedirectedUrl());
 	}
 
-	/**
-	 * SPR-10414
-	 */
 	@Test
+	public void setDateHeader() {
+		response.setDateHeader("Last-Modified", 1437472800000L);
+		assertEquals("Tue, 21 Jul 2015 10:00:00 GMT", response.getHeader("Last-Modified"));
+	}
+
+	@Test
+	public void addDateHeader() {
+		response.addDateHeader("Last-Modified", 1437472800000L);
+		response.addDateHeader("Last-Modified", 1437472801000L);
+		assertEquals("Tue, 21 Jul 2015 10:00:00 GMT", response.getHeaders("Last-Modified").get(0));
+		assertEquals("Tue, 21 Jul 2015 10:00:01 GMT", response.getHeaders("Last-Modified").get(1));
+	}
+
+	@Test
+	public void getDateHeader() {
+		long time = 1437472800000L;
+		response.setDateHeader("Last-Modified", time);
+		assertEquals("Tue, 21 Jul 2015 10:00:00 GMT", response.getHeader("Last-Modified"));
+		assertEquals(time, response.getDateHeader("Last-Modified"));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void getInvalidDateHeader() {
+		response.setHeader("Last-Modified", "invalid");
+		assertEquals("invalid", response.getHeader("Last-Modified"));
+		response.getDateHeader("Last-Modified");
+	}
+
+	@Test  // SPR-10414
 	public void modifyStatusAfterSendError() throws IOException {
 		response.sendError(HttpServletResponse.SC_NOT_FOUND);
 		response.setStatus(HttpServletResponse.SC_OK);
 		assertEquals(response.getStatus(),HttpServletResponse.SC_NOT_FOUND);
 	}
 
-	/**
-	 * SPR-10414
-	 */
-	@Test
+	@Test  // SPR-10414
 	@SuppressWarnings("deprecation")
 	public void modifyStatusMessageAfterSendError() throws IOException {
 		response.sendError(HttpServletResponse.SC_NOT_FOUND);

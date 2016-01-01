@@ -72,10 +72,10 @@ class RequestResponseBodyAdviceChain implements RequestBodyAdvice, ResponseBodyA
 	}
 
 	private List<Object> getAdvice(Class<?> adviceType) {
-		if (RequestBodyAdvice.class.equals(adviceType)) {
+		if (RequestBodyAdvice.class == adviceType) {
 			return this.requestBodyAdvice;
 		}
-		else if (ResponseBodyAdvice.class.equals(adviceType)) {
+		else if (ResponseBodyAdvice.class == adviceType) {
 			return this.responseBodyAdvice;
 		}
 		else {

@@ -1,21 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<!--
-  ~ Copyright 2002-2014 the original author or authors.
-  ~
-  ~ Licensed under the Apache License, Version 2.0 (the "License");
-  ~ you may not use this file except in compliance with the License.
-  ~ You may obtain a copy of the License at
-  ~
-  ~      http://www.apache.org/licenses/LICENSE-2.0
-  ~
-  ~ Unless required by applicable law or agreed to in writing, software
-  ~ distributed under the License is distributed on an "AS IS" BASIS,
-  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  ~ See the License for the specific language governing permissions and
-  ~ limitations under the License.
-  -->
-
 <xsd:schema xmlns="http://www.springframework.org/schema/websocket"
 			xmlns:xsd="http://www.w3.org/2001/XMLSchema"
 			xmlns:beans="http://www.springframework.org/schema/beans"
@@ -24,8 +8,8 @@
 			elementFormDefault="qualified"
 			attributeFormDefault="unqualified">
 
-	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans.xsd"/>
-	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool.xsd" />
+	<xsd:import namespace="http://www.springframework.org/schema/beans" schemaLocation="http://www.springframework.org/schema/beans/spring-beans-4.2.xsd"/>
+	<xsd:import namespace="http://www.springframework.org/schema/tool" schemaLocation="http://www.springframework.org/schema/tool/spring-tool-4.2.xsd"/>
 
 	<xsd:complexType name="mapping">
 		<xsd:annotation>
@@ -342,6 +326,27 @@
 	the TCP connection is established is different from the host providing the cloud-based STOMP service.
 	By default this property is not set.
                 ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="user-destination-broadcast" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Set a destination to broadcast messages to that remain unresolved because
+	the user is not connected. In a multi-application server scenario this
+	gives other application servers a chance to try.
+	By default this is not set.
+                    ]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="user-registry-broadcast" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Set a destination to broadcast the content of the local user registry to
+	and to listen for such broadcasts from other servers. In a multi-application
+	server scenarios this allows each server's user registry to be aware of
+	users connected to other servers.
+	By default this is not set.
+                    ]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
 	</xsd:complexType>
@@ -706,6 +711,22 @@
 						</xsd:attribute>
 					</xsd:complexType>
 				</xsd:element>
+				<xsd:element name="stomp-error-handler" minOccurs="0">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+    Configures a StompSubProtocolErrorHandler to customize or handle STOMP ERROR to clients.
+						]]></xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:attribute name="ref" type="xsd:string" use="required">
+							<xsd:annotation>
+								<xsd:documentation source="java:org.springframework.web.socket.messaging.StompSubProtocolErrorHandler"><![CDATA[
+    The bean name of a StompSubProtocolErrorHandler.
+                ]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+					</xsd:complexType>
+				</xsd:element>
 				<xsd:choice>
 					<xsd:element name="simple-broker" type="simple-broker"/>
 					<xsd:element name="stomp-broker-relay" type="stomp-broker-relay"/>
@@ -734,7 +755,7 @@
 									]]></xsd:documentation>
 									<xsd:appinfo>
 										<tool:annotation kind="ref">
-											<tool:expected-type type="java:org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver" />
+											<tool:expected-type type="java:org.springframework.messaging.handler.invocation.HandlerMethodArgumentResolver"/>
 										</tool:annotation>
 									</xsd:appinfo>
 								</xsd:annotation>
@@ -766,7 +787,7 @@
 									]]></xsd:documentation>
 									<xsd:appinfo>
 										<tool:annotation kind="ref">
-											<tool:expected-type type="java:org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler" />
+											<tool:expected-type type="java:org.springframework.messaging.handler.invocation.HandlerMethodReturnValueHandler"/>
 										</tool:annotation>
 									</xsd:appinfo>
 								</xsd:annotation>
@@ -856,17 +877,6 @@
                     ]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
-			<xsd:attribute name="user-destination-broadcast" type="xsd:string">
-				<xsd:annotation>
-					<xsd:documentation><![CDATA[
-	Set a destination to broadcast messages to that remain unresolved because
-	the user is not connected. In a multi-application server scenario this
-	gives other application servers a chance to try.
-	Note: this option applies only when the stomp-broker-relay is enabled.
-	By default this is not set.
-                    ]]></xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
 			<xsd:attribute name="path-matcher" type="xsd:string">
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
@@ -889,7 +899,7 @@
                     ]]></xsd:documentation>
 					<xsd:appinfo>
 						<tool:annotation kind="ref">
-							<tool:expected-type type="java:org.springframework.util.PathMatcher" />
+							<tool:expected-type type="java:org.springframework.util.PathMatcher"/>
 						</tool:annotation>
 					</xsd:appinfo>
 				</xsd:annotation>

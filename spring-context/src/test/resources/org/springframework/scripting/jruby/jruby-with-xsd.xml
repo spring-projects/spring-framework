@@ -62,7 +62,7 @@ class RubyCalculatingMessenger
  def add(x, y)
 	x + y
  end
- 
+
  def setMessage(message)
 	@@message = message
  end

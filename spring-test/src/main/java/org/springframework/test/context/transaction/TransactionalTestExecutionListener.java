@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
@@ -84,9 +83,8 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
  * <h3>Declarative Rollback and Commit Behavior</h3>
  * <p>By default, test transactions will be automatically <em>rolled back</em>
  * after completion of the test; however, transactional commit and rollback
- * behavior can be configured declaratively via the class-level
- * {@link TransactionConfiguration @TransactionConfiguration} and method-level
- * {@link Rollback @Rollback} annotations.
+ * behavior can be configured declaratively via the {@link Rollback @Rollback}
+ * annotation at the class level and at the method level.
  *
  * <h3>Programmatic Transaction Management</h3>
  * <p>As of Spring Framework 4.1, it is possible to interact with test-managed
@@ -107,13 +105,11 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
  * {@link PlatformTransactionManager} bean to be defined in the Spring
  * {@code ApplicationContext} for the test. In case there are multiple
  * instances of {@code PlatformTransactionManager} within the test's
- * {@code ApplicationContext}, {@code @TransactionConfiguration} supports
- * configuring the bean name of the {@code PlatformTransactionManager} that
- * should be used to drive transactions. Alternatively, a <em>qualifier</em>
- * may be declared via
- * {@link org.springframework.transaction.annotation.Transactional#value @Transactional("myQualifier")}, or
- * {@link org.springframework.transaction.annotation.TransactionManagementConfigurer TransactionManagementConfigurer}
- * can be implemented by an
+ * {@code ApplicationContext}, a <em>qualifier</em> may be declared via
+ * {@link org.springframework.transaction.annotation.Transactional @Transactional}
+ * (e.g., {@code @Transactional("myTxMgr")} or {@code @Transactional(transactionManger = "myTxMgr")},
+ * or {@link org.springframework.transaction.annotation.TransactionManagementConfigurer
+ * TransactionManagementConfigurer} can be implemented by an
  * {@link org.springframework.context.annotation.Configuration @Configuration}
  * class. See {@link TestContextTransactionUtils#retrieveTransactionManager}
  * for details on the algorithm used to look up a transaction manager in
@@ -122,9 +118,9 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
- * @see TransactionConfiguration
  * @see org.springframework.transaction.annotation.TransactionManagementConfigurer
  * @see org.springframework.transaction.annotation.Transactional
+ * @see org.springframework.test.annotation.Commit
  * @see org.springframework.test.annotation.Rollback
  * @see BeforeTransaction
  * @see AfterTransaction
@@ -134,14 +130,12 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 	private static final Log logger = LogFactory.getLog(TransactionalTestExecutionListener.class);
 
-	private static final String DEFAULT_TRANSACTION_MANAGER_NAME = (String) getDefaultValue(
-		TransactionConfiguration.class, "transactionManager");
-
-	private static final Boolean DEFAULT_DEFAULT_ROLLBACK = (Boolean) getDefaultValue(TransactionConfiguration.class,
-		"defaultRollback");
+	@SuppressWarnings("deprecation")
+	private static final TransactionConfigurationAttributes defaultTxConfigAttributes = new TransactionConfigurationAttributes();
 
 	protected final TransactionAttributeSource attributeSource = new AnnotationTransactionAttributeSource();
 
+	@SuppressWarnings("deprecation")
 	private TransactionConfigurationAttributes configurationAttributes;
 
 
@@ -232,8 +226,8 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 	/**
 	 * Run all {@link BeforeTransaction @BeforeTransaction} methods for the
-	 * specified {@link TestContext test context}. If one of the methods fails,
-	 * however, the caught exception will be rethrown in a wrapped
+	 * specified {@linkplain TestContext test context}. If one of the methods
+	 * fails, however, the caught exception will be rethrown in a wrapped
 	 * {@link RuntimeException}, and the remaining methods will <strong>not</strong>
 	 * be given a chance to execute.
 	 * @param testContext the current test context
@@ -258,8 +252,8 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 
 	/**
 	 * Run all {@link AfterTransaction @AfterTransaction} methods for the
-	 * specified {@link TestContext test context}. If one of the methods fails,
-	 * the caught exception will be logged as an error, and the remaining
+	 * specified {@linkplain TestContext test context}. If one of the methods
+	 * fails, the caught exception will be logged as an error, and the remaining
 	 * methods will be given a chance to execute. After all methods have
 	 * executed, the first caught exception, if any, will be rethrown.
 	 * @param testContext the current test context
@@ -298,7 +292,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	}
 
 	/**
-	 * Get the {@link PlatformTransactionManager transaction manager} to use
+	 * Get the {@linkplain PlatformTransactionManager transaction manager} to use
 	 * for the supplied {@linkplain TestContext test context} and {@code qualifier}.
 	 * <p>Delegates to {@link #getTransactionManager(TestContext)} if the
 	 * supplied {@code qualifier} is {@code null} or empty.
@@ -337,8 +331,8 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	}
 
 	/**
-	 * Get the {@link PlatformTransactionManager transaction manager} to use
-	 * for the supplied {@link TestContext test context}.
+	 * Get the {@linkplain PlatformTransactionManager transaction manager}
+	 * to use for the supplied {@linkplain TestContext test context}.
 	 * <p>The default implementation simply delegates to
 	 * {@link TestContextTransactionUtils#retrieveTransactionManager}.
 	 * @param testContext the test context for which the transaction manager
@@ -346,30 +340,58 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	 * @return the transaction manager to use, or {@code null} if not found
 	 * @throws BeansException if an error occurs while retrieving an explicitly
 	 * named transaction manager
+	 * @throws IllegalStateException if more than one TransactionManagementConfigurer
+	 * exists in the ApplicationContext
 	 * @see #getTransactionManager(TestContext, String)
 	 */
 	protected PlatformTransactionManager getTransactionManager(TestContext testContext) {
+		@SuppressWarnings("deprecation")
 		String tmName = retrieveConfigurationAttributes(testContext).getTransactionManagerName();
 		return TestContextTransactionUtils.retrieveTransactionManager(testContext, tmName);
 	}
 
 	/**
 	 * Determine whether or not to rollback transactions by default for the
-	 * supplied {@link TestContext test context}.
+	 * supplied {@linkplain TestContext test context}.
+	 * <p>Supports {@link Rollback @Rollback} or
+	 * {@link TransactionConfiguration @TransactionConfiguration} at the
+	 * class-level.
 	 * @param testContext the test context for which the default rollback flag
 	 * should be retrieved
 	 * @return the <em>default rollback</em> flag for the supplied test context
 	 * @throws Exception if an error occurs while determining the default rollback flag
 	 */
+	@SuppressWarnings("deprecation")
 	protected final boolean isDefaultRollback(TestContext testContext) throws Exception {
-		return retrieveConfigurationAttributes(testContext).isDefaultRollback();
+		Class<?> testClass = testContext.getTestClass();
+		Rollback rollback = findAnnotation(testClass, Rollback.class);
+		boolean rollbackPresent = (rollback != null);
+		TransactionConfigurationAttributes txConfigAttributes = retrieveConfigurationAttributes(testContext);
+
+		if (rollbackPresent && txConfigAttributes != defaultTxConfigAttributes) {
+			throw new IllegalStateException(String.format("Test class [%s] is annotated with both @Rollback "
+					+ "and @TransactionConfiguration, but only one is permitted.", testClass.getName()));
+		}
+
+		if (rollbackPresent) {
+			boolean defaultRollback = rollback.value();
+			if (logger.isDebugEnabled()) {
+				logger.debug(String.format("Retrieved default @Rollback(%s) for test class [%s].", defaultRollback,
+					testClass.getName()));
+			}
+			return defaultRollback;
+		}
+
+		// else
+		return txConfigAttributes.isDefaultRollback();
 	}
 
 	/**
 	 * Determine whether or not to rollback transactions for the supplied
-	 * {@link TestContext test context} by taking into consideration the
-	 * {@link #isDefaultRollback(TestContext) default rollback} flag and a
-	 * possible method-level override via the {@link Rollback} annotation.
+	 * {@linkplain TestContext test context} by taking into consideration the
+	 * {@linkplain #isDefaultRollback(TestContext) default rollback} flag and a
+	 * possible method-level override via the {@link Rollback @Rollback}
+	 * annotation.
 	 * @param testContext the test context for which the rollback flag
 	 * should be retrieved
 	 * @return the <em>rollback</em> flag for the supplied test context
@@ -410,7 +432,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	private List<Class<?>> getSuperClasses(Class<?> clazz) {
 		List<Class<?>> results = new ArrayList<Class<?>>();
 		Class<?> current = clazz;
-		while (current != null && !current.equals(Object.class)) {
+		while (current != null && Object.class != current) {
 			results.add(current);
 			current = current.getSuperclass();
 		}
@@ -461,8 +483,8 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	}
 
 	/**
-	 * Determine if the supplied {@link Method current method} is <em>shadowed</em>
-	 * by a {@link Method previous method}.
+	 * Determine if the supplied {@linkplain Method current method} is
+	 * <em>shadowed</em> by a {@linkplain Method previous method}.
 	 * <p>Note: This code has been borrowed from
 	 * {@link org.junit.internal.runners.TestClass#isShadowed(Method, Method)}.
 	 * @param current the current method
@@ -485,44 +507,37 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	}
 
 	/**
-	 * Retrieves the {@link TransactionConfigurationAttributes} for the
-	 * specified {@link Class class} which may optionally declare or inherit
-	 * {@link TransactionConfiguration @TransactionConfiguration}. If
-	 * {@code @TransactionConfiguration} is not present for the supplied
-	 * class, the <em>default values</em> for attributes defined in
-	 * {@code @TransactionConfiguration} will be used instead.
+	 * Retrieve the {@link TransactionConfigurationAttributes} for the
+	 * supplied {@link TestContext} whose {@linkplain Class test class}
+	 * may optionally declare or inherit
+	 * {@link TransactionConfiguration @TransactionConfiguration}.
+	 * <p>If {@code @TransactionConfiguration} is not present for the
+	 * supplied {@code TestContext}, a default instance of
+	 * {@code TransactionConfigurationAttributes} will be used instead.
 	 * @param testContext the test context for which the configuration
 	 * attributes should be retrieved
 	 * @return the TransactionConfigurationAttributes instance for this listener,
 	 * potentially cached
+	 * @see TransactionConfigurationAttributes#TransactionConfigurationAttributes()
 	 */
+	@SuppressWarnings("deprecation")
 	TransactionConfigurationAttributes retrieveConfigurationAttributes(TestContext testContext) {
 		if (this.configurationAttributes == null) {
 			Class<?> clazz = testContext.getTestClass();
 
-			AnnotationAttributes annAttrs = AnnotatedElementUtils.getAnnotationAttributes(clazz,
-				TransactionConfiguration.class.getName());
+			TransactionConfiguration txConfig = AnnotatedElementUtils.findMergedAnnotation(clazz,
+				TransactionConfiguration.class);
 			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Retrieved @TransactionConfiguration attributes [%s] for test class [%s].",
-					annAttrs, clazz));
+				logger.debug(String.format("Retrieved @TransactionConfiguration [%s] for test class [%s].",
+					txConfig, clazz.getName()));
 			}
 
-			String transactionManagerName;
-			boolean defaultRollback;
-			if (annAttrs != null) {
-				transactionManagerName = annAttrs.getString("transactionManager");
-				defaultRollback = annAttrs.getBoolean("defaultRollback");
-			}
-			else {
-				transactionManagerName = DEFAULT_TRANSACTION_MANAGER_NAME;
-				defaultRollback = DEFAULT_DEFAULT_ROLLBACK;
-			}
+			TransactionConfigurationAttributes configAttributes = (txConfig == null ? defaultTxConfigAttributes
+					: new TransactionConfigurationAttributes(txConfig.transactionManager(), txConfig.defaultRollback()));
 
-			TransactionConfigurationAttributes configAttributes = new TransactionConfigurationAttributes(
-				transactionManagerName, defaultRollback);
 			if (logger.isDebugEnabled()) {
-				logger.debug(String.format("Retrieved TransactionConfigurationAttributes %s for class [%s].",
-					configAttributes, clazz));
+				logger.debug(String.format("Using TransactionConfigurationAttributes %s for test class [%s].",
+					configAttributes, clazz.getName()));
 			}
 			this.configurationAttributes = configAttributes;
 		}

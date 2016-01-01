@@ -68,7 +68,7 @@
 	<bean id="proxyFactory2Lazy" parent="baseProxyFactory">
 		<property name="target">
 			<bean class="org.springframework.aop.target.LazyInitTargetSource">
-				<property name="targetBeanName"><idref local="target"/></property>		
+				<property name="targetBeanName"><idref local="target"/></property>	
 			</bean>
 		</property>
 	</bean>

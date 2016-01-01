@@ -3,6 +3,6 @@
 
 <beans>
 
-	<import resource="XmlBeanFactoryTests-recursiveImport.xml"/> 
+	<import resource="XmlBeanFactoryTests-recursiveImport.xml"/>
 
 </beans>

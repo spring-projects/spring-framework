@@ -36,7 +36,7 @@ import org.springframework.lang.UsesJava8;
  * @since 4.2
  */
 @UsesJava8
-public class StreamConverter implements ConditionalGenericConverter {
+class StreamConverter implements ConditionalGenericConverter {
 
 	private static final TypeDescriptor STREAM_TYPE = TypeDescriptor.valueOf(Stream.class);
 
@@ -44,9 +44,11 @@ public class StreamConverter implements ConditionalGenericConverter {
 
 	private final ConversionService conversionService;
 
+
 	public StreamConverter(ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
+
 
 	@Override
 	public Set<ConvertiblePair> getConvertibleTypes() {
@@ -105,8 +107,7 @@ public class StreamConverter implements ConditionalGenericConverter {
 	}
 
 	private Object convertToStream(Object source, TypeDescriptor sourceType, TypeDescriptor streamType) {
-		TypeDescriptor targetCollection =
-				TypeDescriptor.collection(List.class, streamType.getElementTypeDescriptor());
+		TypeDescriptor targetCollection = TypeDescriptor.collection(List.class, streamType.getElementTypeDescriptor());
 		List<?> target = (List<?>) this.conversionService.convert(source, sourceType, targetCollection);
 		return target.stream();
 	}

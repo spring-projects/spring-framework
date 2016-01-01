@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import java.util.Map;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -53,7 +52,7 @@ final class SimpleBufferingClientHttpRequest extends AbstractBufferingClientHttp
 
 	@Override
 	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(this.connection.getRequestMethod());
+		return HttpMethod.resolve(this.connection.getRequestMethod());
 	}
 
 	@Override
@@ -70,8 +69,8 @@ final class SimpleBufferingClientHttpRequest extends AbstractBufferingClientHttp
 	protected ClientHttpResponse executeInternal(HttpHeaders headers, byte[] bufferedOutput) throws IOException {
 		addHeaders(this.connection, headers);
 
-		// JDK < 1.8 doesn't support getOutputStream with HTTP DELETE
-		if (HttpMethod.DELETE.equals(getMethod()) && bufferedOutput.length == 0) {
+		// JDK <1.8 doesn't support getOutputStream with HTTP DELETE
+		if (HttpMethod.DELETE == getMethod() && bufferedOutput.length == 0) {
 			this.connection.setDoOutput(false);
 		}
 
@@ -101,7 +100,8 @@ final class SimpleBufferingClientHttpRequest extends AbstractBufferingClientHttp
 			}
 			else {
 				for (String headerValue : entry.getValue()) {
-					connection.addRequestProperty(headerName, headerValue);
+					String actualHeaderValue = headerValue != null ? headerValue : "";
+					connection.addRequestProperty(headerName, actualHeaderValue);
 				}
 			}
 		}

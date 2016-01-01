@@ -9,7 +9,7 @@
 		<property name="age"><value>33</value></property>
 		<property name="name"><value>Rod</value></property>
 	</bean>
-	
+
 	<bean id="kerry" class="org.springframework.tests.sample.beans.TestBean"
 		dependency-check="none">
 	</bean>

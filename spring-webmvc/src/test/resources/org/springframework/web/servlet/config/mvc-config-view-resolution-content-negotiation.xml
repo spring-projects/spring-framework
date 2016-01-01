@@ -1,47 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	   xmlns:mvc="http://www.springframework.org/schema/mvc"
-	   xsi:schemaLocation="
-	   	http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
-		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="
+	   	http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd">
 
 	<!--
 		View resolution finds the ContentNegotiationManager created by or
 		registered with <mvc:annotation-driven>. Or in its absence simply declare it.
 	-->
 
-	<bean id="mvcContentNegotiationManager"
-		  class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean"/>
+	<bean id="mvcContentNegotiationManager" class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean"/>
 
 	<mvc:view-resolvers>
 		<mvc:content-negotiation use-not-acceptable="true">
 			<mvc:default-views>
-				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" />
+				<bean class="org.springframework.web.servlet.view.json.MappingJackson2JsonView"/>
 			</mvc:default-views>
 		</mvc:content-negotiation>
-		<mvc:bean-name />
-		<mvc:jsp />
-		<mvc:tiles />
-		<mvc:freemarker />
-		<mvc:velocity />
-		<mvc:groovy />
-		<mvc:script-template />
+		<mvc:bean-name/>
+		<mvc:jsp/>
+		<mvc:tiles/>
+		<mvc:freemarker/>
+		<mvc:velocity/>
+		<mvc:groovy/>
+		<mvc:script-template/>
 	</mvc:view-resolvers>
 
 	<mvc:tiles-configurer check-refresh="true">
-		<mvc:definitions location="/org/springframework/web/servlet/resource/tiles/tiles1.xml" />
+		<mvc:definitions location="/org/springframework/web/servlet/resource/tiles/tiles1.xml"/>
 	</mvc:tiles-configurer>
 
 	<mvc:freemarker-configurer>
-		<mvc:template-loader-path location="/org/springframework/web/servlet/view" />
+		<mvc:template-loader-path location="/org/springframework/web/servlet/view"/>
 	</mvc:freemarker-configurer>
 
-	<mvc:velocity-configurer resource-loader-path="/org/springframework/web/servlet/view" />
+	<mvc:velocity-configurer resource-loader-path="/org/springframework/web/servlet/view"/>
 
-	<mvc:groovy-configurer />
+	<mvc:groovy-configurer/>
 
 	<mvc:script-template-configurer engine-name="nashorn" render-function="render"/>
 
 </beans>
- 

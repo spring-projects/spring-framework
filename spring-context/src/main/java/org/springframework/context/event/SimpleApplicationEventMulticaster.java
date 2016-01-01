@@ -139,7 +139,7 @@ public class SimpleApplicationEventMulticaster extends AbstractApplicationEventM
 	}
 
 	private ResolvableType resolveDefaultEventType(ApplicationEvent event) {
-		return ResolvableType.forType(event.getClass());
+		return ResolvableType.forInstance(event);
 	}
 
 	/**

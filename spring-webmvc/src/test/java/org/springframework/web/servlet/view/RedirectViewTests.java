@@ -110,6 +110,18 @@ public class RedirectViewTests {
 	}
 
 	@Test
+	public void attributeStatusCodeHttp10() throws Exception {
+		RedirectView rv = new RedirectView();
+		rv.setUrl("http://url.somewhere.com");
+		MockHttpServletRequest request = createRequest();
+		request.setAttribute(View.RESPONSE_STATUS_ATTRIBUTE, HttpStatus.CREATED);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		rv.render(new HashMap<String, Object>(), request, response);
+		assertEquals(201, response.getStatus());
+		assertEquals("http://url.somewhere.com", response.getHeader("Location"));
+	}
+
+	@Test
 	public void attributeStatusCodeHttp11() throws Exception {
 		RedirectView rv = new RedirectView();
 		rv.setUrl("http://url.somewhere.com");

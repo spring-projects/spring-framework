@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,19 +19,23 @@ package org.springframework.web.servlet.view.jasperreports;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.servlet.http.HttpServletResponse;
 
 import net.sf.jasperreports.engine.JasperPrint;
+
 import org.junit.Test;
 
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.*;
 
 /**
  * @author Rob Harrop
  * @author Juergen Hoeller
+ * @author Sam Brannen
  */
 public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsViewTests {
 
@@ -41,12 +45,9 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 	}
 
 	@Test
-	public void testSimpleHtmlRender() throws Exception {
+	public void simpleHtmlRender() throws Exception {
 		Assume.group(TestGroup.CUSTOM_COMPILATION);
-
-		if (!canCompileReport) {
-			return;
-		}
+		assumeTrue(canCompileReport);
 
 		AbstractJasperReportsView view = getView(UNCOMPILED_REPORT);
 
@@ -58,14 +59,11 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 		assertEquals("Invalid content type", "text/html", response.getContentType());
 	}
 
-	@Override
 	@Test
-	public void testOverrideContentDisposition() throws Exception {
+	@Override
+	public void overrideContentDisposition() throws Exception {
 		Assume.group(TestGroup.CUSTOM_COMPILATION);
-
-		if (!canCompileReport) {
-			return;
-		}
+		assumeTrue(canCompileReport);
 
 		AbstractJasperReportsView view = getView(UNCOMPILED_REPORT);
 
@@ -86,12 +84,9 @@ public class JasperReportsMultiFormatViewTests extends AbstractJasperReportsView
 	}
 
 	@Test
-	public void testExporterParametersAreCarriedAcross() throws Exception {
+	public void exporterParametersAreCarriedAcross() throws Exception {
 		Assume.group(TestGroup.CUSTOM_COMPILATION);
-
-		if (!canCompileReport) {
-			return;
-		}
+		assumeTrue(canCompileReport);
 
 		JasperReportsMultiFormatView view = (JasperReportsMultiFormatView) getView(UNCOMPILED_REPORT);
 

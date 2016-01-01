@@ -31,7 +31,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
 
 /**
  * Factory used to create a {@link TableMetaDataProvider} implementation
- * based on the type of databse being used.
+ * based on the type of database being used.
  *
  * @author Thomas Risberg
  * @since 2.5

@@ -16,10 +16,6 @@
 
 package org.springframework.web.util;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.web.util.UriComponentsBuilder.*;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
@@ -27,10 +23,16 @@ import java.io.ObjectOutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.Test;
 
-import org.springframework.web.util.HierarchicalUriComponents.FullPathComponent;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.springframework.web.util.UriComponentsBuilder.fromUriString;
 
 /**
  * @author Arjen Poutsma
@@ -82,6 +84,16 @@ public class UriComponentsTests {
 		uriComponents = uriComponents.expand("1 2", "3 4");
 		assertEquals("/1 2 3 4", uriComponents.getPath());
 		assertEquals("http://example.com/1 2 3 4", uriComponents.toUriString());
+	}
+
+	// SPR-13311
+
+	@Test
+	public void expandWithRegexVar() {
+		String template = "/myurl/{name:[a-z]{1,5}}/show";
+		UriComponents uriComponents = UriComponentsBuilder.fromUriString(template).build();
+		uriComponents = uriComponents.expand(Collections.singletonMap("name", "test"));
+		assertEquals("/myurl/test/show", uriComponents.getPath());
 	}
 
 	// SPR-12123
@@ -165,51 +177,6 @@ public class UriComponentsTests {
 		assertThat(uriComponents1, equalTo(uriComponents1));
 		assertThat(uriComponents1, equalTo(uriComponents2));
 		assertThat(uriComponents1, not(equalTo(uriComponents3)));
-	}
-
-	@Test
-	public void partialPath() throws Exception {
-		FullPathComponent l;
-
-		l = new FullPathComponent("x");
-		assertEquals(1, l.getPartialPaths().size());
-		assertEquals("x", l.getPartialPaths().get(0).value);
-		assertEquals(HierarchicalUriComponents.Type.PATH, l.getPartialPaths().get(0).type);
-
-		l = new FullPathComponent("/foo");
-		assertEquals(1, l.getPartialPaths().size());
-		assertEquals("/foo", l.getPartialPaths().get(0).value);
-		assertEquals(HierarchicalUriComponents.Type.PATH, l.getPartialPaths().get(0).type);
-
-		l = new FullPathComponent("{/foo}");
-		assertEquals(1, l.getPartialPaths().size());
-		assertEquals("{/foo}", l.getPartialPaths().get(0).value);
-		assertEquals(HierarchicalUriComponents.Type.PATH_SEGMENT, l.getPartialPaths().get(0).type);
-
-		l = new FullPathComponent("/foo{/bar}");
-		assertEquals(2, l.getPartialPaths().size());
-		assertEquals("/foo", l.getPartialPaths().get(0).value);
-		assertEquals(HierarchicalUriComponents.Type.PATH, l.getPartialPaths().get(0).type);
-		assertEquals("{/bar}", l.getPartialPaths().get(1).value);
-		assertEquals(HierarchicalUriComponents.Type.PATH_SEGMENT, l.getPartialPaths().get(1).type);
-
-		l = new FullPathComponent("{/foo}{/bar}");
-		assertEquals(2, l.getPartialPaths().size());
-		assertEquals("{/foo}", l.getPartialPaths().get(0).value);
-		assertEquals(HierarchicalUriComponents.Type.PATH_SEGMENT, l.getPartialPaths().get(0).type);
-		assertEquals("{/bar}", l.getPartialPaths().get(1).value);
-		assertEquals(HierarchicalUriComponents.Type.PATH_SEGMENT, l.getPartialPaths().get(1).type);
-
-		l = new FullPathComponent("foo{/bar}baz");
-		assertEquals(3, l.getPartialPaths().size());
-		assertEquals("foo", l.getPartialPaths().get(0).value);
-		assertEquals(HierarchicalUriComponents.Type.PATH, l.getPartialPaths().get(0).type);
-		assertEquals("{/bar}", l.getPartialPaths().get(1).value);
-		assertEquals(HierarchicalUriComponents.Type.PATH_SEGMENT, l.getPartialPaths().get(1).type);
-		assertEquals("baz", l.getPartialPaths().get(2).value);
-		assertEquals(HierarchicalUriComponents.Type.PATH, l.getPartialPaths().get(2).type);
-
-
 	}
 
 }

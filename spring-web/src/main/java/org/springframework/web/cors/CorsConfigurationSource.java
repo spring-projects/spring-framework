@@ -19,8 +19,8 @@ package org.springframework.web.cors;
 import javax.servlet.http.HttpServletRequest;
 
 /**
- * Interface to be implemented by classes (usually HTTP request handlers) that provides
- * a {@link CorsConfiguration} instance based on the provided request.
+ * Interface to be implemented by classes (usually HTTP request handlers) that
+ * provides a {@link CorsConfiguration} instance based on the provided request.
  *
  * @author Sebastien Deleuze
  * @since 4.2

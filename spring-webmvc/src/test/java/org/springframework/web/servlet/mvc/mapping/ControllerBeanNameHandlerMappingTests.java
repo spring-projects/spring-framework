@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package org.springframework.web.servlet.mvc.mapping;
 
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockServletContext;
@@ -24,54 +26,65 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
 
+import static org.junit.Assert.*;
+
 /**
  * @author Juergen Hoeller
  */
-public class ControllerBeanNameHandlerMappingTests extends TestCase {
+public class ControllerBeanNameHandlerMappingTests {
 
-	public static final String LOCATION = "/org/springframework/web/servlet/mvc/mapping/name-mapping.xml";
+	private static final String LOCATION = "/org/springframework/web/servlet/mvc/mapping/name-mapping.xml";
 
-	private XmlWebApplicationContext wac;
+	private final XmlWebApplicationContext wac = new XmlWebApplicationContext();
 
 	private HandlerMapping hm;
 
-	@Override
+
+	@Before
 	public void setUp() throws Exception {
-		MockServletContext sc = new MockServletContext("");
-		this.wac = new XmlWebApplicationContext();
-		this.wac.setServletContext(sc);
-		this.wac.setConfigLocations(new String[] {LOCATION});
+		this.wac.setServletContext(new MockServletContext(""));
+		this.wac.setConfigLocations(LOCATION);
 		this.wac.refresh();
-		this.hm = (HandlerMapping) this.wac.getBean("mapping");
+		this.hm = this.wac.getBean(HandlerMapping.class);
 	}
 
-	public void testIndexUri() throws Exception {
+	@After
+	public void closeWac() {
+		this.wac.close();
+	}
+
+	@Test
+	public void indexUri() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/index");
 		HandlerExecutionChain chain = this.hm.getHandler(request);
 		assertEquals(this.wac.getBean("index"), chain.getHandler());
 	}
 
-	public void testMapSimpleUri() throws Exception {
+	@Test
+	public void mapSimpleUri() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/welcome");
 		HandlerExecutionChain chain = this.hm.getHandler(request);
 		assertEquals(this.wac.getBean("welcome"), chain.getHandler());
 	}
 
-	public void testWithContextPath() throws Exception {
+	@Test
+	public void withContextPath() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/myapp/welcome");
 		request.setContextPath("/myapp");
 		HandlerExecutionChain chain = this.hm.getHandler(request);
 		assertEquals(this.wac.getBean("welcome"), chain.getHandler());
 	}
 
-	public void testWithMultiActionControllerMapping() throws Exception {
+	@Test
+	public void withMultiActionControllerMapping() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/admin");
 		HandlerExecutionChain chain = this.hm.getHandler(request);
 		assertEquals(this.wac.getBean("admin"), chain.getHandler());
 	}
 
-	public void testWithoutControllerSuffix() throws Exception {
-	  MockHttpServletRequest request = new MockHttpServletRequest("GET", "/buy");
+	@Test
+	public void withoutControllerSuffix() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/buy");
 		HandlerExecutionChain chain = this.hm.getHandler(request);
 		assertEquals(this.wac.getBean("buy"), chain.getHandler());
 	}

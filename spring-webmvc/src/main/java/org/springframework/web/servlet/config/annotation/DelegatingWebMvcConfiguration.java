@@ -132,4 +132,9 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 		this.configurers.configureHandlerExceptionResolvers(exceptionResolvers);
 	}
 
+	@Override
+	protected void addCorsMappings(CorsRegistry registry) {
+		this.configurers.addCorsMappings(registry);
+	}
+
 }

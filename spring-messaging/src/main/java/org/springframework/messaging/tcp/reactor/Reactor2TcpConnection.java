@@ -16,7 +16,6 @@
 
 package org.springframework.messaging.tcp.reactor;
 
-import reactor.fn.Functions;
 import reactor.io.net.ChannelStream;
 import reactor.rx.Promise;
 import reactor.rx.Promises;
@@ -58,13 +57,15 @@ public class Reactor2TcpConnection<P> implements TcpConnection<P> {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void onReadInactivity(Runnable runnable, long inactivityDuration) {
-		this.channelStream.on().readIdle(inactivityDuration, Functions.<Void>consumer(runnable));
+		this.channelStream.on().readIdle(inactivityDuration, reactor.fn.Functions.<Void>consumer(runnable));
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void onWriteInactivity(Runnable runnable, long inactivityDuration) {
-		this.channelStream.on().writeIdle(inactivityDuration, Functions.<Void>consumer(runnable));
+		this.channelStream.on().writeIdle(inactivityDuration, reactor.fn.Functions.<Void>consumer(runnable));
 	}
 
 	@Override

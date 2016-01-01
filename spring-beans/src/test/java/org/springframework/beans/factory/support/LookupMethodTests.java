@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,6 +88,16 @@ public class LookupMethodTests {
 		}
 		catch (AbstractMethodError ex) {
 		}
+	}
+
+	@Test
+	public void testWithOverriddenLookupMethod() {
+		AbstractBean bean = (AbstractBean) beanFactory.getBean("extendedBean");
+		assertNotNull(bean);
+		TestBean expected = bean.getOneArgument("haha");
+		assertEquals(TestBean.class, expected.getClass());
+		assertEquals("haha", expected.getName());
+		assertTrue(expected.isJedi());
 	}
 
 

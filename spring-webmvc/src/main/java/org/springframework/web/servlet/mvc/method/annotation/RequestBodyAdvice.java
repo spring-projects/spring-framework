@@ -23,12 +23,11 @@ import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageConverter;
 
-
 /**
  * Allows customizing the request before its body is read and converted into an
- * Object and also allows the resulting Object before it is passed into a
- * controller method as an {code @RequestBody} or an {@code HttpEntity} method
- * argument.
+ * Object and also allows for processing of the resulting Object before it is
+ * passed into a controller method as an {@code @RequestBody} or an
+ * {@code HttpEntity} method argument.
  *
  * <p>Implementations of this contract may be registered directly with the
  * {@code RequestMappingHandlerAdapter} or more likely annotated with

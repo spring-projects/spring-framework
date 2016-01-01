@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
+
 import org.junit.Test;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -221,7 +222,7 @@ public class MappingJackson2HttpMessageConverterTests {
 		bean.setName("Jason");
 
 		this.converter.setPrettyPrint(true);
-		this.converter.writeInternal(bean, outputMessage);
+		this.converter.writeInternal(bean, null, outputMessage);
 		String result = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
 
 		assertEquals("{" + NEWLINE_SYSTEM_PROPERTY + "  \"name\" : \"Jason\"" + NEWLINE_SYSTEM_PROPERTY + "}", result);
@@ -231,18 +232,18 @@ public class MappingJackson2HttpMessageConverterTests {
 	public void prefixJson() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		this.converter.setPrefixJson(true);
-		this.converter.writeInternal("foo", outputMessage);
+		this.converter.writeInternal("foo", null, outputMessage);
 
-		assertEquals("{} && \"foo\"", outputMessage.getBodyAsString(Charset.forName("UTF-8")));
+		assertEquals(")]}', \"foo\"", outputMessage.getBodyAsString(Charset.forName("UTF-8")));
 	}
 
 	@Test
 	public void prefixJsonCustom() throws Exception {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		this.converter.setJsonPrefix(")]}',");
-		this.converter.writeInternal("foo", outputMessage);
+		this.converter.setJsonPrefix(")))");
+		this.converter.writeInternal("foo", null, outputMessage);
 
-		assertEquals(")]}',\"foo\"", outputMessage.getBodyAsString(Charset.forName("UTF-8")));
+		assertEquals(")))\"foo\"", outputMessage.getBodyAsString(Charset.forName("UTF-8")));
 	}
 
 	@Test
@@ -255,7 +256,7 @@ public class MappingJackson2HttpMessageConverterTests {
 
 		MappingJacksonValue jacksonValue = new MappingJacksonValue(bean);
 		jacksonValue.setSerializationView(MyJacksonView1.class);
-		this.converter.writeInternal(jacksonValue, outputMessage);
+		this.converter.writeInternal(jacksonValue, null, outputMessage);
 
 		String result = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
 		assertThat(result, containsString("\"withView1\":\"with\""));
@@ -274,7 +275,7 @@ public class MappingJackson2HttpMessageConverterTests {
 		FilterProvider filters = new SimpleFilterProvider().addFilter("myJacksonFilter",
 				SimpleBeanPropertyFilter.serializeAllExcept("property2"));
 		jacksonValue.setFilters(filters);
-		this.converter.writeInternal(jacksonValue, outputMessage);
+		this.converter.writeInternal(jacksonValue, null, outputMessage);
 
 		String result = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
 		assertThat(result, containsString("\"property1\":\"value\""));
@@ -288,9 +289,9 @@ public class MappingJackson2HttpMessageConverterTests {
 		jacksonValue.setJsonpFunction("callback");
 
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		this.converter.writeInternal(jacksonValue, outputMessage);
+		this.converter.writeInternal(jacksonValue, null, outputMessage);
 
-		assertEquals("callback(\"foo\");", outputMessage.getBodyAsString(Charset.forName("UTF-8")));
+		assertEquals("/**/callback(\"foo\");", outputMessage.getBodyAsString(Charset.forName("UTF-8")));
 	}
 
 	@Test
@@ -304,18 +305,64 @@ public class MappingJackson2HttpMessageConverterTests {
 		MappingJacksonValue jacksonValue = new MappingJacksonValue(bean);
 		jacksonValue.setSerializationView(MyJacksonView1.class);
 		jacksonValue.setJsonpFunction("callback");
-		this.converter.writeInternal(jacksonValue, outputMessage);
+		this.converter.writeInternal(jacksonValue, null, outputMessage);
 
 		String result = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
-		assertThat(result, startsWith("callback("));
+		assertThat(result, startsWith("/**/callback("));
 		assertThat(result, endsWith(");"));
 		assertThat(result, containsString("\"withView1\":\"with\""));
 		assertThat(result, not(containsString("\"withView2\":\"with\"")));
 		assertThat(result, not(containsString("\"withoutView\":\"without\"")));
 	}
 
+	@Test  // SPR-13318
+	public void writeSubType() throws Exception {
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		MyBean bean = new MyBean();
+		bean.setString("Foo");
+		bean.setNumber(42);
 
-	public static class MyBean {
+		this.converter.writeInternal(bean, MyInterface.class, outputMessage);
+
+		String result = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
+		assertTrue(result.contains("\"string\":\"Foo\""));
+		assertTrue(result.contains("\"number\":42"));
+	}
+
+	@Test  // SPR-13318
+	public void writeSubTypeList() throws Exception {
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		List<MyBean> beans = new ArrayList<MyBean>();
+		MyBean foo = new MyBean();
+		foo.setString("Foo");
+		foo.setNumber(42);
+		beans.add(foo);
+		MyBean bar = new MyBean();
+		bar.setString("Bar");
+		bar.setNumber(123);
+		beans.add(bar);
+		ParameterizedTypeReference<List<MyInterface>> typeReference =
+				new ParameterizedTypeReference<List<MyInterface>>() {};
+
+		this.converter.writeInternal(beans, typeReference.getType(), outputMessage);
+
+		String result = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
+		assertTrue(result.contains("\"string\":\"Foo\""));
+		assertTrue(result.contains("\"number\":42"));
+		assertTrue(result.contains("\"string\":\"Bar\""));
+		assertTrue(result.contains("\"number\":123"));
+	}
+
+
+	interface MyInterface {
+
+		String getString();
+
+		void setString(String string);
+	}
+
+
+	public static class MyBean implements MyInterface {
 
 		private String string;
 
@@ -395,6 +442,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	private interface MyJacksonView1 {};
 	private interface MyJacksonView2 {};
 
+	@SuppressWarnings("unused")
 	private static class JacksonViewBean {
 
 		@JsonView(MyJacksonView1.class)
@@ -431,6 +479,7 @@ public class MappingJackson2HttpMessageConverterTests {
 	}
 
 	@JsonFilter("myJacksonFilter")
+	@SuppressWarnings("unused")
 	private static class JacksonFilteredBean {
 
 		private String property1;

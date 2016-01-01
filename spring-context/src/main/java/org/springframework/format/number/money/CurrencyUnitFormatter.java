@@ -18,7 +18,7 @@ package org.springframework.format.number.money;
 
 import java.util.Locale;
 import javax.money.CurrencyUnit;
-import javax.money.MonetaryCurrencies;
+import javax.money.Monetary;
 
 import org.springframework.format.Formatter;
 
@@ -38,7 +38,7 @@ public class CurrencyUnitFormatter implements Formatter<CurrencyUnit> {
 
 	@Override
 	public CurrencyUnit parse(String text, Locale locale) {
-		return MonetaryCurrencies.getCurrency(text);
+		return Monetary.getCurrency(text);
 	}
 
 }

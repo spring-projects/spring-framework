@@ -21,8 +21,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.expression.AnnotatedElementKey;
+import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.context.expression.CachedExpressionEvaluator;
 import org.springframework.context.expression.MethodBasedEvaluationContext;
 import org.springframework.core.DefaultParameterNameDiscoverer;
@@ -52,11 +54,16 @@ class EventExpressionEvaluator extends CachedExpressionEvaluator {
 	 * on the specified method.
 	 */
 	public EvaluationContext createEvaluationContext(ApplicationEvent event, Class<?> targetClass,
-			Method method, Object[] args) {
+			Method method, Object[] args, BeanFactory beanFactory) {
 
 		Method targetMethod = getTargetMethod(targetClass, method);
 		EventExpressionRootObject root = new EventExpressionRootObject(event, args);
-		return new MethodBasedEvaluationContext(root, targetMethod, args, this.paramNameDiscoverer);
+		MethodBasedEvaluationContext evaluationContext =
+				new MethodBasedEvaluationContext(root, targetMethod, args, this.paramNameDiscoverer);
+		if (beanFactory != null) {
+			evaluationContext.setBeanResolver(new BeanFactoryResolver(beanFactory));
+		}
+		return evaluationContext;
 	}
 
 	/**

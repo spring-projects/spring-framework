@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,28 +51,28 @@ public abstract class GenericTypeResolver {
 
 	/**
 	 * Determine the target type for the given parameter specification.
-	 * @param methodParam the method parameter specification
+	 * @param methodParameter the method parameter specification
 	 * @return the corresponding generic parameter type
 	 * @deprecated as of Spring 4.0, use {@link MethodParameter#getGenericParameterType()}
 	 */
 	@Deprecated
-	public static Type getTargetType(MethodParameter methodParam) {
-		Assert.notNull(methodParam, "MethodParameter must not be null");
-		return methodParam.getGenericParameterType();
+	public static Type getTargetType(MethodParameter methodParameter) {
+		Assert.notNull(methodParameter, "MethodParameter must not be null");
+		return methodParameter.getGenericParameterType();
 	}
 
 	/**
 	 * Determine the target type for the given generic parameter type.
-	 * @param methodParam the method parameter specification
-	 * @param clazz the class to resolve type variables against
+	 * @param methodParameter the method parameter specification
+	 * @param implementationClass the class to resolve type variables against
 	 * @return the corresponding generic parameter or return type
 	 */
-	public static Class<?> resolveParameterType(MethodParameter methodParam, Class<?> clazz) {
-		Assert.notNull(methodParam, "MethodParameter must not be null");
-		Assert.notNull(clazz, "Class must not be null");
-		methodParam.setContainingClass(clazz);
-		methodParam.setParameterType(ResolvableType.forMethodParameter(methodParam).resolve());
-		return methodParam.getParameterType();
+	public static Class<?> resolveParameterType(MethodParameter methodParameter, Class<?> implementationClass) {
+		Assert.notNull(methodParameter, "MethodParameter must not be null");
+		Assert.notNull(implementationClass, "Class must not be null");
+		methodParameter.setContainingClass(implementationClass);
+		ResolvableType.resolveMethodParameter(methodParameter);
+		return methodParameter.getParameterType();
 	}
 
 	/**

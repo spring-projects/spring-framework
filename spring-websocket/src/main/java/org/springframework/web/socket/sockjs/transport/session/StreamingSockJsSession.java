@@ -47,7 +47,7 @@ public abstract class StreamingSockJsSession extends AbstractHttpSockJsSession {
 
 
 	/**
-	 * @deprecated as of 4.2 this method is no longer used.
+	 * @deprecated as of 4.2, since this method is no longer used.
 	 */
 	@Override
 	@Deprecated
@@ -60,6 +60,7 @@ public abstract class StreamingSockJsSession extends AbstractHttpSockJsSession {
 	 * @since 4.2
 	 */
 	protected abstract byte[] getPrelude(ServerHttpRequest request);
+
 
 	@Override
 	protected void handleRequestInternal(ServerHttpRequest request, ServerHttpResponse response,
@@ -84,15 +85,13 @@ public abstract class StreamingSockJsSession extends AbstractHttpSockJsSession {
 			SockJsFrame frame = SockJsFrame.messageFrame(messageCodec, message);
 			writeFrame(frame);
 
-			this.byteCount += frame.getContentBytes().length + 1;
+			this.byteCount += (frame.getContentBytes().length + 1);
 			if (logger.isTraceEnabled()) {
-				logger.trace(this.byteCount + " bytes written so far, "
-						+ getMessageCache().size() + " more messages not flushed");
+				logger.trace(this.byteCount + " bytes written so far, " +
+						getMessageCache().size() + " more messages not flushed");
 			}
 			if (this.byteCount >= getSockJsServiceConfig().getStreamBytesLimit()) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Streamed bytes limit reached. Recycling current request");
-				}
+				logger.trace("Streamed bytes limit reached, recycling current request");
 				resetRequest();
 				this.byteCount = 0;
 				break;

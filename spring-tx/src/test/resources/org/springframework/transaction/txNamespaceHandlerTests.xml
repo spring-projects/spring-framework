@@ -15,10 +15,10 @@
 		<tx:attributes>
 			<tx:method name="get*" read-only="true"/>
 			<tx:method name="set*"/>
-			<tx:method name="exceptional"/> 
+			<tx:method name="exceptional"/>
 		</tx:attributes>
 	</tx:advice>
-	
+
 	<tx:advice id="txRollbackAdvice">
 		<tx:attributes>
 			<tx:method name="get*" rollback-for="java.lang.Exception"/>

@@ -31,7 +31,6 @@ import groovy.lang.GroovyObjectSupport;
 import groovy.lang.GroovyShell;
 import groovy.lang.GroovySystem;
 import groovy.lang.MetaClass;
-
 import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 import org.codehaus.groovy.runtime.InvokerHelper;
 
@@ -337,8 +336,8 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 				if (uri == null) {
 					throw new IllegalArgumentException("Namespace definition must supply a non-null URI");
 				}
-				NamespaceHandler namespaceHandler = this.groovyDslXmlBeanDefinitionReader.getNamespaceHandlerResolver().resolve(
-					uri);
+				NamespaceHandler namespaceHandler =
+						this.groovyDslXmlBeanDefinitionReader.getNamespaceHandlerResolver().resolve(uri);
 				if (namespaceHandler == null) {
 					throw new BeanDefinitionParsingException(new Problem("No namespace handler found for URI: " + uri,
 							new Location(new DescriptiveResource(("Groovy")))));
@@ -375,7 +374,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 				throw new IllegalArgumentException("Argument to ref() is not a valid bean or was not found");
 
 			if (args[0] instanceof RuntimeBeanReference) {
-				refName = ((RuntimeBeanReference)args[0]).getBeanName();
+				refName = ((RuntimeBeanReference) args[0]).getBeanName();
 			}
 			else {
 				refName = args[0].toString();
@@ -388,7 +387,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			}
 			return new RuntimeBeanReference(refName, parentRef);
 		}
-		else if (this.namespaces.containsKey(name) && args.length > 0 && (args[0] instanceof Closure)) {
+		else if (this.namespaces.containsKey(name) && args.length > 0 && args[0] instanceof Closure) {
 			GroovyDynamicElementReader reader = createDynamicElementReader(name);
 			reader.invokeMethod("doCall", args);
 		}
@@ -396,7 +395,8 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			// abstract bean definition
 			return invokeBeanDefiningMethod(name, args);
 		}
-		else if (args.length > 0 && (args[0] instanceof Class || args[0] instanceof RuntimeBeanReference || args[0] instanceof Map)) {
+		else if (args.length > 0 &&
+				(args[0] instanceof Class || args[0] instanceof RuntimeBeanReference || args[0] instanceof Map)) {
 			return invokeBeanDefiningMethod(name, args);
 		}
 		else if (args.length > 1 && args[args.length -1] instanceof Closure) {
@@ -619,7 +619,7 @@ public class GroovyBeanDefinitionReader extends AbstractBeanDefinitionReader imp
 			try {
 				Closure callable = (Closure) value;
 				Class<?> parameterType = callable.getParameterTypes()[0];
-				if (parameterType.equals(Object.class)) {
+				if (Object.class == parameterType) {
 					this.currentBeanDefinition = new GroovyBeanDefinitionWrapper("");
 					callable.call(this.currentBeanDefinition);
 				}

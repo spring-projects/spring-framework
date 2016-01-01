@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,8 +61,8 @@ import java.lang.annotation.Target;
  * a {@code PropertySourcesPlaceholderConfigurer}. This happens automatically when using
  * {@code <context:property-placeholder>} in XML, but must be explicitly registered using
  * a {@code static} {@code @Bean} method when using {@code @Configuration} classes. See
- * the "Working with externalized values" section of @{@link Configuration} Javadoc and
- * "a note on BeanFactoryPostProcessor-returning @Bean methods" of @{@link Bean} Javadoc
+ * the "Working with externalized values" section of @{@link Configuration}'s javadoc and
+ * "a note on BeanFactoryPostProcessor-returning @Bean methods" of @{@link Bean}'s javadoc
  * for details and examples.
  *
  * <h3>Resolving ${...} placeholders within {@code @PropertySource} resource locations</h3>
@@ -126,11 +126,11 @@ import java.lang.annotation.Target;
  * <p>In certain situations, it may not be possible or practical to tightly control
  * property source ordering when using {@code @ProperySource} annotations. For example,
  * if the {@code @Configuration} classes above were registered via component-scanning,
- * the ordering is difficult to predict.  In such cases - and if overriding is important -
+ * the ordering is difficult to predict. In such cases - and if overriding is important -
  * it is recommended that the user fall back to using the programmatic PropertySource API.
  * See {@link org.springframework.core.env.ConfigurableEnvironment ConfigurableEnvironment}
  * and {@link org.springframework.core.env.MutablePropertySources MutablePropertySources}
- * Javadoc for details.
+ * javadocs for details.
  *
  * @author Chris Beams
  * @author Phillip Webb
@@ -160,11 +160,11 @@ public @interface PropertySource {
 	 * Indicate the resource location(s) of the properties file to be loaded.
 	 * For example, {@code "classpath:/com/myco/app.properties"} or
 	 * {@code "file:/path/to/file"}.
-	 * <p>Resource location wildcards (e.g. *&#42;/*.properties) are not permitted; each
-	 * location must evaluate to exactly one {@code .properties} resource.
+	 * <p>Resource location wildcards (e.g. *&#42;/*.properties) are not permitted;
+	 * each location must evaluate to exactly one {@code .properties} resource.
 	 * <p>${...} placeholders will be resolved against any/all property sources already
-	 * registered with the {@code Environment}. See {@linkplain PropertySource above} for
-	 * examples.
+	 * registered with the {@code Environment}. See {@linkplain PropertySource above}
+	 * for examples.
 	 * <p>Each location will be added to the enclosing {@code Environment} as its own
 	 * property source, and in the order declared.
 	 */

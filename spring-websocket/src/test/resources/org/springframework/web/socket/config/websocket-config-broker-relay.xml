@@ -4,7 +4,7 @@
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
-	<websocket:message-broker order="2" user-destination-broadcast="/topic/unresolved">
+	<websocket:message-broker order="2">
 		<websocket:stomp-endpoint path="/foo">
 			<websocket:sockjs/>
 		</websocket:stomp-endpoint>
@@ -12,7 +12,9 @@
 									  client-login="clientlogin" client-passcode="clientpass"
 									  system-login="syslogin" system-passcode="syspass"
 									  heartbeat-send-interval="5000" heartbeat-receive-interval="5000"
-									  virtual-host="spring.io"/>
+									  virtual-host="spring.io"
+									  user-destination-broadcast="/topic/unresolved-user-destination"
+									  user-registry-broadcast="/topic/simp-user-registry"/>
 	</websocket:message-broker>
 
 	<bean id="myHandler" class="org.springframework.web.socket.config.TestWebSocketHandler"/>

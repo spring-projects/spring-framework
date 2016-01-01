@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,6 @@ import org.springframework.web.socket.sockjs.frame.Jackson2SockJsMessageCodec;
 import org.springframework.web.socket.sockjs.transport.TransportType;
 
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 /**
@@ -128,7 +127,7 @@ public class DefaultTransportRequestTests {
 
 	protected DefaultTransportRequest createTransportRequest(Transport transport, TransportType type) throws Exception {
 		SockJsUrlInfo urlInfo = new SockJsUrlInfo(new URI("http://example.com"));
-		return new DefaultTransportRequest(urlInfo, new HttpHeaders(), transport, type, CODEC);
+		return new DefaultTransportRequest(urlInfo, new HttpHeaders(), new HttpHeaders(), transport, type, CODEC);
 	}
 
 }

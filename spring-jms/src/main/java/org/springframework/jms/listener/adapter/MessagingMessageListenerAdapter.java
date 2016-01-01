@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageLis
 			return (Message<?>) getMessagingMessageConverter().fromMessage(jmsMessage);
 		}
 		catch (JMSException ex) {
-			throw new MessageConversionException("Could not unmarshal message", ex);
+			throw new MessageConversionException("Could not convert JMS message", ex);
 		}
 	}
 
@@ -90,8 +90,8 @@ public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageLis
 			return this.handlerMethod.invoke(message, jmsMessage, session);
 		}
 		catch (MessagingException ex) {
-			throw new ListenerExecutionFailedException(createMessagingErrorMessage("Listener method could not " +
-					"be invoked with the incoming message"), ex);
+			throw new ListenerExecutionFailedException(
+					createMessagingErrorMessage("Listener method could not be invoked with incoming message"), ex);
 		}
 		catch (Exception ex) {
 			throw new ListenerExecutionFailedException("Listener method '" +

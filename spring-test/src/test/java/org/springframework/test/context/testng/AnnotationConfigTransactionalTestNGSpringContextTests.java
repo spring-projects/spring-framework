@@ -183,8 +183,8 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests extends
 		@Bean
 		public DataSource dataSource() {
 			return new EmbeddedDatabaseBuilder()//
-			.addScript("classpath:/org/springframework/test/context/testng/schema.sql")//
-			.addScript("classpath:/org/springframework/test/context/testng/data.sql")//
+			.addScript("classpath:/org/springframework/test/jdbc/schema.sql")//
+			.addScript("classpath:/org/springframework/test/jdbc/data.sql")//
 			.build();
 		}
 

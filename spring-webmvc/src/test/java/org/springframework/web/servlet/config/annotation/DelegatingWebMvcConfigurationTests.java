@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import org.mockito.MockitoAnnotations;
 
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.FormattingConversionService;
-import org.springframework.http.HttpMessage;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.util.PathMatcher;

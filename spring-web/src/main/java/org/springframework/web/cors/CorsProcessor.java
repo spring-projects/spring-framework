@@ -21,35 +21,30 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Contract for handling CORS preflight requests and intercepting CORS simple
- * and actual requests.
+ * A strategy that takes a request and a {@link CorsConfiguration} and updates
+ * the response.
+ *
+ * <p>This component is not concerned with how a {@code CorsConfiguration} is
+ * selected but rather takes follow-up actions such as applying CORS validation
+ * checks and either rejecting the response or adding CORS headers to the
+ * response.
  *
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  * @since 4.2
  * @see <a href="http://www.w3.org/TR/cors/">CORS W3C recommandation</a>
+ * @see org.springframework.web.servlet.handler.AbstractHandlerMapping#setCorsProcessor
  */
 public interface CorsProcessor {
 
 	/**
-	 * Process a preflight CORS request given a {@link CorsConfiguration}.
-	 * If the request is not a valid CORS pre-flight request or if it does not
-	 * comply with the configuration it should be rejected.
-	 * If the request is valid and complies with the configuration, CORS headers
-	 * should be added to the response.
-	 * @return {@code false} if the request is rejected, else {@code true}.
+	 * Process a request given a {@code CorsConfiguration}.
+	 * @param configuration the applicable CORS configuration (possibly {@code null})
+	 * @param request the current request
+	 * @param response the current response
+	 * @return {@code false} if the request is rejected, {@code true} otherwise
 	 */
-	boolean processPreFlightRequest(CorsConfiguration conf, HttpServletRequest request,
-			HttpServletResponse response) throws IOException;
-
-	/**
-	 * Process a simple or actual CORS request given a {@link CorsConfiguration}.
-	 * If the request is not a valid CORS simple or actual request or if it does
-	 * not comply with the configuration, it should be rejected.
-	 * If the request is valid and comply with the configuration, this method adds the related
-	 * CORS headers to the response.
-	 * @return {@code false} if the request is rejected, else {@code true}.
-	 */
-	boolean processActualRequest(CorsConfiguration conf, HttpServletRequest request,
+	boolean processRequest(CorsConfiguration configuration, HttpServletRequest request,
 			HttpServletResponse response) throws IOException;
 
 }

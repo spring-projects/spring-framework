@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,24 +20,17 @@ import org.junit.Test;
 
 import org.springframework.context.support.StaticApplicationContext;
 
-import static org.junit.Assert.*;
-
 /**
  * @author Rob Harrop
  */
 public abstract class AbstractConfigurableJasperReportsViewTests extends AbstractJasperReportsViewTests {
 
-	@Test
-	public void testNoConfiguredExporter() throws Exception {
+	@Test(expected = IllegalArgumentException.class)
+	public void noConfiguredExporter() throws Exception {
 		ConfigurableJasperReportsView view = new ConfigurableJasperReportsView();
 		view.setUrl(COMPILED_REPORT);
-		try {
-			view.setApplicationContext(new StaticApplicationContext());
-			fail("Should not be able to setup view class without an exporter class.");
-		}
-		catch (IllegalArgumentException e) {
-			// success
-		}
+		// Should not be able to set up view class without an exporter class.
+		view.setApplicationContext(new StaticApplicationContext());
 	}
 
 }

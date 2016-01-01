@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ public abstract class TypeUtils {
 		Assert.notNull(rhsType, "Right-hand side type must not be null");
 
 		// all types are assignable to themselves and to class Object
-		if (lhsType.equals(rhsType) || lhsType.equals(Object.class)) {
+		if (lhsType.equals(rhsType) || Object.class == lhsType) {
 			return true;
 		}
 

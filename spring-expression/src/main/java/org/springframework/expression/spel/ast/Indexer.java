@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -166,7 +166,7 @@ public class Indexer extends SpelNodeImpl {
 
 		// Try and treat the index value as a property of the context object
 		// TODO could call the conversion service to convert the value to a String
-		if (String.class.equals(indexValue.getTypeDescriptor().getType())) {
+		if (String.class == indexValue.getTypeDescriptor().getType()) {
 			this.indexedType = IndexedType.OBJECT;
 			return new PropertyIndexingValueRef(targetObject, (String) indexValue.getValue(),
 					state.getEvaluationContext(), targetDescriptor);
@@ -248,6 +248,7 @@ public class Indexer extends SpelNodeImpl {
 			cf.exitCompilationScope();
 			mv.visitInsn(insn);
 		}
+
 		else if (this.indexedType == IndexedType.LIST) {
 			mv.visitTypeInsn(CHECKCAST, "java/util/List");
 			cf.enterCompilationScope();
@@ -255,6 +256,7 @@ public class Indexer extends SpelNodeImpl {
 			cf.exitCompilationScope();
 			mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "get", "(I)Ljava/lang/Object;", true);
 		}
+
 		else if (this.indexedType == IndexedType.MAP) {
 			mv.visitTypeInsn(CHECKCAST, "java/util/Map");
 			// Special case when the key is an unquoted string literal that will be parsed as
@@ -271,27 +273,30 @@ public class Indexer extends SpelNodeImpl {
 			}
 			mv.visitMethodInsn(INVOKEINTERFACE, "java/util/Map", "get", "(Ljava/lang/Object;)Ljava/lang/Object;", true);
 		} 
+
 		else if (this.indexedType == IndexedType.OBJECT) {
 			ReflectivePropertyAccessor.OptimalPropertyAccessor accessor =
 					(ReflectivePropertyAccessor.OptimalPropertyAccessor) this.cachedReadAccessor;
 			Member member = accessor.member;
 			boolean isStatic = Modifier.isStatic(member.getModifiers());
-			String memberDeclaringClassSlashedDescriptor = member.getDeclaringClass().getName().replace('.', '/');
+			String classDesc = member.getDeclaringClass().getName().replace('.', '/');
+
 			if (!isStatic) {
 				if (descriptor == null) {
 					cf.loadTarget(mv);
 				}
-				if (descriptor == null || !memberDeclaringClassSlashedDescriptor.equals(descriptor.substring(1))) {
-					mv.visitTypeInsn(CHECKCAST, memberDeclaringClassSlashedDescriptor);
+				if (descriptor == null || !classDesc.equals(descriptor.substring(1))) {
+					mv.visitTypeInsn(CHECKCAST, classDesc);
 				}
 			}
-			if (member instanceof Field) {
-				mv.visitFieldInsn(isStatic ? GETSTATIC : GETFIELD, memberDeclaringClassSlashedDescriptor,
-						member.getName(), CodeFlow.toJvmDescriptor(((Field) member).getType()));
+
+			if (member instanceof Method) {
+				mv.visitMethodInsn((isStatic? INVOKESTATIC : INVOKEVIRTUAL), classDesc, member.getName(),
+						CodeFlow.createSignatureDescriptor((Method) member), false);
 			}
 			else {
-				mv.visitMethodInsn(isStatic? INVOKESTATIC : INVOKEVIRTUAL, memberDeclaringClassSlashedDescriptor,
-						member.getName(), CodeFlow.createSignatureDescriptor((Method) member), false);
+				mv.visitFieldInsn((isStatic ? GETSTATIC : GETFIELD), classDesc, member.getName(),
+						CodeFlow.toJvmDescriptor(((Field) member).getType()));
 			}
 		} 
 
@@ -555,12 +560,8 @@ public class Indexer extends SpelNodeImpl {
 								ReflectivePropertyAccessor.OptimalPropertyAccessor optimalAccessor =
 										(ReflectivePropertyAccessor.OptimalPropertyAccessor) accessor;
 								Member member = optimalAccessor.member;
-								if (member instanceof Field) {
-									Indexer.this.exitTypeDescriptor = CodeFlow.toDescriptor(((Field)member).getType());
-								}
-								else {
-									Indexer.this.exitTypeDescriptor = CodeFlow.toDescriptor(((Method)member).getReturnType());
-								}
+								Indexer.this.exitTypeDescriptor = CodeFlow.toDescriptor(member instanceof Method ?
+										((Method) member).getReturnType() : ((Field) member).getType());
 							}
 							return accessor.read(this.evaluationContext, this.targetObject, this.name);
 						}

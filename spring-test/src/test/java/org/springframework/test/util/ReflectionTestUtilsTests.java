@@ -42,6 +42,7 @@ public class ReflectionTestUtilsTests {
 	private static final Float PI = new Float((float) 22 / 7);
 
 	private final Person person = new Person();
+
 	private final Component component = new Component();
 
 	@Rule
@@ -52,6 +53,7 @@ public class ReflectionTestUtilsTests {
 	public void resetStaticFields() {
 		StaticFields.reset();
 	}
+
 
 	@Test
 	public void setFieldWithNullTargetObject() throws Exception {
@@ -91,7 +93,7 @@ public class ReflectionTestUtilsTests {
 	@Test
 	public void setFieldWithBogusName() throws Exception {
 		exception.expect(IllegalArgumentException.class);
-		exception.expectMessage(startsWith("Could not find field [bogus]"));
+		exception.expectMessage(startsWith("Could not find field 'bogus'"));
 		setField(person, "bogus", new Long(99), long.class);
 	}
 

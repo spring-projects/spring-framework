@@ -36,7 +36,7 @@ import java.lang.annotation.Target;
  *
  * <p>{@code @DirtiesContext} may be used as a class-level and method-level
  * annotation within the same class or class hierarchy. In such scenarios, the
- * {@code ApplicationContext} will be marked as <em>dirty</em> before or 
+ * {@code ApplicationContext} will be marked as <em>dirty</em> before or
  * after any such annotated method as well as before or after the current test
  * class, depending on the configured {@link #methodMode} and {@link #classMode}.
  *
@@ -64,10 +64,16 @@ import java.lang.annotation.Target;
  * {@link ClassMode#AFTER_CLASS AFTER_CLASS}</li>
  * </ul>
  *
+ * <p>{@code BEFORE_*} modes are supported by the
+ * {@link org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener DirtiesContextBeforeModesTestExecutionListener};
+ * {@code AFTER_*} modes are supported by the
+ * {@link org.springframework.test.context.support.DirtiesContextTestExecutionListener DirtiesContextTestExecutionListener}.
+ *
  * @author Sam Brannen
  * @author Rod Johnson
  * @since 2.0
  * @see org.springframework.test.context.ContextConfiguration
+ * @see org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener
  * @see org.springframework.test.context.support.DirtiesContextTestExecutionListener
  */
 @Documented

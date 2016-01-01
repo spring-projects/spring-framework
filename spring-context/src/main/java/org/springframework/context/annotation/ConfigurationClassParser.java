@@ -73,6 +73,7 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -94,6 +95,7 @@ import org.springframework.util.StringUtils;
  * @author Chris Beams
  * @author Juergen Hoeller
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 3.0
  * @see ConfigurationClassBeanDefinitionReader
  */
@@ -258,15 +260,18 @@ class ConfigurationClassParser {
 		}
 
 		// Process any @ComponentScan annotations
-		AnnotationAttributes componentScan = AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(), ComponentScan.class);
-		if (componentScan != null && !this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
-			// The config class is annotated with @ComponentScan -> perform the scan immediately
-			Set<BeanDefinitionHolder> scannedBeanDefinitions =
-					this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
-			// Check the set of scanned definitions for any further config classes and parse recursively if necessary
-			for (BeanDefinitionHolder holder : scannedBeanDefinitions) {
-				if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(), this.metadataReaderFactory)) {
-					parse(holder.getBeanDefinition().getBeanClassName(), holder.getBeanName());
+		Set<AnnotationAttributes> componentScans = AnnotationConfigUtils.attributesForRepeatable(
+				sourceClass.getMetadata(), ComponentScans.class, ComponentScan.class);
+		if (!componentScans.isEmpty() && !this.conditionEvaluator.shouldSkip(sourceClass.getMetadata(), ConfigurationPhase.REGISTER_BEAN)) {
+			for (AnnotationAttributes componentScan : componentScans) {
+				// The config class is annotated with @ComponentScan -> perform the scan immediately
+				Set<BeanDefinitionHolder> scannedBeanDefinitions =
+						this.componentScanParser.parse(componentScan, sourceClass.getMetadata().getClassName());
+				// Check the set of scanned definitions for any further config classes and parse recursively if necessary
+				for (BeanDefinitionHolder holder : scannedBeanDefinitions) {
+					if (ConfigurationClassUtils.checkConfigurationClassCandidate(holder.getBeanDefinition(), this.metadataReaderFactory)) {
+						parse(holder.getBeanDefinition().getBeanClassName(), holder.getBeanName());
+					}
 				}
 			}
 		}
@@ -277,7 +282,7 @@ class ConfigurationClassParser {
 		// Process any @ImportResource annotations
 		if (sourceClass.getMetadata().isAnnotated(ImportResource.class.getName())) {
 			AnnotationAttributes importResource = AnnotationConfigUtils.attributesFor(sourceClass.getMetadata(), ImportResource.class);
-			String[] resources = importResource.getStringArray("value");
+			String[] resources = importResource.getAliasedStringArray("locations", ImportResource.class, sourceClass);
 			Class<? extends BeanDefinitionReader> readerClass = importResource.getClass("reader");
 			for (String resource : resources) {
 				String resolvedResource = this.environment.resolveRequiredPlaceholders(resource);
@@ -325,7 +330,18 @@ class ConfigurationClassParser {
 		for (SourceClass memberClass : sourceClass.getMemberClasses()) {
 			if (ConfigurationClassUtils.isConfigurationCandidate(memberClass.getMetadata()) &&
 					!memberClass.getMetadata().getClassName().equals(configClass.getMetadata().getClassName())) {
-				processConfigurationClass(memberClass.asConfigClass(configClass));
+				if (this.importStack.contains(configClass)) {
+					this.problemReporter.error(new CircularImportProblem(configClass, this.importStack));
+				}
+				else {
+					this.importStack.push(configClass);
+					try {
+						processConfigurationClass(memberClass.asConfigClass(configClass));
+					}
+					finally {
+						this.importStack.pop();
+					}
+				}
 			}
 		}
 	}
@@ -458,7 +474,7 @@ class ConfigurationClassParser {
 		}
 
 		if (checkForCircularImports && this.importStack.contains(configClass)) {
-			this.problemReporter.error(new CircularImportProblem(configClass, this.importStack, configClass.getMetadata()));
+			this.problemReporter.error(new CircularImportProblem(configClass, this.importStack));
 		}
 		else {
 			this.importStack.push(configClass);
@@ -631,7 +647,7 @@ class ConfigurationClassParser {
 		@Override
 		public AnnotationMetadata getImportingClassFor(String importedClass) {
 			List<AnnotationMetadata> list = this.imports.get(importedClass);
-			return (list == null || list.isEmpty() ? null : list.get(list.size() - 1));
+			return (!CollectionUtils.isEmpty(list) ? list.get(list.size() - 1) : null);
 		}
 
 		/**
@@ -645,7 +661,7 @@ class ConfigurationClassParser {
 			Comparator<ConfigurationClass> comparator = new Comparator<ConfigurationClass>() {
 				@Override
 				public int compare(ConfigurationClass first, ConfigurationClass second) {
-					return first.getMetadata().getClassName().equals(second.getMetadata().getClassName()) ? 0 : 1;
+					return (first.getMetadata().getClassName().equals(second.getMetadata().getClassName()) ? 0 : 1);
 				}
 			};
 			return (Collections.binarySearch(this, configClass, comparator) != -1);
@@ -658,11 +674,11 @@ class ConfigurationClassParser {
 		 * <li>com.acme.Bar</li>
 		 * <li>com.acme.Baz</li>
 		 * </ul>
-		 * return "ImportStack: [Foo->Bar->Baz]".
+		 * return "[Foo->Bar->Baz]".
 		 */
 		@Override
 		public String toString() {
-			StringBuilder builder = new StringBuilder("ImportStack: [");
+			StringBuilder builder = new StringBuilder("[");
 			Iterator<ConfigurationClass> iterator = iterator();
 			while (iterator.hasNext()) {
 				builder.append(iterator.next().getSimpleName());
@@ -766,7 +782,16 @@ class ConfigurationClassParser {
 			String[] memberClassNames = sourceReader.getClassMetadata().getMemberClassNames();
 			List<SourceClass> members = new ArrayList<SourceClass>(memberClassNames.length);
 			for (String memberClassName : memberClassNames) {
-				members.add(asSourceClass(memberClassName));
+				try {
+					members.add(asSourceClass(memberClassName));
+				}
+				catch (IOException ex) {
+					// Let's skip it if it's not resolvable - we're just looking for candidates
+					if (logger.isDebugEnabled()) {
+						logger.debug("Failed to resolve member class [" + memberClassName +
+								"] - not considering it as a configuration class candidate");
+					}
+				}
 			}
 			return members;
 		}
@@ -861,12 +886,12 @@ class ConfigurationClassParser {
 	 */
 	private static class CircularImportProblem extends Problem {
 
-		public CircularImportProblem(ConfigurationClass attemptedImport, Stack<ConfigurationClass> importStack, AnnotationMetadata metadata) {
+		public CircularImportProblem(ConfigurationClass attemptedImport, Stack<ConfigurationClass> importStack) {
 			super(String.format("A circular @Import has been detected: " +
 					"Illegal attempt by @Configuration class '%s' to import class '%s' as '%s' is " +
-					"already present in the current import stack [%s]", importStack.peek().getSimpleName(),
+					"already present in the current import stack %s", importStack.peek().getSimpleName(),
 					attemptedImport.getSimpleName(), attemptedImport.getSimpleName(), importStack),
-					new Location(importStack.peek().getResource(), metadata));
+					new Location(importStack.peek().getResource(), attemptedImport.getMetadata()));
 		}
 	}
 

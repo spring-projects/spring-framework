@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,52 +33,58 @@ import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
+
+import org.eclipse.jetty.server.Connector;
+import org.eclipse.jetty.server.NetworkConnector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 import org.springframework.http.MediaType;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.util.SocketUtils;
 
 import static org.junit.Assert.*;
 
 /**
  * @author Arjen Poutsma
+ * @author Sam Brannen
  */
 public class AbstractJettyServerTestCase {
 
-	protected static String helloWorld = "H\u00e9llo W\u00f6rld";
+	protected static final String helloWorld = "H\u00e9llo W\u00f6rld";
 
-	protected static int port;
-	protected static String baseUrl;
+	protected static final MediaType textContentType = new MediaType("text", "plain",
+			Collections.singletonMap("charset", "UTF-8"));
 
-	protected static MediaType textContentType;
-	protected static MediaType jsonContentType;
+	protected static final MediaType jsonContentType = new MediaType("application",
+			"json", Collections.singletonMap("charset", "utf-8"));
 
 	private static Server jettyServer;
 
+	protected static int port;
+
+	protected static String baseUrl;
+
+
 	@BeforeClass
 	public static void startJettyServer() throws Exception {
-		port = SocketUtils.findAvailableTcpPort();
-		jettyServer = new Server(port);
-		baseUrl = "http://localhost:" + port;
+
+		// Let server pick its own random, available port.
+		jettyServer = new Server(0);
+
 		ServletContextHandler handler = new ServletContextHandler();
-		byte[] bytes = helloWorld.getBytes("UTF-8");
-		textContentType = new MediaType("text", "plain", Collections
-				.singletonMap("charset", "UTF-8"));
-		jsonContentType = new MediaType("application", "json", Collections
-				.singletonMap("charset", "UTF-8"));
+		byte[] bytes = helloWorld.getBytes("utf-8");
 		handler.addServlet(new ServletHolder(new GetServlet(bytes, textContentType)), "/get");
 		handler.addServlet(new ServletHolder(new GetServlet(new byte[0], textContentType)), "/get/nothing");
 		handler.addServlet(new ServletHolder(new GetServlet(bytes, null)), "/get/nocontenttype");
 		handler.addServlet(
-				new ServletHolder(new PostServlet(helloWorld, baseUrl + "/post/1", bytes, textContentType)),
+				new ServletHolder(new PostServlet(helloWorld, "/post/1", bytes, textContentType)),
 				"/post");
 		handler.addServlet(
-				new ServletHolder(new JsonPostServlet(baseUrl + "/jsonpost/1", jsonContentType)),
+				new ServletHolder(new JsonPostServlet("/jsonpost/1", jsonContentType)),
 				"/jsonpost");
 		handler.addServlet(new ServletHolder(new StatusCodeServlet(204)), "/status/nocontent");
 		handler.addServlet(new ServletHolder(new StatusCodeServlet(304)), "/status/notmodified");
@@ -91,8 +97,14 @@ public class AbstractJettyServerTestCase {
 		handler.addServlet(
 				new ServletHolder(new PutServlet(helloWorld, bytes, textContentType)),
 				"/put");
+
 		jettyServer.setHandler(handler);
 		jettyServer.start();
+
+		Connector[] connectors = jettyServer.getConnectors();
+		NetworkConnector connector = (NetworkConnector) connectors[0];
+		port = connector.getLocalPort();
+		baseUrl = "http://localhost:" + port;
 	}
 
 	@AfterClass
@@ -184,7 +196,7 @@ public class AbstractJettyServerTestCase {
 			String body = FileCopyUtils.copyToString(request.getReader());
 			assertEquals("Invalid request body", s, body);
 			response.setStatus(HttpServletResponse.SC_CREATED);
-			response.setHeader("Location", location);
+			response.setHeader("Location", baseUrl + location);
 			response.setContentLength(buf.length);
 			response.setContentType(contentType.toString());
 			FileCopyUtils.copy(buf, response.getOutputStream());
@@ -210,9 +222,9 @@ public class AbstractJettyServerTestCase {
 			assertNotNull("No content-type", request.getContentType());
 			String body = FileCopyUtils.copyToString(request.getReader());
 			response.setStatus(HttpServletResponse.SC_CREATED);
-			response.setHeader("Location", location);
+			response.setHeader("Location", baseUrl +location);
 			response.setContentType(contentType.toString());
-			byte[] bytes = body.getBytes("UTF-8");
+			byte[] bytes = body.getBytes("utf-8");
 			response.setContentLength(bytes.length);;
 			FileCopyUtils.copy(bytes, response.getOutputStream());
 		}
@@ -244,7 +256,7 @@ public class AbstractJettyServerTestCase {
 		@Override
 		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 			resp.setContentType("text/plain");
-			resp.setCharacterEncoding("UTF-8");
+			resp.setCharacterEncoding("utf-8");
 			resp.getWriter().write(req.getRequestURI());
 		}
 	}

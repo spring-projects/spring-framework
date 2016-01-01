@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.aop.support;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -34,13 +35,15 @@ import org.springframework.aop.PointcutAdvisor;
 import org.springframework.aop.SpringProxy;
 import org.springframework.aop.TargetClassAware;
 import org.springframework.core.BridgeMethodResolver;
+import org.springframework.core.MethodIntrospector;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 
 /**
  * Utility methods for AOP support code.
- * Mainly for internal use within Spring's AOP support.
+ *
+ * <p>Mainly for internal use within Spring's AOP support.
  *
  * <p>See {@link org.springframework.aop.framework.AopProxyUtils} for a
  * collection of framework-specific AOP utility methods which depend
@@ -55,6 +58,8 @@ public abstract class AopUtils {
 
 	/**
 	 * Check whether the given object is a JDK dynamic proxy or a CGLIB proxy.
+	 * <p>This method additionally checks if the given object is an instance
+	 * of {@link SpringProxy}.
 	 * @param object the object to check
 	 * @see #isJdkDynamicProxy
 	 * @see #isCglibProxy
@@ -66,6 +71,9 @@ public abstract class AopUtils {
 
 	/**
 	 * Check whether the given object is a JDK dynamic proxy.
+	 * <p>This method goes beyond the implementation of
+	 * {@link Proxy#isProxyClass(Class)} by additionally checking if the
+	 * given object is an instance of {@link SpringProxy}.
 	 * @param object the object to check
 	 * @see java.lang.reflect.Proxy#isProxyClass
 	 */
@@ -74,9 +82,10 @@ public abstract class AopUtils {
 	}
 
 	/**
-	 * Check whether the given object is a CGLIB proxy. Goes beyond the implementation
-	 * in {@link ClassUtils#isCglibProxy(Object)} by checking also to see if the given
-	 * object is an instance of {@link SpringProxy}.
+	 * Check whether the given object is a CGLIB proxy.
+	 * <p>This method goes beyond the implementation of
+	 * {@link ClassUtils#isCglibProxy(Object)} by additionally checking if
+	 * the given object is an instance of {@link SpringProxy}.
 	 * @param object the object to check
 	 * @see ClassUtils#isCglibProxy(Object)
 	 */
@@ -86,7 +95,7 @@ public abstract class AopUtils {
 
 	/**
 	 * Determine the target class of the given bean instance which might be an AOP proxy.
-	 * <p>Returns the target class for an AOP proxy and the plain class else.
+	 * <p>Returns the target class for an AOP proxy or the plain class otherwise.
 	 * @param candidate the instance to check (might be an AOP proxy)
 	 * @return the target class (or the plain class of the given object as fallback;
 	 * never {@code null})
@@ -103,6 +112,30 @@ public abstract class AopUtils {
 			result = (isCglibProxy(candidate) ? candidate.getClass().getSuperclass() : candidate.getClass());
 		}
 		return result;
+	}
+
+	/**
+	 * Select an invocable method on the target type: either the given method itself
+	 * if actually exposed on the target type, or otherwise a corresponding method
+	 * on one of the target type's interfaces or on the target type itself.
+	 * @param method the method to check
+	 * @param targetType the target type to search methods on (typically an AOP proxy)
+	 * @return a corresponding invocable method on the target type
+	 * @throws IllegalStateException if the given method is not invocable on the given
+	 * target type (typically due to a proxy mismatch)
+	 * @since 4.3
+	 * @see MethodIntrospector#selectInvocableMethod(Method, Class)
+	 */
+	public static Method selectInvocableMethod(Method method, Class<?> targetType) {
+		Method methodToUse = MethodIntrospector.selectInvocableMethod(method, targetType);
+		if (Modifier.isPrivate(methodToUse.getModifiers()) && !Modifier.isStatic(methodToUse.getModifiers()) &&
+				SpringProxy.class.isAssignableFrom(targetType)) {
+			throw new IllegalStateException(String.format(
+					"Need to invoke method '%s' found on proxy for target class '%s' but cannot " +
+					"be delegated to target bean. Switch its visibility to package or protected.",
+					method.getName(), method.getDeclaringClass().getSimpleName()));
+		}
+		return methodToUse;
 	}
 
 	/**
@@ -159,7 +192,6 @@ public abstract class AopUtils {
 		// If we are dealing with method with generic parameters, find the original method.
 		return BridgeMethodResolver.findBridgedMethod(resolvedMethod);
 	}
-
 
 	/**
 	 * Can the given pointcut apply at all on the given class?
@@ -277,7 +309,6 @@ public abstract class AopUtils {
 		}
 		return eligibleAdvisors;
 	}
-
 
 	/**
 	 * Invoke the given target via reflection, as part of an AOP method invocation.

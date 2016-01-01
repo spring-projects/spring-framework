@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,10 @@ import java.util.TreeSet;
 
 /**
  * Represents a MIME Type, as originally defined in RFC 2046 and subsequently used in
- * other Internet protocols including HTTP. This class however does not contain support
- * the q-parameters used in HTTP content negotiation. Those can be found in the sub-class
+ * other Internet protocols including HTTP.
+ *
+ * <p>This class, however, does not contain support for the q-parameters used
+ * in HTTP content negotiation. Those can be found in the sub-class
  * {@code org.springframework.http.MediaType} in the {@code spring-web} module.
  *
  * <p>Consists of a {@linkplain #getType() type} and a {@linkplain #getSubtype() subtype}.
@@ -40,6 +42,7 @@ import java.util.TreeSet;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  * @since 4.0
  * @see MimeTypeUtils
  */
@@ -99,9 +102,10 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 
 	/**
 	 * Create a new {@code MimeType} for the given primary type.
-	 * <p>The {@linkplain #getSubtype() subtype} is set to "&#42;", parameters empty.
+	 * <p>The {@linkplain #getSubtype() subtype} is set to <code>"&#42;"</code>,
+	 * and the parameters are empty.
 	 * @param type the primary type
-	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
+	 * @throws IllegalArgumentException if any of the parameters contains illegal characters
 	 */
 	public MimeType(String type) {
 		this(type, WILDCARD_TYPE);
@@ -112,7 +116,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * <p>The parameters are empty.
 	 * @param type the primary type
 	 * @param subtype the subtype
-	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
+	 * @throws IllegalArgumentException if any of the parameters contains illegal characters
 	 */
 	public MimeType(String type, String subtype) {
 		this(type, subtype, Collections.<String, String>emptyMap());
@@ -123,7 +127,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @param type the primary type
 	 * @param subtype the subtype
 	 * @param charSet the character set
-	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
+	 * @throws IllegalArgumentException if any of the parameters contains illegal characters
 	 */
 	public MimeType(String type, String subtype, Charset charSet) {
 		this(type, subtype, Collections.singletonMap(PARAM_CHARSET, charSet.name()));
@@ -134,7 +138,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * and allows for different parameter.
 	 * @param other the other media type
 	 * @param parameters the parameters, may be {@code null}
-	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
+	 * @throws IllegalArgumentException if any of the parameters contains illegal characters
 	 */
 	public MimeType(MimeType other, Map<String, String> parameters) {
 		this(other.getType(), other.getSubtype(), parameters);
@@ -145,7 +149,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @param type the primary type
 	 * @param subtype the subtype
 	 * @param parameters the parameters, may be {@code null}
-	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
+	 * @throws IllegalArgumentException if any of the parameters contains illegal characters
 	 */
 	public MimeType(String type, String subtype, Map<String, String> parameters) {
 		Assert.hasLength(type, "type must not be empty");
@@ -215,25 +219,25 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 
 	/**
 	 * Indicates whether the {@linkplain #getType() type} is the wildcard character
-	 * {@code &#42;} or not.
+	 * <code>&#42;</code> or not.
 	 */
 	public boolean isWildcardType() {
 		return WILDCARD_TYPE.equals(getType());
 	}
 
 	/**
-	 * Indicates whether the {@linkplain #getSubtype() subtype} is the wildcard character
-	 * {@code &#42;} or the wildcard character followed by a sufiix (e.g.
-	 * {@code &#42;+xml}), or not.
-	 * @return whether the subtype is {@code &#42;}
+	 * Indicates whether the {@linkplain #getSubtype() subtype} is the wildcard
+	 * character <code>&#42;</code> or the wildcard character followed by a suffix
+	 * (e.g. <code>&#42;+xml</code>).
+	 * @return whether the subtype is a wildcard
 	 */
 	public boolean isWildcardSubtype() {
 		return WILDCARD_TYPE.equals(getSubtype()) || getSubtype().startsWith("*+");
 	}
 
 	/**
-	 * Indicates whether this media type is concrete, i.e. whether neither the type or
-	 * subtype is a wildcard character {@code &#42;}.
+	 * Indicates whether this media type is concrete, i.e. whether neither the type
+	 * nor the subtype is a wildcard character <code>&#42;</code>.
 	 * @return whether this media type is concrete
 	 */
 	public boolean isConcrete() {
@@ -426,7 +430,36 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		MimeType otherType = (MimeType) other;
 		return (this.type.equalsIgnoreCase(otherType.type) &&
 				this.subtype.equalsIgnoreCase(otherType.subtype) &&
-				this.parameters.equals(otherType.parameters));
+				parametersAreEqual(otherType));
+	}
+
+	/**
+	 * Determine if the parameters in this {@code MimeType} and the supplied
+	 * {@code MimeType} are equal, performing case-insensitive comparisons
+	 * for {@link Charset}s.
+	 * @since 4.2
+	 */
+	private boolean parametersAreEqual(MimeType that) {
+		if (this.parameters.size() != that.parameters.size()) {
+			return false;
+		}
+
+		for (String key : this.parameters.keySet()) {
+			if (!that.parameters.containsKey(key)) {
+				return false;
+			}
+
+			if (PARAM_CHARSET.equals(key)) {
+				if (!ObjectUtils.nullSafeEquals(this.getCharSet(), that.getCharSet())) {
+					return false;
+				}
+			}
+			else if (!ObjectUtils.nullSafeEquals(this.parameters.get(key), that.parameters.get(key))) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	@Override

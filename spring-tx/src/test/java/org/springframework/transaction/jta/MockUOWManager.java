@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,7 +128,7 @@ public class MockUOWManager implements UOWManager {
 		this.synchronizations.add(sync);
 	}
 
-	public List getSynchronizations() {
+	public List<Synchronization> getSynchronizations() {
 		return this.synchronizations;
 	}
 

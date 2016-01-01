@@ -725,7 +725,7 @@ public class DefaultListableBeanFactoryTests {
 		RootBeanDefinition parentDefinition = new RootBeanDefinition(TestBean.class);
 		parentDefinition.setAbstract(true);
 		parentDefinition.getPropertyValues().add("name", EXPECTED_NAME);
-		parentDefinition.getPropertyValues().add("age", new Integer(EXPECTED_AGE));
+		parentDefinition.getPropertyValues().add("age", EXPECTED_AGE);
 
 		ChildBeanDefinition childDefinition = new ChildBeanDefinition("alias");
 
@@ -788,6 +788,15 @@ public class DefaultListableBeanFactoryTests {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		lbf.registerAlias("test", "test2");
 		lbf.registerAlias("test2", "test3");
+
+		try {
+			lbf.registerAlias("test3", "test2");
+			fail("Should have thrown IllegalStateException");
+		}
+		catch (IllegalStateException ex) {
+			// expected
+		}
+
 		try {
 			lbf.registerAlias("test3", "test");
 			fail("Should have thrown IllegalStateException");
@@ -795,6 +804,8 @@ public class DefaultListableBeanFactoryTests {
 		catch (IllegalStateException ex) {
 			// expected
 		}
+
+		lbf.registerAlias("test", "test3");
 	}
 
 	@Test
@@ -1213,7 +1224,7 @@ public class DefaultListableBeanFactoryTests {
 
 		RootBeanDefinition rbd = new RootBeanDefinition(PropertiesFactoryBean.class);
 		MutablePropertyValues pvs = new MutablePropertyValues();
-		pvs.add("locations", new String[] {"#{foo}"});
+		pvs.add("locations", new String[]{"#{foo}"});
 		rbd.setPropertyValues(pvs);
 		bf.registerBeanDefinition("myProperties", rbd);
 		Properties properties = (Properties) bf.getBean("myProperties");
@@ -2324,32 +2335,6 @@ public class DefaultListableBeanFactoryTests {
 		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 3000);
 	}
 
-	/**
-	 * @Test
-	 * public void testPrototypeCreationWithConstructorArgumentsIsFastEnough2() throws Exception {
-	 * if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
-	 * // Skip this test: Trace logging blows the time limit.
-	 * return;
-	 * }
-	 * DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-	 * Constructor<TestBean> ctor = TestBean.class.getConstructor(String.class, int.class);
-	 * Method setBeanNameMethod = TestBean.class.getMethod("setBeanName", String.class);
-	 * Method setBeanFactoryMethod = TestBean.class.getMethod("setBeanFactory", BeanFactory.class);
-	 * StopWatch sw = new StopWatch();
-	 * sw.start("prototype");
-	 * for (int i = 0; i < 100000; i++) {
-	 * TestBean tb = ctor.newInstance("juergen", 99);
-	 * setBeanNameMethod.invoke(tb, "test");
-	 * setBeanFactoryMethod.invoke(tb, lbf);
-	 * assertEquals("juergen", tb.getName());
-	 * assertEquals(99, tb.getAge());
-	 * }
-	 * sw.stop();
-	 * // System.out.println(sw.getTotalTimeMillis());
-	 * assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 1500);
-	 * }
-	 */
-
 	@Test
 	public void testPrototypeCreationWithResolvedConstructorArgumentsIsFastEnough() {
 		Assume.group(TestGroup.PERFORMANCE);
@@ -2394,31 +2379,6 @@ public class DefaultListableBeanFactoryTests {
 		assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 3000);
 	}
 
-	/**
-	 * public void testPrototypeCreationWithPropertiesIsFastEnough2() throws Exception {
-	 * if (factoryLog.isTraceEnabled() || factoryLog.isDebugEnabled()) {
-	 * // Skip this test: Trace logging blows the time limit.
-	 * return;
-	 * }
-	 * DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-	 * StopWatch sw = new StopWatch();
-	 * Method setBeanNameMethod = TestBean.class.getMethod("setBeanName", String.class);
-	 * Method setBeanFactoryMethod = TestBean.class.getMethod("setBeanFactory", BeanFactory.class);
-	 * Method setNameMethod = TestBean.class.getMethod("setName", String.class);
-	 * Method setAgeMethod = TestBean.class.getMethod("setAge", int.class);
-	 * sw.start("prototype");
-	 * for (int i = 0; i < 100000; i++) {
-	 * TestBean tb = TestBean.class.newInstance();
-	 * setBeanNameMethod.invoke(tb, "test");
-	 * setBeanFactoryMethod.invoke(tb, lbf);
-	 * setNameMethod.invoke(tb, "juergen");
-	 * setAgeMethod.invoke(tb, 99);
-	 * }
-	 * sw.stop();
-	 * // System.out.println(sw.getTotalTimeMillis());
-	 * assertTrue("Prototype creation took too long: " + sw.getTotalTimeMillis(), sw.getTotalTimeMillis() < 750);
-	 * }
-	 */
 	@Test
 	public void testPrototypeCreationWithResolvedPropertiesIsFastEnough() {
 		Assume.group(TestGroup.PERFORMANCE);
@@ -2499,10 +2459,41 @@ public class DefaultListableBeanFactoryTests {
 				return bean;
 			}
 		});
-		BeanWithDestroyMethod.closed = false;
+		BeanWithDestroyMethod.closeCount = 0;
 		lbf.preInstantiateSingletons();
 		lbf.destroySingletons();
-		assertTrue("Destroy method invoked", BeanWithDestroyMethod.closed);
+		assertEquals("Destroy methods invoked", 1, BeanWithDestroyMethod.closeCount);
+	}
+
+	@Test
+	public void testDestroyMethodOnInnerBean() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition innerBd = new RootBeanDefinition(BeanWithDestroyMethod.class);
+		innerBd.setDestroyMethodName("close");
+		RootBeanDefinition bd = new RootBeanDefinition(BeanWithDestroyMethod.class);
+		bd.setDestroyMethodName("close");
+		bd.getPropertyValues().add("inner", innerBd);
+		lbf.registerBeanDefinition("test", bd);
+		BeanWithDestroyMethod.closeCount = 0;
+		lbf.preInstantiateSingletons();
+		lbf.destroySingletons();
+		assertEquals("Destroy methods invoked", 2, BeanWithDestroyMethod.closeCount);
+	}
+
+	@Test
+	public void testDestroyMethodOnInnerBeanAsPrototype() {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition innerBd = new RootBeanDefinition(BeanWithDestroyMethod.class);
+		innerBd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		innerBd.setDestroyMethodName("close");
+		RootBeanDefinition bd = new RootBeanDefinition(BeanWithDestroyMethod.class);
+		bd.setDestroyMethodName("close");
+		bd.getPropertyValues().add("inner", innerBd);
+		lbf.registerBeanDefinition("test", bd);
+		BeanWithDestroyMethod.closeCount = 0;
+		lbf.preInstantiateSingletons();
+		lbf.destroySingletons();
+		assertEquals("Destroy methods invoked", 1, BeanWithDestroyMethod.closeCount);
 	}
 
 	@Test
@@ -2739,10 +2730,6 @@ public class DefaultListableBeanFactoryTests {
 		verify(r3, never()).resolveStringValue(isNull(String.class));
 	}
 
-
-	static class A { }
-	static class B { }
-
 	/**
 	 * Test that by-type bean lookup caching is working effectively by searching for a
 	 * bean of type B 10K times within a container having 1K additional beans of type A.
@@ -2753,22 +2740,51 @@ public class DefaultListableBeanFactoryTests {
 	 * under the 1000 ms timeout, usually ~= 300ms. With caching removed and on the same
 	 * hardware the method will take ~13000 ms. See SPR-6870.
 	 */
-	@Test(timeout=1000)
+	@Test(timeout = 1000)
 	public void testByTypeLookupIsFastEnough() {
 		Assume.group(TestGroup.PERFORMANCE);
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 
 		for (int i = 0; i < 1000; i++) {
-			bf.registerBeanDefinition("a"+i, new RootBeanDefinition(A.class));
+			bf.registerBeanDefinition("a" + i, new RootBeanDefinition(A.class));
 		}
 		bf.registerBeanDefinition("b", new RootBeanDefinition(B.class));
 
 		bf.freezeConfiguration();
 
-		for (int i=0; i<10000; i++) {
+		for (int i = 0; i < 10000; i++) {
 			bf.getBean(B.class);
 		}
 	}
+
+	@Test(timeout = 1000)
+	public void testRegistrationOfManyBeanDefinitionsIsFastEnough() {
+		Assume.group(TestGroup.PERFORMANCE);
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerBeanDefinition("b", new RootBeanDefinition(B.class));
+		// bf.getBean("b");
+
+		for (int i = 0; i < 100000; i++) {
+			bf.registerBeanDefinition("a" + i, new RootBeanDefinition(A.class));
+		}
+	}
+
+	@Test(timeout = 1000)
+	public void testRegistrationOfManySingletonsIsFastEnough() {
+		Assume.group(TestGroup.PERFORMANCE);
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.registerBeanDefinition("b", new RootBeanDefinition(B.class));
+		// bf.getBean("b");
+
+		for (int i = 0; i < 100000; i++) {
+			bf.registerSingleton("a" + i, new A());
+		}
+	}
+
+
+	static class A { }
+
+	static class B { }
 
 
 	public static class NoDependencies {
@@ -2876,10 +2892,16 @@ public class DefaultListableBeanFactoryTests {
 
 	public static class BeanWithDestroyMethod {
 
-		private static boolean closed;
+		private static int closeCount = 0;
+
+		private BeanWithDestroyMethod inner;
+
+		public void setInner(BeanWithDestroyMethod inner) {
+			this.inner = inner;
+		}
 
 		public void close() {
-			closed = true;
+			closeCount++;
 		}
 	}
 

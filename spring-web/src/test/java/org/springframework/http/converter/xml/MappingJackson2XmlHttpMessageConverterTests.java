@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,20 +17,22 @@
 package org.springframework.http.converter.xml;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
+import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJacksonValue;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -40,10 +42,14 @@ import static org.junit.Assert.*;
  * Jackson 2.x XML converter tests.
  *
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  */
 public class MappingJackson2XmlHttpMessageConverterTests {
 
 	private final MappingJackson2XmlHttpMessageConverter converter = new MappingJackson2XmlHttpMessageConverter();
+
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 
 
 	@Test
@@ -62,8 +68,7 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 
 	@Test
 	public void read() throws IOException {
-		String body =
-				"<MyBean><string>Foo</string><number>42</number><fraction>42.0</fraction><array><array>Foo</array><array>Bar</array></array><bool>true</bool><bytes>AQI=</bytes></MyBean>";
+		String body = "<MyBean><string>Foo</string><number>42</number><fraction>42.0</fraction><array><array>Foo</array><array>Bar</array></array><bool>true</bool><bytes>AQI=</bytes></MyBean>";
 		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
 		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
 		MyBean result = (MyBean) converter.read(MyBean.class, inputMessage);
@@ -139,10 +144,51 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		// Assert no exception is thrown
 	}
 
-	private void writeInternal(Object object, HttpOutputMessage outputMessage)
-			throws NoSuchMethodException, InvocationTargetException,
-			IllegalAccessException {
-		Method method = AbstractJackson2HttpMessageConverter.class.getDeclaredMethod(
+	@Test
+	public void readWithExternalReference() throws IOException {
+		String body = "<!DOCTYPE MyBean SYSTEM \"http://192.168.28.42/1.jsp\" [" +
+				"  <!ELEMENT root ANY >\n" +
+				"  <!ENTITY ext SYSTEM \"" +
+				new ClassPathResource("external.txt", getClass()).getURI() +
+				"\" >]><MyBean><string>&ext;</string></MyBean>";
+
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
+		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
+
+		this.thrown.expect(HttpMessageNotReadableException.class);
+		this.converter.read(MyBean.class, inputMessage);
+	}
+
+	@Test
+	public void readWithXmlBomb() throws IOException {
+		// https://en.wikipedia.org/wiki/Billion_laughs
+		// https://msdn.microsoft.com/en-us/magazine/ee335713.aspx
+		String body = "<?xml version=\"1.0\"?>\n" +
+				"<!DOCTYPE lolz [\n" +
+				" <!ENTITY lol \"lol\">\n" +
+				" <!ELEMENT lolz (#PCDATA)>\n" +
+				" <!ENTITY lol1 \"&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;&lol;\">\n" +
+				" <!ENTITY lol2 \"&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;&lol1;\">\n" +
+				" <!ENTITY lol3 \"&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;&lol2;\">\n" +
+				" <!ENTITY lol4 \"&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;&lol3;\">\n" +
+				" <!ENTITY lol5 \"&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;&lol4;\">\n" +
+				" <!ENTITY lol6 \"&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;&lol5;\">\n" +
+				" <!ENTITY lol7 \"&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;&lol6;\">\n" +
+				" <!ENTITY lol8 \"&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;&lol7;\">\n" +
+				" <!ENTITY lol9 \"&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;&lol8;\">\n" +
+				"]>\n" +
+				"<MyBean>&lol9;</MyBean>";
+
+		MockHttpInputMessage inputMessage = new MockHttpInputMessage(body.getBytes("UTF-8"));
+		inputMessage.getHeaders().setContentType(new MediaType("application", "xml"));
+
+		this.thrown.expect(HttpMessageNotReadableException.class);
+		this.converter.read(MyBean.class, inputMessage);
+	}
+
+
+	private void writeInternal(Object object, HttpOutputMessage outputMessage) throws Exception {
+		Method method = AbstractHttpMessageConverter.class.getDeclaredMethod(
 				"writeInternal", Object.class, HttpOutputMessage.class);
 		method.setAccessible(true);
 		method.invoke(this.converter, object, outputMessage);
@@ -212,8 +258,11 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		}
 	}
 
+
 	private interface MyJacksonView1 {};
+
 	private interface MyJacksonView2 {};
+
 
 	@SuppressWarnings("unused")
 	private static class JacksonViewBean {
@@ -250,6 +299,7 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 			this.withoutView = withoutView;
 		}
 	}
+
 
 	@SuppressWarnings("serial")
 	private static class MyXmlMapper extends XmlMapper {

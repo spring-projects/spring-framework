@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ import static org.junit.Assert.*;
  * @author Mark Fisher
  * @author Rick Evans
  * @author Chris Beams
+ * @author Sam Brannen
  */
 public final class PortletWrappingControllerTests {
 
@@ -55,11 +56,11 @@ public final class PortletWrappingControllerTests {
 	private static final String RENDERED_RESPONSE_CONTENT = "myPortlet-view";
 	private static final String PORTLET_NAME_ACTION_REQUEST_PARAMETER_NAME = "portletName";
 
-
 	private PortletWrappingController controller;
 
 
 	@Before
+	@SuppressWarnings("resource")
 	public void setUp() {
 		ConfigurablePortletApplicationContext applicationContext = new MyApplicationContext();
 		MockPortletConfig config = new MockPortletConfig(new MockPortletContext(), "wrappedPortlet");
@@ -70,67 +71,65 @@ public final class PortletWrappingControllerTests {
 
 
 	@Test
-	public void testActionRequest() throws Exception {
+	public void actionRequest() throws Exception {
 		MockActionRequest request = new MockActionRequest();
 		MockActionResponse response = new MockActionResponse();
 		request.setParameter("test", "test");
+
 		controller.handleActionRequest(request, response);
-		String result = response.getRenderParameter(RESULT_RENDER_PARAMETER_NAME);
-		assertEquals("myPortlet-action", result);
+		assertEquals("myPortlet-action", response.getRenderParameter(RESULT_RENDER_PARAMETER_NAME));
 	}
 
 	@Test
-	public void testRenderRequest() throws Exception {
-		MockRenderRequest request = new MockRenderRequest();
+	public void renderRequest() throws Exception {
 		MockRenderResponse response = new MockRenderResponse();
-		controller.handleRenderRequest(request, response);
-		String result = response.getContentAsString();
-		assertEquals(RENDERED_RESPONSE_CONTENT, result);
+
+		controller.handleRenderRequest(new MockRenderRequest(), response);
+		assertEquals(RENDERED_RESPONSE_CONTENT, response.getContentAsString());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
-	public void testActionRequestWithNoParameters() throws Exception {
-		MockActionRequest request = new MockActionRequest();
-		MockActionResponse response = new MockActionResponse();
-		controller.handleActionRequest(request, response);
+	@Test(expected = IllegalArgumentException.class)
+	public void actionRequestWithNoParameters() throws Exception {
+		controller.handleActionRequest(new MockActionRequest(), new MockActionResponse());
 	}
 
-	@Test(expected=IllegalArgumentException.class)
-	public void testRejectsPortletClassThatDoesNotImplementPortletInterface() throws Exception {
+	@Test(expected = IllegalArgumentException.class)
+	public void rejectsPortletClassThatDoesNotImplementPortletInterface() throws Exception {
 		PortletWrappingController controller = new PortletWrappingController();
 		controller.setPortletClass(String.class);
+
 		controller.afterPropertiesSet();
 	}
 
-	@Test(expected=IllegalArgumentException.class)
-	public void testRejectsIfPortletClassIsNotSupplied() throws Exception {
+	@Test(expected = IllegalArgumentException.class)
+	public void rejectsIfPortletClassIsNotSupplied() throws Exception {
 		PortletWrappingController controller = new PortletWrappingController();
 		controller.setPortletClass(null);
+
 		controller.afterPropertiesSet();
 	}
 
-	@Test(expected=IllegalStateException.class)
-	public void testDestroyingTheControllerPropagatesDestroyToWrappedPortlet() throws Exception {
+	@Test(expected = IllegalStateException.class)
+	public void destroyingTheControllerPropagatesDestroyToWrappedPortlet() throws Exception {
 		final PortletWrappingController controller = new PortletWrappingController();
 		controller.setPortletClass(MyPortlet.class);
 		controller.afterPropertiesSet();
-		// test for destroy() call being propagated via exception being thrown :(
+
+		// test for destroy() call being propagated via exception being thrown
 		controller.destroy();
 	}
 
 	@Test
-	public void testPortletName() throws Exception {
+	public void portletName() throws Exception {
 		MockActionRequest request = new MockActionRequest();
 		MockActionResponse response = new MockActionResponse();
 		request.setParameter(PORTLET_NAME_ACTION_REQUEST_PARAMETER_NAME, "test");
 		controller.handleActionRequest(request, response);
-		String result = response.getRenderParameter(RESULT_RENDER_PARAMETER_NAME);
-		assertEquals("wrappedPortlet", result);
+		assertEquals("wrappedPortlet", response.getRenderParameter(RESULT_RENDER_PARAMETER_NAME));
 	}
 
 	@Test
-	public void testDelegationToMockPortletConfigIfSoConfigured() throws Exception {
-
+	public void delegationToMockPortletConfigIfSoConfigured() throws Exception {
 		final String BEAN_NAME = "Sixpence None The Richer";
 
 		MockActionRequest request = new MockActionRequest();
@@ -145,8 +144,7 @@ public final class PortletWrappingControllerTests {
 		request.setParameter(PORTLET_NAME_ACTION_REQUEST_PARAMETER_NAME, "true");
 		controller.handleActionRequest(request, response);
 
-		String result = response.getRenderParameter(RESULT_RENDER_PARAMETER_NAME);
-		assertEquals(BEAN_NAME, result);
+		assertEquals(BEAN_NAME, response.getRenderParameter(RESULT_RENDER_PARAMETER_NAME));
 	}
 
 

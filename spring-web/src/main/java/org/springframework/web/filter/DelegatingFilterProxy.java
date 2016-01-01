@@ -249,7 +249,8 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 				if (this.delegate == null) {
 					WebApplicationContext wac = findWebApplicationContext();
 					if (wac == null) {
-						throw new IllegalStateException("No WebApplicationContext found: no ContextLoaderListener registered?");
+						throw new IllegalStateException("No WebApplicationContext found: " +
+								"no ContextLoaderListener or DispatcherServlet registered?");
 					}
 					this.delegate = initDelegate(wac);
 				}
@@ -288,11 +289,12 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 	 */
 	protected WebApplicationContext findWebApplicationContext() {
 		if (this.webApplicationContext != null) {
-			// the user has injected a context at construction time -> use it
+			// The user has injected a context at construction time -> use it...
 			if (this.webApplicationContext instanceof ConfigurableApplicationContext) {
-				if (!((ConfigurableApplicationContext)this.webApplicationContext).isActive()) {
-					// the context has not yet been refreshed -> do so before returning it
-					((ConfigurableApplicationContext)this.webApplicationContext).refresh();
+				ConfigurableApplicationContext cac = (ConfigurableApplicationContext) this.webApplicationContext;
+				if (!cac.isActive()) {
+					// The context has not yet been refreshed -> do so before returning it...
+					cac.refresh();
 				}
 			}
 			return this.webApplicationContext;
@@ -302,7 +304,7 @@ public class DelegatingFilterProxy extends GenericFilterBean {
 			return WebApplicationContextUtils.getWebApplicationContext(getServletContext(), attrName);
 		}
 		else {
-			return WebApplicationContextUtils.getWebApplicationContext(getServletContext());
+			return WebApplicationContextUtils.findWebApplicationContext(getServletContext());
 		}
 	}
 

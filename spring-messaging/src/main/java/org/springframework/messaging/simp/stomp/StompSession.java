@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.messaging.simp.stomp;
 
+package org.springframework.messaging.simp.stomp;
 
 /**
  * Represents a STOMP session with operations to send messages, create
@@ -41,7 +41,6 @@ public interface StompSession {
 	 * the server to return a RECEIPT. An application can then use the
 	 * {@link StompSession.Receiptable
 	 * Receiptable} returned from the operation to track the receipt.
-	 *
 	 * <p>A receipt header can also be added manually through the overloaded
 	 * methods that accept {@code StompHeaders}.
 	 */
@@ -117,7 +116,6 @@ public interface StompSession {
 		 * @see org.springframework.messaging.simp.stomp.StompClientSupport#setReceiptTimeLimit(long)
 		 */
 		void addReceiptLostTask(Runnable runnable);
-
 	}
 
 	/**
@@ -134,7 +132,6 @@ public interface StompSession {
 		 * Remove the subscription by sending an UNSUBSCRIBE frame.
 		 */
 		void unsubscribe();
-
 	}
 
 }

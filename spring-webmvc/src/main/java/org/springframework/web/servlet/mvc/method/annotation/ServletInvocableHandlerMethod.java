@@ -25,7 +25,6 @@ import java.util.concurrent.Callable;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -84,7 +83,7 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 	private void initResponseStatus() {
 		ResponseStatus annotation = getMethodAnnotation(ResponseStatus.class);
 		if (annotation != null) {
-			this.responseStatus = annotation.value();
+			this.responseStatus = annotation.code();
 			this.responseReason = annotation.reason();
 		}
 	}
@@ -269,8 +268,10 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 					StreamingResponseBody.class.isAssignableFrom(parameterType)) {
 				return parameterType;
 			}
-			Assert.isTrue(!ResolvableType.NONE.equals(this.returnType), "Expected one of" +
-					"Callable, DeferredResult, or ListenableFuture: " + super.getParameterType());
+			if (ResolvableType.NONE.equals(this.returnType)) {
+				throw new IllegalArgumentException("Expected one of Callable, DeferredResult, or ListenableFuture: " +
+						super.getParameterType());
+			}
 			return this.returnType.getRawClass();
 		}
 

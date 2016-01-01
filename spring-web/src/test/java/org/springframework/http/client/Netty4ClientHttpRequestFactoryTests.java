@@ -50,6 +50,7 @@ public class Netty4ClientHttpRequestFactoryTests extends AbstractHttpRequestFact
 	@Override
 	@Test
 	public void httpMethods() throws Exception {
+		super.httpMethods();
 		assertHttpMethod("patch", HttpMethod.PATCH);
 	}
 

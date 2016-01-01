@@ -27,7 +27,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import javax.mail.internet.MimeUtility;
 
 import org.springframework.core.io.Resource;
@@ -98,8 +97,6 @@ public class FormHttpMessageConverter implements HttpMessageConverter<MultiValue
 	private List<MediaType> supportedMediaTypes = new ArrayList<MediaType>();
 
 	private List<HttpMessageConverter<?>> partConverters = new ArrayList<HttpMessageConverter<?>>();
-
-	private final Random random = new Random();
 
 
 	public FormHttpMessageConverter() {

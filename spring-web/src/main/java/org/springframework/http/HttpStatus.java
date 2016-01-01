@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,13 @@
 package org.springframework.http;
 
 /**
- * Java 5 enumeration of HTTP status codes.
+ * Enumeration of HTTP status codes.
  *
  * <p>The HTTP status code series can be retrieved via {@link #series()}.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @author Brian Clozel
  * @see HttpStatus.Series
  * @see <a href="http://www.iana.org/assignments/http-status-codes">HTTP Status Code Registry</a>
  * @see <a href="http://en.wikipedia.org/wiki/List_of_HTTP_status_codes">List of HTTP status codes - Wikipedia</a>
@@ -321,6 +322,12 @@ public enum HttpStatus {
 	 * @see <a href="http://tools.ietf.org/html/rfc6585#section-5">Additional HTTP Status Codes</a>
 	 */
 	REQUEST_HEADER_FIELDS_TOO_LARGE(431, "Request Header Fields Too Large"),
+	/**
+	 * {@code 451 Unavailable For Legal Reasons}.
+	 * @see <a href="https://tools.ietf.org/html/draft-ietf-httpbis-legally-restricted-status-04">
+	 *     An HTTP Status Code to Report Legal Obstacles</a>
+	 */
+	UNAVAILABLE_FOR_LEGAL_REASONS(451,"Unavailable For Legal Reasons"),
 
 	// --- 5xx Server Error ---
 

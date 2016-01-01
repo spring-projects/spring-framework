@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,24 +20,22 @@ import java.io.ByteArrayInputStream;
 import javax.xml.transform.stream.StreamSource;
 
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.oxm.AbstractUnmarshallerTests;
-import org.springframework.oxm.Unmarshaller;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 
 import static org.junit.Assert.*;
 
-
 /**
- * @author Arjen Poutsma
- *
  * NOTE: These tests fail under Eclipse/IDEA because JiBX binding does
  * not occur by default. The Gradle build should succeed, however.
+ *
+ * @author Arjen Poutsma
+ * @author Sam Brannen
  */
-public class JibxUnmarshallerTests extends AbstractUnmarshallerTests {
+public class JibxUnmarshallerTests extends AbstractUnmarshallerTests<JibxMarshaller> {
 
 	protected static final String INPUT_STRING_WITH_SPECIAL_CHARACTERS =
 			"<tns:flights xmlns:tns=\"http://samples.springframework.org/flight\">" +
@@ -48,8 +46,9 @@ public class JibxUnmarshallerTests extends AbstractUnmarshallerTests {
 		Assume.group(TestGroup.CUSTOM_COMPILATION);
 	}
 
+
 	@Override
-	protected Unmarshaller createUnmarshaller() throws Exception {
+	protected JibxMarshaller createUnmarshaller() throws Exception {
 		JibxMarshaller unmarshaller = new JibxMarshaller();
 		unmarshaller.setTargetClass(Flights.class);
 		unmarshaller.afterPropertiesSet();
@@ -71,8 +70,8 @@ public class JibxUnmarshallerTests extends AbstractUnmarshallerTests {
 		assertEquals("Number is invalid", 42L, flight.getNumber());
 	}
 
+	@Test
 	@Override
-	@Ignore
 	public void unmarshalPartialStaxSourceXmlStreamReader() throws Exception {
 		// JiBX does not support reading XML fragments, hence the override here
 	}
@@ -80,7 +79,7 @@ public class JibxUnmarshallerTests extends AbstractUnmarshallerTests {
 	@Test
 	public void unmarshalStreamSourceInputStreamUsingNonDefaultEncoding() throws Exception {
 		String encoding = "ISO-8859-1";
-		((JibxMarshaller)unmarshaller).setEncoding(encoding);
+		unmarshaller.setEncoding(encoding);
 
 		StreamSource source = new StreamSource(new ByteArrayInputStream(INPUT_STRING_WITH_SPECIAL_CHARACTERS.getBytes(encoding)));
 		Object flights = unmarshaller.unmarshal(source);

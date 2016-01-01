@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,81 +13,221 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.client.match;
 
 import java.io.IOException;
 
-import org.hamcrest.Matchers;
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.mock.http.client.MockClientHttpRequest;
 
+import static org.hamcrest.CoreMatchers.*;
+
 /**
- * Tests for {@link JsonPathRequestMatchers}.
+ * Unit tests for {@link JsonPathRequestMatchers}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class JsonPathRequestMatchersTests {
 
-	private static final String RESPONSE_CONTENT = "{\"foo\":\"bar\", \"qux\":[\"baz1\",\"baz2\"]}";
+	private static final String REQUEST_CONTENT = "{" + //
+			"'str':         'foo',           " + //
+			"'num':         5,               " + //
+			"'bool':        true,            " + //
+			"'arr':         [42],            " + //
+			"'colorMap':    {'red': 'rojo'}, " + //
+			"'emptyString': '',              " + //
+			"'emptyArray':  [],              " + //
+			"'emptyMap':    {}               " + //
+	"}";
 
-	private MockClientHttpRequest request;
+	private static final MockClientHttpRequest request = new MockClientHttpRequest();
 
-	@Before
-	public void setUp() throws IOException {
-		this.request = new MockClientHttpRequest();
-		this.request.getBody().write(RESPONSE_CONTENT.getBytes());
+	static {
+		try {
+			request.getBody().write(REQUEST_CONTENT.getBytes());
+		}
+		catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
 	}
+
 
 	@Test
 	public void value() throws Exception {
-		new JsonPathRequestMatchers("$.foo").value("bar").match(this.request);
+		new JsonPathRequestMatchers("$.str").value("foo").match(request);
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void valueNoMatch() throws Exception {
-		new JsonPathRequestMatchers("$.foo").value("bogus").match(this.request);
+		new JsonPathRequestMatchers("$.str").value("bogus").match(request);
 	}
 
 	@Test
-	public void valueMatcher() throws Exception {
-		new JsonPathRequestMatchers("$.foo").value(Matchers.equalTo("bar")).match(this.request);
+	public void valueWithMatcher() throws Exception {
+		new JsonPathRequestMatchers("$.str").value(equalTo("foo")).match(request);
 	}
 
-	@Test(expected=AssertionError.class)
-	public void valueMatcherNoMatch() throws Exception {
-		new JsonPathRequestMatchers("$.foo").value(Matchers.equalTo("bogus")).match(this.request);
+	@Test(expected = AssertionError.class)
+	public void valueWithMatcherNoMatch() throws Exception {
+		new JsonPathRequestMatchers("$.str").value(equalTo("bogus")).match(request);
 	}
 
 	@Test
 	public void exists() throws Exception {
-		new JsonPathRequestMatchers("$.foo").exists().match(this.request);
+		new JsonPathRequestMatchers("$.str").exists().match(request);
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test
+	public void existsForAnEmptyArray() throws Exception {
+		new JsonPathRequestMatchers("$.emptyArray").exists().match(request);
+	}
+
+	@Test
+	public void existsForAnEmptyMap() throws Exception {
+		new JsonPathRequestMatchers("$.emptyMap").exists().match(request);
+	}
+
+	@Test(expected = AssertionError.class)
 	public void existsNoMatch() throws Exception {
-		new JsonPathRequestMatchers("$.bogus").exists().match(this.request);
+		new JsonPathRequestMatchers("$.bogus").exists().match(request);
 	}
 
 	@Test
 	public void doesNotExist() throws Exception {
-		new JsonPathRequestMatchers("$.bogus").doesNotExist().match(this.request);
+		new JsonPathRequestMatchers("$.bogus").doesNotExist().match(request);
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test(expected = AssertionError.class)
 	public void doesNotExistNoMatch() throws Exception {
-		new JsonPathRequestMatchers("$.foo").doesNotExist().match(this.request);
+		new JsonPathRequestMatchers("$.str").doesNotExist().match(request);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void doesNotExistForAnEmptyArray() throws Exception {
+		new JsonPathRequestMatchers("$.emptyArray").doesNotExist().match(request);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void doesNotExistForAnEmptyMap() throws Exception {
+		new JsonPathRequestMatchers("$.emptyMap").doesNotExist().match(request);
 	}
 
 	@Test
-	public void isArrayMatch() throws Exception {
-		new JsonPathRequestMatchers("$.qux").isArray().match(this.request);
+	public void isEmptyForAnEmptyString() throws Exception {
+		new JsonPathRequestMatchers("$.emptyString").isEmpty().match(request);
 	}
 
-	@Test(expected=AssertionError.class)
+	@Test
+	public void isEmptyForAnEmptyArray() throws Exception {
+		new JsonPathRequestMatchers("$.emptyArray").isEmpty().match(request);
+	}
+
+	@Test
+	public void isEmptyForAnEmptyMap() throws Exception {
+		new JsonPathRequestMatchers("$.emptyMap").isEmpty().match(request);
+	}
+
+	@Test
+	public void isNotEmptyForString() throws Exception {
+		new JsonPathRequestMatchers("$.str").isNotEmpty().match(request);
+	}
+
+	@Test
+	public void isNotEmptyForNumber() throws Exception {
+		new JsonPathRequestMatchers("$.num").isNotEmpty().match(request);
+	}
+
+	@Test
+	public void isNotEmptyForBoolean() throws Exception {
+		new JsonPathRequestMatchers("$.bool").isNotEmpty().match(request);
+	}
+
+	@Test
+	public void isNotEmptyForArray() throws Exception {
+		new JsonPathRequestMatchers("$.arr").isNotEmpty().match(request);
+	}
+
+	@Test
+	public void isNotEmptyForMap() throws Exception {
+		new JsonPathRequestMatchers("$.colorMap").isNotEmpty().match(request);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void isNotEmptyForAnEmptyString() throws Exception {
+		new JsonPathRequestMatchers("$.emptyString").isNotEmpty().match(request);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void isNotEmptyForAnEmptyArray() throws Exception {
+		new JsonPathRequestMatchers("$.emptyArray").isNotEmpty().match(request);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void isNotEmptyForAnEmptyMap() throws Exception {
+		new JsonPathRequestMatchers("$.emptyMap").isNotEmpty().match(request);
+	}
+
+	@Test
+	public void isArray() throws Exception {
+		new JsonPathRequestMatchers("$.arr").isArray().match(request);
+	}
+
+	@Test
+	public void isArrayForAnEmptyArray() throws Exception {
+		new JsonPathRequestMatchers("$.emptyArray").isArray().match(request);
+	}
+
+	@Test(expected = AssertionError.class)
 	public void isArrayNoMatch() throws Exception {
-		new JsonPathRequestMatchers("$.bar").isArray().match(this.request);
+		new JsonPathRequestMatchers("$.str").isArray().match(request);
+	}
+
+	@Test
+	public void isMap() throws Exception {
+		new JsonPathRequestMatchers("$.colorMap").isMap().match(request);
+	}
+
+	@Test
+	public void isMapForAnEmptyMap() throws Exception {
+		new JsonPathRequestMatchers("$.emptyMap").isMap().match(request);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void isMapNoMatch() throws Exception {
+		new JsonPathRequestMatchers("$.str").isMap().match(request);
+	}
+
+	@Test
+	public void isBoolean() throws Exception {
+		new JsonPathRequestMatchers("$.bool").isBoolean().match(request);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void isBooleanNoMatch() throws Exception {
+		new JsonPathRequestMatchers("$.str").isBoolean().match(request);
+	}
+
+	@Test
+	public void isNumber() throws Exception {
+		new JsonPathRequestMatchers("$.num").isNumber().match(request);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void isNumberNoMatch() throws Exception {
+		new JsonPathRequestMatchers("$.str").isNumber().match(request);
+	}
+
+	@Test
+	public void isString() throws Exception {
+		new JsonPathRequestMatchers("$.str").isString().match(request);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void isStringNoMatch() throws Exception {
+		new JsonPathRequestMatchers("$.arr").isString().match(request);
 	}
 
 }

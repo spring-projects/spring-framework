@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * Test the conversion of Strings to {@link java.util.Properties} objects,
@@ -30,9 +32,10 @@ import junit.framework.TestCase;
  * @author Juergen Hoeller
  * @author Rick Evans
  */
-public class PropertiesEditorTests extends TestCase {
+public class PropertiesEditorTests {
 
-	public void testOneProperty() {
+	@Test
+	public void oneProperty() {
 		String s = "foo=bar";
 		PropertiesEditor pe= new PropertiesEditor();
 		pe.setAsText(s);
@@ -41,7 +44,8 @@ public class PropertiesEditorTests extends TestCase {
 		assertTrue("foo=bar", p.get("foo").equals("bar"));
 	}
 
-	public void testTwoProperties() {
+	@Test
+	public void twoProperties() {
 		String s = "foo=bar with whitespace\n" +
 			"me=mi";
 		PropertiesEditor pe= new PropertiesEditor();
@@ -52,7 +56,8 @@ public class PropertiesEditorTests extends TestCase {
 		assertTrue("me=mi", p.get("me").equals("mi"));
 	}
 
-	public void testHandlesEqualsInValue() {
+	@Test
+	public void handlesEqualsInValue() {
 		String s = "foo=bar\n" +
 			"me=mi\n" +
 			"x=y=z";
@@ -65,7 +70,8 @@ public class PropertiesEditorTests extends TestCase {
 		assertTrue("x='y=z'", p.get("x").equals("y=z"));
 	}
 
-	public void testHandlesEmptyProperty() {
+	@Test
+	public void handlesEmptyProperty() {
 		String s = "foo=bar\nme=mi\nx=";
 		PropertiesEditor pe= new PropertiesEditor();
 		pe.setAsText(s);
@@ -76,7 +82,8 @@ public class PropertiesEditorTests extends TestCase {
 		assertTrue("x='y=z'", p.get("x").equals(""));
 	}
 
-	public void testHandlesEmptyPropertyWithoutEquals() {
+	@Test
+	public void handlesEmptyPropertyWithoutEquals() {
 		String s = "foo\nme=mi\nx=x";
 		PropertiesEditor pe= new PropertiesEditor();
 		pe.setAsText(s);
@@ -89,7 +96,8 @@ public class PropertiesEditorTests extends TestCase {
 	/**
 	 * Comments begin with #
 	 */
-	public void testIgnoresCommentLinesAndEmptyLines() {
+	@Test
+	public void ignoresCommentLinesAndEmptyLines() {
 		String s = "#Ignore this comment\n" +
 			"foo=bar\n" +
 			"#Another=comment more junk /\n" +
@@ -110,7 +118,8 @@ public class PropertiesEditorTests extends TestCase {
 	 * We must ensure that comment lines beginning with whitespace are
 	 * still ignored: The standard syntax doesn't allow this on JDK 1.3.
 	 */
-	public void testIgnoresLeadingSpacesAndTabs() {
+	@Test
+	public void ignoresLeadingSpacesAndTabs() {
 		String s = "    #Ignore this comment\n" +
 			"\t\tfoo=bar\n" +
 			"\t#Another comment more junk \n" +
@@ -125,22 +134,25 @@ public class PropertiesEditorTests extends TestCase {
 		assertTrue("me=mi", p.get("me").equals("mi"));
 	}
 
-	public void testNull() {
+	@Test
+	public void nullValue() {
 		PropertiesEditor pe= new PropertiesEditor();
 		pe.setAsText(null);
 		Properties p = (Properties) pe.getValue();
 		assertEquals(0, p.size());
 	}
 
-	public void testEmptyString() {
+	@Test
+	public void emptyString() {
 		PropertiesEditor pe = new PropertiesEditor();
 		pe.setAsText("");
 		Properties p = (Properties) pe.getValue();
 		assertTrue("empty string means empty properties", p.isEmpty());
 	}
 
-	public void testUsingMapAsValueSource() throws Exception {
-		Map map = new HashMap();
+	@Test
+	public void usingMapAsValueSource() throws Exception {
+		Map<String, String> map = new HashMap<>();
 		map.put("one", "1");
 		map.put("two", "2");
 		map.put("three", "3");

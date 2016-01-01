@@ -34,6 +34,7 @@ import org.springframework.test.context.testng.AbstractTransactionalTestNGSpring
 import org.springframework.test.context.testng.TrackingTestNGTestListener;
 import org.springframework.test.context.transaction.AfterTransaction;
 import org.springframework.test.context.transaction.BeforeTransaction;
+import org.springframework.util.ClassUtils;
 
 import org.testng.TestNG;
 
@@ -73,28 +74,27 @@ public class FailingBeforeAndAfterMethodsTestNGTests {
 	protected final int expectedFailedConfigurationsCount;
 
 
-	public FailingBeforeAndAfterMethodsTestNGTests(final Class<?> clazz, final int expectedTestStartCount,
-			final int expectedTestSuccessCount, final int expectedFailureCount,
-			final int expectedFailedConfigurationsCount) {
-		this.clazz = clazz;
+	@Parameters(name = "{0}")
+	public static Collection<Object[]> testData() {
+		return Arrays.asList(new Object[][] {//
+		//
+			{ AlwaysFailingBeforeTestClassTestCase.class.getSimpleName(), 1, 0, 0, 1 },//
+			{ AlwaysFailingAfterTestClassTestCase.class.getSimpleName(), 1, 1, 0, 1 },//
+			{ AlwaysFailingPrepareTestInstanceTestCase.class.getSimpleName(), 1, 0, 0, 1 },//
+			{ AlwaysFailingBeforeTestMethodTestCase.class.getSimpleName(), 1, 0, 0, 1 },//
+			{ AlwaysFailingAfterTestMethodTestCase.class.getSimpleName(), 1, 1, 0, 1 },//
+			{ FailingBeforeTransactionTestCase.class.getSimpleName(), 1, 0, 0, 1 },//
+			{ FailingAfterTransactionTestCase.class.getSimpleName(), 1, 1, 0, 1 } //
+		});
+	}
+
+	public FailingBeforeAndAfterMethodsTestNGTests(String testClassName, int expectedTestStartCount,
+			int expectedTestSuccessCount, int expectedFailureCount, int expectedFailedConfigurationsCount) throws Exception {
+		this.clazz = ClassUtils.forName(getClass().getName() + "." + testClassName, getClass().getClassLoader());
 		this.expectedTestStartCount = expectedTestStartCount;
 		this.expectedTestSuccessCount = expectedTestSuccessCount;
 		this.expectedFailureCount = expectedFailureCount;
 		this.expectedFailedConfigurationsCount = expectedFailedConfigurationsCount;
-	}
-
-	@Parameters
-	public static Collection<Object[]> testData() {
-		return Arrays.asList(new Object[][] {//
-		//
-			{ AlwaysFailingBeforeTestClassTestCase.class, 1, 0, 0, 1 },//
-			{ AlwaysFailingAfterTestClassTestCase.class, 1, 1, 0, 1 },//
-			{ AlwaysFailingPrepareTestInstanceTestCase.class, 1, 0, 0, 1 },//
-			{ AlwaysFailingBeforeTestMethodTestCase.class, 1, 0, 0, 1 },//
-			{ AlwaysFailingAfterTestMethodTestCase.class, 1, 1, 0, 1 },//
-			{ FailingBeforeTransactionTestCase.class, 1, 0, 0, 1 },//
-			{ FailingAfterTransactionTestCase.class, 1, 1, 0, 1 } //
-		});
 	}
 
 	@Test

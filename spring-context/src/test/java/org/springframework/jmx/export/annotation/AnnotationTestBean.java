@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 @ManagedResource(objectName = "bean:name=testBean4", description = "My Managed Bean", log = true,
 		logFile = "jmx.log", currencyTimeLimit = 15, persistPolicy = "OnUpdate", persistPeriod = 200,
 		persistLocation = "./foo", persistName = "bar.jmx")
-@ManagedNotifications({@ManagedNotification(name="My Notification", notificationTypes={"type.foo", "type.bar"})})
+@ManagedNotification(name="My Notification", notificationTypes={"type.foo", "type.bar"})
 public class AnnotationTestBean implements IJmxTestBean {
 
 	private String name;
@@ -91,9 +91,9 @@ public class AnnotationTestBean implements IJmxTestBean {
 	}
 
 	@Override
-	@org.springframework.jmx.export.annotation.ManagedOperation(description = "Add Two Numbers Together")
-	@ManagedOperationParameters({@ManagedOperationParameter(name="x", description="Left operand"),
-	@ManagedOperationParameter(name="y", description="Right operand")})
+	@ManagedOperation(description = "Add Two Numbers Together")
+	@ManagedOperationParameter(name="x", description="Left operand")
+	@ManagedOperationParameter(name="y", description="Right operand")
 	public int add(int x, int y) {
 		return x + y;
 	}
@@ -116,7 +116,5 @@ public class AnnotationTestBean implements IJmxTestBean {
 	public int getCacheEntries() {
 		return 3;
 	}
-
-
 
 }

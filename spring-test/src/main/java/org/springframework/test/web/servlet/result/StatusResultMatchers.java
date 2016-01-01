@@ -26,12 +26,14 @@ import static org.hamcrest.MatcherAssert.*;
 import static org.springframework.test.util.AssertionErrors.*;
 
 /**
- * Factory for assertions on the response status. An instance of this class is
- * typically accessed via {@link MockMvcResultMatchers#status()}.
+ * Factory for assertions on the response status.
+ * <p>An instance of this class is typically accessed via
+ * {@link MockMvcResultMatchers#status}.
  *
  * @author Keesun Baik
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @author Brian Clozel
  * @since 3.2
  */
 public class StatusResultMatchers {
@@ -558,6 +560,14 @@ public class StatusResultMatchers {
 	 */
 	public ResultMatcher isRequestHeaderFieldsTooLarge() {
 		return matcher(HttpStatus.valueOf(431));
+	}
+
+	/**
+	 * Assert the response status code is {@code HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS} (451).
+	 * @since 4.3
+	 */
+	public ResultMatcher isUnavailableForLegalReasons() {
+		return matcher(HttpStatus.valueOf(451));
 	}
 
 	/**

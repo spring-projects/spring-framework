@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,19 +28,12 @@ import java.util.Iterator;
  */
 public abstract class AbstractMessageCondition<T extends AbstractMessageCondition<T>> implements MessageCondition<T> {
 
-	/**
-	 * @return the collection of objects the message condition is composed of
-	 * .g. destination patterns), never {@code null}
-	 */
-	protected abstract Collection<?> getContent();
-
-
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
 		}
-		if (obj != null && getClass().equals(obj.getClass())) {
+		if (obj != null && getClass() == obj.getClass()) {
 			AbstractMessageCondition<?> other = (AbstractMessageCondition<?>) obj;
 			return getContent().equals(other.getContent());
 		}
@@ -65,6 +58,13 @@ public abstract class AbstractMessageCondition<T extends AbstractMessageConditio
 		builder.append("]");
 		return builder.toString();
 	}
+
+
+	/**
+	 * Return the collection of objects the message condition is composed of
+	 * (e.g. destination patterns), never {@code null}.
+	 */
+	protected abstract Collection<?> getContent();
 
 	/**
 	 * The notation to use when printing discrete items of content.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.WebAsyncUtils;
-import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
+import org.springframework.web.method.support.AsyncHandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
@@ -32,11 +32,16 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  * @author Rossen Stoyanchev
  * @since 4.1
  */
-public class ListenableFutureReturnValueHandler implements HandlerMethodReturnValueHandler {
+public class ListenableFutureReturnValueHandler implements AsyncHandlerMethodReturnValueHandler {
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
 		return ListenableFuture.class.isAssignableFrom(returnType.getParameterType());
+	}
+
+	@Override
+	public boolean isAsyncReturnValue(Object returnValue, MethodParameter returnType) {
+		return (returnValue != null && returnValue instanceof ListenableFuture);
 	}
 
 	@Override

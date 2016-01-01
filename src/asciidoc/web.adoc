@@ -32,3 +32,5 @@ include::web-integration.adoc[leveloffset=+1]
 include::web-portlet.adoc[leveloffset=+1]
 
 include::web-websocket.adoc[leveloffset=+1]
+
+include::web-cors.adoc[leveloffset=+1]

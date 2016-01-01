@@ -100,13 +100,24 @@ public abstract class CommonsFileUploadSupport {
 	}
 
 	/**
-	 * Set the maximum allowed size (in bytes) before uploads are refused.
+	 * Set the maximum allowed size (in bytes) before an upload gets rejected.
 	 * -1 indicates no limit (the default).
 	 * @param maxUploadSize the maximum upload size allowed
 	 * @see org.apache.commons.fileupload.FileUploadBase#setSizeMax
 	 */
 	public void setMaxUploadSize(long maxUploadSize) {
 		this.fileUpload.setSizeMax(maxUploadSize);
+	}
+
+	/**
+	 * Set the maximum allowed size (in bytes) for each individual file before
+	 * an upload gets rejected. -1 indicates no limit (the default).
+	 * @param maxUploadSizePerFile the maximum upload size per file
+	 * @since 4.2
+	 * @see org.apache.commons.fileupload.FileUploadBase#setFileSizeMax
+	 */
+	public void setMaxUploadSizePerFile(long maxUploadSizePerFile) {
+		this.fileUpload.setFileSizeMax(maxUploadSizePerFile);
 	}
 
 	/**
@@ -200,6 +211,7 @@ public abstract class CommonsFileUploadSupport {
 		if (encoding != null && !encoding.equals(fileUpload.getHeaderEncoding())) {
 			actualFileUpload = newFileUpload(getFileItemFactory());
 			actualFileUpload.setSizeMax(fileUpload.getSizeMax());
+			actualFileUpload.setFileSizeMax(fileUpload.getFileSizeMax());
 			actualFileUpload.setHeaderEncoding(encoding);
 		}
 

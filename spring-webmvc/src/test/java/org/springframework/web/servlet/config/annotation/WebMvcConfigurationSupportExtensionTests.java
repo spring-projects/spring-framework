@@ -18,6 +18,7 @@ package org.springframework.web.servlet.config.annotation;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
@@ -56,6 +57,7 @@ import org.springframework.web.context.request.async.CallableProcessingIntercept
 import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
 import org.springframework.web.context.request.async.DeferredResultProcessingInterceptorAdapter;
 import org.springframework.web.context.support.StaticWebApplicationContext;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.annotation.ModelAttributeMethodProcessor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
@@ -270,6 +272,13 @@ public class WebMvcConfigurationSupportExtensionTests {
 		assertEquals(".jsp", accessor.getPropertyValue("suffix"));
 	}
 
+	@Test
+	public void crossOrigin() {
+		Map<String, CorsConfiguration> configs = this.config.getCorsConfigurations();
+		assertEquals(1, configs.size());
+		assertEquals("*", configs.get("/resources/**").getAllowedOrigins().get(0));
+	}
+
 
 	@Controller
 	private static class TestController {
@@ -393,6 +402,12 @@ public class WebMvcConfigurationSupportExtensionTests {
 		public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
 			configurer.enable("default");
 		}
+
+		@Override
+		public void addCorsMappings(CorsRegistry registry) {
+			registry.addMapping("/resources/**");
+		}
+
 	}
 
 	private class TestPathHelper extends UrlPathHelper {}

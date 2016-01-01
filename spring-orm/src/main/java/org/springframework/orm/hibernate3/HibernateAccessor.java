@@ -48,7 +48,9 @@ import org.springframework.jdbc.support.SQLExceptionTranslator;
  * @see HibernateTemplate
  * @see HibernateInterceptor
  * @see #setFlushMode
+ * @deprecated as of Spring 4.3, in favor of Hibernate 4.x/5.x
  */
+@Deprecated
 public abstract class HibernateAccessor implements InitializingBean, BeanFactoryAware {
 
 	/**
@@ -408,7 +410,7 @@ public abstract class HibernateAccessor implements InitializingBean, BeanFactory
 		if (getJdbcExceptionTranslator() != null && ex instanceof JDBCException) {
 			return convertJdbcAccessException((JDBCException) ex, getJdbcExceptionTranslator());
 		}
-		else if (GenericJDBCException.class.equals(ex.getClass())) {
+		else if (GenericJDBCException.class == ex.getClass()) {
 			return convertJdbcAccessException((GenericJDBCException) ex, getDefaultJdbcExceptionTranslator());
 		}
 		return SessionFactoryUtils.convertHibernateAccessException(ex);

@@ -12,11 +12,11 @@
 				implement-interface="org.springframework.aop.aspectj.ICounter"
 				delegate-ref="counter"
 			/>
-		</aop:aspect>		
+		</aop:aspect>	
 	</aop:config>
 
 	<bean id="noMethodsBean" class="org.springframework.aop.aspectj.NoMethodsBeanImpl"/>
-	
+
 	<bean id="counter" class="org.springframework.aop.aspectj.Counter"/>
-	
+
 </beans>

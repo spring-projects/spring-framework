@@ -16,19 +16,14 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.any;
-import static org.mockito.BDDMockito.*;
-import static org.mockito.BDDMockito.isA;
-import static org.mockito.Matchers.eq;
-import static org.springframework.web.servlet.HandlerMapping.*;
-
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.util.Arrays;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -53,6 +48,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import static org.junit.Assert.*;
+import static org.mockito.BDDMockito.*;
+import static org.springframework.web.servlet.HandlerMapping.*;
+
 /**
  * Test fixture for {@link HttpEntityMethodProcessor} delegating to a mock
  * {@link HttpMessageConverter}.
@@ -63,6 +62,8 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  * @author Rossen Stoyanchev
  */
 public class HttpEntityMethodProcessorMockTests {
+
+	private SimpleDateFormat dateFormat;
 
 	private HttpEntityMethodProcessor processor;
 
@@ -90,6 +91,9 @@ public class HttpEntityMethodProcessorMockTests {
 	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() throws Exception {
+		dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+
 		messageConverter = mock(HttpMessageConverter.class);
 		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 
@@ -178,9 +182,10 @@ public class HttpEntityMethodProcessorMockTests {
 	@Test(expected = HttpMediaTypeNotSupportedException.class)
 	public void resolveArgumentNotReadable() throws Exception {
 		MediaType contentType = MediaType.TEXT_PLAIN;
+		servletRequest.setMethod("POST");
 		servletRequest.addHeader("Content-Type", contentType.toString());
 
-		given(messageConverter.getSupportedMediaTypes()).willReturn(Arrays.asList(contentType));
+		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(contentType));
 		given(messageConverter.canRead(String.class, contentType)).willReturn(false);
 
 		processor.resolveArgument(paramHttpEntity, mavContainer, webRequest, null);
@@ -190,6 +195,8 @@ public class HttpEntityMethodProcessorMockTests {
 
 	@Test(expected = HttpMediaTypeNotSupportedException.class)
 	public void resolveArgumentNoContentType() throws Exception {
+		servletRequest.setMethod("POST");
+		servletRequest.setContent("some content".getBytes(Charset.forName("UTF-8")));
 		processor.resolveArgument(paramHttpEntity, mavContainer, webRequest, null);
 		fail("Expected exception");
 	}
@@ -261,7 +268,7 @@ public class HttpEntityMethodProcessorMockTests {
 		servletRequest.addHeader("Accept", accepted.toString());
 
 		given(messageConverter.canWrite(String.class, null)).willReturn(true);
-		given(messageConverter.getSupportedMediaTypes()).willReturn(Arrays.asList(MediaType.TEXT_PLAIN));
+		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 		given(messageConverter.canWrite(String.class, accepted)).willReturn(false);
 
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
@@ -331,7 +338,7 @@ public class HttpEntityMethodProcessorMockTests {
 	public void handleReturnTypeLastModified() throws Exception {
 		long currentTime = new Date().getTime();
 		long oneMinuteAgo  = currentTime - (1000 * 60);
-		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, currentTime);
+		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, dateFormat.format(currentTime));
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setDate(HttpHeaders.LAST_MODIFIED, oneMinuteAgo);
 		ResponseEntity<String> returnValue = new ResponseEntity<String>("body", responseHeaders, HttpStatus.OK);
@@ -342,10 +349,9 @@ public class HttpEntityMethodProcessorMockTests {
 
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
 
-		assertTrue(mavContainer.isRequestHandled());
-		assertEquals(HttpStatus.NOT_MODIFIED.value(), servletResponse.getStatus());
-		assertEquals(oneMinuteAgo/1000 * 1000, Long.parseLong(servletResponse.getHeader(HttpHeaders.LAST_MODIFIED)));
-		assertEquals(0, servletResponse.getContentAsByteArray().length);
+		assertResponseNotModified();
+		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.LAST_MODIFIED).size());
+		assertEquals(dateFormat.format(oneMinuteAgo), servletResponse.getHeader(HttpHeaders.LAST_MODIFIED));
 	}
 
 	@Test
@@ -362,10 +368,9 @@ public class HttpEntityMethodProcessorMockTests {
 
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
 
-		assertTrue(mavContainer.isRequestHandled());
-		assertEquals(HttpStatus.NOT_MODIFIED.value(), servletResponse.getStatus());
+		assertResponseNotModified();
+		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
 		assertEquals(etagValue, servletResponse.getHeader(HttpHeaders.ETAG));
-		assertEquals(0, servletResponse.getContentAsByteArray().length);
 	}
 
 	@Test
@@ -373,7 +378,7 @@ public class HttpEntityMethodProcessorMockTests {
 		long currentTime = new Date().getTime();
 		long oneMinuteAgo  = currentTime - (1000 * 60);
 		String etagValue = "\"deadb33f8badf00d\"";
-		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, currentTime);
+		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, dateFormat.format(currentTime));
 		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, etagValue);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setDate(HttpHeaders.LAST_MODIFIED, oneMinuteAgo);
@@ -386,10 +391,39 @@ public class HttpEntityMethodProcessorMockTests {
 
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
 
+		assertResponseNotModified();
+		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.LAST_MODIFIED).size());
+		assertEquals(dateFormat.format(oneMinuteAgo), servletResponse.getHeader(HttpHeaders.LAST_MODIFIED));
+		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
+		assertEquals(etagValue, servletResponse.getHeader(HttpHeaders.ETAG));
+	}
+
+	@Test
+	public void handleReturnTypeNotModified() throws Exception {
+		long currentTime = new Date().getTime();
+		long oneMinuteAgo  = currentTime - (1000 * 60);
+		String etagValue = "\"deadb33f8badf00d\"";
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.setDate(HttpHeaders.LAST_MODIFIED, oneMinuteAgo);
+		responseHeaders.set(HttpHeaders.ETAG, etagValue);
+		ResponseEntity<String> returnValue = new ResponseEntity<String>("body", responseHeaders, HttpStatus.NOT_MODIFIED);
+
+		given(messageConverter.canWrite(String.class, null)).willReturn(true);
+		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		given(messageConverter.canWrite(String.class, MediaType.TEXT_PLAIN)).willReturn(true);
+
+		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
+
+		assertResponseNotModified();
+		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.LAST_MODIFIED).size());
+		assertEquals(dateFormat.format(oneMinuteAgo), servletResponse.getHeader(HttpHeaders.LAST_MODIFIED));
+		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
+		assertEquals(etagValue, servletResponse.getHeader(HttpHeaders.ETAG));
+	}
+
+	private void assertResponseNotModified() {
 		assertTrue(mavContainer.isRequestHandled());
 		assertEquals(HttpStatus.NOT_MODIFIED.value(), servletResponse.getStatus());
-		assertEquals(oneMinuteAgo/1000 * 1000, Long.parseLong(servletResponse.getHeader(HttpHeaders.LAST_MODIFIED)));
-		assertEquals(etagValue, servletResponse.getHeader(HttpHeaders.ETAG));
 		assertEquals(0, servletResponse.getContentAsByteArray().length);
 	}
 
@@ -399,7 +433,7 @@ public class HttpEntityMethodProcessorMockTests {
 		long oneMinuteAgo  = currentTime - (1000 * 60);
 		String etagValue = "\"deadb33f8badf00d\"";
 		String changedEtagValue = "\"changed-etag-value\"";
-		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, currentTime);
+		servletRequest.addHeader(HttpHeaders.IF_MODIFIED_SINCE, dateFormat.format(currentTime));
 		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, etagValue);
 		HttpHeaders responseHeaders = new HttpHeaders();
 		responseHeaders.setDate(HttpHeaders.LAST_MODIFIED, oneMinuteAgo);
@@ -414,9 +448,103 @@ public class HttpEntityMethodProcessorMockTests {
 
 		assertTrue(mavContainer.isRequestHandled());
 		assertEquals(HttpStatus.OK.value(), servletResponse.getStatus());
-		assertEquals(oneMinuteAgo/1000 * 1000, Long.parseLong(servletResponse.getHeader(HttpHeaders.LAST_MODIFIED)));
+		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.LAST_MODIFIED).size());
+		assertEquals(dateFormat.format(oneMinuteAgo), servletResponse.getHeader(HttpHeaders.LAST_MODIFIED));
+		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
 		assertEquals(changedEtagValue, servletResponse.getHeader(HttpHeaders.ETAG));
 		assertEquals(0, servletResponse.getContentAsByteArray().length);
+	}
+
+	// SPR-13496
+	@Test
+	public void handleReturnTypePostRequestWithIfNotModified() throws Exception {
+		String wildcardValue = "*";
+		String etagValue = "\"some-etag\"";
+		servletRequest.setMethod("POST");
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, wildcardValue);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.set(HttpHeaders.ETAG, etagValue);
+		ResponseEntity<String> returnValue = new ResponseEntity<String>("body", responseHeaders, HttpStatus.OK);
+
+		given(messageConverter.canWrite(String.class, null)).willReturn(true);
+		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		given(messageConverter.canWrite(String.class, MediaType.TEXT_PLAIN)).willReturn(true);
+
+		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
+
+		assertResponseOkWithBody("body");
+		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
+		assertEquals(etagValue, servletResponse.getHeader(HttpHeaders.ETAG));
+	}
+
+	// SPR-13626
+	@Test
+	public void handleReturnTypeGetIfNoneMatchWildcard() throws Exception {
+		String wildcardValue = "*";
+		String etagValue = "\"some-etag\"";
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, wildcardValue);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.set(HttpHeaders.ETAG, etagValue);
+		ResponseEntity<String> returnValue = new ResponseEntity<String>("body", responseHeaders, HttpStatus.OK);
+
+		given(messageConverter.canWrite(String.class, null)).willReturn(true);
+		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		given(messageConverter.canWrite(String.class, MediaType.TEXT_PLAIN)).willReturn(true);
+
+		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
+
+		assertResponseOkWithBody("body");
+		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
+		assertEquals(etagValue, servletResponse.getHeader(HttpHeaders.ETAG));
+	}
+
+	// SPR-13626
+	@Test
+	public void handleReturnTypeIfNoneMatchIfMatch() throws Exception {
+		String etagValue = "\"some-etag\"";
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, etagValue);
+		servletRequest.addHeader(HttpHeaders.IF_MATCH, "ifmatch");
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.set(HttpHeaders.ETAG, etagValue);
+		ResponseEntity<String> returnValue = new ResponseEntity<String>("body", responseHeaders, HttpStatus.OK);
+
+		given(messageConverter.canWrite(String.class, null)).willReturn(true);
+		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		given(messageConverter.canWrite(String.class, MediaType.TEXT_PLAIN)).willReturn(true);
+
+		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
+
+		assertResponseOkWithBody("body");
+		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
+		assertEquals(etagValue, servletResponse.getHeader(HttpHeaders.ETAG));
+	}
+
+	// SPR-13626
+	@Test
+	public void handleReturnTypeIfNoneMatchIfUnmodifiedSince() throws Exception {
+		String etagValue = "\"some-etag\"";
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, etagValue);
+		servletRequest.addHeader(HttpHeaders.IF_UNMODIFIED_SINCE, dateFormat.format(new Date().getTime()));
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.set(HttpHeaders.ETAG, etagValue);
+		ResponseEntity<String> returnValue = new ResponseEntity<String>("body", responseHeaders, HttpStatus.OK);
+
+		given(messageConverter.canWrite(String.class, null)).willReturn(true);
+		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		given(messageConverter.canWrite(String.class, MediaType.TEXT_PLAIN)).willReturn(true);
+
+		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
+
+		assertResponseOkWithBody("body");
+		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
+		assertEquals(etagValue, servletResponse.getHeader(HttpHeaders.ETAG));
+	}
+
+	private void assertResponseOkWithBody(String body) throws Exception {
+		assertTrue(mavContainer.isRequestHandled());
+		assertEquals(HttpStatus.OK.value(), servletResponse.getStatus());
+		ArgumentCaptor<HttpOutputMessage> outputMessage = ArgumentCaptor.forClass(HttpOutputMessage.class);
+		verify(messageConverter).write(eq("body"), eq(MediaType.TEXT_PLAIN), outputMessage.capture());
 	}
 
 	@SuppressWarnings("unused")

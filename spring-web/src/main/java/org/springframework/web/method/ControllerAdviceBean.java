@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.method;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,6 +28,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.OrderUtils;
 import org.springframework.util.Assert;
@@ -101,14 +103,19 @@ public class ControllerAdviceBean implements Ordered {
 			this.order = initOrderFromBean(bean);
 		}
 
-		ControllerAdvice annotation = AnnotationUtils.findAnnotation(beanType, ControllerAdvice.class);
-		if (annotation == null) {
-			throw new IllegalArgumentException(
-					"Bean type [" + beanType.getName() + "] is not annotated as @ControllerAdvice");
+		ControllerAdvice annotation = AnnotatedElementUtils.findMergedAnnotation(
+				beanType, ControllerAdvice.class);
+
+		if (annotation != null) {
+			this.basePackages = initBasePackages(annotation);
+			this.assignableTypes = Arrays.asList(annotation.assignableTypes());
+			this.annotations = Arrays.asList(annotation.annotations());
 		}
-		this.basePackages = initBasePackages(annotation);
-		this.assignableTypes = Arrays.asList(annotation.assignableTypes());
-		this.annotations = Arrays.asList(annotation.annotations());
+		else {
+			this.basePackages = Collections.emptySet();
+			this.assignableTypes = Collections.emptyList();
+			this.annotations = Collections.emptyList();
+		}
 	}
 
 
@@ -223,11 +230,6 @@ public class ControllerAdviceBean implements Ordered {
 
 	private static Set<String> initBasePackages(ControllerAdvice annotation) {
 		Set<String> basePackages = new LinkedHashSet<String>();
-		for (String basePackage : annotation.value()) {
-			if (StringUtils.hasText(basePackage)) {
-				basePackages.add(adaptBasePackage(basePackage));
-			}
-		}
 		for (String basePackage : annotation.basePackages()) {
 			if (StringUtils.hasText(basePackage)) {
 				basePackages.add(adaptBasePackage(basePackage));

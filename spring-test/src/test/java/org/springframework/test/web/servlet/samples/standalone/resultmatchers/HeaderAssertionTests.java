@@ -19,13 +19,13 @@ package org.springframework.test.web.servlet.samples.standalone.resultmatchers;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.test.web.Person;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.context.request.WebRequest;
 
 import static org.hamcrest.CoreMatchers.*;
@@ -34,11 +34,17 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.*;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
+
 /**
  * Examples of expectations on response header values.
  *
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Brian Clozel
  */
 public class HeaderAssertionTests {
 
@@ -50,6 +56,12 @@ public class HeaderAssertionTests {
 
 	private final long currentTime = System.currentTimeMillis();
 
+	private String now;
+
+	private String oneMinuteAgo;
+
+	private String oneSecondLater;
+
 	private MockMvc mockMvc;
 
 	private PersonController personController;
@@ -57,6 +69,11 @@ public class HeaderAssertionTests {
 
 	@Before
 	public void setup() {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
+		dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+		this.now = dateFormat.format(new Date(currentTime));
+		this.oneMinuteAgo = dateFormat.format(new Date(currentTime - (1000 * 60)));
+		this.oneSecondLater = dateFormat.format(new Date(currentTime + 1000));
 		this.personController = new PersonController();
 		this.personController.setStubTimestamp(currentTime);
 		this.mockMvc = standaloneSetup(this.personController).build();
@@ -64,32 +81,38 @@ public class HeaderAssertionTests {
 
 	@Test
 	public void stringWithCorrectResponseHeaderValue() throws Exception {
-		this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, currentTime - (1000 * 60)))//
-		.andExpect(header().string(LAST_MODIFIED, String.valueOf(currentTime)));
+		this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, oneMinuteAgo))//
+		.andExpect(header().string(LAST_MODIFIED, now));
 	}
 
 	@Test
 	public void stringWithMatcherAndCorrectResponseHeaderValue() throws Exception {
-		this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, currentTime - (1000 * 60)))//
-		.andExpect(header().string(LAST_MODIFIED, equalTo(String.valueOf(currentTime))));
+		this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, oneMinuteAgo))//
+		.andExpect(header().string(LAST_MODIFIED, equalTo(now)));
+	}
+
+	@Test
+	public void dateValueWithCorrectResponseHeaderValue() throws Exception {
+		this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, oneMinuteAgo))//
+		.andExpect(header().dateValue(LAST_MODIFIED, currentTime));
 	}
 
 	@Test
 	public void longValueWithCorrectResponseHeaderValue() throws Exception {
-		this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, currentTime - (1000 * 60)))//
-		.andExpect(header().longValue(LAST_MODIFIED, currentTime));
+		this.mockMvc.perform(get("/persons/1"))//
+		.andExpect(header().longValue("X-Rate-Limiting", 42));
 	}
 
 	@Test
 	public void stringWithMissingResponseHeader() throws Exception {
-		this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, currentTime))//
+		this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, now))//
 		.andExpect(status().isNotModified())//
 		.andExpect(header().string("X-Custom-Header", (String) null));
 	}
 
 	@Test
 	public void stringWithMatcherAndMissingResponseHeader() throws Exception {
-		this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, currentTime))//
+		this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, now))//
 		.andExpect(status().isNotModified())//
 		.andExpect(header().string("X-Custom-Header", nullValue()));
 	}
@@ -97,7 +120,7 @@ public class HeaderAssertionTests {
 	@Test
 	public void longValueWithMissingResponseHeader() throws Exception {
 		try {
-			this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, currentTime))//
+			this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, now))//
 			.andExpect(status().isNotModified())//
 			.andExpect(header().longValue("X-Custom-Header", 99L));
 
@@ -129,26 +152,28 @@ public class HeaderAssertionTests {
 
 	@Test
 	public void stringWithIncorrectResponseHeaderValue() throws Exception {
-		long unexpected = currentTime + 1;
-		assertIncorrectResponseHeaderValue(header().string(LAST_MODIFIED, String.valueOf(unexpected)), unexpected);
+		assertIncorrectResponseHeaderValue(header().string(LAST_MODIFIED, oneSecondLater), oneSecondLater);
 	}
 
 	@Test
 	public void stringWithMatcherAndIncorrectResponseHeaderValue() throws Exception {
-		long unexpected = currentTime + 1;
-		assertIncorrectResponseHeaderValue(header().string(LAST_MODIFIED, equalTo(String.valueOf(unexpected))),
-			unexpected);
+		assertIncorrectResponseHeaderValue(header().string(LAST_MODIFIED, equalTo(oneSecondLater)), oneSecondLater);
 	}
 
 	@Test
-	public void longValueWithIncorrectResponseHeaderValue() throws Exception {
-		long unexpected = currentTime + 1;
-		assertIncorrectResponseHeaderValue(header().longValue(LAST_MODIFIED, unexpected), unexpected);
+	public void dateValueWithIncorrectResponseHeaderValue() throws Exception {
+		long unexpected = currentTime + 1000;
+		assertIncorrectResponseHeaderValue(header().dateValue(LAST_MODIFIED, unexpected), oneSecondLater);
 	}
 
-	private void assertIncorrectResponseHeaderValue(ResultMatcher resultMatcher, long unexpected) throws Exception {
+	@Test(expected = AssertionError.class)
+	public void longValueWithIncorrectResponseHeaderValue() throws Exception {
+		this.mockMvc.perform(get("/persons/1")).andExpect(header().longValue("X-Rate-Limiting", 1));
+	}
+
+	private void assertIncorrectResponseHeaderValue(ResultMatcher resultMatcher, String unexpected) throws Exception {
 		try {
-			this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, currentTime - (1000 * 60)))//
+			this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, oneMinuteAgo))//
 			.andExpect(resultMatcher);
 
 			fail(EXPECTED_ASSERTION_ERROR_MSG);
@@ -162,8 +187,8 @@ public class HeaderAssertionTests {
 			// We don't use assertEquals() since we cannot control the formatting
 			// produced by JUnit or Hamcrest.
 			assertMessageContains(e, "Response header " + LAST_MODIFIED);
-			assertMessageContains(e, String.valueOf(unexpected));
-			assertMessageContains(e, String.valueOf(currentTime));
+			assertMessageContains(e, unexpected);
+			assertMessageContains(e, now);
 		}
 	}
 
@@ -186,12 +211,12 @@ public class HeaderAssertionTests {
 		}
 
 		@RequestMapping("/persons/{id}")
-		@ResponseBody
-		public Person showEntity(@PathVariable long id, WebRequest request) {
-			if (request.checkNotModified(calculateLastModified(id))) {
-				return null;
-			}
-			return new Person("Jason");
+		public ResponseEntity<Person> showEntity(@PathVariable long id, WebRequest request) {
+			return ResponseEntity
+					.ok()
+					.lastModified(calculateLastModified(id))
+					.header("X-Rate-Limiting", "42")
+					.body(new Person("Jason"));
 		}
 
 		private long calculateLastModified(long id) {

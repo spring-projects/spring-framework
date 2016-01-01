@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,15 +33,15 @@ import org.springframework.expression.spel.support.ReflectionHelper;
 import org.springframework.util.ReflectionUtils;
 
 /**
- * A function reference is of the form "#someFunction(a,b,c)". Functions may be defined in
- * the context prior to the expression being evaluated or within the expression itself
+ * A function reference is of the form "#someFunction(a,b,c)". Functions may be defined
+ * in the context prior to the expression being evaluated or within the expression itself
  * using a lambda function definition. For example: Lambda function definition in an
  * expression: "(#max = {|x,y|$x>$y?$x:$y};max(2,3))" Calling context defined function:
  * "#isEven(37)". Functions may also be static java methods, registered in the context
  * prior to invocation of the expression.
  *
- * <p>Functions are very simplistic, the arguments are not part of the definition (right
- * now), so the names must be unique.
+ * <p>Functions are very simplistic, the arguments are not part of the definition
+ * (right now), so the names must be unique.
  *
  * @author Andy Clement
  * @since 3.0
@@ -72,7 +72,8 @@ public class FunctionReference extends SpelNodeImpl {
 
 		// Two possibilities: a lambda function or a Java static method registered as a function
 		if (!(value.getValue() instanceof Method)) {
-			throw new SpelEvaluationException(SpelMessage.FUNCTION_REFERENCE_CANNOT_BE_INVOKED, this.name, value.getClass());
+			throw new SpelEvaluationException(
+					SpelMessage.FUNCTION_REFERENCE_CANNOT_BE_INVOKED, this.name, value.getClass());
 		}
 
 		try {
@@ -113,7 +114,8 @@ public class FunctionReference extends SpelNodeImpl {
 			argumentConversionOccurred = ReflectionHelper.convertAllArguments(converter, functionArgs, method);
 		}
 		if (method.isVarArgs()) {
-			functionArgs = ReflectionHelper.setupArgumentsForVarargsInvocation(method.getParameterTypes(), functionArgs);
+			functionArgs =
+					ReflectionHelper.setupArgumentsForVarargsInvocation(method.getParameterTypes(), functionArgs);
 		}
 
 		try {
@@ -160,13 +162,12 @@ public class FunctionReference extends SpelNodeImpl {
 	
 	@Override
 	public boolean isCompilable() {
-		if (this.method == null || argumentConversionOccurred) {
+		if (this.method == null || this.argumentConversionOccurred) {
 			return false;
 		}
 		int methodModifiers = this.method.getModifiers();
-		if (!Modifier.isStatic(methodModifiers) || 
-			!Modifier.isPublic(methodModifiers) ||
-			!Modifier.isPublic(method.getDeclaringClass().getModifiers())) {
+		if (!Modifier.isStatic(methodModifiers) || !Modifier.isPublic(methodModifiers) ||
+				!Modifier.isPublic(this.method.getDeclaringClass().getModifiers())) {
 			return false;
 		}
 		for (SpelNodeImpl child : this.children) {
@@ -179,9 +180,9 @@ public class FunctionReference extends SpelNodeImpl {
 	
 	@Override 
 	public void generateCode(MethodVisitor mv,CodeFlow cf) {
-		String methodDeclaringClassSlashedDescriptor = this.method.getDeclaringClass().getName().replace('.', '/');
-		generateCodeForArguments(mv, cf, method, this.children);
-		mv.visitMethodInsn(INVOKESTATIC, methodDeclaringClassSlashedDescriptor, this.method.getName(),
+		String classDesc = this.method.getDeclaringClass().getName().replace('.', '/');
+		generateCodeForArguments(mv, cf, this.method, this.children);
+		mv.visitMethodInsn(INVOKESTATIC, classDesc, this.method.getName(),
 				CodeFlow.createSignatureDescriptor(this.method), false);
 		cf.pushDescriptor(this.exitTypeDescriptor);
 	}

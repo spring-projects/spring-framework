@@ -23,6 +23,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.annotation.AnnotationConfigurationException;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.mock.env.MockEnvironment;
@@ -81,7 +82,7 @@ public class TestPropertySourceUtilsTests {
 
 	@Test
 	public void locationsAndValueAttributes() {
-		expectedException.expect(IllegalStateException.class);
+		expectedException.expect(AnnotationConfigurationException.class);
 		buildMergedTestPropertySources(LocationsAndValuePropertySources.class);
 	}
 

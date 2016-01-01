@@ -23,12 +23,16 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
@@ -47,6 +51,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Juergen Hoeller
  * @author Rod Johnson
+ * @author Brian Clozel
  * @since 1.0.2
  */
 public class MockHttpServletResponse implements HttpServletResponse {
@@ -58,6 +63,10 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	private static final String CONTENT_LENGTH_HEADER = "Content-Length";
 
 	private static final String LOCATION_HEADER = "Location";
+
+	private static final String DATE_FORMAT = "EEE, dd MMM yyyy HH:mm:ss zzz";
+
+	private static final TimeZone GMT = TimeZone.getTimeZone("GMT");
 
 
 	//---------------------------------------------------------------------
@@ -72,7 +81,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private boolean charset = false;
 
-	private final ByteArrayOutputStream content = new ByteArrayOutputStream();
+	private final ByteArrayOutputStream content = new ByteArrayOutputStream(1024);
 
 	private final ServletOutputStream outputStream = new ResponseServletOutputStream(this.content);
 
@@ -140,6 +149,14 @@ public class MockHttpServletResponse implements HttpServletResponse {
 		return this.writerAccessAllowed;
 	}
 
+	/**
+	 * Return whether the character encoding has been set.
+	 * <p>If {@code false}, {@link #getCharacterEncoding()} will return a default encoding value.
+	 */
+	public boolean isCharset() {
+		return charset;
+	}
+
 	@Override
 	public void setCharacterEncoding(String characterEncoding) {
 		this.characterEncoding = characterEncoding;
@@ -190,8 +207,8 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	public String getContentAsString() throws UnsupportedEncodingException {
 		flushBuffer();
-		return (this.characterEncoding != null) ?
-				this.content.toString(this.characterEncoding) : this.content.toString();
+		return (this.characterEncoding != null ?
+				this.content.toString(this.characterEncoding) : this.content.toString());
 	}
 
 	@Override
@@ -426,11 +443,13 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	}
 
 	@Override
+	@Deprecated
 	public String encodeUrl(String url) {
 		return encodeURL(url);
 	}
 
 	@Override
+	@Deprecated
 	public String encodeRedirectUrl(String url) {
 		return encodeRedirectURL(url);
 	}
@@ -471,12 +490,30 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public void setDateHeader(String name, long value) {
-		setHeaderValue(name, value);
+		setHeaderValue(name, formatDate(value));
+	}
+
+	public long getDateHeader(String name) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.US);
+		dateFormat.setTimeZone(GMT);
+		try {
+			return dateFormat.parse(getHeader(name)).getTime();
+		}
+		catch (ParseException ex) {
+			throw new IllegalArgumentException(
+					"Value for header '" + name + "' is not a valid Date: " + getHeader(name));
+		}
 	}
 
 	@Override
 	public void addDateHeader(String name, long value) {
-		addHeaderValue(name, value);
+		addHeaderValue(name, formatDate(value));
+	}
+
+	private String formatDate(long date) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT, Locale.US);
+		dateFormat.setTimeZone(GMT);
+		return dateFormat.format(new Date(date));
 	}
 
 	@Override
@@ -515,11 +552,12 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private boolean setSpecialHeader(String name, Object value) {
 		if (CONTENT_TYPE_HEADER.equalsIgnoreCase(name)) {
-			setContentType((String) value);
+			setContentType(value.toString());
 			return true;
 		}
 		else if (CONTENT_LENGTH_HEADER.equalsIgnoreCase(name)) {
-			setContentLength(Integer.parseInt((String) value));
+			setContentLength(value instanceof Number ? ((Number) value).intValue() :
+					Integer.parseInt(value.toString()));
 			return true;
 		}
 		else {
@@ -544,14 +582,15 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	@Override
 	public void setStatus(int status) {
-		if(!this.isCommitted()) {
+		if (!this.isCommitted()) {
 			this.status = status;
 		}
 	}
 
 	@Override
+	@Deprecated
 	public void setStatus(int status, String errorMessage) {
-		if(!this.isCommitted()) {
+		if (!this.isCommitted()) {
 			this.status = status;
 			this.errorMessage = errorMessage;
 		}

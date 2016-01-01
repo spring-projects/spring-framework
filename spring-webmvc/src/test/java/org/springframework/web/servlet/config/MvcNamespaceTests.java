@@ -31,14 +31,16 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
-
 import javax.servlet.RequestDispatcher;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import org.apache.tiles.definition.UnresolvingLocaleDefinitionsFactory;
 import org.hamcrest.Matchers;
-
 import org.joda.time.LocalDate;
-
 import org.junit.Before;
 import org.junit.Test;
 
@@ -56,6 +58,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.format.annotation.NumberFormat;
 import org.springframework.format.support.FormattingConversionServiceFactoryBean;
+import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter;
@@ -75,7 +78,6 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.http.CacheControl;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -84,6 +86,7 @@ import org.springframework.web.context.request.async.CallableProcessingIntercept
 import org.springframework.web.context.request.async.DeferredResultProcessingInterceptor;
 import org.springframework.web.context.request.async.DeferredResultProcessingInterceptorAdapter;
 import org.springframework.web.context.support.GenericWebApplicationContext;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.CompositeUriComponentsContributor;
 import org.springframework.web.method.support.InvocableHandlerMethod;
@@ -91,6 +94,7 @@ import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.handler.ConversionServiceExposingInterceptor;
 import org.springframework.web.servlet.handler.MappedInterceptor;
@@ -119,6 +123,7 @@ import org.springframework.web.servlet.resource.ResourceTransformer;
 import org.springframework.web.servlet.resource.ResourceUrlProvider;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
 import org.springframework.web.servlet.resource.VersionResourceResolver;
+import org.springframework.web.servlet.resource.WebJarsResourceResolver;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
 import org.springframework.web.servlet.view.BeanNameViewResolver;
 import org.springframework.web.servlet.view.ContentNegotiatingViewResolver;
@@ -132,16 +137,12 @@ import org.springframework.web.servlet.view.groovy.GroovyMarkupConfigurer;
 import org.springframework.web.servlet.view.groovy.GroovyMarkupViewResolver;
 import org.springframework.web.servlet.view.script.ScriptTemplateConfigurer;
 import org.springframework.web.servlet.view.script.ScriptTemplateViewResolver;
+import org.springframework.web.servlet.view.tiles3.SpringBeanPreparerFactory;
 import org.springframework.web.servlet.view.tiles3.TilesConfigurer;
 import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
 import org.springframework.web.servlet.view.velocity.VelocityConfigurer;
 import org.springframework.web.servlet.view.velocity.VelocityViewResolver;
 import org.springframework.web.util.UrlPathHelper;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -186,7 +187,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testDefaultConfig() throws Exception {
-		loadBeanDefinitions("mvc-config.xml", 13);
+		loadBeanDefinitions("mvc-config.xml", 14);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
@@ -249,7 +250,7 @@ public class MvcNamespaceTests {
 
 	@Test(expected = TypeMismatchException.class)
 	public void testCustomConversionService() throws Exception {
-		loadBeanDefinitions("mvc-config-custom-conversion-service.xml", 13);
+		loadBeanDefinitions("mvc-config-custom-conversion-service.xml", 14);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
@@ -284,7 +285,7 @@ public class MvcNamespaceTests {
 	}
 
 	private void doTestCustomValidator(String xml) throws Exception {
-		loadBeanDefinitions(xml, 13);
+		loadBeanDefinitions(xml, 14);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
@@ -306,7 +307,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testInterceptors() throws Exception {
-		loadBeanDefinitions("mvc-config-interceptors.xml", 20);
+		loadBeanDefinitions("mvc-config-interceptors.xml", 21);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
@@ -342,7 +343,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testResources() throws Exception {
-		loadBeanDefinitions("mvc-config-resources.xml", 9);
+		loadBeanDefinitions("mvc-config-resources.xml", 10);
 
 		HttpRequestHandlerAdapter adapter = appContext.getBean(HttpRequestHandlerAdapter.class);
 		assertNotNull(adapter);
@@ -382,7 +383,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testResourcesWithOptionalAttributes() throws Exception {
-		loadBeanDefinitions("mvc-config-resources-optional-attrs.xml", 9);
+		loadBeanDefinitions("mvc-config-resources-optional-attrs.xml", 10);
 
 		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(mapping);
@@ -393,13 +394,11 @@ public class MvcNamespaceTests {
 				ResourceHttpRequestHandler.class);
 		assertNotNull(handler);
 		assertEquals(3600, handler.getCacheSeconds());
-		assertThat(handler.getCacheControl().getHeaderValue(),
-				Matchers.equalTo(CacheControl.maxAge(1, TimeUnit.HOURS).getHeaderValue()));
 	}
 
 	@Test
 	public void testResourcesWithResolversTransformers() throws Exception {
-		loadBeanDefinitions("mvc-config-resources-chain.xml", 10);
+		loadBeanDefinitions("mvc-config-resources-chain.xml", 11);
 
 		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(mapping);
@@ -409,10 +408,11 @@ public class MvcNamespaceTests {
 		assertNotNull(handler);
 
 		List<ResourceResolver> resolvers = handler.getResourceResolvers();
-		assertThat(resolvers, Matchers.hasSize(3));
+		assertThat(resolvers, Matchers.hasSize(4));
 		assertThat(resolvers.get(0), Matchers.instanceOf(CachingResourceResolver.class));
 		assertThat(resolvers.get(1), Matchers.instanceOf(VersionResourceResolver.class));
-		assertThat(resolvers.get(2), Matchers.instanceOf(PathResourceResolver.class));
+		assertThat(resolvers.get(2), Matchers.instanceOf(WebJarsResourceResolver.class));
+		assertThat(resolvers.get(3), Matchers.instanceOf(PathResourceResolver.class));
 
 		CachingResourceResolver cachingResolver = (CachingResourceResolver) resolvers.get(0);
 		assertThat(cachingResolver.getCache(), Matchers.instanceOf(ConcurrentMapCache.class));
@@ -437,7 +437,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testResourcesWithResolversTransformersCustom() throws Exception {
-		loadBeanDefinitions("mvc-config-resources-chain-no-auto.xml", 11);
+		loadBeanDefinitions("mvc-config-resources-chain-no-auto.xml", 12);
 
 		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(mapping);
@@ -470,7 +470,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testDefaultServletHandler() throws Exception {
-		loadBeanDefinitions("mvc-config-default-servlet.xml", 5);
+		loadBeanDefinitions("mvc-config-default-servlet.xml", 6);
 
 		HttpRequestHandlerAdapter adapter = appContext.getBean(HttpRequestHandlerAdapter.class);
 		assertNotNull(adapter);
@@ -496,7 +496,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testDefaultServletHandlerWithOptionalAttributes() throws Exception {
-		loadBeanDefinitions("mvc-config-default-servlet-optional-attrs.xml", 5);
+		loadBeanDefinitions("mvc-config-default-servlet-optional-attrs.xml", 6);
 
 		HttpRequestHandlerAdapter adapter = appContext.getBean(HttpRequestHandlerAdapter.class);
 		assertNotNull(adapter);
@@ -522,7 +522,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testBeanDecoration() throws Exception {
-		loadBeanDefinitions("mvc-config-bean-decoration.xml", 15);
+		loadBeanDefinitions("mvc-config-bean-decoration.xml", 16);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
@@ -543,7 +543,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testViewControllers() throws Exception {
-		loadBeanDefinitions("mvc-config-view-controllers.xml", 18);
+		loadBeanDefinitions("mvc-config-view-controllers.xml", 19);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
@@ -624,7 +624,7 @@ public class MvcNamespaceTests {
 	/** WebSphere gives trailing servlet path slashes by default!! */
 	@Test
 	public void testViewControllersOnWebSphere() throws Exception {
-		loadBeanDefinitions("mvc-config-view-controllers.xml", 18);
+		loadBeanDefinitions("mvc-config-view-controllers.xml", 19);
 
 		SimpleUrlHandlerMapping mapping2 = appContext.getBean(SimpleUrlHandlerMapping.class);
 		SimpleControllerHandlerAdapter adapter = appContext.getBean(SimpleControllerHandlerAdapter.class);
@@ -668,7 +668,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testViewControllersDefaultConfig() {
-		loadBeanDefinitions("mvc-config-view-controllers-minimal.xml", 6);
+		loadBeanDefinitions("mvc-config-view-controllers-minimal.xml", 7);
 
 		SimpleUrlHandlerMapping hm = this.appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(hm);
@@ -691,7 +691,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testContentNegotiationManager() throws Exception {
-		loadBeanDefinitions("mvc-config-content-negotiation-manager.xml", 13);
+		loadBeanDefinitions("mvc-config-content-negotiation-manager.xml", 15);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		ContentNegotiationManager manager = mapping.getContentNegotiationManager();
@@ -699,11 +699,20 @@ public class MvcNamespaceTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo.xml");
 		NativeWebRequest webRequest = new ServletWebRequest(request);
 		assertEquals(Arrays.asList(MediaType.valueOf("application/rss+xml")), manager.resolveMediaTypes(webRequest));
+
+		ViewResolverComposite compositeResolver = this.appContext.getBean(ViewResolverComposite.class);
+		assertNotNull(compositeResolver);
+		assertEquals("Actual: " + compositeResolver.getViewResolvers(), 1, compositeResolver.getViewResolvers().size());
+
+		ViewResolver resolver = compositeResolver.getViewResolvers().get(0);
+		assertEquals(ContentNegotiatingViewResolver.class, resolver.getClass());
+		ContentNegotiatingViewResolver cnvr = (ContentNegotiatingViewResolver) resolver;
+		assertSame(manager, cnvr.getContentNegotiationManager());
 	}
 
 	@Test
 	public void testAsyncSupportOptions() throws Exception {
-		loadBeanDefinitions("mvc-config-async-support.xml", 14);
+		loadBeanDefinitions("mvc-config-async-support.xml", 15);
 
 		RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
 		assertNotNull(adapter);
@@ -781,6 +790,8 @@ public class MvcNamespaceTests {
 		accessor = new DirectFieldAccessor(tilesConfigurer);
 		assertArrayEquals(definitions, (String[]) accessor.getPropertyValue("definitions"));
 		assertTrue((boolean) accessor.getPropertyValue("checkRefresh"));
+		assertEquals(UnresolvingLocaleDefinitionsFactory.class, accessor.getPropertyValue("definitionsFactoryClass"));
+		assertEquals(SpringBeanPreparerFactory.class, accessor.getPropertyValue("preparerFactoryClass"));
 
 		FreeMarkerConfigurer freeMarkerConfigurer = appContext.getBean(FreeMarkerConfigurer.class);
 		assertNotNull(freeMarkerConfigurer);
@@ -801,8 +812,10 @@ public class MvcNamespaceTests {
 		ScriptTemplateConfigurer scriptTemplateConfigurer = appContext.getBean(ScriptTemplateConfigurer.class);
 		assertNotNull(scriptTemplateConfigurer);
 		assertEquals("render", scriptTemplateConfigurer.getRenderFunction());
+		assertEquals(MediaType.TEXT_PLAIN_VALUE, scriptTemplateConfigurer.getContentType());
 		assertEquals(StandardCharsets.ISO_8859_1, scriptTemplateConfigurer.getCharset());
 		assertEquals("classpath:", scriptTemplateConfigurer.getResourceLoaderPath());
+		assertFalse(scriptTemplateConfigurer.isSharedEngine());
 		String[] scripts = { "org/springframework/web/servlet/view/script/nashorn/render.js" };
 		accessor = new DirectFieldAccessor(scriptTemplateConfigurer);
 		assertArrayEquals(scripts, (String[]) accessor.getPropertyValue("scripts"));
@@ -843,7 +856,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testPathMatchingHandlerMappings() throws Exception {
-		loadBeanDefinitions("mvc-config-path-matching-mappings.xml", 22);
+		loadBeanDefinitions("mvc-config-path-matching-mappings.xml", 23);
 
 		RequestMappingHandlerMapping requestMapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(requestMapping);
@@ -859,6 +872,59 @@ public class MvcNamespaceTests {
 			assertNotNull(handlerMapping);
 			assertEquals(TestPathHelper.class, handlerMapping.getUrlPathHelper().getClass());
 			assertEquals(TestPathMatcher.class, handlerMapping.getPathMatcher().getClass());
+		}
+	}
+
+	@Test
+	public void testCorsMinimal() throws Exception {
+		loadBeanDefinitions("mvc-config-cors-minimal.xml", 14);
+
+		String[] beanNames = appContext.getBeanNamesForType(AbstractHandlerMapping.class);
+		assertEquals(2, beanNames.length);
+		for (String beanName : beanNames) {
+			AbstractHandlerMapping handlerMapping = (AbstractHandlerMapping)appContext.getBean(beanName);
+			assertNotNull(handlerMapping);
+			Map<String, CorsConfiguration> configs = handlerMapping.getCorsConfigurations();
+			assertNotNull(configs);
+			assertEquals(1, configs.size());
+			CorsConfiguration config = configs.get("/**");
+			assertNotNull(config);
+			assertArrayEquals(new String[]{"*"}, config.getAllowedOrigins().toArray());
+			assertArrayEquals(new String[]{"GET", "HEAD", "POST"}, config.getAllowedMethods().toArray());
+			assertArrayEquals(new String[]{"*"}, config.getAllowedHeaders().toArray());
+			assertNull(config.getExposedHeaders());
+			assertTrue(config.getAllowCredentials());
+			assertEquals(new Long(1600), config.getMaxAge());
+		}
+	}
+
+	@Test
+	public void testCors() throws Exception {
+		loadBeanDefinitions("mvc-config-cors.xml", 14);
+
+		String[] beanNames = appContext.getBeanNamesForType(AbstractHandlerMapping.class);
+		assertEquals(2, beanNames.length);
+		for (String beanName : beanNames) {
+			AbstractHandlerMapping handlerMapping = (AbstractHandlerMapping)appContext.getBean(beanName);
+			assertNotNull(handlerMapping);
+			Map<String, CorsConfiguration> configs = handlerMapping.getCorsConfigurations();
+			assertNotNull(configs);
+			assertEquals(2, configs.size());
+			CorsConfiguration config = configs.get("/api/**");
+			assertNotNull(config);
+			assertArrayEquals(new String[]{"http://domain1.com", "http://domain2.com"}, config.getAllowedOrigins().toArray());
+			assertArrayEquals(new String[]{"GET", "PUT"}, config.getAllowedMethods().toArray());
+			assertArrayEquals(new String[]{"header1", "header2", "header3"}, config.getAllowedHeaders().toArray());
+			assertArrayEquals(new String[]{"header1", "header2"}, config.getExposedHeaders().toArray());
+			assertFalse(config.getAllowCredentials());
+			assertEquals(new Long(123), config.getMaxAge());
+			config = configs.get("/resources/**");
+			assertArrayEquals(new String[]{"http://domain1.com"}, config.getAllowedOrigins().toArray());
+			assertArrayEquals(new String[]{"GET", "HEAD", "POST"}, config.getAllowedMethods().toArray());
+			assertArrayEquals(new String[]{"*"}, config.getAllowedHeaders().toArray());
+			assertNull(config.getExposedHeaders());
+			assertTrue(config.getAllowCredentials());
+			assertEquals(new Long(1600), config.getMaxAge());
 		}
 	}
 

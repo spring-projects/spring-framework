@@ -16,11 +16,6 @@
 
 package org.springframework.web.socket.messaging;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -47,9 +42,7 @@ import org.springframework.messaging.simp.TestPrincipal;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompEncoder;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
-import org.springframework.messaging.simp.user.DefaultUserSessionRegistry;
 import org.springframework.messaging.simp.user.DestinationUserNameProvider;
-import org.springframework.messaging.simp.user.UserSessionRegistry;
 import org.springframework.messaging.support.ChannelInterceptorAdapter;
 import org.springframework.messaging.support.ExecutorSubscribableChannel;
 import org.springframework.messaging.support.ImmutableMessageChannelInterceptor;
@@ -62,6 +55,22 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.handler.TestWebSocketSession;
 import org.springframework.web.socket.sockjs.transport.SockJsSession;
+
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * Test fixture for {@link StompSubProtocolHandler} tests.
@@ -88,6 +97,8 @@ public class StompSubProtocolHandlerTests {
 		this.channel = Mockito.mock(MessageChannel.class);
 		this.messageCaptor = ArgumentCaptor.forClass(Message.class);
 
+		when(this.channel.send(any())).thenReturn(true);
+
 		this.session = new TestWebSocketSession();
 		this.session.setId("s1");
 		this.session.setPrincipal(new TestPrincipal("joe"));
@@ -96,9 +107,6 @@ public class StompSubProtocolHandlerTests {
 	@Test
 	public void handleMessageToClientWithConnectedFrame() {
 
-		UserSessionRegistry registry = new DefaultUserSessionRegistry();
-		this.protocolHandler.setUserSessionRegistry(registry);
-
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECTED);
 		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
 		this.protocolHandler.handleMessageToClient(this.session, message);
@@ -106,8 +114,6 @@ public class StompSubProtocolHandlerTests {
 		assertEquals(1, this.session.getSentMessages().size());
 		WebSocketMessage<?> textMessage = this.session.getSentMessages().get(0);
 		assertEquals("CONNECTED\n" + "user-name:joe\n" + "\n" + "\u0000", textMessage.getPayload());
-
-		assertEquals(Collections.singleton("s1"), registry.getSessionIds("joe"));
 	}
 
 	@Test
@@ -115,9 +121,6 @@ public class StompSubProtocolHandlerTests {
 
 		this.session.setPrincipal(new UniqueUser("joe"));
 
-		UserSessionRegistry registry = new DefaultUserSessionRegistry();
-		this.protocolHandler.setUserSessionRegistry(registry);
-
 		StompHeaderAccessor headers = StompHeaderAccessor.create(StompCommand.CONNECTED);
 		Message<byte[]> message = MessageBuilder.createMessage(EMPTY_PAYLOAD, headers.getMessageHeaders());
 		this.protocolHandler.handleMessageToClient(this.session, message);
@@ -125,9 +128,6 @@ public class StompSubProtocolHandlerTests {
 		assertEquals(1, this.session.getSentMessages().size());
 		WebSocketMessage<?> textMessage = this.session.getSentMessages().get(0);
 		assertEquals("CONNECTED\n" + "user-name:joe\n" + "\n" + "\u0000", textMessage.getPayload());
-
-		assertEquals(Collections.<String>emptySet(), registry.getSessionIds("joe"));
-		assertEquals(Collections.singleton("s1"), registry.getSessionIds("Me myself and I"));
 	}
 
 	@Test
@@ -147,6 +147,25 @@ public class StompSubProtocolHandlerTests {
 		assertEquals(1, this.session.getSentMessages().size());
 		TextMessage actual = (TextMessage) this.session.getSentMessages().get(0);
 		assertEquals("CONNECTED\n" + "version:1.1\n" + "heart-beat:15000,15000\n" +
+				"user-name:joe\n" + "\n" + "\u0000", actual.getPayload());
+	}
+
+	@Test
+	public void handleMessageToClientWithSimpConnectAckDefaultHeartBeat() {
+
+		StompHeaderAccessor accessor = StompHeaderAccessor.create(StompCommand.CONNECT);
+		accessor.setHeartbeat(10000, 10000);
+		accessor.setAcceptVersion("1.0,1.1");
+		Message<?> connectMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, accessor.getMessageHeaders());
+
+		SimpMessageHeaderAccessor ackAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.CONNECT_ACK);
+		ackAccessor.setHeader(SimpMessageHeaderAccessor.CONNECT_MESSAGE_HEADER, connectMessage);
+		Message<byte[]> ackMessage = MessageBuilder.createMessage(EMPTY_PAYLOAD, ackAccessor.getMessageHeaders());
+		this.protocolHandler.handleMessageToClient(this.session, ackMessage);
+
+		assertEquals(1, this.session.getSentMessages().size());
+		TextMessage actual = (TextMessage) this.session.getSentMessages().get(0);
+		assertEquals("CONNECTED\n" + "version:1.1\n" + "heart-beat:0,0\n" +
 				"user-name:joe\n" + "\n" + "\u0000", actual.getPayload());
 	}
 
@@ -329,8 +348,6 @@ public class StompSubProtocolHandlerTests {
 
 		TestPublisher publisher = new TestPublisher();
 
-		UserSessionRegistry registry = new DefaultUserSessionRegistry();
-		this.protocolHandler.setUserSessionRegistry(registry);
 		this.protocolHandler.setApplicationEventPublisher(publisher);
 		this.protocolHandler.afterSessionStarted(this.session, this.channel);
 
@@ -368,8 +385,6 @@ public class StompSubProtocolHandlerTests {
 
 		ApplicationEventPublisher publisher = mock(ApplicationEventPublisher.class);
 
-		UserSessionRegistry registry = new DefaultUserSessionRegistry();
-		this.protocolHandler.setUserSessionRegistry(registry);
 		this.protocolHandler.setApplicationEventPublisher(publisher);
 		this.protocolHandler.afterSessionStarted(this.session, this.channel);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,13 @@
 package org.springframework.oxm.config;
 
 import org.apache.xmlbeans.XmlOptions;
-import org.junit.Before;
+
 import org.junit.Test;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.oxm.castor.CastorMarshaller;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
-import org.springframework.oxm.xmlbeans.XmlBeansMarshaller;
 
 import static org.junit.Assert.*;
 
@@ -33,19 +32,18 @@ import static org.junit.Assert.*;
  *
  * @author Arjen Poustma
  * @author Jakub Narloch
+ * @author Sam Brannen
  */
+@SuppressWarnings("deprecation")
 public class OxmNamespaceHandlerTests {
 
-	private ApplicationContext applicationContext;
-
-	@Before
-	public void createAppContext() throws Exception {
-		applicationContext = new ClassPathXmlApplicationContext("oxmNamespaceHandlerTest.xml", getClass());
-	}
+	private final ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
+			"oxmNamespaceHandlerTest.xml", getClass());
 
 	@Test
 	public void xmlBeansMarshaller() throws Exception {
-		XmlBeansMarshaller marshaller = applicationContext.getBean("xmlBeansMarshaller", XmlBeansMarshaller.class);
+		org.springframework.oxm.xmlbeans.XmlBeansMarshaller marshaller = applicationContext.getBean(
+				org.springframework.oxm.xmlbeans.XmlBeansMarshaller.class);
 		XmlOptions options = marshaller.getXmlOptions();
 		assertNotNull("Options not set", options);
 		assertTrue("option not set", options.hasOption("SAVE_PRETTY_PRINT"));

@@ -24,7 +24,7 @@ import org.springframework.mock.http.client.MockClientHttpRequest;
 import static org.hamcrest.Matchers.*;
 
 /**
- * Tests for {@link ContentRequestMatchers}.
+ * Unit tests for {@link ContentRequestMatchers}.
  *
  * @author Rossen Stoyanchev
  */

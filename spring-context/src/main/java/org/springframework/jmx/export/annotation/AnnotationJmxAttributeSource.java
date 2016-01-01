@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,12 @@
 package org.springframework.jmx.export.annotation;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.Set;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.annotation.AnnotationBeanUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -26,26 +30,19 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.jmx.export.metadata.InvalidMetadataException;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
-import org.springframework.jmx.export.metadata.ManagedAttribute;
-import org.springframework.jmx.export.metadata.ManagedMetric;
-import org.springframework.jmx.export.metadata.ManagedNotification;
-import org.springframework.jmx.export.metadata.ManagedOperation;
-import org.springframework.jmx.export.metadata.ManagedOperationParameter;
-import org.springframework.jmx.export.metadata.ManagedResource;
-import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 
 /**
  * Implementation of the {@code JmxAttributeSource} interface that
- * reads JDK 1.5+ annotations and exposes the corresponding attributes.
+ * reads annotations and exposes the corresponding attributes.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Jennifer Hickey
  * @since 1.2
- * @see org.springframework.jmx.export.annotation.ManagedResource
- * @see org.springframework.jmx.export.annotation.ManagedAttribute
- * @see org.springframework.jmx.export.annotation.ManagedOperation
+ * @see ManagedResource
+ * @see ManagedAttribute
+ * @see ManagedOperation
  */
 public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFactoryAware {
 
@@ -66,34 +63,24 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 		}
 	}
 
-
 	@Override
-	public ManagedResource getManagedResource(Class<?> beanClass) throws InvalidMetadataException {
-		org.springframework.jmx.export.annotation.ManagedResource ann =
-				AnnotationUtils.getAnnotation(beanClass, org.springframework.jmx.export.annotation.ManagedResource.class);
+	public org.springframework.jmx.export.metadata.ManagedResource getManagedResource(Class<?> beanClass) throws InvalidMetadataException {
+		ManagedResource ann = AnnotationUtils.findAnnotation(beanClass, ManagedResource.class);
 		if (ann == null) {
 			return null;
 		}
-		ManagedResource managedResource = new ManagedResource();
+		org.springframework.jmx.export.metadata.ManagedResource managedResource = new org.springframework.jmx.export.metadata.ManagedResource();
 		AnnotationBeanUtils.copyPropertiesToBean(ann, managedResource, this.embeddedValueResolver);
-		if (!"".equals(ann.value()) && !StringUtils.hasLength(managedResource.getObjectName())) {
-			String value = ann.value();
-			if (this.embeddedValueResolver != null) {
-				value = this.embeddedValueResolver.resolveStringValue(value);
-			}
-			managedResource.setObjectName(value);
-		}
 		return managedResource;
 	}
 
 	@Override
-	public ManagedAttribute getManagedAttribute(Method method) throws InvalidMetadataException {
-		org.springframework.jmx.export.annotation.ManagedAttribute ann =
-				AnnotationUtils.findAnnotation(method, org.springframework.jmx.export.annotation.ManagedAttribute.class);
+	public org.springframework.jmx.export.metadata.ManagedAttribute getManagedAttribute(Method method) throws InvalidMetadataException {
+		ManagedAttribute ann = AnnotationUtils.findAnnotation(method, ManagedAttribute.class);
 		if (ann == null) {
 			return null;
 		}
-		ManagedAttribute managedAttribute = new ManagedAttribute();
+		org.springframework.jmx.export.metadata.ManagedAttribute managedAttribute = new org.springframework.jmx.export.metadata.ManagedAttribute();
 		AnnotationBeanUtils.copyPropertiesToBean(ann, managedAttribute, "defaultValue");
 		if (ann.defaultValue().length() > 0) {
 			managedAttribute.setDefaultValue(ann.defaultValue());
@@ -102,65 +89,53 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 	}
 
 	@Override
-	public ManagedMetric getManagedMetric(Method method) throws InvalidMetadataException {
-		org.springframework.jmx.export.annotation.ManagedMetric ann =
-				AnnotationUtils.findAnnotation(method, org.springframework.jmx.export.annotation.ManagedMetric.class);
-		if (ann == null) {
-			return null;
-		}
-		ManagedMetric managedMetric = new ManagedMetric();
-		AnnotationBeanUtils.copyPropertiesToBean(ann, managedMetric);
-		return managedMetric;
+	public org.springframework.jmx.export.metadata.ManagedMetric getManagedMetric(Method method) throws InvalidMetadataException {
+		ManagedMetric ann = AnnotationUtils.findAnnotation(method, ManagedMetric.class);
+		return copyPropertiesToBean(ann, org.springframework.jmx.export.metadata.ManagedMetric.class);
 	}
 
 	@Override
-	public ManagedOperation getManagedOperation(Method method) throws InvalidMetadataException {
-		Annotation ann = AnnotationUtils.findAnnotation(method, org.springframework.jmx.export.annotation.ManagedOperation.class);
-		if (ann == null) {
-			return null;
-		}
-		ManagedOperation op = new ManagedOperation();
-		AnnotationBeanUtils.copyPropertiesToBean(ann, op);
-		return op;
+	public org.springframework.jmx.export.metadata.ManagedOperation getManagedOperation(Method method) throws InvalidMetadataException {
+		ManagedOperation ann = AnnotationUtils.findAnnotation(method, ManagedOperation.class);
+		return copyPropertiesToBean(ann, org.springframework.jmx.export.metadata.ManagedOperation.class);
 	}
 
 	@Override
-	public ManagedOperationParameter[] getManagedOperationParameters(Method method)
+	public org.springframework.jmx.export.metadata.ManagedOperationParameter[] getManagedOperationParameters(Method method)
 			throws InvalidMetadataException {
 
-		ManagedOperationParameters params = AnnotationUtils.findAnnotation(method, ManagedOperationParameters.class);
-		ManagedOperationParameter[] result = null;
-		if (params == null) {
-			result = new ManagedOperationParameter[0];
-		}
-		else {
-			Annotation[] paramData = params.value();
-			result = new ManagedOperationParameter[paramData.length];
-			for (int i = 0; i < paramData.length; i++) {
-				Annotation annotation = paramData[i];
-				ManagedOperationParameter managedOperationParameter = new ManagedOperationParameter();
-				AnnotationBeanUtils.copyPropertiesToBean(annotation, managedOperationParameter);
-				result[i] = managedOperationParameter;
-			}
-		}
-		return result;
+		Set<ManagedOperationParameter> anns = AnnotationUtils.getRepeatableAnnotations(
+				method, ManagedOperationParameter.class, ManagedOperationParameters.class);
+		return copyPropertiesToBeanArray(anns, org.springframework.jmx.export.metadata.ManagedOperationParameter.class);
 	}
 
 	@Override
-	public ManagedNotification[] getManagedNotifications(Class<?> clazz) throws InvalidMetadataException {
-		ManagedNotifications notificationsAnn = AnnotationUtils.getAnnotation(clazz, ManagedNotifications.class);
-		if (notificationsAnn == null) {
-			return new ManagedNotification[0];
+	public org.springframework.jmx.export.metadata.ManagedNotification[] getManagedNotifications(Class<?> clazz)
+			throws InvalidMetadataException {
+
+		Set<ManagedNotification> anns = AnnotationUtils.getRepeatableAnnotations(
+				clazz, ManagedNotification.class, ManagedNotifications.class);
+		return copyPropertiesToBeanArray(anns, org.springframework.jmx.export.metadata.ManagedNotification.class);
+	}
+
+
+	@SuppressWarnings("unchecked")
+	private static <T> T[] copyPropertiesToBeanArray(Collection<? extends Annotation> anns, Class<T> beanClass) {
+		T[] beans = (T[]) Array.newInstance(beanClass, anns.size());
+		int i = 0;
+		for (Annotation ann : anns) {
+			beans[i++] = copyPropertiesToBean(ann, beanClass);
 		}
-		Annotation[] notifications = notificationsAnn.value();
-		ManagedNotification[] result = new ManagedNotification[notifications.length];
-		for (int i = 0; i < notifications.length; i++) {
-			Annotation notification = notifications[i];
-			ManagedNotification managedNotification = new ManagedNotification();
-			AnnotationBeanUtils.copyPropertiesToBean(notification, managedNotification);
-			result[i] = managedNotification;
+		return beans;
+	}
+
+	private static <T> T copyPropertiesToBean(Annotation ann, Class<T> beanClass) {
+		if (ann == null) {
+			return null;
 		}
-		return result;
+		T bean = BeanUtils.instantiate(beanClass);
+		AnnotationBeanUtils.copyPropertiesToBean(ann, bean);
+		return bean;
 	}
 
 }

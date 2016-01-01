@@ -39,13 +39,16 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * {@link org.springframework.web.servlet.View} implementation that retrieves a
  * Tiles definition. The "url" property is interpreted as name of a Tiles definition.
  *
- * <p>This class builds on Tiles2, which requires JSP 2.0.
+ * <p>This class builds on Tiles, which requires JSP 2.0.
  * JSTL support is integrated out of the box due to JSTL's inclusion in JSP 2.0.
  * <b>Note: Spring 4.0 requires Tiles 2.2.2.</b>
  *
  * <p>Depends on a TilesContainer which must be available in
  * the ServletContext. This container is typically set up via a
  * {@link TilesConfigurer} bean definition in the application context.
+ *
+ * <p><b>NOTE: Tiles 2 support is deprecated in favor of Tiles 3 and will be removed
+ * as of Spring Framework 5.0.</b>.
  *
  * @author Juergen Hoeller
  * @author Sebastien Deleuze

@@ -30,7 +30,9 @@ import org.apache.velocity.exception.VelocityException;
  *
  * @author Juergen Hoeller
  * @since 22.01.2004
+ * @deprecated as of Spring 4.3, in favor of FreeMarker
  */
+@Deprecated
 public abstract class VelocityEngineUtils {
 
 	/**

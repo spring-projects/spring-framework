@@ -5,17 +5,14 @@
 [[portlet-introduction]]
 == Introduction
 
-.JSR-168 The Java Portlet Specification
+.JSR-286 The Java Portlet Specification
 ****
-For more general information about portlet development, please review a whitepaper from
-Oracle entitled
-http://www.oracle.com/technetwork/java/index-raji-test-141933.html["Introduction
-to JSR 168"], and of course the
-http://jcp.org/aboutJava/communityprocess/final/jsr168/[JSR-168 Specification] itself.
+For more general information about portlet development, please review the
+https://jcp.org/en/jsr/detail?id=286[JSR-286 Specification] itself.
 ****
 
 In addition to supporting conventional (servlet-based) Web development, Spring also
-supports JSR-168 Portlet development. As much as possible, the Portlet MVC framework is
+supports JSR-286 Portlet development. As much as possible, the Portlet MVC framework is
 a mirror image of the Web MVC framework, and also uses the same underlying view
 abstractions and integration technology. So, be sure to review the chapters entitled
 <<mvc>> and <<view>> before continuing with this chapter.
@@ -23,7 +20,7 @@ abstractions and integration technology. So, be sure to review the chapters enti
 [NOTE]
 ====
 Bear in mind that while the concepts of Spring MVC are the same in Spring Portlet MVC,
-there are some notable differences created by the unique workflow of JSR-168 portlets.
+there are some notable differences created by the unique workflow of JSR-286 portlets.
 ====
 
 The main way in which portlet workflow differs from servlet workflow is that the request
@@ -53,7 +50,7 @@ guide the user through controlled navigations that drive business processes.
 For more information about SWF, consult the Spring Web Flow website.
 ****
 
-The dual phases of portlet requests are one of the real strengths of the JSR-168
+The dual phases of portlet requests are one of the real strengths of the JSR-286
 specification. For example, dynamic search results can be updated routinely on the
 display without the user explicitly rerunning the search. Most other portlet MVC
 frameworks attempt to completely hide the two phases from the developer and make it look
@@ -499,7 +496,7 @@ can instantiate an existing `Portlet` as a `Controller` as follows:
 ----
 
 This can be very valuable since you can then use interceptors to pre-process and
-post-process requests going to these portlets. Since JSR-168 does not support any kind
+post-process requests going to these portlets. Since JSR-286 does not support any kind
 of filter mechanism, this is quite handy. For example, this can be used to wrap the
 Hibernate `OpenSessionInViewInterceptor` around a MyFaces JSF Portlet.
 
@@ -791,7 +788,7 @@ The following example shows how to use the `CommonsPortletMultipartResolver`:
 Of course you also need to put the appropriate jars in your classpath for the multipart
 resolver to work. In the case of the `CommonsMultipartResolver`, you need to use
 `commons-fileupload.jar`. Be sure to use at least version 1.1 of Commons FileUpload as
-previous versions do not support JSR-168 Portlet applications.
+previous versions do not support JSR-286 Portlet applications.
 
 Now that you have seen how to set Portlet MVC up to handle multipart requests, let's
 talk about how to actually use it. When `DispatcherPortlet` detects a multipart request,
@@ -1191,6 +1188,62 @@ using this annotation:
 	}
 ----
 
+As of Spring 3.0, there are dedicated `@ActionMapping` and `@RenderMapping` (as well as
+`@ResourceMapping` and `@EventMapping`) annotations which can be used instead:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@Controller
+	@RequestMapping("EDIT")
+	@SessionAttributes("site")
+	public class PetSitesEditController {
+
+		private Properties petSites;
+
+		public void setPetSites(Properties petSites) {
+			this.petSites = petSites;
+		}
+
+		@ModelAttribute("petSites")
+		public Properties getPetSites() {
+			return this.petSites;
+		}
+
+		@RenderMapping // default (action=list)
+		public String showPetSites() {
+			return "petSitesEdit";
+		}
+
+		@RenderMapping(params = "action=add")
+		public String showSiteForm(Model model) {
+			// Used for the initial form as well as for redisplaying with errors.
+			if (!model.containsAttribute("site")) {
+				model.addAttribute("site", new PetSite());
+			}
+
+			return "petSitesAdd";
+		}
+
+		@ActionMapping(params = "action=add")
+		public void populateSite(@ModelAttribute("site") PetSite petSite,
+				BindingResult result, SessionStatus status, ActionResponse response) {
+			new PetSiteValidator().validate(petSite, result);
+			if (!result.hasErrors()) {
+				this.petSites.put(petSite.getName(), petSite.getUrl());
+				status.setComplete();
+				response.setRenderParameter("action", "list");
+			}
+		}
+
+		@ActionMapping(params = "action=delete")
+		public void removeSite(@RequestParam("site") String site, ActionResponse response) {
+			this.petSites.remove(site);
+			response.setRenderParameter("action", "list");
+		}
+	}
+----
+
 
 
 [[portlet-ann-requestmapping-arguments]]
@@ -1295,7 +1348,7 @@ The following code snippet from the PetPortal sample application shows the usage
 
 Parameters using this annotation are required by default, but you can specify that a
 parameter is optional by setting `@RequestParam`'s `required` attribute to `false`
-(e.g., `@RequestParam(value="id", required=false)`).
+(e.g., `@RequestParam(name="id", required=false)`).
 
 
 
@@ -1435,7 +1488,7 @@ configuration.
 [[portlet-deployment]]
 == Portlet application deployment
 The process of deploying a Spring Portlet MVC application is no different than deploying
-any JSR-168 Portlet application. However, this area is confusing enough in general that
+any JSR-286 Portlet application. However, this area is confusing enough in general that
 it is worth talking about here briefly.
 
 Generally, the portal/portlet container runs in one webapp in your servlet container and
@@ -1444,7 +1497,7 @@ container webapp to make calls into your portlet webapp it must make cross-conte
 to a well-known servlet that provides access to the portlet services defined in your
 `portlet.xml` file.
 
-The JSR-168 specification does not specify exactly how this should happen, so each
+The JSR-286 specification does not specify exactly how this should happen, so each
 portlet container has its own mechanism for this, which usually involves some kind of
 "deployment process" that makes changes to the portlet webapp itself and then registers
 the portlets within the portlet container.

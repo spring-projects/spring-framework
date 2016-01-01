@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,22 +30,21 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 
-
 /**
  * Wraps a {@link org.springframework.web.socket.WebSocketSession} and guarantees
  * only one thread can send messages at a time.
  *
  * <p>If a send is slow, subsequent attempts to send more messages from a different
- * thread will fail to acquire the flushLock and the messages will be buffered instead --
- * at that time the specified buffer size limit and send time limit will be checked
- * and the session closed if the limits are exceeded.
+ * thread will fail to acquire the flush lock and the messages will be buffered
+ * instead: At that time, the specified buffer-size limit and send-time limit will
+ * be checked and the session closed if the limits are exceeded.
  *
  * @author Rossen Stoyanchev
  * @since 4.0.3
  */
 public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorator {
 
-	private static final Log logger = LogFactory.getLog("_" + ConcurrentWebSocketSessionDecorator.class.getName());
+	private static final Log logger = LogFactory.getLog(ConcurrentWebSocketSessionDecorator.class);
 
 
 	private final Queue<WebSocketMessage<?>> buffer = new LinkedBlockingQueue<WebSocketMessage<?>>();
@@ -70,6 +69,12 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 	private final Lock closeLock = new ReentrantLock();
 
 
+	/**
+	 * Create a new {@code ConcurrentWebSocketSessionDecorator}.
+	 * @param delegate the {@code WebSocketSession} to delegate to
+	 * @param sendTimeLimit the send-time limit (milliseconds)
+	 * @param bufferSizeLimit the buffer-size limit (number of bytes)
+	 */
 	public ConcurrentWebSocketSessionDecorator(WebSocketSession delegate, int sendTimeLimit, int bufferSizeLimit) {
 		super(delegate);
 		this.sendTimeLimit = sendTimeLimit;

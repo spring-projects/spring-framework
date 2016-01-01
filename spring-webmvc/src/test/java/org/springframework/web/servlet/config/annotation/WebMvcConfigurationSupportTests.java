@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,18 +18,14 @@ package org.springframework.web.servlet.config.annotation;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.joda.time.DateTime;
+
 import org.junit.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
-import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -83,14 +79,21 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.ViewResolverComposite;
 import org.springframework.web.util.UrlPathHelper;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+
 import static org.junit.Assert.*;
 
 /**
- * A test fixture with an {@link WebMvcConfigurationSupport} instance.
+ * Integration tests for {@link WebMvcConfigurationSupport} (imported via
+ * {@link EnableWebMvc @EnableWebMvc}).
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
  * @author Sebastien Deleuze
+ * @author Sam Brannen
  */
 public class WebMvcConfigurationSupportTests {
 
@@ -106,10 +109,10 @@ public class WebMvcConfigurationSupportTests {
 		assertEquals(ConversionServiceExposingInterceptor.class, chain.getInterceptors()[0].getClass());
 
 		chain = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/scoped"));
-		assertNotNull(chain);
+		assertNotNull("HandlerExecutionChain for '/scoped' mapping should not be null.", chain);
 
 		chain = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/scopedProxy"));
-		assertNotNull(chain);
+		assertNotNull("HandlerExecutionChain for '/scopedProxy' mapping should not be null.", chain);
 	}
 
 	@Test
@@ -190,10 +193,10 @@ public class WebMvcConfigurationSupportTests {
 
 		DirectFieldAccessor fieldAccessor = new DirectFieldAccessor(adapter);
 		@SuppressWarnings("unchecked")
-		List<Object> interceptors = (List<Object>) fieldAccessor.getPropertyValue("requestResponseBodyAdvice");
-		assertEquals(2, interceptors.size());
-		assertEquals(JsonViewRequestBodyAdvice.class, interceptors.get(0).getClass());
-		assertEquals(JsonViewResponseBodyAdvice.class, interceptors.get(1).getClass());
+		List<Object> bodyAdvice = (List<Object>) fieldAccessor.getPropertyValue("requestResponseBodyAdvice");
+		assertEquals(2, bodyAdvice.size());
+		assertEquals(JsonViewRequestBodyAdvice.class, bodyAdvice.get(0).getClass());
+		assertEquals(JsonViewResponseBodyAdvice.class, bodyAdvice.get(1).getClass());
 	}
 
 	@Test
@@ -207,6 +210,7 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void handlerExceptionResolver() throws Exception {
 		ApplicationContext context = initContext(WebConfig.class);
 		HandlerExceptionResolverComposite compositeResolver =
@@ -267,9 +271,6 @@ public class WebMvcConfigurationSupportTests {
 		ApplicationContext context = initContext(CustomViewResolverOrderConfig.class);
 		ViewResolverComposite resolver = context.getBean("mvcViewResolver", ViewResolverComposite.class);
 
-		Map<String, ViewResolver> map = BeanFactoryUtils.beansOfTypeIncludingAncestors(
-				context, ViewResolver.class, true, false);
-
 		assertNotNull(resolver);
 		assertEquals(1, resolver.getViewResolvers().size());
 		assertEquals(InternalResourceViewResolver.class, resolver.getViewResolvers().get(0).getClass());
@@ -287,8 +288,7 @@ public class WebMvcConfigurationSupportTests {
 		assertEquals(AntPathMatcher.class, pathMatcher.getClass());
 	}
 
-
-	private ApplicationContext initContext(Class... configClasses) {
+	private ApplicationContext initContext(Class<?>... configClasses) {
 		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
 		context.setServletContext(new MockServletContext());
 		context.register(configClasses);
@@ -372,7 +372,7 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 
-	@ResponseStatus(value = HttpStatus.BAD_REQUEST,  reason = "exception.user.exists")
+	@ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "exception.user.exists")
 	@SuppressWarnings("serial")
 	public static class UserAlreadyExistsException extends RuntimeException {
 	}

@@ -33,7 +33,7 @@ import org.springframework.core.ResolvableType;
  * @author Stephane Nicoll
  * @since 2.0.5
  */
-public class SourceFilteringListener implements GenericApplicationListener {
+public class SourceFilteringListener implements GenericApplicationListener, SmartApplicationListener {
 
 	private final Object source;
 
@@ -75,6 +75,11 @@ public class SourceFilteringListener implements GenericApplicationListener {
 	@Override
 	public boolean supportsEventType(ResolvableType eventType) {
 		return (this.delegate == null || this.delegate.supportsEventType(eventType));
+	}
+
+	@Override
+	public boolean supportsEventType(Class<? extends ApplicationEvent> eventType) {
+		return supportsEventType(ResolvableType.forType(eventType));
 	}
 
 	@Override

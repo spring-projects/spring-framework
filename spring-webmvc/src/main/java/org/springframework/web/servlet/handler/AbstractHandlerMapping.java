@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -27,6 +28,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.core.Ordered;
 import org.springframework.web.HttpRequestHandler;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.cors.CorsProcessor;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -77,9 +79,9 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	private final List<HandlerInterceptor> adaptedInterceptors = new ArrayList<HandlerInterceptor>();
 
-	private final List<MappedInterceptor> mappedInterceptors = new ArrayList<MappedInterceptor>();
-
 	private CorsProcessor corsProcessor = new DefaultCorsProcessor();
+
+	private final UrlBasedCorsConfigurationSource corsConfigSource = new UrlBasedCorsConfigurationSource();
 
 
 	/**
@@ -122,6 +124,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 */
 	public void setAlwaysUseFullPath(boolean alwaysUseFullPath) {
 		this.urlPathHelper.setAlwaysUseFullPath(alwaysUseFullPath);
+		this.corsConfigSource.setAlwaysUseFullPath(alwaysUseFullPath);
 	}
 
 	/**
@@ -133,6 +136,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 */
 	public void setUrlDecode(boolean urlDecode) {
 		this.urlPathHelper.setUrlDecode(urlDecode);
+		this.corsConfigSource.setUrlDecode(urlDecode);
 	}
 
 	/**
@@ -142,6 +146,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 */
 	public void setRemoveSemicolonContent(boolean removeSemicolonContent) {
 		this.urlPathHelper.setRemoveSemicolonContent(removeSemicolonContent);
+		this.corsConfigSource.setRemoveSemicolonContent(removeSemicolonContent);
 	}
 
 	/**
@@ -153,6 +158,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	public void setUrlPathHelper(UrlPathHelper urlPathHelper) {
 		Assert.notNull(urlPathHelper, "UrlPathHelper must not be null");
 		this.urlPathHelper = urlPathHelper;
+		this.corsConfigSource.setUrlPathHelper(urlPathHelper);
 	}
 
 	/**
@@ -170,6 +176,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	public void setPathMatcher(PathMatcher pathMatcher) {
 		Assert.notNull(pathMatcher, "PathMatcher must not be null");
 		this.pathMatcher = pathMatcher;
+		this.corsConfigSource.setPathMatcher(pathMatcher);
 	}
 
 	/**
@@ -195,11 +202,38 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 	/**
+	 * Configure a custom {@link CorsProcessor} to use to apply the matched
+	 * {@link CorsConfiguration} for a request.
+	 * <p>By default {@link DefaultCorsProcessor} is used.
 	 * @since 4.2
 	 */
 	public void setCorsProcessor(CorsProcessor corsProcessor) {
 		Assert.notNull(corsProcessor, "CorsProcessor must not be null");
 		this.corsProcessor = corsProcessor;
+	}
+
+	/**
+	 * Return the configured {@link CorsProcessor}.
+	 */
+	public CorsProcessor getCorsProcessor() {
+		return this.corsProcessor;
+	}
+
+	/**
+	 * Set "global" CORS configuration based on URL patterns. By default the first
+	 * matching URL pattern is combined with the CORS configuration for the
+	 * handler, if any.
+	 * @since 4.2
+	 */
+	public void setCorsConfigurations(Map<String, CorsConfiguration> corsConfigurations) {
+		this.corsConfigSource.setCorsConfigurations(corsConfigurations);
+	}
+
+	/**
+	 * Get the CORS configuration.
+	 */
+	public Map<String, CorsConfiguration> getCorsConfigurations() {
+		return this.corsConfigSource.getCorsConfigurations();
 	}
 
 	/**
@@ -210,7 +244,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	@Override
 	protected void initApplicationContext() throws BeansException {
 		extendInterceptors(this.interceptors);
-		detectMappedInterceptors(this.mappedInterceptors);
+		detectMappedInterceptors(this.adaptedInterceptors);
 		initInterceptors();
 	}
 
@@ -233,7 +267,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * from the current context and its ancestors. Subclasses can override and refine this policy.
 	 * @param mappedInterceptors an empty list to add {@link MappedInterceptor} instances to
 	 */
-	protected void detectMappedInterceptors(List<MappedInterceptor> mappedInterceptors) {
+	protected void detectMappedInterceptors(List<HandlerInterceptor> mappedInterceptors) {
 		mappedInterceptors.addAll(
 				BeanFactoryUtils.beansOfTypeIncludingAncestors(
 						getApplicationContext(), MappedInterceptor.class, true, false).values());
@@ -252,12 +286,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 				if (interceptor == null) {
 					throw new IllegalArgumentException("Entry number " + i + " in interceptors array is null");
 				}
-				if (interceptor instanceof MappedInterceptor) {
-					this.mappedInterceptors.add((MappedInterceptor) interceptor);
-				}
-				else {
-					this.adaptedInterceptors.add(adaptInterceptor(interceptor));
-				}
+				this.adaptedInterceptors.add(adaptInterceptor(interceptor));
 			}
 		}
 	}
@@ -300,8 +329,14 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @return the array of {@link MappedInterceptor}s, or {@code null} if none
 	 */
 	protected final MappedInterceptor[] getMappedInterceptors() {
-		int count = this.mappedInterceptors.size();
-		return (count > 0 ? this.mappedInterceptors.toArray(new MappedInterceptor[count]) : null);
+		List<MappedInterceptor> mappedInterceptors = new ArrayList<MappedInterceptor>();
+		for (HandlerInterceptor interceptor : this.adaptedInterceptors) {
+			if (interceptor instanceof MappedInterceptor) {
+				mappedInterceptors.add((MappedInterceptor) interceptor);
+			}
+		}
+		int count = mappedInterceptors.size();
+		return (count > 0 ? mappedInterceptors.toArray(new MappedInterceptor[count]) : null);
 	}
 
 	/**
@@ -325,9 +360,12 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			String handlerName = (String) handler;
 			handler = getApplicationContext().getBean(handlerName);
 		}
+
 		HandlerExecutionChain executionChain = getHandlerExecutionChain(handler, request);
 		if (CorsUtils.isCorsRequest(request)) {
-			CorsConfiguration config = getCorsConfiguration(handler, request);
+			CorsConfiguration globalConfig = this.corsConfigSource.getCorsConfiguration(request);
+			CorsConfiguration handlerConfig = getCorsConfiguration(handler, request);
+			CorsConfiguration config = (globalConfig != null ? globalConfig.combine(handlerConfig) : handlerConfig);
 			executionChain = getCorsHandlerExecutionChain(request, executionChain, config);
 		}
 		return executionChain;
@@ -337,17 +375,14 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * Look up a handler for the given request, returning {@code null} if no
 	 * specific one is found. This method is called by {@link #getHandler};
 	 * a {@code null} return value will lead to the default handler, if one is set.
-	 *
 	 * <p>On CORS pre-flight requests this method should return a match not for
 	 * the pre-flight request but for the expected actual request based on the URL
 	 * path, the HTTP methods from the "Access-Control-Request-Method" header, and
 	 * the headers from the "Access-Control-Request-Headers" header thus allowing
-	 * the CORS configuration to be obtained via {@link #getCorsConfiguration},
-	 *
+	 * the CORS configuration to be obtained via {@link #getCorsConfigurations},
 	 * <p>Note: This method may also return a pre-built {@link HandlerExecutionChain},
 	 * combining a handler object with dynamically determined interceptors.
 	 * Statically specified interceptors will get merged into such an existing chain.
-	 *
 	 * @param request current HTTP request
 	 * @return the corresponding handler instance, or {@code null} if none found
 	 * @throws Exception if there is an internal error
@@ -359,8 +394,9 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * applicable interceptors.
 	 * <p>The default implementation builds a standard {@link HandlerExecutionChain}
 	 * with the given handler, the handler mapping's common interceptors, and any
-	 * {@link MappedInterceptor}s matching to the current request URL. Subclasses
-	 * may override this in order to extend/rearrange the list of interceptors.
+	 * {@link MappedInterceptor}s matching to the current request URL. Interceptors
+	 * are added in the order they were registered. Subclasses may override this
+	 * in order to extend/rearrange the list of interceptors.
 	 * <p><b>NOTE:</b> The passed-in handler object may be a raw handler or a
 	 * pre-built {@link HandlerExecutionChain}. This method should handle those
 	 * two cases explicitly, either building a new {@link HandlerExecutionChain}
@@ -376,15 +412,19 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {
 		HandlerExecutionChain chain = (handler instanceof HandlerExecutionChain ?
 				(HandlerExecutionChain) handler : new HandlerExecutionChain(handler));
-		chain.addInterceptors(getAdaptedInterceptors());
 
 		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request);
-		for (MappedInterceptor mappedInterceptor : this.mappedInterceptors) {
-			if (mappedInterceptor.matches(lookupPath, this.pathMatcher)) {
-				chain.addInterceptor(mappedInterceptor.getInterceptor());
+		for (HandlerInterceptor interceptor : this.adaptedInterceptors) {
+			if (interceptor instanceof MappedInterceptor) {
+				MappedInterceptor mappedInterceptor = (MappedInterceptor) interceptor;
+				if (mappedInterceptor.matches(lookupPath, this.pathMatcher)) {
+					chain.addInterceptor(mappedInterceptor.getInterceptor());
+				}
+			}
+			else {
+				chain.addInterceptor(interceptor);
 			}
 		}
-
 		return chain;
 	}
 
@@ -393,6 +433,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @param handler the handler to check (never {@code null}).
 	 * @param request the current request.
 	 * @return the CORS configuration for the handler or {@code null}.
+	 * @since 4.2
 	 */
 	protected CorsConfiguration getCorsConfiguration(Object handler, HttpServletRequest request) {
 		if (handler instanceof HandlerExecutionChain) {
@@ -406,25 +447,25 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 	/**
 	 * Update the HandlerExecutionChain for CORS-related handling.
-	 *
 	 * <p>For pre-flight requests, the default implementation replaces the selected
 	 * handler with a simple HttpRequestHandler that invokes the configured
 	 * {@link #setCorsProcessor}.
-	 *
 	 * <p>For actual requests, the default implementation inserts a
 	 * HandlerInterceptor that makes CORS-related checks and adds CORS headers.
+	 * @param request the current request
+	 * @param chain the handler chain
+	 * @param config the applicable CORS configuration, possibly {@code null}
+	 * @since 4.2
 	 */
 	protected HandlerExecutionChain getCorsHandlerExecutionChain(HttpServletRequest request,
 			HandlerExecutionChain chain, CorsConfiguration config) {
 
-		if (config != null) {
-			if (CorsUtils.isPreFlightRequest(request)) {
-				HandlerInterceptor[] interceptors = chain.getInterceptors();
-				chain = new HandlerExecutionChain(new PreFlightHandler(config), interceptors);
-			}
-			else {
-				chain.addInterceptor(new CorsInterceptor(config));
-			}
+		if (CorsUtils.isPreFlightRequest(request)) {
+			HandlerInterceptor[] interceptors = chain.getInterceptors();
+			chain = new HandlerExecutionChain(new PreFlightHandler(config), interceptors);
+		}
+		else {
+			chain.addInterceptor(new CorsInterceptor(config));
 		}
 		return chain;
 	}
@@ -434,31 +475,33 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 		private final CorsConfiguration config;
 
-
 		public PreFlightHandler(CorsConfiguration config) {
 			this.config = config;
 		}
 
 		@Override
-		public void handleRequest(HttpServletRequest request, HttpServletResponse response) throws IOException {
-			corsProcessor.processPreFlightRequest(this.config, request, response);
+		public void handleRequest(HttpServletRequest request, HttpServletResponse response)
+				throws IOException {
+
+			corsProcessor.processRequest(this.config, request, response);
 		}
 	}
+
 
 	private class CorsInterceptor extends HandlerInterceptorAdapter {
 
 		private final CorsConfiguration config;
-
 
 		public CorsInterceptor(CorsConfiguration config) {
 			this.config = config;
 		}
 
 		@Override
-		public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-			return corsProcessor.processActualRequest(this.config, request, response);
-		}
+		public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
+				Object handler) throws Exception {
 
+			return corsProcessor.processRequest(this.config, request, response);
+		}
 	}
 
 }

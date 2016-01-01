@@ -17,7 +17,6 @@
 package org.springframework.web.servlet.mvc.method;
 
 import java.util.List;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
@@ -39,13 +38,13 @@ import org.springframework.web.util.UrlPathHelper;
 /**
  * Encapsulates the following request mapping conditions:
  * <ol>
- * 	<li>{@link PatternsRequestCondition}
- * 	<li>{@link RequestMethodsRequestCondition}
- * 	<li>{@link ParamsRequestCondition}
- * 	<li>{@link HeadersRequestCondition}
- * 	<li>{@link ConsumesRequestCondition}
- * 	<li>{@link ProducesRequestCondition}
- * 	<li>{@code RequestCondition} (optional, custom request condition)
+ * <li>{@link PatternsRequestCondition}
+ * <li>{@link RequestMethodsRequestCondition}
+ * <li>{@link ParamsRequestCondition}
+ * <li>{@link HeadersRequestCondition}
+ * <li>{@link ConsumesRequestCondition}
+ * <li>{@link ProducesRequestCondition}
+ * <li>{@code RequestCondition} (optional, custom request condition)
  * </ol>
  *
  * @author Arjen Poutsma
@@ -297,21 +296,21 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
+	public boolean equals(Object other) {
+		if (this == other) {
 			return true;
 		}
-		if (obj != null && obj instanceof RequestMappingInfo) {
-			RequestMappingInfo other = (RequestMappingInfo) obj;
-			return (this.patternsCondition.equals(other.patternsCondition) &&
-					this.methodsCondition.equals(other.methodsCondition) &&
-					this.paramsCondition.equals(other.paramsCondition) &&
-					this.headersCondition.equals(other.headersCondition) &&
-					this.consumesCondition.equals(other.consumesCondition) &&
-					this.producesCondition.equals(other.producesCondition) &&
-					this.customConditionHolder.equals(other.customConditionHolder));
+		if (!(other instanceof RequestMappingInfo)) {
+			return false;
 		}
-		return false;
+		RequestMappingInfo otherInfo = (RequestMappingInfo) other;
+		return (this.patternsCondition.equals(otherInfo.patternsCondition) &&
+				this.methodsCondition.equals(otherInfo.methodsCondition) &&
+				this.paramsCondition.equals(otherInfo.paramsCondition) &&
+				this.headersCondition.equals(otherInfo.headersCondition) &&
+				this.consumesCondition.equals(otherInfo.consumesCondition) &&
+				this.producesCondition.equals(otherInfo.producesCondition) &&
+				this.customConditionHolder.equals(otherInfo.customConditionHolder));
 	}
 
 	@Override
@@ -326,15 +325,28 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	public String toString() {
 		StringBuilder builder = new StringBuilder("{");
 		builder.append(this.patternsCondition);
-		builder.append(",methods=").append(this.methodsCondition);
-		builder.append(",params=").append(this.paramsCondition);
-		builder.append(",headers=").append(this.headersCondition);
-		builder.append(",consumes=").append(this.consumesCondition);
-		builder.append(",produces=").append(this.producesCondition);
-		builder.append(",custom=").append(this.customConditionHolder);
+		if (!this.methodsCondition.isEmpty()) {
+			builder.append(",methods=").append(this.methodsCondition);
+		}
+		if (!this.paramsCondition.isEmpty()) {
+			builder.append(",params=").append(this.paramsCondition);
+		}
+		if (!this.headersCondition.isEmpty()) {
+			builder.append(",headers=").append(this.headersCondition);
+		}
+		if (!this.consumesCondition.isEmpty()) {
+			builder.append(",consumes=").append(this.consumesCondition);
+		}
+		if (!this.producesCondition.isEmpty()) {
+			builder.append(",produces=").append(this.producesCondition);
+		}
+		if (!this.customConditionHolder.isEmpty()) {
+			builder.append(",custom=").append(this.customConditionHolder);
+		}
 		builder.append('}');
 		return builder.toString();
 	}
+
 
 	/**
 	 * Create a new {@code RequestMappingInfo.Builder} with the given paths.
@@ -389,7 +401,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		Builder mappingName(String name);
 
 		/**
-		 * Set a custom conditions to use.
+		 * Set a custom condition to use.
 		 */
 		Builder customCondition(RequestCondition<?> condition);
 
@@ -403,6 +415,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 */
 		RequestMappingInfo build();
 	}
+
 
 	private static class DefaultBuilder implements Builder {
 
@@ -424,11 +437,9 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 		private BuilderConfiguration options = new BuilderConfiguration();
 
-
 		public DefaultBuilder(String... paths) {
 			this.paths = paths;
 		}
-
 
 		@Override
 		public Builder paths(String... paths) {
@@ -486,7 +497,6 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 		@Override
 		public RequestMappingInfo build() {
-
 			ContentNegotiationManager manager = this.options.getContentNegotiationManager();
 
 			PatternsRequestCondition patternsCondition = new PatternsRequestCondition(
@@ -504,13 +514,13 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		}
 	}
 
+
 	/**
 	 * Container for configuration options used for request mapping purposes.
 	 * Such configuration is required to create RequestMappingInfo instances but
 	 * is typically used across all RequestMappingInfo instances.
-	 *
-	 * @see Builder#options
 	 * @since 4.2
+	 * @see Builder#options
 	 */
 	public static class BuilderConfiguration {
 
@@ -525,7 +535,6 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		private boolean registeredSuffixPatternMatch = false;
 
 		private ContentNegotiationManager contentNegotiationManager;
-
 
 		/**
 		 * Set a custom UrlPathHelper to use for the PatternsRequestCondition.

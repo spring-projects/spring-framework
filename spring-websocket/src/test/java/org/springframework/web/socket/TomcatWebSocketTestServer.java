@@ -20,10 +20,15 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.servlet.Filter;
+import javax.servlet.ServletContext;
 
 import org.apache.catalina.Context;
+import org.apache.catalina.LifecycleEvent;
+import org.apache.catalina.LifecycleListener;
 import org.apache.catalina.connector.Connector;
 import org.apache.catalina.startup.Tomcat;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.coyote.http11.Http11NioProtocol;
 import org.apache.tomcat.util.descriptor.web.FilterDef;
 import org.apache.tomcat.util.descriptor.web.FilterMap;
@@ -38,8 +43,11 @@ import org.springframework.web.servlet.DispatcherServlet;
  * Tomcat based {@link WebSocketTestServer}.
  *
  * @author Rossen Stoyanchev
+ * @author Sam Brannen
  */
 public class TomcatWebSocketTestServer implements WebSocketTestServer {
+
+	private static final Log logger = LogFactory.getLog(TomcatWebSocketTestServer.class);
 
 	private Tomcat tomcatServer;
 
@@ -105,6 +113,11 @@ public class TomcatWebSocketTestServer implements WebSocketTestServer {
 	}
 
 	@Override
+	public ServletContext getServletContext() {
+		return this.context.getServletContext();
+	}
+
+	@Override
 	public void undeployConfig() {
 		if (this.context != null) {
 			this.context.removeServletMapping("/");
@@ -115,6 +128,14 @@ public class TomcatWebSocketTestServer implements WebSocketTestServer {
 	@Override
 	public void start() throws Exception {
 		this.tomcatServer.start();
+		this.context.addLifecycleListener(new LifecycleListener() {
+			@Override
+			public void lifecycleEvent(LifecycleEvent event) {
+				if (logger.isDebugEnabled()) {
+					logger.debug("Event: " + event.getType());
+				}
+			}
+		});
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ import org.springframework.jms.listener.adapter.ListenerExecutionFailedException
 import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
 
 /**
- *
  * @author Stephane Nicoll
  */
 public class AnnotationDrivenNamespaceTests extends AbstractJmsAnnotationDrivenTests {
@@ -75,6 +74,7 @@ public class AnnotationDrivenNamespaceTests extends AbstractJmsAnnotationDrivenT
 	}
 
 	@Override
+	@Test
 	public void defaultContainerFactory() {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				"annotation-driven-default-container-factory.xml", getClass());
@@ -82,6 +82,7 @@ public class AnnotationDrivenNamespaceTests extends AbstractJmsAnnotationDrivenT
 	}
 
 	@Override
+	@Test
 	public void jmsHandlerMethodFactoryConfiguration() throws JMSException {
 		ApplicationContext context = new ClassPathXmlApplicationContext(
 				"annotation-driven-custom-handler-method-factory.xml", getClass());
@@ -90,6 +91,23 @@ public class AnnotationDrivenNamespaceTests extends AbstractJmsAnnotationDrivenT
 		thrown.expectCause(Is.<MethodArgumentNotValidException>isA(MethodArgumentNotValidException.class));
 		testJmsHandlerMethodFactoryConfiguration(context);
 	}
+
+	@Override
+	@Test
+	public void jmsListenerIsRepeatable() {
+		ApplicationContext context = new ClassPathXmlApplicationContext(
+				"annotation-driven-jms-listener-repeatable.xml", getClass());
+		testJmsListenerRepeatable(context);
+	}
+
+	@Override
+	@Test
+	public void jmsListeners() {
+		ApplicationContext context = new ClassPathXmlApplicationContext(
+				"annotation-driven-jms-listeners.xml", getClass());
+		testJmsListenerRepeatable(context);
+	}
+
 
 	static class CustomJmsListenerConfigurer implements JmsListenerConfigurer {
 
@@ -107,6 +125,6 @@ public class AnnotationDrivenNamespaceTests extends AbstractJmsAnnotationDrivenT
 		public void setMessageListener(MessageListener messageListener) {
 			this.messageListener = messageListener;
 		}
-
 	}
+
 }

@@ -16,6 +16,8 @@
 
 package org.springframework.web.socket.messaging;
 
+import java.security.Principal;
+
 import org.springframework.context.ApplicationEvent;
 import org.springframework.messaging.Message;
 import org.springframework.util.Assert;
@@ -32,6 +34,8 @@ public abstract class AbstractSubProtocolEvent extends ApplicationEvent {
 
 	private final Message<byte[]> message;
 
+	private final Principal user;
+
 
 	/**
 	 * Create a new AbstractSubProtocolEvent.
@@ -42,6 +46,19 @@ public abstract class AbstractSubProtocolEvent extends ApplicationEvent {
 		super(source);
 		Assert.notNull(message, "Message must not be null");
 		this.message = message;
+		this.user = null;
+	}
+
+	/**
+	 * Create a new AbstractSubProtocolEvent.
+	 * @param source the component that published the event (never {@code null})
+	 * @param message the incoming message
+	 */
+	protected AbstractSubProtocolEvent(Object source, Message<byte[]> message, Principal user) {
+		super(source);
+		Assert.notNull(message, "Message must not be null");
+		this.message = message;
+		this.user = user;
 	}
 
 
@@ -58,6 +75,13 @@ public abstract class AbstractSubProtocolEvent extends ApplicationEvent {
 	 */
 	public Message<byte[]> getMessage() {
 		return this.message;
+	}
+
+	/**
+	 * Return the user for the session associated with the event.
+	 */
+	public Principal getUser() {
+		return this.user;
 	}
 
 	@Override

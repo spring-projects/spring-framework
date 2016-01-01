@@ -121,7 +121,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 	 * @since 4.2
 	 */
 	public void setTaskScheduler(TaskScheduler taskScheduler) {
-		Assert.notNull(taskScheduler);
+		Assert.notNull(taskScheduler, "TaskScheduler must not be null");
 		this.taskScheduler = taskScheduler;
 		if (this.heartbeatValue == null) {
 			this.heartbeatValue = new long[] {10000, 10000};
@@ -185,7 +185,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		else {
 			Assert.isTrue(getHeartbeatValue() == null ||
 					(getHeartbeatValue()[0] == 0 && getHeartbeatValue()[1] == 0),
-					"Heartbeat values configured but no TaskScheduler is provided.");
+					"Heartbeat values configured but no TaskScheduler provided");
 		}
 	}
 
@@ -328,7 +328,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 	@Override
 	public String toString() {
-		return "SimpleBroker[" + this.subscriptionRegistry + "]";
+		return "SimpleBrokerMessageHandler [" + this.subscriptionRegistry + "]";
 	}
 
 
@@ -336,7 +336,6 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 
 		/* STOMP spec: receiver SHOULD take into account an error margin */
 		private static final long HEARTBEAT_MULTIPLIER = 3;
-
 
 		private final String sessiondId;
 
@@ -349,7 +348,6 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		private volatile long lastReadTime;
 
 		private volatile long lastWriteTime;
-
 
 		public SessionInfo(String sessiondId, Principal user, long[] clientHeartbeat, long[] serverHeartbeat) {
 			this.sessiondId = sessiondId;
@@ -400,6 +398,7 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 		}
 	}
 
+
 	private class HeartbeatTask implements Runnable {
 
 		@Override
@@ -420,4 +419,5 @@ public class SimpleBrokerMessageHandler extends AbstractBrokerMessageHandler {
 			}
 		}
 	}
+
 }

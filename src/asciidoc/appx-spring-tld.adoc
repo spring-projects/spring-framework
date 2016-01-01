@@ -1,5 +1,5 @@
 [[spring-tld]]
-= spring.tld
+= spring JSP Tag Library
 
 
 [[spring.tld-intro]]
@@ -15,12 +15,14 @@ http://www.w3.org/TR/xhtml1/dtds.html#a_dtd_XHTML-1.0-Strict[DTD].
 
 This appendix describes the `spring.tld` tag library.
 
+* <<spring.tld.argument>>
 * <<spring.tld.bind>>
 * <<spring.tld.escapeBody>>
 * <<spring.tld.hasBindErrors>>
 * <<spring.tld.htmlEscape>>
 * <<spring.tld.message>>
 * <<spring.tld.nestedPath>>
+* <<spring.tld.param>>
 * <<spring.tld.theme>>
 * <<spring.tld.transform>>
 * <<spring.tld.url>>
@@ -29,8 +31,28 @@ This appendix describes the `spring.tld` tag library.
 
 
 
+[[spring.tld.argument]]
+== The argument tag
+
+Argument tag based on the JSTL fmt:param tag. The purpose is to support arguments
+inside the message and theme tags.
+
+[[spring.tld.argument.table]]
+[cols="1,1,1,3"]
+.Attributes
+|===
+| Attribute| Required?| Runtime Expression?| Description
+
+| value
+| false
+| true
+| The value of the argument.
+|===
+
+
+
 [[spring.tld.bind]]
-== the bind tag
+== The bind tag
 
 Provides BindStatus object for the given bind path. The HTML escaping flag participates
 in a page-wide or application-wide setting (i.e. by HtmlEscapeTag or a
@@ -65,7 +87,7 @@ in a page-wide or application-wide setting (i.e. by HtmlEscapeTag or a
 
 
 [[spring.tld.escapeBody]]
-== the escapeBody tag
+== The escapeBody tag
 
 Escapes its enclosed body content, applying HTML escaping and/or JavaScript escaping.
 The HTML escaping flag participates in a page-wide or application-wide setting (i.e. by
@@ -92,8 +114,53 @@ HtmlEscapeTag or a "defaultHtmlEscape" context-param in web.xml).
 
 
 
+[[spring.tld.eval]]
+== The eval tag
+
+Evaluates a Spring expression (SpEL) and either prints the result or assigns it to a
+variable.
+
+[[spring.tld.eval.table]]
+[cols="1,1,1,3"]
+.Attributes
+|===
+| Attribute| Required?| Runtime Expression?| Description
+
+| expression
+| true
+| true
+| The expression to evaluate.
+
+| htmlEscape
+| false
+| true
+| Set HTML escaping for this tag, as a boolean value. Overrides the default HTML
+  escaping setting for the current page.
+
+| javaScriptEscape
+| false
+| true
+| Set JavaScript escaping for this tag, as a boolean value. Default is false.
+
+| scope
+| false
+| true
+| The scope for the var. 'application', 'session', 'request' and 'page' scopes are
+  supported. Defaults to page scope. This attribute has no effect unless the var
+  attribute is also defined.
+
+| var
+| false
+| true
+| The name of the variable to export the evaluation result to. If not specified the
+  evaluation result is converted to a String and written as output.
+|===
+
+
+
+
 [[spring.tld.hasBindErrors]]
-== the hasBindErrors tag
+== The hasBindErrors tag
 
 Provides Errors instance in case of bind errors. The HTML escaping flag participates in
 a page-wide or application-wide setting (i.e. by HtmlEscapeTag or a "defaultHtmlEscape"
@@ -122,7 +189,7 @@ context-param in web.xml).
 
 
 [[spring.tld.htmlEscape]]
-== the htmlEscape tag
+== The htmlEscape tag
 
 Sets default HTML escape value for the current page. Overrides a "defaultHtmlEscape"
 context-param in web.xml, if any.
@@ -143,7 +210,7 @@ context-param in web.xml, if any.
 
 
 [[spring.tld.message]]
-== the message tag
+== The message tag
 
 Retrieves the message with the given code, or text if code isn't resolvable. The HTML
 escaping flag participates in a page-wide or application-wide setting (i.e. by
@@ -218,7 +285,7 @@ HtmlEscapeTag or a "defaultHtmlEscape" context-param in web.xml).
 
 
 [[spring.tld.nestedPath]]
-== the nestedPath tag
+== The nestedPath tag
 
 Sets a nested path to be used by the bind tag's path.
 
@@ -238,8 +305,33 @@ Sets a nested path to be used by the bind tag's path.
 
 
 
+[[spring.tld.param]]
+== The param tag
+
+Parameter tag based on the JSTL c:param tag. The sole purpose is to support params
+inside the url tag.
+
+[[spring.tld.param.table]]
+[cols="1,1,1,3"]
+.Attributes
+|===
+| Attribute| Required?| Runtime Expression?| Description
+
+| name
+| true
+| true
+| The name of the parameter.
+
+| value
+| false
+| true
+| The value of the parameter.
+|===
+
+
+
 [[spring.tld.theme]]
-== the theme tag
+== The theme tag
 
 Retrieves the theme message with the given code, or text if code isn't resolvable. The
 HTML escaping flag participates in a page-wide or application-wide setting (i.e. by
@@ -310,7 +402,7 @@ HtmlEscapeTag or a "defaultHtmlEscape" context-param in web.xml).
 
 
 [[spring.tld.transform]]
-== the transform tag
+== The transform tag
 
 Provides transformation of variables to Strings, using an appropriate custom
 PropertyEditor from BindTag (can only be used inside BindTag). The HTML escaping flag
@@ -354,7 +446,7 @@ participates in a page-wide or application-wide setting (i.e. by HtmlEscapeTag o
 
 
 [[spring.tld.url]]
-== the url tag
+== The url tag
 
 Creates URLs with support for URI template variables, HTML/XML escaping, and Javascript
 escaping. Modeled after the JSTL c:url tag with backwards compatibility in mind.
@@ -365,7 +457,7 @@ escaping. Modeled after the JSTL c:url tag with backwards compatibility in mind.
 |===
 | Attribute| Required?| Runtime Expression?| Description
 
-| url
+| value
 | true
 | true
 | The URL to build. This value can include template {placeholders} that are replaced
@@ -402,49 +494,3 @@ escaping. Modeled after the JSTL c:url tag with backwards compatibility in mind.
 | true
 | Set JavaScript escaping for this tag, as a boolean value. Default is false.
 |===
-
-
-
-
-[[spring.tld.eval]]
-== the eval tag
-
-Evaluates a Spring expression (SpEL) and either prints the result or assigns it to a
-variable.
-
-[[spring.tld.eval.table]]
-[cols="1,1,1,3"]
-.Attributes
-|===
-| Attribute| Required?| Runtime Expression?| Description
-
-| expression
-| true
-| true
-| The expression to evaluate.
-
-| var
-| false
-| true
-| The name of the variable to export the evaluation result to. If not specified the
-  evaluation result is converted to a String and written as output.
-
-| scope
-| false
-| true
-| The scope for the var. 'application', 'session', 'request' and 'page' scopes are
-  supported. Defaults to page scope. This attribute has no effect unless the var
-  attribute is also defined.
-
-| htmlEscape
-| false
-| true
-| Set HTML escaping for this tag, as a boolean value. Overrides the default HTML
-  escaping setting for the current page.
-
-| javaScriptEscape
-| false
-| true
-| Set JavaScript escaping for this tag, as a boolean value. Default is false.
-|===
-

@@ -44,6 +44,7 @@ public class JythonScriptTemplateTests {
 
 	private ServletContext servletContext;
 
+
 	@Before
 	public void setup() {
 		this.webAppContext = mock(WebApplicationContext.class);
@@ -80,6 +81,7 @@ public class JythonScriptTemplateTests {
 		view.afterPropertiesSet();
 		return view;
 	}
+
 
 	@Configuration
 	static class ScriptTemplatingConfiguration {

@@ -45,7 +45,7 @@ import static org.springframework.test.context.cache.ContextCacheTestUtils.*;
  * JUnit 4 based integration test which verifies correct {@linkplain ContextCache
  * application context caching} in conjunction with Spring's TestNG support
  * and {@link DirtiesContext @DirtiesContext} at the class level.
- * 
+ *
  * <p>This class is a direct copy of {@link ClassLevelDirtiesContextTests},
  * modified to verify behavior in conjunction with TestNG.
  *
@@ -58,26 +58,6 @@ public class ClassLevelDirtiesContextTestNGTests {
 	private static final AtomicInteger cacheHits = new AtomicInteger(0);
 	private static final AtomicInteger cacheMisses = new AtomicInteger(0);
 
-
-	private static final void runTestClassAndAssertStats(Class<?> testClass, int expectedTestCount) {
-		final int expectedTestFailureCount = 0;
-		final int expectedTestStartedCount = expectedTestCount;
-		final int expectedTestFinishedCount = expectedTestCount;
-
-		final TrackingTestNGTestListener listener = new TrackingTestNGTestListener();
-		final TestNG testNG = new TestNG();
-		testNG.addListener(listener);
-		testNG.setTestClasses(new Class<?>[] { testClass });
-		testNG.setVerbose(0);
-		testNG.run();
-
-		assertEquals("Failures for test class [" + testClass + "].", expectedTestFailureCount,
-			listener.testFailureCount);
-		assertEquals("Tests started for test class [" + testClass + "].", expectedTestStartedCount,
-			listener.testStartCount);
-		assertEquals("Successful tests for test class [" + testClass + "].", expectedTestFinishedCount,
-			listener.testSuccessCount);
-	}
 
 	@BeforeClass
 	public static void verifyInitialCacheState() {
@@ -153,6 +133,26 @@ public class ClassLevelDirtiesContextTestNGTests {
 		runTestClassAndAssertStats(ClassLevelDirtiesContextWithCleanMethodsAndAfterClassModeTestCase.class, 1);
 		assertContextCacheStatistics("after class-level @DirtiesContext with clean test method and AFTER_CLASS mode",
 			0, cacheHits.incrementAndGet(), cacheMisses.get());
+	}
+
+	private void runTestClassAndAssertStats(Class<?> testClass, int expectedTestCount) {
+		final int expectedTestFailureCount = 0;
+		final int expectedTestStartedCount = expectedTestCount;
+		final int expectedTestFinishedCount = expectedTestCount;
+
+		final TrackingTestNGTestListener listener = new TrackingTestNGTestListener();
+		final TestNG testNG = new TestNG();
+		testNG.addListener(listener);
+		testNG.setTestClasses(new Class<?>[] { testClass });
+		testNG.setVerbose(0);
+		testNG.run();
+
+		assertEquals("Failures for test class [" + testClass + "].", expectedTestFailureCount,
+			listener.testFailureCount);
+		assertEquals("Tests started for test class [" + testClass + "].", expectedTestStartedCount,
+			listener.testStartCount);
+		assertEquals("Successful tests for test class [" + testClass + "].", expectedTestFinishedCount,
+			listener.testSuccessCount);
 	}
 
 	private void assertBehaviorForCleanTestCase() {

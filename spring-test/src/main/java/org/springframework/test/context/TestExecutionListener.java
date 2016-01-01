@@ -33,6 +33,8 @@ package org.springframework.test.context;
  * <ul>
  * <li>{@link org.springframework.test.context.web.ServletTestExecutionListener
  * ServletTestExecutionListener}</li>
+ * <li>{@link org.springframework.test.context.support.DirtiesContextBeforeModesTestExecutionListener
+ * DirtiesContextBeforeModesTestExecutionListener}</li>
  * <li>{@link org.springframework.test.context.support.DependencyInjectionTestExecutionListener
  * DependencyInjectionTestExecutionListener}</li>
  * <li>{@link org.springframework.test.context.support.DirtiesContextTestExecutionListener

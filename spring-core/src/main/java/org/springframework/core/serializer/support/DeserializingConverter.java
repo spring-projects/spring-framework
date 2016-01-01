@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,11 +24,13 @@ import org.springframework.core.serializer.Deserializer;
 import org.springframework.util.Assert;
 
 /**
- * A {@link Converter} that delegates to a {@link org.springframework.core.serializer.Deserializer}
+ * A {@link Converter} that delegates to a
+ * {@link org.springframework.core.serializer.Deserializer}
  * to convert data in a byte array to an object.
  *
  * @author Gary Russell
  * @author Mark Fisher
+ * @author Juergen Hoeller
  * @since 3.0.5
  */
 public class DeserializingConverter implements Converter<byte[], Object> {
@@ -37,14 +39,26 @@ public class DeserializingConverter implements Converter<byte[], Object> {
 
 
 	/**
-	 * Create a default DeserializingConverter that uses standard Java deserialization.
+	 * Create a {@code DeserializingConverter} with default {@link java.io.ObjectInputStream}
+	 * configuration, using the "latest user-defined ClassLoader".
+	 * @see DefaultDeserializer#DefaultDeserializer()
 	 */
 	public DeserializingConverter() {
 		this.deserializer = new DefaultDeserializer();
 	}
 
 	/**
-	 * Create a DeserializingConverter that delegates to the provided {@link Deserializer}.
+	 * Create a {@code DeserializingConverter} for using an {@link java.io.ObjectInputStream}
+	 * with the given {@code ClassLoader}.
+	 * @since 4.2.1
+	 * @see DefaultDeserializer#DefaultDeserializer(ClassLoader)
+	 */
+	public DeserializingConverter(ClassLoader classLoader) {
+		this.deserializer = new DefaultDeserializer(classLoader);
+	}
+
+	/**
+	 * Create a {@code DeserializingConverter} that delegates to the provided {@link Deserializer}.
 	 */
 	public DeserializingConverter(Deserializer<Object> deserializer) {
 		Assert.notNull(deserializer, "Deserializer must not be null");

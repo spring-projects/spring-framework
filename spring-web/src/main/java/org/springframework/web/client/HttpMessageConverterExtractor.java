@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.GenericHttpMessageConverter;
@@ -31,12 +30,12 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.util.Assert;
 
 /**
- * Response extractor that uses the given {@linkplain HttpMessageConverter entity
- * converters} to convert the response into a type {@code T}.
+ * Response extractor that uses the given {@linkplain HttpMessageConverter entity converters}
+ * to convert the response into a type {@code T}.
  *
  * @author Arjen Poutsma
- * @see RestTemplate
  * @since 3.0
+ * @see RestTemplate
  */
 public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 
@@ -48,19 +47,18 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 
 	private final Log logger;
 
+
 	/**
-	 * Creates a new instance of the {@code HttpMessageConverterExtractor} with the given
-	 * response type and message converters. The given converters must support the response
-	 * type.
+	 * Create a new instance of the {@code HttpMessageConverterExtractor} with the given response
+	 * type and message converters. The given converters must support the response type.
 	 */
 	public HttpMessageConverterExtractor(Class<T> responseType, List<HttpMessageConverter<?>> messageConverters) {
 		this((Type) responseType, messageConverters);
 	}
 
 	/**
-	 * Creates a new instance of the {@code HttpMessageConverterExtractor} with the given
-	 * response type and message converters. The given converters must support the response
-	 * type.
+	 * Creates a new instance of the {@code HttpMessageConverterExtractor} with the given response
+	 * type and message converters. The given converters must support the response type.
 	 */
 	public HttpMessageConverterExtractor(Type responseType, List<HttpMessageConverter<?>> messageConverters) {
 		this(responseType, messageConverters, LogFactory.getLog(HttpMessageConverterExtractor.class));
@@ -76,12 +74,12 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 		this.logger = logger;
 	}
 
-	@Override
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public T extractData(ClientHttpResponse response) throws IOException {
 
+	@Override
+	@SuppressWarnings({"unchecked", "rawtypes", "resource"})
+	public T extractData(ClientHttpResponse response) throws IOException {
 		MessageBodyClientHttpResponseWrapper responseWrapper = new MessageBodyClientHttpResponseWrapper(response);
-		if(!responseWrapper.hasMessageBody() || responseWrapper.hasEmptyMessageBody()) {
+		if (!responseWrapper.hasMessageBody() || responseWrapper.hasEmptyMessageBody()) {
 			return null;
 		}
 		MediaType contentType = getContentType(responseWrapper);
@@ -107,9 +105,9 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 				}
 			}
 		}
-		throw new RestClientException(
-				"Could not extract response: no suitable HttpMessageConverter found for response type [" +
-						this.responseType + "] and content type [" + contentType + "]");
+
+		throw new RestClientException("Could not extract response: no suitable HttpMessageConverter found " +
+				"for response type [" + this.responseType + "] and content type [" + contentType + "]");
 	}
 
 	private MediaType getContentType(ClientHttpResponse response) {

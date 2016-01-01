@@ -32,11 +32,12 @@ import org.springframework.util.Assert;
  * @since 3.0
  * @see org.springframework.context.ApplicationListener#onApplicationEvent
  */
-public class GenericApplicationListenerAdapter implements GenericApplicationListener {
+public class GenericApplicationListenerAdapter implements GenericApplicationListener, SmartApplicationListener {
 
 	private final ApplicationListener<ApplicationEvent> delegate;
 
 	private final ResolvableType declaredEventType;
+
 
 	/**
 	 * Create a new GenericApplicationListener for the given delegate.
@@ -68,6 +69,11 @@ public class GenericApplicationListenerAdapter implements GenericApplicationList
 	}
 
 	@Override
+	public boolean supportsEventType(Class<? extends ApplicationEvent> eventType) {
+		return supportsEventType(ResolvableType.forType(eventType));
+	}
+
+	@Override
 	public boolean supportsSourceType(Class<?> sourceType) {
 		if (this.delegate instanceof SmartApplicationListener) {
 			return ((SmartApplicationListener) this.delegate).supportsSourceType(sourceType);
@@ -81,6 +87,7 @@ public class GenericApplicationListenerAdapter implements GenericApplicationList
 	public int getOrder() {
 		return (this.delegate instanceof Ordered ? ((Ordered) this.delegate).getOrder() : Ordered.LOWEST_PRECEDENCE);
 	}
+
 
 	static ResolvableType resolveDeclaredEventType(Class<?> listenerType) {
 		ResolvableType resolvableType = ResolvableType.forClass(listenerType).as(ApplicationListener.class);

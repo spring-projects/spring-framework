@@ -30,8 +30,10 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
+import org.springframework.http.HttpMethod;
+
 /**
- * {@link javax.servlet.http-HttpServletRequest} wrapper that caches all content read from
+ * {@link javax.servlet.http.HttpServletRequest} wrapper that caches all content read from
  * the {@linkplain #getInputStream() input stream} and {@linkplain #getReader() reader},
  * and allows this content to be retrieved via a {@link #getContentAsByteArray() byte array}.
  *
@@ -40,12 +42,11 @@ import javax.servlet.http.HttpServletRequestWrapper;
  * @author Juergen Hoeller
  * @author Brian Clozel
  * @since 4.1.3
+ * @see ContentCachingResponseWrapper
  */
 public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 
 	private static final String FORM_CONTENT_TYPE = "application/x-www-form-urlencoded";
-
-	private static final String METHOD_POST = "POST";
 
 
 	private final ByteArrayOutputStream cachedContent;
@@ -124,7 +125,7 @@ public class ContentCachingRequestWrapper extends HttpServletRequestWrapper {
 	private boolean isFormPost() {
 		String contentType = getContentType();
 		return (contentType != null && contentType.contains(FORM_CONTENT_TYPE) &&
-				METHOD_POST.equalsIgnoreCase(getMethod()));
+				HttpMethod.POST.matches(getMethod()));
 	}
 
 	private void writeRequestParametersToCachedContent() {

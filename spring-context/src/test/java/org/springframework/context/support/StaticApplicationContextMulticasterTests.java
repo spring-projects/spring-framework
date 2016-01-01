@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import org.junit.Test;
+
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.support.PropertiesBeanDefinitionReader;
 import org.springframework.context.ACATester;
@@ -34,6 +36,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.EncodedResource;
 import org.springframework.tests.sample.beans.TestBean;
 
+import static org.junit.Assert.*;
+
 /**
  * Tests for static application context with custom application event multicaster.
  *
@@ -43,7 +47,6 @@ public class StaticApplicationContextMulticasterTests extends AbstractApplicatio
 
 	protected StaticApplicationContext sac;
 
-	/** Run for each test */
 	@Override
 	protected ConfigurableApplicationContext createContext() throws Exception {
 		StaticApplicationContext parent = new StaticApplicationContext();
@@ -74,16 +77,17 @@ public class StaticApplicationContextMulticasterTests extends AbstractApplicatio
 		return sac;
 	}
 
-	/** Overridden */
+	@Test
 	@Override
-	public void testCount() {
+	public void count() {
 		assertCount(15);
 	}
 
+	@Test
 	@Override
-	public void testEvents() throws Exception {
+	public void events() throws Exception {
 		TestApplicationEventMulticaster.counter = 0;
-		super.testEvents();
+		super.events();
 		assertEquals(1, TestApplicationEventMulticaster.counter);
 	}
 

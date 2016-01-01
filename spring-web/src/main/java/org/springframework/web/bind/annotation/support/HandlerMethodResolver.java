@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,7 +107,7 @@ public class HandlerMethodResolver {
 		SessionAttributes sessionAttributes = AnnotationUtils.findAnnotation(handlerType, SessionAttributes.class);
 		this.sessionAttributesFound = (sessionAttributes != null);
 		if (this.sessionAttributesFound) {
-			this.sessionAttributeNames.addAll(Arrays.asList(sessionAttributes.value()));
+			this.sessionAttributeNames.addAll(Arrays.asList(sessionAttributes.names()));
 			this.sessionAttributeTypes.addAll(Arrays.asList(sessionAttributes.types()));
 		}
 	}

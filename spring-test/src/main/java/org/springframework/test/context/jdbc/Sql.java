@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,15 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+import org.springframework.core.annotation.AliasFor;
+
 import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 
 /**
- * {@code @Sql} is used to annotate a test class or test method to configure SQL
- * scripts to be executed against a given database during integration tests.
+ * {@code @Sql} is used to annotate a test class or test method to configure
+ * SQL {@link #scripts} and {@link #statements} to be executed against a given
+ * database during integration tests.
  *
  * <p>Method-level declarations override class-level declarations.
  *
@@ -75,14 +78,14 @@ public @interface Sql {
 	static enum ExecutionPhase {
 
 		/**
-		 * The configured SQL scripts will be executed <em>before</em> the
-		 * corresponding test method.
+		 * The configured SQL scripts and statements will be executed
+		 * <em>before</em> the corresponding test method.
 		 */
 		BEFORE_TEST_METHOD,
 
 		/**
-		 * The configured SQL scripts will be executed <em>after</em> the
-		 * corresponding test method.
+		 * The configured SQL scripts and statements will be executed
+		 * <em>after</em> the corresponding test method.
 		 */
 		AFTER_TEST_METHOD
 	}
@@ -92,13 +95,19 @@ public @interface Sql {
 	 * Alias for {@link #scripts}.
 	 * <p>This attribute may <strong>not</strong> be used in conjunction with
 	 * {@link #scripts}, but it may be used instead of {@link #scripts}.
+	 * @see #scripts
+	 * @see #statements
 	 */
+	@AliasFor("scripts")
 	String[] value() default {};
 
 	/**
 	 * The paths to the SQL scripts to execute.
 	 * <p>This attribute may <strong>not</strong> be used in conjunction with
-	 * {@link #value}, but it may be used instead of {@link #value}.
+	 * {@link #value}, but it may be used instead of {@link #value}. Similarly,
+	 * this attribute may be used in conjunction with or instead of
+	 * {@link #statements}.
+	 *
 	 * <h3>Path Resource Semantics</h3>
 	 * <p>Each path will be interpreted as a Spring
 	 * {@link org.springframework.core.io.Resource Resource}. A plain path
@@ -111,11 +120,12 @@ public @interface Sql {
 	 * {@link org.springframework.util.ResourceUtils#CLASSPATH_URL_PREFIX classpath:},
 	 * {@link org.springframework.util.ResourceUtils#FILE_URL_PREFIX file:},
 	 * {@code http:}, etc.) will be loaded using the specified resource protocol.
+	 *
 	 * <h3>Default Script Detection</h3>
-	 * <p>If no SQL scripts are specified, an attempt will be made to detect a
-	 * <em>default</em> script depending on where this annotation is declared.
-	 * If a default cannot be detected, an {@link IllegalStateException} will be
-	 * thrown.
+	 * <p>If no SQL scripts or {@link #statements} are specified, an attempt will
+	 * be made to detect a <em>default</em> script depending on where this
+	 * annotation is declared. If a default cannot be detected, an
+	 * {@link IllegalStateException} will be thrown.
 	 * <ul>
 	 * <li><strong>class-level declaration</strong>: if the annotated test class
 	 * is {@code com.example.MyTest}, the corresponding default script is
@@ -125,18 +135,38 @@ public @interface Sql {
 	 * {@code com.example.MyTest}, the corresponding default script is
 	 * {@code "classpath:com/example/MyTest.testMethod.sql"}.</li>
 	 * </ul>
+	 *
+	 * @see #value
+	 * @see #statements
 	 */
+	@AliasFor("value")
 	String[] scripts() default {};
 
 	/**
-	 * When the SQL scripts should be executed.
+	 * <em>Inlined SQL statements</em> to execute.
+	 * <p>This attribute may be used in conjunction with or instead of
+	 * {@link #scripts}.
+	 *
+	 * <h3>Ordering</h3>
+	 * <p>Statements declared via this attribute will be executed after
+	 * statements loaded from resource {@link #scripts}. If you wish to have
+	 * inlined statements executed before scripts, simply declare multiple
+	 * instances of {@code @Sql} on the same class or method.
+	 *
+	 * @since 4.2
+	 * @see #scripts
+	 */
+	String[] statements() default {};
+
+	/**
+	 * When the SQL scripts and statements should be executed.
 	 * <p>Defaults to {@link ExecutionPhase#BEFORE_TEST_METHOD BEFORE_TEST_METHOD}.
 	 */
 	ExecutionPhase executionPhase() default ExecutionPhase.BEFORE_TEST_METHOD;
 
 	/**
-	 * Local configuration for the SQL scripts declared within this
-	 * {@code @Sql} annotation.
+	 * Local configuration for the SQL scripts and statements declared within
+	 * this {@code @Sql} annotation.
 	 * <p>See the class-level javadocs for {@link SqlConfig} for explanations of
 	 * local vs. global configuration, inheritance, overrides, etc.
 	 * <p>Defaults to an empty {@link SqlConfig @SqlConfig} instance.

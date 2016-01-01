@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,21 +18,17 @@ package org.springframework.transaction.interceptor;
 
 import java.util.Properties;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 import org.springframework.util.SerializationTestUtils;
 
 /**
- *
  * @author Rod Johnson
  */
-public class TransactionAttributeSourceAdvisorTests extends TestCase {
+public class TransactionAttributeSourceAdvisorTests {
 
-	public TransactionAttributeSourceAdvisorTests(String s) {
-		super(s);
-	}
-
-	public void testSerializability() throws Exception {
+	@Test
+	public void serializability() throws Exception {
 		TransactionInterceptor ti = new TransactionInterceptor();
 		ti.setTransactionAttributes(new Properties());
 		TransactionAttributeSourceAdvisor tas = new TransactionAttributeSourceAdvisor(ti);

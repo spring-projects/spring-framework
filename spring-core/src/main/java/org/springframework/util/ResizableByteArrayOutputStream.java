@@ -35,6 +35,8 @@ import java.io.ByteArrayOutputStream;
  * @author Brian Clozel
  * @author Juergen Hoeller
  * @since 4.0.3
+ * @see #resize
+ * @see FastByteArrayOutputStream
  */
 public class ResizableByteArrayOutputStream extends ByteArrayOutputStream {
 

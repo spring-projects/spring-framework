@@ -20,15 +20,14 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.http.CacheControl;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.HttpSessionRequiredException;
-import org.springframework.http.CacheControl;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
 
 /**
@@ -38,19 +37,22 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
  * Can also be used for custom handlers that have their own
  * {@link org.springframework.web.servlet.HandlerAdapter}.
  *
- * <p>Supports HTTP cache control options. The usage of corresponding
- * HTTP headers can be controlled via the "setCacheSeconds" or "setCacheControl" properties.
- * As of 4.2, its default behavior changed when using only {@link #setCacheSeconds(int)}, sending
- * HTTP response headers that are more in line with current browsers and proxies implementations.
+ * <p>Supports HTTP cache control options. The usage of corresponding HTTP
+ * headers can be controlled via the {@link #setCacheSeconds "cacheSeconds"}
+ * and {@link #setCacheControl "cacheControl"} properties.
  *
- * <p>Reverting to the previous behavior can be easily done by using one of the nealy deprecated methods
- * {@link #setUseExpiresHeader}, {@link #setUseCacheControlHeader}, {@link #setUseCacheControlNoStore} or
- * {@link #setAlwaysMustRevalidate}.
+ * <p><b>NOTE:</b> As of Spring 4.2, this generator's default behavior changed when
+ * using only {@link #setCacheSeconds}, sending HTTP response headers that are in line
+ * with current browsers and proxies implementations (i.e. no HTTP 1.0 headers anymore)
+ * Reverting to the previous behavior can be easily done by using one of the newly
+ * deprecated methods {@link #setUseExpiresHeader}, {@link #setUseCacheControlHeader},
+ * {@link #setUseCacheControlNoStore} or {@link #setAlwaysMustRevalidate}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Brian Clozel
  * @see #setCacheSeconds
+ * @see #setCacheControl
  * @see #setRequireSession
  */
 public abstract class WebContentGenerator extends WebApplicationObjectSupport {
@@ -76,10 +78,12 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 	private boolean requireSession = false;
 
+	private CacheControl cacheControl;
+
 	private int cacheSeconds = -1;
 
 	/** Use HTTP 1.0 expires header? */
-	private boolean useExpiresHeader = true;
+	private boolean useExpiresHeader = false;
 
 	/** Use HTTP 1.1 cache-control header? */
 	private boolean useCacheControlHeader = true;
@@ -88,10 +92,6 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	private boolean useCacheControlNoStore = true;
 
 	private boolean alwaysMustRevalidate = false;
-
-	private boolean usePreviousHttpCachingBehavior = false;
-
-	private CacheControl cacheControl;
 
 
 	/**
@@ -164,38 +164,60 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	/**
 	 * Set the {@link org.springframework.http.CacheControl} instance to build
 	 * the Cache-Control HTTP response header.
-	 *
 	 * @since 4.2
 	 */
-	public void setCacheControl(CacheControl cacheControl) {
+	public final void setCacheControl(CacheControl cacheControl) {
 		this.cacheControl = cacheControl;
 	}
 
 	/**
 	 * Get the {@link org.springframework.http.CacheControl} instance
 	 * that builds the Cache-Control HTTP response header.
-	 *
 	 * @since 4.2
 	 */
-	public CacheControl getCacheControl() {
-		return cacheControl;
+	public final CacheControl getCacheControl() {
+		return this.cacheControl;
 	}
 
 	/**
-	 * Set whether to use the HTTP 1.0 expires header. Default is "false".
+	 * Cache content for the given number of seconds, by writing
+	 * cache-related HTTP headers to the response:
+	 * <ul>
+	 * <li>seconds == -1 (default value): no generation cache-related headers</li>
+	 * <li>seconds == 0: "Cache-Control: no-store" will prevent caching</li>
+	 * <li>seconds > 0: "Cache-Control: max-age=seconds" will ask to cache content</li>
+	 * </ul>
+	 * <p>For more specific needs, a custom {@link org.springframework.http.CacheControl}
+	 * should be used.
+	 * @see #setCacheControl
+	 */
+	public final void setCacheSeconds(int seconds) {
+		this.cacheSeconds = seconds;
+	}
+
+	/**
+	 * Return the number of seconds that content is cached.
+	 */
+	public final int getCacheSeconds() {
+		return this.cacheSeconds;
+	}
+
+	/**
+	 * Set whether to use the HTTP 1.0 expires header. Default is "false",
+	 * as of 4.2.
 	 * <p>Note: Cache headers will only get applied if caching is enabled
 	 * (or explicitly prevented) for the current request.
-	 *
-	 * @deprecated in favor of {@link #setCacheSeconds} or {@link #setCacheControl}.
+	 * @deprecated as of 4.2, since going forward, the HTTP 1.1 cache-control
+	 * header will be required, with the HTTP 1.0 headers disappearing
 	 */
 	@Deprecated
 	public final void setUseExpiresHeader(boolean useExpiresHeader) {
 		this.useExpiresHeader = useExpiresHeader;
-		this.usePreviousHttpCachingBehavior = true;
 	}
 
 	/**
 	 * Return whether the HTTP 1.0 expires header is used.
+	 * @deprecated as of 4.2, in favor of {@link #getCacheControl()}
 	 */
 	@Deprecated
 	public final boolean isUseExpiresHeader() {
@@ -206,17 +228,17 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * Set whether to use the HTTP 1.1 cache-control header. Default is "true".
 	 * <p>Note: Cache headers will only get applied if caching is enabled
 	 * (or explicitly prevented) for the current request.
-	 *
-	 * @deprecated in favor of {@link #setCacheSeconds} or {@link #setCacheControl}.
+	 * @deprecated as of 4.2, since going forward, the HTTP 1.1 cache-control
+	 * header will be required, with the HTTP 1.0 headers disappearing
 	 */
 	@Deprecated
 	public final void setUseCacheControlHeader(boolean useCacheControlHeader) {
 		this.useCacheControlHeader = useCacheControlHeader;
-		this.usePreviousHttpCachingBehavior = true;
 	}
 
 	/**
 	 * Return whether the HTTP 1.1 cache-control header is used.
+	 * @deprecated as of 4.2, in favor of {@link #getCacheControl()}
 	 */
 	@Deprecated
 	public final boolean isUseCacheControlHeader() {
@@ -226,17 +248,16 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	/**
 	 * Set whether to use the HTTP 1.1 cache-control header value "no-store"
 	 * when preventing caching. Default is "true".
-	 *
-	 * @deprecated in favor of {@link #setCacheSeconds} or {@link #setCacheControl}.
+	 * @deprecated as of 4.2, in favor of {@link #setCacheControl}
 	 */
 	@Deprecated
 	public final void setUseCacheControlNoStore(boolean useCacheControlNoStore) {
 		this.useCacheControlNoStore = useCacheControlNoStore;
-		this.usePreviousHttpCachingBehavior = true;
 	}
 
 	/**
 	 * Return whether the HTTP 1.1 cache-control header value "no-store" is used.
+	 * @deprecated as of 4.2, in favor of {@link #getCacheControl()}
 	 */
 	@Deprecated
 	public final boolean isUseCacheControlNoStore() {
@@ -244,106 +265,35 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	}
 
 	/**
-	 * An option to add 'must-revalidate' to every Cache-Control header. This
-	 * may be useful with annotated controller methods, which can
-	 * programmatically do a lastModified calculation as described in
-	 * {@link WebRequest#checkNotModified(long)}. Default is "false".
-	 *
-	 * @deprecated in favor of {@link #setCacheSeconds} or {@link #setCacheControl}.
+	 * An option to add 'must-revalidate' to every Cache-Control header.
+	 * This may be useful with annotated controller methods, which can
+	 * programmatically do a last-modified calculation as described in
+	 * {@link org.springframework.web.context.request.WebRequest#checkNotModified(long)}.
+	 * <p>Default is "false".
+	 * @deprecated as of 4.2, in favor of {@link #setCacheControl}
 	 */
 	@Deprecated
-	public void setAlwaysMustRevalidate(boolean mustRevalidate) {
+	public final void setAlwaysMustRevalidate(boolean mustRevalidate) {
 		this.alwaysMustRevalidate = mustRevalidate;
-		this.usePreviousHttpCachingBehavior = true;
 	}
 
 	/**
 	 * Return whether 'must-revalidate' is added to every Cache-Control header.
+	 * @deprecated as of 4.2, in favor of {@link #getCacheControl()}
 	 */
 	@Deprecated
-	public boolean isAlwaysMustRevalidate() {
-		return alwaysMustRevalidate;
-	}
-
-	/**
-	 * Cache content for the given number of seconds, by writing
-	 * cache-related HTTP headers to the response:
-	 * <ul>
-	 *     <li>seconds == -1 (default value): no generation cache-related headers</li>
-	 *     <li>seconds == 0: "Cache-Control: no-store" will prevent caching</li>
-	 *     <li>seconds > 0: "Cache-Control: max-age=seconds" will ask to cache content</li>
-	 * </ul>
-	 * <p>For more specific needs, a custom {@link org.springframework.http.CacheControl} should be used.
-	 *
-	 * @see #setCacheControl
-	 */
-	public final void setCacheSeconds(int seconds) {
-		this.cacheSeconds = seconds;
-		if (!this.usePreviousHttpCachingBehavior) {
-			if (cacheSeconds > 0) {
-				this.cacheControl = CacheControl.maxAge(seconds, TimeUnit.SECONDS);
-			}
-			else if (cacheSeconds == 0) {
-				this.cacheControl = CacheControl.noStore();
-			}
-		}
-	}
-
-	/**
-	 * Return the number of seconds that content is cached.
-	 */
-	public final int getCacheSeconds() {
-		return this.cacheSeconds;
+	public final boolean isAlwaysMustRevalidate() {
+		return this.alwaysMustRevalidate;
 	}
 
 
 	/**
-	 * Check and prepare the given request and response according to the settings
-	 * of this generator. Checks for supported methods and a required session,
-	 * and applies the number of cache seconds specified for this generator.
+	 * Check the given request for supported methods and a required session, if any.
 	 * @param request current HTTP request
-	 * @param response current HTTP response
 	 * @throws ServletException if the request cannot be handled because a check failed
-	 */
-	protected final void checkAndPrepare(
-			HttpServletRequest request, HttpServletResponse response)
-			throws ServletException {
-
-		checkAndPrepare(request, response, this.cacheControl);
-	}
-
-	protected final void checkAndPrepare(
-			HttpServletRequest request, HttpServletResponse response, int cacheSeconds) throws ServletException {
-
-		CacheControl cControl;
-		if (cacheSeconds > 0) {
-			cControl = CacheControl.maxAge(cacheSeconds, TimeUnit.SECONDS);
-		}
-		else if (cacheSeconds == 0) {
-			cControl = CacheControl.noStore();
-		}
-		else {
-			cControl = CacheControl.empty();
-		}
-		checkAndPrepare(request, response, cControl);
-	}
-
-	/**
-	 * Check and prepare the given request and response according to the settings
-	 * of this generator. Checks for supported methods and a required session
-	 * specified for this generator. Also applies the {@link org.springframework.http.CacheControl}
-	 * given as a parameter.
-	 * @param request current HTTP request
-	 * @param response current HTTP response
-	 * @param cacheControl the {@link org.springframework.http.CacheControl} to use
-	 * @throws ServletException if the request cannot be handled because a check failed
-	 *
 	 * @since 4.2
 	 */
-	protected final void checkAndPrepare(
-			HttpServletRequest request, HttpServletResponse response, CacheControl cacheControl)
-			throws ServletException {
-
+	protected final void checkRequest(HttpServletRequest request) throws ServletException {
 		// Check whether we should support the request method.
 		String method = request.getMethod();
 		if (this.supportedMethods != null && !this.supportedMethods.contains(method)) {
@@ -352,30 +302,147 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		}
 
 		// Check whether a session is required.
-		if (this.requireSession) {
-			if (request.getSession(false) == null) {
-				throw new HttpSessionRequiredException("Pre-existing session required but none found");
-			}
+		if (this.requireSession && request.getSession(false) == null) {
+			throw new HttpSessionRequiredException("Pre-existing session required but none found");
 		}
+	}
 
-		if (this.usePreviousHttpCachingBehavior) {
-			addHttp10CacheHeaders(response);
+	/**
+	 * Prepare the given response according to the settings of this generator.
+	 * Applies the number of cache seconds specified for this generator.
+	 * @param response current HTTP response
+	 * @since 4.2
+	 */
+	protected final void prepareResponse(HttpServletResponse response) {
+		if (this.cacheControl != null) {
+			applyCacheControl(response, this.cacheControl);
 		}
-		else if (cacheControl != null) {
-			String ccValue = cacheControl.getHeaderValue();
-			if (ccValue != null) {
-				response.setHeader(HEADER_CACHE_CONTROL, ccValue);
+		else {
+			applyCacheSeconds(response, this.cacheSeconds);
+		}
+	}
+
+	/**
+	 * Set the HTTP Cache-Control header according to the given settings.
+	 * @param response current HTTP response
+	 * @param cacheControl the pre-configured cache control settings
+	 * @since 4.2
+	 */
+	protected final void applyCacheControl(HttpServletResponse response, CacheControl cacheControl) {
+		String ccValue = cacheControl.getHeaderValue();
+		if (ccValue != null) {
+			// Set computed HTTP 1.1 Cache-Control header
+			response.setHeader(HEADER_CACHE_CONTROL, ccValue);
+
+			if (response.containsHeader(HEADER_PRAGMA)) {
+				// Reset HTTP 1.0 Pragma header if present
+				response.setHeader(HEADER_PRAGMA, "");
 			}
 		}
 	}
 
-	protected void addHttp10CacheHeaders(HttpServletResponse response) {
-		if (this.cacheSeconds > 0) {
-			cacheForSeconds(response, this.cacheSeconds, this.alwaysMustRevalidate);
+	/**
+	 * Apply the given cache seconds and generate corresponding HTTP headers,
+	 * i.e. allow caching for the given number of seconds in case of a positive
+	 * value, prevent caching if given a 0 value, do nothing else.
+	 * Does not tell the browser to revalidate the resource.
+	 * @param response current HTTP response
+	 * @param cacheSeconds positive number of seconds into the future that the
+	 * response should be cacheable for, 0 to prevent caching
+	 */
+	@SuppressWarnings("deprecation")
+	protected final void applyCacheSeconds(HttpServletResponse response, int cacheSeconds) {
+		if (this.useExpiresHeader || !this.useCacheControlHeader) {
+			// Deprecated HTTP 1.0 cache behavior, as in previous Spring versions
+			if (cacheSeconds > 0) {
+				cacheForSeconds(response, cacheSeconds);
+			}
+			else if (cacheSeconds == 0) {
+				preventCaching(response);
+			}
 		}
-		else if (this.cacheSeconds == 0) {
+		else {
+			CacheControl cControl;
+			if (cacheSeconds > 0) {
+				cControl = CacheControl.maxAge(cacheSeconds, TimeUnit.SECONDS);
+				if (this.alwaysMustRevalidate) {
+					cControl = cControl.mustRevalidate();
+				}
+			}
+			else if (cacheSeconds == 0) {
+				cControl = (this.useCacheControlNoStore ? CacheControl.noStore() : CacheControl.noCache());
+			}
+			else {
+				cControl = CacheControl.empty();
+			}
+			applyCacheControl(response, cControl);
+		}
+	}
+
+
+	/**
+	 * @see #checkRequest(HttpServletRequest)
+	 * @see #prepareResponse(HttpServletResponse)
+	 * @deprecated as of 4.2, since the {@code lastModified} flag is effectively ignored,
+	 * with a must-revalidate header only generated if explicitly configured
+	 */
+	@Deprecated
+	protected final void checkAndPrepare(
+			HttpServletRequest request, HttpServletResponse response, boolean lastModified) throws ServletException {
+
+		checkRequest(request);
+		prepareResponse(response);
+	}
+
+	/**
+	 * @see #checkRequest(HttpServletRequest)
+	 * @see #applyCacheSeconds(HttpServletResponse, int)
+	 * @deprecated as of 4.2, since the {@code lastModified} flag is effectively ignored,
+	 * with a must-revalidate header only generated if explicitly configured
+	 */
+	@Deprecated
+	protected final void checkAndPrepare(
+			HttpServletRequest request, HttpServletResponse response, int cacheSeconds, boolean lastModified)
+			throws ServletException {
+
+		checkRequest(request);
+		applyCacheSeconds(response, cacheSeconds);
+	}
+
+	/**
+	 * Apply the given cache seconds and generate respective HTTP headers.
+	 * <p>That is, allow caching for the given number of seconds in the
+	 * case of a positive value, prevent caching if given a 0 value, else
+	 * do nothing (i.e. leave caching to the client).
+	 * @param response the current HTTP response
+	 * @param cacheSeconds the (positive) number of seconds into the future
+	 * that the response should be cacheable for; 0 to prevent caching; and
+	 * a negative value to leave caching to the client.
+	 * @param mustRevalidate whether the client should revalidate the resource
+	 * (typically only necessary for controllers with last-modified support)
+	 * @deprecated as of 4.2, in favor of {@link #applyCacheControl}
+	 */
+	@Deprecated
+	protected final void applyCacheSeconds(HttpServletResponse response, int cacheSeconds, boolean mustRevalidate) {
+		if (cacheSeconds > 0) {
+			cacheForSeconds(response, cacheSeconds, mustRevalidate);
+		}
+		else if (cacheSeconds == 0) {
 			preventCaching(response);
 		}
+	}
+
+	/**
+	 * Set HTTP headers to allow caching for the given number of seconds.
+	 * Does not tell the browser to revalidate the resource.
+	 * @param response current HTTP response
+	 * @param seconds number of seconds into the future that the response
+	 * should be cacheable for
+	 * @deprecated as of 4.2, in favor of {@link #applyCacheControl}
+	 */
+	@Deprecated
+	protected final void cacheForSeconds(HttpServletResponse response, int seconds) {
+		cacheForSeconds(response, seconds, false);
 	}
 
 	/**
@@ -387,35 +454,48 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * should be cacheable for
 	 * @param mustRevalidate whether the client should revalidate the resource
 	 * (typically only necessary for controllers with last-modified support)
+	 * @deprecated as of 4.2, in favor of {@link #applyCacheControl}
 	 */
+	@Deprecated
 	protected final void cacheForSeconds(HttpServletResponse response, int seconds, boolean mustRevalidate) {
 		if (this.useExpiresHeader) {
 			// HTTP 1.0 header
 			response.setDateHeader(HEADER_EXPIRES, System.currentTimeMillis() + seconds * 1000L);
 		}
+
 		if (this.useCacheControlHeader) {
 			// HTTP 1.1 header
 			String headerValue = "max-age=" + seconds;
-			if (mustRevalidate) {
+			if (mustRevalidate || this.alwaysMustRevalidate) {
 				headerValue += ", must-revalidate";
 			}
 			response.setHeader(HEADER_CACHE_CONTROL, headerValue);
+		}
+
+		if (response.containsHeader(HEADER_PRAGMA)) {
+			// Reset HTTP 1.0 Pragma header if present
+			response.setHeader(HEADER_PRAGMA, "");
 		}
 	}
 
 	/**
 	 * Prevent the response from being cached.
-	 * See {@code http://www.mnot.net/cache_docs}.
+	 * Only called in HTTP 1.0 compatibility mode.
+	 * <p>See {@code http://www.mnot.net/cache_docs}.
+	 * @deprecated as of 4.2, in favor of {@link #applyCacheControl}
 	 */
+	@Deprecated
 	protected final void preventCaching(HttpServletResponse response) {
 		response.setHeader(HEADER_PRAGMA, "no-cache");
+
 		if (this.useExpiresHeader) {
-			// HTTP 1.0 header
+			// HTTP 1.0 Expires header
 			response.setDateHeader(HEADER_EXPIRES, 1L);
 		}
+
 		if (this.useCacheControlHeader) {
-			// HTTP 1.1 header: "no-cache" is the standard value,
-			// "no-store" is necessary to prevent caching on FireFox.
+			// HTTP 1.1 Cache-Control header: "no-cache" is the standard value,
+			// "no-store" is necessary to prevent caching on Firefox.
 			response.setHeader(HEADER_CACHE_CONTROL, "no-cache");
 			if (this.useCacheControlNoStore) {
 				response.addHeader(HEADER_CACHE_CONTROL, "no-store");

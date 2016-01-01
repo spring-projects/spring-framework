@@ -179,7 +179,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 	private transient BeanFactory beanFactory;
 
 	private transient final Map<String, InjectionMetadata> injectionMetadataCache =
-			new ConcurrentHashMap<String, InjectionMetadata>(64);
+			new ConcurrentHashMap<String, InjectionMetadata>(256);
 
 
 	/**
@@ -595,7 +595,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			else if (beanFactory instanceof ConfigurableBeanFactory){
 				resourceName = ((ConfigurableBeanFactory) beanFactory).resolveEmbeddedValue(resourceName);
 			}
-			if (resourceType != null && !Object.class.equals(resourceType)) {
+			if (resourceType != null && Object.class != resourceType) {
 				checkResourceType(resourceType);
 			}
 			else {
@@ -639,7 +639,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 					resourceName = Introspector.decapitalize(resourceName.substring(3));
 				}
 			}
-			if (resourceType != null && !Object.class.equals(resourceType)) {
+			if (resourceType != null && Object.class != resourceType) {
 				checkResourceType(resourceType);
 			}
 			else {
@@ -652,7 +652,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 				this.lookupType = resourceType;
 			}
 			else {
-				this.lookupType = (!Object.class.equals(resource.value()) ? resource.value() : Service.class);
+				this.lookupType = resource.value();
 			}
 			this.mappedName = resource.mappedName();
 			this.wsdlLocation = resource.wsdlLocation();
@@ -666,7 +666,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 			}
 			catch (NoSuchBeanDefinitionException notFound) {
 				// Service to be created through generated class.
-				if (Service.class.equals(this.lookupType)) {
+				if (Service.class == this.lookupType) {
 					throw new IllegalStateException("No resource with name '" + this.name + "' found in context, " +
 							"and no specific JAX-WS Service subclass specified. The typical solution is to either specify " +
 							"a LocalJaxWsServiceFactoryBean with the given name or to specify the (generated) Service " +
@@ -723,7 +723,7 @@ public class CommonAnnotationBeanPostProcessor extends InitDestroyAnnotationBean
 				}
 			}
 			Class<?> resourceType = resource.beanInterface();
-			if (resourceType != null && !Object.class.equals(resourceType)) {
+			if (resourceType != null && Object.class != resourceType) {
 				checkResourceType(resourceType);
 			}
 			else {

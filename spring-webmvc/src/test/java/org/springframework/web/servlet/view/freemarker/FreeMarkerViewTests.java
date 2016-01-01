@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,11 +25,9 @@ import java.util.Locale;
 import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
-import freemarker.ext.servlet.AllHttpScopesHashModel;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import org.springframework.context.ApplicationContextException;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -44,17 +42,27 @@ import org.springframework.web.servlet.view.AbstractView;
 import org.springframework.web.servlet.view.InternalResourceView;
 import org.springframework.web.servlet.view.RedirectView;
 
+import freemarker.ext.servlet.AllHttpScopesHashModel;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
 /**
  * @author Juergen Hoeller
+ * @author Sam Brannen
  * @since 14.03.2004
  */
 public class FreeMarkerViewTests {
 
+	@Rule
+	public final ExpectedException exception = ExpectedException.none();
+
 	@Test
-	public void testNoFreeMarkerConfig() throws Exception {
+	public void noFreeMarkerConfig() throws Exception {
 		FreeMarkerView fv = new FreeMarkerView();
 
 		WebApplicationContext wac = mock(WebApplicationContext.class);
@@ -62,32 +70,23 @@ public class FreeMarkerViewTests {
 		given(wac.getServletContext()).willReturn(new MockServletContext());
 
 		fv.setUrl("anythingButNull");
-		try {
-			fv.setApplicationContext(wac);
-			fv.afterPropertiesSet();
-			fail("Should have thrown BeanDefinitionStoreException");
-		}
-		catch (ApplicationContextException ex) {
-			// Check there's a helpful error message
-			assertTrue(ex.getMessage().contains("FreeMarkerConfig"));
-		}
+
+		exception.expect(ApplicationContextException.class);
+		exception.expectMessage(containsString("FreeMarkerConfig"));
+		fv.setApplicationContext(wac);
 	}
 
 	@Test
-	public void testNoTemplateName() throws Exception {
+	public void noTemplateName() throws Exception {
 		FreeMarkerView fv = new FreeMarkerView();
-		try {
-			fv.afterPropertiesSet();
-			fail("Should have thrown IllegalArgumentException");
-		}
-		catch (IllegalArgumentException ex) {
-			// Check there's a helpful error message
-			assertTrue(ex.getMessage().contains("url"));
-		}
+
+		exception.expect(IllegalArgumentException.class);
+		exception.expectMessage(containsString("url"));
+		fv.afterPropertiesSet();
 	}
 
 	@Test
-	public void testValidTemplateName() throws Exception {
+	public void validTemplateName() throws Exception {
 		FreeMarkerView fv = new FreeMarkerView();
 
 		WebApplicationContext wac = mock(WebApplicationContext.class);
@@ -117,7 +116,7 @@ public class FreeMarkerViewTests {
 	}
 
 	@Test
-	public void testKeepExistingContentType() throws Exception {
+	public void keepExistingContentType() throws Exception {
 		FreeMarkerView fv = new FreeMarkerView();
 
 		WebApplicationContext wac = mock(WebApplicationContext.class);
@@ -148,7 +147,7 @@ public class FreeMarkerViewTests {
 	}
 
 	@Test
-	public void testFreeMarkerViewResolver() throws Exception {
+	public void freeMarkerViewResolver() throws Exception {
 		FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
 		configurer.setConfiguration(new TestConfiguration());
 
@@ -157,9 +156,7 @@ public class FreeMarkerViewTests {
 		wac.getBeanFactory().registerSingleton("configurer", configurer);
 		wac.refresh();
 
-		FreeMarkerViewResolver vr = new FreeMarkerViewResolver();
-		vr.setPrefix("prefix_");
-		vr.setSuffix("_suffix");
+		FreeMarkerViewResolver vr = new FreeMarkerViewResolver("prefix_", "_suffix");
 		vr.setApplicationContext(wac);
 
 		View view = vr.resolveViewName("test", Locale.CANADA);
@@ -180,6 +177,10 @@ public class FreeMarkerViewTests {
 
 
 	private class TestConfiguration extends Configuration {
+
+		TestConfiguration() {
+			super(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
+		}
 
 		@Override
 		public Template getTemplate(String name, final Locale locale) throws IOException {

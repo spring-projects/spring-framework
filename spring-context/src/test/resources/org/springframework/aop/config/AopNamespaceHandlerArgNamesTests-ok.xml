@@ -7,7 +7,7 @@
 
 	<aop:config>
 		<aop:aspect id="countAgeCalls" ref="countingAdvice">
-			<aop:before pointcut="execution(* setAge(..)) and args(age) and this(bean)" 
+			<aop:before pointcut="execution(* setAge(..)) and args(age) and this(bean)"
 					method="mySetAgeAdvice" arg-names="age,bean"/>
 		</aop:aspect>
 	</aop:config>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +19,8 @@ package org.springframework.test.context;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
@@ -49,8 +48,9 @@ import org.springframework.util.StringUtils;
  * <p>A {@link SmartContextLoader} uses {@code MergedContextConfiguration}
  * to load an {@link org.springframework.context.ApplicationContext ApplicationContext}.
  *
- * <p>{@code MergedContextConfiguration} is also used by the {@link TestContext}
- * as the context cache key for caching an
+ * <p>{@code MergedContextConfiguration} is also used by the
+ * {@link org.springframework.test.context.cache.ContextCache ContextCache}
+ * as the key for caching an
  * {@link org.springframework.context.ApplicationContext ApplicationContext}
  * that was loaded using properties of this {@code MergedContextConfiguration}.
  *
@@ -116,11 +116,9 @@ public class MergedContextConfiguration implements Serializable {
 			return EMPTY_STRING_ARRAY;
 		}
 
-		// Active profiles must be unique and sorted in order to support proper
-		// cache key generation. Specifically, profile sets {foo,bar} and
-		// {bar,foo} must both result in the same array (e.g., [bar,foo]).
-		SortedSet<String> sortedProfilesSet = new TreeSet<String>(Arrays.asList(activeProfiles));
-		return StringUtils.toStringArray(sortedProfilesSet);
+		// Active profiles must be unique
+		Set<String> profilesSet = new LinkedHashSet<String>(Arrays.asList(activeProfiles));
+		return StringUtils.toStringArray(profilesSet);
 	}
 
 	/**

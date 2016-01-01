@@ -16,23 +16,30 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
-import static org.junit.Assert.*;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import org.springframework.beans.DirectFieldAccessor;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.http.HttpHeaders;
-import org.springframework.util.CollectionUtils;
-import org.springframework.web.context.support.StaticWebApplicationContext;
-import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.context.support.StaticWebApplicationContext;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.mvc.condition.ConsumesRequestCondition;
@@ -43,24 +50,32 @@ import org.springframework.web.servlet.mvc.condition.ProducesRequestCondition;
 import org.springframework.web.servlet.mvc.condition.RequestMethodsRequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+
 /**
  * Test fixture for {@link CrossOrigin @CrossOrigin} annotated methods.
  *
  * @author Sebastien Deleuze
+ * @author Sam Brannen
+ * @author Nicolas Labrot
  */
-@SuppressWarnings("unchecked")
 public class CrossOriginTests {
 
-	private TestRequestMappingInfoHandlerMapping handlerMapping;
-	private MockHttpServletRequest request;
+	private final TestRequestMappingInfoHandlerMapping handlerMapping = new TestRequestMappingInfoHandlerMapping();
+
+	private final MockHttpServletRequest request = new MockHttpServletRequest();
+
+	@Rule
+	public ExpectedException exception = ExpectedException.none();
+
 
 	@Before
 	public void setUp() {
-		this.handlerMapping = new TestRequestMappingInfoHandlerMapping();
 		this.handlerMapping.setRemoveSemicolonContent(false);
 		this.handlerMapping.setApplicationContext(new StaticWebApplicationContext());
 		this.handlerMapping.afterPropertiesSet();
-		this.request = new MockHttpServletRequest();
+
 		this.request.setMethod("GET");
 		this.request.addHeader(HttpHeaders.ORIGIN, "http://domain.com/");
 	}
@@ -70,8 +85,7 @@ public class CrossOriginTests {
 		this.handlerMapping.registerHandler(new MethodLevelController());
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/no");
 		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
-		CorsConfiguration config = getCorsConfiguration(chain, false);
-		assertNull(config);
+		assertNull(getCorsConfiguration(chain, false));
 	}
 
 	@Test  // SPR-12931
@@ -79,8 +93,7 @@ public class CrossOriginTests {
 		this.handlerMapping.registerHandler(new MethodLevelController());
 		this.request.setRequestURI("/no");
 		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
-		CorsConfiguration config = getCorsConfiguration(chain, false);
-		assertNull(config);
+		assertNull(getCorsConfiguration(chain, false));
 	}
 
 	@Test  // SPR-12931
@@ -89,8 +102,7 @@ public class CrossOriginTests {
 		this.request.setMethod("POST");
 		this.request.setRequestURI("/no");
 		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
-		CorsConfiguration config = getCorsConfiguration(chain, false);
-		assertNull(config);
+		assertNull(getCorsConfiguration(chain, false));
 	}
 
 	@Test
@@ -120,18 +132,81 @@ public class CrossOriginTests {
 		assertArrayEquals(new String[]{"header1", "header2"}, config.getAllowedHeaders().toArray());
 		assertArrayEquals(new String[]{"header3", "header4"}, config.getExposedHeaders().toArray());
 		assertEquals(new Long(123), config.getMaxAge());
-		assertEquals(false, config.getAllowCredentials());
+		assertFalse(config.getAllowCredentials());
+	}
+
+	@Test
+	public void customOriginDefinedViaValueAttribute() throws Exception {
+		this.handlerMapping.registerHandler(new MethodLevelController());
+		this.request.setRequestURI("/customOrigin");
+		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
+		CorsConfiguration config = getCorsConfiguration(chain, false);
+		assertNotNull(config);
+		assertEquals(Arrays.asList("http://example.com"), config.getAllowedOrigins());
+		assertTrue(config.getAllowCredentials());
+	}
+
+	@Test
+	public void bogusAllowCredentialsValue() throws Exception {
+		exception.expect(IllegalStateException.class);
+		exception.expectMessage(containsString("@CrossOrigin's allowCredentials"));
+		exception.expectMessage(containsString("current value is [bogus]"));
+		this.handlerMapping.registerHandler(new MethodLevelControllerWithBogusAllowCredentialsValue());
 	}
 
 	@Test
 	public void classLevel() throws Exception {
 		this.handlerMapping.registerHandler(new ClassLevelController());
+
 		this.request.setRequestURI("/foo");
 		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
 		CorsConfiguration config = getCorsConfiguration(chain, false);
 		assertNotNull(config);
 		assertArrayEquals(new String[]{"GET"}, config.getAllowedMethods().toArray());
 		assertArrayEquals(new String[]{"*"}, config.getAllowedOrigins().toArray());
+		assertFalse(config.getAllowCredentials());
+
+		this.request.setRequestURI("/bar");
+		chain = this.handlerMapping.getHandler(request);
+		config = getCorsConfiguration(chain, false);
+		assertNotNull(config);
+		assertArrayEquals(new String[]{"GET"}, config.getAllowedMethods().toArray());
+		assertArrayEquals(new String[]{"*"}, config.getAllowedOrigins().toArray());
+		assertFalse(config.getAllowCredentials());
+
+		this.request.setRequestURI("/baz");
+		chain = this.handlerMapping.getHandler(request);
+		config = getCorsConfiguration(chain, false);
+		assertNotNull(config);
+		assertArrayEquals(new String[]{"GET"}, config.getAllowedMethods().toArray());
+		assertArrayEquals(new String[]{"*"}, config.getAllowedOrigins().toArray());
+		assertTrue(config.getAllowCredentials());
+	}
+
+	@Test // SPR-13468
+	public void classLevelComposedAnnotation() throws Exception {
+		this.handlerMapping.registerHandler(new ClassLevelMappingWithComposedAnnotation());
+
+		this.request.setRequestURI("/foo");
+		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
+		CorsConfiguration config = getCorsConfiguration(chain, false);
+		assertNotNull(config);
+		assertArrayEquals(new String[]{"GET"}, config.getAllowedMethods().toArray());
+		assertArrayEquals(new String[]{"http://foo.com"}, config.getAllowedOrigins().toArray());
+		assertTrue(config.getAllowCredentials());
+	}
+
+	@Test // SPR-13468
+	public void methodLevelComposedAnnotation() throws Exception {
+		this.handlerMapping.registerHandler(new MethodLevelMappingWithComposedAnnotation());
+
+		this.request.setRequestURI("/foo");
+		HandlerExecutionChain chain = this.handlerMapping.getHandler(request);
+		CorsConfiguration config = getCorsConfiguration(chain, false);
+		assertNotNull(config);
+		assertArrayEquals(new String[]{"GET"}, config.getAllowedMethods().toArray());
+		assertArrayEquals(new String[]{"http://foo.com"}, config.getAllowedOrigins().toArray());
+		assertTrue(config.getAllowCredentials());
 	}
 
 	@Test
@@ -218,59 +293,110 @@ public class CrossOriginTests {
 	@Controller
 	private static class MethodLevelController {
 
-		@RequestMapping(value = "/no", method = RequestMethod.GET)
+		@RequestMapping(path = "/no", method = RequestMethod.GET)
 		public void noAnnotation() {
 		}
 
-		@RequestMapping(value = "/no", method = RequestMethod.POST)
+		@RequestMapping(path = "/no", method = RequestMethod.POST)
 		public void noAnnotationPost() {
 		}
 
 		@CrossOrigin
-		@RequestMapping(value = "/default", method = RequestMethod.GET)
+		@RequestMapping(path = "/default", method = RequestMethod.GET)
 		public void defaultAnnotation() {
 		}
 
 		@CrossOrigin
-		@RequestMapping(value = "/default", method = RequestMethod.GET, params = "q")
+		@RequestMapping(path = "/default", method = RequestMethod.GET, params = "q")
 		public void defaultAnnotationWithParams() {
 		}
 
 		@CrossOrigin
-		@RequestMapping(value = "/ambiguous-header", method = RequestMethod.GET, headers = "header1=a")
+		@RequestMapping(path = "/ambiguous-header", method = RequestMethod.GET, headers = "header1=a")
 		public void ambigousHeader1a() {
 		}
 
 		@CrossOrigin
-		@RequestMapping(value = "/ambiguous-header", method = RequestMethod.GET, headers = "header1=b")
+		@RequestMapping(path = "/ambiguous-header", method = RequestMethod.GET, headers = "header1=b")
 		public void ambigousHeader1b() {
 		}
 
 		@CrossOrigin
-		@RequestMapping(value = "/ambiguous-produces", method = RequestMethod.GET, produces = "application/xml")
+		@RequestMapping(path = "/ambiguous-produces", method = RequestMethod.GET, produces = "application/xml")
 		public String ambigousProducesXml() {
 			return "<a></a>";
 		}
 
 		@CrossOrigin
-		@RequestMapping(value = "/ambiguous-produces", method = RequestMethod.GET, produces = "application/json")
+		@RequestMapping(path = "/ambiguous-produces", method = RequestMethod.GET, produces = "application/json")
 		public String ambigousProducesJson() {
 			return "{}";
 		}
 
-		@CrossOrigin(origin = { "http://site1.com", "http://site2.com" }, allowedHeaders = { "header1", "header2" },
-				exposedHeaders = { "header3", "header4" }, method = RequestMethod.DELETE, maxAge = 123, allowCredentials = "false")
-		@RequestMapping(value = "/customized", method = { RequestMethod.GET, RequestMethod.POST } )
+		@CrossOrigin(origins = { "http://site1.com", "http://site2.com" }, allowedHeaders = { "header1", "header2" },
+				exposedHeaders = { "header3", "header4" }, methods = RequestMethod.DELETE, maxAge = 123, allowCredentials = "false")
+		@RequestMapping(path = "/customized", method = { RequestMethod.GET, RequestMethod.POST })
 		public void customized() {
+		}
+
+		@CrossOrigin("http://example.com")
+		@RequestMapping("/customOrigin")
+		public void customOriginDefinedViaValueAttribute() {
+		}
+	}
+
+	@Controller
+	private static class MethodLevelControllerWithBogusAllowCredentialsValue {
+
+		@CrossOrigin(allowCredentials = "bogus")
+		@RequestMapping("/bogus")
+		public void bogusAllowCredentialsValue() {
+		}
+	}
+
+	@Controller
+	@CrossOrigin(allowCredentials = "false")
+	private static class ClassLevelController {
+
+		@RequestMapping(path = "/foo", method = RequestMethod.GET)
+		public void foo() {
+		}
+
+		@CrossOrigin
+		@RequestMapping(path = "/bar", method = RequestMethod.GET)
+		public void bar() {
+		}
+
+		@CrossOrigin(allowCredentials = "true")
+		@RequestMapping(path = "/baz", method = RequestMethod.GET)
+		public void baz() {
 		}
 
 	}
 
-	@Controller
+	@Target({ElementType.METHOD, ElementType.TYPE})
+	@Retention(RetentionPolicy.RUNTIME)
 	@CrossOrigin
-	private static class ClassLevelController {
+	private @interface ComposedCrossOrigin {
+		String[] origins() default {};
+		String allowCredentials() default "";
+	}
 
-		@RequestMapping(value = "/foo", method = RequestMethod.GET)
+	@Controller
+	@ComposedCrossOrigin(origins = "http://foo.com", allowCredentials = "true")
+	private static class ClassLevelMappingWithComposedAnnotation {
+
+		@RequestMapping(path = "/foo", method = RequestMethod.GET)
+		public void foo() {
+		}
+	}
+
+
+	@Controller
+	private static class MethodLevelMappingWithComposedAnnotation {
+
+		@RequestMapping(path = "/foo", method = RequestMethod.GET)
+		@ComposedCrossOrigin(origins = "http://foo.com", allowCredentials = "true")
 		public void foo() {
 		}
 	}
@@ -288,7 +414,7 @@ public class CrossOriginTests {
 
 		@Override
 		protected RequestMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
-			RequestMapping annotation = AnnotationUtils.findAnnotation(method, RequestMapping.class);
+			RequestMapping annotation = AnnotatedElementUtils.findMergedAnnotation(method, RequestMapping.class);
 			if (annotation != null) {
 				return new RequestMappingInfo(
 						new PatternsRequestCondition(annotation.value(), getUrlPathHelper(), getPathMatcher(), true, true),

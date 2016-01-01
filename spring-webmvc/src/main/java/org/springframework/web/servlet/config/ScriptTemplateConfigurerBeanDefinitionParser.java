@@ -67,18 +67,25 @@ public class ScriptTemplateConfigurerBeanDefinitionParser extends AbstractSimple
 		if (element.hasAttribute("render-function")) {
 			builder.addPropertyValue("renderFunction", element.getAttribute("render-function"));
 		}
+		if (element.hasAttribute("content-type")) {
+			builder.addPropertyValue("contentType", element.getAttribute("content-type"));
+		}
 		if (element.hasAttribute("charset")) {
 			builder.addPropertyValue("charset", Charset.forName(element.getAttribute("charset")));
 		}
 		if (element.hasAttribute("resource-loader-path")) {
 			builder.addPropertyValue("resourceLoaderPath", element.getAttribute("resource-loader-path"));
 		}
+		if (element.hasAttribute("shared-engine")) {
+			builder.addPropertyValue("sharedEngine", element.getAttribute("shared-engine"));
+		}
 	}
 
 	@Override
 	protected boolean isEligibleAttribute(String name) {
 		return (name.equals("engine-name") || name.equals("scripts") || name.equals("render-object") ||
-				name.equals("render-function") || name.equals("charset") || name.equals("resource-loader-path"));
+				name.equals("render-function") || name.equals("content-type") ||
+				name.equals("charset") || name.equals("resource-loader-path"));
 	}
 
 }

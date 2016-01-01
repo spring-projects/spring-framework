@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.socket.messaging;
 
 import java.io.IOException;
@@ -69,7 +70,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 public class WebSocketStompClient extends StompClientSupport implements SmartLifecycle {
 
-	private static Log logger = LogFactory.getLog(WebSocketStompClient.class);
+	private static final Log logger = LogFactory.getLog(WebSocketStompClient.class);
 
 
 	private final WebSocketClient webSocketClient;
@@ -87,7 +88,6 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * Class constructor. Sets {@link #setDefaultHeartbeat} to "0,0" but will
 	 * reset it back to the preferred "10000,10000" when a
 	 * {@link #setTaskScheduler} is configured.
-	 *
 	 * @param webSocketClient the WebSocket client to connect with
 	 */
 	public WebSocketStompClient(WebSocketClient webSocketClient) {
@@ -302,12 +302,10 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 		private final List<ScheduledFuture<?>> inactivityTasks = new ArrayList<ScheduledFuture<?>>(2);
 
-
 		public WebSocketTcpConnectionHandlerAdapter(TcpConnectionHandler<byte[]> connectionHandler) {
 			Assert.notNull(connectionHandler);
 			this.connectionHandler = connectionHandler;
 		}
-
 
 		// ListenableFutureCallback implementation: handshake outcome
 
@@ -319,7 +317,6 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		public void onFailure(Throwable ex) {
 			this.connectionHandler.afterConnectFailure(ex);
 		}
-
 
 		// WebSocketHandler implementation
 
@@ -374,7 +371,6 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		public boolean supportsPartialMessages() {
 			return false;
 		}
-
 
 		// TcpConnection implementation
 
@@ -466,11 +462,9 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 		private final BufferingStompDecoder bufferingDecoder;
 
-
 		public StompWebSocketMessageCodec(int messageSizeLimit) {
 			this.bufferingDecoder = new BufferingStompDecoder(DECODER, messageSizeLimit);
 		}
-
 
 		public List<Message<byte[]>> decode(WebSocketMessage<?> webSocketMessage) {
 			List<Message<byte[]>> result = Collections.<Message<byte[]>>emptyList();

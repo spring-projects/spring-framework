@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,12 @@
 
 package org.springframework.cache.jcache;
 
-import java.io.Serializable;
+import java.util.concurrent.Callable;
+import javax.cache.processor.EntryProcessor;
+import javax.cache.processor.EntryProcessorException;
+import javax.cache.processor.MutableEntry;
 
-import org.springframework.cache.Cache;
-import org.springframework.cache.support.SimpleValueWrapper;
+import org.springframework.cache.support.AbstractValueAdaptingCache;
 import org.springframework.util.Assert;
 
 /**
@@ -32,13 +34,9 @@ import org.springframework.util.Assert;
  * @author Stephane Nicoll
  * @since 3.2
  */
-public class JCacheCache implements Cache {
-
-	private static final Object NULL_HOLDER = new NullHolder();
+public class JCacheCache extends AbstractValueAdaptingCache {
 
 	private final javax.cache.Cache<Object, Object> cache;
-
-	private final boolean allowNullValues;
 
 
 	/**
@@ -55,9 +53,9 @@ public class JCacheCache implements Cache {
 	 * @param allowNullValues whether to accept and convert null values for this cache
 	 */
 	public JCacheCache(javax.cache.Cache<Object, Object> jcache, boolean allowNullValues) {
+		super(allowNullValues);
 		Assert.notNull(jcache, "Cache must not be null");
 		this.cache = jcache;
-		this.allowNullValues = allowNullValues;
 	}
 
 
@@ -71,24 +69,19 @@ public class JCacheCache implements Cache {
 		return this.cache;
 	}
 
-	public final boolean isAllowNullValues() {
-		return this.allowNullValues;
+	@Override
+	protected Object lookup(Object key) {
+		return this.cache.get(key);
 	}
 
 	@Override
-	public ValueWrapper get(Object key) {
-		Object value = this.cache.get(key);
-		return (value != null ? new SimpleValueWrapper(fromStoreValue(value)) : null);
-	}
-
-	@Override
-	@SuppressWarnings("unchecked")
-	public <T> T get(Object key, Class<T> type) {
-		Object value = fromStoreValue(this.cache.get(key));
-		if (value != null && type != null && !type.isInstance(value)) {
-			throw new IllegalStateException("Cached value is not of required type [" + type.getName() + "]: " + value);
+	public <T> T get(Object key, Callable<T> valueLoader) {
+		try {
+			return this.cache.invoke(key, new ValueLoaderEntryProcessor<T>(), valueLoader);
 		}
-		return (T) value;
+		catch (EntryProcessorException ex) {
+			throw new ValueRetrievalException(key, valueLoader, ex.getCause());
+		}
 	}
 
 	@Override
@@ -113,35 +106,29 @@ public class JCacheCache implements Cache {
 	}
 
 
-	/**
-	 * Convert the given value from the internal store to a user value
-	 * returned from the get method (adapting {@code null}).
-	 * @param storeValue the store value
-	 * @return the value to return to the user
-	 */
-	protected Object fromStoreValue(Object storeValue) {
-		if (this.allowNullValues && storeValue == NULL_HOLDER) {
-			return null;
+	private class ValueLoaderEntryProcessor<T> implements EntryProcessor<Object, Object, T> {
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public T process(MutableEntry<Object, Object> entry, Object... arguments)
+				throws EntryProcessorException {
+			Callable<T> valueLoader = (Callable<T>) arguments[0];
+			if (entry.exists()) {
+				return (T) fromStoreValue(entry.getValue());
+			}
+			else {
+				T value;
+				try {
+					value = valueLoader.call();
+				}
+				catch (Exception ex) {
+					throw new EntryProcessorException("Value loader '" + valueLoader + "' failed " +
+							"to compute  value for key '" + entry.getKey() + "'", ex);
+				}
+				entry.setValue(toStoreValue(value));
+				return value;
+			}
 		}
-		return storeValue;
-	}
-
-	/**
-	 * Convert the given user value, as passed into the put method,
-	 * to a value in the internal store (adapting {@code null}).
-	 * @param userValue the given user value
-	 * @return the value to store
-	 */
-	protected Object toStoreValue(Object userValue) {
-		if (this.allowNullValues && userValue == null) {
-			return NULL_HOLDER;
-		}
-		return userValue;
-	}
-
-
-	@SuppressWarnings("serial")
-	private static class NullHolder implements Serializable {
 	}
 
 }

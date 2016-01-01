@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -277,12 +277,17 @@ public abstract class StatementCreatorUtils {
 					if (jdbcDriverName == null) {
 						jdbcDriverName = dbmd.getDriverName();
 					}
-					if (checkGetParameterType) {
+					if (checkGetParameterType &&
+							!(jdbcDriverName.startsWith("Oracle") && dbmd.getDriverMajorVersion() >= 12)) {
+						// Register JDBC driver with no support for getParameterType, except for the
+						// Oracle 12c driver where getParameterType fails for specific statements only
+						// (so an exception thrown above does not indicate general lack of support).
 						driversWithNoSupportForGetParameterType.add(jdbcDriverName);
 					}
 					String databaseProductName = dbmd.getDatabaseProductName();
 					if (databaseProductName.startsWith("Informix") ||
-							jdbcDriverName.startsWith("Microsoft SQL Server")) {
+							(jdbcDriverName.startsWith("Microsoft") && jdbcDriverName.contains("SQL Server"))) {
+							// "Microsoft SQL Server JDBC Driver 3.0" versus "Microsoft JDBC Driver 4.0 for SQL Server"
 						useSetObject = true;
 					}
 					else if (databaseProductName.startsWith("DB2") ||

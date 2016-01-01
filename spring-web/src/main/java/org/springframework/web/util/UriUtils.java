@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,6 @@ package org.springframework.web.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.springframework.util.Assert;
 
@@ -27,11 +25,11 @@ import org.springframework.util.Assert;
  * Utility class for URI encoding and decoding based on RFC 3986.
  * Offers encoding methods for the various URI components.
  *
- * <p>All {@code encode*(String, String} methods in this class operate in a similar way:
+ * <p>All {@code encode*(String, String)} methods in this class operate in a similar way:
  * <ul>
  * <li>Valid characters for the specific URI component as defined in RFC 3986 stay the same.</li>
  * <li>All other characters are converted into one or more bytes in the given encoding scheme.
- * Each of the resulting bytes is written as a hexadecimal string in the "{@code %<i>xy</i>}"
+ * Each of the resulting bytes is written as a hexadecimal string in the "<code>%<i>xy</i></code>"
  * format.</li>
  * </ul>
  *
@@ -40,32 +38,6 @@ import org.springframework.util.Assert;
  * @see <a href="http://www.ietf.org/rfc/rfc3986.txt">RFC 3986</a>
  */
 public abstract class UriUtils {
-
-	private static final String SCHEME_PATTERN = "([^:/?#]+):";
-
-	private static final String HTTP_PATTERN = "(http|https):";
-
-	private static final String USERINFO_PATTERN = "([^@/]*)";
-
-	private static final String HOST_PATTERN = "([^/?#:]*)";
-
-	private static final String PORT_PATTERN = "(\\d*)";
-
-	private static final String PATH_PATTERN = "([^?#]*)";
-
-	private static final String QUERY_PATTERN = "([^#]*)";
-
-	private static final String LAST_PATTERN = "(.*)";
-
-	// Regex patterns that matches URIs. See RFC 3986, appendix B
-	private static final Pattern URI_PATTERN = Pattern.compile(
-			"^(" + SCHEME_PATTERN + ")?" + "(//(" + USERINFO_PATTERN + "@)?" + HOST_PATTERN + "(:" + PORT_PATTERN +
-					")?" + ")?" + PATH_PATTERN + "(\\?" + QUERY_PATTERN + ")?" + "(#" + LAST_PATTERN + ")?");
-
-	private static final Pattern HTTP_URL_PATTERN = Pattern.compile(
-			"^" + HTTP_PATTERN + "(//(" + USERINFO_PATTERN + "@)?" + HOST_PATTERN + "(:" + PORT_PATTERN + ")?" + ")?" +
-					PATH_PATTERN + "(\\?" + LAST_PATTERN + ")?");
-
 
 	/**
 	 * Encodes the given URI scheme with the given encoding.
@@ -177,6 +149,20 @@ public abstract class UriUtils {
 		return HierarchicalUriComponents.encodeUriComponent(fragment, encoding, HierarchicalUriComponents.Type.FRAGMENT);
 	}
 
+	/**
+	 * Encode characters outside the unreserved character set as defined in
+	 * <a href="https://tools.ietf.org/html/rfc3986#section-2">RFC 3986 Section 2</a>.
+	 * <p>This can be used to ensure the given String will not contain any
+	 * characters with reserved URI meaning regardless of URI component.
+	 * @param source the string to be encoded
+	 * @param encoding the character encoding to encode to
+	 * @return the encoded string
+	 * @throws UnsupportedEncodingException when the given encoding parameter is not supported
+	 */
+	public static String encode(String source, String encoding) throws UnsupportedEncodingException {
+		HierarchicalUriComponents.Type type = HierarchicalUriComponents.Type.URI;
+		return HierarchicalUriComponents.encodeUriComponent(source, encoding, type);
+	}
 
 	// decoding
 

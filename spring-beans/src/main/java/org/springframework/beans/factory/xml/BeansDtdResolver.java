@@ -59,8 +59,8 @@ public class BeansDtdResolver implements EntityResolver {
 		}
 		if (systemId != null && systemId.endsWith(DTD_EXTENSION)) {
 			int lastPathSeparator = systemId.lastIndexOf("/");
-			int dtdNameStart = systemId.indexOf(DTD_NAME);
-			if (dtdNameStart > lastPathSeparator) {
+			int dtdNameStart = systemId.indexOf(DTD_NAME, lastPathSeparator);
+			if (dtdNameStart != -1) {
 				String dtdFile = DTD_FILENAME + DTD_EXTENSION;
 				if (logger.isTraceEnabled()) {
 					logger.trace("Trying to locate [" + dtdFile + "] in Spring jar on classpath");

@@ -41,7 +41,10 @@ import org.apache.log4j.xml.DOMConfigurator;
  * @since 13.03.2003
  * @see org.springframework.web.util.Log4jWebConfigurer
  * @see org.springframework.web.util.Log4jConfigListener
+ * @deprecated as of Spring 4.2.1, in favor of Apache Log4j 2
+ * (following Apache's EOL declaration for log4j 1.x)
  */
+@Deprecated
 public abstract class Log4jConfigurer {
 
 	/** Pseudo URL prefix for loading from the class path: "classpath:" */

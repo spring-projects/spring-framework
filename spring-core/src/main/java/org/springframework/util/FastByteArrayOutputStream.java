@@ -24,7 +24,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 /**
- * A speedy alternative to {@link java.io.ByteArrayOutputStream}.
+ * A speedy alternative to {@link java.io.ByteArrayOutputStream}. Note that
+ * this variant does <i>not</i> extend {@code ByteArrayOutputStream}, unlike
+ * its sibling {@link ResizableByteArrayOutputStream}.
  *
  * <p>Unlike {@link java.io.ByteArrayOutputStream}, this implementation is backed
  * by a {@link java.util.LinkedList} of {@code byte[]} instead of 1 constantly
@@ -35,9 +37,12 @@ import java.util.LinkedList;
  * with the {@link #writeTo(OutputStream)} method.
  *
  * @author Craig Andrews
+ * @author Juergen Hoeller
  * @since 4.2
+ * @see #resize
+ * @see ResizableByteArrayOutputStream
  */
-public final class FastByteArrayOutputStream extends OutputStream {
+public class FastByteArrayOutputStream extends OutputStream {
 
 	private static final int DEFAULT_BLOCK_SIZE = 256;
 
@@ -258,7 +263,7 @@ public final class FastByteArrayOutputStream extends OutputStream {
 	 */
 	public void resize(int targetCapacity) {
 		Assert.isTrue(targetCapacity >= size(), "New capacity must not be smaller than current size");
-		if (buffers.peekFirst() == null) {
+		if (this.buffers.peekFirst() == null) {
 			this.nextBlockSize = targetCapacity - size();
 		}
 		else if (size() == targetCapacity && this.buffers.getFirst().length == targetCapacity) {

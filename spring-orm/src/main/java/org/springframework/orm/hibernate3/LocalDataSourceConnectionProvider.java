@@ -36,7 +36,9 @@ import org.springframework.jdbc.datasource.DataSourceUtils;
  * @author Juergen Hoeller
  * @since 1.2
  * @see LocalSessionFactoryBean#setDataSource
+ * @deprecated as of Spring 4.3, in favor of Hibernate 4.x/5.x
  */
+@Deprecated
 public class LocalDataSourceConnectionProvider implements ConnectionProvider {
 
 	private DataSource dataSource;

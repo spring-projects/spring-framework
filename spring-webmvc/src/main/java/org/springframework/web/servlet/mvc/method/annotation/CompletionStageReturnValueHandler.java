@@ -25,7 +25,7 @@ import org.springframework.lang.UsesJava8;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.WebAsyncUtils;
-import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
+import org.springframework.web.method.support.AsyncHandlerMethodReturnValueHandler;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
@@ -36,11 +36,16 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  * @since 4.2
  */
 @UsesJava8
-public class CompletionStageReturnValueHandler implements HandlerMethodReturnValueHandler {
+public class CompletionStageReturnValueHandler implements AsyncHandlerMethodReturnValueHandler {
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
 		return CompletionStage.class.isAssignableFrom(returnType.getParameterType());
+	}
+
+	@Override
+	public boolean isAsyncReturnValue(Object returnValue, MethodParameter returnType) {
+		return (returnValue != null && returnValue instanceof CompletionStage);
 	}
 
 	@Override
@@ -70,7 +75,6 @@ public class CompletionStageReturnValueHandler implements HandlerMethodReturnVal
 				return null;
 			}
 		});
-
 	}
 
 }

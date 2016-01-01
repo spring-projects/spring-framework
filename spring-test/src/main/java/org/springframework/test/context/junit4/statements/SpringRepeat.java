@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,17 +22,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.runners.model.Statement;
 
-import org.springframework.test.annotation.Repeat;
-import org.springframework.util.ClassUtils;
+import org.springframework.test.annotation.TestAnnotationUtils;
 
 /**
  * {@code SpringRepeat} is a custom JUnit {@link Statement} which adds support
- * for Spring's {@link Repeat @Repeat} annotation by repeating the test for
- * the specified number of times.
+ * for Spring's {@link org.springframework.test.annotation.Repeat @Repeat}
+ * annotation by repeating the test the specified number of times.
  *
- * @see #evaluate()
  * @author Sam Brannen
  * @since 3.0
+ * @see #evaluate()
  */
 public class SpringRepeat extends Statement {
 
@@ -46,12 +45,23 @@ public class SpringRepeat extends Statement {
 
 
 	/**
-	 * Constructs a new {@code SpringRepeat} statement.
-	 *
+	 * Construct a new {@code SpringRepeat} statement for the supplied
+	 * {@code testMethod}, retrieving the configured repeat count from the
+	 * {@code @Repeat} annotation on the supplied method.
+	 * @param next the next {@code Statement} in the execution chain
+	 * @param testMethod the current test method
+	 * @see TestAnnotationUtils#getRepeatCount(Method)
+	 */
+	public SpringRepeat(Statement next, Method testMethod) {
+		this(next, testMethod, TestAnnotationUtils.getRepeatCount(testMethod));
+	}
+
+	/**
+	 * Construct a new {@code SpringRepeat} statement for the supplied
+	 * {@code testMethod} and {@code repeat} count.
 	 * @param next the next {@code Statement} in the execution chain
 	 * @param testMethod the current test method
 	 * @param repeat the configured repeat count for the current test method
-	 * @see Repeat#value()
 	 */
 	public SpringRepeat(Statement next, Method testMethod, int repeat) {
 		this.next = next;
@@ -59,16 +69,17 @@ public class SpringRepeat extends Statement {
 		this.repeat = Math.max(1, repeat);
 	}
 
+
 	/**
-	 * Invokes the next {@link Statement statement} in the execution chain for
-	 * the specified repeat count.
+	 * Evaluate the next {@link Statement statement} in the execution chain
+	 * repeatedly, using the specified repeat count.
 	 */
 	@Override
 	public void evaluate() throws Throwable {
 		for (int i = 0; i < this.repeat; i++) {
 			if (this.repeat > 1 && logger.isInfoEnabled()) {
 				logger.info(String.format("Repetition %d of test %s#%s()", (i + 1),
-					ClassUtils.getShortName(this.testMethod.getDeclaringClass()), this.testMethod.getName()));
+						this.testMethod.getDeclaringClass().getSimpleName(), this.testMethod.getName()));
 			}
 			this.next.evaluate();
 		}

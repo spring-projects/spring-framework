@@ -185,13 +185,13 @@ style.
 Spring AOP defaults to using standard JDK __dynamic proxies__ for AOP proxies. This
 enables any interface (or set of interfaces) to be proxied.
 
-Spring AOP can also use CGLIB proxies. This is necessary to proxy classes, rather than
+Spring AOP can also use CGLIB proxies. This is necessary to proxy classes rather than
 interfaces. CGLIB is used by default if a business object does not implement an
-interface. As it is good practice to program to interfaces rather than classes, business
+interface. As it is good practice to program to interfaces rather than classes; business
 classes normally will implement one or more business interfaces. It is possible to
-<<aop-autoproxy-force-CGLIB,force the use of CGLIB>>, in those (hopefully rare) cases
-where you need to advise a method that is not declared on an interface, or where you
-need to pass a proxied object to a method as a concrete type.
+<<aop-proxying,force the use of CGLIB>>, in those (hopefully rare) cases where you
+need to advise a method that is not declared on an interface, or where you need to
+pass a proxied object to a method as a concrete type.
 
 It is important to grasp the fact that Spring AOP is __proxy-based__. See
 <<aop-understanding-aop-proxies>> for a thorough examination of exactly what this
@@ -259,8 +259,8 @@ element:
 	<aop:aspectj-autoproxy/>
 ----
 
-This assumes that you are using schema support as described in <<xsd-config>>. See
-<<xsd-config-body-schemas-aop>> for how to import the tags in the aop namespace.
+This assumes that you are using schema support as described in <<xsd-configuration>>. See
+<<xsd-config-body-schemas-aop>> for how to import the tags in the `aop` namespace.
 
 
 
@@ -579,7 +579,7 @@ The format of an execution expression is:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	execution(modifiers-pattern? ret-type-pattern declaring-type-pattern? name-pattern(param-pattern)
+	execution(modifiers-pattern? ret-type-pattern declaring-type-pattern?name-pattern(param-pattern)
 				throws-pattern?)
 ----
 
@@ -589,7 +589,9 @@ what the return type of the method must be in order for a join point to be match
 frequently you will use `{asterisk}` as the returning type pattern, which matches any return
 type. A fully-qualified type name will match only when the method returns the given
 type. The name pattern matches the method name. You can use the `{asterisk}` wildcard as all or
-part of a name pattern. The parameters pattern is slightly more complex: `()` matches a
+part of a name pattern. If specifying a declaring type pattern
+then include a trailing `.` to join it to the name pattern component.
+The parameters pattern is slightly more complex: `()` matches a
 method that takes no parameters, whereas `(..)` matches any number of parameters (zero
 or more). The pattern `({asterisk})` matches a method taking one parameter of any type,
 `(*,String)` matches a method taking two parameters, the first can be of any type, the
@@ -1174,7 +1176,7 @@ you have a generic type like this:
 ----
 	public interface Sample<T> {
 		void sampleGenericMethod(T param);
-		void sampleGenericCollectionMethod(Collection>T> param);
+		void sampleGenericCollectionMethod(Collection<T> param);
 	}
 ----
 
@@ -1546,8 +1548,8 @@ the new __syntax__ and refer the reader to the discussion in the previous sectio
 of advice parameters.
 
 To use the aop namespace tags described in this section, you need to import the
-spring-aop schema as described in <<xsd-config>>. See <<xsd-config-body-schemas-aop>>
-for how to import the tags in the aop namespace.
+`spring-aop` schema as described in <<xsd-configuration>>. See <<xsd-config-body-schemas-aop>>
+for how to import the tags in the `aop` namespace.
 
 Within your Spring configurations, all aspect and advisor elements must be placed within
 an `<aop:config>` element (you can have more than one `<aop:config>` element in an
@@ -2432,13 +2434,10 @@ so. However, there are some issues to consider:
   CGLIB classes are repackaged under org.springframework and included directly in the
   spring-core JAR. This means that CGLIB-based proxy support 'just works' in the same
   way that JDK dynamic proxies always have.
-* The constructor of your proxied object will be called twice. This is a natural
-  consequence of the CGLIB proxy model whereby a subclass is generated for each proxied
-  object. For each proxied instance, two objects are created: the actual proxied object
-  and an instance of the subclass that implements the advice. This behavior is not
-  exhibited when using JDK proxies. Usually, calling the constructor of the proxied type
-  twice, is not an issue, as there are usually only assignments taking place and no real
-  logic is implemented in the constructor.
+* As of Spring 4.0, the constructor of your proxied object will NOT be called twice
+  anymore since the CGLIB proxy instance will be created via Objenesis. Only if your
+  JVM does not allow for constructor bypassing, you might see double invocations and
+  corresponding debug log entries from Spring's AOP support.
 
 To force the use of CGLIB proxies set the value of the `proxy-target-class` attribute of
 the `<aop:config>` element to true:
@@ -2717,7 +2716,7 @@ can do so directly in the annotation:
 	}
 ----
 
-Spring will now look for a bean definition named " `account`" and use that as the
+Spring will now look for a bean definition named "account" and use that as the
 definition to configure new `Account` instances.
 
 You can also use autowiring to avoid having to specify a dedicated bean definition at
@@ -3335,20 +3334,21 @@ environment (summarized in the following table).
 |===
 | Runtime Environment| `LoadTimeWeaver` implementation
 
-| Running in
-  http://www.bea.com/framework.jsp?CNT=index.htm&FP=/content/products/weblogic/server[BEA's
-  Weblogic 10]
+| Running in Oracle's
+  http://www.oracle.com/technetwork/middleware/weblogic/overview/index-085209.html[WebLogic]
 | `WebLogicLoadTimeWeaver`
 
-| Running in http://www-01.ibm.com/software/webservers/appserv/was/[IBM WebSphere
-  Application Server 7]
-| `WebSphereLoadTimeWeaver`
-
-| Running in http://glassfish.dev.java.net/[GlassFish]
+| Running in Oracle's http://glassfish.dev.java.net/[GlassFish]
 | `GlassFishLoadTimeWeaver`
 
-| Running in http://www.jboss.org/jbossas/[JBoss AS]
+| Running in http://tomcat.apache.org/[Apache Tomcat]
+| `TomcatLoadTimeWeaver`
+
+| Running in Red Hat's http://www.jboss.org/jbossas/[JBoss AS] or http://www.wildfly.org/[WildFly]
 | `JBossLoadTimeWeaver`
+
+| Running in IBM's http://www-01.ibm.com/software/webservers/appserv/was/[WebSphere]
+| `WebSphereLoadTimeWeaver`
 
 | JVM started with Spring `InstrumentationSavingAgent` __(java
   -javaagent:path/to/spring-instrument.jar)__
@@ -3446,12 +3446,21 @@ containers.
 
 [[aop-aj-ltw-environment-tomcat]]
 ===== Tomcat
-http://tomcat.apache.org/[Apache Tomcat]'s default class loader does not support class
-transformation which is why Spring provides an enhanced implementation that addresses
-this need. Named `TomcatInstrumentableClassLoader`, the loader works on Tomcat 5.0 and
-above and can be registered individually for __each__ web application as follows:
+Historically, http://tomcat.apache.org/[Apache Tomcat]'s default class loader did not
+support class transformation which is why Spring provides an enhanced implementation
+that addresses this need. Named `TomcatInstrumentableClassLoader`, the loader works on
+Tomcat 6.0 and above.
 
-* Tomcat 6.0.x or higher
+[TIP]
+====
+Do not define `TomcatInstrumentableClassLoader` anymore on Tomcat 8.0 and higher.
+Instead, let Spring automatically use Tomcat's new native `InstrumentableClassLoader`
+facility through the `TomcatLoadTimeWeaver` strategy.
+====
+
+If you still need to use `TomcatInstrumentableClassLoader`, it can be registered
+individually for __each__ web application as follows:
+
 * Copy `org.springframework.instrument.tomcat.jar` into __$CATALINA_HOME__/lib, where
   __$CATALINA_HOME__ represents the root of the Tomcat installation)
 * Instruct Tomcat to use the custom class loader (instead of the default) by editing the
@@ -3544,7 +3553,7 @@ website].
 The book __Eclipse AspectJ__ by Adrian Colyer et. al. (Addison-Wesley, 2005) provides a
 comprehensive introduction and reference for the AspectJ language.
 
-The book __AspectJ in Action__ by Ramnivas Laddad (Manning, 2003) comes highly
+The book __AspectJ in Action, Second Edition__ by Ramnivas Laddad (Manning, 2009) comes highly
 recommended; the focus of the book is on AspectJ, but a lot of general AOP themes are
 explored (in some depth).
 

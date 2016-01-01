@@ -342,7 +342,6 @@ public abstract class CollectionUtils {
 	 */
 	public static <K, V> MultiValueMap<K, V> toMultiValueMap(Map<K, List<V>> map) {
 		return new MultiValueMapAdapter<K, V>(map);
-
 	}
 
 	/**
@@ -390,6 +389,7 @@ public abstract class CollectionUtils {
 			throw new UnsupportedOperationException("Not supported");
 		}
 	}
+
 
 	/**
 	 * Adapts a Map to the MultiValueMap contract.
