@@ -200,7 +200,7 @@ configure(allprojects) { project ->
 		"http://tiles.apache.org/framework/apidocs/",
 		"http://aopalliance.sourceforge.net/doc/",
 		"http://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
-		"http://ehcache.org/apidocs/",
+		"http://ehcache.org/apidocs/2.9/",
 		"http://quartz-scheduler.org/api/2.2.0/",
 		"http://fasterxml.github.com/jackson-core/javadoc/2.3.0/",
 		"http://fasterxml.github.com/jackson-databind/javadoc/2.3.0/",
