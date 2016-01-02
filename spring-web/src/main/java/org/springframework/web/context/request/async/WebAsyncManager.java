@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.RejectedExecutionException;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
@@ -306,24 +307,30 @@ public final class WebAsyncManager {
 
 		interceptorChain.applyBeforeConcurrentHandling(this.asyncWebRequest, callable);
 		startAsyncProcessing(processingContext);
-
-		this.taskExecutor.submit(new Runnable() {
-			@Override
-			public void run() {
-				Object result = null;
-				try {
-					interceptorChain.applyPreProcess(asyncWebRequest, callable);
-					result = callable.call();
+		try {
+			this.taskExecutor.submit(new Runnable() {
+				@Override
+				public void run() {
+					Object result = null;
+					try {
+						interceptorChain.applyPreProcess(asyncWebRequest, callable);
+						result = callable.call();
+					}
+					catch (Throwable ex) {
+						result = ex;
+					}
+					finally {
+						result = interceptorChain.applyPostProcess(asyncWebRequest, callable, result);
+					}
+					setConcurrentResultAndDispatch(result);
 				}
-				catch (Throwable ex) {
-					result = ex;
-				}
-				finally {
-					result = interceptorChain.applyPostProcess(asyncWebRequest, callable, result);
-				}
-				setConcurrentResultAndDispatch(result);
-			}
-		});
+			});
+		}
+		catch (RejectedExecutionException ex) {
+			Object result = interceptorChain.applyPostProcess(this.asyncWebRequest, callable, ex);
+			setConcurrentResultAndDispatch(result);
+			throw ex;
+		}
 	}
 
 	private void setConcurrentResultAndDispatch(Object result) {
