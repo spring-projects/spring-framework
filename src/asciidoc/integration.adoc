@@ -8815,7 +8815,7 @@ up its declaration at runtime and understands its meaning. Note that as mentione
 === JCache (JSR-107) annotations
 
 Since the Spring Framework 4.1, the caching abstraction fully supports the JCache
-standard annotations: these are `@CacheResult`, `@CacheEvict`, `@CacheRemove` and
+standard annotations: these are `@CacheResult`, `@CachePut`, `@CacheRemove` and
 `@CacheRemoveAll` as well as the `@CacheDefaults`, `@CacheKey` and `@CacheValue`
 companions. These annotations can be used right the way without migrating your
 cache store to JSR-107: the internal implementation uses Spring's caching abstraction
