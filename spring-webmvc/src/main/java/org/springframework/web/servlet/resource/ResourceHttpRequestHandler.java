@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -266,7 +266,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		}
 
 		if (request.getHeader(HttpHeaders.RANGE) == null) {
-			setETagHeader(request, response);
 			setHeaders(response, resource, mediaType);
 			writeContent(response, resource);
 		}
@@ -407,21 +406,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	}
 
 	/**
-	 * Set the ETag header if the version string of the served resource is present.
-	 * Version strings can be resolved by {@link VersionStrategy} implementations and then
-	 * set as a request attribute by {@link VersionResourceResolver}.
-	 * @param request current servlet request
-	 * @param response current servlet response
-	 * @see VersionResourceResolver
-	 */
-	protected void setETagHeader(HttpServletRequest request, HttpServletResponse response) {
-		String versionString = (String) request.getAttribute(VersionResourceResolver.RESOURCE_VERSION_ATTRIBUTE);
-		if (versionString != null) {
-			response.setHeader(HttpHeaders.ETAG, "\"" + versionString + "\"");
-		}
-	}
-
-	/**
 	 * Set headers on the given servlet response.
 	 * Called for GET requests as well as HEAD requests.
 	 * @param response current servlet response
@@ -435,15 +419,15 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			throw new IOException("Resource content too long (beyond Integer.MAX_VALUE): " + resource);
 		}
 		response.setContentLength((int) length);
-
 		if (mediaType != null) {
 			response.setContentType(mediaType.toString());
 		}
-
 		if (resource instanceof EncodedResource) {
 			response.setHeader(HttpHeaders.CONTENT_ENCODING, ((EncodedResource) resource).getContentEncoding());
 		}
-
+		if (resource instanceof VersionedResource) {
+			response.setHeader(HttpHeaders.ETAG, "\"" + ((VersionedResource) resource).getVersion() + "\"");
+		}
 		response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
 	}
 
