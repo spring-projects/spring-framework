@@ -65,6 +65,10 @@ public class CacheControl {
 
 	private boolean proxyRevalidate = false;
 
+	private long staleWhileRevalidate = -1;
+
+	private long staleIfError = -1;
+
 	private long sMaxAge = -1;
 
 
@@ -207,6 +211,36 @@ public class CacheControl {
 		return this;
 	}
 
+	/**
+     * Add an "stale-while-revalidate" directive.
+     * <p>This directive indicates that caches MAY serve the response in
+     * which it appears after it becomes stale, up to the indicated number of seconds.
+     * If a cached response is served stale due to the presence of this extension,
+     * the cache SHOULD attempt to revalidate it while still serving stale responses (i.e., without blocking).
+     * @param staleWhileRevalidate the maximum time the response should be used while being revalidated
+     * @param unit the time unit of the {@code sMaxAge} argument
+     * @return {@code this}, to facilitate method chaining
+     * @see <a href="http://tools.ietf.org/html/rfc5861#section-3">rfc5861 section 3</a>
+     */
+    public CacheControl staleWhileRevalidate(long staleWhileRevalidate, TimeUnit unit) {
+    	this.staleWhileRevalidate = unit.toSeconds(staleWhileRevalidate);
+        return this;
+    }
+
+    /**
+     * Add an "stale-if-error" directive.
+     * <p>This directive indicates that that when an error is encountered, a cached stale response MAY be used to satisfy
+     * the request, regardless of other freshness information..
+     * @param staleIfError the maximum time the response should be used when errors are encountered
+     * @param unit the time unit of the {@code sMaxAge} argument
+     * @return {@code this}, to facilitate method chaining
+     * @see <a href="http://tools.ietf.org/html/rfc5861#section-4">rfc5861 section 4</a>
+     */
+    public CacheControl staleIfError(long staleIfError, TimeUnit unit) {
+        this.staleIfError = unit.toSeconds(staleIfError);
+        return this;
+    }
+
 
 	/**
 	 * Return the "Cache-Control" header value.
@@ -241,6 +275,13 @@ public class CacheControl {
 		if (this.sMaxAge != -1) {
 			appendDirective(ccValue, "s-maxage=" + Long.toString(this.sMaxAge));
 		}
+		if(this.staleIfError != -1) {
+			appendDirective(ccValue, "stale-if-error=" + Long.toString(this.staleIfError));
+		}
+		if(this.staleWhileRevalidate != -1) {
+			appendDirective(ccValue, "stale-while-revalidate=" + Long.toString(this.staleWhileRevalidate));
+		}
+
 		String ccHeaderValue = ccValue.toString();
 		return (StringUtils.hasText(ccHeaderValue) ? ccHeaderValue : null);
 	}
