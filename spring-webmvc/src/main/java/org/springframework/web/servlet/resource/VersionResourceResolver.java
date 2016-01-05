@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,21 @@
 
 package org.springframework.web.servlet.resource;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.core.io.AbstractResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
@@ -54,10 +61,6 @@ import org.springframework.util.StringUtils;
  * @see VersionStrategy
  */
 public class VersionResourceResolver extends AbstractResourceResolver {
-
-	public static final String RESOURCE_VERSION_ATTRIBUTE =
-			VersionResourceResolver.class.getName() + ".resourceVersion";
-
 
 	private AntPathMatcher pathMatcher = new AntPathMatcher();
 
@@ -168,12 +171,9 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		String actualVersion = versionStrategy.getResourceVersion(baseResource);
 		if (candidateVersion.equals(actualVersion)) {
 			if (logger.isTraceEnabled()) {
-				logger.trace("Resource matches extracted version ["+ candidateVersion + "]");
+				logger.trace("Resource matches extracted version [" + candidateVersion + "]");
 			}
-			if (request != null) {
-				request.setAttribute(RESOURCE_VERSION_ATTRIBUTE, candidateVersion);
-			}
-			return baseResource;
+			return new FileNameVersionedResource(baseResource, candidateVersion);
 		}
 		else {
 			if (logger.isTraceEnabled()) {
@@ -223,6 +223,84 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 			return this.versionStrategyMap.get(matchingPatterns.get(0));
 		}
 		return null;
+	}
+
+	private class FileNameVersionedResource extends AbstractResource implements VersionedResource {
+
+		private final Resource original;
+
+		private final String version;
+
+		public FileNameVersionedResource(Resource original, String version) {
+			this.original = original;
+			this.version = version;
+		}
+
+		@Override
+		public boolean exists() {
+			return this.original.exists();
+		}
+
+		@Override
+		public boolean isReadable() {
+			return this.original.isReadable();
+		}
+
+		@Override
+		public boolean isOpen() {
+			return this.original.isOpen();
+		}
+
+		@Override
+		public URL getURL() throws IOException {
+			return this.original.getURL();
+		}
+
+		@Override
+		public URI getURI() throws IOException {
+			return this.original.getURI();
+		}
+
+		@Override
+		public File getFile() throws IOException {
+			return this.original.getFile();
+		}
+
+		@Override
+		public String getFilename() {
+			return this.original.getFilename();
+		}
+
+		@Override
+		public long contentLength() throws IOException {
+			return this.original.contentLength();
+		}
+
+		@Override
+		public long lastModified() throws IOException {
+			return this.original.lastModified();
+		}
+
+		@Override
+		public Resource createRelative(String relativePath) throws IOException {
+			return this.original.createRelative(relativePath);
+		}
+
+		@Override
+		public String getDescription() {
+			return original.getDescription();
+		}
+
+		@Override
+		public InputStream getInputStream() throws IOException {
+			return original.getInputStream();
+		}
+
+		@Override
+		public String getVersion() {
+			return this.version;
+		}
+
 	}
 
 }
