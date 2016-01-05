@@ -10,6 +10,10 @@ buildscript {
 	}
 }
 
+plugins {
+	id "org.sonarqube" version "1.1"
+}
+
 ext {
 	linkHomepage = 'https://projects.spring.io/spring-framework'
 	linkCi = 'https://build.spring.io/browse/SPR'
@@ -218,11 +222,11 @@ configure(subprojects - project(":spring-build-src")) { subproject ->
 	}
 
 	dependencies {
-		jacoco("org.jacoco:org.jacoco.agent:0.7.1.201405082137:runtime")
+		jacoco("org.jacoco:org.jacoco.agent:0.7.5.201505241946:runtime")
 	}
 
 	gradle.taskGraph.whenReady {taskGraph ->
-		if (taskGraph.hasTask(':sonarRunner')) {
+		if (taskGraph.hasTask(':sonarqube')) {
 			test.jvmArgs "-javaagent:${configurations.jacoco.asPath}=destfile=${buildDir}/jacoco.exec,includes=org.springframework.*"
 		}
 	}
@@ -1141,10 +1145,8 @@ project("spring-framework-bom") {
 	}
 }
 
-apply plugin: 'sonar-runner'
-
-sonarRunner {
-	sonarProperties {
+sonarqube {
+	properties {
 		property "sonar.projectName", "Spring Framework"
 		property "sonar.profile", "Spring Framework"
 		property "sonar.jacoco.reportPath", "${buildDir.name}/jacoco.exec"
@@ -1400,14 +1402,14 @@ configure(rootProject) {
 }
 
 configure([project(':spring-build-src'), project(':spring-framework-bom')]) {
-	sonarRunner {
+	sonarqube {
 		skipProject = true
 	}
 }
 
 configure(project(':spring-core')) {
-	sonarRunner {
-		sonarProperties {
+	sonarqube {
+		properties {
 			property "sonar.exclusions",
 					"src/main/java/org/springframework/cglib/**/*,src/main/java/org/springframework/asm/**/*"
 		}
