@@ -63,4 +63,17 @@ public class CacheControlTests {
 		CacheControl cc = CacheControl.noStore();
 		assertThat(cc.getHeaderValue(), Matchers.equalTo("no-store"));
 	}
+
+	@Test
+	public void staleIfError() throws Exception {
+		CacheControl cc = CacheControl.maxAge(1, TimeUnit.HOURS).staleIfError(2, TimeUnit.HOURS);
+		assertThat(cc.getHeaderValue(), Matchers.equalTo("max-age=3600, stale-if-error=7200"));
+	}
+
+	@Test
+	public void staleWhileRevalidate() throws Exception {
+		CacheControl cc = CacheControl.maxAge(1, TimeUnit.HOURS).staleWhileRevalidate(2, TimeUnit.HOURS);
+		assertThat(cc.getHeaderValue(), Matchers.equalTo("max-age=3600, stale-while-revalidate=7200"));
+	}
+
 }
