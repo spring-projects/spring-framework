@@ -23,7 +23,7 @@ import org.springframework.core.io.Resource;
  * with a version string that can be derived from its content and/or metadata.
  *
  * @author Brian Clozel
- * @since 4.2
+ * @since 4.2.5
  * @see VersionResourceResolver
  */
 public interface VersionedResource extends Resource {
