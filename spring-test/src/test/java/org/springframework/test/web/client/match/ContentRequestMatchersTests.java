@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import org.junit.Test;
 
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.client.MockClientHttpRequest;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import static org.hamcrest.Matchers.*;
 
@@ -117,6 +119,29 @@ public class ContentRequestMatchersTests {
 		this.request.getBody().write(content.getBytes());
 
 		MockRestRequestMatchers.content().node(hasXPath("/foo/bar/bar")).match(this.request);
+	}
+
+	@Test
+	public void testFormMatcher() throws Exception {
+		String content = "foo=foo&bar=bar";
+		this.request.getHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		this.request.getBody().write(content.getBytes());
+
+		MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+		form.add("bar", "bar");
+		form.add("foo", "foo");
+		MockRestRequestMatchers.content().formData(form).match(this.request);
+	}
+
+	@Test(expected=AssertionError.class)
+	public void testFormMatcherNoMatch() throws Exception {
+		String content = "foo=foo&bar=bar";
+		this.request.getHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		this.request.getBody().write(content.getBytes());
+
+		MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+		form.add("foobar", "bar");
+		MockRestRequestMatchers.content().formData(form).match(this.request);
 	}
 
 }

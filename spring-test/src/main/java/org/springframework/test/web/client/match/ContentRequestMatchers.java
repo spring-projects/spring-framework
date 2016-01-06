@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,9 @@ import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 
 import org.hamcrest.Matcher;
+import org.springframework.http.converter.FormHttpMessageConverter;
+import org.springframework.mock.http.MockHttpInputMessage;
+import org.springframework.util.MultiValueMap;
 import org.w3c.dom.Node;
 
 import org.springframework.http.MediaType;
@@ -176,6 +179,23 @@ public class ContentRequestMatchers {
 			@Override
 			protected void matchInternal(MockClientHttpRequest request) throws Exception {
 				xmlHelper.assertSource(request.getBodyAsString(), matcher);
+			}
+		};
+	}
+
+	/**
+	 * Compare the body of the request to the form given as MultiValueMap.
+	 * @since 4.3
+	 */
+	public RequestMatcher formData(final MultiValueMap<String, String> expectedContent) {
+		return new RequestMatcher() {
+			@Override
+			public void match(ClientHttpRequest request) throws IOException, AssertionError {
+				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
+				MockHttpInputMessage mockHttpInputMessage = new MockHttpInputMessage(mockRequest.getBodyAsBytes());
+				mockHttpInputMessage.getHeaders().putAll(request.getHeaders());
+				FormHttpMessageConverter formHttpMessageConverter = new FormHttpMessageConverter();
+				assertEquals("Request formData", expectedContent, formHttpMessageConverter.read(null, mockHttpInputMessage));
 			}
 		};
 	}
