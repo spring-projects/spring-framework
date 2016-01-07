@@ -29,7 +29,6 @@ import reactor.Mono;
 import reactor.io.buffer.Buffer;
 import reactor.rx.Promise;
 import reactor.rx.Stream;
-import reactor.rx.Streams;
 import rx.Observable;
 import rx.Single;
 
@@ -359,7 +358,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		@RequestMapping("/param")
 		@ResponseBody
 		public Publisher<String> handleWithParam(@RequestParam String name) {
-			return Streams.just("Hello ", name, "!");
+			return Stream.just("Hello ", name, "!");
 		}
 
 		@RequestMapping("/person")
@@ -378,7 +377,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		@ResponseBody
 		public Publisher<ByteBuffer> rawResponseBody() {
 			JacksonJsonEncoder encoder = new JacksonJsonEncoder();
-			return encoder.encode(Streams.just(new Person("Robert")),
+			return encoder.encode(Stream.just(new Person("Robert")),
 					ResolvableType.forClass(Person.class), MediaType.APPLICATION_JSON);
 		}
 
@@ -409,7 +408,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		@RequestMapping("/publisher")
 		@ResponseBody
 		public Publisher<Person> publisherResponseBody() {
-			return Streams.just(new Person("Robert"), new Person("Marie"));
+			return Stream.just(new Person("Robert"), new Person("Marie"));
 		}
 
 		@RequestMapping("/observable")
@@ -421,13 +420,13 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		@RequestMapping("/stream")
 		@ResponseBody
 		public Stream<Person> reactorStreamResponseBody() {
-			return Streams.just(new Person("Robert"), new Person("Marie"));
+			return Stream.just(new Person("Robert"), new Person("Marie"));
 		}
 
 		@RequestMapping("/publisher-capitalize")
 		@ResponseBody
 		public Publisher<Person> publisherCapitalize(@RequestBody Publisher<Person> persons) {
-			return Streams.from(persons).map(person -> {
+			return Stream.from(persons).map(person -> {
 				person.setName(person.getName().toUpperCase());
 				return person;
 			});
@@ -481,7 +480,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		@RequestMapping("/promise-capitalize")
 		@ResponseBody
 		public Promise<Person> promiseCapitalize(@RequestBody Promise<Person> personFuture) {
-			return Streams.from(personFuture.map(person -> {
+			return Stream.from(personFuture.map(person -> {
 				person.setName(person.getName().toUpperCase());
 				return person;
 			})).promise();
@@ -489,12 +488,12 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@RequestMapping("/publisher-create")
 		public Publisher<Void> publisherCreate(@RequestBody Publisher<Person> personStream) {
-			return Streams.from(personStream).toList().doOnSuccess(persons::addAll).after();
+			return Stream.from(personStream).toList().doOnSuccess(persons::addAll).after();
 		}
 
 		@RequestMapping("/stream-create")
 		public Publisher<Void> streamCreate(@RequestBody Stream<Person> personStream) {
-			return Streams.from(personStream.toList().doOnSuccess(persons::addAll).after()).promise();
+			return Stream.from(personStream.toList().doOnSuccess(persons::addAll).after()).promise();
 		}
 
 		@RequestMapping("/observable-create")
@@ -517,7 +516,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		@ExceptionHandler
 		@ResponseBody
 		public Publisher<String> handleException(IllegalStateException ex) {
-			return Streams.just("Recovered from error: " + ex.getMessage());
+			return Stream.just("Recovered from error: " + ex.getMessage());
 		}
 
 		//TODO add mixed and T request mappings tests
