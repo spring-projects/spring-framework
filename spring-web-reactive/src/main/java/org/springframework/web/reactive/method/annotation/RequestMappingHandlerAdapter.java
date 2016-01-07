@@ -109,17 +109,15 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 			Object handler) {
 
 		HandlerMethod handlerMethod = (HandlerMethod) handler;
-
 		InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
 		invocable.setHandlerMethodArgumentResolvers(this.argumentResolvers);
 
 		return invocable.invokeForRequest(request)
-				.otherwise(ex -> Mono.just(new HandlerResult(handler, ex)))
-				.map(result -> result.setExceptionMapper(
-						ex -> mapException(ex, handlerMethod, request, response)));
+				.map(result -> result.setExceptionHandler(ex -> handleException(ex, handlerMethod, request, response)))
+				.otherwise(ex -> handleException(ex, handlerMethod, request, response));
 	}
 
-	private Mono<HandlerResult> mapException(Throwable ex, HandlerMethod handlerMethod,
+	private Mono<HandlerResult> handleException(Throwable ex, HandlerMethod handlerMethod,
 			ServerHttpRequest request, ServerHttpResponse response) {
 
 		if (ex instanceof Exception) {

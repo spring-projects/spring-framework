@@ -36,9 +36,7 @@ public class HandlerResult {
 
 	private final ResolvableType resultType;
 
-	private final Throwable error;
-
-	private Function<Throwable, Mono<HandlerResult>> exceptionMapper;
+	private Function<Throwable, Mono<HandlerResult>> exceptionHandler;
 
 
 	public HandlerResult(Object handler, Object result, ResolvableType resultType) {
@@ -47,16 +45,6 @@ public class HandlerResult {
 		this.handler = handler;
 		this.result = result;
 		this.resultType = resultType;
-		this.error = null;
-	}
-
-	public HandlerResult(Object handler, Throwable error) {
-		Assert.notNull(handler, "'handler' is required");
-		Assert.notNull(error, "'error' is required");
-		this.handler = handler;
-		this.result = null;
-		this.resultType = null;
-		this.error = error;
 	}
 
 
@@ -72,38 +60,25 @@ public class HandlerResult {
 		return this.resultType;
 	}
 
-	public Throwable getError() {
-		return this.error;
-	}
-
 	/**
-	 * Whether handler invocation produced a result or failed with an error.
-	 * <p>If {@code true} the {@link #getError()} returns the error while
-	 * {@link #getResult()} and {@link #getResultType()} return {@code null}
-	 * and vice versa.
-	 * @return whether this instance contains a result or an error.
+	 * For an async result, failures may occur later during result handling.
+	 * Use this property to configure an exception handler to be invoked if
+	 * result handling fails.
+	 *
+	 * @param function a function to map the the error to an alternative result.
+	 * @return the current instance
 	 */
-	public boolean hasError() {
-		return (this.error != null);
-	}
-
-	/**
-	 * Configure a function for selecting an alternate {@code HandlerResult} in
-	 * case of an {@link #hasError() error result} or in case of an async result
-	 * that results in an error.
-	 * @param function the exception resolving function
-	 */
-	public HandlerResult setExceptionMapper(Function<Throwable, Mono<HandlerResult>> function) {
-		this.exceptionMapper = function;
+	public HandlerResult setExceptionHandler(Function<Throwable, Mono<HandlerResult>> function) {
+		this.exceptionHandler = function;
 		return this;
 	}
 
-	public Function<Throwable, Mono<HandlerResult>> getExceptionMapper() {
-		return this.exceptionMapper;
+	public boolean hasExceptionHandler() {
+		return (this.exceptionHandler != null);
 	}
 
-	public boolean hasExceptionMapper() {
-		return (this.exceptionMapper != null);
+	public Mono<HandlerResult> applyExceptionHandler(Throwable ex) {
+		return (hasExceptionHandler() ? this.exceptionHandler.apply(ex) : Mono.error(ex));
 	}
 
 }

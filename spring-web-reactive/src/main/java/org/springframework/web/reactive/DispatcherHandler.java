@@ -117,35 +117,29 @@ public class DispatcherHandler implements HttpHandler, ApplicationContextAware {
 			logger.debug("Processing " + request.getMethod() + " request for [" + request.getURI() + "]");
 		}
 		return Flux.fromIterable(this.handlerMappings)
-				.concatMap(m -> m.getHandler(request))
+				.concatMap(mapping -> mapping.getHandler(request))
 				.next()
-				.then(handler -> getHandlerAdapter(handler).handle(request, response, handler))
-				.then(result -> {
-					Mono<Void> mono = (result.hasError() ? Mono.error(result.getError()) :
-							handleResult(request, response, result));
-					if (result.hasExceptionMapper()) {
-						return mono.otherwise(ex -> result.getExceptionMapper().apply(ex)
-								.then(exResult -> handleResult(request, response, exResult)));
-					}
-					return mono;
-				})
+				.then(handler -> invokeHandler(request, response, handler))
+				.then(result -> handleResult(request, response, result))
 				.otherwise(ex -> Mono.error(this.errorMapper.apply(ex)));
 	}
 
-	protected HandlerAdapter getHandlerAdapter(Object handler) {
+	private Mono<HandlerResult> invokeHandler(ServerHttpRequest request, ServerHttpResponse response, Object handler) {
 		for (HandlerAdapter handlerAdapter : this.handlerAdapters) {
 			if (handlerAdapter.supports(handler)) {
-				return handlerAdapter;
+				return handlerAdapter.handle(request, response, handler);
 			}
 		}
-		throw new IllegalStateException("No HandlerAdapter: " + handler);
+		return Mono.error(new IllegalStateException("No HandlerAdapter: " + handler));
 	}
 
-	protected Mono<Void> handleResult(ServerHttpRequest request, ServerHttpResponse response, HandlerResult result) {
-		return getResultHandler(result).handleResult(request, response, result);
+	private Mono<Void> handleResult(ServerHttpRequest request, ServerHttpResponse response, HandlerResult result) {
+		return getResultHandler(result).handleResult(request, response, result)
+				.otherwise(ex -> result.applyExceptionHandler(ex).then(exceptionResult ->
+						getResultHandler(result).handleResult(request, response, exceptionResult)));
 	}
 
-	protected HandlerResultHandler getResultHandler(HandlerResult handlerResult) {
+	private HandlerResultHandler getResultHandler(HandlerResult handlerResult) {
 		for (HandlerResultHandler resultHandler : resultHandlers) {
 			if (resultHandler.supports(handlerResult)) {
 				return resultHandler;

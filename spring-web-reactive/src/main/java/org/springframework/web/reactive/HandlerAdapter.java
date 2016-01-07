@@ -16,17 +16,16 @@
 
 package org.springframework.web.reactive;
 
-import org.reactivestreams.Publisher;
+import java.util.function.Function;
+
 import reactor.Mono;
 
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 
 /**
- * Interface that must be implemented for each handler type to handle an HTTP request.
- * This interface is used to allow the {@link DispatcherHandler} to be indefinitely
- * extensible. The {@code DispatcherHandler} accesses all installed handlers through
- * this interface, meaning that it does not contain code specific to any handler type.
+ * Contract that decouples the {@link DispatcherHandler} from the details of
+ * invoking a handler and makes it possible to support any handler type.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
@@ -34,26 +33,32 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 public interface HandlerAdapter {
 
 	/**
-	 * Given a handler instance, return whether or not this {@code HandlerAdapter}
-	 * can support it. Typical HandlerAdapters will base the decision on the handler
-	 * type. HandlerAdapters will usually only support one handler type each.
-	 * <p>A typical implementation:
-	 * <p>{@code
-	 * return (handler instanceof MyHandler);
-	 * }
+	 * Whether this {@code HandlerAdapter} supports the given {@code handler}.
+	 *
 	 * @param handler handler object to check
-	 * @return whether or not this object can use the given handler
+	 * @return whether or not the handler is supported
 	 */
 	boolean supports(Object handler);
 
 	/**
-	 * Use the given handler to handle this request.
-	 * @param request current HTTP request
-	 * @param response current HTTP response
-	 * @param handler handler to use. This object must have previously been passed
-	 * to the {@code supports} method of this interface, which must have
-	 * returned {@code true}.
-	 * @return A {@link Mono} that emits a single {@link HandlerResult} element
+	 * Handle the request with the given handler.
+	 *
+	 * <p>Implementations are encouraged to handle exceptions resulting from the
+	 * invocation of a handler in order and if necessary to return an alternate
+	 * result that represents an error response.
+	 *
+	 * <p>Furthermore since an async {@code HandlerResult} may produce an error
+	 * later during result handling implementations are also encouraged to
+	 * {@link HandlerResult#setExceptionHandler(Function) set an exception
+	 * handler} on the {@code HandlerResult} so that may also be applied later
+	 * after result handling.
+	 *
+	 * @param request current request
+	 * @param response current response
+	 * @param handler the selected handler which must have been previously
+	 * checked via {@link #supports(Object)}
+	 * @return {@link Mono} that emits a single {@code HandlerResult} or none if
+	 * the request has been fully handled and doesn't require further handling.
 	 */
 	Mono<HandlerResult> handle(ServerHttpRequest request, ServerHttpResponse response,
 			Object handler);
