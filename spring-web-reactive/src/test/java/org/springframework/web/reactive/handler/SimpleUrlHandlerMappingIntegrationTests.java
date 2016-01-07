@@ -24,7 +24,7 @@ import java.util.Map;
 import org.junit.Test;
 import reactor.Mono;
 import reactor.io.buffer.Buffer;
-import reactor.rx.Streams;
+import reactor.rx.Stream;
 
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.http.HttpStatus;
@@ -136,7 +136,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 
 		@Override
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-			return response.setBody(Streams.just(Buffer.wrap("foo").byteBuffer()));
+			return response.setBody(Stream.just(Buffer.wrap("foo").byteBuffer()));
 		}
 	}
 
@@ -144,7 +144,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 
 		@Override
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-			return response.setBody(Streams.just(Buffer.wrap("bar").byteBuffer()));
+			return response.setBody(Stream.just(Buffer.wrap("bar").byteBuffer()));
 		}
 	}
 

@@ -44,7 +44,7 @@ public abstract class AbstractHttpHandlerIntegrationTests {
 		return new Object[][] {
 				{new JettyHttpServer()},
 				{new RxNettyHttpServer()},
-//				{new ReactorHttpServer()},
+				{new ReactorHttpServer()},
 				{new TomcatHttpServer()},
 				{new UndertowHttpServer()}
 		};
