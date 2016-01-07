@@ -585,6 +585,22 @@
 					]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
+		<xsd:attribute name="stale-while-revalidate" type="xsd:int" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Adds a "stale-while-revalidate" directive in the Cache-Control header.
+	This indicates that caches may serve the response after it becomes stale up to the given number of seconds.
+					]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
+		<xsd:attribute name="stale-if-error" type="xsd:int" use="optional">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	Adds a "s-maxage" directive in the Cache-Control header.
+	This directive has the same meaning as the "max-age" directive, except it only applies to shared caches.
+					]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
 	</xsd:complexType>
 
 	<xsd:element name="resources">

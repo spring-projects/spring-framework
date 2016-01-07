@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -241,6 +241,14 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		}
 		if (element.hasAttribute("s-maxage")) {
 			cacheControl = cacheControl.sMaxAge(Long.parseLong(element.getAttribute("s-maxage")), TimeUnit.SECONDS);
+		}
+		if (element.hasAttribute("stale-while-revalidate")) {
+			cacheControl = cacheControl.staleWhileRevalidate(
+					Long.parseLong(element.getAttribute("stale-while-revalidate")), TimeUnit.SECONDS);
+		}
+		if (element.hasAttribute("stale-if-error")) {
+			cacheControl = cacheControl.staleIfError(
+					Long.parseLong(element.getAttribute("stale-if-error")), TimeUnit.SECONDS);
 		}
 		return cacheControl;
 	}
