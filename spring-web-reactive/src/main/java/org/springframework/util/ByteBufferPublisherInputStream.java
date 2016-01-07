@@ -19,11 +19,13 @@ package org.springframework.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
-import reactor.rx.Streams;
+
+import org.springframework.reactor.rx.subscriber.BlockingQueueSubscriber;
 
 /**
  * {@code InputStream} implementation based on a byte array {@link Publisher}.
@@ -60,7 +62,7 @@ public class ByteBufferPublisherInputStream extends InputStream {
 	public ByteBufferPublisherInputStream(Publisher<ByteBuffer> publisher, int requestSize) {
 		Assert.notNull(publisher, "'publisher' must not be null");
 
-		this.queue = Streams.from(publisher).toBlockingQueue(requestSize);
+		this.queue = new BlockingQueueSubscriber<>(publisher, null, new ArrayBlockingQueue<>(requestSize), false, requestSize);
 	}
 
 

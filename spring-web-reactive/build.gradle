@@ -12,8 +12,45 @@ apply plugin: 'propdeps'
 apply plugin: 'propdeps-idea'
 apply plugin: 'propdeps-maven'
 
+ext {
+	springVersion = '4.2.3.RELEASE'
+	reactorVersion = '2.5.0.BUILD-SNAPSHOT'
+	tomcatVersion = '8.0.28'
+	jettyVersion = '9.3.5.v20151012'
+}
+
+configurations {
+	jarjar
+	reactorstream
+}
+
+task reactorstreamRepackJar(type: Jar) { repackJar ->
+	repackJar.baseName = "spring-reactive-reactorstream-repack"
+	repackJar.version = reactorVersion
+
+	doLast() {
+		project.ant {
+			taskdef name: "jarjar", classname: "com.tonicsystems.jarjar.JarJarTask",
+				classpath: configurations.jarjar.asPath
+			jarjar(destfile: repackJar.archivePath) {
+				configurations.reactorstream.each { originalJar ->
+					zipfileset(src: originalJar)
+				}
+				// repackage reactor. => org.springframework.reactor
+				rule(pattern: "reactor.rx.**", result: "org.springframework.reactor.rx.@1")
+			}
+		}
+	}
+}
+
+
 jar {
 	baseName = 'spring-reactive'
+
+	dependsOn reactorstreamRepackJar
+		from(zipTree(reactorstreamRepackJar.archivePath)) {
+			include "reactor/rx/subscriber/BlockingQueueSubscriber.java"
+		}
 }
 
 group = 'org.springframework.reactive'
@@ -30,19 +67,14 @@ configurations.all {
 	resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }
 
-ext {
-	springVersion = '4.2.3.RELEASE'
-	reactorVersion = '2.5.0.BUILD-SNAPSHOT'
-	tomcatVersion = '8.0.28'
-	jettyVersion = '9.3.5.v20151012'
-}
-
 dependencies {
 	compile "org.springframework:spring-core:${springVersion}"
 	compile "org.springframework:spring-web:${springVersion}"
 	compile "org.reactivestreams:reactive-streams:1.0.0"
 	compile "io.projectreactor:reactor-core:${reactorVersion}"
 	compile "commons-logging:commons-logging:1.2"
+	reactorstream("io.projectreactor:reactor-stream:${reactorVersion}@jar")
+	compile(files(reactorstreamRepackJar))
 
 	optional 'io.reactivex:rxjava:1.1.0'
 	optional "io.reactivex:rxnetty-http:0.5.0-SNAPSHOT"
@@ -56,6 +88,8 @@ dependencies {
 	optional "org.eclipse.jetty:jetty-servlet:${jettyVersion}"
 
 	provided "javax.servlet:javax.servlet-api:3.1.0"
+
+	jarjar("com.googlecode.jarjar:jarjar:1.3")
 
 	testCompile "junit:junit:4.12"
 	testCompile "org.springframework:spring-test:${springVersion}"
