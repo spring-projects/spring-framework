@@ -22,7 +22,6 @@ import java.util.Set;
 import org.reactivestreams.Publisher;
 import reactor.rx.Promise;
 import reactor.rx.Stream;
-import reactor.rx.Streams;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
@@ -52,13 +51,13 @@ public final class ReactiveStreamsToReactorStreamConverter implements GenericCon
 			return source;
 		}
 		else if (Stream.class.isAssignableFrom(targetType.getResolvableType().getRawClass())) {
-			return Streams.from((Publisher)source);
+			return Stream.from((Publisher)source);
 		}
 		else if (Promise.class.isAssignableFrom(source.getClass())) {
 			return source;
 		}
 		else if (Promise.class.isAssignableFrom(targetType.getResolvableType().getRawClass())) {
-			return Streams.from((Publisher)source).promise();
+			return Stream.from((Publisher)source).promise();
 		}
 		return null;
 	}
