@@ -24,6 +24,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.Mono;
 import reactor.io.buffer.Buffer;
+import reactor.rx.Streams;
 
 import org.springframework.http.MediaType;
 import org.springframework.util.BufferOutputStream;
@@ -72,7 +73,7 @@ public class XmlHandler implements HttpHandler {
 			bos.close();
 			buffer.flip();
 
-			return response.setBody(Mono.just(buffer.byteBuffer()));
+			return response.setBody(Streams.just(buffer.byteBuffer()));
 		}
 		catch (Exception ex) {
 			logger.error(ex, ex);
