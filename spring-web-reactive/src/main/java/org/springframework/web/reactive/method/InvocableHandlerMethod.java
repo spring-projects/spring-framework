@@ -25,9 +25,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import reactor.Flux;
 import reactor.Mono;
-import reactor.fn.tuple.Tuple;
 
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.GenericTypeResolver;
@@ -46,7 +44,7 @@ import org.springframework.web.reactive.HandlerResult;
  */
 public class InvocableHandlerMethod extends HandlerMethod {
 
-	public static final Mono<Object[]> NO_ARGS = Mono.just(new Object[0]);
+	private static final Mono<Object[]> NO_ARGS = Mono.just(new Object[0]);
 
 	private final static Object NO_VALUE = new Object();
 
@@ -85,19 +83,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * never throws an exception.
 	 */
 	public Mono<HandlerResult> invokeForRequest(ServerHttpRequest request, Object... providedArgs) {
-
-		Mono<Object[]> argsPublisher = NO_ARGS;
-		try {
-			if (!ObjectUtils.isEmpty(getMethodParameters())) {
-				List<Mono<Object>> publishers = resolveArguments(request, providedArgs);
-				argsPublisher = Flux.zip(publishers, this::initArgs).next();
-			}
-		}
-		catch (Throwable ex) {
-			return Mono.error(ex);
-		}
-
-		return Flux.from(argsPublisher).concatMap(args -> {
+		return resolveArguments(request, providedArgs).then(args -> {
 			try {
 				Object value = doInvoke(args);
 				ResolvableType type =  ResolvableType.forMethodParameter(getReturnType());
@@ -111,35 +97,46 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				String s = getInvocationErrorMessage(args);
 				return Mono.error(new IllegalStateException(s));
 			}
-		}).next();
+		});
 	}
 
-	private List<Mono<Object>> resolveArguments(ServerHttpRequest request, Object... providedArgs) {
-		return Stream.of(getMethodParameters())
-				.map(parameter -> {
-					parameter.initParameterNameDiscovery(this.parameterNameDiscoverer);
-					GenericTypeResolver.resolveParameterType(parameter, getBean().getClass());
-					if (!ObjectUtils.isEmpty(providedArgs)) {
-						for (Object providedArg : providedArgs) {
-							if (parameter.getParameterType().isInstance(providedArg)) {
-								return Mono.just(providedArg);
+	private Mono<Object[]> resolveArguments(ServerHttpRequest request, Object... providedArgs) {
+		if (ObjectUtils.isEmpty(getMethodParameters())) {
+			return NO_ARGS;
+		}
+		try {
+			List<Mono<Object>> monos = Stream.of(getMethodParameters())
+					.map(param -> {
+						param.initParameterNameDiscovery(this.parameterNameDiscoverer);
+						GenericTypeResolver.resolveParameterType(param, getBean().getClass());
+						if (!ObjectUtils.isEmpty(providedArgs)) {
+							for (Object providedArg : providedArgs) {
+								if (param.getParameterType().isInstance(providedArg)) {
+									return Mono.just(providedArg);
+								}
 							}
 						}
-					}
-					HandlerMethodArgumentResolver resolver = this.resolvers.stream()
-							.filter(r -> r.supportsParameter(parameter))
-							.findFirst()
-							.orElseThrow(() -> getArgError("No resolver for ", parameter, null));
-					try {
-						return resolver.resolveArgument(parameter, request)
-								.defaultIfEmpty(NO_VALUE)
-								.otherwise(ex -> Mono.error(getArgError("Error resolving ", parameter, ex)));
-					}
-					catch (Exception ex) {
-						throw getArgError("Error resolving ", parameter, ex);
-					}
-				})
-				.collect(Collectors.toList());
+						HandlerMethodArgumentResolver resolver = this.resolvers.stream()
+								.filter(r -> r.supportsParameter(param))
+								.findFirst()
+								.orElseThrow(() -> getArgError("No resolver for ", param, null));
+						try {
+							return resolver.resolveArgument(param, request)
+									.defaultIfEmpty(NO_VALUE)
+									.otherwise(ex -> Mono.error(getArgError("Error resolving ", param, ex)));
+						}
+						catch (Exception ex) {
+							throw getArgError("Error resolving ", param, ex);
+						}
+					})
+					.collect(Collectors.toList());
+
+			return Mono.when(monos).map(args ->
+					Stream.of(args.toArray()).map(o -> o != NO_VALUE ? o : null).toArray());
+		}
+		catch (Throwable ex) {
+			return Mono.error(ex);
+		}
 	}
 
 	private IllegalStateException getArgError(String message, MethodParameter param, Throwable cause) {
@@ -171,10 +168,6 @@ public class InvocableHandlerMethod extends HandlerMethod {
 				.collect(Collectors.joining(",", " ", " "));
 		return "Failed to invoke controller with resolved arguments:" + argumentDetails +
 				"on method [" + getBridgedMethod().toGenericString() + "]";
-	}
-
-	private Object[] initArgs(Tuple tuple) {
-		return Stream.of(tuple.toArray()).map(o -> o != NO_VALUE ? o : null).toArray();
 	}
 
 }

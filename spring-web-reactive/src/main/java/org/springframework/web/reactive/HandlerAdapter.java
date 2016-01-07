@@ -53,7 +53,7 @@ public interface HandlerAdapter {
 	 * @param handler handler to use. This object must have previously been passed
 	 * to the {@code supports} method of this interface, which must have
 	 * returned {@code true}.
-	 * @return A {@link Publisher} object that produces a single {@link HandlerResult} element
+	 * @return A {@link Mono} that emits a single {@link HandlerResult} element
 	 */
 	Mono<HandlerResult> handle(ServerHttpRequest request, ServerHttpResponse response,
 			Object handler);

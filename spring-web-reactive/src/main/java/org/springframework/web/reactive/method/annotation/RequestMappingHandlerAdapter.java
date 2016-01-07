@@ -25,7 +25,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import reactor.Flux;
 import reactor.Mono;
 
 import org.springframework.beans.factory.InitializingBean;
@@ -106,23 +105,18 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 	}
 
 	@Override
-	public Mono<HandlerResult> handle(ServerHttpRequest request,
-			ServerHttpResponse response, Object handler) {
+	public Mono<HandlerResult> handle(ServerHttpRequest request, ServerHttpResponse response,
+			Object handler) {
 
 		HandlerMethod handlerMethod = (HandlerMethod) handler;
 
 		InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
 		invocable.setHandlerMethodArgumentResolvers(this.argumentResolvers);
 
-		Flux<HandlerResult> publisher = invocable.invokeForRequest(request).flux();
-		publisher = publisher.onErrorResumeWith(ex -> Mono.just(new HandlerResult(handler, ex)));
-
-
-		publisher = publisher.map(
-				result -> result.setExceptionMapper(
+		return invocable.invokeForRequest(request)
+				.otherwise(ex -> Mono.just(new HandlerResult(handler, ex)))
+				.map(result -> result.setExceptionMapper(
 						ex -> mapException(ex, handlerMethod, request, response)));
-
-		return publisher.next();
 	}
 
 	private Mono<HandlerResult> mapException(Throwable ex, HandlerMethod handlerMethod,

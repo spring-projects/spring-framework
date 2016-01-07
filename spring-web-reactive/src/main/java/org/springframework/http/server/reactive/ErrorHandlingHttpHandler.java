@@ -44,23 +44,23 @@ public class ErrorHandlingHttpHandler extends HttpHandlerDecorator {
 
 	@Override
 	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-		Mono<Void> publisher;
+		Mono<Void> mono;
 		try {
-			publisher = getDelegate().handle(request, response);
+			mono = getDelegate().handle(request, response);
 		}
 		catch (Throwable ex) {
-			publisher = Mono.error(ex);
+			mono = Mono.error(ex);
 		}
 		for (HttpExceptionHandler handler : this.exceptionHandlers) {
-			publisher = applyExceptionHandler(publisher, handler, request, response);
+			mono = applyExceptionHandler(mono, handler, request, response);
 		}
-		return publisher;
+		return mono;
 	}
 
-	private static Mono<Void> applyExceptionHandler(Mono<Void> publisher,
-			HttpExceptionHandler handler, ServerHttpRequest request, ServerHttpResponse response) {
+	private static Mono<Void> applyExceptionHandler(Mono<Void> mono, HttpExceptionHandler handler,
+			ServerHttpRequest request, ServerHttpResponse response) {
 
-		return publisher.flux().onErrorResumeWith(ex -> handler.handle(request, response, ex)).after();
+		return mono.otherwise(ex -> handler.handle(request, response, ex)).after();
 	}
 
 }

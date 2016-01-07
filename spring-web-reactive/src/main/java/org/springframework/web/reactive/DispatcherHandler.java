@@ -121,14 +121,13 @@ public class DispatcherHandler implements HttpHandler, ApplicationContextAware {
 				.next()
 				.then(handler -> getHandlerAdapter(handler).handle(request, response, handler))
 				.then(result -> {
-					Mono<Void> publisher = (result.hasError() ? Mono.error(result.getError()) :
-							getResultHandler(result).handleResult(request, response, result));
+					Mono<Void> mono = (result.hasError() ? Mono.error(result.getError()) :
+							handleResult(request, response, result));
 					if (result.hasExceptionMapper()) {
-						return publisher
-								.otherwise(ex -> result.getExceptionMapper().apply(ex)
-								.then(errorResult -> getResultHandler(errorResult).handleResult(request, response, errorResult)));
+						return mono.otherwise(ex -> result.getExceptionMapper().apply(ex)
+								.then(exResult -> handleResult(request, response, exResult)));
 					}
-					return publisher;
+					return mono;
 				})
 				.otherwise(ex -> Mono.error(this.errorMapper.apply(ex)));
 	}
@@ -140,6 +139,10 @@ public class DispatcherHandler implements HttpHandler, ApplicationContextAware {
 			}
 		}
 		throw new IllegalStateException("No HandlerAdapter: " + handler);
+	}
+
+	protected Mono<Void> handleResult(ServerHttpRequest request, ServerHttpResponse response, HandlerResult result) {
+		return getResultHandler(result).handleResult(request, response, result);
 	}
 
 	protected HandlerResultHandler getResultHandler(HandlerResult handlerResult) {

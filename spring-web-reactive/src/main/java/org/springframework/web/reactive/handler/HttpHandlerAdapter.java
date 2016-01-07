@@ -50,9 +50,7 @@ public class HttpHandlerAdapter implements HandlerAdapter {
 	}
 
 	@Override
-	public Mono<HandlerResult> handle(ServerHttpRequest request,
-			ServerHttpResponse response, Object handler) {
-
+	public Mono<HandlerResult> handle(ServerHttpRequest request, ServerHttpResponse response, Object handler) {
 		HttpHandler httpHandler = (HttpHandler)handler;
 		Mono<Void> completion = httpHandler.handle(request, response);
 		return Mono.just(new HandlerResult(httpHandler, completion, PUBLISHER_VOID));

@@ -36,7 +36,7 @@ public interface HttpExceptionHandler {
 	 * @param request the current request
 	 * @param response the current response
 	 * @param ex the exception to handle
-	 * @return Publisher to indicate when exception handling is complete.
+	 * @return {@code Mono<Void>} to indicate when exception handling is complete.
 	 */
 	Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response, Throwable ex);
 

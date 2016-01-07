@@ -69,7 +69,8 @@ public class SimpleHandlerResultHandler implements Ordered, HandlerResultHandler
 
 	private boolean isConvertibleToPublisher(ResolvableType type) {
 		return Publisher.class.isAssignableFrom(type.getRawClass()) ||
-				((this.conversionService != null) && this.conversionService.canConvert(type.getRawClass(), Publisher.class));
+				((this.conversionService != null) &&
+						this.conversionService.canConvert(type.getRawClass(), Publisher.class));
 	}
 
 	@SuppressWarnings("unchecked")

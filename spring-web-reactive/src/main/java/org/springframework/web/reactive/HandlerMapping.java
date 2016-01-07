@@ -32,7 +32,8 @@ public interface HandlerMapping {
 	/**
 	 * Return a handler for this request.
 	 * @param request current HTTP request
-	 * @return A {@link Mono} object that produces a single handler element
+	 * @return A {@link Mono} that emits one value or none in case the request
+	 * cannot be resolved to a handler.
 	 */
 	Mono<Object> getHandler(ServerHttpRequest request);
 

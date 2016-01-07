@@ -31,13 +31,9 @@ public interface HandlerMethodArgumentResolver {
 	boolean supportsParameter(MethodParameter parameter);
 
 	/**
-	 * The returned Publisher is expected to produce a single value -- i.e. the
-	 * value to use to invoke the handler method. Any additional values will be
-	 * ignored.
-	 *
-	 * <p>The publisher may also produce zero values if the argument does not
-	 * resolve to any value which will result in passing {@code null} as the
-	 * argument value.
+	 * The returned {@link Mono} may produce one or zero values if the argument
+	 * does not resolve to any value, which will result in {@code null} passed
+	 * as the argument value.
 	 */
 	Mono<Object> resolveArgument(MethodParameter parameter, ServerHttpRequest request);
 

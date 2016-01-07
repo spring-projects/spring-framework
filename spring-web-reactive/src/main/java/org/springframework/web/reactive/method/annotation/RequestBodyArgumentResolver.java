@@ -65,19 +65,19 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 		}
 		ResolvableType type = ResolvableType.forMethodParameter(parameter);
 		Flux<ByteBuffer> body = request.getBody();
-		Flux<?> elementStream = body;
+		Flux<?> elementFlux = body;
 		ResolvableType elementType = type.hasGenerics() ? type.getGeneric(0) : type;
 
 		Decoder<?> decoder = resolveDecoder(elementType, mediaType);
 		if (decoder != null) {
-			elementStream = decoder.decode(body, elementType, mediaType);
+			elementFlux = decoder.decode(body, elementType, mediaType);
 		}
 
 		if (this.conversionService.canConvert(Publisher.class, type.getRawClass())) {
-			return Mono.just(this.conversionService.convert(elementStream, type.getRawClass()));
+			return Mono.just(this.conversionService.convert(elementFlux, type.getRawClass()));
 		}
 
-		return (Mono<Object>)Mono.from(elementStream);
+		return elementFlux.next().map(o -> o);
 	}
 
 	private Decoder<?> resolveDecoder(ResolvableType type, MediaType mediaType, Object... hints) {

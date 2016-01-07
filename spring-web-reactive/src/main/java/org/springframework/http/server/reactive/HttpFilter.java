@@ -39,7 +39,7 @@ public interface HttpFilter {
 	 * @param request current HTTP request.
 	 * @param response current HTTP response.
 	 * @param chain provides a way to delegate to the next HttpFilter.
-	 * @return Publisher to indicate when request processing is complete.
+	 * @return {@code Mono<Void>} to indicate when request processing is complete.
 	 */
 	Mono<Void> filter(ServerHttpRequest request, ServerHttpResponse response,
 			HttpFilterChain chain);
