@@ -132,8 +132,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 							.orElseThrow(() -> getArgError("No resolver for ", parameter, null));
 					try {
 						return resolver.resolveArgument(parameter, request)
-								// TODO Add a defaultIfEmpty alias to Mono to avoid conversion to Flux
-								.flux().defaultIfEmpty(NO_VALUE).next()
+								.defaultIfEmpty(NO_VALUE)
 								.otherwise(ex -> Mono.error(getArgError("Error resolving ", parameter, ex)));
 					}
 					catch (Exception ex) {
