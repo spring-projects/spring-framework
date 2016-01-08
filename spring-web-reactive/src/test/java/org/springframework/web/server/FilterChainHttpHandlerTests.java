@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.http.server.reactive;
+package org.springframework.web.server;
 
 
 import org.apache.commons.logging.Log;
@@ -21,6 +21,10 @@ import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.Mono;
+
+import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

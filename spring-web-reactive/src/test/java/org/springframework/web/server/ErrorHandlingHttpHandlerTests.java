@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.http.server.reactive;
+package org.springframework.web.server;
 
 
 import java.net.URI;
@@ -27,6 +27,14 @@ import reactor.rx.stream.Signal;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.http.server.reactive.MockServerHttpRequest;
+import org.springframework.http.server.reactive.MockServerHttpResponse;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.web.server.ErrorHandlingHttpHandler;
+import org.springframework.web.server.HttpExceptionHandler;
+import org.springframework.web.server.InternalServerErrorExceptionHandler;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;

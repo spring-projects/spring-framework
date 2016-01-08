@@ -22,9 +22,6 @@ import reactor.Mono;
  * Contract for handling HTTP requests in a non-blocking way.
  *
  * @author Arjen Poutsma
- * @author Rossen Stoyanchev
- * @author Sebastien Deleuze
- * @see HttpFilter
  */
 public interface HttpHandler {
 

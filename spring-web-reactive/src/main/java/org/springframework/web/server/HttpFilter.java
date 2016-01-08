@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-package org.springframework.http.server.reactive;
+package org.springframework.web.server;
 
-import org.reactivestreams.Publisher;
 import reactor.Mono;
+
+import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 
 /**
  * Contract for interception-style, chained processing of HTTP requests.

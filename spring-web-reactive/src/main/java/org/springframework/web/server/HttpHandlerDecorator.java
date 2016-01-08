@@ -13,30 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.reactive;
+package org.springframework.web.server;
 
 import reactor.Mono;
 
-import org.springframework.web.server.HttpExceptionHandler;
+import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.web.ResponseStatusException;
+import org.springframework.util.Assert;
 
 /**
- * Handle {@link ResponseStatusException} by setting the response status.
  *
  * @author Rossen Stoyanchev
  */
-public class ResponseStatusExceptionHandler implements HttpExceptionHandler {
+public class HttpHandlerDecorator implements HttpHandler {
+
+	private final HttpHandler delegate;
+
+
+	public HttpHandlerDecorator(HttpHandler delegate) {
+		Assert.notNull(delegate, "'delegate' must not be null");
+		this.delegate = delegate;
+	}
+
+
+	public HttpHandler getDelegate() {
+		return this.delegate;
+	}
 
 
 	@Override
-	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response, Throwable ex) {
-		if (ex instanceof ResponseStatusException) {
-			response.setStatusCode(((ResponseStatusException) ex).getHttpStatus());
-			return Mono.empty();
-		}
-		return Mono.error(ex);
+	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
+		return this.delegate.handle(request, response);
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + " [delegate=" + this.delegate + "]";
 	}
 
 }

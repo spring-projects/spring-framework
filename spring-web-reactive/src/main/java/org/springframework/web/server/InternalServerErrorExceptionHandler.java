@@ -13,40 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.http.server.reactive;
+package org.springframework.web.server;
 
 import reactor.Mono;
 
-import org.springframework.util.Assert;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 
 /**
+ * Handle any exception by setting the response status to 500.
  *
  * @author Rossen Stoyanchev
  */
-public class HttpHandlerDecorator implements HttpHandler {
-
-	private final HttpHandler delegate;
-
-
-	public HttpHandlerDecorator(HttpHandler delegate) {
-		Assert.notNull(delegate, "'delegate' must not be null");
-		this.delegate = delegate;
-	}
-
-
-	public HttpHandler getDelegate() {
-		return this.delegate;
-	}
+public class InternalServerErrorExceptionHandler implements HttpExceptionHandler {
 
 
 	@Override
-	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-		return this.delegate.handle(request, response);
-	}
-
-	@Override
-	public String toString() {
-		return getClass().getSimpleName() + " [delegate=" + this.delegate + "]";
+	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response, Throwable ex) {
+		response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+		return Mono.empty();
 	}
 
 }

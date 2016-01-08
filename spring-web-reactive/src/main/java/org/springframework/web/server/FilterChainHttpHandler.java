@@ -13,13 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.http.server.reactive;
+package org.springframework.web.server;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import reactor.Mono;
+
+import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 
 /**
  * {@link HttpHandler} that delegates to a chain of {@link HttpFilter}s followed
