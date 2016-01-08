@@ -20,25 +20,20 @@ import org.reactivestreams.Publisher;
 import reactor.Mono;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.HandlerAdapter;
 import org.springframework.web.reactive.HandlerResult;
-import org.springframework.http.server.reactive.HttpHandler;
-import org.springframework.web.reactive.DispatcherHandler;
+import org.springframework.web.server.WebHandler;
+import org.springframework.web.server.WebServerExchange;
 
 /**
- * Support use of {@link HttpHandler} with
- * {@link DispatcherHandler
- * DispatcherHandler} (which implements the same contract).
- * The use of {@code DispatcherHandler} this way enables routing requests to
- * one of many {@code HttpHandler} instances depending on the configured
- * handler mappings.
+ * Support use of {@link org.springframework.web.server.WebHandler} through the
+ * {@link DispatcherHandler}.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  */
-public class HttpHandlerAdapter implements HandlerAdapter {
+public class HttpHandlerHandlerAdapter implements HandlerAdapter {
 
 	private static final ResolvableType PUBLISHER_VOID = ResolvableType.forClassWithGenerics(
 			Publisher.class, Void.class);
@@ -46,14 +41,14 @@ public class HttpHandlerAdapter implements HandlerAdapter {
 
 	@Override
 	public boolean supports(Object handler) {
-		return HttpHandler.class.isAssignableFrom(handler.getClass());
+		return WebHandler.class.isAssignableFrom(handler.getClass());
 	}
 
 	@Override
-	public Mono<HandlerResult> handle(ServerHttpRequest request, ServerHttpResponse response, Object handler) {
-		HttpHandler httpHandler = (HttpHandler)handler;
-		Mono<Void> completion = httpHandler.handle(request, response);
-		return Mono.just(new HandlerResult(httpHandler, completion, PUBLISHER_VOID));
+	public Mono<HandlerResult> handle(WebServerExchange exchange, Object handler) {
+		WebHandler webHandler = (WebHandler) handler;
+		Mono<Void> completion = webHandler.handle(exchange);
+		return Mono.just(new HandlerResult(webHandler, completion, PUBLISHER_VOID));
 	}
 
 }

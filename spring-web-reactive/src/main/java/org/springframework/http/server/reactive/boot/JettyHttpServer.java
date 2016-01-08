@@ -22,9 +22,9 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.http.server.reactive.ServletHttpHandlerAdapter;
 import org.springframework.util.Assert;
 import org.springframework.util.SocketUtils;
-import org.springframework.http.server.reactive.ServletHttpHandlerAdapter;
 
 /**
  * @author Rossen Stoyanchev

@@ -32,11 +32,11 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ResolvableType;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
+import org.springframework.web.server.WebServerExchange;
 
 
 /**
@@ -76,14 +76,14 @@ public class InvocableHandlerMethod extends HandlerMethod {
 
 	/**
 	 * Invoke the method and return a Publisher for the return value.
-	 * @param request the current request
+	 * @param exchange the current exchange
 	 * @param providedArgs optional list of argument values to check by type
 	 * (via {@code instanceof}) for resolving method arguments.
 	 * @return Publisher that produces a single HandlerResult or an error signal;
-	 * never throws an exception.
+	 * never throws an exception
 	 */
-	public Mono<HandlerResult> invokeForRequest(ServerHttpRequest request, Object... providedArgs) {
-		return resolveArguments(request, providedArgs).then(args -> {
+	public Mono<HandlerResult> invokeForRequest(WebServerExchange exchange, Object... providedArgs) {
+		return resolveArguments(exchange, providedArgs).then(args -> {
 			try {
 				Object value = doInvoke(args);
 				ResolvableType type =  ResolvableType.forMethodParameter(getReturnType());
@@ -100,7 +100,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		});
 	}
 
-	private Mono<Object[]> resolveArguments(ServerHttpRequest request, Object... providedArgs) {
+	private Mono<Object[]> resolveArguments(WebServerExchange exchange, Object... providedArgs) {
 		if (ObjectUtils.isEmpty(getMethodParameters())) {
 			return NO_ARGS;
 		}
@@ -121,7 +121,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 								.findFirst()
 								.orElseThrow(() -> getArgError("No resolver for ", param, null));
 						try {
-							return resolver.resolveArgument(param, request)
+							return resolver.resolveArgument(param, exchange)
 									.defaultIfEmpty(NO_VALUE)
 									.otherwise(ex -> Mono.error(getArgError("Error resolving ", param, ex)));
 						}

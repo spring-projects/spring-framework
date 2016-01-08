@@ -18,7 +18,7 @@ package org.springframework.web.reactive;
 
 import reactor.Mono;
 
-import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.web.server.WebServerExchange;
 
 /**
  * Interface to be implemented by objects that define a mapping between
@@ -31,10 +31,10 @@ public interface HandlerMapping {
 
 	/**
 	 * Return a handler for this request.
-	 * @param request current HTTP request
+	 * @param exchange current server exchange
 	 * @return A {@link Mono} that emits one value or none in case the request
-	 * cannot be resolved to a handler.
+	 * cannot be resolved to a handler
 	 */
-	Mono<Object> getHandler(ServerHttpRequest request);
+	Mono<Object> getHandler(WebServerExchange exchange);
 
 }

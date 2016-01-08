@@ -19,8 +19,8 @@ package org.springframework.http.server.reactive.boot;
 import io.netty.buffer.ByteBuf;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.util.Assert;
 import org.springframework.http.server.reactive.RxNettyHttpHandlerAdapter;
+import org.springframework.util.Assert;
 
 
 /**

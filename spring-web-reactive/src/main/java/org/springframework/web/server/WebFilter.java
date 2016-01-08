@@ -13,27 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.server;
 
 import reactor.Mono;
 
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
-
 /**
- * Represents a chain of {@link HttpFilter}s allowing each {@link HttpFilter} to
- * delegate to the next in the chain.
+ * Contract for interception-style, chained processing of Web requests that may
+ * be used to implement cross-cutting, application-agnostic requirements such
+ * as security, timeouts, and others.
  *
  * @author Rossen Stoyanchev
  */
-public interface HttpFilterChain {
+public interface WebFilter {
 
 	/**
+	 * Process the Web request and (optionally) delegate to the next
+	 * {@code WebFilter} through the given {@link WebFilterChain}.
 	 *
-	 * @param request current HTTP request.
-	 * @param response current HTTP response.
-	 * @return {@code Mono<Void>} to indicate when request handling is complete.
+	 * @param exchange the current server exchange
+	 * @param chain provides a way to delegate to the next filter
+	 * @return {@code Mono<Void>} to indicate when request processing is complete
 	 */
-	Mono<Void> filter(ServerHttpRequest request, ServerHttpResponse response);
+	Mono<Void> filter(WebServerExchange exchange, WebFilterChain chain);
 
 }

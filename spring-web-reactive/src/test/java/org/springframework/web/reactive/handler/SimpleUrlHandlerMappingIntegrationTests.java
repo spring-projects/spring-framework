@@ -31,7 +31,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
-import org.springframework.web.server.ErrorHandlingHttpHandler;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -39,6 +38,9 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.ResponseStatusExceptionHandler;
+import org.springframework.web.server.WebHandler;
+import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.WebToHttpHandlerBuilder;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -57,13 +59,16 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 
 		StaticApplicationContext wac = new StaticApplicationContext();
 		wac.registerSingleton("hm", TestHandlerMapping.class);
-		wac.registerSingleton("ha", HttpHandlerAdapter.class);
+		wac.registerSingleton("ha", HttpHandlerHandlerAdapter.class);
 		wac.registerSingleton("rh", SimpleHandlerResultHandler.class);
 		wac.refresh();
 
-		DispatcherHandler dispatcherHandler = new DispatcherHandler();
-		dispatcherHandler.setApplicationContext(wac);
-		return new ErrorHandlingHttpHandler(dispatcherHandler, new ResponseStatusExceptionHandler());
+		DispatcherHandler webHandler = new DispatcherHandler();
+		webHandler.setApplicationContext(wac);
+
+		return WebToHttpHandlerBuilder.webHandler(webHandler)
+				.exceptionHandlers(new ResponseStatusExceptionHandler())
+				.build();
 	}
 
 	@Test
@@ -132,27 +137,27 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 		}
 	}
 
-	private static class FooHandler implements HttpHandler {
+	private static class FooHandler implements WebHandler {
 
 		@Override
-		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-			return response.setBody(Stream.just(Buffer.wrap("foo").byteBuffer()));
+		public Mono<Void> handle(WebServerExchange exchange) {
+			return exchange.getResponse().setBody(Stream.just(Buffer.wrap("foo").byteBuffer()));
 		}
 	}
 
-	private static class BarHandler implements HttpHandler {
+	private static class BarHandler implements WebHandler {
 
 		@Override
-		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-			return response.setBody(Stream.just(Buffer.wrap("bar").byteBuffer()));
+		public Mono<Void> handle(WebServerExchange exchange) {
+			return exchange.getResponse().setBody(Stream.just(Buffer.wrap("bar").byteBuffer()));
 		}
 	}
 
-	private static class HeaderSettingHandler implements HttpHandler {
+	private static class HeaderSettingHandler implements WebHandler {
 
 		@Override
-		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-			response.getHeaders().add("foo", "bar");
+		public Mono<Void> handle(WebServerExchange exchange) {
+			exchange.getResponse().getHeaders().add("foo", "bar");
 			return Mono.empty();
 		}
 	}

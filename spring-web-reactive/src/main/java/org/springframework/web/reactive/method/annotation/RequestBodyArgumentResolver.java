@@ -25,13 +25,13 @@ import reactor.Mono;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.Decoder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.MediaType;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.core.codec.Decoder;
-import org.springframework.web.reactive.method.HandlerMethodArgumentResolver;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.reactive.method.HandlerMethodArgumentResolver;
+import org.springframework.web.server.WebServerExchange;
 
 /**
  * @author Sebastien Deleuze
@@ -58,13 +58,13 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 	}
 
 	@Override
-	public Mono<Object> resolveArgument(MethodParameter parameter, ServerHttpRequest request) {
-		MediaType mediaType = request.getHeaders().getContentType();
+	public Mono<Object> resolveArgument(MethodParameter parameter, WebServerExchange exchange) {
+		MediaType mediaType = exchange.getRequest().getHeaders().getContentType();
 		if (mediaType == null) {
 			mediaType = MediaType.APPLICATION_OCTET_STREAM;
 		}
 		ResolvableType type = ResolvableType.forMethodParameter(parameter);
-		Flux<ByteBuffer> body = request.getBody();
+		Flux<ByteBuffer> body = exchange.getRequest().getBody();
 		Flux<?> elementFlux = body;
 		ResolvableType elementType = type.hasGenerics() ? type.getGeneric(0) : type;
 

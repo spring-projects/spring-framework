@@ -21,8 +21,8 @@ import reactor.io.buffer.Buffer;
 import reactor.io.net.ReactiveNet;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.util.Assert;
 import org.springframework.http.server.reactive.ReactorHttpHandlerAdapter;
+import org.springframework.util.Assert;
 
 /**
  * @author Stephane Maldini

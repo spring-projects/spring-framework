@@ -15,33 +15,33 @@
  */
 package org.springframework.web.server;
 
-import reactor.Mono;
+import java.util.Map;
 
-import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 
 /**
- * A contract for resolving exceptions from HTTP request handling.
- *
- * <p>{@link ErrorHandlingHttpHandler} provides a way of applying a list
- * {@link HttpExceptionHandler}s to a target {@link HttpHandler}.
+ * Contract for an HTTP request-response interaction. Provides access to the HTTP
+ * request and response and also exposes additional server-side processing
+ * related properties and features such as request attributes.
  *
  * @author Rossen Stoyanchev
- * @see ErrorHandlingHttpHandler
  */
-public interface HttpExceptionHandler {
+public interface WebServerExchange {
 
 	/**
-	 * Handle the given exception and return a completion Publisher to indicate
-	 * when error handling is complete, or send an error signal if the exception
-	 * was not handled.
-	 *
-	 * @param request the current request
-	 * @param response the current response
-	 * @param ex the exception to handle
-	 * @return {@code Mono<Void>} to indicate when exception handling is complete.
+	 * @return the current HTTP request
 	 */
-	Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response, Throwable ex);
+	ServerHttpRequest getRequest();
+
+	/**
+	 * @return the current HTTP response
+	 */
+	ServerHttpResponse getResponse();
+
+	/**
+	 * @return mutable map of request attributes for the current exchange
+	 */
+	Map<String, Object> getAttributes();
 
 }

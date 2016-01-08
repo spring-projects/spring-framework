@@ -27,14 +27,17 @@ import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.Flux;
 import reactor.Mono;
-import reactor.rx.Streams;
+import reactor.rx.Stream;
 import reactor.rx.stream.Signal;
 
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.method.annotation.RequestParamArgumentResolver;
+import org.springframework.web.server.DefaultWebServerExchange;
+import org.springframework.web.server.WebServerExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -49,10 +52,13 @@ public class InvocableHandlerMethodTests {
 
 	private ServerHttpRequest request;
 
+	private WebServerExchange exchange;
+
 
 	@Before
 	public void setUp() throws Exception {
 		this.request = mock(ServerHttpRequest.class);
+		this.exchange = new DefaultWebServerExchange(request, mock(ServerHttpResponse.class));
 	}
 
 
@@ -60,8 +66,8 @@ public class InvocableHandlerMethodTests {
 	public void noArgsMethod() throws Exception {
 		InvocableHandlerMethod hm = createHandlerMethod("noArgs");
 
-		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.request);
-		List<HandlerResult> values = Streams.from(publisher).toList().get();
+		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange);
+		List<HandlerResult> values = Stream.from(publisher).toList().get();
 
 		assertEquals(1, values.size());
 		assertEquals("success", values.get(0).getResult());
@@ -73,8 +79,8 @@ public class InvocableHandlerMethodTests {
 		InvocableHandlerMethod hm = createHandlerMethod("singleArg", String.class);
 		hm.setHandlerMethodArgumentResolvers(Collections.singletonList(new RequestParamArgumentResolver()));
 
-		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.request);
-		List<HandlerResult> values = Streams.from(publisher).toList().get();
+		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange);
+		List<HandlerResult> values = Stream.from(publisher).toList().get();
 
 		assertEquals(1, values.size());
 		assertEquals("success:null", values.get(0).getResult());
@@ -85,8 +91,8 @@ public class InvocableHandlerMethodTests {
 		InvocableHandlerMethod hm = createHandlerMethod("singleArg", String.class);
 		addResolver(hm, Mono.just("value1"));
 
-		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.request);
-		List<HandlerResult> values = Streams.from(publisher).toList().get();
+		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange);
+		List<HandlerResult> values = Stream.from(publisher).toList().get();
 
 		assertEquals(1, values.size());
 		assertEquals("success:value1", values.get(0).getResult());
@@ -97,8 +103,8 @@ public class InvocableHandlerMethodTests {
 		InvocableHandlerMethod hm = createHandlerMethod("singleArg", String.class);
 		addResolver(hm, Flux.fromIterable(Arrays.asList("value1", "value2", "value3")));
 
-		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.request);
-		List<HandlerResult> values = Streams.from(publisher).toList().get();
+		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange);
+		List<HandlerResult> values = Stream.from(publisher).toList().get();
 
 		assertEquals(1, values.size());
 		assertEquals("success:value1", values.get(0).getResult());
@@ -108,7 +114,7 @@ public class InvocableHandlerMethodTests {
 	public void noResolverForArg() throws Exception {
 		InvocableHandlerMethod hm = createHandlerMethod("singleArg", String.class);
 
-		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.request);
+		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange);
 		Throwable ex = awaitErrorSignal(publisher);
 
 		assertEquals(IllegalStateException.class, ex.getClass());
@@ -125,7 +131,7 @@ public class InvocableHandlerMethodTests {
 		InvocableHandlerMethod hm = createHandlerMethod("singleArg", String.class);
 		hm.setHandlerMethodArgumentResolvers(Collections.singletonList(resolver));
 
-		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.request);
+		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange);
 		Throwable ex = awaitErrorSignal(publisher);
 
 		assertEquals(IllegalStateException.class, ex.getClass());
@@ -139,7 +145,7 @@ public class InvocableHandlerMethodTests {
 		InvocableHandlerMethod hm = createHandlerMethod("singleArg", String.class);
 		addResolver(hm, Mono.error(new IllegalStateException("boo")));
 
-		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.request);
+		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange);
 		Throwable ex = awaitErrorSignal(publisher);
 
 		assertEquals(IllegalStateException.class, ex.getClass());
@@ -153,7 +159,7 @@ public class InvocableHandlerMethodTests {
 		InvocableHandlerMethod hm = createHandlerMethod("singleArg", String.class);
 		addResolver(hm, Mono.just(1));
 
-		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.request);
+		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange);
 		Throwable ex = awaitErrorSignal(publisher);
 
 		assertEquals(IllegalStateException.class, ex.getClass());
@@ -166,7 +172,7 @@ public class InvocableHandlerMethodTests {
 	public void invocationTargetExceptionIsUnwrapped() throws Exception {
 		InvocableHandlerMethod hm = createHandlerMethod("exceptionMethod");
 
-		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.request);
+		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange);
 		Throwable ex = awaitErrorSignal(publisher);
 
 		assertEquals(IllegalStateException.class, ex.getClass());
@@ -188,7 +194,7 @@ public class InvocableHandlerMethodTests {
 	}
 
 	private Throwable awaitErrorSignal(Publisher<?> publisher) throws Exception {
-		Signal<?> signal = Streams.from(publisher).materialize().toList().get().get(0);
+		Signal<?> signal = Stream.from(publisher).materialize().toList().get().get(0);
 		assertEquals("Unexpected signal: " + signal, Signal.Type.ERROR, signal.getType());
 		return signal.getThrowable();
 	}

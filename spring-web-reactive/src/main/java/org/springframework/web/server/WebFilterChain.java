@@ -13,29 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.reactive;
+package org.springframework.web.server;
 
 import reactor.Mono;
 
-import org.springframework.web.ResponseStatusException;
-import org.springframework.web.server.WebExceptionHandler;
-import org.springframework.web.server.WebServerExchange;
-
 /**
- * Handle {@link ResponseStatusException} by setting the response status.
+ * Contract to allow a {@link WebFilter} to delegate to the next in the chain.
  *
  * @author Rossen Stoyanchev
  */
-public class ResponseStatusExceptionHandler implements WebExceptionHandler {
+public interface WebFilterChain {
 
-
-	@Override
-	public Mono<Void> handle(WebServerExchange exchange, Throwable ex) {
-		if (ex instanceof ResponseStatusException) {
-			exchange.getResponse().setStatusCode(((ResponseStatusException) ex).getHttpStatus());
-			return Mono.empty();
-		}
-		return Mono.error(ex);
-	}
+	/**
+	 * Delegate to the next {@code WebFilter} in the chain.
+	 *
+	 * @param exchange the current server exchange
+	 * @return {@code Mono<Void>} to indicate when request handling is complete
+	 */
+	Mono<Void> filter(WebServerExchange exchange);
 
 }

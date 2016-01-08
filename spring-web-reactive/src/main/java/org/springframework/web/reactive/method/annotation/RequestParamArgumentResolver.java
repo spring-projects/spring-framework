@@ -19,9 +19,9 @@ package org.springframework.web.reactive.method.annotation;
 import reactor.Mono;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.web.reactive.method.HandlerMethodArgumentResolver;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.reactive.method.HandlerMethodArgumentResolver;
+import org.springframework.web.server.WebServerExchange;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -41,10 +41,10 @@ public class RequestParamArgumentResolver implements HandlerMethodArgumentResolv
 
 
 	@Override
-	public Mono<Object> resolveArgument(MethodParameter param, ServerHttpRequest request) {
+	public Mono<Object> resolveArgument(MethodParameter param, WebServerExchange exchange) {
 		RequestParam annotation = param.getParameterAnnotation(RequestParam.class);
 		String name = (annotation.value().length() != 0 ? annotation.value() : param.getParameterName());
-		UriComponents uriComponents = UriComponentsBuilder.fromUri(request.getURI()).build();
+		UriComponents uriComponents = UriComponentsBuilder.fromUri(exchange.getRequest().getURI()).build();
 		String value = uriComponents.getQueryParams().getFirst(name);
 		return (value != null ? Mono.just(value) : Mono.empty());
 	}

@@ -14,27 +14,29 @@
  * limitations under the License.
  */
 
-package org.springframework.web.reactive.method;
+package org.springframework.web.server;
 
 import reactor.Mono;
 
-import org.springframework.core.MethodParameter;
-import org.springframework.web.server.WebServerExchange;
-
-
 /**
+ * Contract to handle a web server exchange.
+ *
+ * <p>Use {@link WebToHttpHandlerAdapter} to adapt a {@code WebHandler} to an
+ * {@link org.springframework.http.server.reactive.HttpHandler HttpHandler}.
+ * The {@link WebToHttpHandlerBuilder} provides a convenient way to do that while
+ * also optionally configuring one or more filters and/or exception handlers.
+ *
  * @author Rossen Stoyanchev
+ * @see WebToHttpHandlerBuilder
  */
-public interface HandlerMethodArgumentResolver {
-
-
-	boolean supportsParameter(MethodParameter parameter);
+public interface WebHandler {
 
 	/**
-	 * The returned {@link Mono} may produce one or zero values if the argument
-	 * does not resolve to any value, which will result in {@code null} passed
-	 * as the argument value.
+	 * Handle the web server exchange.
+	 *
+	 * @param exchange the current server exchange
+	 * @return {@code Mono<Void>} to indicate when request handling is complete
 	 */
-	Mono<Object> resolveArgument(MethodParameter parameter, WebServerExchange exchange);
+	Mono<Void> handle(WebServerExchange exchange);
 
 }

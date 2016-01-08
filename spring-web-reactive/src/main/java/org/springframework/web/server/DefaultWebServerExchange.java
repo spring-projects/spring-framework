@@ -15,41 +15,48 @@
  */
 package org.springframework.web.server;
 
-import reactor.Mono;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 
 /**
+ * Default implementation of {@link WebServerExchange}.
  *
  * @author Rossen Stoyanchev
  */
-public class HttpHandlerDecorator implements HttpHandler {
+public class DefaultWebServerExchange implements WebServerExchange {
 
-	private final HttpHandler delegate;
+	private final ServerHttpRequest request;
 
+	private final ServerHttpResponse response;
 
-	public HttpHandlerDecorator(HttpHandler delegate) {
-		Assert.notNull(delegate, "'delegate' must not be null");
-		this.delegate = delegate;
-	}
+	private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
 
-	public HttpHandler getDelegate() {
-		return this.delegate;
+	public DefaultWebServerExchange(ServerHttpRequest request, ServerHttpResponse response) {
+		Assert.notNull(request, "'request' is required.");
+		Assert.notNull(response, "'response' is required.");
+		this.request = request;
+		this.response = response;
 	}
 
 
 	@Override
-	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-		return this.delegate.handle(request, response);
+	public ServerHttpRequest getRequest() {
+		return this.request;
 	}
 
 	@Override
-	public String toString() {
-		return getClass().getSimpleName() + " [delegate=" + this.delegate + "]";
+	public ServerHttpResponse getResponse() {
+		return this.response;
+	}
+
+	@Override
+	public Map<String, Object> getAttributes() {
+		return this.attributes;
 	}
 
 }

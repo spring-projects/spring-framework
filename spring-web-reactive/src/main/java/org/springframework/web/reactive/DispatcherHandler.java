@@ -31,9 +31,9 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
-import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.web.server.WebHandler;
+import org.springframework.web.server.WebServerExchange;
 
 /**
  * Central dispatcher for HTTP request handlers/controllers. Dispatches to registered
@@ -53,7 +53,7 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  */
-public class DispatcherHandler implements HttpHandler, ApplicationContextAware {
+public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 
 	private static final Log logger = LogFactory.getLog(DispatcherHandler.class);
 
@@ -112,31 +112,32 @@ public class DispatcherHandler implements HttpHandler, ApplicationContextAware {
 
 
 	@Override
-	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
+	public Mono<Void> handle(WebServerExchange exchange) {
 		if (logger.isDebugEnabled()) {
+			ServerHttpRequest request = exchange.getRequest();
 			logger.debug("Processing " + request.getMethod() + " request for [" + request.getURI() + "]");
 		}
 		return Flux.fromIterable(this.handlerMappings)
-				.concatMap(mapping -> mapping.getHandler(request))
+				.concatMap(mapping -> mapping.getHandler(exchange))
 				.next()
-				.then(handler -> invokeHandler(request, response, handler))
-				.then(result -> handleResult(request, response, result))
+				.then(handler -> invokeHandler(exchange, handler))
+				.then(result -> handleResult(exchange, result))
 				.otherwise(ex -> Mono.error(this.errorMapper.apply(ex)));
 	}
 
-	private Mono<HandlerResult> invokeHandler(ServerHttpRequest request, ServerHttpResponse response, Object handler) {
+	private Mono<HandlerResult> invokeHandler(WebServerExchange exchange, Object handler) {
 		for (HandlerAdapter handlerAdapter : this.handlerAdapters) {
 			if (handlerAdapter.supports(handler)) {
-				return handlerAdapter.handle(request, response, handler);
+				return handlerAdapter.handle(exchange, handler);
 			}
 		}
 		return Mono.error(new IllegalStateException("No HandlerAdapter: " + handler));
 	}
 
-	private Mono<Void> handleResult(ServerHttpRequest request, ServerHttpResponse response, HandlerResult result) {
-		return getResultHandler(result).handleResult(request, response, result)
+	private Mono<Void> handleResult(WebServerExchange exchange, HandlerResult result) {
+		return getResultHandler(result).handleResult(exchange, result)
 				.otherwise(ex -> result.applyExceptionHandler(ex).then(exceptionResult ->
-						getResultHandler(result).handleResult(request, response, exceptionResult)));
+						getResultHandler(result).handleResult(exchange, exceptionResult)));
 	}
 
 	private HandlerResultHandler getResultHandler(HandlerResult handlerResult) {
@@ -156,7 +157,7 @@ public class DispatcherHandler implements HttpHandler, ApplicationContextAware {
 
 
 		@Override
-		public Mono<Object> getHandler(ServerHttpRequest request) {
+		public Mono<Object> getHandler(WebServerExchange exchange) {
 			return Mono.error(HANDLER_NOT_FOUND_EXCEPTION);
 		}
 	}

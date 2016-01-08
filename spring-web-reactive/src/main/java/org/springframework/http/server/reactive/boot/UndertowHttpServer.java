@@ -16,12 +16,12 @@
 
 package org.springframework.http.server.reactive.boot;
 
-import org.springframework.beans.factory.InitializingBean;
-import org.springframework.util.Assert;
-import org.springframework.http.server.reactive.UndertowHttpHandlerAdapter;
-
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
+
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.http.server.reactive.UndertowHttpHandlerAdapter;
+import org.springframework.util.Assert;
 
 /**
  * @author Marek Hawrylczak

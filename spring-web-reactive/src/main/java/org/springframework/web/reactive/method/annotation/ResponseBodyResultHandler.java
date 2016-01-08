@@ -33,11 +33,11 @@ import reactor.Mono;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.codec.Encoder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.core.codec.Encoder;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
@@ -45,6 +45,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
+import org.springframework.web.server.WebServerExchange;
 
 
 /**
@@ -127,8 +128,7 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Mono<Void> handleResult(ServerHttpRequest request,
-			ServerHttpResponse response, HandlerResult result) {
+	public Mono<Void> handleResult(WebServerExchange exchange, HandlerResult result) {
 
 		Object value = result.getResult();
 		if (value == null) {
@@ -147,7 +147,7 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 			elementType = returnType;
 		}
 
-		List<MediaType> requestedMediaTypes = getAcceptableMediaTypes(request);
+		List<MediaType> requestedMediaTypes = getAcceptableMediaTypes(exchange.getRequest());
 		List<MediaType> producibleMediaTypes = getProducibleMediaTypes(elementType);
 
 		if (producibleMediaTypes.isEmpty()) {
@@ -184,6 +184,7 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 		if (selectedMediaType != null) {
 			Encoder<?> encoder = resolveEncoder(elementType, selectedMediaType);
 			if (encoder != null) {
+				ServerHttpResponse response = exchange.getResponse();
 				response.getHeaders().setContentType(selectedMediaType);
 				return response.setBody(encoder.encode((Publisher) publisher, elementType, selectedMediaType));
 			}

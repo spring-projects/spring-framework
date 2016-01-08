@@ -41,6 +41,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.HandlerMethodSelector;
 import org.springframework.web.reactive.HandlerMapping;
+import org.springframework.web.server.WebServerExchange;
 
 
 /**
@@ -65,9 +66,7 @@ public class RequestMappingHandlerMapping implements HandlerMapping,
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		for (Object bean : this.applicationContext.getBeansOfType(Object.class).values()) {
-			detectHandlerMethods(bean);
-		}
+		this.applicationContext.getBeansOfType(Object.class).values().forEach(this::detectHandlerMethods);
 	}
 
 	protected void detectHandlerMethods(final Object bean) {
@@ -94,15 +93,15 @@ public class RequestMappingHandlerMapping implements HandlerMapping,
 	}
 
 	@Override
-	public Mono<Object> getHandler(ServerHttpRequest request) {
+	public Mono<Object> getHandler(WebServerExchange exchange) {
 		return Flux.create(subscriber -> {
 			for (Map.Entry<RequestMappingInfo, HandlerMethod> entry : this.methodMap.entrySet()) {
 				RequestMappingInfo info = entry.getKey();
-				if (info.matchesRequest(request)) {
+				if (info.matchesRequest(exchange.getRequest())) {
 					HandlerMethod handlerMethod = entry.getValue();
 					if (logger.isDebugEnabled()) {
-						logger.debug("Mapped " + request.getMethod() + " " +
-								request.getURI().getPath() + " to [" + handlerMethod + "]");
+						logger.debug("Mapped " + exchange.getRequest().getMethod() + " " +
+								exchange.getRequest().getURI().getPath() + " to [" + handlerMethod + "]");
 					}
 					subscriber.onNext(handlerMethod);
 					break;

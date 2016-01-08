@@ -18,8 +18,7 @@ package org.springframework.web.reactive;
 
 import reactor.Mono;
 
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.web.server.WebServerExchange;
 
 /**
  * Process the {@link HandlerResult}, usually returned by an {@link HandlerAdapter}.
@@ -41,9 +40,10 @@ public interface HandlerResultHandler {
 	 * Process the given result modifying response headers and/or writing data
 	 * to the response.
 	 *
+	 * @param exchange current server exchange
+	 * @param result the result from the handling
 	 * @return {@code Mono<Void>} to indicate when request handling is complete.
 	 */
-	Mono<Void> handleResult(ServerHttpRequest request, ServerHttpResponse response,
-			HandlerResult result);
+	Mono<Void> handleResult(WebServerExchange exchange, HandlerResult result);
 
 }

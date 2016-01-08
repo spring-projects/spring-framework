@@ -33,9 +33,9 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Rossen Stoyanchev
  */
-public class FilterChainHttpHandlerTests {
+public class FilteringWebHandlerTests {
 
-	private static Log logger = LogFactory.getLog(FilterChainHttpHandlerTests.class);
+	private static Log logger = LogFactory.getLog(FilteringWebHandlerTests.class);
 
 
 	private ServerHttpRequest request;
@@ -51,61 +51,60 @@ public class FilterChainHttpHandlerTests {
 
 	@Test
 	public void multipleFilters() throws Exception {
-		StubHandler handler = new StubHandler();
+		StubWebHandler webHandler = new StubWebHandler();
 		TestFilter filter1 = new TestFilter();
 		TestFilter filter2 = new TestFilter();
 		TestFilter filter3 = new TestFilter();
-		FilterChainHttpHandler filterHandler = new FilterChainHttpHandler(handler, filter1, filter2, filter3);
-
-		filterHandler.handle(this.request, this.response).get();
+		HttpHandler httpHandler = createHttpHandler(webHandler, filter1, filter2, filter3);
+		httpHandler.handle(this.request, this.response).get();
 
 		assertTrue(filter1.invoked());
 		assertTrue(filter2.invoked());
 		assertTrue(filter3.invoked());
-		assertTrue(handler.invoked());
+		assertTrue(webHandler.invoked());
 	}
 
 	@Test
 	public void zeroFilters() throws Exception {
-		StubHandler handler = new StubHandler();
-		FilterChainHttpHandler filterHandler = new FilterChainHttpHandler(handler);
+		StubWebHandler webHandler = new StubWebHandler();
+		HttpHandler httpHandler = createHttpHandler(webHandler);
+		httpHandler.handle(this.request, this.response).get();
 
-		filterHandler.handle(this.request, this.response).get();
-
-		assertTrue(handler.invoked());
+		assertTrue(webHandler.invoked());
 	}
 
 	@Test
 	public void shortcircuitFilter() throws Exception {
-		StubHandler handler = new StubHandler();
+		StubWebHandler webHandler = new StubWebHandler();
 		TestFilter filter1 = new TestFilter();
 		ShortcircuitingFilter filter2 = new ShortcircuitingFilter();
 		TestFilter filter3 = new TestFilter();
-		FilterChainHttpHandler filterHandler = new FilterChainHttpHandler(handler, filter1, filter2, filter3);
-
-		filterHandler.handle(this.request, this.response).get();
+		HttpHandler httpHandler = createHttpHandler(webHandler, filter1, filter2, filter3);
+		httpHandler.handle(this.request, this.response).get();
 
 		assertTrue(filter1.invoked());
 		assertTrue(filter2.invoked());
 		assertFalse(filter3.invoked());
-		assertFalse(handler.invoked());
+		assertFalse(webHandler.invoked());
 	}
 
 	@Test
 	public void asyncFilter() throws Exception {
-		StubHandler handler = new StubHandler();
+		StubWebHandler webHandler = new StubWebHandler();
 		AsyncFilter filter = new AsyncFilter();
-		FilterChainHttpHandler filterHandler = new FilterChainHttpHandler(handler, filter);
-
-		filterHandler.handle(this.request, this.response).get();
+		HttpHandler httpHandler = createHttpHandler(webHandler, filter);
+		httpHandler.handle(this.request, this.response).get();
 
 		assertTrue(filter.invoked());
-		assertTrue(handler.invoked());
+		assertTrue(webHandler.invoked());
+	}
+
+	private WebToHttpHandlerAdapter createHttpHandler(StubWebHandler webHandler, WebFilter... filters) {
+		return WebToHttpHandlerBuilder.webHandler(webHandler).filters(filters).build();
 	}
 
 
-
-	private static class TestFilter implements HttpFilter {
+	private static class TestFilter implements WebFilter {
 
 		private volatile boolean invoked;
 
@@ -115,26 +114,20 @@ public class FilterChainHttpHandlerTests {
 		}
 
 		@Override
-		public Mono<Void> filter(ServerHttpRequest req, ServerHttpResponse res,
-				HttpFilterChain chain) {
-
+		public Mono<Void> filter(WebServerExchange exchange, WebFilterChain chain) {
 			this.invoked = true;
-			return doFilter(req, res, chain);
+			return doFilter(exchange, chain);
 		}
 
-		public Mono<Void> doFilter(ServerHttpRequest req, ServerHttpResponse res,
-				HttpFilterChain chain) {
-
-			return chain.filter(req, res);
+		public Mono<Void> doFilter(WebServerExchange exchange, WebFilterChain chain) {
+			return chain.filter(exchange);
 		}
 	}
 
 	private static class ShortcircuitingFilter extends TestFilter {
 
 		@Override
-		public Mono<Void> doFilter(ServerHttpRequest req, ServerHttpResponse res,
-				HttpFilterChain chain) {
-
+		public Mono<Void> doFilter(WebServerExchange exchange, WebFilterChain chain) {
 			return Mono.empty();
 		}
 	}
@@ -142,10 +135,10 @@ public class FilterChainHttpHandlerTests {
 	private static class AsyncFilter extends TestFilter {
 
 		@Override
-		public Mono<Void> doFilter(ServerHttpRequest req, ServerHttpResponse res, HttpFilterChain chain) {
+		public Mono<Void> doFilter(WebServerExchange exchange, WebFilterChain chain) {
 			return doAsyncWork().then(asyncResult -> {
 				logger.debug("Async result: " + asyncResult);
-				return chain.filter(req, res);
+				return chain.filter(exchange);
 			});
 		}
 
@@ -155,7 +148,7 @@ public class FilterChainHttpHandlerTests {
 	}
 
 
-	private static class StubHandler implements HttpHandler {
+	private static class StubWebHandler implements WebHandler {
 
 		private volatile boolean invoked;
 
@@ -164,7 +157,7 @@ public class FilterChainHttpHandlerTests {
 		}
 
 		@Override
-		public Mono<Void> handle(ServerHttpRequest req, ServerHttpResponse res) {
+		public Mono<Void> handle(WebServerExchange exchange) {
 			logger.trace("StubHandler invoked.");
 			this.invoked = true;
 			return Mono.empty();

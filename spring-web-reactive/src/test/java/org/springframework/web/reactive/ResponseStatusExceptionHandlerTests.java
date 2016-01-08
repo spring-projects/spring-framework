@@ -17,12 +17,11 @@ package org.springframework.web.reactive;
 
 import java.net.URI;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
-import reactor.rx.Streams;
+import reactor.rx.Stream;
 import reactor.rx.stream.Signal;
 
 import org.springframework.http.HttpMethod;
@@ -30,6 +29,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.web.ResponseStatusException;
+import org.springframework.web.server.DefaultWebServerExchange;
+import org.springframework.web.server.WebServerExchange;
 
 import static junit.framework.TestCase.assertSame;
 import static org.junit.Assert.assertEquals;
@@ -42,34 +43,35 @@ public class ResponseStatusExceptionHandlerTests {
 
 	private ResponseStatusExceptionHandler handler;
 
-	private MockServerHttpRequest request;
-
 	private MockServerHttpResponse response;
+
+	private WebServerExchange exchange;
 
 
 	@Before
 	public void setUp() throws Exception {
 		this.handler = new ResponseStatusExceptionHandler();
-		this.request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
+		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
 		this.response = new MockServerHttpResponse();
+		this.exchange = new DefaultWebServerExchange(request, this.response);
 	}
 
 
 	@Test
 	public void handleException() throws Exception {
 		Throwable ex = new ResponseStatusException(HttpStatus.BAD_REQUEST);
-		Publisher<Void> publisher = this.handler.handle(this.request, this.response, ex);
+		Publisher<Void> publisher = this.handler.handle(this.exchange, ex);
 
-		Streams.from(publisher).toList().get();
+		Stream.from(publisher).toList().get();
 		assertEquals(HttpStatus.BAD_REQUEST, this.response.getStatus());
 	}
 
 	@Test
 	public void unresolvedException() throws Exception {
 		Throwable ex = new IllegalStateException();
-		Publisher<Void> publisher = this.handler.handle(this.request, this.response, ex);
+		Publisher<Void> publisher = this.handler.handle(this.exchange, ex);
 
-		List<Signal<Void>> signals = Streams.from(publisher).materialize().toList().get();
+		List<Signal<Void>> signals = Stream.from(publisher).materialize().toList().get();
 		assertEquals(1, signals.size());
 		assertTrue(signals.get(0).hasError());
 		assertSame(ex, signals.get(0).getThrowable());

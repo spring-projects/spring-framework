@@ -19,8 +19,8 @@ import java.util.function.Function;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.ResponseStatusException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.ResponseStatusException;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 /**

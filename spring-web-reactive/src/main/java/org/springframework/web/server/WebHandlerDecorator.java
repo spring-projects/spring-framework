@@ -17,22 +17,37 @@ package org.springframework.web.server;
 
 import reactor.Mono;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.util.Assert;
 
 /**
- * Handle any exception by setting the response status to 500.
+ * Base class for a {@link WebHandler} that decorates and delegates to another.
  *
  * @author Rossen Stoyanchev
  */
-public class InternalServerErrorExceptionHandler implements HttpExceptionHandler {
+public class WebHandlerDecorator implements WebHandler {
+
+	private final WebHandler delegate;
+
+
+	public WebHandlerDecorator(WebHandler delegate) {
+		Assert.notNull(delegate, "'delegate' must not be null");
+		this.delegate = delegate;
+	}
+
+
+	public WebHandler getDelegate() {
+		return this.delegate;
+	}
 
 
 	@Override
-	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response, Throwable ex) {
-		response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
-		return Mono.empty();
+	public Mono<Void> handle(WebServerExchange exchange) {
+		return this.delegate.handle(exchange);
+	}
+
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + " [delegate=" + this.delegate + "]";
 	}
 
 }

@@ -35,8 +35,6 @@ import org.springframework.core.codec.support.JsonObjectDecoder;
 import org.springframework.core.codec.support.StringDecoder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.ExceptionHandlerMethodResolver;
@@ -44,6 +42,7 @@ import org.springframework.web.reactive.HandlerAdapter;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.method.HandlerMethodArgumentResolver;
 import org.springframework.web.reactive.method.InvocableHandlerMethod;
+import org.springframework.web.server.WebServerExchange;
 
 
 /**
@@ -105,20 +104,18 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 	}
 
 	@Override
-	public Mono<HandlerResult> handle(ServerHttpRequest request, ServerHttpResponse response,
-			Object handler) {
-
+	public Mono<HandlerResult> handle(WebServerExchange exchange, Object handler) {
 		HandlerMethod handlerMethod = (HandlerMethod) handler;
 		InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
 		invocable.setHandlerMethodArgumentResolvers(this.argumentResolvers);
 
-		return invocable.invokeForRequest(request)
-				.map(result -> result.setExceptionHandler(ex -> handleException(ex, handlerMethod, request, response)))
-				.otherwise(ex -> handleException(ex, handlerMethod, request, response));
+		return invocable.invokeForRequest(exchange)
+				.map(result -> result.setExceptionHandler(ex -> handleException(ex, handlerMethod, exchange)))
+				.otherwise(ex -> handleException(ex, handlerMethod, exchange));
 	}
 
 	private Mono<HandlerResult> handleException(Throwable ex, HandlerMethod handlerMethod,
-			ServerHttpRequest request, ServerHttpResponse response) {
+			WebServerExchange exchange) {
 
 		if (ex instanceof Exception) {
 			InvocableHandlerMethod invocable = findExceptionHandler(handlerMethod, (Exception) ex);
@@ -128,7 +125,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 						logger.debug("Invoking @ExceptionHandler method: " + invocable);
 					}
 					invocable.setHandlerMethodArgumentResolvers(getArgumentResolvers());
-					return invocable.invokeForRequest(request, response, ex);
+					return invocable.invokeForRequest(exchange, ex);
 				}
 				catch (Exception invocationEx) {
 					if (logger.isErrorEnabled()) {

@@ -22,7 +22,6 @@ import java.nio.ByteBuffer;
 
 import io.netty.buffer.ByteBuf;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
-import org.reactivestreams.Publisher;
 import reactor.Flux;
 import reactor.core.publisher.convert.RxJava1Converter;
 import rx.Observable;

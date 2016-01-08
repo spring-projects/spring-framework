@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.Mono;
-import reactor.rx.Streams;
+import reactor.rx.Stream;
 import reactor.rx.stream.Signal;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -36,25 +36,25 @@ import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.ResponseStatusException;
-import org.springframework.web.server.ErrorHandlingHttpHandler;
-import org.springframework.web.server.FilterChainHttpHandler;
-import org.springframework.web.server.HttpExceptionHandler;
-import org.springframework.web.server.HttpFilter;
-import org.springframework.web.server.HttpFilterChain;
-import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.ResponseStatusException;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.reactive.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.reactive.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.reactive.method.annotation.ResponseBodyResultHandler;
+import org.springframework.web.server.DefaultWebServerExchange;
+import org.springframework.web.server.ExceptionHandlingWebHandler;
+import org.springframework.web.server.FilteringWebHandler;
+import org.springframework.web.server.WebExceptionHandler;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
+import org.springframework.web.server.WebHandler;
+import org.springframework.web.server.WebServerExchange;
 
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertEquals;
@@ -80,6 +80,8 @@ public class DispatcherHandlerErrorTests {
 
 	private MockServerHttpResponse response;
 
+	private WebServerExchange exchange;
+
 
 	@Before
 	public void setUp() throws Exception {
@@ -92,6 +94,7 @@ public class DispatcherHandlerErrorTests {
 
 		this.request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
 		this.response = new MockServerHttpResponse();
+		this.exchange = new DefaultWebServerExchange(this.request, this.response);
 	}
 
 
@@ -99,7 +102,7 @@ public class DispatcherHandlerErrorTests {
 	public void noHandler() throws Exception {
 		this.request.setUri(new URI("/does-not-exist"));
 
-		Publisher<Void> publisher = this.dispatcherHandler.handle(this.request, this.response);
+		Publisher<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 		Throwable ex = awaitErrorSignal(publisher);
 
 		assertEquals(ResponseStatusException.class, ex.getClass());
@@ -111,7 +114,7 @@ public class DispatcherHandlerErrorTests {
 	public void noResolverForArgument() throws Exception {
 		this.request.setUri(new URI("/uknown-argument-type"));
 
-		Publisher<Void> publisher = this.dispatcherHandler.handle(this.request, this.response);
+		Publisher<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 		Throwable ex = awaitErrorSignal(publisher);
 
 		assertEquals(IllegalStateException.class, ex.getClass());
@@ -122,7 +125,7 @@ public class DispatcherHandlerErrorTests {
 	public void controllerMethodError() throws Exception {
 		this.request.setUri(new URI("/error-signal"));
 
-		Publisher<Void> publisher = this.dispatcherHandler.handle(this.request, this.response);
+		Publisher<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 		Throwable ex = awaitErrorSignal(publisher);
 
 		assertSame(EXCEPTION, ex);
@@ -132,7 +135,7 @@ public class DispatcherHandlerErrorTests {
 	public void controllerMethodWithThrownException() throws Exception {
 		this.request.setUri(new URI("/raise-exception"));
 
-		Publisher<Void> publisher = this.dispatcherHandler.handle(this.request, this.response);
+		Publisher<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 		Throwable ex = awaitErrorSignal(publisher);
 
 		assertSame(EXCEPTION, ex);
@@ -142,7 +145,7 @@ public class DispatcherHandlerErrorTests {
 	public void noHandlerResultHandler() throws Exception {
 		this.request.setUri(new URI("/unknown-return-type"));
 
-		Publisher<Void> publisher = this.dispatcherHandler.handle(this.request, this.response);
+		Publisher<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 		Throwable ex = awaitErrorSignal(publisher);
 
 		assertEquals(IllegalStateException.class, ex.getClass());
@@ -155,7 +158,7 @@ public class DispatcherHandlerErrorTests {
 		this.request.getHeaders().setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 		this.request.setBody(Mono.just(ByteBuffer.wrap("body".getBytes("UTF-8"))));
 
-		Publisher<Void> publisher = this.dispatcherHandler.handle(this.request, this.response);
+		Publisher<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 		Throwable ex = awaitErrorSignal(publisher);
 
 		assertEquals(ResponseStatusException.class, ex.getClass());
@@ -168,7 +171,7 @@ public class DispatcherHandlerErrorTests {
 		this.request.setUri(new URI("/request-body"));
 		this.request.setBody(Mono.error(EXCEPTION));
 
-		Publisher<Void> publisher = this.dispatcherHandler.handle(this.request, this.response);
+		Publisher<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 		Throwable ex = awaitErrorSignal(publisher);
 
 		ex.printStackTrace();
@@ -180,11 +183,11 @@ public class DispatcherHandlerErrorTests {
 	public void dispatcherHandlerWithHttpExceptionHandler() throws Exception {
 		this.request.setUri(new URI("/uknown-argument-type"));
 
-		HttpExceptionHandler exceptionHandler = new ServerError500ExceptionHandler();
-		HttpHandler httpHandler = new ErrorHandlingHttpHandler(this.dispatcherHandler, exceptionHandler);
-		Publisher<Void> publisher = httpHandler.handle(this.request, this.response);
+		WebExceptionHandler exceptionHandler = new ServerError500ExceptionHandler();
+		WebHandler webHandler = new ExceptionHandlingWebHandler(this.dispatcherHandler, exceptionHandler);
+		Publisher<Void> publisher = webHandler.handle(this.exchange);
 
-		Streams.from(publisher).toList().get();
+		Stream.from(publisher).toList().get();
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatus());
 	}
 
@@ -192,18 +195,17 @@ public class DispatcherHandlerErrorTests {
 	public void filterChainWithHttpExceptionHandler() throws Exception {
 		this.request.setUri(new URI("/uknown-argument-type"));
 
-		HttpHandler httpHandler;
-		httpHandler = new FilterChainHttpHandler(this.dispatcherHandler, new TestHttpFilter());
-		httpHandler = new ErrorHandlingHttpHandler(httpHandler, new ServerError500ExceptionHandler());
-		Publisher<Void> publisher = httpHandler.handle(this.request, this.response);
+		WebHandler webHandler = new FilteringWebHandler(this.dispatcherHandler, new TestWebFilter());
+		webHandler = new ExceptionHandlingWebHandler(webHandler, new ServerError500ExceptionHandler());
+		Publisher<Void> publisher = webHandler.handle(this.exchange);
 
-		Streams.from(publisher).toList().get();
+		Stream.from(publisher).toList().get();
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatus());
 	}
 
 
 	private Throwable awaitErrorSignal(Publisher<?> publisher) throws Exception {
-		Signal<?> signal = Streams.from(publisher).materialize().toList().get().get(0);
+		Signal<?> signal = Stream.from(publisher).materialize().toList().get().get(0);
 		assertEquals("Unexpected signal: " + signal, Signal.Type.ERROR, signal.getType());
 		return signal.getThrowable();
 	}
@@ -269,20 +271,20 @@ public class DispatcherHandlerErrorTests {
 	private static class Foo {
 	}
 
-	private static class ServerError500ExceptionHandler implements HttpExceptionHandler {
+	private static class ServerError500ExceptionHandler implements WebExceptionHandler {
 
 		@Override
-		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response, Throwable ex) {
-			response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+		public Mono<Void> handle(WebServerExchange exchange, Throwable ex) {
+			exchange.getResponse().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			return Mono.empty();
 		}
 	}
 
-	private static class TestHttpFilter implements HttpFilter {
+	private static class TestWebFilter implements WebFilter {
 
 		@Override
-		public Mono<Void> filter(ServerHttpRequest req, ServerHttpResponse res, HttpFilterChain chain) {
-			return chain.filter(req, res);
+		public Mono<Void> filter(WebServerExchange exchange, WebFilterChain chain) {
+			return chain.filter(exchange);
 		}
 	}
 

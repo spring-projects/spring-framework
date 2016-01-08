@@ -22,16 +22,19 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
-import reactor.rx.Streams;
+import reactor.rx.Stream;
 
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
+import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.server.DefaultWebServerExchange;
+import org.springframework.web.server.WebServerExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -57,7 +60,8 @@ public class RequestMappingHandlerMappingTests {
 	@Test
 	public void path() throws Exception {
 		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("boo"));
-		Publisher<?> handlerPublisher = this.mapping.getHandler(request);
+		WebServerExchange exchange = new DefaultWebServerExchange(request, new MockServerHttpResponse());
+		Publisher<?> handlerPublisher = this.mapping.getHandler(exchange);
 		HandlerMethod handlerMethod = toHandlerMethod(handlerPublisher);
 		assertEquals(TestController.class.getMethod("boo"), handlerMethod.getMethod());
 	}
@@ -65,19 +69,21 @@ public class RequestMappingHandlerMappingTests {
 	@Test
 	public void method() throws Exception {
 		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.POST, new URI("foo"));
-		Publisher<?> handlerPublisher = this.mapping.getHandler(request);
+		WebServerExchange exchange = new DefaultWebServerExchange(request, new MockServerHttpResponse());
+		Publisher<?> handlerPublisher = this.mapping.getHandler(exchange);
 		HandlerMethod handlerMethod = toHandlerMethod(handlerPublisher);
 		assertEquals(TestController.class.getMethod("postFoo"), handlerMethod.getMethod());
 
 		request = new MockServerHttpRequest(HttpMethod.GET, new URI("foo"));
-		handlerPublisher = this.mapping.getHandler(request);
+		exchange = new DefaultWebServerExchange(request, new MockServerHttpResponse());
+		handlerPublisher = this.mapping.getHandler(exchange);
 		handlerMethod = toHandlerMethod(handlerPublisher);
 		assertEquals(TestController.class.getMethod("getFoo"), handlerMethod.getMethod());
 	}
 
 	private HandlerMethod toHandlerMethod(Publisher<?> handlerPublisher) throws InterruptedException {
 		assertNotNull(handlerPublisher);
-		List<?> handlerList = Streams.from(handlerPublisher).toList().get();
+		List<?> handlerList = Stream.from(handlerPublisher).toList().get();
 		assertEquals(1, handlerList.size());
 		return (HandlerMethod) handlerList.get(0);
 	}

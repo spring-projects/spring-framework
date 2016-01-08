@@ -22,11 +22,10 @@ import reactor.Mono;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
+import org.springframework.web.server.WebServerExchange;
 
 /**
  * Supports {@link HandlerResult} with a {@code void} or {@code Publisher<Void>} value.
@@ -75,15 +74,11 @@ public class SimpleHandlerResultHandler implements Ordered, HandlerResultHandler
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Mono<Void> handleResult(ServerHttpRequest request,
-			ServerHttpResponse response, HandlerResult result) {
-
+	public Mono<Void> handleResult(WebServerExchange exchange, HandlerResult result) {
 		Object value = result.getResult();
-
 		if (Void.TYPE.equals(result.getResultType().getRawClass())) {
 			return Mono.empty();
 		}
-
 		return (value instanceof Mono ? (Mono<Void>)value :
 				Mono.from(this.conversionService.convert(value, Publisher.class)));
 	}

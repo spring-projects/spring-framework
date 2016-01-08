@@ -23,9 +23,9 @@ import org.apache.catalina.LifecycleException;
 import org.apache.catalina.startup.Tomcat;
 
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.http.server.reactive.ServletHttpHandlerAdapter;
 import org.springframework.util.Assert;
 import org.springframework.util.SocketUtils;
-import org.springframework.http.server.reactive.ServletHttpHandlerAdapter;
 
 
 /**

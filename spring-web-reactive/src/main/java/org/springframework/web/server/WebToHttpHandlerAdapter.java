@@ -15,10 +15,6 @@
  */
 package org.springframework.web.server;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import reactor.Mono;
 
 import org.springframework.http.server.reactive.HttpHandler;
@@ -26,42 +22,26 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 
 /**
- * {@link HttpHandler} that delegates to a chain of {@link HttpFilter}s followed
- * by a target {@link HttpHandler}.
+ * Adapt {@link WebHandler} to {@link HttpHandler} also creating the
+ * {@link WebServerExchange} before invoking the target {@code WebHandler}.
  *
  * @author Rossen Stoyanchev
  */
-public class FilterChainHttpHandler extends HttpHandlerDecorator {
-
-	private final List<HttpFilter> filters;
+public class WebToHttpHandlerAdapter extends WebHandlerDecorator implements HttpHandler {
 
 
-	public FilterChainHttpHandler(HttpHandler targetHandler, HttpFilter... filters) {
-		super(targetHandler);
-		this.filters = (filters != null ? Arrays.asList(filters) : Collections.emptyList());
+	public WebToHttpHandlerAdapter(WebHandler delegate) {
+		super(delegate);
 	}
-
 
 	@Override
 	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-		return new DefaultHttpFilterChain().filter(request, response);
+		WebServerExchange exchange = createWebServerExchange(request, response);
+		return getDelegate().handle(exchange);
 	}
 
-
-	private class DefaultHttpFilterChain implements HttpFilterChain {
-
-		private int index;
-
-		@Override
-		public Mono<Void> filter(ServerHttpRequest request, ServerHttpResponse response) {
-			if (this.index < filters.size()) {
-				HttpFilter filter = filters.get(this.index++);
-				return filter.filter(request, response, this);
-			}
-			else {
-				return getDelegate().handle(request, response);
-			}
-		}
+	protected WebServerExchange createWebServerExchange(ServerHttpRequest request, ServerHttpResponse response) {
+		return new DefaultWebServerExchange(request, response);
 	}
 
 }

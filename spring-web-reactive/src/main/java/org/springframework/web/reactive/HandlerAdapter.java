@@ -20,8 +20,7 @@ import java.util.function.Function;
 
 import reactor.Mono;
 
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.web.server.WebServerExchange;
 
 /**
  * Contract that decouples the {@link DispatcherHandler} from the details of
@@ -53,14 +52,12 @@ public interface HandlerAdapter {
 	 * handler} on the {@code HandlerResult} so that may also be applied later
 	 * after result handling.
 	 *
-	 * @param request current request
-	 * @param response current response
+	 * @param exchange current server exchange
 	 * @param handler the selected handler which must have been previously
 	 * checked via {@link #supports(Object)}
 	 * @return {@link Mono} that emits a single {@code HandlerResult} or none if
 	 * the request has been fully handled and doesn't require further handling.
 	 */
-	Mono<HandlerResult> handle(ServerHttpRequest request, ServerHttpResponse response,
-			Object handler);
+	Mono<HandlerResult> handle(WebServerExchange exchange, Object handler);
 
 }
