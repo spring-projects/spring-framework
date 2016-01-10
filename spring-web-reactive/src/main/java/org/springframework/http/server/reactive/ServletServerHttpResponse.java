@@ -17,7 +17,9 @@
 package org.springframework.http.server.reactive;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import javax.servlet.http.HttpServletResponse;
 
@@ -25,9 +27,9 @@ import org.reactivestreams.Publisher;
 import reactor.Flux;
 import reactor.Mono;
 
-import org.springframework.http.ExtendedHttpHeaders;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 
 /**
@@ -43,6 +45,8 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 
 	private final HttpHeaders headers;
 
+	private boolean headersWritten = false;
+
 
 	public ServletServerHttpResponse(HttpServletResponse response,
 			Function<Publisher<ByteBuffer>, Mono<Void>> responseBodyWriter) {
@@ -51,7 +55,7 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 		Assert.notNull(responseBodyWriter, "'responseBodyWriter' must not be null");
 		this.response = response;
 		this.responseBodyWriter = responseBodyWriter;
-		this.headers = new ExtendedHttpHeaders(new ServletHeaderChangeListener());
+		this.headers = new HttpHeaders();
 	}
 
 
@@ -66,7 +70,7 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public HttpHeaders getHeaders() {
-		return this.headers;
+		return (this.headersWritten ? HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
 	}
 
 	@Override
@@ -75,28 +79,28 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 	}
 
 	protected Mono<Void> setBodyInternal(Publisher<ByteBuffer> publisher) {
+		writeHeaders();
 		return this.responseBodyWriter.apply(publisher);
 	}
 
-
-	private class ServletHeaderChangeListener implements ExtendedHttpHeaders.HeaderChangeListener {
-
-		@Override
-		public void headerAdded(String name, String value) {
-			getServletResponse().addHeader(name, value);
-		}
-
-		@Override
-		public void headerPut(String key, List<String> values) {
-			// We can only add but not remove
-			for (String value : values) {
-				getServletResponse().addHeader(key, value);
+	@Override
+	public void writeHeaders() {
+		if (!this.headersWritten) {
+			for (Map.Entry<String, List<String>> entry : this.headers.entrySet()) {
+				String headerName = entry.getKey();
+				for (String headerValue : entry.getValue()) {
+					this.response.addHeader(headerName, headerValue);
+				}
 			}
-		}
-
-		@Override
-		public void headerRemoved(String key) {
-			// No Servlet support for removing headers
+			MediaType contentType = this.headers.getContentType();
+			if (this.response.getContentType() == null && contentType != null) {
+				this.response.setContentType(contentType.toString());
+			}
+			Charset charset = (contentType != null ? contentType.getCharSet() : null);
+			if (this.response.getCharacterEncoding() == null && charset != null) {
+				this.response.setCharacterEncoding(charset.name());
+			}
+			this.headersWritten = true;
 		}
 	}
 

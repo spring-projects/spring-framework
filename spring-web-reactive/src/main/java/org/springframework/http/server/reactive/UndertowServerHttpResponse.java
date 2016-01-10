@@ -18,6 +18,7 @@ package org.springframework.http.server.reactive;
 
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 import io.undertow.server.HttpServerExchange;
@@ -26,7 +27,6 @@ import org.reactivestreams.Publisher;
 import reactor.Flux;
 import reactor.Mono;
 
-import org.springframework.http.ExtendedHttpHeaders;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
@@ -45,6 +45,8 @@ public class UndertowServerHttpResponse implements ServerHttpResponse {
 
 	private final HttpHeaders headers;
 
+	private boolean headersWritten = false;
+
 
 	public UndertowServerHttpResponse(HttpServerExchange exchange,
 			Function<Publisher<ByteBuffer>, Mono<Void>> responseBodyWriter) {
@@ -53,7 +55,7 @@ public class UndertowServerHttpResponse implements ServerHttpResponse {
 		Assert.notNull(responseBodyWriter, "'responseBodyWriter' must not be null");
 		this.exchange = exchange;
 		this.responseBodyWriter = responseBodyWriter;
-		this.headers = new ExtendedHttpHeaders(new UndertowHeaderChangeListener());
+		this.headers = new HttpHeaders();
 	}
 
 
@@ -69,7 +71,7 @@ public class UndertowServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public HttpHeaders getHeaders() {
-		return this.headers;
+		return (this.headersWritten ? HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
 	}
 
 	@Override
@@ -78,27 +80,18 @@ public class UndertowServerHttpResponse implements ServerHttpResponse {
 	}
 
 	protected Mono<Void> setBodyInternal(Publisher<ByteBuffer> publisher) {
+		writeHeaders();
 		return this.responseBodyWriter.apply(publisher);
 	}
 
-
-	private class UndertowHeaderChangeListener implements ExtendedHttpHeaders.HeaderChangeListener {
-
-		@Override
-		public void headerAdded(String name, String value) {
-			HttpString headerName = HttpString.tryFromString(name);
-			getUndertowExchange().getResponseHeaders().add(headerName, value);
-		}
-
-		@Override
-		public void headerPut(String key, List<String> values) {
-			HttpString headerName = HttpString.tryFromString(key);
-			getUndertowExchange().getResponseHeaders().putAll(headerName, values);
-		}
-
-		@Override
-		public void headerRemoved(String key) {
-			getUndertowExchange().getResponseHeaders().remove(key);
+	@Override
+	public void writeHeaders() {
+		if (!this.headersWritten) {
+			for (Map.Entry<String, List<String>> entry : this.headers.entrySet()) {
+				HttpString headerName = HttpString.tryFromString(entry.getKey());
+				this.exchange.getResponseHeaders().addAll(headerName, entry.getValue());
+			}
+			this.headersWritten = true;
 		}
 	}
 

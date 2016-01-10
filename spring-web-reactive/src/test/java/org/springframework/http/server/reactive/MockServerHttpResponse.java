@@ -60,4 +60,8 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 		return this.body;
 	}
 
+	@Override
+	public void writeHeaders() {
+	}
+
 }

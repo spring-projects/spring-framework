@@ -17,7 +17,6 @@
 package org.springframework.http.server.reactive;
 
 import java.nio.ByteBuffer;
-import java.util.List;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
@@ -27,7 +26,6 @@ import reactor.Mono;
 import reactor.core.publisher.convert.RxJava1Converter;
 import rx.Observable;
 
-import org.springframework.http.ExtendedHttpHeaders;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
@@ -44,11 +42,13 @@ public class RxNettyServerHttpResponse implements ServerHttpResponse {
 
 	private final HttpHeaders headers;
 
+	private boolean headersWritten = false;
+
 
 	public RxNettyServerHttpResponse(HttpServerResponse<?> response) {
 		Assert.notNull("'response', response must not be null.");
 		this.response = response;
-		this.headers = new ExtendedHttpHeaders(new RxNettyHeaderChangeListener());
+		this.headers = new HttpHeaders();
 	}
 
 
@@ -63,7 +63,7 @@ public class RxNettyServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public HttpHeaders getHeaders() {
-		return this.headers;
+		return (this.headersWritten ? HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
 	}
 
 	@Override
@@ -72,6 +72,7 @@ public class RxNettyServerHttpResponse implements ServerHttpResponse {
 	}
 
 	protected Mono<Void> setBodyInternal(Publisher<ByteBuffer> publisher) {
+		writeHeaders();
 		Observable<byte[]> content = RxJava1Converter.from(publisher).map(this::toBytes);
 		Observable<Void> completion = getRxNettyResponse().writeBytes(content);
 		return RxJava1Converter.from(completion).after();
@@ -83,25 +84,14 @@ public class RxNettyServerHttpResponse implements ServerHttpResponse {
 		return bytes;
 	}
 
-
-	private class RxNettyHeaderChangeListener implements ExtendedHttpHeaders.HeaderChangeListener {
-
-		@Override
-		public void headerAdded(String name, String value) {
-			getRxNettyResponse().addHeader(name, value);
-		}
-
-		@Override
-		public void headerPut(String key, List<String> values) {
-			getRxNettyResponse().removeHeader(key);
-			for (String value : values) {
-				getRxNettyResponse().addHeader(key, value);
+	@Override
+	public void writeHeaders() {
+		if (!this.headersWritten) {
+			for (String name : this.headers.keySet()) {
+				for (String value : this.headers.get(name))
+				this.response.addHeader(name, value);
 			}
-		}
-
-		@Override
-		public void headerRemoved(String key) {
-			getRxNettyResponse().removeHeader(key);
+			this.headersWritten = true;
 		}
 	}
 

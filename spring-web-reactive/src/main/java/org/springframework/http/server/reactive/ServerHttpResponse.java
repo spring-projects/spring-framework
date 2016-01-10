@@ -16,6 +16,8 @@
 
 package org.springframework.http.server.reactive;
 
+import org.reactivestreams.Publisher;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ReactiveHttpOutputMessage;
 
@@ -31,5 +33,17 @@ public interface ServerHttpResponse extends ReactiveHttpOutputMessage {
 	 * @param status the HTTP status as an {@link HttpStatus} enum value
 	 */
 	void setStatusCode(HttpStatus status);
-	
+
+	/**
+	 * Use this method to apply header changes made via {@link #getHeaders()} to
+	 * the underlying server response. By default changes made via
+	 * {@link #getHeaders()} are cached until a call to {@link #setBody}
+	 * implicitly applies header changes or until this method is called.
+	 *
+	 * <p><strong>Note:</strong> After this method is called,
+	 * {@link #getHeaders() headers} become read-only and any additional calls
+	 * to this method are ignored.
+	 */
+	void writeHeaders();
+
 }

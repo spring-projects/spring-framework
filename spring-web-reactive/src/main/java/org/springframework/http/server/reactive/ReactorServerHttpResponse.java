@@ -16,7 +16,6 @@
 package org.springframework.http.server.reactive;
 
 import java.nio.ByteBuffer;
-import java.util.List;
 
 import org.reactivestreams.Publisher;
 import reactor.Flux;
@@ -25,7 +24,6 @@ import reactor.io.buffer.Buffer;
 import reactor.io.net.http.HttpChannel;
 import reactor.io.net.http.model.Status;
 
-import org.springframework.http.ExtendedHttpHeaders;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
@@ -42,11 +40,13 @@ public class ReactorServerHttpResponse implements ServerHttpResponse {
 
 	private final HttpHeaders headers;
 
+	private boolean headersWritten = false;
+
 
 	public ReactorServerHttpResponse(HttpChannel<?, Buffer> response) {
 		Assert.notNull("'response' must not be null.");
 		this.channel = response;
-		this.headers = new ExtendedHttpHeaders(new ReactorHeaderChangeListener());
+		this.headers = new HttpHeaders();
 	}
 
 
@@ -61,7 +61,7 @@ public class ReactorServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public HttpHeaders getHeaders() {
-		return this.headers;
+		return (this.headersWritten ? HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
 	}
 
 	@Override
@@ -70,26 +70,19 @@ public class ReactorServerHttpResponse implements ServerHttpResponse {
 	}
 
 	protected Mono<Void> setBodyInternal(Publisher<ByteBuffer> publisher) {
+		writeHeaders();
 		return Mono.from(getReactorChannel().writeWith(Flux.from(publisher).map(Buffer::new)));
 	}
 
-
-	private class ReactorHeaderChangeListener implements ExtendedHttpHeaders.HeaderChangeListener {
-
-		@Override
-		public void headerAdded(String name, String value) {
-			getReactorChannel().responseHeaders().add(name, value);
-		}
-
-		@Override
-		public void headerPut(String key, List<String> values) {
-			getReactorChannel().responseHeaders().remove(key);
-			getReactorChannel().responseHeaders().add(key, values);
-		}
-
-		@Override
-		public void headerRemoved(String key) {
-			getReactorChannel().responseHeaders().remove(key);
+	@Override
+	public void writeHeaders() {
+		if (!this.headersWritten) {
+			for (String name : this.headers.keySet()) {
+				for (String value : this.headers.get(name)) {
+					this.channel.responseHeaders().add(name, value);
+				}
+			}
+			this.headersWritten = true;
 		}
 	}
 
