@@ -36,13 +36,9 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @author Stephane Maldini
  */
-public class RxNettyServerHttpRequest implements ServerHttpRequest {
+public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final HttpServerRequest<ByteBuf> request;
-
-	private URI uri;
-
-	private HttpHeaders headers;
 
 
 	public RxNettyServerHttpRequest(HttpServerRequest<ByteBuf> request) {
@@ -61,27 +57,17 @@ public class RxNettyServerHttpRequest implements ServerHttpRequest {
 	}
 
 	@Override
-	public URI getURI() {
-		if (this.uri == null) {
-			try {
-				this.uri = new URI(this.getRxNettyRequest().getUri());
-			}
-			catch (URISyntaxException ex) {
-				throw new IllegalStateException("Could not get URI: " + ex.getMessage(), ex);
-			}
-		}
-		return this.uri;
+	protected URI initUri() throws URISyntaxException {
+		return new URI(this.getRxNettyRequest().getUri());
 	}
 
 	@Override
-	public HttpHeaders getHeaders() {
-		if (this.headers == null) {
-			this.headers = new HttpHeaders();
-			for (String name : this.getRxNettyRequest().getHeaderNames()) {
-				this.headers.put(name, this.getRxNettyRequest().getAllHeaderValues(name));
-			}
+	protected HttpHeaders initHeaders() {
+		HttpHeaders headers = new HttpHeaders();
+		for (String name : this.getRxNettyRequest().getHeaderNames()) {
+			headers.put(name, this.getRxNettyRequest().getAllHeaderValues(name));
 		}
-		return this.headers;
+		return headers;
 	}
 
 	@Override

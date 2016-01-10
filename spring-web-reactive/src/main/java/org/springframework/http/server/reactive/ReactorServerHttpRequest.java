@@ -32,13 +32,9 @@ import org.springframework.util.Assert;
  *
  * @author Stephane Maldini
  */
-public class ReactorServerHttpRequest implements ServerHttpRequest {
+public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final HttpChannel<Buffer, ?> channel;
-
-	private URI uri;
-
-	private HttpHeaders headers;
 
 
 	public ReactorServerHttpRequest(HttpChannel<Buffer, ?> request) {
@@ -57,27 +53,17 @@ public class ReactorServerHttpRequest implements ServerHttpRequest {
 	}
 
 	@Override
-	public URI getURI() {
-		if (this.uri == null) {
-			try {
-				this.uri = new URI(this.channel.uri());
-			}
-			catch (URISyntaxException ex) {
-				throw new IllegalStateException("Could not get URI: " + ex.getMessage(), ex);
-			}
-		}
-		return this.uri;
+	protected URI initUri() throws URISyntaxException {
+		return new URI(this.channel.uri());
 	}
 
 	@Override
-	public HttpHeaders getHeaders() {
-		if (this.headers == null) {
-			this.headers = new HttpHeaders();
-			for (String name : this.channel.headers().names()) {
-				this.headers.put(name, this.channel.headers().getAll(name));
-			}
+	protected HttpHeaders initHeaders() {
+		HttpHeaders headers = new HttpHeaders();
+		for (String name : this.channel.headers().names()) {
+			headers.put(name, this.channel.headers().getAll(name));
 		}
-		return this.headers;
+		return headers;
 	}
 
 	@Override

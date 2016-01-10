@@ -24,10 +24,8 @@ import java.util.function.Function;
 import javax.servlet.http.HttpServletResponse;
 
 import org.reactivestreams.Publisher;
-import reactor.Flux;
 import reactor.Mono;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -37,15 +35,11 @@ import org.springframework.util.Assert;
  *
  * @author Rossen Stoyanchev
  */
-public class ServletServerHttpResponse implements ServerHttpResponse {
+public class ServletServerHttpResponse extends AbstractServerHttpResponse {
 
 	private final HttpServletResponse response;
 
 	private final Function<Publisher<ByteBuffer>, Mono<Void>> responseBodyWriter;
-
-	private final HttpHeaders headers;
-
-	private boolean headersWritten = false;
 
 
 	public ServletServerHttpResponse(HttpServletResponse response,
@@ -55,7 +49,6 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 		Assert.notNull(responseBodyWriter, "'responseBodyWriter' must not be null");
 		this.response = response;
 		this.responseBodyWriter = responseBodyWriter;
-		this.headers = new HttpHeaders();
 	}
 
 
@@ -69,38 +62,25 @@ public class ServletServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public HttpHeaders getHeaders() {
-		return (this.headersWritten ? HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
-	}
-
-	@Override
-	public Mono<Void> setBody(final Publisher<ByteBuffer> publisher) {
-		return Flux.from(publisher).lift(new WriteWithOperator<>(this::setBodyInternal)).after();
-	}
-
 	protected Mono<Void> setBodyInternal(Publisher<ByteBuffer> publisher) {
-		writeHeaders();
 		return this.responseBodyWriter.apply(publisher);
 	}
 
 	@Override
-	public void writeHeaders() {
-		if (!this.headersWritten) {
-			for (Map.Entry<String, List<String>> entry : this.headers.entrySet()) {
-				String headerName = entry.getKey();
-				for (String headerValue : entry.getValue()) {
-					this.response.addHeader(headerName, headerValue);
-				}
+	protected void writeHeadersInternal() {
+		for (Map.Entry<String, List<String>> entry : getHeaders().entrySet()) {
+			String headerName = entry.getKey();
+			for (String headerValue : entry.getValue()) {
+				this.response.addHeader(headerName, headerValue);
 			}
-			MediaType contentType = this.headers.getContentType();
-			if (this.response.getContentType() == null && contentType != null) {
-				this.response.setContentType(contentType.toString());
-			}
-			Charset charset = (contentType != null ? contentType.getCharSet() : null);
-			if (this.response.getCharacterEncoding() == null && charset != null) {
-				this.response.setCharacterEncoding(charset.name());
-			}
-			this.headersWritten = true;
+		}
+		MediaType contentType = getHeaders().getContentType();
+		if (this.response.getContentType() == null && contentType != null) {
+			this.response.setContentType(contentType.toString());
+		}
+		Charset charset = (contentType != null ? contentType.getCharSet() : null);
+		if (this.response.getCharacterEncoding() == null && charset != null) {
+			this.response.setCharacterEncoding(charset.name());
 		}
 	}
 

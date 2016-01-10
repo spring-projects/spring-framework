@@ -39,13 +39,9 @@ import org.springframework.util.StringUtils;
  *
  * @author Rossen Stoyanchev
  */
-public class ServletServerHttpRequest implements ServerHttpRequest {
+public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final HttpServletRequest request;
-
-	private URI uri;
-
-	private HttpHeaders headers;
 
 	private final Flux<ByteBuffer> requestBodyPublisher;
 
@@ -68,62 +64,48 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	}
 
 	@Override
-	public URI getURI() {
-		if (this.uri == null) {
-			try {
-				this.uri = new URI(getServletRequest().getScheme(), null,
-						getServletRequest().getServerName(),
-						getServletRequest().getServerPort(),
-						getServletRequest().getRequestURI(),
-						getServletRequest().getQueryString(), null);
-			}
-			catch (URISyntaxException ex) {
-				throw new IllegalStateException("Could not get HttpServletRequest URI: " + ex.getMessage(), ex);
-			}
-		}
-		return this.uri;
+	protected URI initUri() throws URISyntaxException {
+		return new URI(getServletRequest().getScheme(), null,
+				getServletRequest().getServerName(),
+				getServletRequest().getServerPort(),
+				getServletRequest().getRequestURI(),
+				getServletRequest().getQueryString(), null);
 	}
 
 	@Override
-	public HttpHeaders getHeaders() {
-		if (this.headers == null) {
-			this.headers = new HttpHeaders();
-			for (Enumeration<?> names = getServletRequest().getHeaderNames(); names.hasMoreElements(); ) {
-				String headerName = (String) names.nextElement();
-				for (Enumeration<?> headerValues = getServletRequest().getHeaders(headerName);
-					 headerValues.hasMoreElements(); ) {
-					String headerValue = (String) headerValues.nextElement();
-					this.headers.add(headerName, headerValue);
-				}
-			}
-			// HttpServletRequest exposes some headers as properties: we should include those if not already present
-			MediaType contentType = this.headers.getContentType();
-			if (contentType == null) {
-				String requestContentType = getServletRequest().getContentType();
-				if (StringUtils.hasLength(requestContentType)) {
-					contentType = MediaType.parseMediaType(requestContentType);
-					this.headers.setContentType(contentType);
-				}
-			}
-			if (contentType != null && contentType.getCharSet() == null) {
-				String requestEncoding = getServletRequest().getCharacterEncoding();
-				if (StringUtils.hasLength(requestEncoding)) {
-					Charset charSet = Charset.forName(requestEncoding);
-					Map<String, String> params = new LinkedCaseInsensitiveMap<>();
-					params.putAll(contentType.getParameters());
-					params.put("charset", charSet.toString());
-					MediaType newContentType = new MediaType(contentType.getType(), contentType.getSubtype(), params);
-					this.headers.setContentType(newContentType);
-				}
-			}
-			if (this.headers.getContentLength() == -1) {
-				int requestContentLength = getServletRequest().getContentLength();
-				if (requestContentLength != -1) {
-					this.headers.setContentLength(requestContentLength);
-				}
+	protected HttpHeaders initHeaders() {
+		HttpHeaders headers = new HttpHeaders();
+		for (Enumeration<?> names = getServletRequest().getHeaderNames(); names.hasMoreElements(); ) {
+			String name = (String) names.nextElement();
+			for (Enumeration<?> values = getServletRequest().getHeaders(name); values.hasMoreElements(); ) {
+				headers.add(name, (String) values.nextElement());
 			}
 		}
-		return this.headers;
+		MediaType contentType = headers.getContentType();
+		if (contentType == null) {
+			String requestContentType = getServletRequest().getContentType();
+			if (StringUtils.hasLength(requestContentType)) {
+				contentType = MediaType.parseMediaType(requestContentType);
+				headers.setContentType(contentType);
+			}
+		}
+		if (contentType != null && contentType.getCharSet() == null) {
+			String encoding = getServletRequest().getCharacterEncoding();
+			if (StringUtils.hasLength(encoding)) {
+				Charset charset = Charset.forName(encoding);
+				Map<String, String> params = new LinkedCaseInsensitiveMap<>();
+				params.putAll(contentType.getParameters());
+				params.put("charset", charset.toString());
+				headers.setContentType(new MediaType(contentType.getType(), contentType.getSubtype(), params));
+			}
+		}
+		if (headers.getContentLength() == -1) {
+			int contentLength = getServletRequest().getContentLength();
+			if (contentLength != -1) {
+				headers.setContentLength(contentLength);
+			}
+		}
+		return headers;
 	}
 
 	@Override

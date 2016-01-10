@@ -36,19 +36,14 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @author Stephane Maldini
  */
-public class RxNettyServerHttpResponse implements ServerHttpResponse {
+public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 
 	private final HttpServerResponse<?> response;
-
-	private final HttpHeaders headers;
-
-	private boolean headersWritten = false;
 
 
 	public RxNettyServerHttpResponse(HttpServerResponse<?> response) {
 		Assert.notNull("'response', response must not be null.");
 		this.response = response;
-		this.headers = new HttpHeaders();
 	}
 
 
@@ -62,17 +57,7 @@ public class RxNettyServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public HttpHeaders getHeaders() {
-		return (this.headersWritten ? HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
-	}
-
-	@Override
-	public Mono<Void> setBody(Publisher<ByteBuffer> publisher) {
-		return Flux.from(publisher).lift(new WriteWithOperator<>(this::setBodyInternal)).after();
-	}
-
 	protected Mono<Void> setBodyInternal(Publisher<ByteBuffer> publisher) {
-		writeHeaders();
 		Observable<byte[]> content = RxJava1Converter.from(publisher).map(this::toBytes);
 		Observable<Void> completion = getRxNettyResponse().writeBytes(content);
 		return RxJava1Converter.from(completion).after();
@@ -85,13 +70,10 @@ public class RxNettyServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public void writeHeaders() {
-		if (!this.headersWritten) {
-			for (String name : this.headers.keySet()) {
-				for (String value : this.headers.get(name))
+	protected void writeHeadersInternal() {
+		for (String name : getHeaders().keySet()) {
+			for (String value : getHeaders().get(name))
 				this.response.addHeader(name, value);
-			}
-			this.headersWritten = true;
 		}
 	}
 

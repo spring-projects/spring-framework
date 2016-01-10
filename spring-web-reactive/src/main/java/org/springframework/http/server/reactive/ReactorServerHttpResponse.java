@@ -24,7 +24,6 @@ import reactor.io.buffer.Buffer;
 import reactor.io.net.http.HttpChannel;
 import reactor.io.net.http.model.Status;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 
@@ -34,19 +33,14 @@ import org.springframework.util.Assert;
  * @author Stephane Maldini
  * @author Rossen Stoyanchev
  */
-public class ReactorServerHttpResponse implements ServerHttpResponse {
+public class ReactorServerHttpResponse extends AbstractServerHttpResponse {
 
 	private final HttpChannel<?, Buffer> channel;
-
-	private final HttpHeaders headers;
-
-	private boolean headersWritten = false;
 
 
 	public ReactorServerHttpResponse(HttpChannel<?, Buffer> response) {
 		Assert.notNull("'response' must not be null.");
 		this.channel = response;
-		this.headers = new HttpHeaders();
 	}
 
 
@@ -60,29 +54,16 @@ public class ReactorServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public HttpHeaders getHeaders() {
-		return (this.headersWritten ? HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
-	}
-
-	@Override
-	public Mono<Void> setBody(Publisher<ByteBuffer> publisher) {
-		return Flux.from(publisher).lift(new WriteWithOperator<>(this::setBodyInternal)).after();
-	}
-
 	protected Mono<Void> setBodyInternal(Publisher<ByteBuffer> publisher) {
-		writeHeaders();
-		return Mono.from(getReactorChannel().writeWith(Flux.from(publisher).map(Buffer::new)));
+		return Mono.from(this.channel.writeWith(Flux.from(publisher).map(Buffer::new)));
 	}
 
 	@Override
-	public void writeHeaders() {
-		if (!this.headersWritten) {
-			for (String name : this.headers.keySet()) {
-				for (String value : this.headers.get(name)) {
-					this.channel.responseHeaders().add(name, value);
-				}
+	protected void writeHeadersInternal() {
+		for (String name : getHeaders().keySet()) {
+			for (String value : getHeaders().get(name)) {
+				this.channel.responseHeaders().add(name, value);
 			}
-			this.headersWritten = true;
 		}
 	}
 

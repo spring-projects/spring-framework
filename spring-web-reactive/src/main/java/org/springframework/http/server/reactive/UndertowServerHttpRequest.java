@@ -35,13 +35,9 @@ import org.springframework.util.Assert;
  * @author Marek Hawrylczak
  * @author Rossen Stoyanchev
  */
-public class UndertowServerHttpRequest implements ServerHttpRequest {
+public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final HttpServerExchange exchange;
-
-	private URI uri;
-
-	private HttpHeaders headers;
 
 	private final Flux<ByteBuffer> body;
 
@@ -64,31 +60,19 @@ public class UndertowServerHttpRequest implements ServerHttpRequest {
 	}
 
 	@Override
-	public URI getURI() {
-		if (this.uri == null) {
-			try {
-				return new URI(this.getUndertowExchange().getRequestScheme(), null,
-						this.getUndertowExchange().getHostName(),
-						this.getUndertowExchange().getHostPort(),
-						this.getUndertowExchange().getRequestURI(),
-						this.getUndertowExchange().getQueryString(), null);
-			}
-			catch (URISyntaxException ex) {
-				throw new IllegalStateException("Could not get URI: " + ex.getMessage(), ex);
-			}
-		}
-		return this.uri;
+	protected URI initUri() throws URISyntaxException {
+		return new URI(this.exchange.getRequestScheme(), null,
+				this.exchange.getHostName(), this.exchange.getHostPort(),
+				this.exchange.getRequestURI(), this.exchange.getQueryString(), null);
 	}
 
 	@Override
-	public HttpHeaders getHeaders() {
-		if (this.headers == null) {
-			this.headers = new HttpHeaders();
-			for (HeaderValues values : this.getUndertowExchange().getRequestHeaders()) {
-				this.headers.put(values.getHeaderName().toString(), values);
-			}
+	protected HttpHeaders initHeaders() {
+		HttpHeaders headers = new HttpHeaders();
+		for (HeaderValues values : this.getUndertowExchange().getRequestHeaders()) {
+			headers.put(values.getHeaderName().toString(), values);
 		}
-		return this.headers;
+		return headers;
 	}
 
 	@Override

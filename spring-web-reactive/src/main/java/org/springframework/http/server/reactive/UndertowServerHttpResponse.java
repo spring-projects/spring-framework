@@ -24,10 +24,8 @@ import java.util.function.Function;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.HttpString;
 import org.reactivestreams.Publisher;
-import reactor.Flux;
 import reactor.Mono;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 
@@ -37,15 +35,11 @@ import org.springframework.util.Assert;
  * @author Marek Hawrylczak
  * @author Rossen Stoyanchev
  */
-public class UndertowServerHttpResponse implements ServerHttpResponse {
+public class UndertowServerHttpResponse extends AbstractServerHttpResponse {
 
 	private final HttpServerExchange exchange;
 
 	private final Function<Publisher<ByteBuffer>, Mono<Void>> responseBodyWriter;
-
-	private final HttpHeaders headers;
-
-	private boolean headersWritten = false;
 
 
 	public UndertowServerHttpResponse(HttpServerExchange exchange,
@@ -55,7 +49,6 @@ public class UndertowServerHttpResponse implements ServerHttpResponse {
 		Assert.notNull(responseBodyWriter, "'responseBodyWriter' must not be null");
 		this.exchange = exchange;
 		this.responseBodyWriter = responseBodyWriter;
-		this.headers = new HttpHeaders();
 	}
 
 
@@ -70,28 +63,15 @@ public class UndertowServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public HttpHeaders getHeaders() {
-		return (this.headersWritten ? HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
-	}
-
-	@Override
-	public Mono<Void> setBody(Publisher<ByteBuffer> publisher) {
-		return Flux.from(publisher).lift(new WriteWithOperator<>(this::setBodyInternal)).after();
-	}
-
 	protected Mono<Void> setBodyInternal(Publisher<ByteBuffer> publisher) {
-		writeHeaders();
 		return this.responseBodyWriter.apply(publisher);
 	}
 
 	@Override
-	public void writeHeaders() {
-		if (!this.headersWritten) {
-			for (Map.Entry<String, List<String>> entry : this.headers.entrySet()) {
-				HttpString headerName = HttpString.tryFromString(entry.getKey());
-				this.exchange.getResponseHeaders().addAll(headerName, entry.getValue());
-			}
-			this.headersWritten = true;
+	protected void writeHeadersInternal() {
+		for (Map.Entry<String, List<String>> entry : getHeaders().entrySet()) {
+			HttpString headerName = HttpString.tryFromString(entry.getKey());
+			this.exchange.getResponseHeaders().addAll(headerName, entry.getValue());
 		}
 	}
 
