@@ -42,7 +42,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public HttpHeaders getHeaders() {
-		return (this.headersWritten ? HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
+		return (this.headersWritten ? org.springframework.http.HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
 	}
 
 	@Override
@@ -64,6 +64,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 		if (!this.headersWritten) {
 			try {
 				writeHeadersInternal();
+				writeCookies();
 			}
 			finally {
 				this.headersWritten = true;
@@ -73,9 +74,14 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	/**
 	 * Implement this method to apply header changes from {@link #getHeaders()}
-	 * to the underlying response. This method is protected from being called
-	 * more than once.
+	 * to the underlying response. This method is called once only.
 	 */
 	protected abstract void writeHeadersInternal();
+
+	/**
+	 * Implement this method to add cookies from {@link #getHeaders()} to the
+	 * underlying response. This method is called once only.
+	 */
+	protected abstract void writeCookies();
 
 }

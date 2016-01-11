@@ -21,12 +21,16 @@ import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 import org.reactivestreams.Publisher;
 import reactor.Flux;
 
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -73,8 +77,7 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	protected HttpHeaders initHeaders() {
-		HttpHeaders headers = new HttpHeaders();
+	protected void initHeaders(HttpHeaders headers) {
 		for (Enumeration<?> names = getServletRequest().getHeaderNames(); names.hasMoreElements(); ) {
 			String name = (String) names.nextElement();
 			for (Enumeration<?> values = getServletRequest().getHeaders(name); values.hasMoreElements(); ) {
@@ -105,7 +108,24 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 				headers.setContentLength(contentLength);
 			}
 		}
-		return headers;
+	}
+
+	@Override
+	protected void initCookies(Map<String, Set<HttpCookie>> map) {
+		for (Cookie cookie : this.request.getCookies()) {
+			String name = cookie.getName();
+			Set<HttpCookie> set = map.get(name);
+			if (set == null) {
+				set = new LinkedHashSet<>();
+				map.put(name, set);
+			}
+			set.add(new HttpCookie(name, cookie.getValue())
+					.setDomain(cookie.getDomain())
+					.setPath(cookie.getPath())
+					.setMaxAge(cookie.getMaxAge() == -1 ? Long.MIN_VALUE : cookie.getMaxAge())
+					.setHttpOnly(cookie.isHttpOnly())
+					.setSecure(cookie.getSecure()));
+		}
 	}
 
 	@Override

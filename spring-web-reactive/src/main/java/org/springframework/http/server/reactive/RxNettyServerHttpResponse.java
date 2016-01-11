@@ -19,14 +19,15 @@ package org.springframework.http.server.reactive;
 import java.nio.ByteBuffer;
 
 import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.cookie.Cookie;
+import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import org.reactivestreams.Publisher;
-import reactor.Flux;
 import reactor.Mono;
 import reactor.core.publisher.convert.RxJava1Converter;
 import rx.Observable;
 
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 
@@ -53,13 +54,13 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 
 	@Override
 	public void setStatusCode(HttpStatus status) {
-		getRxNettyResponse().setStatus(HttpResponseStatus.valueOf(status.value()));
+		this.response.setStatus(HttpResponseStatus.valueOf(status.value()));
 	}
 
 	@Override
 	protected Mono<Void> setBodyInternal(Publisher<ByteBuffer> publisher) {
 		Observable<byte[]> content = RxJava1Converter.from(publisher).map(this::toBytes);
-		Observable<Void> completion = getRxNettyResponse().writeBytes(content);
+		Observable<Void> completion = this.response.writeBytes(content);
 		return RxJava1Converter.from(completion).after();
 	}
 
@@ -74,6 +75,21 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 		for (String name : getHeaders().keySet()) {
 			for (String value : getHeaders().get(name))
 				this.response.addHeader(name, value);
+		}
+	}
+
+	@Override
+	protected void writeCookies() {
+		for (String name : getHeaders().getCookies().keySet()) {
+			for (HttpCookie httpCookie : getHeaders().getCookies().get(name)) {
+				Cookie cookie = new DefaultCookie(name, httpCookie.getValue());
+				cookie.setDomain(httpCookie.getDomain());
+				cookie.setPath(httpCookie.getPath());
+				cookie.setMaxAge(httpCookie.getMaxAge());
+				cookie.setSecure(httpCookie.isSecure());
+				cookie.setHttpOnly(httpCookie.isHttpOnly());
+				this.response.addCookie(cookie);
+			}
 		}
 	}
 

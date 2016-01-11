@@ -22,10 +22,13 @@ import java.util.Map;
 import java.util.function.Function;
 
 import io.undertow.server.HttpServerExchange;
+import io.undertow.server.handlers.Cookie;
+import io.undertow.server.handlers.CookieImpl;
 import io.undertow.util.HttpString;
 import org.reactivestreams.Publisher;
 import reactor.Mono;
 
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 
@@ -72,6 +75,21 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse {
 		for (Map.Entry<String, List<String>> entry : getHeaders().entrySet()) {
 			HttpString headerName = HttpString.tryFromString(entry.getKey());
 			this.exchange.getResponseHeaders().addAll(headerName, entry.getValue());
+		}
+	}
+
+	@Override
+	protected void writeCookies() {
+		for (String name : getHeaders().getCookies().keySet()) {
+			for (HttpCookie httpCookie : getHeaders().getCookies().get(name)) {
+				Cookie cookie = new CookieImpl(name, httpCookie.getValue());
+				cookie.setDomain(httpCookie.getDomain());
+				cookie.setPath(httpCookie.getPath());
+				cookie.setMaxAge(httpCookie.getMaxAge() == Long.MIN_VALUE ? null : (int) httpCookie.getMaxAge());
+				cookie.setSecure(httpCookie.isSecure());
+				cookie.setHttpOnly(httpCookie.isHttpOnly());
+				this.exchange.getResponseCookies().putIfAbsent(name, cookie);
+			}
 		}
 	}
 

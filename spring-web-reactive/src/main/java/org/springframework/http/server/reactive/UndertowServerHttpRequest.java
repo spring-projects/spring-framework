@@ -19,12 +19,17 @@ package org.springframework.http.server.reactive;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 import io.undertow.server.HttpServerExchange;
+import io.undertow.server.handlers.Cookie;
 import io.undertow.util.HeaderValues;
 import org.reactivestreams.Publisher;
 import reactor.Flux;
 
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
@@ -67,12 +72,28 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	protected HttpHeaders initHeaders() {
-		HttpHeaders headers = new HttpHeaders();
+	protected void initHeaders(HttpHeaders headers) {
 		for (HeaderValues values : this.getUndertowExchange().getRequestHeaders()) {
 			headers.put(values.getHeaderName().toString(), values);
 		}
-		return headers;
+	}
+
+	@Override
+	protected void initCookies(Map<String, Set<HttpCookie>> map) {
+		for (String name : this.exchange.getRequestCookies().keySet()) {
+			Set<HttpCookie> set = map.get(name);
+			if (set == null) {
+				set = new LinkedHashSet<>();
+				map.put(name, set);
+			}
+			Cookie cookie = this.exchange.getRequestCookies().get(name);
+			set.add(new HttpCookie(name, cookie.getValue())
+					.setDomain(cookie.getDomain())
+					.setPath(cookie.getPath())
+					.setMaxAge(cookie.getMaxAge() != null ? cookie.getMaxAge() : Long.MIN_VALUE)
+					.setSecure(cookie.isSecure())
+					.setHttpOnly(cookie.isHttpOnly()));
+		}
 	}
 
 	@Override

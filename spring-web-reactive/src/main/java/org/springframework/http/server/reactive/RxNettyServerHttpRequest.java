@@ -19,13 +19,18 @@ package org.springframework.http.server.reactive;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.http.cookie.Cookie;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import reactor.Flux;
 import reactor.core.publisher.convert.RxJava1Converter;
 import rx.Observable;
 
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
@@ -53,26 +58,43 @@ public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(this.getRxNettyRequest().getHttpMethod().name());
+		return HttpMethod.valueOf(this.request.getHttpMethod().name());
 	}
 
 	@Override
 	protected URI initUri() throws URISyntaxException {
-		return new URI(this.getRxNettyRequest().getUri());
+		return new URI(this.request.getUri());
 	}
 
 	@Override
-	protected HttpHeaders initHeaders() {
-		HttpHeaders headers = new HttpHeaders();
-		for (String name : this.getRxNettyRequest().getHeaderNames()) {
-			headers.put(name, this.getRxNettyRequest().getAllHeaderValues(name));
+	protected void initHeaders(HttpHeaders headers) {
+		for (String name : this.request.getHeaderNames()) {
+			headers.put(name, this.request.getAllHeaderValues(name));
 		}
-		return headers;
+	}
+
+	@Override
+	protected void initCookies(Map<String, Set<HttpCookie>> map) {
+		for (String name : this.request.getCookies().keySet()) {
+			Set<HttpCookie> set = map.get(name);
+			if (set == null) {
+				set = new LinkedHashSet<>();
+				map.put(name, set);
+			}
+			for (Cookie cookie : this.request.getCookies().get(name)) {
+				set.add(new HttpCookie(name, cookie.value())
+						.setDomain(cookie.domain())
+						.setPath(cookie.path())
+						.setMaxAge(cookie.maxAge())
+						.setSecure(cookie.isSecure())
+						.setHttpOnly(cookie.isHttpOnly()));
+			}
+		}
 	}
 
 	@Override
 	public Flux<ByteBuffer> getBody() {
-		Observable<ByteBuffer> content = this.getRxNettyRequest().getContent().map(ByteBuf::nioBuffer);
+		Observable<ByteBuffer> content = this.request.getContent().map(ByteBuf::nioBuffer);
 		content = content.concatWith(Observable.empty()); // See GH issue #58
 		return RxJava1Converter.from(content);
 	}

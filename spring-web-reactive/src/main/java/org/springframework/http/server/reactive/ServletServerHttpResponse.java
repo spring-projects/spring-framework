@@ -21,11 +21,13 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 import org.reactivestreams.Publisher;
 import reactor.Mono;
 
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
@@ -81,6 +83,25 @@ public class ServletServerHttpResponse extends AbstractServerHttpResponse {
 		Charset charset = (contentType != null ? contentType.getCharSet() : null);
 		if (this.response.getCharacterEncoding() == null && charset != null) {
 			this.response.setCharacterEncoding(charset.name());
+		}
+	}
+
+	@Override
+	protected void writeCookies() {
+		for (String name : getHeaders().getCookies().keySet()) {
+			for (HttpCookie httpCookie : getHeaders().getCookies().get(name)) {
+				Cookie cookie = new Cookie(name, httpCookie.getValue());
+				if (httpCookie.getDomain() != null) {
+					cookie.setDomain(httpCookie.getDomain());
+				}
+				if (httpCookie.getPath() != null) {
+					cookie.setPath(httpCookie.getPath());
+				}
+				cookie.setMaxAge(httpCookie.getMaxAge() == Long.MIN_VALUE ? -1 : (int) httpCookie.getMaxAge());
+				cookie.setSecure(httpCookie.isSecure());
+				cookie.setHttpOnly(httpCookie.isHttpOnly());
+				this.response.addCookie(cookie);
+			}
 		}
 	}
 
