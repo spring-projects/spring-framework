@@ -28,7 +28,6 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -366,7 +365,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 
 	private final Map<String, List<String>> headers;
 
-	private final Map<String, Set<HttpCookie>> cookies;
+	private final Map<String, List<HttpCookie>> cookies;
 
 
 	/**
@@ -377,11 +376,11 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Constructor with a map of HTTP cookies that enables lazy initialization
-	 * of input cookies on first access of the map.
-	 * @param inputCookies a Map with input cookies
+	 * Constructor with a map of HTTP input cookies (e.g. cookies sent by client)
+	 * that enables lazy initialization on first access of the map.
+	 * @param inputCookies input cookies
 	 */
-	public HttpHeaders(Map<String, Set<HttpCookie>> inputCookies) {
+	public HttpHeaders(Map<String, List<HttpCookie>> inputCookies) {
 		this(new LinkedCaseInsensitiveMap<List<String>>(8, Locale.ENGLISH), inputCookies, false);
 		Assert.notNull(cookies, "'inputCookies' is required.");
 	}
@@ -389,7 +388,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	/**
 	 * Private constructor that can create read-only {@code HttpHeader} instances.
 	 */
-	private HttpHeaders(Map<String, List<String>> headers, Map<String, Set<HttpCookie>> cookies,
+	private HttpHeaders(Map<String, List<String>> headers, Map<String, List<HttpCookie>> cookies,
 			boolean readOnly) {
 
 		Assert.notNull(headers, "'headers' must not be null");
@@ -405,7 +404,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		}
 		else {
 			this.headers = headers;
-			this.cookies = (cookies != null ? cookies : new LinkedHashMap<>());
+			this.cookies = (cookies != null ? cookies : new LinkedCaseInsensitiveMap<>());
 		}
 	}
 
@@ -722,13 +721,13 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Add an HTTP cookie. Supported only when writing output cookies.
+	 * Add an HTTP cookie.
 	 */
 	public void addCookie(HttpCookie cookie) {
 		String name = cookie.getName();
-		Set<HttpCookie> set = this.cookies.get(name);
+		List<HttpCookie> set = this.cookies.get(name);
 		if (set == null) {
-			set = new LinkedHashSet<>();
+			set = new ArrayList<>();
 			this.cookies.put(name, set);
 		}
 		set.add(cookie);
@@ -738,7 +737,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Return a map with {@link HttpCookie}s. When reading input cookies this map
 	 * cannot be modified. When writing output cookies, this map is mutable.
 	 */
-	public Map<String, Set<HttpCookie>> getCookies() {
+	public Map<String, List<HttpCookie>> getCookies() {
 		return this.cookies;
 	}
 

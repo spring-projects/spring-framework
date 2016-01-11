@@ -18,12 +18,13 @@ package org.springframework.http.server.reactive;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collection;
-import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpCookie;
+import org.springframework.http.HttpHeaders;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
  * Common base class for {@link ServerHttpRequest} implementations.
@@ -78,20 +79,20 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	 * first access to cookies via {@link #getHeaders()} and then cached.
 	 * @param cookies the map to add cookies to
 	 */
-	protected abstract void initCookies(Map<String, Set<HttpCookie>> cookies);
+	protected abstract void initCookies(Map<String, List<HttpCookie>> cookies);
 
 
 	/**
 	 * Read-only map of input cookies with lazy initialization.
 	 */
-	private class HttpCookieInputMap implements Map<String, Set<HttpCookie>> {
+	private class HttpCookieInputMap implements Map<String, List<HttpCookie>> {
 
-		private Map<String, Set<HttpCookie>> cookies;
+		private Map<String, List<HttpCookie>> cookies;
 
 
-		private Map<String, Set<HttpCookie>> getCookies() {
+		private Map<String, List<HttpCookie>> getCookies() {
 			if (this.cookies == null) {
-				this.cookies = new LinkedHashMap<>();
+				this.cookies = new LinkedCaseInsensitiveMap<>();
 				initCookies(this.cookies);
 			}
 			return this.cookies;
@@ -118,7 +119,7 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 		}
 
 		@Override
-		public Set<HttpCookie> get(Object key) {
+		public List<HttpCookie> get(Object key) {
 			return getCookies().get(key);
 		}
 
@@ -128,33 +129,33 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 		}
 
 		@Override
-		public Collection<Set<HttpCookie>> values() {
+		public Collection<List<HttpCookie>> values() {
 			return getCookies().values();
 		}
 
 		@Override
-		public Set<Entry<String, Set<HttpCookie>>> entrySet() {
+		public Set<Entry<String, List<HttpCookie>>> entrySet() {
 			return getCookies().entrySet();
 		}
 
 		@Override
-		public Set<HttpCookie> put(String key, Set<HttpCookie> value) {
-			throw new UnsupportedOperationException("Read-only map of cookies.");
+		public List<HttpCookie> put(String key, List<HttpCookie> value) {
+			throw new UnsupportedOperationException("Can't modify client sent cookies.");
 		}
 
 		@Override
-		public Set<HttpCookie> remove(Object key) {
-			throw new UnsupportedOperationException("Read-only map of cookies.");
+		public List<HttpCookie> remove(Object key) {
+			throw new UnsupportedOperationException("Can't modify client sent cookies.");
 		}
 
 		@Override
-		public void putAll(Map<? extends String, ? extends Set<HttpCookie>> m) {
-			throw new UnsupportedOperationException("Read-only map of cookies.");
+		public void putAll(Map<? extends String, ? extends List<HttpCookie>> map) {
+			throw new UnsupportedOperationException("Can't modify client sent cookies.");
 		}
 
 		@Override
 		public void clear() {
-			throw new UnsupportedOperationException("Read-only map of cookies.");
+			throw new UnsupportedOperationException("Can't modify client sent cookies.");
 		}
 	}
 

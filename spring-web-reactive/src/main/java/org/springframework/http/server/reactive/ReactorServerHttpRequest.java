@@ -18,8 +18,8 @@ package org.springframework.http.server.reactive;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import reactor.Flux;
 import reactor.io.buffer.Buffer;
@@ -68,7 +68,7 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	protected void initCookies(Map<String, Set<HttpCookie>> cookies) {
+	protected void initCookies(Map<String, List<HttpCookie>> cookies) {
 		// https://github.com/reactor/reactor/issues/614
 	}
 

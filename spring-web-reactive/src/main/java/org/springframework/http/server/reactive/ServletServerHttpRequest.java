@@ -20,10 +20,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
@@ -111,20 +111,15 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	protected void initCookies(Map<String, Set<HttpCookie>> map) {
+	protected void initCookies(Map<String, List<HttpCookie>> map) {
 		for (Cookie cookie : this.request.getCookies()) {
 			String name = cookie.getName();
-			Set<HttpCookie> set = map.get(name);
-			if (set == null) {
-				set = new LinkedHashSet<>();
-				map.put(name, set);
+			List<HttpCookie> list = map.get(name);
+			if (list == null) {
+				list = new ArrayList<>();
+				map.put(name, list);
 			}
-			set.add(new HttpCookie(name, cookie.getValue())
-					.setDomain(cookie.getDomain())
-					.setPath(cookie.getPath())
-					.setMaxAge(cookie.getMaxAge() == -1 ? Long.MIN_VALUE : cookie.getMaxAge())
-					.setHttpOnly(cookie.isHttpOnly())
-					.setSecure(cookie.getSecure()));
+			list.add(HttpCookie.clientCookie(name, cookie.getValue()));
 		}
 	}
 

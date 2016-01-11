@@ -19,9 +19,9 @@ package org.springframework.http.server.reactive;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-import java.util.LinkedHashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.cookie.Cookie;
@@ -74,20 +74,15 @@ public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	protected void initCookies(Map<String, Set<HttpCookie>> map) {
+	protected void initCookies(Map<String, List<HttpCookie>> map) {
 		for (String name : this.request.getCookies().keySet()) {
-			Set<HttpCookie> set = map.get(name);
-			if (set == null) {
-				set = new LinkedHashSet<>();
-				map.put(name, set);
+			List<HttpCookie> list = map.get(name);
+			if (list == null) {
+				list = new ArrayList<>();
+				map.put(name, list);
 			}
 			for (Cookie cookie : this.request.getCookies().get(name)) {
-				set.add(new HttpCookie(name, cookie.value())
-						.setDomain(cookie.domain())
-						.setPath(cookie.path())
-						.setMaxAge(cookie.maxAge())
-						.setSecure(cookie.isSecure())
-						.setHttpOnly(cookie.isHttpOnly()));
+				list.add(HttpCookie.clientCookie(name, cookie.value()));
 			}
 		}
 	}

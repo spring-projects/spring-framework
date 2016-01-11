@@ -19,9 +19,9 @@ package org.springframework.http.server.reactive;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
-import java.util.LinkedHashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.Cookie;
@@ -79,20 +79,15 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	protected void initCookies(Map<String, Set<HttpCookie>> map) {
+	protected void initCookies(Map<String, List<HttpCookie>> map) {
 		for (String name : this.exchange.getRequestCookies().keySet()) {
-			Set<HttpCookie> set = map.get(name);
-			if (set == null) {
-				set = new LinkedHashSet<>();
-				map.put(name, set);
+			List<HttpCookie> list = map.get(name);
+			if (list == null) {
+				list = new ArrayList<>();
+				map.put(name, list);
 			}
 			Cookie cookie = this.exchange.getRequestCookies().get(name);
-			set.add(new HttpCookie(name, cookie.getValue())
-					.setDomain(cookie.getDomain())
-					.setPath(cookie.getPath())
-					.setMaxAge(cookie.getMaxAge() != null ? cookie.getMaxAge() : Long.MIN_VALUE)
-					.setSecure(cookie.isSecure())
-					.setHttpOnly(cookie.isHttpOnly()));
+			list.add(HttpCookie.clientCookie(name, cookie.getValue()));
 		}
 	}
 

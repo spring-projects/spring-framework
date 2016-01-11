@@ -91,13 +91,15 @@ public class ServletServerHttpResponse extends AbstractServerHttpResponse {
 		for (String name : getHeaders().getCookies().keySet()) {
 			for (HttpCookie httpCookie : getHeaders().getCookies().get(name)) {
 				Cookie cookie = new Cookie(name, httpCookie.getValue());
+				if (httpCookie.getMaxAge() > -1) {
+					cookie.setMaxAge(httpCookie.getMaxAge());
+				}
 				if (httpCookie.getDomain() != null) {
 					cookie.setDomain(httpCookie.getDomain());
 				}
 				if (httpCookie.getPath() != null) {
 					cookie.setPath(httpCookie.getPath());
 				}
-				cookie.setMaxAge(httpCookie.getMaxAge() == Long.MIN_VALUE ? -1 : (int) httpCookie.getMaxAge());
 				cookie.setSecure(httpCookie.isSecure());
 				cookie.setHttpOnly(httpCookie.isHttpOnly());
 				this.response.addCookie(cookie);

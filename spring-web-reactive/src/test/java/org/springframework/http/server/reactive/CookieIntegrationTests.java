@@ -19,7 +19,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.junit.After;
 import org.junit.Before;
@@ -102,32 +101,29 @@ public class CookieIntegrationTests {
 		ResponseEntity<Void> response = new RestTemplate().exchange(
 				RequestEntity.get(url).header("Cookie", header).build(), Void.class);
 
-		Map<String, Set<HttpCookie>> requestCookies = this.cookieHandler.requestCookies;
+		Map<String, List<HttpCookie>> requestCookies = this.cookieHandler.requestCookies;
 		assertEquals(2, requestCookies.size());
 
-		Set<HttpCookie> set = requestCookies.get("SID");
-		assertEquals(1, set.size());
-		assertEquals("31d4d96e407aad42", set.iterator().next().getValue());
+		List<HttpCookie> list = requestCookies.get("SID");
+		assertEquals(1, list.size());
+		assertEquals("31d4d96e407aad42", list.iterator().next().getValue());
 
-		set = requestCookies.get("lang");
-		assertEquals(1, set.size());
-		assertEquals("en-US", set.iterator().next().getValue());
+		list = requestCookies.get("lang");
+		assertEquals(1, list.size());
+		assertEquals("en-US", list.iterator().next().getValue());
 
 		List<String> headerValues = response.getHeaders().get("Set-Cookie");
 		assertEquals(2, headerValues.size());
 
-		List<String> parts = splitCookieHeader(headerValues.get(0));
-		assertThat(parts, containsInAnyOrder(equalTo("SID=31d4d96e407aad42"),
-				equalToIgnoringCase("Path=/"), equalToIgnoringCase("Secure"),
-				equalToIgnoringCase("HttpOnly")));
+		assertThat(splitCookie(headerValues.get(0)), containsInAnyOrder(equalTo("SID=31d4d96e407aad42"),
+				equalToIgnoringCase("Path=/"), equalToIgnoringCase("Secure"), equalToIgnoringCase("HttpOnly")));
 
-		parts = splitCookieHeader(headerValues.get(1));
-		assertThat(parts, containsInAnyOrder(equalTo("lang=en-US"),
+		assertThat(splitCookie(headerValues.get(1)), containsInAnyOrder(equalTo("lang=en-US"),
 				equalToIgnoringCase("Path=/"), equalToIgnoringCase("Domain=example.com")));
 	}
 
 	// No client side HttpCookie support yet
-	private List<String> splitCookieHeader(String value) {
+	private List<String> splitCookie(String value) {
 		List<String> list = new ArrayList<>();
 		for (String s : value.split(";")){
 			list.add(s.trim());
@@ -138,7 +134,7 @@ public class CookieIntegrationTests {
 
 	private class CookieHandler implements HttpHandler {
 
-		private Map<String, Set<HttpCookie>> requestCookies;
+		private Map<String, List<HttpCookie>> requestCookies;
 
 
 		@Override
@@ -147,10 +143,10 @@ public class CookieIntegrationTests {
 			this.requestCookies = request.getHeaders().getCookies();
 			this.requestCookies.size(); // Cause lazy loading
 
-			response.getHeaders().addCookie(new HttpCookie("SID", "31d4d96e407aad42")
-					.setPath("/").setHttpOnly(true).setSecure(true));
-			response.getHeaders().addCookie(new HttpCookie("lang", "en-US")
-					.setDomain("example.com").setPath("/"));
+			response.getHeaders().addCookie(HttpCookie.serverCookie("SID", "31d4d96e407aad42")
+					.path("/").secure().httpOnly().build());
+			response.getHeaders().addCookie(HttpCookie.serverCookie("lang", "en-US")
+					.domain("example.com").path("/").build());
 			response.writeHeaders();
 
 			return Mono.empty();
