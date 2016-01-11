@@ -76,7 +76,14 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 		if (this.conversionService.canConvert(Publisher.class, type.getRawClass())) {
 			return Mono.just(this.conversionService.convert(elementFlux, type.getRawClass()));
 		}
+		else if (type.getRawClass() == Flux.class) {
+			return Mono.just(elementFlux);
+		}
+		else if (type.getRawClass() == Mono.class) {
+			return Mono.just(Mono.from(elementFlux));
+		}
 
+		// TODO Currently manage only "Foo" parameter, not "List<Foo>" parameters, Stéphane is going to add toIterable/toIterator to Flux to support that use case
 		return elementFlux.next().map(o -> o);
 	}
 
