@@ -18,14 +18,15 @@ package org.springframework.reactive.codec.decoder;
 
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.stream.StreamSupport;
 
+import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
+import reactor.Flux;
 import reactor.io.buffer.Buffer;
-import reactor.rx.Stream;
-import reactor.rx.Streams;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.support.JacksonJsonDecoder;
@@ -47,9 +48,9 @@ public class JacksonJsonDecoderTests {
 
 	@Test
 	public void decode() throws InterruptedException {
-		Stream<ByteBuffer> source = Streams.just(Buffer.wrap("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}").byteBuffer());
-		List<Object> results = Streams.from(decoder.decode(source, ResolvableType.forClass(Pojo.class), null))
-				.toList().get();
+		Flux<ByteBuffer> source = Flux.just(Buffer.wrap("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}").byteBuffer());
+		Flux<Object> output = decoder.decode(source, ResolvableType.forClass(Pojo.class), null);
+		List<Object> results = StreamSupport.stream(output.toIterable().spliterator(), false).collect(toList());
 		assertEquals(1, results.size());
 		assertEquals("foofoo", ((Pojo) results.get(0)).getFoo());
 	}

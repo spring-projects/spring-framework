@@ -18,11 +18,12 @@ package org.springframework.web.reactive.method.annotation;
 
 import java.net.URI;
 import java.util.List;
+import java.util.stream.StreamSupport;
 
+import static java.util.stream.Collectors.toList;
 import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
-import reactor.rx.Stream;
 
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.http.HttpMethod;
@@ -38,6 +39,7 @@ import org.springframework.web.server.WebServerExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import reactor.Flux;
 
 /**
  * @author Sebastien Deleuze
@@ -83,7 +85,7 @@ public class RequestMappingHandlerMappingTests {
 
 	private HandlerMethod toHandlerMethod(Publisher<?> handlerPublisher) throws InterruptedException {
 		assertNotNull(handlerPublisher);
-		List<?> handlerList = Stream.from(handlerPublisher).toList().get();
+		List<?> handlerList = StreamSupport.stream(Flux.from(handlerPublisher).toIterable().spliterator(), false).collect(toList());
 		assertEquals(1, handlerList.size());
 		return (HandlerMethod) handlerList.get(0);
 	}

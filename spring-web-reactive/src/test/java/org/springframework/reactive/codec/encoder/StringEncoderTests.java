@@ -16,14 +16,17 @@
 
 package org.springframework.reactive.codec.encoder;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.stream.StreamSupport;
 
+import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import reactor.rx.Streams;
+import reactor.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.support.StringEncoder;
@@ -45,12 +48,12 @@ public class StringEncoderTests {
 
 	@Test
 	public void write() throws InterruptedException {
-		List<String> results = Streams.from(encoder.encode(Streams.just("foo"), null, null))
-				.map(chunk -> {
-					byte[] b = new byte[chunk.remaining()];
-					chunk.get(b);
-					return new String(b, StandardCharsets.UTF_8);
-				}).toList().get();
+		Flux<String> output = Flux.from(encoder.encode(Flux.just("foo"), null, null)).map(chunk -> {
+			byte[] b = new byte[chunk.remaining()];
+			chunk.get(b);
+			return new String(b, StandardCharsets.UTF_8);
+		});
+		List<String> results = StreamSupport.stream(output.toIterable().spliterator(), false).collect(toList());
 		assertEquals(1, results.size());
 		assertEquals("foo", results.get(0));
 	}

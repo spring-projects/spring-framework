@@ -18,13 +18,14 @@ package org.springframework.reactive.codec.decoder;
 
 import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.stream.StreamSupport;
 
+import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.*;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
+import reactor.Flux;
 import reactor.io.buffer.Buffer;
-import reactor.rx.Stream;
-import reactor.rx.Streams;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.support.ByteBufferDecoder;
@@ -48,9 +49,9 @@ public class ByteBufferDecoderTests {
 	public void decode() throws InterruptedException {
 		ByteBuffer fooBuffer = Buffer.wrap("foo").byteBuffer();
 		ByteBuffer barBuffer = Buffer.wrap("bar").byteBuffer();
-		Stream<ByteBuffer> source = Streams.just(fooBuffer, barBuffer);
-		List<ByteBuffer> results = Streams.from(decoder.decode(source,
-				ResolvableType.forClassWithGenerics(Publisher.class, ByteBuffer.class), null)).toList().get();
+		Flux<ByteBuffer> source = Flux.just(fooBuffer, barBuffer);
+		Flux<ByteBuffer> output = decoder.decode(source, ResolvableType.forClassWithGenerics(Publisher.class, ByteBuffer.class), null);
+		List<ByteBuffer> results = StreamSupport.stream(output.toIterable().spliterator(), false).collect(toList());
 		assertEquals(2, results.size());
 		assertEquals(fooBuffer, results.get(0));
 		assertEquals(barBuffer, results.get(1));

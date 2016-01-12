@@ -60,6 +60,7 @@ public class ByteBufferPublisherInputStream extends InputStream {
 	public ByteBufferPublisherInputStream(Publisher<ByteBuffer> publisher, int requestSize) {
 		Assert.notNull(publisher, "'publisher' must not be null");
 
+		// TODO Avoid using Reactor Stream, it should not be a mandatory dependency of Spring Reactive
 		this.queue = Stream.from(publisher).toBlockingQueue(requestSize);
 	}
 
