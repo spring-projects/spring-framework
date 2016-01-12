@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import reactor.Flux;
+import reactor.Mono;
 import reactor.core.subscriber.SubscriberBarrier;
 import reactor.core.support.BackpressureUtils;
 import reactor.io.buffer.Buffer;
@@ -32,8 +33,9 @@ import org.springframework.core.ResolvableType;
 import org.springframework.util.MimeType;
 
 /**
- * Encode a byte stream of individual JSON element to a byte stream representing
- * a single JSON array when if it contains more than one element.
+ * Encode a byte stream of individual JSON element to a byte stream representing:
+ *  - the same JSON object than the input stream if it is a {@link Mono}
+ *  - a JSON array for other kinds of {@link Publisher}
  *
  * @author Sebastien Deleuze
  * @author Stephane Maldini
@@ -48,22 +50,24 @@ public class JsonObjectEncoder extends AbstractEncoder<ByteBuffer> {
 	}
 
 	@Override
-	public Flux<ByteBuffer> encode(Publisher<? extends ByteBuffer> messageStream,
+	public Flux<ByteBuffer> encode(Publisher<? extends ByteBuffer> inputStream,
 			ResolvableType type, MimeType mimeType, Object... hints) {
 
-		//noinspection Convert2MethodRef
-		return Flux.from(messageStream).lift(bbs -> new JsonEncoderBarrier(bbs));
+		if (inputStream instanceof Mono) {
+			return Flux.from(inputStream);
+		}
+		return Flux.from(inputStream).lift(s -> new JsonArrayEncoderBarrier(s));
 	}
 
 
-	private static class JsonEncoderBarrier extends SubscriberBarrier<ByteBuffer, ByteBuffer> {
+	private static class JsonArrayEncoderBarrier extends SubscriberBarrier<ByteBuffer, ByteBuffer> {
 
 		@SuppressWarnings("rawtypes")
-		static final AtomicLongFieldUpdater<JsonEncoderBarrier> REQUESTED =
-				AtomicLongFieldUpdater.newUpdater(JsonEncoderBarrier.class, "requested");
+		static final AtomicLongFieldUpdater<JsonArrayEncoderBarrier> REQUESTED =
+				AtomicLongFieldUpdater.newUpdater(JsonArrayEncoderBarrier.class, "requested");
 
-		static final AtomicIntegerFieldUpdater<JsonEncoderBarrier> TERMINATED =
-				AtomicIntegerFieldUpdater.newUpdater(JsonEncoderBarrier.class, "terminated");
+		static final AtomicIntegerFieldUpdater<JsonArrayEncoderBarrier> TERMINATED =
+				AtomicIntegerFieldUpdater.newUpdater(JsonArrayEncoderBarrier.class, "terminated");
 
 
 		private ByteBuffer prev = null;
@@ -75,7 +79,7 @@ public class JsonObjectEncoder extends AbstractEncoder<ByteBuffer> {
 		private volatile int terminated;
 
 
-		public JsonEncoderBarrier(Subscriber<? super ByteBuffer> subscriber) {
+		public JsonArrayEncoderBarrier(Subscriber<? super ByteBuffer> subscriber) {
 			super(subscriber);
 		}
 
@@ -94,20 +98,19 @@ public class JsonObjectEncoder extends AbstractEncoder<ByteBuffer> {
 		@Override
 		protected void doNext(ByteBuffer next) {
 			this.count++;
-			if (this.count == 1) {
-				this.prev = next;
-				super.doRequest(1);
-				return;
-			}
 
 			ByteBuffer tmp = this.prev;
 			this.prev = next;
 			Buffer buffer = new Buffer();
-			if (this.count == 2) {
+			if (this.count == 1) {
 				buffer.append("[");
 			}
-			buffer.append(tmp);
-			buffer.append(",");
+			if (tmp != null) {
+				buffer.append(tmp);
+			}
+			if (this.count > 1) {
+				buffer.append(",");
+			}
 			buffer.flip();
 
 			BackpressureUtils.getAndSub(REQUESTED, this, 1L);
@@ -118,9 +121,7 @@ public class JsonObjectEncoder extends AbstractEncoder<ByteBuffer> {
 			if(BackpressureUtils.getAndSub(REQUESTED, this, 1L) > 0) {
 				Buffer buffer = new Buffer();
 				buffer.append(this.prev);
-				if (this.count > 1) {
-					buffer.append("]");
-				}
+				buffer.append("]");
 				buffer.flip();
 				subscriber.onNext(buffer.byteBuffer());
 				super.doComplete();

@@ -18,13 +18,12 @@ package org.springframework.reactive.codec.encoder;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import org.junit.Test;
+import reactor.Flux;
+import reactor.Mono;
 import reactor.io.buffer.Buffer;
-import reactor.rx.Stream;
-import reactor.rx.Streams;
 
 import org.springframework.core.codec.support.JsonObjectEncoder;
 
@@ -34,46 +33,59 @@ import org.springframework.core.codec.support.JsonObjectEncoder;
 public class JsonObjectEncoderTests {
 
 	@Test
-	public void encodeSingleElement() throws InterruptedException {
+	public void encodeSingleElementFlux() throws InterruptedException {
 		JsonObjectEncoder encoder = new JsonObjectEncoder();
-		Stream<ByteBuffer> source = Streams.just(Buffer.wrap("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}").byteBuffer());
-		List<String> results = Streams.from(encoder.encode(source, null, null)).map(chunk -> {
+		Flux<ByteBuffer> source = Flux.just(Buffer.wrap("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}").byteBuffer());
+		Iterable<String> results = Flux.from(encoder.encode(source, null, null)).map(chunk -> {
 			byte[] b = new byte[chunk.remaining()];
 			chunk.get(b);
 			return new String(b, StandardCharsets.UTF_8);
-		}).toList().get();
+		}).toIterable();
+		String result = String.join("", results);
+		assertEquals("[{\"foo\": \"foofoo\", \"bar\": \"barbar\"}]", result);
+	}
+
+	@Test
+	public void encodeSingleElementMono() throws InterruptedException {
+		JsonObjectEncoder encoder = new JsonObjectEncoder();
+		Mono<ByteBuffer> source = Mono.just(Buffer.wrap("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}").byteBuffer());
+		Iterable<String> results = Flux.from(encoder.encode(source, null, null)).map(chunk -> {
+			byte[] b = new byte[chunk.remaining()];
+			chunk.get(b);
+			return new String(b, StandardCharsets.UTF_8);
+		}).toIterable();
 		String result = String.join("", results);
 		assertEquals("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}", result);
 	}
 
 	@Test
-	public void encodeTwoElements() throws InterruptedException {
+	public void encodeTwoElementsFlux() throws InterruptedException {
 		JsonObjectEncoder encoder = new JsonObjectEncoder();
-		Stream<ByteBuffer> source = Streams.just(
+		Flux<ByteBuffer> source = Flux.just(
 				Buffer.wrap("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}").byteBuffer(),
 				Buffer.wrap("{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}").byteBuffer());
-		List<String> results = Streams.from(encoder.encode(source, null, null)).map(chunk -> {
+		Iterable<String> results = Flux.from(encoder.encode(source, null, null)).map(chunk -> {
 			byte[] b = new byte[chunk.remaining()];
 			chunk.get(b);
 			return new String(b, StandardCharsets.UTF_8);
-		}).toList().get();
+		}).toIterable();
 		String result = String.join("", results);
 		assertEquals("[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]", result);
 	}
 
 	@Test
-	public void encodeThreeElements() throws InterruptedException {
+	public void encodeThreeElementsFlux() throws InterruptedException {
 		JsonObjectEncoder encoder = new JsonObjectEncoder();
-		Stream<ByteBuffer> source = Streams.just(
+		Flux<ByteBuffer> source = Flux.just(
 				Buffer.wrap("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}").byteBuffer(),
 				Buffer.wrap("{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}").byteBuffer(),
 				Buffer.wrap("{\"foo\": \"foofoofoofoo\", \"bar\": \"barbarbarbar\"}").byteBuffer()
 		);
-		List<String> results = Streams.from(encoder.encode(source, null, null)).map(chunk -> {
+		Iterable<String> results = Flux.from(encoder.encode(source, null, null)).map(chunk -> {
 			byte[] b = new byte[chunk.remaining()];
 			chunk.get(b);
 			return new String(b, StandardCharsets.UTF_8);
-		}).toList().get();
+		}).toIterable();
 		String result = String.join("", results);
 		assertEquals("[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"},{\"foo\": \"foofoofoofoo\", \"bar\": \"barbarbarbar\"}]", result);
 	}

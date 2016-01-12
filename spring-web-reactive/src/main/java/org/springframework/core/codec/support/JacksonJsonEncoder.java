@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.reactivestreams.Publisher;
 import reactor.Flux;
+import reactor.Mono;
 import reactor.io.buffer.Buffer;
 
 import org.springframework.core.ResolvableType;
@@ -64,22 +65,23 @@ public class JacksonJsonEncoder extends AbstractEncoder<Object> {
 	public Flux<ByteBuffer> encode(Publisher<? extends Object> inputStream,
 			ResolvableType type, MimeType mimeType, Object... hints) {
 
-		Flux<ByteBuffer> stream = Flux.from(inputStream).map(value -> {
-			Buffer buffer = new Buffer();
-			BufferOutputStream outputStream = new BufferOutputStream(buffer);
-			try {
-				this.mapper.writeValue(outputStream, value);
-			}
-			catch (IOException e) {
-				throw new CodecException("Error while writing the data", e);
-			}
-			buffer.flip();
-			return buffer.byteBuffer();
-		});
-		if (this.postProcessor != null) {
-			stream = this.postProcessor.encode(stream, type, mimeType, hints);
-		};
-		return stream;
+		Publisher<ByteBuffer> stream = (inputStream instanceof Mono ?
+				((Mono<?>)inputStream).map(this::serialize) :
+				Flux.from(inputStream).map(this::serialize));
+		return (this.postProcessor == null ? Flux.from(stream) : this.postProcessor.encode(stream, type, mimeType, hints));
+	}
+
+	private ByteBuffer serialize(Object value) {
+		Buffer buffer = new Buffer();
+		BufferOutputStream outputStream = new BufferOutputStream(buffer);
+		try {
+			this.mapper.writeValue(outputStream, value);
+		}
+		catch (IOException e) {
+			throw new CodecException("Error while writing the data", e);
+		}
+		buffer.flip();
+		return buffer.byteBuffer();
 	}
 
 }
