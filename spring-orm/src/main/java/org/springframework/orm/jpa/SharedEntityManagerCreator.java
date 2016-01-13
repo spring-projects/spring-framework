@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -272,7 +272,8 @@ public abstract class SharedEntityManagerCreator {
 			else if (transactionRequiringMethods.contains(method.getName())) {
 				// We need a transactional target now, according to the JPA spec.
 				// Otherwise, the operation would get accepted but remain unflushed...
-				if (target == null || !TransactionSynchronizationManager.isActualTransactionActive()) {
+				if (target == null || (!TransactionSynchronizationManager.isActualTransactionActive() &&
+						!target.getTransaction().isActive())) {
 					throw new TransactionRequiredException("No EntityManager with actual transaction available " +
 							"for current thread - cannot reliably process '" + method.getName() + "' call");
 				}
