@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,10 +18,12 @@ package org.springframework.context.annotation;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -30,7 +32,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -625,7 +626,7 @@ class ConfigurationClassParser {
 
 
 	@SuppressWarnings("serial")
-	private static class ImportStack extends Stack<ConfigurationClass> implements ImportRegistry {
+	private static class ImportStack extends ArrayDeque<ConfigurationClass> implements ImportRegistry {
 
 		private final MultiValueMap<String, AnnotationMetadata> imports = new LinkedMultiValueMap<String, AnnotationMetadata>();
 
@@ -648,23 +649,6 @@ class ConfigurationClassParser {
 		public AnnotationMetadata getImportingClassFor(String importedClass) {
 			List<AnnotationMetadata> list = this.imports.get(importedClass);
 			return (!CollectionUtils.isEmpty(list) ? list.get(list.size() - 1) : null);
-		}
-
-		/**
-		 * Simplified contains() implementation that tests to see if any {@link ConfigurationClass}
-		 * exists within this stack that has the same name as <var>elem</var>. Elem must be of
-		 * type ConfigurationClass.
-		 */
-		@Override
-		public boolean contains(Object elem) {
-			ConfigurationClass configClass = (ConfigurationClass) elem;
-			Comparator<ConfigurationClass> comparator = new Comparator<ConfigurationClass>() {
-				@Override
-				public int compare(ConfigurationClass first, ConfigurationClass second) {
-					return (first.getMetadata().getClassName().equals(second.getMetadata().getClassName()) ? 0 : 1);
-				}
-			};
-			return (Collections.binarySearch(this, configClass, comparator) != -1);
 		}
 
 		/**
@@ -886,7 +870,7 @@ class ConfigurationClassParser {
 	 */
 	private static class CircularImportProblem extends Problem {
 
-		public CircularImportProblem(ConfigurationClass attemptedImport, Stack<ConfigurationClass> importStack) {
+		public CircularImportProblem(ConfigurationClass attemptedImport, Deque<ConfigurationClass> importStack) {
 			super(String.format("A circular @Import has been detected: " +
 					"Illegal attempt by @Configuration class '%s' to import class '%s' as '%s' is " +
 					"already present in the current import stack %s", importStack.peek().getSimpleName(),
