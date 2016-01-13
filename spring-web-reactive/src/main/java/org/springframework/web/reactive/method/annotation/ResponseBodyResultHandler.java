@@ -30,9 +30,11 @@ import java.util.stream.Collectors;
 import org.reactivestreams.Publisher;
 import reactor.Mono;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.http.MediaType;
@@ -120,8 +122,10 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 	public boolean supports(HandlerResult result) {
 		Object handler = result.getHandler();
 		if (handler instanceof HandlerMethod) {
-			Method method = ((HandlerMethod) handler).getMethod();
-			return AnnotatedElementUtils.isAnnotated(method, ResponseBody.class.getName());
+			MethodParameter returnType = ((HandlerMethod) handler).getReturnType();
+			Class<?> containingClass = returnType.getContainingClass();
+			return (AnnotationUtils.findAnnotation(containingClass, ResponseBody.class) != null ||
+					returnType.getMethodAnnotation(ResponseBody.class) != null);
 		}
 		return false;
 	}
