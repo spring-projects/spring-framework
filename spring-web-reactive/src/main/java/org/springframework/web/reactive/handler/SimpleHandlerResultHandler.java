@@ -62,8 +62,8 @@ public class SimpleHandlerResultHandler implements Ordered, HandlerResultHandler
 	@Override
 	public boolean supports(HandlerResult result) {
 		ResolvableType type = result.getResultType();
-		return type != null && Void.TYPE.equals(type.getRawClass()) ||
-				(Void.class.isAssignableFrom(type.getGeneric(0).getRawClass()) && isConvertibleToPublisher(type));
+		return (type != null && Void.TYPE.equals(type.getRawClass()) ||
+				(isConvertibleToPublisher(type) && Void.class.isAssignableFrom(type.getGeneric(0).getRawClass())));
 	}
 
 	private boolean isConvertibleToPublisher(ResolvableType type) {

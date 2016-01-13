@@ -19,6 +19,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import reactor.Mono;
 
 import org.springframework.http.HttpStatus;
@@ -30,6 +32,9 @@ import org.springframework.http.HttpStatus;
  * @author Rossen Stoyanchev
  */
 public class ExceptionHandlingWebHandler extends WebHandlerDecorator {
+
+	private static Log logger = LogFactory.getLog(ExceptionHandlingWebHandler.class);
+
 
 	private final List<WebExceptionHandler> exceptionHandlers;
 
@@ -51,6 +56,7 @@ public class ExceptionHandlingWebHandler extends WebHandlerDecorator {
 		return this.exceptionHandlers;
 	}
 
+
 	@Override
 	public Mono<Void> handle(WebServerExchange exchange) {
 		Mono<Void> mono;
@@ -63,10 +69,13 @@ public class ExceptionHandlingWebHandler extends WebHandlerDecorator {
 		for (WebExceptionHandler exceptionHandler : this.exceptionHandlers) {
 			mono = mono.otherwise(ex -> exceptionHandler.handle(exchange, ex));
 		}
-		return mono.otherwise(ex -> handleUnresolvedException(exchange));
+		return mono.otherwise(ex -> handleUnresolvedException(exchange, ex));
 	}
 
-	private Mono<? extends Void> handleUnresolvedException(WebServerExchange exchange) {
+	private Mono<? extends Void> handleUnresolvedException(WebServerExchange exchange, Throwable ex) {
+		if (logger.isDebugEnabled()) {
+			logger.debug("Could not complete request", ex);
+		}
 		exchange.getResponse().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
 		return Mono.empty();
 	}

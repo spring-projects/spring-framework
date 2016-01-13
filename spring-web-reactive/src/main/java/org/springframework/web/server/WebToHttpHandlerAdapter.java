@@ -15,8 +15,11 @@
  */
 package org.springframework.web.server;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import reactor.Mono;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -29,15 +32,28 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
  */
 public class WebToHttpHandlerAdapter extends WebHandlerDecorator implements HttpHandler {
 
+	private static Log logger = LogFactory.getLog(WebToHttpHandlerAdapter.class);
+
 
 	public WebToHttpHandlerAdapter(WebHandler delegate) {
 		super(delegate);
 	}
 
+
 	@Override
 	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 		WebServerExchange exchange = createWebServerExchange(request, response);
-		return getDelegate().handle(exchange).doOnTerminate((aVoid, ex) -> response.writeHeaders());
+		return getDelegate().handle(exchange).otherwise(ex -> {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Could not complete request", ex);
+					}
+					response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
+					return Mono.empty();
+				})
+				.doOnTerminate((aVoid, ex) -> {
+					response.writeHeaders();
+				});
+
 	}
 
 	protected WebServerExchange createWebServerExchange(ServerHttpRequest request, ServerHttpResponse response) {
