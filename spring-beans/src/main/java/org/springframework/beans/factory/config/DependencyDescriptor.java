@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -196,6 +196,7 @@ public class DependencyDescriptor implements Serializable {
 	 * Optionally set the concrete class that contains this dependency.
 	 * This may differ from the class that declares the parameter/field in that
 	 * it may be a subclass thereof, potentially substituting type variables.
+	 * @since 4.0
 	 */
 	public void setContainingClass(Class<?> containingClass) {
 		this.containingClass = containingClass;
@@ -206,6 +207,7 @@ public class DependencyDescriptor implements Serializable {
 
 	/**
 	 * Build a ResolvableType object for the wrapped parameter/field.
+	 * @since 4.0
 	 */
 	public ResolvableType getResolvableType() {
 		return (this.field != null ? ResolvableType.forField(this.field, this.nestingLevel, this.containingClass) :
@@ -217,6 +219,7 @@ public class DependencyDescriptor implements Serializable {
 	 * <p>This is {@code false} by default but may be overridden to return {@code true} in order
 	 * to suggest to a {@link org.springframework.beans.factory.support.AutowireCandidateResolver}
 	 * that a fallback match is acceptable as well.
+	 * @since 4.0
 	 */
 	public boolean fallbackMatchAllowed() {
 		return false;
@@ -224,6 +227,7 @@ public class DependencyDescriptor implements Serializable {
 
 	/**
 	 * Return a variant of this descriptor that is intended for a fallback match.
+	 * @since 4.0
 	 * @see #fallbackMatchAllowed()
 	 */
 	public DependencyDescriptor forFallbackMatch() {
