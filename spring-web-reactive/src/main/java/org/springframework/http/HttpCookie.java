@@ -15,6 +15,8 @@
  */
 package org.springframework.http;
 
+import java.time.Duration;
+
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -34,7 +36,7 @@ public final class HttpCookie {
 
 	private final String value;
 
-	private final int maxAge;
+	private final Duration maxAge;
 
 	private final String domain;
 
@@ -46,17 +48,17 @@ public final class HttpCookie {
 
 
 	private HttpCookie(String name, String value) {
-		this(name, value, -1, null, null, false, false);
+		this(name, value, Duration.ofSeconds(-1), null, null, false, false);
 	}
 
-	private HttpCookie(String name, String value, int maxAge, String domain, String path,
+	private HttpCookie(String name, String value, Duration maxAge, String domain, String path,
 			boolean secure, boolean httpOnly) {
 
 		Assert.hasLength(name, "'name' is required and must not be empty.");
-		Assert.hasLength(value, "'value' is required and must not be empty.");
+		Assert.notNull(maxAge);
 		this.name = name;
-		this.value = value;
-		this.maxAge = (maxAge > -1 ? maxAge : -1);
+		this.value = (value != null ? value : "");
+		this.maxAge = maxAge;
 		this.domain = domain;
 		this.path = path;
 		this.secure = secure;
@@ -85,7 +87,7 @@ public final class HttpCookie {
 	 * A negative value means no "Max-Age" attribute in which case the cookie
 	 * is removed when the browser is closed.
 	 */
-	public int getMaxAge() {
+	public Duration getMaxAge() {
 		return this.maxAge;
 	}
 
@@ -162,7 +164,7 @@ public final class HttpCookie {
 
 		return new HttpCookieBuilder() {
 
-			private int maxAge = -1;
+			private Duration maxAge = Duration.ofSeconds(-1);
 
 			private String domain;
 
@@ -174,7 +176,7 @@ public final class HttpCookie {
 
 
 			@Override
-			public HttpCookieBuilder maxAge(int maxAge) {
+			public HttpCookieBuilder maxAge(Duration maxAge) {
 				this.maxAge = maxAge;
 				return this;
 			}
@@ -217,14 +219,14 @@ public final class HttpCookie {
 	public interface HttpCookieBuilder {
 
 		/**
-		 * Set the cookie "Max-Age" attribute in seconds.
+		 * Set the cookie "Max-Age" attribute.
 		 *
 		 * <p>A positive value indicates when the cookie should expire relative
 		 * to the current time. A value of 0 means the cookie should expire
 		 * immediately. A negative value results in no "Max-Age" attribute in
 		 * which case the cookie is removed when the browser is closed.
 		 */
-		HttpCookieBuilder maxAge(int maxAge);
+		HttpCookieBuilder maxAge(Duration maxAge);
 
 		/**
 		 * Set the cookie "Path" attribute.

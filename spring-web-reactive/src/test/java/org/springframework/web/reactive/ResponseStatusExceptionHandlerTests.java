@@ -31,10 +31,12 @@ import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.web.ResponseStatusException;
 import org.springframework.web.server.DefaultWebServerExchange;
 import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.session.WebSessionManager;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Rossen Stoyanchev
@@ -52,8 +54,9 @@ public class ResponseStatusExceptionHandlerTests {
 	public void setUp() throws Exception {
 		this.handler = new ResponseStatusExceptionHandler();
 		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
+		WebSessionManager sessionManager = mock(WebSessionManager.class);
 		this.response = new MockServerHttpResponse();
-		this.exchange = new DefaultWebServerExchange(request, this.response);
+		this.exchange = new DefaultWebServerExchange(request, this.response, sessionManager);
 	}
 
 

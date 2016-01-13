@@ -15,6 +15,8 @@
  */
 package org.springframework.http.server.reactive;
 
+import java.time.Duration;
+
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -73,55 +75,59 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse {
 	protected void writeCookies() {
 		for (String name : getHeaders().getCookies().keySet()) {
 			for (HttpCookie httpCookie : getHeaders().getCookies().get(name)) {
-				Cookie cookie = new ReactorCookie(name, httpCookie);
-				this.channel.addResponseCookie(name, cookie);
+				Cookie reactorCookie = new ReactorCookie(httpCookie);
+				this.channel.addResponseCookie(name, reactorCookie);
 			}
 		}
 	}
 
+
+	/**
+	 * At present Reactor does not provide a {@link Cookie} implementation.
+	 */
 	private final static class ReactorCookie extends Cookie {
 
-		final HttpCookie httpCookie;
-		final String name;
+		private final HttpCookie httpCookie;
 
-		public ReactorCookie(String name, HttpCookie httpCookie) {
-			this.name = name;
+
+		public ReactorCookie(HttpCookie httpCookie) {
 			this.httpCookie = httpCookie;
 		}
 
 		@Override
 		public String name() {
-			return name;
+			return this.httpCookie.getName();
 		}
 
 		@Override
 		public String value() {
-			return httpCookie.getValue();
+			return this.httpCookie.getValue();
 		}
 
 		@Override
 		public boolean httpOnly() {
-			return httpCookie.isHttpOnly();
+			return this.httpCookie.isHttpOnly();
 		}
 
 		@Override
 		public long maxAge() {
-			return httpCookie.getMaxAge() > -1 ? httpCookie.getMaxAge() : -1;
+			Duration maxAge = this.httpCookie.getMaxAge();
+			return (!maxAge.isNegative() ?  maxAge.getSeconds() : -1);
 		}
 
 		@Override
 		public String domain() {
-			return httpCookie.getDomain();
+			return this.httpCookie.getDomain();
 		}
 
 		@Override
 		public String path() {
-			return httpCookie.getPath();
+			return this.httpCookie.getPath();
 		}
 
 		@Override
 		public boolean secure() {
-			return httpCookie.isSecure();
+			return this.httpCookie.isSecure();
 		}
 	}
 }

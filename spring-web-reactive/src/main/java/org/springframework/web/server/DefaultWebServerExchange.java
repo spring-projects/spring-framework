@@ -18,9 +18,14 @@ package org.springframework.web.server;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import reactor.core.publisher.FluxProcessor;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.Processors;
+
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.web.server.session.WebSessionManager;
 
 /**
  * Default implementation of {@link WebServerExchange}.
@@ -33,14 +38,26 @@ public class DefaultWebServerExchange implements WebServerExchange {
 
 	private final ServerHttpResponse response;
 
+	private final WebSessionManager sessionManager;
+
+
 	private final Map<String, Object> attributes = new ConcurrentHashMap<>();
 
+	private final Object createSessionLock = new Object();
 
-	public DefaultWebServerExchange(ServerHttpRequest request, ServerHttpResponse response) {
+	private Mono<WebSession> sessionMono;
+
+
+
+	public DefaultWebServerExchange(ServerHttpRequest request, ServerHttpResponse response,
+			WebSessionManager sessionManager) {
+
 		Assert.notNull(request, "'request' is required.");
 		Assert.notNull(response, "'response' is required.");
+		Assert.notNull(response, "'sessionManager' is required.");
 		this.request = request;
 		this.response = response;
+		this.sessionManager = sessionManager;
 	}
 
 
@@ -57,6 +74,19 @@ public class DefaultWebServerExchange implements WebServerExchange {
 	@Override
 	public Map<String, Object> getAttributes() {
 		return this.attributes;
+	}
+
+	@Override
+	public Mono<WebSession> getSession() {
+		if (this.sessionMono == null) {
+			synchronized (this.createSessionLock) {
+				if (this.sessionMono == null) {
+					FluxProcessor<WebSession, WebSession> replay = Processors.replay(1);
+					this.sessionMono = this.sessionManager.getSession(this).subscribeWith(replay).next();
+				}
+			}
+		}
+		return this.sessionMono;
 	}
 
 }

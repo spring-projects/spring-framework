@@ -66,25 +66,23 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	}
 
 	private Mono<Void> applyBeforeCommit() {
-		return Stream.defer(() -> {
-			Mono<Void> mono = Mono.empty();
-			if (this.state.compareAndSet(State.NEW, State.COMMITTING)) {
-				for (Supplier<? extends Mono<Void>> action : this.beforeCommitActions) {
-					mono = mono.after(() -> action.get());
-				}
-				mono = mono.otherwise(ex -> {
-					// Ignore errors from beforeCommit actions
-					return Mono.empty();
-				});
-				mono = mono.after(() -> {
-					this.state.set(State.COMITTED);
-					writeHeaders();
-					writeCookies();
-					return Mono.empty();
-				});
+		Mono<Void> mono = Mono.empty();
+		if (this.state.compareAndSet(State.NEW, State.COMMITTING)) {
+			for (Supplier<? extends Mono<Void>> action : this.beforeCommitActions) {
+				mono = mono.after(() -> action.get());
 			}
-			return mono;
-		}).after();
+			mono = mono.otherwise(ex -> {
+				// Ignore errors from beforeCommit actions
+				return Mono.empty();
+			});
+			mono = mono.after(() -> {
+				this.state.set(State.COMITTED);
+				writeHeaders();
+				writeCookies();
+				return Mono.empty();
+			});
+		}
+		return mono;
 	}
 
 	/**

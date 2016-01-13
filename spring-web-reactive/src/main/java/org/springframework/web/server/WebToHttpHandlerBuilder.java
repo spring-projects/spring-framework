@@ -21,6 +21,7 @@ import java.util.List;
 
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.server.session.WebSessionManager;
 
 /**
  * Assist with building an
@@ -42,6 +43,8 @@ public class WebToHttpHandlerBuilder {
 	private final List<WebFilter> filters = new ArrayList<>();
 
 	private final List<WebExceptionHandler> exceptionHandlers = new ArrayList<>();
+
+	private WebSessionManager sessionManager;
 
 
 	private WebToHttpHandlerBuilder(WebHandler targetHandler) {
@@ -68,17 +71,26 @@ public class WebToHttpHandlerBuilder {
 		return this;
 	}
 
+	public WebToHttpHandlerBuilder sessionManager(WebSessionManager sessionManager) {
+		this.sessionManager = sessionManager;
+		return this;
+	}
+
 	public WebToHttpHandlerAdapter build() {
-		WebHandler webHandler = this.targetHandler;
+		WebHandler handler = this.targetHandler;
 		if (!this.exceptionHandlers.isEmpty()) {
 			WebExceptionHandler[] array = new WebExceptionHandler[this.exceptionHandlers.size()];
-			webHandler = new ExceptionHandlingWebHandler(webHandler,  this.exceptionHandlers.toArray(array));
+			handler = new ExceptionHandlingWebHandler(handler,  this.exceptionHandlers.toArray(array));
 		}
 		if (!this.filters.isEmpty()) {
 			WebFilter[] array = new WebFilter[this.filters.size()];
-			webHandler = new FilteringWebHandler(webHandler, this.filters.toArray(array));
+			handler = new FilteringWebHandler(handler, this.filters.toArray(array));
 		}
-		return new WebToHttpHandlerAdapter(webHandler);
+		WebToHttpHandlerAdapter adapter = new WebToHttpHandlerAdapter(handler);
+		if (this.sessionManager != null) {
+			adapter.setSessionManager(this.sessionManager);
+		}
+		return adapter;
 	}
 
 }

@@ -82,8 +82,8 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 		for (String name : getHeaders().getCookies().keySet()) {
 			for (HttpCookie httpCookie : getHeaders().getCookies().get(name)) {
 				Cookie cookie = new DefaultCookie(name, httpCookie.getValue());
-				if (httpCookie.getMaxAge() > -1) {
-					cookie.setMaxAge(httpCookie.getMaxAge());
+				if (!httpCookie.getMaxAge().isNegative()) {
+					cookie.setMaxAge(httpCookie.getMaxAge().getSeconds());
 				}
 				cookie.setDomain(httpCookie.getDomain());
 				cookie.setPath(httpCookie.getPath());

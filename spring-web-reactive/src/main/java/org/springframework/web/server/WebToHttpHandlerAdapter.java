@@ -23,6 +23,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.util.Assert;
+import org.springframework.web.server.session.DefaultWebSessionManager;
+import org.springframework.web.server.session.WebSessionManager;
 
 /**
  * Adapt {@link WebHandler} to {@link HttpHandler} also creating the
@@ -35,8 +38,28 @@ public class WebToHttpHandlerAdapter extends WebHandlerDecorator implements Http
 	private static Log logger = LogFactory.getLog(WebToHttpHandlerAdapter.class);
 
 
+	private WebSessionManager sessionManager = new DefaultWebSessionManager();
+
+
 	public WebToHttpHandlerAdapter(WebHandler delegate) {
 		super(delegate);
+	}
+
+
+	/**
+	 *
+	 * @param sessionManager
+	 */
+	public void setSessionManager(WebSessionManager sessionManager) {
+		Assert.notNull(sessionManager, "'sessionManager' must not be null.");
+		this.sessionManager = sessionManager;
+	}
+
+	/**
+	 * Return the configured {@link WebSessionManager}.
+	 */
+	public WebSessionManager getSessionManager() {
+		return this.sessionManager;
 	}
 
 
@@ -55,7 +78,7 @@ public class WebToHttpHandlerAdapter extends WebHandlerDecorator implements Http
 	}
 
 	protected WebServerExchange createWebServerExchange(ServerHttpRequest request, ServerHttpResponse response) {
-		return new DefaultWebServerExchange(request, response);
+		return new DefaultWebServerExchange(request, response, this.sessionManager);
 	}
 
 }

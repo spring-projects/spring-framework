@@ -113,14 +113,17 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	protected void initCookies(Map<String, List<HttpCookie>> map) {
-		for (Cookie cookie : this.request.getCookies()) {
-			String name = cookie.getName();
-			List<HttpCookie> list = map.get(name);
-			if (list == null) {
-				list = new ArrayList<>();
-				map.put(name, list);
+		Cookie[] cookies = this.request.getCookies();
+		if (cookies != null) {
+			for (Cookie cookie : cookies) {
+				String name = cookie.getName();
+				List<HttpCookie> list = map.get(name);
+				if (list == null) {
+					list = new ArrayList<>();
+					map.put(name, list);
+				}
+				list.add(HttpCookie.clientCookie(name, cookie.getValue()));
 			}
-			list.add(HttpCookie.clientCookie(name, cookie.getValue()));
 		}
 	}
 

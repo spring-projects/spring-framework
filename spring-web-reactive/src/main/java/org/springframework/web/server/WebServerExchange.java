@@ -17,6 +17,8 @@ package org.springframework.web.server;
 
 import java.util.Map;
 
+import reactor.core.publisher.Mono;
+
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 
@@ -30,18 +32,23 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 public interface WebServerExchange {
 
 	/**
-	 * @return the current HTTP request
+	 * Return the current HTTP request.
 	 */
 	ServerHttpRequest getRequest();
 
 	/**
-	 * @return the current HTTP response
+	 * Return the current HTTP response.
 	 */
 	ServerHttpResponse getResponse();
 
 	/**
-	 * @return mutable map of request attributes for the current exchange
+	 * Return a mutable map of request attributes for the current exchange.
 	 */
 	Map<String, Object> getAttributes();
+
+	/**
+	 *
+	 */
+	Mono<WebSession> getSession();
 
 }

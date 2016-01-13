@@ -57,9 +57,11 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.session.WebSessionManager;
 
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
 
 /**
  * Test the effect of exceptions at different stages of request processing by
@@ -91,9 +93,11 @@ public class DispatcherHandlerErrorTests {
 		this.dispatcherHandler = new DispatcherHandler();
 		this.dispatcherHandler.setApplicationContext(appContext);
 
+		WebSessionManager sessionManager = mock(WebSessionManager.class);
+
 		this.request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
 		this.response = new MockServerHttpResponse();
-		this.exchange = new DefaultWebServerExchange(this.request, this.response);
+		this.exchange = new DefaultWebServerExchange(this.request, this.response, sessionManager);
 	}
 
 
