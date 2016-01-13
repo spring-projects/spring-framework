@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -361,7 +361,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 		@Override
 		public int read() {
 			if (this.currentBuffer == null) {
-				// this stream doesn't have any data in it
+				// This stream doesn't have any data in it...
 				return -1;
 			}
 			else {
@@ -412,8 +412,8 @@ public class FastByteArrayOutputStream extends OutputStream {
 			}
 			else {
 				if (this.currentBuffer == null) {
-					// this stream doesn't have any data in it
-					return 0;
+					// This stream doesn't have any data in it...
+					return -1;
 				}
 				else {
 					if (this.nextIndexInCurrentBuffer < this.currentBufferLength) {
@@ -456,7 +456,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 			}
 			int len = (int) n;
 			if (this.currentBuffer == null) {
-				// this stream doesn't have any data in it
+				// This stream doesn't have any data in it...
 				return 0;
 			}
 			else {
@@ -506,7 +506,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 		 */
 		public void updateMessageDigest(MessageDigest messageDigest, int len) {
 			if (this.currentBuffer == null) {
-				// this stream doesn't have any data in it
+				// This stream doesn't have any data in it...
 				return;
 			}
 			else if (len == 0) {
