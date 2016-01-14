@@ -5035,8 +5035,10 @@ http://www.gebish.org/manual/current/[The Book of Geb] user's manual.
 
 [[spring-mvc-test-client]]
 ==== Client-Side REST Tests
-Client-side tests are for code using the `RestTemplate`. The goal is to define expected
-requests and provide "stub" responses:
+Client-side tests can be used to test code that internally uses the `RestTemplate`.
+The idea is to declare expected requests and to provide "stub" responses so that
+you can focus on testing the code in isolation, i.e. without running a server.
+Here is an example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -5046,7 +5048,7 @@ requests and provide "stub" responses:
 	MockRestServiceServer mockServer = MockRestServiceServer.createServer(restTemplate);
 	mockServer.expect(requestTo("/greeting")).andRespond(withSuccess("Hello world", MediaType.TEXT_PLAIN));
 
-	// use RestTemplate ...
+	// Test code that uses the above RestTemplate ...
 
 	mockServer.verify();
 ----
@@ -5056,11 +5058,27 @@ tests -- configures the `RestTemplate` with a custom `ClientHttpRequestFactory` 
 asserts actual requests against expectations and returns "stub" responses. In this case
 we expect a single request to "/greeting" and want to return a 200 response with
 "text/plain" content. We could define as many additional requests and stub responses as
-necessary.
-
-Once expected requests and stub responses have been defined, the `RestTemplate` can be
+necessary. Once expected requests and stub responses have been defined, the `RestTemplate` can be
 used in client-side code as usual. At the end of the tests `mockServer.verify()` can be
 used to verify that all expected requests were performed.
+
+The client-side test support also provides an alternative `ClientHttpRequestFactory`
+strategy for executing requests with a `MockMvc` instance. That allows you to
+process requests using your server-side code but without running a server.
+Here is an example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	MockMvc mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
+	this.restTemplate = new RestTemplate(new MockMvcClientHttpRequestFactory(mockMvc));
+
+	// Test code that uses the above RestTemplate ...
+
+	mockServer.verify();
+----
+
+
 
 [[spring-mvc-test-client-static-imports]]
 ===== Static Imports

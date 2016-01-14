@@ -80,6 +80,12 @@ import org.springframework.web.client.support.RestGatewaySupport;
  * classes), you can typically use the Code Completion features (i.e.
  * ctrl-space) in your IDE to set up the mocks.
  *
+ * <p>An alternative to the above is to use
+ * {@link MockMvcClientHttpRequestFactory} which allows executing requests
+ * against a {@link org.springframework.test.web.servlet.MockMvc MockMvc}
+ * instance. That allows you to process requests using your server-side code
+ * but without running a server.
+ *
  * <p><strong>Credits:</strong> The client-side REST testing support was
  * inspired by and initially based on similar code in the Spring WS project for
  * client-side tests involving the {@code WebServiceTemplate}.
