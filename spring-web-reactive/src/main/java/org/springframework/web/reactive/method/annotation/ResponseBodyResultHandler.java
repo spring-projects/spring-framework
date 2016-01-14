@@ -145,6 +145,9 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 		if (this.conversionService.canConvert(returnType.getRawClass(), Publisher.class)) {
 			publisher = this.conversionService.convert(value, Publisher.class);
 			elementType = returnType.getGeneric(0);
+			if (Void.class.equals(elementType.getRawClass())) {
+				return (Mono<Void>)Mono.from(publisher);
+			}
 		}
 		else {
 			publisher = Mono.just(value);

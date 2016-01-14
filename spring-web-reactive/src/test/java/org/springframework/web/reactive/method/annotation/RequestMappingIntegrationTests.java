@@ -54,12 +54,11 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.handler.SimpleHandlerResultHandler;
@@ -404,32 +403,28 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 	}
 
 
-	@Controller
+	@RestController
 	@SuppressWarnings("unused")
 	private static class TestController {
 
 		final List<Person> persons = new ArrayList<>();
 
 		@RequestMapping("/param")
-		@ResponseBody
 		public Publisher<String> handleWithParam(@RequestParam String name) {
 			return Stream.just("Hello ", name, "!");
 		}
 
 		@RequestMapping("/person")
-		@ResponseBody
 		public Person personResponseBody() {
 			return new Person("Robert");
 		}
 
 		@RequestMapping("/completable-future")
-		@ResponseBody
 		public CompletableFuture<Person> completableFutureResponseBody() {
 			return CompletableFuture.completedFuture(new Person("Robert"));
 		}
 
 		@RequestMapping("/raw")
-		@ResponseBody
 		public Publisher<ByteBuffer> rawResponseBody() {
 			JacksonJsonEncoder encoder = new JacksonJsonEncoder();
 			return encoder.encode(Stream.just(new Person("Robert")),
@@ -437,73 +432,61 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		}
 
 		@RequestMapping("/stream-result")
-		@ResponseBody
 		public Publisher<String> stringStreamResponseBody() {
 			return Flux.interval(1).map(Object::toString).as(Stream::from).take(5);
 		}
 
 		@RequestMapping("/raw-flux")
-		@ResponseBody
 		public Flux<ByteBuffer> rawFluxResponseBody() {
 			return Flux.just(Buffer.wrap("Hello!").byteBuffer());
 		}
 
 		@RequestMapping("/raw-observable")
-		@ResponseBody
 		public Observable<ByteBuffer> rawObservableResponseBody() {
 			return Observable.just(Buffer.wrap("Hello!").byteBuffer());
 		}
 
 		@RequestMapping("/mono")
-		@ResponseBody
 		public Mono<Person> monoResponseBody() {
 			return Mono.just(new Person("Robert"));
 		}
 
 		@RequestMapping("/single")
-		@ResponseBody
 		public Single<Person> singleResponseBody() {
 			return Single.just(new Person("Robert"));
 		}
 
 		@RequestMapping("/promise")
-		@ResponseBody
 		public Promise<Person> promiseResponseBody() {
 			return Promise.success(new Person("Robert"));
 		}
 
 		@RequestMapping("/list")
-		@ResponseBody
 		public List<Person> listResponseBody() {
 			return Arrays.asList(new Person("Robert"), new Person("Marie"));
 		}
 
 		@RequestMapping("/publisher")
-		@ResponseBody
 		public Publisher<Person> publisherResponseBody() {
 			return Stream.just(new Person("Robert"), new Person("Marie"));
 		}
 
 		@RequestMapping("/flux")
-		@ResponseBody
 		public Flux<Person> fluxResponseBody() {
 			return Flux.just(new Person("Robert"), new Person("Marie"));
 		}
 
 		@RequestMapping("/observable")
-		@ResponseBody
 		public Observable<Person> observableResponseBody() {
 			return Observable.just(new Person("Robert"), new Person("Marie"));
 		}
 
 		@RequestMapping("/stream")
-		@ResponseBody
 		public Stream<Person> reactorStreamResponseBody() {
 			return Stream.just(new Person("Robert"), new Person("Marie"));
 		}
 
 		@RequestMapping("/publisher-capitalize")
-		@ResponseBody
 		public Publisher<Person> publisherCapitalize(@RequestBody Publisher<Person> persons) {
 			return Stream.from(persons).map(person -> {
 				person.setName(person.getName().toUpperCase());
@@ -512,7 +495,6 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		}
 
 		@RequestMapping("/flux-capitalize")
-		@ResponseBody
 		public Flux<Person> fluxCapitalize(@RequestBody Flux<Person> persons) {
 			return persons.map(person -> {
 				person.setName(person.getName().toUpperCase());
@@ -521,7 +503,6 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		}
 
 		@RequestMapping("/observable-capitalize")
-		@ResponseBody
 		public Observable<Person> observableCapitalize(@RequestBody Observable<Person> persons) {
 			return persons.map(person -> {
 				person.setName(person.getName().toUpperCase());
@@ -530,7 +511,6 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		}
 
 		@RequestMapping("/stream-capitalize")
-		@ResponseBody
 		public Stream<Person> streamCapitalize(@RequestBody Stream<Person> persons) {
 			return persons.map(person -> {
 				person.setName(person.getName().toUpperCase());
@@ -539,14 +519,12 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		}
 
 		@RequestMapping("/person-capitalize")
-		@ResponseBody
 		public Person personCapitalize(@RequestBody Person person) {
 			person.setName(person.getName().toUpperCase());
 			return person;
 		}
 		
 		@RequestMapping("/completable-future-capitalize")
-		@ResponseBody
 		public CompletableFuture<Person> completableFutureCapitalize(
 				@RequestBody CompletableFuture<Person> personFuture) {
 
@@ -557,7 +535,6 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		}
 
 		@RequestMapping("/mono-capitalize")
-		@ResponseBody
 		public Mono<Person> monoCapitalize(@RequestBody Mono<Person> personFuture) {
 			return personFuture.map(person -> {
 				person.setName(person.getName().toUpperCase());
@@ -566,7 +543,6 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		}
 
 		@RequestMapping("/single-capitalize")
-		@ResponseBody
 		public Single<Person> singleCapitalize(@RequestBody Single<Person> personFuture) {
 			return personFuture.map(person -> {
 				person.setName(person.getName().toUpperCase());
@@ -575,7 +551,6 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		}
 
 		@RequestMapping("/promise-capitalize")
-		@ResponseBody
 		public Promise<Person> promiseCapitalize(@RequestBody Promise<Person> personFuture) {
 			return Stream.from(personFuture.map(person -> {
 				person.setName(person.getName().toUpperCase());
@@ -604,19 +579,16 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		}
 
 		@RequestMapping("/thrown-exception")
-		@ResponseBody
 		public Publisher<String> handleAndThrowException() {
 			throw new IllegalStateException("Boo");
 		}
 
 		@RequestMapping("/error-signal")
-		@ResponseBody
 		public Publisher<String> handleWithError() {
 			return Mono.error(new IllegalStateException("Boo"));
 		}
 
 		@ExceptionHandler
-		@ResponseBody
 		public Publisher<String> handleException(IllegalStateException ex) {
 			return Mono.just("Recovered from error: " + ex.getMessage());
 		}
