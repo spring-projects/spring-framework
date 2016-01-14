@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.Flux;
@@ -64,6 +65,7 @@ import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.handler.SimpleHandlerResultHandler;
 import org.springframework.web.server.WebToHttpHandlerBuilder;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -158,6 +160,19 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		ResponseEntity<String> response = restTemplate.exchange(request, String.class);
 
 		assertEquals("Recovered from error: Boo", response.getBody());
+	}
+
+	@Test
+	@Ignore
+	//FIXME Fail with Jetty and Tomcat
+	public void streamResult() throws Exception {
+		RestTemplate restTemplate = new RestTemplate();
+
+		URI url = new URI("http://localhost:" + port + "/stream-result");
+		RequestEntity<Void> request = RequestEntity.get(url).build();
+		ResponseEntity<String[]> response = restTemplate.exchange(request, String[].class);
+
+		assertArrayEquals(new String[]{"0", "1", "2", "3", "4"}, response.getBody());
 	}
 
 	@Test
@@ -419,6 +434,12 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 			JacksonJsonEncoder encoder = new JacksonJsonEncoder();
 			return encoder.encode(Stream.just(new Person("Robert")),
 					ResolvableType.forClass(Person.class), MediaType.APPLICATION_JSON);
+		}
+
+		@RequestMapping("/stream-result")
+		@ResponseBody
+		public Publisher<String> stringStreamResponseBody() {
+			return Flux.interval(1).map(Object::toString).as(Stream::from).take(5);
 		}
 
 		@RequestMapping("/raw-flux")
