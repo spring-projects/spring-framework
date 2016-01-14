@@ -15,6 +15,7 @@
  */
 
 /**
- * Miscellaneous utility classes, such as {@code InputStream}/{@code OutputStream} manipulation utilities.
+ * Contains a basic abstraction over client/server-side HTTP. This package contains
+ * the {@code HttpInputMessage} and {@code HttpOutputMessage} interfaces.
  */
-package org.springframework.util;
+package org.springframework.http;
