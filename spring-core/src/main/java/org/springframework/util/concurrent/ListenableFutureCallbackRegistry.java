@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,12 +22,14 @@ import java.util.Queue;
 import org.springframework.util.Assert;
 
 /**
- * Registry for {@link ListenableFutureCallback} instances.
+ * Helper class for {@link ListenableFuture} implementations that maintains a
+ * of success and failure callbacks and helps to notify them.
  *
  * <p>Inspired by {@code com.google.common.util.concurrent.ExecutionList}.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  * @since 4.0
  */
 public class ListenableFutureCallbackRegistry<T> {
@@ -47,7 +49,6 @@ public class ListenableFutureCallbackRegistry<T> {
 	 * Add the given callback to this registry.
 	 * @param callback the callback to add
 	 */
-	@SuppressWarnings("unchecked")
 	public void addCallback(ListenableFutureCallback<? super T> callback) {
 		Assert.notNull(callback, "'callback' must not be null");
 		synchronized (this.mutex) {
@@ -57,12 +58,31 @@ public class ListenableFutureCallbackRegistry<T> {
 					this.failureCallbacks.add(callback);
 					break;
 				case SUCCESS:
-					callback.onSuccess((T) this.result);
+					notifySuccess(callback);
 					break;
 				case FAILURE:
-					callback.onFailure((Throwable) this.result);
+					notifyFailure(callback);
 					break;
 			}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private void notifySuccess(SuccessCallback<? super T> callback) {
+		try {
+			callback.onSuccess((T) this.result);
+		}
+		catch (Throwable ex) {
+			// Ignore
+		}
+	}
+
+	private void notifyFailure(FailureCallback callback) {
+		try {
+			callback.onFailure((Throwable) this.result);
+		}
+		catch (Throwable ex) {
+			// Ignore
 		}
 	}
 
@@ -80,7 +100,7 @@ public class ListenableFutureCallbackRegistry<T> {
 					this.successCallbacks.add(callback);
 					break;
 				case SUCCESS:
-					callback.onSuccess((T) this.result);
+					notifySuccess(callback);
 					break;
 			}
 		}
@@ -99,7 +119,7 @@ public class ListenableFutureCallbackRegistry<T> {
 					this.failureCallbacks.add(callback);
 					break;
 				case FAILURE:
-					callback.onFailure((Throwable) this.result);
+					notifyFailure(callback);
 					break;
 			}
 		}
@@ -115,7 +135,7 @@ public class ListenableFutureCallbackRegistry<T> {
 			this.state = State.SUCCESS;
 			this.result = result;
 			while (!this.successCallbacks.isEmpty()) {
-				this.successCallbacks.poll().onSuccess(result);
+				notifySuccess(this.successCallbacks.poll());
 			}
 		}
 	}
@@ -130,7 +150,7 @@ public class ListenableFutureCallbackRegistry<T> {
 			this.state = State.FAILURE;
 			this.result = ex;
 			while (!this.failureCallbacks.isEmpty()) {
-				this.failureCallbacks.poll().onFailure(ex);
+				notifyFailure(this.failureCallbacks.poll());
 			}
 		}
 	}

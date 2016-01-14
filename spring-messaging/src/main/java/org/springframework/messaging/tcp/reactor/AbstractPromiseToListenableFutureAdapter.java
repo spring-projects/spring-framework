@@ -53,12 +53,15 @@ abstract class AbstractPromiseToListenableFutureAdapter<S, T> implements Listena
 		this.promise.onSuccess(new Consumer<S>() {
 			@Override
 			public void accept(S result) {
+				T adapted;
 				try {
-					registry.success(adapt(result));
+					adapted = adapt(result);
 				}
 				catch (Throwable ex) {
 					registry.failure(ex);
+					return;
 				}
+				registry.success(adapted);
 			}
 		});
 

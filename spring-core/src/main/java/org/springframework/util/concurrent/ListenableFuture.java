@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,11 @@ package org.springframework.util.concurrent;
 import java.util.concurrent.Future;
 
 /**
- * Extends the {@link Future} interface with the capability to accept completion
- * callbacks. If the future has already completed when the callback is added, the
- * callback will be triggered immediately.
+ * Extend {@link Future} with the capability to accept completion callbacks.
+ * If the future has completed when the callback is added, the callback is
+ * triggered immediately.
  * <p>Inspired by {@code com.google.common.util.concurrent.ListenableFuture}.
-
+ *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
  * @since 4.0
@@ -31,20 +31,15 @@ import java.util.concurrent.Future;
 public interface ListenableFuture<T> extends Future<T> {
 
 	/**
-	 * Registers the given callback to this {@code ListenableFuture}. The callback will
-	 * be triggered when this {@code Future} is complete or, if it is already complete,
-	 * immediately.
+	 * Register the given {@code ListenableFutureCallback}.
 	 * @param callback the callback to register
 	 */
 	void addCallback(ListenableFutureCallback<? super T> callback);
 
 	/**
-	 * Registers the given success and failure callbacks to this {@code ListenableFuture}.
-	 * The callback will be triggered when this {@code Future} is complete or, if it is
-	 * already complete immediately. This is a Java 8 lambdas compliant alternative to
-	 * {@link #addCallback(ListenableFutureCallback)}.
-	 * @param successCallback the success callback to register
-	 * @param failureCallback the failure callback to register
+	 * Java 8 lambda-friendly alternative with success and failure callbacks.
+	 * @param successCallback the success callback
+	 * @param failureCallback the failure callback
 	 * @since 4.1
 	 */
 	void addCallback(SuccessCallback<? super T> successCallback, FailureCallback failureCallback);

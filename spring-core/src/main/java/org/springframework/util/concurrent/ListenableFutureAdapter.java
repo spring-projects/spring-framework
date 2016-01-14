@@ -52,20 +52,34 @@ public abstract class ListenableFutureAdapter<T, S> extends FutureAdapter<T, S> 
 		listenableAdaptee.addCallback(new ListenableFutureCallback<S>() {
 			@Override
 			public void onSuccess(S result) {
+				T adapted;
 				try {
-					successCallback.onSuccess(adaptInternal(result));
+					adapted = adaptInternal(result);
 				}
 				catch (ExecutionException ex) {
 					Throwable cause = ex.getCause();
 					onFailure(cause != null ? cause : ex);
+					return;
 				}
 				catch (Throwable ex) {
 					onFailure(ex);
+					return;
+				}
+				try {
+					successCallback.onSuccess(adapted);
+				}
+				catch (Throwable e) {
+					// Ignore
 				}
 			}
 			@Override
 			public void onFailure(Throwable ex) {
-				failureCallback.onFailure(ex);
+				try {
+					failureCallback.onFailure(ex);
+				}
+				catch (Throwable t) {
+					// Ignore
+				}
 			}
 		});
 	}
