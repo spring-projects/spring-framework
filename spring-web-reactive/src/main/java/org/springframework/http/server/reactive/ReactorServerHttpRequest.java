@@ -18,12 +18,14 @@ package org.springframework.http.server.reactive;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import reactor.Flux;
 import reactor.io.buffer.Buffer;
 import reactor.io.net.http.HttpChannel;
+import reactor.io.net.http.model.Cookie;
 
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
@@ -69,7 +71,16 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	protected void initCookies(Map<String, List<HttpCookie>> cookies) {
-		// https://github.com/reactor/reactor/issues/614
+		for (String name : this.channel.cookies().keySet()) {
+			List<HttpCookie> list = cookies.get(name);
+			if (list == null) {
+				list = new ArrayList<>();
+				cookies.put(name, list);
+			}
+			for (Cookie cookie : this.channel.cookies().get(name)) {
+				list.add(HttpCookie.clientCookie(name, cookie.value()));
+			}
+		}
 	}
 
 	@Override

@@ -22,8 +22,10 @@ import reactor.Flux;
 import reactor.Mono;
 import reactor.io.buffer.Buffer;
 import reactor.io.net.http.HttpChannel;
+import reactor.io.net.http.model.Cookie;
 import reactor.io.net.http.model.Status;
 
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 
@@ -69,7 +71,57 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse {
 
 	@Override
 	protected void writeCookies() {
-		// https://github.com/reactor/reactor/issues/614
+		for (String name : getHeaders().getCookies().keySet()) {
+			for (HttpCookie httpCookie : getHeaders().getCookies().get(name)) {
+				Cookie cookie = new ReactorCookie(name, httpCookie);
+				this.channel.addResponseCookie(name, cookie);
+			}
+		}
 	}
 
+	private final static class ReactorCookie extends Cookie {
+
+		final HttpCookie httpCookie;
+		final String name;
+
+		public ReactorCookie(String name, HttpCookie httpCookie) {
+			this.name = name;
+			this.httpCookie = httpCookie;
+		}
+
+		@Override
+		public String name() {
+			return name;
+		}
+
+		@Override
+		public String value() {
+			return httpCookie.getValue();
+		}
+
+		@Override
+		public boolean httpOnly() {
+			return httpCookie.isHttpOnly();
+		}
+
+		@Override
+		public long maxAge() {
+			return httpCookie.getMaxAge() > -1 ? httpCookie.getMaxAge() : -1;
+		}
+
+		@Override
+		public String domain() {
+			return httpCookie.getDomain();
+		}
+
+		@Override
+		public String path() {
+			return httpCookie.getPath();
+		}
+
+		@Override
+		public boolean secure() {
+			return httpCookie.isSecure();
+		}
+	}
 }

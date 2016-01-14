@@ -32,6 +32,7 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.boot.HttpServer;
 import org.springframework.http.server.reactive.boot.JettyHttpServer;
+import org.springframework.http.server.reactive.boot.ReactorHttpServer;
 import org.springframework.http.server.reactive.boot.RxNettyHttpServer;
 import org.springframework.http.server.reactive.boot.TomcatHttpServer;
 import org.springframework.http.server.reactive.boot.UndertowHttpServer;
@@ -66,7 +67,7 @@ public class CookieIntegrationTests {
 		return new Object[][] {
 				{new JettyHttpServer()},
 				{new RxNettyHttpServer()},
-//				{new ReactorHttpServer()},
+				{new ReactorHttpServer()},
 				{new TomcatHttpServer()},
 				{new UndertowHttpServer()}
 		};
