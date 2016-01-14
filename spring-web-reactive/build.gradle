@@ -35,6 +35,13 @@ ext {
 	reactorVersion = '2.5.0.BUILD-SNAPSHOT'
 	tomcatVersion = '8.0.28'
 	jettyVersion = '9.3.5.v20151012'
+
+	javadocLinks = [
+		"http://docs.oracle.com/javase/8/docs/api/",
+		"http://next.projectreactor.io/core/docs/api/",
+		"http://docs.spring.io/spring/docs/${springVersion}/javadoc-api/",
+		"http://www.reactive-streams.org/reactive-streams-1.0.0-javadoc/"
+	] as String[]
 }
 
 uploadArchives {
@@ -46,9 +53,13 @@ uploadArchives {
 }
 
 javadoc {
+	description = "Generates project-level javadoc for use in -javadoc jar"
+
+	options.memberLevel = org.gradle.external.javadoc.JavadocMemberLevel.PROTECTED
 	options.author = true
+	options.header = project.name
 	options.addStringOption('Xdoclint:none', '-quiet')
-	options.links 'http://docs.oracle.com/javase/8/docs/api/'
+	options.links(project.ext.javadocLinks)
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
