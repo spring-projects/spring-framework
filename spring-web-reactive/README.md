@@ -10,7 +10,7 @@ Spring Reactive JAR dependency is available from Spring snapshot repository:
  - Version: `0.1.0.BUILD-SNAPSHOT`
  
 ## Documentation
-See the current [Javadoc][] and [reference docs][].
+See the current [Javadoc][].
  
 ## Sample application
 [Spring Reactive Playground] is a sample application based on Spring Reactive and on MongoDB,
@@ -53,3 +53,4 @@ The Spring Reactive is released under version 2.0 of the [Apache License][].
 [issue tracker]: https://github.com/spring-projects/spring-reactive/issues
 [Pull requests]: http://help.github.com/send-pull-requests
 [Apache License]: http://www.apache.org/licenses/LICENSE-2.0
+[Javadoc]: https://repo.spring.io/snapshot/org/springframework/reactive/spring-reactive/0.1.0.BUILD-SNAPSHOT/spring-reactive-0.1.0.BUILD-SNAPSHOT-javadoc.jar!/index.html
