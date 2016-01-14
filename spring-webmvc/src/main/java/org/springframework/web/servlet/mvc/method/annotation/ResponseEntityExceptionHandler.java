@@ -47,21 +47,24 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMethodException;
+import org.springframework.web.util.WebUtils;
 
 /**
  * A convenient base class for {@link ControllerAdvice @ControllerAdvice} classes
  * that wish to provide centralized exception handling across all
  * {@code @RequestMapping} methods through {@code @ExceptionHandler} methods.
  *
- * <p>This base class provides an {@code @ExceptionHandler} method for handling standard
- * Spring MVC exceptions that returns a {@code ResponseEntity} to be written with
- * {@link HttpMessageConverter message converters}. This is in contrast to
+ * <p>This base class provides an {@code @ExceptionHandler} method for handling
+ * internal Spring MVC exceptions. This method returns a {@code ResponseEntity}
+ * for writing to the response with a {@link HttpMessageConverter message converter}.
+ * in contrast to
  * {@link org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver
- * DefaultHandlerExceptionResolver} which returns a {@code ModelAndView} instead.
+ * DefaultHandlerExceptionResolver} which returns a
+ * {@link org.springframework.web.servlet.ModelAndView ModelAndView}.
  *
- * <p>If there is no need to write error content to the response body, or if using
- * view resolution (e.g., via {@code ContentNegotiatingViewResolver}), then use
- * {@code DefaultHandlerExceptionResolver} instead.
+ * <p>If there is no need to write error content to the response body, or when
+ * using view resolution (e.g., via {@code ContentNegotiatingViewResolver}),
+ * then {@code DefaultHandlerExceptionResolver} is good enough.
  *
  * <p>Note that in order for an {@code @ControllerAdvice} sub-class to be
  * detected, {@link ExceptionHandlerExceptionResolver} must be configured.
@@ -184,18 +187,20 @@ public abstract class ResponseEntityExceptionHandler {
 
 	/**
 	 * A single place to customize the response body of all Exception types.
-	 * <p>This method returns {@code null} by default.
+	 * <p>The default implementation sets the {@link WebUtils#ERROR_EXCEPTION_ATTRIBUTE}
+	 * request attribute and creates a {@link ResponseEntity} from the given
+	 * body, headers, and status.
 	 * @param ex the exception
-	 * @param body the body to use for the response
-	 * @param headers the headers to be written to the response
-	 * @param status the selected response status
+	 * @param body the body for the response
+	 * @param headers the headers for the response
+	 * @param status the response status
 	 * @param request the current request
 	 */
 	protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body,
 			HttpHeaders headers, HttpStatus status, WebRequest request) {
 
 		if (HttpStatus.INTERNAL_SERVER_ERROR.equals(status)) {
-			request.setAttribute("javax.servlet.error.exception", ex, WebRequest.SCOPE_REQUEST);
+			request.setAttribute(WebUtils.ERROR_EXCEPTION_ATTRIBUTE, ex, WebRequest.SCOPE_REQUEST);
 		}
 
 		return new ResponseEntity<Object>(body, headers, status);
