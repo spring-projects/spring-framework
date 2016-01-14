@@ -37,6 +37,14 @@ ext {
 	jettyVersion = '9.3.5.v20151012'
 }
 
+uploadArchives {
+	repositories {
+		mavenDeployer {
+			uniqueVersion = false
+		}
+	}
+}
+
 javadoc {
 	options.author = true
 	options.addStringOption('Xdoclint:none', '-quiet')

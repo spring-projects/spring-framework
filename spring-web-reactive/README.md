@@ -9,6 +9,9 @@ Spring Reactive JAR dependency is available from Spring snapshot repository:
  - ArtifactId: `spring-reactive`
  - Version: `0.1.0.BUILD-SNAPSHOT`
  
+## Documentation
+See the current [Javadoc][] and [reference docs][].
+ 
 ## Sample application
 [Spring Reactive Playground] is a sample application based on Spring Reactive and on MongoDB,
 Couchbase and PostgreSQL Reactive database drivers.
