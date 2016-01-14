@@ -46,9 +46,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 /**
- * Temporarily does not extend AbstractHttpHandlerIntegrationTests in order to
- * exclude Reactor Net due to https://github.com/reactor/reactor/issues/614.
- *
  * @author Rossen Stoyanchev
  */
 @RunWith(Parameterized.class)
