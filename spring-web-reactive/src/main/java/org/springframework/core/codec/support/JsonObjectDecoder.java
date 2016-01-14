@@ -39,8 +39,7 @@ import org.springframework.util.MimeType;
  * is considered a JSON object/array if it contains a matching number of opening
  * and closing braces/brackets.
  *
- * Based on <a href=https://github.com/netty/netty/blob/master/codec/src/main/java/io/netty/handler/codec/json/JsonObjectDecoder.java">
- * Netty {@code JsonObjectDecoder}</a>
+ * Based on  <a href="https://github.com/netty/netty/blob/master/codec/src/main/java/io/netty/handler/codec/json/JsonObjectDecoder.java">Netty JsonObjectDecoder</a>
  *
  * @author Sebastien Deleuze
  * @see JsonObjectEncoder
