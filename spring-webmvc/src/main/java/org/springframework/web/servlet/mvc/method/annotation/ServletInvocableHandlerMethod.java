@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import java.util.concurrent.Callable;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
@@ -82,6 +83,9 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 
 	private void initResponseStatus() {
 		ResponseStatus annotation = getMethodAnnotation(ResponseStatus.class);
+		if (annotation == null) {
+			annotation = AnnotatedElementUtils.findMergedAnnotation(getBeanType(), ResponseStatus.class);
+		}
 		if (annotation != null) {
 			this.responseStatus = annotation.code();
 			this.responseReason = annotation.reason();
