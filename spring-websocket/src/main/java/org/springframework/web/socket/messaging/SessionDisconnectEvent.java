@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,14 +53,23 @@ public class SessionDisconnectEvent extends AbstractSubProtocolEvent {
 		this(source, message, sessionId, closeStatus, null);
 	}
 
+	/**
+	 * Create a new SessionDisconnectEvent.
+	 * @param source the component that published the event (never {@code null})
+	 * @param message the message
+	 * @param sessionId the disconnect message
+	 * @param closeStatus the status object
+	 * @param user the current session user
+	 */
 	public SessionDisconnectEvent(Object source, Message<byte[]> message, String sessionId,
 			CloseStatus closeStatus, Principal user) {
 
-		super(source, message);
-		Assert.notNull(sessionId, "'sessionId' must not be null");
+		super(source, message, user);
+		Assert.notNull(sessionId, "Session id must not be null");
 		this.sessionId = sessionId;
 		this.status = closeStatus;
 	}
+
 
 	/**
 	 * Return the session id.
@@ -75,6 +84,7 @@ public class SessionDisconnectEvent extends AbstractSubProtocolEvent {
 	public CloseStatus getCloseStatus() {
 		return this.status;
 	}
+
 
 	@Override
 	public String toString() {
