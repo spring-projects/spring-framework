@@ -31,6 +31,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.MethodIntrospector;
@@ -223,7 +224,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			logger.debug(methods.size() + " request handler methods found on " + userType + ": " + methods);
 		}
 		for (Map.Entry<Method, T> entry : methods.entrySet()) {
-			registerHandlerMethod(handler, entry.getKey(), entry.getValue());
+			Method invocableMethod = AopUtils.selectInvocableMethod(entry.getKey(), userType);
+			T mapping = entry.getValue();
+			registerHandlerMethod(handler, invocableMethod, mapping);
 		}
 	}
 
