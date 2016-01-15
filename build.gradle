@@ -27,7 +27,7 @@ configure(allprojects) { project ->
 	group = "org.springframework"
 	version = qualifyVersionIfNecessary(version)
 
-	ext.aspectjVersion       = "1.8.7"
+	ext.aspectjVersion       = "1.9.0.BETA-3"
 	ext.caffeineVersion      = "2.0.3"
 	ext.eclipselinkVersion   = "2.4.2"
 	ext.ehcacheVersion       = "2.10.1"
@@ -867,6 +867,7 @@ project("spring-webmvc") {
 	description = "Spring Web MVC"
 
 	dependencies {
+		compile(project(":spring-aop"))
 		compile(project(":spring-beans"))
 		compile(project(":spring-context"))
 		compile(project(":spring-core"))
@@ -916,7 +917,6 @@ project("spring-webmvc") {
 			exclude group: "org.springframework", module: "spring-web"
 		}
 		optional('org.webjars:webjars-locator:0.28')
-		testCompile(project(":spring-aop"))
 		testCompile("rhino:js:1.7R1")
 		testCompile("xmlunit:xmlunit:${xmlunitVersion}")
 		testCompile("dom4j:dom4j:1.6.1") {
@@ -1082,9 +1082,9 @@ project("spring-aspects") {
 
 	dependencies {
 		aspects(project(":spring-orm"))
-		ajc("org.aspectj:aspectjtools:1.9.0.BETA-2")  // for the ability to build on JDK 9, not exposed in the POMs yet
-		rt("org.aspectj:aspectjrt:${aspectjVersion}")  // regular AspectJ version here, to be exposed in the POMs
-		compile("org.aspectj:aspectjweaver:${aspectjVersion}")
+		ajc("org.aspectj:aspectjtools:${aspectjVersion}")  // for the ability to build on JDK 9, not exposed in the POMs yet
+		rt("org.aspectj:aspectjrt:1.8.7")  // regular AspectJ version here, to be exposed in the POMs
+		compile("org.aspectj:aspectjweaver:1.8.7")
 		provided("org.eclipse.persistence:javax.persistence:2.0.0")
 		optional(project(":spring-aop"))  // for @Async support
 		optional(project(":spring-beans"))  // for @Configurable support
