@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -266,7 +266,7 @@ public class MethodJmsListenerEndpointTests {
 		SimpleMessageListenerContainer container = new SimpleMessageListenerContainer();
 		MessagingMessageListenerAdapter listener = createInstance(this.factory,
 				getListenerMethod(methodName, String.class), container);
-		processAndReplyWithSendTo(listener, false);
+		processAndReplyWithSendTo(listener, "replyDestination", false);
 		assertListenerMethodInvocation(sample, methodName);
 	}
 
@@ -278,7 +278,7 @@ public class MethodJmsListenerEndpointTests {
 		container.setReplyPubSubDomain(false);
 		MessagingMessageListenerAdapter listener = createInstance(this.factory,
 				getListenerMethod(methodName, String.class), container);
-		processAndReplyWithSendTo(listener, false);
+		processAndReplyWithSendTo(listener, "replyDestination", false);
 		assertListenerMethodInvocation(sample, methodName);
 	}
 
@@ -289,7 +289,7 @@ public class MethodJmsListenerEndpointTests {
 		container.setPubSubDomain(true);
 		MessagingMessageListenerAdapter listener = createInstance(this.factory,
 				getListenerMethod(methodName, String.class), container);
-		processAndReplyWithSendTo(listener, true);
+		processAndReplyWithSendTo(listener, "replyDestination", true);
 		assertListenerMethodInvocation(sample, methodName);
 	}
 
@@ -300,11 +300,19 @@ public class MethodJmsListenerEndpointTests {
 		container.setReplyPubSubDomain(true);
 		MessagingMessageListenerAdapter listener = createInstance(this.factory,
 				getListenerMethod(methodName, String.class), container);
-		processAndReplyWithSendTo(listener, true);
+		processAndReplyWithSendTo(listener, "replyDestination", true);
 		assertListenerMethodInvocation(sample, methodName);
 	}
 
-	private void processAndReplyWithSendTo(MessagingMessageListenerAdapter listener, boolean pubSubDomain) throws JMSException {
+	@Test
+	public void processAndReplyWithDefaultSendTo() throws JMSException {
+		MessagingMessageListenerAdapter listener = createDefaultInstance(String.class);
+		processAndReplyWithSendTo(listener, "defaultReply", false);
+		assertDefaultListenerMethodInvocation();
+	}
+
+	private void processAndReplyWithSendTo(MessagingMessageListenerAdapter listener,
+			String replyDestinationName, boolean pubSubDomain) throws JMSException {
 		String body = "echo text";
 		String correlationId = "link-1234";
 		Destination replyDestination = new Destination() {};
@@ -314,7 +322,7 @@ public class MethodJmsListenerEndpointTests {
 		QueueSender queueSender = mock(QueueSender.class);
 		Session session = mock(Session.class);
 
-		given(destinationResolver.resolveDestinationName(session, "replyDestination", pubSubDomain))
+		given(destinationResolver.resolveDestinationName(session, replyDestinationName, pubSubDomain))
 				.willReturn(replyDestination);
 		given(session.createTextMessage(body)).willReturn(reply);
 		given(session.createProducer(replyDestination)).willReturn(queueSender);
@@ -324,7 +332,7 @@ public class MethodJmsListenerEndpointTests {
 		inputMessage.setJMSCorrelationID(correlationId);
 		listener.onMessage(inputMessage, session);
 
-		verify(destinationResolver).resolveDestinationName(session, "replyDestination", pubSubDomain);
+		verify(destinationResolver).resolveDestinationName(session, replyDestinationName, pubSubDomain);
 		verify(reply).setJMSCorrelationID(correlationId);
 		verify(queueSender).send(reply);
 		verify(queueSender).close();
@@ -470,6 +478,7 @@ public class MethodJmsListenerEndpointTests {
 	}
 
 
+	@SendTo("defaultReply")
 	static class JmsEndpointSampleBean {
 
 		private final Map<String, Boolean> invocations = new HashMap<String, Boolean>();
@@ -546,6 +555,11 @@ public class MethodJmsListenerEndpointTests {
 		@SendTo("replyDestination")
 		public String processAndReplyWithSendTo(String content) {
 			invocations.put("processAndReplyWithSendTo", true);
+			return content;
+		}
+
+		public String processAndReplyWithDefaultSendTo(String content) {
+			invocations.put("processAndReplyWithDefaultSendTo", true);
 			return content;
 		}
 

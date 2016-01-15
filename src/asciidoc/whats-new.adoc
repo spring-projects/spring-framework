@@ -650,11 +650,19 @@ Spring 4.3 also improves the caching abstraction as follows:
 * `ConcurrentMapCacheManager` and `ConcurrentMapCache` now support the serialization
   of cache entries via a new `storeByValue` attribute.
 
+=== JMS Improvements
+
+* `@SendTo` can now be specified at class-level to share a common reply destination.
+
 === Web Improvements
 
 * New `@RestControllerAdvice` annotation combines `@ControllerAdvice` with `@ResponseBody`.
 * `@ResponseStatus` can be used on a controller type is inherited for all method.
 * `AsyncRestTemplate` supports request interception.
+
+=== WebSocket Messaging Improvements
+
+* `@SendTo` can now be specified at class-level to share a common destination.
 
 === Testing Improvements
 

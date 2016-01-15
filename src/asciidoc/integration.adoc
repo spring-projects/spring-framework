@@ -2796,6 +2796,9 @@ as follow to automatically send a response:
 	}
 ----
 
+TIP: If you have several `@JmsListener`-annotated methods, you can also place the `@SendTo`
+annotation at class-level to share a default reply destination.
+
 If you need to set additional headers in a transport-independent manner, you could return a
 `Message` instead, something like:
 

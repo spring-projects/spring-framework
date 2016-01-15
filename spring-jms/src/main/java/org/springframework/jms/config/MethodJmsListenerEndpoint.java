@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -157,7 +157,7 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 	 */
 	protected String getDefaultResponseDestination() {
 		Method specificMethod = getMostSpecificMethod();
-		SendTo ann = AnnotationUtils.getAnnotation(specificMethod, SendTo.class);
+		SendTo ann = getSendTo(specificMethod);
 		if (ann != null) {
 			Object[] destinations = ann.value();
 			if (destinations.length != 1) {
@@ -167,6 +167,16 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 			return resolve((String) destinations[0]);
 		}
 		return null;
+	}
+
+	private SendTo getSendTo(Method specificMethod) {
+		SendTo ann = AnnotationUtils.getAnnotation(specificMethod, SendTo.class);
+		if (ann != null) {
+			return ann;
+		}
+		else {
+			return AnnotationUtils.getAnnotation(specificMethod.getDeclaringClass(), SendTo.class);
+		}
 	}
 
 	/**

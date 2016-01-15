@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,6 +88,9 @@ public class SendToMethodReturnValueHandlerTests {
 	private MethodParameter sendToUserDefaultDestReturnType;
 	private MethodParameter sendToUserSingleSessionDefaultDestReturnType;
 	private MethodParameter jsonViewReturnType;
+	private MethodParameter defaultNoAnnotation;
+	private MethodParameter defaultEmptyAnnotation;
+	private MethodParameter defaultOverrideAnnotation;
 
 
 	@Before
@@ -129,6 +132,15 @@ public class SendToMethodReturnValueHandlerTests {
 
 		method = this.getClass().getDeclaredMethod("handleAndSendToJsonView");
 		this.jsonViewReturnType = new SynthesizingMethodParameter(method, -1);
+
+		method = TestBean.class.getDeclaredMethod("handleNoAnnotation");
+		this.defaultNoAnnotation = new SynthesizingMethodParameter(method, -1);
+
+		method = TestBean.class.getDeclaredMethod("handleAndSendToDefaultDestination");
+		this.defaultEmptyAnnotation = new SynthesizingMethodParameter(method, -1);
+
+		method = TestBean.class.getDeclaredMethod("handleAndSendToOverride");
+		this.defaultOverrideAnnotation = new SynthesizingMethodParameter(method, -1);
 	}
 
 
@@ -138,23 +150,22 @@ public class SendToMethodReturnValueHandlerTests {
 		assertTrue(this.handler.supportsReturnType(this.sendToUserReturnType));
 		assertFalse(this.handler.supportsReturnType(this.noAnnotationsReturnType));
 		assertTrue(this.handlerAnnotationNotRequired.supportsReturnType(this.noAnnotationsReturnType));
+
+		assertTrue(this.handler.supportsReturnType(this.defaultNoAnnotation));
+		assertTrue(this.handler.supportsReturnType(this.defaultEmptyAnnotation));
+		assertTrue(this.handler.supportsReturnType(this.defaultOverrideAnnotation));
 	}
 
 	@Test
 	public void sendToNoAnnotations() throws Exception {
 		given(this.messageChannel.send(any(Message.class))).willReturn(true);
 
-		Message<?> inputMessage = createInputMessage("sess1", "sub1", "/app", "/dest", null);
+		String sessionId = "sess1";
+		Message<?> inputMessage = createInputMessage(sessionId, "sub1", "/app", "/dest", null);
 		this.handler.handleReturnValue(PAYLOAD, this.noAnnotationsReturnType, inputMessage);
 
 		verify(this.messageChannel, times(1)).send(this.messageCaptor.capture());
-
-		SimpMessageHeaderAccessor accessor = getCapturedAccessor(0);
-		assertEquals("sess1", accessor.getSessionId());
-		assertEquals("/topic/dest", accessor.getDestination());
-		assertEquals(MIME_TYPE, accessor.getContentType());
-		assertNull("Subscription id should not be copied", accessor.getSubscriptionId());
-		assertEquals(this.noAnnotationsReturnType, accessor.getHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER));
+		assertResponse(this.noAnnotationsReturnType, sessionId, 0, "/topic/dest");
 	}
 
 	@Test
@@ -166,20 +177,8 @@ public class SendToMethodReturnValueHandlerTests {
 		this.handler.handleReturnValue(PAYLOAD, this.sendToReturnType, inputMessage);
 
 		verify(this.messageChannel, times(2)).send(this.messageCaptor.capture());
-
-		SimpMessageHeaderAccessor accessor = getCapturedAccessor(0);
-		assertEquals(sessionId, accessor.getSessionId());
-		assertEquals("/dest1", accessor.getDestination());
-		assertEquals(MIME_TYPE, accessor.getContentType());
-		assertNull("Subscription id should not be copied", accessor.getSubscriptionId());
-		assertEquals(this.sendToReturnType, accessor.getHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER));
-
-		accessor = getCapturedAccessor(1);
-		assertEquals(sessionId, accessor.getSessionId());
-		assertEquals("/dest2", accessor.getDestination());
-		assertEquals(MIME_TYPE, accessor.getContentType());
-		assertNull("Subscription id should not be copied", accessor.getSubscriptionId());
-		assertEquals(this.sendToReturnType, accessor.getHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER));
+		assertResponse(this.sendToReturnType, sessionId, 0, "/dest1");
+		assertResponse(this.sendToReturnType, sessionId, 1, "/dest2");
 	}
 
 	@Test
@@ -191,13 +190,54 @@ public class SendToMethodReturnValueHandlerTests {
 		this.handler.handleReturnValue(PAYLOAD, this.sendToDefaultDestReturnType, inputMessage);
 
 		verify(this.messageChannel, times(1)).send(this.messageCaptor.capture());
+		assertResponse(this.sendToDefaultDestReturnType, sessionId, 0, "/topic/dest");
+	}
 
-		SimpMessageHeaderAccessor accessor = getCapturedAccessor(0);
+	@Test
+	public void sendToClassDefaultNoAnnotation() throws Exception {
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
+
+		String sessionId = "sess1";
+		Message<?> inputMessage = createInputMessage(sessionId, "sub1", null, null, null);
+		this.handler.handleReturnValue(PAYLOAD, this.defaultNoAnnotation, inputMessage);
+
+		verify(this.messageChannel, times(1)).send(this.messageCaptor.capture());
+		assertResponse(this.defaultNoAnnotation, sessionId, 0, "/dest-default");
+	}
+
+	@Test
+	public void sendToClassDefaultEmptyAnnotation() throws Exception {
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
+
+		String sessionId = "sess1";
+		Message<?> inputMessage = createInputMessage(sessionId, "sub1", null, null, null);
+		this.handler.handleReturnValue(PAYLOAD, this.defaultEmptyAnnotation, inputMessage);
+
+		verify(this.messageChannel, times(1)).send(this.messageCaptor.capture());
+		assertResponse(this.defaultEmptyAnnotation, sessionId, 0, "/dest-default");
+	}
+
+	@Test
+	public void sendToClassDefaultOverride() throws Exception {
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
+
+		String sessionId = "sess1";
+		Message<?> inputMessage = createInputMessage(sessionId, "sub1", null, null, null);
+		this.handler.handleReturnValue(PAYLOAD, this.defaultOverrideAnnotation, inputMessage);
+
+		verify(this.messageChannel, times(2)).send(this.messageCaptor.capture());
+		assertResponse(this.defaultOverrideAnnotation, sessionId, 0, "/dest3");
+		assertResponse(this.defaultOverrideAnnotation, sessionId, 1, "/dest4");
+	}
+
+	private void assertResponse(MethodParameter methodParameter, String sessionId,
+			int index, String destination) {
+		SimpMessageHeaderAccessor accessor = getCapturedAccessor(index);
 		assertEquals(sessionId, accessor.getSessionId());
-		assertEquals("/topic/dest", accessor.getDestination());
+		assertEquals(destination, accessor.getDestination());
 		assertEquals(MIME_TYPE, accessor.getContentType());
 		assertNull("Subscription id should not be copied", accessor.getSubscriptionId());
-		assertEquals(this.sendToDefaultDestReturnType, accessor.getHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER));
+		assertEquals(methodParameter, accessor.getHeader(SimpMessagingTemplate.CONVERSION_HINT_HEADER));
 	}
 
 	@Test
@@ -495,6 +535,25 @@ public class SendToMethodReturnValueHandlerTests {
 		payload.setWithView2("with");
 		payload.setWithoutView("without");
 		return payload;
+	}
+
+	@SendTo("/dest-default")
+	private static class TestBean {
+
+		public String handleNoAnnotation() {
+			return PAYLOAD;
+		}
+
+		@SendTo
+		public String handleAndSendToDefaultDestination() {
+			return PAYLOAD;
+		}
+
+		@SendTo({"/dest3", "/dest4"})
+		public String handleAndSendToOverride() {
+			return PAYLOAD;
+		}
+
 	}
 
 

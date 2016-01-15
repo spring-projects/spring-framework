@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -133,6 +133,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
 		if (returnType.getMethodAnnotation(SendTo.class) != null ||
+				AnnotationUtils.getAnnotation(returnType.getDeclaringClass(), SendTo.class) != null ||
 				returnType.getMethodAnnotation(SendToUser.class) != null) {
 			return true;
 		}
@@ -174,12 +175,22 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 			}
 		}
 		else {
-			SendTo sendTo = returnType.getMethodAnnotation(SendTo.class);
+			SendTo sendTo = getSendTo(returnType);
 			String[] destinations = getTargetDestinations(sendTo, message, this.defaultDestinationPrefix);
 			for (String destination : destinations) {
 				destination = this.placeholderHelper.replacePlaceholders(destination, varResolver);
 				this.messagingTemplate.convertAndSend(destination, returnValue, createHeaders(sessionId, returnType));
 			}
+		}
+	}
+
+	private SendTo getSendTo(MethodParameter returnType) {
+		SendTo sendTo = returnType.getMethodAnnotation(SendTo.class);
+		if (sendTo != null && !ObjectUtils.isEmpty((sendTo.value()))) {
+			return sendTo;
+		}
+		else {
+			return AnnotationUtils.getAnnotation(returnType.getDeclaringClass(), SendTo.class);
 		}
 	}
 

@@ -1359,7 +1359,8 @@ The return value from an `@MessageMapping` method is converted with a
 of a new message that is then sent, by default, to the `"brokerChannel"` with
 the same destination as the client message but using the prefix `"/topic"` by
 default. An `@SendTo` message level annotation can be used to specify any
-other destination instead.
+other destination instead. It can also be set a class-level to share a common
+destination.
 
 An `@SubscribeMapping` annotation can also be used to map subscription requests
 to `@Controller` methods. It is supported on the method level, but can also be
