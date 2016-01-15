@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.util.ClassUtils;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
@@ -69,6 +70,38 @@ public class HandlerResultMatchers {
 					actual = ((HandlerMethod) handler).getBeanType();
 				}
 				assertEquals("Handler type", type, ClassUtils.getUserClass(actual));
+			}
+		};
+	}
+
+	/**
+	 * Assert the controller method used to process the request. The expected
+	 * method is specified through a "mock" controller method invocation
+	 * similar to {@link MvcUriComponentsBuilder#fromMethodCall(Object)}.
+	 * <p>For example given this controller:
+	 * <pre class="code">
+	 * &#064;RestController
+	 * static class SimpleController {
+	 *
+	 *     &#064;RequestMapping("/")
+	 *     public ResponseEntity<Void> handle() {
+	 *         return ResponseEntity.ok().build();
+	 *     }
+	 * }
+	 * </pre>
+	 * <p>A test can be performed:
+	 * <pre class="code">
+	 * mockMvc.perform(get("/"))
+	 *     .andExpect(handler().methodCall(on(SimpleController.class).handle()));
+	 * </pre>
+	 */
+	public ResultMatcher methodCall(final Object info) {
+		return new ResultMatcher() {
+			@Override
+			public void match(MvcResult result) throws Exception {
+				HandlerMethod handlerMethod = getHandlerMethod(result);
+				Method method = ((MvcUriComponentsBuilder.MethodInvocationInfo) info).getControllerMethod();
+				assertEquals("HandlerMethod", method, handlerMethod.getMethod());
 			}
 		};
 	}
