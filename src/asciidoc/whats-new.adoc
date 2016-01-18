@@ -635,6 +635,11 @@ public @interface MyTestConfig {
 * Any SpEL expression used to specify the `condition` of an `@EventListener` can
   now refer to beans (i.e. `@beanName.method()`).
 
+=== Data Access Improvements
+
+* `jdbc:initialize-database` and `jdbc:embedded-database` support a configurable
+  separator to be applied to each script.
+
 === Caching Improvements
 
 Spring 4.3 allows concurrent calls on a given key to be synchronized so that the

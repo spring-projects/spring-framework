@@ -4877,6 +4877,25 @@ followed by a set of `CREATE` statements.
 The `ignore-failures` option can be set to `NONE` (the default), `DROPS` (ignore failed
 drops), or `ALL` (ignore all failures).
 
+Each statement should be separated by `;` or a new line if the `;` character is not
+present at all in the script. You can control that globally or script by script, for
+example:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<jdbc:initialize-database data-source="dataSource" **separator="@@"**>
+		<jdbc:script location="classpath:com/foo/sql/db-schema.sql" **separator=";"**/>
+		<jdbc:script location="classpath:com/foo/sql/db-test-data-1.sql"/>
+		<jdbc:script location="classpath:com/foo/sql/db-test-data-2.sql"/>
+	</jdbc:initialize-database>
+----
+
+In this example, the two `test-data` scripts use `@@` as statement separator and only
+the `db-schema.sql` uses `;`. This configuration specifies that the default separator
+is `@@` and override that default for the `db-schema` script.
+
+
 If you need more control than you get from the XML namespace, you can simply use the
 `DataSourceInitializer` directly and define it as a component in your application.
 
