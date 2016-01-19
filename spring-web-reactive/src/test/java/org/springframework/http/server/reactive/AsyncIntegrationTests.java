@@ -27,7 +27,7 @@ import org.junit.runners.Parameterized;
 import reactor.Mono;
 import reactor.Processors;
 import reactor.Timers;
-import reactor.core.processor.ProcessorGroup;
+import reactor.core.publisher.ProcessorGroup;
 import reactor.io.buffer.Buffer;
 import reactor.rx.Stream;
 
