@@ -56,13 +56,16 @@ public class ServletServerHttpRequestTests {
 
 	@Test
 	public void getURI() throws Exception {
-		URI uri = new URI("http://example.com/path?query");
-		mockRequest.setServerName(uri.getHost());
-		mockRequest.setServerPort(uri.getPort());
-		mockRequest.setRequestURI(uri.getPath());
-		mockRequest.setQueryString(uri.getQuery());
-		assertEquals("Invalid uri", uri, request.getURI());
-	}
+        URI uri = new URI("https://example.com/%E4%B8%AD%E6%96%87?redirect=https%3A%2F%2Fgithub.com%2Fspring-projects%2Fspring-framework");
+        mockRequest.setScheme(uri.getScheme());
+        mockRequest.setServerName(uri.getHost());
+        mockRequest.setServerPort(uri.getPort());
+        // NOTE: should use getRawPath() instead of getPath() is decoded, while HttpServletRequest.setRequestURI() is encoded
+        mockRequest.setRequestURI(uri.getRawPath());
+        // NOTE: should use getRawQuery() instead of getQuery() is decoded, while HttpServletRequest.getQueryString() is encoded
+        mockRequest.setQueryString(uri.getRawQuery());
+        assertEquals("Invalid uri", uri, request.getURI());
+    }
 
 	@Test
 	public void getHeaders() throws Exception {
