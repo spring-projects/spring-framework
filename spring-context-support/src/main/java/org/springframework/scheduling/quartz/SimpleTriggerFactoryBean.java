@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -237,7 +237,9 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 		SimpleTriggerImpl sti = new SimpleTriggerImpl();
 		sti.setName(this.name);
 		sti.setGroup(this.group);
-		sti.setJobKey(this.jobDetail.getKey());
+		if (this.jobDetail != null) {
+			sti.setJobKey(this.jobDetail.getKey());
+		}
 		sti.setJobDataMap(this.jobDataMap);
 		sti.setStartTime(this.startTime);
 		sti.setRepeatInterval(this.repeatInterval);
@@ -265,12 +267,14 @@ public class SimpleTriggerFactoryBean implements FactoryBean<SimpleTrigger>, Bea
 		MutablePropertyValues pvs = new MutablePropertyValues();
 		pvs.add("name", this.name);
 		pvs.add("group", this.group);
-		if (jobKeyMethod != null) {
-			pvs.add("jobKey", ReflectionUtils.invokeMethod(jobKeyMethod, this.jobDetail));
-		}
-		else {
-			pvs.add("jobName", this.jobDetail.getName());
-			pvs.add("jobGroup", this.jobDetail.getGroup());
+		if (this.jobDetail != null) {
+			if (jobKeyMethod != null) {
+				pvs.add("jobKey", ReflectionUtils.invokeMethod(jobKeyMethod, this.jobDetail));
+			}
+			else {
+				pvs.add("jobName", this.jobDetail.getName());
+				pvs.add("jobGroup", this.jobDetail.getGroup());
+			}
 		}
 		pvs.add("jobDataMap", this.jobDataMap);
 		pvs.add("startTime", this.startTime);
