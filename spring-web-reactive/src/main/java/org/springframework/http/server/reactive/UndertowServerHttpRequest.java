@@ -27,7 +27,7 @@ import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.Cookie;
 import io.undertow.util.HeaderValues;
 import org.reactivestreams.Publisher;
-import reactor.Flux;
+import reactor.core.publisher.Flux;
 
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;

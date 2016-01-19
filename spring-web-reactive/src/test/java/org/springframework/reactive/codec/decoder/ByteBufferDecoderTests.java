@@ -20,16 +20,17 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.stream.StreamSupport;
 
-import static java.util.stream.Collectors.toList;
-import static org.junit.Assert.*;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
-import reactor.Flux;
+import reactor.core.publisher.Flux;
 import reactor.io.buffer.Buffer;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.support.ByteBufferDecoder;
 import org.springframework.http.MediaType;
+
+import static java.util.stream.Collectors.toList;
+import static org.junit.Assert.*;
 
 /**
  * @author Sebastien Deleuze

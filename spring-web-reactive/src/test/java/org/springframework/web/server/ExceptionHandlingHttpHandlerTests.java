@@ -20,7 +20,7 @@ import java.net.URI;
 
 import org.junit.Before;
 import org.junit.Test;
-import reactor.Mono;
+import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;

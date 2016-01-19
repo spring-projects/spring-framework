@@ -15,7 +15,7 @@
  */
 package org.springframework.web.server;
 
-import reactor.Mono;
+import reactor.core.publisher.Mono;
 
 import org.springframework.util.Assert;
 

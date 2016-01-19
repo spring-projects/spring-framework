@@ -16,7 +16,7 @@
 
 package org.springframework.web.reactive.method.annotation;
 
-import reactor.Mono;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.annotation.RequestParam;

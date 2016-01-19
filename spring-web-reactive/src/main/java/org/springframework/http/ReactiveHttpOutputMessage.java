@@ -19,7 +19,7 @@ package org.springframework.http;
 import java.nio.ByteBuffer;
 
 import org.reactivestreams.Publisher;
-import reactor.Mono;
+import reactor.core.publisher.Mono;
 
 /**
  * A "reactive" HTTP output message that accepts output as a {@link Publisher}.

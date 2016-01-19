@@ -27,7 +27,7 @@ import org.junit.Test;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import reactor.Flux;
+import reactor.core.publisher.Flux;
 import reactor.core.subscriber.SubscriberBarrier;
 import reactor.rx.Stream;
 import reactor.rx.stream.Signal;

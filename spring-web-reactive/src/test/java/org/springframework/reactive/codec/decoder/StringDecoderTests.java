@@ -16,16 +16,13 @@
 
 package org.springframework.reactive.codec.decoder;
 
-import static java.util.stream.Collectors.*;
-import static org.junit.Assert.*;
-
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.stream.StreamSupport;
 
 import org.junit.Test;
-import reactor.Flux;
-import reactor.Mono;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.core.publisher.convert.RxJava1SingleConverter;
 import reactor.io.buffer.Buffer;
 import rx.Single;
@@ -33,6 +30,9 @@ import rx.Single;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.support.StringDecoder;
 import org.springframework.http.MediaType;
+
+import static java.util.stream.Collectors.toList;
+import static org.junit.Assert.*;
 
 /**
  * @author Sebastien Deleuze

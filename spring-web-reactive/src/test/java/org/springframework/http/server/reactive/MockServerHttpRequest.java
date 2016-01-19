@@ -19,7 +19,7 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 
 import org.reactivestreams.Publisher;
-import reactor.Flux;
+import reactor.core.publisher.Flux;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;

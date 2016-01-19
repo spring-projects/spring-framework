@@ -15,7 +15,7 @@
  */
 package org.springframework.web.server;
 
-import reactor.Mono;
+import reactor.core.publisher.Mono;
 
 /**
  * Contract to allow a {@link WebFilter} to delegate to the next in the chain.

@@ -24,10 +24,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import reactor.Mono;
-import reactor.Processors;
-import reactor.Timers;
+import reactor.core.publisher.Mono;
 import reactor.core.publisher.ProcessorGroup;
+import reactor.core.publisher.Processors;
+import reactor.core.timer.Timers;
 import reactor.io.buffer.Buffer;
 import reactor.rx.Stream;
 

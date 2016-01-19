@@ -18,7 +18,7 @@ package org.springframework.web.reactive;
 
 import java.util.function.Function;
 
-import reactor.Mono;
+import reactor.core.publisher.Mono;
 
 import org.springframework.web.server.WebServerExchange;
 

@@ -23,7 +23,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
-import reactor.Mono;
+import reactor.core.publisher.Mono;
 import reactor.rx.Stream;
 import reactor.rx.stream.Signal;
 
@@ -57,10 +57,7 @@ import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.WebServerExchange;
 
 import static org.hamcrest.CoreMatchers.startsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 /**
  * Test the effect of exceptions at different stages of request processing by

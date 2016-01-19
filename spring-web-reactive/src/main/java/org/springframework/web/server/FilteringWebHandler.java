@@ -19,7 +19,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import reactor.Mono;
+import reactor.core.publisher.Mono;
 
 /**
  * {@code WebHandler} that decorates another with a chain of {@link WebFilter}s.

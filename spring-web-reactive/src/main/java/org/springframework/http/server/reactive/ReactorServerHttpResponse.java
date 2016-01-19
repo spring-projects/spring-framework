@@ -18,8 +18,8 @@ package org.springframework.http.server.reactive;
 import java.nio.ByteBuffer;
 
 import org.reactivestreams.Publisher;
-import reactor.Flux;
-import reactor.Mono;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.io.buffer.Buffer;
 import reactor.io.net.http.HttpChannel;
 import reactor.io.net.http.model.Cookie;

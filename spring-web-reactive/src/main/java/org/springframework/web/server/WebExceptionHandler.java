@@ -15,7 +15,7 @@
  */
 package org.springframework.web.server;
 
-import reactor.Mono;
+import reactor.core.publisher.Mono;
 
 /**
  * Contract for handling exceptions during web server exchange processing.

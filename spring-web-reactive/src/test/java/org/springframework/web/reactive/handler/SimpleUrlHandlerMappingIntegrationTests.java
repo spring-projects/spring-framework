@@ -22,8 +22,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
-import reactor.Flux;
-import reactor.Mono;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.io.buffer.Buffer;
 
 import org.springframework.context.support.StaticApplicationContext;

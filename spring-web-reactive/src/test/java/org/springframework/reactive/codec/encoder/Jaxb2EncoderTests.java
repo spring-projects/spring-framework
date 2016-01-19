@@ -20,16 +20,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.StreamSupport;
 
-import static java.util.stream.Collectors.toList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import org.junit.Test;
-import reactor.Flux;
+import reactor.core.publisher.Flux;
 
 import org.springframework.core.codec.support.Jaxb2Encoder;
 import org.springframework.http.MediaType;
 import org.springframework.reactive.codec.Pojo;
+
+import static java.util.stream.Collectors.toList;
+import static org.junit.Assert.*;
 
 /**
  * @author Sebastien Deleuze

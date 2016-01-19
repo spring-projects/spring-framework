@@ -19,8 +19,8 @@ package org.springframework.web.reactive.handler;
 import java.util.HashMap;
 import java.util.Map;
 
-import reactor.Flux;
-import reactor.Mono;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.server.WebServerExchange;

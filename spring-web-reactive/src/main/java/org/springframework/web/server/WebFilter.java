@@ -16,7 +16,7 @@
 
 package org.springframework.web.server;
 
-import reactor.Mono;
+import reactor.core.publisher.Mono;
 
 /**
  * Contract for interception-style, chained processing of Web requests that may

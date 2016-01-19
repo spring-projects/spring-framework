@@ -20,10 +20,10 @@ import java.net.URI;
 import java.util.List;
 import java.util.stream.StreamSupport;
 
-import static java.util.stream.Collectors.toList;
 import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.http.HttpMethod;
@@ -37,9 +37,9 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.server.DefaultWebServerExchange;
 import org.springframework.web.server.WebServerExchange;
 
+import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import reactor.Flux;
 
 /**
  * @author Sebastien Deleuze

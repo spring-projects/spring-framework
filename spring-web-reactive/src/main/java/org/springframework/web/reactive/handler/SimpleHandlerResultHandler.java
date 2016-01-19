@@ -17,7 +17,7 @@
 package org.springframework.web.reactive.handler;
 
 import org.reactivestreams.Publisher;
-import reactor.Mono;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.ResolvableType;

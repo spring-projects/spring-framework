@@ -35,7 +35,7 @@ import org.reactivestreams.Subscription;
 import org.xnio.ChannelListener;
 import org.xnio.channels.StreamSinkChannel;
 import org.xnio.channels.StreamSourceChannel;
-import reactor.Mono;
+import reactor.core.publisher.Mono;
 import reactor.core.subscriber.BaseSubscriber;
 import reactor.core.subscription.BackpressureUtils;
 import reactor.core.support.Exceptions;

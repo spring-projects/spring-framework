@@ -15,7 +15,7 @@
  */
 package org.springframework.http.server.reactive;
 
-import reactor.Mono;
+import reactor.core.publisher.Mono;
 import reactor.io.buffer.Buffer;
 import reactor.io.net.ReactiveChannelHandler;
 import reactor.io.net.http.HttpChannel;

@@ -21,7 +21,7 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import reactor.Mono;
+import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpStatus;
 

@@ -15,7 +15,7 @@
  */
 package org.springframework.web.reactive;
 
-import reactor.Mono;
+import reactor.core.publisher.Mono;
 
 import org.springframework.web.ResponseStatusException;
 import org.springframework.web.server.WebExceptionHandler;

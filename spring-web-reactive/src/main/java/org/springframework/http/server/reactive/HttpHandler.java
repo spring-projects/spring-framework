@@ -16,7 +16,7 @@
 
 package org.springframework.http.server.reactive;
 
-import reactor.Mono;
+import reactor.core.publisher.Mono;
 
 /**
  * Contract for handling HTTP requests in a non-blocking way.

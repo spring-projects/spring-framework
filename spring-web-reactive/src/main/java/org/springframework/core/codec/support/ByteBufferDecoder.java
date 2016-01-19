@@ -19,7 +19,7 @@ package org.springframework.core.codec.support;
 import java.nio.ByteBuffer;
 
 import org.reactivestreams.Publisher;
-import reactor.Flux;
+import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.util.MimeType;

@@ -21,13 +21,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.StreamSupport;
 
-import static java.util.stream.Collectors.toList;
-import static org.junit.Assert.assertEquals;
 import org.junit.Test;
-import reactor.Flux;
+import reactor.core.publisher.Flux;
 import reactor.io.buffer.Buffer;
 
 import org.springframework.core.codec.support.JsonObjectDecoder;
+
+import static java.util.stream.Collectors.toList;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Sebastien Deleuze

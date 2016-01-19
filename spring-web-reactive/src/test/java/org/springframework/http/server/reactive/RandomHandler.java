@@ -23,7 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
-import reactor.Mono;
+import reactor.core.publisher.Mono;
 import reactor.io.buffer.Buffer;
 
 import static org.junit.Assert.assertEquals;

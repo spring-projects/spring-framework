@@ -26,7 +26,7 @@ import javax.xml.bind.MarshalException;
 import javax.xml.bind.Marshaller;
 
 import org.reactivestreams.Publisher;
-import reactor.Flux;
+import reactor.core.publisher.Flux;
 import reactor.io.buffer.Buffer;
 
 import org.springframework.core.ResolvableType;
