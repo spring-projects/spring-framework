@@ -2209,17 +2209,27 @@ public abstract class AbstractPropertyAccessorTests {
 		}
 	}
 
-	static class Spr13837Bean {
+	interface Spr13837 {
+
+		Integer getSomething();
+
+		<T extends Spr13837> T setSomething(Integer something);
+
+	}
+
+	static class Spr13837Bean implements Spr13837 {
 
 		protected Integer something;
 
+		@Override
+		public Integer getSomething() {
+			return this.something;
+		}
+
+		@Override
 		public Spr13837Bean setSomething(final Integer something) {
 			this.something = something;
 			return this;
-		}
-
-		public Integer getSomething() {
-			return this.something;
 		}
 	}
 
