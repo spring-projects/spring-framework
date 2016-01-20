@@ -26,7 +26,7 @@ import org.reactivestreams.Subscriber;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.subscriber.SubscriberBarrier;
-import reactor.core.subscription.BackpressureUtils;
+import reactor.core.util.BackpressureUtils;
 import reactor.io.buffer.Buffer;
 
 import org.springframework.core.ResolvableType;
