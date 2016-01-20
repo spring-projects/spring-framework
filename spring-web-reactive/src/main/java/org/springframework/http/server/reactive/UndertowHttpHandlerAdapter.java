@@ -38,7 +38,7 @@ import org.xnio.channels.StreamSourceChannel;
 import reactor.core.publisher.Mono;
 import reactor.core.subscriber.BaseSubscriber;
 import reactor.core.subscription.BackpressureUtils;
-import reactor.core.support.Exceptions;
+import reactor.core.util.Exceptions;
 
 import org.springframework.util.Assert;
 

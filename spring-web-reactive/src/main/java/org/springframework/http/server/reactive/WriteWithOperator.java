@@ -19,7 +19,7 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.subscriber.SubscriberBarrier;
-import reactor.core.support.Assert;
+import reactor.core.util.Assert;
 import reactor.fn.Function;
 
 

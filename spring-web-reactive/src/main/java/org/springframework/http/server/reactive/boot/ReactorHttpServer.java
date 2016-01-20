@@ -16,7 +16,7 @@
 
 package org.springframework.http.server.reactive.boot;
 
-import reactor.core.support.ReactiveState;
+import reactor.core.util.ReactiveState;
 import reactor.io.buffer.Buffer;
 import reactor.io.net.ReactiveNet;
 
