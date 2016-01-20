@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,9 +88,12 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 	@Override
 	public URI getURI() {
 		try {
-			return new URI(this.servletRequest.getScheme(), null, this.servletRequest.getServerName(),
-					this.servletRequest.getServerPort(), this.servletRequest.getRequestURI(),
-					this.servletRequest.getQueryString(), null);
+			StringBuffer url = this.servletRequest.getRequestURL();
+			String query = this.servletRequest.getQueryString();
+			if (StringUtils.hasText(query)) {
+				url.append('?').append(query);
+			}
+			return new URI(url.toString());
 		}
 		catch (URISyntaxException ex) {
 			throw new IllegalStateException("Could not get HttpServletRequest URI: " + ex.getMessage(), ex);
