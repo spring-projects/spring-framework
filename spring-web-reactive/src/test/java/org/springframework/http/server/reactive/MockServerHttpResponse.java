@@ -15,6 +15,7 @@
  */
 package org.springframework.http.server.reactive;
 
+import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -27,7 +28,7 @@ import org.springframework.http.HttpStatus;
 /**
  * @author Rossen Stoyanchev
  */
-public class MockServerHttpResponse implements ServerHttpResponse {
+public class MockServerHttpResponse extends AbstractServerHttpResponse {
 
 	private HttpStatus status;
 
@@ -50,18 +51,31 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 		return this.headers;
 	}
 
-	@Override
-	public Mono<Void> setBody(Publisher<DataBuffer> body) {
-		this.body = body;
-		return Flux.from(body).after();
-	}
-
 	public Publisher<DataBuffer> getBody() {
 		return this.body;
 	}
 
 	@Override
-	public void writeHeaders() {
+	protected Mono<Void> setBodyInternal(Publisher<DataBuffer> body) {
+		this.body = body;
+		return Flux.from(this.body).after();
+	}
+
+	@Override
+	protected void writeHeaders() {
+	}
+
+	@Override
+	protected void writeCookies() {
+	}
+
+	@Override
+	public void beforeCommit(Supplier<? extends Mono<Void>> action) {
+	}
+
+	@Override
+	public Mono<Void> setComplete() {
+		return Mono.empty();
 	}
 
 }

@@ -43,17 +43,15 @@ public class WebToHttpHandlerAdapter extends WebHandlerDecorator implements Http
 	@Override
 	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 		WebServerExchange exchange = createWebServerExchange(request, response);
-		return getDelegate().handle(exchange).otherwise(ex -> {
+		return getDelegate().handle(exchange)
+				.otherwise(ex -> {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Could not complete request", ex);
 					}
 					response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
 					return Mono.empty();
 				})
-				.doOnTerminate((aVoid, ex) -> {
-					response.writeHeaders();
-				});
-
+				.after(response::setComplete);
 	}
 
 	protected WebServerExchange createWebServerExchange(ServerHttpRequest request, ServerHttpResponse response) {

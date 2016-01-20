@@ -69,7 +69,7 @@ public class ServletServerHttpResponse extends AbstractServerHttpResponse {
 	}
 
 	@Override
-	protected void writeHeadersInternal() {
+	protected void writeHeaders() {
 		for (Map.Entry<String, List<String>> entry : getHeaders().entrySet()) {
 			String headerName = entry.getKey();
 			for (String headerValue : entry.getValue()) {

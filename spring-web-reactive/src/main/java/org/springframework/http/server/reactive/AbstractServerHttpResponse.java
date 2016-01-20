@@ -15,12 +15,20 @@
  */
 package org.springframework.http.server.reactive;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
+
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.rx.Stream;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
+import org.springframework.util.Assert;
+
 
 /**
  * Base class for {@link ServerHttpResponse} implementations.
@@ -31,7 +39,9 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	private final HttpHeaders headers;
 
-	private boolean headersWritten = false;
+	private AtomicReference<State> state = new AtomicReference<>(State.NEW);
+
+	private final List<Supplier<? extends Mono<Void>>> beforeCommitActions = new ArrayList<>(4);
 
 
 	protected AbstractServerHttpResponse() {
@@ -41,16 +51,53 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public HttpHeaders getHeaders() {
-		return (this.headersWritten ? org.springframework.http.HttpHeaders.readOnlyHttpHeaders(this.headers) : this.headers);
+		if (State.COMITTED.equals(this.state.get())) {
+			return HttpHeaders.readOnlyHttpHeaders(this.headers);
+		}
+		return this.headers;
 	}
 
 	@Override
 	public Mono<Void> setBody(Publisher<DataBuffer> publisher) {
-		return Flux.from(publisher).lift(new WriteWithOperator<>(writeWithPublisher -> {
-			writeHeaders();
-			return setBodyInternal(writeWithPublisher);
-		})).after();
+		return Flux.from(publisher)
+				.lift(new WriteWithOperator<>(writePublisher ->
+						applyBeforeCommit().after(() -> setBodyInternal(writePublisher))))
+				.after();
 	}
+
+	private Mono<Void> applyBeforeCommit() {
+		return Stream.defer(() -> {
+			Mono<Void> mono = Mono.empty();
+			if (this.state.compareAndSet(State.NEW, State.COMMITTING)) {
+				for (Supplier<? extends Mono<Void>> action : this.beforeCommitActions) {
+					mono = mono.after(() -> action.get());
+				}
+				mono = mono.otherwise(ex -> {
+					// Ignore errors from beforeCommit actions
+					return Mono.empty();
+				});
+				mono = mono.after(() -> {
+					this.state.set(State.COMITTED);
+					writeHeaders();
+					writeCookies();
+					return Mono.empty();
+				});
+			}
+			return mono;
+		}).after();
+	}
+
+	/**
+	 * Implement this method to apply header changes from {@link #getHeaders()}
+	 * to the underlying response. This method is called once only.
+	 */
+	protected abstract void writeHeaders();
+
+	/**
+	 * Implement this method to add cookies from {@link #getHeaders()} to the
+	 * underlying response. This method is called once only.
+	 */
+	protected abstract void writeCookies();
 
 	/**
 	 * Implement this method to write to the underlying the response.
@@ -59,28 +106,17 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	protected abstract Mono<Void> setBodyInternal(Publisher<DataBuffer> publisher);
 
 	@Override
-	public void writeHeaders() {
-		if (!this.headersWritten) {
-			try {
-				writeHeadersInternal();
-				writeCookies();
-			}
-			finally {
-				this.headersWritten = true;
-			}
-		}
+	public void beforeCommit(Supplier<? extends Mono<Void>> action) {
+		Assert.notNull(action);
+		this.beforeCommitActions.add(action);
 	}
 
-	/**
-	 * Implement this method to apply header changes from {@link #getHeaders()}
-	 * to the underlying response. This method is called once only.
-	 */
-	protected abstract void writeHeadersInternal();
+	@Override
+	public Mono<Void> setComplete() {
+		return applyBeforeCommit();
+	}
 
-	/**
-	 * Implement this method to add cookies from {@link #getHeaders()} to the
-	 * underlying response. This method is called once only.
-	 */
-	protected abstract void writeCookies();
+
+	private enum State { NEW, COMMITTING, COMITTED }
 
 }

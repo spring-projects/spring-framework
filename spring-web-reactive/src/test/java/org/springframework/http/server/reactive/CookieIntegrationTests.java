@@ -20,8 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -30,13 +28,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.reactive.boot.HttpServer;
-import org.springframework.http.server.reactive.boot.JettyHttpServer;
-import org.springframework.http.server.reactive.boot.ReactorHttpServer;
-import org.springframework.http.server.reactive.boot.RxNettyHttpServer;
-import org.springframework.http.server.reactive.boot.TomcatHttpServer;
-import org.springframework.http.server.reactive.boot.UndertowHttpServer;
-import org.springframework.util.SocketUtils;
 import org.springframework.web.client.RestTemplate;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -49,45 +40,14 @@ import static org.junit.Assert.assertThat;
  * @author Rossen Stoyanchev
  */
 @RunWith(Parameterized.class)
-public class CookieIntegrationTests {
-
-	protected int port;
-
-	@Parameterized.Parameter(0)
-	public HttpServer server;
+public class CookieIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	private CookieHandler cookieHandler;
 
-
-	@Parameterized.Parameters(name = "server [{0}]")
-	public static Object[][] arguments() {
-		return new Object[][] {
-				{new JettyHttpServer()},
-				{new RxNettyHttpServer()},
-				{new ReactorHttpServer()},
-				{new TomcatHttpServer()},
-				{new UndertowHttpServer()}
-		};
-	}
-
-
-	@Before
-	public void setup() throws Exception {
-		this.port = SocketUtils.findAvailableTcpPort();
-		this.server.setPort(this.port);
-		this.server.setHandler(createHttpHandler());
-		this.server.afterPropertiesSet();
-		this.server.start();
-	}
-
+	@Override
 	protected HttpHandler createHttpHandler() {
 		this.cookieHandler = new CookieHandler();
 		return this.cookieHandler;
-	}
-
-	@After
-	public void tearDown() throws Exception {
-		this.server.stop();
 	}
 
 
@@ -145,9 +105,8 @@ public class CookieIntegrationTests {
 					.path("/").secure().httpOnly().build());
 			response.getHeaders().addCookie(HttpCookie.serverCookie("lang", "en-US")
 					.domain("example.com").path("/").build());
-			response.writeHeaders();
 
-			return Mono.empty();
+			return response.setComplete();
 		}
 	}
 

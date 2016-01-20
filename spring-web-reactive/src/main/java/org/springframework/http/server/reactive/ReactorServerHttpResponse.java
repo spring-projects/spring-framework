@@ -61,7 +61,7 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse {
 	}
 
 	@Override
-	protected void writeHeadersInternal() {
+	protected void writeHeaders() {
 		for (String name : getHeaders().keySet()) {
 			for (String value : getHeaders().get(name)) {
 				this.channel.responseHeaders().add(name, value);

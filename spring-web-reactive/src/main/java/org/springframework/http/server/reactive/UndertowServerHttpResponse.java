@@ -71,7 +71,7 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse {
 	}
 
 	@Override
-	protected void writeHeadersInternal() {
+	protected void writeHeaders() {
 		for (Map.Entry<String, List<String>> entry : getHeaders().entrySet()) {
 			HttpString headerName = HttpString.tryFromString(entry.getKey());
 			this.exchange.getResponseHeaders().addAll(headerName, entry.getValue());
