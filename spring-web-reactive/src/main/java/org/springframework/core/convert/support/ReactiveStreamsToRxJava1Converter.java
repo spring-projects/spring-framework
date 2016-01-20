@@ -20,7 +20,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.reactivestreams.Publisher;
-import reactor.core.converter.RxJava1Converter;
+import reactor.core.converter.RxJava1ObservableConverter;
+import reactor.core.converter.RxJava1SingleConverter;
 import rx.Observable;
 import rx.Single;
 
@@ -50,16 +51,16 @@ public final class ReactiveStreamsToRxJava1Converter implements GenericConverter
 			return null;
 		}
 		if (Observable.class.isAssignableFrom(source.getClass())) {
-			return RxJava1Converter.from((Observable) source);
+			return RxJava1ObservableConverter.from((Observable) source);
 		}
 		else if (Observable.class.isAssignableFrom(targetType.getResolvableType().getRawClass())) {
-			return RxJava1Converter.from((Publisher) source);
+			return RxJava1ObservableConverter.from((Publisher) source);
 		}
 		else if (Single.class.isAssignableFrom(source.getClass())) {
-			return reactor.core.converter.RxJava1SingleConverter.from((Single) source);
+			return RxJava1SingleConverter.from((Single) source);
 		}
 		else if (Single.class.isAssignableFrom(targetType.getResolvableType().getRawClass())) {
-			return reactor.core.converter.RxJava1SingleConverter.from((Publisher) source);
+			return RxJava1SingleConverter.from((Publisher) source);
 		}
 		return null;
 	}

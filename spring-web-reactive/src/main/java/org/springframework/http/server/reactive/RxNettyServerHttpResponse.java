@@ -23,8 +23,8 @@ import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import org.reactivestreams.Publisher;
+import reactor.core.converter.RxJava1ObservableConverter;
 import reactor.core.publisher.Mono;
-import reactor.core.converter.RxJava1Converter;
 import rx.Observable;
 
 import org.springframework.http.HttpCookie;
@@ -59,9 +59,9 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 
 	@Override
 	protected Mono<Void> setBodyInternal(Publisher<ByteBuffer> publisher) {
-		Observable<byte[]> content = RxJava1Converter.from(publisher).map(this::toBytes);
+		Observable<byte[]> content = RxJava1ObservableConverter.from(publisher).map(this::toBytes);
 		Observable<Void> completion = this.response.writeBytes(content);
-		return RxJava1Converter.from(completion).after();
+		return RxJava1ObservableConverter.from(completion).after();
 	}
 
 	private byte[] toBytes(ByteBuffer buffer) {

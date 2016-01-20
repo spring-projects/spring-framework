@@ -26,7 +26,7 @@ import java.util.Map;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
-import reactor.core.converter.RxJava1Converter;
+import reactor.core.converter.RxJava1ObservableConverter;
 import reactor.core.publisher.Flux;
 import rx.Observable;
 
@@ -91,7 +91,7 @@ public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 	public Flux<ByteBuffer> getBody() {
 		Observable<ByteBuffer> content = this.request.getContent().map(ByteBuf::nioBuffer);
 		content = content.concatWith(Observable.empty()); // See GH issue #58
-		return RxJava1Converter.from(content);
+		return RxJava1ObservableConverter.from(content);
 	}
 
 }

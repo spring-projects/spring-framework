@@ -21,7 +21,7 @@ import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import io.reactivex.netty.protocol.http.server.RequestHandler;
 import org.reactivestreams.Publisher;
-import reactor.core.converter.RxJava1Converter;
+import reactor.core.converter.RxJava1ObservableConverter;
 import rx.Observable;
 
 import org.springframework.util.Assert;
@@ -44,7 +44,7 @@ public class RxNettyHttpHandlerAdapter implements RequestHandler<ByteBuf, ByteBu
 		RxNettyServerHttpRequest adaptedRequest = new RxNettyServerHttpRequest(request);
 		RxNettyServerHttpResponse adaptedResponse = new RxNettyServerHttpResponse(response);
 		Publisher<Void> result = this.httpHandler.handle(adaptedRequest, adaptedResponse);
-		return RxJava1Converter.from(result);
+		return RxJava1ObservableConverter.from(result);
 	}
 
 }
