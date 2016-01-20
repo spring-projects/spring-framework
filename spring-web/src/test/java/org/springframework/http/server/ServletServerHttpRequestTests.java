@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,13 +56,24 @@ public class ServletServerHttpRequestTests {
 
 	@Test
 	public void getURI() throws Exception {
-        URI uri = new URI("https://example.com/%E4%B8%AD%E6%96%87?redirect=https%3A%2F%2Fgithub.com%2Fspring-projects%2Fspring-framework");
+		URI uri = new URI("http://example.com/path?query");
+		mockRequest.setServerName(uri.getHost());
+		mockRequest.setServerPort(uri.getPort());
+		mockRequest.setRequestURI(uri.getPath());
+		mockRequest.setQueryString(uri.getQuery());
+		assertEquals("Invalid uri", uri, request.getURI());
+	}
+
+	// SPR-13876
+
+	@Test
+	public void getUriWithEncoding() throws Exception {
+        URI uri = new URI("https://example.com/%E4%B8%AD%E6%96%87" +
+				"?redirect=https%3A%2F%2Fgithub.com%2Fspring-projects%2Fspring-framework");
         mockRequest.setScheme(uri.getScheme());
         mockRequest.setServerName(uri.getHost());
         mockRequest.setServerPort(uri.getPort());
-        // NOTE: should use getRawPath() instead of getPath() is decoded, while HttpServletRequest.setRequestURI() is encoded
         mockRequest.setRequestURI(uri.getRawPath());
-        // NOTE: should use getRawQuery() instead of getQuery() is decoded, while HttpServletRequest.getQueryString() is encoded
         mockRequest.setQueryString(uri.getRawQuery());
         assertEquals("Invalid uri", uri, request.getURI());
     }
