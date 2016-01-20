@@ -175,7 +175,8 @@ public class HttpEntityMethodProcessorMockTests {
 		assertFalse("The requestHandled flag shouldn't change", mavContainer.isRequestHandled());
 		RequestEntity<?> requestEntity = (RequestEntity<?>) result;
 		assertEquals("Invalid method", HttpMethod.GET, requestEntity.getMethod());
-		assertEquals("Invalid url", new URI("http", null, "www.example.com", 80, "/path", null, null), requestEntity.getUrl());
+		// using default port (which is 80), so do not need to append the port (-1 means ignore)
+		assertEquals("Invalid url", new URI("http", null, "www.example.com", -1, "/path", null, null), requestEntity.getUrl());
 		assertEquals("Invalid argument", body, requestEntity.getBody());
 	}
 
