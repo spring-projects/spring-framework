@@ -26,8 +26,8 @@ import java.util.Map;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.reactivex.netty.protocol.http.server.HttpServerRequest;
+import reactor.core.converter.RxJava1Converter;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.convert.RxJava1Converter;
 import rx.Observable;
 
 import org.springframework.http.HttpCookie;

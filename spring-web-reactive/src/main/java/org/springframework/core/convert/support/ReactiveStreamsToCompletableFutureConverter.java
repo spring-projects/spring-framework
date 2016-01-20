@@ -44,10 +44,10 @@ public class ReactiveStreamsToCompletableFutureConverter implements GenericConve
 			return null;
 		}
 		else if (CompletableFuture.class.isAssignableFrom(source.getClass())) {
-			return reactor.core.publisher.convert.CompletableFutureConverter.from((CompletableFuture) source);
+			return reactor.core.converter.CompletableFutureConverter.from((CompletableFuture) source);
 		}
 		else if (CompletableFuture.class.isAssignableFrom(targetType.getResolvableType().getRawClass())) {
-			return reactor.core.publisher.convert.CompletableFutureConverter.fromSingle((Publisher) source);
+			return reactor.core.converter.CompletableFutureConverter.fromSingle((Publisher) source);
 		}
 		return null;
 	}

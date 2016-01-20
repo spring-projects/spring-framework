@@ -21,7 +21,7 @@ import io.reactivex.netty.protocol.http.server.HttpServerRequest;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import io.reactivex.netty.protocol.http.server.RequestHandler;
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.convert.RxJava1Converter;
+import reactor.core.converter.RxJava1Converter;
 import rx.Observable;
 
 import org.springframework.util.Assert;

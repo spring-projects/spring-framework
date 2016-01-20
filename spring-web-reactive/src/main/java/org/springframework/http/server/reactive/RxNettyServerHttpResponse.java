@@ -24,7 +24,7 @@ import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.reactivex.netty.protocol.http.server.HttpServerResponse;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.convert.RxJava1Converter;
+import reactor.core.converter.RxJava1Converter;
 import rx.Observable;
 
 import org.springframework.http.HttpCookie;

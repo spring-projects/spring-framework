@@ -23,7 +23,7 @@ import java.util.stream.StreamSupport;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.convert.RxJava1SingleConverter;
+import reactor.core.converter.RxJava1SingleConverter;
 import reactor.io.buffer.Buffer;
 import rx.Single;
 
