@@ -69,11 +69,12 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	protected URI initUri() throws URISyntaxException {
-		return new URI(getServletRequest().getScheme(), null,
-				getServletRequest().getServerName(),
-				getServletRequest().getServerPort(),
-				getServletRequest().getRequestURI(),
-				getServletRequest().getQueryString(), null);
+		StringBuffer url = this.request.getRequestURL();
+		String query = this.request.getQueryString();
+		if (StringUtils.hasText(query)) {
+			url.append('?').append(query);
+		}
+		return new URI(url.toString());
 	}
 
 	@Override
