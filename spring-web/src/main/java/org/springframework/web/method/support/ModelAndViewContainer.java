@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.method.support;
 
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
 import org.springframework.validation.support.BindingAwareModelMap;
@@ -53,6 +54,8 @@ public class ModelAndViewContainer {
 	private ModelMap redirectModel;
 
 	private boolean redirectModelScenario = false;
+
+	private HttpStatus status;
 
 	private final SessionStatus sessionStatus = new SimpleSessionStatus();
 
@@ -174,6 +177,22 @@ public class ModelAndViewContainer {
 	 */
 	public SessionStatus getSessionStatus() {
 		return this.sessionStatus;
+	}
+
+	/**
+	 * Provide a HTTP status that will be passed on to with the
+	 * {@code ModelAndView} used for view rendering purposes.
+	 * @since 4.3
+	 */
+	public void setStatus(HttpStatus status) {
+		this.status = status;
+	}
+
+	/**
+	 * Return the configured HTTP status, if any.
+	 */
+	public HttpStatus getStatus() {
+		return this.status;
 	}
 
 	/**

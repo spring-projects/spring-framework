@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1736,6 +1736,19 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		assertArrayEquals(content, response.getContentAsByteArray());
 	}
 
+	@Test
+	public void modelAndViewWithStatus() throws Exception {
+		initServletWithControllers(ModelAndViewController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/path");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+
+		assertEquals(422, response.getStatus());
+		assertEquals("view", response.getForwardedUrl());
+	}
+
+
 	/*
 	 * Controllers
 	 */
@@ -3219,6 +3232,14 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		}
 	}
 
+	@Controller
+	public static class ModelAndViewController {
+
+		@RequestMapping("/path")
+		public ModelAndView methodWithHttpStatus(MyEntity object) {
+			return new ModelAndView("view", new ModelMap(), HttpStatus.UNPROCESSABLE_ENTITY);
+		}
+	}
 
 
 // Test cases deleted from the original ServletAnnotationControllerTests:
