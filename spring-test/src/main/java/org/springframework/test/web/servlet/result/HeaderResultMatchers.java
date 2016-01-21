@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.test.web.servlet.result;
 
 import org.hamcrest.Matcher;
 
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 
@@ -31,7 +32,7 @@ import java.util.TimeZone;
 
 /**
  * Factory for response header assertions.
- * <p>An instance of this class is usually accessed via
+ * <p>An instance of this class is available via
  * {@link MockMvcResultMatchers#header}.
  *
  * @author Rossen Stoyanchev
@@ -41,12 +42,14 @@ import java.util.TimeZone;
  */
 public class HeaderResultMatchers {
 
+
 	/**
 	 * Protected constructor.
-	 * Use {@link MockMvcResultMatchers#header()}.
+	 * See {@link MockMvcResultMatchers#header()}.
 	 */
 	protected HeaderResultMatchers() {
 	}
+
 
 	/**
 	 * Assert the primary value of the named response header with the given
@@ -81,23 +84,25 @@ public class HeaderResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) {
-				assertTrue("Response should not contain header " + name, !result.getResponse().containsHeader(name));
+				assertTrue("Response should not contain header " + name,
+						!result.getResponse().containsHeader(name));
 			}
 		};
 	}
 
 	/**
 	 * Assert the primary value of the named response header as a {@code long}.
-	 * <p>The {@link ResultMatcher} returned by this method throws an {@link AssertionError}
-	 * if the response does not contain the specified header, or if the supplied
-	 * {@code value} does not match the primary value.
+	 * <p>The {@link ResultMatcher} returned by this method throws an
+	 * {@link AssertionError} if the response does not contain the specified
+	 * header, or if the supplied {@code value} does not match the primary value.
 	 */
 	public ResultMatcher longValue(final String name, final long value) {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) {
-				assertTrue("Response does not contain header " + name, result.getResponse().containsHeader(name));
-				assertEquals("Response header " + name, value, Long.parseLong(result.getResponse().getHeader(name)));
+				MockHttpServletResponse response = result.getResponse();
+				assertTrue("Response does not contain header " + name, response.containsHeader(name));
+				assertEquals("Response header " + name, value, Long.parseLong(response.getHeader(name)));
 			}
 		};
 	}
@@ -105,10 +110,9 @@ public class HeaderResultMatchers {
 	/**
 	 * Assert the primary value of the named response header as a date String,
 	 * using the preferred date format described in RFC 7231.
-	 * <p>The {@link ResultMatcher} returned by this method throws an {@link AssertionError}
-	 * if the response does not contain the specified header, or if the supplied
-	 * {@code value} does not match the primary value.
-	 *
+	 * <p>The {@link ResultMatcher} returned by this method throws an
+	 * {@link AssertionError} if the response does not contain the specified
+	 * header, or if the supplied {@code value} does not match the primary value.
 	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
 	 * @since 4.2
 	 */
@@ -118,8 +122,10 @@ public class HeaderResultMatchers {
 			public void match(MvcResult result) {
 				SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US);
 				format.setTimeZone(TimeZone.getTimeZone("GMT"));
-				assertTrue("Response does not contain header " + name, result.getResponse().containsHeader(name));
-				assertEquals("Response header " + name, format.format(new Date(value)), result.getResponse().getHeader(name));
+				String formatted = format.format(new Date(value));
+				MockHttpServletResponse response = result.getResponse();
+				assertTrue("Response does not contain header " + name, response.containsHeader(name));
+				assertEquals("Response header " + name, formatted, response.getHeader(name));
 			}
 		};
 	}
