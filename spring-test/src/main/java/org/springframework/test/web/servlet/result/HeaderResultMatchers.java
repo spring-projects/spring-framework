@@ -16,19 +16,22 @@
 
 package org.springframework.test.web.servlet.result;
 
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
+
 import org.hamcrest.Matcher;
 
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
 
-import static org.hamcrest.MatcherAssert.*;
-import static org.springframework.test.util.AssertionErrors.*;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 /**
  * Factory for response header assertions.
@@ -52,8 +55,8 @@ public class HeaderResultMatchers {
 
 
 	/**
-	 * Assert the primary value of the named response header with the given
-	 * Hamcrest {@link Matcher}.
+	 * Assert the primary value of the response header with the given Hamcrest
+	 * String {@code Matcher}.
 	 */
 	public ResultMatcher string(final String name, final Matcher<? super String> matcher) {
 		return new ResultMatcher() {
@@ -65,13 +68,42 @@ public class HeaderResultMatchers {
 	}
 
 	/**
-	 * Assert the primary value of the named response header as a {@link String}.
+	 * Assert the values of the response header with the given Hamcrest
+	 * Iterable {@link Matcher}.
+	 * @since 4.3
+	 */
+	public <T> ResultMatcher stringValues(final String name, final Matcher<Iterable<String>> matcher) {
+		return new ResultMatcher() {
+			@Override
+			public void match(MvcResult result) {
+				List<String> values = result.getResponse().getHeaders(name);
+				assertThat("Response header " + name, values, matcher);
+			}
+		};
+	}
+
+	/**
+	 * Assert the primary value of the response header as a String value.
 	 */
 	public ResultMatcher string(final String name, final String value) {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) {
-				assertEquals("Response header " + name, value, result.getResponse().getHeader(name));
+				assertEquals("Response header " + name, result.getResponse().getHeader(name), value);
+			}
+		};
+	}
+
+	/**
+	 * Assert the values of the response header as String values.
+	 * @since 4.3
+	 */
+	public ResultMatcher stringValues(final String name, final String... values) {
+		return new ResultMatcher() {
+			@Override
+			public void match(MvcResult result) {
+				List<Object> actual = result.getResponse().getHeaderValues(name);
+				assertEquals("Response header " + name, Arrays.asList(values), actual);
 			}
 		};
 	}

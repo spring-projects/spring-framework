@@ -672,3 +672,4 @@ Spring 4.3 also improves the caching abstraction as follows:
 === Testing Improvements
 
 * The JUnit support in the _Spring TestContext Framework_ now requires JUnit 4.12 or higher.
+* HeaderResultMatchers in Spring MVC Test supports expectations on multiple header values

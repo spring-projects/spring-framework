@@ -33,13 +33,17 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.WebRequest;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.springframework.http.HttpHeaders.IF_MODIFIED_SINCE;
 import static org.springframework.http.HttpHeaders.LAST_MODIFIED;
+import static org.springframework.http.HttpHeaders.VARY;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -96,6 +100,18 @@ public class HeaderAssertionTests {
 	}
 
 	@Test
+	public void multiStringHeaderValue() throws Exception {
+		this.mockMvc.perform(get("/persons/1")).andExpect(header().stringValues(VARY, "foo", "bar"));
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void multiStringHeaderValueWithMatchers() throws Exception {
+		this.mockMvc.perform(get("/persons/1"))
+				.andExpect(header().stringValues(VARY, hasItems(containsString("foo"), startsWith("bar"))));
+	}
+
+	@Test
 	public void dateValueWithCorrectResponseHeaderValue() throws Exception {
 		this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, minuteAgo))
 				.andExpect(header().dateValue(LAST_MODIFIED, this.currentTime));
@@ -111,7 +127,7 @@ public class HeaderAssertionTests {
 	public void stringWithMissingResponseHeader() throws Exception {
 		this.mockMvc.perform(get("/persons/1").header(IF_MODIFIED_SINCE, now))
 				.andExpect(status().isNotModified())
-				.andExpect(header().string("X-Custom-Header", (String) null));
+				.andExpect(header().stringValues("X-Custom-Header"));
 	}
 
 	@Test
