@@ -471,7 +471,9 @@ public class MockHttpServletRequestBuilderTests {
 		assertEquals(user, request.getUserPrincipal());
 	}
 
-	// SPR-12945
+	/**
+	 * See SPR-12945
+	 */
 	@Test
 	public void mergeInvokesDefaultRequestPostProcessorFirst() {
 		final String ATTR = "ATTR";
@@ -490,6 +492,24 @@ public class MockHttpServletRequestBuilderTests {
 		request = builder.postProcessRequest(request);
 
 		assertEquals(EXEPCTED, request.getAttribute(ATTR));
+	}
+
+	/**
+	 * See SPR-13719
+	 */
+	@Test
+	public void arbitraryMethod() {
+		/*
+		 * http method is case-sensitive
+		 * http://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html#sec5.1.1
+		 */
+		String httpMethod = "REPort";
+		this.builder = new MockHttpServletRequestBuilder(httpMethod, "/foo/{bar}", 42);
+
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+
+		assertEquals(httpMethod, request.getMethod());
+		assertEquals("/foo/42", request.getPathInfo());
 	}
 
 
