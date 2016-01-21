@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,16 +60,20 @@ import org.springframework.web.util.UriUtils;
  *
  * <p>Application tests will typically access this builder through the static factory
  * methods in {@link MockMvcRequestBuilders}.
+ * <p>Although this class cannot be extended, additional ways to initialize
+ * the {@code MockHttpServletRequest} can be plugged in via
+ * {@link #with(RequestPostProcessor)}.
  *
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
  * @author Sam Brannen
+ * @author Kamill Sokol
  * @since 3.2
  */
 public class MockHttpServletRequestBuilder
 		implements ConfigurableSmartRequestBuilder<MockHttpServletRequestBuilder>, Mergeable {
 
-	private final HttpMethod method;
+	private final String method;
 
 	private final URI url;
 
@@ -119,26 +123,32 @@ public class MockHttpServletRequestBuilder
 	 * @param vars zero or more URL variables
 	 */
 	MockHttpServletRequestBuilder(HttpMethod httpMethod, String url, Object... vars) {
-		this(httpMethod, UriComponentsBuilder.fromUriString(url).buildAndExpand(vars).encode().toUri());
+		this(httpMethod.name(), UriComponentsBuilder.fromUriString(url).buildAndExpand(vars).encode().toUri());
 	}
 
 	/**
-	 * Package private constructor. To get an instance, use static factory
-	 * methods in {@link MockMvcRequestBuilders}.
-	 * <p>Although this class cannot be extended, additional ways to initialize
-	 * the {@code MockHttpServletRequest} can be plugged in via
-	 * {@link #with(RequestPostProcessor)}.
+	 * Alternative to {@link #MockHttpServletRequestBuilder(HttpMethod, String, Object...)}
+	 * with a pre-built URI.
 	 * @param httpMethod the HTTP method (GET, POST, etc)
 	 * @param url the URL
 	 * @since 4.0.3
 	 */
 	MockHttpServletRequestBuilder(HttpMethod httpMethod, URI url) {
+		this(httpMethod.name(), url);
+	}
+
+	/**
+	 * Alternative constructor for custom HTTP methods.
+	 * @param httpMethod the HTTP method (GET, POST, etc)
+	 * @param url the URL
+	 * @since 4.3
+	 */
+	MockHttpServletRequestBuilder(String httpMethod, URI url) {
 		Assert.notNull(httpMethod, "httpMethod is required");
 		Assert.notNull(url, "url is required");
 		this.method = httpMethod;
 		this.url = url;
 	}
-
 
 	/**
 	 * Add a request parameter to the {@link MockHttpServletRequest}.
@@ -585,7 +595,7 @@ public class MockHttpServletRequestBuilder
 			request.setServerPort(this.url.getPort());
 		}
 
-		request.setMethod(this.method.name());
+		request.setMethod(this.method);
 
 		for (String name : this.headers.keySet()) {
 			for (Object value : this.headers.get(name)) {
