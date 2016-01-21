@@ -89,6 +89,7 @@ dependencies {
 	optional "com.fasterxml.jackson.core:jackson-databind:2.6.2"
 	optional "io.projectreactor:reactor-stream:${reactorVersion}"
 	optional "io.projectreactor:reactor-net:${reactorVersion}"
+	optional "io.projectreactor:reactor-io:${reactorVersion}"
 	optional "org.apache.tomcat:tomcat-util:${tomcatVersion}"
 	optional "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
 	optional 'io.undertow:undertow-core:1.3.5.Final'
