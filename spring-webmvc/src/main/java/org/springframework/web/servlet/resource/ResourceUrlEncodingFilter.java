@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * @author Jeremy Grelle
  * @author Rossen Stoyanchev
  * @author Sam Brannen
+ * @author Brian Clozel
  * @since 4.1
  */
 public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
@@ -56,8 +57,10 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 
 		private final HttpServletRequest request;
 
-		/* Cache the index of the path within the DispatcherServlet mapping */
+		/* Cache the index and prefix of the path within the DispatcherServlet mapping */
 		private Integer indexLookupPath;
+
+		private String prefixLookupPath;
 
 		public ResourceUrlEncodingResponseWrapper(HttpServletRequest request, HttpServletResponse wrapped) {
 			super(wrapped);
@@ -72,15 +75,14 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 				return super.encodeURL(url);
 			}
 
-			initIndexLookupPath(resourceUrlProvider);
-			if (url.length() >= this.indexLookupPath) {
-				String prefix = url.substring(0, this.indexLookupPath);
+			initLookupPath(resourceUrlProvider);
+			if (url.startsWith(this.prefixLookupPath)) {
 				int suffixIndex = getQueryParamsIndex(url);
 				String suffix = url.substring(suffixIndex);
 				String lookupPath = url.substring(this.indexLookupPath, suffixIndex);
 				lookupPath = resourceUrlProvider.getForLookupPath(lookupPath);
 				if (lookupPath != null) {
-					return super.encodeURL(prefix + lookupPath + suffix);
+					return super.encodeURL(this.prefixLookupPath + lookupPath + suffix);
 				}
 			}
 
@@ -92,16 +94,18 @@ public class ResourceUrlEncodingFilter extends OncePerRequestFilter {
 					ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR);
 		}
 
-		private void initIndexLookupPath(ResourceUrlProvider urlProvider) {
+		private void initLookupPath(ResourceUrlProvider urlProvider) {
 			if (this.indexLookupPath == null) {
 				String requestUri = urlProvider.getPathHelper().getRequestUri(this.request);
 				String lookupPath = urlProvider.getPathHelper().getLookupPathForRequest(this.request);
 				this.indexLookupPath = requestUri.lastIndexOf(lookupPath);
+				this.prefixLookupPath = requestUri.substring(0, this.indexLookupPath);
 
 				if ("/".equals(lookupPath) && !"/".equals(requestUri)) {
 					String contextPath = urlProvider.getPathHelper().getContextPath(this.request);
 					if (requestUri.equals(contextPath)) {
 						this.indexLookupPath = requestUri.length();
+						this.prefixLookupPath = requestUri;
 					}
 				}
 			}
