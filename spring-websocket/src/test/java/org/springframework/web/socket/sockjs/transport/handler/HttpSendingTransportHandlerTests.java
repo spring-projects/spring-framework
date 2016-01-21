@@ -31,6 +31,7 @@ import org.springframework.web.socket.sockjs.transport.session.AbstractSockJsSes
 import org.springframework.web.socket.sockjs.transport.session.PollingSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.StreamingSockJsSession;
 import org.springframework.web.socket.sockjs.transport.session.StubSockJsServiceConfig;
+import org.springframework.web.util.UriUtils;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -114,7 +115,7 @@ public class HttpSendingTransportHandlerTests  extends AbstractHttpRequestTests 
 		setRequest("POST", "/");
 
 		if (callbackValue != null) {
-			this.servletRequest.setQueryString("c=" + callbackValue);
+			this.servletRequest.setQueryString("c=" + UriUtils.encodeQueryParam(callbackValue, "UTF-8"));
 			this.servletRequest.addParameter("c", callbackValue);
 		}
 
