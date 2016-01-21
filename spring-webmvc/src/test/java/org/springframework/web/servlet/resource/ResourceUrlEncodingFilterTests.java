@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -149,6 +149,25 @@ public class ResourceUrlEncodingFilterTests {
 			}
 		});
 	}
+
+	// SPR-13847
+	@Test
+	public void encodeUrlPreventStringOutOfBounds() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/context-path/index");
+		request.setContextPath("/context-path");
+		request.setServletPath("");
+		request.setAttribute(ResourceUrlProviderExposingInterceptor.RESOURCE_URL_PROVIDER_ATTR, this.resourceUrlProvider);
+		MockHttpServletResponse response = new MockHttpServletResponse();
+
+		this.filter.doFilterInternal(request, response, new FilterChain() {
+			@Override
+			public void doFilter(ServletRequest request, ServletResponse response) throws IOException, ServletException {
+				String result = ((HttpServletResponse)response).encodeURL("index?key=value");
+				assertEquals("index?key=value", result);
+			}
+		});
+	}
+
 
 	protected ResourceUrlProvider createResourceUrlProvider(List<ResourceResolver> resolvers) {
 		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
