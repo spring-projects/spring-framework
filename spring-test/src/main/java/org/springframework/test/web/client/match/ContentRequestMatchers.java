@@ -149,7 +149,7 @@ public class ContentRequestMatchers {
 	public RequestMatcher formData(final MultiValueMap<String, String> expectedContent) {
 		return new RequestMatcher() {
 			@Override
-			public void match(ClientHttpRequest request) throws IOException, AssertionError {
+			public void match(final ClientHttpRequest request) throws IOException, AssertionError {
 				HttpInputMessage inputMessage = new HttpInputMessage() {
 					@Override
 					public InputStream getBody() throws IOException {
