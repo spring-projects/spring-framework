@@ -16,6 +16,9 @@
 
 package org.springframework.test.web.servlet.request;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.security.Principal;
@@ -33,8 +36,10 @@ import javax.servlet.http.Cookie;
 import org.springframework.beans.Mergeable;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
@@ -603,24 +608,10 @@ public class MockHttpServletRequestBuilder
 			}
 		}
 
-		try {
-			if (this.url.getRawQuery() != null) {
-				request.setQueryString(this.url.getRawQuery());
-			}
-
-			MultiValueMap<String, String> queryParams =
-					UriComponentsBuilder.fromUri(this.url).build().getQueryParams();
-
-			for (Entry<String, List<String>> entry : queryParams.entrySet()) {
-				for (String value : entry.getValue()) {
-					value = (value != null) ? UriUtils.decode(value, "UTF-8") : null;
-					request.addParameter(UriUtils.decode(entry.getKey(), "UTF-8"), value);
-				}
-			}
+		if (this.url.getRawQuery() != null) {
+			request.setQueryString(this.url.getRawQuery());
 		}
-		catch (UnsupportedEncodingException ex) {
-			// shouldn't happen
-		}
+		addRequestParams(request, UriComponentsBuilder.fromUri(this.url).build().getQueryParams());
 
 		for (String name : this.parameters.keySet()) {
 			for (String value : this.parameters.get(name)) {
@@ -631,6 +622,13 @@ public class MockHttpServletRequestBuilder
 		request.setContentType(this.contentType);
 		request.setContent(this.content);
 		request.setCharacterEncoding(this.characterEncoding);
+
+		if (this.content != null && this.contentType != null) {
+			MediaType mediaType = MediaType.parseMediaType(this.contentType);
+			if (MediaType.APPLICATION_FORM_URLENCODED.includes(mediaType)) {
+				addRequestParams(request, parseFormData(mediaType));
+			}
+		}
 
 		if (!ObjectUtils.isEmpty(this.cookies)) {
 			request.setCookies(this.cookies.toArray(new Cookie[this.cookies.size()]));
@@ -693,6 +691,43 @@ public class MockHttpServletRequestBuilder
 			this.pathInfo = (StringUtils.hasText(extraPath)) ? extraPath : null;
 		}
 		request.setPathInfo(this.pathInfo);
+	}
+
+	private void addRequestParams(MockHttpServletRequest request, MultiValueMap<String, String> map) {
+		try {
+			for (Entry<String, List<String>> entry : map.entrySet()) {
+				for (String value : entry.getValue()) {
+					value = (value != null) ? UriUtils.decode(value, "UTF-8") : null;
+					request.addParameter(UriUtils.decode(entry.getKey(), "UTF-8"), value);
+				}
+			}
+		}
+		catch (UnsupportedEncodingException ex) {
+			// shouldn't happen
+		}
+	}
+
+	private MultiValueMap<String, String> parseFormData(final MediaType mediaType) {
+		MultiValueMap<String, String> map;HttpInputMessage message = new HttpInputMessage() {
+			@Override
+			public InputStream getBody() throws IOException {
+				return new ByteArrayInputStream(content);
+			}
+
+			@Override
+			public HttpHeaders getHeaders() {
+				HttpHeaders headers = new HttpHeaders();
+				headers.setContentType(mediaType);
+				return headers;
+			}
+		};
+		try {
+			map = new FormHttpMessageConverter().read(null, message);
+		}
+		catch (IOException ex) {
+			throw new IllegalStateException("Failed to parse form data in request body: ", ex);
+		}
+		return map;
 	}
 
 	private FlashMapManager getFlashMapManager(MockHttpServletRequest request) {
