@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.http.server.reactive;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -28,6 +27,7 @@ import io.undertow.util.HttpString;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
@@ -42,11 +42,11 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse {
 
 	private final HttpServerExchange exchange;
 
-	private final Function<Publisher<ByteBuffer>, Mono<Void>> responseBodyWriter;
+	private final Function<Publisher<DataBuffer>, Mono<Void>> responseBodyWriter;
 
 
 	public UndertowServerHttpResponse(HttpServerExchange exchange,
-			Function<Publisher<ByteBuffer>, Mono<Void>> responseBodyWriter) {
+			Function<Publisher<DataBuffer>, Mono<Void>> responseBodyWriter) {
 
 		Assert.notNull(exchange, "'exchange' is required.");
 		Assert.notNull(responseBodyWriter, "'responseBodyWriter' must not be null");
@@ -66,7 +66,7 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse {
 	}
 
 	@Override
-	protected Mono<Void> setBodyInternal(Publisher<ByteBuffer> publisher) {
+	protected Mono<Void> setBodyInternal(Publisher<DataBuffer> publisher) {
 		return this.responseBodyWriter.apply(publisher);
 	}
 

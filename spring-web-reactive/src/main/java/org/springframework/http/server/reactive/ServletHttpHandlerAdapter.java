@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,6 @@
 package org.springframework.http.server.reactive;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.servlet.AsyncContext;
 import javax.servlet.ReadListener;
@@ -38,6 +36,9 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 
@@ -55,11 +56,16 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 
 	private HttpHandler handler;
 
+	private DataBufferAllocator allocator = new DefaultDataBufferAllocator();
+
 
 	public void setHandler(HttpHandler handler) {
 		this.handler = handler;
 	}
 
+	public void setAllocator(DataBufferAllocator allocator) {
+		this.allocator = allocator;
+	}
 
 	@Override
 	protected void service(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
@@ -68,11 +74,13 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		AsyncContext context = servletRequest.startAsync();
 		ServletAsyncContextSynchronizer synchronizer = new ServletAsyncContextSynchronizer(context);
 
-		RequestBodyPublisher requestBody = new RequestBodyPublisher(synchronizer, BUFFER_SIZE);
+		RequestBodyPublisher requestBody =
+				new RequestBodyPublisher(synchronizer, allocator, BUFFER_SIZE);
 		ServletServerHttpRequest request = new ServletServerHttpRequest(servletRequest, requestBody);
 		servletRequest.getInputStream().setReadListener(requestBody);
 
-		ResponseBodySubscriber responseBodySubscriber = new ResponseBodySubscriber(synchronizer);
+		ResponseBodySubscriber responseBodySubscriber =
+				new ResponseBodySubscriber(synchronizer, allocator);
 		ServletServerHttpResponse response = new ServletServerHttpResponse(servletResponse,
 				publisher -> Mono.from(subscriber -> publisher.subscribe(responseBodySubscriber)));
 		servletResponse.getOutputStream().setWriteListener(responseBodySubscriber);
@@ -81,30 +89,32 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		this.handler.handle(request, response).subscribe(resultSubscriber);
 	}
 
-
-	private static class RequestBodyPublisher implements ReadListener, Publisher<ByteBuffer> {
+	private static class RequestBodyPublisher
+			implements ReadListener, Publisher<DataBuffer> {
 
 		private final ServletAsyncContextSynchronizer synchronizer;
+
+		private final DataBufferAllocator allocator;
 
 		private final byte[] buffer;
 
 		private final DemandCounter demand = new DemandCounter();
 
-		private Subscriber<? super ByteBuffer> subscriber;
+		private Subscriber<? super DataBuffer> subscriber;
 
 		private boolean stalled;
 
 		private boolean cancelled;
 
-
-		public RequestBodyPublisher(ServletAsyncContextSynchronizer synchronizer, int bufferSize) {
+		public RequestBodyPublisher(ServletAsyncContextSynchronizer synchronizer,
+				DataBufferAllocator allocator, int bufferSize) {
 			this.synchronizer = synchronizer;
+			this.allocator = allocator;
 			this.buffer = new byte[bufferSize];
 		}
 
-
 		@Override
-		public void subscribe(Subscriber<? super ByteBuffer> subscriber) {
+		public void subscribe(Subscriber<? super DataBuffer> subscriber) {
 			if (subscriber == null) {
 				throw new NullPointerException();
 			}
@@ -146,11 +156,11 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 				}
 				else if (read > 0) {
 					this.demand.decrement();
-					byte[] copy = Arrays.copyOf(this.buffer, read);
 
-//				logger.debug("Next: " + new String(copy, UTF_8));
+					DataBuffer dataBuffer = allocator.allocateBuffer(read);
+					dataBuffer.write(this.buffer, 0, read);
 
-					this.subscriber.onNext(ByteBuffer.wrap(copy));
+					this.subscriber.onNext(dataBuffer);
 
 				}
 			}
@@ -265,19 +275,23 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		}
 	}
 
-	private static class ResponseBodySubscriber implements WriteListener, Subscriber<ByteBuffer> {
+	private static class ResponseBodySubscriber
+			implements WriteListener, Subscriber<DataBuffer> {
 
 		private final ServletAsyncContextSynchronizer synchronizer;
 
+		private final DataBufferAllocator allocator;
+
 		private Subscription subscription;
 
-		private ByteBuffer buffer;
+		private DataBuffer buffer;
 
 		private volatile boolean subscriberComplete = false;
 
-
-		public ResponseBodySubscriber(ServletAsyncContextSynchronizer synchronizer) {
+		public ResponseBodySubscriber(ServletAsyncContextSynchronizer synchronizer,
+				DataBufferAllocator allocator) {
 			this.synchronizer = synchronizer;
+			this.allocator = allocator;
 		}
 
 
@@ -288,8 +302,7 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 		}
 
 		@Override
-		public void onNext(ByteBuffer bytes) {
-
+		public void onNext(DataBuffer bytes) {
 			Assert.isNull(buffer);
 
 			this.buffer = bytes;
@@ -321,8 +334,8 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 
 			if (ready) {
 				if (this.buffer != null) {
-					byte[] bytes = new byte[this.buffer.remaining()];
-					this.buffer.get(bytes);
+					byte[] bytes = new byte[this.buffer.readableByteCount()];
+					this.buffer.read(bytes);
 					this.buffer = null;
 					output.write(bytes);
 					if (!subscriberComplete) {

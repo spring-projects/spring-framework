@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,9 @@ import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutureConverter;
 import org.springframework.core.convert.support.ReactiveStreamsToReactorStreamConverter;
 import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converter;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
@@ -380,8 +383,10 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@Bean
 		public ResponseBodyResultHandler responseBodyResultHandler() {
+			DataBufferAllocator allocator = new DefaultDataBufferAllocator();
 			return new ResponseBodyResultHandler(Arrays.asList(
-					new ByteBufferEncoder(), new StringEncoder(), new JacksonJsonEncoder(new JsonObjectEncoder())),
+					new ByteBufferEncoder(allocator), new StringEncoder(allocator),
+					new JacksonJsonEncoder(allocator, new JsonObjectEncoder(allocator))),
 					conversionService());
 		}
 
@@ -426,9 +431,9 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@RequestMapping("/raw")
 		public Publisher<ByteBuffer> rawResponseBody() {
-			JacksonJsonEncoder encoder = new JacksonJsonEncoder();
+			JacksonJsonEncoder encoder = new JacksonJsonEncoder(new DefaultDataBufferAllocator());
 			return encoder.encode(Stream.just(new Person("Robert")),
-					ResolvableType.forClass(Person.class), MediaType.APPLICATION_JSON);
+					ResolvableType.forClass(Person.class), MediaType.APPLICATION_JSON).map(DataBuffer::asByteBuffer);
 		}
 
 		@RequestMapping("/stream-result")

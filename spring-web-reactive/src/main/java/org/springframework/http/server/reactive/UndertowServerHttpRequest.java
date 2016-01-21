@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.http.server.reactive;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +28,7 @@ import io.undertow.util.HeaderValues;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -44,10 +44,10 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final HttpServerExchange exchange;
 
-	private final Flux<ByteBuffer> body;
+	private final Flux<DataBuffer> body;
 
-
-	public UndertowServerHttpRequest(HttpServerExchange exchange, Publisher<ByteBuffer> body) {
+	public UndertowServerHttpRequest(HttpServerExchange exchange,
+			Publisher<DataBuffer> body) {
 		Assert.notNull(exchange, "'exchange' is required.");
 		Assert.notNull(exchange, "'body' is required.");
 		this.exchange = exchange;
@@ -92,7 +92,7 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	public Flux<ByteBuffer> getBody() {
+	public Flux<DataBuffer> getBody() {
 		return this.body;
 	}
 

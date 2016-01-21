@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.reactive.handler;
 
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,6 +28,8 @@ import reactor.core.publisher.Mono;
 import reactor.io.buffer.Buffer;
 
 import org.springframework.context.support.StaticApplicationContext;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -139,7 +142,9 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 
 		@Override
 		public Mono<Void> handle(WebServerExchange exchange) {
-			return exchange.getResponse().setBody(Flux.just(Buffer.wrap("foo").byteBuffer()));
+			DataBuffer buffer = new DefaultDataBufferAllocator().allocateBuffer()
+					.write("foo".getBytes(StandardCharsets.UTF_8));
+			return exchange.getResponse().setBody(Flux.just(buffer));
 		}
 	}
 
@@ -147,7 +152,9 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 
 		@Override
 		public Mono<Void> handle(WebServerExchange exchange) {
-			return exchange.getResponse().setBody(Flux.just(Buffer.wrap("bar").byteBuffer()));
+			DataBuffer buffer = new DefaultDataBufferAllocator().allocateBuffer()
+					.write("bar".getBytes(StandardCharsets.UTF_8));
+			return exchange.getResponse().setBody(Flux.just(buffer));
 		}
 	}
 

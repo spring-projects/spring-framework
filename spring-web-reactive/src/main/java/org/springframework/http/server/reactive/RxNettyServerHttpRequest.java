@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.http.server.reactive;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +29,8 @@ import reactor.core.converter.RxJava1ObservableConverter;
 import reactor.core.publisher.Flux;
 import rx.Observable;
 
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.NettyDataBufferAllocator;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -45,9 +46,13 @@ public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final HttpServerRequest<ByteBuf> request;
 
+	private final NettyDataBufferAllocator allocator;
 
-	public RxNettyServerHttpRequest(HttpServerRequest<ByteBuf> request) {
-		Assert.notNull("'request', request must not be null.");
+	public RxNettyServerHttpRequest(HttpServerRequest<ByteBuf> request,
+			NettyDataBufferAllocator allocator) {
+		Assert.notNull("'request', request must not be null");
+		Assert.notNull(allocator, "'allocator' must not be null");
+		this.allocator = allocator;
 		this.request = request;
 	}
 
@@ -88,8 +93,8 @@ public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	public Flux<ByteBuffer> getBody() {
-		Observable<ByteBuffer> content = this.request.getContent().map(ByteBuf::nioBuffer);
+	public Flux<DataBuffer> getBody() {
+		Observable<DataBuffer> content = this.request.getContent().map(allocator::wrap);
 		content = content.concatWith(Observable.empty()); // See GH issue #58
 		return RxJava1ObservableConverter.from(content);
 	}

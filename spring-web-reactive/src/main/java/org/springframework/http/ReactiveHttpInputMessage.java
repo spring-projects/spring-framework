@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 package org.springframework.http;
 
-import java.nio.ByteBuffer;
-
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+
+import org.springframework.core.io.buffer.DataBuffer;
 
 /**
  * An "reactive" HTTP input message that exposes the input as {@link Publisher}.
@@ -35,6 +35,6 @@ public interface ReactiveHttpInputMessage extends HttpMessage {
 	 * Return the body of the message as a {@link Publisher}.
 	 * @return the body content publisher
 	 */
-	Flux<ByteBuffer> getBody();
+	Flux<DataBuffer> getBody();
 
 }

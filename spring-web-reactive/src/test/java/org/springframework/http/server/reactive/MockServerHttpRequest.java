@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 package org.springframework.http.server.reactive;
 
 import java.net.URI;
-import java.nio.ByteBuffer;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 
@@ -35,7 +35,7 @@ public class MockServerHttpRequest implements ServerHttpRequest {
 
 	private HttpHeaders headers = new HttpHeaders();
 
-	private Flux<ByteBuffer> body;
+	private Flux<DataBuffer> body;
 
 
 	public MockServerHttpRequest(HttpMethod httpMethod, URI uri) {
@@ -43,7 +43,8 @@ public class MockServerHttpRequest implements ServerHttpRequest {
 		this.uri = uri;
 	}
 
-	public MockServerHttpRequest(Publisher<ByteBuffer> body, HttpMethod httpMethod, URI uri) {
+	public MockServerHttpRequest(Publisher<DataBuffer> body, HttpMethod httpMethod,
+			URI uri) {
 		this.body = Flux.from(body);
 		this.httpMethod = httpMethod;
 		this.uri = uri;
@@ -78,11 +79,11 @@ public class MockServerHttpRequest implements ServerHttpRequest {
 	}
 
 	@Override
-	public Flux<ByteBuffer> getBody() {
+	public Flux<DataBuffer> getBody() {
 		return this.body;
 	}
 
-	public void setBody(Publisher<ByteBuffer> body) {
+	public void setBody(Publisher<DataBuffer> body) {
 		this.body = Flux.from(body);
 	}
 }

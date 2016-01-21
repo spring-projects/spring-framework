@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ import reactor.io.buffer.Buffer;
 import reactor.io.net.http.HttpChannel;
 import reactor.io.net.http.model.Cookie;
 
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -41,10 +43,14 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final HttpChannel<Buffer, ?> channel;
 
+	private final DataBufferAllocator allocator;
 
-	public ReactorServerHttpRequest(HttpChannel<Buffer, ?> request) {
-		Assert.notNull("'request' must not be null.");
+	public ReactorServerHttpRequest(HttpChannel<Buffer, ?> request,
+			DataBufferAllocator allocator) {
+		Assert.notNull("'request' must not be null");
+		Assert.notNull(allocator, "'allocator' must not be null");
 		this.channel = request;
+		this.allocator = allocator;
 	}
 
 
@@ -84,8 +90,11 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	public Flux<ByteBuffer> getBody() {
-		return Flux.from(this.channel.input()).map(Buffer::byteBuffer);
+	public Flux<DataBuffer> getBody() {
+		return Flux.from(this.channel.input()).map(bytes -> {
+			ByteBuffer byteBuffer = bytes.byteBuffer();
+			return allocator.wrap(byteBuffer);
+		});
 	}
 
 }

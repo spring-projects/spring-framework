@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,8 +17,10 @@
 package org.springframework.http.server.reactive.boot;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.UnpooledByteBufAllocator;
 
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.io.buffer.NettyDataBufferAllocator;
 import org.springframework.http.server.reactive.RxNettyHttpHandlerAdapter;
 import org.springframework.util.Assert;
 
@@ -26,30 +28,38 @@ import org.springframework.util.Assert;
 /**
  * @author Rossen Stoyanchev
  */
-public class RxNettyHttpServer extends HttpServerSupport implements InitializingBean, HttpServer {
+public class RxNettyHttpServer extends HttpServerSupport implements HttpServer {
 
 	private RxNettyHttpHandlerAdapter rxNettyHandler;
 
 	private io.reactivex.netty.protocol.http.server.HttpServer<ByteBuf, ByteBuf> rxNettyServer;
 
+	private NettyDataBufferAllocator allocator;
+
 	private boolean running;
+
+	public void setAllocator(ByteBufAllocator allocator) {
+		Assert.notNull(allocator, "'allocator' must not be null");
+		this.allocator = new NettyDataBufferAllocator(allocator);
+	}
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		Assert.notNull(getHttpHandler());
+		if (allocator == null) {
+			allocator = new NettyDataBufferAllocator(UnpooledByteBufAllocator.DEFAULT);
+		}
+		this.rxNettyHandler = new RxNettyHttpHandlerAdapter(getHttpHandler(), allocator);
+
+		this.rxNettyServer = (getPort() != -1 ?
+				io.reactivex.netty.protocol.http.server.HttpServer.newServer(getPort()) :
+				io.reactivex.netty.protocol.http.server.HttpServer.newServer());
+	}
 
 
 	@Override
 	public boolean isRunning() {
 		return this.running;
-	}
-
-
-	@Override
-	public void afterPropertiesSet() throws Exception {
-
-		Assert.notNull(getHttpHandler());
-		this.rxNettyHandler = new RxNettyHttpHandlerAdapter(getHttpHandler());
-
-		this.rxNettyServer = (getPort() != -1 ?
-				io.reactivex.netty.protocol.http.server.HttpServer.newServer(getPort()) :
-				io.reactivex.netty.protocol.http.server.HttpServer.newServer());
 	}
 
 

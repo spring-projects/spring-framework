@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,12 @@ import org.junit.Test;
 import org.reactivestreams.Publisher;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.codec.support.StringEncoder;
-import org.springframework.web.reactive.HandlerResult;
+import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.reactive.HandlerResult;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -40,7 +41,8 @@ public class ResponseBodyResultHandlerTests {
 	@Test
 	public void supports() throws NoSuchMethodException {
 		ResponseBodyResultHandler handler = new ResponseBodyResultHandler(Collections.singletonList(
-				new StringEncoder()), new DefaultConversionService());
+				new StringEncoder(new DefaultDataBufferAllocator())),
+				new DefaultConversionService());
 		TestController controller = new TestController();
 
 		HandlerMethod hm = new HandlerMethod(controller,TestController.class.getMethod("notAnnotated"));

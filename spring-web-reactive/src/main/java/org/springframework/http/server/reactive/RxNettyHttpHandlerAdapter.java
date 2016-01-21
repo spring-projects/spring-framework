@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.converter.RxJava1ObservableConverter;
 import rx.Observable;
 
+import org.springframework.core.io.buffer.NettyDataBufferAllocator;
 import org.springframework.util.Assert;
 
 /**
@@ -33,15 +34,20 @@ public class RxNettyHttpHandlerAdapter implements RequestHandler<ByteBuf, ByteBu
 
 	private final HttpHandler httpHandler;
 
+	private final NettyDataBufferAllocator allocator;
 
-	public RxNettyHttpHandlerAdapter(HttpHandler httpHandler) {
-		Assert.notNull(httpHandler, "'httpHandler' is required.");
+	public RxNettyHttpHandlerAdapter(HttpHandler httpHandler,
+			NettyDataBufferAllocator allocator) {
+		Assert.notNull(httpHandler, "'httpHandler' is required");
+		Assert.notNull(allocator, "'allocator' must not be null");
 		this.httpHandler = httpHandler;
+		this.allocator = allocator;
 	}
 
 	@Override
 	public Observable<Void> handle(HttpServerRequest<ByteBuf> request, HttpServerResponse<ByteBuf> response) {
-		RxNettyServerHttpRequest adaptedRequest = new RxNettyServerHttpRequest(request);
+		RxNettyServerHttpRequest adaptedRequest =
+				new RxNettyServerHttpRequest(request, allocator);
 		RxNettyServerHttpResponse adaptedResponse = new RxNettyServerHttpResponse(response);
 		Publisher<Void> result = this.httpHandler.handle(adaptedRequest, adaptedResponse);
 		return RxJava1ObservableConverter.from(result);

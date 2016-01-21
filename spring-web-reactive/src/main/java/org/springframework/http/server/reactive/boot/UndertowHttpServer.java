@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,24 +19,30 @@ package org.springframework.http.server.reactive.boot;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
 import org.springframework.http.server.reactive.UndertowHttpHandlerAdapter;
 import org.springframework.util.Assert;
 
 /**
  * @author Marek Hawrylczak
  */
-public class UndertowHttpServer extends HttpServerSupport implements InitializingBean, HttpServer {
+public class UndertowHttpServer extends HttpServerSupport implements HttpServer {
 
 	private Undertow server;
 
+	private DataBufferAllocator allocator = new DefaultDataBufferAllocator();
+
 	private boolean running;
 
+	public void setAllocator(DataBufferAllocator allocator) {
+		this.allocator = allocator;
+	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		Assert.notNull(getHttpHandler());
-		HttpHandler handler = new UndertowHttpHandlerAdapter(getHttpHandler());
+		HttpHandler handler = new UndertowHttpHandlerAdapter(getHttpHandler(), allocator);
 		int port = (getPort() != -1 ? getPort() : 8080);
 		this.server = Undertow.builder().addHttpListener(port, "localhost")
 				.setHandler(handler).build();

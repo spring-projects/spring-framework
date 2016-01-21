@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.method.annotation;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 
 import org.reactivestreams.Publisher;
@@ -27,6 +26,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -64,7 +64,7 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 			mediaType = MediaType.APPLICATION_OCTET_STREAM;
 		}
 		ResolvableType type = ResolvableType.forMethodParameter(parameter);
-		Flux<ByteBuffer> body = exchange.getRequest().getBody();
+		Flux<DataBuffer> body = exchange.getRequest().getBody();
 		Flux<?> elementFlux = body;
 		ResolvableType elementType = type.hasGenerics() ? type.getGeneric(0) : type;
 

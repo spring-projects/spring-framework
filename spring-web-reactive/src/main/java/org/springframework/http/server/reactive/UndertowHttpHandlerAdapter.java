@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,6 +33,8 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import org.xnio.ChannelListener;
+import org.xnio.ChannelListeners;
+import org.xnio.IoUtils;
 import org.xnio.channels.StreamSinkChannel;
 import org.xnio.channels.StreamSourceChannel;
 import reactor.core.publisher.Mono;
@@ -40,12 +42,9 @@ import reactor.core.subscriber.BaseSubscriber;
 import reactor.core.util.BackpressureUtils;
 import reactor.core.util.Exceptions;
 
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.util.Assert;
-
-import static org.xnio.ChannelListeners.closingChannelExceptionHandler;
-import static org.xnio.ChannelListeners.flushingChannelListener;
-import static org.xnio.IoUtils.safeClose;
-
 
 /**
  * @author Marek Hawrylczak
@@ -58,17 +57,21 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 	private final HttpHandler delegate;
 
+	private final DataBufferAllocator allocator;
 
-	public UndertowHttpHandlerAdapter(HttpHandler delegate) {
-		Assert.notNull(delegate, "'delegate' is required.");
+	public UndertowHttpHandlerAdapter(HttpHandler delegate,
+			DataBufferAllocator allocator) {
+		Assert.notNull(delegate, "'delegate' is required");
+		Assert.notNull(allocator, "'allocator' must not be null");
 		this.delegate = delegate;
+		this.allocator = allocator;
 	}
 
 
 	@Override
 	public void handleRequest(HttpServerExchange exchange) throws Exception {
 
-		RequestBodyPublisher requestBody = new RequestBodyPublisher(exchange);
+		RequestBodyPublisher requestBody = new RequestBodyPublisher(exchange, allocator);
 		ServerHttpRequest request = new UndertowServerHttpRequest(exchange, requestBody);
 
 		ResponseBodySubscriber responseBodySubscriber = new ResponseBodySubscriber(exchange);
@@ -107,8 +110,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 		});
 	}
 
-
-	private static class RequestBodyPublisher implements Publisher<ByteBuffer> {
+	private static class RequestBodyPublisher implements Publisher<DataBuffer> {
 
 		private static final AtomicLongFieldUpdater<RequestBodySubscription> DEMAND =
 				AtomicLongFieldUpdater.newUpdater(RequestBodySubscription.class, "demand");
@@ -116,16 +118,18 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 		private final HttpServerExchange exchange;
 
-		private Subscriber<? super ByteBuffer> subscriber;
+		private final DataBufferAllocator allocator;
 
+		private Subscriber<? super DataBuffer> subscriber;
 
-		public RequestBodyPublisher(HttpServerExchange exchange) {
+		public RequestBodyPublisher(HttpServerExchange exchange,
+				DataBufferAllocator allocator) {
 			this.exchange = exchange;
+			this.allocator = allocator;
 		}
 
-
 		@Override
-		public void subscribe(Subscriber<? super ByteBuffer> subscriber) {
+		public void subscribe(Subscriber<? super DataBuffer> subscriber) {
 			if (subscriber == null) {
 				throw Exceptions.spec_2_13_exception();
 			}
@@ -175,11 +179,11 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 			private void close() {
 				if (this.pooledBuffer != null) {
-					safeClose(this.pooledBuffer);
+					IoUtils.safeClose(this.pooledBuffer);
 					this.pooledBuffer = null;
 				}
 				if (this.channel != null) {
-					safeClose(this.channel);
+					IoUtils.safeClose(this.channel);
 					this.channel = null;
 				}
 			}
@@ -251,7 +255,8 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 			private void doOnNext(ByteBuffer buffer) {
 				this.draining = false;
 				buffer.flip();
-				subscriber.onNext(buffer);
+				DataBuffer dataBuffer = allocator.wrap(buffer);
+				subscriber.onNext(dataBuffer);
 			}
 
 			private void doOnComplete() {
@@ -315,7 +320,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 		}
 	}
 
-	private static class ResponseBodySubscriber extends BaseSubscriber<ByteBuffer>
+	private static class ResponseBodySubscriber extends BaseSubscriber<DataBuffer>
 			implements ChannelListener<StreamSinkChannel> {
 
 		private final HttpServerExchange exchange;
@@ -343,8 +348,10 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 		}
 
 		@Override
-		public void onNext(ByteBuffer buffer) {
-			super.onNext(buffer);
+		public void onNext(DataBuffer dataBuffer) {
+			super.onNext(dataBuffer);
+
+			ByteBuffer buffer = dataBuffer.asByteBuffer();
 
 			if (this.responseChannel == null) {
 				this.responseChannel = exchange.getResponseChannel();
@@ -407,7 +414,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 					} while (buffer.hasRemaining() && c > 0);
 
 					if (!buffer.hasRemaining()) {
-						safeClose(this.buffers.remove());
+						IoUtils.safeClose(this.buffers.remove());
 					}
 				} while (!this.buffers.isEmpty() && c > 0);
 
@@ -461,8 +468,10 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 				this.responseChannel.shutdownWrites();
 
 				if (!this.responseChannel.flush()) {
-					this.responseChannel.getWriteSetter().set(flushingChannelListener(
-							o -> safeClose(this.responseChannel), closingChannelExceptionHandler()));
+					this.responseChannel.getWriteSetter().set(ChannelListeners
+							.flushingChannelListener(
+									o -> IoUtils.safeClose(this.responseChannel),
+									ChannelListeners.closingChannelExceptionHandler()));
 					this.responseChannel.resumeWrites();
 				}
 				this.responseChannel = null;

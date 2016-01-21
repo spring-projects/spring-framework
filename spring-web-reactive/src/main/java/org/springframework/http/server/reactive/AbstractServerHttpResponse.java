@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,11 @@
  */
 package org.springframework.http.server.reactive;
 
-import java.nio.ByteBuffer;
-
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 
 /**
@@ -46,7 +45,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public Mono<Void> setBody(Publisher<ByteBuffer> publisher) {
+	public Mono<Void> setBody(Publisher<DataBuffer> publisher) {
 		return Flux.from(publisher).lift(new WriteWithOperator<>(writeWithPublisher -> {
 			writeHeaders();
 			return setBodyInternal(writeWithPublisher);
@@ -57,7 +56,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	 * Implement this method to write to the underlying the response.
 	 * @param publisher the publisher to write with
 	 */
-	protected abstract Mono<Void> setBodyInternal(Publisher<ByteBuffer> publisher);
+	protected abstract Mono<Void> setBodyInternal(Publisher<DataBuffer> publisher);
 
 	@Override
 	public void writeHeaders() {
