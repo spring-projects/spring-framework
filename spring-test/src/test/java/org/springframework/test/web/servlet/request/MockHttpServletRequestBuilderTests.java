@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.servlet.ServletContext;
 import javax.servlet.http.Cookie;
 
@@ -43,8 +42,12 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 /**
  * Unit tests for building a {@link MockHttpServletRequest} with
@@ -429,7 +432,7 @@ public class MockHttpServletRequestBuilderTests {
 
 	@Test
 	public void sessionAttributes() {
-		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map = new HashMap<>();
 		map.put("foo", "bar");
 		this.builder.sessionAttrs(map);
 
@@ -471,9 +474,8 @@ public class MockHttpServletRequestBuilderTests {
 		assertEquals(user, request.getUserPrincipal());
 	}
 
-	/**
-	 * See SPR-12945
-	 */
+	// SPR-12945
+
 	@Test
 	public void mergeInvokesDefaultRequestPostProcessorFirst() {
 		final String ATTR = "ATTR";
@@ -494,17 +496,13 @@ public class MockHttpServletRequestBuilderTests {
 		assertEquals(EXEPCTED, request.getAttribute(ATTR));
 	}
 
-	/**
-	 * See SPR-13719
-	 */
+	// SPR-13719
+
 	@Test
 	public void arbitraryMethod() {
-		/*
-		 * http method is case-sensitive
-		 * http://www.w3.org/Protocols/rfc2616/rfc2616-sec5.html#sec5.1.1
-		 */
 		String httpMethod = "REPort";
-		this.builder = new MockHttpServletRequestBuilder(httpMethod, "/foo/{bar}", 42);
+		URI url = UriComponentsBuilder.fromPath("/foo/{bar}").buildAndExpand(42).toUri();
+		this.builder = new MockHttpServletRequestBuilder(httpMethod, url);
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 

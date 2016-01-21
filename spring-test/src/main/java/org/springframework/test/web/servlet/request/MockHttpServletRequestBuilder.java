@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,6 +113,11 @@ public class MockHttpServletRequestBuilder
 
 
 	/**
+	 * Package private constructor. To get an instance, use static factory
+	 * methods in {@link MockMvcRequestBuilders}.
+	 * <p>Although this class cannot be extended, additional ways to initialize
+	 * the {@code MockHttpServletRequest} can be plugged in via
+	 * {@link #with(RequestPostProcessor)}.
 	 * @param httpMethod the HTTP method (GET, POST, etc)
 	 * @param url a URL template; the resulting URL will be encoded
 	 * @param vars zero or more URL variables
@@ -122,25 +127,18 @@ public class MockHttpServletRequestBuilder
 	}
 
 	/**
-	 * @param httpMethod the HTTP method (GET, POST, etc)
-	 * @param url a URL template; the resulting URL will be encoded
-	 * @param vars zero or more URL variables
-	 * @since 4.3
-	 */
-	MockHttpServletRequestBuilder(String httpMethod, String url, Object... vars) {
-		this(httpMethod, UriComponentsBuilder.fromUriString(url).buildAndExpand(vars).encode().toUri());
-	}
-
-	/**
+	 * Alternative to {@link #MockHttpServletRequestBuilder(HttpMethod, String, Object...)}
+	 * with a pre-built URI.
 	 * @param httpMethod the HTTP method (GET, POST, etc)
 	 * @param url the URL
 	 * @since 4.0.3
 	 */
 	MockHttpServletRequestBuilder(HttpMethod httpMethod, URI url) {
-        this(httpMethod.name(), url);
+		this(httpMethod.name(), url);
 	}
 
 	/**
+	 * Alternative constructor for custom HTTP methods.
 	 * @param httpMethod the HTTP method (GET, POST, etc)
 	 * @param url the URL
 	 * @since 4.3
