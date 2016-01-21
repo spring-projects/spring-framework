@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,21 +16,28 @@
 
 package org.springframework.test.web.client.match;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import javax.xml.transform.Source;
 import javax.xml.transform.dom.DOMSource;
 
 import org.hamcrest.Matcher;
 import org.w3c.dom.Node;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpInputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequest;
+import org.springframework.http.converter.FormHttpMessageConverter;
 import org.springframework.mock.http.client.MockClientHttpRequest;
 import org.springframework.test.util.XmlExpectationsHelper;
 import org.springframework.test.web.client.RequestMatcher;
+import org.springframework.util.MultiValueMap;
 
 import static org.hamcrest.MatcherAssert.*;
 import static org.springframework.test.util.AssertionErrors.*;
+
 
 /**
  * Factory for request content {@code RequestMatcher}'s. An instance of this
@@ -132,6 +139,30 @@ public class ContentRequestMatchers {
 			public void match(ClientHttpRequest request) throws IOException, AssertionError {
 				MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
 				assertEquals("Request content", expectedContent, mockRequest.getBodyAsBytes());
+			}
+		};
+	}
+
+	/**
+	 * Parse the body as form data and compare to the given {@code MultiValueMap}.
+	 */
+	public RequestMatcher formData(final MultiValueMap<String, String> expectedContent) {
+		return new RequestMatcher() {
+			@Override
+			public void match(ClientHttpRequest request) throws IOException, AssertionError {
+				HttpInputMessage inputMessage = new HttpInputMessage() {
+					@Override
+					public InputStream getBody() throws IOException {
+						MockClientHttpRequest mockRequest = (MockClientHttpRequest) request;
+						return new ByteArrayInputStream(mockRequest.getBodyAsBytes());
+					}
+					@Override
+					public HttpHeaders getHeaders() {
+						return request.getHeaders();
+					}
+				};
+				FormHttpMessageConverter converter = new FormHttpMessageConverter();
+				assertEquals("Request content", expectedContent, converter.read(null, inputMessage));
 			}
 		};
 	}
