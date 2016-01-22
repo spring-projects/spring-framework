@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -329,14 +330,16 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * @since 4.2
 	 */
 	protected final void applyCacheControl(HttpServletResponse response, CacheControl cacheControl) {
-		String ccValue = cacheControl.getHeaderValue();
-		if (ccValue != null) {
-			// Set computed HTTP 1.1 Cache-Control header
-			response.setHeader(HEADER_CACHE_CONTROL, ccValue);
+		if (!response.containsHeader(HEADER_CACHE_CONTROL)) {
+			String ccValue = cacheControl.getHeaderValue();
+			if (ccValue != null) {
+				// Set computed HTTP 1.1 Cache-Control header
+				response.setHeader(HEADER_CACHE_CONTROL, ccValue);
 
-			if (response.containsHeader(HEADER_PRAGMA)) {
-				// Reset HTTP 1.0 Pragma header if present
-				response.setHeader(HEADER_PRAGMA, "");
+				if (response.containsHeader(HEADER_PRAGMA)) {
+					// Reset HTTP 1.0 Pragma header if present
+					response.setHeader(HEADER_PRAGMA, "");
+				}
 			}
 		}
 	}
@@ -352,30 +355,32 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 */
 	@SuppressWarnings("deprecation")
 	protected final void applyCacheSeconds(HttpServletResponse response, int cacheSeconds) {
-		if (this.useExpiresHeader || !this.useCacheControlHeader) {
-			// Deprecated HTTP 1.0 cache behavior, as in previous Spring versions
-			if (cacheSeconds > 0) {
-				cacheForSeconds(response, cacheSeconds);
-			}
-			else if (cacheSeconds == 0) {
-				preventCaching(response);
-			}
-		}
-		else {
-			CacheControl cControl;
-			if (cacheSeconds > 0) {
-				cControl = CacheControl.maxAge(cacheSeconds, TimeUnit.SECONDS);
-				if (this.alwaysMustRevalidate) {
-					cControl = cControl.mustRevalidate();
+		if (!response.containsHeader(HEADER_CACHE_CONTROL)) {
+			if (this.useExpiresHeader || !this.useCacheControlHeader) {
+				// Deprecated HTTP 1.0 cache behavior, as in previous Spring versions
+				if (cacheSeconds > 0) {
+					cacheForSeconds(response, cacheSeconds);
+				}
+				else if (cacheSeconds == 0) {
+					preventCaching(response);
 				}
 			}
-			else if (cacheSeconds == 0) {
-				cControl = (this.useCacheControlNoStore ? CacheControl.noStore() : CacheControl.noCache());
-			}
 			else {
-				cControl = CacheControl.empty();
+				CacheControl cControl;
+				if (cacheSeconds > 0) {
+					cControl = CacheControl.maxAge(cacheSeconds, TimeUnit.SECONDS);
+					if (this.alwaysMustRevalidate) {
+						cControl = cControl.mustRevalidate();
+					}
+				}
+				else if (cacheSeconds == 0) {
+					cControl = (this.useCacheControlNoStore ? CacheControl.noStore() : CacheControl.noCache());
+				}
+				else {
+					cControl = CacheControl.empty();
+				}
+				applyCacheControl(response, cControl);
 			}
-			applyCacheControl(response, cControl);
 		}
 	}
 
