@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,14 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,8 +43,8 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.propertyeditors.CustomDateEditor;
 import org.springframework.core.MethodParameter;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -85,6 +88,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -262,6 +266,24 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		assertEquals(HttpStatus.ACCEPTED.value(), response.getStatus());
 		assertEquals("Handled requestBody=[Hello Server]", new String(response.getContentAsByteArray(), "UTF-8"));
 		assertEquals("headerValue", response.getHeader("header"));
+		// set because of @SesstionAttributes
+		assertEquals("no-store", response.getHeader("Cache-Control"));
+	}
+
+	// SPR-13867
+	@Test
+	public void handleHttpEntityWithCacheControl() throws Exception {
+		Class<?>[] parameterTypes = new Class<?>[] { HttpEntity.class };
+		request.addHeader("Content-Type", "text/plain; charset=utf-8");
+		request.setContent("Hello Server".getBytes("UTF-8"));
+
+		HandlerMethod handlerMethod = handlerMethod("handleHttpEntityWithCacheControl", parameterTypes);
+		ModelAndView mav = handlerAdapter.handle(request, response, handlerMethod);
+
+		assertNull(mav);
+		assertEquals(HttpStatus.OK.value(), response.getStatus());
+		assertEquals("Handled requestBody=[Hello Server]", new String(response.getContentAsByteArray(), "UTF-8"));
+		assertThat(response.getHeaderValues("Cache-Control"), Matchers.contains("max-age=3600"));
 	}
 
 	@Test
@@ -373,10 +395,15 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		}
 
 		public ResponseEntity<String> handleHttpEntity(HttpEntity<byte[]> httpEntity) throws Exception {
-			HttpHeaders responseHeaders = new HttpHeaders();
-			responseHeaders.set("header", "headerValue");
 			String responseBody = "Handled requestBody=[" + new String(httpEntity.getBody(), "UTF-8") + "]";
-			return new ResponseEntity<String>(responseBody, responseHeaders, HttpStatus.ACCEPTED);
+			return ResponseEntity.accepted()
+					.header("header", "headerValue")
+					.body(responseBody);
+		}
+
+		public ResponseEntity<String> handleHttpEntityWithCacheControl(HttpEntity<byte[]> httpEntity) throws Exception {
+			String responseBody = "Handled requestBody=[" + new String(httpEntity.getBody(), "UTF-8") + "]";
+			return ResponseEntity.ok().cacheControl(CacheControl.maxAge(1, TimeUnit.HOURS)).body(responseBody);
 		}
 
 		public void handleRequestPart(@RequestPart String requestPart, Model model) {

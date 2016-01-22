@@ -714,7 +714,21 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	protected ModelAndView handleInternal(HttpServletRequest request,
 			HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
 
+		ModelAndView mav = null;
 		checkRequest(request);
+
+		// Execute invokeHandlerMethod in synchronized block if required.
+		if (this.synchronizeOnSession) {
+			HttpSession session = request.getSession(false);
+			if (session != null) {
+				Object mutex = WebUtils.getSessionMutex(session);
+				synchronized (mutex) {
+					mav = invokeHandlerMethod(request, response, handlerMethod);
+				}
+			}
+		}
+
+		mav = invokeHandlerMethod(request, response, handlerMethod);
 
 		if (getSessionAttributesHandler(handlerMethod).hasSessionAttributes()) {
 			applyCacheSeconds(response, this.cacheSecondsForSessionAttributeHandlers);
@@ -723,18 +737,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			prepareResponse(response);
 		}
 
-		// Execute invokeHandlerMethod in synchronized block if required.
-		if (this.synchronizeOnSession) {
-			HttpSession session = request.getSession(false);
-			if (session != null) {
-				Object mutex = WebUtils.getSessionMutex(session);
-				synchronized (mutex) {
-					return invokeHandlerMethod(request, response, handlerMethod);
-				}
-			}
-		}
-
-		return invokeHandlerMethod(request, response, handlerMethod);
+		return mav;
 	}
 
 	/**
