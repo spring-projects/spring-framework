@@ -16,7 +16,8 @@
 
 package org.springframework.http.server.reactive.boot;
 
-import reactor.core.util.ReactiveState;
+import reactor.core.trait.Completable;
+import reactor.core.trait.Connectable;
 import reactor.io.buffer.Buffer;
 import reactor.io.net.ReactiveNet;
 
@@ -28,7 +29,7 @@ import org.springframework.util.Assert;
  * @author Stephane Maldini
  */
 public class ReactorHttpServer extends HttpServerSupport
-		implements InitializingBean, HttpServer, ReactiveState.FeedbackLoop, ReactiveState.ActiveUpstream {
+		implements InitializingBean, HttpServer, Connectable, Completable {
 
 	private ReactorHttpHandlerAdapter reactorHandler;
 
@@ -52,12 +53,12 @@ public class ReactorHttpServer extends HttpServerSupport
 	}
 
 	@Override
-	public Object delegateInput() {
+	public Object connectedInput() {
 		return reactorServer;
 	}
 
 	@Override
-	public Object delegateOutput() {
+	public Object connectedOutput() {
 		return reactorServer;
 	}
 
@@ -92,4 +93,8 @@ public class ReactorHttpServer extends HttpServerSupport
 		}
 	}
 
+	@Override
+	public Object upstream() {
+		return null;
+	}
 }
