@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -28,7 +29,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 
-import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
@@ -167,5 +168,19 @@ public class VersionResourceResolverTests {
 		assertEquals(jsStrategy, this.resolver.getStrategyForPath("foo.js"));
 		assertEquals(jsStrategy, this.resolver.getStrategyForPath("bar/foo.js"));
 	}
+
+	// SPR-13883
+	@Test
+	public void shouldConfigureFixedPrefixAutomatically() throws Exception {
+
+		this.resolver.addFixedVersionStrategy("fixedversion", "/js/**", "/css/**", "/fixedversion/css/**");
+
+		assertThat(this.resolver.getStrategyMap().size(), is(4));
+		assertThat(this.resolver.getStrategyForPath("/js/something.js"), Matchers.instanceOf(FixedVersionStrategy.class));
+		assertThat(this.resolver.getStrategyForPath("/fixedversion/js/something.js"), Matchers.instanceOf(FixedVersionStrategy.class));
+		assertThat(this.resolver.getStrategyForPath("/css/something.css"), Matchers.instanceOf(FixedVersionStrategy.class));
+		assertThat(this.resolver.getStrategyForPath("/fixedversion/css/something.css"), Matchers.instanceOf(FixedVersionStrategy.class));
+	}
+
 
 }

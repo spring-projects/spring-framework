@@ -22,11 +22,13 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.AbstractResource;
@@ -109,14 +111,26 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 	 * fetched from a git commit sha, a property file, or environment variable
 	 * and set with SpEL expressions in the configuration (e.g. see {@code @Value}
 	 * in Java config).
+	 * <p>If not done already, variants of the given {@code pathPatterns}, prefixed with
+	 * the {@code version} will be also configured. For example, adding a {@code "/js/**"} path pattern
+	 * will also cofigure automatically a {@code "/v1.0.0/js/**"} with {@code "v1.0.0"} the
+	 * {@code version} String given as an argument.
 	 * @param version a version string
 	 * @param pathPatterns one or more resource URL path patterns
 	 * @return the current instance for chained method invocation
 	 * @see FixedVersionStrategy
 	 */
 	public VersionResourceResolver addFixedVersionStrategy(String version, String... pathPatterns) {
-		addVersionStrategy(new FixedVersionStrategy(version), pathPatterns);
-		return this;
+		List<String> patternsList = Arrays.asList(pathPatterns);
+		List<String> prefixedPatterns = new ArrayList<String>(pathPatterns.length);
+		String versionPrefix = "/" + version;
+		for(String pattern : patternsList) {
+			prefixedPatterns.add(pattern);
+			if(!pattern.startsWith(versionPrefix) && !patternsList.contains(versionPrefix + pattern)) {
+				prefixedPatterns.add(versionPrefix + pattern);
+			}
+		}
+		return addVersionStrategy(new FixedVersionStrategy(version), prefixedPatterns.toArray(new String[0]));
 	}
 
 	/**
