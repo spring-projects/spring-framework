@@ -1056,6 +1056,18 @@ lookup beans from an expression using the (@) symbol.
 	Object bean = parser.parseExpression("@foo").getValue(context);
 ----
 
+To access a factory bean itself, the bean name should instead be prefixed with a (&) symbol.
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	ExpressionParser parser = new SpelExpressionParser();
+	StandardEvaluationContext context = new StandardEvaluationContext();
+	context.setBeanResolver(new MyBeanResolver());
+
+	// This will end up calling resolve(context,"&foo") on MyBeanResolver during evaluation
+	Object bean = parser.parseExpression("&foo").getValue(context);
+----
 
 
 [[expressions-operator-ternary]]

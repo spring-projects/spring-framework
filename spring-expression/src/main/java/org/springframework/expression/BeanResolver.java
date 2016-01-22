@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,9 @@ package org.springframework.expression;
 
 /**
  * A bean resolver can be registered with the evaluation context
- * and will kick in for {@code @myBeanName} still expressions.
+ * and will kick in for {@code @myBeanName} and {@code &myBeanName} expressions.
+ * The <tt>&</tt> variant syntax allows access to the factory bean where
+ * relevant.
  *
  * @author Andy Clement
  * @since 3.0.3
@@ -26,7 +28,8 @@ package org.springframework.expression;
 public interface BeanResolver {
 
 	/**
-	 * Look up the named bean and return it.
+	 * Look up the named bean and return it. If attempting to access a factory
+	 * bean the name will have a <tt>&</tt> prefix.
 	 * @param context the current evaluation context
 	 * @param beanName the name of the bean to lookup
 	 * @return an object representing the bean

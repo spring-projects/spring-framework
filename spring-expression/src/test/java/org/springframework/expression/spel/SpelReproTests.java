@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -717,6 +717,9 @@ public class SpelReproTests extends AbstractExpressionTests {
 			}
 			else if (beanName.equals("foo.bar")) {
 				return "trouble";
+			}
+			else if (beanName.equals("&foo")) {
+				return "foo factory";
 			}
 			else if (beanName.equals("goo")) {
 				throw new AccessException("DONT ASK ME ABOUT GOO");
@@ -1949,6 +1952,32 @@ public class SpelReproTests extends AbstractExpressionTests {
 
 		res = parser.parseExpression("#root.![values()]").getValue(context, List.class);
 		assertEquals("[[test12, test11], [test22, test21]]", res.toString());
+	}
+	
+	@Test
+	public void AccessingFactoryBean_spr9511() {
+		StandardEvaluationContext context = new StandardEvaluationContext();
+		context.setBeanResolver(new MyBeanResolver());
+		Expression expr = new SpelExpressionParser().parseRaw("@foo");
+		assertEquals("custard", expr.getValue(context));
+		expr = new SpelExpressionParser().parseRaw("&foo");
+		assertEquals("foo factory",expr.getValue(context));
+		
+		try {
+			expr = new SpelExpressionParser().parseRaw("&@foo");
+			fail("Illegal syntax, error expected");
+		} catch (SpelParseException spe) {
+			assertEquals(SpelMessage.INVALID_BEAN_REFERENCE,spe.getMessageCode());
+			assertEquals(0,spe.getPosition());
+		}
+		
+		try {
+			expr = new SpelExpressionParser().parseRaw("@&foo");
+			fail("Illegal syntax, error expected");
+		} catch (SpelParseException spe) {
+			assertEquals(SpelMessage.INVALID_BEAN_REFERENCE,spe.getMessageCode());
+			assertEquals(0,spe.getPosition());
+		}		
 	}
 
 	@Test
