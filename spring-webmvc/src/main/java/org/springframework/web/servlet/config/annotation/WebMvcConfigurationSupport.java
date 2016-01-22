@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -480,7 +480,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		List<HandlerMethodReturnValueHandler> returnValueHandlers = new ArrayList<HandlerMethodReturnValueHandler>();
 		addReturnValueHandlers(returnValueHandlers);
 
-		RequestMappingHandlerAdapter adapter = new RequestMappingHandlerAdapter();
+		RequestMappingHandlerAdapter adapter = createRequestMappingHandlerAdapter();
 		adapter.setContentNegotiationManager(mvcContentNegotiationManager());
 		adapter.setMessageConverters(getMessageConverters());
 		adapter.setWebBindingInitializer(getConfigurableWebBindingInitializer());
@@ -510,6 +510,14 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		adapter.setDeferredResultInterceptors(configurer.getDeferredResultInterceptors());
 
 		return adapter;
+	}
+
+	/**
+	 * Protected method for plugging in a custom sub-class of
+	 * {@link RequestMappingHandlerAdapter}.
+	 */
+	protected RequestMappingHandlerAdapter createRequestMappingHandlerAdapter() {
+		return new RequestMappingHandlerAdapter();
 	}
 
 	/**
@@ -810,23 +818,31 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * </ul>
 	 */
 	protected final void addDefaultHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
-		ExceptionHandlerExceptionResolver exceptionHandlerExceptionResolver = new ExceptionHandlerExceptionResolver();
-		exceptionHandlerExceptionResolver.setContentNegotiationManager(mvcContentNegotiationManager());
-		exceptionHandlerExceptionResolver.setMessageConverters(getMessageConverters());
+		ExceptionHandlerExceptionResolver exceptionHandlerResolver = createExceptionHandlerExceptionResolver();
+		exceptionHandlerResolver.setContentNegotiationManager(mvcContentNegotiationManager());
+		exceptionHandlerResolver.setMessageConverters(getMessageConverters());
 		if (jackson2Present) {
 			List<ResponseBodyAdvice<?>> interceptors = new ArrayList<ResponseBodyAdvice<?>>();
 			interceptors.add(new JsonViewResponseBodyAdvice());
-			exceptionHandlerExceptionResolver.setResponseBodyAdvice(interceptors);
+			exceptionHandlerResolver.setResponseBodyAdvice(interceptors);
 		}
-		exceptionHandlerExceptionResolver.setApplicationContext(this.applicationContext);
-		exceptionHandlerExceptionResolver.afterPropertiesSet();
-		exceptionResolvers.add(exceptionHandlerExceptionResolver);
+		exceptionHandlerResolver.setApplicationContext(this.applicationContext);
+		exceptionHandlerResolver.afterPropertiesSet();
+		exceptionResolvers.add(exceptionHandlerResolver);
 
-		ResponseStatusExceptionResolver responseStatusExceptionResolver = new ResponseStatusExceptionResolver();
-		responseStatusExceptionResolver.setMessageSource(this.applicationContext);
-		exceptionResolvers.add(responseStatusExceptionResolver);
+		ResponseStatusExceptionResolver responseStatusResolver = new ResponseStatusExceptionResolver();
+		responseStatusResolver.setMessageSource(this.applicationContext);
+		exceptionResolvers.add(responseStatusResolver);
 
 		exceptionResolvers.add(new DefaultHandlerExceptionResolver());
+	}
+
+	/**
+	 * Protected method for plugging in a custom sub-class of
+	 * {@link ExceptionHandlerExceptionResolver}.
+	 */
+	protected ExceptionHandlerExceptionResolver createExceptionHandlerExceptionResolver() {
+		return new ExceptionHandlerExceptionResolver();
 	}
 
 	/**
