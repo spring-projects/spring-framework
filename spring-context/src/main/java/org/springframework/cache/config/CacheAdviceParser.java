@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -197,14 +197,14 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 
 		Props(Element root) {
 			String defaultCache = root.getAttribute("cache");
-			key = root.getAttribute("key");
-			keyGenerator = root.getAttribute("key-generator");
-			cacheManager = root.getAttribute("cache-manager");
-			condition = root.getAttribute("condition");
-			method = root.getAttribute(METHOD_ATTRIBUTE);
+			this.key = root.getAttribute("key");
+			this.keyGenerator = root.getAttribute("key-generator");
+			this.cacheManager = root.getAttribute("cache-manager");
+			this.condition = root.getAttribute("condition");
+			this.method = root.getAttribute(METHOD_ATTRIBUTE);
 
 			if (StringUtils.hasText(defaultCache)) {
-				caches = StringUtils.commaDelimitedListToStringArray(defaultCache.trim());
+				this.caches = StringUtils.commaDelimitedListToStringArray(defaultCache.trim());
 			}
 		}
 
@@ -212,12 +212,12 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			String cache = element.getAttribute("cache");
 
 			// sanity check
-			String[] localCaches = caches;
+			String[] localCaches = this.caches;
 			if (StringUtils.hasText(cache)) {
 				localCaches = StringUtils.commaDelimitedListToStringArray(cache.trim());
 			}
 			else {
-				if (caches == null) {
+				if (this.caches == null) {
 					readerCtx.error("No cache specified specified for " + element.getNodeName(), element);
 				}
 			}
