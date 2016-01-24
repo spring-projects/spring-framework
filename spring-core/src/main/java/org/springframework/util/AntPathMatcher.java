@@ -85,7 +85,7 @@ public class AntPathMatcher implements PathMatcher {
 
 	private volatile Boolean cachePatterns;
 
-	private final Map<String, String[]> tokenizedPatternCache = new ConcurrentHashMap<String, String[]>(256);
+	private final Map<String, PreprocessedPattern> tokenizedPatternCache = new ConcurrentHashMap<String, PreprocessedPattern>(256);
 
 	final Map<String, AntPathStringMatcher> stringMatcherCache = new ConcurrentHashMap<String, AntPathStringMatcher>(256);
 
@@ -187,7 +187,11 @@ public class AntPathMatcher implements PathMatcher {
 			return false;
 		}
 
-		String[] pattDirs = tokenizePattern(pattern);
+		PreprocessedPattern preprocessedPattern = tokenizePattern(pattern);
+		if (fullMatch && this.caseSensitive && preprocessedPattern.certainlyNotMatch(path)) {
+			return false;
+		}
+		String[] pattDirs = preprocessedPattern.tokenized;
 		String[] pathDirs = tokenizePath(path);
 
 		int pattIdxStart = 0;
@@ -314,14 +318,14 @@ public class AntPathMatcher implements PathMatcher {
 	 * @param pattern the pattern to tokenize
 	 * @return the tokenized pattern parts
 	 */
-	protected String[] tokenizePattern(String pattern) {
-		String[] tokenized = null;
+	protected PreprocessedPattern tokenizePattern(String pattern) {
+		PreprocessedPattern tokenized = null;
 		Boolean cachePatterns = this.cachePatterns;
 		if (cachePatterns == null || cachePatterns.booleanValue()) {
 			tokenized = this.tokenizedPatternCache.get(pattern);
 		}
 		if (tokenized == null) {
-			tokenized = tokenizePath(pattern);
+			tokenized = compiledPattern(pattern);
 			if (cachePatterns == null && this.tokenizedPatternCache.size() >= CACHE_TURNOFF_THRESHOLD) {
 				// Try to adapt to the runtime situation that we're encountering:
 				// There are obviously too many different patterns coming in here...
@@ -343,6 +347,29 @@ public class AntPathMatcher implements PathMatcher {
 	 */
 	protected String[] tokenizePath(String path) {
 		return StringUtils.tokenizeToStringArray(path, this.pathSeparator, this.trimTokens, true);
+	}
+
+	private int firstSpecialCharIdx(int specialCharIdx, int prevFoundIdx){
+		if(specialCharIdx != -1){
+			return prevFoundIdx == -1 ? specialCharIdx : Math.min(prevFoundIdx, specialCharIdx);
+		}else{
+			return prevFoundIdx;
+		}
+	}
+
+	private PreprocessedPattern compiledPattern(String pattern){
+		String[] tokenized = tokenizePath(pattern);
+		int specialCharIdx = -1;
+		specialCharIdx = firstSpecialCharIdx(pattern.indexOf('*'), specialCharIdx);
+		specialCharIdx = firstSpecialCharIdx(pattern.indexOf('?'), specialCharIdx);
+		specialCharIdx = firstSpecialCharIdx(pattern.indexOf('{'), specialCharIdx);
+		final String prefix;
+		if(specialCharIdx != -1){
+			prefix = pattern.substring(0, specialCharIdx);
+		}else{
+			prefix = pattern;
+		}
+		return new PreprocessedPattern(tokenized, prefix.isEmpty() ? null : prefix);
 	}
 
 	/**
@@ -844,6 +871,20 @@ public class AntPathMatcher implements PathMatcher {
 
 		public String getEndsOnDoubleWildCard() {
 			return this.endsOnDoubleWildCard;
+		}
+	}
+
+	private static class PreprocessedPattern {
+		private final String[] tokenized;
+		private final String prefix;
+
+		public PreprocessedPattern(String[] tokenized, String prefix) {
+			this.tokenized = tokenized;
+			this.prefix = prefix;
+		}
+
+		private boolean certainlyNotMatch(String path){
+			return prefix != null && !path.startsWith(prefix);
 		}
 	}
 

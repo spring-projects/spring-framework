@@ -618,10 +618,42 @@ public class AntPathMatcherTests {
 		assertTrue(pathMatcher.stringMatcherCache.size() > 20);
 
 		for (int i = 0; i < 65536; i++) {
-			pathMatcher.match("test" + i, "test");
+			pathMatcher.match("test" + i, "test" + i);
 		}
 		// Cache keeps being alive due to the explicit cache setting
 		assertTrue(pathMatcher.stringMatcherCache.size() > 65536);
+	}
+
+	@Test
+	public void preventCreatingStringMatchersIfPathDoesNotStartsWithPatternPrefix() {
+		pathMatcher.setCachePatterns(true);
+		assertEquals(0, pathMatcher.stringMatcherCache.size());
+
+		pathMatcher.match("test?", "test");
+		assertEquals(1, pathMatcher.stringMatcherCache.size());
+
+		pathMatcher.match("test?", "best");
+		pathMatcher.match("test/*", "view/test.jpg");
+		pathMatcher.match("test/**/test.jpg", "view/test.jpg");
+		pathMatcher.match("test/{name}.jpg", "view/test.jpg");
+		assertEquals(1, pathMatcher.stringMatcherCache.size());
+	}
+
+	@Test
+	public void creatingStringMatchersIfPatternPrefixCannotDetermineIfPathMatch() {
+		pathMatcher.setCachePatterns(true);
+		assertEquals(0, pathMatcher.stringMatcherCache.size());
+
+		pathMatcher.match("test", "testian");
+		pathMatcher.match("test?", "testFf");
+		pathMatcher.match("test/*", "test/dir/name.jpg");
+		pathMatcher.match("test/{name}.jpg", "test/lorem.jpg");
+		pathMatcher.match("bla/**/test.jpg", "bla/test.jpg");
+		pathMatcher.match("**/{name}.jpg", "test/lorem.jpg");
+		pathMatcher.match("/**/{name}.jpg", "/test/lorem.jpg");
+		pathMatcher.match("/*/dir/{name}.jpg", "/*/dir/lorem.jpg");
+
+		assertEquals(7, pathMatcher.stringMatcherCache.size());
 	}
 
 	@Test
