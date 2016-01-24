@@ -134,6 +134,22 @@ public class AntPathMatcherTests {
 	}
 
 	@Test
+	public void isPattern() {
+		assertTrue(pathMatcher.isPattern("/tes?"));
+		assertTrue(pathMatcher.isPattern("/bla/*"));
+		assertTrue(pathMatcher.isPattern("/bla/**"));
+		assertTrue(pathMatcher.isPattern("/{bla}.*"));
+		assertTrue(pathMatcher.isPattern("/{bla}.jpg"));
+
+		assertFalse(pathMatcher.isPattern("/test"));
+		assertFalse(pathMatcher.isPattern("test"));
+		assertFalse(pathMatcher.isPattern("test.jpg"));
+		assertFalse(pathMatcher.isPattern("bla/test.jpg"));
+		assertFalse(pathMatcher.isPattern("/bla/test.jpg"));
+	}
+
+
+	@Test
 	public void withMatchStart() {
 		// test exact matching
 		assertTrue(pathMatcher.matchStart("test", "test"));

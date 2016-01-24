@@ -161,7 +161,7 @@ public class AntPathMatcher implements PathMatcher {
 
 	@Override
 	public boolean isPattern(String path) {
-		return (path.indexOf('*') != -1 || path.indexOf('?') != -1);
+		return (path.indexOf('*') != -1 || path.indexOf('?') != -1 || path.indexOf('{') != -1);
 	}
 
 	@Override
