@@ -590,7 +590,7 @@ are relative to the `/appointments` path. The `get()` method has a further
 requests for `appointments/new` are handled by that method.
 
 The `getForDay()` method shows another usage of `@RequestMapping`: URI templates. (See
-<<mvc-ann-requestmapping-uri-templates,the next section >>).
+<<mvc-ann-requestmapping-uri-templates>>).
 
 A `@RequestMapping` on the class level is not required. Without it, all paths are simply
 absolute, and not relative. The following example from the __PetClinic__ sample
@@ -1160,6 +1160,26 @@ wild cards (for example __"content-type=text/*"__ will match to __"text/plain"__
 __"text/html"__), it is recommended to use the __consumes__ and __produces__ conditions
 respectively instead. They are intended specifically for that purpose.
 ====
+
+
+[[mvc-ann-requestmapping-head-options]]
+==== HTTP HEAD and HTTP OPTIONS
+
+`@RequestMapping` methods mapped to "GET" are also implicitly mapped to "HEAD",
+i.e. there is no need to have "HEAD" explicitly declared. An HTTP HEAD request
+is processed as if it was an HTTP GET except instead of writing the body only
+the number of bytes are counted and the "Content-Length" header set.
+
+`@RequestMapping` method have built-in support for HTTP OPTIONS. By default an
+HTTP OPTIONS request is handled by setting the "Allow" response header to the
+HTTP methods explicitly declared on all `@RequestMapping` methods with matching
+URL patterns. When no HTTP methods are explicitly declared the "Allow" header
+is set to "GET,HEAD". Therefore it's highly recommended to always explicitly
+declare the HTTP method(s) an `@RequestMapping` method is meant to handle.
+
+Although not necessary an `@RequestMapping` method can be mapped to and handle
+either HTTP HEAD or HTTP OPTIONS, or both.
+
 
 
 
