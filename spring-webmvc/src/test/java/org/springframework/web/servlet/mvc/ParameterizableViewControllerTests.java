@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package org.springframework.web.servlet.mvc;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.ui.ModelMap;
@@ -67,6 +68,16 @@ public class ParameterizableViewControllerTests {
 		ModelAndView mav = this.controller.handleRequest(this.request, new MockHttpServletResponse());
 		assertEquals(1, mav.getModel().size());
 		assertEquals("value", mav.getModel().get("name"));
+	}
+
+	@Test
+	public void handleRequestHttpOptions() throws Exception {
+		this.request.setMethod(HttpMethod.OPTIONS.name());
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		ModelAndView mav = this.controller.handleRequest(this.request, response);
+
+		assertNull(mav);
+		assertEquals("GET,HEAD", response.getHeader("Allow"));
 	}
 
 }
