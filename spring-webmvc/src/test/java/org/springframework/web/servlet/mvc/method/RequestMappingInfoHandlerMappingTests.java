@@ -33,6 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.stereotype.Controller;
@@ -44,8 +45,11 @@ import org.springframework.web.bind.UnsatisfiedServletRequestParameterException;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.method.support.InvocableHandlerMethod;
+import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
@@ -170,6 +174,14 @@ public class RequestMappingInfoHandlerMappingTests {
 		testHttpMediaTypeNotSupportedException("/person/1");
 		testHttpMediaTypeNotSupportedException("/person/1/");
 		testHttpMediaTypeNotSupportedException("/person/1.json");
+	}
+
+	@Test
+	public void getHandlerHttpOptions() throws Exception {
+		testHttpOptions("/foo", "GET,HEAD");
+		testHttpOptions("/person/1", "PUT");
+		testHttpOptions("/persons", "GET,HEAD");
+		testHttpOptions("/something", "PUT,POST");
 	}
 
 	@Test
@@ -388,6 +400,19 @@ public class RequestMappingInfoHandlerMappingTests {
 		}
 	}
 
+	private void testHttpOptions(String requestURI, String allowHeader) throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", requestURI);
+		HandlerMethod handlerMethod = getHandler(request);
+
+		ServletWebRequest webRequest = new ServletWebRequest(request);
+		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
+		Object result = new InvocableHandlerMethod(handlerMethod).invokeForRequest(webRequest, mavContainer);
+
+		assertNotNull(result);
+		assertEquals(HttpHeaders.class, result.getClass());
+		assertEquals(allowHeader, ((HttpHeaders) result).getFirst("Allow"));
+	}
+
 	private void testHttpMediaTypeNotAcceptableException(String url) throws Exception {
 		try {
 			MockHttpServletRequest request = new MockHttpServletRequest("GET", url);
@@ -467,6 +492,13 @@ public class RequestMappingInfoHandlerMappingTests {
 		@RequestMapping(value = "/content", produces="!application/xml")
 		public String nonXmlContent() {
 			return "";
+		}
+
+		@RequestMapping(value = "/something", method = RequestMethod.OPTIONS)
+		public HttpHeaders fooOptions() {
+			HttpHeaders headers = new HttpHeaders();
+			headers.add("Allow", "PUT,POST");
+			return headers;
 		}
 	}
 

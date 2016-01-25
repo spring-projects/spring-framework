@@ -99,25 +99,22 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 */
 	@Override
 	public RequestMethodsRequestCondition getMatchingCondition(HttpServletRequest request) {
-		if (this.methods.isEmpty()) {
-			return this;
-		}
 		RequestMethod requestMethod = getRequestMethod(request);
-		if (requestMethod != null) {
-			for (RequestMethod method : this.methods) {
-				if (method.equals(requestMethod)) {
-					return new RequestMethodsRequestCondition(method);
-				}
+		if (requestMethod == null) {
+			return null;
+		}
+		if (this.methods.isEmpty()) {
+			return (RequestMethod.OPTIONS.equals(requestMethod) ? null : this);
+		}
+		for (RequestMethod method : this.methods) {
+			if (method.equals(requestMethod)) {
+				return new RequestMethodsRequestCondition(method);
 			}
-			if (isHeadRequest(requestMethod) && getMethods().contains(RequestMethod.GET)) {
-				return HEAD_CONDITION;
-			}
+		}
+		if (RequestMethod.HEAD.equals(requestMethod) && getMethods().contains(RequestMethod.GET)) {
+			return HEAD_CONDITION;
 		}
 		return null;
-	}
-
-	private boolean isHeadRequest(RequestMethod requestMethod) {
-		return (requestMethod != null && RequestMethod.HEAD.equals(requestMethod));
 	}
 
 	private RequestMethod getRequestMethod(HttpServletRequest request) {

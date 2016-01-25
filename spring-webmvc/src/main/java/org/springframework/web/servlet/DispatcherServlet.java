@@ -347,6 +347,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	public DispatcherServlet() {
 		super();
+		this.setDispatchOptionsRequest(true);
 	}
 
 	/**
@@ -390,6 +391,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	public DispatcherServlet(WebApplicationContext webApplicationContext) {
 		super(webApplicationContext);
+		this.setDispatchOptionsRequest(true);
 	}
 
 	/**

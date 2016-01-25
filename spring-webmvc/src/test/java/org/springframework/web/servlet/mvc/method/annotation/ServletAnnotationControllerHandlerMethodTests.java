@@ -1771,6 +1771,19 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		assertEquals("body", response.getContentAsString());
 	}
 
+	@Test
+	public void httpOptions() throws ServletException, IOException {
+		initServletWithControllers(ResponseEntityController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "/baz");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+
+		assertEquals(200, response.getStatus());
+		assertEquals("GET,HEAD", response.getHeader("Allow"));
+		assertTrue(response.getContentAsByteArray().length == 0);
+	}
+
 
 	/*
 	 * Controllers
@@ -3059,7 +3072,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 			return ResponseEntity.notFound().header("MyResponseHeader", "MyValue").build();
 		}
 
-		@RequestMapping("/baz")
+		@RequestMapping(path = "/baz", method = RequestMethod.GET)
 		public ResponseEntity<String> baz() {
 			return ResponseEntity.ok().header("MyResponseHeader", "MyValue").body("body");
 		}

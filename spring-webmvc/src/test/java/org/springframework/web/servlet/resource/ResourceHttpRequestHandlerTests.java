@@ -98,6 +98,31 @@ public class ResourceHttpRequestHandlerTests {
 	}
 
 	@Test
+	public void getResourceHttpHeader() throws Exception {
+		this.request.setMethod("HEAD");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
+		this.handler.handleRequest(this.request, this.response);
+
+		assertEquals(200, this.response.getStatus());
+		assertEquals("text/css", this.response.getContentType());
+		assertEquals(17, this.response.getContentLength());
+		assertEquals("max-age=3600", this.response.getHeader("Cache-Control"));
+		assertTrue(this.response.containsHeader("Last-Modified"));
+		assertEquals(this.response.getHeader("Last-Modified"), resourceLastModifiedDate("test/foo.css"));
+		assertEquals(0, this.response.getContentAsByteArray().length);
+	}
+
+	@Test
+	public void getResourceHttpOptions() throws Exception {
+		this.request.setMethod("OPTIONS");
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
+		this.handler.handleRequest(this.request, this.response);
+
+		assertEquals(200, this.response.getStatus());
+		assertEquals("GET,HEAD", this.response.getHeader("Allow"));
+	}
+
+	@Test
 	public void getResourceNoCache() throws Exception {
 		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
 		this.handler.setCacheSeconds(0);

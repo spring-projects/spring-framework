@@ -37,6 +37,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -111,7 +112,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 
 	public ResourceHttpRequestHandler() {
-		super(METHOD_GET, METHOD_HEAD);
+		super(HttpMethod.GET.name(), HttpMethod.HEAD.name(), HttpMethod.OPTIONS.name());
 		this.resourceResolvers.add(new PathResourceResolver());
 	}
 
@@ -233,6 +234,11 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		if (resource == null) {
 			logger.trace("No matching resource found - returning 404");
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
+
+		if (HttpMethod.OPTIONS.matches(request.getMethod())) {
+			response.setHeader("Allow", "GET,HEAD");
 			return;
 		}
 
