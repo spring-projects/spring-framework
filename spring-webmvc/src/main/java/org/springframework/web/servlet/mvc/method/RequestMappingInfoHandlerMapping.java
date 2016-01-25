@@ -317,8 +317,11 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		private static Set<HttpMethod> initAllowedHttpMethods(Set<String> declaredMethods) {
 			Set<HttpMethod> result = new LinkedHashSet<HttpMethod>(declaredMethods.size());
 			if (declaredMethods.isEmpty()) {
-				result.add(HttpMethod.GET);
-				result.add(HttpMethod.HEAD);
+				for (HttpMethod method : HttpMethod.values()) {
+					if (!HttpMethod.TRACE.equals(method)) {
+						result.add(method);
+					}
+				}
 			}
 			else {
 				boolean hasHead = declaredMethods.contains("HEAD");

@@ -119,7 +119,7 @@ public class ResourceHttpRequestHandlerTests {
 		this.handler.handleRequest(this.request, this.response);
 
 		assertEquals(200, this.response.getStatus());
-		assertEquals("GET,HEAD", this.response.getHeader("Allow"));
+		assertEquals("GET,HEAD,OPTIONS", this.response.getHeader("Allow"));
 	}
 
 	@Test

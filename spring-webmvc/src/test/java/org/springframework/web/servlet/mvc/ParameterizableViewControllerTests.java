@@ -77,7 +77,7 @@ public class ParameterizableViewControllerTests {
 		ModelAndView mav = this.controller.handleRequest(this.request, response);
 
 		assertNull(mav);
-		assertEquals("GET,HEAD", response.getHeader("Allow"));
+		assertEquals("GET,HEAD,OPTIONS", response.getHeader("Allow"));
 	}
 
 }

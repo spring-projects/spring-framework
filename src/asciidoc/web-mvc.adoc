@@ -1174,8 +1174,8 @@ the number of bytes are counted and the "Content-Length" header set.
 HTTP OPTIONS request is handled by setting the "Allow" response header to the
 HTTP methods explicitly declared on all `@RequestMapping` methods with matching
 URL patterns. When no HTTP methods are explicitly declared the "Allow" header
-is set to "GET,HEAD". Therefore it's highly recommended to always explicitly
-declare the HTTP method(s) an `@RequestMapping` method is meant to handle.
+is set to "GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS". Ideally always declare the
+HTTP method(s) an `@RequestMapping` method is intended to handle.
 
 Although not necessary an `@RequestMapping` method can be mapped to and handle
 either HTTP HEAD or HTTP OPTIONS, or both.

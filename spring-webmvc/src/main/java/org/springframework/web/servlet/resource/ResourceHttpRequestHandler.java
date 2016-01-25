@@ -112,7 +112,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 
 	public ResourceHttpRequestHandler() {
-		super(HttpMethod.GET.name(), HttpMethod.HEAD.name(), HttpMethod.OPTIONS.name());
+		super(HttpMethod.GET.name(), HttpMethod.HEAD.name());
 		this.resourceResolvers.add(new PathResourceResolver());
 	}
 
@@ -226,6 +226,11 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
+		if (HttpMethod.OPTIONS.matches(request.getMethod())) {
+			response.setHeader("Allow", getAllowHeader());
+			return;
+		}
+
 		// Supported methods and required session
 		checkRequest(request);
 
@@ -234,11 +239,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		if (resource == null) {
 			logger.trace("No matching resource found - returning 404");
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
-			return;
-		}
-
-		if (HttpMethod.OPTIONS.matches(request.getMethod())) {
-			response.setHeader("Allow", "GET,HEAD");
 			return;
 		}
 
