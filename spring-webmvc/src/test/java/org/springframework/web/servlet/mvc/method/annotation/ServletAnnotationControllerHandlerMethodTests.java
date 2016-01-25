@@ -19,7 +19,6 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.beans.PropertyEditorSupport;
 import java.io.IOException;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -968,7 +967,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	public void httpEntity() throws ServletException, IOException {
 		initServletWithControllers(ResponseEntityController.class);
 
-		MockHttpServletRequest request = new MockHttpServletRequest("PUT", "/foo");
+		MockHttpServletRequest request = new MockHttpServletRequest("POST", "/foo");
 		String requestBody = "Hello World";
 		request.setContent(requestBody.getBytes("UTF-8"));
 		request.addHeader("Content-Type", "text/plain; charset=utf-8");
@@ -980,7 +979,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		assertEquals(requestBody, response.getContentAsString());
 		assertEquals("MyValue", response.getHeader("MyResponseHeader"));
 
-		request = new MockHttpServletRequest("PUT", "/bar");
+		request = new MockHttpServletRequest("GET", "/bar");
 		response = new MockHttpServletResponse();
 		getServlet().service(request, response);
 		assertEquals("MyValue", response.getHeader("MyResponseHeader"));
@@ -1746,6 +1745,30 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 
 		assertEquals(422, response.getStatus());
 		assertEquals("view", response.getForwardedUrl());
+	}
+
+	@Test
+	public void httpHead() throws ServletException, IOException {
+		initServletWithControllers(ResponseEntityController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("HEAD", "/baz");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+
+		assertEquals(200, response.getStatus());
+		assertEquals("MyValue", response.getHeader("MyResponseHeader"));
+		assertEquals(4, response.getContentLength());
+		assertTrue(response.getContentAsByteArray().length == 0);
+
+		// Now repeat with GET
+		request = new MockHttpServletRequest("GET", "/baz");
+		response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+
+		assertEquals(200, response.getStatus());
+		assertEquals("MyValue", response.getHeader("MyResponseHeader"));
+		assertEquals(4, response.getContentLength());
+		assertEquals("body", response.getContentAsString());
 	}
 
 
@@ -3019,25 +3042,27 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	@Controller
 	public static class ResponseEntityController {
 
-		@RequestMapping("/foo")
-		public ResponseEntity<String> foo(HttpEntity<byte[]> requestEntity) throws UnsupportedEncodingException {
+		@RequestMapping(path = "/foo", method = RequestMethod.POST)
+		public ResponseEntity<String> foo(HttpEntity<byte[]> requestEntity) throws Exception {
 			assertNotNull(requestEntity);
 			assertEquals("MyValue", requestEntity.getHeaders().getFirst("MyRequestHeader"));
-			String requestBody = new String(requestEntity.getBody(), "UTF-8");
-			assertEquals("Hello World", requestBody);
 
-			HttpHeaders responseHeaders = new HttpHeaders();
-			responseHeaders.set("MyResponseHeader", "MyValue");
-			return new ResponseEntity<String>(requestBody, responseHeaders, HttpStatus.CREATED);
+			String body = new String(requestEntity.getBody(), "UTF-8");
+			assertEquals("Hello World", body);
+
+			URI location = new URI("/foo");
+			return ResponseEntity.created(location).header("MyResponseHeader", "MyValue").body(body);
 		}
 
-		@RequestMapping("/bar")
-		public ResponseEntity<String> bar() {
-			HttpHeaders responseHeaders = new HttpHeaders();
-			responseHeaders.set("MyResponseHeader", "MyValue");
-			return new ResponseEntity<String>(responseHeaders, HttpStatus.NOT_FOUND);
+		@RequestMapping(path = "/bar", method = RequestMethod.GET)
+		public ResponseEntity<Void> bar() {
+			return ResponseEntity.notFound().header("MyResponseHeader", "MyValue").build();
 		}
 
+		@RequestMapping("/baz")
+		public ResponseEntity<String> baz() {
+			return ResponseEntity.ok().header("MyResponseHeader", "MyValue").body("body");
+		}
 	}
 
 	@Controller

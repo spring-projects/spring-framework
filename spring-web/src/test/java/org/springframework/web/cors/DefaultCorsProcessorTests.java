@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,7 +171,7 @@ public class DefaultCorsProcessorTests {
 		this.conf.addAllowedOrigin("*");
 		this.processor.processRequest(this.conf, request, response);
 		assertEquals(HttpServletResponse.SC_OK, response.getStatus());
-		assertEquals("GET", response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS));
+		assertEquals("GET,HEAD", response.getHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS));
 	}
 
 	@Test

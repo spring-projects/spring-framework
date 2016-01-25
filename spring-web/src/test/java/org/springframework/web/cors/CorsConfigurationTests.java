@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,10 @@ import org.junit.Test;
 
 import org.springframework.http.HttpMethod;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit tests for {@link CorsConfiguration}.
@@ -176,7 +179,7 @@ public class CorsConfigurationTests {
 
 	@Test
 	public void checkMethodAllowed() {
-		assertEquals(Arrays.asList(HttpMethod.GET), config.checkHttpMethod(HttpMethod.GET));
+		assertEquals(Arrays.asList(HttpMethod.GET, HttpMethod.HEAD), config.checkHttpMethod(HttpMethod.GET));
 		config.addAllowedMethod("GET");
 		assertEquals(Arrays.asList(HttpMethod.GET), config.checkHttpMethod(HttpMethod.GET));
 		config.addAllowedMethod("POST");
@@ -189,7 +192,7 @@ public class CorsConfigurationTests {
 		assertNull(config.checkHttpMethod(null));
 		assertNull(config.checkHttpMethod(HttpMethod.DELETE));
 		config.setAllowedMethods(new ArrayList<>());
-		assertNull(config.checkHttpMethod(HttpMethod.HEAD));
+		assertNull(config.checkHttpMethod(HttpMethod.POST));
 	}
 
 	@Test

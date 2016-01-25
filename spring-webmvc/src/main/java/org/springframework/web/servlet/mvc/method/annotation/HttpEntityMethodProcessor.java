@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -170,7 +170,9 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		Object body = responseEntity.getBody();
 		if (responseEntity instanceof ResponseEntity) {
 			outputMessage.setStatusCode(((ResponseEntity<?>) responseEntity).getStatusCode());
-			if (HttpMethod.GET == inputMessage.getMethod() && isResourceNotModified(inputMessage, outputMessage)) {
+			HttpMethod method = inputMessage.getMethod();
+			boolean isGetOrHead = (HttpMethod.GET == method || HttpMethod.HEAD == method);
+			if (isGetOrHead && isResourceNotModified(inputMessage, outputMessage)) {
 				outputMessage.setStatusCode(HttpStatus.NOT_MODIFIED);
 				// Ensure headers are flushed, no body should be written.
 				outputMessage.flush();

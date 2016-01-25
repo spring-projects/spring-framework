@@ -32,6 +32,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 /**
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  */
 public class RequestMethodsRequestConditionTests {
 
@@ -59,6 +60,25 @@ public class RequestMethodsRequestConditionTests {
 
 		assertNotNull(actual);
 		assertEquals(Collections.singleton(GET), actual.getContent());
+	}
+
+	@Test
+	public void methodHeadMatch() throws Exception {
+		RequestMethodsRequestCondition condition = new RequestMethodsRequestCondition(GET, POST);
+		MockHttpServletRequest request = new MockHttpServletRequest("HEAD", "/foo");
+		RequestMethodsRequestCondition actual = condition.getMatchingCondition(request);
+
+		assertNotNull(actual);
+		assertEquals("GET should also match HEAD", Collections.singleton(HEAD), actual.getContent());
+	}
+
+	@Test
+	public void methodHeadNoMatch() throws Exception {
+		RequestMethodsRequestCondition condition = new RequestMethodsRequestCondition(POST);
+		MockHttpServletRequest request = new MockHttpServletRequest("HEAD", "/foo");
+		RequestMethodsRequestCondition actual = condition.getMatchingCondition(request);
+
+		assertNull("HEAD should match only if GET is declared", actual);
 	}
 
 	@Test

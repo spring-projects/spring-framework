@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * @since 3.1
  */
 public final class RequestMethodsRequestCondition extends AbstractRequestCondition<RequestMethodsRequestCondition> {
+
+	private static final RequestMethodsRequestCondition HEAD_CONDITION =
+			new RequestMethodsRequestCondition(RequestMethod.HEAD);
+
 
 	private final Set<RequestMethod> methods;
 
@@ -98,15 +102,22 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 		if (this.methods.isEmpty()) {
 			return this;
 		}
-		RequestMethod incomingRequestMethod = getRequestMethod(request);
-		if (incomingRequestMethod != null) {
+		RequestMethod requestMethod = getRequestMethod(request);
+		if (requestMethod != null) {
 			for (RequestMethod method : this.methods) {
-				if (method.equals(incomingRequestMethod)) {
+				if (method.equals(requestMethod)) {
 					return new RequestMethodsRequestCondition(method);
 				}
 			}
+			if (isHeadRequest(requestMethod) && getMethods().contains(RequestMethod.GET)) {
+				return HEAD_CONDITION;
+			}
 		}
 		return null;
+	}
+
+	private boolean isHeadRequest(RequestMethod requestMethod) {
+		return (requestMethod != null && RequestMethod.HEAD.equals(requestMethod));
 	}
 
 	private RequestMethod getRequestMethod(HttpServletRequest request) {

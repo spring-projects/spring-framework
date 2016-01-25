@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -144,7 +144,10 @@ public class ShallowEtagHeaderFilter extends OncePerRequestFilter {
 	protected boolean isEligibleForEtag(HttpServletRequest request, HttpServletResponse response,
 			int responseStatusCode, InputStream inputStream) {
 
-		if (responseStatusCode >= 200 && responseStatusCode < 300 && HttpMethod.GET.matches(request.getMethod())) {
+		String method = request.getMethod();
+		if (responseStatusCode >= 200 && responseStatusCode < 300 &&
+				(HttpMethod.GET.matches(method) || HttpMethod.HEAD.matches(method))) {
+
 			String cacheControl = null;
 			if (servlet3Present) {
 				cacheControl = response.getHeader(HEADER_CACHE_CONTROL);
