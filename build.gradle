@@ -49,7 +49,7 @@ configure(allprojects) { project ->
 	ext.htmlunitVersion      = "2.19"
 	ext.httpasyncVersion     = "4.1.1"
 	ext.httpclientVersion    = "4.5.1"
-	ext.jackson2Version      = "2.6.4"
+	ext.jackson2Version      = "2.7.0"
 	ext.jasperreportsVersion = "6.2.0"
 	ext.javamailVersion      = "1.5.5"
 	ext.jettyVersion         = "9.3.6.v20151106"
@@ -735,7 +735,6 @@ project("spring-web") {
 			exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"
 		}
 		testCompile("com.fasterxml.jackson.datatype:jackson-datatype-joda:${jackson2Version}")
-		testCompile("com.fasterxml.jackson.datatype:jackson-datatype-jdk7:${jackson2Version}")
 		testCompile("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jackson2Version}")
 		testRuntime("com.sun.mail:javax.mail:${javamailVersion}")
 	}

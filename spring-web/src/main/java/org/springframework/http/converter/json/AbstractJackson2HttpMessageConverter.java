@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.http.converter.json;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.nio.charset.Charset;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -30,7 +31,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -296,7 +299,35 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	 * @return the Jackson JavaType
 	 */
 	protected JavaType getJavaType(Type type, Class<?> contextClass) {
-		return this.objectMapper.getTypeFactory().constructType(type, contextClass);
+		TypeFactory typeFactory = this.objectMapper.getTypeFactory();
+		if (type instanceof TypeVariable && contextClass != null) {
+			ResolvableType resolvedType = resolveVariable((TypeVariable<?>)type, ResolvableType.forClass(contextClass));
+			if (resolvedType != ResolvableType.NONE) {
+				return typeFactory.constructType(resolvedType.resolve());
+			}
+		}
+		return typeFactory.constructType(type);
+	}
+
+	private ResolvableType resolveVariable(TypeVariable<?> typeVariable, ResolvableType contextType) {
+		ResolvableType resolvedType;
+		if (contextType.hasGenerics()) {
+			resolvedType = ResolvableType.forType(typeVariable, contextType);
+			if (resolvedType.resolve() != null) {
+				return resolvedType;
+			}
+		}
+		resolvedType = resolveVariable(typeVariable, contextType.getSuperType());
+		if (resolvedType.resolve() != null) {
+			return resolvedType;
+		}
+		for (ResolvableType i : contextType.getInterfaces()) {
+			resolvedType = resolveVariable(typeVariable, i);
+			if (resolvedType.resolve() != null) {
+				return resolvedType;
+			}
+		}
+		return ResolvableType.NONE;
 	}
 
 	/**
