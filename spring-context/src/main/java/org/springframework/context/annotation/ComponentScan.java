@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -125,10 +125,13 @@ public @interface ComponentScan {
 
 	/**
 	 * Specifies which types are eligible for component scanning.
-	 * <p>Further narrows the set of candidate components from everything in
-	 * {@link #basePackages} to everything in the base packages that matches
-	 * the given filter or filters.
-	 * @see #resourcePattern
+	 * <p>Further narrows the set of candidate components from everything in {@link #basePackages}
+	 * to everything in the base packages that matches the given filter or filters.
+	 * <p>Note that these filters will be applied in addition to the default filters, if specified.
+	 * Any type under the specified base packages which matches a given filter will be included,
+	 * even if it does not match the default filters (i.e. is not annotated with {@code @Component}).
+	 * @see #resourcePattern()
+	 * @see #useDefaultFilters()
 	 */
 	Filter[] includeFilters() default {};
 
