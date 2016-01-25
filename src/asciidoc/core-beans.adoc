@@ -7480,7 +7480,7 @@ is populated with additional default property sources including servlet config a
 context parameters. {api-spring-framework}/web/portlet/context/StandardPortletEnvironment.html[`StandardPortletEnvironment`]
 similarly has access to portlet config and portlet context parameters as property sources.
 Both can optionally enable a {api-spring-framework}/jndi/JndiPropertySource.html[`JndiPropertySource`].
-See Javadoc for details.
+See the javadocs for details.
 ====
 
 Concretely, when using the `StandardEnvironment`, the call to `env.containsProperty("foo")`
@@ -7492,7 +7492,16 @@ runtime.
 The search performed is hierarchical. By default, system properties have precedence over
 environment variables, so if the `foo` property happens to be set in both places during
 a call to `env.getProperty("foo")`, the system property value will 'win' and be returned
-preferentially over the environment variable.
+preferentially over the environment variable. Note that property values will not get merged
+but rather completely overridden by a preceding entry.
+
+For a common `StandardServletEnvironment`, the full hierarchy looks as follows, with the
+highest-precedence entries at the top:
+* ServletConfig parameters (if applicable, e.g. in case of a `DispatcherServlet` context)
+* ServletContext parameters (web.xml context-param entries)
+* JNDI environment variables ("java:comp/env/" entries)
+* JVM system properties ("-D" command-line arguments)
+* JVM system environment (operating system environment variables)
 ====
 
 Most importantly, the entire mechanism is configurable. Perhaps you have a custom source
