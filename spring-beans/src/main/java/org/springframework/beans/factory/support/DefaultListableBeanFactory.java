@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.inject.Provider;
 
 import org.springframework.beans.BeansException;
-import org.springframework.beans.FatalBeanException;
 import org.springframework.beans.TypeConverter;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
@@ -112,6 +111,9 @@ import org.springframework.util.StringUtils;
 @SuppressWarnings("serial")
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
 		implements ConfigurableListableBeanFactory, BeanDefinitionRegistry, Serializable {
+
+	private static final Object NOT_MULTIPLE_BEANS = new Object();
+
 
 	private static Class<?> javaUtilOptionalClass = null;
 
@@ -615,10 +617,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 	@Override
 	public void registerResolvableDependency(Class<?> dependencyType, Object autowiredValue) {
-		Assert.notNull(dependencyType, "Type must not be null");
+		Assert.notNull(dependencyType, "Dependency type must not be null");
 		if (autowiredValue != null) {
-			Assert.isTrue((autowiredValue instanceof ObjectFactory || dependencyType.isInstance(autowiredValue)),
-					"Value [" + autowiredValue + "] does not implement specified type [" + dependencyType.getName() + "]");
+			if (!(autowiredValue instanceof ObjectFactory || dependencyType.isInstance(autowiredValue))) {
+				throw new IllegalArgumentException("Value [" + autowiredValue +
+						"] does not implement specified dependency type [" + dependencyType.getName() + "]");
+			}
 			this.resolvableDependencies.put(dependencyType, autowiredValue);
 		}
 	}
@@ -1034,15 +1038,54 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 					converter.convertIfNecessary(value, type, descriptor.getMethodParameter()));
 		}
 
+		Object multipleBeans = resolveMultipleBeans(descriptor, beanName, autowiredBeanNames, typeConverter);
+		if (multipleBeans != null && multipleBeans != NOT_MULTIPLE_BEANS) {
+			return multipleBeans;
+		}
+
+		Map<String, Object> matchingBeans = findAutowireCandidates(beanName, type, descriptor);
+		if (matchingBeans.isEmpty()) {
+			if (descriptor.isRequired()) {
+				raiseNoSuchBeanDefinitionException(type, descriptor.getResolvableType().toString(), descriptor);
+			}
+			return null;
+		}
+		if (matchingBeans.size() > 1) {
+			String primaryBeanName = determineAutowireCandidate(matchingBeans, descriptor);
+			if (primaryBeanName == null) {
+				if (multipleBeans == NOT_MULTIPLE_BEANS || descriptor.isRequired()) {
+					throw new NoUniqueBeanDefinitionException(type, matchingBeans.keySet());
+				}
+				else {
+					// In case of an optional Collection/Map, silently ignore a non-unique case:
+					// possibly it was meant to be an empty collection of multiple regular beans
+					// (before 4.3 in particular when we didn't even look for collection beans).
+					return null;
+				}
+			}
+			if (autowiredBeanNames != null) {
+				autowiredBeanNames.add(primaryBeanName);
+			}
+			return matchingBeans.get(primaryBeanName);
+		}
+		// We have exactly one match.
+		Map.Entry<String, Object> entry = matchingBeans.entrySet().iterator().next();
+		if (autowiredBeanNames != null) {
+			autowiredBeanNames.add(entry.getKey());
+		}
+		return entry.getValue();
+	}
+
+	private Object resolveMultipleBeans(DependencyDescriptor descriptor, String beanName,
+			Set<String> autowiredBeanNames, TypeConverter typeConverter) {
+
+		Class<?> type = descriptor.getDependencyType();
 		if (type.isArray()) {
 			Class<?> componentType = type.getComponentType();
 			DependencyDescriptor targetDesc = new DependencyDescriptor(descriptor);
 			targetDesc.increaseNestingLevel();
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, componentType, targetDesc);
 			if (matchingBeans.isEmpty()) {
-				if (descriptor.isRequired()) {
-					raiseNoSuchBeanDefinitionException(componentType, "array of " + componentType.getName(), descriptor);
-				}
 				return null;
 			}
 			if (autowiredBeanNames != null) {
@@ -1058,18 +1101,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		else if (Collection.class.isAssignableFrom(type) && type.isInterface()) {
 			Class<?> elementType = descriptor.getCollectionType();
 			if (elementType == null) {
-				if (descriptor.isRequired()) {
-					throw new FatalBeanException("No element type declared for collection [" + type.getName() + "]");
-				}
 				return null;
 			}
 			DependencyDescriptor targetDesc = new DependencyDescriptor(descriptor);
 			targetDesc.increaseNestingLevel();
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, elementType, targetDesc);
 			if (matchingBeans.isEmpty()) {
-				if (descriptor.isRequired()) {
-					raiseNoSuchBeanDefinitionException(elementType, "collection of " + elementType.getName(), descriptor);
-				}
 				return null;
 			}
 			if (autowiredBeanNames != null) {
@@ -1085,26 +1122,16 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		else if (Map.class.isAssignableFrom(type) && type.isInterface()) {
 			Class<?> keyType = descriptor.getMapKeyType();
 			if (String.class != keyType) {
-				if (descriptor.isRequired()) {
-					throw new FatalBeanException("Key type [" + keyType + "] of map [" + type.getName() +
-							"] must be [java.lang.String]");
-				}
 				return null;
 			}
 			Class<?> valueType = descriptor.getMapValueType();
 			if (valueType == null) {
-				if (descriptor.isRequired()) {
-					throw new FatalBeanException("No value type declared for map [" + type.getName() + "]");
-				}
 				return null;
 			}
 			DependencyDescriptor targetDesc = new DependencyDescriptor(descriptor);
 			targetDesc.increaseNestingLevel();
 			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, valueType, targetDesc);
 			if (matchingBeans.isEmpty()) {
-				if (descriptor.isRequired()) {
-					raiseNoSuchBeanDefinitionException(valueType, "map with value type " + valueType.getName(), descriptor);
-				}
 				return null;
 			}
 			if (autowiredBeanNames != null) {
@@ -1113,29 +1140,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			return matchingBeans;
 		}
 		else {
-			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, type, descriptor);
-			if (matchingBeans.isEmpty()) {
-				if (descriptor.isRequired()) {
-					raiseNoSuchBeanDefinitionException(type, "", descriptor);
-				}
-				return null;
-			}
-			if (matchingBeans.size() > 1) {
-				String primaryBeanName = determineAutowireCandidate(matchingBeans, descriptor);
-				if (primaryBeanName == null) {
-					throw new NoUniqueBeanDefinitionException(type, matchingBeans.keySet());
-				}
-				if (autowiredBeanNames != null) {
-					autowiredBeanNames.add(primaryBeanName);
-				}
-				return matchingBeans.get(primaryBeanName);
-			}
-			// We have exactly one match.
-			Map.Entry<String, Object> entry = matchingBeans.entrySet().iterator().next();
-			if (autowiredBeanNames != null) {
-				autowiredBeanNames.add(entry.getKey());
-			}
-			return entry.getValue();
+			return NOT_MULTIPLE_BEANS;
 		}
 	}
 
@@ -1193,10 +1198,19 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 		}
 		if (result.isEmpty()) {
+			// Consider fallback matches if the first pass failed to find anything...
 			DependencyDescriptor fallbackDescriptor = descriptor.forFallbackMatch();
 			for (String candidateName : candidateNames) {
-				if (!candidateName.equals(beanName) && isAutowireCandidate(candidateName, fallbackDescriptor)) {
+				if (!isSelfReference(beanName, candidateName) && isAutowireCandidate(candidateName, fallbackDescriptor)) {
 					result.put(candidateName, getBean(candidateName));
+				}
+			}
+			if (result.isEmpty()) {
+				// Consider self references before as a final pass
+				for (String candidateName : candidateNames) {
+					if (isSelfReference(beanName, candidateName) && isAutowireCandidate(candidateName, fallbackDescriptor)) {
+						result.put(candidateName, getBean(candidateName));
+					}
 				}
 			}
 		}

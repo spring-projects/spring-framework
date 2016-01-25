@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,13 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.Callable;
 
 import org.junit.Ignore;
@@ -741,10 +746,10 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		RootBeanDefinition bd = new RootBeanDefinition(MapConstructorInjectionBean.class);
 		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 		bf.registerBeanDefinition("annotatedBean", bd);
-		TestBean tb1 = new TestBean();
-		TestBean tb2 = new TestBean();
+		TestBean tb1 = new TestBean("tb1");
+		TestBean tb2 = new TestBean("tb2");
 		bf.registerSingleton("testBean1", tb1);
-		bf.registerSingleton("testBean2", tb1);
+		bf.registerSingleton("testBean2", tb2);
 
 		MapConstructorInjectionBean bean = (MapConstructorInjectionBean) bf.getBean("annotatedBean");
 		assertEquals(2, bean.getTestBeanMap().size());
@@ -770,10 +775,10 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		RootBeanDefinition bd = new RootBeanDefinition(MapFieldInjectionBean.class);
 		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 		bf.registerBeanDefinition("annotatedBean", bd);
-		TestBean tb1 = new TestBean();
-		TestBean tb2 = new TestBean();
+		TestBean tb1 = new TestBean("tb1");
+		TestBean tb2 = new TestBean("tb2");
 		bf.registerSingleton("testBean1", tb1);
-		bf.registerSingleton("testBean2", tb1);
+		bf.registerSingleton("testBean2", tb2);
 
 		MapFieldInjectionBean bean = (MapFieldInjectionBean) bf.getBean("annotatedBean");
 		assertEquals(2, bean.getTestBeanMap().size());
@@ -829,7 +834,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 			bf.getBean("annotatedBean");
 			fail("should have failed, more than one bean of type");
 		}
-		catch (BeanCreationException e) {
+		catch (BeanCreationException ex) {
 			// expected
 		}
 		bf.destroySingletons();
@@ -868,6 +873,108 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertNull(bean.getTestBeanMap());
 		assertNull(bean.getTestBean());
 		bf.destroySingletons();
+	}
+
+	@Test
+	public void testConstructorInjectionWithTypedMapAsBean() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(MapConstructorInjectionBean.class);
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		MyTestBeanMap tbm = new MyTestBeanMap();
+		tbm.put("testBean1", new TestBean("tb1"));
+		tbm.put("testBean2", new TestBean("tb2"));
+		bf.registerSingleton("testBeans", tbm);
+		bf.registerSingleton("otherMap", new Properties());
+
+		MapConstructorInjectionBean bean = (MapConstructorInjectionBean) bf.getBean("annotatedBean");
+		assertSame(tbm, bean.getTestBeanMap());
+		bean = (MapConstructorInjectionBean) bf.getBean("annotatedBean");
+		assertSame(tbm, bean.getTestBeanMap());
+	}
+
+	@Test
+	public void testConstructorInjectionWithPlainMapAsBean() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(MapConstructorInjectionBean.class);
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		Map<String, TestBean> tbm = new LinkedHashMap<String, TestBean>();
+		tbm.put("testBean1", new TestBean("tb1"));
+		tbm.put("testBean2", new TestBean("tb2"));
+		bf.registerSingleton("testBeans", tbm);
+		bf.registerSingleton("otherMap", new Properties());
+
+		MapConstructorInjectionBean bean = (MapConstructorInjectionBean) bf.getBean("annotatedBean");
+		assertSame(tbm, bean.getTestBeanMap());
+		bean = (MapConstructorInjectionBean) bf.getBean("annotatedBean");
+		assertSame(tbm, bean.getTestBeanMap());
+	}
+
+	@Test
+	public void testConstructorInjectionWithTypedSetAsBean() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(SetConstructorInjectionBean.class);
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		MyTestBeanSet tbs = new MyTestBeanSet();
+		tbs.add(new TestBean("tb1"));
+		tbs.add(new TestBean("tb2"));
+		bf.registerSingleton("testBeans", tbs);
+		bf.registerSingleton("otherSet", new HashSet<Object>());
+
+		SetConstructorInjectionBean bean = (SetConstructorInjectionBean) bf.getBean("annotatedBean");
+		assertSame(tbs, bean.getTestBeanSet());
+		bean = (SetConstructorInjectionBean) bf.getBean("annotatedBean");
+		assertSame(tbs, bean.getTestBeanSet());
+	}
+
+	@Test
+	public void testConstructorInjectionWithPlainSetAsBean() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(SetConstructorInjectionBean.class);
+		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("annotatedBean", bd);
+		Set<TestBean> tbs = new LinkedHashSet<TestBean>();
+		tbs.add(new TestBean("tb1"));
+		tbs.add(new TestBean("tb2"));
+		bf.registerSingleton("testBeanSet", tbs);
+		bf.registerSingleton("otherSet", new HashSet<Object>());
+
+		SetConstructorInjectionBean bean = (SetConstructorInjectionBean) bf.getBean("annotatedBean");
+		assertSame(tbs, bean.getTestBeanSet());
+		bean = (SetConstructorInjectionBean) bf.getBean("annotatedBean");
+		assertSame(tbs, bean.getTestBeanSet());
+	}
+
+	@Test
+	public void testSelfReference() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		RootBeanDefinition bd = new RootBeanDefinition(SelfInjectionBean.class);
+		bf.registerBeanDefinition("annotatedBean", bd);
+
+		SelfInjectionBean bean = (SelfInjectionBean) bf.getBean("annotatedBean");
+		assertSame(bean, bean.selfReference);
 	}
 
 	@Test
@@ -972,7 +1079,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 			bf.getBean("customBean");
 			fail("expected BeanCreationException; no dependency available for required field");
 		}
-		catch (BeanCreationException e) {
+		catch (BeanCreationException ex) {
 			// expected
 		}
 		bf.destroySingletons();
@@ -998,7 +1105,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 			bf.getBean("customBean");
 			fail("expected BeanCreationException; multiple beans of dependency type available");
 		}
-		catch (BeanCreationException e) {
+		catch (BeanCreationException ex) {
 			// expected
 		}
 		bf.destroySingletons();
@@ -1065,7 +1172,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 			bf.getBean("customBean");
 			fail("expected BeanCreationException; multiple beans of dependency type available");
 		}
-		catch (BeanCreationException e) {
+		catch (BeanCreationException ex) {
 			// expected
 		}
 		bf.destroySingletons();
@@ -1131,7 +1238,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 			bf.getBean("customBean");
 			fail("expected BeanCreationException; multiple beans of dependency type available");
 		}
-		catch (BeanCreationException e) {
+		catch (BeanCreationException ex) {
 			// expected
 		}
 		bf.destroySingletons();
@@ -1197,7 +1304,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 			bf.getBean("customBean");
 			fail("expected BeanCreationException; multiple beans of dependency type available");
 		}
-		catch (BeanCreationException e) {
+		catch (BeanCreationException ex) {
 			// expected
 		}
 		bf.destroySingletons();
@@ -2244,6 +2351,14 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 
+	public static class MyTestBeanMap extends LinkedHashMap<String, TestBean> {
+	}
+
+
+	public static class MyTestBeanSet extends LinkedHashSet<TestBean> {
+	}
+
+
 	public static class MapConstructorInjectionBean {
 
 		private Map<String, TestBean> testBeanMap;
@@ -2256,6 +2371,28 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		public Map<String, TestBean> getTestBeanMap() {
 			return this.testBeanMap;
 		}
+	}
+
+
+	public static class SetConstructorInjectionBean {
+
+		private Set<TestBean> testBeanSet;
+
+		@Autowired
+		public SetConstructorInjectionBean(Set<TestBean> testBeanSet) {
+			this.testBeanSet = testBeanSet;
+		}
+
+		public Set<TestBean> getTestBeanSet() {
+			return this.testBeanSet;
+		}
+	}
+
+
+	public static class SelfInjectionBean {
+
+		@Autowired
+		public SelfInjectionBean selfReference;
 	}
 
 
