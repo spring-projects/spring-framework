@@ -21,8 +21,8 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
+import reactor.rx.Signal;
 import reactor.rx.Stream;
-import reactor.rx.stream.Signal;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -32,7 +32,6 @@ import org.springframework.web.ResponseStatusException;
 import org.springframework.web.server.DefaultWebServerExchange;
 import org.springframework.web.server.WebServerExchange;
 
-import static junit.framework.TestCase.assertSame;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

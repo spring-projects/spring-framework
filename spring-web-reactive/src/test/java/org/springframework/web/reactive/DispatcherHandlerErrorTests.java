@@ -24,8 +24,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
+import reactor.rx.Signal;
 import reactor.rx.Stream;
-import reactor.rx.stream.Signal;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;

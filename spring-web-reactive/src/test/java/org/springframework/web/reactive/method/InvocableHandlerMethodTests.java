@@ -15,7 +15,6 @@
  */
 package org.springframework.web.reactive.method;
 
-
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.Arrays;
@@ -27,8 +26,8 @@ import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.rx.Signal;
 import reactor.rx.Stream;
-import reactor.rx.stream.Signal;
 
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
