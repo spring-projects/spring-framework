@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -344,7 +344,11 @@ public class LocalSessionFactoryBean extends HibernateExceptionTranslator
 	 */
 	public MetadataSources getMetadataSources() {
 		if (this.metadataSources == null) {
-			this.metadataSources = new MetadataSources(new BootstrapServiceRegistryBuilder().build());
+			BootstrapServiceRegistryBuilder builder = new BootstrapServiceRegistryBuilder();
+			if (this.resourcePatternResolver != null) {
+				builder = builder.applyClassLoader(this.resourcePatternResolver.getClassLoader());
+			}
+			this.metadataSources = new MetadataSources(builder.build());
 		}
 		return this.metadataSources;
 	}
