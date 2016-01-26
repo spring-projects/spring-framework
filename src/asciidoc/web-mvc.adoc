@@ -1250,6 +1250,10 @@ multiple requests are allowed to access a session concurrently.
 * `@RequestPart` annotated parameters for access to the content of a
   "multipart/form-data" request part. See <<mvc-multipart-forms-non-browsers>> and
   <<mvc-multipart>>.
+* `@SessionAttribute` annotated parameters for access to existing, permanent
+  session attributes (e.g. user authentication object) as opposed to model
+  attributes temporarily stored in the session as part of a controller workflow
+  via `@SessionAttributes`.
 * `HttpEntity<?>` parameters for access to the Servlet request HTTP headers and
   contents. The request stream will be converted to the entity body using
   ++HttpMessageConverter++s. See <<mvc-ann-httpentity>>.
@@ -1763,6 +1767,32 @@ attribute name:
 		// ...
 	}
 ----
+
+
+[[mvc-ann-sessionattrib-global]]
+==== Using @SessionAttribute to access pre-existing global session attributes
+
+If you need access to pre-existing session attributes that are managed globally,
+i.e. outside the controller (e.g. by a filter), and may or may not be present
+use the `@SessionAttribute` annotation on a method parameter:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@RequestMapping("/")
+	public String handle(**@SessionAttribute** User user) {
+		// ...
+	}
+----
+
+For use cases that require adding or removing session attributes consider injecting
+`org.springframework.web.context.request.WebRequest` or
+`javax.servlet.http.HttpSession` into the controller method.
+
+For temporary storage of model attributes in the session as part of a controller
+workflow consider using `SessionAttributes` as described in
+<<mvc-ann-sessionattrib>>.
+
 
 
 [[mvc-ann-form-urlencoded-data]]

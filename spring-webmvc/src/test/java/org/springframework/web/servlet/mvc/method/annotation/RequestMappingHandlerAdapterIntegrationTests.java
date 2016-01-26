@@ -68,6 +68,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.SessionStatus;
@@ -148,12 +149,13 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 	public void handle() throws Exception {
 		Class<?>[] parameterTypes = new Class<?>[] { int.class, String.class, String.class, String.class, Map.class,
 				Date.class, Map.class, String.class, String.class, TestBean.class, Errors.class, TestBean.class,
-				Color.class, HttpServletRequest.class, HttpServletResponse.class, User.class, OtherUser.class,
-				Model.class, UriComponentsBuilder.class };
+				Color.class, HttpServletRequest.class, HttpServletResponse.class, TestBean.class,
+				User.class, OtherUser.class, Model.class, UriComponentsBuilder.class };
 
 		String datePattern = "yyyy.MM.dd";
 		String formattedDate = "2011.03.16";
 		Date date = new GregorianCalendar(2011, Calendar.MARCH, 16).getTime();
+		TestBean sessionAttribute = new TestBean();
 
 		request.addHeader("Content-Type", "text/plain; charset=utf-8");
 		request.addHeader("header", "headerValue");
@@ -171,6 +173,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		Map<String, String> uriTemplateVars = new HashMap<String, String>();
 		uriTemplateVars.put("pathvar", "pathvarValue");
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVars);
+		request.getSession().setAttribute("sessionAttribute", sessionAttribute);
 
 		HandlerMethod handlerMethod = handlerMethod("handle", parameterTypes);
 		ModelAndView mav = handlerAdapter.handle(request, response, handlerMethod);
@@ -214,6 +217,8 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 		assertTrue(model.get("customArg") instanceof Color);
 		assertEquals(User.class, model.get("user").getClass());
 		assertEquals(OtherUser.class, model.get("otherUser").getClass());
+
+		assertSame(sessionAttribute, model.get("sessionAttribute"));
 
 		assertEquals(new URI("http://localhost/contextPath/main/path"), model.get("url"));
 	}
@@ -363,6 +368,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 						 	Color customArg,
 						 	HttpServletRequest request,
 						 	HttpServletResponse response,
+							@SessionAttribute TestBean sessionAttribute,
 						 	User user,
 						 	@ModelAttribute OtherUser otherUser,
 						 	Model model,
@@ -373,6 +379,7 @@ public class RequestMappingHandlerAdapterIntegrationTests {
 					.addAttribute("dateParam", dateParam).addAttribute("paramMap", paramMap)
 					.addAttribute("paramByConvention", paramByConvention).addAttribute("value", value)
 					.addAttribute("customArg", customArg).addAttribute(user)
+					.addAttribute("sessionAttribute", sessionAttribute)
 					.addAttribute("url", builder.path("/path").build().toUri());
 
 			assertNotNull(request);

@@ -662,8 +662,9 @@ Spring 4.3 also improves the caching abstraction as follows:
 === Web Improvements
 
 * Built-in support for <<mvc-ann-requestmapping-head-options,HTTP HEAD and HTTP OPTIONS>>.
-* New `@RestControllerAdvice` annotation combines `@ControllerAdvice` with `@ResponseBody`.
-* `@ResponseStatus` can be used on a controller type and is inherited for all method.
+* New `@RestControllerAdvice` annotation with combined `@ControllerAdvice` with `@ResponseBody` semantics.
+* `@ResponseStatus` supported on the class level and inherited on all methods.
+* New `@SessionAttribute` annotation for access to session attributes (see <<mvc-ann-sessionattrib-global, example>>).
 * `AsyncRestTemplate` supports request interception.
 
 === WebSocket Messaging Improvements

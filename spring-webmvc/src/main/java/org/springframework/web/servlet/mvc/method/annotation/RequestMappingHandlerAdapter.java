@@ -600,6 +600,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		resolvers.add(new RequestHeaderMapMethodArgumentResolver());
 		resolvers.add(new ServletCookieValueMethodArgumentResolver(getBeanFactory()));
 		resolvers.add(new ExpressionValueMethodArgumentResolver(getBeanFactory()));
+		resolvers.add(new SessionAttributeMethodArgumentResolver());
 
 		// Type-based argument resolution
 		resolvers.add(new ServletRequestMethodArgumentResolver());
@@ -639,6 +640,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		resolvers.add(new MatrixVariableMethodArgumentResolver());
 		resolvers.add(new MatrixVariableMapMethodArgumentResolver());
 		resolvers.add(new ExpressionValueMethodArgumentResolver(getBeanFactory()));
+		resolvers.add(new SessionAttributeMethodArgumentResolver());
 
 		// Type-based argument resolution
 		resolvers.add(new ServletRequestMethodArgumentResolver());
@@ -788,46 +790,50 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
 
 		ServletWebRequest webRequest = new ServletWebRequest(request, response);
+		try {
+			WebDataBinderFactory binderFactory = getDataBinderFactory(handlerMethod);
+			ModelFactory modelFactory = getModelFactory(handlerMethod, binderFactory);
 
-		WebDataBinderFactory binderFactory = getDataBinderFactory(handlerMethod);
-		ModelFactory modelFactory = getModelFactory(handlerMethod, binderFactory);
+			ServletInvocableHandlerMethod invocableMethod = createInvocableHandlerMethod(handlerMethod);
+			invocableMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
+			invocableMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
+			invocableMethod.setDataBinderFactory(binderFactory);
+			invocableMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
 
-		ServletInvocableHandlerMethod invocableMethod = createInvocableHandlerMethod(handlerMethod);
-		invocableMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
-		invocableMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
-		invocableMethod.setDataBinderFactory(binderFactory);
-		invocableMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
+			ModelAndViewContainer mavContainer = new ModelAndViewContainer();
+			mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));
+			modelFactory.initModel(webRequest, mavContainer, invocableMethod);
+			mavContainer.setIgnoreDefaultModelOnRedirect(this.ignoreDefaultModelOnRedirect);
 
-		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
-		mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));
-		modelFactory.initModel(webRequest, mavContainer, invocableMethod);
-		mavContainer.setIgnoreDefaultModelOnRedirect(this.ignoreDefaultModelOnRedirect);
+			AsyncWebRequest asyncWebRequest = WebAsyncUtils.createAsyncWebRequest(request, response);
+			asyncWebRequest.setTimeout(this.asyncRequestTimeout);
 
-		AsyncWebRequest asyncWebRequest = WebAsyncUtils.createAsyncWebRequest(request, response);
-		asyncWebRequest.setTimeout(this.asyncRequestTimeout);
+			WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
+			asyncManager.setTaskExecutor(this.taskExecutor);
+			asyncManager.setAsyncWebRequest(asyncWebRequest);
+			asyncManager.registerCallableInterceptors(this.callableInterceptors);
+			asyncManager.registerDeferredResultInterceptors(this.deferredResultInterceptors);
 
-		WebAsyncManager asyncManager = WebAsyncUtils.getAsyncManager(request);
-		asyncManager.setTaskExecutor(this.taskExecutor);
-		asyncManager.setAsyncWebRequest(asyncWebRequest);
-		asyncManager.registerCallableInterceptors(this.callableInterceptors);
-		asyncManager.registerDeferredResultInterceptors(this.deferredResultInterceptors);
-
-		if (asyncManager.hasConcurrentResult()) {
-			Object result = asyncManager.getConcurrentResult();
-			mavContainer = (ModelAndViewContainer) asyncManager.getConcurrentResultContext()[0];
-			asyncManager.clearConcurrentResult();
-			if (logger.isDebugEnabled()) {
-				logger.debug("Found concurrent result value [" + result + "]");
+			if (asyncManager.hasConcurrentResult()) {
+				Object result = asyncManager.getConcurrentResult();
+				mavContainer = (ModelAndViewContainer) asyncManager.getConcurrentResultContext()[0];
+				asyncManager.clearConcurrentResult();
+				if (logger.isDebugEnabled()) {
+					logger.debug("Found concurrent result value [" + result + "]");
+				}
+				invocableMethod = invocableMethod.wrapConcurrentResult(result);
 			}
-			invocableMethod = invocableMethod.wrapConcurrentResult(result);
-		}
 
-		invocableMethod.invokeAndHandle(webRequest, mavContainer);
-		if (asyncManager.isConcurrentHandlingStarted()) {
-			return null;
-		}
+			invocableMethod.invokeAndHandle(webRequest, mavContainer);
+			if (asyncManager.isConcurrentHandlingStarted()) {
+				return null;
+			}
 
-		return getModelAndView(mavContainer, modelFactory, webRequest);
+			return getModelAndView(mavContainer, modelFactory, webRequest);
+		}
+		finally {
+			webRequest.requestCompleted();
+		}
 	}
 
 	/**
