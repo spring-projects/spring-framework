@@ -33,6 +33,7 @@ import org.springframework.web.server.DefaultWebServerExchange;
 import org.springframework.web.server.WebServerExchange;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 /**
