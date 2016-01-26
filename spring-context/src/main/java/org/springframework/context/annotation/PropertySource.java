@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -148,13 +148,18 @@ import java.lang.annotation.Target;
 public @interface PropertySource {
 
 	/**
-	 * Indicate the name of this property source. If omitted, a name
-	 * will be generated based on the description of the underlying
-	 * resource.
+	 * Indicate the name of this property source. If omitted, a name will
+	 * be generated based on the description of the underlying resource.
 	 * @see org.springframework.core.env.PropertySource#getName()
 	 * @see org.springframework.core.io.Resource#getDescription()
 	 */
 	String name() default "";
+
+	/**
+	 * A specific character encoding for the given resources, e.g. "UTF-8".
+	 * @since 4.3
+	 */
+	String encoding() default "";
 
 	/**
 	 * Indicate the resource location(s) of the properties file to be loaded.

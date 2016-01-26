@@ -66,6 +66,7 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.EncodedResource;
 import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
@@ -354,6 +355,7 @@ class ConfigurationClassParser {
 	 */
 	private void processPropertySource(AnnotationAttributes propertySource) throws IOException {
 		String name = propertySource.getString("name");
+		String encoding = propertySource.getString("encoding");
 		String[] locations = propertySource.getStringArray("value");
 		boolean ignoreResourceNotFound = propertySource.getBoolean("ignoreResourceNotFound");
 		Assert.isTrue(locations.length > 0, "At least one @PropertySource(value) location is required");
@@ -361,9 +363,7 @@ class ConfigurationClassParser {
 			try {
 				String resolvedLocation = this.environment.resolveRequiredPlaceholders(location);
 				Resource resource = this.resourceLoader.getResource(resolvedLocation);
-				ResourcePropertySource rps = (StringUtils.hasText(name) ?
-						new ResourcePropertySource(name, resource) : new ResourcePropertySource(resource));
-				addPropertySource(rps);
+				addPropertySource(createPropertySource(name, encoding, resource));
 			}
 			catch (IllegalArgumentException ex) {
 				// from resolveRequiredPlaceholders
@@ -377,6 +377,19 @@ class ConfigurationClassParser {
 					throw ex;
 				}
 			}
+		}
+	}
+
+	private ResourcePropertySource createPropertySource(String name, String encoding, Resource resource) throws IOException {
+		if (StringUtils.hasText(name)) {
+			return (StringUtils.hasText(encoding) ?
+					new ResourcePropertySource(name, new EncodedResource(resource, encoding)) :
+					new ResourcePropertySource(name, resource));
+		}
+		else {
+			return (StringUtils.hasText(encoding) ?
+					new ResourcePropertySource(new EncodedResource(resource, encoding)) :
+					new ResourcePropertySource(resource));
 		}
 	}
 
