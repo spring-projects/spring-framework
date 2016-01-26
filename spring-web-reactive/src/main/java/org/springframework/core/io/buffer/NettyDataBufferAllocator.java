@@ -61,18 +61,6 @@ public class NettyDataBufferAllocator implements DataBufferAllocator {
 	}
 
 	@Override
-	public NettyDataBuffer allocateHeapBuffer(int initialCapacity) {
-		ByteBuf byteBuf = this.byteBufAllocator.heapBuffer(initialCapacity);
-		return new NettyDataBuffer(byteBuf);
-	}
-
-	@Override
-	public NettyDataBuffer allocateDirectBuffer(int initialCapacity) {
-		ByteBuf byteBuf = this.byteBufAllocator.directBuffer(initialCapacity);
-		return new NettyDataBuffer(byteBuf);
-	}
-
-	@Override
 	public NettyDataBuffer wrap(ByteBuffer byteBuffer) {
 		ByteBuf byteBuf = Unpooled.wrappedBuffer(byteBuffer);
 		return new NettyDataBuffer(byteBuf);

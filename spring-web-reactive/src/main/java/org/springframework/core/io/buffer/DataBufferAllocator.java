@@ -43,20 +43,6 @@ public interface DataBufferAllocator {
 	DataBuffer allocateBuffer(int initialCapacity);
 
 	/**
-	 * Allocates a data buffer of the given initial capacity on the heap.
-	 * @param initialCapacity the initial capacity of the buffer to allocate
-	 * @return the allocated buffer
-	 */
-	DataBuffer allocateHeapBuffer(int initialCapacity);
-
-	/**
-	 * Allocates a direct data buffer of the given initial capacity.
-	 * @param initialCapacity the initial capacity of the buffer to allocate
-	 * @return the allocated buffer
-	 */
-	DataBuffer allocateDirectBuffer(int initialCapacity);
-
-	/**
 	 * Wraps the given {@link ByteBuffer} in a {@code DataBuffer}.
 	 * @param byteBuffer the NIO byte buffer to wrap
 	 * @return the wrapped buffer

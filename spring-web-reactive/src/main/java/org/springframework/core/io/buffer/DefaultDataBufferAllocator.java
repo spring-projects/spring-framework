@@ -57,18 +57,9 @@ public class DefaultDataBufferAllocator implements DataBufferAllocator {
 
 	@Override
 	public DefaultDataBuffer allocateBuffer(int initialCapacity) {
-		return preferDirect ? allocateDirectBuffer(initialCapacity) :
-				allocateHeapBuffer(initialCapacity);
-	}
-
-	@Override
-	public DefaultDataBuffer allocateHeapBuffer(int initialCapacity) {
-		return new DefaultDataBuffer(ByteBuffer.allocate(initialCapacity));
-	}
-
-	@Override
-	public DefaultDataBuffer allocateDirectBuffer(int initialCapacity) {
-		return new DefaultDataBuffer(ByteBuffer.allocateDirect(initialCapacity));
+		return this.preferDirect ?
+				new DefaultDataBuffer(ByteBuffer.allocateDirect(initialCapacity)) :
+				new DefaultDataBuffer(ByteBuffer.allocate(initialCapacity));
 	}
 
 	@Override

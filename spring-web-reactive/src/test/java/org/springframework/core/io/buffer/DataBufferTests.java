@@ -37,28 +37,23 @@ import static org.junit.Assert.assertEquals;
 @RunWith(Parameterized.class)
 public class DataBufferTests {
 
-	@Parameterized.Parameter(0)
+	@Parameterized.Parameter
 	public DataBufferAllocator allocator;
 
-	@Parameterized.Parameter(1)
-	public boolean direct;
-
-	@Parameterized.Parameters(name = "{0} - direct: {1}")
+	@Parameterized.Parameters(name = "{0}")
 	public static Object[][] buffers() {
 
 		return new Object[][]{
-				{new NettyDataBufferAllocator(new UnpooledByteBufAllocator(false)), true},
-				{new NettyDataBufferAllocator(new UnpooledByteBufAllocator(false)),
-						false},
-				{new NettyDataBufferAllocator(new PooledByteBufAllocator(false)), true},
-				{new NettyDataBufferAllocator(new PooledByteBufAllocator(false)), false},
+				{new NettyDataBufferAllocator(new UnpooledByteBufAllocator(true))},
+				{new NettyDataBufferAllocator(new UnpooledByteBufAllocator(false))},
+				{new NettyDataBufferAllocator(new PooledByteBufAllocator(true))},
+				{new NettyDataBufferAllocator(new PooledByteBufAllocator(false))},
 				{new DefaultDataBufferAllocator(), true},
 				{new DefaultDataBufferAllocator(), false}};
 	}
 
 	private DataBuffer createDataBuffer(int capacity) {
-		return direct ? allocator.allocateDirectBuffer(capacity) :
-				allocator.allocateHeapBuffer(capacity);
+		return allocator.allocateBuffer(capacity);
 	}
 
 	@Test
@@ -183,8 +178,7 @@ public class DataBufferTests {
 	}
 
 	private ByteBuffer createByteBuffer(int capacity) {
-		return direct ? ByteBuffer.allocateDirect(capacity) :
-				ByteBuffer.allocate(capacity);
+		return ByteBuffer.allocate(capacity);
 	}
 
 	@Test
