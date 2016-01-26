@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package org.springframework.reactive.codec.decoder;
+package org.springframework.core.codec.support;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.stream.StreamSupport;
 
+import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -28,7 +28,7 @@ import reactor.io.buffer.Buffer;
 import rx.Single;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.support.StringDecoder;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 
 import static java.util.stream.Collectors.toList;
@@ -38,9 +38,15 @@ import static org.junit.Assert.*;
  * @author Sebastien Deleuze
  * @author Brian Clozel
  */
-public class StringDecoderTests {
+public class StringDecoderTests extends AbstractAllocatingTestCase {
 
-	private final StringDecoder decoder = new StringDecoder();
+	private StringDecoder decoder;
+
+	@Before
+	public void createEncoder() {
+		decoder = new StringDecoder(allocator);
+	}
+
 
 	@Test
 	public void canDecode() {
@@ -51,7 +57,7 @@ public class StringDecoderTests {
 
 	@Test
 	public void decode() throws InterruptedException {
-		Flux<ByteBuffer> source = Flux.just(Buffer.wrap("foo").byteBuffer(), Buffer.wrap("bar").byteBuffer());
+		Flux<DataBuffer> source = Flux.just(stringBuffer("foo"), stringBuffer("bar"));
 		Flux<String> output = this.decoder.decode(source, ResolvableType.forClassWithGenerics(Flux.class, String.class), null);
 		List<String> results = StreamSupport.stream(output.toIterable().spliterator(), false).collect(toList());
 		assertEquals(1, results.size());
@@ -60,8 +66,8 @@ public class StringDecoderTests {
 
 	@Test
 	public void decodeDoNotBuffer() throws InterruptedException {
-		StringDecoder decoder = new StringDecoder(false);
-		Flux<ByteBuffer> source = Flux.just(Buffer.wrap("foo").byteBuffer(), Buffer.wrap("bar").byteBuffer());
+		StringDecoder decoder = new StringDecoder(allocator, false);
+		Flux<DataBuffer> source = Flux.just(stringBuffer("foo"), stringBuffer("bar"));
 		Flux<String> output = decoder.decode(source, ResolvableType.forClassWithGenerics(Flux.class, String.class), null);
 		List<String> results = StreamSupport.stream(output.toIterable().spliterator(), false).collect(toList());
 		assertEquals(2, results.size());
@@ -71,7 +77,7 @@ public class StringDecoderTests {
 
 	@Test
 	public void decodeMono() throws InterruptedException {
-		Flux<ByteBuffer> source = Flux.just(Buffer.wrap("foo").byteBuffer(), Buffer.wrap("bar").byteBuffer());
+		Flux<DataBuffer> source = Flux.just(stringBuffer("foo"), stringBuffer("bar"));
 		Mono<String> mono = Mono.from(this.decoder.decode(source,
 				ResolvableType.forClassWithGenerics(Mono.class, String.class),
 				MediaType.TEXT_PLAIN));
@@ -81,7 +87,7 @@ public class StringDecoderTests {
 
 	@Test
 	public void decodeSingle() throws InterruptedException {
-		Flux<ByteBuffer> source = Flux.just(Buffer.wrap("foo").byteBuffer(), Buffer.wrap("bar").byteBuffer());
+		Flux<DataBuffer> source = Flux.just(stringBuffer("foo"), stringBuffer("bar"));
 		Single<String> single = RxJava1SingleConverter.from(this.decoder.decode(source,
 				ResolvableType.forClassWithGenerics(Single.class, String.class),
 				MediaType.TEXT_PLAIN));

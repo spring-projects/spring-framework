@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.core.codec.support;
 
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -24,6 +23,8 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.util.MimeType;
 
 /**
@@ -32,13 +33,12 @@ import org.springframework.util.MimeType;
  * @author Sebastien Deleuze
  * @see StringDecoder
  */
-public class StringEncoder extends AbstractEncoder<String> {
+public class StringEncoder extends AbstractAllocatingEncoder<String> {
 
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-
-	public StringEncoder() {
-		super(new MimeType("text", "plain", DEFAULT_CHARSET));
+	public StringEncoder(DataBufferAllocator allocator) {
+		super(allocator, new MimeType("text", "plain", DEFAULT_CHARSET));
 	}
 
 
@@ -49,7 +49,7 @@ public class StringEncoder extends AbstractEncoder<String> {
 	}
 
 	@Override
-	public Flux<ByteBuffer> encode(Publisher<? extends String> elementStream,
+	public Flux<DataBuffer> encode(Publisher<? extends String> elementStream,
 			ResolvableType type, MimeType mimeType, Object... hints) {
 
 		Charset charset;
@@ -59,7 +59,12 @@ public class StringEncoder extends AbstractEncoder<String> {
 		else {
 			 charset = DEFAULT_CHARSET;
 		}
-		return Flux.from(elementStream).map(s -> ByteBuffer.wrap(s.getBytes(charset)));
+		return Flux.from(elementStream).map(s -> {
+			byte[] bytes = s.getBytes(charset);
+			DataBuffer dataBuffer = allocator().allocateBuffer(bytes.length);
+			dataBuffer.write(bytes);
+			return dataBuffer;
+		});
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,19 +17,19 @@
 package org.springframework.core.codec.support;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.io.buffer.Buffer;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.Encoder;
-import org.springframework.util.BufferOutputStream;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.util.MimeType;
 
 /**
@@ -38,50 +38,49 @@ import org.springframework.util.MimeType;
  * @author Sebastien Deleuze
  * @see JacksonJsonDecoder
  */
-public class JacksonJsonEncoder extends AbstractEncoder<Object> {
+public class JacksonJsonEncoder extends AbstractAllocatingEncoder<Object> {
 
 	private final ObjectMapper mapper;
 
-	private Encoder<ByteBuffer> postProcessor;
+	private Encoder<DataBuffer> postProcessor;
 
-
-	public JacksonJsonEncoder() {
-		this(new ObjectMapper(), null);
+	public JacksonJsonEncoder(DataBufferAllocator allocator) {
+		this(allocator, new ObjectMapper(), null);
 	}
 
-	public JacksonJsonEncoder(Encoder<ByteBuffer> postProcessor) {
-		this(new ObjectMapper(), postProcessor);
+	public JacksonJsonEncoder(DataBufferAllocator allocator,
+			Encoder<DataBuffer> postProcessor) {
+		this(allocator, new ObjectMapper(), postProcessor);
 	}
 
-
-	public JacksonJsonEncoder(ObjectMapper mapper, Encoder<ByteBuffer> postProcessor) {
-		super(new MimeType("application", "json", StandardCharsets.UTF_8),
+	public JacksonJsonEncoder(DataBufferAllocator allocator, ObjectMapper mapper,
+			Encoder<DataBuffer> postProcessor) {
+		super(allocator, new MimeType("application", "json", StandardCharsets.UTF_8),
 				new MimeType("application", "*+json", StandardCharsets.UTF_8));
 		this.mapper = mapper;
 		this.postProcessor = postProcessor;
 	}
 
 	@Override
-	public Flux<ByteBuffer> encode(Publisher<? extends Object> inputStream,
+	public Flux<DataBuffer> encode(Publisher<? extends Object> inputStream,
 			ResolvableType type, MimeType mimeType, Object... hints) {
 
-		Publisher<ByteBuffer> stream = (inputStream instanceof Mono ?
+		Publisher<DataBuffer> stream = (inputStream instanceof Mono ?
 				((Mono<?>)inputStream).map(this::serialize) :
 				Flux.from(inputStream).map(this::serialize));
 		return (this.postProcessor == null ? Flux.from(stream) : this.postProcessor.encode(stream, type, mimeType, hints));
 	}
 
-	private ByteBuffer serialize(Object value) {
-		Buffer buffer = new Buffer();
-		BufferOutputStream outputStream = new BufferOutputStream(buffer);
+	private DataBuffer serialize(Object value) {
+		DataBuffer buffer = allocator().allocateBuffer();
+		OutputStream outputStream = buffer.asOutputStream();
 		try {
 			this.mapper.writeValue(outputStream, value);
 		}
 		catch (IOException e) {
 			throw new CodecException("Error while writing the data", e);
 		}
-		buffer.flip();
-		return buffer.byteBuffer();
+		return buffer;
 	}
 
 }

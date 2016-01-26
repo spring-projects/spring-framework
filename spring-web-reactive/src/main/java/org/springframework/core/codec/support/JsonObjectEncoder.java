@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.core.codec.support;
 
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
@@ -27,9 +26,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.subscriber.SubscriberBarrier;
 import reactor.core.util.BackpressureUtils;
-import reactor.io.buffer.Buffer;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.util.MimeType;
 
 /**
@@ -42,25 +42,25 @@ import org.springframework.util.MimeType;
  *
  * @see JsonObjectDecoder
  */
-public class JsonObjectEncoder extends AbstractEncoder<ByteBuffer> {
+public class JsonObjectEncoder extends AbstractAllocatingEncoder<DataBuffer> {
 
-	public JsonObjectEncoder() {
-		super(new MimeType("application", "json", StandardCharsets.UTF_8),
+	public JsonObjectEncoder(DataBufferAllocator allocator) {
+		super(allocator, new MimeType("application", "json", StandardCharsets.UTF_8),
 				new MimeType("application", "*+json", StandardCharsets.UTF_8));
 	}
 
 	@Override
-	public Flux<ByteBuffer> encode(Publisher<? extends ByteBuffer> inputStream,
+	public Flux<DataBuffer> encode(Publisher<? extends DataBuffer> inputStream,
 			ResolvableType type, MimeType mimeType, Object... hints) {
-
 		if (inputStream instanceof Mono) {
 			return Flux.from(inputStream);
 		}
-		return Flux.from(inputStream).lift(s -> new JsonArrayEncoderBarrier(s));
+		return Flux.from(inputStream)
+				.lift(s -> new JsonArrayEncoderBarrier(s, allocator()));
 	}
 
-
-	private static class JsonArrayEncoderBarrier extends SubscriberBarrier<ByteBuffer, ByteBuffer> {
+	private static class JsonArrayEncoderBarrier
+			extends SubscriberBarrier<DataBuffer, DataBuffer> {
 
 		@SuppressWarnings("rawtypes")
 		static final AtomicLongFieldUpdater<JsonArrayEncoderBarrier> REQUESTED =
@@ -69,8 +69,9 @@ public class JsonObjectEncoder extends AbstractEncoder<ByteBuffer> {
 		static final AtomicIntegerFieldUpdater<JsonArrayEncoderBarrier> TERMINATED =
 				AtomicIntegerFieldUpdater.newUpdater(JsonArrayEncoderBarrier.class, "terminated");
 
+		private final DataBufferAllocator allocator;
 
-		private ByteBuffer prev = null;
+		private DataBuffer prev = null;
 
 		private long count = 0;
 
@@ -78,9 +79,10 @@ public class JsonObjectEncoder extends AbstractEncoder<ByteBuffer> {
 
 		private volatile int terminated;
 
-
-		public JsonArrayEncoderBarrier(Subscriber<? super ByteBuffer> subscriber) {
+		public JsonArrayEncoderBarrier(Subscriber<? super DataBuffer> subscriber,
+				DataBufferAllocator allocator) {
 			super(subscriber);
+			this.allocator = allocator;
 		}
 
 
@@ -96,34 +98,32 @@ public class JsonObjectEncoder extends AbstractEncoder<ByteBuffer> {
 		}
 
 		@Override
-		protected void doNext(ByteBuffer next) {
+		protected void doNext(DataBuffer next) {
 			this.count++;
 
-			ByteBuffer tmp = this.prev;
+			DataBuffer tmp = this.prev;
 			this.prev = next;
-			Buffer buffer = new Buffer();
+			DataBuffer buffer = allocator.allocateBuffer();
 			if (this.count == 1) {
-				buffer.append("[");
+				buffer.write((byte) '[');
 			}
 			if (tmp != null) {
-				buffer.append(tmp);
+				buffer.write(tmp);
 			}
 			if (this.count > 1) {
-				buffer.append(",");
+				buffer.write((byte) ',');
 			}
-			buffer.flip();
 
 			BackpressureUtils.getAndSub(REQUESTED, this, 1L);
-			subscriber.onNext(buffer.byteBuffer());
+			subscriber.onNext(buffer);
 		}
 
 		protected void drainLast(){
 			if(BackpressureUtils.getAndSub(REQUESTED, this, 1L) > 0) {
-				Buffer buffer = new Buffer();
-				buffer.append(this.prev);
-				buffer.append("]");
-				buffer.flip();
-				subscriber.onNext(buffer.byteBuffer());
+				DataBuffer buffer = allocator.allocateBuffer();
+				buffer.write(this.prev);
+				buffer.write((byte) ']');
+				subscriber.onNext(buffer);
 				super.doComplete();
 			}
 		}

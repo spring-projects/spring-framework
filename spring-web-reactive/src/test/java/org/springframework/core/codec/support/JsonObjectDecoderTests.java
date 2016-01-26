@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package org.springframework.reactive.codec.decoder;
+package org.springframework.core.codec.support;
 
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.StreamSupport;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
-import reactor.io.buffer.Buffer;
 
-import org.springframework.core.codec.support.JsonObjectDecoder;
+import org.springframework.core.io.buffer.DataBuffer;
 
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertEquals;
@@ -33,17 +31,16 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Sebastien Deleuze
  */
-public class JsonObjectDecoderTests {
+public class JsonObjectDecoderTests extends AbstractAllocatingTestCase {
+
 
 	@Test
 	public void decodeSingleChunkToJsonObject() throws InterruptedException {
-		JsonObjectDecoder decoder = new JsonObjectDecoder();
-		Flux<ByteBuffer> source = Flux.just(Buffer.wrap("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}").byteBuffer());
-		Flux<String> output = decoder.decode(source, null, null).map(chunk -> {
-			byte[] b = new byte[chunk.remaining()];
-			chunk.get(b);
-			return new String(b, StandardCharsets.UTF_8);
-		});
+		JsonObjectDecoder decoder = new JsonObjectDecoder(allocator);
+		Flux<DataBuffer> source =
+				Flux.just(stringBuffer("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"));
+		Flux<String> output =
+				decoder.decode(source, null, null).map(JsonObjectDecoderTests::toString);
 		List<Object> results = StreamSupport.stream(output.toIterable().spliterator(), false).collect(toList());
 		assertEquals(1, results.size());
 		assertEquals("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}", results.get(0));
@@ -51,13 +48,11 @@ public class JsonObjectDecoderTests {
 
 	@Test
 	public void decodeMultipleChunksToJsonObject() throws InterruptedException {
-		JsonObjectDecoder decoder = new JsonObjectDecoder();
-		Flux<ByteBuffer> source = Flux.just(Buffer.wrap("{\"foo\": \"foofoo\"").byteBuffer(), Buffer.wrap(", \"bar\": \"barbar\"}").byteBuffer());
-		Flux<String> output = decoder.decode(source, null, null).map(chunk -> {
-			byte[] b = new byte[chunk.remaining()];
-			chunk.get(b);
-			return new String(b, StandardCharsets.UTF_8);
-		});
+		JsonObjectDecoder decoder = new JsonObjectDecoder(allocator);
+		Flux<DataBuffer> source = Flux.just(stringBuffer("{\"foo\": \"foofoo\""),
+				stringBuffer(", \"bar\": \"barbar\"}"));
+		Flux<String> output =
+				decoder.decode(source, null, null).map(JsonObjectDecoderTests::toString);
 		List<String> results = StreamSupport.stream(output.toIterable().spliterator(), false).collect(toList());
 		assertEquals(1, results.size());
 		assertEquals("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}", results.get(0));
@@ -65,13 +60,12 @@ public class JsonObjectDecoderTests {
 
 	@Test
 	public void decodeSingleChunkToArray() throws InterruptedException {
-		JsonObjectDecoder decoder = new JsonObjectDecoder();
-		Flux<ByteBuffer> source = Flux.just(Buffer.wrap("[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]").byteBuffer());
-		Flux<String> output = decoder.decode(source, null, null).map(chunk -> {
-			byte[] b = new byte[chunk.remaining()];
-			chunk.get(b);
-			return new String(b, StandardCharsets.UTF_8);
-		});
+		JsonObjectDecoder decoder = new JsonObjectDecoder(allocator);
+		Flux<DataBuffer> source = Flux.just(stringBuffer(
+				"[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"));
+		Flux<String> output =
+				decoder.decode(source, null, null).map(JsonObjectDecoderTests::toString);
+
 		List<String> results = StreamSupport.stream(output.toIterable().spliterator(), false).collect(toList());
 		assertEquals(2, results.size());
 		assertEquals("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}", results.get(0));
@@ -80,17 +74,22 @@ public class JsonObjectDecoderTests {
 
 	@Test
 	public void decodeMultipleChunksToArray() throws InterruptedException {
-		JsonObjectDecoder decoder = new JsonObjectDecoder();
-		Flux<ByteBuffer> source = Flux.just(Buffer.wrap("[{\"foo\": \"foofoo\", \"bar\"").byteBuffer(), Buffer.wrap(": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]").byteBuffer());
-		Flux<String> output = decoder.decode(source, null, null).map(chunk -> {
-			byte[] b = new byte[chunk.remaining()];
-			chunk.get(b);
-			return new String(b, StandardCharsets.UTF_8);
-		});
+		JsonObjectDecoder decoder = new JsonObjectDecoder(allocator);
+		Flux<DataBuffer> source =
+				Flux.just(stringBuffer("[{\"foo\": \"foofoo\", \"bar\""), stringBuffer(
+						": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"));
+		Flux<String> output =
+				decoder.decode(source, null, null).map(JsonObjectDecoderTests::toString);
 		List<String> results = StreamSupport.stream(output.toIterable().spliterator(), false).collect(toList());
 		assertEquals(2, results.size());
 		assertEquals("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}", results.get(0));
 		assertEquals("{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}", results.get(1));
+	}
+
+	private static String toString(DataBuffer buffer) {
+		byte[] b = new byte[buffer.readableByteCount()];
+		buffer.read(b);
+		return new String(b, StandardCharsets.UTF_8);
 	}
 
 }

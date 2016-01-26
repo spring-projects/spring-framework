@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 package org.springframework.core.codec.support;
 
-import java.nio.ByteBuffer;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -27,12 +27,12 @@ import javax.xml.bind.Marshaller;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
-import reactor.io.buffer.Buffer;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.util.Assert;
-import org.springframework.util.BufferOutputStream;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
@@ -43,30 +43,29 @@ import org.springframework.util.MimeTypeUtils;
  * @author Sebastien Deleuze
  * @see Jaxb2Decoder
  */
-public class Jaxb2Encoder extends AbstractEncoder<Object> {
+public class Jaxb2Encoder extends AbstractAllocatingEncoder<Object> {
 
 	private final ConcurrentMap<Class<?>, JAXBContext> jaxbContexts = new ConcurrentHashMap<>(64);
 
-
-	public Jaxb2Encoder() {
-		super(MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML);
+	public Jaxb2Encoder(DataBufferAllocator allocator) {
+		super(allocator, MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML);
 	}
 
 
 	@Override
-	public Flux<ByteBuffer> encode(Publisher<? extends Object> messageStream, ResolvableType type,
+	public Flux<DataBuffer> encode(Publisher<? extends Object> messageStream,
+			ResolvableType type,
 			MimeType mimeType, Object... hints) {
 
 		return Flux.from(messageStream).map(value -> {
 			try {
-				Buffer buffer = new Buffer();
-				BufferOutputStream outputStream = new BufferOutputStream(buffer);
+				DataBuffer buffer = allocator().allocateBuffer(1024);
+				OutputStream outputStream = buffer.asOutputStream();
 				Class<?> clazz = ClassUtils.getUserClass(value);
 				Marshaller marshaller = createMarshaller(clazz);
 				marshaller.setProperty(Marshaller.JAXB_ENCODING, StandardCharsets.UTF_8.name());
 				marshaller.marshal(value, outputStream);
-				buffer.flip();
-				return buffer.byteBuffer();
+				return buffer;
 			}
 			catch (MarshalException ex) {
 				throw new CodecException("Could not marshal [" + value + "]: " + ex.getMessage(), ex);

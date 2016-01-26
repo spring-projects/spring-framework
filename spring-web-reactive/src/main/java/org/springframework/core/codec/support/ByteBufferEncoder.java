@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,17 +22,18 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
 /**
  * @author Sebastien Deleuze
  */
-public class ByteBufferEncoder extends AbstractEncoder<ByteBuffer> {
+public class ByteBufferEncoder extends AbstractAllocatingEncoder<ByteBuffer> {
 
-
-	public ByteBufferEncoder() {
-		super(MimeTypeUtils.ALL);
+	public ByteBufferEncoder(DataBufferAllocator allocator) {
+		super(allocator, MimeTypeUtils.ALL);
 	}
 
 
@@ -43,11 +44,16 @@ public class ByteBufferEncoder extends AbstractEncoder<ByteBuffer> {
 	}
 
 	@Override
-	public Flux<ByteBuffer> encode(Publisher<? extends ByteBuffer> inputStream, ResolvableType type,
+	public Flux<DataBuffer> encode(Publisher<? extends ByteBuffer> inputStream,
+			ResolvableType type,
 			MimeType mimeType, Object... hints) {
 
 		//noinspection unchecked
-		return Flux.from(inputStream);
+		return Flux.from(inputStream).map(byteBuffer -> {
+			DataBuffer dataBuffer = allocator().allocateBuffer(byteBuffer.remaining());
+			dataBuffer.write(byteBuffer);
+			return dataBuffer;
+		});
 	}
 
 }

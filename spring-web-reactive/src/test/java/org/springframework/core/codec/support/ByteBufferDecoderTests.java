@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.reactive.codec.decoder;
+package org.springframework.core.codec.support;
 
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -26,7 +26,7 @@ import reactor.core.publisher.Flux;
 import reactor.io.buffer.Buffer;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.support.ByteBufferDecoder;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 
 import static java.util.stream.Collectors.toList;
@@ -35,7 +35,7 @@ import static org.junit.Assert.*;
 /**
  * @author Sebastien Deleuze
  */
-public class ByteBufferDecoderTests {
+public class ByteBufferDecoderTests extends AbstractAllocatingTestCase {
 
 	private final ByteBufferDecoder decoder = new ByteBufferDecoder();
 
@@ -48,14 +48,25 @@ public class ByteBufferDecoderTests {
 
 	@Test
 	public void decode() throws InterruptedException {
-		ByteBuffer fooBuffer = Buffer.wrap("foo").byteBuffer();
-		ByteBuffer barBuffer = Buffer.wrap("bar").byteBuffer();
-		Flux<ByteBuffer> source = Flux.just(fooBuffer, barBuffer);
+		DataBuffer fooBuffer = stringBuffer("foo");
+		DataBuffer barBuffer = stringBuffer("bar");
+		Flux<DataBuffer> source = Flux.just(fooBuffer, barBuffer);
 		Flux<ByteBuffer> output = decoder.decode(source, ResolvableType.forClassWithGenerics(Publisher.class, ByteBuffer.class), null);
 		List<ByteBuffer> results = StreamSupport.stream(output.toIterable().spliterator(), false).collect(toList());
 		assertEquals(2, results.size());
-		assertEquals(fooBuffer, results.get(0));
-		assertEquals(barBuffer, results.get(1));
+
+		assertBufferEquals(fooBuffer, results.get(0));
+		assertBufferEquals(barBuffer, results.get(1));
+	}
+
+	public void assertBufferEquals(DataBuffer expected, ByteBuffer actual) {
+		byte[] byteBufferBytes = new byte[actual.remaining()];
+		actual.get(byteBufferBytes);
+
+		byte[] dataBufferBytes = new byte[expected.readableByteCount()];
+		expected.read(dataBufferBytes);
+
+		assertArrayEquals(dataBufferBytes, byteBufferBytes);
 	}
 
 }
