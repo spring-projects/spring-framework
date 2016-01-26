@@ -1254,6 +1254,7 @@ multiple requests are allowed to access a session concurrently.
   session attributes (e.g. user authentication object) as opposed to model
   attributes temporarily stored in the session as part of a controller workflow
   via `@SessionAttributes`.
+* `@RequestAttribute` annotated parameters for access to request attributes.
 * `HttpEntity<?>` parameters for access to the Servlet request HTTP headers and
   contents. The request stream will be converted to the entity body using
   ++HttpMessageConverter++s. See <<mvc-ann-httpentity>>.
@@ -1792,6 +1793,23 @@ For use cases that require adding or removing session attributes consider inject
 For temporary storage of model attributes in the session as part of a controller
 workflow consider using `SessionAttributes` as described in
 <<mvc-ann-sessionattrib>>.
+
+
+[[mvc-ann-requestattrib]]
+==== Using @RequestAttribute to access request attributes
+
+Similar to `@SessionAttribute` the `@RequestAttribute` annotation can be used to
+access pre-existing request attributes created by a filter or interceptor:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	@RequestMapping("/")
+	public String handle(**@RequestAttribute** Client client) {
+		// ...
+	}
+----
+
 
 
 

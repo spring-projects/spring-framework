@@ -25,29 +25,21 @@ import java.lang.annotation.Target;
 import org.springframework.core.annotation.AliasFor;
 
 /**
- * Annotation to bind a method parameter to a session attribute.
+ * Annotation to bind a method parameter to a request attribute.
  *
- * <p>The main motivation is to provide convenient access to existing, permanent
- * session attributes (e.g. user authentication object) with an optional/required
- * check and a cast to the target method parameter type.
- *
- * <p>For use cases that require adding or removing session attributes consider
- * injecting {@code org.springframework.web.context.request.WebRequest} or
- * {@code javax.servlet.http.HttpSession} into the controller method.
- *
- * <p>For temporary storage of model attributes in the session as part of the
- * workflow for a controller, consider using {@link SessionAttributes} instead.
+ * <p>The main motivation is to provide convenient access to request attributes
+ * from a controller method with an optional/required check and a cast to the
+ * target method parameter type.
  *
  * @author Rossen Stoyanchev
  * @since 4.3
  * @see RequestMapping
- * @see SessionAttributes
- * @see RequestAttribute
+ * @see SessionAttribute
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface SessionAttribute {
+public @interface RequestAttribute {
 
 	/**
 	 * Alias for {@link #name}.
@@ -56,18 +48,18 @@ public @interface SessionAttribute {
 	String value() default "";
 
 	/**
-	 * The name of the session attribute to bind to.
+	 * The name of the request attribute to bind to.
 	 * <p>The default name is inferred from the method parameter name.
 	 */
 	@AliasFor("value")
 	String name() default "";
 
 	/**
-	 * Whether the session attribute is required.
+	 * Whether the request attribute is required.
 	 * <p>Defaults to {@code true}, leading to an exception being thrown
-	 * if the attribute is missing in the session or there is no session.
-	 * Switch this to {@code false} if you prefer a {@code null} or Java 1.8+
-	 * {@code java.util.Optional} if the attribute doesn't exist.
+	 * if the attribute is missing. Switch this to {@code false} if you prefer
+	 * a {@code null} or Java 1.8+ {@code java.util.Optional} if the attribute
+	 * doesn't exist.
 	 */
 	boolean required() default true;
 

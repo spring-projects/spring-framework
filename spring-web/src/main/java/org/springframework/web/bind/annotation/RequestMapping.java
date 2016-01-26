@@ -130,6 +130,8 @@ import org.springframework.core.annotation.AliasFor;
  * to existing, permanent session attributes (e.g. user authentication object)
  * as opposed to model attributes temporarily stored in the session as part of
  * a controller workflow via {@link SessionAttributes}.
+ * <li>{@link RequestAttribute @RequestAttribute} annotated parameters for access
+ * to request attributes.
  * <li>{@link org.springframework.http.HttpEntity HttpEntity&lt;?&gt;} parameters
  * (Servlet-only) for access to the Servlet request HTTP headers and contents.
  * The request stream will be converted to the entity body using

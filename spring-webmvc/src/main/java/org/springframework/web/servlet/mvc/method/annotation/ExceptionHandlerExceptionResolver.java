@@ -292,6 +292,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 
 		// Annotation-based argument resolution
 		resolvers.add(new SessionAttributeMethodArgumentResolver());
+		resolvers.add(new RequestAttributeMethodArgumentResolver());
 
 		// Type-based argument resolution
 		resolvers.add(new ServletRequestMethodArgumentResolver());
