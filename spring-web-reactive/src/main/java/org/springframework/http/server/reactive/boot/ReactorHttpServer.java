@@ -1,11 +1,11 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright (c) 2011-2016 Pivotal Software Inc, All Rights Reserved.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *       http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -16,8 +16,8 @@
 
 package org.springframework.http.server.reactive.boot;
 
-import reactor.core.trait.Completable;
-import reactor.core.trait.Connectable;
+import reactor.core.graph.Connectable;
+import reactor.core.state.Completable;
 import reactor.io.buffer.Buffer;
 import reactor.io.net.ReactiveNet;
 
