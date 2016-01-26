@@ -262,6 +262,12 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 			this.returnType = ResolvableType.forType(super.getGenericParameterType()).getGeneric(0);
 		}
 
+		public ConcurrentResultMethodParameter(ConcurrentResultMethodParameter original) {
+			super(original);
+			this.returnValue = original.returnValue;
+			this.returnType = original.returnType;
+		}
+
 		@Override
 		public Class<?> getParameterType() {
 			if (this.returnValue != null) {
@@ -282,6 +288,11 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		@Override
 		public Type getGenericParameterType() {
 			return this.returnType.getType();
+		}
+
+		@Override
+		public ConcurrentResultMethodParameter clone() {
+			return new ConcurrentResultMethodParameter(this);
 		}
 	}
 

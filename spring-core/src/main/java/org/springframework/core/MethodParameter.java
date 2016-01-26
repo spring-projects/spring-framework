@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,17 +27,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 
 /**
- * Helper class that encapsulates the specification of a method parameter, i.e.
- * a {@link Method} or {@link Constructor} plus a parameter index and a nested
- * type index for a declared generic type. Useful as a specification object to
- * pass along.
+ * Helper class that encapsulates the specification of a method parameter, i.e. a {@link Method}
+ * or {@link Constructor} plus a parameter index and a nested type index for a declared generic
+ * type. Useful as a specification object to pass along.
  *
- * <p>As of 4.2, there is a {@link org.springframework.core.annotation.SynthesizingMethodParameter
- * SynthesizingMethodParameter} subclass available which synthesizes annotations
- * with attribute aliases. That subclass is used for web and message endpoint
- * processing, in particular.
+ * <p>As of 4.2, there is a {@link org.springframework.core.annotation.SynthesizingMethodParameter}
+ * subclass available which synthesizes annotations with attribute aliases. That subclass is used
+ * for web and message endpoint processing, in particular.
  *
  * @author Juergen Hoeller
  * @author Rob Harrop
@@ -48,6 +47,18 @@ import org.springframework.util.Assert;
  * @see org.springframework.core.annotation.SynthesizingMethodParameter
  */
 public class MethodParameter {
+
+	private static Class<?> javaUtilOptionalClass = null;
+
+	static {
+		try {
+			javaUtilOptionalClass = ClassUtils.forName("java.util.Optional", MethodParameter.class.getClassLoader());
+		}
+		catch (ClassNotFoundException ex) {
+			// Java 8 not available - Optional references simply not supported then.
+		}
+	}
+
 
 	private final Method method;
 
@@ -71,6 +82,8 @@ public class MethodParameter {
 	private volatile ParameterNameDiscoverer parameterNameDiscoverer;
 
 	private volatile String parameterName;
+
+	private volatile MethodParameter nestedMethodParameter;
 
 
 	/**
@@ -279,6 +292,44 @@ public class MethodParameter {
 		return this.typeIndexesPerLevel;
 	}
 
+	/**
+	 * Return a variant of this {@code MethodParameter} which points to the
+	 * same parameter but one nesting level deeper. This is effectively the
+	 * same as {@link #increaseNestingLevel()}, just with an independent
+	 * {@code MethodParameter} object (e.g. in case of the original being cached).
+	 * @since 4.3
+	 */
+	public MethodParameter nested() {
+		if (this.nestedMethodParameter != null) {
+			return this.nestedMethodParameter;
+		}
+		MethodParameter nestedParam = clone();
+		nestedParam.nestingLevel = this.nestingLevel + 1;
+		this.nestedMethodParameter = nestedParam;
+		return nestedParam;
+	}
+
+	/**
+	 * Return whether this method parameter is declared as optiona
+	 * in the form of Java 8's {@link java.util.Optional}.
+	 * @since 4.3
+	 */
+	public boolean isOptional() {
+		return (getParameterType() == javaUtilOptionalClass);
+	}
+
+	/**
+	 * Return a variant of this {@code MethodParameter} which points to
+	 * the same parameter but one nesting level deeper in case of a
+	 * {@link java.util.Optional} declaration.
+	 * @since 4.3
+	 * @see #isOptional()
+	 * @see #nested()
+	 */
+	public MethodParameter nestedIfOptional() {
+		return (isOptional() ? nested() : this);
+	}
+
 
 	/**
 	 * Set a containing class to resolve the parameter type against.
@@ -370,8 +421,8 @@ public class MethodParameter {
 	/**
 	 * Return the nested generic type of the method/constructor parameter.
 	 * @return the parameter type (never {@code null})
-	 * @see #getNestingLevel()
 	 * @since 4.2
+	 * @see #getNestingLevel()
 	 */
 	public Type getNestedGenericParameterType() {
 		if (this.nestingLevel > 1) {
@@ -524,6 +575,11 @@ public class MethodParameter {
 	@Override
 	public int hashCode() {
 		return (getMember().hashCode() * 31 + this.parameterIndex);
+	}
+
+	@Override
+	public MethodParameter clone() {
+		return new MethodParameter(this);
 	}
 
 

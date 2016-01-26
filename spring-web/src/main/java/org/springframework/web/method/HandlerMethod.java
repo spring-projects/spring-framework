@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -280,6 +280,10 @@ public class HandlerMethod {
 			super(HandlerMethod.this.bridgedMethod, index);
 		}
 
+		protected HandlerMethodParameter(HandlerMethodParameter original) {
+			super(original);
+		}
+
 		@Override
 		public Class<?> getContainingClass() {
 			return HandlerMethod.this.getBeanType();
@@ -288,6 +292,11 @@ public class HandlerMethod {
 		@Override
 		public <T extends Annotation> T getMethodAnnotation(Class<T> annotationType) {
 			return HandlerMethod.this.getMethodAnnotation(annotationType);
+		}
+
+		@Override
+		public HandlerMethodParameter clone() {
+			return new HandlerMethodParameter(this);
 		}
 	}
 
@@ -304,9 +313,19 @@ public class HandlerMethod {
 			this.returnValue = returnValue;
 		}
 
+		protected ReturnValueMethodParameter(ReturnValueMethodParameter original) {
+			super(original);
+			this.returnValue = original.returnValue;
+		}
+
 		@Override
 		public Class<?> getParameterType() {
 			return (this.returnValue != null ? this.returnValue.getClass() : super.getParameterType());
+		}
+
+		@Override
+		public ReturnValueMethodParameter clone() {
+			return new ReturnValueMethodParameter(this);
 		}
 	}
 

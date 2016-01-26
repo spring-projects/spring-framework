@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -272,6 +272,12 @@ public class InvocableHandlerMethod extends HandlerMethod {
 			this.returnType = ResolvableType.forType(super.getGenericParameterType()).getGeneric(0);
 		}
 
+		protected AsyncResultMethodParameter(AsyncResultMethodParameter original) {
+			super(original);
+			this.returnValue = original.returnValue;
+			this.returnType = original.returnType;
+		}
+
 		@Override
 		public Class<?> getParameterType() {
 			if (this.returnValue != null) {
@@ -286,6 +292,11 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		@Override
 		public Type getGenericParameterType() {
 			return this.returnType.getType();
+		}
+
+		@Override
+		public AsyncResultMethodParameter clone() {
+			return new AsyncResultMethodParameter(this);
 		}
 	}
 

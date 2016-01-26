@@ -79,7 +79,7 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 		if (!parameter.hasParameterAnnotation(PathVariable.class)) {
 			return false;
 		}
-		if (Map.class.isAssignableFrom(parameter.getParameterType())) {
+		if (Map.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType())) {
 			String paramName = parameter.getParameterAnnotation(PathVariable.class).value();
 			return StringUtils.hasText(paramName);
 		}
@@ -95,10 +95,9 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 	@Override
 	@SuppressWarnings("unchecked")
 	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
-		Map<String, String> uriTemplateVars =
-			(Map<String, String>) request.getAttribute(
-					HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
-		return (uriTemplateVars != null) ? uriTemplateVars.get(name) : null;
+		Map<String, String> uriTemplateVars = (Map<String, String>) request.getAttribute(
+				HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
+		return (uriTemplateVars != null ? uriTemplateVars.get(name) : null);
 	}
 
 	@Override
@@ -127,7 +126,7 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 	public void contributeMethodArgument(MethodParameter parameter, Object value,
 			UriComponentsBuilder builder, Map<String, Object> uriVariables, ConversionService conversionService) {
 
-		if (Map.class.isAssignableFrom(parameter.getParameterType())) {
+		if (Map.class.isAssignableFrom(parameter.getNestedParameterType())) {
 			return;
 		}
 

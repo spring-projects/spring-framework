@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,6 +44,10 @@ public class SynthesizingMethodParameter extends MethodParameter {
 		super(method, parameterIndex);
 	}
 
+	protected SynthesizingMethodParameter(SynthesizingMethodParameter original) {
+		super(original);
+	}
+
 
 	@Override
 	protected <A extends Annotation> A adaptAnnotation(A annotation) {
@@ -53,6 +57,12 @@ public class SynthesizingMethodParameter extends MethodParameter {
 	@Override
 	protected Annotation[] adaptAnnotationArray(Annotation[] annotations) {
 		return AnnotationUtils.synthesizeAnnotationArray(annotations, getAnnotatedElement());
+	}
+
+
+	@Override
+	public SynthesizingMethodParameter clone() {
+		return new SynthesizingMethodParameter(this);
 	}
 
 }

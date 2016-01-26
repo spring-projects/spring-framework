@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,24 +84,24 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 
 	@Override
 	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
-		Class<?> paramType = parameter.getParameterType();
 		NamedValueInfo namedValueInfo = getNamedValueInfo(parameter);
+		MethodParameter nestedParameter = parameter.nestedIfOptional();
 
-		Object arg = resolveArgumentInternal(parameter, message, namedValueInfo.name);
+		Object arg = resolveArgumentInternal(nestedParameter, message, namedValueInfo.name);
 		if (arg == null) {
 			if (namedValueInfo.defaultValue != null) {
 				arg = resolveDefaultValue(namedValueInfo.defaultValue);
 			}
-			else if (namedValueInfo.required && !parameter.getParameterType().getName().equals("java.util.Optional")) {
-				handleMissingValue(namedValueInfo.name, parameter, message);
+			else if (namedValueInfo.required && !nestedParameter.isOptional()) {
+				handleMissingValue(namedValueInfo.name, nestedParameter, message);
 			}
-			arg = handleNullValue(namedValueInfo.name, arg, paramType);
+			arg = handleNullValue(namedValueInfo.name, arg, nestedParameter.getNestedParameterType());
 		}
 		else if ("".equals(arg) && namedValueInfo.defaultValue != null) {
 			arg = resolveDefaultValue(namedValueInfo.defaultValue);
 		}
 
-		if (!ClassUtils.isAssignableValue(paramType, arg)) {
+		if (!ClassUtils.isAssignableValue(parameter.getParameterType(), arg)) {
 			arg = this.conversionService.convert(
 					arg, TypeDescriptor.valueOf(arg.getClass()), new TypeDescriptor(parameter));
 		}
