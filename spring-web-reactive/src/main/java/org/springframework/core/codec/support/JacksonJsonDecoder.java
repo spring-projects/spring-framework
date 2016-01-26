@@ -28,6 +28,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.support.DataBufferUtils;
 import org.springframework.util.MimeType;
 
 
@@ -70,9 +71,11 @@ public class JacksonJsonDecoder extends AbstractDecoder<Object> {
 			stream = this.preProcessor.decode(inputStream, type, mimeType, hints);
 		}
 
-		return stream.map(content -> {
+		return stream.map(dataBuffer -> {
 			try {
-				return reader.readValue(content.asInputStream());
+				Object value = reader.readValue(dataBuffer.asInputStream());
+				DataBufferUtils.release(dataBuffer);
+				return value;
 			}
 			catch (IOException e) {
 				throw new CodecException("Error while reading the data", e);

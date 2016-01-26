@@ -28,6 +28,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import org.springframework.core.io.buffer.support.DataBufferUtils;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
@@ -56,6 +58,10 @@ public class DataBufferTests {
 		return allocator.allocateBuffer(capacity);
 	}
 
+	private void release(DataBuffer... buffers) {
+		Arrays.stream(buffers).forEach(DataBufferUtils::release);
+	}
+
 	@Test
 	public void writeAndRead() {
 
@@ -72,6 +78,8 @@ public class DataBufferTests {
 		buffer.read(result);
 
 		assertArrayEquals(new byte[]{'b', 'c', 'd', 'e'}, result);
+
+		release(buffer);
 	}
 
 	@Test
@@ -103,6 +111,8 @@ public class DataBufferTests {
 		len = inputStream.read(bytes);
 		assertEquals(1, len);
 		assertArrayEquals(new byte[]{'e', (byte) 0}, bytes);
+
+		release(buffer);
 	}
 
 	@Test
@@ -118,6 +128,8 @@ public class DataBufferTests {
 		byte[] bytes = new byte[5];
 		buffer.read(bytes);
 		assertArrayEquals(new byte[]{'a', 'b', 'c', 'd', 'e'}, bytes);
+
+		release(buffer);
 	}
 
 	@Test
@@ -135,6 +147,8 @@ public class DataBufferTests {
 		result = new byte[2];
 		buffer.read(result);
 		assertArrayEquals(new byte[]{'c', 'd'}, result);
+
+		release(buffer);
 	}
 
 	@Test
@@ -156,6 +170,12 @@ public class DataBufferTests {
 		buffer1.read(result);
 
 		assertArrayEquals(new byte[]{'a', 'b', 'c', 'd'}, result);
+
+		release(buffer1);
+	}
+
+	private ByteBuffer createByteBuffer(int capacity) {
+		return ByteBuffer.allocate(capacity);
 	}
 
 	@Test
@@ -175,10 +195,8 @@ public class DataBufferTests {
 		buffer1.read(result);
 
 		assertArrayEquals(new byte[]{'a', 'b', 'c', 'd'}, result);
-	}
 
-	private ByteBuffer createByteBuffer(int capacity) {
-		return ByteBuffer.allocate(capacity);
+		release(buffer1);
 	}
 
 	@Test
@@ -194,6 +212,8 @@ public class DataBufferTests {
 		byte[] resultBytes = new byte[2];
 		buffer.read(resultBytes);
 		assertArrayEquals(new byte[]{'b', 'c'}, resultBytes);
+
+		release(buffer);
 
 	}
 

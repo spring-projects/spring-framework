@@ -30,6 +30,7 @@ import reactor.core.publisher.Flux;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.support.DataBufferUtils;
 import org.springframework.util.MimeType;
 
 /**
@@ -110,11 +111,13 @@ public class JsonObjectDecoder extends AbstractDecoder<DataBuffer> {
 				List<DataBuffer> chunks = new ArrayList<>();
 				if (this.input == null) {
 					this.input = Unpooled.copiedBuffer(b.asByteBuffer());
+					DataBufferUtils.release(b);
 					this.writerIndex = this.input.writerIndex();
 				}
 				else {
 					this.input = Unpooled.copiedBuffer(this.input,
 							Unpooled.copiedBuffer(b.asByteBuffer()));
+					DataBufferUtils.release(b);
 					this.writerIndex = this.input.writerIndex();
 				}
 				if (this.state == ST_CORRUPTED) {

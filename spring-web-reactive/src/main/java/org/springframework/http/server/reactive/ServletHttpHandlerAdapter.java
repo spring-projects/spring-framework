@@ -39,6 +39,7 @@ import reactor.core.util.BackpressureUtils;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
+import org.springframework.core.io.buffer.support.DataBufferUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 
@@ -361,7 +362,7 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 			}
 
 			private void releaseBuffer() {
-				// TODO: call PooledDataBuffer.release() when we it is introduced
+				DataBufferUtils.release(dataBuffer);
 				dataBuffer = null;
 			}
 

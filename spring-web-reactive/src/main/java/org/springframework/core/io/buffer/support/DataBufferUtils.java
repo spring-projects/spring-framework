@@ -35,6 +35,7 @@ import reactor.core.subscriber.SubscriberWithContext;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils2;
 
@@ -170,6 +171,18 @@ public abstract class DataBufferUtils {
 		});
 	}
 
+	/**
+	 * Releases the given data buffer, if it is a {@link PooledDataBuffer}.
+	 * @param dataBuffer the data buffer to release
+	 * @return {@code true} if the buffer was released; {@code false} otherwise.
+	 */
+	public static boolean release(DataBuffer dataBuffer) {
+		if (dataBuffer instanceof PooledDataBuffer) {
+			return ((PooledDataBuffer) dataBuffer).release();
+		}
+		return false;
+	}
+
 	private static class ReadableByteChannelConsumer
 			implements Consumer<SubscriberWithContext<DataBuffer, ReadableByteChannel>> {
 
@@ -199,7 +212,7 @@ public abstract class DataBufferUtils {
 					}
 					finally {
 						if (release) {
-							// TODO: release buffer when we have PooledDataBuffer
+							release(dataBuffer);
 						}
 					}
 				}

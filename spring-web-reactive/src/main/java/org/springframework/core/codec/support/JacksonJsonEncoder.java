@@ -18,6 +18,7 @@ package org.springframework.core.codec.support;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -43,6 +44,12 @@ public class JacksonJsonEncoder extends AbstractEncoder<Object> {
 
 	private final ObjectMapper mapper;
 
+	private static final ByteBuffer START_ARRAY_BUFFER = ByteBuffer.wrap(new byte[]{'['});
+
+	private static final ByteBuffer SEPARATOR_BUFFER = ByteBuffer.wrap(new byte[]{','});
+
+	private static final ByteBuffer END_ARRAY_BUFFER = ByteBuffer.wrap(new byte[]{']'});
+
 	public JacksonJsonEncoder() {
 		this(new ObjectMapper());
 	}
@@ -65,10 +72,10 @@ public class JacksonJsonEncoder extends AbstractEncoder<Object> {
 		}
 		else {
 			// array
-			Mono<DataBuffer> startArray = Mono.just(charBuffer('[', allocator));
+			Mono<DataBuffer> startArray = Mono.just(allocator.wrap(START_ARRAY_BUFFER));
 			Flux<DataBuffer> arraySeparators =
-					Flux.create(sub -> sub.onNext(charBuffer(',', allocator)));
-			Mono<DataBuffer> endArray = Mono.just(charBuffer(']', allocator));
+					Flux.create(sub -> sub.onNext(allocator.wrap(SEPARATOR_BUFFER)));
+			Mono<DataBuffer> endArray = Mono.just(allocator.wrap(END_ARRAY_BUFFER));
 
 			Flux<DataBuffer> serializedObjects =
 					Flux.from(inputStream).map(value -> serialize(value, allocator));
@@ -91,12 +98,6 @@ public class JacksonJsonEncoder extends AbstractEncoder<Object> {
 		catch (IOException e) {
 			throw new CodecException("Error while writing the data", e);
 		}
-		return buffer;
-	}
-
-	private DataBuffer charBuffer(char ch, DataBufferAllocator allocator) {
-		DataBuffer buffer = allocator.allocateBuffer(1);
-		buffer.write((byte) ch);
 		return buffer;
 	}
 

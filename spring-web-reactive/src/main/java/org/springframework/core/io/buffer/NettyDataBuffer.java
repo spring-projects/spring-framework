@@ -36,7 +36,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Arjen Poutsma
  */
-public class NettyDataBuffer implements DataBuffer {
+public class NettyDataBuffer implements PooledDataBuffer {
 
 	private final NettyDataBufferAllocator allocator;
 
@@ -179,6 +179,17 @@ public class NettyDataBuffer implements DataBuffer {
 	@Override
 	public OutputStream asOutputStream() {
 		return new ByteBufOutputStream(this.byteBuf);
+	}
+
+	@Override
+	public PooledDataBuffer retain() {
+		this.byteBuf.retain();
+		return this;
+	}
+
+	@Override
+	public boolean release() {
+		return this.byteBuf.release();
 	}
 
 	@Override
