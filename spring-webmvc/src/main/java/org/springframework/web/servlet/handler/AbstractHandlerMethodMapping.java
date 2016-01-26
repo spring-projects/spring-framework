@@ -153,6 +153,28 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		return this.mappingRegistry;
 	}
 
+	/**
+	 * Register the given mapping.
+	 * <p>This method may be invoked at runtime after initialization has completed.
+	 * @param mapping the mapping for the handler method
+	 * @param handler the handler
+	 * @param method the method
+	 */
+	public void registerMapping(T mapping, Object handler, Method method) {
+		this.mappingRegistry.register(mapping, handler, method);
+	}
+
+	/**
+	 * Un-register the given mapping.
+	 * <p>This method may be invoked at runtime after initialization has completed.
+	 * @param mapping the mapping to unregister
+	 */
+	public void unregisterMapping(T mapping) {
+		this.mappingRegistry.unregister(mapping);
+	}
+
+
+	// Handler method detection
 
 	/**
 	 * Detects handler methods at initialization.
@@ -197,13 +219,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	}
 
 	/**
-	 * Whether the given type is a handler with handler methods.
-	 * @param beanType the type of the bean being checked
-	 * @return "true" if this a handler type, "false" otherwise.
-	 */
-	protected abstract boolean isHandler(Class<?> beanType);
-
-	/**
 	 * Look for handler methods in a handler.
 	 * @param handler the bean name of a handler or a handler instance
 	 */
@@ -229,16 +244,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			registerHandlerMethod(handler, invocableMethod, mapping);
 		}
 	}
-
-	/**
-	 * Provide the mapping for a handler method. A method for which no
-	 * mapping can be provided is not a handler method.
-	 * @param method the method to provide a mapping for
-	 * @param handlerType the handler type, possibly a sub-type of the method's
-	 * declaring class
-	 * @return the mapping, or {@code null} if the method is not mapped
-	 */
-	protected abstract T getMappingForMethod(Method method, Class<?> handlerType);
 
 	/**
 	 * Register a handler method and its unique mapping. Invoked at startup for
@@ -273,11 +278,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	}
 
 	/**
-	 * Extract and return the URL paths contained in a mapping.
-	 */
-	protected abstract Set<String> getMappingPathPatterns(T mapping);
-
-	/**
 	 * Extract and return the CORS configuration for the mapping.
 	 */
 	protected CorsConfiguration initCorsConfiguration(Object handler, Method method, T mapping) {
@@ -291,25 +291,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	protected void handlerMethodsInitialized(Map<T, HandlerMethod> handlerMethods) {
 	}
 
-	/**
-	 * Register the given mapping.
-	 * <p>This method may be invoked at runtime after initialization has completed.
-	 * @param mapping the mapping for the handler method
-	 * @param handler the handler
-	 * @param method the method
-	 */
-	public void registerMapping(T mapping, Object handler, Method method) {
-		this.mappingRegistry.register(mapping, handler, method);
-	}
 
-	/**
-	 * Un-register the given mapping.
-	 * <p>This method may be invoked at runtime after initialization has completed.
-	 * @param mapping the mapping to unregister
-	 */
-	public void unregisterMapping(T mapping) {
-		this.mappingRegistry.unregister(mapping);
-	}
+	// Handler method lookup
 
 	/**
 	 * Look up a handler method for the given request.
@@ -396,23 +379,6 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	}
 
 	/**
-	 * Check if a mapping matches the current request and return a (potentially
-	 * new) mapping with conditions relevant to the current request.
-	 * @param mapping the mapping to get a match for
-	 * @param request the current HTTP servlet request
-	 * @return the match, or {@code null} if the mapping doesn't match
-	 */
-	protected abstract T getMatchingMapping(T mapping, HttpServletRequest request);
-
-	/**
-	 * Return a comparator for sorting matching mappings.
-	 * The returned comparator should sort 'better' matches higher.
-	 * @param request the current request
-	 * @return the comparator (never {@code null})
-	 */
-	protected abstract Comparator<T> getMappingComparator(HttpServletRequest request);
-
-	/**
 	 * Invoked when a matching mapping is found.
 	 * @param mapping the matching mapping
 	 * @param lookupPath mapping lookup path within the current servlet mapping
@@ -450,6 +416,48 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		}
 		return corsConfig;
 	}
+
+
+	// Abstract template methods
+
+	/**
+	 * Whether the given type is a handler with handler methods.
+	 * @param beanType the type of the bean being checked
+	 * @return "true" if this a handler type, "false" otherwise.
+	 */
+	protected abstract boolean isHandler(Class<?> beanType);
+
+	/**
+	 * Provide the mapping for a handler method. A method for which no
+	 * mapping can be provided is not a handler method.
+	 * @param method the method to provide a mapping for
+	 * @param handlerType the handler type, possibly a sub-type of the method's
+	 * declaring class
+	 * @return the mapping, or {@code null} if the method is not mapped
+	 */
+	protected abstract T getMappingForMethod(Method method, Class<?> handlerType);
+
+	/**
+	 * Extract and return the URL paths contained in a mapping.
+	 */
+	protected abstract Set<String> getMappingPathPatterns(T mapping);
+
+	/**
+	 * Check if a mapping matches the current request and return a (potentially
+	 * new) mapping with conditions relevant to the current request.
+	 * @param mapping the mapping to get a match for
+	 * @param request the current HTTP servlet request
+	 * @return the match, or {@code null} if the mapping doesn't match
+	 */
+	protected abstract T getMatchingMapping(T mapping, HttpServletRequest request);
+
+	/**
+	 * Return a comparator for sorting matching mappings.
+	 * The returned comparator should sort 'better' matches higher.
+	 * @param request the current request
+	 * @return the comparator (never {@code null})
+	 */
+	protected abstract Comparator<T> getMappingComparator(HttpServletRequest request);
 
 
 	/**
