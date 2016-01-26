@@ -56,8 +56,8 @@ public class JacksonJsonEncoderTests extends AbstractAllocatingTestCase {
 		});
 		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
 		testSubscriber.bindTo(output)
-				.assertValues("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}",
-							  "{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}");
+				.assertValues("[", "{\"foo\":\"foofoo\",\"bar\":\"barbar\"}", ",",
+						"{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}", "]");
 	}
 
 }

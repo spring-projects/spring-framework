@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Encoder;
@@ -55,7 +56,7 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
 
 	protected URI url;
 
-	protected Flux contentPublisher;
+	protected Publisher contentPublisher;
 
 	protected List<Encoder<?>> messageEncoders;
 
@@ -127,7 +128,7 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
 	}
 
 	public DefaultHttpRequestBuilder content(Object content) {
-		this.contentPublisher = Flux.just(content);
+		this.contentPublisher = Mono.just(content);
 		return this;
 	}
 

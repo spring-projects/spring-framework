@@ -40,7 +40,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.support.ByteBufferEncoder;
 import org.springframework.core.codec.support.JacksonJsonEncoder;
-import org.springframework.core.codec.support.JsonObjectEncoder;
 import org.springframework.core.codec.support.StringEncoder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
@@ -380,7 +379,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		@Bean
 		public ResponseBodyResultHandler responseBodyResultHandler() {
 			List<Encoder<?>> encoders = Arrays.asList(new ByteBufferEncoder(),
-					new StringEncoder(), new JacksonJsonEncoder(new JsonObjectEncoder()));
+					new StringEncoder(), new JacksonJsonEncoder());
 			ResponseBodyResultHandler resultHandler = new ResponseBodyResultHandler(encoders, conversionService());
 			resultHandler.setOrder(1);
 			return resultHandler;

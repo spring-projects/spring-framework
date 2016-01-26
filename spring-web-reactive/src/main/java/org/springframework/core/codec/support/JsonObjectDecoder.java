@@ -43,7 +43,6 @@ import org.springframework.util.MimeType;
  * Based on  <a href="https://github.com/netty/netty/blob/master/codec/src/main/java/io/netty/handler/codec/json/JsonObjectDecoder.java">Netty JsonObjectDecoder</a>
  *
  * @author Sebastien Deleuze
- * @see JsonObjectEncoder
  */
 public class JsonObjectDecoder extends AbstractDecoder<DataBuffer> {
 
@@ -74,7 +73,6 @@ public class JsonObjectDecoder extends AbstractDecoder<DataBuffer> {
 
 
 	/**
-	 * @param allocator
 	 * @param maxObjectLength maximum number of bytes a JSON object/array may
 	 * use (including braces and all). Objects exceeding this length are dropped
 	 * and an {@link IllegalStateException} is thrown.

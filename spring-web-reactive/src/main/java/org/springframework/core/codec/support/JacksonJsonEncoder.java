@@ -27,54 +27,59 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
-import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;
-import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
+import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
 /**
  * Encode from an {@code Object} stream to a byte stream of JSON objects.
  *
  * @author Sebastien Deleuze
+ * @author Arjen Poutsma
  * @see JacksonJsonDecoder
  */
 public class JacksonJsonEncoder extends AbstractEncoder<Object> {
 
 	private final ObjectMapper mapper;
 
-	private Encoder<DataBuffer> postProcessor;
-
 	public JacksonJsonEncoder() {
-		this(new ObjectMapper(), null);
+		this(new ObjectMapper());
 	}
 
-	public JacksonJsonEncoder(Encoder<DataBuffer> postProcessor) {
-		this(new ObjectMapper(), postProcessor);
-	}
-
-	public JacksonJsonEncoder(ObjectMapper mapper,
-			Encoder<DataBuffer> postProcessor) {
+	public JacksonJsonEncoder(ObjectMapper mapper) {
 		super(new MimeType("application", "json", StandardCharsets.UTF_8),
 				new MimeType("application", "*+json", StandardCharsets.UTF_8));
+		Assert.notNull(mapper, "'mapper' must not be null");
+
 		this.mapper = mapper;
-		this.postProcessor = postProcessor;
 	}
 
 	@Override
 	public Flux<DataBuffer> encode(Publisher<?> inputStream,
 			DataBufferAllocator allocator, ResolvableType type, MimeType mimeType,
 			Object... hints) {
+		if (inputStream instanceof Mono) {
+			// single object
+			return Flux.from(inputStream).map(value -> serialize(value, allocator));
+		}
+		else {
+			// array
+			Mono<DataBuffer> startArray = Mono.just(charBuffer('[', allocator));
+			Flux<DataBuffer> arraySeparators =
+					Flux.create(sub -> sub.onNext(charBuffer(',', allocator)));
+			Mono<DataBuffer> endArray = Mono.just(charBuffer(']', allocator));
 
-		Publisher<DataBuffer> stream = (inputStream instanceof Mono ?
-				((Mono<?>) inputStream).map(value -> serialize(value, allocator)) :
-				Flux.from(inputStream).map(value -> serialize(value, allocator)));
-		// TODO: figure out why using the parameter allocator for the postprocessor
-		// commits the response too early
-		DefaultDataBufferAllocator tempAllocator = new DefaultDataBufferAllocator();
+			Flux<DataBuffer> serializedObjects =
+					Flux.from(inputStream).map(value -> serialize(value, allocator));
 
-		return (this.postProcessor == null ? Flux.from(stream) :
-				this.postProcessor.encode(stream, tempAllocator, type, mimeType, hints));
+			Flux<DataBuffer> array = Flux.zip(serializedObjects, arraySeparators)
+					.flatMap(tuple -> Flux.just(tuple.getT1(), tuple.getT2()));
+
+			Flux<DataBuffer> arrayWithoutLastSeparator = Flux.from(array).skipLast(1);
+
+			return Flux.concat(startArray, arrayWithoutLastSeparator, endArray);
+		}
 	}
 
 	private DataBuffer serialize(Object value, DataBufferAllocator allocator) {
@@ -88,5 +93,12 @@ public class JacksonJsonEncoder extends AbstractEncoder<Object> {
 		}
 		return buffer;
 	}
+
+	private DataBuffer charBuffer(char ch, DataBufferAllocator allocator) {
+		DataBuffer buffer = allocator.allocateBuffer(1);
+		buffer.write((byte) ch);
+		return buffer;
+	}
+
 
 }
