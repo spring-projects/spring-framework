@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import javax.transaction.TransactionManager;
 
 import org.hibernate.HibernateException;
 import org.hibernate.MappingException;
+import org.hibernate.boot.registry.BootstrapServiceRegistryBuilder;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
@@ -106,6 +107,8 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	 * @param resourceLoader the ResourceLoader to load application classes from
 	 */
 	public LocalSessionFactoryBuilder(DataSource dataSource, ResourceLoader resourceLoader) {
+		super(new BootstrapServiceRegistryBuilder().applyClassLoader(resourceLoader.getClassLoader()).build());
+
 		getProperties().put(Environment.CURRENT_SESSION_CONTEXT_CLASS, SpringSessionContext.class.getName());
 		if (dataSource != null) {
 			getProperties().put(Environment.DATASOURCE, dataSource);
