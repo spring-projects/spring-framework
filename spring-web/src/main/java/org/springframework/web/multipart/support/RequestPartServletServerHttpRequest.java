@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
 import org.springframework.web.util.WebUtils;
 
-
 /**
  * {@link ServerHttpRequest} implementation that accesses one part of a multipart
  * request. If using {@link MultipartResolver} configuration the part is accessed
@@ -54,8 +53,8 @@ public class RequestPartServletServerHttpRequest extends ServletServerHttpReques
 
 
 	/**
-	 * Create a new instance.
-	 * @param request the current request
+	 * Create a new {@code RequestPartServletServerHttpRequest} instance.
+	 * @param request the current servlet request
 	 * @param partName the name of the part to adapt to the {@link ServerHttpRequest} contract
 	 * @throws MissingServletRequestPartException if the request part cannot be found
 	 * @throws IllegalArgumentException if MultipartHttpServletRequest cannot be initialized

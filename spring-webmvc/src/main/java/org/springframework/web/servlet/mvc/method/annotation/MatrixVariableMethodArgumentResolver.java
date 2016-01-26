@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,6 +48,7 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueMeth
 		super(null);
 	}
 
+
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		if (!parameter.hasParameterAnnotation(MatrixVariable.class)) {
@@ -67,13 +68,10 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueMeth
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
-
-		@SuppressWarnings("unchecked")
-		Map<String, MultiValueMap<String, String>> pathParameters =
-			(Map<String, MultiValueMap<String, String>>) request.getAttribute(
-					HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
-
+		Map<String, MultiValueMap<String, String>> pathParameters = (Map<String, MultiValueMap<String, String>>)
+				request.getAttribute(HandlerMapping.MATRIX_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
 		if (CollectionUtils.isEmpty(pathParameters)) {
 			return null;
 		}
@@ -95,7 +93,7 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueMeth
 						String paramType = parameter.getParameterType().getName();
 						throw new ServletRequestBindingException(
 								"Found more than one match for URI path parameter '" + name +
-								"' for parameter type [" + paramType + "]. Use pathVar attribute to disambiguate.");
+								"' for parameter type [" + paramType + "]. Use 'pathVar' attribute to disambiguate.");
 					}
 					paramValues.addAll(params.get(name));
 					found = true;
@@ -127,4 +125,5 @@ public class MatrixVariableMethodArgumentResolver extends AbstractNamedValueMeth
 			super(annotation.name(), annotation.required(), annotation.defaultValue());
 		}
 	}
+
 }

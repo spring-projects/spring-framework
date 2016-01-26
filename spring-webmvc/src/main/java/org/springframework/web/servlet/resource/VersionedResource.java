@@ -19,8 +19,8 @@ package org.springframework.web.servlet.resource;
 import org.springframework.core.io.Resource;
 
 /**
- * Interface for a resource descriptor that describes its version
- * with a version string that can be derived from its content and/or metadata.
+ * Interface for a resource descriptor that describes its version with a
+ * version string that can be derived from its content and/or metadata.
  *
  * @author Brian Clozel
  * @since 4.2.5
@@ -29,4 +29,5 @@ import org.springframework.core.io.Resource;
 public interface VersionedResource extends Resource {
 
 	String getVersion();
+
 }

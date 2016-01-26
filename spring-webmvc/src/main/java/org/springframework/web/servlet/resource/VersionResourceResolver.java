@@ -28,7 +28,6 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.io.AbstractResource;
@@ -238,6 +237,7 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		return null;
 	}
 
+
 	private class FileNameVersionedResource extends AbstractResource implements VersionedResource {
 
 		private final Resource original;
@@ -313,7 +313,6 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		public String getVersion() {
 			return this.version;
 		}
-
 	}
 
 }

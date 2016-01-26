@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,10 +87,10 @@ public class RequestParamMethodArgumentResolverTests {
 
 	private MockHttpServletRequest request;
 
+
 	@Before
 	public void setUp() throws Exception {
 		resolver = new RequestParamMethodArgumentResolver(null, true);
-
 		ParameterNameDiscoverer paramNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
 
 		Method method = getClass().getMethod("params", String.class, String[].class,
@@ -126,6 +126,7 @@ public class RequestParamMethodArgumentResolverTests {
 		webRequest = new ServletWebRequest(request, new MockHttpServletResponse());
 	}
 
+
 	@Test
 	public void supportsParameter() {
 		resolver = new RequestParamMethodArgumentResolver(null, true);
@@ -154,18 +155,16 @@ public class RequestParamMethodArgumentResolverTests {
 		request.addParameter("name", expected);
 
 		Object result = resolver.resolveArgument(paramNamedDefaultValueString, null, webRequest, null);
-
 		assertTrue(result instanceof String);
 		assertEquals("Invalid result", expected, result);
 	}
 
 	@Test
 	public void resolveStringArray() throws Exception {
-		String[] expected = new String[]{"foo", "bar"};
+		String[] expected = new String[] {"foo", "bar"};
 		request.addParameter("name", expected);
 
 		Object result = resolver.resolveArgument(paramNamedStringArray, null, webRequest, null);
-
 		assertTrue(result instanceof String[]);
 		assertArrayEquals("Invalid result", expected, (String[]) result);
 	}
@@ -178,7 +177,6 @@ public class RequestParamMethodArgumentResolverTests {
 		webRequest = new ServletWebRequest(request);
 
 		Object result = resolver.resolveArgument(paramMultipartFile, null, webRequest, null);
-
 		assertTrue(result instanceof MultipartFile);
 		assertEquals("Invalid result", expected, result);
 	}
@@ -193,7 +191,6 @@ public class RequestParamMethodArgumentResolverTests {
 		webRequest = new ServletWebRequest(request);
 
 		Object result = resolver.resolveArgument(paramMultipartFileList, null, webRequest, null);
-
 		assertTrue(result instanceof List);
 		assertEquals(Arrays.asList(expected1, expected2), result);
 	}
@@ -208,9 +205,9 @@ public class RequestParamMethodArgumentResolverTests {
 		webRequest = new ServletWebRequest(request);
 
 		Object result = resolver.resolveArgument(paramMultipartFileArray, null, webRequest, null);
-
 		assertTrue(result instanceof MultipartFile[]);
 		MultipartFile[] parts = (MultipartFile[]) result;
+		assertEquals(2, parts.length);
 		assertEquals(parts[0], expected1);
 		assertEquals(parts[1], expected2);
 	}
@@ -242,7 +239,6 @@ public class RequestParamMethodArgumentResolverTests {
 		webRequest = new ServletWebRequest(request);
 
 		Object result = resolver.resolveArgument(paramPartList, null, webRequest, null);
-
 		assertTrue(result instanceof List);
 		assertEquals(Arrays.asList(expected1, expected2), result);
 	}
@@ -259,9 +255,9 @@ public class RequestParamMethodArgumentResolverTests {
 		webRequest = new ServletWebRequest(request);
 
 		Object result = resolver.resolveArgument(paramPartArray, null, webRequest, null);
-
 		assertTrue(result instanceof Part[]);
 		Part[] parts = (Part[]) result;
+		assertEquals(2, parts.length);
 		assertEquals(parts[0], expected1);
 		assertEquals(parts[1], expected2);
 	}
@@ -274,7 +270,6 @@ public class RequestParamMethodArgumentResolverTests {
 		webRequest = new ServletWebRequest(request);
 
 		Object result = resolver.resolveArgument(paramMultipartFileNotAnnot, null, webRequest, null);
-
 		assertTrue(result instanceof MultipartFile);
 		assertEquals("Invalid result", expected, result);
 	}
@@ -289,7 +284,6 @@ public class RequestParamMethodArgumentResolverTests {
 		webRequest = new ServletWebRequest(request);
 
 		Object result = resolver.resolveArgument(paramMultipartFileListNotAnnot, null, webRequest, null);
-
 		assertTrue(result instanceof List);
 		assertEquals(Arrays.asList(expected1, expected2), result);
 	}
@@ -300,9 +294,7 @@ public class RequestParamMethodArgumentResolverTests {
 		fail("Expected exception: request is not a multipart request");
 	}
 
-	// SPR-9079
-
-	@Test
+	@Test  // SPR-9079
 	public void isMultipartRequestHttpPut() throws Exception {
 		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
 		MultipartFile expected = new MockMultipartFile("multipartFileList", "Hello World".getBytes());
@@ -311,7 +303,6 @@ public class RequestParamMethodArgumentResolverTests {
 		webRequest = new ServletWebRequest(request);
 
 		Object actual = resolver.resolveArgument(paramMultipartFileListNotAnnot, null, webRequest, null);
-
 		assertTrue(actual instanceof List);
 		assertEquals(expected, ((List<?>) actual).get(0));
 	}
@@ -334,7 +325,6 @@ public class RequestParamMethodArgumentResolverTests {
 		webRequest = new ServletWebRequest(request);
 
 		Object result = resolver.resolveArgument(paramPartNotAnnot, null, webRequest, null);
-
 		assertTrue(result instanceof Part);
 		assertEquals("Invalid result", expected, result);
 	}
@@ -342,7 +332,6 @@ public class RequestParamMethodArgumentResolverTests {
 	@Test
 	public void resolveDefaultValue() throws Exception {
 		Object result = resolver.resolveArgument(paramNamedDefaultValueString, null, webRequest, null);
-
 		assertTrue(result instanceof String);
 		assertEquals("Invalid result", "bar", result);
 	}
@@ -353,11 +342,8 @@ public class RequestParamMethodArgumentResolverTests {
 		fail("Expected exception");
 	}
 
-	// SPR-10578
-
-	@Test
+	@Test  // SPR-10578
 	public void missingRequestParamEmptyValueConvertedToNull() throws Exception {
-
 		WebDataBinder binder = new WebRequestDataBinder(null);
 		binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
 
@@ -367,13 +353,11 @@ public class RequestParamMethodArgumentResolverTests {
 		this.request.addParameter("stringNotAnnot", "");
 
 		Object arg = resolver.resolveArgument(paramStringNotAnnot, null, webRequest, binderFactory);
-
 		assertNull(arg);
 	}
 
 	@Test
 	public void missingRequestParamEmptyValueNotRequired() throws Exception {
-
 		WebDataBinder binder = new WebRequestDataBinder(null);
 		binder.registerCustomEditor(String.class, new StringTrimmerEditor(true));
 
@@ -383,7 +367,6 @@ public class RequestParamMethodArgumentResolverTests {
 		this.request.addParameter("name", "");
 
 		Object arg = resolver.resolveArgument(paramNotRequired, null, webRequest, binderFactory);
-
 		assertNull(arg);
 	}
 
@@ -396,17 +379,13 @@ public class RequestParamMethodArgumentResolverTests {
 		assertEquals("plainValue", result);
 	}
 
-	// SPR-8561
-
-	@Test
+	@Test  // SPR-8561
 	public void resolveSimpleTypeParamToNull() throws Exception {
 		Object result = resolver.resolveArgument(paramStringNotAnnot, null, webRequest, null);
 		assertNull(result);
 	}
 
-	// SPR-10180
-
-	@Test
+	@Test  // SPR-10180
 	public void resolveEmptyValueToDefault() throws Exception {
 		this.request.addParameter("name", "");
 		Object result = resolver.resolveArgument(paramNamedDefaultValueString, null, webRequest, null);
@@ -429,13 +408,12 @@ public class RequestParamMethodArgumentResolverTests {
 
 	@Test
 	@SuppressWarnings("rawtypes")
-	public void resolveOptional() throws Exception {
+	public void resolveOptionalParamValue() throws Exception {
 		ConfigurableWebBindingInitializer initializer = new ConfigurableWebBindingInitializer();
 		initializer.setConversionService(new DefaultConversionService());
 		WebDataBinderFactory binderFactory = new DefaultDataBinderFactory(initializer);
 
 		Object result = resolver.resolveArgument(paramOptional, null, webRequest, binderFactory);
-		assertEquals(Optional.class, result.getClass());
 		assertEquals(Optional.empty(), result);
 
 		this.request.addParameter("name", "123");
