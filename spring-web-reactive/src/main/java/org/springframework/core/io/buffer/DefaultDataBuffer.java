@@ -28,12 +28,9 @@ import org.springframework.util.ObjectUtils;
 
 /**
  * Default implementation of the {@link DataBuffer} interface that uses a {@link
- * ByteBuffer} internally, with separate read and write positions. Typically constructed
+ * ByteBuffer} internally, with separate read and write positions. Constructed
  * using the {@link DefaultDataBufferAllocator}.
  *
- * <p>This class is rather limited; consider using Netty's
- * {@link io.netty.buffer.ByteBuf} and {@link NettyDataBuffer} for a more comprehensive byte buffer.
-
  * @author Arjen Poutsma
  * @see DefaultDataBufferAllocator
  */

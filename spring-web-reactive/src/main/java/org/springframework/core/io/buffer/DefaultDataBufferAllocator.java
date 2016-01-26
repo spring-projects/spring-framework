@@ -21,9 +21,6 @@ import java.nio.ByteBuffer;
 /**
  * Default implementation of the {@code DataBufferAllocator} interface.
  *
- * <p>This class is rather limited; consider using Netty's
- * {@link io.netty.buffer.ByteBuf} and {@link NettyDataBuffer} for a more comprehensive
- * byte buffer.
  * @author Arjen Poutsma
  */
 public class DefaultDataBufferAllocator implements DataBufferAllocator {
@@ -70,7 +67,7 @@ public class DefaultDataBufferAllocator implements DataBufferAllocator {
 
 	@Override
 	public String toString() {
-		return "DefaultDataBufferFactory";
+		return "DefaultDataBufferFactory - preferDirect: " + this.preferDirect;
 	}
 
 }

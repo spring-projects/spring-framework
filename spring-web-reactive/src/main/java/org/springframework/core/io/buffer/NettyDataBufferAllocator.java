@@ -25,7 +25,7 @@ import io.netty.buffer.Unpooled;
 import org.springframework.util.Assert;
 
 /**
- * Implemtation of the {@code DataBufferAllocator} interface based on a Netty
+ * Implementation of the {@code DataBufferAllocator} interface based on a Netty
  * {@link ByteBufAllocator}.
  *
  * @author Arjen Poutsma

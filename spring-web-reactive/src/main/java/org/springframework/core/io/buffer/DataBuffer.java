@@ -23,9 +23,6 @@ import java.nio.ByteBuffer;
 /**
  * Basic abstraction over byte buffers.
  *
- * <p>Mainly for internal use within the framework; consider Netty's
- * {@link io.netty.buffer.ByteBuf} for a more comprehensive byte buffer.
- *
  * @author Arjen Poutsma
  */
 public interface DataBuffer {

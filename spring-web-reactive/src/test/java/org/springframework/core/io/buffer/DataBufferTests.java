@@ -48,8 +48,8 @@ public class DataBufferTests {
 				{new NettyDataBufferAllocator(new UnpooledByteBufAllocator(false))},
 				{new NettyDataBufferAllocator(new PooledByteBufAllocator(true))},
 				{new NettyDataBufferAllocator(new PooledByteBufAllocator(false))},
-				{new DefaultDataBufferAllocator(), true},
-				{new DefaultDataBufferAllocator(), false}};
+				{new DefaultDataBufferAllocator(true)},
+				{new DefaultDataBufferAllocator(false)}};
 	}
 
 	private DataBuffer createDataBuffer(int capacity) {

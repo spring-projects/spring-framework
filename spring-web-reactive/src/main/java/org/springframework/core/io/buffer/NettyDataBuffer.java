@@ -107,12 +107,9 @@ public class NettyDataBuffer implements DataBuffer {
 	public NettyDataBuffer write(DataBuffer... buffers) {
 		if (!ObjectUtils.isEmpty(buffers)) {
 			if (buffers[0] instanceof NettyDataBuffer) {
-				NettyDataBuffer[] copy =
-						Arrays.copyOf(buffers, buffers.length, NettyDataBuffer[].class);
-
-				ByteBuf[] nativeBuffers =
-						Arrays.stream(copy).map(NettyDataBuffer::getNativeBuffer)
-								.toArray(ByteBuf[]::new);
+				ByteBuf[] nativeBuffers = Arrays.stream(buffers)
+						.map(b -> ((NettyDataBuffer) b).getNativeBuffer())
+						.toArray(ByteBuf[]::new);
 
 				write(nativeBuffers);
 			}
@@ -149,7 +146,7 @@ public class NettyDataBuffer implements DataBuffer {
 				new CompositeByteBuf(this.byteBuf.alloc(), this.byteBuf.isDirect(),
 						byteBufs.length + 1);
 		composite.addComponent(this.byteBuf);
-		Arrays.stream(byteBufs).forEach(composite::addComponent);
+		composite.addComponents(byteBufs);
 
 		int writerIndex = this.byteBuf.readableBytes() +
 				Arrays.stream(byteBufs).mapToInt(ByteBuf::readableBytes).sum();
