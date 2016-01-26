@@ -109,7 +109,6 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 	}
 
 	@Override
-	@UsesJava8
 	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest request, WebDataBinderFactory binderFactory) throws Exception {
 
@@ -182,6 +181,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 	/**
 	 * Inner class to avoid hard-coded dependency on Java 8 Optional type...
 	 */
+	@UsesJava8
 	private static class OptionalResolver {
 
 		public static Object resolveValue(Object value) {
