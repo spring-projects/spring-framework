@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,14 +45,15 @@ import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
- * Provides methods to initialize the {@link Model} before controller method
- * invocation and to update it afterwards.
+ * Assist with initialization of the {@link Model} before controller method
+ * invocation and with updates to it after the invocation.
  *
- * <p>On initialization, the model is populated with attributes from the session
- * and by invoking methods annotated with {@code @ModelAttribute}.
+ * <p>On initialization the model is populated with attributes temporarily
+ * stored in the session and through the invocation of {@code @ModelAttribute}
+ * methods.
  *
- * <p>On update, model attributes are synchronized with the session and also
- * {@link BindingResult} attributes are added where missing.
+ * <p>On update model attributes are synchronized with the session and also
+ * {@link BindingResult} attributes are added if missing.
  *
  * @author Rossen Stoyanchev
  * @since 3.1
@@ -60,6 +61,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 public final class ModelFactory {
 
 	private static final Log logger = LogFactory.getLog(ModelFactory.class);
+
 
 	private final List<ModelMethod> modelMethods = new ArrayList<ModelMethod>();
 
@@ -70,21 +72,22 @@ public final class ModelFactory {
 
 	/**
 	 * Create a new instance with the given {@code @ModelAttribute} methods.
-	 * @param invocableMethods the {@code @ModelAttribute} methods to invoke
-	 * @param dataBinderFactory for preparation of {@link BindingResult} attributes
-	 * @param sessionAttributesHandler for access to session attributes
+	 * @param handlerMethods the {@code @ModelAttribute} methods to invoke
+	 * @param binderFactory for preparation of {@link BindingResult} attributes
+	 * @param attributeHandler for access to session attributes
 	 */
-	public ModelFactory(List<InvocableHandlerMethod> invocableMethods, WebDataBinderFactory dataBinderFactory,
-			SessionAttributesHandler sessionAttributesHandler) {
+	public ModelFactory(List<InvocableHandlerMethod> handlerMethods,
+			WebDataBinderFactory binderFactory, SessionAttributesHandler attributeHandler) {
 
-		if (invocableMethods != null) {
-			for (InvocableHandlerMethod method : invocableMethods) {
-				this.modelMethods.add(new ModelMethod(method));
+		if (handlerMethods != null) {
+			for (InvocableHandlerMethod handlerMethod : handlerMethods) {
+				this.modelMethods.add(new ModelMethod(handlerMethod));
 			}
 		}
-		this.dataBinderFactory = dataBinderFactory;
-		this.sessionAttributesHandler = sessionAttributesHandler;
+		this.dataBinderFactory = binderFactory;
+		this.sessionAttributesHandler = attributeHandler;
 	}
+
 
 	/**
 	 * Populate the model in the following order:
@@ -96,25 +99,26 @@ public final class ModelFactory {
 	 * 	an exception if necessary.
 	 * </ol>
 	 * @param request the current request
-	 * @param mavContainer a container with the model to be initialized
+	 * @param container a container with the model to be initialized
 	 * @param handlerMethod the method for which the model is initialized
 	 * @throws Exception may arise from {@code @ModelAttribute} methods
 	 */
-	public void initModel(NativeWebRequest request, ModelAndViewContainer mavContainer, HandlerMethod handlerMethod)
-			throws Exception {
+	public void initModel(NativeWebRequest request, ModelAndViewContainer container,
+			HandlerMethod handlerMethod) throws Exception {
 
 		Map<String, ?> sessionAttributes = this.sessionAttributesHandler.retrieveAttributes(request);
-		mavContainer.mergeAttributes(sessionAttributes);
+		container.mergeAttributes(sessionAttributes);
 
-		invokeModelAttributeMethods(request, mavContainer);
+		invokeModelAttributeMethods(request, container);
 
 		for (String name : findSessionAttributeArguments(handlerMethod)) {
-			if (!mavContainer.containsAttribute(name)) {
+			if (!container.containsAttribute(name)) {
 				Object value = this.sessionAttributesHandler.retrieveAttribute(request, name);
 				if (value == null) {
-					throw new HttpSessionRequiredException("Expected session attribute '" + name + "'");
+					throw new HttpSessionRequiredException(
+							"Expected session attribute '" + name + "'");
 				}
-				mavContainer.addAttribute(name, value);
+				container.addAttribute(name, value);
 			}
 		}
 	}
@@ -123,30 +127,31 @@ public final class ModelFactory {
 	 * Invoke model attribute methods to populate the model.
 	 * Attributes are added only if not already present in the model.
 	 */
-	private void invokeModelAttributeMethods(NativeWebRequest request, ModelAndViewContainer mavContainer)
-			throws Exception {
+	private void invokeModelAttributeMethods(NativeWebRequest request,
+			ModelAndViewContainer container) throws Exception {
 
 		while (!this.modelMethods.isEmpty()) {
-			InvocableHandlerMethod attrMethod = getNextModelMethod(mavContainer).getHandlerMethod();
-			String modelName = attrMethod.getMethodAnnotation(ModelAttribute.class).value();
-			if (mavContainer.containsAttribute(modelName)) {
+			InvocableHandlerMethod modelMethod = getNextModelMethod(container).getHandlerMethod();
+			ModelAttribute annot = modelMethod.getMethodAnnotation(ModelAttribute.class);
+			String modelName = annot.value();
+			if (container.containsAttribute(modelName)) {
 				continue;
 			}
 
-			Object returnValue = attrMethod.invokeForRequest(request, mavContainer);
+			Object returnValue = modelMethod.invokeForRequest(request, container);
 
-			if (!attrMethod.isVoid()){
-				String returnValueName = getNameForReturnValue(returnValue, attrMethod.getReturnType());
-				if (!mavContainer.containsAttribute(returnValueName)) {
-					mavContainer.addAttribute(returnValueName, returnValue);
+			if (!modelMethod.isVoid()){
+				String returnValueName = getNameForReturnValue(returnValue, modelMethod.getReturnType());
+				if (!container.containsAttribute(returnValueName)) {
+					container.addAttribute(returnValueName, returnValue);
 				}
 			}
 		}
 	}
 
-	private ModelMethod getNextModelMethod(ModelAndViewContainer mavContainer) {
+	private ModelMethod getNextModelMethod(ModelAndViewContainer container) {
 		for (ModelMethod modelMethod : this.modelMethods) {
-			if (modelMethod.checkDependencies(mavContainer)) {
+			if (modelMethod.checkDependencies(container)) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Selected @ModelAttribute method " + modelMethod);
 				}
@@ -157,7 +162,7 @@ public final class ModelFactory {
 		ModelMethod modelMethod = this.modelMethods.get(0);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Selected @ModelAttribute method (not present: " +
-					modelMethod.getUnresolvedDependencies(mavContainer)+ ") " + modelMethod);
+					modelMethod.getUnresolvedDependencies(container)+ ") " + modelMethod);
 		}
 		this.modelMethods.remove(modelMethod);
 		return modelMethod;
@@ -171,7 +176,8 @@ public final class ModelFactory {
 		for (MethodParameter parameter : handlerMethod.getMethodParameters()) {
 			if (parameter.hasParameterAnnotation(ModelAttribute.class)) {
 				String name = getNameForParameter(parameter);
-				if (this.sessionAttributesHandler.isHandlerSessionAttribute(name, parameter.getParameterType())) {
+				Class<?> paramType = parameter.getParameterType();
+				if (this.sessionAttributesHandler.isHandlerSessionAttribute(name, paramType)) {
 					result.add(name);
 				}
 			}
@@ -189,8 +195,8 @@ public final class ModelFactory {
 	 */
 	public static String getNameForParameter(MethodParameter parameter) {
 		ModelAttribute annot = parameter.getParameterAnnotation(ModelAttribute.class);
-		String attrName = (annot != null) ? annot.value() : null;
-		return StringUtils.hasText(attrName) ? attrName :  Conventions.getVariableNameForParameter(parameter);
+		String name = (annot != null) ? annot.value() : null;
+		return StringUtils.hasText(name) ? name : Conventions.getVariableNameForParameter(parameter);
 	}
 
 	/**
@@ -211,7 +217,8 @@ public final class ModelFactory {
 		}
 		else {
 			Method method = returnType.getMethod();
-			Class<?> resolvedType = GenericTypeResolver.resolveReturnType(method, returnType.getContainingClass());
+			Class<?> containingClass = returnType.getContainingClass();
+			Class<?> resolvedType = GenericTypeResolver.resolveReturnType(method, containingClass);
 			return Conventions.getVariableNameForReturnType(method, resolvedType, returnValue);
 		}
 	}
@@ -220,18 +227,18 @@ public final class ModelFactory {
 	 * Promote model attributes listed as {@code @SessionAttributes} to the session.
 	 * Add {@link BindingResult} attributes where necessary.
 	 * @param request the current request
-	 * @param mavContainer contains the model to update
+	 * @param container contains the model to update
 	 * @throws Exception if creating BindingResult attributes fails
 	 */
-	public void updateModel(NativeWebRequest request, ModelAndViewContainer mavContainer) throws Exception {
-		ModelMap defaultModel = mavContainer.getDefaultModel();
-		if (mavContainer.getSessionStatus().isComplete()){
+	public void updateModel(NativeWebRequest request, ModelAndViewContainer container) throws Exception {
+		ModelMap defaultModel = container.getDefaultModel();
+		if (container.getSessionStatus().isComplete()){
 			this.sessionAttributesHandler.cleanupAttributes(request);
 		}
 		else {
 			this.sessionAttributesHandler.storeAttributes(request, defaultModel);
 		}
-		if (!mavContainer.isRequestHandled() && mavContainer.getModel() == defaultModel) {
+		if (!container.isRequestHandled() && container.getModel() == defaultModel) {
 			updateBindingResult(request, defaultModel);
 		}
 	}
@@ -248,7 +255,7 @@ public final class ModelFactory {
 				String bindingResultKey = BindingResult.MODEL_KEY_PREFIX + name;
 
 				if (!model.containsAttribute(bindingResultKey)) {
-					WebDataBinder dataBinder = dataBinderFactory.createBinder(request, value, name);
+					WebDataBinder dataBinder = this.dataBinderFactory.createBinder(request, value, name);
 					model.put(bindingResultKey, dataBinder.getBindingResult());
 				}
 			}
