@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ import javax.servlet.http.Part;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -157,14 +156,12 @@ public class RequestPartMethodArgumentResolverTests {
 	@Test
 	public void resolveMultipartFile() throws Exception {
 		Object actual = resolver.resolveArgument(paramMultipartFile, null, webRequest, null);
-		assertNotNull(actual);
 		assertSame(multipartFile1, actual);
 	}
 
 	@Test
 	public void resolveMultipartFileList() throws Exception {
 		Object actual = resolver.resolveArgument(paramMultipartFileList, null, webRequest, null);
-		assertNotNull(actual);
 		assertTrue(actual instanceof List);
 		assertEquals(Arrays.asList(multipartFile1, multipartFile2), actual);
 	}
@@ -175,6 +172,7 @@ public class RequestPartMethodArgumentResolverTests {
 		assertNotNull(actual);
 		assertTrue(actual instanceof MultipartFile[]);
 		MultipartFile[] parts = (MultipartFile[]) actual;
+		assertEquals(2, parts.length);
 		assertEquals(parts[0], multipartFile1);
 		assertEquals(parts[1], multipartFile2);
 	}
@@ -202,7 +200,6 @@ public class RequestPartMethodArgumentResolverTests {
 		webRequest = new ServletWebRequest(request);
 
 		Object result = resolver.resolveArgument(paramPart, null, webRequest, null);
-
 		assertTrue(result instanceof Part);
 		assertEquals("Invalid result", expected, result);
 	}
@@ -219,7 +216,6 @@ public class RequestPartMethodArgumentResolverTests {
 		webRequest = new ServletWebRequest(request);
 
 		Object result = resolver.resolveArgument(paramPartList, null, webRequest, null);
-
 		assertTrue(result instanceof List);
 		assertEquals(Arrays.asList(part1, part2), result);
 	}
@@ -236,10 +232,9 @@ public class RequestPartMethodArgumentResolverTests {
 		webRequest = new ServletWebRequest(request);
 
 		Object result = resolver.resolveArgument(paramPartArray, null, webRequest, null);
-
 		assertTrue(result instanceof Part[]);
 		Part[] parts = (Part[]) result;
-		assertThat(parts, Matchers.arrayWithSize(2));
+		assertEquals(2, parts.length);
 		assertEquals(parts[0], part1);
 		assertEquals(parts[1], part2);
 	}
@@ -302,8 +297,8 @@ public class RequestPartMethodArgumentResolverTests {
 	@Test  // SPR-9079
 	public void isMultipartRequestPut() throws Exception {
 		this.multipartRequest.setMethod("PUT");
-		Object actual = resolver.resolveArgument(paramMultipartFile, null, webRequest, null);
-		assertSame(multipartFile1, actual);
+		Object actualValue = resolver.resolveArgument(paramMultipartFile, null, webRequest, null);
+		assertSame(multipartFile1, actualValue);
 	}
 
 	@Test
@@ -313,10 +308,13 @@ public class RequestPartMethodArgumentResolverTests {
 		request.addFile(expected);
 		webRequest = new ServletWebRequest(request);
 
-		Object result = resolver.resolveArgument(optionalMultipartFile, null, webRequest, null);
+		Object actualValue = resolver.resolveArgument(optionalMultipartFile, null, webRequest, null);
+		assertTrue(actualValue instanceof Optional);
+		assertEquals("Invalid result", expected, ((Optional) actualValue).get());
 
-		assertTrue(result instanceof Optional);
-		assertEquals("Invalid result", expected, ((Optional) result).get());
+		actualValue = resolver.resolveArgument(optionalMultipartFile, null, webRequest, null);
+		assertTrue(actualValue instanceof Optional);
+		assertEquals("Invalid result", expected, ((Optional) actualValue).get());
 	}
 
 	@Test
@@ -324,10 +322,11 @@ public class RequestPartMethodArgumentResolverTests {
 		MockMultipartHttpServletRequest request = new MockMultipartHttpServletRequest();
 		webRequest = new ServletWebRequest(request);
 
-		Object result = resolver.resolveArgument(optionalMultipartFile, null, webRequest, null);
+		Object actualValue = resolver.resolveArgument(optionalMultipartFile, null, webRequest, null);
+		assertEquals("Invalid argument value", Optional.empty(), actualValue);
 
-		assertTrue(result instanceof Optional);
-		assertFalse("Invalid result", ((Optional) result).isPresent());
+		actualValue = resolver.resolveArgument(optionalMultipartFile, null, webRequest, null);
+		assertEquals("Invalid argument value", Optional.empty(), actualValue);
 	}
 
 	@Test
@@ -339,10 +338,13 @@ public class RequestPartMethodArgumentResolverTests {
 		request.addPart(expected);
 		webRequest = new ServletWebRequest(request);
 
-		Object result = resolver.resolveArgument(optionalPart, null, webRequest, null);
+		Object actualValue = resolver.resolveArgument(optionalPart, null, webRequest, null);
+		assertTrue(actualValue instanceof Optional);
+		assertEquals("Invalid result", expected, ((Optional) actualValue).get());
 
-		assertTrue(result instanceof Optional);
-		assertEquals("Invalid result", expected, ((Optional) result).get());
+		actualValue = resolver.resolveArgument(optionalPart, null, webRequest, null);
+		assertTrue(actualValue instanceof Optional);
+		assertEquals("Invalid result", expected, ((Optional) actualValue).get());
 	}
 
 	@Test
@@ -352,22 +354,26 @@ public class RequestPartMethodArgumentResolverTests {
 		request.setContentType("multipart/form-data");
 		webRequest = new ServletWebRequest(request);
 
-		Object result = resolver.resolveArgument(optionalPart, null, webRequest, null);
+		Object actualValue = resolver.resolveArgument(optionalPart, null, webRequest, null);
+		assertEquals("Invalid argument value", Optional.empty(), actualValue);
 
-		assertTrue(result instanceof Optional);
-		assertFalse("Invalid result", ((Optional) result).isPresent());
+		actualValue = resolver.resolveArgument(optionalPart, null, webRequest, null);
+		assertEquals("Invalid argument value", Optional.empty(), actualValue);
 	}
 
 	@Test
 	public void resolveOptionalRequestPart() throws Exception {
 		SimpleBean simpleBean = new SimpleBean("foo");
-
 		given(messageConverter.canRead(SimpleBean.class, MediaType.TEXT_PLAIN)).willReturn(true);
 		given(messageConverter.read(eq(SimpleBean.class), isA(HttpInputMessage.class))).willReturn(simpleBean);
 
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
-		Object actualValue = resolver.resolveArgument(optionalRequestPart, mavContainer, webRequest, new ValidatingBinderFactory());
 
+		Object actualValue = resolver.resolveArgument(optionalRequestPart, mavContainer, webRequest, new ValidatingBinderFactory());
+		assertEquals("Invalid argument value", Optional.of(simpleBean), actualValue);
+		assertFalse("The requestHandled flag shouldn't change", mavContainer.isRequestHandled());
+
+		actualValue = resolver.resolveArgument(optionalRequestPart, mavContainer, webRequest, new ValidatingBinderFactory());
 		assertEquals("Invalid argument value", Optional.of(simpleBean), actualValue);
 		assertFalse("The requestHandled flag shouldn't change", mavContainer.isRequestHandled());
 	}
@@ -378,8 +384,12 @@ public class RequestPartMethodArgumentResolverTests {
 		given(messageConverter.read(eq(SimpleBean.class), isA(RequestPartServletServerHttpRequest.class))).willReturn(null);
 
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
-		Object actualValue = resolver.resolveArgument(optionalRequestPart, mavContainer, webRequest, new ValidatingBinderFactory());
 
+		Object actualValue = resolver.resolveArgument(optionalRequestPart, mavContainer, webRequest, new ValidatingBinderFactory());
+		assertEquals("Invalid argument value", Optional.empty(), actualValue);
+		assertFalse("The requestHandled flag shouldn't change", mavContainer.isRequestHandled());
+
+		actualValue = resolver.resolveArgument(optionalRequestPart, mavContainer, webRequest, new ValidatingBinderFactory());
 		assertEquals("Invalid argument value", Optional.empty(), actualValue);
 		assertFalse("The requestHandled flag shouldn't change", mavContainer.isRequestHandled());
 	}
@@ -390,8 +400,8 @@ public class RequestPartMethodArgumentResolverTests {
 		given(messageConverter.read(eq(SimpleBean.class), isA(HttpInputMessage.class))).willReturn(argValue);
 
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
-		Object actualValue = resolver.resolveArgument(parameter, mavContainer, webRequest, new ValidatingBinderFactory());
 
+		Object actualValue = resolver.resolveArgument(parameter, mavContainer, webRequest, new ValidatingBinderFactory());
 		assertEquals("Invalid argument value", argValue, actualValue);
 		assertFalse("The requestHandled flag shouldn't change", mavContainer.isRequestHandled());
 	}
@@ -425,22 +435,24 @@ public class RequestPartMethodArgumentResolverTests {
 		}
 	}
 
+
 	@SuppressWarnings("unused")
-	public void handle(@RequestPart SimpleBean requestPart,
-					   @RequestPart(value="requestPart", required=false) SimpleBean namedRequestPart,
-					   @Valid @RequestPart("requestPart") SimpleBean validRequestPart,
-					   @RequestPart("requestPart") MultipartFile multipartFile,
-					   @RequestPart("requestPart") List<MultipartFile> multipartFileList,
-					   @RequestPart("requestPart") MultipartFile[] multipartFileArray,
-					   int i,
-					   MultipartFile multipartFileNotAnnot,
-					   Part part,
-					   @RequestPart("part") List<Part> partList,
-					   @RequestPart("part") Part[] partArray,
-					   @RequestParam MultipartFile requestParamAnnot,
-					   Optional<MultipartFile> optionalMultipartFile,
-					   Optional<Part> optionalPart,
-					   @RequestPart("requestPart") Optional<SimpleBean> optionalRequestPart) {
+	public void handle(
+			@RequestPart SimpleBean requestPart,
+			@RequestPart(value="requestPart", required=false) SimpleBean namedRequestPart,
+			@Valid @RequestPart("requestPart") SimpleBean validRequestPart,
+			@RequestPart("requestPart") MultipartFile multipartFile,
+			@RequestPart("requestPart") List<MultipartFile> multipartFileList,
+			@RequestPart("requestPart") MultipartFile[] multipartFileArray,
+			int i,
+			MultipartFile multipartFileNotAnnot,
+			Part part,
+			@RequestPart("requestPart") List<Part> partList,
+			@RequestPart("requestPart") Part[] partArray,
+			@RequestParam MultipartFile requestParamAnnot,
+			Optional<MultipartFile> optionalMultipartFile,
+			Optional<Part> optionalPart,
+			@RequestPart("requestPart") Optional<SimpleBean> optionalRequestPart) {
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
@@ -123,24 +122,23 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 	}
 
 	@Override
-	@UsesJava8
 	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
 			NativeWebRequest request, WebDataBinderFactory binderFactory) throws Exception {
 
 		HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);
 		assertIsMultipartRequest(servletRequest);
-
 		MultipartHttpServletRequest multipartRequest =
 				WebUtils.getNativeRequest(servletRequest, MultipartHttpServletRequest.class);
 
+		String partName = getPartName(parameter);
 		Class<?> paramType = parameter.getParameterType();
 		boolean optional = paramType.getName().equals("java.util.Optional");
 		if (optional) {
+			parameter = new MethodParameter(parameter);
 			parameter.increaseNestingLevel();
 			paramType = parameter.getNestedParameterType();
 		}
 
-		String partName = getPartName(parameter);
 		Object arg;
 
 		if (MultipartFile.class == paramType) {
@@ -194,7 +192,7 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 			throw new MissingServletRequestPartException(partName);
 		}
 		if (optional) {
-			arg = Optional.ofNullable(arg);
+			arg = OptionalResolver.resolveValue(arg);
 		}
 
 		return arg;
@@ -261,6 +259,18 @@ public class RequestPartMethodArgumentResolver extends AbstractMessageConverterM
 		public static Object resolvePart(HttpServletRequest servletRequest) throws Exception {
 			Collection<Part> parts = servletRequest.getParts();
 			return parts.toArray(new Part[parts.size()]);
+		}
+	}
+
+
+	/**
+	 * Inner class to avoid hard-coded dependency on Java 8 Optional type...
+	 */
+	@UsesJava8
+	private static class OptionalResolver {
+
+		public static Object resolveValue(Object value) {
+			return Optional.ofNullable(value);
 		}
 	}
 
