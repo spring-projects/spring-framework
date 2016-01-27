@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.http.server.reactive;
 
-import java.nio.ByteBuffer;
 import java.util.Random;
 
 import org.apache.commons.logging.Log;
@@ -24,7 +23,9 @@ import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.Mono;
-import reactor.io.buffer.Buffer;
+
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
 
 import static org.junit.Assert.assertEquals;
 
@@ -42,7 +43,7 @@ public class RandomHandler implements HttpHandler {
 	@Override
 	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 
-		request.getBody().subscribe(new Subscriber<ByteBuffer>() {
+		request.getBody().subscribe(new Subscriber<DataBuffer>() {
 			private Subscription s;
 
 			private int requestSize = 0;
@@ -54,8 +55,8 @@ public class RandomHandler implements HttpHandler {
 			}
 
 			@Override
-			public void onNext(ByteBuffer bytes) {
-				requestSize += new Buffer(bytes).limit();
+			public void onNext(DataBuffer bytes) {
+				requestSize += bytes.readableByteCount();
 			}
 
 			@Override
@@ -72,7 +73,11 @@ public class RandomHandler implements HttpHandler {
 		});
 
 		response.getHeaders().setContentLength(RESPONSE_SIZE);
-		return response.setBody(Mono.just(ByteBuffer.wrap(randomBytes())));
+		byte[] randomBytes = randomBytes();
+		DataBuffer buffer =
+				new DefaultDataBufferAllocator().allocateBuffer(randomBytes.length);
+		buffer.write(randomBytes);
+		return response.setBody(Mono.just(buffer));
 	}
 
 	private byte[] randomBytes() {

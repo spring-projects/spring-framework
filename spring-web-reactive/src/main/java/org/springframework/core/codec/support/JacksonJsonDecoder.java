@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package org.springframework.core.codec.support;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -28,7 +27,7 @@ import reactor.core.publisher.Flux;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.Decoder;
-import org.springframework.util.ByteBufferInputStream;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.MimeType;
 
 
@@ -42,39 +41,38 @@ public class JacksonJsonDecoder extends AbstractDecoder<Object> {
 
 	private final ObjectMapper mapper;
 
-	private Decoder<ByteBuffer> preProcessor;
+	private Decoder<DataBuffer> preProcessor;
 
 
 	public JacksonJsonDecoder() {
 		this(new ObjectMapper(), null);
 	}
 
-	public JacksonJsonDecoder(Decoder<ByteBuffer> preProcessor) {
+	public JacksonJsonDecoder(Decoder<DataBuffer> preProcessor) {
 		this(new ObjectMapper(), preProcessor);
 	}
 
-	public JacksonJsonDecoder(ObjectMapper mapper, Decoder<ByteBuffer> preProcessor) {
+	public JacksonJsonDecoder(ObjectMapper mapper, Decoder<DataBuffer> preProcessor) {
 		super(new MimeType("application", "json", StandardCharsets.UTF_8),
 				new MimeType("application", "*+json", StandardCharsets.UTF_8));
 		this.mapper = mapper;
 		this.preProcessor = preProcessor;
 	}
 
-
 	@Override
-	public Flux<Object> decode(Publisher<ByteBuffer> inputStream, ResolvableType type,
+	public Flux<Object> decode(Publisher<DataBuffer> inputStream, ResolvableType type,
 			MimeType mimeType, Object... hints) {
 
 		ObjectReader reader = this.mapper.readerFor(type.getRawClass());
 
-		Flux<ByteBuffer> stream = Flux.from(inputStream);
+		Flux<DataBuffer> stream = Flux.from(inputStream);
 		if (this.preProcessor != null) {
 			stream = this.preProcessor.decode(inputStream, type, mimeType, hints);
 		}
 
 		return stream.map(content -> {
 			try {
-				return reader.readValue(new ByteBufferInputStream(content));
+				return reader.readValue(content.asInputStream());
 			}
 			catch (IOException e) {
 				throw new CodecException("Error while reading the data", e);

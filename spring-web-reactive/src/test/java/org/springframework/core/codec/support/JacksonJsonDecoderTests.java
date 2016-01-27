@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package org.springframework.reactive.codec.decoder;
+package org.springframework.core.codec.support;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.stream.StreamSupport;
 
@@ -25,9 +24,8 @@ import reactor.core.publisher.Flux;
 import reactor.io.buffer.Buffer;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.support.JacksonJsonDecoder;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
-import org.springframework.reactive.codec.Pojo;
 
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.*;
@@ -35,7 +33,7 @@ import static org.junit.Assert.*;
 /**
  * @author Sebastien Deleuze
  */
-public class JacksonJsonDecoderTests {
+public class JacksonJsonDecoderTests extends AbstractAllocatingTestCase {
 
 	private final JacksonJsonDecoder decoder = new JacksonJsonDecoder();
 
@@ -47,7 +45,8 @@ public class JacksonJsonDecoderTests {
 
 	@Test
 	public void decode() throws InterruptedException {
-		Flux<ByteBuffer> source = Flux.just(Buffer.wrap("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}").byteBuffer());
+		Flux<DataBuffer> source =
+				Flux.just(stringBuffer("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"));
 		Flux<Object> output = decoder.decode(source, ResolvableType.forClass(Pojo.class), null);
 		List<Object> results = StreamSupport.stream(output.toIterable().spliterator(), false).collect(toList());
 		assertEquals(1, results.size());

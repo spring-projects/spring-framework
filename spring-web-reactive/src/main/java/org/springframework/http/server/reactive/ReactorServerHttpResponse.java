@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +15,6 @@
  */
 package org.springframework.http.server.reactive;
 
-import java.nio.ByteBuffer;
-
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -25,6 +23,7 @@ import reactor.io.net.http.HttpChannel;
 import reactor.io.net.http.model.Cookie;
 import reactor.io.net.http.model.Status;
 
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
@@ -56,8 +55,9 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse {
 	}
 
 	@Override
-	protected Mono<Void> setBodyInternal(Publisher<ByteBuffer> publisher) {
-		return Mono.from(this.channel.writeWith(Flux.from(publisher).map(Buffer::new)));
+	protected Mono<Void> setBodyInternal(Publisher<DataBuffer> publisher) {
+		return Mono.from(this.channel.writeWith(
+				Flux.from(publisher).map(buffer -> new Buffer(buffer.asByteBuffer()))));
 	}
 
 	@Override

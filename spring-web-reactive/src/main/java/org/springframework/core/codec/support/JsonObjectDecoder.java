@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.core.codec.support;
 
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +28,8 @@ import reactor.core.publisher.Flux;
 import reactor.fn.Function;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.util.MimeType;
 
 /**
@@ -44,7 +45,7 @@ import org.springframework.util.MimeType;
  * @author Sebastien Deleuze
  * @see JsonObjectEncoder
  */
-public class JsonObjectDecoder extends AbstractDecoder<ByteBuffer> {
+public class JsonObjectDecoder extends AbstractDecoder<DataBuffer> {
 
 	private static final int ST_CORRUPTED = -1;
 
@@ -54,38 +55,40 @@ public class JsonObjectDecoder extends AbstractDecoder<ByteBuffer> {
 
 	private static final int ST_DECODING_ARRAY_STREAM = 2;
 
+	private final DataBufferAllocator allocator;
 
 	private final int maxObjectLength;
 
 	private final boolean streamArrayElements;
 
-
-	public JsonObjectDecoder() {
+	public JsonObjectDecoder(DataBufferAllocator allocator) {
 		// 1 MB
-		this(1024 * 1024);
+		this(allocator, 1024 * 1024);
 	}
 
-	public JsonObjectDecoder(int maxObjectLength) {
-		this(maxObjectLength, true);
+	public JsonObjectDecoder(DataBufferAllocator allocator, int maxObjectLength) {
+		this(allocator, maxObjectLength, true);
 	}
 
-	public JsonObjectDecoder(boolean streamArrayElements) {
-		this(1024 * 1024, streamArrayElements);
+	public JsonObjectDecoder(DataBufferAllocator allocator, boolean streamArrayElements) {
+		this(allocator, 1024 * 1024, streamArrayElements);
 	}
 
 
 	/**
+	 * @param allocator
 	 * @param maxObjectLength maximum number of bytes a JSON object/array may
 	 * use (including braces and all). Objects exceeding this length are dropped
 	 * and an {@link IllegalStateException} is thrown.
 	 * @param streamArrayElements if set to true and the "top level" JSON object
 	 * is an array, each of its entries is passed through the pipeline individually
 	 * and immediately after it was fully received, allowing for arrays with
-	 * "infinitely" many elements.
 	 */
-	public JsonObjectDecoder(int maxObjectLength, boolean streamArrayElements) {
+	public JsonObjectDecoder(DataBufferAllocator allocator, int maxObjectLength,
+			boolean streamArrayElements) {
 		super(new MimeType("application", "json", StandardCharsets.UTF_8),
 				new MimeType("application", "*+json", StandardCharsets.UTF_8));
+		this.allocator = allocator;
 		if (maxObjectLength < 1) {
 			throw new IllegalArgumentException("maxObjectLength must be a positive int");
 		}
@@ -94,10 +97,11 @@ public class JsonObjectDecoder extends AbstractDecoder<ByteBuffer> {
 	}
 
 	@Override
-	public Flux<ByteBuffer> decode(Publisher<ByteBuffer> inputStream, ResolvableType type,
+	public Flux<DataBuffer> decode(Publisher<DataBuffer> inputStream, ResolvableType type,
 			MimeType mimeType, Object... hints) {
 
-		return Flux.from(inputStream).flatMap(new Function<ByteBuffer, Publisher<? extends ByteBuffer>>() {
+		return Flux.from(inputStream)
+				.flatMap(new Function<DataBuffer, Publisher<? extends DataBuffer>>() {
 
 			int openBraces;
 			int index;
@@ -107,14 +111,15 @@ public class JsonObjectDecoder extends AbstractDecoder<ByteBuffer> {
 			Integer writerIndex;
 
 			@Override
-			public Publisher<? extends ByteBuffer> apply(ByteBuffer b) {
-				List<ByteBuffer> chunks = new ArrayList<>();
+			public Publisher<? extends DataBuffer> apply(DataBuffer b) {
+				List<DataBuffer> chunks = new ArrayList<>();
 				if (this.input == null) {
-					this.input = Unpooled.copiedBuffer(b);
+					this.input = Unpooled.copiedBuffer(b.asByteBuffer());
 					this.writerIndex = this.input.writerIndex();
 				}
 				else {
-					this.input = Unpooled.copiedBuffer(this.input, Unpooled.copiedBuffer(b));
+					this.input = Unpooled.copiedBuffer(this.input,
+							Unpooled.copiedBuffer(b.asByteBuffer()));
 					this.writerIndex = this.input.writerIndex();
 				}
 				if (this.state == ST_CORRUPTED) {
@@ -139,7 +144,7 @@ public class JsonObjectDecoder extends AbstractDecoder<ByteBuffer> {
 							ByteBuf json = extractObject(this.input, this.input.readerIndex(),
 									this.index + 1 - this.input.readerIndex());
 							if (json != null) {
-								chunks.add(json.nioBuffer());
+								chunks.add(allocator.wrap(json.nioBuffer()));
 							}
 
 							// The JSON object/array was extracted => discard the bytes from
@@ -173,7 +178,7 @@ public class JsonObjectDecoder extends AbstractDecoder<ByteBuffer> {
 									idxNoSpaces + 1 - this.input.readerIndex());
 
 							if (json != null) {
-								chunks.add(json.nioBuffer());
+								chunks.add(allocator.wrap(json.nioBuffer()));
 							}
 
 							this.input.readerIndex(this.index + 1);

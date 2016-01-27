@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,10 @@
 
 package org.springframework.http;
 
-import java.nio.ByteBuffer;
-
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
+
+import org.springframework.core.io.buffer.DataBuffer;
 
 /**
  * A "reactive" HTTP output message that accepts output as a {@link Publisher}.
@@ -38,6 +38,6 @@ public interface ReactiveHttpOutputMessage extends HttpMessage {
 	 * @param body the body content publisher
 	 * @return a publisher that indicates completion or error.
 	 */
-	Mono<Void> setBody(Publisher<ByteBuffer> body);
+	Mono<Void> setBody(Publisher<DataBuffer> body);
 
 }

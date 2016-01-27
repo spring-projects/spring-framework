@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.core.codec.support;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import javax.xml.bind.JAXBContext;
@@ -38,8 +37,9 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.support.DataBufferUtils;
 import org.springframework.util.Assert;
-import org.springframework.util.ByteBufferPublisherInputStream;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
@@ -60,12 +60,13 @@ public class Jaxb2Decoder extends AbstractDecoder<Object> {
 
 
 	@Override
-	public Flux<Object> decode(Publisher<ByteBuffer> inputStream, ResolvableType type,
+	public Flux<Object> decode(Publisher<DataBuffer> inputStream, ResolvableType type,
 			MimeType mimeType, Object... hints) {
 
 		Class<?> outputClass = type.getRawClass();
 		try {
-			Source source = processSource(new StreamSource(new ByteBufferPublisherInputStream(inputStream)));
+			Source source = processSource(
+					new StreamSource(DataBufferUtils.toInputStream(inputStream)));
 			Unmarshaller unmarshaller = createUnmarshaller(outputClass);
 			if (outputClass.isAnnotationPresent(XmlRootElement.class)) {
 				return Flux.just(unmarshaller.unmarshal(source));

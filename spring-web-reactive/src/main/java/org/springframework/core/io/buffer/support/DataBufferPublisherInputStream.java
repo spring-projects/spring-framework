@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,60 +14,56 @@
  * limitations under the License.
  */
 
-package org.springframework.util;
+package org.springframework.core.io.buffer.support;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscription;
 import reactor.rx.Stream;
 
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.util.Assert;
+
 /**
- * {@code InputStream} implementation based on a byte array {@link Publisher}.
- *
  * @author Arjen Poutsma
- * @author Sebastien Deleuze
- * @author Stephane Maldini
  */
-public class ByteBufferPublisherInputStream extends InputStream {
+class DataBufferPublisherInputStream extends InputStream {
 
-	private final BlockingQueue<ByteBuffer> queue;
+	private final AtomicBoolean completed = new AtomicBoolean();
 
-	private ByteBufferInputStream currentStream;
+	private final BlockingQueue<DataBuffer> queue;
 
-	private boolean completed;
-
+	private InputStream currentStream;
 
 	/**
 	 * Creates a new {@code ByteArrayPublisherInputStream} based on the given publisher.
-	 *
 	 * @param publisher the publisher to use
 	 */
-	public ByteBufferPublisherInputStream(Publisher<ByteBuffer> publisher) {
+	public DataBufferPublisherInputStream(Publisher<DataBuffer> publisher) {
 		this(publisher, 1);
 	}
 
 	/**
 	 * Creates a new {@code ByteArrayPublisherInputStream} based on the given publisher.
-	 *
-	 * @param publisher   the publisher to use
+	 * @param publisher the publisher to use
 	 * @param requestSize the {@linkplain Subscription#request(long) request size} to use
 	 * on the publisher bound to Integer MAX
 	 */
-	public ByteBufferPublisherInputStream(Publisher<ByteBuffer> publisher, int requestSize) {
+	public DataBufferPublisherInputStream(Publisher<DataBuffer> publisher,
+			int requestSize) {
 		Assert.notNull(publisher, "'publisher' must not be null");
 
 		// TODO Avoid using Reactor Stream, it should not be a mandatory dependency of Spring Reactive
 		this.queue = Stream.from(publisher).toBlockingQueue(requestSize);
 	}
 
-
 	@Override
 	public int available() throws IOException {
-		if (completed) {
+		if (completed.get()) {
 			return 0;
 		}
 		InputStream is = currentStream();
@@ -76,7 +72,7 @@ public class ByteBufferPublisherInputStream extends InputStream {
 
 	@Override
 	public int read() throws IOException {
-		if (completed) {
+		if (completed.get()) {
 			return -1;
 		}
 		InputStream is = currentStream();
@@ -94,7 +90,7 @@ public class ByteBufferPublisherInputStream extends InputStream {
 
 	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
-		if (completed) {
+		if (completed.get()) {
 			return -1;
 		}
 		InputStream is = currentStream();
@@ -128,26 +124,28 @@ public class ByteBufferPublisherInputStream extends InputStream {
 		try {
 			if (this.currentStream != null && this.currentStream.available() > 0) {
 				return this.currentStream;
-			} else {
+			}
+			else {
 				// take() blocks until next or complete() then return null,
 				// but that's OK since this is a *blocking* InputStream
-				ByteBuffer signal = this.queue.take();
-				if(signal == null){
-					this.completed = true;
+				DataBuffer signal = this.queue.take();
+				if (signal == null) {
+					this.completed.set(true);
 					return null;
 				}
-				this.currentStream = new ByteBufferInputStream(signal);
+				this.currentStream = signal.asInputStream();
 				return this.currentStream;
 			}
 		}
 		catch (InterruptedException ex) {
 			Thread.currentThread().interrupt();
 		}
-		catch (Throwable error ){
-			this.completed = true;
+		catch (Throwable error) {
+			this.completed.set(true);
 			throw new IOException(error);
 		}
 		throw new IOException();
 	}
+
 
 }

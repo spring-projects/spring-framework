@@ -14,27 +14,36 @@
  * limitations under the License.
  */
 
-package org.springframework.http;
+package org.springframework.core.io.buffer.support;
+
+import java.io.InputStream;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.util.Assert;
 
 /**
- * An "reactive" HTTP input message that exposes the input as {@link Publisher}.
- *
- * <p>Typically implemented by an HTTP request on the server-side or a response
- * on the client-side.
- *
  * @author Arjen Poutsma
  */
-public interface ReactiveHttpInputMessage extends HttpMessage {
+public abstract class DataBufferUtils {
 
-	/**
-	 * Return the body of the message as a {@link Publisher}.
-	 * @return the body content publisher
-	 */
-	Flux<DataBuffer> getBody();
+	public static Flux<Byte> toPublisher(DataBuffer buffer) {
+		Assert.notNull(buffer, "'buffer' must not be null");
+
+		byte[] bytes1 = new byte[buffer.readableByteCount()];
+		buffer.read(bytes1);
+
+		Byte[] bytes2 = new Byte[bytes1.length];
+		for (int i = 0; i < bytes1.length; i++) {
+			bytes2[i] = bytes1[i];
+		}
+		return Flux.fromArray(bytes2);
+	}
+
+	public static InputStream toInputStream(Publisher<DataBuffer> publisher) {
+		return new DataBufferPublisherInputStream(publisher);
+	}
 
 }

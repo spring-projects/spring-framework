@@ -1,11 +1,11 @@
 /*
- * Copyright (c) 2011-2016 Pivotal Software Inc, All Rights Reserved.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,6 +31,8 @@ import reactor.core.timer.Timers;
 import reactor.io.buffer.Buffer;
 import reactor.rx.Stream;
 
+import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.boot.HttpServer;
@@ -51,6 +53,8 @@ import static org.junit.Assert.assertThat;
 public class AsyncIntegrationTests {
 
 	private final ProcessorGroup asyncGroup = Processors.asyncGroup();
+
+	private final DataBufferAllocator allocator = new DefaultDataBufferAllocator();
 
 	protected int port;
 
@@ -109,7 +113,7 @@ public class AsyncIntegrationTests {
 			                              .dispatchOn(asyncGroup)
 			                              .collect(Buffer::new, Buffer::append)
 			                              .doOnSuccess(Buffer::flip)
-			                              .map(Buffer::byteBuffer)
+					.map((bytes) -> allocator.wrap(bytes.byteBuffer()))
 			);
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.MimeType;
 
 /**
@@ -50,7 +51,7 @@ public interface Encoder<T> {
 	 * @param hints Additional information about how to do decode, optional.
 	 * @return the output stream
 	 */
-	Flux<ByteBuffer> encode(Publisher<? extends T> inputStream, ResolvableType type,
+	Flux<DataBuffer> encode(Publisher<? extends T> inputStream, ResolvableType type,
 			MimeType mimeType, Object... hints);
 
 	/**

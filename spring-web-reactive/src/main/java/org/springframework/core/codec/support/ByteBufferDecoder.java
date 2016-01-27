@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
@@ -43,10 +44,9 @@ public class ByteBufferDecoder extends AbstractDecoder<ByteBuffer> {
 	}
 
 	@Override
-	public Flux<ByteBuffer> decode(Publisher<ByteBuffer> inputStream, ResolvableType type,
+	public Flux<ByteBuffer> decode(Publisher<DataBuffer> inputStream, ResolvableType type,
 			MimeType mimeType, Object... hints) {
-
-		return Flux.from(inputStream);
+		return Flux.from(inputStream).map(DataBuffer::asByteBuffer);
 	}
 
 }

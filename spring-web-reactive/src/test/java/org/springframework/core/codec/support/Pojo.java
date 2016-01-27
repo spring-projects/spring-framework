@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.reactive.codec;
+package org.springframework.core.codec.support;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -52,4 +52,20 @@ public class Pojo {
 		this.bar = bar;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o instanceof Pojo) {
+			Pojo other = (Pojo) o;
+			return this.foo.equals(other.foo) && this.bar.equals(other.bar);
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return 31 * foo.hashCode() + bar.hashCode();
+	}
 }

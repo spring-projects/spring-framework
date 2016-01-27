@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.http.server.reactive;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -26,9 +28,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.io.buffer.Buffer;
 
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
+import org.springframework.core.io.buffer.support.DataBufferUtils;
 import org.springframework.http.MediaType;
-import org.springframework.util.BufferOutputStream;
-import org.springframework.util.ByteBufferPublisherInputStream;
 
 import static org.junit.Assert.fail;
 
@@ -49,7 +52,7 @@ public class XmlHandler implements HttpHandler {
 
 			Runnable r = () -> {
 				try {
-					ByteBufferPublisherInputStream bis = new ByteBufferPublisherInputStream(request.getBody());
+					InputStream bis = DataBufferUtils.toInputStream(request.getBody());
 
 					XmlHandlerIntegrationTests.Person johnDoe =
 						(XmlHandlerIntegrationTests.Person) unmarshaller.unmarshal(bis);
@@ -67,13 +70,13 @@ public class XmlHandler implements HttpHandler {
 
 			response.getHeaders().setContentType(MediaType.APPLICATION_XML);
 			XmlHandlerIntegrationTests.Person janeDoe = new XmlHandlerIntegrationTests.Person("Jane Doe");
-			Buffer buffer = new Buffer();
-			BufferOutputStream bos = new BufferOutputStream(buffer);
+
+			DataBuffer buffer = new DefaultDataBufferAllocator().allocateBuffer();
+			OutputStream bos = buffer.asOutputStream();
 			marshaller.marshal(janeDoe, bos);
 			bos.close();
-			buffer.flip();
 
-			return response.setBody(Flux.just(buffer.byteBuffer()));
+			return response.setBody(Flux.just(buffer));
 		}
 		catch (Exception ex) {
 			logger.error(ex, ex);

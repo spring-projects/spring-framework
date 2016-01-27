@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import reactor.io.buffer.Buffer;
 import reactor.io.net.ReactiveChannelHandler;
 import reactor.io.net.http.HttpChannel;
 
+import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.util.Assert;
 
 /**
@@ -30,15 +31,19 @@ public class ReactorHttpHandlerAdapter
 
 	private final HttpHandler httpHandler;
 
+	private final DataBufferAllocator allocator;
 
-	public ReactorHttpHandlerAdapter(HttpHandler httpHandler) {
+	public ReactorHttpHandlerAdapter(HttpHandler httpHandler,
+			DataBufferAllocator allocator) {
 		Assert.notNull(httpHandler, "'httpHandler' is required.");
 		this.httpHandler = httpHandler;
+		this.allocator = allocator;
 	}
 
 	@Override
 	public Mono<Void> apply(HttpChannel<Buffer, Buffer> channel) {
-		ReactorServerHttpRequest adaptedRequest = new ReactorServerHttpRequest(channel);
+		ReactorServerHttpRequest adaptedRequest =
+				new ReactorServerHttpRequest(channel, allocator);
 		ReactorServerHttpResponse adaptedResponse = new ReactorServerHttpResponse(channel);
 		return this.httpHandler.handle(adaptedRequest, adaptedResponse);
 	}

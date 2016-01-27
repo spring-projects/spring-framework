@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive;
 
 import java.net.URI;
-import java.nio.ByteBuffer;
 import java.util.Collections;
 import java.util.List;
 
@@ -33,6 +33,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.support.StringEncoder;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -109,7 +111,7 @@ public class DispatcherHandlerErrorTests {
 
 	@Test
 	public void noResolverForArgument() throws Exception {
-		this.request.setUri(new URI("/uknown-argument-type"));
+		this.request.setUri(new URI("/unknown-argument-type"));
 
 		Publisher<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 		Throwable ex = awaitErrorSignal(publisher);
@@ -153,7 +155,9 @@ public class DispatcherHandlerErrorTests {
 	public void notAcceptable() throws Exception {
 		this.request.setUri(new URI("/request-body"));
 		this.request.getHeaders().setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-		this.request.setBody(Mono.just(ByteBuffer.wrap("body".getBytes("UTF-8"))));
+		DataBuffer buffer = new DefaultDataBufferAllocator().allocateBuffer()
+				.write("body".getBytes("UTF-8"));
+		this.request.setBody(Mono.just(buffer));
 
 		Publisher<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 		Throwable ex = awaitErrorSignal(publisher);
@@ -178,7 +182,7 @@ public class DispatcherHandlerErrorTests {
 
 	@Test
 	public void dispatcherHandlerWithHttpExceptionHandler() throws Exception {
-		this.request.setUri(new URI("/uknown-argument-type"));
+		this.request.setUri(new URI("/unknown-argument-type"));
 
 		WebExceptionHandler exceptionHandler = new ServerError500ExceptionHandler();
 		WebHandler webHandler = new ExceptionHandlingWebHandler(this.dispatcherHandler, exceptionHandler);
@@ -190,7 +194,7 @@ public class DispatcherHandlerErrorTests {
 
 	@Test
 	public void filterChainWithHttpExceptionHandler() throws Exception {
-		this.request.setUri(new URI("/uknown-argument-type"));
+		this.request.setUri(new URI("/unknown-argument-type"));
 
 		WebHandler webHandler = new FilteringWebHandler(this.dispatcherHandler, new TestWebFilter());
 		webHandler = new ExceptionHandlingWebHandler(webHandler, new ServerError500ExceptionHandler());
@@ -224,7 +228,8 @@ public class DispatcherHandlerErrorTests {
 
 		@Bean
 		public ResponseBodyResultHandler resultHandler() {
-			List<Encoder<?>> encoders = Collections.singletonList(new StringEncoder());
+			List<Encoder<?>> encoders = Collections
+					.singletonList(new StringEncoder(new DefaultDataBufferAllocator()));
 			return new ResponseBodyResultHandler(encoders, new DefaultConversionService());
 		}
 
@@ -238,8 +243,8 @@ public class DispatcherHandlerErrorTests {
 	@SuppressWarnings("unused")
 	private static class TestController {
 
-		@RequestMapping("/uknown-argument-type")
-		public void uknownArgumentType(Foo arg) {
+		@RequestMapping("/unknown-argument-type")
+		public void unknownArgumentType(Foo arg) {
 		}
 
 		@RequestMapping("/error-signal")

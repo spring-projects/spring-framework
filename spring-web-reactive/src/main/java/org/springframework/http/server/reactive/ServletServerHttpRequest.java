@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.http.server.reactive;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -30,6 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -47,10 +47,10 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final HttpServletRequest request;
 
-	private final Flux<ByteBuffer> requestBodyPublisher;
+	private final Flux<DataBuffer> requestBodyPublisher;
 
-
-	public ServletServerHttpRequest(HttpServletRequest request, Publisher<ByteBuffer> body) {
+	public ServletServerHttpRequest(HttpServletRequest request,
+			Publisher<DataBuffer> body) {
 		Assert.notNull(request, "'request' must not be null.");
 		Assert.notNull(body, "'body' must not be null.");
 		this.request = request;
@@ -125,7 +125,7 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	public Flux<ByteBuffer> getBody() {
+	public Flux<DataBuffer> getBody() {
 		return this.requestBodyPublisher;
 	}
 

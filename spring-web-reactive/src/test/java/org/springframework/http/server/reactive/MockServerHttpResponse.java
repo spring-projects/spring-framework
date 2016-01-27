@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,12 @@
  */
 package org.springframework.http.server.reactive;
 
-import java.nio.ByteBuffer;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 
@@ -33,7 +33,7 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 
 	private HttpHeaders headers = new HttpHeaders();
 
-	private Publisher<ByteBuffer> body;
+	private Publisher<DataBuffer> body;
 
 
 	@Override
@@ -51,12 +51,12 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public Mono<Void> setBody(Publisher<ByteBuffer> body) {
+	public Mono<Void> setBody(Publisher<DataBuffer> body) {
 		this.body = body;
 		return Flux.from(body).after();
 	}
 
-	public Publisher<ByteBuffer> getBody() {
+	public Publisher<DataBuffer> getBody() {
 		return this.body;
 	}
 

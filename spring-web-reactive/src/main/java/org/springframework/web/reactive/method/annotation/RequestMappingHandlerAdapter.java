@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.netty.buffer.UnpooledByteBufAllocator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
@@ -35,6 +36,8 @@ import org.springframework.core.codec.support.JsonObjectDecoder;
 import org.springframework.core.codec.support.StringDecoder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.NettyDataBufferAllocator;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.ExceptionHandlerMethodResolver;
@@ -56,6 +59,9 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 	private final List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<>();
 
 	private ConversionService conversionService = new DefaultConversionService();
+
+	private DataBufferAllocator allocator =
+			new NettyDataBufferAllocator(new UnpooledByteBufAllocator(false));
 
 	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache =
 			new ConcurrentHashMap<Class<?>, ExceptionHandlerMethodResolver>(64);
@@ -85,13 +91,17 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 		return this.conversionService;
 	}
 
+	public void setAllocator(DataBufferAllocator allocator) {
+		this.allocator = allocator;
+	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (ObjectUtils.isEmpty(this.argumentResolvers)) {
 
 			List<Decoder<?>> decoders = Arrays.asList(new ByteBufferDecoder(),
-					new StringDecoder(), new JacksonJsonDecoder(new JsonObjectDecoder()));
+					new StringDecoder(allocator),
+					new JacksonJsonDecoder(new JsonObjectDecoder(allocator)));
 
 			this.argumentResolvers.add(new RequestParamArgumentResolver());
 			this.argumentResolvers.add(new RequestBodyArgumentResolver(decoders, this.conversionService));

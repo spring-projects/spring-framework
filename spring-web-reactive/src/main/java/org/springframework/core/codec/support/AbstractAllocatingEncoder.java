@@ -14,27 +14,29 @@
  * limitations under the License.
  */
 
-package org.springframework.http;
+package org.springframework.core.codec.support;
 
-import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
-
-import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.util.Assert;
+import org.springframework.util.MimeType;
 
 /**
- * An "reactive" HTTP input message that exposes the input as {@link Publisher}.
- *
- * <p>Typically implemented by an HTTP request on the server-side or a response
- * on the client-side.
- *
  * @author Arjen Poutsma
  */
-public interface ReactiveHttpInputMessage extends HttpMessage {
+public abstract class AbstractAllocatingEncoder<T> extends AbstractEncoder<T> {
 
-	/**
-	 * Return the body of the message as a {@link Publisher}.
-	 * @return the body content publisher
-	 */
-	Flux<DataBuffer> getBody();
+	private final DataBufferAllocator allocator;
+
+	public AbstractAllocatingEncoder(DataBufferAllocator allocator,
+			MimeType... supportedMimeTypes) {
+		super(supportedMimeTypes);
+		Assert.notNull(allocator, "'allocator' must not be null");
+
+		this.allocator = allocator;
+	}
+
+	public DataBufferAllocator allocator() {
+		return allocator;
+	}
 
 }

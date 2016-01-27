@@ -16,7 +16,6 @@
 
 package org.springframework.core.codec.support;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicIntegerFieldUpdater;
 import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 
@@ -28,6 +27,9 @@ import reactor.core.util.BackpressureUtils;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Decoder;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
 
 /**
@@ -38,12 +40,19 @@ import org.springframework.util.MimeType;
  */
 public abstract class AbstractRawByteStreamDecoder<T> extends AbstractDecoder<T> {
 
-	public AbstractRawByteStreamDecoder(MimeType... supportedMimeTypes) {
+	private final DataBufferAllocator allocator;
+
+	public AbstractRawByteStreamDecoder(DataBufferAllocator allocator,
+			MimeType... supportedMimeTypes) {
 		super(supportedMimeTypes);
+		Assert.notNull(allocator, "'allocator' must not be null");
+
+		this.allocator = allocator;
 	}
 
 	@Override
-	public Flux<T> decode(Publisher<ByteBuffer> inputStream, ResolvableType type, MimeType mimeType, Object... hints) {
+	public Flux<T> decode(Publisher<DataBuffer> inputStream, ResolvableType type,
+			MimeType mimeType, Object... hints) {
 
 		return decodeInternal(Flux.from(inputStream).lift(bbs -> subscriberBarrier(bbs)),
 				type, mimeType, hints);
@@ -55,17 +64,20 @@ public abstract class AbstractRawByteStreamDecoder<T> extends AbstractDecoder<T>
 	 * <p>Implementations should provide their own {@link SubscriberBarrier} or use one of the
 	 * provided implementations by this class
 	 */
-	public abstract SubscriberBarrier<ByteBuffer, ByteBuffer> subscriberBarrier(Subscriber<? super ByteBuffer> subscriber);
+	public abstract SubscriberBarrier<DataBuffer, DataBuffer> subscriberBarrier(
+			Subscriber<? super DataBuffer> subscriber);
 
-	public abstract Flux<T> decodeInternal(Publisher<ByteBuffer> inputStream, ResolvableType type
+	public abstract Flux<T> decodeInternal(Publisher<DataBuffer> inputStream,
+			ResolvableType type
 			, MimeType mimeType, Object... hints);
 
 
 	/**
 	 * {@code SubscriberBarrier} implementation that buffers all received elements and emits a single
-	 * {@code ByteBuffer} once the incoming stream has been completed
+	 * {@code DataBuffer} once the incoming stream has been completed
 	 */
-	public static class ReduceSingleByteStreamBarrier extends SubscriberBarrier<ByteBuffer, ByteBuffer> {
+	public static class ReduceSingleByteStreamBarrier
+			extends SubscriberBarrier<DataBuffer, DataBuffer> {
 
 		@SuppressWarnings("rawtypes")
 		static final AtomicLongFieldUpdater<ReduceSingleByteStreamBarrier> REQUESTED =
@@ -74,16 +86,16 @@ public abstract class AbstractRawByteStreamDecoder<T> extends AbstractDecoder<T>
 		static final AtomicIntegerFieldUpdater<ReduceSingleByteStreamBarrier> TERMINATED =
 				AtomicIntegerFieldUpdater.newUpdater(ReduceSingleByteStreamBarrier.class, "terminated");
 
-
 		private volatile long requested;
 
 		private volatile int terminated;
 
-		private ByteBuffer buffer;
+		private DataBuffer buffer;
 
-		public ReduceSingleByteStreamBarrier(Subscriber<? super ByteBuffer> subscriber) {
+		public ReduceSingleByteStreamBarrier(Subscriber<? super DataBuffer> subscriber,
+				DataBufferAllocator allocator) {
 			super(subscriber);
-			this.buffer = ByteBuffer.allocate(0);
+			this.buffer = allocator.allocateBuffer();
 		}
 
 		@Override
@@ -108,15 +120,12 @@ public abstract class AbstractRawByteStreamDecoder<T> extends AbstractDecoder<T>
 		 * TODO: when available, wrap buffers with a single buffer and avoid copying data for every method call.
 		 */
 		@Override
-		protected void doNext(ByteBuffer byteBuffer) {
-			this.buffer = ByteBuffer.allocate(this.buffer.capacity() + byteBuffer.capacity())
-					.put(this.buffer).put(byteBuffer);
-			this.buffer.flip();
+		protected void doNext(DataBuffer dataBuffer) {
+			this.buffer.write(dataBuffer);
 		}
 
 		protected void drainLast() {
 			if (BackpressureUtils.getAndSub(REQUESTED, this, 1L) > 0) {
-				this.buffer.flip();
 				subscriber.onNext(this.buffer);
 				super.doComplete();
 			}
@@ -127,7 +136,8 @@ public abstract class AbstractRawByteStreamDecoder<T> extends AbstractDecoder<T>
 	 * {@code SubscriberBarrier} implementation that splits incoming elements
 	 * using line return delimiters: {@code "\n"} and {@code "\r\n"}
 	 */
-	public static class SplitLinesByteStreamBarrier extends SubscriberBarrier<ByteBuffer, ByteBuffer> {
+	public static class SplitLinesByteStreamBarrier
+			extends SubscriberBarrier<DataBuffer, DataBuffer> {
 
 		@SuppressWarnings("rawtypes")
 		static final AtomicLongFieldUpdater<SplitLinesByteStreamBarrier> REQUESTED =
@@ -136,16 +146,20 @@ public abstract class AbstractRawByteStreamDecoder<T> extends AbstractDecoder<T>
 		static final AtomicIntegerFieldUpdater<SplitLinesByteStreamBarrier> TERMINATED =
 				AtomicIntegerFieldUpdater.newUpdater(SplitLinesByteStreamBarrier.class, "terminated");
 
+		private final DataBufferAllocator allocator;
+
 
 		private volatile long requested;
 
 		private volatile int terminated;
 
-		private ByteBuffer buffer;
+		private DataBuffer buffer;
 
-		public SplitLinesByteStreamBarrier(Subscriber<? super ByteBuffer> subscriber) {
+		public SplitLinesByteStreamBarrier(Subscriber<? super DataBuffer> subscriber,
+				DataBufferAllocator allocator) {
 			super(subscriber);
-			this.buffer = ByteBuffer.allocate(0);
+			this.allocator = allocator;
+			this.buffer = allocator.allocateBuffer();
 		}
 
 		@Override
@@ -170,19 +184,20 @@ public abstract class AbstractRawByteStreamDecoder<T> extends AbstractDecoder<T>
 		 * TODO: when available, wrap buffers with a single buffer and avoid copying data for every method call.
 		 */
 		@Override
-		protected void doNext(ByteBuffer byteBuffer) {
-			this.buffer = ByteBuffer.allocate(this.buffer.capacity() + byteBuffer.capacity())
-					.put(this.buffer).put(byteBuffer);
+		protected void doNext(DataBuffer dataBuffer) {
+			this.buffer.write(dataBuffer);
 
 			while (REQUESTED.get(this) > 0) {
 				int separatorIndex = findEndOfLine(this.buffer);
 				if (separatorIndex != -1) {
 					if (BackpressureUtils.getAndSub(REQUESTED, this, 1L) > 0) {
 						byte[] message = new byte[separatorIndex];
-						this.buffer.get(message);
+						this.buffer.read(message);
 						consumeSeparator(this.buffer);
-						this.buffer = this.buffer.slice();
-						super.doNext(ByteBuffer.wrap(message));
+//						this.buffer = this.buffer.slice();
+						DataBuffer buffer2 = allocator.allocateBuffer(message.length);
+						buffer2.write(message);
+						super.doNext(buffer2);
 					}
 				}
 				else {
@@ -191,9 +206,9 @@ public abstract class AbstractRawByteStreamDecoder<T> extends AbstractDecoder<T>
 			}
 		}
 
-		protected int findEndOfLine(ByteBuffer buffer) {
+		protected int findEndOfLine(DataBuffer buffer) {
 
-			final int n = buffer.limit();
+			final int n = buffer.readableByteCount();
 			for (int i = 0; i < n; i++) {
 				final byte b = buffer.get(i);
 				if (b == '\n') {
@@ -207,16 +222,15 @@ public abstract class AbstractRawByteStreamDecoder<T> extends AbstractDecoder<T>
 			return -1;
 		}
 
-		protected void consumeSeparator(ByteBuffer buffer) {
-			byte sep = buffer.get();
+		protected void consumeSeparator(DataBuffer buffer) {
+			byte sep = buffer.read();
 			if (sep == '\r') {
-				buffer.get();
+				buffer.read();
 			}
 		}
 
 		protected void drainLast() {
 			if (BackpressureUtils.getAndSub(REQUESTED, this, 1L) > 0) {
-				this.buffer.flip();
 				subscriber.onNext(this.buffer);
 				super.doComplete();
 			}

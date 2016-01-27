@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.http.server.reactive;
 
-import java.nio.ByteBuffer;
-
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
@@ -27,6 +25,7 @@ import reactor.core.converter.RxJava1ObservableConverter;
 import reactor.core.publisher.Mono;
 import rx.Observable;
 
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
@@ -58,15 +57,15 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 	}
 
 	@Override
-	protected Mono<Void> setBodyInternal(Publisher<ByteBuffer> publisher) {
+	protected Mono<Void> setBodyInternal(Publisher<DataBuffer> publisher) {
 		Observable<byte[]> content = RxJava1ObservableConverter.from(publisher).map(this::toBytes);
 		Observable<Void> completion = this.response.writeBytes(content);
 		return RxJava1ObservableConverter.from(completion).after();
 	}
 
-	private byte[] toBytes(ByteBuffer buffer) {
-		byte[] bytes = new byte[buffer.remaining()];
-		buffer.get(bytes);
+	private byte[] toBytes(DataBuffer buffer) {
+		byte[] bytes = new byte[buffer.readableByteCount()];
+		buffer.read(bytes);
 		return bytes;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 package org.springframework.core.codec;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.MimeType;
 
 /**
@@ -43,14 +43,14 @@ public interface Decoder<T> {
 	boolean canDecode(ResolvableType type, MimeType mimeType, Object... hints);
 
 	/**
-	 * Decode an input {@link ByteBuffer} stream to an output stream of {@code T}.
+	 * Decode an input {@link DataBuffer} stream to an output stream of {@code T}.
 	 * @param inputStream the input stream to process.
 	 * @param type the stream element type to process.
 	 * @param mimeType the mime type to process.
 	 * @param hints Additional information about how to do decode, optional.
 	 * @return the output stream
 	 */
-	Flux<T> decode(Publisher<ByteBuffer> inputStream, ResolvableType type,
+	Flux<T> decode(Publisher<DataBuffer> inputStream, ResolvableType type,
 			MimeType mimeType, Object... hints);
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package org.springframework.reactive.codec.encoder;
+package org.springframework.core.codec.support;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.StreamSupport;
 
+import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 
-import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.support.StringEncoder;
 import org.springframework.http.MediaType;
 
 import static java.util.stream.Collectors.toList;
@@ -33,27 +32,33 @@ import static org.junit.Assert.*;
 /**
  * @author Sebastien Deleuze
  */
-public class StringEncoderTests {
+public class JacksonJsonEncoderTests extends AbstractAllocatingTestCase {
 
-	private final StringEncoder encoder = new StringEncoder();
+	private JacksonJsonEncoder encoder;
+
+	@Before
+	public void createEncoder() {
+		encoder = new JacksonJsonEncoder(allocator);
+	}
 
 	@Test
 	public void canWrite() {
-		assertTrue(encoder.canEncode(ResolvableType.forClass(String.class), MediaType.TEXT_PLAIN));
-		assertFalse(encoder.canEncode(ResolvableType.forClass(Integer.class), MediaType.TEXT_PLAIN));
-		assertFalse(encoder.canEncode(ResolvableType.forClass(String.class), MediaType.APPLICATION_JSON));
+		assertTrue(encoder.canEncode(null, MediaType.APPLICATION_JSON));
+		assertFalse(encoder.canEncode(null, MediaType.APPLICATION_XML));
 	}
 
 	@Test
 	public void write() throws InterruptedException {
-		Flux<String> output = Flux.from(encoder.encode(Flux.just("foo"), null, null)).map(chunk -> {
-			byte[] b = new byte[chunk.remaining()];
-			chunk.get(b);
+		Flux<Pojo> source = Flux.just(new Pojo("foofoo", "barbar"), new Pojo("foofoofoo", "barbarbar"));
+		Flux<String> output = encoder.encode(source, null, null).map(chunk -> {
+			byte[] b = new byte[chunk.readableByteCount()];
+			chunk.read(b);
 			return new String(b, StandardCharsets.UTF_8);
 		});
 		List<String> results = StreamSupport.stream(output.toIterable().spliterator(), false).collect(toList());
-		assertEquals(1, results.size());
-		assertEquals("foo", results.get(0));
+		assertEquals(2, results.size());
+		assertEquals("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}", results.get(0));
+		assertEquals("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}", results.get(1));
 	}
 
 }
