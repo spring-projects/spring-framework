@@ -112,7 +112,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 						if (!ObjectUtils.isEmpty(providedArgs)) {
 							for (Object providedArg : providedArgs) {
 								if (param.getParameterType().isInstance(providedArg)) {
-									return Mono.just(providedArg);
+									return Mono.just(providedArg).log("reactor.resolved");
 								}
 							}
 						}
@@ -123,7 +123,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 						try {
 							return resolver.resolveArgument(param, exchange)
 									.defaultIfEmpty(NO_VALUE)
-									.otherwise(ex -> Mono.error(getArgError("Error resolving ", param, ex)));
+									.otherwise(ex -> Mono.error(getArgError("Error resolving ", param, ex)))
+									.log("reactor.unresolved");
 						}
 						catch (Exception ex) {
 							throw getArgError("Error resolving ", param, ex);
@@ -131,8 +132,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 					})
 					.collect(Collectors.toList());
 
-			return Mono.when(monos).map(args ->
-					Stream.of(args.toArray()).map(o -> o != NO_VALUE ? o : null).toArray());
+			return Mono.when(monos).log("reactor.unresolved").map(args ->
+					Stream.of(args).map(o -> o != NO_VALUE ? o : null).toArray());
 		}
 		catch (Throwable ex) {
 			return Mono.error(ex);
