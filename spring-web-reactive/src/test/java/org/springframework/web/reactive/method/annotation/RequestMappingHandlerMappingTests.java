@@ -34,7 +34,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.server.DefaultWebServerExchange;
+import org.springframework.web.server.adapter.DefaultWebServerExchange;
 import org.springframework.web.server.WebServerExchange;
 import org.springframework.web.server.session.WebSessionManager;
 

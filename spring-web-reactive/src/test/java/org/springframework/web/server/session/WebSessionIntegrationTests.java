@@ -37,7 +37,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.WebServerExchange;
-import org.springframework.web.server.WebToHttpHandlerBuilder;
+import org.springframework.web.server.adapter.WebToHttpHandlerBuilder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

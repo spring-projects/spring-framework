@@ -13,14 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.server;
+package org.springframework.web.server.adapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.server.WebExceptionHandler;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebHandler;
+import org.springframework.web.server.handler.ExceptionHandlingWebHandler;
+import org.springframework.web.server.handler.FilteringWebHandler;
 import org.springframework.web.server.session.WebSessionManager;
 
 /**
@@ -76,7 +82,7 @@ public class WebToHttpHandlerBuilder {
 		return this;
 	}
 
-	public WebToHttpHandlerAdapter build() {
+	public HttpHandler build() {
 		WebHandler handler = this.targetHandler;
 		if (!this.exceptionHandlers.isEmpty()) {
 			WebExceptionHandler[] array = new WebExceptionHandler[this.exceptionHandlers.size()];

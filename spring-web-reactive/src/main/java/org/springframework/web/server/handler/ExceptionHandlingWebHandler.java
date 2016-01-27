@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.server;
+package org.springframework.web.server.handler;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,6 +24,9 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.web.server.WebExceptionHandler;
+import org.springframework.web.server.WebHandler;
+import org.springframework.web.server.WebServerExchange;
 
 /**
  * {@code WebHandler} that decorates another with exception handling using one

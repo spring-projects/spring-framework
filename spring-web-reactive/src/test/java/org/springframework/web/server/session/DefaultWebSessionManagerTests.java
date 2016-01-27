@@ -27,7 +27,7 @@ import org.junit.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
-import org.springframework.web.server.DefaultWebServerExchange;
+import org.springframework.web.server.adapter.DefaultWebServerExchange;
 import org.springframework.web.server.WebServerExchange;
 import org.springframework.web.server.WebSession;
 
@@ -37,7 +37,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Rossen Stoyanchev
@@ -74,7 +73,7 @@ public class DefaultWebSessionManagerTests {
 
 		session.save();
 
-		assertFalse(this.idResolver.getId().isPresent());
+		assertNull(this.idResolver.getId());
 		assertNull(this.manager.getSessionStore().retrieveSession(session.getId()).get());
 	}
 
@@ -86,8 +85,8 @@ public class DefaultWebSessionManagerTests {
 		session.save();
 
 		String id = session.getId();
-		assertTrue(this.idResolver.getId().isPresent());
-		assertEquals(id, this.idResolver.getId().get());
+		assertNotNull(this.idResolver.getId());
+		assertEquals(id, this.idResolver.getId());
 		assertSame(session, this.manager.getSessionStore().retrieveSession(id).get());
 	}
 
@@ -98,7 +97,7 @@ public class DefaultWebSessionManagerTests {
 		session.getAttributes().put("foo", "bar");
 		session.save();
 
-		assertTrue(this.idResolver.getId().isPresent());
+		assertNotNull(this.idResolver.getId());
 	}
 
 	@Test
@@ -129,14 +128,14 @@ public class DefaultWebSessionManagerTests {
 
 		private Optional<String> idToResolve = Optional.empty();
 
-		private Optional<String> id = Optional.empty();
+		private String id = null;
 
 
 		public void setIdToResolve(Optional<String> idToResolve) {
 			this.idToResolve = idToResolve;
 		}
 
-		public Optional<String> getId() {
+		public String getId() {
 			return this.id;
 		}
 
@@ -146,7 +145,7 @@ public class DefaultWebSessionManagerTests {
 		}
 
 		@Override
-		public void setSessionId(WebServerExchange exchange, Optional<String> sessionId) {
+		public void setSessionId(WebServerExchange exchange, String sessionId) {
 			this.id = sessionId;
 		}
 	}

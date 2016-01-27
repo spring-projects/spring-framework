@@ -40,7 +40,7 @@ import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.ResponseStatusExceptionHandler;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.WebServerExchange;
-import org.springframework.web.server.WebToHttpHandlerBuilder;
+import org.springframework.web.server.adapter.WebToHttpHandlerBuilder;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;

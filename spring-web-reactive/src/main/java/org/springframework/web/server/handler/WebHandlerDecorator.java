@@ -13,11 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.server;
+package org.springframework.web.server.handler;
 
 import reactor.core.publisher.Mono;
 
 import org.springframework.util.Assert;
+import org.springframework.web.server.WebHandler;
+import org.springframework.web.server.WebServerExchange;
 
 /**
  * Base class for a {@link WebHandler} that decorates and delegates to another.

@@ -64,7 +64,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.handler.SimpleHandlerResultHandler;
-import org.springframework.web.server.WebToHttpHandlerBuilder;
+import org.springframework.web.server.adapter.WebToHttpHandlerBuilder;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;

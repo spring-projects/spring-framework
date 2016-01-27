@@ -29,7 +29,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.web.ResponseStatusException;
-import org.springframework.web.server.DefaultWebServerExchange;
+import org.springframework.web.server.adapter.DefaultWebServerExchange;
 import org.springframework.web.server.WebServerExchange;
 import org.springframework.web.server.session.WebSessionManager;
 

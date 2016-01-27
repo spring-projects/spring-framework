@@ -35,7 +35,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.method.annotation.RequestParamArgumentResolver;
-import org.springframework.web.server.DefaultWebServerExchange;
+import org.springframework.web.server.adapter.DefaultWebServerExchange;
 import org.springframework.web.server.WebServerExchange;
 import org.springframework.web.server.session.WebSessionManager;
 

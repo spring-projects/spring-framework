@@ -13,13 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.server;
+package org.springframework.web.server.handler;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import reactor.core.publisher.Mono;
+
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
+import org.springframework.web.server.WebHandler;
+import org.springframework.web.server.WebServerExchange;
 
 /**
  * {@code WebHandler} that decorates another with a chain of {@link WebFilter}s.

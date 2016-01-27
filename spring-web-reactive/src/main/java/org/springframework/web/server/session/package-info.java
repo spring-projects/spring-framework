@@ -1,4 +1,4 @@
 /**
- * Support for a user session.
+ * Web session support.
  */
 package org.springframework.web.server.session;

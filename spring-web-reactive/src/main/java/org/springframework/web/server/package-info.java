@@ -15,6 +15,6 @@
  */
 
 /**
- * Web server infrastructure like filter, exchange (request + response), etc.
+ * Foundational Spring web server support.
  */
 package org.springframework.web.server;

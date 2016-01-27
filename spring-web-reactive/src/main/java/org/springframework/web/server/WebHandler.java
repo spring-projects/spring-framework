@@ -18,6 +18,9 @@ package org.springframework.web.server;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.web.server.adapter.WebToHttpHandlerAdapter;
+import org.springframework.web.server.adapter.WebToHttpHandlerBuilder;
+
 /**
  * Contract to handle a web server exchange.
  *

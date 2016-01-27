@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.server;
+package org.springframework.web.server.handler;
 
 
 import java.net.URI;
@@ -30,10 +30,14 @@ import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
+import org.springframework.web.server.WebHandler;
+import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.adapter.WebToHttpHandlerBuilder;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
 
 /**
  * @author Rossen Stoyanchev
@@ -104,7 +108,7 @@ public class FilteringWebHandlerTests {
 		assertTrue(webHandler.invoked());
 	}
 
-	private WebToHttpHandlerAdapter createHttpHandler(StubWebHandler webHandler, WebFilter... filters) {
+	private HttpHandler createHttpHandler(StubWebHandler webHandler, WebFilter... filters) {
 		return WebToHttpHandlerBuilder.webHandler(webHandler).filters(filters).build();
 	}
 

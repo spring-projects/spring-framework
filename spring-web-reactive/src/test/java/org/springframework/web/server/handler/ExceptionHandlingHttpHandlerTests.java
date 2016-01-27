@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.server;
+package org.springframework.web.server.handler;
 
 
 import java.net.URI;
@@ -26,6 +26,11 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
+import org.springframework.web.server.WebExceptionHandler;
+import org.springframework.web.server.WebHandler;
+import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.handler.ExceptionHandlingWebHandler;
+import org.springframework.web.server.adapter.DefaultWebServerExchange;
 import org.springframework.web.server.session.WebSessionManager;
 
 import static org.junit.Assert.assertEquals;
