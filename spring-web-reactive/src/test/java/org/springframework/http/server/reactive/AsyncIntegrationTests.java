@@ -106,7 +106,6 @@ public class AsyncIntegrationTests {
 
 		@Override
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-			DataBufferAllocator allocator = new DefaultDataBufferAllocator();
 			return response.setBody(Stream.just("h", "e", "l", "l", "o")
 			                              .timer(Timers.global())
 			                              .throttleRequest(100)
