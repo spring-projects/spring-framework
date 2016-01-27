@@ -99,9 +99,4 @@ public class ReactorHttpServer extends HttpServerSupport
 			this.running = false;
 		}
 	}
-
-	@Override
-	public Object upstream() {
-		return null;
-	}
 }
