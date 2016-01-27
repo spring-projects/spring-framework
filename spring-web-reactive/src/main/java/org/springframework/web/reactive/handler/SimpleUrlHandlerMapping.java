@@ -23,7 +23,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.web.reactive.HandlerMapping;
-import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.ServerWebExchange;
 
 /**
  * @author Rossen Stoyanchev
@@ -42,7 +42,7 @@ public class SimpleUrlHandlerMapping implements HandlerMapping {
 
 
 	@Override
-	public Mono<Object> getHandler(WebServerExchange exchange) {
+	public Mono<Object> getHandler(ServerWebExchange exchange) {
 		return Flux.create(subscriber -> {
 			String path = exchange.getRequest().getURI().getPath();
 			Object handler = this.handlerMap.get(path);

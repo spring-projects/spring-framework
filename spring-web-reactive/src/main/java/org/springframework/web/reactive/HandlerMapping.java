@@ -18,7 +18,7 @@ package org.springframework.web.reactive;
 
 import reactor.core.publisher.Mono;
 
-import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Interface to be implemented by objects that define a mapping between
@@ -35,6 +35,6 @@ public interface HandlerMapping {
 	 * @return A {@link Mono} that emits one value or none in case the request
 	 * cannot be resolved to a handler
 	 */
-	Mono<Object> getHandler(WebServerExchange exchange);
+	Mono<Object> getHandler(ServerWebExchange exchange);
 
 }

@@ -36,7 +36,7 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
-import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.ServerWebExchange;
 
 
 /**
@@ -82,7 +82,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	 * @return Publisher that produces a single HandlerResult or an error signal;
 	 * never throws an exception
 	 */
-	public Mono<HandlerResult> invokeForRequest(WebServerExchange exchange, Object... providedArgs) {
+	public Mono<HandlerResult> invokeForRequest(ServerWebExchange exchange, Object... providedArgs) {
 		return resolveArguments(exchange, providedArgs).then(args -> {
 			try {
 				Object value = doInvoke(args);
@@ -100,7 +100,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		});
 	}
 
-	private Mono<Object[]> resolveArguments(WebServerExchange exchange, Object... providedArgs) {
+	private Mono<Object[]> resolveArguments(ServerWebExchange exchange, Object... providedArgs) {
 		if (ObjectUtils.isEmpty(getMethodParameters())) {
 			return NO_ARGS;
 		}

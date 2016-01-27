@@ -17,7 +17,7 @@ package org.springframework.web.server.session;
 
 import reactor.core.publisher.Mono;
 
-import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 
 /**
@@ -43,6 +43,6 @@ public interface WebSessionManager {
 	 * @param exchange the current exchange
 	 * @return {@code Mono} for async access to the session
 	 */
-	Mono<WebSession> getSession(WebServerExchange exchange);
+	Mono<WebSession> getSession(ServerWebExchange exchange);
 
 }

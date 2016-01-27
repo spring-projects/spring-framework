@@ -24,7 +24,7 @@ import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.HandlerAdapter;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.server.WebHandler;
-import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Support use of {@link org.springframework.web.server.WebHandler} through the
@@ -45,7 +45,7 @@ public class HttpHandlerHandlerAdapter implements HandlerAdapter {
 	}
 
 	@Override
-	public Mono<HandlerResult> handle(WebServerExchange exchange, Object handler) {
+	public Mono<HandlerResult> handle(ServerWebExchange exchange, Object handler) {
 		WebHandler webHandler = (WebHandler) handler;
 		Mono<Void> completion = webHandler.handle(exchange);
 		return Mono.just(new HandlerResult(webHandler, completion, PUBLISHER_VOID));

@@ -18,7 +18,7 @@ package org.springframework.web.reactive;
 
 import reactor.core.publisher.Mono;
 
-import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Process the {@link HandlerResult}, usually returned by an {@link HandlerAdapter}.
@@ -44,6 +44,6 @@ public interface HandlerResultHandler {
 	 * @param result the result from the handling
 	 * @return {@code Mono<Void>} to indicate when request handling is complete.
 	 */
-	Mono<Void> handleResult(WebServerExchange exchange, HandlerResult result);
+	Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result);
 
 }

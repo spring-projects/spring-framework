@@ -33,8 +33,8 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.server.WebHandler;
-import org.springframework.web.server.WebServerExchange;
-import org.springframework.web.server.adapter.WebToHttpHandlerBuilder;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -109,7 +109,7 @@ public class FilteringWebHandlerTests {
 	}
 
 	private HttpHandler createHttpHandler(StubWebHandler webHandler, WebFilter... filters) {
-		return WebToHttpHandlerBuilder.webHandler(webHandler).filters(filters).build();
+		return WebHttpHandlerBuilder.webHandler(webHandler).filters(filters).build();
 	}
 
 
@@ -123,12 +123,12 @@ public class FilteringWebHandlerTests {
 		}
 
 		@Override
-		public Mono<Void> filter(WebServerExchange exchange, WebFilterChain chain) {
+		public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
 			this.invoked = true;
 			return doFilter(exchange, chain);
 		}
 
-		public Mono<Void> doFilter(WebServerExchange exchange, WebFilterChain chain) {
+		public Mono<Void> doFilter(ServerWebExchange exchange, WebFilterChain chain) {
 			return chain.filter(exchange);
 		}
 	}
@@ -136,7 +136,7 @@ public class FilteringWebHandlerTests {
 	private static class ShortcircuitingFilter extends TestFilter {
 
 		@Override
-		public Mono<Void> doFilter(WebServerExchange exchange, WebFilterChain chain) {
+		public Mono<Void> doFilter(ServerWebExchange exchange, WebFilterChain chain) {
 			return Mono.empty();
 		}
 	}
@@ -144,7 +144,7 @@ public class FilteringWebHandlerTests {
 	private static class AsyncFilter extends TestFilter {
 
 		@Override
-		public Mono<Void> doFilter(WebServerExchange exchange, WebFilterChain chain) {
+		public Mono<Void> doFilter(ServerWebExchange exchange, WebFilterChain chain) {
 			return doAsyncWork().then(asyncResult -> {
 				logger.debug("Async result: " + asyncResult);
 				return chain.filter(exchange);
@@ -166,7 +166,7 @@ public class FilteringWebHandlerTests {
 		}
 
 		@Override
-		public Mono<Void> handle(WebServerExchange exchange) {
+		public Mono<Void> handle(ServerWebExchange exchange) {
 			logger.trace("StubHandler invoked.");
 			this.invoked = true;
 			return Mono.empty();

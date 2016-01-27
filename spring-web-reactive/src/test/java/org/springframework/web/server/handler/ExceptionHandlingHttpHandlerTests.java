@@ -28,9 +28,8 @@ import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebHandler;
-import org.springframework.web.server.WebServerExchange;
-import org.springframework.web.server.handler.ExceptionHandlingWebHandler;
-import org.springframework.web.server.adapter.DefaultWebServerExchange;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.WebSessionManager;
 
 import static org.junit.Assert.assertEquals;
@@ -44,7 +43,7 @@ public class ExceptionHandlingHttpHandlerTests {
 
 	private MockServerHttpResponse response;
 
-	private WebServerExchange exchange;
+	private ServerWebExchange exchange;
 
 	private WebHandler targetHandler;
 
@@ -55,7 +54,7 @@ public class ExceptionHandlingHttpHandlerTests {
 		WebSessionManager sessionManager = mock(WebSessionManager.class);
 		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, uri);
 		this.response = new MockServerHttpResponse();
-		this.exchange = new DefaultWebServerExchange(request, this.response, sessionManager);
+		this.exchange = new DefaultServerWebExchange(request, this.response, sessionManager);
 		this.targetHandler = new StubWebHandler(new IllegalStateException("boo"));
 	}
 
@@ -119,7 +118,7 @@ public class ExceptionHandlingHttpHandlerTests {
 		}
 
 		@Override
-		public Mono<Void> handle(WebServerExchange exchange) {
+		public Mono<Void> handle(ServerWebExchange exchange) {
 			if (this.raise) {
 				throw this.exception;
 			}
@@ -130,7 +129,7 @@ public class ExceptionHandlingHttpHandlerTests {
 	private static class BadRequestExceptionHandler implements WebExceptionHandler {
 
 		@Override
-		public Mono<Void> handle(WebServerExchange exchange, Throwable ex) {
+		public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
 			exchange.getResponse().setStatusCode(HttpStatus.BAD_REQUEST);
 			return Mono.empty();
 		}
@@ -140,7 +139,7 @@ public class ExceptionHandlingHttpHandlerTests {
 	private static class UnresolvedExceptionHandler implements WebExceptionHandler {
 
 		@Override
-		public Mono<Void> handle(WebServerExchange exchange, Throwable ex) {
+		public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
 			return Mono.error(ex);
 		}
 	}

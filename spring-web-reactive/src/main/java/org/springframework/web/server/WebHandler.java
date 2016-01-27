@@ -18,19 +18,19 @@ package org.springframework.web.server;
 
 import reactor.core.publisher.Mono;
 
-import org.springframework.web.server.adapter.WebToHttpHandlerAdapter;
-import org.springframework.web.server.adapter.WebToHttpHandlerBuilder;
+import org.springframework.web.server.adapter.WebHttpHandlerAdapter;
+import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 /**
  * Contract to handle a web server exchange.
  *
- * <p>Use {@link WebToHttpHandlerAdapter} to adapt a {@code WebHandler} to an
+ * <p>Use {@link WebHttpHandlerAdapter} to adapt a {@code WebHandler} to an
  * {@link org.springframework.http.server.reactive.HttpHandler HttpHandler}.
- * The {@link WebToHttpHandlerBuilder} provides a convenient way to do that while
+ * The {@link WebHttpHandlerBuilder} provides a convenient way to do that while
  * also optionally configuring one or more filters and/or exception handlers.
  *
  * @author Rossen Stoyanchev
- * @see WebToHttpHandlerBuilder
+ * @see WebHttpHandlerBuilder
  */
 public interface WebHandler {
 
@@ -40,6 +40,6 @@ public interface WebHandler {
 	 * @param exchange the current server exchange
 	 * @return {@code Mono<Void>} to indicate when request handling is complete
 	 */
-	Mono<Void> handle(WebServerExchange exchange);
+	Mono<Void> handle(ServerWebExchange exchange);
 
 }

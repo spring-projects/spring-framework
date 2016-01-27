@@ -29,7 +29,7 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
  *
  * @author Rossen Stoyanchev
  */
-public interface WebServerExchange {
+public interface ServerWebExchange {
 
 	/**
 	 * Return the current HTTP request.
@@ -47,7 +47,12 @@ public interface WebServerExchange {
 	Map<String, Object> getAttributes();
 
 	/**
-	 *
+	 * Return the web session for the current request. Always guaranteed  to
+	 * return an instance either matching to the session id requested by the
+	 * client, or with a new session id either because the client did not
+	 * specify one or because the underlying session had expired. Use of this
+	 * method does not automatically create a session. See {@link WebSession}
+	 * for more details.
 	 */
 	Mono<WebSession> getSession();
 

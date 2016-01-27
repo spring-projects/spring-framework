@@ -19,10 +19,10 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.util.Assert;
 import org.springframework.web.server.WebHandler;
-import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.ServerWebExchange;
 
 /**
- * Base class for a {@link WebHandler} that decorates and delegates to another.
+ * {@link WebHandler} that decorates and delegates to another.
  *
  * @author Rossen Stoyanchev
  */
@@ -43,7 +43,7 @@ public class WebHandlerDecorator implements WebHandler {
 
 
 	@Override
-	public Mono<Void> handle(WebServerExchange exchange) {
+	public Mono<Void> handle(ServerWebExchange exchange) {
 		return this.delegate.handle(exchange);
 	}
 

@@ -31,7 +31,7 @@ import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.reactive.method.HandlerMethodArgumentResolver;
-import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.ServerWebExchange;
 
 /**
  * @author Sebastien Deleuze
@@ -58,7 +58,7 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 	}
 
 	@Override
-	public Mono<Object> resolveArgument(MethodParameter parameter, WebServerExchange exchange) {
+	public Mono<Object> resolveArgument(MethodParameter parameter, ServerWebExchange exchange) {
 		MediaType mediaType = exchange.getRequest().getHeaders().getContentType();
 		if (mediaType == null) {
 			mediaType = MediaType.APPLICATION_OCTET_STREAM;

@@ -26,32 +26,37 @@ import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.handler.WebHandlerDecorator;
-import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
 /**
- * Adapt {@link WebHandler} to {@link HttpHandler} also creating the
- * {@link WebServerExchange} before invoking the target {@code WebHandler}.
+ * Default adapter of {@link WebHandler} to the {@link HttpHandler} contract.
+ *
+ * <p>By default creates and configures a {@link DefaultServerWebExchange} and
+ * then invokes the target {@code WebHandler}.
  *
  * @author Rossen Stoyanchev
  */
-public class WebToHttpHandlerAdapter extends WebHandlerDecorator implements HttpHandler {
+public class WebHttpHandlerAdapter extends WebHandlerDecorator implements HttpHandler {
 
-	private static Log logger = LogFactory.getLog(WebToHttpHandlerAdapter.class);
+	private static Log logger = LogFactory.getLog(WebHttpHandlerAdapter.class);
 
 
 	private WebSessionManager sessionManager = new DefaultWebSessionManager();
 
 
-	public WebToHttpHandlerAdapter(WebHandler delegate) {
+	public WebHttpHandlerAdapter(WebHandler delegate) {
 		super(delegate);
 	}
 
 
 	/**
-	 *
-	 * @param sessionManager
+	 * Configure a custom {@link WebSessionManager} to use for managing web
+	 * sessions. The provided instance is set on each created
+	 * {@link DefaultServerWebExchange}.
+	 * <p>By default this is set to {@link DefaultWebSessionManager}.
+	 * @param sessionManager the session manager to use
 	 */
 	public void setSessionManager(WebSessionManager sessionManager) {
 		Assert.notNull(sessionManager, "'sessionManager' must not be null.");
@@ -68,7 +73,7 @@ public class WebToHttpHandlerAdapter extends WebHandlerDecorator implements Http
 
 	@Override
 	public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-		WebServerExchange exchange = createWebServerExchange(request, response);
+		ServerWebExchange exchange = createExchange(request, response);
 		return getDelegate().handle(exchange)
 				.otherwise(ex -> {
 					if (logger.isDebugEnabled()) {
@@ -80,8 +85,8 @@ public class WebToHttpHandlerAdapter extends WebHandlerDecorator implements Http
 				.after(response::setComplete);
 	}
 
-	protected WebServerExchange createWebServerExchange(ServerHttpRequest request, ServerHttpResponse response) {
-		return new DefaultWebServerExchange(request, response, this.sessionManager);
+	protected ServerWebExchange createExchange(ServerHttpRequest request, ServerHttpResponse response) {
+		return new DefaultServerWebExchange(request, response, this.sessionManager);
 	}
 
 }

@@ -20,7 +20,7 @@ import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
 
-import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Contract that decouples the {@link DispatcherHandler} from the details of
@@ -58,6 +58,6 @@ public interface HandlerAdapter {
 	 * @return {@link Mono} that emits a single {@code HandlerResult} or none if
 	 * the request has been fully handled and doesn't require further handling.
 	 */
-	Mono<HandlerResult> handle(WebServerExchange exchange, Object handler);
+	Mono<HandlerResult> handle(ServerWebExchange exchange, Object handler);
 
 }

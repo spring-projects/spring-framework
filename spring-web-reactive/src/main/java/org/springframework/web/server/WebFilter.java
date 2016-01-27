@@ -35,6 +35,6 @@ public interface WebFilter {
 	 * @param chain provides a way to delegate to the next filter
 	 * @return {@code Mono<Void>} to indicate when request processing is complete
 	 */
-	Mono<Void> filter(WebServerExchange exchange, WebFilterChain chain);
+	Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain);
 
 }

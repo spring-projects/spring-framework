@@ -45,7 +45,7 @@ import org.springframework.web.reactive.HandlerAdapter;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.method.HandlerMethodArgumentResolver;
 import org.springframework.web.reactive.method.InvocableHandlerMethod;
-import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.ServerWebExchange;
 
 
 /**
@@ -114,7 +114,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 	}
 
 	@Override
-	public Mono<HandlerResult> handle(WebServerExchange exchange, Object handler) {
+	public Mono<HandlerResult> handle(ServerWebExchange exchange, Object handler) {
 		HandlerMethod handlerMethod = (HandlerMethod) handler;
 		InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
 		invocable.setHandlerMethodArgumentResolvers(this.argumentResolvers);
@@ -125,7 +125,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 	}
 
 	private Mono<HandlerResult> handleException(Throwable ex, HandlerMethod handlerMethod,
-			WebServerExchange exchange) {
+			ServerWebExchange exchange) {
 
 		if (ex instanceof Exception) {
 			InvocableHandlerMethod invocable = findExceptionHandler(handlerMethod, (Exception) ex);

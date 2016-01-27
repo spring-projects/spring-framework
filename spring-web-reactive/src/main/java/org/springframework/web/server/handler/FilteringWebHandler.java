@@ -24,10 +24,11 @@ import reactor.core.publisher.Mono;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.server.WebHandler;
-import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.ServerWebExchange;
 
 /**
- * {@code WebHandler} that decorates another with a chain of {@link WebFilter}s.
+ * WebHandler that delegates to a chain of {@link WebFilter} instances followed
+ * by a target {@link WebHandler}.
  *
  * @author Rossen Stoyanchev
  */
@@ -47,14 +48,14 @@ public class FilteringWebHandler extends WebHandlerDecorator {
 
 
 	/**
-	 * @return a read-only list of the configured filters.
+	 * Return a read-only list of the configured filters.
 	 */
 	public List<WebFilter> getFilters() {
 		return this.filters;
 	}
 
 	@Override
-	public Mono<Void> handle(WebServerExchange exchange) {
+	public Mono<Void> handle(ServerWebExchange exchange) {
 		return new DefaultWebFilterChain().filter(exchange);
 	}
 
@@ -65,7 +66,7 @@ public class FilteringWebHandler extends WebHandlerDecorator {
 
 
 		@Override
-		public Mono<Void> filter(WebServerExchange exchange) {
+		public Mono<Void> filter(ServerWebExchange exchange) {
 			if (this.index < filters.size()) {
 				WebFilter filter = filters.get(this.index++);
 				return filter.filter(exchange, this);

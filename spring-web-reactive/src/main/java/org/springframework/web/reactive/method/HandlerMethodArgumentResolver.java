@@ -19,7 +19,7 @@ package org.springframework.web.reactive.method;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
-import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.ServerWebExchange;
 
 
 /**
@@ -35,6 +35,6 @@ public interface HandlerMethodArgumentResolver {
 	 * does not resolve to any value, which will result in {@code null} passed
 	 * as the argument value.
 	 */
-	Mono<Object> resolveArgument(MethodParameter parameter, WebServerExchange exchange);
+	Mono<Object> resolveArgument(MethodParameter parameter, ServerWebExchange exchange);
 
 }

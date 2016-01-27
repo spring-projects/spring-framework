@@ -36,8 +36,8 @@ import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.WebHandler;
-import org.springframework.web.server.WebServerExchange;
-import org.springframework.web.server.adapter.WebToHttpHandlerBuilder;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -72,7 +72,7 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 	protected HttpHandler createHttpHandler() {
 		this.sessionManager = new DefaultWebSessionManager();
 		this.handler = new TestWebHandler();
-		return WebToHttpHandlerBuilder.webHandler(this.handler).sessionManager(this.sessionManager).build();
+		return WebHttpHandlerBuilder.webHandler(this.handler).sessionManager(this.sessionManager).build();
 	}
 
 	@Test
@@ -152,7 +152,7 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		}
 
 		@Override
-		public Mono<Void> handle(WebServerExchange exchange) {
+		public Mono<Void> handle(ServerWebExchange exchange) {
 			return exchange.getSession().map(session -> {
 				Map<String, Object> map = session.getAttributes();
 				int value = (map.get("counter") != null ? (int) map.get("counter") : 0);

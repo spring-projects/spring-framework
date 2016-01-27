@@ -27,8 +27,8 @@ import org.junit.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
-import org.springframework.web.server.adapter.DefaultWebServerExchange;
-import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.adapter.DefaultServerWebExchange;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 
 import static org.junit.Assert.assertEquals;
@@ -47,7 +47,7 @@ public class DefaultWebSessionManagerTests {
 
 	private TestWebSessionIdResolver idResolver;
 
-	private DefaultWebServerExchange exchange;
+	private DefaultServerWebExchange exchange;
 
 
 	@Before
@@ -58,7 +58,7 @@ public class DefaultWebSessionManagerTests {
 
 		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
 		MockServerHttpResponse response = new MockServerHttpResponse();
-		this.exchange = new DefaultWebServerExchange(request, response, this.manager);
+		this.exchange = new DefaultServerWebExchange(request, response, this.manager);
 	}
 
 
@@ -140,12 +140,12 @@ public class DefaultWebSessionManagerTests {
 		}
 
 		@Override
-		public Optional<String> resolveSessionId(WebServerExchange exchange) {
+		public Optional<String> resolveSessionId(ServerWebExchange exchange) {
 			return this.idToResolve;
 		}
 
 		@Override
-		public void setSessionId(WebServerExchange exchange, String sessionId) {
+		public void setSessionId(ServerWebExchange exchange, String sessionId) {
 			this.id = sessionId;
 		}
 	}

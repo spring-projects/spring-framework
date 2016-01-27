@@ -25,16 +25,16 @@ import reactor.core.publisher.Processors;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
-import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 import org.springframework.web.server.session.WebSessionManager;
 
 /**
- * Default implementation of {@link WebServerExchange}.
+ * Default implementation of {@link ServerWebExchange}.
  *
  * @author Rossen Stoyanchev
  */
-public class DefaultWebServerExchange implements WebServerExchange {
+public class DefaultServerWebExchange implements ServerWebExchange {
 
 	private final ServerHttpRequest request;
 
@@ -51,7 +51,7 @@ public class DefaultWebServerExchange implements WebServerExchange {
 
 
 
-	public DefaultWebServerExchange(ServerHttpRequest request, ServerHttpResponse response,
+	public DefaultServerWebExchange(ServerHttpRequest request, ServerHttpResponse response,
 			WebSessionManager sessionManager) {
 
 		Assert.notNull(request, "'request' is required.");

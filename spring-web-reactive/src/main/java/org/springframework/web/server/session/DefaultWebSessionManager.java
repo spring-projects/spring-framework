@@ -23,7 +23,7 @@ import java.util.UUID;
 import reactor.core.publisher.Mono;
 
 import org.springframework.util.Assert;
-import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
 
 
@@ -97,7 +97,7 @@ public class DefaultWebSessionManager implements WebSessionManager {
 
 
 	@Override
-	public Mono<WebSession> getSession(WebServerExchange exchange) {
+	public Mono<WebSession> getSession(ServerWebExchange exchange) {
 		return Mono.fromCallable(() -> getSessionIdResolver().resolveSessionId(exchange))
 				.where(Optional::isPresent)
 				.map(Optional::get)
@@ -107,7 +107,7 @@ public class DefaultWebSessionManager implements WebSessionManager {
 				.map(session -> extendSession(exchange, session));
 	}
 
-	protected Mono<WebSession> validateSession(WebServerExchange exchange, WebSession session) {
+	protected Mono<WebSession> validateSession(ServerWebExchange exchange, WebSession session) {
 		if (session.isExpired()) {
 			this.sessionIdResolver.setSessionId(exchange, "");
 			return this.sessionStore.removeSession(session.getId()).after(Mono::empty);
@@ -117,13 +117,13 @@ public class DefaultWebSessionManager implements WebSessionManager {
 		}
 	}
 
-	protected Mono<WebSession> createSession(WebServerExchange exchange) {
+	protected Mono<WebSession> createSession(ServerWebExchange exchange) {
 		String sessionId = UUID.randomUUID().toString();
 		WebSession session = new DefaultWebSession(sessionId, getClock());
 		return Mono.just(session);
 	}
 
-	protected WebSession extendSession(WebServerExchange exchange, WebSession session) {
+	protected WebSession extendSession(ServerWebExchange exchange, WebSession session) {
 		if (session instanceof ConfigurableWebSession) {
 			ConfigurableWebSession managed = (ConfigurableWebSession) session;
 			managed.setSaveOperation(() -> saveSession(exchange, session));
@@ -133,7 +133,7 @@ public class DefaultWebSessionManager implements WebSessionManager {
 		return session;
 	}
 
-	protected Mono<Void> saveSession(WebServerExchange exchange, WebSession session) {
+	protected Mono<Void> saveSession(ServerWebExchange exchange, WebSession session) {
 
 		Assert.isTrue(!session.isExpired(), "Sessions are checked for expiration and have their " +
 				"access time updated when first accessed during request processing. " +

@@ -49,14 +49,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.reactive.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.reactive.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.reactive.method.annotation.ResponseBodyResultHandler;
-import org.springframework.web.server.adapter.DefaultWebServerExchange;
+import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.handler.ExceptionHandlingWebHandler;
 import org.springframework.web.server.handler.FilteringWebHandler;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.server.WebHandler;
-import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.session.WebSessionManager;
 
 import static org.hamcrest.CoreMatchers.startsWith;
@@ -81,7 +81,7 @@ public class DispatcherHandlerErrorTests {
 
 	private MockServerHttpResponse response;
 
-	private WebServerExchange exchange;
+	private ServerWebExchange exchange;
 
 
 	@Before
@@ -97,7 +97,7 @@ public class DispatcherHandlerErrorTests {
 
 		this.request = new MockServerHttpRequest(HttpMethod.GET, new URI("/"));
 		this.response = new MockServerHttpResponse();
-		this.exchange = new DefaultWebServerExchange(this.request, this.response, sessionManager);
+		this.exchange = new DefaultServerWebExchange(this.request, this.response, sessionManager);
 	}
 
 
@@ -280,7 +280,7 @@ public class DispatcherHandlerErrorTests {
 	private static class ServerError500ExceptionHandler implements WebExceptionHandler {
 
 		@Override
-		public Mono<Void> handle(WebServerExchange exchange, Throwable ex) {
+		public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
 			exchange.getResponse().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
 			return Mono.empty();
 		}
@@ -289,7 +289,7 @@ public class DispatcherHandlerErrorTests {
 	private static class TestWebFilter implements WebFilter {
 
 		@Override
-		public Mono<Void> filter(WebServerExchange exchange, WebFilterChain chain) {
+		public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
 			return chain.filter(exchange);
 		}
 	}

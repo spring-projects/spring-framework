@@ -33,7 +33,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.server.WebHandler;
-import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Central dispatcher for HTTP request handlers/controllers. Dispatches to registered
@@ -112,7 +112,7 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 
 
 	@Override
-	public Mono<Void> handle(WebServerExchange exchange) {
+	public Mono<Void> handle(ServerWebExchange exchange) {
 		if (logger.isDebugEnabled()) {
 			ServerHttpRequest request = exchange.getRequest();
 			logger.debug("Processing " + request.getMethod() + " request for [" + request.getURI() + "]");
@@ -125,7 +125,7 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 				.otherwise(ex -> Mono.error(this.errorMapper.apply(ex)));
 	}
 
-	private Mono<HandlerResult> invokeHandler(WebServerExchange exchange, Object handler) {
+	private Mono<HandlerResult> invokeHandler(ServerWebExchange exchange, Object handler) {
 		for (HandlerAdapter handlerAdapter : this.handlerAdapters) {
 			if (handlerAdapter.supports(handler)) {
 				return handlerAdapter.handle(exchange, handler);
@@ -134,7 +134,7 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 		return Mono.error(new IllegalStateException("No HandlerAdapter: " + handler));
 	}
 
-	private Mono<Void> handleResult(WebServerExchange exchange, HandlerResult result) {
+	private Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
 		return getResultHandler(result).handleResult(exchange, result)
 				.otherwise(ex -> result.applyExceptionHandler(ex).then(exceptionResult ->
 						getResultHandler(result).handleResult(exchange, exceptionResult)));
@@ -157,7 +157,7 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 
 
 		@Override
-		public Mono<Object> getHandler(WebServerExchange exchange) {
+		public Mono<Object> getHandler(ServerWebExchange exchange) {
 			return Mono.error(HANDLER_NOT_FOUND_EXCEPTION);
 		}
 	}

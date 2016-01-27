@@ -25,7 +25,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.util.Assert;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
-import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Supports {@link HandlerResult} with a {@code void} or {@code Publisher<Void>} value.
@@ -74,7 +74,7 @@ public class SimpleHandlerResultHandler implements Ordered, HandlerResultHandler
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Mono<Void> handleResult(WebServerExchange exchange, HandlerResult result) {
+	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
 		Object value = result.getResult();
 		if (Void.TYPE.equals(result.getResultType().getRawClass())) {
 			return Mono.empty();

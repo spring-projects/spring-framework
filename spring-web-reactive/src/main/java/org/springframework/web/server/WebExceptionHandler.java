@@ -33,6 +33,6 @@ public interface WebExceptionHandler {
 	 * @param ex the exception to handle
 	 * @return {@code Mono<Void>} to indicate when exception handling is complete
 	 */
-	Mono<Void> handle(WebServerExchange exchange, Throwable ex);
+	Mono<Void> handle(ServerWebExchange exchange, Throwable ex);
 
 }

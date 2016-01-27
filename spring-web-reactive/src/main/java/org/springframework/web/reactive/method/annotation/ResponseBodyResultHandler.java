@@ -45,7 +45,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
-import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.ServerWebExchange;
 
 
 /**
@@ -130,7 +130,7 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Mono<Void> handleResult(WebServerExchange exchange, HandlerResult result) {
+	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
 
 		Object value = result.getResult();
 		if (value == null) {

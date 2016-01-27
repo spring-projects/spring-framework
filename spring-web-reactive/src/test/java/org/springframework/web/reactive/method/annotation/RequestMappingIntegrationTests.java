@@ -64,7 +64,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.handler.SimpleHandlerResultHandler;
-import org.springframework.web.server.adapter.WebToHttpHandlerBuilder;
+import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -88,7 +88,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		DispatcherHandler webHandler = new DispatcherHandler();
 		webHandler.setApplicationContext(this.wac);
 
-		return WebToHttpHandlerBuilder.webHandler(webHandler).build();
+		return WebHttpHandlerBuilder.webHandler(webHandler).build();
 	}
 
 	@Test

@@ -41,7 +41,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.HandlerMethodSelector;
 import org.springframework.web.reactive.HandlerMapping;
-import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.ServerWebExchange;
 
 
 /**
@@ -93,7 +93,7 @@ public class RequestMappingHandlerMapping implements HandlerMapping,
 	}
 
 	@Override
-	public Mono<Object> getHandler(WebServerExchange exchange) {
+	public Mono<Object> getHandler(ServerWebExchange exchange) {
 		return Flux.create(subscriber -> {
 			for (Map.Entry<RequestMappingInfo, HandlerMethod> entry : this.methodMap.entrySet()) {
 				RequestMappingInfo info = entry.getKey();

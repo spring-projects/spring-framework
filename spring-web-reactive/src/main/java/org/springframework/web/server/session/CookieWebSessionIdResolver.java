@@ -25,7 +25,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.ServerWebExchange;
 
 /**
  * Cookie-based {@link WebSessionIdResolver}.
@@ -75,7 +75,7 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 
 
 	@Override
-	public Optional<String> resolveSessionId(WebServerExchange exchange) {
+	public Optional<String> resolveSessionId(ServerWebExchange exchange) {
 		HttpHeaders headers = exchange.getRequest().getHeaders();
 		List<HttpCookie> cookies = headers.getCookies().get(getCookieName());
 		return (CollectionUtils.isEmpty(cookies) ?
@@ -83,7 +83,7 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 	}
 
 	@Override
-	public void setSessionId(WebServerExchange exchange, String id) {
+	public void setSessionId(ServerWebExchange exchange, String id) {
 		Duration maxAge = (StringUtils.hasText(id) ? getCookieMaxAge() : Duration.ofSeconds(0));
 		HttpCookie cookie = HttpCookie.serverCookie(getCookieName(), id).maxAge(maxAge).build();
 		HttpHeaders headers = exchange.getResponse().getHeaders();

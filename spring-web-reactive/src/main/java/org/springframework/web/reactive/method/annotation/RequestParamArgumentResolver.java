@@ -21,7 +21,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.reactive.method.HandlerMethodArgumentResolver;
-import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -41,7 +41,7 @@ public class RequestParamArgumentResolver implements HandlerMethodArgumentResolv
 
 
 	@Override
-	public Mono<Object> resolveArgument(MethodParameter param, WebServerExchange exchange) {
+	public Mono<Object> resolveArgument(MethodParameter param, ServerWebExchange exchange) {
 		RequestParam annotation = param.getParameterAnnotation(RequestParam.class);
 		String name = (annotation.value().length() != 0 ? annotation.value() : param.getParameterName());
 		UriComponents uriComponents = UriComponentsBuilder.fromUri(exchange.getRequest().getURI()).build();

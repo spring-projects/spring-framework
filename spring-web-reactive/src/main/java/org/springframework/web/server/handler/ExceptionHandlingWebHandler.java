@@ -26,11 +26,11 @@ import reactor.core.publisher.Mono;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebHandler;
-import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.ServerWebExchange;
 
 /**
- * {@code WebHandler} that decorates another with exception handling using one
- * or more instances of {@link WebExceptionHandler}.
+ * WebHandler that can invoke a target {@link WebHandler} and then apply
+ * exception handling with one or more {@link WebExceptionHandler} instances.
  *
  * @author Rossen Stoyanchev
  */
@@ -53,7 +53,7 @@ public class ExceptionHandlingWebHandler extends WebHandlerDecorator {
 
 
 	/**
-	 * @return a read-only list of the configured exception handlers.
+	 * Return a read-only list of the configured exception handlers.
 	 */
 	public List<WebExceptionHandler> getExceptionHandlers() {
 		return this.exceptionHandlers;
@@ -61,7 +61,7 @@ public class ExceptionHandlingWebHandler extends WebHandlerDecorator {
 
 
 	@Override
-	public Mono<Void> handle(WebServerExchange exchange) {
+	public Mono<Void> handle(ServerWebExchange exchange) {
 		Mono<Void> mono;
 		try {
 			mono = getDelegate().handle(exchange);
@@ -75,7 +75,7 @@ public class ExceptionHandlingWebHandler extends WebHandlerDecorator {
 		return mono.otherwise(ex -> handleUnresolvedException(exchange, ex));
 	}
 
-	private Mono<? extends Void> handleUnresolvedException(WebServerExchange exchange, Throwable ex) {
+	private Mono<? extends Void> handleUnresolvedException(ServerWebExchange exchange, Throwable ex) {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Could not complete request", ex);
 		}

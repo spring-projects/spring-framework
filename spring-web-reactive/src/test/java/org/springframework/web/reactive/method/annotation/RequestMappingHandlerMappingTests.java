@@ -34,8 +34,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.server.adapter.DefaultWebServerExchange;
-import org.springframework.web.server.WebServerExchange;
+import org.springframework.web.server.adapter.DefaultServerWebExchange;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.session.WebSessionManager;
 
 import static java.util.stream.Collectors.toList;
@@ -66,7 +66,7 @@ public class RequestMappingHandlerMappingTests {
 		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("boo"));
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		WebSessionManager sessionManager = mock(WebSessionManager.class);
-		WebServerExchange exchange = new DefaultWebServerExchange(request, response, sessionManager);
+		ServerWebExchange exchange = new DefaultServerWebExchange(request, response, sessionManager);
 		Publisher<?> handlerPublisher = this.mapping.getHandler(exchange);
 		HandlerMethod handlerMethod = toHandlerMethod(handlerPublisher);
 		assertEquals(TestController.class.getMethod("boo"), handlerMethod.getMethod());
@@ -77,13 +77,13 @@ public class RequestMappingHandlerMappingTests {
 		ServerHttpRequest request = new MockServerHttpRequest(HttpMethod.POST, new URI("foo"));
 		MockServerHttpResponse response = new MockServerHttpResponse();
 		WebSessionManager sessionManager = mock(WebSessionManager.class);
-		WebServerExchange exchange = new DefaultWebServerExchange(request, response, sessionManager);
+		ServerWebExchange exchange = new DefaultServerWebExchange(request, response, sessionManager);
 		Publisher<?> handlerPublisher = this.mapping.getHandler(exchange);
 		HandlerMethod handlerMethod = toHandlerMethod(handlerPublisher);
 		assertEquals(TestController.class.getMethod("postFoo"), handlerMethod.getMethod());
 
 		request = new MockServerHttpRequest(HttpMethod.GET, new URI("foo"));
-		exchange = new DefaultWebServerExchange(request, new MockServerHttpResponse(), sessionManager);
+		exchange = new DefaultServerWebExchange(request, new MockServerHttpResponse(), sessionManager);
 		handlerPublisher = this.mapping.getHandler(exchange);
 		handlerMethod = toHandlerMethod(handlerPublisher);
 		assertEquals(TestController.class.getMethod("getFoo"), handlerMethod.getMethod());
