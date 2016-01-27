@@ -24,7 +24,6 @@ import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.converter.RxJava1SingleConverter;
-import reactor.io.buffer.Buffer;
 import rx.Single;
 
 import org.springframework.core.ResolvableType;

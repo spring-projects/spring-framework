@@ -28,7 +28,6 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.ProcessorGroup;
 import reactor.core.publisher.Processors;
 import reactor.core.timer.Timers;
-import reactor.io.buffer.Buffer;
 import reactor.rx.Stream;
 
 import org.springframework.core.io.buffer.DataBufferAllocator;
@@ -98,7 +97,7 @@ public class AsyncIntegrationTests {
 	public void basicTest() throws Exception {
 		URI url = new URI("http://localhost:" + port);
 		ResponseEntity<String> response = new RestTemplate().exchange(RequestEntity.get(url)
-		                                                                             .build(), String.class);
+		                                                                           .build(), String.class);
 
 		assertThat(response.getBody(), Matchers.equalTo("hello"));
 	}
@@ -107,14 +106,13 @@ public class AsyncIntegrationTests {
 
 		@Override
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
+			DataBufferAllocator allocator = new DefaultDataBufferAllocator();
 			return response.setBody(Stream.just("h", "e", "l", "l", "o")
 			                              .timer(Timers.global())
 			                              .throttleRequest(100)
 			                              .dispatchOn(asyncGroup)
-			                              .collect(Buffer::new, Buffer::append)
-			                              .doOnSuccess(Buffer::flip)
-					.map((bytes) -> allocator.wrap(bytes.byteBuffer()))
-			);
+			                              .collect(allocator::allocateBuffer,
+			                               (buffer, str) -> buffer.write(str.getBytes())));
 		}
 	}
 

@@ -28,7 +28,6 @@ import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.io.buffer.Buffer;
 import reactor.rx.Promise;
 import reactor.rx.Stream;
 import rx.Observable;
@@ -443,12 +442,12 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@RequestMapping("/raw-flux")
 		public Flux<ByteBuffer> rawFluxResponseBody() {
-			return Flux.just(Buffer.wrap("Hello!").byteBuffer());
+			return Flux.just(ByteBuffer.wrap("Hello!".getBytes()));
 		}
 
 		@RequestMapping("/raw-observable")
 		public Observable<ByteBuffer> rawObservableResponseBody() {
-			return Observable.just(Buffer.wrap("Hello!").byteBuffer());
+			return Observable.just(ByteBuffer.wrap("Hello!".getBytes()));
 		}
 
 		@RequestMapping("/mono")
