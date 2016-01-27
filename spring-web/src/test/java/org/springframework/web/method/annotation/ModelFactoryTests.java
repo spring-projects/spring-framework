@@ -116,6 +116,30 @@ public class ModelFactoryTests {
 	}
 
 	@Test
+	public void modelAttributeWithBindingDisabled() throws Exception {
+		ModelFactory modelFactory = createModelFactory("modelAttrWithBindingDisabled");
+		HandlerMethod handlerMethod = createHandlerMethod("handle");
+		modelFactory.initModel(this.webRequest, this.mavContainer, handlerMethod);
+
+		assertTrue(this.mavContainer.containsAttribute("foo"));
+		assertTrue(this.mavContainer.isBindingDisabled("foo"));
+	}
+
+	@Test
+	public void modelAttributeFromSessionWithBindingDisabled() throws Exception {
+		Foo foo = new Foo();
+		this.attributeStore.storeAttribute(this.webRequest, "foo", foo);
+
+		ModelFactory modelFactory = createModelFactory("modelAttrWithBindingDisabled");
+		HandlerMethod handlerMethod = createHandlerMethod("handle");
+		modelFactory.initModel(this.webRequest, this.mavContainer, handlerMethod);
+
+		assertTrue(this.mavContainer.containsAttribute("foo"));
+		assertSame(foo, this.mavContainer.getModel().get("foo"));
+		assertTrue(this.mavContainer.isBindingDisabled("foo"));
+	}
+
+	@Test
 	public void sessionAttribute() throws Exception {
 		this.attributeStore.storeAttribute(this.webRequest, "sessionAttr", "sessionAttrValue");
 
@@ -250,7 +274,7 @@ public class ModelFactoryTests {
 	}
 
 
-	@SessionAttributes("sessionAttr") @SuppressWarnings("unused")
+	@SessionAttributes({"sessionAttr", "foo"}) @SuppressWarnings("unused")
 	private static class TestController {
 
 		@ModelAttribute
@@ -273,11 +297,19 @@ public class ModelFactoryTests {
 			return null;
 		}
 
+		@ModelAttribute(name="foo", binding=false)
+		public Foo modelAttrWithBindingDisabled() {
+			return new Foo();
+		}
+
 		public void handle() {
 		}
 
 		public void handleSessionAttr(@ModelAttribute("sessionAttr") String sessionAttr) {
 		}
+	}
+
+	private static class Foo {
 	}
 
 }

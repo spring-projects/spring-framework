@@ -62,6 +62,7 @@ public class ModelAttributeMethodProcessorTests {
 	private MethodParameter paramErrors;
 	private MethodParameter paramInt;
 	private MethodParameter paramModelAttr;
+	private MethodParameter paramBindingDisabledAttr;
 	private MethodParameter paramNonSimpleType;
 
 	private MethodParameter returnParamNamedModelAttr;
@@ -75,13 +76,15 @@ public class ModelAttributeMethodProcessorTests {
 		this.processor = new ModelAttributeMethodProcessor(false);
 
 		Method method = ModelAttributeHandler.class.getDeclaredMethod("modelAttribute",
-				TestBean.class, Errors.class, int.class, TestBean.class, TestBean.class);
+				TestBean.class, Errors.class, int.class, TestBean.class,
+				TestBean.class, TestBean.class);
 
 		this.paramNamedValidModelAttr = new SynthesizingMethodParameter(method, 0);
 		this.paramErrors = new SynthesizingMethodParameter(method, 1);
 		this.paramInt = new SynthesizingMethodParameter(method, 2);
 		this.paramModelAttr = new SynthesizingMethodParameter(method, 3);
-		this.paramNonSimpleType = new SynthesizingMethodParameter(method, 4);
+		this.paramBindingDisabledAttr = new SynthesizingMethodParameter(method, 4);
+		this.paramNonSimpleType = new SynthesizingMethodParameter(method, 5);
 
 		method = getClass().getDeclaredMethod("annotatedReturnValue");
 		this.returnParamNamedModelAttr = new MethodParameter(method, -1);
@@ -164,6 +167,41 @@ public class ModelAttributeMethodProcessorTests {
 		this.processor.resolveArgument(this.paramNamedValidModelAttr, this.container, this.request, factory);
 
 		assertTrue(dataBinder.isBindInvoked());
+		assertTrue(dataBinder.isValidateInvoked());
+	}
+
+	@Test
+	public void resolveArgumentBindingDisabledPreviously() throws Exception {
+		String name = "attrName";
+		Object target = new TestBean();
+		this.container.addAttribute(name, target);
+
+		// Declare binding disabled (e.g. via @ModelAttribute method)
+		this.container.setBindingDisabled(name);
+
+		StubRequestDataBinder dataBinder = new StubRequestDataBinder(target, name);
+		WebDataBinderFactory factory = mock(WebDataBinderFactory.class);
+		given(factory.createBinder(this.request, target, name)).willReturn(dataBinder);
+
+		this.processor.resolveArgument(this.paramNamedValidModelAttr, this.container, this.request, factory);
+
+		assertFalse(dataBinder.isBindInvoked());
+		assertTrue(dataBinder.isValidateInvoked());
+	}
+
+	@Test
+	public void resolveArgumentBindingDisabled() throws Exception {
+		String name = "noBindAttr";
+		Object target = new TestBean();
+		this.container.addAttribute(name, target);
+
+		StubRequestDataBinder dataBinder = new StubRequestDataBinder(target, name);
+		WebDataBinderFactory factory = mock(WebDataBinderFactory.class);
+		given(factory.createBinder(this.request, target, name)).willReturn(dataBinder);
+
+		this.processor.resolveArgument(this.paramBindingDisabledAttr, this.container, this.request, factory);
+
+		assertFalse(dataBinder.isBindInvoked());
 		assertTrue(dataBinder.isValidateInvoked());
 	}
 
@@ -281,6 +319,7 @@ public class ModelAttributeMethodProcessorTests {
 				Errors errors,
 				int intArg,
 				@ModelAttribute TestBean defaultNameAttr,
+				@ModelAttribute(name="noBindAttr", binding=false) @Valid TestBean noBindAttr,
 				TestBean notAnnotatedAttr) {
 		}
 	}

@@ -132,9 +132,11 @@ public final class ModelFactory {
 
 		while (!this.modelMethods.isEmpty()) {
 			InvocableHandlerMethod modelMethod = getNextModelMethod(container).getHandlerMethod();
-			ModelAttribute annot = modelMethod.getMethodAnnotation(ModelAttribute.class);
-			String modelName = annot.value();
-			if (container.containsAttribute(modelName)) {
+			ModelAttribute annotation = modelMethod.getMethodAnnotation(ModelAttribute.class);
+			if (container.containsAttribute(annotation.name())) {
+				if (!annotation.binding()) {
+					container.setBindingDisabled(annotation.name());
+				}
 				continue;
 			}
 
@@ -142,6 +144,9 @@ public final class ModelFactory {
 
 			if (!modelMethod.isVoid()){
 				String returnValueName = getNameForReturnValue(returnValue, modelMethod.getReturnType());
+				if (!annotation.binding()) {
+					container.setBindingDisabled(returnValueName);
+				}
 				if (!container.containsAttribute(returnValueName)) {
 					container.addAttribute(returnValueName, returnValue);
 				}

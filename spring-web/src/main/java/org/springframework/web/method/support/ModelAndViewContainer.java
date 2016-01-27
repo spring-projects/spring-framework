@@ -16,7 +16,9 @@
 
 package org.springframework.web.method.support;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
@@ -54,6 +56,9 @@ public class ModelAndViewContainer {
 	private ModelMap redirectModel;
 
 	private boolean redirectModelScenario = false;
+
+	/* Names of attributes with binding disabled */
+	private final Set<String> bindingDisabledAttributes = new HashSet<String>(4);
 
 	private HttpStatus status;
 
@@ -131,6 +136,23 @@ public class ModelAndViewContainer {
 		else {
 			return (this.redirectModel != null) ? this.redirectModel : new ModelMap();
 		}
+	}
+
+	/**
+	 * Register an attribute for which data binding should not occur, for example
+	 * corresponding to an {@code @ModelAttribute(binding=false)} declaration.
+	 * @param attributeName the name of the attribute
+	 * @since 4.3
+	 */
+	public void setBindingDisabled(String attributeName) {
+		this.bindingDisabledAttributes.add(attributeName);
+	}
+
+	/**
+	 * Whether binding is disabled for the given model attribute.
+	 */
+	public boolean isBindingDisabled(String name) {
+		return this.bindingDisabledAttributes.contains(name);
 	}
 
 	/**

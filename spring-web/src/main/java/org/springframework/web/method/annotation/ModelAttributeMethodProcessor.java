@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,9 +101,18 @@ public class ModelAttributeMethodProcessor
 		Object attribute = (mavContainer.containsAttribute(name) ? mavContainer.getModel().get(name) :
 				createAttribute(name, parameter, binderFactory, webRequest));
 
+		if (!mavContainer.isBindingDisabled(name)) {
+			ModelAttribute annotation = parameter.getParameterAnnotation(ModelAttribute.class);
+			if (annotation != null && !annotation.binding()) {
+				mavContainer.setBindingDisabled(name);
+			}
+		}
+
 		WebDataBinder binder = binderFactory.createBinder(webRequest, attribute, name);
 		if (binder.getTarget() != null) {
-			bindRequestParameters(binder, webRequest);
+			if (!mavContainer.isBindingDisabled(name)) {
+				bindRequestParameters(binder, webRequest);
+			}
 			validateIfApplicable(binder, parameter);
 			if (binder.getBindingResult().hasErrors() && isBindExceptionRequired(binder, parameter)) {
 				throw new BindException(binder.getBindingResult());

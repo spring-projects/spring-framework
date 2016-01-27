@@ -1704,6 +1704,31 @@ With a `BindingResult` you can check if errors were found in which case it's com
 render the same form where the errors can be shown with the help of Spring's `<errors>`
 form tag.
 
+Note that in some cases it may be useful to gain access to an attribute in the
+model without data binding. For such cases you may inject the `Model` into the
+controller or alternatively use the `binding` flag on the annotation:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+@ModelAttribute
+public AccountForm setUpForm() {
+    return new AccountForm();
+}
+
+@ModelAttribute
+public Account findAccount(@PathVariable String accountId) {
+    return accountRepository.findOne(accountId);
+}
+
+@RequestMapping(path="update", method=POST)
+public String update(@Valid AccountUpdateForm form, BindingResult result,
+        **@ModelAttribute(binding=false)** Account account) {
+
+    // ...
+}
+----
+
 In addition to data binding you can also invoke validation using your own custom
 validator passing the same `BindingResult` that was used to record data binding errors.
 That allows for data binding and validation errors to be accumulated in one place and
@@ -1745,6 +1770,7 @@ annotation:
 
 See <<validation-beanvalidation>> and <<validation>> for details on how to configure and
 use validation.
+
 
 
 [[mvc-ann-sessionattrib]]
