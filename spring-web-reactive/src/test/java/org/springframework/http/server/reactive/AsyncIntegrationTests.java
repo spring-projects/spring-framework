@@ -27,7 +27,6 @@ import org.junit.runners.Parameterized;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ProcessorGroup;
 import reactor.core.publisher.Processors;
-import reactor.core.timer.Timers;
 import reactor.rx.Stream;
 
 import org.springframework.core.io.buffer.DataBufferAllocator;
@@ -107,7 +106,7 @@ public class AsyncIntegrationTests {
 		@Override
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 			return response.setBody(Stream.just("h", "e", "l", "l", "o")
-			                              .timer(Timers.global())
+			                              .timer(Timer.global())
 			                              .throttleRequest(100)
 			                              .dispatchOn(asyncGroup)
 			                              .collect(allocator::allocateBuffer,
