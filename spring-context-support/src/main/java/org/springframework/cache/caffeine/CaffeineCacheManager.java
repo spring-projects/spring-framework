@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.CaffeineSpec;
 
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -38,10 +39,12 @@ import org.springframework.util.ObjectUtils;
  * with no dynamic creation of further cache regions at runtime.
  *
  * <p>The configuration of the underlying cache can be fine-tuned through a
- * {@link Caffeine} builder, passed into this CacheManager through
- * {@link #setCaffeine}.
+ * {@link Caffeine} builder or {@link CaffeineSpec}, passed into this
+ * CacheManager through {@link #setCaffeine}/{@link #setCaffeineSpec}.
+ * A {@link CaffeineSpec}-compliant expression value can also be applied
+ * via the {@link #setCacheSpecification "cacheSpecification"} bean property.
  *
- * <p>Requires Caffeine 2.0 or higher.
+ * <p>Requires Caffeine 2.1 or higher.
  *
  * @author Ben Manes
  * @author Juergen Hoeller
@@ -103,9 +106,30 @@ public class CaffeineCacheManager implements CacheManager {
 	 * @see #createNativeCaffeineCache
 	 * @see com.github.benmanes.caffeine.cache.Caffeine#build()
 	 */
-	public void setCaffeine(Caffeine<Object, Object> cacheBuilder) {
-		Assert.notNull(cacheBuilder, "Caffeine must not be null");
-		doSetCaffeine(cacheBuilder);
+	public void setCaffeine(Caffeine<Object, Object> caffeine) {
+		Assert.notNull(caffeine, "Caffeine must not be null");
+		doSetCaffeine(caffeine);
+	}
+
+	/**
+	 * Set the {@link CaffeineSpec} to use for building each individual
+	 * {@link CaffeineCache} instance.
+	 * @see #createNativeCaffeineCache
+	 * @see com.github.benmanes.caffeine.cache.Caffeine#from(CaffeineSpec)
+	 */
+	public void setCaffeineSpec(CaffeineSpec caffeineSpec) {
+		doSetCaffeine(Caffeine.from(caffeineSpec));
+	}
+
+	/**
+	 * Set the Caffeine cache specification String to use for building each
+	 * individual {@link CaffeineCache} instance. The given value needs to
+	 * comply with Caffeine's {@link CaffeineSpec} (see its javadoc).
+	 * @see #createNativeCaffeineCache
+	 * @see com.github.benmanes.caffeine.cache.Caffeine#from(String)
+	 */
+	public void setCacheSpecification(String cacheSpecification) {
+		doSetCaffeine(Caffeine.from(cacheSpecification));
 	}
 
 	/**

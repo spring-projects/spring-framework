@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.cache.caffeine;
 
 import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.CaffeineSpec;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -119,7 +120,7 @@ public class CaffeineCacheManagerTests {
 	}
 
 	@Test
-	public void changeCacheSpecificationRecreateCache() {
+	public void changeCaffeineRecreateCache() {
 		CaffeineCacheManager cm = new CaffeineCacheManager("c1");
 		Cache cache1 = cm.getCache("c1");
 
@@ -131,6 +132,26 @@ public class CaffeineCacheManagerTests {
 		cm.setCaffeine(caffeine); // Set same instance
 		Cache cache1xx = cm.getCache("c1");
 		assertSame(cache1x, cache1xx);
+	}
+
+	@Test
+	public void changeCaffeineSpecRecreateCache() {
+		CaffeineCacheManager cm = new CaffeineCacheManager("c1");
+		Cache cache1 = cm.getCache("c1");
+
+		cm.setCaffeineSpec(CaffeineSpec.parse("maximumSize=10"));
+		Cache cache1x = cm.getCache("c1");
+		assertTrue(cache1x != cache1);
+	}
+
+	@Test
+	public void changeCacheSpecificationRecreateCache() {
+		CaffeineCacheManager cm = new CaffeineCacheManager("c1");
+		Cache cache1 = cm.getCache("c1");
+
+		cm.setCacheSpecification("maximumSize=10");
+		Cache cache1x = cm.getCache("c1");
+		assertTrue(cache1x != cache1);
 	}
 
 	@Test

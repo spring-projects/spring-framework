@@ -29,7 +29,7 @@ import org.springframework.util.Assert;
  * Spring {@link org.springframework.cache.Cache} adapter implementation
  * on top of a Caffeine {@link com.github.benmanes.caffeine.cache.Cache} instance.
  *
- * <p>Requires Caffeine 2.0 or higher.
+ * <p>Requires Caffeine 2.1 or higher.
  *
  * @author Ben Manes
  * @author Juergen Hoeller
