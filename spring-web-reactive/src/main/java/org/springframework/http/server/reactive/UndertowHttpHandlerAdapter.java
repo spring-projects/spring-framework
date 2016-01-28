@@ -131,7 +131,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 		@Override
 		public void subscribe(Subscriber<? super DataBuffer> subscriber) {
 			if (subscriber == null) {
-				throw Exceptions.spec_2_13_exception();
+				throw Exceptions.argumentIsNullException();
 			}
 			if (this.subscriber != null) {
 				subscriber.onError(new IllegalStateException("Only one subscriber allowed"));
