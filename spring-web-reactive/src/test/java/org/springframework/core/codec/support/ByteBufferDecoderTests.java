@@ -17,8 +17,6 @@
 package org.springframework.core.codec.support;
 
 import java.nio.ByteBuffer;
-import java.util.List;
-import java.util.stream.StreamSupport;
 
 import org.junit.Test;
 import org.reactivestreams.Publisher;
@@ -28,8 +26,8 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 
-import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.*;
+import reactor.core.test.TestSubscriber;
 
 /**
  * @author Sebastien Deleuze
@@ -46,16 +44,14 @@ public class ByteBufferDecoderTests extends AbstractAllocatingTestCase {
 	}
 
 	@Test
-	public void decode() throws InterruptedException {
+	public void decode() {
 		DataBuffer fooBuffer = stringBuffer("foo");
 		DataBuffer barBuffer = stringBuffer("bar");
 		Flux<DataBuffer> source = Flux.just(fooBuffer, barBuffer);
 		Flux<ByteBuffer> output = decoder.decode(source, ResolvableType.forClassWithGenerics(Publisher.class, ByteBuffer.class), null);
-		List<ByteBuffer> results = StreamSupport.stream(output.toIterable().spliterator(), false).collect(toList());
-		assertEquals(2, results.size());
-
-		assertBufferEquals(fooBuffer, results.get(0));
-		assertBufferEquals(barBuffer, results.get(1));
+		TestSubscriber<ByteBuffer> testSubscriber = new TestSubscriber<>();
+		testSubscriber.bindTo(output)
+				.assertValuesWith(b -> assertBufferEquals(fooBuffer, b), b -> assertBufferEquals(barBuffer, b));
 	}
 
 	public void assertBufferEquals(DataBuffer expected, ByteBuffer actual) {

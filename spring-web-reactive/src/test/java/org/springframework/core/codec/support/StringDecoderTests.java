@@ -16,21 +16,18 @@
 
 package org.springframework.core.codec.support;
 
-import java.util.List;
-import java.util.stream.StreamSupport;
-
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.converter.RxJava1SingleConverter;
+import reactor.core.test.TestSubscriber;
 import rx.Single;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 
-import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.*;
 
 /**
@@ -58,9 +55,8 @@ public class StringDecoderTests extends AbstractAllocatingTestCase {
 	public void decode() throws InterruptedException {
 		Flux<DataBuffer> source = Flux.just(stringBuffer("foo"), stringBuffer("bar"));
 		Flux<String> output = this.decoder.decode(source, ResolvableType.forClassWithGenerics(Flux.class, String.class), null);
-		List<String> results = StreamSupport.stream(output.toIterable().spliterator(), false).collect(toList());
-		assertEquals(1, results.size());
-		assertEquals("foobar", results.get(0));
+		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
+		testSubscriber.bindTo(output).assertValues("foobar");
 	}
 
 	@Test
@@ -68,10 +64,8 @@ public class StringDecoderTests extends AbstractAllocatingTestCase {
 		StringDecoder decoder = new StringDecoder(allocator, false);
 		Flux<DataBuffer> source = Flux.just(stringBuffer("foo"), stringBuffer("bar"));
 		Flux<String> output = decoder.decode(source, ResolvableType.forClassWithGenerics(Flux.class, String.class), null);
-		List<String> results = StreamSupport.stream(output.toIterable().spliterator(), false).collect(toList());
-		assertEquals(2, results.size());
-		assertEquals("foo", results.get(0));
-		assertEquals("bar", results.get(1));
+		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
+		testSubscriber.bindTo(output).assertValues("foo", "bar");
 	}
 
 	@Test
@@ -80,8 +74,8 @@ public class StringDecoderTests extends AbstractAllocatingTestCase {
 		Mono<String> mono = Mono.from(this.decoder.decode(source,
 				ResolvableType.forClassWithGenerics(Mono.class, String.class),
 				MediaType.TEXT_PLAIN));
-		String result = mono.get();
-		assertEquals("foobar", result);
+		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
+		testSubscriber.bindTo(mono).assertValues("foobar");
 	}
 
 	@Test

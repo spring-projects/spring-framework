@@ -17,16 +17,13 @@
 package org.springframework.core.codec.support;
 
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.stream.StreamSupport;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
 
-import static java.util.stream.Collectors.toList;
-import static org.junit.Assert.assertEquals;
+import reactor.core.test.TestSubscriber;
 
 /**
  * @author Sebastien Deleuze
@@ -35,15 +32,15 @@ public class JsonObjectDecoderTests extends AbstractAllocatingTestCase {
 
 
 	@Test
-	public void decodeSingleChunkToJsonObject() throws InterruptedException {
+	public void decodeSingleChunkToJsonObject()  {
 		JsonObjectDecoder decoder = new JsonObjectDecoder(allocator);
 		Flux<DataBuffer> source =
 				Flux.just(stringBuffer("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"));
 		Flux<String> output =
 				decoder.decode(source, null, null).map(JsonObjectDecoderTests::toString);
-		List<Object> results = StreamSupport.stream(output.toIterable().spliterator(), false).collect(toList());
-		assertEquals(1, results.size());
-		assertEquals("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}", results.get(0));
+		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
+		testSubscriber.bindTo(output)
+				.assertValues("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}");
 	}
 
 	@Test
@@ -53,9 +50,9 @@ public class JsonObjectDecoderTests extends AbstractAllocatingTestCase {
 				stringBuffer(", \"bar\": \"barbar\"}"));
 		Flux<String> output =
 				decoder.decode(source, null, null).map(JsonObjectDecoderTests::toString);
-		List<String> results = StreamSupport.stream(output.toIterable().spliterator(), false).collect(toList());
-		assertEquals(1, results.size());
-		assertEquals("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}", results.get(0));
+		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
+		testSubscriber.bindTo(output)
+				.assertValues("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}");
 	}
 
 	@Test
@@ -65,11 +62,10 @@ public class JsonObjectDecoderTests extends AbstractAllocatingTestCase {
 				"[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"));
 		Flux<String> output =
 				decoder.decode(source, null, null).map(JsonObjectDecoderTests::toString);
-
-		List<String> results = StreamSupport.stream(output.toIterable().spliterator(), false).collect(toList());
-		assertEquals(2, results.size());
-		assertEquals("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}", results.get(0));
-		assertEquals("{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}", results.get(1));
+		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
+		testSubscriber.bindTo(output)
+				.assertValues("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}",
+							  "{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}");
 	}
 
 	@Test
@@ -80,10 +76,10 @@ public class JsonObjectDecoderTests extends AbstractAllocatingTestCase {
 						": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"));
 		Flux<String> output =
 				decoder.decode(source, null, null).map(JsonObjectDecoderTests::toString);
-		List<String> results = StreamSupport.stream(output.toIterable().spliterator(), false).collect(toList());
-		assertEquals(2, results.size());
-		assertEquals("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}", results.get(0));
-		assertEquals("{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}", results.get(1));
+		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
+		testSubscriber.bindTo(output)
+				.assertValues("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}",
+							  "{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}");
 	}
 
 	private static String toString(DataBuffer buffer) {

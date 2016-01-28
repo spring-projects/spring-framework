@@ -18,8 +18,6 @@ package org.springframework.core.codec.support;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.stream.StreamSupport;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,8 +28,8 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 
-import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.*;
+import reactor.core.test.TestSubscriber;
 
 /**
  * @author Sebastien Deleuze
@@ -53,7 +51,7 @@ public class ByteBufferEncoderTests extends AbstractAllocatingTestCase {
 	}
 
 	@Test
-	public void encode() throws Exception {
+	public void encode() {
 		byte[] fooBytes = "foo".getBytes(StandardCharsets.UTF_8);
 		byte[] barBytes = "bar".getBytes(StandardCharsets.UTF_8);
 		Flux<ByteBuffer> source =
@@ -62,21 +60,17 @@ public class ByteBufferEncoderTests extends AbstractAllocatingTestCase {
 		Flux<DataBuffer> output = encoder.encode(source,
 				ResolvableType.forClassWithGenerics(Publisher.class, ByteBuffer.class),
 				null);
-		List<DataBuffer> results =
-				StreamSupport.stream(output.toIterable().spliterator(), false)
-						.collect(toList());
-
-		assertEquals(2, results.size());
-		assertEquals(3, results.get(0).readableByteCount());
-		assertEquals(3, results.get(1).readableByteCount());
-
-		byte[] buf = new byte[3];
-		results.get(0).read(buf);
-		assertArrayEquals(fooBytes, buf);
-
-		results.get(1).read(buf);
-		assertArrayEquals(barBytes, buf);
-
+		TestSubscriber<DataBuffer> testSubscriber = new TestSubscriber<>();
+		testSubscriber.bindTo(output)
+				.assertValuesWith(b -> {
+					byte[] buf = new byte[3];
+					b.read(buf);
+					assertArrayEquals(fooBytes, buf);
+				}, b -> {
+					byte[] buf = new byte[3];
+					b.read(buf);
+					assertArrayEquals(barBytes, buf);
+				});
 	}
 
 }

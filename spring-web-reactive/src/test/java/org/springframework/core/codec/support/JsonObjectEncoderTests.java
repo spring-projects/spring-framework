@@ -25,7 +25,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 
-import static org.junit.Assert.assertEquals;
+import reactor.core.test.TestSubscriber;
 
 /**
  * @author Sebastien Deleuze
@@ -43,27 +43,28 @@ public class JsonObjectEncoderTests extends AbstractAllocatingTestCase {
 	public void encodeSingleElementFlux() throws InterruptedException {
 		Flux<DataBuffer> source =
 				Flux.just(stringBuffer("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"));
-		Iterable<String> results = Flux.from(encoder.encode(source, null, null)).map(chunk -> {
+		Flux<String> output = Flux.from(encoder.encode(source, null, null)).map(chunk -> {
 			byte[] b = new byte[chunk.readableByteCount()];
 			chunk.read(b);
 			return new String(b, StandardCharsets.UTF_8);
-		}).toIterable();
-		String result = String.join("", results);
-		assertEquals("[{\"foo\": \"foofoo\", \"bar\": \"barbar\"}]", result);
+		});
+		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
+		testSubscriber.bindTo(output)
+				.assertValues("[", "{\"foo\": \"foofoo\", \"bar\": \"barbar\"}]");
 	}
-
 
 	@Test
 	public void encodeSingleElementMono() throws InterruptedException {
 		Mono<DataBuffer> source =
 				Mono.just(stringBuffer("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"));
-		Iterable<String> results = Flux.from(encoder.encode(source, null, null)).map(chunk -> {
+		Flux<String> output = Flux.from(encoder.encode(source, null, null)).map(chunk -> {
 			byte[] b = new byte[chunk.readableByteCount()];
 			chunk.read(b);
 			return new String(b, StandardCharsets.UTF_8);
-		}).toIterable();
-		String result = String.join("", results);
-		assertEquals("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}", result);
+		});
+		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
+		testSubscriber.bindTo(output)
+				.assertValues("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}");
 	}
 
 	@Test
@@ -71,13 +72,16 @@ public class JsonObjectEncoderTests extends AbstractAllocatingTestCase {
 		Flux<DataBuffer> source =
 				Flux.just(stringBuffer("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"),
 						stringBuffer("{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}"));
-		Iterable<String> results = Flux.from(encoder.encode(source, null, null)).map(chunk -> {
+		Flux<String> output = Flux.from(encoder.encode(source, null, null)).map(chunk -> {
 			byte[] b = new byte[chunk.readableByteCount()];
 			chunk.read(b);
 			return new String(b, StandardCharsets.UTF_8);
-		}).toIterable();
-		String result = String.join("", results);
-		assertEquals("[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]", result);
+		});
+		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
+		testSubscriber.bindTo(output)
+				.assertValues("[",
+						"{\"foo\": \"foofoo\", \"bar\": \"barbar\"},",
+						"{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]");
 	}
 
 	@Test
@@ -85,16 +89,19 @@ public class JsonObjectEncoderTests extends AbstractAllocatingTestCase {
 		Flux<DataBuffer> source =
 				Flux.just(stringBuffer("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"),
 						stringBuffer("{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}"),
-						stringBuffer(
-								"{\"foo\": \"foofoofoofoo\", \"bar\": \"barbarbarbar\"}")
+						stringBuffer("{\"foo\": \"foofoofoofoo\", \"bar\": \"barbarbarbar\"}")
 		);
-		Iterable<String> results = Flux.from(encoder.encode(source, null, null)).map(chunk -> {
+		Flux<String> output = Flux.from(encoder.encode(source, null, null)).map(chunk -> {
 			byte[] b = new byte[chunk.readableByteCount()];
 			chunk.read(b);
 			return new String(b, StandardCharsets.UTF_8);
-		}).toIterable();
-		String result = String.join("", results);
-		assertEquals("[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"},{\"foo\": \"foofoofoofoo\", \"bar\": \"barbarbarbar\"}]", result);
+		});
+		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
+		testSubscriber.bindTo(output)
+				.assertValues("[",
+						"{\"foo\": \"foofoo\", \"bar\": \"barbar\"},",
+						"{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"},",
+						"{\"foo\": \"foofoofoofoo\", \"bar\": \"barbarbarbar\"}]");
 	}
 
 }

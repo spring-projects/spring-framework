@@ -17,8 +17,6 @@
 package org.springframework.core.codec.support;
 
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.stream.StreamSupport;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,8 +24,8 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.http.MediaType;
 
-import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.*;
+import reactor.core.test.TestSubscriber;
 
 /**
  * @author Sebastien Deleuze
@@ -49,17 +47,17 @@ public class Jaxb2EncoderTests extends AbstractAllocatingTestCase {
 	}
 
 	@Test
-	public void encode() throws InterruptedException {
+	public void encode() {
 		Flux<Pojo> source = Flux.just(new Pojo("foofoo", "barbar"), new Pojo("foofoofoo", "barbarbar"));
 		Flux<String> output = encoder.encode(source, null, null).map(chunk -> {
 			byte[] b = new byte[chunk.readableByteCount()];
 			chunk.read(b);
 			return new String(b, StandardCharsets.UTF_8);
 		});
-		List<String> results = StreamSupport.stream(output.toIterable().spliterator(), false).collect(toList());
-		assertEquals(2, results.size());
-		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><pojo><bar>barbar</bar><foo>foofoo</foo></pojo>", results.get(0));
-		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><pojo><bar>barbarbar</bar><foo>foofoofoo</foo></pojo>", results.get(1));
+		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
+		testSubscriber.bindTo(output)
+				.assertValues("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><pojo><bar>barbar</bar><foo>foofoo</foo></pojo>",
+							  "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><pojo><bar>barbarbar</bar><foo>foofoofoo</foo></pojo>");
 	}
 
 }

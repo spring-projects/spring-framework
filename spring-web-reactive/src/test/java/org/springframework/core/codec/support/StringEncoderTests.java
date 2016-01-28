@@ -17,8 +17,6 @@
 package org.springframework.core.codec.support;
 
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.stream.StreamSupport;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -29,8 +27,8 @@ import reactor.core.publisher.Flux;
 import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 
-import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.*;
+import reactor.core.test.TestSubscriber;
 
 /**
  * @author Sebastien Deleuze
@@ -59,9 +57,8 @@ public class StringEncoderTests extends AbstractAllocatingTestCase {
 			chunk.read(b);
 			return new String(b, StandardCharsets.UTF_8);
 		});
-		List<String> results = StreamSupport.stream(output.toIterable().spliterator(), false).collect(toList());
-		assertEquals(1, results.size());
-		assertEquals("foo", results.get(0));
+		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
+		testSubscriber.bindTo(output).assertValues("foo");
 	}
 
 }

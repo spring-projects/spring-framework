@@ -16,9 +16,6 @@
 
 package org.springframework.core.codec.support;
 
-import java.util.List;
-import java.util.stream.StreamSupport;
-
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 
@@ -26,8 +23,8 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 
-import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.*;
+import reactor.core.test.TestSubscriber;
 
 /**
  * @author Sebastien Deleuze
@@ -44,13 +41,13 @@ public class Jaxb2DecoderTests extends AbstractAllocatingTestCase {
 	}
 
 	@Test
-	public void decode() throws InterruptedException {
+	public void decode() {
 		Flux<DataBuffer> source = Flux.just(stringBuffer(
 				"<?xml version=\"1.0\" encoding=\"UTF-8\"?><pojo><bar>barbar</bar><foo>foofoo</foo></pojo>"));
 		Flux<Object> output = decoder.decode(source, ResolvableType.forClass(Pojo.class), null);
-		List<Object> results = StreamSupport.stream(output.toIterable().spliterator(), false).collect(toList());
-		assertEquals(1, results.size());
-		assertEquals("foofoo", ((Pojo) results.get(0)).getFoo());
+		TestSubscriber<Object> testSubscriber = new TestSubscriber<>();
+		testSubscriber.bindTo(output)
+				.assertValues(new Pojo("foofoo", "barbar"));
 	}
 
 }
