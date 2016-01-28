@@ -216,7 +216,6 @@ public class HeaderAssertionTests {
 
 
 	@Controller
-	@SuppressWarnings("unused")
 	private static class PersonController {
 
 		private long timestamp;
