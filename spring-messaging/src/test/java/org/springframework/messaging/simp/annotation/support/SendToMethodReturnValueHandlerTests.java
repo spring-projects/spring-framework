@@ -91,6 +91,9 @@ public class SendToMethodReturnValueHandlerTests {
 	private MethodParameter defaultNoAnnotation;
 	private MethodParameter defaultEmptyAnnotation;
 	private MethodParameter defaultOverrideAnnotation;
+	private MethodParameter userDefaultNoAnnotation;
+	private MethodParameter userDefaultEmptyAnnotation;
+	private MethodParameter userDefaultOverrideAnnotation;
 
 
 	@Before
@@ -133,14 +136,23 @@ public class SendToMethodReturnValueHandlerTests {
 		method = this.getClass().getDeclaredMethod("handleAndSendToJsonView");
 		this.jsonViewReturnType = new SynthesizingMethodParameter(method, -1);
 
-		method = TestBean.class.getDeclaredMethod("handleNoAnnotation");
+		method = SendToTestBean.class.getDeclaredMethod("handleNoAnnotation");
 		this.defaultNoAnnotation = new SynthesizingMethodParameter(method, -1);
 
-		method = TestBean.class.getDeclaredMethod("handleAndSendToDefaultDestination");
+		method = SendToTestBean.class.getDeclaredMethod("handleAndSendToDefaultDestination");
 		this.defaultEmptyAnnotation = new SynthesizingMethodParameter(method, -1);
 
-		method = TestBean.class.getDeclaredMethod("handleAndSendToOverride");
+		method = SendToTestBean.class.getDeclaredMethod("handleAndSendToOverride");
 		this.defaultOverrideAnnotation = new SynthesizingMethodParameter(method, -1);
+
+		method = SendToUserTestBean.class.getDeclaredMethod("handleNoAnnotation");
+		this.userDefaultNoAnnotation = new SynthesizingMethodParameter(method, -1);
+
+		method = SendToUserTestBean.class.getDeclaredMethod("handleAndSendToDefaultDestination");
+		this.userDefaultEmptyAnnotation = new SynthesizingMethodParameter(method, -1);
+
+		method = SendToUserTestBean.class.getDeclaredMethod("handleAndSendToOverride");
+		this.userDefaultOverrideAnnotation = new SynthesizingMethodParameter(method, -1);
 	}
 
 
@@ -154,6 +166,10 @@ public class SendToMethodReturnValueHandlerTests {
 		assertTrue(this.handler.supportsReturnType(this.defaultNoAnnotation));
 		assertTrue(this.handler.supportsReturnType(this.defaultEmptyAnnotation));
 		assertTrue(this.handler.supportsReturnType(this.defaultOverrideAnnotation));
+
+		assertTrue(this.handler.supportsReturnType(this.userDefaultNoAnnotation));
+		assertTrue(this.handler.supportsReturnType(this.userDefaultEmptyAnnotation));
+		assertTrue(this.handler.supportsReturnType(this.userDefaultOverrideAnnotation));
 	}
 
 	@Test
@@ -229,6 +245,44 @@ public class SendToMethodReturnValueHandlerTests {
 		assertResponse(this.defaultOverrideAnnotation, sessionId, 0, "/dest3");
 		assertResponse(this.defaultOverrideAnnotation, sessionId, 1, "/dest4");
 	}
+
+	@Test
+	public void sendToUserClassDefaultNoAnnotation() throws Exception {
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
+
+		String sessionId = "sess1";
+		Message<?> inputMessage = createInputMessage(sessionId, "sub1", null, null, null);
+		this.handler.handleReturnValue(PAYLOAD, this.userDefaultNoAnnotation, inputMessage);
+
+		verify(this.messageChannel, times(1)).send(this.messageCaptor.capture());
+		assertResponse(this.userDefaultNoAnnotation, sessionId, 0, "/user/sess1/dest-default");
+	}
+
+	@Test
+	public void sendToUserClassDefaultEmptyAnnotation() throws Exception {
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
+
+		String sessionId = "sess1";
+		Message<?> inputMessage = createInputMessage(sessionId, "sub1", null, null, null);
+		this.handler.handleReturnValue(PAYLOAD, this.userDefaultEmptyAnnotation, inputMessage);
+
+		verify(this.messageChannel, times(1)).send(this.messageCaptor.capture());
+		assertResponse(this.userDefaultEmptyAnnotation, sessionId, 0, "/user/sess1/dest-default");
+	}
+
+	@Test
+	public void sendToUserClassDefaultOverride() throws Exception {
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
+
+		String sessionId = "sess1";
+		Message<?> inputMessage = createInputMessage(sessionId, "sub1", null, null, null);
+		this.handler.handleReturnValue(PAYLOAD, this.userDefaultOverrideAnnotation, inputMessage);
+
+		verify(this.messageChannel, times(2)).send(this.messageCaptor.capture());
+		assertResponse(this.userDefaultOverrideAnnotation, sessionId, 0, "/user/sess1/dest3");
+		assertResponse(this.userDefaultOverrideAnnotation, sessionId, 1, "/user/sess1/dest4");
+	}
+
 
 	private void assertResponse(MethodParameter methodParameter, String sessionId,
 			int index, String destination) {
@@ -537,8 +591,8 @@ public class SendToMethodReturnValueHandlerTests {
 		return payload;
 	}
 
-	@SendTo("/dest-default")
-	private static class TestBean {
+	@SendTo("/dest-default") @SuppressWarnings("unused")
+	private static class SendToTestBean {
 
 		public String handleNoAnnotation() {
 			return PAYLOAD;
@@ -550,6 +604,25 @@ public class SendToMethodReturnValueHandlerTests {
 		}
 
 		@SendTo({"/dest3", "/dest4"})
+		public String handleAndSendToOverride() {
+			return PAYLOAD;
+		}
+
+	}
+
+	@SendToUser("/dest-default") @SuppressWarnings("unused")
+	private static class SendToUserTestBean {
+
+		public String handleNoAnnotation() {
+			return PAYLOAD;
+		}
+
+		@SendToUser
+		public String handleAndSendToDefaultDestination() {
+			return PAYLOAD;
+		}
+
+		@SendToUser({"/dest3", "/dest4"})
 		public String handleAndSendToOverride() {
 			return PAYLOAD;
 		}

@@ -134,7 +134,8 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 	public boolean supportsReturnType(MethodParameter returnType) {
 		if (returnType.getMethodAnnotation(SendTo.class) != null ||
 				AnnotationUtils.getAnnotation(returnType.getDeclaringClass(), SendTo.class) != null ||
-				returnType.getMethodAnnotation(SendToUser.class) != null) {
+				returnType.getMethodAnnotation(SendToUser.class) != null ||
+				AnnotationUtils.getAnnotation(returnType.getDeclaringClass(), SendToUser.class) != null) {
 			return true;
 		}
 		return (!this.annotationRequired);
@@ -149,7 +150,7 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 		MessageHeaders headers = message.getHeaders();
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 		PlaceholderResolver varResolver = initVarResolver(headers);
-		SendToUser sendToUser = returnType.getMethodAnnotation(SendToUser.class);
+		SendToUser sendToUser = getSendToUser(returnType);
 
 		if (sendToUser != null) {
 			boolean broadcast = sendToUser.broadcast();
@@ -182,6 +183,18 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 				this.messagingTemplate.convertAndSend(destination, returnValue, createHeaders(sessionId, returnType));
 			}
 		}
+	}
+
+	private SendToUser getSendToUser(MethodParameter returnType) {
+		SendToUser annot = returnType.getMethodAnnotation(SendToUser.class);
+		if (annot != null && !ObjectUtils.isEmpty((annot.value()))) {
+			return annot;
+		}
+		SendToUser typeAnnot = AnnotationUtils.getAnnotation(returnType.getDeclaringClass(), SendToUser.class);
+		if (typeAnnot != null && !ObjectUtils.isEmpty((typeAnnot.value()))) {
+			return typeAnnot;
+		}
+		return (annot != null ? annot : typeAnnot);
 	}
 
 	private SendTo getSendTo(MethodParameter returnType) {

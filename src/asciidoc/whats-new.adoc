@@ -671,7 +671,7 @@ Spring 4.3 also improves the caching abstraction as follows:
 
 === WebSocket Messaging Improvements
 
-* `@SendTo` can now be specified at class-level to share a common destination.
+* `@SendTo` and `@SendToUser` can now be specified at class-level to share a common destination.
 
 === Testing Improvements
 

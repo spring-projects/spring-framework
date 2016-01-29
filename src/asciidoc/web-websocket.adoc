@@ -1700,7 +1700,8 @@ than their name and the generic destination. This is also supported through an
 annotation as well as a messaging template.
 
 For example, a message-handling method can send messages to the user associated with
-the message being handled through the `@SendToUser` annotation:
+the message being handled through the `@SendToUser` annotation (also supported on
+the class-level to share a common destination):
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
