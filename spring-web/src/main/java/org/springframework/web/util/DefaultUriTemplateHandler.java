@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,16 +90,16 @@ public class DefaultUriTemplateHandler implements UriTemplateHandler {
 
 	@Override
 	public URI expand(String uriTemplate, Map<String, ?> uriVariables) {
-		UriComponentsBuilder uriComponentsBuilder = initUriComponentsBuilder(uriTemplate);
-		UriComponents uriComponents = uriComponentsBuilder.build().expand(uriVariables).encode();
-		return insertBaseUrl(uriComponents);
+		UriComponentsBuilder builder = initUriComponentsBuilder(uriTemplate);
+		UriComponents url = builder.build().expand(uriVariables).encode();
+		return insertBaseUrl(url);
 	}
 
 	@Override
-	public URI expand(String uriTemplate, Object... uriVariableValues) {
-		UriComponentsBuilder uriComponentsBuilder = initUriComponentsBuilder(uriTemplate);
-		UriComponents uriComponents = uriComponentsBuilder.build().expand(uriVariableValues).encode();
-		return insertBaseUrl(uriComponents);
+	public URI expand(String uriTemplate, Object... uriVariables) {
+		UriComponentsBuilder builder = initUriComponentsBuilder(uriTemplate);
+		UriComponents url = builder.build().expand(uriVariables).encode();
+		return insertBaseUrl(url);
 	}
 
 	protected UriComponentsBuilder initUriComponentsBuilder(String uriTemplate) {
