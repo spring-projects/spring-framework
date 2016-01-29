@@ -20,8 +20,6 @@ import java.util.List;
 import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.joda.time.DateTime;
@@ -87,6 +85,8 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.ViewResolverComposite;
 import org.springframework.web.util.UrlPathHelper;
 
+import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
+import static com.fasterxml.jackson.databind.MapperFeature.DEFAULT_VIEW_INCLUSION;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -142,6 +142,7 @@ public class WebMvcConfigurationSupportTests {
 		HttpServletRequest request = new MockHttpServletRequest("GET", "/testController");
 		HandlerExecutionChain chain = handlerMapping.getHandler(request);
 
+		assertNotNull(chain);
 		assertNotNull(chain.getInterceptors());
 		assertEquals(3, chain.getInterceptors().length);
 		assertEquals(ConversionServiceExposingInterceptor.class, chain.getInterceptors()[1].getClass());
@@ -175,19 +176,20 @@ public class WebMvcConfigurationSupportTests {
 		RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
 		List<HttpMessageConverter<?>> converters = adapter.getMessageConverters();
 		assertEquals(9, converters.size());
-		for(HttpMessageConverter<?> converter : converters) {
-			if (converter instanceof AbstractJackson2HttpMessageConverter) {
-				ObjectMapper objectMapper = ((AbstractJackson2HttpMessageConverter)converter).getObjectMapper();
-				assertFalse(objectMapper.getDeserializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
-				assertFalse(objectMapper.getSerializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
-				assertFalse(objectMapper.getDeserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
-				if (converter instanceof MappingJackson2XmlHttpMessageConverter) {
-					assertEquals(XmlMapper.class, objectMapper.getClass());
-				}
-			}
-		}
+		converters.stream()
+				.filter(converter -> converter instanceof AbstractJackson2HttpMessageConverter)
+				.forEach(converter -> {
+					ObjectMapper mapper = ((AbstractJackson2HttpMessageConverter) converter).getObjectMapper();
+					assertFalse(mapper.getDeserializationConfig().isEnabled(DEFAULT_VIEW_INCLUSION));
+					assertFalse(mapper.getSerializationConfig().isEnabled(DEFAULT_VIEW_INCLUSION));
+					assertFalse(mapper.getDeserializationConfig().isEnabled(FAIL_ON_UNKNOWN_PROPERTIES));
+					if (converter instanceof MappingJackson2XmlHttpMessageConverter) {
+						assertEquals(XmlMapper.class, mapper.getClass());
+					}
+				});
 
-		ConfigurableWebBindingInitializer initializer = (ConfigurableWebBindingInitializer) adapter.getWebBindingInitializer();
+		ConfigurableWebBindingInitializer initializer =
+				(ConfigurableWebBindingInitializer) adapter.getWebBindingInitializer();
 		assertNotNull(initializer);
 
 		ConversionService conversionService = initializer.getConversionService();
@@ -331,8 +333,8 @@ public class WebMvcConfigurationSupportTests {
 
 
 	@EnableWebMvc
-	@Configuration
-	public static class WebConfig {
+	@Configuration @SuppressWarnings("unused")
+	static class WebConfig {
 
 		@Bean(name="/testController")
 		public TestController testController() {
@@ -348,8 +350,8 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 
-	@Configuration
-	public static class ViewResolverConfig {
+	@Configuration @SuppressWarnings("unused")
+	static class ViewResolverConfig {
 
 		@Bean
 		public ViewResolver beanNameViewResolver() {
@@ -360,7 +362,7 @@ public class WebMvcConfigurationSupportTests {
 
 	@EnableWebMvc
 	@Configuration
-	public static class CustomViewResolverOrderConfig extends WebMvcConfigurerAdapter {
+	static class CustomViewResolverOrderConfig extends WebMvcConfigurerAdapter {
 
 		@Override
 		public void configureViewResolvers(ViewResolverRegistry registry) {
@@ -374,19 +376,19 @@ public class WebMvcConfigurationSupportTests {
 	static class CustomArgumentResolverConfig extends WebMvcConfigurerAdapter {
 
 		@Override
-		public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-			argumentResolvers.add(new TestArgumentResolver());
+		public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+			resolvers.add(new TestArgumentResolver());
 		}
 
 		@Override
-		public void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
-			returnValueHandlers.add(new TestReturnValueHandler());
+		public void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> handlers) {
+			handlers.add(new TestReturnValueHandler());
 		}
 	}
 
 
-	@Controller
-	public static class TestController {
+	@Controller @SuppressWarnings("unused")
+	private static class TestController {
 
 		@RequestMapping("/")
 		public void handle() {
@@ -402,7 +404,7 @@ public class WebMvcConfigurationSupportTests {
 
 	@Controller
 	@Scope("prototype")
-	public static class ScopedController {
+	private static class ScopedController {
 
 		@RequestMapping("/scoped")
 		public void handle() {
@@ -412,7 +414,7 @@ public class WebMvcConfigurationSupportTests {
 
 	@Controller
 	@Scope(value="prototype", proxyMode=ScopedProxyMode.TARGET_CLASS)
-	public static class ScopedProxyController {
+	static class ScopedProxyController {
 
 		@RequestMapping("/scopedProxy")
 		public void handle() {
@@ -422,7 +424,7 @@ public class WebMvcConfigurationSupportTests {
 
 	@ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "exception.user.exists")
 	@SuppressWarnings("serial")
-	public static class UserAlreadyExistsException extends RuntimeException {
+	private static class UserAlreadyExistsException extends RuntimeException {
 	}
 
 	private static class TestArgumentResolver implements HandlerMethodArgumentResolver {

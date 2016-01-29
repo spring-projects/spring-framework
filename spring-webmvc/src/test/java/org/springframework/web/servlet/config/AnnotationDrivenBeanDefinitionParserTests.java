@@ -25,6 +25,7 @@ import org.springframework.beans.DirectFieldAccessor;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -62,17 +63,18 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 
 	@Before
 	public void setup() {
-		appContext = new GenericWebApplicationContext();
+		this.appContext = new GenericWebApplicationContext();
 	}
 
 	@Test
 	public void testMessageCodesResolver() {
 		loadBeanDefinitions("mvc-config-message-codes-resolver.xml");
-		RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
+		RequestMappingHandlerAdapter adapter = this.appContext.getBean(RequestMappingHandlerAdapter.class);
 		assertNotNull(adapter);
 		Object initializer = adapter.getWebBindingInitializer();
 		assertNotNull(initializer);
-		MessageCodesResolver resolver = ((ConfigurableWebBindingInitializer) initializer).getMessageCodesResolver();
+		MessageCodesResolver resolver =
+				((ConfigurableWebBindingInitializer) initializer).getMessageCodesResolver();
 		assertNotNull(resolver);
 		assertEquals(TestMessageCodesResolver.class, resolver.getClass());
 		assertEquals(false, new DirectFieldAccessor(adapter).getPropertyValue("ignoreDefaultModelOnRedirect"));
@@ -81,7 +83,7 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 	@Test
 	public void testPathMatchingConfiguration() {
 		loadBeanDefinitions("mvc-config-path-matching.xml");
-		RequestMappingHandlerMapping hm = appContext.getBean(RequestMappingHandlerMapping.class);
+		RequestMappingHandlerMapping hm = this.appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(hm);
 		assertTrue(hm.useSuffixPatternMatch());
 		assertFalse(hm.useTrailingSlashMatch());
@@ -96,17 +98,17 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 	@Test
 	public void testMessageConverters() {
 		loadBeanDefinitions("mvc-config-message-converters.xml");
-		verifyMessageConverters(appContext.getBean(RequestMappingHandlerAdapter.class), true);
-		verifyMessageConverters(appContext.getBean(ExceptionHandlerExceptionResolver.class), true);
-		verifyRequestResponseBodyAdvice(appContext.getBean(RequestMappingHandlerAdapter.class));
-		verifyResponseBodyAdvice(appContext.getBean(ExceptionHandlerExceptionResolver.class));
+		verifyMessageConverters(this.appContext.getBean(RequestMappingHandlerAdapter.class), true);
+		verifyMessageConverters(this.appContext.getBean(ExceptionHandlerExceptionResolver.class), true);
+		verifyRequestResponseBodyAdvice(this.appContext.getBean(RequestMappingHandlerAdapter.class));
+		verifyResponseBodyAdvice(this.appContext.getBean(ExceptionHandlerExceptionResolver.class));
 	}
 
 	@Test
 	public void testMessageConvertersWithoutDefaultRegistrations() {
 		loadBeanDefinitions("mvc-config-message-converters-defaults-off.xml");
-		verifyMessageConverters(appContext.getBean(RequestMappingHandlerAdapter.class), false);
-		verifyMessageConverters(appContext.getBean(ExceptionHandlerExceptionResolver.class), false);
+		verifyMessageConverters(this.appContext.getBean(RequestMappingHandlerAdapter.class), false);
+		verifyMessageConverters(this.appContext.getBean(ExceptionHandlerExceptionResolver.class), false);
 	}
 
 	@Test
@@ -153,16 +155,16 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 	@Test
 	public void beanNameUrlHandlerMapping() {
 		loadBeanDefinitions("mvc-config.xml");
-		BeanNameUrlHandlerMapping mapping = appContext.getBean(BeanNameUrlHandlerMapping.class);
+		BeanNameUrlHandlerMapping mapping = this.appContext.getBean(BeanNameUrlHandlerMapping.class);
 		assertNotNull(mapping);
 		assertEquals(2, mapping.getOrder());
 	}
 
 	private void loadBeanDefinitions(String fileName) {
-		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(appContext);
-		ClassPathResource resource = new ClassPathResource(fileName, AnnotationDrivenBeanDefinitionParserTests.class);
+		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(this.appContext);
+		Resource resource = new ClassPathResource(fileName, AnnotationDrivenBeanDefinitionParserTests.class);
 		reader.loadBeanDefinitions(resource);
-		appContext.refresh();
+		this.appContext.refresh();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -173,9 +175,9 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertTrue(value instanceof List);
 		List<HttpMessageConverter<?>> converters = (List<HttpMessageConverter<?>>) value;
 		if (hasDefaultRegistrations) {
-			assertTrue("Default converters are registered in addition to custom ones", converters.size() > 2);
+			assertTrue("Default and custom converter expected", converters.size() > 2);
 		} else {
-			assertTrue("Default converters should not be registered", converters.size() == 2);
+			assertTrue("Only custom converters expected", converters.size() == 2);
 		}
 		assertTrue(converters.get(0) instanceof StringHttpMessageConverter);
 		assertTrue(converters.get(1) instanceof ResourceHttpMessageConverter);
