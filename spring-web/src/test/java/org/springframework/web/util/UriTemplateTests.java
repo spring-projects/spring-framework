@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import static org.junit.Assert.*;
 /**
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Rossen Stoyanchev
  */
 public class UriTemplateTests {
 
@@ -45,6 +46,15 @@ public class UriTemplateTests {
 		UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
 		URI result = template.expand("1", "42");
 		assertEquals("Invalid expanded template", new URI("http://example.com/hotels/1/bookings/42"), result);
+	}
+
+	// SPR-9712
+
+	@Test @SuppressWarnings("PrimitiveArrayArgumentToVariableArgMethod")
+	public void expandVarArgsWithArrayValue() throws Exception {
+		UriTemplate template = new UriTemplate("/sum?numbers={numbers}");
+		URI result = template.expand(new int[] {1, 2, 3});
+		assertEquals(new URI("/sum?numbers=1,2,3"), result);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
