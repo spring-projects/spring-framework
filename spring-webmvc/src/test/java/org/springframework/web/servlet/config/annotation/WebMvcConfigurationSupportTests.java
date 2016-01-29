@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,13 @@ package org.springframework.web.servlet.config.annotation;
 
 import java.util.List;
 import java.util.Locale;
-
 import javax.servlet.http.HttpServletRequest;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.joda.time.DateTime;
-
 import org.junit.Test;
 
 import org.springframework.beans.DirectFieldAccessor;
@@ -34,6 +36,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.context.support.StaticMessageSource;
+import org.springframework.core.MethodParameter;
 import org.springframework.core.Ordered;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -56,8 +59,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
+import org.springframework.web.bind.support.WebDataBinderFactory;
+import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.method.support.CompositeUriComponentsContributor;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
+import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.ViewResolver;
@@ -79,12 +87,11 @@ import org.springframework.web.servlet.view.InternalResourceViewResolver;
 import org.springframework.web.servlet.view.ViewResolverComposite;
 import org.springframework.web.util.UrlPathHelper;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Integration tests for {@link WebMvcConfigurationSupport} (imported via
@@ -245,6 +252,32 @@ public class WebMvcConfigurationSupportTests {
 	}
 
 	@Test
+	public void customArgumentResolvers() {
+		ApplicationContext context = initContext(CustomArgumentResolverConfig.class);
+		RequestMappingHandlerAdapter adapter = context.getBean(RequestMappingHandlerAdapter.class);
+		HandlerExceptionResolverComposite composite = context.getBean(HandlerExceptionResolverComposite.class);
+
+		assertNotNull(adapter);
+		assertEquals(1, adapter.getCustomArgumentResolvers().size());
+		assertEquals(TestArgumentResolver.class, adapter.getCustomArgumentResolvers().get(0).getClass());
+		assertEquals(1, adapter.getCustomReturnValueHandlers().size());
+		assertEquals(TestReturnValueHandler.class, adapter.getCustomReturnValueHandlers().get(0).getClass());
+
+		assertNotNull(composite);
+		assertEquals(3, composite.getExceptionResolvers().size());
+		assertEquals(ExceptionHandlerExceptionResolver.class, composite.getExceptionResolvers().get(0).getClass());
+
+		ExceptionHandlerExceptionResolver resolver =
+				(ExceptionHandlerExceptionResolver) composite.getExceptionResolvers().get(0);
+
+		assertEquals(1, resolver.getCustomArgumentResolvers().size());
+		assertEquals(TestArgumentResolver.class, resolver.getCustomArgumentResolvers().get(0).getClass());
+		assertEquals(1, resolver.getCustomReturnValueHandlers().size());
+		assertEquals(TestReturnValueHandler.class, resolver.getCustomReturnValueHandlers().get(0).getClass());
+	}
+
+
+	@Test
 	public void mvcViewResolver() {
 		ApplicationContext context = initContext(WebConfig.class);
 		ViewResolverComposite resolver = context.getBean("mvcViewResolver", ViewResolverComposite.class);
@@ -336,6 +369,21 @@ public class WebMvcConfigurationSupportTests {
 		}
 	}
 
+	@EnableWebMvc
+	@Configuration
+	static class CustomArgumentResolverConfig extends WebMvcConfigurerAdapter {
+
+		@Override
+		public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+			argumentResolvers.add(new TestArgumentResolver());
+		}
+
+		@Override
+		public void addReturnValueHandlers(List<HandlerMethodReturnValueHandler> returnValueHandlers) {
+			returnValueHandlers.add(new TestReturnValueHandler());
+		}
+	}
+
 
 	@Controller
 	public static class TestController {
@@ -375,6 +423,33 @@ public class WebMvcConfigurationSupportTests {
 	@ResponseStatus(code = HttpStatus.BAD_REQUEST, reason = "exception.user.exists")
 	@SuppressWarnings("serial")
 	public static class UserAlreadyExistsException extends RuntimeException {
+	}
+
+	private static class TestArgumentResolver implements HandlerMethodArgumentResolver {
+
+		@Override
+		public boolean supportsParameter(MethodParameter parameter) {
+			return false;
+		}
+
+		@Override
+		public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer container,
+				NativeWebRequest request, WebDataBinderFactory factory) {
+			return null;
+		}
+	}
+
+	private static class TestReturnValueHandler implements HandlerMethodReturnValueHandler {
+
+		@Override
+		public boolean supportsReturnType(MethodParameter returnType) {
+			return false;
+		}
+
+		@Override
+		public void handleReturnValue(Object value, MethodParameter parameter,
+				ModelAndViewContainer container, NativeWebRequest request) {
+		}
 	}
 
 }

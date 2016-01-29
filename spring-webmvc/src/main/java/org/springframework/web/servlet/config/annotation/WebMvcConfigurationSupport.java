@@ -199,6 +199,10 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
 	private ContentNegotiationManager contentNegotiationManager;
 
+	private List<HandlerMethodArgumentResolver> argumentResolvers;
+
+	private List<HandlerMethodReturnValueHandler> returnValueHandlers;
+
 	private List<HttpMessageConverter<?>> messageConverters;
 
 	private Map<String, CorsConfiguration> corsConfigurations;
@@ -474,18 +478,12 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public RequestMappingHandlerAdapter requestMappingHandlerAdapter() {
-		List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<HandlerMethodArgumentResolver>();
-		addArgumentResolvers(argumentResolvers);
-
-		List<HandlerMethodReturnValueHandler> returnValueHandlers = new ArrayList<HandlerMethodReturnValueHandler>();
-		addReturnValueHandlers(returnValueHandlers);
-
 		RequestMappingHandlerAdapter adapter = createRequestMappingHandlerAdapter();
 		adapter.setContentNegotiationManager(mvcContentNegotiationManager());
 		adapter.setMessageConverters(getMessageConverters());
 		adapter.setWebBindingInitializer(getConfigurableWebBindingInitializer());
-		adapter.setCustomArgumentResolvers(argumentResolvers);
-		adapter.setCustomReturnValueHandlers(returnValueHandlers);
+		adapter.setCustomArgumentResolvers(getArgumentResolvers());
+		adapter.setCustomReturnValueHandlers(getReturnValueHandlers());
 
 		if (jackson2Present) {
 			List<RequestBodyAdvice> requestBodyAdvices = new ArrayList<RequestBodyAdvice>();
@@ -626,6 +624,20 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
+	 * Provide access to the shared custom argument resolvers used by the
+	 * {@link RequestMappingHandlerAdapter} and the
+	 * {@link ExceptionHandlerExceptionResolver}. This method cannot be
+	 * overridden, use {@link #addArgumentResolvers(List)} instead.
+	 */
+	protected final List<HandlerMethodArgumentResolver> getArgumentResolvers() {
+		if (this.argumentResolvers == null) {
+			this.argumentResolvers = new ArrayList<HandlerMethodArgumentResolver>();
+			addArgumentResolvers(this.argumentResolvers);
+		}
+		return this.argumentResolvers;
+	}
+
+	/**
 	 * Add custom {@link HandlerMethodArgumentResolver}s to use in addition to
 	 * the ones registered by default.
 	 * <p>Custom argument resolvers are invoked before built-in resolvers
@@ -637,6 +649,20 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * 	initially an empty list.
 	 */
 	protected void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+	}
+
+	/**
+	 * Provide access to the shared return value handlers used by the
+	 * {@link RequestMappingHandlerAdapter} and the
+	 * {@link ExceptionHandlerExceptionResolver}. This method cannot be
+	 * overridden, use {@link #addReturnValueHandlers(List)} instead.
+	 */
+	protected final List<HandlerMethodReturnValueHandler> getReturnValueHandlers() {
+		if (this.returnValueHandlers == null) {
+			this.returnValueHandlers = new ArrayList<HandlerMethodReturnValueHandler>();
+			addReturnValueHandlers(this.returnValueHandlers);
+		}
+		return this.returnValueHandlers;
 	}
 
 	/**
@@ -821,6 +847,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		ExceptionHandlerExceptionResolver exceptionHandlerResolver = createExceptionHandlerExceptionResolver();
 		exceptionHandlerResolver.setContentNegotiationManager(mvcContentNegotiationManager());
 		exceptionHandlerResolver.setMessageConverters(getMessageConverters());
+		exceptionHandlerResolver.setCustomArgumentResolvers(getArgumentResolvers());
+		exceptionHandlerResolver.setCustomReturnValueHandlers(getReturnValueHandlers());
 		if (jackson2Present) {
 			List<ResponseBodyAdvice<?>> interceptors = new ArrayList<ResponseBodyAdvice<?>>();
 			interceptors.add(new JsonViewResponseBodyAdvice());

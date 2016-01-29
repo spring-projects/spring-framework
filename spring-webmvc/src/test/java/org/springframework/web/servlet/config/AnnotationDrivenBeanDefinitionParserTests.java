@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -109,15 +109,19 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		verifyMessageConverters(appContext.getBean(ExceptionHandlerExceptionResolver.class), false);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testArgumentResolvers() {
 		loadBeanDefinitions("mvc-config-argument-resolvers.xml");
-		RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
-		assertNotNull(adapter);
-		Object value = new DirectFieldAccessor(adapter).getPropertyValue("customArgumentResolvers");
+		testArgumentResolvers(this.appContext.getBean(RequestMappingHandlerAdapter.class));
+		testArgumentResolvers(this.appContext.getBean(ExceptionHandlerExceptionResolver.class));
+	}
+
+	private void testArgumentResolvers(Object bean) {
+		assertNotNull(bean);
+		Object value = new DirectFieldAccessor(bean).getPropertyValue("customArgumentResolvers");
 		assertNotNull(value);
 		assertTrue(value instanceof List);
+		@SuppressWarnings("unchecked")
 		List<HandlerMethodArgumentResolver> resolvers = (List<HandlerMethodArgumentResolver>) value;
 		assertEquals(3, resolvers.size());
 		assertTrue(resolvers.get(0) instanceof ServletWebArgumentResolverAdapter);
@@ -126,15 +130,19 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertNotSame(resolvers.get(1), resolvers.get(2));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testReturnValueHandlers() {
 		loadBeanDefinitions("mvc-config-return-value-handlers.xml");
-		RequestMappingHandlerAdapter adapter = appContext.getBean(RequestMappingHandlerAdapter.class);
-		assertNotNull(adapter);
-		Object value = new DirectFieldAccessor(adapter).getPropertyValue("customReturnValueHandlers");
+		testReturnValueHandlers(this.appContext.getBean(RequestMappingHandlerAdapter.class));
+		testReturnValueHandlers(this.appContext.getBean(ExceptionHandlerExceptionResolver.class));
+	}
+
+	private void testReturnValueHandlers(Object bean) {
+		assertNotNull(bean);
+		Object value = new DirectFieldAccessor(bean).getPropertyValue("customReturnValueHandlers");
 		assertNotNull(value);
 		assertTrue(value instanceof List);
+		@SuppressWarnings("unchecked")
 		List<HandlerMethodReturnValueHandler> handlers = (List<HandlerMethodReturnValueHandler>) value;
 		assertEquals(2, handlers.size());
 		assertEquals(TestHandlerMethodReturnValueHandler.class, handlers.get(0).getClass());
