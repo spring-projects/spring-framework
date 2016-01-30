@@ -45,7 +45,7 @@ public abstract class CacheOperation implements BasicOperation {
 
     private final String condition;
 
-    private String toString;
+    private final String toString;
 
     protected CacheOperation(Builder b) {
         this.name = b.name;
@@ -55,6 +55,7 @@ public abstract class CacheOperation implements BasicOperation {
         this.cacheManager = b.cacheManager;
         this.cacheResolver = b.cacheResolver;
         this.condition = b.condition;
+        this.toString = b.getOperationDescription().toString();
     }
 
     public String getName() {
@@ -115,34 +116,14 @@ public abstract class CacheOperation implements BasicOperation {
 
     /**
      * Return an identifying description for this cache operation.
-     * <p>Has to be overridden in subclasses for correct {@code equals}
-     * and {@code hashCode} behavior. Alternatively, {@link #equals}
-     * and {@link #hashCode} can be overridden themselves.
+     * <p>Returned value is produced by calling {@link Builder#getOperationDescription()}
+     * during object construction. This method is used in {#hashCode} and {#equals}.
+     *
+     * @see Builder#getOperationDescription()
      */
     @Override
-    public String toString() {
-        String result = toString;
-        if (result == null) {
-            result = getOperationDescription().toString();
-            toString = result;
-        }
-        return result;
-    }
-
-    /**
-     * Return an identifying description for this caching operation.
-     * <p>Available to subclasses, for inclusion in their {@code toString()} result.
-     */
-    protected StringBuilder getOperationDescription() {
-        StringBuilder result = new StringBuilder(getClass().getSimpleName());
-        result.append("[").append(this.name);
-        result.append("] caches=").append(this.cacheNames);
-        result.append(" | key='").append(this.key);
-        result.append("' | keyGenerator='").append(this.keyGenerator);
-        result.append("' | cacheManager='").append(this.cacheManager);
-        result.append("' | cacheResolver='").append(this.cacheResolver);
-        result.append("' | condition='").append(this.condition).append("'");
-        return result;
+    public final String toString() {
+        return toString;
     }
 
     public abstract static class Builder {
@@ -222,6 +203,22 @@ public abstract class CacheOperation implements BasicOperation {
         public void setCondition(String condition) {
             Assert.notNull(condition);
             this.condition = condition;
+        }
+
+        /**
+         * Return an identifying description for this caching operation.
+         * <p>Available to subclasses, for inclusion in their {@code toString()} result.
+         */
+        protected StringBuilder getOperationDescription() {
+            StringBuilder result = new StringBuilder(getClass().getSimpleName());
+            result.append("[").append(this.name);
+            result.append("] caches=").append(this.cacheNames);
+            result.append(" | key='").append(this.key);
+            result.append("' | keyGenerator='").append(this.keyGenerator);
+            result.append("' | cacheManager='").append(this.cacheManager);
+            result.append("' | cacheResolver='").append(this.cacheResolver);
+            result.append("' | condition='").append(this.condition).append("'");
+            return result;
         }
 
         public abstract CacheOperation build();

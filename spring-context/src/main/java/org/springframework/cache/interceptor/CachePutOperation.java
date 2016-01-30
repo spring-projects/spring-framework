@@ -36,21 +36,21 @@ public class CachePutOperation extends CacheOperation {
         return unless;
     }
 
-    @Override
-    protected StringBuilder getOperationDescription() {
-        StringBuilder sb = super.getOperationDescription();
-        sb.append(" | unless='");
-        sb.append(this.unless);
-        sb.append("'");
-        return sb;
-    }
-
     public static class Builder extends CacheOperation.Builder {
 
         private String unless;
 
         public void setUnless(String unless) {
             this.unless = unless;
+        }
+
+        @Override
+        protected StringBuilder getOperationDescription() {
+            StringBuilder sb = super.getOperationDescription();
+            sb.append(" | unless='");
+            sb.append(this.unless);
+            sb.append("'");
+            return sb;
         }
 
         public CachePutOperation build() {

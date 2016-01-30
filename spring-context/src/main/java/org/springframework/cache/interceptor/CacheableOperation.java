@@ -44,29 +44,29 @@ public class CacheableOperation extends CacheOperation {
     }
 
 
-    @Override
-    protected StringBuilder getOperationDescription() {
-        StringBuilder sb = super.getOperationDescription();
-        sb.append(" | unless='");
-        sb.append(this.unless);
-        sb.append("'");
-        sb.append(" | sync='");
-        sb.append(this.sync);
-        sb.append("'");
-        return sb;
-    }
-
     public static class Builder extends CacheOperation.Builder {
 
         private String unless;
-        private boolean sync;
 
+        private boolean sync;
         public void setUnless(String unless) {
             this.unless = unless;
         }
 
         public void setSync(boolean sync) {
             this.sync = sync;
+        }
+
+        @Override
+        protected StringBuilder getOperationDescription() {
+            StringBuilder sb = super.getOperationDescription();
+            sb.append(" | unless='");
+            sb.append(this.unless);
+            sb.append("'");
+            sb.append(" | sync='");
+            sb.append(this.sync);
+            sb.append("'");
+            return sb;
         }
 
         @Override

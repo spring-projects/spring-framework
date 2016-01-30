@@ -42,16 +42,6 @@ public class CacheEvictOperation extends CacheOperation {
         this.beforeInvocation = b.beforeInvocation;
     }
 
-    @Override
-    protected StringBuilder getOperationDescription() {
-        StringBuilder sb = super.getOperationDescription();
-        sb.append(",");
-        sb.append(this.cacheWide);
-        sb.append(",");
-        sb.append(this.beforeInvocation);
-        return sb;
-    }
-
     public static class Builder extends CacheOperation.Builder {
         private boolean cacheWide = false;
 
@@ -63,6 +53,16 @@ public class CacheEvictOperation extends CacheOperation {
 
         public void setBeforeInvocation(boolean beforeInvocation) {
             this.beforeInvocation = beforeInvocation;
+        }
+
+        @Override
+        protected StringBuilder getOperationDescription() {
+            StringBuilder sb = super.getOperationDescription();
+            sb.append(",");
+            sb.append(this.cacheWide);
+            sb.append(",");
+            sb.append(this.beforeInvocation);
+            return sb;
         }
 
         public CacheEvictOperation build() {
