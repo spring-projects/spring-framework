@@ -10,6 +10,10 @@ The framework also serves as the foundation for [Spring Integration][], [Spring 
 and the rest of the Spring [family of projects][]. Browse the repositories under
 the [Spring organization][] on GitHub for a full list.
 
+## Code of Conduct
+This project adheres to the Contributor Covenant [code of conduct](CODE_OF_CONDUCT.adoc).
+By participating, you  are expected to uphold this code. Please report unacceptable behavior to spring-code-of-conduct@pivotal.io.
+
 ## Downloading Artifacts
 See [downloading Spring artifacts][] for Maven repository information. Unable to
 use Maven or other transitive dependency management tools?
