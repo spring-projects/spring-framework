@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.client;
+package org.springframework.web.client.reactive;
 
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.client.reactive.ClientHttpRequestFactory;
