@@ -13,17 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.springframework.http.client.reactive;
 
-package org.springframework.http.server.reactive;
+import java.net.URI;
 
-import org.springframework.http.HttpRequest;
-import org.springframework.http.ReactiveHttpInputMessage;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 
 /**
- * Represents a reactive server-side HTTP request
+ * Factory for {@link ClientHttpRequest} objects.
  *
- * @author Arjen Poutsma
+ * @author Brian Clozel
  */
-public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage {
+public interface ClientHttpRequestFactory {
+
+	/**
+	 * Create a new {@link ClientHttpRequest} for the specified HTTP method, URI and headers
+	 *
+	 * @param httpMethod the HTTP method to execute
+	 * @param uri the URI to create a request for
+	 * @param headers the HTTP request headers
+	 */
+	ClientHttpRequest createRequest(HttpMethod httpMethod, URI uri, HttpHeaders headers);
 
 }

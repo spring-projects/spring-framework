@@ -16,6 +16,8 @@
 
 package org.springframework.http;
 
+import java.util.function.Supplier;
+
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
@@ -30,6 +32,12 @@ import org.springframework.core.io.buffer.DataBuffer;
  * @author Arjen Poutsma
  */
 public interface ReactiveHttpOutputMessage extends HttpMessage {
+
+	/**
+	 * Register an action to be applied just before the message is committed.
+	 * @param action the action
+	 */
+	void beforeCommit(Supplier<? extends Mono<Void>> action);
 
 	/**
 	 * Set the body of the message to the given {@link Publisher} which will be

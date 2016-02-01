@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-package org.springframework.http.server.reactive;
+package org.springframework.web.client;
 
-import org.springframework.http.HttpRequest;
-import org.springframework.http.ReactiveHttpInputMessage;
+import org.springframework.http.client.reactive.ClientHttpRequest;
+import org.springframework.http.client.reactive.ClientHttpRequestFactory;
 
 /**
- * Represents a reactive server-side HTTP request
+ * Build {@link ClientHttpRequest} using a {@link ClientHttpRequestFactory}
+ * which wraps an HTTP client implementation.
  *
- * @author Arjen Poutsma
+ * @author Brian Clozel
  */
-public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage {
+public interface HttpRequestBuilder {
 
+	/**
+	 * Build a {@link ClientHttpRequest}
+	 */
+	ClientHttpRequest build(ClientHttpRequestFactory factory);
 }
