@@ -92,7 +92,7 @@ public interface DataBuffer {
 	DataBuffer write(byte[] source, int offset, int length);
 
 	/**
-	 * Writes one or more {@link DataBuffer} to this buffer, starting at the current
+	 * Writes one or more {@code DataBuffer}s to this buffer, starting at the current
 	 * writing position.
 	 * @param buffers the byte buffers to write into this buffer
 	 * @return this buffer

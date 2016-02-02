@@ -18,17 +18,28 @@ package org.springframework.core.io.buffer;
 
 import java.nio.ByteBuffer;
 
+import org.springframework.util.Assert;
+
 /**
- * Default implementation of the {@code DataBufferAllocator} interface.
+ * Default implementation of the {@code DataBufferAllocator} interface. Allows for
+ * specification of the default initial capacity at construction time, as well as whether
+ * heap-based or direct buffers are to be preferred.
  *
  * @author Arjen Poutsma
  */
 public class DefaultDataBufferAllocator implements DataBufferAllocator {
 
+	/**
+	 * The default capacity when none is specified.
+	 * @see #DefaultDataBufferAllocator()
+	 * @see #DefaultDataBufferAllocator(boolean)
+	 */
 	public static final int DEFAULT_INITIAL_CAPACITY = 256;
 
 
 	private final boolean preferDirect;
+
+	private final int defaultInitialCapacity;
 
 	/**
 	 * Creates a new {@code DefaultDataBufferAllocator} with default settings.
@@ -39,17 +50,31 @@ public class DefaultDataBufferAllocator implements DataBufferAllocator {
 
 	/**
 	 * Creates a new {@code DefaultDataBufferAllocator}, indicating whether direct buffers
-	 * should be created by {@link #allocateBuffer(int)}.
+	 * should be created by {@link #allocateBuffer()} and {@link #allocateBuffer(int)}.
 	 * @param preferDirect {@code true} if direct buffers are to be preferred; {@code
 	 * false} otherwise
 	 */
 	public DefaultDataBufferAllocator(boolean preferDirect) {
+		this(preferDirect, DEFAULT_INITIAL_CAPACITY);
+	}
+
+	/**
+	 * Creates a new {@code DefaultDataBufferAllocator}, indicating whether direct buffers
+	 * should be created by {@link #allocateBuffer()} and {@link #allocateBuffer(int)},
+	 * and what the capacity is to be used for {@link #allocateBuffer()}.
+	 * @param preferDirect {@code true} if direct buffers are to be preferred; {@code
+	 * false} otherwise
+	 */
+	public DefaultDataBufferAllocator(boolean preferDirect, int defaultInitialCapacity) {
+		Assert.isTrue(defaultInitialCapacity > 0,
+				"'defaultInitialCapacity' should be larger than 0");
 		this.preferDirect = preferDirect;
+		this.defaultInitialCapacity = defaultInitialCapacity;
 	}
 
 	@Override
-	public DataBuffer allocateBuffer() {
-		return allocateBuffer(DEFAULT_INITIAL_CAPACITY);
+	public DefaultDataBuffer allocateBuffer() {
+		return allocateBuffer(this.defaultInitialCapacity);
 	}
 
 	@Override
@@ -60,7 +85,7 @@ public class DefaultDataBufferAllocator implements DataBufferAllocator {
 	}
 
 	@Override
-	public DataBuffer wrap(ByteBuffer byteBuffer) {
+	public DefaultDataBuffer wrap(ByteBuffer byteBuffer) {
 		ByteBuffer sliced = byteBuffer.slice();
 		return new DefaultDataBuffer(sliced, 0, byteBuffer.remaining());
 	}
