@@ -146,7 +146,7 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 				return resultHandler;
 			}
 		}
-		throw new IllegalStateException("No HandlerResultHandler for " + handlerResult.getResult());
+		throw new IllegalStateException("No HandlerResultHandler for " + handlerResult.getReturnValue());
 	}
 
 

@@ -16,6 +16,8 @@
 
 package org.springframework.web.reactive.handler;
 
+import java.util.Optional;
+
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
@@ -61,7 +63,7 @@ public class SimpleHandlerResultHandler implements Ordered, HandlerResultHandler
 
 	@Override
 	public boolean supports(HandlerResult result) {
-		ResolvableType type = result.getResultType();
+		ResolvableType type = result.getReturnValueType();
 		return (type != null && Void.TYPE.equals(type.getRawClass()) ||
 				(isConvertibleToPublisher(type) && Void.class.isAssignableFrom(type.getGeneric(0).getRawClass())));
 	}
@@ -75,12 +77,14 @@ public class SimpleHandlerResultHandler implements Ordered, HandlerResultHandler
 	@SuppressWarnings("unchecked")
 	@Override
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
-		Object value = result.getResult();
-		if (Void.TYPE.equals(result.getResultType().getRawClass())) {
+		Optional<Object> value = result.getReturnValue();
+		if (!value.isPresent() || Void.TYPE.equals(result.getReturnValueType().getRawClass())) {
 			return Mono.empty();
 		}
-		return (value instanceof Mono ? (Mono<Void>)value :
-				Mono.from(this.conversionService.convert(value, Publisher.class)));
+		if (value.get() instanceof Mono) {
+			return (Mono<Void>) value.get();
+		}
+		return Mono.from(this.conversionService.convert(value.get(), Publisher.class));
 	}
 
 }
