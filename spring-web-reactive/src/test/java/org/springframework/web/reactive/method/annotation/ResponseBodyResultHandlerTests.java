@@ -25,6 +25,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.support.StringEncoder;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
+import org.springframework.ui.ExtendedModelMap;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
@@ -47,15 +48,15 @@ public class ResponseBodyResultHandlerTests {
 
 		HandlerMethod hm = new HandlerMethod(controller,TestController.class.getMethod("notAnnotated"));
 		ResolvableType type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertFalse(handler.supports(new HandlerResult(hm, null, type)));
+		assertFalse(handler.supports(new HandlerResult(hm, null, type, new ExtendedModelMap())));
 
 		hm = new HandlerMethod(controller, TestController.class.getMethod("publisherString"));
 		type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertTrue(handler.supports(new HandlerResult(hm, null, type)));
+		assertTrue(handler.supports(new HandlerResult(hm, null, type, new ExtendedModelMap())));
 
 		hm = new HandlerMethod(controller, TestController.class.getMethod("publisherVoid"));
 		type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertTrue(handler.supports(new HandlerResult(hm, null, type)));
+		assertTrue(handler.supports(new HandlerResult(hm, null, type, new ExtendedModelMap())));
 	}
 
 

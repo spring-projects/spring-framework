@@ -22,6 +22,8 @@ import java.util.function.Function;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.ui.ExtendedModelMap;
+import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
 
 /**
@@ -37,6 +39,8 @@ public class HandlerResult {
 
 	private final ResolvableType returnValueType;
 
+	private final ModelMap model;
+
 	private Function<Throwable, Mono<HandlerResult>> exceptionHandler;
 
 
@@ -45,13 +49,16 @@ public class HandlerResult {
 	 * @param handler the handler that handled the request
 	 * @param returnValue the return value from the handler possibly {@code null}
 	 * @param returnValueType the return value type
+	 * @param model the model used for request handling
 	 */
-	public HandlerResult(Object handler, Object returnValue, ResolvableType returnValueType) {
+	public HandlerResult(Object handler, Object returnValue, ResolvableType returnValueType, ModelMap model) {
 		Assert.notNull(handler, "'handler' is required");
 		Assert.notNull(returnValueType, "'returnValueType' is required");
+		Assert.notNull(model, "'model' is required");
 		this.handler = handler;
 		this.returnValue = Optional.ofNullable(returnValue);
 		this.returnValueType = returnValueType;
+		this.model = new ExtendedModelMap();
 	}
 
 
@@ -74,6 +81,14 @@ public class HandlerResult {
 	 */
 	public ResolvableType getReturnValueType() {
 		return this.returnValueType;
+	}
+
+	/**
+	 * Return the model used during request handling with attributes that may be
+	 * used to render HTML templates with.
+	 */
+	public ModelMap getModel() {
+		return this.model;
 	}
 
 	/**

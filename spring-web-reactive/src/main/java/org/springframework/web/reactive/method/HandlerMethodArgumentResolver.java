@@ -19,6 +19,7 @@ package org.springframework.web.reactive.method;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.server.ServerWebExchange;
 
 
@@ -34,7 +35,10 @@ public interface HandlerMethodArgumentResolver {
 	 * The returned {@link Mono} may produce one or zero values if the argument
 	 * does not resolve to any value, which will result in {@code null} passed
 	 * as the argument value.
+	 * @param parameter the method parameter
+	 * @param model the implicit model for request handling
+	 * @param exchange the current exchange
 	 */
-	Mono<Object> resolveArgument(MethodParameter parameter, ServerWebExchange exchange);
+	Mono<Object> resolveArgument(MethodParameter parameter, ModelMap model, ServerWebExchange exchange);
 
 }

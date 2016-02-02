@@ -32,6 +32,7 @@ import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ResolvableType;
+import org.springframework.ui.ModelMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.method.HandlerMethod;
@@ -77,17 +78,20 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	/**
 	 * Invoke the method and return a Publisher for the return value.
 	 * @param exchange the current exchange
+	 * @param model the model for request handling
 	 * @param providedArgs optional list of argument values to check by type
 	 * (via {@code instanceof}) for resolving method arguments.
 	 * @return Publisher that produces a single HandlerResult or an error signal;
 	 * never throws an exception
 	 */
-	public Mono<HandlerResult> invokeForRequest(ServerWebExchange exchange, Object... providedArgs) {
-		return resolveArguments(exchange, providedArgs).then(args -> {
+	public Mono<HandlerResult> invokeForRequest(ServerWebExchange exchange, ModelMap model,
+			Object... providedArgs) {
+
+		return resolveArguments(exchange, model, providedArgs).then(args -> {
 			try {
 				Object value = doInvoke(args);
 				ResolvableType type =  ResolvableType.forMethodParameter(getReturnType());
-				HandlerResult handlerResult = new HandlerResult(this, value, type);
+				HandlerResult handlerResult = new HandlerResult(this, value, type, model);
 				return Mono.just(handlerResult);
 			}
 			catch (InvocationTargetException ex) {
@@ -100,7 +104,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		});
 	}
 
-	private Mono<Object[]> resolveArguments(ServerWebExchange exchange, Object... providedArgs) {
+	private Mono<Object[]> resolveArguments(ServerWebExchange exchange, ModelMap model, Object... providedArgs) {
 		if (ObjectUtils.isEmpty(getMethodParameters())) {
 			return NO_ARGS;
 		}
@@ -121,7 +125,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 								.findFirst()
 								.orElseThrow(() -> getArgError("No resolver for ", param, null));
 						try {
-							return resolver.resolveArgument(param, exchange)
+							return resolver.resolveArgument(param, model, exchange)
 									.defaultIfEmpty(NO_VALUE)
 									.otherwise(ex -> Mono.error(getArgError("Error resolving ", param, ex)))
 									.log("reactor.unresolved");

@@ -38,6 +38,8 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.core.io.buffer.NettyDataBufferAllocator;
+import org.springframework.ui.ExtendedModelMap;
+import org.springframework.ui.ModelMap;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.annotation.ExceptionHandlerMethodResolver;
@@ -64,7 +66,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 			new NettyDataBufferAllocator(new UnpooledByteBufAllocator(false));
 
 	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache =
-			new ConcurrentHashMap<Class<?>, ExceptionHandlerMethodResolver>(64);
+			new ConcurrentHashMap<>(64);
 
 
 	/**
@@ -105,6 +107,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 
 			this.argumentResolvers.add(new RequestParamArgumentResolver());
 			this.argumentResolvers.add(new RequestBodyArgumentResolver(decoders, this.conversionService));
+			this.argumentResolvers.add(new ModelArgumentResolver());
 		}
 	}
 
@@ -118,8 +121,8 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 		HandlerMethod handlerMethod = (HandlerMethod) handler;
 		InvocableHandlerMethod invocable = new InvocableHandlerMethod(handlerMethod);
 		invocable.setHandlerMethodArgumentResolvers(this.argumentResolvers);
-
-		return invocable.invokeForRequest(exchange)
+		ModelMap model = new ExtendedModelMap();
+		return invocable.invokeForRequest(exchange, model)
 				.map(result -> result.setExceptionHandler(ex -> handleException(ex, handlerMethod, exchange)))
 				.otherwise(ex -> handleException(ex, handlerMethod, exchange));
 	}
@@ -135,7 +138,8 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 						logger.debug("Invoking @ExceptionHandler method: " + invocable);
 					}
 					invocable.setHandlerMethodArgumentResolvers(getArgumentResolvers());
-					return invocable.invokeForRequest(exchange, ex);
+					ExtendedModelMap errorModel = new ExtendedModelMap();
+					return invocable.invokeForRequest(exchange, errorModel, ex);
 				}
 				catch (Exception invocationEx) {
 					if (logger.isErrorEnabled()) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,41 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.web.reactive.method.annotation;
 
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.reactive.method.HandlerMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
-import org.springframework.web.util.UriComponents;
-import org.springframework.web.util.UriComponentsBuilder;
-
 
 /**
- * Support {@code @RequestParam} but for query params only.
+ * Resolver for the {@link Model} controller method argument.
  *
  * @author Rossen Stoyanchev
  */
-public class RequestParamArgumentResolver implements HandlerMethodArgumentResolver {
+public class ModelArgumentResolver implements HandlerMethodArgumentResolver {
 
 
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		return parameter.hasParameterAnnotation(RequestParam.class);
+		return Model.class.isAssignableFrom(parameter.getParameterType());
 	}
 
-
 	@Override
-	public Mono<Object> resolveArgument(MethodParameter param, ModelMap model, ServerWebExchange exchange) {
-		RequestParam annotation = param.getParameterAnnotation(RequestParam.class);
-		String name = (annotation.value().length() != 0 ? annotation.value() : param.getParameterName());
-		UriComponents uriComponents = UriComponentsBuilder.fromUri(exchange.getRequest().getURI()).build();
-		String value = uriComponents.getQueryParams().getFirst(name);
-		return (value != null ? Mono.just(value) : Mono.empty());
+	public Mono<Object> resolveArgument(MethodParameter parameter, ModelMap model, ServerWebExchange exchange) {
+		return Mono.just(model);
 	}
 
 }
