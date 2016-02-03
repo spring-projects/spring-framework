@@ -186,6 +186,12 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 			}
 
 			tm = getTransactionManager(testContext, transactionAttribute.getQualifier());
+
+			if (tm == null) {
+				throw new IllegalStateException(String.format(
+					"Failed to retrieve PlatformTransactionManager for @Transactional test for test context %s.",
+					testContext));
+			}
 		}
 
 		if (tm != null) {
