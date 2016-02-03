@@ -1458,8 +1458,8 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerBeanDefinition("integerRepo", rbd);
 
 		RepositoryFieldInjectionBeanWithQualifiers bean = (RepositoryFieldInjectionBeanWithQualifiers) bf.getBean("annotatedBean");
-		Repository sr = bf.getBean("stringRepo", Repository.class);
-		Repository ir = bf.getBean("integerRepo", Repository.class);
+		Repository<?> sr = bf.getBean("stringRepo", Repository.class);
+		Repository<?> ir = bf.getBean("integerRepo", Repository.class);
 		assertSame(sr, bean.stringRepository);
 		assertSame(ir, bean.integerRepository);
 		assertSame(1, bean.stringRepositoryArray.length);
@@ -1490,7 +1490,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerSingleton("repo", new StringRepository());
 
 		RepositoryFieldInjectionBeanWithSimpleMatch bean = (RepositoryFieldInjectionBeanWithSimpleMatch) bf.getBean("annotatedBean");
-		Repository repo = bf.getBean("repo", Repository.class);
+		Repository<?> repo = bf.getBean("repo", Repository.class);
 		assertSame(repo, bean.repository);
 		assertSame(repo, bean.stringRepository);
 		assertSame(1, bean.repositoryArray.length);
@@ -1520,7 +1520,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerBeanDefinition("repoFactoryBean", new RootBeanDefinition(RepositoryFactoryBean.class));
 
 		RepositoryFactoryBeanInjectionBean bean = (RepositoryFactoryBeanInjectionBean) bf.getBean("annotatedBean");
-		RepositoryFactoryBean repoFactoryBean = bf.getBean("&repoFactoryBean", RepositoryFactoryBean.class);
+		RepositoryFactoryBean<?> repoFactoryBean = bf.getBean("&repoFactoryBean", RepositoryFactoryBean.class);
 		assertSame(repoFactoryBean, bean.repositoryFactoryBean);
 	}
 
@@ -1537,7 +1537,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerSingleton("repoFactoryBean", new RepositoryFactoryBean<>());
 
 		RepositoryFactoryBeanInjectionBean bean = (RepositoryFactoryBeanInjectionBean) bf.getBean("annotatedBean");
-		RepositoryFactoryBean repoFactoryBean = bf.getBean("&repoFactoryBean", RepositoryFactoryBean.class);
+		RepositoryFactoryBean<?> repoFactoryBean = bf.getBean("&repoFactoryBean", RepositoryFactoryBean.class);
 		assertSame(repoFactoryBean, bean.repositoryFactoryBean);
 	}
 
@@ -1561,7 +1561,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerBeanDefinition("repo", rbd);
 
 		RepositoryFieldInjectionBeanWithSimpleMatch bean = (RepositoryFieldInjectionBeanWithSimpleMatch) bf.getBean("annotatedBean");
-		Repository repo = bf.getBean("repo", Repository.class);
+		Repository<?> repo = bf.getBean("repo", Repository.class);
 		assertSame(repo, bean.repository);
 		assertSame(repo, bean.stringRepository);
 		assertSame(1, bean.repositoryArray.length);
@@ -1597,7 +1597,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerBeanDefinition("repo", rbd);
 
 		RepositoryFieldInjectionBeanWithSimpleMatch bean = (RepositoryFieldInjectionBeanWithSimpleMatch) bf.getBean("annotatedBean");
-		Repository repo = bf.getBean("repo", Repository.class);
+		Repository<?> repo = bf.getBean("repo", Repository.class);
 		assertSame(repo, bean.repository);
 		assertSame(repo, bean.stringRepository);
 		assertSame(1, bean.repositoryArray.length);
@@ -1711,6 +1711,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void testGenericsBasedConstructorInjectionWithNonTypedTarget() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
@@ -1771,6 +1772,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void testGenericsBasedConstructorInjectionWithMixedTargets() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
@@ -1835,6 +1837,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void testGenericsBasedInjectionIntoMatchingTypeVariable() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
@@ -1852,6 +1855,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void testGenericsBasedInjectionIntoUnresolvedTypeVariable() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
@@ -1869,6 +1873,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void testGenericsBasedInjectionIntoTypeVariableSelectingBestMatch() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
@@ -1889,6 +1894,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 	@Test
 	@Ignore  // SPR-11521
+	@SuppressWarnings("rawtypes")
 	public void testGenericsBasedInjectionIntoTypeVariableSelectingBestMatchAgainstFactoryMethodSignature() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		bf.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
@@ -2351,10 +2357,12 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class MyTestBeanMap extends LinkedHashMap<String, TestBean> {
 	}
 
 
+	@SuppressWarnings("serial")
 	public static class MyTestBeanSet extends LinkedHashSet<TestBean> {
 	}
 
@@ -2582,9 +2590,11 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	public static class GenericRepository<T> implements Repository<T> {
 	}
 
+	@SuppressWarnings("rawtypes")
 	public static class GenericRepositorySubclass extends GenericRepository {
 	}
 
+	@SuppressWarnings("rawtypes")
 	public static class SimpleRepository implements Repository {
 	}
 
@@ -2678,16 +2688,16 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		public Repository<?> stringRepository;
 
 		@Autowired @Qualifier("integerRepo")
-		public Repository integerRepository;
+		public Repository<?> integerRepository;
 
 		@Autowired @Qualifier("stringRepo")
 		public Repository<?>[] stringRepositoryArray;
 
 		@Autowired @Qualifier("integerRepo")
-		public Repository[] integerRepositoryArray;
+		public Repository<?>[] integerRepositoryArray;
 
 		@Autowired @Qualifier("stringRepo")
-		public List<Repository> stringRepositoryList;
+		public List<Repository<?>> stringRepositoryList;
 
 		@Autowired @Qualifier("integerRepo")
 		public List<Repository<?>> integerRepositoryList;
@@ -2696,7 +2706,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		public Map<String, Repository<?>> stringRepositoryMap;
 
 		@Autowired @Qualifier("integerRepo")
-		public Map<String, Repository> integerRepositoryMap;
+		public Map<String, Repository<?>> integerRepositoryMap;
 	}
 
 
@@ -2709,13 +2719,13 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		public Repository<String> stringRepository;
 
 		@Autowired
-		public Repository[] repositoryArray;
+		public Repository<?>[] repositoryArray;
 
 		@Autowired
 		public Repository<String>[] stringRepositoryArray;
 
 		@Autowired
-		public List<Repository> repositoryList;
+		public List<Repository<?>> repositoryList;
 
 		@Autowired
 		public List<Repository<String>> stringRepositoryList;
@@ -2937,6 +2947,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 			return new GenericInterface1Impl<String>();
 		}
 
+		@SuppressWarnings("rawtypes")
 		public static GenericInterface1 createPlain() {
 			return new GenericInterface1Impl();
 		}
@@ -2971,6 +2982,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 
+	@SuppressWarnings("rawtypes")
 	public static class PlainGenericInterface2Impl implements GenericInterface2 {
 
 		@Override
@@ -2980,26 +2992,32 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 
+	@SuppressWarnings("rawtypes")
 	public interface StockMovement<P extends StockMovementInstruction> {
 	}
 
 
+	@SuppressWarnings("rawtypes")
 	public interface StockMovementInstruction<C extends StockMovement> {
 	}
 
 
+	@SuppressWarnings("rawtypes")
 	public interface StockMovementDao<S extends StockMovement> {
 	}
 
 
+	@SuppressWarnings("rawtypes")
 	public static class StockMovementImpl<P extends StockMovementInstruction> implements StockMovement<P> {
 	}
 
 
+	@SuppressWarnings("rawtypes")
 	public static class StockMovementInstructionImpl<C extends StockMovement> implements StockMovementInstruction<C> {
 	}
 
 
+	@SuppressWarnings("rawtypes")
 	public static class StockMovementDaoImpl<E extends StockMovement> implements StockMovementDao<E> {
 	}
 
@@ -3007,6 +3025,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	public static class StockServiceImpl {
 
 		@Autowired
+		@SuppressWarnings("rawtypes")
 		private StockMovementDao<StockMovement> stockMovementDao;
 	}
 
