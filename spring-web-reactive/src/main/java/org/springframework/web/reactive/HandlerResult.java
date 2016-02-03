@@ -58,7 +58,7 @@ public class HandlerResult {
 		this.handler = handler;
 		this.returnValue = Optional.ofNullable(returnValue);
 		this.returnValueType = returnValueType;
-		this.model = new ExtendedModelMap();
+		this.model = model;
 	}
 
 
