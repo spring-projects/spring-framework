@@ -301,7 +301,8 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	protected JavaType getJavaType(Type type, Class<?> contextClass) {
 		TypeFactory typeFactory = this.objectMapper.getTypeFactory();
 		if (type instanceof TypeVariable && contextClass != null) {
-			ResolvableType resolvedType = resolveVariable((TypeVariable<?>)type, ResolvableType.forClass(contextClass));
+			ResolvableType resolvedType = resolveVariable(
+					(TypeVariable<?>) type, ResolvableType.forClass(contextClass));
 			if (resolvedType != ResolvableType.NONE) {
 				return typeFactory.constructType(resolvedType.resolve());
 			}
@@ -321,8 +322,8 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		if (resolvedType.resolve() != null) {
 			return resolvedType;
 		}
-		for (ResolvableType i : contextType.getInterfaces()) {
-			resolvedType = resolveVariable(typeVariable, i);
+		for (ResolvableType ifc : contextType.getInterfaces()) {
+			resolvedType = resolveVariable(typeVariable, ifc);
 			if (resolvedType.resolve() != null) {
 				return resolvedType;
 			}
