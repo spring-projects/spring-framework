@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketMessage;
+import org.springframework.web.socket.WebSocketSession;
 
 import static org.junit.Assert.*;
 
@@ -186,6 +187,56 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 			assertEquals(CloseStatus.SESSION_NOT_RELIABLE, ex.getStatus());
 		}
 	}
+
+	@Test
+	public void closeStatusNormal() throws Exception {
+
+		BlockingSession delegate = new BlockingSession();
+		delegate.setOpen(true);
+		WebSocketSession decorator = new ConcurrentWebSocketSessionDecorator(delegate, 10 * 1000, 1024);
+
+		decorator.close(CloseStatus.PROTOCOL_ERROR);
+		assertEquals(CloseStatus.PROTOCOL_ERROR, delegate.getCloseStatus());
+
+		decorator.close(CloseStatus.SERVER_ERROR);
+		assertEquals("Should have been ignored", CloseStatus.PROTOCOL_ERROR, delegate.getCloseStatus());
+	}
+
+	@Test
+	public void closeStatusChangesToSessionNotReliable() throws Exception {
+
+		BlockingSession blockingSession = new BlockingSession();
+		blockingSession.setId("123");
+		blockingSession.setOpen(true);
+		CountDownLatch sentMessageLatch = blockingSession.getSentMessageLatch();
+
+		int sendTimeLimit = 100;
+		int bufferSizeLimit = 1024;
+
+		final ConcurrentWebSocketSessionDecorator concurrentSession =
+				new ConcurrentWebSocketSessionDecorator(blockingSession, sendTimeLimit, bufferSizeLimit);
+
+		Executors.newSingleThreadExecutor().submit((Runnable) () -> {
+			TextMessage message = new TextMessage("slow message");
+			try {
+				concurrentSession.sendMessage(message);
+			}
+			catch (IOException e) {
+				e.printStackTrace();
+			}
+		});
+
+		assertTrue(sentMessageLatch.await(5, TimeUnit.SECONDS));
+
+		// ensure some send time elapses
+		Thread.sleep(sendTimeLimit + 100);
+
+		concurrentSession.close(CloseStatus.PROTOCOL_ERROR);
+
+		assertEquals("CloseStatus should have changed to SESSION_NOT_RELIABLE",
+				CloseStatus.SESSION_NOT_RELIABLE, blockingSession.getCloseStatus());
+	}
+
 
 
 	private static class BlockingSession extends TestWebSocketSession {
