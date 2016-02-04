@@ -25,7 +25,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.ProcessorGroup;
+import reactor.core.publisher.SchedulerGroup;
 import reactor.core.timer.Timer;
 import reactor.rx.Stream;
 
@@ -50,7 +50,7 @@ import static org.junit.Assert.assertThat;
 @RunWith(Parameterized.class)
 public class AsyncIntegrationTests {
 
-	private final ProcessorGroup asyncGroup = ProcessorGroup.async();
+	private final SchedulerGroup asyncGroup = SchedulerGroup.async();
 
 	private final DataBufferAllocator allocator = new DefaultDataBufferAllocator();
 
