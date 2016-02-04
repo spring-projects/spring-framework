@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ import static org.junit.Assert.*;
 @SuppressWarnings("resource")
 public class ConcurrentWebSocketSessionDecoratorTests {
 
+
 	@Test
 	public void send() throws IOException {
 
@@ -69,16 +70,13 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 		final ConcurrentWebSocketSessionDecorator concurrentSession =
 				new ConcurrentWebSocketSessionDecorator(blockingSession, 10 * 1000, 1024);
 
-		Executors.newSingleThreadExecutor().submit(new Runnable() {
-			@Override
-			public void run() {
-				TextMessage textMessage = new TextMessage("slow message");
-				try {
-					concurrentSession.sendMessage(textMessage);
-				}
-				catch (IOException e) {
-					e.printStackTrace();
-				}
+		Executors.newSingleThreadExecutor().submit((Runnable) () -> {
+			TextMessage message = new TextMessage("slow message");
+			try {
+				concurrentSession.sendMessage(message);
+			}
+			catch (IOException e) {
+				e.printStackTrace();
 			}
 		});
 
@@ -102,6 +100,7 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 	public void sendTimeLimitExceeded() throws IOException, InterruptedException {
 
 		BlockingSession blockingSession = new BlockingSession();
+		blockingSession.setId("123");
 		blockingSession.setOpen(true);
 		CountDownLatch sentMessageLatch = blockingSession.getSentMessageLatch();
 
@@ -111,16 +110,13 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 		final ConcurrentWebSocketSessionDecorator concurrentSession =
 				new ConcurrentWebSocketSessionDecorator(blockingSession, sendTimeLimit, bufferSizeLimit);
 
-		Executors.newSingleThreadExecutor().submit(new Runnable() {
-			@Override
-			public void run() {
-				TextMessage textMessage = new TextMessage("slow message");
-				try {
-					concurrentSession.sendMessage(textMessage);
-				}
-				catch (IOException e) {
-					e.printStackTrace();
-				}
+		Executors.newSingleThreadExecutor().submit((Runnable) () -> {
+			TextMessage message = new TextMessage("slow message");
+			try {
+				concurrentSession.sendMessage(message);
+			}
+			catch (IOException e) {
+				e.printStackTrace();
 			}
 		});
 
@@ -135,6 +131,9 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 			fail("Expected exception");
 		}
 		catch (SessionLimitExceededException ex) {
+			String actual = ex.getMessage();
+			String regex = "Message send time [\\d]+ \\(ms\\) for session '123' exceeded the allowed limit 100";
+			assertTrue("Unexpected message: " + actual, actual.matches(regex));
 			assertEquals(CloseStatus.SESSION_NOT_RELIABLE, ex.getStatus());
 		}
 	}
@@ -143,6 +142,7 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 	public void sendBufferSizeExceeded() throws IOException, InterruptedException {
 
 		BlockingSession blockingSession = new BlockingSession();
+		blockingSession.setId("123");
 		blockingSession.setOpen(true);
 		CountDownLatch sentMessageLatch = blockingSession.getSentMessageLatch();
 
@@ -152,16 +152,13 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 		final ConcurrentWebSocketSessionDecorator concurrentSession =
 				new ConcurrentWebSocketSessionDecorator(blockingSession, sendTimeLimit, bufferSizeLimit);
 
-		Executors.newSingleThreadExecutor().submit(new Runnable() {
-			@Override
-			public void run() {
-				TextMessage textMessage = new TextMessage("slow message");
-				try {
-					concurrentSession.sendMessage(textMessage);
-				}
-				catch (IOException e) {
-					e.printStackTrace();
-				}
+		Executors.newSingleThreadExecutor().submit((Runnable) () -> {
+			TextMessage message = new TextMessage("slow message");
+			try {
+				concurrentSession.sendMessage(message);
+			}
+			catch (IOException e) {
+				e.printStackTrace();
 			}
 		});
 
@@ -183,6 +180,10 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 			fail("Expected exception");
 		}
 		catch (SessionLimitExceededException ex) {
+			String actual = ex.getMessage();
+			String regex = "The send buffer size [\\d]+ bytes for session '123' exceeded the allowed limit 1024";
+			assertTrue("Unexpected message: " + actual, actual.matches(regex));
+			assertEquals(CloseStatus.SESSION_NOT_RELIABLE, ex.getStatus());
 		}
 	}
 
@@ -219,48 +220,5 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 		}
 
 	}
-
-//	@Test
-//	public void sendSessionLimitException() throws IOException, InterruptedException {
-//
-//		BlockingSession blockingSession = new BlockingSession();
-//		blockingSession.setOpen(true);
-//		CountDownLatch sentMessageLatch = blockingSession.getSentMessageLatch();
-//
-//		int sendTimeLimit = 10 * 1000;
-//		int bufferSizeLimit = 1024;
-//
-//		final ConcurrentWebSocketSessionDecorator concurrentSession =
-//				new ConcurrentWebSocketSessionDecorator(blockingSession, sendTimeLimit, bufferSizeLimit);
-//
-//		Executors.newSingleThreadExecutor().submit(new Runnable() {
-//			@Override
-//			public void run() {
-//				TextMessage textMessage = new TextMessage("slow message");
-//				try {
-//					concurrentSession.sendMessage(textMessage);
-//				}
-//				catch (IOException e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		});
-//
-//		assertTrue(sentMessageLatch.await(5, TimeUnit.SECONDS));
-//
-//		StringBuilder sb = new StringBuilder();
-//		for (int i=0 ; i < 1023; i++) {
-//			sb.append("a");
-//		}
-//
-//		TextMessage message = new TextMessage(sb.toString());
-//		concurrentSession.sendMessage(message);
-//
-//		assertEquals(1023, concurrentSession.getBufferSize());
-//		assertTrue(blockingSession.isOpen());
-//
-//		concurrentSession.sendMessage(message);
-//		assertFalse(blockingSession.isOpen());
-//	}
 
 }
