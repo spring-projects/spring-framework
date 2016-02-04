@@ -57,14 +57,14 @@ import org.springframework.util.StringUtils;
  * prefix, resources can still be loaded from the classpath, but "cacheSeconds" values
  * other than "-1" (caching forever) might not work reliably in this case.
  *
- * <p>For a typical web application, message files could be placed into {@code WEB-INF}:
- * e.g. a "WEB-INF/messages" basename would fine a "WEB-INF/messages.properties",
+ * <p>For a typical web application, message files could be placed in {@code WEB-INF}:
+ * e.g. a "WEB-INF/messages" basename would find a "WEB-INF/messages.properties",
  * "WEB-INF/messages_en.properties" etc arrangement as well as "WEB-INF/messages.xml",
  * "WEB-INF/messages_en.xml" etc. Note that message definitions in a <i>previous</i>
  * resource bundle will override ones in a later bundle, due to sequential lookup.
 
  * <p>This MessageSource can easily be used outside of an
- * {@link org.springframework.context.ApplicationContext}: It will use a
+ * {@link org.springframework.context.ApplicationContext}: it will use a
  * {@link org.springframework.core.io.DefaultResourceLoader} as default,
  * simply getting overridden with the ApplicationContext's resource loader
  * if running in a context. It does not have any other specific dependencies.
@@ -117,7 +117,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 * <p>Only applies to classic properties files, not to XML files.
 	 * @param fileEncodings Properties with filenames as keys and charset
 	 * names as values. Filenames have to match the basename syntax,
-	 * with optional locale-specific appendices: e.g. "WEB-INF/messages"
+	 * with optional locale-specific components: e.g. "WEB-INF/messages"
 	 * or "WEB-INF/messages_en".
 	 * @see #setBasenames
 	 * @see org.springframework.util.PropertiesPersister#load
@@ -131,7 +131,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractResourceBased
 	 * locked in a refresh attempt for a specific cached properties file whereas
 	 * other threads keep returning the old properties for the time being, until
 	 * the refresh attempt has completed.
-	 * <p>Default is "true": This behavior is new as of Spring Framework 4.1,
+	 * <p>Default is "true": this behavior is new as of Spring Framework 4.1,
 	 * minimizing contention between threads. If you prefer the old behavior,
 	 * i.e. to fully block on refresh, switch this flag to "false".
 	 * @since 4.1

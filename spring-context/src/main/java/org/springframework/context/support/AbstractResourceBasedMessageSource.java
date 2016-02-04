@@ -48,7 +48,7 @@ public abstract class AbstractResourceBasedMessageSource extends AbstractMessage
 	 * Set a single basename, following the basic ResourceBundle convention
 	 * of not specifying file extension or language codes. The resource location
 	 * format is up to the specific {@code MessageSource} implementation.
-	 * <p>Regular and XMl properties files are supported: .g. "messages" will find
+	 * <p>Regular and XMl properties files are supported: e.g. "messages" will find
 	 * a "messages.properties", "messages_en.properties" etc arrangement as well
 	 * as "messages.xml", "messages_en.xml" etc.
 	 * @param basename the single basename
@@ -64,7 +64,7 @@ public abstract class AbstractResourceBasedMessageSource extends AbstractMessage
 	 * Set an array of basenames, each following the basic ResourceBundle convention
 	 * of not specifying file extension or language codes. The resource location
 	 * format is up to the specific {@code MessageSource} implementation.
-	 * <p>Regular and XMl properties files are supported: .g. "messages" will find
+	 * <p>Regular and XMl properties files are supported: e.g. "messages" will find
 	 * a "messages.properties", "messages_en.properties" etc arrangement as well
 	 * as "messages.xml", "messages_en.xml" etc.
 	 * <p>The associated resource bundles will be checked sequentially when resolving
@@ -138,7 +138,7 @@ public abstract class AbstractResourceBasedMessageSource extends AbstractMessage
 	 * <p>Falling back to the system Locale is the default behavior of
 	 * {@code java.util.ResourceBundle}. However, this is often not desirable
 	 * in an application server environment, where the system Locale is not relevant
-	 * to the application at all: Set this flag to "false" in such a scenario.
+	 * to the application at all: set this flag to "false" in such a scenario.
 	 */
 	public void setFallbackToSystemLocale(boolean fallbackToSystemLocale) {
 		this.fallbackToSystemLocale = fallbackToSystemLocale;
