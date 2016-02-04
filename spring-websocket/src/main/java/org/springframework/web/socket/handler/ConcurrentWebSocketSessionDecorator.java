@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -169,8 +169,31 @@ public class ConcurrentWebSocketSessionDecorator extends WebSocketSessionDecorat
 
 	@Override
 	public void close(CloseStatus status) throws IOException {
-		this.shutdownInProgress = true;
-		super.close(status);
+		this.closeLock.lock();
+		try {
+			if (this.shutdownInProgress) {
+				return;
+			}
+			if (!CloseStatus.SESSION_NOT_RELIABLE.equals(status)) {
+				try {
+					checkSessionLimits();
+				}
+				catch (SessionLimitExceededException ex) {
+					// Ignore
+				}
+				if (this.limitExceeded) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Changing close status " + status + " to SESSION_NOT_RELIABLE.");
+					}
+					status = CloseStatus.SESSION_NOT_RELIABLE;
+				}
+			}
+			this.shutdownInProgress = true;
+			super.close(status);
+		}
+		finally {
+			this.closeLock.unlock();
+		}
 	}
 
 

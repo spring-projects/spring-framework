@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketMessage;
+import org.springframework.web.socket.WebSocketSession;
 
 import static org.junit.Assert.*;
 
@@ -186,6 +187,59 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 		}
 	}
 
+	@Test
+	public void closeStatusNormal() throws Exception {
+
+		BlockingSession delegate = new BlockingSession();
+		delegate.setOpen(true);
+		WebSocketSession decorator = new ConcurrentWebSocketSessionDecorator(delegate, 10 * 1000, 1024);
+
+		decorator.close(CloseStatus.PROTOCOL_ERROR);
+		assertEquals(CloseStatus.PROTOCOL_ERROR, delegate.getCloseStatus());
+
+		decorator.close(CloseStatus.SERVER_ERROR);
+		assertEquals("Should have been ignored", CloseStatus.PROTOCOL_ERROR, delegate.getCloseStatus());
+	}
+
+	@Test
+	public void closeStatusChangesToSessionNotReliable() throws Exception {
+
+		BlockingSession blockingSession = new BlockingSession();
+		blockingSession.setId("123");
+		blockingSession.setOpen(true);
+		CountDownLatch sentMessageLatch = blockingSession.getSentMessageLatch();
+
+		int sendTimeLimit = 100;
+		int bufferSizeLimit = 1024;
+
+		final ConcurrentWebSocketSessionDecorator concurrentSession =
+				new ConcurrentWebSocketSessionDecorator(blockingSession, sendTimeLimit, bufferSizeLimit);
+
+		Executors.newSingleThreadExecutor().submit(new Runnable() {
+			@Override
+			public void run() {
+				TextMessage message = new TextMessage("slow message");
+				try {
+					concurrentSession.sendMessage(message);
+				}
+				catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		});
+
+		assertTrue(sentMessageLatch.await(5, TimeUnit.SECONDS));
+
+		// ensure some send time elapses
+		Thread.sleep(sendTimeLimit + 100);
+
+		concurrentSession.close(CloseStatus.PROTOCOL_ERROR);
+
+		assertEquals("CloseStatus should have changed to SESSION_NOT_RELIABLE",
+				CloseStatus.SESSION_NOT_RELIABLE, blockingSession.getCloseStatus());
+	}
+
+
 
 	private static class BlockingSession extends TestWebSocketSession {
 
@@ -219,48 +273,5 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 		}
 
 	}
-
-//	@Test
-//	public void sendSessionLimitException() throws IOException, InterruptedException {
-//
-//		BlockingSession blockingSession = new BlockingSession();
-//		blockingSession.setOpen(true);
-//		CountDownLatch sentMessageLatch = blockingSession.getSentMessageLatch();
-//
-//		int sendTimeLimit = 10 * 1000;
-//		int bufferSizeLimit = 1024;
-//
-//		final ConcurrentWebSocketSessionDecorator concurrentSession =
-//				new ConcurrentWebSocketSessionDecorator(blockingSession, sendTimeLimit, bufferSizeLimit);
-//
-//		Executors.newSingleThreadExecutor().submit(new Runnable() {
-//			@Override
-//			public void run() {
-//				TextMessage textMessage = new TextMessage("slow message");
-//				try {
-//					concurrentSession.sendMessage(textMessage);
-//				}
-//				catch (IOException e) {
-//					e.printStackTrace();
-//				}
-//			}
-//		});
-//
-//		assertTrue(sentMessageLatch.await(5, TimeUnit.SECONDS));
-//
-//		StringBuilder sb = new StringBuilder();
-//		for (int i=0 ; i < 1023; i++) {
-//			sb.append("a");
-//		}
-//
-//		TextMessage message = new TextMessage(sb.toString());
-//		concurrentSession.sendMessage(message);
-//
-//		assertEquals(1023, concurrentSession.getBufferSize());
-//		assertTrue(blockingSession.isOpen());
-//
-//		concurrentSession.sendMessage(message);
-//		assertFalse(blockingSession.isOpen());
-//	}
 
 }
