@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,29 +50,20 @@ import org.springframework.util.StringUtils;
  * reloading files based on timestamp changes, but also of loading properties files
  * with a specific character encoding. It will detect XML property files as well.
  *
- * <p>In contrast to {@link ResourceBundleMessageSource}, this class supports
- * reloading of properties files through the {@link #setCacheSeconds "cacheSeconds"}
- * setting, and also through programmatically clearing the properties cache.
- * Since application servers typically cache all files loaded from the classpath,
- * it is necessary to store resources somewhere else (for example, in the
- * "WEB-INF" directory of a web app). Otherwise changes of files in the
- * classpath will <i>not</i> be reflected in the application.
- *
- * <p>Note that the base names set as {@link #setBasenames "basenames"} property
+ * <p>Note that the basenames set as {@link #setBasenames "basenames"} property
  * are treated in a slightly different fashion than the "basenames" property of
  * {@link ResourceBundleMessageSource}. It follows the basic ResourceBundle rule of not
  * specifying file extension or language codes, but can refer to any Spring resource
  * location (instead of being restricted to classpath resources). With a "classpath:"
  * prefix, resources can still be loaded from the classpath, but "cacheSeconds" values
- * other than "-1" (caching forever) will not work in this case.
+ * other than "-1" (caching forever) might not work reliably in this case.
  *
- * <p>This MessageSource implementation is usually slightly faster than
- * {@link ResourceBundleMessageSource}, which builds on {@link java.util.ResourceBundle}
- * - in the default mode, i.e. when caching forever. With "cacheSeconds" set to 1,
- * message lookup takes about twice as long - with the benefit that changes in
- * individual properties files are detected with a maximum delay of 1 second.
- * Higher "cacheSeconds" values usually <i>do not</i> make a significant difference.
- *
+ * <p>For a typical web application, message files could be placed into {@code WEB-INF}:
+ * e.g. a "WEB-INF/messages" basename would fine a "WEB-INF/messages.properties",
+ * "WEB-INF/messages_en.properties" etc arrangement as well as "WEB-INF/messages.xml",
+ * "WEB-INF/messages_en.xml" etc. Note that message definitions in a <i>previous</i>
+ * resource bundle will override ones in a later bundle, due to sequential lookup.
+
  * <p>This MessageSource can easily be used outside of an
  * {@link org.springframework.context.ApplicationContext}: It will use a
  * {@link org.springframework.core.io.DefaultResourceLoader} as default,
@@ -244,6 +235,7 @@ public class ReloadableResourceBundleMessageSource extends AbstractMessageSource
 	 * <p>Default is "true": This behavior is new as of Spring Framework 4.1,
 	 * minimizing contention between threads. If you prefer the old behavior,
 	 * i.e. to fully block on refresh, switch this flag to "false".
+	 * @since 4.1
 	 * @see #setCacheSeconds
 	 */
 	public void setConcurrentRefresh(boolean concurrentRefresh) {

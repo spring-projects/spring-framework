@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,11 +51,11 @@ import org.springframework.util.StringUtils;
  * base class. The caching provided by this MessageSource is significantly faster
  * than the built-in caching of the {@code java.util.ResourceBundle} class.
  *
- * <p>Unfortunately, {@code java.util.ResourceBundle} caches loaded bundles
- * forever: Reloading a bundle during VM execution is <i>not</i> possible.
- * As this MessageSource relies on ResourceBundle, it faces the same limitation.
- * Consider {@link ReloadableResourceBundleMessageSource} for an alternative
- * that is capable of refreshing the underlying bundle files.
+ * <p>The basenames follow {@link java.util.ResourceBundle} conventions: essentially,
+ * a fully-qualified classpath location. If it doesn't contain a package qualifier
+ * (such as {@code org.mypackage}), it will be resolved from the classpath root.
+ * Note that the JDK's standard ResourceBundle treats dots as package separators:
+ * This means that "test.theme" is effectively equivalent to "test/theme".
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -404,8 +404,7 @@ public class ResourceBundleMessageSource extends AbstractMessageSource implement
 	 */
 	@Override
 	public String toString() {
-		return getClass().getName() + ": basenames=[" +
-				StringUtils.arrayToCommaDelimitedString(this.basenames) + "]";
+		return getClass().getName() + ": basenames=[" + StringUtils.arrayToCommaDelimitedString(this.basenames) + "]";
 	}
 
 
