@@ -25,23 +25,42 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.Assert;
 
 /**
+ * Utility class for working with {@link DataBuffer}s.
+ *
  * @author Arjen Poutsma
  */
 public abstract class DataBufferUtils {
 
+	/**
+	 * Returns the given {@link DataBuffer} as a {@link Flux} of bytes.
+	 * @param buffer the buffer to return the bytes of
+	 * @return the bytes as a flux
+	 */
 	public static Flux<Byte> toPublisher(DataBuffer buffer) {
 		Assert.notNull(buffer, "'buffer' must not be null");
 
-		byte[] bytes1 = new byte[buffer.readableByteCount()];
-		buffer.read(bytes1);
+		byte[] bytes = new byte[buffer.readableByteCount()];
+		buffer.read(bytes);
 
-		Byte[] bytes2 = new Byte[bytes1.length];
-		for (int i = 0; i < bytes1.length; i++) {
-			bytes2[i] = bytes1[i];
-		}
-		return Flux.fromArray(bytes2);
+		Byte[] bytesObjects = box(bytes);
+
+		return Flux.fromArray(bytesObjects);
 	}
 
+	private static Byte[] box(byte[] bytes) {
+		Byte[] bytesObjects = new Byte[bytes.length];
+		for (int i = 0; i < bytes.length; i++) {
+			bytesObjects[i] = bytes[i];
+		}
+		return bytesObjects;
+	}
+
+	/**
+	 * Returns the given data buffer publisher as an input stream, streaming over all
+	 * underlying buffers when available.
+	 * @param publisher the publisher to create the input stream for
+	 * @return the input stream
+	 */
 	public static InputStream toInputStream(Publisher<DataBuffer> publisher) {
 		return new DataBufferPublisherInputStream(publisher);
 	}

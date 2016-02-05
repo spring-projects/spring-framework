@@ -244,7 +244,7 @@ public class DefaultDataBuffer implements DataBuffer {
 
 		@Override
 		public int available() throws IOException {
-			return byteBuffer.limit() - readPosition;
+			return readableByteCount();
 		}
 
 		@Override
