@@ -170,6 +170,13 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 
 		Class<?> returnValueClass = getReturnValueType(returnValue, returnType);
 		Type returnValueType = getGenericType(returnType);
+
+		if (returnValue != null && returnValue instanceof CharSequence) {
+			returnValueClass = String.class;
+			returnValueType = String.class;
+			returnValue = (T) returnValue.toString();
+		}
+
 		HttpServletRequest servletRequest = inputMessage.getServletRequest();
 		List<MediaType> requestedMediaTypes = getAcceptableMediaTypes(servletRequest);
 		List<MediaType> producibleMediaTypes = getProducibleMediaTypes(servletRequest, returnValueClass, returnValueType);

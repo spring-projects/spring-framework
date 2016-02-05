@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -285,6 +285,24 @@ public class RequestResponseBodyMethodProcessorTests {
 
 		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
 		processor.handleReturnValue("Foo", returnTypeString, mavContainer, webRequest);
+
+		assertEquals("text/plain;charset=ISO-8859-1", servletResponse.getHeader("Content-Type"));
+		assertEquals("Foo", servletResponse.getContentAsString());
+	}
+
+	// SPR-13423
+	
+	@Test
+	public void handleReturnValueCharSequence() throws Exception {
+		List<HttpMessageConverter<?>>converters = new ArrayList<>();
+		converters.add(new ByteArrayHttpMessageConverter());
+		converters.add(new StringHttpMessageConverter());
+
+		Method method = ResponseBodyController.class.getMethod("handleWithCharSequence");
+		MethodParameter returnType = new MethodParameter(method, -1);
+
+		RequestResponseBodyMethodProcessor processor = new RequestResponseBodyMethodProcessor(converters);
+		processor.handleReturnValue(new StringBuilder("Foo"), returnType, mavContainer, webRequest);
 
 		assertEquals("text/plain;charset=ISO-8859-1", servletResponse.getHeader("Content-Type"));
 		assertEquals("Foo", servletResponse.getContentAsString());
@@ -738,6 +756,11 @@ public class RequestResponseBodyMethodProcessorTests {
 		@RequestMapping
 		public String handle() {
 			return "hello";
+		}
+
+		@RequestMapping
+		public CharSequence handleWithCharSequence() {
+			return null;
 		}
 	}
 
