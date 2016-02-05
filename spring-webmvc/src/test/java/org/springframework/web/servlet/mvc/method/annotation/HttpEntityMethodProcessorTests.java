@@ -19,7 +19,6 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -80,7 +79,7 @@ public class HttpEntityMethodProcessorTests {
 
 	@Before
 	public void setUp() throws Exception {
-		Method method = getClass().getMethod("handle", HttpEntity.class, HttpEntity.class);
+		Method method = getClass().getDeclaredMethod("handle", HttpEntity.class, HttpEntity.class);
 		paramList = new MethodParameter(method, 0);
 		paramSimpleBean = new MethodParameter(method, 1);
 
@@ -90,8 +89,8 @@ public class HttpEntityMethodProcessorTests {
 		servletResponse = new MockHttpServletResponse();
 		servletRequest.setMethod("POST");
 		webRequest = new ServletWebRequest(servletRequest, servletResponse);
-
 	}
+
 
 	@Test
 	public void resolveArgument() throws Exception {
@@ -99,7 +98,7 @@ public class HttpEntityMethodProcessorTests {
 		this.servletRequest.setContent(content.getBytes("UTF-8"));
 		this.servletRequest.setContentType("application/json");
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2HttpMessageConverter());
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
 
@@ -118,7 +117,8 @@ public class HttpEntityMethodProcessorTests {
 		this.servletRequest.setContent(new byte[0]);
 		this.servletRequest.setContentType("application/json");
 
-		List<HttpMessageConverter<?>> converters = Collections.singletonList(new MappingJackson2HttpMessageConverter());
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
+		converters.add(new MappingJackson2HttpMessageConverter());
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
 
 		HttpEntity<?> result = (HttpEntity<?>) processor.resolveArgument(this.paramSimpleBean,
@@ -134,7 +134,7 @@ public class HttpEntityMethodProcessorTests {
 		this.servletRequest.setContent(content.getBytes("UTF-8"));
 		this.servletRequest.setContentType("application/json");
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2HttpMessageConverter());
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
 
@@ -157,7 +157,7 @@ public class HttpEntityMethodProcessorTests {
 		this.servletRequest.setContent(content.getBytes("UTF-8"));
 		this.servletRequest.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2HttpMessageConverter());
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
 
@@ -175,7 +175,7 @@ public class HttpEntityMethodProcessorTests {
 		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
 		MethodParameter methodReturnType = handlerMethod.getReturnType();
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2HttpMessageConverter());
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
 
@@ -209,10 +209,10 @@ public class HttpEntityMethodProcessorTests {
 
 
 	@SuppressWarnings("unused")
-	public void handle(HttpEntity<List<SimpleBean>> arg1, HttpEntity<SimpleBean> arg2) {
+	private void handle(HttpEntity<List<SimpleBean>> arg1, HttpEntity<SimpleBean> arg2) {
 	}
 
-	ResponseEntity<CharSequence> handle() {
+	private ResponseEntity<CharSequence> handle() {
 		return null;
 	}
 
