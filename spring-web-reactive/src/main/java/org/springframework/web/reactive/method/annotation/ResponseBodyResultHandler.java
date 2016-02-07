@@ -66,7 +66,7 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 
 	private final Map<Encoder<?>, List<MediaType>> mediaTypesByEncoder;
 
-	private int order = 0;
+	private int order = 0; // TODO: should be MAX_VALUE
 
 
 	public ResponseBodyResultHandler(List<Encoder<?>> encoders, ConversionService service) {

@@ -24,6 +24,7 @@ import java.util.Optional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import org.springframework.core.Ordered;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.Assert;
@@ -45,11 +46,13 @@ import org.springframework.web.server.ServerWebExchange;
  *
  * @author Rossen Stoyanchev
  */
-public class ViewResolverResultHandler implements HandlerResultHandler {
+public class ViewResolverResultHandler implements HandlerResultHandler, Ordered {
 
 	private final List<ViewResolver> viewResolvers = new ArrayList<>(4);
 
 	private final ConversionService conversionService;
+
+	private int order = Integer.MAX_VALUE;
 
 
 	public ViewResolverResultHandler(List<ViewResolver> resolvers, ConversionService service) {
@@ -65,6 +68,15 @@ public class ViewResolverResultHandler implements HandlerResultHandler {
 	 */
 	public List<ViewResolver> getViewResolvers() {
 		return Collections.unmodifiableList(this.viewResolvers);
+	}
+
+	public void setOrder(int order) {
+		this.order = order;
+	}
+
+	@Override
+	public int getOrder() {
+		return this.order;
 	}
 
 
