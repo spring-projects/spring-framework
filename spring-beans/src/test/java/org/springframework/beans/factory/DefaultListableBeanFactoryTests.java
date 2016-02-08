@@ -206,6 +206,43 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
+	public void testSingletonFactoryBeanInitialized() {
+		DummyFactoryInitialized.reset();
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		Properties p = new Properties();
+		p.setProperty("x1.(class)", DummyFactoryInitialized.class.getName());
+		assertTrue("bean not initialized", !DummyFactoryInitialized.beanInitialized());
+		(new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p);
+		assertTrue("bean not initialized", !DummyFactoryInitialized.beanInitialized());
+		lbf.preInstantiateSingletons();
+
+		assertTrue("bean initialized", DummyFactoryInitialized.beanInitialized());
+	}
+
+	@Test
+	public void testLazySingletonFactoryBeanInitialized() {
+		DummyFactoryInitialized.reset();
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		Properties p = new Properties();
+		p.setProperty("x1.(class)", DummyFactoryInitialized.class.getName());
+		p.setProperty("x1.(lazy-init)", "true");
+		assertTrue("bean not initialized", !DummyFactoryInitialized.beanInitialized());
+		(new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p);
+		assertTrue("bean not initialized", !DummyFactoryInitialized.beanInitialized());
+		lbf.preInstantiateSingletons();
+
+		assertTrue("bean not initialized", !DummyFactoryInitialized.beanInitialized());
+		lbf.getBeansOfType(KnowsIfInstantiated.class, false, true);
+		assertTrue("bean not initialized", !DummyFactoryInitialized.beanInitialized());
+
+		lbf.getBeansOfType(TestBean.class, false, false);
+		assertTrue("bean not initialized", !DummyFactoryInitialized.beanInitialized());
+
+		lbf.getBeansOfType(TestBean.class, false, true);
+		assertTrue("bean initialized", DummyFactoryInitialized.beanInitialized());
+	}
+
+	@Test
 	public void testSingletonFactoryBeanIgnoredByNonEagerTypeMatching() {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		Properties p = new Properties();
@@ -3218,6 +3255,25 @@ public class DefaultListableBeanFactoryTests {
 			instantiated = true;
 		}
 
+	}
+
+	private static class DummyFactoryInitialized extends DummyFactory {
+		public static boolean beanInitialized = false;
+
+		public static void reset() {
+			beanInitialized = false;
+			DummyFactory.reset();
+		}
+
+		public static boolean beanInitialized() {
+			return beanInitialized;
+		}
+
+		@Override
+		public void afterPropertiesSet() {
+			super.afterPropertiesSet();
+			beanInitialized = true;
+		}
 	}
 
 
