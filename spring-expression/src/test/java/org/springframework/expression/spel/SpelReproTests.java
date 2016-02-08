@@ -19,6 +19,7 @@ package org.springframework.expression.spel;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -36,6 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.AccessException;
@@ -2051,6 +2053,17 @@ public class SpelReproTests extends AbstractExpressionTests {
 		assertEquals("{X=66}", result.toString());
 	}
 
+	@Test
+	public void SPR13918() {
+		EvaluationContext context = new StandardEvaluationContext();
+		context.setVariable("encoding", "UTF-8");
+
+		Expression ex = parser.parseExpression("T(java.nio.charset.Charset).forName(#encoding)");
+		Object result = ex.getValue(context);
+		assertEquals(Charset.forName("UTF-8"), result);
+	}
+
+
 	public static class ListOf {
 
 		private final double value;
@@ -2063,6 +2076,7 @@ public class SpelReproTests extends AbstractExpressionTests {
 			return value;
 		}
 	}
+
 
 	public static class BeanClass {
 
