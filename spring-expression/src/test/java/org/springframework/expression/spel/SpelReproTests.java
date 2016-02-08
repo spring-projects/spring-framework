@@ -19,6 +19,7 @@ package org.springframework.expression.spel;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1836,7 +1837,7 @@ public class SpelReproTests extends ExpressionTestCase {
 	}
 
 	@Test
-	public void SPR12502() throws Exception {
+	public void SPR12502() {
 		SpelExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression("#root.getClass().getName()");
 		assertEquals(UnnamedUser.class.getName(), expression.getValue(new UnnamedUser()));
@@ -1844,7 +1845,7 @@ public class SpelReproTests extends ExpressionTestCase {
 	}
 
 	@Test
-	public void SPR12803() throws Exception {
+	public void SPR12803() {
 		StandardEvaluationContext sec = new StandardEvaluationContext();
 		sec.setVariable("iterable", Collections.emptyList());
 		SpelExpressionParser parser = new SpelExpressionParser();
@@ -1852,10 +1853,20 @@ public class SpelReproTests extends ExpressionTestCase {
 		assertTrue(expression.getValue(sec) instanceof ArrayList);
 	}
 
+	@Test
+	public void SPR13918() {
+		EvaluationContext context = new StandardEvaluationContext();
+		context.setVariable("encoding", "UTF-8");
 
-	private static enum ABC { A, B, C }
+		Expression ex = parser.parseExpression("T(java.nio.charset.Charset).forName(#encoding)");
+		Object result = ex.getValue(context);
+		assertEquals(Charset.forName("UTF-8"), result);
+	}
 
-	private static enum XYZ { X, Y, Z }
+
+	private enum ABC { A, B, C }
+
+	private enum XYZ { X, Y, Z }
 
 
 	public static class BooleanHolder {
@@ -1882,7 +1893,7 @@ public class SpelReproTests extends ExpressionTestCase {
 	}
 
 
-	private static interface GenericInterface<T extends Number> {
+	private interface GenericInterface<T extends Number> {
 
 		public T getProperty();
 	}
@@ -1909,9 +1920,9 @@ public class SpelReproTests extends ExpressionTestCase {
 	}
 
 
-	public static interface StaticFinal {
+	public interface StaticFinal {
 
-		public static final String VALUE = "interfaceValue";
+		String VALUE = "interfaceValue";
 	}
 
 
@@ -1988,6 +1999,7 @@ public class SpelReproTests extends ExpressionTestCase {
 	}
 
 
+	@SuppressWarnings({"rawtypes", "serial"})
 	public static class MapWithConstant extends HashMap {
 
 		public static final int X = 1;
