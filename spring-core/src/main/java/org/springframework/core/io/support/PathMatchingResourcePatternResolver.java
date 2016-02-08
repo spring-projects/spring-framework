@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -312,6 +312,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			path = path.substring(1);
 		}
 		Set<Resource> result = doFindAllClassPathResources(path);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Resolved classpath location [" + location + "] to resources " + result);
+		}
 		return result.toArray(new Resource[result.size()]);
 	}
 
