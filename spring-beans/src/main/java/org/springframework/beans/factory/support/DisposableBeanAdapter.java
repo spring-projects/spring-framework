@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -310,7 +310,7 @@ class DisposableBeanAdapter implements DisposableBean, Runnable, Serializable {
 			}
 		}
 		catch (IllegalArgumentException ex) {
-			throw new BeanDefinitionValidationException("Couldn't find a unique destroy method on bean with name '" +
+			throw new BeanDefinitionValidationException("Could not find unique destroy method on bean with name '" +
 					this.beanName + ": " + ex.getMessage());
 		}
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -278,8 +278,12 @@ public abstract class BeanUtils {
 					targetMethod = method;
 					numMethodsFoundWithCurrentMinimumArgs = 1;
 				}
-				else {
-					if (targetMethod.getParameterTypes().length == numParams) {
+				else if (!method.isBridge() && targetMethod.getParameterTypes().length == numParams) {
+					if (targetMethod.isBridge()) {
+						// Prefer regular method over bridge...
+						targetMethod = method;
+					}
+					else {
 						// Additional candidate with same length
 						numMethodsFoundWithCurrentMinimumArgs++;
 					}
@@ -289,7 +293,7 @@ public abstract class BeanUtils {
 		if (numMethodsFoundWithCurrentMinimumArgs > 1) {
 			throw new IllegalArgumentException("Cannot resolve method '" + methodName +
 					"' to a unique method. Attempted to resolve to overloaded method with " +
-					"the least number of parameters, but there were " +
+					"the least number of parameters but there were " +
 					numMethodsFoundWithCurrentMinimumArgs + " candidates.");
 		}
 		return targetMethod;
