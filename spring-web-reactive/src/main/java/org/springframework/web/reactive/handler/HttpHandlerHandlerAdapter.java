@@ -20,6 +20,8 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.ui.ExtendedModelMap;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.HandlerAdapter;
 import org.springframework.web.reactive.HandlerResult;
@@ -48,7 +50,8 @@ public class HttpHandlerHandlerAdapter implements HandlerAdapter {
 	public Mono<HandlerResult> handle(ServerWebExchange exchange, Object handler) {
 		WebHandler webHandler = (WebHandler) handler;
 		Mono<Void> completion = webHandler.handle(exchange);
-		return Mono.just(new HandlerResult(webHandler, completion, PUBLISHER_VOID));
+		ModelMap model = new ExtendedModelMap();
+		return Mono.just(new HandlerResult(webHandler, completion, PUBLISHER_VOID, model));
 	}
 
 }

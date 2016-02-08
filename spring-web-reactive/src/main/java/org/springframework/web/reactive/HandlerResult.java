@@ -16,11 +16,14 @@
 
 package org.springframework.web.reactive;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.ui.ExtendedModelMap;
+import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
 
 /**
@@ -32,40 +35,67 @@ public class HandlerResult {
 
 	private final Object handler;
 
-	private final Object result;
+	private final Optional<Object> returnValue;
 
-	private final ResolvableType resultType;
+	private final ResolvableType returnValueType;
+
+	private final ModelMap model;
 
 	private Function<Throwable, Mono<HandlerResult>> exceptionHandler;
 
 
-	public HandlerResult(Object handler, Object result, ResolvableType resultType) {
+	/**
+	 * Create a new {@code HandlerResult}.
+	 * @param handler the handler that handled the request
+	 * @param returnValue the return value from the handler possibly {@code null}
+	 * @param returnValueType the return value type
+	 * @param model the model used for request handling
+	 */
+	public HandlerResult(Object handler, Object returnValue, ResolvableType returnValueType, ModelMap model) {
 		Assert.notNull(handler, "'handler' is required");
-		Assert.notNull(handler, "'resultType' is required");
+		Assert.notNull(returnValueType, "'returnValueType' is required");
+		Assert.notNull(model, "'model' is required");
 		this.handler = handler;
-		this.result = result;
-		this.resultType = resultType;
+		this.returnValue = Optional.ofNullable(returnValue);
+		this.returnValueType = returnValueType;
+		this.model = model;
 	}
 
 
+	/**
+	 * Return the handler that handled the request.
+	 */
 	public Object getHandler() {
 		return this.handler;
 	}
 
-	public Object getResult() {
-		return this.result;
-	}
-
-	public ResolvableType getResultType() {
-		return this.resultType;
+	/**
+	 * Return the value returned from the handler wrapped as {@link Optional}.
+	 */
+	public Optional<Object> getReturnValue() {
+		return this.returnValue;
 	}
 
 	/**
-	 * For an async result, failures may occur later during result handling.
-	 * Use this property to configure an exception handler to be invoked if
-	 * result handling fails.
-	 *
-	 * @param function a function to map the the error to an alternative result.
+	 * Return the type of the value returned from the handler.
+	 */
+	public ResolvableType getReturnValueType() {
+		return this.returnValueType;
+	}
+
+	/**
+	 * Return the model used during request handling with attributes that may be
+	 * used to render HTML templates with.
+	 */
+	public ModelMap getModel() {
+		return this.model;
+	}
+
+	/**
+	 * Configure an exception handler that may be used to produce an alternative
+	 * result when result handling fails. Especially for an async return value
+	 * errors may occur after the invocation of the handler.
+	 * @param function the error handler
 	 * @return the current instance
 	 */
 	public HandlerResult setExceptionHandler(Function<Throwable, Mono<HandlerResult>> function) {
@@ -73,12 +103,20 @@ public class HandlerResult {
 		return this;
 	}
 
+	/**
+	 * Whether there is an exception handler.
+	 */
 	public boolean hasExceptionHandler() {
 		return (this.exceptionHandler != null);
 	}
 
-	public Mono<HandlerResult> applyExceptionHandler(Throwable ex) {
-		return (hasExceptionHandler() ? this.exceptionHandler.apply(ex) : Mono.error(ex));
+	/**
+	 * Apply the exception handler and return the alternative result.
+	 * @param failure the exception
+	 * @return the new result or the same error if there is no exception handler
+	 */
+	public Mono<HandlerResult> applyExceptionHandler(Throwable failure) {
+		return (hasExceptionHandler() ? this.exceptionHandler.apply(failure) : Mono.error(failure));
 	}
 
 }

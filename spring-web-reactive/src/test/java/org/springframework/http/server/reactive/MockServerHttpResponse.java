@@ -28,7 +28,7 @@ import org.springframework.http.HttpStatus;
 /**
  * @author Rossen Stoyanchev
  */
-public class MockServerHttpResponse extends AbstractServerHttpResponse {
+public class MockServerHttpResponse implements ServerHttpResponse {
 
 	private HttpStatus status;
 
@@ -56,17 +56,9 @@ public class MockServerHttpResponse extends AbstractServerHttpResponse {
 	}
 
 	@Override
-	protected Mono<Void> setBodyInternal(Publisher<DataBuffer> body) {
+	public Mono<Void> setBody(Publisher<DataBuffer> body) {
 		this.body = body;
 		return Flux.from(this.body).after();
-	}
-
-	@Override
-	protected void writeHeaders() {
-	}
-
-	@Override
-	protected void writeCookies() {
 	}
 
 	@Override

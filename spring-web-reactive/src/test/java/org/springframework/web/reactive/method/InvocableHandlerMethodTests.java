@@ -31,6 +31,8 @@ import reactor.rx.Stream;
 
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.ui.ExtendedModelMap;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
@@ -54,12 +56,15 @@ public class InvocableHandlerMethodTests {
 
 	private ServerWebExchange exchange;
 
+	private ModelMap model;
+
 
 	@Before
 	public void setUp() throws Exception {
 		WebSessionManager sessionManager = mock(WebSessionManager.class);
 		this.request = mock(ServerHttpRequest.class);
 		this.exchange = new DefaultServerWebExchange(request, mock(ServerHttpResponse.class), sessionManager);
+		this.model = new ExtendedModelMap();
 	}
 
 
@@ -67,11 +72,11 @@ public class InvocableHandlerMethodTests {
 	public void noArgsMethod() throws Exception {
 		InvocableHandlerMethod hm = createHandlerMethod("noArgs");
 
-		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange);
+		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange, this.model);
 		List<HandlerResult> values = Stream.from(publisher).toList().get();
 
 		assertEquals(1, values.size());
-		assertEquals("success", values.get(0).getResult());
+		assertEquals("success", values.get(0).getReturnValue().get());
 	}
 
 	@Test
@@ -80,11 +85,11 @@ public class InvocableHandlerMethodTests {
 		InvocableHandlerMethod hm = createHandlerMethod("singleArg", String.class);
 		hm.setHandlerMethodArgumentResolvers(Collections.singletonList(new RequestParamArgumentResolver()));
 
-		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange);
+		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange, this.model);
 		List<HandlerResult> values = Stream.from(publisher).toList().get();
 
 		assertEquals(1, values.size());
-		assertEquals("success:null", values.get(0).getResult());
+		assertEquals("success:null", values.get(0).getReturnValue().get());
 	}
 
 	@Test
@@ -92,11 +97,11 @@ public class InvocableHandlerMethodTests {
 		InvocableHandlerMethod hm = createHandlerMethod("singleArg", String.class);
 		addResolver(hm, Mono.just("value1"));
 
-		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange);
+		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange, this.model);
 		List<HandlerResult> values = Stream.from(publisher).toList().get();
 
 		assertEquals(1, values.size());
-		assertEquals("success:value1", values.get(0).getResult());
+		assertEquals("success:value1", values.get(0).getReturnValue().get());
 	}
 
 	@Test
@@ -104,18 +109,18 @@ public class InvocableHandlerMethodTests {
 		InvocableHandlerMethod hm = createHandlerMethod("singleArg", String.class);
 		addResolver(hm, Flux.fromIterable(Arrays.asList("value1", "value2", "value3")));
 
-		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange);
+		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange, this.model);
 		List<HandlerResult> values = Stream.from(publisher).toList().get();
 
 		assertEquals(1, values.size());
-		assertEquals("success:value1", values.get(0).getResult());
+		assertEquals("success:value1", values.get(0).getReturnValue().get());
 	}
 
 	@Test
 	public void noResolverForArg() throws Exception {
 		InvocableHandlerMethod hm = createHandlerMethod("singleArg", String.class);
 
-		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange);
+		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange, this.model);
 		Throwable ex = awaitErrorSignal(publisher);
 
 		assertEquals(IllegalStateException.class, ex.getClass());
@@ -127,12 +132,12 @@ public class InvocableHandlerMethodTests {
 	public void resolveArgumentWithThrownException() throws Exception {
 		HandlerMethodArgumentResolver resolver = mock(HandlerMethodArgumentResolver.class);
 		when(resolver.supportsParameter(any())).thenReturn(true);
-		when(resolver.resolveArgument(any(), any())).thenThrow(new IllegalStateException("boo"));
+		when(resolver.resolveArgument(any(), any(), any())).thenThrow(new IllegalStateException("boo"));
 
 		InvocableHandlerMethod hm = createHandlerMethod("singleArg", String.class);
 		hm.setHandlerMethodArgumentResolvers(Collections.singletonList(resolver));
 
-		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange);
+		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange, this.model);
 		Throwable ex = awaitErrorSignal(publisher);
 
 		assertEquals(IllegalStateException.class, ex.getClass());
@@ -146,7 +151,7 @@ public class InvocableHandlerMethodTests {
 		InvocableHandlerMethod hm = createHandlerMethod("singleArg", String.class);
 		addResolver(hm, Mono.error(new IllegalStateException("boo")));
 
-		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange);
+		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange, this.model);
 		Throwable ex = awaitErrorSignal(publisher);
 
 		assertEquals(IllegalStateException.class, ex.getClass());
@@ -160,7 +165,7 @@ public class InvocableHandlerMethodTests {
 		InvocableHandlerMethod hm = createHandlerMethod("singleArg", String.class);
 		addResolver(hm, Mono.just(1));
 
-		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange);
+		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange, this.model);
 		Throwable ex = awaitErrorSignal(publisher);
 
 		assertEquals(IllegalStateException.class, ex.getClass());
@@ -173,7 +178,7 @@ public class InvocableHandlerMethodTests {
 	public void invocationTargetExceptionIsUnwrapped() throws Exception {
 		InvocableHandlerMethod hm = createHandlerMethod("exceptionMethod");
 
-		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange);
+		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange, this.model);
 		Throwable ex = awaitErrorSignal(publisher);
 
 		assertEquals(IllegalStateException.class, ex.getClass());
@@ -190,7 +195,7 @@ public class InvocableHandlerMethodTests {
 	private void addResolver(InvocableHandlerMethod handlerMethod, Publisher<Object> resolvedValue) {
 		HandlerMethodArgumentResolver resolver = mock(HandlerMethodArgumentResolver.class);
 		when(resolver.supportsParameter(any())).thenReturn(true);
-		when(resolver.resolveArgument(any(), any())).thenReturn(Mono.from(resolvedValue));
+		when(resolver.resolveArgument(any(), any(), any())).thenReturn(Mono.from(resolvedValue));
 		handlerMethod.setHandlerMethodArgumentResolvers(Collections.singletonList(resolver));
 	}
 

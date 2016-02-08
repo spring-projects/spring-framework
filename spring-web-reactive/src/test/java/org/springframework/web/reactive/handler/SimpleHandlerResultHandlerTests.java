@@ -30,6 +30,7 @@ import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutureConverter;
 import org.springframework.core.convert.support.ReactiveStreamsToReactorStreamConverter;
 import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converter;
+import org.springframework.ui.ExtendedModelMap;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
 
@@ -46,28 +47,28 @@ public class SimpleHandlerResultHandlerTests {
 
 		HandlerMethod hm = new HandlerMethod(controller, TestController.class.getMethod("voidReturnValue"));
 		ResolvableType type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertTrue(resultHandler.supports(new HandlerResult(hm, null, type)));
+		assertTrue(resultHandler.supports(createHandlerResult(hm, type)));
 
 		hm = new HandlerMethod(controller, TestController.class.getMethod("publisherString"));
 		type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertFalse(resultHandler.supports(new HandlerResult(hm, null, type)));
+		assertFalse(resultHandler.supports(createHandlerResult(hm, type)));
 
 		hm = new HandlerMethod(controller, TestController.class.getMethod("publisherVoid"));
 		type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertTrue(resultHandler.supports(new HandlerResult(hm, null, type)));
+		assertTrue(resultHandler.supports(createHandlerResult(hm, type)));
 
 		hm = new HandlerMethod(controller, TestController.class.getMethod("streamVoid"));
 		type = ResolvableType.forMethodParameter(hm.getReturnType());
 		// Reactor Stream is a Publisher
-		assertTrue(resultHandler.supports(new HandlerResult(hm, null, type)));
+		assertTrue(resultHandler.supports(createHandlerResult(hm, type)));
 
 		hm = new HandlerMethod(controller, TestController.class.getMethod("observableVoid"));
 		type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertFalse(resultHandler.supports(new HandlerResult(hm, null, type)));
+		assertFalse(resultHandler.supports(createHandlerResult(hm, type)));
 
 		hm = new HandlerMethod(controller, TestController.class.getMethod("completableFutureVoid"));
 		type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertFalse(resultHandler.supports(new HandlerResult(hm, null, type)));
+		assertFalse(resultHandler.supports(createHandlerResult(hm, type)));
 	}
 
 	@Test
@@ -82,27 +83,31 @@ public class SimpleHandlerResultHandlerTests {
 
 		HandlerMethod hm = new HandlerMethod(controller, TestController.class.getMethod("voidReturnValue"));
 		ResolvableType type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertTrue(resultHandler.supports(new HandlerResult(hm, null, type)));
+		assertTrue(resultHandler.supports(createHandlerResult(hm, type)));
 
 		hm = new HandlerMethod(controller, TestController.class.getMethod("publisherString"));
 		type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertFalse(resultHandler.supports(new HandlerResult(hm, null, type)));
+		assertFalse(resultHandler.supports(createHandlerResult(hm, type)));
 
 		hm = new HandlerMethod(controller, TestController.class.getMethod("publisherVoid"));
 		type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertTrue(resultHandler.supports(new HandlerResult(hm, null, type)));
+		assertTrue(resultHandler.supports(createHandlerResult(hm, type)));
 
 		hm = new HandlerMethod(controller, TestController.class.getMethod("streamVoid"));
 		type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertTrue(resultHandler.supports(new HandlerResult(hm, null, type)));
+		assertTrue(resultHandler.supports(createHandlerResult(hm, type)));
 
 		hm = new HandlerMethod(controller, TestController.class.getMethod("observableVoid"));
 		type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertTrue(resultHandler.supports(new HandlerResult(hm, null, type)));
+		assertTrue(resultHandler.supports(createHandlerResult(hm, type)));
 
 		hm = new HandlerMethod(controller, TestController.class.getMethod("completableFutureVoid"));
 		type = ResolvableType.forMethodParameter(hm.getReturnType());
-		assertTrue(resultHandler.supports(new HandlerResult(hm, null, type)));
+		assertTrue(resultHandler.supports(createHandlerResult(hm, type)));
+	}
+
+	private HandlerResult createHandlerResult(HandlerMethod hm, ResolvableType type) {
+		return new HandlerResult(hm, null, type, new ExtendedModelMap());
 	}
 
 

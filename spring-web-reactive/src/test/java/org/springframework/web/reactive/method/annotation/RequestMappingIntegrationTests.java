@@ -20,6 +20,7 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -38,6 +39,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.codec.Encoder;
 import org.springframework.core.codec.support.ByteBufferEncoder;
 import org.springframework.core.codec.support.JacksonJsonEncoder;
 import org.springframework.core.codec.support.JsonObjectEncoder;
@@ -56,6 +58,8 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -63,7 +67,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.DispatcherHandler;
+import org.springframework.web.reactive.ViewResolver;
 import org.springframework.web.reactive.handler.SimpleHandlerResultHandler;
+import org.springframework.web.reactive.view.ViewResolverResultHandler;
+import org.springframework.web.reactive.view.freemarker.FreeMarkerConfigurer;
+import org.springframework.web.reactive.view.freemarker.FreeMarkerViewResolver;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -291,6 +299,18 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		create("http://localhost:" + this.port + "/observable-create");
 	}
 
+	@Test
+	public void html() throws Exception {
+
+		RestTemplate restTemplate = new RestTemplate();
+
+		URI url = new URI("http://localhost:" + port + "/html?name=Jason");
+		RequestEntity<Void> request = RequestEntity.get(url).accept(MediaType.TEXT_HTML).build();
+		ResponseEntity<String> response = restTemplate.exchange(request, String.class);
+
+		assertEquals("<html><body>Hello: Jason!</body></html>", response.getBody());
+	}
+
 
 	private void serializeAsPojo(String requestUrl) throws Exception {
 		RestTemplate restTemplate = new RestTemplate();
@@ -350,13 +370,16 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		ResponseEntity<Void> response = restTemplate.exchange(request, Void.class);
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
-		assertEquals(2, this.wac.getBean(TestController.class).persons.size());
+		assertEquals(2, this.wac.getBean(TestRestController.class).persons.size());
 	}
 
 
 	@Configuration
 	@SuppressWarnings("unused")
 	static class FrameworkConfig {
+
+		private DataBufferAllocator allocator = new DefaultDataBufferAllocator();
+
 
 		@Bean
 		public RequestMappingHandlerMapping handlerMapping() {
@@ -382,16 +405,42 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@Bean
 		public ResponseBodyResultHandler responseBodyResultHandler() {
-			DataBufferAllocator allocator = new DefaultDataBufferAllocator();
-			return new ResponseBodyResultHandler(Arrays.asList(
-					new ByteBufferEncoder(allocator), new StringEncoder(allocator),
-					new JacksonJsonEncoder(allocator, new JsonObjectEncoder(allocator))),
-					conversionService());
+			List<Encoder<?>> encoders = Arrays.asList(
+					new ByteBufferEncoder(this.allocator), new StringEncoder(this.allocator),
+					new JacksonJsonEncoder(this.allocator, new JsonObjectEncoder(this.allocator)));
+			ResponseBodyResultHandler resultHandler = new ResponseBodyResultHandler(encoders, conversionService());
+			resultHandler.setOrder(1);
+			return resultHandler;
 		}
 
 		@Bean
 		public SimpleHandlerResultHandler simpleHandlerResultHandler() {
-			return new SimpleHandlerResultHandler(conversionService());
+			SimpleHandlerResultHandler resultHandler = new SimpleHandlerResultHandler(conversionService());
+			resultHandler.setOrder(2);
+			return resultHandler;
+		}
+
+		@Bean
+		public ViewResolverResultHandler viewResolverResultHandler() {
+			List<ViewResolver> resolvers = Collections.singletonList(freeMarkerViewResolver());
+			ViewResolverResultHandler resultHandler = new ViewResolverResultHandler(resolvers, conversionService());
+			resultHandler.setOrder(3);
+			return resultHandler;
+		}
+
+		@Bean
+		public ViewResolver freeMarkerViewResolver() {
+			FreeMarkerViewResolver viewResolver = new FreeMarkerViewResolver("", ".ftl");
+			viewResolver.setBufferAllocator(this.allocator);
+			return viewResolver;
+		}
+
+		@Bean
+		public FreeMarkerConfigurer freeMarkerConfig() {
+			FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
+			configurer.setPreferFileSystemAccess(false);
+			configurer.setTemplateLoaderPath("classpath*:org/springframework/web/reactive/view/freemarker/");
+			return configurer;
 		}
 
 	}
@@ -399,6 +448,11 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 	@Configuration
 	@SuppressWarnings("unused")
 	static class ApplicationConfig {
+
+		@Bean
+		public TestRestController testRestController() {
+			return new TestRestController();
+		}
 
 		@Bean
 		public TestController testController() {
@@ -409,7 +463,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 	@RestController
 	@SuppressWarnings("unused")
-	private static class TestController {
+	private static class TestRestController {
 
 		final List<Person> persons = new ArrayList<>();
 
@@ -598,6 +652,18 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		}
 
 		//TODO add mixed and T request mappings tests
+
+	}
+
+	@Controller
+	@SuppressWarnings("unused")
+	private static class TestController {
+
+		@RequestMapping("/html")
+		public String getHtmlPage(@RequestParam String name, Model model) {
+			model.addAttribute("hello", "Hello: " + name + "!");
+			return "test";
+		}
 
 	}
 

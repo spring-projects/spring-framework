@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -65,7 +66,7 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 
 	private final Map<Encoder<?>, List<MediaType>> mediaTypesByEncoder;
 
-	private int order = 0;
+	private int order = 0; // TODO: should be MAX_VALUE
 
 
 	public ResponseBodyResultHandler(List<Encoder<?>> encoders, ConversionService service) {
@@ -132,23 +133,23 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 	@SuppressWarnings("unchecked")
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
 
-		Object value = result.getResult();
-		if (value == null) {
+		Optional<Object> value = result.getReturnValue();
+		if (!value.isPresent()) {
 			return Mono.empty();
 		}
 
 		Publisher<?> publisher;
 		ResolvableType elementType;
-		ResolvableType returnType = result.getResultType();
+		ResolvableType returnType = result.getReturnValueType();
 		if (this.conversionService.canConvert(returnType.getRawClass(), Publisher.class)) {
-			publisher = this.conversionService.convert(value, Publisher.class);
+			publisher = this.conversionService.convert(value.get(), Publisher.class);
 			elementType = returnType.getGeneric(0);
 			if (Void.class.equals(elementType.getRawClass())) {
 				return (Mono<Void>)Mono.from(publisher);
 			}
 		}
 		else {
-			publisher = Mono.just(value);
+			publisher = Mono.just(value.get());
 			elementType = returnType;
 		}
 
