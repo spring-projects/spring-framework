@@ -206,21 +206,7 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
-	public void testSingletonFactoryBeanInitialized() {
-		DummyFactoryInitialized.reset();
-		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
-		Properties p = new Properties();
-		p.setProperty("x1.(class)", DummyFactoryInitialized.class.getName());
-		assertTrue("bean not initialized", !DummyFactoryInitialized.beanInitialized());
-		(new PropertiesBeanDefinitionReader(lbf)).registerBeanDefinitions(p);
-		assertTrue("bean not initialized", !DummyFactoryInitialized.beanInitialized());
-		lbf.preInstantiateSingletons();
-
-		assertTrue("bean initialized", DummyFactoryInitialized.beanInitialized());
-	}
-
-	@Test
-	public void testLazySingletonFactoryBeanInitialized() {
+	public void testLazySingletonFactoryBeanInitializedIncludePrototypes() {
 		DummyFactoryInitialized.reset();
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		Properties p = new Properties();
@@ -232,14 +218,12 @@ public class DefaultListableBeanFactoryTests {
 		lbf.preInstantiateSingletons();
 
 		assertTrue("bean not initialized", !DummyFactoryInitialized.beanInitialized());
+		lbf.getBeansOfType(KnowsIfInstantiated.class, true, true);
+		assertTrue("bean not initialized", !DummyFactoryInitialized.beanInitialized());
+
+		// ignore prototypes
 		lbf.getBeansOfType(KnowsIfInstantiated.class, false, true);
 		assertTrue("bean not initialized", !DummyFactoryInitialized.beanInitialized());
-
-		lbf.getBeansOfType(TestBean.class, false, false);
-		assertTrue("bean not initialized", !DummyFactoryInitialized.beanInitialized());
-
-		lbf.getBeansOfType(TestBean.class, false, true);
-		assertTrue("bean initialized", DummyFactoryInitialized.beanInitialized());
 	}
 
 	@Test
