@@ -469,7 +469,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@RequestMapping("/param")
 		public Publisher<String> handleWithParam(@RequestParam String name) {
-			return Stream.just("Hello ", name, "!");
+			return Flux.just("Hello ", name, "!");
 		}
 
 		@RequestMapping("/person")
@@ -485,7 +485,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		@RequestMapping("/raw")
 		public Publisher<ByteBuffer> rawResponseBody() {
 			JacksonJsonEncoder encoder = new JacksonJsonEncoder(new DefaultDataBufferAllocator());
-			return encoder.encode(Stream.just(new Person("Robert")),
+			return encoder.encode(Mono.just(new Person("Robert")),
 					ResolvableType.forClass(Person.class), MediaType.APPLICATION_JSON).map(DataBuffer::asByteBuffer);
 		}
 
@@ -526,7 +526,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@RequestMapping("/publisher")
 		public Publisher<Person> publisherResponseBody() {
-			return Stream.just(new Person("Robert"), new Person("Marie"));
+			return Flux.just(new Person("Robert"), new Person("Marie"));
 		}
 
 		@RequestMapping("/flux")
@@ -546,7 +546,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@RequestMapping("/publisher-capitalize")
 		public Publisher<Person> publisherCapitalize(@RequestBody Publisher<Person> persons) {
-			return Stream
+			return Flux
 					.from(persons)
 					.map(person -> new Person(person.getName().toUpperCase()));
 		}
