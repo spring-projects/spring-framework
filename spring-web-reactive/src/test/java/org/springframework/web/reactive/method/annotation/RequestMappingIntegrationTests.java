@@ -546,74 +546,50 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@RequestMapping("/publisher-capitalize")
 		public Publisher<Person> publisherCapitalize(@RequestBody Publisher<Person> persons) {
-			return Stream.from(persons).map(person -> {
-				person.setName(person.getName().toUpperCase());
-				return person;
-			});
+			return Stream
+					.from(persons)
+					.map(person -> new Person(person.getName().toUpperCase()));
 		}
 
 		@RequestMapping("/flux-capitalize")
 		public Flux<Person> fluxCapitalize(@RequestBody Flux<Person> persons) {
-			return persons.map(person -> {
-				person.setName(person.getName().toUpperCase());
-				return person;
-			});
+			return persons.map(person -> new Person(person.getName().toUpperCase()));
 		}
 
 		@RequestMapping("/observable-capitalize")
 		public Observable<Person> observableCapitalize(@RequestBody Observable<Person> persons) {
-			return persons.map(person -> {
-				person.setName(person.getName().toUpperCase());
-				return person;
-			});
+			return persons.map(person -> new Person(person.getName().toUpperCase()));
 		}
 
 		@RequestMapping("/stream-capitalize")
 		public Stream<Person> streamCapitalize(@RequestBody Stream<Person> persons) {
-			return persons.map(person -> {
-				person.setName(person.getName().toUpperCase());
-				return person;
-			});
+			return persons.map(person -> new Person(person.getName().toUpperCase()));
 		}
 
 		@RequestMapping("/person-capitalize")
 		public Person personCapitalize(@RequestBody Person person) {
-			person.setName(person.getName().toUpperCase());
-			return person;
+			return new Person(person.getName().toUpperCase());
 		}
 		
 		@RequestMapping("/completable-future-capitalize")
 		public CompletableFuture<Person> completableFutureCapitalize(
 				@RequestBody CompletableFuture<Person> personFuture) {
-
-			return personFuture.thenApply(person -> {
-				person.setName(person.getName().toUpperCase());
-				return person;
-			});
+			return personFuture.thenApply(person -> new Person(person.getName().toUpperCase()));
 		}
 
 		@RequestMapping("/mono-capitalize")
 		public Mono<Person> monoCapitalize(@RequestBody Mono<Person> personFuture) {
-			return personFuture.map(person -> {
-				person.setName(person.getName().toUpperCase());
-				return person;
-			});
+			return personFuture.map(person -> new Person(person.getName().toUpperCase()));
 		}
 
 		@RequestMapping("/single-capitalize")
 		public Single<Person> singleCapitalize(@RequestBody Single<Person> personFuture) {
-			return personFuture.map(person -> {
-				person.setName(person.getName().toUpperCase());
-				return person;
-			});
+			return personFuture.map(person -> new Person(person.getName().toUpperCase()));
 		}
 
 		@RequestMapping("/promise-capitalize")
 		public Promise<Person> promiseCapitalize(@RequestBody Promise<Person> personFuture) {
-			return Stream.from(personFuture.map(person -> {
-				person.setName(person.getName().toUpperCase());
-				return person;
-			})).promise();
+			return Stream.from(personFuture.map(person -> new Person(person.getName().toUpperCase()))).promise();
 		}
 
 		@RequestMapping("/publisher-create")
