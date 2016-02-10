@@ -48,9 +48,9 @@ public abstract class RestClientResponseException extends RestClientException {
 	 * Construct a new instance of with the given response data.
 	 * @param statusCode the raw status code value
 	 * @param statusText the status text
-	 * @param responseHeaders the response headers, may be {@code null}
-	 * @param responseBody the response body content, may be {@code null}
-	 * @param responseCharset the response body charset, may be {@code null}
+	 * @param responseHeaders the response headers (may be {@code null})
+	 * @param responseBody the response body content (may be {@code null})
+	 * @param responseCharset the response body charset (may be {@code null})
 	 */
 	public RestClientResponseException(String message, int statusCode, String statusText,
 			HttpHeaders responseHeaders, byte[] responseBody, Charset responseCharset) {
@@ -59,8 +59,8 @@ public abstract class RestClientResponseException extends RestClientException {
 		this.rawStatusCode = statusCode;
 		this.statusText = statusText;
 		this.responseHeaders = responseHeaders;
-		this.responseBody = responseBody != null ? responseBody : new byte[0];
-		this.responseCharset = responseCharset != null ? responseCharset.name() : DEFAULT_CHARSET;
+		this.responseBody = (responseBody != null ? responseBody : new byte[0]);
+		this.responseCharset = (responseCharset != null ? responseCharset.name() : DEFAULT_CHARSET);
 	}
 
 
