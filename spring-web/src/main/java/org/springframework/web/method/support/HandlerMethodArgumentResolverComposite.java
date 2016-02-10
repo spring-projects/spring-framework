@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,11 +48,32 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 
 
 	/**
+	 * Add the given {@link HandlerMethodArgumentResolver}.
+	 */
+	public HandlerMethodArgumentResolverComposite addResolver(HandlerMethodArgumentResolver resolver) {
+		this.argumentResolvers.add(resolver);
+		return this;
+	}
+
+	/**
+	 * Add the given {@link HandlerMethodArgumentResolver}s.
+	 */
+	public HandlerMethodArgumentResolverComposite addResolvers(List<? extends HandlerMethodArgumentResolver> resolvers) {
+		if (resolvers != null) {
+			for (HandlerMethodArgumentResolver resolver : resolvers) {
+				this.argumentResolvers.add(resolver);
+			}
+		}
+		return this;
+	}
+
+	/**
 	 * Return a read-only list with the contained resolvers, or an empty list.
 	 */
 	public List<HandlerMethodArgumentResolver> getResolvers() {
 		return Collections.unmodifiableList(this.argumentResolvers);
 	}
+
 
 	/**
 	 * Whether the given {@linkplain MethodParameter method parameter} is supported by any registered
@@ -97,26 +118,6 @@ public class HandlerMethodArgumentResolverComposite implements HandlerMethodArgu
 			}
 		}
 		return result;
-	}
-
-	/**
-	 * Add the given {@link HandlerMethodArgumentResolver}.
-	 */
-	public HandlerMethodArgumentResolverComposite addResolver(HandlerMethodArgumentResolver resolver) {
-		this.argumentResolvers.add(resolver);
-		return this;
-	}
-
-	/**
-	 * Add the given {@link HandlerMethodArgumentResolver}s.
-	 */
-	public HandlerMethodArgumentResolverComposite addResolvers(List<? extends HandlerMethodArgumentResolver> resolvers) {
-		if (resolvers != null) {
-			for (HandlerMethodArgumentResolver resolver : resolvers) {
-				this.argumentResolvers.add(resolver);
-			}
-		}
-		return this;
 	}
 
 }
