@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,6 +41,7 @@ import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.EntityResolver;
@@ -120,6 +121,28 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 		return this.processExternalEntities;
 	}
 
+
+	/**
+	 * Build a new {@link Document} from this marshaller's {@link DocumentBuilderFactory},
+	 * as a placeholder for a DOM node.
+	 * @see #createDocumentBuilderFactory()
+	 * @see #createDocumentBuilder(DocumentBuilderFactory)
+	 */
+	protected Document buildDocument() {
+		try {
+			DocumentBuilder documentBuilder;
+			synchronized (this.documentBuilderFactoryMonitor) {
+				if (this.documentBuilderFactory == null) {
+					this.documentBuilderFactory = createDocumentBuilderFactory();
+				}
+				documentBuilder = createDocumentBuilder(this.documentBuilderFactory);
+			}
+			return documentBuilder.newDocument();
+		}
+		catch (ParserConfigurationException ex) {
+			throw new UnmarshallingFailureException("Could not create document placeholder: " + ex.getMessage(), ex);
+		}
+	}
 
 	/**
 	 * Create a {@code DocumentBuilder} that this marshaller will use for creating
@@ -226,19 +249,7 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	 */
 	protected void marshalDomResult(Object graph, DOMResult domResult) throws XmlMappingException {
 		if (domResult.getNode() == null) {
-			try {
-				synchronized (this.documentBuilderFactoryMonitor) {
-					if (this.documentBuilderFactory == null) {
-						this.documentBuilderFactory = createDocumentBuilderFactory();
-					}
-				}
-				DocumentBuilder documentBuilder = createDocumentBuilder(this.documentBuilderFactory);
-				domResult.setNode(documentBuilder.newDocument());
-			}
-			catch (ParserConfigurationException ex) {
-				throw new UnmarshallingFailureException(
-						"Could not create document placeholder for DOMResult: " + ex.getMessage(), ex);
-			}
+			domResult.setNode(buildDocument());
 		}
 		marshalDomNode(graph, domResult.getNode());
 	}
@@ -249,7 +260,7 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	 * {@code marshalXMLEventConsumer}, depending on what is contained in the
 	 * {@code StaxResult}.
 	 * @param graph the root of the object graph to marshal
-	 * @param staxResult a Spring {@link org.springframework.util.xml.StaxSource} or JAXP 1.4 {@link StAXSource}
+	 * @param staxResult a JAXP 1.4 {@link StAXSource}
 	 * @throws XmlMappingException if the given object cannot be marshalled to the result
 	 * @throws IllegalArgumentException if the {@code domResult} is empty
 	 * @see #marshalDomNode(Object, org.w3c.dom.Node)
@@ -358,19 +369,7 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	 */
 	protected Object unmarshalDomSource(DOMSource domSource) throws XmlMappingException {
 		if (domSource.getNode() == null) {
-			try {
-				synchronized (this.documentBuilderFactoryMonitor) {
-					if (this.documentBuilderFactory == null) {
-						this.documentBuilderFactory = createDocumentBuilderFactory();
-					}
-				}
-				DocumentBuilder documentBuilder = createDocumentBuilder(this.documentBuilderFactory);
-				domSource.setNode(documentBuilder.newDocument());
-			}
-			catch (ParserConfigurationException ex) {
-				throw new UnmarshallingFailureException(
-						"Could not create document placeholder for DOMSource: " + ex.getMessage(), ex);
-			}
+			domSource.setNode(buildDocument());
 		}
 		try {
 			return unmarshalDomNode(domSource.getNode());
@@ -437,7 +436,7 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 			if (!isSupportDtd()) {
 				throw new UnmarshallingFailureException("NPE while unmarshalling. " +
 						"This can happen on JDK 1.6 due to the presence of DTD " +
-						"declarations, which are disabled.", ex);
+						"declarations, which are disabled.");
 			}
 			throw ex;
 		}
