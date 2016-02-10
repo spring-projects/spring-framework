@@ -43,6 +43,7 @@ import org.springframework.web.servlet.support.SessionFlashMapManager;
 import org.springframework.web.util.WebUtils;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.mock;
@@ -203,6 +204,24 @@ public class RedirectViewTests {
 		finally {
 			contextLoader.closeWebApplicationContext(servletContext);
 		}
+	}
+
+	// SPR-13693
+
+	@Test
+	public void remoteHost() throws Exception {
+		RedirectView rv = new RedirectView();
+
+		assertFalse(rv.isRemoteHost("http://url.somewhere.com"));
+		assertFalse(rv.isRemoteHost("/path"));
+		assertFalse(rv.isRemoteHost("http://url.somewhereelse.com"));
+
+		rv.setHosts(new String[] {"url.somewhere.com"});
+
+		assertFalse(rv.isRemoteHost("http://url.somewhere.com"));
+		assertFalse(rv.isRemoteHost("/path"));
+		assertTrue(rv.isRemoteHost("http://url.somewhereelse.com"));
+
 	}
 
 	@Test

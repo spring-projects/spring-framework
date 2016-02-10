@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.Ordered;
@@ -111,6 +112,8 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	private boolean redirectContextRelative = true;
 
 	private boolean redirectHttp10Compatible = true;
+
+	private String[] redirectHosts;
 
 	private String requestContextAttribute;
 
@@ -251,6 +254,27 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 	 */
 	protected boolean isRedirectHttp10Compatible() {
 		return this.redirectHttp10Compatible;
+	}
+
+	/**
+	 * Configure one or more hosts associated with the application. All other
+	 * hosts will be considered external hosts. In effect this property
+	 * provides a way turn off encoding on redirect via
+	 * {@link HttpServletResponse#encodeRedirectURL} for URLs that have a host
+	 * and that host is not listed as a known host.
+	 * <p>If not set (the default) all URLs are encoded through the response.
+	 * @param redirectHosts one or more application hosts
+	 * @since 4.3
+	 */
+	public void setRedirectHosts(String[] redirectHosts) {
+		this.redirectHosts = redirectHosts;
+	}
+
+	/**
+	 * Return the configured application hosts for redirect purposes.
+	 */
+	public String[] getRedirectHosts() {
+		return this.redirectHosts;
 	}
 
 	/**
@@ -435,6 +459,7 @@ public class UrlBasedViewResolver extends AbstractCachingViewResolver implements
 		if (viewName.startsWith(REDIRECT_URL_PREFIX)) {
 			String redirectUrl = viewName.substring(REDIRECT_URL_PREFIX.length());
 			RedirectView view = new RedirectView(redirectUrl, isRedirectContextRelative(), isRedirectHttp10Compatible());
+			view.setHosts(getRedirectHosts());
 			return applyLifecycleMethods(viewName, view);
 		}
 		// Check for special "forward:" prefix.
