@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import io.netty.buffer.UnpooledByteBufAllocator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
@@ -37,7 +36,7 @@ import org.springframework.core.codec.support.StringDecoder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.io.buffer.DataBufferAllocator;
-import org.springframework.core.io.buffer.NettyDataBufferAllocator;
+import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.ObjectUtils;
@@ -62,8 +61,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 
 	private ConversionService conversionService = new DefaultConversionService();
 
-	private DataBufferAllocator allocator =
-			new NettyDataBufferAllocator(new UnpooledByteBufAllocator(false));
+	private DataBufferAllocator allocator = new DefaultDataBufferAllocator();
 
 	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache =
 			new ConcurrentHashMap<>(64);
