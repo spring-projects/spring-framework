@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,6 +70,7 @@ import org.springframework.web.servlet.handler.ConversionServiceExposingIntercep
 import org.springframework.web.servlet.handler.HandlerExceptionResolverComposite;
 import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
+import org.springframework.web.servlet.mvc.annotation.ResponseStatusExceptionResolver;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.resource.ResourceUrlProviderExposingInterceptor;
@@ -241,8 +242,12 @@ public class WebMvcConfigurationSupportExtensionTests {
 
 	@Test
 	public void exceptionResolvers() throws Exception {
-		HandlerExceptionResolver exceptionResolver = this.config.handlerExceptionResolver();
-		assertEquals(1, ((HandlerExceptionResolverComposite) exceptionResolver).getExceptionResolvers().size());
+		List<HandlerExceptionResolver> resolvers = ((HandlerExceptionResolverComposite)
+				this.config.handlerExceptionResolver()).getExceptionResolvers();
+
+		assertEquals(2, resolvers.size());
+		assertEquals(ResponseStatusExceptionResolver.class, resolvers.get(0).getClass());
+		assertEquals(SimpleMappingExceptionResolver.class, resolvers.get(1).getClass());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -356,6 +361,11 @@ public class WebMvcConfigurationSupportExtensionTests {
 		@Override
 		public void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
 			exceptionResolvers.add(new SimpleMappingExceptionResolver());
+		}
+
+		@Override
+		public void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
+			exceptionResolvers.add(0, new ResponseStatusExceptionResolver());
 		}
 
 		@Override
