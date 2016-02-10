@@ -17,11 +17,10 @@
 package org.springframework.web.servlet.config.annotation;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -80,7 +79,14 @@ import org.springframework.web.servlet.view.ViewResolverComposite;
 import org.springframework.web.servlet.view.json.MappingJackson2JsonView;
 import org.springframework.web.util.UrlPathHelper;
 
-import static org.junit.Assert.*;
+import static com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES;
+import static com.fasterxml.jackson.databind.MapperFeature.DEFAULT_VIEW_INCLUSION;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.springframework.http.MediaType.APPLICATION_ATOM_XML;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.http.MediaType.APPLICATION_XML;
 
 /**
  * A test fixture with a sub-class of {@link WebMvcConfigurationSupport} that also
@@ -120,6 +126,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 		assertEquals(TestPathHelper.class, rmHandlerMapping.getUrlPathHelper().getClass());
 		assertEquals(TestPathMatcher.class, rmHandlerMapping.getPathMatcher().getClass());
 		HandlerExecutionChain chain = rmHandlerMapping.getHandler(new MockHttpServletRequest("GET", "/"));
+		assertNotNull(chain);
 		assertNotNull(chain.getInterceptors());
 		assertEquals(3, chain.getInterceptors().length);
 		assertEquals(LocaleChangeInterceptor.class, chain.getInterceptors()[0].getClass());
@@ -133,10 +140,13 @@ public class WebMvcConfigurationSupportExtensionTests {
 		assertEquals(TestPathHelper.class, handlerMapping.getUrlPathHelper().getClass());
 		assertEquals(TestPathMatcher.class, handlerMapping.getPathMatcher().getClass());
 		chain = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/path"));
+		assertNotNull(chain);
 		assertNotNull(chain.getHandler());
 		chain = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/bad"));
+		assertNotNull(chain);
 		assertNotNull(chain.getHandler());
 		chain = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/old"));
+		assertNotNull(chain);
 		assertNotNull(chain.getHandler());
 
 		handlerMapping = (AbstractHandlerMapping) this.config.resourceHandlerMapping();
@@ -146,6 +156,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 		assertEquals(TestPathHelper.class, handlerMapping.getUrlPathHelper().getClass());
 		assertEquals(TestPathMatcher.class, handlerMapping.getPathMatcher().getClass());
 		chain = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/resources/foo.gif"));
+		assertNotNull(chain);
 		assertNotNull(chain.getHandler());
 		assertEquals(Arrays.toString(chain.getInterceptors()), 2, chain.getInterceptors().length);
 		// PathExposingHandlerInterceptor at chain.getInterceptors()[0]
@@ -156,6 +167,7 @@ public class WebMvcConfigurationSupportExtensionTests {
 		assertNotNull(handlerMapping);
 		assertEquals(Integer.MAX_VALUE, handlerMapping.getOrder());
 		chain = handlerMapping.getHandler(new MockHttpServletRequest("GET", "/anyPath"));
+		assertNotNull(chain);
 		assertNotNull(chain.getHandler());
 	}
 
@@ -169,13 +181,14 @@ public class WebMvcConfigurationSupportExtensionTests {
 		assertEquals("converted", actual);
 
 		// Message converters
-		assertEquals(2, adapter.getMessageConverters().size());
-		assertEquals(StringHttpMessageConverter.class, adapter.getMessageConverters().get(0).getClass());
-		assertEquals(MappingJackson2HttpMessageConverter.class, adapter.getMessageConverters().get(1).getClass());
-		ObjectMapper objectMapper = ((MappingJackson2HttpMessageConverter)adapter.getMessageConverters().get(1)).getObjectMapper();
-		assertFalse(objectMapper.getDeserializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
-		assertFalse(objectMapper.getSerializationConfig().isEnabled(MapperFeature.DEFAULT_VIEW_INCLUSION));
-		assertFalse(objectMapper.getDeserializationConfig().isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
+		List<HttpMessageConverter<?>> converters = adapter.getMessageConverters();
+		assertEquals(2, converters.size());
+		assertEquals(StringHttpMessageConverter.class, converters.get(0).getClass());
+		assertEquals(MappingJackson2HttpMessageConverter.class, converters.get(1).getClass());
+		ObjectMapper objectMapper = ((MappingJackson2HttpMessageConverter) converters.get(1)).getObjectMapper();
+		assertFalse(objectMapper.getDeserializationConfig().isEnabled(DEFAULT_VIEW_INCLUSION));
+		assertFalse(objectMapper.getSerializationConfig().isEnabled(DEFAULT_VIEW_INCLUSION));
+		assertFalse(objectMapper.getDeserializationConfig().isEnabled(FAIL_ON_UNKNOWN_PROPERTIES));
 
 		DirectFieldAccessor fieldAccessor = new DirectFieldAccessor(adapter);
 
@@ -223,21 +236,23 @@ public class WebMvcConfigurationSupportExtensionTests {
 		MockHttpServletRequest request = new MockHttpServletRequest("GET", "/foo.json");
 		NativeWebRequest webRequest = new ServletWebRequest(request);
 
-		ContentNegotiationManager manager = this.config.requestMappingHandlerMapping().getContentNegotiationManager();
-		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON), manager.resolveMediaTypes(webRequest));
+		RequestMappingHandlerMapping mapping = this.config.requestMappingHandlerMapping();
+		ContentNegotiationManager manager = mapping.getContentNegotiationManager();
+		assertEquals(Collections.singletonList(APPLICATION_JSON), manager.resolveMediaTypes(webRequest));
 
 		request.setRequestURI("/foo.xml");
-		assertEquals(Arrays.asList(MediaType.APPLICATION_XML), manager.resolveMediaTypes(webRequest));
+		assertEquals(Collections.singletonList(APPLICATION_XML), manager.resolveMediaTypes(webRequest));
 
 		request.setRequestURI("/foo.rss");
-		assertEquals(Arrays.asList(MediaType.valueOf("application/rss+xml")), manager.resolveMediaTypes(webRequest));
+		assertEquals(Collections.singletonList(MediaType.valueOf("application/rss+xml")),
+				manager.resolveMediaTypes(webRequest));
 
 		request.setRequestURI("/foo.atom");
-		assertEquals(Arrays.asList(MediaType.APPLICATION_ATOM_XML), manager.resolveMediaTypes(webRequest));
+		assertEquals(Collections.singletonList(APPLICATION_ATOM_XML), manager.resolveMediaTypes(webRequest));
 
 		request.setRequestURI("/foo");
 		request.setParameter("f", "json");
-		assertEquals(Arrays.asList(MediaType.APPLICATION_JSON), manager.resolveMediaTypes(webRequest));
+		assertEquals(Collections.singletonList(APPLICATION_JSON), manager.resolveMediaTypes(webRequest));
 	}
 
 	@Test
