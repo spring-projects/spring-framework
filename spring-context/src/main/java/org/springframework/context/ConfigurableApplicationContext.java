@@ -131,13 +131,13 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	void addApplicationListener(ApplicationListener<?> listener);
 
 	/**
-	 * Register the given resource resolver with this application context,
+	 * Register the given protocol resolver with this application context,
 	 * allowing for additional resource protocols to be handled.
 	 * <p>Any such resolver will be invoked ahead of this context's standard
 	 * resolution rules. It may therefore also override any default rules.
 	 * @since 4.3
 	 */
-	void addResourceResolver(ProtocolResolver protocolHandler);
+	void addProtocolResolver(ProtocolResolver resolver);
 
 	/**
 	 * Load or refresh the persistent representation of the configuration,
