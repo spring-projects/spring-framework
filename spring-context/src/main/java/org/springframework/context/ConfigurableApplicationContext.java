@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.ProtocolResolver;
 
 /**
  * SPI interface to be implemented by most if not all application contexts.
@@ -113,9 +114,9 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * Add a new BeanFactoryPostProcessor that will get applied to the internal
 	 * bean factory of this application context on refresh, before any of the
 	 * bean definitions get evaluated. To be invoked during context configuration.
-	 * @param beanFactoryPostProcessor the factory processor to register
+	 * @param postProcessor the factory processor to register
 	 */
-	void addBeanFactoryPostProcessor(BeanFactoryPostProcessor beanFactoryPostProcessor);
+	void addBeanFactoryPostProcessor(BeanFactoryPostProcessor postProcessor);
 
 	/**
 	 * Add a new ApplicationListener that will be notified on context events
@@ -128,6 +129,15 @@ public interface ConfigurableApplicationContext extends ApplicationContext, Life
 	 * @see org.springframework.context.event.ContextClosedEvent
 	 */
 	void addApplicationListener(ApplicationListener<?> listener);
+
+	/**
+	 * Register the given resource resolver with this application context,
+	 * allowing for additional resource protocols to be handled.
+	 * <p>Any such resolver will be invoked ahead of this context's standard
+	 * resolution rules. It may therefore also override any default rules.
+	 * @since 4.3
+	 */
+	void addResourceResolver(ProtocolResolver protocolHandler);
 
 	/**
 	 * Load or refresh the persistent representation of the configuration,
