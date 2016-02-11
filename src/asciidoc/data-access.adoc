@@ -2918,10 +2918,6 @@ query methods, one for an `int` and one that queries for a `String`.
 		public String getName() {
 			return this.jdbcTemplate.queryForObject("select name from mytable", String.class);
 		}
-
-		public void setDataSource(DataSource dataSource) {
-			this.dataSource = dataSource;
-		}
 	}
 ----
 
