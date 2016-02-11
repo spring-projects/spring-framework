@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
@@ -48,7 +49,7 @@ import org.springframework.util.TypeUtils;
  * Abstract base class for Jackson based and content type independent
  * {@link HttpMessageConverter} implementations.
  *
- * <p>Compatible with Jackson 2.1 and higher.
+ * <p>Compatible with Jackson 2.1 to 2.6.
  *
  * @author Arjen Poutsma
  * @author Keith Donald
@@ -308,7 +309,10 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	 * @return the Jackson JavaType
 	 */
 	protected JavaType getJavaType(Type type, Class<?> contextClass) {
-		return this.objectMapper.getTypeFactory().constructType(type, contextClass);
+		TypeFactory tf = this.objectMapper.getTypeFactory();
+		// Conditional call because Jackson 2.7 does not support null contextClass anymore
+		// TypeVariable resolution will not work with Jackson 2.7, see SPR-13853 for more details
+		return (contextClass != null ? tf.constructType(type, contextClass) : tf.constructType(type));
 	}
 
 	/**
