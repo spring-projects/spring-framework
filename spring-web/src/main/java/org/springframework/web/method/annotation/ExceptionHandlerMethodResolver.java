@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
  * to the exception types supported by a given {@link Method}.
  *
  * @author Rossen Stoyanchev
+ * @author Martin Macko
  * @since 3.1
  */
 public class ExceptionHandlerMethodResolver {
@@ -60,6 +61,9 @@ public class ExceptionHandlerMethodResolver {
 
 	private final Map<Class<? extends Throwable>, Method> mappedMethods =
 			new ConcurrentHashMap<Class<? extends Throwable>, Method>(16);
+
+	private final Map<Class<? extends Throwable>, Boolean> excludedExceptions =
+			new ConcurrentHashMap<Class<? extends Throwable>, Boolean>(16);
 
 	private final Map<Class<? extends Throwable>, Method> exceptionLookupCache =
 			new ConcurrentHashMap<Class<? extends Throwable>, Method>(16);
@@ -94,6 +98,7 @@ public class ExceptionHandlerMethodResolver {
 			}
 		}
 		Assert.notEmpty(result, "No exception types mapped to {" + method + "}");
+		addExclusions(method, result);
 		return result;
 	}
 
@@ -107,6 +112,19 @@ public class ExceptionHandlerMethodResolver {
 		if (oldMethod != null && !oldMethod.equals(method)) {
 			throw new IllegalStateException("Ambiguous @ExceptionHandler method mapped for [" +
 					exceptionType + "]: {" + oldMethod + ", " + method + "}");
+		}
+	}
+
+	private void addExclusions(Method method,  List<Class<? extends Throwable>> result) {
+		ExceptionHandler annot = AnnotationUtils.findAnnotation(method, ExceptionHandler.class);
+		List<Class<? extends Throwable>> exclusions = Arrays.asList(annot.exclude());
+
+		for (Class<? extends Throwable> excludedException : exclusions) {
+			if(result.contains(excludedException)) {
+				throw new IllegalStateException("Conflicting @ExceptionHandler method configured: ["
+					+ excludedException + "] is mapped for handling and for exclusion");
+			}
+			this.excludedExceptions.put(excludedException, Boolean.TRUE);
 		}
 	}
 
@@ -152,13 +170,46 @@ public class ExceptionHandlerMethodResolver {
 				matches.add(mappedException);
 			}
 		}
-		if (!matches.isEmpty()) {
-			Collections.sort(matches, new ExceptionDepthComparator(exceptionType));
-			return this.mappedMethods.get(matches.get(0));
-		}
-		else {
+
+		if(matches.isEmpty()) {
 			return null;
 		}
+
+		Collections.sort(matches, new ExceptionDepthComparator(exceptionType));
+
+		if (!this.excludedExceptions.containsKey(exceptionType)) {
+			return this.mappedMethods.get(matches.get(0));
+		}
+		return firstNonExcludedMethod(matches, exceptionType);
+	}
+
+	/**
+	 * Finds first method that can handle {@code exceptionType} accounting for
+	 * excluded exceptions
+	 * @param matches list of matched exceptions that are mapped
+	 * @param exceptionType exception that is being handled
+	 * @return {@code null} or the first non excluded method that can handle {@code exceptionType}
+	 */
+	private Method firstNonExcludedMethod(List<Class<? extends Throwable>> matches, Class<? extends Exception> exceptionType) {
+		for (Class<? extends Throwable> match : matches) {
+			Method matchedMethod = this.mappedMethods.get(match);
+			if(!hasExclusion(matchedMethod, exceptionType)) {
+				return matchedMethod;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Checks if method has {@code exceptionType} excluded
+	 * @param method Method to check for excluded exceptions
+	 * @param exceptionType exception to look for in exclusions
+	 * @return {@code true} if {@code exceptionType} is in excluded exceptions
+	 */
+	private boolean hasExclusion(Method method, Class<? extends Exception> exceptionType) {
+		ExceptionHandler annot = AnnotationUtils.findAnnotation(method, ExceptionHandler.class);
+		List<Class<? extends Throwable>> exclusions = Arrays.asList(annot.exclude());
+		return exclusions.contains(exceptionType);
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import static org.junit.Assert.*;
  * Test fixture for {@link ExceptionHandlerMethodResolver} tests.
  *
  * @author Rossen Stoyanchev
+ * @author Martin Macko
  */
 public class ExceptionHandlerMethodResolverTests {
 
@@ -88,9 +89,36 @@ public class ExceptionHandlerMethodResolverTests {
 		new ExceptionHandlerMethodResolver(AmbiguousController.class);
 	}
 
+	@Test(expected = IllegalStateException.class)
+	public void misconfiguredExclusion() {
+		new ExceptionHandlerMethodResolver(MisconfiguredExclusionController.class);
+	}
+
 	@Test(expected = IllegalArgumentException.class)
 	public void noExceptionMapping() {
 		new ExceptionHandlerMethodResolver(NoExceptionController.class);
+	}
+
+	@Test
+	public void bubblingUpSocketExpection() {
+		ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(BubblingUpSocketExclusionController.class);
+		SocketException exception = new SocketException();
+		assertNotEquals("handleIOExceptionButNoSocketException", resolver.resolveMethod(exception));
+		assertEquals("handle", resolver.resolveMethod(exception).getName());
+	}
+
+	@Test
+	public void noExceptionMappingWithExclusion() {
+		ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(ExceptionWithExclusionsController.class);
+		SocketException exception = new SocketException();
+		assertNull(resolver.resolveMethod(exception));
+	}
+
+	@Test
+	public void higherExceptionInExclusion() {
+		ExceptionHandlerMethodResolver resolver = new ExceptionHandlerMethodResolver(HigherExceptionInExclusionController.class);
+		SocketException exception = new SocketException();
+		assertEquals("handle", resolver.resolveMethod(exception).getName());
 	}
 
 	@Controller
@@ -108,6 +136,41 @@ public class ExceptionHandlerMethodResolverTests {
 
 		@ExceptionHandler
 		public void handleIllegalArgumentException(IllegalArgumentException exception) {
+		}
+	}
+
+	@Controller
+	static class BubblingUpSocketExclusionController {
+
+		@ExceptionHandler(value = Exception.class)
+		public void handle() {}
+
+
+		@ExceptionHandler(value = IOException.class, exclude = SocketException.class)
+		public void handleIOExceptionButNoSocketException() {
+		}
+	}
+
+	@Controller
+	static class ExceptionWithExclusionsController {
+
+		@ExceptionHandler(value = IOException.class, exclude = SocketException.class)
+		public void handleIOException() {
+		}
+	}
+
+	@Controller
+	static class MisconfiguredExclusionController {
+
+		@ExceptionHandler(value = SocketException.class, exclude = SocketException.class)
+		public void handleIOException() {
+		}
+	}
+
+	@Controller
+	static class HigherExceptionInExclusionController {
+		@ExceptionHandler(value = SocketException.class, exclude = Exception.class)
+		public void handle() {
 		}
 	}
 

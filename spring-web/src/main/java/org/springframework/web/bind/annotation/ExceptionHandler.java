@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,6 +113,7 @@ import java.lang.annotation.Target;
  *
  * @author Arjen Poutsma
  * @author Juergen Hoeller
+ * @author Martin Macko
  * @since 3.0
  * @see org.springframework.web.context.request.WebRequest
  * @see org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver
@@ -129,4 +130,9 @@ public @interface ExceptionHandler {
 	 */
 	Class<? extends Throwable>[] value() default {};
 
+	/**
+	 * Exceptions excluded from handling by the annotated method.
+	 * @since 5.0
+	 */
+	Class<? extends Throwable>[] exclude() default {};
 }
