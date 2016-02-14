@@ -226,6 +226,14 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	public void handleRequest(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
+		// First, check whether a matching resource exists
+		Resource resource = getResource(request);
+		if (resource == null) {
+			logger.trace("No matching resource found - returning 404");
+			response.sendError(HttpServletResponse.SC_NOT_FOUND);
+			return;
+		}
+
 		if (HttpMethod.OPTIONS.matches(request.getMethod())) {
 			response.setHeader("Allow", getAllowHeader());
 			return;
@@ -233,14 +241,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 		// Supported methods and required session
 		checkRequest(request);
-
-		// Check whether a matching resource exists
-		Resource resource = getResource(request);
-		if (resource == null) {
-			logger.trace("No matching resource found - returning 404");
-			response.sendError(HttpServletResponse.SC_NOT_FOUND);
-			return;
-		}
 
 		// Header phase
 		if (new ServletWebRequest(request, response).checkNotModified(resource.lastModified())) {
