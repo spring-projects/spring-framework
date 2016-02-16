@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,8 +18,16 @@ package org.springframework.http.client;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
+import java.util.List;
+import java.util.Map;
 
+import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpEntityEnclosingRequest;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.Configurable;
@@ -33,12 +41,21 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpTrace;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.protocol.HTTP;
 import org.apache.http.protocol.HttpContext;
+import org.apache.http.util.EntityUtils;
 
 import org.springframework.beans.factory.DisposableBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.StreamingHttpOutputMessage;
 import org.springframework.util.Assert;
+import org.springframework.util.StreamUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link org.springframework.http.client.ClientHttpRequestFactory} implementation that
@@ -82,7 +99,6 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		Assert.notNull(httpClient, "HttpClient must not be null");
 		this.httpClient = httpClient;
 	}
-
 
 	/**
 	 * Set the {@code HttpClient} used for
@@ -185,7 +201,6 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		this.bufferRequestBody = bufferRequestBody;
 	}
 
-
 	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 		HttpClient client = getHttpClient();
@@ -229,6 +244,7 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	private RequestConfig.Builder requestConfigBuilder() {
 		return (this.requestConfig != null ? RequestConfig.copy(this.requestConfig) : RequestConfig.custom());
 	}
+
 
 	/**
 	 * Create a default {@link RequestConfig} to use with the given client.
@@ -308,6 +324,28 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 	}
 
 	/**
+	 * Add the given headers to the given HTTP request.
+	 * @param httpRequest the request to add the headers to
+	 * @param headers the headers to add
+	 */
+	static void addHeaders(HttpUriRequest httpRequest, HttpHeaders headers) {
+		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+			String headerName = entry.getKey();
+			if (HttpHeaders.COOKIE.equalsIgnoreCase(headerName)) {  // RFC 6265
+				String headerValue = StringUtils
+						.collectionToDelimitedString(entry.getValue(), "; ");
+				httpRequest.addHeader(headerName, headerValue);
+			}
+			else if (!HTTP.CONTENT_LEN.equalsIgnoreCase(headerName) &&
+					!HTTP.TRANSFER_ENCODING.equalsIgnoreCase(headerName)) {
+				for (String headerValue : entry.getValue()) {
+					httpRequest.addHeader(headerName, headerValue);
+				}
+			}
+		}
+	}
+
+	/**
 	 * Template method that allows for manipulating the {@link HttpUriRequest} before it is
 	 * returned as part of a {@link HttpComponentsClientHttpRequest}.
 	 * <p>The default implementation is empty.
@@ -362,4 +400,205 @@ public class HttpComponentsClientHttpRequestFactory implements ClientHttpRequest
 		}
 	}
 
+	static class HttpComponentsClientHttpRequest extends AbstractBufferingClientHttpRequest {
+
+		final HttpClient httpClient;
+
+		final HttpUriRequest httpRequest;
+
+		final HttpContext httpContext;
+
+
+		HttpComponentsClientHttpRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext) {
+			this.httpClient = httpClient;
+			this.httpRequest = httpRequest;
+			this.httpContext = httpContext;
+		}
+
+
+		@Override
+		public HttpMethod getMethod() {
+			return HttpMethod.resolve(this.httpRequest.getMethod());
+		}
+
+		@Override
+		public URI getURI() {
+			return this.httpRequest.getURI();
+		}
+
+
+		@Override
+		protected ClientHttpResponse executeInternal(HttpHeaders headers, byte[] bufferedOutput) throws IOException {
+			addHeaders(this.httpRequest, headers);
+
+			if (this.httpRequest instanceof HttpEntityEnclosingRequest) {
+				HttpEntityEnclosingRequest entityEnclosingRequest = (HttpEntityEnclosingRequest) this.httpRequest;
+				HttpEntity requestEntity = new ByteArrayEntity(bufferedOutput);
+				entityEnclosingRequest.setEntity(requestEntity);
+			}
+			HttpResponse httpResponse = this.httpClient.execute(this.httpRequest, this.httpContext);
+			return new HttpComponentsClientHttpResponse(httpResponse);
+		}
+
+
+	}
+
+	private static final class HttpComponentsStreamingClientHttpRequest extends HttpComponentsClientHttpRequest implements
+			StreamingHttpOutputMessage {
+
+		private Body body;
+
+
+		HttpComponentsStreamingClientHttpRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext) {
+			super(httpClient, httpRequest, httpContext);
+		}
+
+		@Override
+		public void setBody(Body body) {
+			assertNotExecuted();
+			this.body = body;
+		}
+
+		@Override
+		protected OutputStream getBodyInternal(HttpHeaders headers) throws IOException {
+			throw new UnsupportedOperationException("getBody not supported");
+		}
+
+		@Override
+		protected ClientHttpResponse executeInternal(HttpHeaders headers) throws IOException {
+			addHeaders(this.httpRequest, headers);
+
+			if (this.httpRequest instanceof HttpEntityEnclosingRequest && body != null) {
+				HttpEntityEnclosingRequest entityEnclosingRequest = (HttpEntityEnclosingRequest) this.httpRequest;
+				HttpEntity requestEntity = new StreamingHttpEntity(getHeaders(), body);
+				entityEnclosingRequest.setEntity(requestEntity);
+			}
+
+			HttpResponse httpResponse = this.httpClient.execute(this.httpRequest, this.httpContext);
+			return new HttpComponentsClientHttpResponse(httpResponse);
+		}
+
+
+		private static class StreamingHttpEntity implements HttpEntity {
+
+			private final HttpHeaders headers;
+
+			private final Body body;
+
+			public StreamingHttpEntity(HttpHeaders headers, Body body) {
+				this.headers = headers;
+				this.body = body;
+			}
+
+			@Override
+			public boolean isRepeatable() {
+				return false;
+			}
+
+			@Override
+			public boolean isChunked() {
+				return false;
+			}
+
+			@Override
+			public long getContentLength() {
+				return this.headers.getContentLength();
+			}
+
+			@Override
+			public Header getContentType() {
+				MediaType contentType = this.headers.getContentType();
+				return (contentType != null ? new BasicHeader("Content-Type", contentType.toString()) : null);
+			}
+
+			@Override
+			public Header getContentEncoding() {
+				String contentEncoding = this.headers.getFirst("Content-Encoding");
+				return (contentEncoding != null ? new BasicHeader("Content-Encoding", contentEncoding) : null);
+
+			}
+
+			@Override
+			public InputStream getContent() throws IOException, IllegalStateException {
+				throw new IllegalStateException("No content available");
+			}
+
+			@Override
+			public void writeTo(OutputStream outputStream) throws IOException {
+				this.body.writeTo(outputStream);
+			}
+
+			@Override
+			public boolean isStreaming() {
+				return true;
+			}
+
+			@Override
+			@Deprecated
+			public void consumeContent() throws IOException {
+				throw new UnsupportedOperationException();
+			}
+		}
+
+	}
+
+	static class HttpComponentsClientHttpResponse extends AbstractClientHttpResponse {
+
+		private final HttpResponse httpResponse;
+
+		private HttpHeaders headers;
+
+
+		HttpComponentsClientHttpResponse(HttpResponse httpResponse) {
+			this.httpResponse = httpResponse;
+		}
+
+
+		@Override
+		public int getRawStatusCode() throws IOException {
+			return this.httpResponse.getStatusLine().getStatusCode();
+		}
+
+		@Override
+		public String getStatusText() throws IOException {
+			return this.httpResponse.getStatusLine().getReasonPhrase();
+		}
+
+		@Override
+		public HttpHeaders getHeaders() {
+			if (this.headers == null) {
+				this.headers = new HttpHeaders();
+				for (Header header : this.httpResponse.getAllHeaders()) {
+					this.headers.add(header.getName(), header.getValue());
+				}
+			}
+			return this.headers;
+		}
+
+		@Override
+		public InputStream getBody() throws IOException {
+			HttpEntity entity = this.httpResponse.getEntity();
+			return (entity != null ? entity.getContent() : StreamUtils.emptyInput());
+		}
+
+		@Override
+		public void close() {
+	        // Release underlying connection back to the connection manager
+	        try {
+	            try {
+	                // Attempt to keep connection alive by consuming its remaining content
+	                EntityUtils.consume(this.httpResponse.getEntity());
+	            }
+				finally {
+					if (this.httpResponse instanceof Closeable) {
+						((Closeable) this.httpResponse).close();
+					}
+	            }
+	        }
+	        catch (IOException ex) {
+				// Ignore exception on close...
+	        }
+		}
+
+	}
 }

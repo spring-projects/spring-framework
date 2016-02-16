@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,8 @@ public class SimpleClientHttpRequestFactoryTests {
 		HttpURLConnection urlConnection = mock(HttpURLConnection.class);
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("foo", null);
-		SimpleBufferingClientHttpRequest.addHeaders(urlConnection, headers);
+		SimpleClientHttpRequestFactory
+				.addHeaders(urlConnection, headers);
 		verify(urlConnection, times(1)).addRequestProperty("foo", "");
 	}
 

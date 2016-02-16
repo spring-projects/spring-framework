@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,16 @@
 
 package org.springframework.http.client;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
 
 import org.junit.Test;
+
 import org.springframework.http.HttpMethod;
+
+import static org.junit.Assert.assertEquals;
 
 public class BufferedSimpleHttpRequestFactoryTests extends AbstractHttpRequestFactoryTestCase {
 
@@ -60,7 +61,8 @@ public class BufferedSimpleHttpRequestFactoryTests extends AbstractHttpRequestFa
 	public void deleteWithoutBodyDoesNotRaiseException() throws Exception {
 		HttpURLConnection connection = new TestHttpURLConnection(new URL("http://example.com"));
 		((SimpleClientHttpRequestFactory) this.factory).prepareConnection(connection, "DELETE");
-		SimpleBufferingClientHttpRequest request = new SimpleBufferingClientHttpRequest(connection, false);
+		SimpleClientHttpRequestFactory.SimpleBufferingClientHttpRequest
+				request = new SimpleClientHttpRequestFactory.SimpleBufferingClientHttpRequest(connection, false);
 		request.execute();
 	}
 

@@ -17,6 +17,7 @@
 package org.springframework.http.client;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -24,15 +25,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import com.squareup.okhttp.Call;
+import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.RequestBody;
+import com.squareup.okhttp.Response;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.SettableListenableFuture;
 
 /**
  * {@link ClientHttpRequestFactory} implementation that uses
@@ -63,7 +69,7 @@ public class OkHttpClientHttpRequestFactory
 	 * @param client the client to use
 	 */
 	public OkHttpClientHttpRequestFactory(OkHttpClient client) {
-		Assert.notNull(client, "OkHttpClient must not be null");
+		Assert.notNull(client, "'client' must not be null");
 		this.client = client;
 		this.defaultClient = false;
 	}
@@ -120,7 +126,7 @@ public class OkHttpClientHttpRequestFactory
 	}
 
 
-	static Request buildRequest(HttpHeaders headers, byte[] content, URI uri,
+	private static Request buildRequest(HttpHeaders headers, byte[] content, URI uri,
 			HttpMethod method) throws MalformedURLException {
 
 		com.squareup.okhttp.MediaType contentType = getContentType(headers);
@@ -144,6 +150,157 @@ public class OkHttpClientHttpRequestFactory
 		String rawContentType = headers.getFirst(HttpHeaders.CONTENT_TYPE);
 		return (StringUtils.hasText(rawContentType) ?
 				com.squareup.okhttp.MediaType.parse(rawContentType) : null);
+	}
+
+	private static class OkHttpClientHttpRequest extends AbstractBufferingClientHttpRequest {
+
+		private final OkHttpClient client;
+
+		private final URI uri;
+
+		private final HttpMethod method;
+
+
+		public OkHttpClientHttpRequest(OkHttpClient client, URI uri, HttpMethod method) {
+			this.client = client;
+			this.uri = uri;
+			this.method = method;
+		}
+
+
+		@Override
+		public HttpMethod getMethod() {
+			return this.method;
+		}
+
+		@Override
+		public URI getURI() {
+			return this.uri;
+		}
+
+
+		@Override
+		protected ClientHttpResponse executeInternal(HttpHeaders headers, byte[] content) throws IOException {
+			Request request = buildRequest(headers, content, this.uri, this.method);
+			return new OkHttpClientHttpResponse(this.client.newCall(request).execute());
+		}
+
+	}
+
+	private static class OkHttpAsyncClientHttpRequest extends AbstractBufferingAsyncClientHttpRequest {
+
+		private final OkHttpClient client;
+
+		private final URI uri;
+
+		private final HttpMethod method;
+
+
+		public OkHttpAsyncClientHttpRequest(OkHttpClient client, URI uri, HttpMethod method) {
+			this.client = client;
+			this.uri = uri;
+			this.method = method;
+		}
+
+
+		@Override
+		public HttpMethod getMethod() {
+			return this.method;
+		}
+
+		@Override
+		public URI getURI() {
+			return this.uri;
+		}
+
+		@Override
+		protected ListenableFuture<ClientHttpResponse> executeInternal(HttpHeaders headers, byte[] content)
+				throws IOException {
+
+			Request request = buildRequest(headers, content, this.uri, this.method);
+			return new OkHttpListenableFuture(this.client.newCall(request));
+		}
+
+
+		private static class OkHttpListenableFuture extends
+				SettableListenableFuture<ClientHttpResponse> {
+
+			private final Call call;
+
+			public OkHttpListenableFuture(Call call) {
+				this.call = call;
+				this.call.enqueue(new Callback() {
+					@Override
+					public void onResponse(Response response) {
+						set(new OkHttpClientHttpResponse(response));
+					}
+					@Override
+					public void onFailure(Request request, IOException ex) {
+						setException(ex);
+					}
+				});
+			}
+
+			@Override
+			protected void interruptTask() {
+				this.call.cancel();
+			}
+		}
+
+	}
+
+	private static class OkHttpClientHttpResponse extends AbstractClientHttpResponse {
+
+		private final Response response;
+
+		private HttpHeaders headers;
+
+
+		public OkHttpClientHttpResponse(Response response) {
+			Assert.notNull(response, "'response' must not be null");
+			this.response = response;
+		}
+
+
+		@Override
+		public int getRawStatusCode() {
+			return this.response.code();
+		}
+
+		@Override
+		public String getStatusText() {
+			return this.response.message();
+		}
+
+		@Override
+		public InputStream getBody() throws IOException {
+			return this.response.body().byteStream();
+		}
+
+		@Override
+		public HttpHeaders getHeaders() {
+			if (this.headers == null) {
+				HttpHeaders headers = new HttpHeaders();
+				for (String headerName : this.response.headers().names()) {
+					for (String headerValue : this.response.headers(headerName)) {
+						headers.add(headerName, headerValue);
+					}
+				}
+				this.headers = headers;
+			}
+			return this.headers;
+		}
+
+		@Override
+		public void close() {
+			try {
+				this.response.body().close();
+			}
+			catch (IOException ex) {
+				// ignore
+			}
+		}
+
 	}
 
 }

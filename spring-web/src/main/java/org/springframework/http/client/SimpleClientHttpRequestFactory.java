@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,26 @@
 package org.springframework.http.client;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.Proxy;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
 
 import org.springframework.core.task.AsyncListenableTaskExecutor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
+import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StreamUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.util.concurrent.ListenableFuture;
 
 /**
  * {@link ClientHttpRequestFactory} implementation that uses standard JDK facilities.
@@ -131,7 +142,6 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 		this.taskExecutor = taskExecutor;
 	}
 
-
 	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) throws IOException {
 		HttpURLConnection connection = openConnection(uri.toURL(), this.proxy);
@@ -144,6 +154,7 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 			return new SimpleStreamingClientHttpRequest(connection, this.chunkSize, this.outputStreaming);
 		}
 	}
+
 
 	/**
 	 * {@inheritDoc}
@@ -217,4 +228,342 @@ public class SimpleClientHttpRequestFactory implements ClientHttpRequestFactory,
 		connection.setRequestMethod(httpMethod);
 	}
 
+	/**
+	 * Add the given headers to the given HTTP connection.
+	 * @param connection the connection to add the headers to
+	 * @param headers the headers to add
+	 */
+	static void addHeaders(HttpURLConnection connection, HttpHeaders headers) {
+		for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+			String headerName = entry.getKey();
+			if (HttpHeaders.COOKIE.equalsIgnoreCase(headerName)) {  // RFC 6265
+				String headerValue = StringUtils
+						.collectionToDelimitedString(entry.getValue(), "; ");
+				connection.setRequestProperty(headerName, headerValue);
+			}
+			else {
+				for (String headerValue : entry.getValue()) {
+					String actualHeaderValue = headerValue != null ? headerValue : "";
+					connection.addRequestProperty(headerName, actualHeaderValue);
+				}
+			}
+		}
+	}
+
+
+	private static class HttpURLConnectionHelper {
+
+		protected final HttpURLConnection connection;
+
+		public HttpURLConnectionHelper(HttpURLConnection connection) {
+			this.connection = connection;
+		}
+
+		public HttpMethod getMethod() {
+			return HttpMethod.resolve(this.connection.getRequestMethod());
+		}
+
+		public URI getURI() {
+			try {
+				return this.connection.getURL().toURI();
+			}
+			catch (URISyntaxException ex) {
+				throw new IllegalStateException(
+						"Could not get HttpURLConnection URI: " + ex.getMessage(), ex);
+			}
+		}
+
+		public SimpleClientHttpResponse executeBuffered(HttpHeaders headers,
+				byte[] bufferedOutput, boolean outputStreaming) throws IOException {
+			addHeaders(this.connection, headers);
+
+			// JDK <1.8 doesn't support getOutputStream with HTTP DELETE
+			if (HttpMethod.DELETE == getMethod() && bufferedOutput.length == 0) {
+				this.connection.setDoOutput(false);
+			}
+
+			if (this.connection.getDoOutput() && outputStreaming) {
+				this.connection.setFixedLengthStreamingMode(bufferedOutput.length);
+			}
+			this.connection.connect();
+			if (this.connection.getDoOutput()) {
+				FileCopyUtils.copy(bufferedOutput, this.connection.getOutputStream());
+			}
+
+			return new SimpleClientHttpResponse(this.connection);
+		}
+
+		public void setFixedLengthStreamingMode(int contentLength) {
+			this.connection.setFixedLengthStreamingMode(contentLength);
+		}
+
+		public void setChunkedStreamingMode(int chunkSize) {
+			this.connection.setChunkedStreamingMode(chunkSize);
+		}
+	}
+
+	private static class StreamingHttpURLConnectionHelper
+			extends HttpURLConnectionHelper {
+
+		private OutputStream body;
+
+		public StreamingHttpURLConnectionHelper(HttpURLConnection connection) {
+			super(connection);
+		}
+
+		public OutputStream getBody(HttpHeaders headers, boolean outputStreaming,
+				int chunkSize) throws IOException {
+			if (this.body == null) {
+				if (outputStreaming) {
+					int contentLength = (int) headers.getContentLength();
+					if (contentLength >= 0) {
+						this.connection.setFixedLengthStreamingMode(contentLength);
+					}
+					else {
+						this.connection.setChunkedStreamingMode(chunkSize);
+					}
+				}
+				addHeaders(this.connection, headers);
+				this.connection.connect();
+				this.body = this.connection.getOutputStream();
+			}
+			return StreamUtils.nonClosing(this.body);
+		}
+
+		public SimpleClientHttpResponse executeStreaming(HttpHeaders headers)
+				throws IOException {
+			try {
+				if (body != null) {
+					body.close();
+				}
+				else {
+					addHeaders(this.connection, headers);
+					this.connection.connect();
+				}
+			}
+			catch (IOException ex) {
+				// ignore
+			}
+			return new SimpleClientHttpResponse(this.connection);
+		}
+
+	}
+
+	static class SimpleBufferingClientHttpRequest
+			extends AbstractBufferingClientHttpRequest {
+
+		private final HttpURLConnectionHelper connectionHelper;
+
+		private final boolean outputStreaming;
+
+		SimpleBufferingClientHttpRequest(HttpURLConnection connection,
+				boolean outputStreaming) {
+			this.connectionHelper = new HttpURLConnectionHelper(connection);
+			this.outputStreaming = outputStreaming;
+		}
+
+		@Override
+		public HttpMethod getMethod() {
+			return this.connectionHelper.getMethod();
+		}
+
+		@Override
+		public URI getURI() {
+			return this.connectionHelper.getURI();
+		}
+
+		@Override
+		protected ClientHttpResponse executeInternal(HttpHeaders headers,
+				byte[] bufferedOutput) throws IOException {
+			return this.connectionHelper
+					.executeBuffered(headers, bufferedOutput, outputStreaming);
+		}
+
+	}
+
+	private static class SimpleStreamingClientHttpRequest
+			extends AbstractClientHttpRequest {
+
+		private final StreamingHttpURLConnectionHelper connectionHelper;
+
+		private final int chunkSize;
+
+		private final boolean outputStreaming;
+
+		SimpleStreamingClientHttpRequest(HttpURLConnection connection, int chunkSize,
+				boolean outputStreaming) {
+			this.connectionHelper = new StreamingHttpURLConnectionHelper(connection);
+			this.chunkSize = chunkSize;
+			this.outputStreaming = outputStreaming;
+		}
+
+		@Override
+		public HttpMethod getMethod() {
+			return this.connectionHelper.getMethod();
+		}
+
+		@Override
+		public URI getURI() {
+			return this.connectionHelper.getURI();
+		}
+
+		@Override
+		protected OutputStream getBodyInternal(HttpHeaders headers) throws IOException {
+			return this.connectionHelper.getBody(headers, outputStreaming, chunkSize);
+		}
+
+		@Override
+		protected ClientHttpResponse executeInternal(HttpHeaders headers)
+				throws IOException {
+			return this.connectionHelper.executeStreaming(headers);
+		}
+
+	}
+
+	private static final class SimpleBufferingAsyncClientHttpRequest
+			extends AbstractBufferingAsyncClientHttpRequest {
+
+		private final HttpURLConnectionHelper connectionHelper;
+
+		private final boolean outputStreaming;
+
+		private final AsyncListenableTaskExecutor taskExecutor;
+
+		SimpleBufferingAsyncClientHttpRequest(HttpURLConnection connection,
+				boolean outputStreaming, AsyncListenableTaskExecutor taskExecutor) {
+
+			this.connectionHelper = new HttpURLConnectionHelper(connection);
+			this.outputStreaming = outputStreaming;
+			this.taskExecutor = taskExecutor;
+		}
+
+		@Override
+		public HttpMethod getMethod() {
+			return this.connectionHelper.getMethod();
+		}
+
+		@Override
+		public URI getURI() {
+			return this.connectionHelper.getURI();
+		}
+
+		@Override
+		protected ListenableFuture<ClientHttpResponse> executeInternal(
+				final HttpHeaders headers, final byte[] bufferedOutput)
+				throws IOException {
+			return this.taskExecutor.submitListenable(new Callable<ClientHttpResponse>() {
+				@Override
+				public ClientHttpResponse call() throws Exception {
+					return connectionHelper
+							.executeBuffered(headers, bufferedOutput, outputStreaming);
+				}
+			});
+		}
+
+
+	}
+
+	private static final class SimpleStreamingAsyncClientHttpRequest
+			extends AbstractAsyncClientHttpRequest {
+
+		private StreamingHttpURLConnectionHelper connectionHelper;
+
+		private final int chunkSize;
+
+		private final boolean outputStreaming;
+
+		private final AsyncListenableTaskExecutor taskExecutor;
+
+		SimpleStreamingAsyncClientHttpRequest(HttpURLConnection connection, int chunkSize,
+				boolean outputStreaming, AsyncListenableTaskExecutor taskExecutor) {
+			this.connectionHelper = new StreamingHttpURLConnectionHelper(connection);
+
+			this.chunkSize = chunkSize;
+			this.outputStreaming = outputStreaming;
+			this.taskExecutor = taskExecutor;
+		}
+
+		@Override
+		public HttpMethod getMethod() {
+			return this.connectionHelper.getMethod();
+		}
+
+		@Override
+		public URI getURI() {
+			return this.connectionHelper.getURI();
+		}
+
+		@Override
+		protected OutputStream getBodyInternal(HttpHeaders headers) throws IOException {
+			return this.connectionHelper.getBody(headers, outputStreaming, chunkSize);
+		}
+
+		@Override
+		protected ListenableFuture<ClientHttpResponse> executeInternal(
+				final HttpHeaders headers) throws IOException {
+			return this.taskExecutor.submitListenable(new Callable<ClientHttpResponse>() {
+				@Override
+				public ClientHttpResponse call() throws Exception {
+					return connectionHelper.executeStreaming(headers);
+				}
+			});
+		}
+
+	}
+
+	private static final class SimpleClientHttpResponse
+			extends AbstractClientHttpResponse {
+
+		private final HttpURLConnection connection;
+
+		private HttpHeaders headers;
+
+		SimpleClientHttpResponse(HttpURLConnection connection) {
+			this.connection = connection;
+		}
+
+		@Override
+		public int getRawStatusCode() throws IOException {
+			return this.connection.getResponseCode();
+		}
+
+		@Override
+		public String getStatusText() throws IOException {
+			return this.connection.getResponseMessage();
+		}
+
+		@Override
+		public HttpHeaders getHeaders() {
+			if (this.headers == null) {
+				this.headers = new HttpHeaders();
+				// Header field 0 is the status line for most HttpURLConnections, but not on GAE
+				String name = this.connection.getHeaderFieldKey(0);
+				if (StringUtils.hasLength(name)) {
+					this.headers.add(name, this.connection.getHeaderField(0));
+				}
+				int i = 1;
+				while (true) {
+					name = this.connection.getHeaderFieldKey(i);
+					if (!StringUtils.hasLength(name)) {
+						break;
+					}
+					this.headers.add(name, this.connection.getHeaderField(i));
+					i++;
+				}
+			}
+			return this.headers;
+		}
+
+		@Override
+		public InputStream getBody() throws IOException {
+			InputStream errorStream = this.connection.getErrorStream();
+			return (errorStream != null ? errorStream : this.connection.getInputStream());
+		}
+
+		@Override
+		public void close() {
+			this.connection.disconnect();
+		}
+
+	}
 }
