@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,15 @@
 
 package org.springframework.http.client;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.util.StreamUtils;
 
 /**
  * Wrapper for a {@link ClientHttpRequestFactory} that buffers
@@ -68,4 +73,80 @@ public class BufferingClientHttpRequestFactory extends AbstractClientHttpRequest
 		return true;
 	}
 
+	private static final class BufferingClientHttpRequestWrapper extends AbstractBufferingClientHttpRequest {
+
+		private final ClientHttpRequest request;
+
+
+		BufferingClientHttpRequestWrapper(ClientHttpRequest request) {
+			this.request = request;
+		}
+
+
+		@Override
+		public HttpMethod getMethod() {
+			return this.request.getMethod();
+		}
+
+		@Override
+		public URI getURI() {
+			return this.request.getURI();
+		}
+
+		@Override
+		protected ClientHttpResponse executeInternal(HttpHeaders headers, byte[] bufferedOutput) throws IOException {
+			this.request.getHeaders().putAll(headers);
+			StreamUtils.copy(bufferedOutput, this.request.getBody());
+			ClientHttpResponse response = this.request.execute();
+			return new BufferingClientHttpResponseWrapper(response);
+		}
+
+	}
+
+	private static final class BufferingClientHttpResponseWrapper implements ClientHttpResponse {
+
+		private final ClientHttpResponse response;
+
+		private byte[] body;
+
+
+		BufferingClientHttpResponseWrapper(ClientHttpResponse response) {
+			this.response = response;
+		}
+
+
+		@Override
+		public HttpStatus getStatusCode() throws IOException {
+			return this.response.getStatusCode();
+		}
+
+		@Override
+		public int getRawStatusCode() throws IOException {
+			return this.response.getRawStatusCode();
+		}
+
+		@Override
+		public String getStatusText() throws IOException {
+			return this.response.getStatusText();
+		}
+
+		@Override
+		public HttpHeaders getHeaders() {
+			return this.response.getHeaders();
+		}
+
+		@Override
+		public InputStream getBody() throws IOException {
+			if (this.body == null) {
+				this.body = StreamUtils.copyToByteArray(this.response.getBody());
+			}
+			return new ByteArrayInputStream(this.body);
+		}
+
+		@Override
+		public void close() {
+			this.response.close();
+		}
+
+	}
 }

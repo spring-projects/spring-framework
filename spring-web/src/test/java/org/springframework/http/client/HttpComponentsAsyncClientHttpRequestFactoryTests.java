@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,11 +53,12 @@ public class HttpComponentsAsyncClientHttpRequestFactoryTests extends AbstractAs
 				new HttpComponentsAsyncClientHttpRequestFactory();
 
 		URI uri = new URI(baseUrl + "/status/ok");
-		HttpComponentsAsyncClientHttpRequest request = (HttpComponentsAsyncClientHttpRequest)
+		HttpComponentsAsyncClientHttpRequestFactory.HttpComponentsAsyncClientHttpRequest
+				request = (HttpComponentsAsyncClientHttpRequestFactory.HttpComponentsAsyncClientHttpRequest)
 				factory.createAsyncRequest(uri, HttpMethod.GET);
 
 		assertNull("No custom config should be set with a custom HttpAsyncClient",
-				request.getHttpContext().getAttribute(HttpClientContext.REQUEST_CONFIG));
+				request.httpContext.getAttribute(HttpClientContext.REQUEST_CONFIG));
 	}
 
 	@Test
@@ -68,16 +69,18 @@ public class HttpComponentsAsyncClientHttpRequestFactoryTests extends AbstractAs
 		HttpComponentsAsyncClientHttpRequestFactory factory = new HttpComponentsAsyncClientHttpRequestFactory(client);
 
 		URI uri = new URI(baseUrl + "/status/ok");
-		HttpComponentsAsyncClientHttpRequest request = (HttpComponentsAsyncClientHttpRequest)
+		HttpComponentsAsyncClientHttpRequestFactory.HttpComponentsAsyncClientHttpRequest
+				request = (HttpComponentsAsyncClientHttpRequestFactory.HttpComponentsAsyncClientHttpRequest)
 				factory.createAsyncRequest(uri, HttpMethod.GET);
 
 		assertNull("No custom config should be set with a custom HttpClient",
-				request.getHttpContext().getAttribute(HttpClientContext.REQUEST_CONFIG));
+				request.httpContext.getAttribute(HttpClientContext.REQUEST_CONFIG));
 
 		factory.setConnectionRequestTimeout(4567);
-		HttpComponentsAsyncClientHttpRequest request2 = (HttpComponentsAsyncClientHttpRequest)
+		HttpComponentsAsyncClientHttpRequestFactory.HttpComponentsAsyncClientHttpRequest
+				request2 = (HttpComponentsAsyncClientHttpRequestFactory.HttpComponentsAsyncClientHttpRequest)
 				factory.createAsyncRequest(uri, HttpMethod.GET);
-		Object requestConfigAttribute = request2.getHttpContext().getAttribute(HttpClientContext.REQUEST_CONFIG);
+		Object requestConfigAttribute = request2.httpContext.getAttribute(HttpClientContext.REQUEST_CONFIG);
 		assertNotNull(requestConfigAttribute);
 		RequestConfig requestConfig = (RequestConfig) requestConfigAttribute;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.Test;
+
 import org.springframework.http.HttpMethod;
 
 import static org.junit.Assert.*;
@@ -72,10 +73,11 @@ public class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpReq
 		hrf.setReadTimeout(4567);
 
 		URI uri = new URI(baseUrl + "/status/ok");
-		HttpComponentsClientHttpRequest request = (HttpComponentsClientHttpRequest)
+		HttpComponentsClientHttpRequestFactory.HttpComponentsClientHttpRequest
+				request = (HttpComponentsClientHttpRequestFactory.HttpComponentsClientHttpRequest)
 				hrf.createRequest(uri, HttpMethod.GET);
 
-		Object config = request.getHttpContext().getAttribute(HttpClientContext.REQUEST_CONFIG);
+		Object config = request.httpContext.getAttribute(HttpClientContext.REQUEST_CONFIG);
 		assertNotNull("Request config should be set", config);
 		assertTrue("Wrong request config type" + config.getClass().getName(),
 				RequestConfig.class.isInstance(config));
@@ -157,9 +159,10 @@ public class HttpComponentsClientHttpRequestFactoryTests extends AbstractHttpReq
 
 	private RequestConfig retrieveRequestConfig(HttpComponentsClientHttpRequestFactory factory) throws Exception {
 		URI uri = new URI(baseUrl + "/status/ok");
-		HttpComponentsClientHttpRequest request = (HttpComponentsClientHttpRequest)
+		HttpComponentsClientHttpRequestFactory.HttpComponentsClientHttpRequest
+				request = (HttpComponentsClientHttpRequestFactory.HttpComponentsClientHttpRequest)
 				factory.createRequest(uri, HttpMethod.GET);
-		return (RequestConfig) request.getHttpContext().getAttribute(HttpClientContext.REQUEST_CONFIG);
+		return (RequestConfig) request.httpContext.getAttribute(HttpClientContext.REQUEST_CONFIG);
 	}
 
 	@Test
