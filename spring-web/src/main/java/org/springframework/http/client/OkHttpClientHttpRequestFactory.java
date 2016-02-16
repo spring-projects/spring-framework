@@ -16,6 +16,7 @@
 
 package org.springframework.http.client;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -62,7 +63,7 @@ public class OkHttpClientHttpRequestFactory
 	 * @param client the client to use
 	 */
 	public OkHttpClientHttpRequestFactory(OkHttpClient client) {
-		Assert.notNull(client, "'client' must not be null");
+		Assert.notNull(client, "OkHttpClient must not be null");
 		this.client = client;
 		this.defaultClient = false;
 	}
@@ -106,11 +107,24 @@ public class OkHttpClientHttpRequestFactory
 		return new OkHttpAsyncClientHttpRequest(this.client, uri, httpMethod);
 	}
 
+
+	@Override
+	public void destroy() throws IOException {
+		if (this.defaultClient) {
+			// Clean up the client if we created it in the constructor
+			if (this.client.getCache() != null) {
+				this.client.getCache().close();
+			}
+			this.client.getDispatcher().getExecutorService().shutdown();
+		}
+	}
+
+
 	static Request buildRequest(HttpHeaders headers, byte[] content, URI uri,
 			HttpMethod method) throws MalformedURLException {
+
 		com.squareup.okhttp.MediaType contentType = getContentType(headers);
-		RequestBody body =
-				(content.length > 0 ? RequestBody.create(contentType, content) : null);
+		RequestBody body = (content.length > 0 ? RequestBody.create(contentType, content) : null);
 
 		URL url = uri.toURL();
 		String methodName = method.name();
@@ -122,6 +136,7 @@ public class OkHttpClientHttpRequestFactory
 				builder.addHeader(headerName, headerValue);
 			}
 		}
+
 		return builder.build();
 	}
 
@@ -129,18 +144,6 @@ public class OkHttpClientHttpRequestFactory
 		String rawContentType = headers.getFirst(HttpHeaders.CONTENT_TYPE);
 		return (StringUtils.hasText(rawContentType) ?
 				com.squareup.okhttp.MediaType.parse(rawContentType) : null);
-	}
-
-
-	@Override
-	public void destroy() throws Exception {
-		if (this.defaultClient) {
-			// Clean up the client if we created it in the constructor
-			if (this.client.getCache() != null) {
-				this.client.getCache().close();
-			}
-			this.client.getDispatcher().getExecutorService().shutdown();
-		}
 	}
 
 }

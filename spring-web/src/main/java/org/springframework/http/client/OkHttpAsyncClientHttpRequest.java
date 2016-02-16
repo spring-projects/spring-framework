@@ -69,14 +69,12 @@ class OkHttpAsyncClientHttpRequest extends AbstractBufferingAsyncClientHttpReque
 	protected ListenableFuture<ClientHttpResponse> executeInternal(HttpHeaders headers, byte[] content)
 			throws IOException {
 
-		Request request = OkHttpClientHttpRequestFactory
-				.buildRequest(headers, content, this.uri, this.method);
-
+		Request request = OkHttpClientHttpRequestFactory.buildRequest(headers, content, this.uri, this.method);
 		return new OkHttpListenableFuture(this.client.newCall(request));
 	}
 
-	private static class OkHttpListenableFuture
-			extends SettableListenableFuture<ClientHttpResponse> {
+
+	private static class OkHttpListenableFuture extends SettableListenableFuture<ClientHttpResponse> {
 
 		private final Call call;
 
@@ -87,7 +85,6 @@ class OkHttpAsyncClientHttpRequest extends AbstractBufferingAsyncClientHttpReque
 				public void onResponse(Response response) {
 					set(new OkHttpClientHttpResponse(response));
 				}
-
 				@Override
 				public void onFailure(Request request, IOException ex) {
 					setException(ex);

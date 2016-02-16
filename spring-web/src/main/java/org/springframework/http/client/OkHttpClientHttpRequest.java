@@ -62,12 +62,8 @@ class OkHttpClientHttpRequest extends AbstractBufferingClientHttpRequest {
 
 
 	@Override
-	protected ClientHttpResponse executeInternal(HttpHeaders headers, byte[] content)
-			throws IOException {
-
-		Request request = OkHttpClientHttpRequestFactory
-				.buildRequest(headers, content, this.uri, this.method);
-
+	protected ClientHttpResponse executeInternal(HttpHeaders headers, byte[] content) throws IOException {
+		Request request = OkHttpClientHttpRequestFactory.buildRequest(headers, content, this.uri, this.method);
 		return new OkHttpClientHttpResponse(this.client.newCall(request).execute());
 	}
 
