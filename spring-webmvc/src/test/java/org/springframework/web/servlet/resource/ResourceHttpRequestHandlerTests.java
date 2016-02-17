@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -225,57 +226,26 @@ public class ResourceHttpRequestHandlerTests {
 	}
 
 	@Test
-	public void invalidPathForDelete() throws Exception {
-		invalidPath(HttpMethod.DELETE);
+	public void invalidPath() throws Exception {
+		for (HttpMethod method : HttpMethod.values()) {
+			this.request = new MockHttpServletRequest("GET", "");
+			this.response = new MockHttpServletResponse();
+			testInvalidPath(method);
+		}
 	}
 
-	@Test
-	public void invalidPathForGet() throws Exception {
-		invalidPath(HttpMethod.GET);
-	}
-
-	@Test
-	public void invalidPathForHead() throws Exception {
-		invalidPath(HttpMethod.HEAD);
-	}
-
-	@Test
-	public void invalidPathForOptions() throws Exception {
-		invalidPath(HttpMethod.OPTIONS);
-	}
-
-	@Test
-	public void invalidPathForPost() throws Exception {
-		invalidPath(HttpMethod.POST);
-	}
-
-	@Test
-	public void invalidPathForPut() throws Exception {
-		invalidPath(HttpMethod.PUT);
-	}
-
-	@Test
-	public void invalidPathForPatch() throws Exception {
-		invalidPath(HttpMethod.PATCH);
-	}
-
-	@Test
-	public void invalidPathForTrace() throws Exception {
-		invalidPath(HttpMethod.TRACE);
-	}
-
-	private void invalidPath(HttpMethod httpMethod) throws Exception {
+	private void testInvalidPath(HttpMethod httpMethod) throws Exception {
 		this.request.setMethod(httpMethod.name());
 
 		Resource location = new ClassPathResource("test/", getClass());
-		this.handler.setLocations(Arrays.asList(location));
+		this.handler.setLocations(Collections.singletonList(location));
 
 		testInvalidPath(location, "../testsecret/secret.txt");
 		testInvalidPath(location, "test/../../testsecret/secret.txt");
 		testInvalidPath(location, ":/../../testsecret/secret.txt");
 
 		location = new UrlResource(getClass().getResource("./test/"));
-		this.handler.setLocations(Arrays.asList(location));
+		this.handler.setLocations(Collections.singletonList(location));
 		Resource secretResource = new UrlResource(getClass().getResource("testsecret/secret.txt"));
 		String secretPath = secretResource.getURL().getPath();
 
@@ -357,7 +327,7 @@ public class ResourceHttpRequestHandlerTests {
 		pathResolver.setAllowedLocations(location1);
 
 		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
-		handler.setResourceResolvers(Arrays.asList(pathResolver));
+		handler.setResourceResolvers(Collections.singletonList(pathResolver));
 		handler.setLocations(Arrays.asList(location1, location2));
 		handler.afterPropertiesSet();
 
@@ -418,43 +388,12 @@ public class ResourceHttpRequestHandlerTests {
 	}
 
 	@Test
-	public void resourceNotFoundForDelete() throws Exception {
-		resourceNotFound(HttpMethod.DELETE);
-	}
-
-	@Test
-	public void resourceNotFoundForGet() throws Exception {
-		resourceNotFound(HttpMethod.GET);
-	}
-
-	@Test
-	public void resourceNotFoundForHead() throws Exception {
-		resourceNotFound(HttpMethod.HEAD);
-	}
-
-	@Test
-	public void resourceNotFoundForOptions() throws Exception {
-		resourceNotFound(HttpMethod.OPTIONS);
-	}
-
-	@Test
-	public void resourceNotFoundForPost() throws Exception {
-		resourceNotFound(HttpMethod.POST);
-	}
-
-	@Test
-	public void resourceNotFoundForPut() throws Exception {
-		resourceNotFound(HttpMethod.PUT);
-	}
-
-	@Test
-	public void resourceNotFoundForPatch() throws Exception {
-		resourceNotFound(HttpMethod.PATCH);
-	}
-
-	@Test
-	public void resourceNotFoundForTrace() throws Exception {
-		resourceNotFound(HttpMethod.TRACE);
+	public void resourceNotFound() throws Exception {
+		for (HttpMethod method : HttpMethod.values()) {
+			this.request = new MockHttpServletRequest("GET", "");
+			this.response = new MockHttpServletResponse();
+			resourceNotFound(method);
+		}
 	}
 
 	private void resourceNotFound(HttpMethod httpMethod) throws Exception {
@@ -570,7 +509,7 @@ public class ResourceHttpRequestHandlerTests {
 	}
 
 	// SPR-12999
-	@Test
+	@Test @SuppressWarnings("unchecked")
 	public void writeContentNotGettingInputStream() throws Exception {
 		Resource resource = mock(Resource.class);
 		given(resource.getInputStream()).willThrow(FileNotFoundException.class);
@@ -597,7 +536,7 @@ public class ResourceHttpRequestHandlerTests {
 	}
 
 	// SPR-13620
-	@Test
+	@Test @SuppressWarnings("unchecked")
 	public void writeContentInputStreamThrowingNullPointerException() throws Exception {
 		Resource resource = mock(Resource.class);
 		InputStream in = mock(InputStream.class);
