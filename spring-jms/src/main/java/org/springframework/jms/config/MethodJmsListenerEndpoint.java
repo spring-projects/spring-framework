@@ -22,7 +22,9 @@ import java.util.Arrays;
 import org.springframework.aop.framework.AopProxyUtils;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.EmbeddedValueResolver;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.jms.listener.adapter.MessagingMessageListenerAdapter;
@@ -33,6 +35,7 @@ import org.springframework.messaging.handler.annotation.support.MessageHandlerMe
 import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
+import org.springframework.util.StringValueResolver;
 
 /**
  * A {@link JmsListenerEndpoint} providing the method to invoke to process
@@ -42,7 +45,7 @@ import org.springframework.util.StringUtils;
  * @author Juergen Hoeller
  * @since 4.1
  */
-public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
+public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint implements BeanFactoryAware {
 
 	private Object bean;
 
@@ -51,6 +54,8 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 	private Method mostSpecificMethod;
 
 	private MessageHandlerMethodFactory messageHandlerMethodFactory;
+
+	private StringValueResolver embeddedValueResolver;
 
 	private BeanFactory beanFactory;
 
@@ -110,11 +115,23 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 	}
 
 	/**
-	 * Set the {@link BeanFactory} to use to resolve expressions (can be null).
+	 * Set a value resolver for embedded placeholders and expressions.
 	 */
+	public void setEmbeddedValueResolver(StringValueResolver embeddedValueResolver) {
+		this.embeddedValueResolver = embeddedValueResolver;
+	}
+
+	/**
+	 * Set the {@link BeanFactory} to use to resolve expressions (can be {@code null}).
+	 */
+	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
+		if (this.embeddedValueResolver == null && beanFactory instanceof ConfigurableBeanFactory) {
+			this.embeddedValueResolver = new EmbeddedValueResolver((ConfigurableBeanFactory) beanFactory);
+		}
 	}
+
 
 	@Override
 	protected MessagingMessageListenerAdapter createMessageListener(MessageListenerContainer container) {
@@ -179,15 +196,8 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint {
 		}
 	}
 
-	/**
-	 * Resolve the specified value if possible.
-	 * @see ConfigurableBeanFactory#resolveEmbeddedValue
-	 */
 	private String resolve(String value) {
-		if (this.beanFactory instanceof ConfigurableBeanFactory) {
-			return ((ConfigurableBeanFactory) this.beanFactory).resolveEmbeddedValue(value);
-		}
-		return value;
+		return (this.embeddedValueResolver != null ? this.embeddedValueResolver.resolveStringValue(value) : value);
 	}
 
 
