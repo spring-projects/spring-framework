@@ -106,7 +106,7 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 	 * the last one in the codes array.
 	 */
 	public String getCode() {
-		return (this.codes != null && this.codes.length > 0) ? this.codes[this.codes.length - 1] : null;
+		return (this.codes != null && this.codes.length > 0 ? this.codes[this.codes.length - 1] : null);
 	}
 
 	@Override
@@ -153,9 +153,9 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 			return false;
 		}
 		MessageSourceResolvable otherResolvable = (MessageSourceResolvable) other;
-		return ObjectUtils.nullSafeEquals(getCodes(), otherResolvable.getCodes()) &&
+		return (ObjectUtils.nullSafeEquals(getCodes(), otherResolvable.getCodes()) &&
 				ObjectUtils.nullSafeEquals(getArguments(), otherResolvable.getArguments()) &&
-				ObjectUtils.nullSafeEquals(getDefaultMessage(), otherResolvable.getDefaultMessage());
+				ObjectUtils.nullSafeEquals(getDefaultMessage(), otherResolvable.getDefaultMessage()));
 	}
 
 	@Override

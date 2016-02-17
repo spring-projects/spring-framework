@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -161,14 +161,8 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 */
 	@Override
 	public boolean equals(Object other) {
-		if (this == other) {
-			return true;
-		}
-		if (!(other instanceof WebMergedContextConfiguration)) {
-			return false;
-		}
-		WebMergedContextConfiguration otherConfig = (WebMergedContextConfiguration) other;
-		return super.equals(otherConfig) && this.getResourceBasePath().equals(otherConfig.getResourceBasePath());
+		return (this == other || (super.equals(other) &&
+				this.resourceBasePath.equals(((WebMergedContextConfiguration) other).resourceBasePath)));
 	}
 
 	/**
@@ -178,7 +172,7 @@ public class WebMergedContextConfiguration extends MergedContextConfiguration {
 	 */
 	@Override
 	public int hashCode() {
-		return 31 * super.hashCode() + this.resourceBasePath.hashCode();
+		return super.hashCode() * 31 + this.resourceBasePath.hashCode();
 	}
 
 	/**
