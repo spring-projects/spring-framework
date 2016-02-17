@@ -21,21 +21,23 @@ public class Spr5475Tests {
 
 	@Test
 	public void noArgFactoryMethodInvokedWithOneArg() {
-		assertExceptionMessageForMisconfiguredFactoryMethod(
+		assertExceptionForMisconfiguredFactoryMethod(
 				rootBeanDefinition(Foo.class)
 					.setFactoryMethod("noArgFactory")
 					.addConstructorArgValue("bogusArg").getBeanDefinition(),
+					BeanCreationException.class,
 				"Error creating bean with name 'foo': No matching factory method found: factory method 'noArgFactory(String)'. " +
 				"Check that a method with the specified name and arguments exists and that it is static.");
 	}
 
 	@Test
 	public void noArgFactoryMethodInvokedWithTwoArgs() {
-		assertExceptionMessageForMisconfiguredFactoryMethod(
+		assertExceptionForMisconfiguredFactoryMethod(
 				rootBeanDefinition(Foo.class)
 					.setFactoryMethod("noArgFactory")
 					.addConstructorArgValue("bogusArg1")
 					.addConstructorArgValue("bogusArg2".getBytes()).getBeanDefinition(),
+					BeanCreationException.class,
 				"Error creating bean with name 'foo': No matching factory method found: factory method 'noArgFactory(String,byte[])'. " +
 				"Check that a method with the specified name and arguments exists and that it is static.");
 	}
@@ -49,13 +51,13 @@ public class Spr5475Tests {
 		cav.addIndexedArgumentValue(1, "bogusArg2".getBytes());
 		def.setConstructorArgumentValues(cav);
 
-		assertExceptionMessageForMisconfiguredFactoryMethod(
-				def,
+		assertExceptionForMisconfiguredFactoryMethod(
+				def, BeanCreationException.class,
 				"Error creating bean with name 'foo': No matching factory method found: factory method 'noArgFactory(CharSequence,byte[])'. " +
 				"Check that a method with the specified name and arguments exists and that it is static.");
 	}
 
-	private void assertExceptionMessageForMisconfiguredFactoryMethod(BeanDefinition bd, String expectedMessage) {
+	private void assertExceptionForMisconfiguredFactoryMethod(BeanDefinition bd, Class<? extends Throwable> expectedType, String expectedMessage) {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		factory.registerBeanDefinition("foo", bd);
 
@@ -64,6 +66,7 @@ public class Spr5475Tests {
 			fail("should have failed with BeanCreationException due to incorrectly invoked factory method");
 		} catch (BeanCreationException ex) {
 			assertThat(ex.getMessage(), equalTo(expectedMessage));
+			assertThat(ex, instanceOf(expectedType));
 		}
 	}
 
@@ -71,12 +74,13 @@ public class Spr5475Tests {
 	public void singleArgFactoryMethodInvokedWithNoArgs() {
 		// calling a factory method that accepts arguments without any arguments emits an exception unlike cases
 		// where a no-arg factory method is called with arguments. Adding this test just to document the difference
-		assertExceptionMessageForMisconfiguredFactoryMethod(
+		assertExceptionForMisconfiguredFactoryMethod(
 				rootBeanDefinition(Foo.class)
 					.setFactoryMethod("singleArgFactory").getBeanDefinition(),
+					UnsatisfiedFactoryMethodDependencyException.class,
 				"Error creating bean with name 'foo': " +
-				"Unsatisfied dependency expressed through constructor argument with index 0 of type [java.lang.String]: " +
-				"Ambiguous factory method argument types - did you specify the correct bean references as factory method arguments?");
+				"Unsatisfied dependency expressed through argument with index 0 of type [java.lang.String]: " +
+				"Ambiguous argument types - did you specify the correct bean references as arguments?");
 	}
 
 
