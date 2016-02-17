@@ -26,6 +26,7 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -39,6 +40,8 @@ import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
@@ -224,16 +227,25 @@ public class ResourceHttpRequestHandlerTests {
 
 	@Test
 	public void invalidPath() throws Exception {
+		for (HttpMethod method : HttpMethod.values()) {
+			this.request = new MockHttpServletRequest("GET", "");
+			this.response = new MockHttpServletResponse();
+			testInvalidPath(method);
+		}
+	}
+
+	private void testInvalidPath(HttpMethod httpMethod) throws Exception {
+		this.request.setMethod(httpMethod.name());
 
 		Resource location = new ClassPathResource("test/", getClass());
-		this.handler.setLocations(Arrays.asList(location));
+		this.handler.setLocations(Collections.singletonList(location));
 
 		testInvalidPath(location, "../testsecret/secret.txt");
 		testInvalidPath(location, "test/../../testsecret/secret.txt");
 		testInvalidPath(location, ":/../../testsecret/secret.txt");
 
 		location = new UrlResource(getClass().getResource("./test/"));
-		this.handler.setLocations(Arrays.asList(location));
+		this.handler.setLocations(Collections.singletonList(location));
 		Resource secretResource = new UrlResource(getClass().getResource("testsecret/secret.txt"));
 		String secretPath = secretResource.getURL().getPath();
 
@@ -255,7 +267,7 @@ public class ResourceHttpRequestHandlerTests {
 		if (!location.createRelative(requestPath).exists() && !requestPath.contains(":")) {
 			fail(requestPath + " doesn't actually exist as a relative path");
 		}
-		assertEquals(404, this.response.getStatus());
+		assertEquals(HttpStatus.NOT_FOUND.value(), this.response.getStatus());
 	}
 
 	@Test
@@ -315,7 +327,7 @@ public class ResourceHttpRequestHandlerTests {
 		pathResolver.setAllowedLocations(location1);
 
 		ResourceHttpRequestHandler handler = new ResourceHttpRequestHandler();
-		handler.setResourceResolvers(Arrays.asList(pathResolver));
+		handler.setResourceResolvers(Collections.singletonList(pathResolver));
 		handler.setLocations(Arrays.asList(location1, location2));
 		handler.afterPropertiesSet();
 
@@ -377,9 +389,18 @@ public class ResourceHttpRequestHandlerTests {
 
 	@Test
 	public void resourceNotFound() throws Exception {
+		for (HttpMethod method : HttpMethod.values()) {
+			this.request = new MockHttpServletRequest("GET", "");
+			this.response = new MockHttpServletResponse();
+			resourceNotFound(method);
+		}
+	}
+
+	private void resourceNotFound(HttpMethod httpMethod) throws Exception {
+		this.request.setMethod(httpMethod.name());
 		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "not-there.css");
 		this.handler.handleRequest(this.request, this.response);
-		assertEquals(404, this.response.getStatus());
+		assertEquals(HttpStatus.NOT_FOUND.value(), this.response.getStatus());
 	}
 
 	@Test
@@ -488,7 +509,7 @@ public class ResourceHttpRequestHandlerTests {
 	}
 
 	// SPR-12999
-	@Test
+	@Test @SuppressWarnings("unchecked")
 	public void writeContentNotGettingInputStream() throws Exception {
 		Resource resource = mock(Resource.class);
 		given(resource.getInputStream()).willThrow(FileNotFoundException.class);
@@ -515,7 +536,7 @@ public class ResourceHttpRequestHandlerTests {
 	}
 
 	// SPR-13620
-	@Test
+	@Test @SuppressWarnings("unchecked")
 	public void writeContentInputStreamThrowingNullPointerException() throws Exception {
 		Resource resource = mock(Resource.class);
 		InputStream in = mock(InputStream.class);
