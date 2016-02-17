@@ -39,6 +39,8 @@ import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
@@ -223,7 +225,47 @@ public class ResourceHttpRequestHandlerTests {
 	}
 
 	@Test
-	public void invalidPath() throws Exception {
+	public void invalidPathForDelete() throws Exception {
+		invalidPath(HttpMethod.DELETE);
+	}
+
+	@Test
+	public void invalidPathForGet() throws Exception {
+		invalidPath(HttpMethod.GET);
+	}
+
+	@Test
+	public void invalidPathForHead() throws Exception {
+		invalidPath(HttpMethod.HEAD);
+	}
+
+	@Test
+	public void invalidPathForOptions() throws Exception {
+		invalidPath(HttpMethod.OPTIONS);
+	}
+
+	@Test
+	public void invalidPathForPost() throws Exception {
+		invalidPath(HttpMethod.POST);
+	}
+
+	@Test
+	public void invalidPathForPut() throws Exception {
+		invalidPath(HttpMethod.PUT);
+	}
+
+	@Test
+	public void invalidPathForPatch() throws Exception {
+		invalidPath(HttpMethod.PATCH);
+	}
+
+	@Test
+	public void invalidPathForTrace() throws Exception {
+		invalidPath(HttpMethod.TRACE);
+	}
+
+	private void invalidPath(HttpMethod httpMethod) throws Exception {
+		this.request.setMethod(httpMethod.name());
 
 		Resource location = new ClassPathResource("test/", getClass());
 		this.handler.setLocations(Arrays.asList(location));
@@ -255,7 +297,7 @@ public class ResourceHttpRequestHandlerTests {
 		if (!location.createRelative(requestPath).exists() && !requestPath.contains(":")) {
 			fail(requestPath + " doesn't actually exist as a relative path");
 		}
-		assertEquals(404, this.response.getStatus());
+		assertEquals(HttpStatus.NOT_FOUND.value(), this.response.getStatus());
 	}
 
 	@Test
@@ -376,10 +418,50 @@ public class ResourceHttpRequestHandlerTests {
 	}
 
 	@Test
-	public void resourceNotFound() throws Exception {
+	public void resourceNotFoundForDelete() throws Exception {
+		resourceNotFound(HttpMethod.DELETE);
+	}
+
+	@Test
+	public void resourceNotFoundForGet() throws Exception {
+		resourceNotFound(HttpMethod.GET);
+	}
+
+	@Test
+	public void resourceNotFoundForHead() throws Exception {
+		resourceNotFound(HttpMethod.HEAD);
+	}
+
+	@Test
+	public void resourceNotFoundForOptions() throws Exception {
+		resourceNotFound(HttpMethod.OPTIONS);
+	}
+
+	@Test
+	public void resourceNotFoundForPost() throws Exception {
+		resourceNotFound(HttpMethod.POST);
+	}
+
+	@Test
+	public void resourceNotFoundForPut() throws Exception {
+		resourceNotFound(HttpMethod.PUT);
+	}
+
+	@Test
+	public void resourceNotFoundForPatch() throws Exception {
+		resourceNotFound(HttpMethod.PATCH);
+	}
+
+	@Test
+	public void resourceNotFoundForTrace() throws Exception {
+		resourceNotFound(HttpMethod.TRACE);
+	}
+
+	private void resourceNotFound(HttpMethod httpMethod) throws Exception {
+		this.request.setMethod(httpMethod.name());
 		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "not-there.css");
 		this.handler.handleRequest(this.request, this.response);
-		assertEquals(404, this.response.getStatus());
+		assertEquals(HttpStatus.NOT_FOUND.value(), this.response.getStatus());
 	}
 
 	@Test
