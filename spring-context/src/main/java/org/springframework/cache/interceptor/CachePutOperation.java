@@ -21,6 +21,7 @@ package org.springframework.cache.interceptor;
  *
  * @author Costin Leau
  * @author Phillip Webb
+ * @author Marcin Kamionowski
  * @since 3.1
  */
 public class CachePutOperation extends CacheOperation {
