@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -90,7 +90,11 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 	protected Long getContentLength(Resource resource, MediaType contentType) throws IOException {
 		// Don't try to determine contentLength on InputStreamResource - cannot be read afterwards...
 		// Note: custom InputStreamResource subclasses could provide a pre-calculated content length!
-		return (InputStreamResource.class == resource.getClass() ? null : resource.contentLength());
+		if (InputStreamResource.class == resource.getClass()) {
+			return null;
+		}
+		long contentLength = resource.contentLength();
+		return (contentLength < 0 ? null : contentLength);
 	}
 
 	@Override

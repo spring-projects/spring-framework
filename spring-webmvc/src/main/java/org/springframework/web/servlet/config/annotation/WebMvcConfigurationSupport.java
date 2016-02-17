@@ -713,6 +713,14 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	protected void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 	}
 
+	/**
+	 * Override this method to extend or modify the list of converters after it
+	 * has been configured. This may be useful for example to allow default
+	 * converters to be registered and then insert a custom converter through
+	 * this method.
+	 * @param converters the list of configured converters to extend.
+	 * @since 4.1.3
+	 */
 	protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
 	}
 
@@ -813,6 +821,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			addDefaultHandlerExceptionResolvers(exceptionResolvers);
 		}
 
+		extendHandlerExceptionResolvers(exceptionResolvers);
 		HandlerExceptionResolverComposite composite = new HandlerExceptionResolverComposite();
 		composite.setOrder(0);
 		composite.setExceptionResolvers(exceptionResolvers);
@@ -829,6 +838,17 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * initially an empty list.
 	 */
 	protected void configureHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
+	}
+
+	/**
+	 * Override this method to extend or modify the list of
+	 * {@link HandlerExceptionResolver}s after it has been configured. This may
+	 * be useful for example to allow default resolvers to be registered and then
+	 * insert a custom one through this method.
+	 * @param exceptionResolvers the list of configured resolvers to extend.
+	 * @since 4.3.1
+	 */
+	protected void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ import javax.validation.metadata.BeanDescriptor;
 import javax.validation.metadata.ConstraintDescriptor;
 
 import org.springframework.beans.NotReadablePropertyException;
+import org.springframework.context.MessageSourceResolvable;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.util.Assert;
 import org.springframework.validation.BindingResult;
@@ -212,6 +213,9 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 			String attributeName = entry.getKey();
 			Object attributeValue = entry.getValue();
 			if (!internalAnnotationAttributes.contains(attributeName)) {
+				if (attributeValue instanceof String) {
+					attributeValue = new ResolvableAttribute(attributeValue.toString());
+				}
 				attributesToExpose.put(attributeName, attributeValue);
 			}
 		}
@@ -277,6 +281,35 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	public <T> T unwrap(Class<T> type) {
 		Assert.notNull(this.targetValidator, "No target Validator set");
 		return this.targetValidator.unwrap(type);
+	}
+
+
+	/**
+	 * Wrapper for a String attribute which can be resolved via a {@code MessageSource},
+	 * falling back to the original attribute as a default value otherwise.
+	 */
+	private static class ResolvableAttribute implements MessageSourceResolvable {
+
+		private final String resolvableString;
+
+		public ResolvableAttribute(String resolvableString) {
+			this.resolvableString = resolvableString;
+		}
+
+		@Override
+		public String[] getCodes() {
+			return new String[] {this.resolvableString};
+		}
+
+		@Override
+		public Object[] getArguments() {
+			return null;
+		}
+
+		@Override
+		public String getDefaultMessage() {
+			return this.resolvableString;
+		}
 	}
 
 }

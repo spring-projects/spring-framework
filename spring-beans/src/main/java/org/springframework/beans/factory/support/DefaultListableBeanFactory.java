@@ -59,6 +59,7 @@ import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.beans.factory.SmartInitializingSingleton;
+import org.springframework.beans.factory.SmartObjectFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -1006,7 +1007,8 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (descriptor.getDependencyType().equals(javaUtilOptionalClass)) {
 			return new OptionalDependencyFactory().createOptionalDependency(descriptor, beanName);
 		}
-		else if (ObjectFactory.class == descriptor.getDependencyType()) {
+		else if (ObjectFactory.class == descriptor.getDependencyType() ||
+				SmartObjectFactory.class == descriptor.getDependencyType()) {
 			return new DependencyObjectFactory(descriptor, beanName);
 		}
 		else if (javaxInjectProviderClass == descriptor.getDependencyType()) {
@@ -1054,7 +1056,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			String primaryBeanName = determineAutowireCandidate(matchingBeans, descriptor);
 			if (primaryBeanName == null) {
 				if (multipleBeans == NOT_MULTIPLE_BEANS || descriptor.isRequired()) {
-					throw new NoUniqueBeanDefinitionException(type, matchingBeans.keySet());
+					return descriptor.resolveNotUnique(type, matchingBeans);
 				}
 				else {
 					// In case of an optional Collection/Map, silently ignore a non-unique case:
@@ -1474,7 +1476,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/**
 	 * Serializable ObjectFactory for lazy resolution of a dependency.
 	 */
-	private class DependencyObjectFactory implements ObjectFactory<Object>, Serializable {
+	private class DependencyObjectFactory implements SmartObjectFactory<Object>, Serializable {
 
 		private final DependencyDescriptor descriptor;
 
@@ -1496,6 +1498,42 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			else {
 				return doResolveDependency(this.descriptor, this.beanName, null, null);
+			}
+		}
+
+		@Override
+		public Object getIfAvailable() throws BeansException {
+			if (this.optional) {
+				return new OptionalDependencyFactory().createOptionalDependency(this.descriptor, this.beanName);
+			}
+			else {
+				DependencyDescriptor descriptorToUse = new DependencyDescriptor(descriptor) {
+					@Override
+					public boolean isRequired() {
+						return false;
+					}
+				};
+				return doResolveDependency(descriptorToUse, this.beanName, null, null);
+			}
+		}
+
+		@Override
+		public Object getIfUnique() throws BeansException {
+			DependencyDescriptor descriptorToUse = new DependencyDescriptor(descriptor) {
+				@Override
+				public boolean isRequired() {
+					return false;
+				}
+				@Override
+				public Object resolveNotUnique(Class<?> type, Map<String, Object> matchingBeans) {
+					return null;
+				}
+			};
+			if (this.optional) {
+				return new OptionalDependencyFactory().createOptionalDependency(descriptorToUse, this.beanName);
+			}
+			else {
+				return doResolveDependency(descriptorToUse, this.beanName, null, null);
 			}
 		}
 	}

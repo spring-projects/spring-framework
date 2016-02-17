@@ -34,8 +34,7 @@ import org.springframework.util.ReflectionUtils;
  * Provides a method for invoking the handler method for a given message after resolving its
  * method argument values through registered {@link HandlerMethodArgumentResolver}s.
  *
- * <p>Use {@link #setMessageMethodArgumentResolvers(HandlerMethodArgumentResolver)}
- * to customize the list of argument resolvers.
+ * <p>Use {@link #setMessageMethodArgumentResolvers} to customize the list of argument resolvers.
  *
  * @author Rossen Stoyanchev
  * @author Juergen Hoeller
@@ -43,7 +42,7 @@ import org.springframework.util.ReflectionUtils;
  */
 public class InvocableHandlerMethod extends HandlerMethod {
 
-	private HandlerMethodArgumentResolver argumentResolvers = new HandlerMethodArgumentResolverComposite();
+	private HandlerMethodArgumentResolverComposite argumentResolvers = new HandlerMethodArgumentResolverComposite();
 
 	private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
 
@@ -79,7 +78,7 @@ public class InvocableHandlerMethod extends HandlerMethod {
 	/**
 	 * Set {@link HandlerMethodArgumentResolver}s to use to use for resolving method argument values.
 	 */
-	public void setMessageMethodArgumentResolvers(HandlerMethodArgumentResolver argumentResolvers) {
+	public void setMessageMethodArgumentResolvers(HandlerMethodArgumentResolverComposite argumentResolvers) {
 		this.argumentResolvers = argumentResolvers;
 	}
 
@@ -199,7 +198,8 @@ public class InvocableHandlerMethod extends HandlerMethod {
 		}
 		catch (IllegalArgumentException ex) {
 			assertTargetBean(getBridgedMethod(), getBean(), args);
-			throw new IllegalStateException(getInvocationErrorMessage(ex.getMessage(), args), ex);
+			String message = (ex.getMessage() != null ? ex.getMessage() : "Illegal argument");
+			throw new IllegalStateException(getInvocationErrorMessage(message, args), ex);
 		}
 		catch (InvocationTargetException ex) {
 			// Unwrap for HandlerExceptionResolvers ...

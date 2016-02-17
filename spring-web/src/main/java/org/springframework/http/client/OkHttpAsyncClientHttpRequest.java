@@ -19,22 +19,27 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.net.URI;
 
+import com.squareup.okhttp.Call;
+import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.SettableListenableFuture;
 
 /**
- * {@link ClientHttpRequest} implementation that uses OkHttp to execute requests.
+ * {@link AsyncClientHttpRequest} implementation that uses OkHttp to execute requests.
  *
  * <p>Created via the {@link OkHttpClientHttpRequestFactory}.
  *
  * @author Luciano Leggieri
  * @author Arjen Poutsma
- * @since 4.2
+ * @since 4.3
  */
-class OkHttpClientHttpRequest extends AbstractBufferingClientHttpRequest {
+class OkHttpAsyncClientHttpRequest extends AbstractBufferingAsyncClientHttpRequest {
 
 	private final OkHttpClient client;
 
@@ -43,7 +48,7 @@ class OkHttpClientHttpRequest extends AbstractBufferingClientHttpRequest {
 	private final HttpMethod method;
 
 
-	public OkHttpClientHttpRequest(OkHttpClient client, URI uri, HttpMethod method) {
+	public OkHttpAsyncClientHttpRequest(OkHttpClient client, URI uri, HttpMethod method) {
 		this.client = client;
 		this.uri = uri;
 		this.method = method;
@@ -60,11 +65,37 @@ class OkHttpClientHttpRequest extends AbstractBufferingClientHttpRequest {
 		return this.uri;
 	}
 
-
 	@Override
-	protected ClientHttpResponse executeInternal(HttpHeaders headers, byte[] content) throws IOException {
+	protected ListenableFuture<ClientHttpResponse> executeInternal(HttpHeaders headers, byte[] content)
+			throws IOException {
+
 		Request request = OkHttpClientHttpRequestFactory.buildRequest(headers, content, this.uri, this.method);
-		return new OkHttpClientHttpResponse(this.client.newCall(request).execute());
+		return new OkHttpListenableFuture(this.client.newCall(request));
+	}
+
+
+	private static class OkHttpListenableFuture extends SettableListenableFuture<ClientHttpResponse> {
+
+		private final Call call;
+
+		public OkHttpListenableFuture(Call call) {
+			this.call = call;
+			this.call.enqueue(new Callback() {
+				@Override
+				public void onResponse(Response response) {
+					set(new OkHttpClientHttpResponse(response));
+				}
+				@Override
+				public void onFailure(Request request, IOException ex) {
+					setException(ex);
+				}
+			});
+		}
+
+		@Override
+		protected void interruptTask() {
+			this.call.cancel();
+		}
 	}
 
 }

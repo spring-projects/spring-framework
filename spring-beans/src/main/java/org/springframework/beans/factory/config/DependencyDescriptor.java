@@ -23,7 +23,10 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Map;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
@@ -178,6 +181,23 @@ public class DependencyDescriptor implements Serializable {
 	 */
 	public boolean isEager() {
 		return this.eager;
+	}
+
+	/**
+	 * Resolve the specified not-unique scenario: by default,
+	 * throwing a {@link NoUniqueBeanDefinitionException}.
+	 * <p>Subclasses may override this to select one of the instances or
+	 * to opt out with no result at all through returning {@code null}.
+	 * @param type the requested bean type
+	 * @param matchingBeans a map of bean names and corresponding bean
+	 * instances which have been pre-selected for the given type
+	 * (qualifiers etc already applied)
+	 * @return a bean instance to proceed with, or {@code null} for none
+	 * @throws BeansException in case of the not-unique scenario being fatal
+	 * @since 4.3
+	 */
+	public Object resolveNotUnique(Class<?> type, Map<String, Object> matchingBeans) throws BeansException {
+		throw new NoUniqueBeanDefinitionException(type, matchingBeans.keySet());
 	}
 
 
