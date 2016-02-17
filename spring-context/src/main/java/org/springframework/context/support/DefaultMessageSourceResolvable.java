@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 	 * the last one in the codes array.
 	 */
 	public String getCode() {
-		return (this.codes != null && this.codes.length > 0) ? this.codes[this.codes.length - 1] : null;
+		return (this.codes != null && this.codes.length > 0 ? this.codes[this.codes.length - 1] : null);
 	}
 
 	@Override
@@ -127,7 +127,7 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 	protected final String resolvableToString() {
 		StringBuilder result = new StringBuilder();
 		result.append("codes [").append(StringUtils.arrayToDelimitedString(this.codes, ","));
-		result.append("]; arguments [" + StringUtils.arrayToDelimitedString(this.arguments, ","));
+		result.append("]; arguments [").append(StringUtils.arrayToDelimitedString(this.arguments, ","));
 		result.append("]; default message [").append(this.defaultMessage).append(']');
 		return result.toString();
 	}
@@ -153,9 +153,9 @@ public class DefaultMessageSourceResolvable implements MessageSourceResolvable, 
 			return false;
 		}
 		MessageSourceResolvable otherResolvable = (MessageSourceResolvable) other;
-		return ObjectUtils.nullSafeEquals(getCodes(), otherResolvable.getCodes()) &&
+		return (ObjectUtils.nullSafeEquals(getCodes(), otherResolvable.getCodes()) &&
 				ObjectUtils.nullSafeEquals(getArguments(), otherResolvable.getArguments()) &&
-				ObjectUtils.nullSafeEquals(getDefaultMessage(), otherResolvable.getDefaultMessage());
+				ObjectUtils.nullSafeEquals(getDefaultMessage(), otherResolvable.getDefaultMessage()));
 	}
 
 	@Override
