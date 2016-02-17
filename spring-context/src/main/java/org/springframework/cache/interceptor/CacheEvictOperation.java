@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,49 +24,50 @@ package org.springframework.cache.interceptor;
  */
 public class CacheEvictOperation extends CacheOperation {
 
-    private final boolean cacheWide;
+	private final boolean cacheWide;
 
-    private final boolean beforeInvocation;
+	private final boolean beforeInvocation;
 
-    public boolean isCacheWide() {
-        return this.cacheWide;
-    }
+	public boolean isCacheWide() {
+		return this.cacheWide;
+	}
 
-    public boolean isBeforeInvocation() {
-        return this.beforeInvocation;
-    }
+	public boolean isBeforeInvocation() {
+		return this.beforeInvocation;
+	}
 
-    public CacheEvictOperation(CacheEvictOperation.Builder b) {
-        super(b);
-        this.cacheWide = b.cacheWide;
-        this.beforeInvocation = b.beforeInvocation;
-    }
+	public CacheEvictOperation(CacheEvictOperation.Builder b) {
+		super(b);
+		this.cacheWide = b.cacheWide;
+		this.beforeInvocation = b.beforeInvocation;
+	}
 
-    public static class Builder extends CacheOperation.Builder {
-        private boolean cacheWide = false;
+	public static class Builder extends CacheOperation.Builder {
 
-        private boolean beforeInvocation = false;
+		private boolean cacheWide = false;
 
-        public void setCacheWide(boolean cacheWide) {
-            this.cacheWide = cacheWide;
-        }
+		private boolean beforeInvocation = false;
 
-        public void setBeforeInvocation(boolean beforeInvocation) {
-            this.beforeInvocation = beforeInvocation;
-        }
+		public void setCacheWide(boolean cacheWide) {
+			this.cacheWide = cacheWide;
+		}
 
-        @Override
-        protected StringBuilder getOperationDescription() {
-            StringBuilder sb = super.getOperationDescription();
-            sb.append(",");
-            sb.append(this.cacheWide);
-            sb.append(",");
-            sb.append(this.beforeInvocation);
-            return sb;
-        }
+		public void setBeforeInvocation(boolean beforeInvocation) {
+			this.beforeInvocation = beforeInvocation;
+		}
 
-        public CacheEvictOperation build() {
-	        return new CacheEvictOperation(this);
-        }
-    }
+		@Override
+		protected StringBuilder getOperationDescription() {
+			StringBuilder sb = super.getOperationDescription();
+			sb.append(",");
+			sb.append(this.cacheWide);
+			sb.append(",");
+			sb.append(this.beforeInvocation);
+			return sb;
+		}
+
+		public CacheEvictOperation build() {
+			return new CacheEvictOperation(this);
+		}
+	}
 }

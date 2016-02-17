@@ -25,15 +25,15 @@ package org.springframework.cache.interceptor;
  */
 public class CacheableOperation extends CacheOperation {
 
-    private final String unless;
+	private final String unless;
 
-    private boolean sync;
+	private boolean sync;
 
-    public CacheableOperation(CacheableOperation.Builder b) {
-        super(b);
-        this.unless = b.unless;
-        this.sync = b.sync;
-    }
+	public CacheableOperation(CacheableOperation.Builder b) {
+		super(b);
+		this.unless = b.unless;
+		this.sync = b.sync;
+	}
 
 	public String getUnless() {
 		return this.unless;
@@ -44,34 +44,35 @@ public class CacheableOperation extends CacheOperation {
 	}
 
 
-    public static class Builder extends CacheOperation.Builder {
+	public static class Builder extends CacheOperation.Builder {
 
-        private String unless;
+		private String unless;
 
-        private boolean sync;
-        public void setUnless(String unless) {
-            this.unless = unless;
-        }
+		private boolean sync;
 
-        public void setSync(boolean sync) {
-            this.sync = sync;
-        }
+		public void setUnless(String unless) {
+			this.unless = unless;
+		}
 
-        @Override
-        protected StringBuilder getOperationDescription() {
-            StringBuilder sb = super.getOperationDescription();
-            sb.append(" | unless='");
-            sb.append(this.unless);
-            sb.append("'");
-            sb.append(" | sync='");
-            sb.append(this.sync);
-            sb.append("'");
-            return sb;
-        }
+		public void setSync(boolean sync) {
+			this.sync = sync;
+		}
 
-        @Override
-        public CacheableOperation build() {
-            return new CacheableOperation(this);
-        }
-    }
+		@Override
+		protected StringBuilder getOperationDescription() {
+			StringBuilder sb = super.getOperationDescription();
+			sb.append(" | unless='");
+			sb.append(this.unless);
+			sb.append("'");
+			sb.append(" | sync='");
+			sb.append(this.sync);
+			sb.append("'");
+			return sb;
+		}
+
+		@Override
+		public CacheableOperation build() {
+			return new CacheableOperation(this);
+		}
+	}
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -98,59 +98,59 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 	}
 
 	CacheableOperation parseCacheableAnnotation(AnnotatedElement ae, DefaultCacheConfig defaultConfig, Cacheable cacheable) {
-		CacheableOperation.Builder opBuilder = new CacheableOperation.Builder();
+		CacheableOperation.Builder builder = new CacheableOperation.Builder();
 
-		opBuilder.setCacheNames(cacheable.cacheNames());
-		opBuilder.setCondition(cacheable.condition());
-		opBuilder.setUnless(cacheable.unless());
-		opBuilder.setKey(cacheable.key());
-		opBuilder.setKeyGenerator(cacheable.keyGenerator());
-		opBuilder.setCacheManager(cacheable.cacheManager());
-		opBuilder.setCacheResolver(cacheable.cacheResolver());
-		opBuilder.setSync(cacheable.sync());
-		opBuilder.setName(ae.toString());
+		builder.setCacheNames(cacheable.cacheNames());
+		builder.setCondition(cacheable.condition());
+		builder.setUnless(cacheable.unless());
+		builder.setKey(cacheable.key());
+		builder.setKeyGenerator(cacheable.keyGenerator());
+		builder.setCacheManager(cacheable.cacheManager());
+		builder.setCacheResolver(cacheable.cacheResolver());
+		builder.setSync(cacheable.sync());
+		builder.setName(ae.toString());
 
-		defaultConfig.applyDefault(opBuilder);
-		CacheableOperation op = opBuilder.build();
+		defaultConfig.applyDefault(builder);
+		CacheableOperation op = builder.build();
 		validateCacheOperation(ae, op);
 
 		return op;
 	}
 
 	CacheEvictOperation parseEvictAnnotation(AnnotatedElement ae, DefaultCacheConfig defaultConfig, CacheEvict cacheEvict) {
-		CacheEvictOperation.Builder opBuilder = new CacheEvictOperation.Builder();
+		CacheEvictOperation.Builder builder = new CacheEvictOperation.Builder();
 
-		opBuilder.setCacheNames(cacheEvict.cacheNames());
-		opBuilder.setCondition(cacheEvict.condition());
-		opBuilder.setKey(cacheEvict.key());
-		opBuilder.setKeyGenerator(cacheEvict.keyGenerator());
-		opBuilder.setCacheManager(cacheEvict.cacheManager());
-		opBuilder.setCacheResolver(cacheEvict.cacheResolver());
-		opBuilder.setCacheWide(cacheEvict.allEntries());
-		opBuilder.setBeforeInvocation(cacheEvict.beforeInvocation());
-		opBuilder.setName(ae.toString());
+		builder.setCacheNames(cacheEvict.cacheNames());
+		builder.setCondition(cacheEvict.condition());
+		builder.setKey(cacheEvict.key());
+		builder.setKeyGenerator(cacheEvict.keyGenerator());
+		builder.setCacheManager(cacheEvict.cacheManager());
+		builder.setCacheResolver(cacheEvict.cacheResolver());
+		builder.setCacheWide(cacheEvict.allEntries());
+		builder.setBeforeInvocation(cacheEvict.beforeInvocation());
+		builder.setName(ae.toString());
 
-		defaultConfig.applyDefault(opBuilder);
-		CacheEvictOperation op = opBuilder.build();
+		defaultConfig.applyDefault(builder);
+		CacheEvictOperation op = builder.build();
 		validateCacheOperation(ae, op);
 
 		return op;
 	}
 
 	CacheOperation parsePutAnnotation(AnnotatedElement ae, DefaultCacheConfig defaultConfig, CachePut cachePut) {
-		CachePutOperation.Builder opBuilder = new CachePutOperation.Builder();
+		CachePutOperation.Builder builder = new CachePutOperation.Builder();
 
-		opBuilder.setCacheNames(cachePut.cacheNames());
-		opBuilder.setCondition(cachePut.condition());
-		opBuilder.setUnless(cachePut.unless());
-		opBuilder.setKey(cachePut.key());
-		opBuilder.setKeyGenerator(cachePut.keyGenerator());
-		opBuilder.setCacheManager(cachePut.cacheManager());
-		opBuilder.setCacheResolver(cachePut.cacheResolver());
-		opBuilder.setName(ae.toString());
+		builder.setCacheNames(cachePut.cacheNames());
+		builder.setCondition(cachePut.condition());
+		builder.setUnless(cachePut.unless());
+		builder.setKey(cachePut.key());
+		builder.setKeyGenerator(cachePut.keyGenerator());
+		builder.setCacheManager(cachePut.cacheManager());
+		builder.setCacheResolver(cachePut.cacheResolver());
+		builder.setName(ae.toString());
 
-		defaultConfig.applyDefault(opBuilder);
-		CachePutOperation op = opBuilder.build();
+		defaultConfig.applyDefault(builder);
+		CachePutOperation op = builder.build();
 		validateCacheOperation(ae, op);
 
 		return op;
@@ -278,26 +278,26 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		}
 
 		/**
-		 * Apply the defaults to the specified {@link CacheOperation}.
-		 * @param operation the operation to update
+		 * Apply the defaults to the specified {@link CacheOperation.Builder}.
+		 * @param builder the operation builder to update
 		 */
-		public void applyDefault(CacheOperation.Builder operation) {
-			if (operation.getCacheNames().isEmpty() && this.cacheNames != null) {
-				operation.setCacheNames(this.cacheNames);
+		public void applyDefault(CacheOperation.Builder builder) {
+			if (builder.getCacheNames().isEmpty() && this.cacheNames != null) {
+				builder.setCacheNames(this.cacheNames);
 			}
-			if (!StringUtils.hasText(operation.getKey()) && !StringUtils.hasText(operation.getKeyGenerator()) &&
+			if (!StringUtils.hasText(builder.getKey()) && !StringUtils.hasText(builder.getKeyGenerator()) &&
 					StringUtils.hasText(this.keyGenerator)) {
-				operation.setKeyGenerator(this.keyGenerator);
+				builder.setKeyGenerator(this.keyGenerator);
 			}
 
-			if (StringUtils.hasText(operation.getCacheManager()) || StringUtils.hasText(operation.getCacheResolver())) {
+			if (StringUtils.hasText(builder.getCacheManager()) || StringUtils.hasText(builder.getCacheResolver())) {
 				// One of these is set so we should not inherit anything
 			}
 			else if (StringUtils.hasText(this.cacheResolver)) {
-				operation.setCacheResolver(this.cacheResolver);
+				builder.setCacheResolver(this.cacheResolver);
 			}
 			else if (StringUtils.hasText(this.cacheManager)) {
-				operation.setCacheManager(this.cacheManager);
+				builder.setCacheManager(this.cacheManager);
 			}
 		}
 
