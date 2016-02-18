@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ public class MessageMethodArgumentResolverTests {
 		Message<String> message = MessageBuilder.withPayload("test").build();
 		MethodParameter parameter = new MethodParameter(this.method, 0);
 
-		assertTrue("Parameter '" + parameter + "' should be supported", this.resolver.supportsParameter(parameter));
+		assertTrue(this.resolver.supportsParameter(parameter));
 		assertSame(message, this.resolver.resolveArgument(parameter, message));
 	}
 
@@ -69,7 +69,7 @@ public class MessageMethodArgumentResolverTests {
 		Message<Integer> message = MessageBuilder.withPayload(123).build();
 		MethodParameter parameter = new MethodParameter(this.method, 1);
 
-		assertTrue("Parameter '" + parameter + "' should be supported", this.resolver.supportsParameter(parameter));
+		assertTrue(this.resolver.supportsParameter(parameter));
 		assertSame(message, this.resolver.resolveArgument(parameter, message));
 	}
 
@@ -78,7 +78,7 @@ public class MessageMethodArgumentResolverTests {
 		Message<Integer> message = MessageBuilder.withPayload(123).build();
 		MethodParameter parameter = new MethodParameter(this.method, 2);
 
-		assertTrue("Parameter '" + parameter + "' should be supported", this.resolver.supportsParameter(parameter));
+		assertTrue(this.resolver.supportsParameter(parameter));
 		assertSame(message, this.resolver.resolveArgument(parameter, message));
 	}
 
@@ -87,7 +87,7 @@ public class MessageMethodArgumentResolverTests {
 		Message<String> message = MessageBuilder.withPayload("test").build();
 		MethodParameter parameter = new MethodParameter(this.method, 1);
 
-		assertTrue("Parameter '" + parameter + "' should be supported", this.resolver.supportsParameter(parameter));
+		assertTrue(this.resolver.supportsParameter(parameter));
 		thrown.expect(MethodArgumentTypeMismatchException.class);
 		thrown.expectMessage(Integer.class.getName());
 		thrown.expectMessage(String.class.getName());
@@ -99,7 +99,7 @@ public class MessageMethodArgumentResolverTests {
 		Message<Integer> message = MessageBuilder.withPayload(123).build();
 		MethodParameter parameter = new MethodParameter(this.method, 3);
 
-		assertTrue("Parameter '" + parameter + "' should be supported", this.resolver.supportsParameter(parameter));
+		assertTrue(this.resolver.supportsParameter(parameter));
 		assertSame(message, this.resolver.resolveArgument(parameter, message));
 	}
 
@@ -108,7 +108,7 @@ public class MessageMethodArgumentResolverTests {
 		Message<Locale> message = MessageBuilder.withPayload(Locale.getDefault()).build();
 		MethodParameter parameter = new MethodParameter(this.method, 3);
 
-		assertTrue("Parameter '" + parameter + "' should be supported", this.resolver.supportsParameter(parameter));
+		assertTrue(this.resolver.supportsParameter(parameter));
 		thrown.expect(MethodArgumentTypeMismatchException.class);
 		thrown.expectMessage(Number.class.getName());
 		thrown.expectMessage(Locale.class.getName());
@@ -120,7 +120,7 @@ public class MessageMethodArgumentResolverTests {
 		ErrorMessage message = new ErrorMessage(new UnsupportedOperationException());
 		MethodParameter parameter = new MethodParameter(this.method, 4);
 
-		assertTrue("Parameter '" + parameter + "' should be supported", this.resolver.supportsParameter(parameter));
+		assertTrue(this.resolver.supportsParameter(parameter));
 		assertSame(message, this.resolver.resolveArgument(parameter, message));
 	}
 
@@ -129,16 +129,17 @@ public class MessageMethodArgumentResolverTests {
 		ErrorMessage message = new ErrorMessage(new UnsupportedOperationException());
 		MethodParameter parameter = new MethodParameter(this.method, 0);
 
-		assertTrue("Parameter '" + parameter + "' should be supported", this.resolver.supportsParameter(parameter));
+		assertTrue(this.resolver.supportsParameter(parameter));
 		assertSame(message, this.resolver.resolveArgument(parameter, message));
 	}
 
 	@Test
 	public void resolveWrongMessageType() throws Exception {
-		Message<? extends Throwable> message = new GenericMessage<Throwable>(new UnsupportedOperationException());
+		UnsupportedOperationException ex = new UnsupportedOperationException();
+		Message<? extends Throwable> message = new GenericMessage<Throwable>(ex);
 		MethodParameter parameter = new MethodParameter(this.method, 4);
 
-		assertTrue("Parameter '" + parameter + "' should be supported", this.resolver.supportsParameter(parameter));
+		assertTrue(this.resolver.supportsParameter(parameter));
 		thrown.expect(MethodArgumentTypeMismatchException.class);
 		thrown.expectMessage(ErrorMessage.class.getName());
 		thrown.expectMessage(GenericMessage.class.getName());

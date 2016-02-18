@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ import org.springframework.messaging.handler.invocation.HandlerMethodArgumentRes
 import org.springframework.util.ClassUtils;
 
 /**
- * A {@link HandlerMethodArgumentResolver} for {@link Message} parameters.
- * Validates that the generic type of the payload matches with the message value.
+ * {@code HandlerMethodArgumentResolver} for {@link Message} method arguments.
+ * Validates that the generic type of the payload matches to the message value.
  *
  * @author Rossen Stoyanchev
  * @author Stephane Nicoll
@@ -43,16 +43,17 @@ public class MessageMethodArgumentResolver implements HandlerMethodArgumentResol
 	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
 		Class<?> paramType = parameter.getParameterType();
 		if (!paramType.isAssignableFrom(message.getClass())) {
-				throw new MethodArgumentTypeMismatchException(message, parameter,
-						"The actual message type [" + ClassUtils.getQualifiedName(message.getClass()) + "] " +
-						"does not match the expected type [" + ClassUtils.getQualifiedName(paramType) + "]");
+			String actual = ClassUtils.getQualifiedName(message.getClass());
+			String expected = ClassUtils.getQualifiedName(paramType);
+			throw new MethodArgumentTypeMismatchException(message, parameter, "The actual message type " +
+					"[" + actual + "] does not match the expected type [" + expected + "]");
 		}
 
-		Class<?> expectedPayloadType = getPayloadType(parameter);
+		Class<?> targetPayloadType = getPayloadType(parameter);
 		Object payload = message.getPayload();
-		if (payload != null && expectedPayloadType != null && !expectedPayloadType.isInstance(payload)) {
+		if (payload != null && !targetPayloadType.isInstance(payload)) {
 			throw new MethodArgumentTypeMismatchException(message, parameter,
-					"The expected Message<?> payload type [" + ClassUtils.getQualifiedName(expectedPayloadType) +
+					"The expected Message<?> payload type [" + ClassUtils.getQualifiedName(targetPayloadType) +
 					"] does not match the actual payload type [" + ClassUtils.getQualifiedName(payload.getClass()) + "]");
 		}
 

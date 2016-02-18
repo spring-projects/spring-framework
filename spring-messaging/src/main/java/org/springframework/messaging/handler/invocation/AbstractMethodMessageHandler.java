@@ -470,6 +470,11 @@ public abstract class AbstractMethodMessageHandler<T>
 	 */
 	protected abstract T getMatchingMapping(T mapping, Message<?> message);
 
+
+	protected void handleNoMatch(Set<T> ts, String lookupDestination, Message<?> message) {
+		logger.debug("No matching methods.");
+	}
+
 	/**
 	 * Return a comparator for sorting matching mappings.
 	 * The returned comparator should sort 'better' matches higher.
@@ -535,8 +540,6 @@ public abstract class AbstractMethodMessageHandler<T>
 		}
 	}
 
-	protected abstract AbstractExceptionHandlerMethodResolver createExceptionHandlerMethodResolverFor(Class<?> beanType);
-
 	/**
 	 * Find an {@code @MessageExceptionHandler} method for the given exception.
 	 * The default implementation searches methods in the class hierarchy of the
@@ -575,9 +578,8 @@ public abstract class AbstractMethodMessageHandler<T>
 		return null;
 	}
 
-	protected void handleNoMatch(Set<T> ts, String lookupDestination, Message<?> message) {
-		logger.debug("No matching methods.");
-	}
+	protected abstract AbstractExceptionHandlerMethodResolver createExceptionHandlerMethodResolverFor(
+			Class<?> beanType);
 
 	@Override
 	public String toString() {
@@ -621,6 +623,7 @@ public abstract class AbstractMethodMessageHandler<T>
 			return this.comparator.compare(match1.mapping, match2.mapping);
 		}
 	}
+
 
 	private class ReturnValueListenableFutureCallback implements ListenableFutureCallback<Object> {
 

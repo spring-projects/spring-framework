@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -336,23 +336,23 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		}
 
 		// Annotation-based return value types
-		SendToMethodReturnValueHandler sth =
+		SendToMethodReturnValueHandler sendToHandler =
 				new SendToMethodReturnValueHandler(this.brokerTemplate, true);
-		sth.setHeaderInitializer(this.headerInitializer);
-		handlers.add(sth);
+		sendToHandler.setHeaderInitializer(this.headerInitializer);
+		handlers.add(sendToHandler);
 
-		SubscriptionMethodReturnValueHandler sh =
+		SubscriptionMethodReturnValueHandler subscriptionHandler =
 				new SubscriptionMethodReturnValueHandler(this.clientMessagingTemplate);
-		sh.setHeaderInitializer(this.headerInitializer);
-		handlers.add(sh);
+		subscriptionHandler.setHeaderInitializer(this.headerInitializer);
+		handlers.add(subscriptionHandler);
 
 		// custom return value types
 		handlers.addAll(getCustomReturnValueHandlers());
 
 		// catch-all
-		sth = new SendToMethodReturnValueHandler(this.brokerTemplate, false);
-		sth.setHeaderInitializer(this.headerInitializer);
-		handlers.add(sth);
+		sendToHandler = new SendToMethodReturnValueHandler(this.brokerTemplate, false);
+		sendToHandler.setHeaderInitializer(this.headerInitializer);
+		handlers.add(sendToHandler);
 
 		return handlers;
 	}
