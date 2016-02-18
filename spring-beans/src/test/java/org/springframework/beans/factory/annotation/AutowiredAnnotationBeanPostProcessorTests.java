@@ -25,6 +25,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -910,16 +911,15 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		RootBeanDefinition bd = new RootBeanDefinition(MapConstructorInjectionBean.class);
 		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 		bf.registerBeanDefinition("annotatedBean", bd);
-		Map<String, TestBean> tbm = new LinkedHashMap<String, TestBean>();
-		tbm.put("testBean1", new TestBean("tb1"));
-		tbm.put("testBean2", new TestBean("tb2"));
-		bf.registerSingleton("testBeans", tbm);
-		bf.registerSingleton("otherMap", new Properties());
+		RootBeanDefinition tbm = new RootBeanDefinition(CollectionFactoryMethods.class);
+		tbm.setUniqueFactoryMethodName("testBeanMap");
+		bf.registerBeanDefinition("myTestBeanMap", tbm);
+		bf.registerSingleton("otherMap", new HashMap<Object, Object>());
 
 		MapConstructorInjectionBean bean = (MapConstructorInjectionBean) bf.getBean("annotatedBean");
-		assertSame(tbm, bean.getTestBeanMap());
+		assertSame(bf.getBean("myTestBeanMap"), bean.getTestBeanMap());
 		bean = (MapConstructorInjectionBean) bf.getBean("annotatedBean");
-		assertSame(tbm, bean.getTestBeanMap());
+		assertSame(bf.getBean("myTestBeanMap"), bean.getTestBeanMap());
 	}
 
 	@Test
@@ -954,16 +954,15 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		RootBeanDefinition bd = new RootBeanDefinition(SetConstructorInjectionBean.class);
 		bd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
 		bf.registerBeanDefinition("annotatedBean", bd);
-		Set<TestBean> tbs = new LinkedHashSet<TestBean>();
-		tbs.add(new TestBean("tb1"));
-		tbs.add(new TestBean("tb2"));
-		bf.registerSingleton("testBeanSet", tbs);
+		RootBeanDefinition tbs = new RootBeanDefinition(CollectionFactoryMethods.class);
+		tbs.setUniqueFactoryMethodName("testBeanSet");
+		bf.registerBeanDefinition("myTestBeanSet", tbs);
 		bf.registerSingleton("otherSet", new HashSet<Object>());
 
 		SetConstructorInjectionBean bean = (SetConstructorInjectionBean) bf.getBean("annotatedBean");
-		assertSame(tbs, bean.getTestBeanSet());
+		assertSame(bf.getBean("myTestBeanSet"), bean.getTestBeanSet());
 		bean = (SetConstructorInjectionBean) bf.getBean("annotatedBean");
-		assertSame(tbs, bean.getTestBeanSet());
+		assertSame(bf.getBean("myTestBeanSet"), bean.getTestBeanSet());
 	}
 
 	@Test
@@ -3201,6 +3200,25 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		public ProvidedArgumentBean(String[] args) {
 		}
+	}
+
+
+	public static class CollectionFactoryMethods {
+
+		public static Map<String, TestBean> testBeanMap() {
+			Map<String, TestBean> tbm = new LinkedHashMap<String, TestBean>();
+			tbm.put("testBean1", new TestBean("tb1"));
+			tbm.put("testBean2", new TestBean("tb2"));
+			return tbm;
+		}
+
+		public static Set<TestBean> testBeanSet() {
+			Set<TestBean> tbs = new LinkedHashSet<TestBean>();
+			tbs.add(new TestBean("tb1"));
+			tbs.add(new TestBean("tb2"));
+			return tbs;
+		}
+
 	}
 
 }

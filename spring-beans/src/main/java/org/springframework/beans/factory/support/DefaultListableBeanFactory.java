@@ -1199,7 +1199,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				result.put(candidateName, getBean(candidateName));
 			}
 		}
-		if (result.isEmpty()) {
+		if (result.isEmpty() && !Collection.class.isAssignableFrom(requiredType) && !Map.class.isAssignableFrom(requiredType)) {
 			// Consider fallback matches if the first pass failed to find anything...
 			DependencyDescriptor fallbackDescriptor = descriptor.forFallbackMatch();
 			for (String candidateName : candidateNames) {
