@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import org.springframework.beans.annotation.AnnotationBeanUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.beans.factory.config.EmbeddedValueResolver;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.jmx.export.metadata.InvalidMetadataException;
 import org.springframework.jmx.export.metadata.JmxAttributeSource;
@@ -50,18 +51,12 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 
 
 	@Override
-	public void setBeanFactory(final BeanFactory beanFactory) {
+	public void setBeanFactory(BeanFactory beanFactory) {
 		if (beanFactory instanceof ConfigurableBeanFactory) {
-			// Not using EmbeddedValueResolverAware in order to avoid a spring-context dependency:
-			// ConfigurableBeanFactory and its resolveEmbeddedValue live in the spring-beans module.
-			this.embeddedValueResolver = new StringValueResolver() {
-				@Override
-				public String resolveStringValue(String strVal) {
-					return ((ConfigurableBeanFactory) beanFactory).resolveEmbeddedValue(strVal);
-				}
-			};
+			this.embeddedValueResolver = new EmbeddedValueResolver((ConfigurableBeanFactory) beanFactory);
 		}
 	}
+
 
 	@Override
 	public org.springframework.jmx.export.metadata.ManagedResource getManagedResource(Class<?> beanClass) throws InvalidMetadataException {

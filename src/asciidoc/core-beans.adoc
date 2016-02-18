@@ -2561,7 +2561,7 @@ The Spring container creates a new instance of the `AppPreferences` bean by usin
 `appPreferences` bean is scoped at the `ServletContext` level, stored as a regular
 `ServletContext` attribute. This is somewhat similar to a Spring singleton bean but
 differs in two important ways: It is a singleton per `ServletContext`, not per Spring
-'ApplicationContext' (or which there may be several in any given web application),
+'ApplicationContext' (for which there may be several in any given web application),
 and it is actually exposed and therefore visible as a `ServletContext` attribute.
 
 
@@ -5441,7 +5441,7 @@ resolving expression text.
 The `@Bean` methods in a Spring component are processed differently than their
 counterparts inside a Spring `@Configuration` class. The difference is that `@Component`
 classes are not enhanced with CGLIB to intercept the invocation of methods and fields.
-CGLIB proxying is the means by which invoking methods or fields within `@Bean` methods 
+CGLIB proxying is the means by which invoking methods or fields within `@Bean` methods
 in `@Configuration` classes creates bean metadata references to collaborating objects;
 such methods are __not__ invoked with normal Java semantics but rather go through the
 container in order to provide the usual lifecycle management and proxying of Spring
@@ -8525,4 +8525,3 @@ utility class
 locator that is described in this
 https://spring.io/blog/2007/06/11/using-a-shared-parent-application-context-in-a-multi-war-spring-application/[Spring
 team blog entry].
-

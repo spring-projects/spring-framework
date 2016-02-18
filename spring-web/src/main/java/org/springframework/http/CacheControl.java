@@ -114,7 +114,7 @@ public class CacheControl {
 	 * clients sending conditional requests (with "ETag", "If-Modified-Since" headers) and the server responding
 	 * with "304 - Not Modified" status.
 	 * <p>In order to disable caching and minimize requests/responses exchanges, the {@link #noStore()} directive
-	 * should be used.
+	 * should be used instead of {@link #noCache()}.
 	 * @return {@code this}, to facilitate method chaining
 	 * @see <a href="https://tools.ietf.org/html/rfc7234#section-5.2.2.2">rfc7234 section 5.2.2.2</a>
 	 */

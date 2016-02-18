@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,9 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
 
@@ -364,8 +366,8 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		properties.setProperty("schedules.businessHours", businessHoursCronExpression);
 		placeholderDefinition.getPropertyValues().addPropertyValue("properties", properties);
 		BeanDefinition targetDefinition = new RootBeanDefinition(PropertyPlaceholderWithCronTestBean.class);
-		context.registerBeanDefinition("placeholder", placeholderDefinition);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
+		context.registerBeanDefinition("placeholder", placeholderDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
 
@@ -395,8 +397,8 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		properties.setProperty("initialDelay", "1000");
 		placeholderDefinition.getPropertyValues().addPropertyValue("properties", properties);
 		BeanDefinition targetDefinition = new RootBeanDefinition(PropertyPlaceholderWithFixedDelayTestBean.class);
-		context.registerBeanDefinition("placeholder", placeholderDefinition);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
+		context.registerBeanDefinition("placeholder", placeholderDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
 
@@ -427,8 +429,8 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		properties.setProperty("initialDelay", "1000");
 		placeholderDefinition.getPropertyValues().addPropertyValue("properties", properties);
 		BeanDefinition targetDefinition = new RootBeanDefinition(PropertyPlaceholderWithFixedRateTestBean.class);
-		context.registerBeanDefinition("placeholder", placeholderDefinition);
 		context.registerBeanDefinition("postProcessor", processorDefinition);
+		context.registerBeanDefinition("placeholder", placeholderDefinition);
 		context.registerBeanDefinition("target", targetDefinition);
 		context.refresh();
 
@@ -448,6 +450,35 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 		assertEquals("fixedRate", targetMethod.getName());
 		assertEquals(1000L, task.getInitialDelay());
 		assertEquals(3000L, task.getInterval());
+	}
+
+	@Test
+	public void expressionWithCron() {
+		String businessHoursCronExpression = "0 0 9-17 * * MON-FRI";
+		BeanDefinition processorDefinition = new RootBeanDefinition(ScheduledAnnotationBeanPostProcessor.class);
+		BeanDefinition targetDefinition = new RootBeanDefinition(ExpressionWithCronTestBean.class);
+		context.registerBeanDefinition("postProcessor", processorDefinition);
+		context.registerBeanDefinition("target", targetDefinition);
+		Map<String, String> schedules = new HashMap<String, String>();
+		schedules.put("businessHours", businessHoursCronExpression);
+		context.getBeanFactory().registerSingleton("schedules", schedules);
+		context.refresh();
+
+		Object postProcessor = context.getBean("postProcessor");
+		Object target = context.getBean("target");
+		ScheduledTaskRegistrar registrar = (ScheduledTaskRegistrar)
+				new DirectFieldAccessor(postProcessor).getPropertyValue("registrar");
+		@SuppressWarnings("unchecked")
+		List<CronTask> cronTasks = (List<CronTask>)
+				new DirectFieldAccessor(registrar).getPropertyValue("cronTasks");
+		assertEquals(1, cronTasks.size());
+		CronTask task = cronTasks.get(0);
+		ScheduledMethodRunnable runnable = (ScheduledMethodRunnable) task.getRunnable();
+		Object targetObject = runnable.getTarget();
+		Method targetMethod = runnable.getMethod();
+		assertEquals(target, targetObject);
+		assertEquals("x", targetMethod.getName());
+		assertEquals(businessHoursCronExpression, task.getExpression());
 	}
 
 	@Test
@@ -695,6 +726,14 @@ public class ScheduledAnnotationBeanPostProcessorTests {
 
 		@Scheduled(fixedRateString="${fixedRate}", initialDelayString="${initialDelay}")
 		public void fixedRate() {
+		}
+	}
+
+
+	static class ExpressionWithCronTestBean {
+
+		@Scheduled(cron = "#{schedules.businessHours}")
+		public void x() {
 		}
 	}
 

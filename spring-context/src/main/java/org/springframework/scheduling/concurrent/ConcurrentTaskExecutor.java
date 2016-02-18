@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import javax.enterprise.concurrent.ManagedExecutors;
 import javax.enterprise.concurrent.ManagedTask;
 
 import org.springframework.core.task.AsyncListenableTaskExecutor;
+import org.springframework.core.task.TaskDecorator;
 import org.springframework.core.task.support.TaskExecutorAdapter;
 import org.springframework.scheduling.SchedulingAwareRunnable;
 import org.springframework.scheduling.SchedulingTaskExecutor;
@@ -125,6 +126,20 @@ public class ConcurrentTaskExecutor implements AsyncListenableTaskExecutor, Sche
 	 */
 	public final Executor getConcurrentExecutor() {
 		return this.concurrentExecutor;
+	}
+
+	/**
+	 * Specify a custom {@link TaskDecorator} to be applied to any {@link Runnable}
+	 * about to be executed.
+	 * <p>Note that such a decorator is not necessarily being applied to the
+	 * user-supplied {@code Runnable}/{@code Callable} but rather to the actual
+	 * execution callback (which may be a wrapper around the user-supplied task).
+	 * <p>The primary use case is to set some execution context around the task's
+	 * invocation, or to provide some monitoring/statistics for task execution.
+	 * @since 4.3
+	 */
+	public final void setTaskDecorator(TaskDecorator taskDecorator) {
+		this.adaptedExecutor.setTaskDecorator(taskDecorator);
 	}
 
 
