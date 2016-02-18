@@ -32,7 +32,9 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@code HandlerMethodArgumentResolver} for {@link Message} method arguments.
- * Validates that the generic type of the payload matches to the message value.
+ * Validates that the generic type of the payload matches to the message value
+ * or otherwise applies {@link MessageConverter} to convert to the expected
+ * payload type.
  *
  * @author Rossen Stoyanchev
  * @author Stephane Nicoll
@@ -46,6 +48,7 @@ public class MessageMethodArgumentResolver implements HandlerMethodArgumentResol
 	/**
 	 * Create a new instance with the given {@link MessageConverter}.
 	 * @param converter the MessageConverter to use (required)
+	 * @since 4.1
 	 */
 	public MessageMethodArgumentResolver(MessageConverter converter) {
 		Assert.notNull(converter, "MessageConverter must not be null");
