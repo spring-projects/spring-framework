@@ -317,7 +317,7 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 		// Type-based argument resolution
 		resolvers.add(new PrincipalMethodArgumentResolver());
-		resolvers.add(new MessageMethodArgumentResolver());
+		resolvers.add(new MessageMethodArgumentResolver(this.messageConverter));
 
 		resolvers.addAll(getCustomArgumentResolvers());
 		resolvers.add(new PayloadArgumentResolver(this.messageConverter, this.validator));

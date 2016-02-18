@@ -158,7 +158,7 @@ public class DefaultMessageHandlerMethodFactory implements MessageHandlerMethodF
 		resolvers.add(new HeadersMethodArgumentResolver());
 
 		// Type-based argument resolution
-		resolvers.add(new MessageMethodArgumentResolver());
+		resolvers.add(new MessageMethodArgumentResolver(this.messageConverter));
 
 		if (this.customArgumentResolvers != null) {
 			resolvers.addAll(this.customArgumentResolvers);

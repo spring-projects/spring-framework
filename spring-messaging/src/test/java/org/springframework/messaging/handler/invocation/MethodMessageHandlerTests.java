@@ -34,6 +34,7 @@ import org.junit.Test;
 import org.springframework.context.support.StaticApplicationContext;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.messaging.Message;
+import org.springframework.messaging.converter.SimpleMessageConverter;
 import org.springframework.messaging.handler.DestinationPatternsMessageCondition;
 import org.springframework.messaging.handler.HandlerMethod;
 import org.springframework.messaging.handler.annotation.support.MessageMethodArgumentResolver;
@@ -196,7 +197,7 @@ public class MethodMessageHandlerTests {
 		@Override
 		protected List<? extends HandlerMethodArgumentResolver> initArgumentResolvers() {
 			List<HandlerMethodArgumentResolver> resolvers = new ArrayList<HandlerMethodArgumentResolver>();
-			resolvers.add(new MessageMethodArgumentResolver());
+			resolvers.add(new MessageMethodArgumentResolver(new SimpleMessageConverter()));
 			resolvers.addAll(getCustomArgumentResolvers());
 			return resolvers;
 		}
