@@ -82,12 +82,13 @@ public class RequestMethodsRequestConditionTests {
 	}
 
 	@Test
-	public void noDeclaredMethodsMatchesAllMethodsExceptOptions() {
+	public void emptyMatchesAnythingExceptHttpOptions() {
 		RequestCondition condition = new RequestMethodsRequestCondition();
 
 		assertNotNull(condition.getMatchingCondition(new MockHttpServletRequest("GET", "")));
 		assertNotNull(condition.getMatchingCondition(new MockHttpServletRequest("POST", "")));
 		assertNotNull(condition.getMatchingCondition(new MockHttpServletRequest("HEAD", "")));
+		assertNotNull(condition.getMatchingCondition(new MockHttpServletRequest("CUSTOM", "")));
 		assertNull(condition.getMatchingCondition(new MockHttpServletRequest("OPTIONS", "")));
 	}
 

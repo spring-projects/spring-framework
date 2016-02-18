@@ -94,25 +94,26 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 * Check if any of the HTTP request methods match the given request and
 	 * return an instance that contains the matching HTTP request method only.
 	 * @param request the current request
-	 * @return the same instance if the condition is empty, a new condition with
-	 * the matched request method, or {@code null} if no request methods match
+	 * @return the same instance if the condition is empty (unless the request
+	 * method is HTTP OPTIONS), a new condition with the matched request method,
+	 * or {@code null} if there is no match or the condition is empty and the
+	 * request method is OPTIONS.
 	 */
 	@Override
 	public RequestMethodsRequestCondition getMatchingCondition(HttpServletRequest request) {
 		RequestMethod requestMethod = getRequestMethod(request);
-		if (requestMethod == null) {
-			return null;
-		}
 		if (this.methods.isEmpty()) {
 			return (RequestMethod.OPTIONS.equals(requestMethod) ? null : this);
 		}
-		for (RequestMethod method : this.methods) {
-			if (method.equals(requestMethod)) {
-				return new RequestMethodsRequestCondition(method);
+		if (requestMethod != null) {
+			for (RequestMethod method : this.methods) {
+				if (method.equals(requestMethod)) {
+					return new RequestMethodsRequestCondition(method);
+				}
 			}
-		}
-		if (RequestMethod.HEAD.equals(requestMethod) && getMethods().contains(RequestMethod.GET)) {
-			return HEAD_CONDITION;
+			if (RequestMethod.HEAD.equals(requestMethod) && getMethods().contains(RequestMethod.GET)) {
+				return HEAD_CONDITION;
+			}
 		}
 		return null;
 	}
