@@ -17,10 +17,7 @@
 package org.springframework.http.server.reactive.boot;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufAllocator;
-import io.netty.buffer.UnpooledByteBufAllocator;
 
-import org.springframework.core.io.buffer.NettyDataBufferAllocator;
 import org.springframework.http.server.reactive.RxNettyHttpHandlerAdapter;
 import org.springframework.util.Assert;
 
@@ -34,22 +31,12 @@ public class RxNettyHttpServer extends HttpServerSupport implements HttpServer {
 
 	private io.reactivex.netty.protocol.http.server.HttpServer<ByteBuf, ByteBuf> rxNettyServer;
 
-	private NettyDataBufferAllocator allocator;
-
 	private boolean running;
-
-	public void setAllocator(ByteBufAllocator allocator) {
-		Assert.notNull(allocator, "'allocator' must not be null");
-		this.allocator = new NettyDataBufferAllocator(allocator);
-	}
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		Assert.notNull(getHttpHandler());
-		if (allocator == null) {
-			allocator = new NettyDataBufferAllocator(UnpooledByteBufAllocator.DEFAULT);
-		}
-		this.rxNettyHandler = new RxNettyHttpHandlerAdapter(getHttpHandler(), allocator);
+		this.rxNettyHandler = new RxNettyHttpHandlerAdapter(getHttpHandler());
 
 		this.rxNettyServer = (getPort() != -1 ?
 				io.reactivex.netty.protocol.http.server.HttpServer.newServer(getPort()) :

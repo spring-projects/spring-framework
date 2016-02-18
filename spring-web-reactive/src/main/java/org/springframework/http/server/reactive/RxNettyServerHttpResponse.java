@@ -16,6 +16,8 @@
 
 package org.springframework.http.server.reactive;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
@@ -26,6 +28,7 @@ import reactor.core.publisher.Mono;
 import rx.Observable;
 
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.NettyDataBuffer;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
@@ -38,10 +41,9 @@ import org.springframework.util.Assert;
  */
 public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 
-	private final HttpServerResponse<?> response;
+	private final HttpServerResponse<ByteBuf> response;
 
-
-	public RxNettyServerHttpResponse(HttpServerResponse<?> response) {
+	public RxNettyServerHttpResponse(HttpServerResponse<ByteBuf> response) {
 		Assert.notNull("'response', response must not be null.");
 		this.response = response;
 	}
@@ -58,15 +60,19 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 
 	@Override
 	protected Mono<Void> setBodyInternal(Publisher<DataBuffer> publisher) {
-		Observable<byte[]> content = RxJava1ObservableConverter.from(publisher).map(this::toBytes);
-		Observable<Void> completion = this.response.writeBytes(content);
+		Observable<ByteBuf> content =
+				RxJava1ObservableConverter.from(publisher).map(this::toByteBuf);
+		Observable<Void> completion = this.response.write(content);
 		return RxJava1ObservableConverter.from(completion).after();
 	}
 
-	private byte[] toBytes(DataBuffer buffer) {
-		byte[] bytes = new byte[buffer.readableByteCount()];
-		buffer.read(bytes);
-		return bytes;
+	private ByteBuf toByteBuf(DataBuffer buffer) {
+		if (buffer instanceof NettyDataBuffer) {
+			return ((NettyDataBuffer) buffer).getNativeBuffer();
+		}
+		else {
+			return Unpooled.wrappedBuffer(buffer.asByteBuffer());
+		}
 	}
 
 	@Override

@@ -34,18 +34,16 @@ public class RxNettyHttpHandlerAdapter implements RequestHandler<ByteBuf, ByteBu
 
 	private final HttpHandler httpHandler;
 
-	private final NettyDataBufferAllocator allocator;
-
-	public RxNettyHttpHandlerAdapter(HttpHandler httpHandler,
-			NettyDataBufferAllocator allocator) {
+	public RxNettyHttpHandlerAdapter(HttpHandler httpHandler) {
 		Assert.notNull(httpHandler, "'httpHandler' is required");
-		Assert.notNull(allocator, "'allocator' must not be null");
 		this.httpHandler = httpHandler;
-		this.allocator = allocator;
 	}
 
 	@Override
 	public Observable<Void> handle(HttpServerRequest<ByteBuf> request, HttpServerResponse<ByteBuf> response) {
+		NettyDataBufferAllocator allocator =
+				new NettyDataBufferAllocator(response.unsafeNettyChannel().alloc());
+
 		RxNettyServerHttpRequest adaptedRequest =
 				new RxNettyServerHttpRequest(request, allocator);
 		RxNettyServerHttpResponse adaptedResponse = new RxNettyServerHttpResponse(response);
