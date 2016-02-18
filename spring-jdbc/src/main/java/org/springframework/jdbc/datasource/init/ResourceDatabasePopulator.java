@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -80,8 +80,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	/**
 	 * Construct a new {@code ResourceDatabasePopulator} with default settings
 	 * for the supplied scripts.
-	 * @param scripts the scripts to execute to initialize or clean up the database;
-	 * never {@code null}
+	 * @param scripts the scripts to execute to initialize or clean up the database
+	 * (never {@code null})
 	 * @since 4.0.3
 	 */
 	public ResourceDatabasePopulator(Resource... scripts) {
@@ -97,21 +97,23 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * statement can be ignored
 	 * @param sqlScriptEncoding the encoding for the supplied SQL scripts; may
 	 * be {@code null} or <em>empty</em> to indicate platform encoding
-	 * @param scripts the scripts to execute to initialize or clean up the database;
-	 * never {@code null}
+	 * @param scripts the scripts to execute to initialize or clean up the database
+	 * (never {@code null})
 	 * @since 4.0.3
 	 */
-	public ResourceDatabasePopulator(boolean continueOnError, boolean ignoreFailedDrops, String sqlScriptEncoding,
-			Resource... scripts) {
+	public ResourceDatabasePopulator(boolean continueOnError, boolean ignoreFailedDrops,
+			String sqlScriptEncoding, Resource... scripts) {
+
 		this(scripts);
 		this.continueOnError = continueOnError;
 		this.ignoreFailedDrops = ignoreFailedDrops;
 		setSqlScriptEncoding(sqlScriptEncoding);
 	}
 
+
 	/**
 	 * Add a script to execute to initialize or clean up the database.
-	 * @param script the path to an SQL script; never {@code null}
+	 * @param script the path to an SQL script (never {@code null})
 	 */
 	public void addScript(Resource script) {
 		Assert.notNull(script, "Script must not be null");
@@ -120,7 +122,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 
 	/**
 	 * Add multiple scripts to execute to initialize or clean up the database.
-	 * @param scripts the scripts to execute; never {@code null}
+	 * @param scripts the scripts to execute (never {@code null})
 	 */
 	public void addScripts(Resource... scripts) {
 		assertContentsOfScriptArray(scripts);
@@ -130,7 +132,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	/**
 	 * Set the scripts to execute to initialize or clean up the database,
 	 * replacing any previously added scripts.
-	 * @param scripts the scripts to execute; never {@code null}
+	 * @param scripts the scripts to execute (never {@code null})
 	 */
 	public void setScripts(Resource... scripts) {
 		assertContentsOfScriptArray(scripts);
@@ -173,8 +175,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * Set the start delimiter that identifies block comments within the SQL
 	 * scripts.
 	 * <p>Defaults to {@code "/*"}.
-	 * @param blockCommentStartDelimiter the start delimiter for block comments;
-	 * never {@code null} or empty
+	 * @param blockCommentStartDelimiter the start delimiter for block comments
+	 * (never {@code null} or empty)
 	 * @since 4.0.3
 	 * @see #setBlockCommentEndDelimiter
 	 */
@@ -187,8 +189,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * Set the end delimiter that identifies block comments within the SQL
 	 * scripts.
 	 * <p>Defaults to <code>"*&#47;"</code>.
-	 * @param blockCommentEndDelimiter the end delimiter for block comments;
-	 * never {@code null} or empty
+	 * @param blockCommentEndDelimiter the end delimiter for block comments
+	 * (never {@code null} or empty)
 	 * @since 4.0.3
 	 * @see #setBlockCommentStartDelimiter
 	 */
@@ -227,8 +229,8 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 		Assert.notNull(connection, "Connection must not be null");
 		for (Resource script : getScripts()) {
 			ScriptUtils.executeSqlScript(connection, encodeScript(script), this.continueOnError,
-				this.ignoreFailedDrops, this.commentPrefix, this.separator, this.blockCommentStartDelimiter,
-				this.blockCommentEndDelimiter);
+					this.ignoreFailedDrops, this.commentPrefix, this.separator, this.blockCommentStartDelimiter,
+					this.blockCommentEndDelimiter);
 		}
 	}
 
@@ -236,7 +238,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * Execute this {@code ResourceDatabasePopulator} against the given
 	 * {@link DataSource}.
 	 * <p>Delegates to {@link DatabasePopulatorUtils#execute}.
-	 * @param dataSource the {@code DataSource} to execute against; never {@code null}
+	 * @param dataSource the {@code DataSource} to execute against (never {@code null})
 	 * @throws ScriptException if an error occurs
 	 * @since 4.1
 	 * @see #populate(Connection)
@@ -254,7 +256,7 @@ public class ResourceDatabasePopulator implements DatabasePopulator {
 	 * {@link EncodedResource} is not a sub-type of {@link Resource}. Thus we
 	 * always need to wrap each script resource in an {@code EncodedResource}
 	 * using the configured {@linkplain #setSqlScriptEncoding encoding}.
-	 * @param script the script to wrap; never {@code null}
+	 * @param script the script to wrap (never {@code null})
 	 */
 	private EncodedResource encodeScript(Resource script) {
 		Assert.notNull(script, "Script must not be null");
