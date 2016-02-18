@@ -4302,7 +4302,6 @@ responsible for this, along with conditional headers such as `'Last-Modified'` a
 The `'Cache-Control'` HTTP response header advises private caches (e.g. browsers) and
 public caches (e.g. proxies) on how they can cache HTTP responses for further reuse.
 
-mvc-config-static-resources
 An http://en.wikipedia.org/wiki/HTTP_ETag[ETag] (entity tag) is an HTTP response header
 returned by an HTTP/1.1 compliant web server used to determine change in content at a
 given URL. It can be considered to be the more sophisticated successor to the
@@ -4473,14 +4472,15 @@ ETags, more about that later).The filter caches the content of the rendered JSP 
 other content), generates an MD5 hash over that, and returns that as an ETag header in
 the response. The next time a client sends a request for the same resource, it uses that
 hash as the `If-None-Match` value. The filter detects this, renders the view again, and
-compares the two hashes. If they are equal, a `304` is returned. This filter will not
-save processing power, as the view is still rendered. The only thing it saves is
-bandwidth, as the rendered response is not sent back over the wire.
+compares the two hashes. If they are equal, a `304` is returned.
 
 Note that this strategy saves network bandwidth but not CPU, as the full response must be
 computed for each request. Other strategies at the controller level (described above) can
 save network bandwidth and avoid computation.
-mvc-config-static-resources
+
+This filter has a `writeWeakETag` parameter that configures the filter to write Weak ETags,
+like this: `W/"02a2d595e6ed9a0b24f027f2b63b134d6"`, as defined in
+https://tools.ietf.org/html/rfc7232#section-2.3[RFC 7232 Section 2.3].
 
 You configure the `ShallowEtagHeaderFilter` in `web.xml`:
 
@@ -4490,6 +4490,12 @@ You configure the `ShallowEtagHeaderFilter` in `web.xml`:
 	<filter>
 		<filter-name>etagFilter</filter-name>
 		<filter-class>org.springframework.web.filter.ShallowEtagHeaderFilter</filter-class>
+		<!-- Optional parameter that configures the filter to write weak ETags
+		<init-param>
+        	<param-name>writeWeakETag</param-name>
+        	<param-value>true</param-value>
+		</init-param>
+		-->
 	</filter>
 
 	<filter-mapping>
