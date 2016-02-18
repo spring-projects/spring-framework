@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.portlet.context;
 
 import java.io.Serializable;
 import javax.portlet.PortletRequest;
+import javax.portlet.PortletSession;
 
 import org.junit.Test;
 
@@ -37,12 +38,12 @@ public class PortletRequestAttributesTests {
 
 	private static final String KEY = "ThatThingThatThing";
 
-
 	@SuppressWarnings("serial")
-	private static final Serializable VALUE = new Serializable() { };
+	private static final Serializable VALUE = new Serializable() {
+	};
 
 
-	@Test(expected=IllegalArgumentException.class)
+	@Test(expected = IllegalArgumentException.class)
 	public void testCtorRejectsNullArg() throws Exception {
 		new PortletRequestAttributes(null);
 	}
@@ -85,53 +86,51 @@ public class PortletRequestAttributesTests {
 	@Test
 	public void testSetSessionScopedAttribute() throws Exception {
 		MockPortletSession session = new MockPortletSession();
-		session.setAttribute(KEY, VALUE);
+		session.setAttribute(KEY, VALUE, PortletSession.PORTLET_SCOPE);
 		MockPortletRequest request = new MockPortletRequest();
 		request.setSession(session);
 		PortletRequestAttributes attrs = new PortletRequestAttributes(request);
 		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_SESSION);
-		Object value = session.getAttribute(KEY);
-		assertSame(VALUE, value);
+		assertSame(VALUE, session.getAttribute(KEY, PortletSession.PORTLET_SCOPE));
 	}
 
 	@Test
 	public void testSetSessionScopedAttributeAfterCompletion() throws Exception {
 		MockPortletSession session = new MockPortletSession();
-		session.setAttribute(KEY, VALUE);
+		session.setAttribute(KEY, VALUE, PortletSession.PORTLET_SCOPE);
 		MockPortletRequest request = new MockPortletRequest();
 		request.setSession(session);
 		PortletRequestAttributes attrs = new PortletRequestAttributes(request);
+		assertSame(VALUE, attrs.getAttribute(KEY, RequestAttributes.SCOPE_SESSION));
 		attrs.requestCompleted();
 		request.close();
 		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_SESSION);
-		Object value = session.getAttribute(KEY);
-		assertSame(VALUE, value);
+		assertSame(VALUE, session.getAttribute(KEY, PortletSession.PORTLET_SCOPE));
 	}
 
 	@Test
 	public void testSetGlobalSessionScopedAttribute() throws Exception {
 		MockPortletSession session = new MockPortletSession();
-		session.setAttribute(KEY, VALUE);
+		session.setAttribute(KEY, VALUE, PortletSession.APPLICATION_SCOPE);
 		MockPortletRequest request = new MockPortletRequest();
 		request.setSession(session);
 		PortletRequestAttributes attrs = new PortletRequestAttributes(request);
 		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_GLOBAL_SESSION);
-		Object value = session.getAttribute(KEY);
-		assertSame(VALUE, value);
+		assertSame(VALUE, session.getAttribute(KEY, PortletSession.APPLICATION_SCOPE));
 	}
 
 	@Test
 	public void testSetGlobalSessionScopedAttributeAfterCompletion() throws Exception {
 		MockPortletSession session = new MockPortletSession();
-		session.setAttribute(KEY, VALUE);
+		session.setAttribute(KEY, VALUE, PortletSession.APPLICATION_SCOPE);
 		MockPortletRequest request = new MockPortletRequest();
 		request.setSession(session);
 		PortletRequestAttributes attrs = new PortletRequestAttributes(request);
+		assertSame(VALUE, attrs.getAttribute(KEY, RequestAttributes.SCOPE_GLOBAL_SESSION));
 		attrs.requestCompleted();
 		request.close();
 		attrs.setAttribute(KEY, VALUE, RequestAttributes.SCOPE_GLOBAL_SESSION);
-		Object value = session.getAttribute(KEY);
-		assertSame(VALUE, value);
+		assertSame(VALUE, session.getAttribute(KEY, PortletSession.APPLICATION_SCOPE));
 	}
 
 	@Test
