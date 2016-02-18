@@ -253,13 +253,13 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 
 	@Override
 	public <T> Set<ConstraintViolation<T>> validate(T object, Class<?>... groups) {
-		Assert.notNull(this.targetValidator, "No target Validator set");
+		Assert.state(this.targetValidator != null, "No target Validator set");
 		return this.targetValidator.validate(object, groups);
 	}
 
 	@Override
 	public <T> Set<ConstraintViolation<T>> validateProperty(T object, String propertyName, Class<?>... groups) {
-		Assert.notNull(this.targetValidator, "No target Validator set");
+		Assert.state(this.targetValidator != null, "No target Validator set");
 		return this.targetValidator.validateProperty(object, propertyName, groups);
 	}
 
@@ -267,20 +267,21 @@ public class SpringValidatorAdapter implements SmartValidator, javax.validation.
 	public <T> Set<ConstraintViolation<T>> validateValue(
 			Class<T> beanType, String propertyName, Object value, Class<?>... groups) {
 
-		Assert.notNull(this.targetValidator, "No target Validator set");
+		Assert.state(this.targetValidator != null, "No target Validator set");
 		return this.targetValidator.validateValue(beanType, propertyName, value, groups);
 	}
 
 	@Override
 	public BeanDescriptor getConstraintsForClass(Class<?> clazz) {
-		Assert.notNull(this.targetValidator, "No target Validator set");
+		Assert.state(this.targetValidator != null, "No target Validator set");
 		return this.targetValidator.getConstraintsForClass(clazz);
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public <T> T unwrap(Class<T> type) {
-		Assert.notNull(this.targetValidator, "No target Validator set");
-		return this.targetValidator.unwrap(type);
+		Assert.state(this.targetValidator != null, "No target Validator set");
+		return (type != null ? this.targetValidator.unwrap(type) : (T) this.targetValidator);
 	}
 
 
