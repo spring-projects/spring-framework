@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ public class OkHttpClientHttpRequestFactory
 	 * @param client the client to use
 	 */
 	public OkHttpClientHttpRequestFactory(OkHttpClient client) {
-		Assert.notNull(client, "'client' must not be null");
+		Assert.notNull(client, "OkHttpClient must not be null");
 		this.client = client;
 		this.defaultClient = false;
 	}
