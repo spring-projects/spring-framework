@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -364,8 +364,20 @@ class ConfigurationClassEnhancer {
 					if (alreadyInCreation) {
 						beanFactory.setCurrentlyInCreation(beanName, false);
 					}
-					Object beanInstance = (!ObjectUtils.isEmpty(beanMethodArgs) ?
-							beanFactory.getBean(beanName, beanMethodArgs) : beanFactory.getBean(beanName));
+					boolean useArgs = !ObjectUtils.isEmpty(beanMethodArgs);
+					if (useArgs && beanFactory.isSingleton(beanName)) {
+						// Stubbed null arguments just for reference purposes,
+						// expecting them to be autowired for regular singleton references?
+						// A safe assumption since @Bean singleton arguments cannot be optional...
+						for (Object arg : beanMethodArgs) {
+							if (arg == null) {
+								useArgs = false;
+								break;
+							}
+						}
+					}
+					Object beanInstance = (useArgs ? beanFactory.getBean(beanName, beanMethodArgs) :
+							beanFactory.getBean(beanName));
 					if (beanInstance != null && !ClassUtils.isAssignableValue(beanMethod.getReturnType(), beanInstance)) {
 						String msg = String.format("@Bean method %s.%s called as a bean reference " +
 									"for type [%s] but overridden by non-compatible bean instance of type [%s].",
