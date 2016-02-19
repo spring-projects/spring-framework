@@ -152,6 +152,14 @@
 				]]></xsd:documentation>
 						</xsd:annotation>
 					</xsd:attribute>
+					<xsd:attribute name="trim-values">
+						<xsd:annotation>
+							<xsd:documentation><![CDATA[
+	Whether to trim resolved values before applying them, removing superfluous
+	whitespace (in particular tab characters) from the beginning and end.
+				]]></xsd:documentation>
+						</xsd:annotation>
+					</xsd:attribute>
 					<xsd:attribute name="null-value">
 						<xsd:annotation>
 							<xsd:documentation><![CDATA[
