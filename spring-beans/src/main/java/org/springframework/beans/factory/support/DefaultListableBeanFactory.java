@@ -113,9 +113,6 @@ import org.springframework.util.StringUtils;
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory
 		implements ConfigurableListableBeanFactory, BeanDefinitionRegistry, Serializable {
 
-	private static final Object NOT_MULTIPLE_BEANS = new Object();
-
-
 	private static Class<?> javaUtilOptionalClass = null;
 
 	private static Class<?> javaxInjectProviderClass = null;
@@ -1041,7 +1038,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 
 		Object multipleBeans = resolveMultipleBeans(descriptor, beanName, autowiredBeanNames, typeConverter);
-		if (multipleBeans != null && multipleBeans != NOT_MULTIPLE_BEANS) {
+		if (multipleBeans != null) {
 			return multipleBeans;
 		}
 
@@ -1055,7 +1052,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (matchingBeans.size() > 1) {
 			String primaryBeanName = determineAutowireCandidate(matchingBeans, descriptor);
 			if (primaryBeanName == null) {
-				if (multipleBeans == NOT_MULTIPLE_BEANS || descriptor.isRequired()) {
+				if (!indicatesMultipleBeans(type) || descriptor.isRequired()) {
 					return descriptor.resolveNotUnique(type, matchingBeans);
 				}
 				else {
@@ -1142,8 +1139,13 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			return matchingBeans;
 		}
 		else {
-			return NOT_MULTIPLE_BEANS;
+			return null;
 		}
+	}
+
+	private boolean indicatesMultipleBeans(Class<?> type) {
+		return (type.isArray() || (type.isInterface() &&
+				(Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type))));
 	}
 
 	private Comparator<Object> adaptDependencyComparator(Map<String, Object> matchingBeans) {
@@ -1199,7 +1201,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 				result.put(candidateName, getBean(candidateName));
 			}
 		}
-		if (result.isEmpty() && !Collection.class.isAssignableFrom(requiredType) && !Map.class.isAssignableFrom(requiredType)) {
+		if (result.isEmpty() && !indicatesMultipleBeans(requiredType)) {
 			// Consider fallback matches if the first pass failed to find anything...
 			DependencyDescriptor fallbackDescriptor = descriptor.forFallbackMatch();
 			for (String candidateName : candidateNames) {
