@@ -1047,7 +1047,26 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	}
 
 	@Test
-	public void testSmartObjectFactoryInjection() {
+	public void testSmartObjectFactoryInjectionWithPrototype() {
+		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
+		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
+		bpp.setBeanFactory(bf);
+		bf.addBeanPostProcessor(bpp);
+		bf.registerBeanDefinition("annotatedBean", new RootBeanDefinition(SmartObjectFactoryInjectionBean.class));
+		RootBeanDefinition tbd = new RootBeanDefinition(TestBean.class);
+		tbd.setScope(RootBeanDefinition.SCOPE_PROTOTYPE);
+		bf.registerBeanDefinition("testBean", tbd);
+
+		SmartObjectFactoryInjectionBean bean = (SmartObjectFactoryInjectionBean) bf.getBean("annotatedBean");
+		assertEquals(bf.getBean("testBean"), bean.getTestBean());
+		assertEquals(bf.getBean("testBean", "myName"), bean.getTestBean("myName"));
+		assertEquals(bf.getBean("testBean"), bean.getOptionalTestBean());
+		assertEquals(bf.getBean("testBean"), bean.getUniqueTestBean());
+		bf.destroySingletons();
+	}
+
+	@Test
+	public void testSmartObjectFactoryInjectionWithSingletonTarget() {
 		DefaultListableBeanFactory bf = new DefaultListableBeanFactory();
 		AutowiredAnnotationBeanPostProcessor bpp = new AutowiredAnnotationBeanPostProcessor();
 		bpp.setBeanFactory(bf);
@@ -2555,6 +2574,10 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		public TestBean getTestBean() {
 			return this.testBeanFactory.getObject();
+		}
+
+		public TestBean getTestBean(String name) {
+			return this.testBeanFactory.getObject(name);
 		}
 
 		public TestBean getOptionalTestBean() {

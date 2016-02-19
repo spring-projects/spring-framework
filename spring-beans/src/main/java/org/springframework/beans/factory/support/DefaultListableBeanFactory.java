@@ -1052,7 +1052,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		if (matchingBeans.size() > 1) {
 			String primaryBeanName = determineAutowireCandidate(matchingBeans, descriptor);
 			if (primaryBeanName == null) {
-				if (!indicatesMultipleBeans(type) || descriptor.isRequired()) {
+				if (descriptor.isRequired() || !indicatesMultipleBeans(type)) {
 					return descriptor.resolveNotUnique(type, matchingBeans);
 				}
 				else {
@@ -1198,7 +1198,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 		}
 		for (String candidateName : candidateNames) {
 			if (!isSelfReference(beanName, candidateName) && isAutowireCandidate(candidateName, descriptor)) {
-				result.put(candidateName, getBean(candidateName));
+				result.put(candidateName, descriptor.resolveCandidate(candidateName, this));
 			}
 		}
 		if (result.isEmpty() && !indicatesMultipleBeans(requiredType)) {
@@ -1206,14 +1206,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			DependencyDescriptor fallbackDescriptor = descriptor.forFallbackMatch();
 			for (String candidateName : candidateNames) {
 				if (!isSelfReference(beanName, candidateName) && isAutowireCandidate(candidateName, fallbackDescriptor)) {
-					result.put(candidateName, getBean(candidateName));
+					result.put(candidateName, descriptor.resolveCandidate(candidateName, this));
 				}
 			}
 			if (result.isEmpty()) {
 				// Consider self references before as a final pass
 				for (String candidateName : candidateNames) {
 					if (isSelfReference(beanName, candidateName) && isAutowireCandidate(candidateName, fallbackDescriptor)) {
-						result.put(candidateName, getBean(candidateName));
+						result.put(candidateName, descriptor.resolveCandidate(candidateName, this));
 					}
 				}
 			}
@@ -1462,11 +1462,16 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	@UsesJava8
 	private class OptionalDependencyFactory {
 
-		public Object createOptionalDependency(DependencyDescriptor descriptor, String beanName) {
+		public Object createOptionalDependency(DependencyDescriptor descriptor, String beanName, final Object... args) {
 			DependencyDescriptor descriptorToUse = new DependencyDescriptor(descriptor) {
 				@Override
 				public boolean isRequired() {
 					return false;
+				}
+				@Override
+				public Object resolveCandidate(String beanName, BeanFactory beanFactory) {
+					return (!ObjectUtils.isEmpty(args) ? beanFactory.getBean(beanName, args) :
+							super.resolveCandidate(beanName, beanFactory));
 				}
 			};
 			descriptorToUse.increaseNestingLevel();
@@ -1500,6 +1505,22 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			}
 			else {
 				return doResolveDependency(this.descriptor, this.beanName, null, null);
+			}
+		}
+
+		@Override
+		public Object getObject(final Object... args) throws BeansException {
+			if (this.optional) {
+				return new OptionalDependencyFactory().createOptionalDependency(this.descriptor, this.beanName, args);
+			}
+			else {
+				DependencyDescriptor descriptorToUse = new DependencyDescriptor(descriptor) {
+					@Override
+					public Object resolveCandidate(String beanName, BeanFactory beanFactory) {
+						return beanFactory.getBean(beanName, args);
+					}
+				};
+				return doResolveDependency(descriptorToUse, this.beanName, null, null);
 			}
 		}
 

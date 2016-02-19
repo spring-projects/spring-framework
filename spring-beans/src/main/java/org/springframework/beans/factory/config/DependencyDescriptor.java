@@ -26,6 +26,7 @@ import java.lang.reflect.Type;
 import java.util.Map;
 
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.GenericTypeResolver;
@@ -198,6 +199,20 @@ public class DependencyDescriptor implements Serializable {
 	 */
 	public Object resolveNotUnique(Class<?> type, Map<String, Object> matchingBeans) throws BeansException {
 		throw new NoUniqueBeanDefinitionException(type, matchingBeans.keySet());
+	}
+
+	/**
+	 * Resolve the specified bean name, as a candidate result of the matching
+	 * algorithm for this dependency, to a bean instance from the given factory.
+	 * <p>The default implementation calls {@link BeanFactory#getBean(String)}.
+	 * Subclasses may provide additional arguments or other customizations.
+	 * @param beanName the bean name, as a candidate result for this dependency
+	 * @param beanFactory the associated factory
+	 * @return the bean instance (never {@code null})
+	 * @see BeanFactory#getBean(String)
+	 */
+	public Object resolveCandidate(String beanName, BeanFactory beanFactory) {
+		return beanFactory.getBean(beanName);
 	}
 
 
