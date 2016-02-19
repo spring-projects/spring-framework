@@ -24,7 +24,9 @@ import java.util.List;
 import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.cors.CorsUtils;
 
 /**
  * A logical disjunction (' || ') request condition that matches a request
@@ -101,12 +103,38 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 */
 	@Override
 	public RequestMethodsRequestCondition getMatchingCondition(HttpServletRequest request) {
-		RequestMethod requestMethod = getRequestMethod(request);
-		if (this.methods.isEmpty()) {
-			return (RequestMethod.OPTIONS.equals(requestMethod) ? null : this);
+
+		if (CorsUtils.isPreFlightRequest(request)) {
+			return matchPreFlight(request);
 		}
+
+		if (getMethods().isEmpty()) {
+			if (RequestMethod.OPTIONS.name().equals(request.getMethod())) {
+				return null; // No implicit match for OPTIONS (we handle it)
+			}
+			return this;
+		}
+
+		return matchRequestMethod(request.getMethod());
+	}
+
+	/**
+	 * On a pre-flight request match to the would-be, actual request.
+	 * Hence empty conditions is a match, otherwise try to match to the HTTP
+	 * method in the "Access-Control-Request-Method" header.
+	 */
+	private RequestMethodsRequestCondition matchPreFlight(HttpServletRequest request) {
+		if (getMethods().isEmpty()) {
+			return this;
+		}
+		String expectedMethod = request.getHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD);
+		return matchRequestMethod(expectedMethod);
+	}
+
+	private RequestMethodsRequestCondition matchRequestMethod(String httpMethod) {
+		RequestMethod requestMethod = getRequestMethod(httpMethod);
 		if (requestMethod != null) {
-			for (RequestMethod method : this.methods) {
+			for (RequestMethod method : getMethods()) {
 				if (method.equals(requestMethod)) {
 					return new RequestMethodsRequestCondition(method);
 				}
@@ -118,9 +146,9 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 		return null;
 	}
 
-	private RequestMethod getRequestMethod(HttpServletRequest request) {
+	private RequestMethod getRequestMethod(String httpMethod) {
 		try {
-			return RequestMethod.valueOf(request.getMethod());
+			return RequestMethod.valueOf(httpMethod);
 		}
 		catch (IllegalArgumentException ex) {
 			return null;

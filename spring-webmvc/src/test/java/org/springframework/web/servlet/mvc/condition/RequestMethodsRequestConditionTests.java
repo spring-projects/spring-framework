@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Test;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -29,10 +30,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.HEAD;
 import static org.springframework.web.bind.annotation.RequestMethod.OPTIONS;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
+import static org.springframework.web.bind.annotation.RequestMethod.PUT;
 
 /**
  * @author Arjen Poutsma
@@ -71,6 +74,17 @@ public class RequestMethodsRequestConditionTests {
 		HttpServletRequest request = new MockHttpServletRequest("PROPFIND", "");
 		assertNotNull(new RequestMethodsRequestCondition().getMatchingCondition(request));
 		assertNull(new RequestMethodsRequestCondition(GET, POST).getMatchingCondition(request));
+	}
+
+	@Test
+	public void getMatchingConditionWithCorsPreFlight() throws Exception {
+		MockHttpServletRequest request = new MockHttpServletRequest("OPTIONS", "");
+		request.addHeader("Origin", "http://example.com");
+		request.addHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "PUT");
+
+		assertNotNull(new RequestMethodsRequestCondition().getMatchingCondition(request));
+		assertNotNull(new RequestMethodsRequestCondition(PUT).getMatchingCondition(request));
+		assertNull(new RequestMethodsRequestCondition(DELETE).getMatchingCondition(request));
 	}
 
 	@Test

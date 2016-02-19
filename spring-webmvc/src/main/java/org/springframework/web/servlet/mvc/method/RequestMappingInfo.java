@@ -215,15 +215,7 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		ProducesRequestCondition produces = this.producesCondition.getMatchingCondition(request);
 
 		if (methods == null || params == null || headers == null || consumes == null || produces == null) {
-			if (CorsUtils.isPreFlightRequest(request)) {
-				methods = getAccessControlRequestMethodCondition(request);
-				if (methods == null || params == null) {
-					return null;
-				}
-			}
-			else {
-				return null;
-			}
+			return null;
 		}
 
 		PatternsRequestCondition patterns = this.patternsCondition.getMatchingCondition(request);
@@ -238,22 +230,6 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 
 		return new RequestMappingInfo(this.name, patterns,
 				methods, params, headers, consumes, produces, custom.getCondition());
-	}
-
-	/**
-	 * Return a matching RequestMethodsRequestCondition based on the expected
-	 * HTTP method specified in a CORS pre-flight request.
-	 */
-	private RequestMethodsRequestCondition getAccessControlRequestMethodCondition(HttpServletRequest request) {
-		String expectedMethod = request.getHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD);
-		if (StringUtils.hasText(expectedMethod)) {
-			for (RequestMethod method : getMethodsCondition().getMethods()) {
-				if (expectedMethod.equalsIgnoreCase(method.name())) {
-					return new RequestMethodsRequestCondition(method);
-				}
-			}
-		}
-		return null;
 	}
 
 	/**
