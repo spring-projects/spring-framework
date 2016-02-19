@@ -280,7 +280,10 @@ import org.springframework.core.annotation.AliasFor;
  * @author Sam Brannen
  * @since 2.5
  * @see RequestParam
+ * @see RequestAttribute
+ * @see PathVariable
  * @see ModelAttribute
+ * @see SessionAttribute
  * @see SessionAttributes
  * @see InitBinder
  * @see org.springframework.web.context.request.WebRequest
