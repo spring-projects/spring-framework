@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package org.springframework.core.io.support;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +32,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.io.UrlResource;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -132,7 +134,9 @@ public abstract class SpringFactoriesLoader {
 				throw new IllegalArgumentException(
 						"Class [" + instanceClassName + "] is not assignable to [" + factoryClass.getName() + "]");
 			}
-			return (T) instanceClass.newInstance();
+			Constructor<?> constructor = instanceClass.getDeclaredConstructor();
+			ReflectionUtils.makeAccessible(constructor);
+			return (T) constructor.newInstance();
 		}
 		catch (Throwable ex) {
 			throw new IllegalArgumentException("Cannot instantiate factory class: " + factoryClass.getName(), ex);
