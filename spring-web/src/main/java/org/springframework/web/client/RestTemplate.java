@@ -782,11 +782,34 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			}
 			else {
 				Object requestBody = this.requestEntity.getBody();
-				Class<?> requestType = requestBody.getClass();
+				Class<?> requestBodyClass = requestBody.getClass();
+				Type requestBodyType = (this.requestEntity instanceof RequestEntity ?
+						((RequestEntity<?>)this.requestEntity).getType() : requestBodyClass);
 				HttpHeaders requestHeaders = this.requestEntity.getHeaders();
 				MediaType requestContentType = requestHeaders.getContentType();
 				for (HttpMessageConverter<?> messageConverter : getMessageConverters()) {
-					if (messageConverter.canWrite(requestType, requestContentType)) {
+					if (messageConverter instanceof GenericHttpMessageConverter) {
+						GenericHttpMessageConverter<Object> genericMessageConverter = (GenericHttpMessageConverter<Object>) messageConverter;
+						if (genericMessageConverter.canWrite(requestBodyType, requestBodyClass, requestContentType)) {
+							if (!requestHeaders.isEmpty()) {
+								httpRequest.getHeaders().putAll(requestHeaders);
+							}
+							if (logger.isDebugEnabled()) {
+								if (requestContentType != null) {
+									logger.debug("Writing [" + requestBody + "] as \"" + requestContentType +
+											"\" using [" + messageConverter + "]");
+								}
+								else {
+									logger.debug("Writing [" + requestBody + "] using [" + messageConverter + "]");
+								}
+
+							}
+							genericMessageConverter.write(
+									requestBody, requestBodyType, requestContentType, httpRequest);
+							return;
+						}
+					}
+					else if (messageConverter.canWrite(requestBodyClass, requestContentType)) {
 						if (!requestHeaders.isEmpty()) {
 							httpRequest.getHeaders().putAll(requestHeaders);
 						}
@@ -806,7 +829,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 					}
 				}
 				String message = "Could not write request: no suitable HttpMessageConverter found for request type [" +
-						requestType.getName() + "]";
+						requestBodyClass.getName() + "]";
 				if (requestContentType != null) {
 					message += " and content type [" + requestContentType + "]";
 				}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.http;
 
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -54,6 +55,7 @@ import org.springframework.util.ObjectUtils;
  * </pre>
  *
  * @author Arjen Poutsma
+ * @author Sebastien Deleuze
  * @since 4.1
  * @see #getMethod()
  * @see #getUrl()
@@ -63,6 +65,8 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	private final HttpMethod method;
 
 	private final URI url;
+
+	private final Type type;
 
 
 	/**
@@ -81,7 +85,19 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param url the URL
 	 */
 	public RequestEntity(T body, HttpMethod method, URI url) {
-		this(body, null, method, url);
+		this(body, null, method, url, null);
+	}
+
+	/**
+	 * Constructor with method, URL, body and type but without headers.
+	 * @param body the body
+	 * @param method the method
+	 * @param url the URL
+	 * @param type the type used for generic type resolution
+	 * @since 4.3
+	 */
+	public RequestEntity(T body, HttpMethod method, URI url, Type type) {
+		this(body, null, method, url, type);
 	}
 
 	/**
@@ -91,7 +107,7 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param url the URL
 	 */
 	public RequestEntity(MultiValueMap<String, String> headers, HttpMethod method, URI url) {
-		this(null, headers, method, url);
+		this(null, headers, method, url, null);
 	}
 
 	/**
@@ -102,9 +118,23 @@ public class RequestEntity<T> extends HttpEntity<T> {
 	 * @param url the URL
 	 */
 	public RequestEntity(T body, MultiValueMap<String, String> headers, HttpMethod method, URI url) {
+		this(body, headers, method, url, null);
+	}
+
+	/**
+	 * Constructor with method, URL, headers, body and type.
+	 * @param body the body
+	 * @param headers the headers
+	 * @param method the method
+	 * @param url the URL
+	 * @param type the type used for generic type resolution
+	 * @since 4.3
+	 */
+	public RequestEntity(T body, MultiValueMap<String, String> headers, HttpMethod method, URI url, Type type) {
 		super(body, headers);
 		this.method = method;
 		this.url = url;
+		this.type = type;
 	}
 
 
@@ -124,6 +154,14 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		return this.url;
 	}
 
+	/**
+	 * Return the type of the request's body.
+	 * @return the request's body type
+	 * @since 4.3
+	 */
+	public Type getType() {
+		return (this.type == null && this.getBody() != null ? this.getBody().getClass() : this.type );
+	}
 
 	@Override
 	public boolean equals(Object other) {
@@ -327,6 +365,16 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		 * @return the built request entity
 		 */
 		<T> RequestEntity<T> body(T body);
+
+		/**
+		 * Set the body and type of the request entity and build the RequestEntity.
+		 * @param <T> the type of the body
+		 * @param body the body of the request entity
+		 * @param type the type of the body, useful for generic type resolution
+		 * @return the built request entity
+		 * @since 4.3
+		 */
+		<T> RequestEntity<T> body(T body, Type type);
 	}
 
 
@@ -395,6 +443,11 @@ public class RequestEntity<T> extends HttpEntity<T> {
 		@Override
 		public <T> RequestEntity<T> body(T body) {
 			return new RequestEntity<T>(body, this.headers, this.method, this.url);
+		}
+
+		@Override
+		public <T> RequestEntity<T> body(T body, Type type) {
+			return new RequestEntity<T>(body, this.headers, this.method, this.url, type);
 		}
 	}
 
