@@ -23,6 +23,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.springframework.core.io.support.PropertySourceFactory;
+
 /**
  * Annotation providing a convenient and declarative mechanism for adding a
  * {@link org.springframework.core.env.PropertySource PropertySource} to Spring's
@@ -133,6 +135,7 @@ import java.lang.annotation.Target;
  * javadocs for details.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @author Phillip Webb
  * @since 3.1
  * @see PropertySources
@@ -156,12 +159,6 @@ public @interface PropertySource {
 	String name() default "";
 
 	/**
-	 * A specific character encoding for the given resources, e.g. "UTF-8".
-	 * @since 4.3
-	 */
-	String encoding() default "";
-
-	/**
 	 * Indicate the resource location(s) of the properties file to be loaded.
 	 * For example, {@code "classpath:/com/myco/app.properties"} or
 	 * {@code "file:/path/to/file"}.
@@ -183,5 +180,20 @@ public @interface PropertySource {
 	 * @since 4.0
 	 */
 	boolean ignoreResourceNotFound() default false;
+
+	/**
+	 * A specific character encoding for the given resources, e.g. "UTF-8".
+	 * @since 4.3
+	 */
+	String encoding() default "";
+
+	/**
+	 * Specify a custom {@link PropertySourceFactory}, if any.
+	 * <p>By default, a default factory for standard resource files will be used.
+	 * @since 4.3
+	 * @see org.springframework.core.io.support.DefaultPropertySourceFactory
+	 * @see org.springframework.core.io.support.ResourcePropertySource
+	 */
+	Class<? extends PropertySourceFactory> factory() default PropertySourceFactory.class;
 
 }

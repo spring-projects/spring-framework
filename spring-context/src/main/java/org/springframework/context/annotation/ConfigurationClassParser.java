@@ -66,7 +66,9 @@ import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.DefaultPropertySourceFactory;
 import org.springframework.core.io.support.EncodedResource;
+import org.springframework.core.io.support.PropertySourceFactory;
 import org.springframework.core.io.support.ResourcePropertySource;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.MethodMetadata;
@@ -102,6 +104,8 @@ import org.springframework.util.StringUtils;
  * @see ConfigurationClassBeanDefinitionReader
  */
 class ConfigurationClassParser {
+
+	private static final PropertySourceFactory DEFAULT_PROPERTY_SOURCE_FACTORY = new DefaultPropertySourceFactory();
 
 	private static final Comparator<DeferredImportSelectorHolder> DEFERRED_IMPORT_COMPARATOR =
 			new Comparator<ConfigurationClassParser.DeferredImportSelectorHolder>() {
@@ -355,15 +359,26 @@ class ConfigurationClassParser {
 	 */
 	private void processPropertySource(AnnotationAttributes propertySource) throws IOException {
 		String name = propertySource.getString("name");
+		if (!StringUtils.hasLength(name)) {
+			name = null;
+		}
 		String encoding = propertySource.getString("encoding");
+		if (!StringUtils.hasLength(encoding)) {
+			encoding = null;
+		}
 		String[] locations = propertySource.getStringArray("value");
-		boolean ignoreResourceNotFound = propertySource.getBoolean("ignoreResourceNotFound");
 		Assert.isTrue(locations.length > 0, "At least one @PropertySource(value) location is required");
+		boolean ignoreResourceNotFound = propertySource.getBoolean("ignoreResourceNotFound");
+
+		Class<? extends PropertySourceFactory> factoryClass = propertySource.getClass("factory");
+		PropertySourceFactory factory = (factoryClass == PropertySourceFactory.class ?
+				DEFAULT_PROPERTY_SOURCE_FACTORY : BeanUtils.instantiate(factoryClass));
+
 		for (String location : locations) {
 			try {
 				String resolvedLocation = this.environment.resolveRequiredPlaceholders(location);
 				Resource resource = this.resourceLoader.getResource(resolvedLocation);
-				addPropertySource(createPropertySource(name, encoding, resource));
+				addPropertySource(factory.createPropertySource(name, new EncodedResource(resource, encoding)));
 			}
 			catch (IllegalArgumentException ex) {
 				// from resolveRequiredPlaceholders
@@ -380,34 +395,23 @@ class ConfigurationClassParser {
 		}
 	}
 
-	private ResourcePropertySource createPropertySource(String name, String encoding, Resource resource) throws IOException {
-		if (StringUtils.hasText(name)) {
-			return (StringUtils.hasText(encoding) ?
-					new ResourcePropertySource(name, new EncodedResource(resource, encoding)) :
-					new ResourcePropertySource(name, resource));
-		}
-		else {
-			return (StringUtils.hasText(encoding) ?
-					new ResourcePropertySource(new EncodedResource(resource, encoding)) :
-					new ResourcePropertySource(resource));
-		}
-	}
-
-	private void addPropertySource(ResourcePropertySource propertySource) {
+	private void addPropertySource(PropertySource<?> propertySource) {
 		String name = propertySource.getName();
 		MutablePropertySources propertySources = ((ConfigurableEnvironment) this.environment).getPropertySources();
 		if (propertySources.contains(name) && this.propertySourceNames.contains(name)) {
 			// We've already added a version, we need to extend it
 			PropertySource<?> existing = propertySources.get(name);
+			PropertySource<?> newSource = (propertySource instanceof ResourcePropertySource ?
+					((ResourcePropertySource) propertySource).withResourceName() : propertySource);
 			if (existing instanceof CompositePropertySource) {
-				((CompositePropertySource) existing).addFirstPropertySource(propertySource.withResourceName());
+				((CompositePropertySource) existing).addFirstPropertySource(newSource);
 			}
 			else {
 				if (existing instanceof ResourcePropertySource) {
 					existing = ((ResourcePropertySource) existing).withResourceName();
 				}
 				CompositePropertySource composite = new CompositePropertySource(name);
-				composite.addPropertySource(propertySource.withResourceName());
+				composite.addPropertySource(newSource);
 				composite.addPropertySource(existing);
 				propertySources.replace(name, composite);
 			}
