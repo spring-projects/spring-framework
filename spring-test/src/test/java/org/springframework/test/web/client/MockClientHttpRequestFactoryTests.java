@@ -52,10 +52,8 @@ public class MockClientHttpRequestFactoryTests {
 	@Test
 	public void createRequest() throws Exception {
 		URI uri = new URI("/foo");
-		ClientHttpRequest expected = (ClientHttpRequest) this.server.expect(anything());
 		ClientHttpRequest actual = this.factory.createRequest(uri, HttpMethod.GET);
 
-		assertSame(expected, actual);
 		assertEquals(uri, actual.getURI());
 		assertEquals(HttpMethod.GET, actual.getMethod());
 	}

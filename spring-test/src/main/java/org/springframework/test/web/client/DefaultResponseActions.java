@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,28 +20,26 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.mock.http.client.MockAsyncClientHttpRequest;
 import org.springframework.util.Assert;
 
 /**
- * A specialization of {@code MockClientHttpRequest} that matches the request
- * against a set of expectations, via {@link RequestMatcher} instances. The
- * expectations are checked when the request is executed. This class also uses a
- * {@link ResponseCreator} to create the response.
+ * Default implementation of {@code ResponseActions} that is also a composite
+ * {@code RequestMatcher}, invoking all request matchers it contains, as well as
+ * a {@code ResponseCreator} delegating to the response creator it contains.
  *
- * @author Craig Walls
  * @author Rossen Stoyanchev
- * @since 3.2
+ * @since 4.3
  */
-class RequestMatcherClientHttpRequest extends MockAsyncClientHttpRequest implements ResponseActions {
+class DefaultResponseActions implements ResponseActions, RequestMatcher, ResponseCreator {
 
 	private final List<RequestMatcher> requestMatchers = new LinkedList<RequestMatcher>();
 
 	private ResponseCreator responseCreator;
 
 
-	public RequestMatcherClientHttpRequest(RequestMatcher requestMatcher) {
+	public DefaultResponseActions(RequestMatcher requestMatcher) {
 		Assert.notNull(requestMatcher, "RequestMatcher is required");
 		this.requestMatchers.add(requestMatcher);
 	}
@@ -61,21 +59,18 @@ class RequestMatcherClientHttpRequest extends MockAsyncClientHttpRequest impleme
 	}
 
 	@Override
-	public ClientHttpResponse executeInternal() throws IOException {
-		if (this.requestMatchers.isEmpty()) {
-			throw new AssertionError("No request expectations to execute");
+	public void match(ClientHttpRequest request) throws IOException {
+		for (RequestMatcher matcher : this.requestMatchers) {
+			matcher.match(request);
 		}
+	}
 
+	@Override
+	public ClientHttpResponse createResponse(ClientHttpRequest request) throws IOException {
 		if (this.responseCreator == null) {
-			throw new AssertionError("No ResponseCreator was set up. Add it after request expectations, " +
-					"e.g. MockRestServiceServer.expect(requestTo(\"/foo\")).andRespond(withSuccess())");
+			throw new IllegalStateException("createResponse called before ResponseCreator was set.");
 		}
-
-		for (RequestMatcher requestMatcher : this.requestMatchers) {
-			requestMatcher.match(this);
-		}
-		setResponse(this.responseCreator.createResponse(this));
-		return super.executeInternal();
+		return this.responseCreator.createResponse(request);
 	}
 
 }
