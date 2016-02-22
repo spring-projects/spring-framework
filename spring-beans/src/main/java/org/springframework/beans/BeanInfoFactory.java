@@ -24,7 +24,7 @@ import java.beans.IntrospectionException;
  * Can be used to plug in custom bean property resolution strategies (e.g. for other
  * languages on the JVM) or more efficient {@link BeanInfo} retrieval algorithms.
  *
- * <p>BeanInfoFactories are are instantiated by the {@link CachedIntrospectionResults},
+ * <p>BeanInfoFactories are all instantiated by the {@link CachedIntrospectionResults},
  * by using the {@link org.springframework.core.io.support.SpringFactoriesLoader}
  * utility class.
  *
