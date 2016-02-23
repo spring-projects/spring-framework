@@ -34,7 +34,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  * Unit tests for {@link AbstractRequestExpectationManager}.
  * @author Rossen Stoyanchev
  */
-public class OrderedRequestExpectationManagerTests {
+public class SimpleRequestExpectationManagerTests {
 
 	private SimpleRequestExpectationManager manager = new SimpleRequestExpectationManager();
 
@@ -45,7 +45,8 @@ public class OrderedRequestExpectationManagerTests {
 			this.manager.validateRequest(request(HttpMethod.GET, "/foo"));
 		}
 		catch (AssertionError error) {
-			assertEquals("No further requests expected: HTTP GET /foo", error.getMessage());
+			assertEquals("No further requests expected: HTTP GET /foo\n" +
+					"0 out of 0 were executed", error.getMessage());
 		}
 	}
 

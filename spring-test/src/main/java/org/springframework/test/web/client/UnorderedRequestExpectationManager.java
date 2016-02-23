@@ -25,9 +25,8 @@ import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 
 /**
- * {@code RequestExpectationManager} that tries to match actual requests to
- * expected requests regardless of the order in which expected requests were
- * declared.
+ * {@code RequestExpectationManager} that matches requests to expectations
+ * regardless of the order of declaration of expectations.
  *
  * @author Rossen Stoyanchev
  * @since 4.3
@@ -37,23 +36,20 @@ public class UnorderedRequestExpectationManager extends AbstractRequestExpectati
 	private final List<RequestExpectation> remainingExpectations = new LinkedList<RequestExpectation>();
 
 
-	public UnorderedRequestExpectationManager() {
-	}
-
-	public UnorderedRequestExpectationManager(List<RequestExpectation> expectations) {
-		super(expectations);
+	protected List<RequestExpectation> getRemainingExpectations() {
+		return this.remainingExpectations;
 	}
 
 
 	@Override
 	public ClientHttpResponse validateRequestInternal(ClientHttpRequest request) throws IOException {
 		if (getRequests().isEmpty()) {
-			this.remainingExpectations.addAll(getExpectations());
+			getRemainingExpectations().addAll(getExpectations());
 		}
 		for (RequestExpectation expectation : getExpectations()) {
 			try {
 				expectation.match(request);
-				this.remainingExpectations.remove(expectation);
+				getRemainingExpectations().remove(expectation);
 				return expectation.createResponse(request);
 			}
 			catch (AssertionError error) {

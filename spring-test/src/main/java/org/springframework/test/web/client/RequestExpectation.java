@@ -16,12 +16,16 @@
 package org.springframework.test.web.client;
 
 /**
- * A contract that combines {@code RequestMatcher} with {@code ResponseCreator}
- * to define an expected request and a response to use for it.
+ * An extension of {@code ResponseActions} that also implements
+ * {@code RequestMatcher} and {@code ResponseCreator}
+ *
+ * <p>{@code ResponseActions} is the API for defining expectations while
+ * {@code RequestExpectation} is the internal SPI to match those expectations
+ * to actual requests and to create responses.
  *
  * @author Rossen Stoyanchev
  * @since 4.3
  */
-public interface RequestExpectation extends RequestMatcher, ResponseCreator {
+public interface RequestExpectation extends ResponseActions, RequestMatcher, ResponseCreator {
 
 }

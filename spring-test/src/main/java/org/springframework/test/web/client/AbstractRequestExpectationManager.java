@@ -24,11 +24,11 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.Assert;
 
 /**
- * Base class for {@code RequestExpectationManager} implementations.
- * Creates and contains expectations and stores actual requests.
+ * Base class for {@code RequestExpectationManager} implementations responsible
+ * for storing expectations and requests.
  *
- * <p>Sub-classes are responsible for matching actual to expected requests and
- * for verifying remaining expectations at the end.
+ * <p>Sub-classes are responsible for matching requests to expectations and
+ * verifying there are no remaining expectations at the end.
  *
  * @author Rossen Stoyanchev
  * @since 4.3
@@ -40,28 +40,24 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 	private final List<ClientHttpRequest> requests = new LinkedList<ClientHttpRequest>();
 
 
-	public AbstractRequestExpectationManager() {
-	}
-
-	public AbstractRequestExpectationManager(List<RequestExpectation> expectations) {
-		this.expectations.addAll(expectations);
-	}
-
-
-	public List<RequestExpectation> getExpectations() {
+	protected List<RequestExpectation> getExpectations() {
 		return this.expectations;
 	}
 
-	public List<ClientHttpRequest> getRequests() {
+	protected List<ClientHttpRequest> getRequests() {
 		return this.requests;
 	}
 
 	@Override
 	public ResponseActions expectRequest(RequestMatcher requestMatcher) {
 		Assert.state(getRequests().isEmpty(), "Cannot add more expectations after actual requests are made.");
-		DefaultResponseActions expectation = new DefaultResponseActions(requestMatcher);
+		RequestExpectation expectation = createExpectation(requestMatcher);
 		getExpectations().add(expectation);
 		return expectation;
+	}
+
+	protected RequestExpectation createExpectation(RequestMatcher requestMatcher) {
+		return new DefaultRequestExpectation(requestMatcher);
 	}
 
 	@Override

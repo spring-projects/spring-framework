@@ -200,10 +200,19 @@ public class MockRestServiceServer {
 	public interface MockRestServiceServerBuilder {
 
 		/**
-		 * When this option is set, requests can be executed in any order, i.e.
-		 * not matching the order in which expected requests are declared.
+		 * Allow expected requests to be executed in any order not necessarily
+		 * matching the order of declaration. This is a shortcut for:<br>
+		 * {@code builder.expectationManager(new UnorderedRequestExpectationManager)}
 		 */
-		MockRestServiceServerBuilder ignoreExpectOrder();
+		MockRestServiceServerBuilder unordered();
+
+		/**
+		 * Configure a custom {@code RequestExpectationManager}.
+		 * <p>By default {@link SimpleRequestExpectationManager} is used. It is
+		 * also possible to switch to {@link UnorderedRequestExpectationManager}
+		 * by setting {@link #unordered()}.
+		 */
+		MockRestServiceServerBuilder expectationManager(RequestExpectationManager manager);
 
 		/**
 		 * Build the {@code MockRestServiceServer} and setting up the underlying
@@ -220,7 +229,7 @@ public class MockRestServiceServer {
 
 		private final AsyncRestTemplate asyncRestTemplate;
 
-		private boolean ignoreExpectOrder;
+		private RequestExpectationManager expectationManager = new SimpleRequestExpectationManager();
 
 
 		public DefaultBuilder(RestTemplate restTemplate) {
@@ -237,19 +246,21 @@ public class MockRestServiceServer {
 
 
 		@Override
-		public MockRestServiceServerBuilder ignoreExpectOrder() {
-			this.ignoreExpectOrder = true;
+		public MockRestServiceServerBuilder unordered() {
+			expectationManager(new UnorderedRequestExpectationManager());
 			return this;
 		}
 
+		@Override
+		public MockRestServiceServerBuilder expectationManager(RequestExpectationManager manager) {
+			Assert.notNull(manager, "'manager' is required.");
+			this.expectationManager = manager;
+			return this;
+		}
 
 		@Override
 		public MockRestServiceServer build() {
-
-			MockRestServiceServer server = (this.ignoreExpectOrder ?
-					new MockRestServiceServer(new UnorderedRequestExpectationManager()) :
-					new MockRestServiceServer());
-
+			MockRestServiceServer server = new MockRestServiceServer(this.expectationManager);
 			MockClientHttpRequestFactory factory = server.new MockClientHttpRequestFactory();
 			if (this.restTemplate != null) {
 				this.restTemplate.setRequestFactory(factory);
@@ -257,7 +268,6 @@ public class MockRestServiceServer {
 			if (this.asyncRestTemplate != null) {
 				this.asyncRestTemplate.setAsyncRequestFactory(factory);
 			}
-
 			return server;
 		}
 	}
@@ -265,7 +275,7 @@ public class MockRestServiceServer {
 
 	/**
 	 * Mock ClientHttpRequestFactory that creates requests by iterating
-	 * over the list of expected {@link DefaultResponseActions}'s.
+	 * over the list of expected {@link DefaultRequestExpectation}'s.
 	 */
 	private class MockClientHttpRequestFactory implements ClientHttpRequestFactory, AsyncClientHttpRequestFactory {
 

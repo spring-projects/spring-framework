@@ -24,8 +24,8 @@ import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 
 /**
- * {@code RequestExpectationManager} that expects requests to follow the order
- * in which expected requests were declared.
+ * Simple {@code RequestExpectationManager} that matches requests to expectations
+ * sequentially, i.e. in the order of declaration of expectations.
  *
  * @author Rossen Stoyanchev
  * @since 4.3
@@ -43,7 +43,8 @@ public class SimpleRequestExpectationManager extends AbstractRequestExpectationM
 		if (!this.iterator.hasNext()) {
 			HttpMethod method = request.getMethod();
 			URI uri = request.getURI();
-			throw new AssertionError("No further requests expected: HTTP " + method + " " + uri);
+			String firstLine = "No further requests expected: HTTP " + method + " " + uri + "\n";
+			throw new AssertionError(createErrorMessage(firstLine));
 		}
 		RequestExpectation expectation = this.iterator.next();
 		expectation.match(request);
@@ -55,11 +56,11 @@ public class SimpleRequestExpectationManager extends AbstractRequestExpectationM
 		if (getExpectations().isEmpty() || getExpectations().size() == getRequests().size()) {
 			return;
 		}
-		throw new AssertionError(getVerifyMessage());
+		throw new AssertionError(createErrorMessage("Further request(s) expected\n"));
 	}
 
-	private String getVerifyMessage() {
-		StringBuilder sb = new StringBuilder("Further request(s) expected\n");
+	private String createErrorMessage(String firstLine) {
+		StringBuilder sb = new StringBuilder(firstLine);
 		if (getRequests().size() > 0) {
 			sb.append("The following ");
 		}

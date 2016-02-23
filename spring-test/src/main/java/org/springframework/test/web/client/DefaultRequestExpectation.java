@@ -25,21 +25,20 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.Assert;
 
 /**
- * Default implementation of {@code ResponseActions} that is also a composite
- * {@code RequestMatcher}, invoking all request matchers it contains, as well as
- * a {@code ResponseCreator} delegating to the response creator it contains.
+ * Default implementation of {@code RequestExpectation} that simply delegates
+ * to the request matchers and the response creator it contains.
  *
  * @author Rossen Stoyanchev
  * @since 4.3
  */
-class DefaultResponseActions implements ResponseActions, RequestExpectation {
+public class DefaultRequestExpectation implements RequestExpectation {
 
 	private final List<RequestMatcher> requestMatchers = new LinkedList<RequestMatcher>();
 
 	private ResponseCreator responseCreator;
 
 
-	public DefaultResponseActions(RequestMatcher requestMatcher) {
+	public DefaultRequestExpectation(RequestMatcher requestMatcher) {
 		Assert.notNull(requestMatcher, "RequestMatcher is required");
 		this.requestMatchers.add(requestMatcher);
 	}
