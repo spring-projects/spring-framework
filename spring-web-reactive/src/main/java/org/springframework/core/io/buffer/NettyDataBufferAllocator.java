@@ -51,19 +51,19 @@ public class NettyDataBufferAllocator implements DataBufferAllocator {
 	@Override
 	public NettyDataBuffer allocateBuffer() {
 		ByteBuf byteBuf = this.byteBufAllocator.buffer();
-		return new NettyDataBuffer(byteBuf);
+		return new NettyDataBuffer(byteBuf, this);
 	}
 
 	@Override
 	public NettyDataBuffer allocateBuffer(int initialCapacity) {
 		ByteBuf byteBuf = this.byteBufAllocator.buffer(initialCapacity);
-		return new NettyDataBuffer(byteBuf);
+		return new NettyDataBuffer(byteBuf, this);
 	}
 
 	@Override
 	public NettyDataBuffer wrap(ByteBuffer byteBuffer) {
 		ByteBuf byteBuf = Unpooled.wrappedBuffer(byteBuffer);
-		return new NettyDataBuffer(byteBuf);
+		return new NettyDataBuffer(byteBuf, this);
 	}
 
 	/**
@@ -72,7 +72,7 @@ public class NettyDataBufferAllocator implements DataBufferAllocator {
 	 * @return the wrapped buffer
 	 */
 	public NettyDataBuffer wrap(ByteBuf byteBuf) {
-		return new NettyDataBuffer(byteBuf);
+		return new NettyDataBuffer(byteBuf, this);
 	}
 
 	@Override

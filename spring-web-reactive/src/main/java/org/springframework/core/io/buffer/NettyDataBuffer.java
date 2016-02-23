@@ -38,16 +38,25 @@ import org.springframework.util.ObjectUtils;
  */
 public class NettyDataBuffer implements DataBuffer {
 
+	private final NettyDataBufferAllocator allocator;
+
 	private ByteBuf byteBuf;
 
 	/**
 	 * Creates a new {@code NettyDataBuffer} based on the given {@code ByteBuff}.
 	 * @param byteBuf the buffer to base this buffer on
 	 */
-	public NettyDataBuffer(ByteBuf byteBuf) {
+	NettyDataBuffer(ByteBuf byteBuf, NettyDataBufferAllocator allocator) {
 		Assert.notNull(byteBuf, "'byteBuf' must not be null");
+		Assert.notNull(allocator, "'allocator' must not be null");
 
 		this.byteBuf = byteBuf;
+		this.allocator = allocator;
+	}
+
+	@Override
+	public NettyDataBufferAllocator allocator() {
+		return allocator;
 	}
 
 	/**

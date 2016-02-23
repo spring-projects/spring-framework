@@ -80,14 +80,14 @@ public class DefaultDataBufferAllocator implements DataBufferAllocator {
 	@Override
 	public DefaultDataBuffer allocateBuffer(int initialCapacity) {
 		return this.preferDirect ?
-				new DefaultDataBuffer(ByteBuffer.allocateDirect(initialCapacity)) :
-				new DefaultDataBuffer(ByteBuffer.allocate(initialCapacity));
+				new DefaultDataBuffer(ByteBuffer.allocateDirect(initialCapacity), this) :
+				new DefaultDataBuffer(ByteBuffer.allocate(initialCapacity), this);
 	}
 
 	@Override
 	public DefaultDataBuffer wrap(ByteBuffer byteBuffer) {
 		ByteBuffer sliced = byteBuffer.slice();
-		return new DefaultDataBuffer(sliced, 0, byteBuffer.remaining());
+		return new DefaultDataBuffer(sliced, 0, byteBuffer.remaining(), this);
 	}
 
 	@Override

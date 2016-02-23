@@ -36,6 +36,8 @@ import org.springframework.util.ObjectUtils;
  */
 public class DefaultDataBuffer implements DataBuffer {
 
+	private final DefaultDataBufferAllocator allocator;
+
 	private ByteBuffer byteBuffer;
 
 	private int readPosition;
@@ -48,20 +50,27 @@ public class DefaultDataBuffer implements DataBuffer {
 	 * ByteBuffer#position() position} of the given buffer.
 	 * @param byteBuffer the buffer to base this buffer on
 	 */
-	DefaultDataBuffer(ByteBuffer byteBuffer) {
-		this(byteBuffer, byteBuffer.position(), byteBuffer.position());
+	DefaultDataBuffer(ByteBuffer byteBuffer, DefaultDataBufferAllocator allocator) {
+		this(byteBuffer, byteBuffer.position(), byteBuffer.position(), allocator);
 	}
 
-	DefaultDataBuffer(ByteBuffer byteBuffer, int readPosition, int writePosition) {
+	DefaultDataBuffer(ByteBuffer byteBuffer, int readPosition, int writePosition, DefaultDataBufferAllocator allocator) {
 		Assert.notNull(byteBuffer, "'byteBuffer' must not be null");
 		Assert.isTrue(readPosition >= 0, "'readPosition' must be 0 or higher");
 		Assert.isTrue(writePosition >= 0, "'writePosition' must be 0 or higher");
 		Assert.isTrue(readPosition <= writePosition,
 				"'readPosition' must be smaller than or equal to 'writePosition'");
+		Assert.notNull(allocator, "'allocator' must not be null");
 
 		this.byteBuffer = byteBuffer;
 		this.readPosition = readPosition;
 		this.writePosition = writePosition;
+		this.allocator = allocator;
+	}
+
+	@Override
+	public DefaultDataBufferAllocator allocator() {
+		return this.allocator;
 	}
 
 	/**

@@ -28,6 +28,12 @@ import java.nio.ByteBuffer;
 public interface DataBuffer {
 
 	/**
+	 * Returns the {@link DataBufferAllocator} that created this buffer.
+	 * @return the creating buffer allocator
+	 */
+	DataBufferAllocator allocator();
+
+	/**
 	 * Gets the byte at the specified index.
 	 * @param index the index
 	 * @return the byte at the specified index
