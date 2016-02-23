@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import javax.servlet.AsyncContext;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 
 /**
  * Utility class for synchronizing between the reading and writing side of an
@@ -40,9 +42,11 @@ final class ServletAsyncContextSynchronizer {
 
 	private static final int COMPLETE = READ_COMPLETE | WRITE_COMPLETE;
 
+
 	private final AsyncContext asyncContext;
 
 	private final AtomicInteger complete = new AtomicInteger(NONE_COMPLETE);
+
 
 	/**
 	 * Creates a new {@code AsyncContextSynchronizer} based on the given context.
@@ -52,13 +56,21 @@ final class ServletAsyncContextSynchronizer {
 		this.asyncContext = asyncContext;
 	}
 
+	public ServletRequest getRequest() {
+		return this.asyncContext.getRequest();
+	}
+
+	public ServletResponse getResponse() {
+		return this.asyncContext.getResponse();
+	}
+
 	/**
 	 * Returns the input stream of this synchronizer.
 	 * @return the input stream
 	 * @throws IOException if an input or output exception occurred
 	 */
 	public ServletInputStream getInputStream() throws IOException {
-		return this.asyncContext.getRequest().getInputStream();
+		return getRequest().getInputStream();
 	}
 
 	/**
@@ -67,7 +79,7 @@ final class ServletAsyncContextSynchronizer {
 	 * @throws IOException if an input or output exception occurred
 	 */
 	public ServletOutputStream getOutputStream() throws IOException {
-		return this.asyncContext.getResponse().getOutputStream();
+		return getResponse().getOutputStream();
 	}
 
 	/**

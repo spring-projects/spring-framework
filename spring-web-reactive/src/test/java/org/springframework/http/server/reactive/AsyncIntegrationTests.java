@@ -19,11 +19,7 @@ package org.springframework.http.server.reactive;
 import java.net.URI;
 
 import org.hamcrest.Matchers;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.SchedulerGroup;
 import reactor.core.timer.Timer;
@@ -33,11 +29,6 @@ import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.reactive.boot.HttpServer;
-import org.springframework.http.server.reactive.boot.ReactorHttpServer;
-import org.springframework.http.server.reactive.boot.RxNettyHttpServer;
-import org.springframework.http.server.reactive.boot.UndertowHttpServer;
-import org.springframework.util.SocketUtils;
 import org.springframework.web.client.RestTemplate;
 
 import static org.junit.Assert.assertThat;
@@ -47,48 +38,15 @@ import static org.junit.Assert.assertThat;
  *
  * @author Stephane Maldini
  */
-@RunWith(Parameterized.class)
-public class AsyncIntegrationTests {
+public class AsyncIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	private final SchedulerGroup asyncGroup = SchedulerGroup.async();
 
 	private final DataBufferAllocator allocator = new DefaultDataBufferAllocator();
 
-	protected int port;
-
-	@Parameterized.Parameter(0)
-	public HttpServer server;
-
-	private AsyncHandler asyncHandler;
-
-	@Parameterized.Parameters(name = "server [{0}]")
-	public static Object[][] arguments() {
-		return new Object[][]{
-				//{new JettyHttpServer()},
-				{new RxNettyHttpServer()},
-				{new ReactorHttpServer()},
-				//{new TomcatHttpServer()},
-				{new UndertowHttpServer()}
-		};
-	}
-
-	@Before
-	public void setup() throws Exception {
-		this.port = SocketUtils.findAvailableTcpPort();
-		this.server.setPort(this.port);
-		this.server.setHandler(createHttpHandler());
-		this.server.afterPropertiesSet();
-		this.server.start();
-	}
-
-	protected HttpHandler createHttpHandler() {
-		this.asyncHandler = new AsyncHandler();
-		return this.asyncHandler;
-	}
-
-	@After
-	public void tearDown() throws Exception {
-		this.server.stop();
+	@Override
+	protected AsyncHandler createHttpHandler() {
+		return new AsyncHandler();
 	}
 
 	@SuppressWarnings("unchecked")
