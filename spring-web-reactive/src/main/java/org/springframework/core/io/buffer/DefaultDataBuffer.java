@@ -250,14 +250,15 @@ public class DefaultDataBuffer implements DataBuffer {
 		@Override
 		public int read() {
 			return readInternal(
-					buffer -> buffer.hasRemaining() ? buffer.get() & 0xFF : -1);
+					buffer -> readableByteCount() > 0 ? buffer.get() & 0xFF : -1);
 		}
 
 		@Override
 		public int read(byte[] bytes, int off, int len) throws IOException {
 			return readInternal(buffer -> {
-				if (buffer.hasRemaining()) {
-					int minLen = Math.min(len, buffer.remaining());
+				int count = readableByteCount();
+				if (count > 0) {
+					int minLen = Math.min(len, count);
 					buffer.get(bytes, off, minLen);
 					return minLen;
 				}
