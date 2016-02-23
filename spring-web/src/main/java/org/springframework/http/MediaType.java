@@ -279,6 +279,17 @@ public class MediaType extends MimeType implements Serializable {
 	}
 
 	/**
+	 * Copy-constructor that copies the type, subtype and parameters of the given
+	 * {@code MediaType}, and allows to set the specified character set.
+	 * @param other the other media type
+	 * @param charset the character set
+	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
+	 */
+	public MediaType(MediaType other, Charset charset) {
+		super(other, charset);
+	}
+
+	/**
 	 * Copy-constructor that copies the type and subtype of the given {@code MediaType},
 	 * and allows for different parameter.
 	 * @param other the other media type

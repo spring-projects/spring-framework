@@ -1356,7 +1356,7 @@ public class ServletAnnotationControllerTests {
 		request.addHeader("Accept", "application/json, text/javascript, */*");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		servlet.service(request, response);
-		assertEquals("Invalid response status code", "application/json", response.getHeader("Content-Type"));
+		assertEquals("Invalid response status code", "application/json;charset=ISO-8859-1", response.getHeader("Content-Type"));
 	}
 
 	@Test
@@ -1770,7 +1770,7 @@ public class ServletAnnotationControllerTests {
 		servlet.service(request, response);
 
 		assertEquals(200, response.getStatus());
-		assertEquals("application/json", response.getHeader("Content-Type"));
+		assertEquals("application/json;charset=ISO-8859-1", response.getHeader("Content-Type"));
 		assertEquals("homeJson", response.getContentAsString());
 	}
 

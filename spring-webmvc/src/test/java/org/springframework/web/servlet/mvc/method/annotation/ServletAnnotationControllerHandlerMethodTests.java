@@ -1011,7 +1011,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		request.addHeader("Accept", "application/json, text/javascript, */*");
 		MockHttpServletResponse response = new MockHttpServletResponse();
 		getServlet().service(request, response);
-		assertEquals("Invalid content-type", "application/json", response.getHeader("Content-Type"));
+		assertEquals("Invalid content-type", "application/json;charset=ISO-8859-1", response.getHeader("Content-Type"));
 	}
 
 	@Test
@@ -1531,7 +1531,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		getServlet().service(request, response);
 
 		assertEquals(200, response.getStatus());
-		assertEquals("application/json", response.getHeader("Content-Type"));
+		assertEquals("application/json;charset=ISO-8859-1", response.getHeader("Content-Type"));
 		assertEquals("homeJson", response.getContentAsString());
 	}
 
@@ -1652,7 +1652,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		getServlet().service(request, response);
 
 		assertEquals(200, response.getStatus());
-		assertEquals("text/html", response.getContentType());
+		assertEquals("text/html;charset=ISO-8859-1", response.getContentType());
 		assertEquals("inline;filename=f.txt", response.getHeader("Content-Disposition"));
 		assertArrayEquals(content, response.getContentAsByteArray());
 	}
@@ -1678,7 +1678,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		getServlet().service(request, response);
 
 		assertEquals(200, response.getStatus());
-		assertEquals("text/html", response.getContentType());
+		assertEquals("text/html;charset=ISO-8859-1", response.getContentType());
 		assertNull(response.getHeader("Content-Disposition"));
 		assertArrayEquals(content, response.getContentAsByteArray());
 	}
@@ -1704,7 +1704,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		getServlet().service(request, response);
 
 		assertEquals(200, response.getStatus());
-		assertEquals("text/html", response.getContentType());
+		assertEquals("text/html;charset=ISO-8859-1", response.getContentType());
 		assertNull(response.getHeader("Content-Disposition"));
 		assertArrayEquals(content, response.getContentAsByteArray());
 	}
@@ -1730,7 +1730,7 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		getServlet().service(request, response);
 
 		assertEquals(200, response.getStatus());
-		assertEquals("text/css", response.getContentType());
+		assertEquals("text/css;charset=ISO-8859-1", response.getContentType());
 		assertNull(response.getHeader("Content-Disposition"));
 		assertArrayEquals(content, response.getContentAsByteArray());
 	}

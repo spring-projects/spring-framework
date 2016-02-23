@@ -71,16 +71,19 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 
 	protected AbstractJackson2HttpMessageConverter(ObjectMapper objectMapper) {
 		this.objectMapper = objectMapper;
+		this.setDefaultCharset(DEFAULT_CHARSET);
 	}
 
 	protected AbstractJackson2HttpMessageConverter(ObjectMapper objectMapper, MediaType supportedMediaType) {
 		super(supportedMediaType);
 		this.objectMapper = objectMapper;
+		this.setDefaultCharset(DEFAULT_CHARSET);
 	}
 
 	protected AbstractJackson2HttpMessageConverter(ObjectMapper objectMapper, MediaType... supportedMediaTypes) {
 		super(supportedMediaTypes);
 		this.objectMapper = objectMapper;
+		this.setDefaultCharset(DEFAULT_CHARSET);
 	}
 
 

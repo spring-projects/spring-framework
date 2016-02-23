@@ -74,7 +74,7 @@ public class ObjectToStringHttpMessageConverter extends AbstractHttpMessageConve
 	 * @param defaultCharset the default charset
 	 */
 	public ObjectToStringHttpMessageConverter(ConversionService conversionService, Charset defaultCharset) {
-		super(new MediaType("text", "plain", defaultCharset));
+		super(defaultCharset, MediaType.TEXT_PLAIN);
 
 		Assert.notNull(conversionService, "conversionService is required");
 		this.conversionService = conversionService;
