@@ -32,7 +32,7 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 4.3
  */
-class DefaultResponseActions implements ResponseActions, RequestMatcher, ResponseCreator {
+class DefaultResponseActions implements ResponseActions, RequestExpectation {
 
 	private final List<RequestMatcher> requestMatchers = new LinkedList<RequestMatcher>();
 
