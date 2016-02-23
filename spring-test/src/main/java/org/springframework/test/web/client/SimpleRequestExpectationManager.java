@@ -30,7 +30,7 @@ import org.springframework.http.client.ClientHttpResponse;
  * @author Rossen Stoyanchev
  * @since 4.3
  */
-public class OrderedRequestExpectationManager extends AbstractRequestExpectationManager {
+public class SimpleRequestExpectationManager extends AbstractRequestExpectationManager {
 
 	private Iterator<RequestExpectation> iterator;
 

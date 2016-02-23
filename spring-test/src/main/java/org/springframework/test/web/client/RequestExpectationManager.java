@@ -16,7 +16,6 @@
 package org.springframework.test.web.client;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
@@ -30,16 +29,6 @@ import org.springframework.http.client.ClientHttpResponse;
  * @since 4.3
  */
 public interface RequestExpectationManager {
-
-	/**
-	 * Return the list of declared request expectations.
-	 */
-	List<RequestExpectation> getExpectations();
-
-	/**
-	 * Return the list of actual requests.
-	 */
-	List<ClientHttpRequest> getRequests();
 
 	/**
 	 * Set up a new request expectation. The returned {@link ResponseActions} is

@@ -36,7 +36,7 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  */
 public class OrderedRequestExpectationManagerTests {
 
-	private OrderedRequestExpectationManager manager = new OrderedRequestExpectationManager();
+	private SimpleRequestExpectationManager manager = new SimpleRequestExpectationManager();
 
 
 	@Test

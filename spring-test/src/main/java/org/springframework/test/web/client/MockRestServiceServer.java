@@ -18,7 +18,6 @@ package org.springframework.test.web.client;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.List;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.client.AsyncClientHttpRequest;
@@ -96,69 +95,25 @@ import org.springframework.web.client.support.RestGatewaySupport;
  */
 public class MockRestServiceServer {
 
-	private RequestExpectationManager expectationManager = new OrderedRequestExpectationManager();
+	private final RequestExpectationManager expectationManager;
 
 
 	/**
 	 * Private constructor.
-	 * @see #createServer(RestTemplate)
-	 * @see #createServer(RestGatewaySupport)
+	 * See static builder methods and {@code createServer} shortcut methods.
 	 */
 	private MockRestServiceServer() {
-	}
-
-
-	/**
-	 * Create a {@code MockRestServiceServer} and set up the given
-	 * {@code RestTemplate} with a mock {@link ClientHttpRequestFactory}.
-	 * @param restTemplate the RestTemplate to set up for mock testing
-	 * @return the created mock server
-	 */
-	public static MockRestServiceServer createServer(RestTemplate restTemplate) {
-		Assert.notNull(restTemplate, "'restTemplate' must not be null");
-		MockRestServiceServer mockServer = new MockRestServiceServer();
-		MockClientHttpRequestFactory factory = mockServer.new MockClientHttpRequestFactory();
-		restTemplate.setRequestFactory(factory);
-		return mockServer;
+		this.expectationManager = new SimpleRequestExpectationManager();
 	}
 
 	/**
-	 * Create a {@code MockRestServiceServer} and set up the given
-	 * {@code AsyRestTemplate} with a mock {@link AsyncClientHttpRequestFactory}.
-	 * @param asyncRestTemplate the AsyncRestTemplate to set up for mock testing
-	 * @return the created mock server
+	 * Private constructor with {@code RequestExpectationManager}.
+	 * See static builder methods and {@code createServer} shortcut methods.
 	 */
-	public static MockRestServiceServer createServer(AsyncRestTemplate asyncRestTemplate) {
-		Assert.notNull(asyncRestTemplate, "'asyncRestTemplate' must not be null");
-		MockRestServiceServer mockServer = new MockRestServiceServer();
-		MockClientHttpRequestFactory factory = mockServer.new MockClientHttpRequestFactory();
-		asyncRestTemplate.setAsyncRequestFactory(factory);
-		return mockServer;
+	private MockRestServiceServer(RequestExpectationManager expectationManager) {
+		this.expectationManager = expectationManager;
 	}
 
-	/**
-	 * Create a {@code MockRestServiceServer} and set up the given
-	 * {@code RestGatewaySupport} with a mock {@link ClientHttpRequestFactory}.
-	 * @param restGateway the REST gateway to set up for mock testing
-	 * @return the created mock server
-	 */
-	public static MockRestServiceServer createServer(RestGatewaySupport restGateway) {
-		Assert.notNull(restGateway, "'gatewaySupport' must not be null");
-		return createServer(restGateway.getRestTemplate());
-	}
-
-
-	/**
-	 * When this option is set, the order in which requests are executed does not
-	 * need to match the order in which expected requests are declared.
-	 */
-	public MockRestServiceServer setIgnoreRequestOrder() {
-		String message = "Cannot switch to unordered mode after actual requests are made.";
-		Assert.state(this.expectationManager.getRequests().isEmpty(), message);
-		List<RequestExpectation> expectations = this.expectationManager.getExpectations();
-		this.expectationManager = new UnorderedRequestExpectationManager(expectations);
-		return this;
-	}
 
 	/**
 	 * Set up a new HTTP request expectation. The returned {@link ResponseActions}
@@ -180,6 +135,131 @@ public class MockRestServiceServer {
 	 */
 	public void verify() {
 		this.expectationManager.verify();
+	}
+
+
+	/**
+	 * Build a {@code MockRestServiceServer} with a {@code RestTemplate}.
+	 * @since 4.3
+	 */
+	public static MockRestServiceServerBuilder restTemplate(RestTemplate restTemplate) {
+		return new DefaultBuilder(restTemplate);
+	}
+
+	/**
+	 * Build a {@code MockRestServiceServer} with an {@code AsyncRestTemplate}.
+	 * @since 4.3
+	 */
+	public static MockRestServiceServerBuilder asyncRestTemplate(AsyncRestTemplate asyncRestTemplate) {
+		return new DefaultBuilder(asyncRestTemplate);
+	}
+
+	/**
+	 * Build a {@code MockRestServiceServer} with a {@code RestGateway}.
+	 * @since 4.3
+	 */
+	public static MockRestServiceServerBuilder restGateway(RestGatewaySupport restGateway) {
+		Assert.notNull(restGateway, "'gatewaySupport' must not be null");
+		return new DefaultBuilder(restGateway.getRestTemplate());
+	}
+
+
+	/**
+	 * A shortcut for {@code restTemplate(restTemplate).build()}.
+	 * @param restTemplate the RestTemplate to set up for mock testing
+	 * @return the mock server
+	 */
+	public static MockRestServiceServer createServer(RestTemplate restTemplate) {
+		return restTemplate(restTemplate).build();
+	}
+
+	/**
+	 * A shortcut for {@code asyncRestTemplate(asyncRestTemplate).build()}.
+	 * @param asyncRestTemplate the AsyncRestTemplate to set up for mock testing
+	 * @return the created mock server
+	 */
+	public static MockRestServiceServer createServer(AsyncRestTemplate asyncRestTemplate) {
+		return asyncRestTemplate(asyncRestTemplate).build();
+	}
+
+	/**
+	 * A shortcut for {@code restGateway(restGateway).build()}.
+	 * @param restGateway the REST gateway to set up for mock testing
+	 * @return the created mock server
+	 */
+	public static MockRestServiceServer createServer(RestGatewaySupport restGateway) {
+		return restGateway(restGateway).build();
+	}
+
+
+
+	/**
+	 * Builder to create a {@code MockRestServiceServer}.
+
+	 */
+	public interface MockRestServiceServerBuilder {
+
+		/**
+		 * When this option is set, requests can be executed in any order, i.e.
+		 * not matching the order in which expected requests are declared.
+		 */
+		MockRestServiceServerBuilder ignoreExpectOrder();
+
+		/**
+		 * Build the {@code MockRestServiceServer} and setting up the underlying
+		 * {@code RestTemplate} or {@code AsyncRestTemplate} with a
+		 * {@link ClientHttpRequestFactory} that creates mock requests.
+		 */
+		MockRestServiceServer build();
+
+	}
+
+	private static class DefaultBuilder implements MockRestServiceServerBuilder {
+
+		private final RestTemplate restTemplate;
+
+		private final AsyncRestTemplate asyncRestTemplate;
+
+		private boolean ignoreExpectOrder;
+
+
+		public DefaultBuilder(RestTemplate restTemplate) {
+			Assert.notNull(restTemplate, "'restTemplate' must not be null");
+			this.restTemplate = restTemplate;
+			this.asyncRestTemplate = null;
+		}
+
+		public DefaultBuilder(AsyncRestTemplate asyncRestTemplate) {
+			Assert.notNull(asyncRestTemplate, "'asyncRestTemplate' must not be null");
+			this.restTemplate = null;
+			this.asyncRestTemplate = asyncRestTemplate;
+		}
+
+
+		@Override
+		public MockRestServiceServerBuilder ignoreExpectOrder() {
+			this.ignoreExpectOrder = true;
+			return this;
+		}
+
+
+		@Override
+		public MockRestServiceServer build() {
+
+			MockRestServiceServer server = (this.ignoreExpectOrder ?
+					new MockRestServiceServer(new UnorderedRequestExpectationManager()) :
+					new MockRestServiceServer());
+
+			MockClientHttpRequestFactory factory = server.new MockClientHttpRequestFactory();
+			if (this.restTemplate != null) {
+				this.restTemplate.setRequestFactory(factory);
+			}
+			if (this.asyncRestTemplate != null) {
+				this.asyncRestTemplate.setAsyncRequestFactory(factory);
+			}
+
+			return server;
+		}
 	}
 
 

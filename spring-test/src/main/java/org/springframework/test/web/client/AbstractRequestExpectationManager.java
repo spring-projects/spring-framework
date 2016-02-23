@@ -48,12 +48,10 @@ public abstract class AbstractRequestExpectationManager implements RequestExpect
 	}
 
 
-	@Override
 	public List<RequestExpectation> getExpectations() {
 		return this.expectations;
 	}
 
-	@Override
 	public List<ClientHttpRequest> getRequests() {
 		return this.requests;
 	}
