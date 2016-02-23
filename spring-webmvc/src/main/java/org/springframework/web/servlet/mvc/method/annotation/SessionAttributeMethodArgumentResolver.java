@@ -35,7 +35,7 @@ public class SessionAttributeMethodArgumentResolver extends AbstractNamedValueMe
 
 
 	@Override
-	public boolean supportsParameter(MethodParameter parameter) {
+	protected boolean supportsLocalParameter(MethodParameter parameter) {
 		return parameter.hasParameterAnnotation(SessionAttribute.class);
 	}
 

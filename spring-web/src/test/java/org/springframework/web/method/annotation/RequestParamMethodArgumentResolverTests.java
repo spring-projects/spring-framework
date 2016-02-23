@@ -17,6 +17,7 @@
 package org.springframework.web.method.annotation;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +26,10 @@ import javax.servlet.http.Part;
 
 import org.junit.Before;
 import org.junit.Test;
-
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 import org.springframework.beans.propertyeditors.StringTrimmerEditor;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
@@ -37,7 +41,6 @@ import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockMultipartFile;
 import org.springframework.mock.web.test.MockMultipartHttpServletRequest;
 import org.springframework.mock.web.test.MockPart;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -53,6 +56,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.*;
 import static org.mockito.BDDMockito.*;
 
 /**
@@ -62,7 +66,25 @@ import static org.mockito.BDDMockito.*;
  * @author Rossen Stoyanchev
  * @author Brian Clozel
  */
+@RunWith(Parameterized.class)
 public class RequestParamMethodArgumentResolverTests {
+
+	@Parameters(name = "{0};{1}")
+	public static List<Object[]> createParameters() {
+		List<Object[]> parameters = new ArrayList<Object[]>();
+		parameters.add(new Object[] { Foo.class, Boolean.FALSE });
+		parameters.add(new Object[] { Foo.class, Boolean.TRUE });
+		parameters.add(new Object[] { Bar.class, Boolean.FALSE });
+		parameters.add(new Object[] { Bar.class, Boolean.TRUE });
+		parameters.add(new Object[] { Baz.class, Boolean.FALSE });
+		parameters.add(new Object[] { Baz.class, Boolean.TRUE });
+		return parameters;
+	}
+
+	@Parameter(0)
+	public Class<?> target;
+	@Parameter(1)
+	public boolean useDefaultResolution;
 
 	private RequestParamMethodArgumentResolver resolver;
 
@@ -93,9 +115,14 @@ public class RequestParamMethodArgumentResolverTests {
 
 	@Before
 	public void setUp() throws Exception {
-		resolver = new RequestParamMethodArgumentResolver(null, true);
+		resolver = new RequestParamMethodArgumentResolver(null,
+				this.useDefaultResolution);
 		ParameterNameDiscoverer paramNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
-		Method method = ReflectionUtils.findMethod(getClass(), "handle", (Class<?>[]) null);
+		Method method = target.getMethod("handle", String.class, String[].class,
+				Map.class, MultipartFile.class, List.class, MultipartFile[].class,
+				Part.class, List.class, Part[].class, Map.class, String.class,
+				MultipartFile.class, List.class, Part.class, MultipartFile.class,
+				String.class, String.class, Optional.class, Optional.class);
 
 		paramNamedDefaultValueString = new SynthesizingMethodParameter(method, 0);
 		paramNamedStringArray = new SynthesizingMethodParameter(method, 1);
@@ -387,6 +414,7 @@ public class RequestParamMethodArgumentResolverTests {
 
 	@Test
 	public void resolveSimpleTypeParam() throws Exception {
+		assumeTrue(useDefaultResolution);
 		request.setParameter("stringNotAnnot", "plainValue");
 		Object result = resolver.resolveArgument(paramStringNotAnnot, null, webRequest, null);
 
@@ -409,6 +437,7 @@ public class RequestParamMethodArgumentResolverTests {
 
 	@Test
 	public void resolveEmptyValueWithoutDefault() throws Exception {
+		assumeTrue(useDefaultResolution);
 		this.request.addParameter("stringNotAnnot", "");
 		Object result = resolver.resolveArgument(paramStringNotAnnot, null, webRequest, null);
 		assertEquals("", result);
@@ -474,27 +503,45 @@ public class RequestParamMethodArgumentResolverTests {
 	}
 
 
-	@SuppressWarnings("unused")
-	public void handle(
-			@RequestParam(name = "name", defaultValue = "bar") String param1,
-			@RequestParam("name") String[] param2,
-			@RequestParam("name") Map<?, ?> param3,
-			@RequestParam("mfile") MultipartFile param4,
-			@RequestParam("mfilelist") List<MultipartFile> param5,
-			@RequestParam("mfilearray") MultipartFile[] param6,
-			@RequestParam("pfile") Part param7,
-			@RequestParam("pfilelist") List<Part> param8,
-			@RequestParam("pfilearray") Part[] param9,
-			@RequestParam Map<?, ?> param10,
-			String stringNotAnnot,
-			MultipartFile multipartFileNotAnnot,
-			List<MultipartFile> multipartFileList,
-			Part part,
-			@RequestPart MultipartFile requestPartAnnot,
-			@RequestParam("name") String paramRequired,
-			@RequestParam(name = "name", required = false) String paramNotRequired,
-			@RequestParam("name") Optional<Integer> paramOptional,
-			@RequestParam("mfile") Optional<MultipartFile> multipartFileOptional) {
+	public interface Foo {
+		public void handle(
+				@RequestParam(name = "name", defaultValue = "bar") String param1,
+				@RequestParam("name") String[] param2,
+				@RequestParam("name") Map<?, ?> param3,
+				@RequestParam("mfile") MultipartFile param4,
+				@RequestParam("mfilelist") List<MultipartFile> param5,
+				@RequestParam("mfilearray") MultipartFile[] param6,
+				@RequestParam("pfile") Part param7,
+				@RequestParam("pfilelist") List<Part> param8,
+				@RequestParam("pfilearray") Part[] param9,
+				@RequestParam Map<?, ?> param10,
+				String stringNotAnnot,
+				MultipartFile multipartFileNotAnnot,
+				List<MultipartFile> multipartFileList,
+				Part part,
+				@RequestPart MultipartFile requestPartAnnot,
+				@RequestParam("name") String paramRequired,
+				@RequestParam(name = "name", required = false) String paramNotRequired,
+				@RequestParam("name") Optional<Integer> paramOptional,
+				@RequestParam("mfile") Optional<MultipartFile> multipartFileOptional);
+	}
+
+	public static abstract class Bar implements Foo {
+	}
+
+	public static class Baz extends Bar {
+
+		@Override
+		public void handle(String param1, String[] param2, Map<?, ?> param3,
+				MultipartFile param4, List<MultipartFile> param5, MultipartFile[] param6,
+				Part param7, List<Part> param8, Part[] param9, Map<?, ?> param10,
+				String stringNotAnnot, MultipartFile multipartFileNotAnnot,
+				List<MultipartFile> multipartFileList, Part part,
+				MultipartFile requestPartAnnot, String paramRequired,
+				String paramNotRequired, Optional<Integer> paramOptional,
+				Optional<MultipartFile> multipartFileOptional) {
+		}
+
 	}
 
 }

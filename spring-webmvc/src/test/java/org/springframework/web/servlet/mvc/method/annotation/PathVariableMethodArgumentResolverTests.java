@@ -19,12 +19,17 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import static org.junit.Assert.*;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -40,7 +45,20 @@ import org.springframework.web.servlet.View;
  *
  * @author Rossen Stoyanchev
  */
+@RunWith(Parameterized.class)
 public class PathVariableMethodArgumentResolverTests {
+
+	@Parameters(name = "{0}")
+	public static List<Object[]> createParameters() {
+		List<Object[]> parameters = new ArrayList<Object[]>();
+		parameters.add(new Object[] { Foo.class });
+		parameters.add(new Object[] { Bar.class });
+		parameters.add(new Object[] { Baz.class });
+		return parameters;
+	}
+
+	@Parameter(0)
+	public Class<?> target;
 
 	private PathVariableMethodArgumentResolver resolver;
 
@@ -58,7 +76,7 @@ public class PathVariableMethodArgumentResolverTests {
 	public void setUp() throws Exception {
 		resolver = new PathVariableMethodArgumentResolver();
 
-		Method method = getClass().getMethod("handle", String.class, String.class);
+		Method method = target.getMethod("handle", String.class, String.class);
 		paramNamedString = new MethodParameter(method, 0);
 		paramString = new MethodParameter(method, 1);
 
@@ -116,8 +134,18 @@ public class PathVariableMethodArgumentResolverTests {
 		fail("Unresolved path variable should lead to exception.");
 	}
 
-	@SuppressWarnings("unused")
-	public void handle(@PathVariable(value = "name") String param1, String param2) {
+
+	public interface Foo {
+		void handle(@PathVariable(value = "name") String param1, String param2);
+	}
+
+	public static abstract class Bar implements Foo {
+	}
+
+	public static class Baz extends Bar {
+		@Override
+		public void handle(String param1, String param2) {
+		}
 	}
 
 }

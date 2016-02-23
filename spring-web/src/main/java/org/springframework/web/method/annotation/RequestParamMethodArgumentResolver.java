@@ -34,7 +34,12 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ValueConstants;
+import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver.NamedValueInfo;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.MethodParameterUtils;
+import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.method.support.UriComponentsContributor;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.MultipartFile;
@@ -71,12 +76,13 @@ import org.springframework.web.util.WebUtils;
  * @since 3.1
  * @see RequestParamMapMethodArgumentResolver
  */
-public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethodArgumentResolver
-		implements UriComponentsContributor {
+public class RequestParamMethodArgumentResolver
+		implements UriComponentsContributor, HandlerMethodArgumentResolver {
 
 	private static final TypeDescriptor STRING_TYPE_DESCRIPTOR = TypeDescriptor.valueOf(String.class);
 
-	private final boolean useDefaultResolution;
+	private final HandlerMethodArgumentResolver annotationResolver;
+	private final HandlerMethodArgumentResolver plainResolver;
 
 
 	/**
@@ -86,7 +92,7 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	 * request parameter name is derived from the method parameter name.
 	 */
 	public RequestParamMethodArgumentResolver(boolean useDefaultResolution) {
-		this.useDefaultResolution = useDefaultResolution;
+		this(null, useDefaultResolution);
 	}
 
 	/**
@@ -99,8 +105,8 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	 * request parameter name is derived from the method parameter name.
 	 */
 	public RequestParamMethodArgumentResolver(ConfigurableBeanFactory beanFactory, boolean useDefaultResolution) {
-		super(beanFactory);
-		this.useDefaultResolution = useDefaultResolution;
+		this.annotationResolver = new AnnotationResolver(beanFactory);
+		this.plainResolver = new PlainResolver(beanFactory, useDefaultResolution);
 	}
 
 
@@ -121,79 +127,28 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 	 */
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
-		if (parameter.hasParameterAnnotation(RequestParam.class)) {
-			if (Map.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType())) {
-				String paramName = parameter.getParameterAnnotation(RequestParam.class).name();
-				return StringUtils.hasText(paramName);
-			}
-			else {
-				return true;
-			}
+		if (annotationResolver.supportsParameter(parameter)) {
+			return true;
 		}
-		else {
-			if (parameter.hasParameterAnnotation(RequestPart.class)) {
-				return false;
-			}
-			parameter = parameter.nestedIfOptional();
-			if (MultipartResolutionDelegate.isMultipartArgument(parameter)) {
-				return true;
-			}
-			else if (this.useDefaultResolution) {
-				return BeanUtils.isSimpleProperty(parameter.getNestedParameterType());
-			}
-			else {
+		for (MethodParameter p : MethodParameterUtils.parameterHierarchy(parameter)) {
+			if (p.hasParameterAnnotation(RequestPart.class)) {
 				return false;
 			}
 		}
+		return plainResolver.supportsParameter(parameter);
 	}
 
 	@Override
-	protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
-		RequestParam ann = parameter.getParameterAnnotation(RequestParam.class);
-		return (ann != null ? new RequestParamNamedValueInfo(ann) : new RequestParamNamedValueInfo());
-	}
-
-	@Override
-	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
-		HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);
-		MultipartHttpServletRequest multipartRequest =
-				WebUtils.getNativeRequest(servletRequest, MultipartHttpServletRequest.class);
-
-		Object mpArg = MultipartResolutionDelegate.resolveMultipartArgument(name, parameter, servletRequest);
-		if (mpArg != MultipartResolutionDelegate.UNRESOLVABLE) {
-			return mpArg;
+	public Object resolveArgument(MethodParameter parameter,
+			ModelAndViewContainer mavContainer, NativeWebRequest webRequest,
+			WebDataBinderFactory binderFactory) throws Exception {
+		if (annotationResolver.supportsParameter(parameter)) {
+			return annotationResolver.resolveArgument(parameter, mavContainer, webRequest, binderFactory);
 		}
-
-		Object arg = null;
-		if (multipartRequest != null) {
-			List<MultipartFile> files = multipartRequest.getFiles(name);
-			if (!files.isEmpty()) {
-				arg = (files.size() == 1 ? files.get(0) : files);
-			}
+		if (plainResolver.supportsParameter(parameter)) {
+			return plainResolver.resolveArgument(parameter, mavContainer, webRequest, binderFactory);
 		}
-		if (arg == null) {
-			String[] paramValues = request.getParameterValues(name);
-			if (paramValues != null) {
-				arg = (paramValues.length == 1 ? paramValues[0] : paramValues);
-			}
-		}
-		return arg;
-	}
-
-	@Override
-	protected void handleMissingValue(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
-		HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);
-		if (MultipartResolutionDelegate.isMultipartArgument(parameter)) {
-			if (!MultipartResolutionDelegate.isMultipartRequest(servletRequest)) {
-				throw new MultipartException("Current request is not a multipart request");
-			}
-			else {
-				throw new MissingServletRequestPartException(name);
-			}
-		}
-		else {
-			throw new MissingServletRequestParameterException(name, parameter.getNestedParameterType().getSimpleName());
-		}
+		return null;
 	}
 
 	@Override
@@ -249,6 +204,118 @@ public class RequestParamMethodArgumentResolver extends AbstractNamedValueMethod
 		public RequestParamNamedValueInfo(RequestParam annotation) {
 			super(annotation.name(), annotation.required(), annotation.defaultValue());
 		}
+	}
+
+	private static abstract class InnerResolver extends AbstractNamedValueMethodArgumentResolver {
+
+		InnerResolver(ConfigurableBeanFactory beanFactory) {
+			super(beanFactory);
+		}
+
+		@Override
+		protected final Object resolveName(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
+			HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);
+			MultipartHttpServletRequest multipartRequest =
+					WebUtils.getNativeRequest(servletRequest, MultipartHttpServletRequest.class);
+
+			Object mpArg = MultipartResolutionDelegate.resolveMultipartArgument(name, parameter, servletRequest);
+			if (mpArg != MultipartResolutionDelegate.UNRESOLVABLE) {
+				return mpArg;
+			}
+
+			Object arg = null;
+			if (multipartRequest != null) {
+				List<MultipartFile> files = multipartRequest.getFiles(name);
+				if (!files.isEmpty()) {
+					arg = (files.size() == 1 ? files.get(0) : files);
+				}
+			}
+			if (arg == null) {
+				String[] paramValues = request.getParameterValues(name);
+				if (paramValues != null) {
+					arg = (paramValues.length == 1 ? paramValues[0] : paramValues);
+				}
+			}
+			return arg;
+		}
+
+		@Override
+		protected void handleMissingValue(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
+			HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);
+			if (MultipartResolutionDelegate.isMultipartArgument(parameter)) {
+				if (!MultipartResolutionDelegate.isMultipartRequest(servletRequest)) {
+					throw new MultipartException("Current request is not a multipart request");
+				}
+				else {
+					throw new MissingServletRequestPartException(name);
+				}
+			}
+			else {
+				throw new MissingServletRequestParameterException(name, parameter.getNestedParameterType().getSimpleName());
+			}
+		}
+
+	}
+
+	private static class AnnotationResolver extends InnerResolver {
+
+		AnnotationResolver(ConfigurableBeanFactory beanFactory) {
+			super(beanFactory);
+		}
+
+		@Override
+		protected boolean supportsLocalParameter(MethodParameter parameter) {
+			if (parameter.hasParameterAnnotation(RequestParam.class)) {
+				if (Map.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType())) {
+					String paramName = parameter.getParameterAnnotation(RequestParam.class).name();
+					return StringUtils.hasText(paramName);
+				}
+				else {
+					return true;
+				}
+			}
+			else {
+				return false;
+			}
+		}
+
+		@Override
+		protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
+			RequestParam ann = parameter.getParameterAnnotation(RequestParam.class);
+			return new RequestParamNamedValueInfo(ann);
+		}
+	}
+
+	private static class PlainResolver extends InnerResolver {
+		private final boolean useDefaultResolution;
+
+		PlainResolver(ConfigurableBeanFactory beanFactory, boolean useDefaultResolution) {
+			super(beanFactory);
+			this.useDefaultResolution = useDefaultResolution;
+		}
+
+		@Override
+		protected NamedValueInfo createNamedValueInfo(MethodParameter parameter) {
+			return new RequestParamNamedValueInfo();
+		}
+
+		@Override
+		protected boolean supportsLocalParameter(MethodParameter parameter) {
+			if (parameter.hasParameterAnnotation(RequestParam.class)) {
+				return false;
+			}
+			parameter = parameter.nestedIfOptional();
+			if (MultipartResolutionDelegate.isMultipartArgument(parameter)) {
+				return true;
+			}
+			else if (useDefaultResolution) {
+				return BeanUtils.isSimpleProperty(parameter.getNestedParameterType());
+			}
+			else {
+				return false;
+			}
+		}
+
 	}
 
 }

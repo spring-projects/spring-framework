@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -24,7 +25,10 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -44,8 +48,20 @@ import static org.junit.Assert.*;
  *
  * @author Rossen Stoyanchev
  */
+@RunWith(Parameterized.class)
 public class MatrixVariablesMethodArgumentResolverTests {
 
+	@Parameters(name = "{0}")
+	public static List<Object[]> createParameters() {
+		List<Object[]> parameters = new ArrayList<Object[]>();
+		parameters.add(new Object[] { Foo.class });
+		parameters.add(new Object[] { Bar.class });
+		parameters.add(new Object[] { Baz.class });
+		return parameters;
+	}
+
+	@Parameter(0)
+	public Class<?> target;
 	private MatrixVariableMethodArgumentResolver resolver;
 
 	private MethodParameter paramString;
@@ -63,7 +79,7 @@ public class MatrixVariablesMethodArgumentResolverTests {
 	public void setUp() throws Exception {
 		this.resolver = new MatrixVariableMethodArgumentResolver();
 
-		Method method = getClass().getMethod("handle", String.class, List.class, int.class);
+		Method method = target.getMethod("handle", String.class, List.class, int.class);
 		this.paramString = new MethodParameter(method, 0);
 		this.paramColors = new MethodParameter(method, 1);
 		this.paramYear = new MethodParameter(method, 2);
@@ -149,10 +165,19 @@ public class MatrixVariablesMethodArgumentResolverTests {
 	}
 
 
-	public void handle(
+	public interface Foo {
+		void handle(
 			String stringArg,
 			@MatrixVariable List<String> colors,
-			@MatrixVariable(name = "year", pathVar = "cars", required = false, defaultValue = "2013") int preferredYear) {
+			@MatrixVariable(name = "year", pathVar = "cars", required = false, defaultValue = "2013") int preferredYear);
 	}
 
+	public static abstract class Bar implements Foo {
+	}
+
+	public static class Baz extends Bar {
+		@Override
+		public void handle(String stringArg, List<String> colors, int preferredYear) {
+		}
+	}
 }

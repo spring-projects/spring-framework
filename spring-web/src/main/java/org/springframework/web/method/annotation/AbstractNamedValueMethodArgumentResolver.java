@@ -32,7 +32,7 @@ import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestScope;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.AbstractAnnotationBasedHandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
@@ -57,7 +57,8 @@ import org.springframework.web.method.support.ModelAndViewContainer;
  * @author Juergen Hoeller
  * @since 3.1
  */
-public abstract class AbstractNamedValueMethodArgumentResolver implements HandlerMethodArgumentResolver {
+public abstract class AbstractNamedValueMethodArgumentResolver
+		extends AbstractAnnotationBasedHandlerMethodArgumentResolver {
 
 	private final ConfigurableBeanFactory configurableBeanFactory;
 
@@ -83,8 +84,9 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 
 
 	@Override
-	public final Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+	protected Object resolveLocalArgument(MethodParameter parameter,
+			ModelAndViewContainer mavContainer, NativeWebRequest webRequest,
+			WebDataBinderFactory binderFactory) throws Exception {
 
 		NamedValueInfo namedValueInfo = getNamedValueInfo(parameter);
 		MethodParameter nestedParameter = parameter.nestedIfOptional();

@@ -50,7 +50,7 @@ public class ExpressionValueMethodArgumentResolver extends AbstractNamedValueMet
 
 
 	@Override
-	public boolean supportsParameter(MethodParameter parameter) {
+	protected boolean supportsLocalParameter(MethodParameter parameter) {
 		return parameter.hasParameterAnnotation(Value.class);
 	}
 
