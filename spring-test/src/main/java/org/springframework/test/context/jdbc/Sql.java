@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,28 +68,9 @@ import static java.lang.annotation.RetentionPolicy.*;
 @Documented
 @Inherited
 @Retention(RUNTIME)
-@Target({ TYPE, METHOD })
+@Target({TYPE, METHOD})
 @Repeatable(SqlGroup.class)
 public @interface Sql {
-
-	/**
-	 * Enumeration of <em>phases</em> that dictate when SQL scripts are executed.
-	 */
-	static enum ExecutionPhase {
-
-		/**
-		 * The configured SQL scripts and statements will be executed
-		 * <em>before</em> the corresponding test method.
-		 */
-		BEFORE_TEST_METHOD,
-
-		/**
-		 * The configured SQL scripts and statements will be executed
-		 * <em>after</em> the corresponding test method.
-		 */
-		AFTER_TEST_METHOD
-	}
-
 
 	/**
 	 * Alias for {@link #scripts}.
@@ -172,5 +153,24 @@ public @interface Sql {
 	 * <p>Defaults to an empty {@link SqlConfig @SqlConfig} instance.
 	 */
 	SqlConfig config() default @SqlConfig();
+
+
+	/**
+	 * Enumeration of <em>phases</em> that dictate when SQL scripts are executed.
+	 */
+	enum ExecutionPhase {
+
+		/**
+		 * The configured SQL scripts and statements will be executed
+		 * <em>before</em> the corresponding test method.
+		 */
+		BEFORE_TEST_METHOD,
+
+		/**
+		 * The configured SQL scripts and statements will be executed
+		 * <em>after</em> the corresponding test method.
+		 */
+		AFTER_TEST_METHOD
+	}
 
 }

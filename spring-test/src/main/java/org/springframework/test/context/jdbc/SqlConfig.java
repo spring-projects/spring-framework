@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,130 +64,6 @@ import static java.lang.annotation.RetentionPolicy.*;
 @Retention(RUNTIME)
 @Target(TYPE)
 public @interface SqlConfig {
-
-	/**
-	 * Enumeration of <em>modes</em> that dictate whether SQL scripts should be
-	 * executed within a transaction and what the transaction propagation behavior
-	 * should be.
-	 */
-	static enum TransactionMode {
-
-		/**
-		 * Indicates that the <em>default</em> transaction mode should be used.
-		 * <p>The meaning of <em>default</em> depends on the context in which
-		 * {@code @SqlConfig} is declared:
-		 * <ul>
-		 * <li>If {@code @SqlConfig} is declared <strong>only</strong> locally,
-		 * the default transaction mode is {@link #INFERRED}.</li>
-		 * <li>If {@code @SqlConfig} is declared globally, the default transaction
-		 * mode is {@link #INFERRED}.</li>
-		 * <li>If {@code @SqlConfig} is declared globally <strong>and</strong>
-		 * locally, the default transaction mode for the local declaration is
-		 * inherited from the global declaration.</li>
-		 * </ul>
-		 */
-		DEFAULT,
-
-		/**
-		 * Indicates that the transaction mode to use when executing SQL
-		 * scripts should be <em>inferred</em> using the rules listed below.
-		 * In the context of these rules, the term "<em>available</em>"
-		 * means that the bean for the data source or transaction manager
-		 * is either explicitly specified via a corresponding annotation
-		 * attribute in {@code @SqlConfig} or discoverable via conventions. See
-		 * {@link org.springframework.test.context.transaction.TestContextTransactionUtils TestContextTransactionUtils}
-		 * for details on the conventions used to discover such beans in
-		 * the {@code ApplicationContext}.
-		 *
-		 * <h4>Inference Rules</h4>
-		 * <ol>
-		 * <li>If neither a transaction manager nor a data source is
-		 * available, an exception will be thrown.
-		 * <li>If a transaction manager is not available but a data source
-		 * is available, SQL scripts will be executed directly against the
-		 * data source without a transaction.
-		 * <li>If a transaction manager is available:
-		 * <ul>
-		 * <li>If a data source is not available, an attempt will be made
-		 * to retrieve it from the transaction manager by using reflection
-		 * to invoke a public method named {@code getDataSource()} on the
-		 * transaction manager. If the attempt fails, an exception will be
-		 * thrown.
-		 * <li>Using the resolved transaction manager and data source, SQL
-		 * scripts will be executed within an existing transaction if
-		 * present; otherwise, scripts will be executed in a new transaction
-		 * that will be immediately committed. An <em>existing</em>
-		 * transaction will typically be managed by the
-		 * {@link org.springframework.test.context.transaction.TransactionalTestExecutionListener TransactionalTestExecutionListener}.
-		 * </ul>
-		 * </ol>
-		 * @see #ISOLATED
-		 * @see org.springframework.test.context.transaction.TestContextTransactionUtils#retrieveDataSource
-		 * @see org.springframework.test.context.transaction.TestContextTransactionUtils#retrieveTransactionManager
-		 */
-		INFERRED,
-
-		/**
-		 * Indicates that SQL scripts should always be executed in a new,
-		 * <em>isolated</em> transaction that will be immediately committed.
-		 * <p>In contrast to {@link #INFERRED}, this mode requires the
-		 * presence of a transaction manager <strong>and</strong> a data
-		 * source.
-		 */
-		ISOLATED
-	}
-
-	/**
-	 * Enumeration of <em>modes</em> that dictate how errors are handled while
-	 * executing SQL statements.
-	 */
-	static enum ErrorMode {
-
-		/**
-		 * Indicates that the <em>default</em> error mode should be used.
-		 * <p>The meaning of <em>default</em> depends on the context in which
-		 * {@code @SqlConfig} is declared:
-		 * <ul>
-		 * <li>If {@code @SqlConfig} is declared <strong>only</strong> locally,
-		 * the default error mode is {@link #FAIL_ON_ERROR}.</li>
-		 * <li>If {@code @SqlConfig} is declared globally, the default error
-		 * mode is {@link #FAIL_ON_ERROR}.</li>
-		 * <li>If {@code @SqlConfig} is declared globally <strong>and</strong>
-		 * locally, the default error mode for the local declaration is
-		 * inherited from the global declaration.</li>
-		 * </ul>
-		 */
-		DEFAULT,
-
-		/**
-		 * Indicates that script execution will fail if an error is encountered.
-		 * In other words, no errors should be ignored.
-		 * <p>This is effectively the default error mode so that if a script
-		 * is accidentally executed, it will fail fast if any SQL statement in
-		 * the script results in an error.
-		 * @see #CONTINUE_ON_ERROR
-		 */
-		FAIL_ON_ERROR,
-
-		/**
-		 * Indicates that all errors in SQL scripts should be logged but not
-		 * propagated as exceptions.
-		 * <p>{@code CONTINUE_ON_ERROR} is the logical <em>opposite</em> of
-		 * {@code FAIL_ON_ERROR} and a <em>superset</em> of {@code IGNORE_FAILED_DROPS}.
-		 * @see #FAIL_ON_ERROR
-		 * @see #IGNORE_FAILED_DROPS
-		 */
-		CONTINUE_ON_ERROR,
-
-		/**
-		 * Indicates that failed SQL {@code DROP} statements can be ignored.
-		 * <p>This is useful for a non-embedded database whose SQL dialect does
-		 * not support an {@code IF EXISTS} clause in a {@code DROP} statement.
-		 * @see #CONTINUE_ON_ERROR
-		 */
-		IGNORE_FAILED_DROPS
-	}
-
 
 	/**
 	 * The bean name of the {@link javax.sql.DataSource} against which the
@@ -297,5 +173,130 @@ public @interface SqlConfig {
 	 * @see ErrorMode
 	 */
 	ErrorMode errorMode() default ErrorMode.DEFAULT;
+
+
+	/**
+	 * Enumeration of <em>modes</em> that dictate whether SQL scripts should be
+	 * executed within a transaction and what the transaction propagation behavior
+	 * should be.
+	 */
+	enum TransactionMode {
+
+		/**
+		 * Indicates that the <em>default</em> transaction mode should be used.
+		 * <p>The meaning of <em>default</em> depends on the context in which
+		 * {@code @SqlConfig} is declared:
+		 * <ul>
+		 * <li>If {@code @SqlConfig} is declared <strong>only</strong> locally,
+		 * the default transaction mode is {@link #INFERRED}.</li>
+		 * <li>If {@code @SqlConfig} is declared globally, the default transaction
+		 * mode is {@link #INFERRED}.</li>
+		 * <li>If {@code @SqlConfig} is declared globally <strong>and</strong>
+		 * locally, the default transaction mode for the local declaration is
+		 * inherited from the global declaration.</li>
+		 * </ul>
+		 */
+		DEFAULT,
+
+		/**
+		 * Indicates that the transaction mode to use when executing SQL
+		 * scripts should be <em>inferred</em> using the rules listed below.
+		 * In the context of these rules, the term "<em>available</em>"
+		 * means that the bean for the data source or transaction manager
+		 * is either explicitly specified via a corresponding annotation
+		 * attribute in {@code @SqlConfig} or discoverable via conventions. See
+		 * {@link org.springframework.test.context.transaction.TestContextTransactionUtils TestContextTransactionUtils}
+		 * for details on the conventions used to discover such beans in
+		 * the {@code ApplicationContext}.
+		 *
+		 * <h4>Inference Rules</h4>
+		 * <ol>
+		 * <li>If neither a transaction manager nor a data source is
+		 * available, an exception will be thrown.
+		 * <li>If a transaction manager is not available but a data source
+		 * is available, SQL scripts will be executed directly against the
+		 * data source without a transaction.
+		 * <li>If a transaction manager is available:
+		 * <ul>
+		 * <li>If a data source is not available, an attempt will be made
+		 * to retrieve it from the transaction manager by using reflection
+		 * to invoke a public method named {@code getDataSource()} on the
+		 * transaction manager. If the attempt fails, an exception will be
+		 * thrown.
+		 * <li>Using the resolved transaction manager and data source, SQL
+		 * scripts will be executed within an existing transaction if
+		 * present; otherwise, scripts will be executed in a new transaction
+		 * that will be immediately committed. An <em>existing</em>
+		 * transaction will typically be managed by the
+		 * {@link org.springframework.test.context.transaction.TransactionalTestExecutionListener TransactionalTestExecutionListener}.
+		 * </ul>
+		 * </ol>
+		 * @see #ISOLATED
+		 * @see org.springframework.test.context.transaction.TestContextTransactionUtils#retrieveDataSource
+		 * @see org.springframework.test.context.transaction.TestContextTransactionUtils#retrieveTransactionManager
+		 */
+		INFERRED,
+
+		/**
+		 * Indicates that SQL scripts should always be executed in a new,
+		 * <em>isolated</em> transaction that will be immediately committed.
+		 * <p>In contrast to {@link #INFERRED}, this mode requires the
+		 * presence of a transaction manager <strong>and</strong> a data
+		 * source.
+		 */
+		ISOLATED
+	}
+
+
+	/**
+	 * Enumeration of <em>modes</em> that dictate how errors are handled while
+	 * executing SQL statements.
+	 */
+	enum ErrorMode {
+
+		/**
+		 * Indicates that the <em>default</em> error mode should be used.
+		 * <p>The meaning of <em>default</em> depends on the context in which
+		 * {@code @SqlConfig} is declared:
+		 * <ul>
+		 * <li>If {@code @SqlConfig} is declared <strong>only</strong> locally,
+		 * the default error mode is {@link #FAIL_ON_ERROR}.</li>
+		 * <li>If {@code @SqlConfig} is declared globally, the default error
+		 * mode is {@link #FAIL_ON_ERROR}.</li>
+		 * <li>If {@code @SqlConfig} is declared globally <strong>and</strong>
+		 * locally, the default error mode for the local declaration is
+		 * inherited from the global declaration.</li>
+		 * </ul>
+		 */
+		DEFAULT,
+
+		/**
+		 * Indicates that script execution will fail if an error is encountered.
+		 * In other words, no errors should be ignored.
+		 * <p>This is effectively the default error mode so that if a script
+		 * is accidentally executed, it will fail fast if any SQL statement in
+		 * the script results in an error.
+		 * @see #CONTINUE_ON_ERROR
+		 */
+		FAIL_ON_ERROR,
+
+		/**
+		 * Indicates that all errors in SQL scripts should be logged but not
+		 * propagated as exceptions.
+		 * <p>{@code CONTINUE_ON_ERROR} is the logical <em>opposite</em> of
+		 * {@code FAIL_ON_ERROR} and a <em>superset</em> of {@code IGNORE_FAILED_DROPS}.
+		 * @see #FAIL_ON_ERROR
+		 * @see #IGNORE_FAILED_DROPS
+		 */
+		CONTINUE_ON_ERROR,
+
+		/**
+		 * Indicates that failed SQL {@code DROP} statements can be ignored.
+		 * <p>This is useful for a non-embedded database whose SQL dialect does
+		 * not support an {@code IF EXISTS} clause in a {@code DROP} statement.
+		 * @see #CONTINUE_ON_ERROR
+		 */
+		IGNORE_FAILED_DROPS
+	}
 
 }
