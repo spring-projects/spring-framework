@@ -57,9 +57,9 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.ObjectFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.SmartFactoryBean;
 import org.springframework.beans.factory.SmartInitializingSingleton;
-import org.springframework.beans.factory.SmartObjectFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -1005,11 +1005,11 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			return new OptionalDependencyFactory().createOptionalDependency(descriptor, beanName);
 		}
 		else if (ObjectFactory.class == descriptor.getDependencyType() ||
-				SmartObjectFactory.class == descriptor.getDependencyType()) {
-			return new DependencyObjectFactory(descriptor, beanName);
+				ObjectProvider.class == descriptor.getDependencyType()) {
+			return new DependencyObjectProvider(descriptor, beanName);
 		}
 		else if (javaxInjectProviderClass == descriptor.getDependencyType()) {
-			return new DependencyProviderFactory().createDependencyProvider(descriptor, beanName);
+			return new Jsr330ProviderFactory().createDependencyProvider(descriptor, beanName);
 		}
 		else {
 			Object result = getAutowireCandidateResolver().getLazyResolutionProxyIfNecessary(descriptor, beanName);
@@ -1481,9 +1481,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 
 	/**
-	 * Serializable ObjectFactory for lazy resolution of a dependency.
+	 * Serializable ObjectFactory/ObjectProvider for lazy resolution of a dependency.
 	 */
-	private class DependencyObjectFactory implements SmartObjectFactory<Object>, Serializable {
+	private class DependencyObjectProvider implements ObjectProvider<Object>, Serializable {
 
 		private final DependencyDescriptor descriptor;
 
@@ -1491,7 +1491,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		private final String beanName;
 
-		public DependencyObjectFactory(DependencyDescriptor descriptor, String beanName) {
+		public DependencyObjectProvider(DependencyDescriptor descriptor, String beanName) {
 			this.descriptor = new DependencyDescriptor(descriptor);
 			this.descriptor.increaseNestingLevel();
 			this.optional = this.descriptor.getDependencyType().equals(javaUtilOptionalClass);
@@ -1565,9 +1565,9 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/**
 	 * Serializable ObjectFactory for lazy resolution of a dependency.
 	 */
-	private class DependencyProvider extends DependencyObjectFactory implements Provider<Object> {
+	private class Jsr330DependencyProvider extends DependencyObjectProvider implements Provider<Object> {
 
-		public DependencyProvider(DependencyDescriptor descriptor, String beanName) {
+		public Jsr330DependencyProvider(DependencyDescriptor descriptor, String beanName) {
 			super(descriptor, beanName);
 		}
 
@@ -1581,10 +1581,10 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	/**
 	 * Separate inner class for avoiding a hard dependency on the {@code javax.inject} API.
 	 */
-	private class DependencyProviderFactory {
+	private class Jsr330ProviderFactory {
 
 		public Object createDependencyProvider(DependencyDescriptor descriptor, String beanName) {
-			return new DependencyProvider(descriptor, beanName);
+			return new Jsr330DependencyProvider(descriptor, beanName);
 		}
 	}
 

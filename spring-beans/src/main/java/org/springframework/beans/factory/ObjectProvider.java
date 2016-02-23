@@ -25,7 +25,7 @@ import org.springframework.beans.BeansException;
  * @author Juergen Hoeller
  * @since 4.3
  */
-public interface SmartObjectFactory<T> extends ObjectFactory<T> {
+public interface ObjectProvider<T> extends ObjectFactory<T> {
 
 	/**
 	 * Return an instance (possibly shared or independent) of the object

@@ -45,7 +45,7 @@ import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.ObjectFactory;
-import org.springframework.beans.factory.SmartObjectFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
@@ -2570,7 +2570,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 	public static class SmartObjectFactoryInjectionBean {
 
 		@Autowired
-		private SmartObjectFactory<TestBean> testBeanFactory;
+		private ObjectProvider<TestBean> testBeanFactory;
 
 		public TestBean getTestBean() {
 			return this.testBeanFactory.getObject();
