@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.springframework.test.web.client;
 
 import java.net.URI;
@@ -29,7 +28,6 @@ import org.springframework.mock.http.client.MockAsyncClientHttpRequest;
 
 import static org.junit.Assert.assertEquals;
 import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.test.web.client.ExpectedCount.max;
 import static org.springframework.test.web.client.ExpectedCount.min;
 import static org.springframework.test.web.client.ExpectedCount.once;
@@ -39,12 +37,12 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 /**
- * Unit tests for {@link SimpleRequestExpectationManager}.
+ * Unit tests for {@link UnorderedRequestExpectationManager}.
  * @author Rossen Stoyanchev
  */
-public class SimpleRequestExpectationManagerTests {
+public class UnorderedRequestExpectationManagerTests {
 
-	private SimpleRequestExpectationManager manager = new SimpleRequestExpectationManager();
+	private UnorderedRequestExpectationManager manager = new UnorderedRequestExpectationManager();
 
 	@Rule
 	public ExpectedException thrown = ExpectedException.none();
@@ -67,38 +65,11 @@ public class SimpleRequestExpectationManagerTests {
 	}
 
 	@Test
-	public void sequentialRequests() throws Exception {
+	public void multipleRequests() throws Exception {
 		this.manager.expectRequest(once(), requestTo("/foo")).andExpect(method(GET)).andRespond(withSuccess());
 		this.manager.expectRequest(once(), requestTo("/bar")).andExpect(method(GET)).andRespond(withSuccess());
 
-		this.manager.validateRequest(createRequest(GET, "/foo"));
 		this.manager.validateRequest(createRequest(GET, "/bar"));
-		this.manager.verify();
-	}
-
-	@Test
-	public void sequentialRequestsTooMany() throws Exception {
-		this.manager.expectRequest(max(1), requestTo("/foo")).andExpect(method(GET)).andRespond(withSuccess());
-		this.manager.expectRequest(max(1), requestTo("/bar")).andExpect(method(GET)).andRespond(withSuccess());
-
-		this.thrown.expectMessage("No further requests expected: HTTP GET /baz\n" +
-				"2 request(s) executed:\n" +
-				"GET /foo\n" +
-				"GET /bar\n");
-
-		this.manager.validateRequest(createRequest(GET, "/foo"));
-		this.manager.validateRequest(createRequest(GET, "/bar"));
-		this.manager.validateRequest(createRequest(GET, "/baz"));
-	}
-
-	@Test
-	public void sequentialRequestsTooFew() throws Exception {
-		this.manager.expectRequest(min(1), requestTo("/foo")).andExpect(method(GET)).andRespond(withSuccess());
-		this.manager.expectRequest(min(1), requestTo("/bar")).andExpect(method(GET)).andRespond(withSuccess());
-
-		this.thrown.expectMessage("Further request(s) expected leaving 1 unsatisfied expectation(s).\n" +
-				"1 request(s) executed:\nGET /foo\n");
-
 		this.manager.validateRequest(createRequest(GET, "/foo"));
 		this.manager.verify();
 	}
@@ -108,8 +79,8 @@ public class SimpleRequestExpectationManagerTests {
 		this.manager.expectRequest(times(2), requestTo("/foo")).andExpect(method(GET)).andRespond(withSuccess());
 		this.manager.expectRequest(times(2), requestTo("/bar")).andExpect(method(GET)).andRespond(withSuccess());
 
-		this.manager.validateRequest(createRequest(GET, "/foo"));
 		this.manager.validateRequest(createRequest(GET, "/bar"));
+		this.manager.validateRequest(createRequest(GET, "/foo"));
 		this.manager.validateRequest(createRequest(GET, "/foo"));
 		this.manager.validateRequest(createRequest(GET, "/bar"));
 		this.manager.verify();
@@ -122,15 +93,15 @@ public class SimpleRequestExpectationManagerTests {
 
 		this.thrown.expectMessage("No further requests expected: HTTP GET /foo\n" +
 				"4 request(s) executed:\n" +
-				"GET /foo\n" +
 				"GET /bar\n" +
 				"GET /foo\n" +
-				"GET /bar\n");
+				"GET /bar\n" +
+				"GET /foo\n");
 
-		this.manager.validateRequest(createRequest(GET, "/foo"));
 		this.manager.validateRequest(createRequest(GET, "/bar"));
 		this.manager.validateRequest(createRequest(GET, "/foo"));
 		this.manager.validateRequest(createRequest(GET, "/bar"));
+		this.manager.validateRequest(createRequest(GET, "/foo"));
 		this.manager.validateRequest(createRequest(GET, "/foo"));
 	}
 
@@ -140,24 +111,14 @@ public class SimpleRequestExpectationManagerTests {
 		this.manager.expectRequest(min(2), requestTo("/bar")).andExpect(method(GET)).andRespond(withSuccess());
 
 		this.thrown.expectMessage("3 request(s) executed:\n" +
-				"GET /foo\n" +
 				"GET /bar\n" +
+				"GET /foo\n" +
 				"GET /foo\n");
 
-		this.manager.validateRequest(createRequest(GET, "/foo"));
 		this.manager.validateRequest(createRequest(GET, "/bar"));
 		this.manager.validateRequest(createRequest(GET, "/foo"));
+		this.manager.validateRequest(createRequest(GET, "/foo"));
 		this.manager.verify();
-	}
-
-	@Test
-	public void repeatedRequestsNotInOrder() throws Exception {
-		this.manager.expectRequest(times(2), requestTo("/foo")).andExpect(method(GET)).andRespond(withSuccess());
-		this.manager.expectRequest(times(2), requestTo("/bar")).andExpect(method(GET)).andRespond(withSuccess());
-		this.manager.expectRequest(times(2), requestTo("/baz")).andExpect(method(GET)).andRespond(withSuccess());
-
-		this.thrown.expectMessage("Unexpected HttpMethod expected:<GET> but was:<POST>");
-		this.manager.validateRequest(createRequest(POST, "/foo"));
 	}
 
 
@@ -169,5 +130,4 @@ public class SimpleRequestExpectationManagerTests {
 			throw new IllegalStateException(ex);
 		}
 	}
-
 }

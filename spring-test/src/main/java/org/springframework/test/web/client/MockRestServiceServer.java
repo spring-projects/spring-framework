@@ -35,59 +35,33 @@ import org.springframework.web.client.support.RestGatewaySupport;
 
 /**
  * <strong>Main entry point for client-side REST testing</strong>. Used for tests
- * that involve direct or indirect (through client code) use of the
- * {@link RestTemplate}. Provides a way to set up fine-grained expectations
- * on the requests that will be performed through the {@code RestTemplate} and
- * a way to define the responses to send back removing the need for an
- * actual running server.
+ * that involve direct or indirect use of the {@link RestTemplate}. Provides a
+ * way to set up expected requests that will be performed through the
+ * {@code RestTemplate} as well as mock responses to send back thus removing the
+ * need for an actual server.
  *
- * <p>Below is an example:
+ * <p>Below is an example that assumes static imports from
+ * {@code MockRestRequestMatchers}, {@code MockRestResponseCreators},
+ * and {@code ExpectedCount}:
+ *
  * <pre class="code">
- * import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
- * import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
- * import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
- *
- * ...
- *
  * RestTemplate restTemplate = new RestTemplate()
- * MockRestServiceServer mockServer = MockRestServiceServer.createServer(restTemplate);
+ * MockRestServiceServer server = MockRestServiceServer.restTemplate(restTemplate).build();
  *
- * mockServer.expect(requestTo("/hotels/42")).andExpect(method(HttpMethod.GET))
+ * server.expect(manyTimes(), requestTo("/hotels/42")).andExpect(method(HttpMethod.GET))
  *     .andRespond(withSuccess("{ \"id\" : \"42\", \"name\" : \"Holiday Inn\"}", MediaType.APPLICATION_JSON));
  *
  * Hotel hotel = restTemplate.getForObject("/hotels/{id}", Hotel.class, 42);
  * &#47;&#47; Use the hotel instance...
  *
- * mockServer.verify();
+ * // Verify all expectations met
+ * server.verify();
  * </pre>
  *
- * <p>To create an instance of this class, use {@link #createServer(RestTemplate)}
- * and provide the {@code RestTemplate} to set up for the mock testing.
- *
- * <p>After that use {@link #expect(RequestMatcher)} and fluent API methods
- * {@link ResponseActions#andExpect(RequestMatcher) andExpect(RequestMatcher)} and
- * {@link ResponseActions#andRespond(ResponseCreator) andRespond(ResponseCreator)}
- * to set up request expectations and responses, most likely relying on the default
- * {@code RequestMatcher} implementations provided in {@link MockRestRequestMatchers}
- * and the {@code ResponseCreator} implementations provided in
- * {@link MockRestResponseCreators} both of which can be statically imported.
- *
- * <p>At the end of the test use {@link #verify()} to ensure all expected
- * requests were actually performed.
- *
- * <p>Note that because of the fluent API offered by this class (and related
- * classes), you can typically use the Code Completion features (i.e.
- * ctrl-space) in your IDE to set up the mocks.
- *
- * <p>An alternative to the above is to use
- * {@link MockMvcClientHttpRequestFactory} which allows executing requests
- * against a {@link org.springframework.test.web.servlet.MockMvc MockMvc}
- * instance. That allows you to process requests using your server-side code
- * but without running a server.
- *
- * <p><strong>Credits:</strong> The client-side REST testing support was
- * inspired by and initially based on similar code in the Spring WS project for
- * client-side tests involving the {@code WebServiceTemplate}.
+ * <p>Note that as an alternative to the above you can also set the
+ * {@link MockMvcClientHttpRequestFactory} on a {@code RestTemplate} which
+ * allows executing requests against an instance of
+ * {@link org.springframework.test.web.servlet.MockMvc MockMvc}.
  *
  * @author Craig Walls
  * @author Rossen Stoyanchev
@@ -99,14 +73,6 @@ public class MockRestServiceServer {
 
 
 	/**
-	 * Private constructor.
-	 * See static builder methods and {@code createServer} shortcut methods.
-	 */
-	private MockRestServiceServer() {
-		this.expectationManager = new SimpleRequestExpectationManager();
-	}
-
-	/**
 	 * Private constructor with {@code RequestExpectationManager}.
 	 * See static builder methods and {@code createServer} shortcut methods.
 	 */
@@ -116,17 +82,37 @@ public class MockRestServiceServer {
 
 
 	/**
-	 * Set up a new HTTP request expectation. The returned {@link ResponseActions}
-	 * is used to set up further expectations and to define the response.
-	 * <p>This method may be invoked multiple times before starting the test, i.e. before
-	 * using the {@code RestTemplate}, to set up expectations for multiple requests.
-	 * @param matcher a request expectation, see {@link MockRestRequestMatchers}
-	 * @return used to set up further expectations or to define a response
+	 * Set up an expectation for a single HTTP request. The returned
+	 * {@link ResponseActions} can be used to set up further expectations as
+	 * well as to define the response.
+	 *
+	 * <p>This method may be invoked any number times before starting to make
+	 * request through the underlying {@code RestTemplate} in order to set up
+	 * all expected requests.
+	 *
+	 * @param matcher request matcher
+	 * @return a representation of the expectation
 	 */
 	public ResponseActions expect(RequestMatcher matcher) {
-		return this.expectationManager.expectRequest(matcher);
+		return expect(ExpectedCount.once(), matcher);
 	}
 
+	/**
+	 * An alternative to {@link #expect(RequestMatcher)} with an indication how
+	 * many times the request is expected to be executed.
+	 *
+	 * <p>When request expectations have an expected count greater than one, only
+	 * the first execution is expected to match the order of declaration. Subsequent
+	 * request executions may be inserted anywhere thereafter.
+	 *
+	 * @param count the expected count
+	 * @param matcher request matcher
+	 * @return a representation of the expectation
+	 * @since 4.3
+	 */
+	public ResponseActions expect(ExpectedCount count, RequestMatcher matcher) {
+		return this.expectationManager.expectRequest(count, matcher);
+	}
 
 	/**
 	 * Verify that all expected requests set up via
@@ -139,7 +125,7 @@ public class MockRestServiceServer {
 
 
 	/**
-	 * Build a {@code MockRestServiceServer} with a {@code RestTemplate}.
+	 * Build a {@code MockRestServiceServer} for a {@code RestTemplate}.
 	 * @since 4.3
 	 */
 	public static MockRestServiceServerBuilder restTemplate(RestTemplate restTemplate) {
@@ -147,7 +133,7 @@ public class MockRestServiceServer {
 	}
 
 	/**
-	 * Build a {@code MockRestServiceServer} with an {@code AsyncRestTemplate}.
+	 * Build a {@code MockRestServiceServer} for an {@code AsyncRestTemplate}.
 	 * @since 4.3
 	 */
 	public static MockRestServiceServerBuilder asyncRestTemplate(AsyncRestTemplate asyncRestTemplate) {
@@ -155,7 +141,7 @@ public class MockRestServiceServer {
 	}
 
 	/**
-	 * Build a {@code MockRestServiceServer} with a {@code RestGateway}.
+	 * Build a {@code MockRestServiceServer} for a {@code RestGateway}.
 	 * @since 4.3
 	 */
 	public static MockRestServiceServerBuilder restGateway(RestGatewaySupport restGateway) {
@@ -195,7 +181,6 @@ public class MockRestServiceServer {
 
 	/**
 	 * Builder to create a {@code MockRestServiceServer}.
-
 	 */
 	public interface MockRestServiceServerBuilder {
 

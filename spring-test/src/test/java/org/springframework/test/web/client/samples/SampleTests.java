@@ -23,10 +23,12 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.Person;
+import org.springframework.test.web.client.ExpectedCount;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
 import static org.junit.Assert.assertTrue;
+import static org.springframework.test.web.client.ExpectedCount.manyTimes;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
@@ -60,11 +62,33 @@ public class SampleTests {
 			.andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
 		@SuppressWarnings("unused")
-		Person ludwig = restTemplate.getForObject("/composers/{id}", Person.class, 42);
+		Person ludwig = this.restTemplate.getForObject("/composers/{id}", Person.class, 42);
 
 		// We are only validating the request. The response is mocked out.
 		// hotel.getId() == 42
 		// hotel.getName().equals("Holiday Inn")
+
+		this.mockServer.verify();
+	}
+
+	@Test
+	public void performGetManyTimes() throws Exception {
+
+		String responseBody = "{\"name\" : \"Ludwig van Beethoven\", \"someDouble\" : \"1.6035\"}";
+
+		this.mockServer.expect(manyTimes(), requestTo("/composers/42")).andExpect(method(HttpMethod.GET))
+				.andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
+
+		@SuppressWarnings("unused")
+		Person ludwig = this.restTemplate.getForObject("/composers/{id}", Person.class, 42);
+
+		// We are only validating the request. The response is mocked out.
+		// hotel.getId() == 42
+		// hotel.getName().equals("Holiday Inn")
+
+		this.restTemplate.getForObject("/composers/{id}", Person.class, 42);
+		this.restTemplate.getForObject("/composers/{id}", Person.class, 42);
+		this.restTemplate.getForObject("/composers/{id}", Person.class, 42);
 
 		this.mockServer.verify();
 	}
@@ -78,7 +102,7 @@ public class SampleTests {
 			.andRespond(withSuccess(responseBody, MediaType.APPLICATION_JSON));
 
 		@SuppressWarnings("unused")
-		Person ludwig = restTemplate.getForObject("/composers/{id}", Person.class, 42);
+		Person ludwig = this.restTemplate.getForObject("/composers/{id}", Person.class, 42);
 
 		// hotel.getId() == 42
 		// hotel.getName().equals("Holiday Inn")
@@ -112,7 +136,7 @@ public class SampleTests {
 			this.mockServer.verify();
 		}
 		catch (AssertionError error) {
-			assertTrue(error.getMessage(), error.getMessage().contains("2 out of 4 were executed"));
+			assertTrue(error.getMessage(), error.getMessage().contains("2 unsatisfied expectation(s)"));
 		}
 	}
 }

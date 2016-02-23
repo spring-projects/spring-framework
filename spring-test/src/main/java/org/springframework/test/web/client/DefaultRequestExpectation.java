@@ -33,16 +33,37 @@ import org.springframework.util.Assert;
  */
 public class DefaultRequestExpectation implements RequestExpectation {
 
+	private final RequestCount requestCount;
+
 	private final List<RequestMatcher> requestMatchers = new LinkedList<RequestMatcher>();
 
 	private ResponseCreator responseCreator;
 
 
-	public DefaultRequestExpectation(RequestMatcher requestMatcher) {
-		Assert.notNull(requestMatcher, "RequestMatcher is required");
+	/**
+	 * Create a new request expectation that should be called a number of times
+	 * as indicated by {@code RequestCount}.
+	 * @param expectedCount the expected request expectedCount
+	 */
+	public DefaultRequestExpectation(ExpectedCount expectedCount, RequestMatcher requestMatcher) {
+		Assert.notNull(expectedCount, "'expectedCount' is required");
+		Assert.notNull(requestMatcher, "'requestMatcher' is required");
+		this.requestCount = new RequestCount(expectedCount);
 		this.requestMatchers.add(requestMatcher);
 	}
 
+
+	protected RequestCount getRequestCount() {
+		return this.requestCount;
+	}
+
+	protected List<RequestMatcher> getRequestMatchers() {
+		return this.requestMatchers;
+	}
+
+	protected ResponseCreator getResponseCreator() {
+		return this.responseCreator;
+	}
 
 	@Override
 	public ResponseActions andExpect(RequestMatcher requestMatcher) {
@@ -59,17 +80,68 @@ public class DefaultRequestExpectation implements RequestExpectation {
 
 	@Override
 	public void match(ClientHttpRequest request) throws IOException {
-		for (RequestMatcher matcher : this.requestMatchers) {
+		for (RequestMatcher matcher : getRequestMatchers()) {
 			matcher.match(request);
 		}
 	}
 
 	@Override
 	public ClientHttpResponse createResponse(ClientHttpRequest request) throws IOException {
-		if (this.responseCreator == null) {
+		if (getResponseCreator() == null) {
 			throw new IllegalStateException("createResponse called before ResponseCreator was set.");
 		}
-		return this.responseCreator.createResponse(request);
+		getRequestCount().incrementAndValidate();
+		return getResponseCreator().createResponse(request);
+	}
+
+	@Override
+	public boolean hasRemainingCount() {
+		return getRequestCount().hasRemainingCount();
+	}
+
+	@Override
+	public boolean isSatisfied() {
+		return getRequestCount().isSatisfied();
+	}
+
+
+	/**
+	 * Helper class that keeps track of actual vs expected request count.
+	 */
+	protected static class RequestCount {
+
+		private final ExpectedCount expectedCount;
+
+		private int matchedRequestCount;
+
+
+		public RequestCount(ExpectedCount expectedCount) {
+			this.expectedCount = expectedCount;
+		}
+
+
+		public ExpectedCount getExpectedCount() {
+			return this.expectedCount;
+		}
+
+		public int getMatchedRequestCount() {
+			return this.matchedRequestCount;
+		}
+
+		public void incrementAndValidate() {
+			this.matchedRequestCount++;
+			if (getMatchedRequestCount() > getExpectedCount().getMaxCount()) {
+				throw new AssertionError("No more calls expected.");
+			}
+		}
+
+		public boolean hasRemainingCount() {
+			return (getMatchedRequestCount() < getExpectedCount().getMaxCount());
+		}
+
+		public boolean isSatisfied() {
+			return (getMatchedRequestCount() >= getExpectedCount().getMinCount());
+		}
 	}
 
 }

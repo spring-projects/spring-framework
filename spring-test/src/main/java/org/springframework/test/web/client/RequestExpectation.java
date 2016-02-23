@@ -19,13 +19,23 @@ package org.springframework.test.web.client;
  * An extension of {@code ResponseActions} that also implements
  * {@code RequestMatcher} and {@code ResponseCreator}
  *
- * <p>{@code ResponseActions} is the API for defining expectations while
- * {@code RequestExpectation} is the internal SPI to match those expectations
- * to actual requests and to create responses.
+ * <p>While {@code ResponseActions} is the API for defining expectations this
+ * sub-interface is the internal SPI for matching these expectations to actual
+ * requests and for creating responses.
  *
  * @author Rossen Stoyanchev
  * @since 4.3
  */
 public interface RequestExpectation extends ResponseActions, RequestMatcher, ResponseCreator {
+
+	/**
+	 * Whether there is a remaining count of invocations for this expectation.
+	 */
+	boolean hasRemainingCount();
+
+	/**
+	 * Whether the requirements for this request expectation have been met.
+	 */
+	boolean isSatisfied();
 
 }

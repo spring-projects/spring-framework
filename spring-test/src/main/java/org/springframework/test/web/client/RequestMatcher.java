@@ -23,6 +23,9 @@ import org.springframework.http.client.ClientHttpRequest;
 /**
  * A contract for matching requests to expectations.
  *
+ * <p>See {@link org.springframework.test.web.client.match.MockRestRequestMatchers
+ * MockRestRequestMatchers} for static factory methods.
+ *
  * @author Craig Walls
  * @since 3.2
  */

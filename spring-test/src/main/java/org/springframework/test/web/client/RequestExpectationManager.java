@@ -21,9 +21,9 @@ import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 
 /**
- * Contract to manage creating HTTP request expectations, apply them to actual
- * requests (in strict or random order), and at the end verify whether all
- * expectations were met.
+ * Abstraction for creating HTTP request expectations, applying them to actual
+ * requests (in strict or random order), and verifying whether expectations
+ * have been met.
  *
  * @author Rossen Stoyanchev
  * @since 4.3
@@ -36,11 +36,11 @@ public interface RequestExpectationManager {
 	 * @param requestMatcher a request expectation
 	 * @return for setting up further expectations and define a response
 	 */
-	ResponseActions expectRequest(RequestMatcher requestMatcher);
+	ResponseActions expectRequest(ExpectedCount count, RequestMatcher requestMatcher);
 
 	/**
-	 * Validate the given actual request against the declared expectations
-	 * raising {@link AssertionError} if not met.
+	 * Validate the given actual request against the declared expectations.
+	 * Is successful return the mock response to use or raise an error.
 	 * @param request the request
 	 * @return the response to return if the request was validated.
 	 * @throws AssertionError when some expectations were not met

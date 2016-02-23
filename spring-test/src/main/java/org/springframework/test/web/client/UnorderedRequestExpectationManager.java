@@ -16,74 +16,36 @@
 package org.springframework.test.web.client;
 
 import java.io.IOException;
-import java.net.URI;
-import java.util.LinkedList;
-import java.util.List;
 
-import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
 
 /**
  * {@code RequestExpectationManager} that matches requests to expectations
- * regardless of the order of declaration of expectations.
+ * regardless of the order of declaration of expectated requests.
  *
  * @author Rossen Stoyanchev
  * @since 4.3
  */
 public class UnorderedRequestExpectationManager extends AbstractRequestExpectationManager {
 
-	private final List<RequestExpectation> remainingExpectations = new LinkedList<RequestExpectation>();
+	private final RequestExpectationGroup remainingExpectations = new RequestExpectationGroup();
 
 
-	protected List<RequestExpectation> getRemainingExpectations() {
-		return this.remainingExpectations;
+	@Override
+	protected void afterExpectationsDeclared() {
+		this.remainingExpectations.updateAll(getExpectations());
 	}
-
 
 	@Override
 	public ClientHttpResponse validateRequestInternal(ClientHttpRequest request) throws IOException {
-		if (getRequests().isEmpty()) {
-			getRemainingExpectations().addAll(getExpectations());
+		RequestExpectation expectation = this.remainingExpectations.findExpectation(request);
+		if (expectation != null) {
+			ClientHttpResponse response = expectation.createResponse(request);
+			this.remainingExpectations.update(expectation);
+			return response;
 		}
-		for (RequestExpectation expectation : getExpectations()) {
-			try {
-				expectation.match(request);
-				getRemainingExpectations().remove(expectation);
-				return expectation.createResponse(request);
-			}
-			catch (AssertionError error) {
-				// Ignore
-			}
-		}
-		HttpMethod method = request.getMethod();
-		URI uri = request.getURI();
-		throw new AssertionError("Unexpected request: HTTP " + method + " " + uri);
-	}
-
-	@Override
-	public void verify() {
-		if (getExpectations().isEmpty() || this.remainingExpectations.isEmpty()) {
-			return;
-		}
-		throw new AssertionError(getVerifyMessage());
-	}
-
-	private String getVerifyMessage() {
-		StringBuilder sb = new StringBuilder("Further request(s) expected\n");
-		if (getRequests().size() > 0) {
-			sb.append("The following ");
-		}
-		sb.append(getRequests().size()).append(" were executed");
-		sb.append(" leaving ").append(this.remainingExpectations.size()).append(" expectations.");
-
-		if (getRequests().size() > 0) {
-			sb.append(":\n");
-			for (ClientHttpRequest request : getRequests()) {
-				sb.append(request.toString()).append("\n");
-			}
-		}
-		return sb.toString();
+		throw createUnexpectedRequestError(request);
 	}
 
 }

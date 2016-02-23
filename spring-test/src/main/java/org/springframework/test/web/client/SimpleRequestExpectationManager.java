@@ -16,64 +16,59 @@
 package org.springframework.test.web.client;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.Iterator;
 
-import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.util.Assert;
 
 /**
  * Simple {@code RequestExpectationManager} that matches requests to expectations
  * sequentially, i.e. in the order of declaration of expectations.
+ *
+ * <p>When request expectations have an expected count greater than one, only
+ * the first execution is expected to match the order of declaration. Subsequent
+ * request executions may be inserted anywhere thereafter.
  *
  * @author Rossen Stoyanchev
  * @since 4.3
  */
 public class SimpleRequestExpectationManager extends AbstractRequestExpectationManager {
 
-	private Iterator<RequestExpectation> iterator;
+	private Iterator<RequestExpectation> expectationIterator;
 
+	private final RequestExpectationGroup repeatExpectations = new RequestExpectationGroup();
+
+
+	@Override
+	protected void afterExpectationsDeclared() {
+		Assert.state(this.expectationIterator == null);
+		this.expectationIterator = getExpectations().iterator();
+	}
 
 	@Override
 	public ClientHttpResponse validateRequestInternal(ClientHttpRequest request) throws IOException {
-		if (this.iterator == null) {
-			this.iterator = getExpectations().iterator();
+		RequestExpectation expectation;
+		try {
+			expectation = next(request);
+			expectation.match(request);
 		}
-		if (!this.iterator.hasNext()) {
-			HttpMethod method = request.getMethod();
-			URI uri = request.getURI();
-			String firstLine = "No further requests expected: HTTP " + method + " " + uri + "\n";
-			throw new AssertionError(createErrorMessage(firstLine));
-		}
-		RequestExpectation expectation = this.iterator.next();
-		expectation.match(request);
-		return expectation.createResponse(request);
-	}
-
-	@Override
-	public void verify() {
-		if (getExpectations().isEmpty() || getExpectations().size() == getRequests().size()) {
-			return;
-		}
-		throw new AssertionError(createErrorMessage("Further request(s) expected\n"));
-	}
-
-	private String createErrorMessage(String firstLine) {
-		StringBuilder sb = new StringBuilder(firstLine);
-		if (getRequests().size() > 0) {
-			sb.append("The following ");
-		}
-		sb.append(getRequests().size()).append(" out of ");
-		sb.append(getExpectations().size()).append(" were executed");
-
-		if (getRequests().size() > 0) {
-			sb.append(":\n");
-			for (ClientHttpRequest request : getRequests()) {
-				sb.append(request.toString()).append("\n");
+		catch (AssertionError error) {
+			expectation = this.repeatExpectations.findExpectation(request);
+			if (expectation == null) {
+				throw error;
 			}
 		}
-		return sb.toString();
+		ClientHttpResponse response = expectation.createResponse(request);
+		this.repeatExpectations.update(expectation);
+		return response;
+	}
+
+	private RequestExpectation next(ClientHttpRequest request) {
+		if (this.expectationIterator.hasNext()) {
+			return this.expectationIterator.next();
+		}
+		throw createUnexpectedRequestError(request);
 	}
 
 }
