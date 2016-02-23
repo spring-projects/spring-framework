@@ -106,7 +106,7 @@ public class AsyncIntegrationTests {
 		@Override
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 			return response.setBody(Stream.just("h", "e", "l", "l", "o")
-			                              .timer(Timer.global())
+			                              .useTimer(Timer.global())
 			                              .throttleRequest(100)
 			                              .dispatchOn(asyncGroup)
 			                              .collect(allocator::allocateBuffer,
