@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,19 +49,18 @@ import org.springframework.util.StringUtils;
  * Performs the actual initialization work for the root application context.
  * Called by {@link ContextLoaderListener}.
  *
- * <p>Looks for a {@link #CONTEXT_CLASS_PARAM "contextClass"} parameter
- * at the {@code web.xml} context-param level to specify the context
- * class type, falling back to the default of
- * {@link org.springframework.web.context.support.XmlWebApplicationContext}
+ * <p>Looks for a {@link #CONTEXT_CLASS_PARAM "contextClass"} parameter at the
+ * {@code web.xml} context-param level to specify the context class type, falling
+ * back to {@link org.springframework.web.context.support.XmlWebApplicationContext}
  * if not found. With the default ContextLoader implementation, any context class
- * specified needs to implement the ConfigurableWebApplicationContext interface.
+ * specified needs to implement the {@link ConfigurableWebApplicationContext} interface.
  *
- * <p>Processes a {@link #CONFIG_LOCATION_PARAM "contextConfigLocation"}
- * context-param and passes its value to the context instance, parsing it into
- * potentially multiple file paths which can be separated by any number of
- * commas and spaces, e.g. "WEB-INF/applicationContext1.xml,
- * WEB-INF/applicationContext2.xml". Ant-style path patterns are supported as well,
- * e.g. "WEB-INF/*Context.xml,WEB-INF/spring*.xml" or "WEB-INF/&#42;&#42;/*Context.xml".
+ * <p>Processes a {@link #CONFIG_LOCATION_PARAM "contextConfigLocation"} context-param
+ * and passes its value to the context instance, parsing it into potentially multiple
+ * file paths which can be separated by any number of commas and spaces, e.g.
+ * "WEB-INF/applicationContext1.xml, WEB-INF/applicationContext2.xml".
+ * Ant-style path patterns are supported as well, e.g.
+ * "WEB-INF/*Context.xml,WEB-INF/spring*.xml" or "WEB-INF/&#42;&#42;/*Context.xml".
  * If not explicitly specified, the context implementation is supposed to use a
  * default location (with XmlWebApplicationContext: "/WEB-INF/applicationContext.xml").
  *
@@ -70,10 +69,9 @@ import org.springframework.util.StringUtils;
  * Spring's default ApplicationContext implementations. This can be leveraged
  * to deliberately override certain bean definitions via an extra XML file.
  *
- * <p>Above and beyond loading the root application context, this class
- * can optionally load or obtain and hook up a shared parent context to
- * the root application context. See the
- * {@link #loadParentContext(ServletContext)} method for more information.
+ * <p>Above and beyond loading the root application context, this class can optionally
+ * load or obtain and hook up a shared parent context to the root application context.
+ * See the {@link #loadParentContext(ServletContext)} method for more information.
  *
  * <p>As of Spring 3.1, {@code ContextLoader} supports injecting the root web
  * application context via the {@link #ContextLoader(WebApplicationContext)}
@@ -470,11 +468,11 @@ public class ContextLoader {
 		for (Class<ApplicationContextInitializer<ConfigurableApplicationContext>> initializerClass : initializerClasses) {
 			Class<?> initializerContextClass =
 					GenericTypeResolver.resolveTypeArgument(initializerClass, ApplicationContextInitializer.class);
-			if (initializerContextClass != null) {
-				Assert.isAssignable(initializerContextClass, wac.getClass(), String.format(
-						"Could not add context initializer [%s] since its generic parameter [%s] " +
+			if (initializerContextClass != null && !initializerContextClass.isInstance(wac)) {
+				throw new ApplicationContextException(String.format(
+						"Could not apply context initializer [%s] since its generic parameter [%s] " +
 						"is not assignable from the type of application context used by this " +
-						"context loader [%s]: ", initializerClass.getName(), initializerContextClass.getName(),
+						"context loader: [%s]", initializerClass.getName(), initializerContextClass.getName(),
 						wac.getClass().getName()));
 			}
 			this.contextInitializers.add(BeanUtils.instantiateClass(initializerClass));
