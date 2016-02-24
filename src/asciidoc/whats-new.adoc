@@ -678,4 +678,5 @@ Spring 4.3 also improves the caching abstraction as follows:
 * The JUnit support in the _Spring TestContext Framework_ now requires JUnit 4.12 or higher.
 * Server-side Spring MVC Test supports expectations on response headers with multiple values.
 * Server-side Spring MVC Test parses form data request content and populates request parameters.
+* Client-side Spring MVC Test supports expected count of request executions (once, manyTimes, min, max, etc.)
 * Client-side Spring MVC Test supports expectations for form data in the request body.

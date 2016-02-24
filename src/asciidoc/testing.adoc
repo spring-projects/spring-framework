@@ -5045,8 +5045,9 @@ Here is an example:
 ----
 	RestTemplate restTemplate = new RestTemplate();
 
-	MockRestServiceServer mockServer = MockRestServiceServer.createServer(restTemplate);
-	mockServer.expect(requestTo("/greeting")).andRespond(withSuccess("Hello world", MediaType.TEXT_PLAIN));
+	MockRestServiceServer mockServer = MockRestServiceServer.restTemplate(restTemplate).build();
+	mockServer.expect(manyTimes(), requestTo("/greeting"))
+			.andRespond(withSuccess("Hello world", MediaType.TEXT_PLAIN));
 
 	// Test code that uses the above RestTemplate ...
 
