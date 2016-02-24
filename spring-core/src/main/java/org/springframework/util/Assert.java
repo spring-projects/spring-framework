@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -373,8 +373,8 @@ public abstract class Assert {
 	public static void isAssignable(Class<?> superType, Class<?> subType, String message) {
 		notNull(superType, "Type to check against must not be null");
 		if (subType == null || !superType.isAssignableFrom(subType)) {
-			throw new IllegalArgumentException((StringUtils.hasLength(message) ? message + " " : "")
-				+ subType + " is not assignable to " + superType);
+			throw new IllegalArgumentException((StringUtils.hasLength(message) ? message + " " : "") +
+					subType + " is not assignable to " + superType);
 		}
 	}
 
