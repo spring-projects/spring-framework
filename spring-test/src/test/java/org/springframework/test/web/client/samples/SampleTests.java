@@ -23,7 +23,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.Person;
-import org.springframework.test.web.client.ExpectedCount;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
@@ -50,7 +49,7 @@ public class SampleTests {
 	@Before
 	public void setup() {
 		this.restTemplate = new RestTemplate();
-		this.mockServer = MockRestServiceServer.createServer(this.restTemplate);
+		this.mockServer = MockRestServiceServer.bindTo(this.restTemplate).ignoreExpectOrder().build();
 	}
 
 	@Test

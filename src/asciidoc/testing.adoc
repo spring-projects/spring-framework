@@ -5045,28 +5045,63 @@ Here is an example:
 ----
 	RestTemplate restTemplate = new RestTemplate();
 
-	MockRestServiceServer mockServer = MockRestServiceServer.restTemplate(restTemplate).build();
-	mockServer.expect(manyTimes(), requestTo("/greeting"))
-			.andRespond(withSuccess("Hello world", MediaType.TEXT_PLAIN));
+	MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
+	mockServer.expect(requestTo("/greeting")).andRespond(withSuccess());
 
 	// Test code that uses the above RestTemplate ...
 
 	mockServer.verify();
 ----
 
-In the above example, `MockRestServiceServer` -- the central class for client-side REST
-tests -- configures the `RestTemplate` with a custom `ClientHttpRequestFactory` that
+In the above example, `MockRestServiceServer`, the central class for client-side REST
+tests, configures the `RestTemplate` with a custom `ClientHttpRequestFactory` that
 asserts actual requests against expectations and returns "stub" responses. In this case
-we expect a single request to "/greeting" and want to return a 200 response with
-"text/plain" content. We could define as many additional requests and stub responses as
-necessary. Once expected requests and stub responses have been defined, the `RestTemplate` can be
-used in client-side code as usual. At the end of the tests `mockServer.verify()` can be
-used to verify that all expected requests were performed.
+we expect a request to "/greeting" and want to return a 200 response with
+"text/plain" content. We could define as additional expected requests and stub responses as
+needed. When expected requests and stub responses are defined, the `RestTemplate` can be
+used in client-side code as usual. At the end of testing `mockServer.verify()` can be
+used to verify that all expectations have been satisfied.
 
-The client-side test support also provides an alternative `ClientHttpRequestFactory`
-strategy for executing requests with a `MockMvc` instance. That allows you to
-process requests using your server-side code but without running a server.
-Here is an example:
+By default requests are expected in the order in which expectations were declared.
+You can set the `ignoreExpectOrder` option when building the server in which case
+all expectations are checked (in order) to find a match for a given request. That
+means requests are allowed to come in any order. Here is an example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	server = MockRestServiceServer.bindTo(restTemplate).ignoreExpectOrder().build();
+----
+
+Even with unordered requests by default each request is allowed to execute once only.
+The `expect` method provides an overloaded variant that accepts an `ExpectedCount`
+argument that specifies a count range, e.g. `once`, `manyTimes`, `max`, `min`,
+`between`, and so on. Here is an example:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	RestTemplate restTemplate = new RestTemplate();
+
+	MockRestServiceServer mockServer = MockRestServiceServer.bindTo(restTemplate).build();
+	mockServer.expect(times(2), requestTo("/foo")).andRespond(withSuccess());
+	mockServer.expect(times(3), requestTo("/bar")).andRespond(withSuccess());
+
+	// ...
+
+	mockServer.verify();
+----
+
+Note that when `ignoreExpectOrder` is not set (the default), and therefore requests
+are expected in order of declaration, then that order only applies to the first of
+any expected request. For example if "/foo" is expected 2 times followed by "/bar"
+3 times, then there should be a request to "/foo" before there is a request to "/bar"
+but aside from that subsequent "/foo" and "/bar" requests can come at any time.
+
+As an alternative to all of the above the client-side test support also provides a
+`ClientHttpRequestFactory` implementation that can be configured into a `RestTemplate`
+to bind it to a `MockMvc` instance. That allows processing requests using actual
+server-side logic but without running a server. Here is an example:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -5086,7 +5121,7 @@ Here is an example:
 Just like with server-side tests, the fluent API for client-side tests requires a few
 static imports. Those are easy to find by searching __"MockRest*"__. Eclipse users
 should add `"MockRestRequestMatchers.{asterisk}"` and `"MockRestResponseCreators.{asterisk}"`
-as "favorite static members" in the Eclipse preferences under 
+as "favorite static members" in the Eclipse preferences under
 __Java -> Editor -> Content Assist -> Favorites__.
 That allows using content assist after typing the first character of the
 static method name. Other IDEs (e.g. IntelliJ) may not require any additional

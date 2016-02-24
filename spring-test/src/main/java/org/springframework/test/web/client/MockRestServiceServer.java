@@ -26,8 +26,6 @@ import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.mock.http.client.MockAsyncClientHttpRequest;
-import org.springframework.test.web.client.match.MockRestRequestMatchers;
-import org.springframework.test.web.client.response.MockRestResponseCreators;
 import org.springframework.util.Assert;
 import org.springframework.web.client.AsyncRestTemplate;
 import org.springframework.web.client.RestTemplate;
@@ -46,7 +44,7 @@ import org.springframework.web.client.support.RestGatewaySupport;
  *
  * <pre class="code">
  * RestTemplate restTemplate = new RestTemplate()
- * MockRestServiceServer server = MockRestServiceServer.restTemplate(restTemplate).build();
+ * MockRestServiceServer server = MockRestServiceServer.bindTo(restTemplate).build();
  *
  * server.expect(manyTimes(), requestTo("/hotels/42")).andExpect(method(HttpMethod.GET))
  *     .andRespond(withSuccess("{ \"id\" : \"42\", \"name\" : \"Holiday Inn\"}", MediaType.APPLICATION_JSON));
@@ -125,56 +123,59 @@ public class MockRestServiceServer {
 
 
 	/**
-	 * Build a {@code MockRestServiceServer} for a {@code RestTemplate}.
+	 * Return a builder for a {@code MockRestServiceServer} that should be used
+	 * to reply to the given {@code RestTemplate}.
 	 * @since 4.3
 	 */
-	public static MockRestServiceServerBuilder restTemplate(RestTemplate restTemplate) {
+	public static MockRestServiceServerBuilder bindTo(RestTemplate restTemplate) {
 		return new DefaultBuilder(restTemplate);
 	}
 
 	/**
-	 * Build a {@code MockRestServiceServer} for an {@code AsyncRestTemplate}.
+	 * Return a builder for a {@code MockRestServiceServer} that should be used
+	 * to reply to the given {@code AsyncRestTemplate}.
 	 * @since 4.3
 	 */
-	public static MockRestServiceServerBuilder asyncRestTemplate(AsyncRestTemplate asyncRestTemplate) {
+	public static MockRestServiceServerBuilder bindTo(AsyncRestTemplate asyncRestTemplate) {
 		return new DefaultBuilder(asyncRestTemplate);
 	}
 
 	/**
-	 * Build a {@code MockRestServiceServer} for a {@code RestGateway}.
+	 * Return a builder for a {@code MockRestServiceServer} that should be used
+	 * to reply to the given {@code RestGatewaySupport}.
 	 * @since 4.3
 	 */
-	public static MockRestServiceServerBuilder restGateway(RestGatewaySupport restGateway) {
+	public static MockRestServiceServerBuilder bindTo(RestGatewaySupport restGateway) {
 		Assert.notNull(restGateway, "'gatewaySupport' must not be null");
 		return new DefaultBuilder(restGateway.getRestTemplate());
 	}
 
 
 	/**
-	 * A shortcut for {@code restTemplate(restTemplate).build()}.
+	 * A shortcut for {@code bindTo(restTemplate).build()}.
 	 * @param restTemplate the RestTemplate to set up for mock testing
 	 * @return the mock server
 	 */
 	public static MockRestServiceServer createServer(RestTemplate restTemplate) {
-		return restTemplate(restTemplate).build();
+		return bindTo(restTemplate).build();
 	}
 
 	/**
-	 * A shortcut for {@code asyncRestTemplate(asyncRestTemplate).build()}.
+	 * A shortcut for {@code bindTo(asyncRestTemplate).build()}.
 	 * @param asyncRestTemplate the AsyncRestTemplate to set up for mock testing
 	 * @return the created mock server
 	 */
 	public static MockRestServiceServer createServer(AsyncRestTemplate asyncRestTemplate) {
-		return asyncRestTemplate(asyncRestTemplate).build();
+		return bindTo(asyncRestTemplate).build();
 	}
 
 	/**
-	 * A shortcut for {@code restGateway(restGateway).build()}.
+	 * A shortcut for {@code bindTo(restGateway).build()}.
 	 * @param restGateway the REST gateway to set up for mock testing
 	 * @return the created mock server
 	 */
 	public static MockRestServiceServer createServer(RestGatewaySupport restGateway) {
-		return restGateway(restGateway).build();
+		return bindTo(restGateway).build();
 	}
 
 
@@ -189,13 +190,13 @@ public class MockRestServiceServer {
 		 * matching the order of declaration. This is a shortcut for:<br>
 		 * {@code builder.expectationManager(new UnorderedRequestExpectationManager)}
 		 */
-		MockRestServiceServerBuilder unordered();
+		MockRestServiceServerBuilder ignoreExpectOrder();
 
 		/**
 		 * Configure a custom {@code RequestExpectationManager}.
 		 * <p>By default {@link SimpleRequestExpectationManager} is used. It is
 		 * also possible to switch to {@link UnorderedRequestExpectationManager}
-		 * by setting {@link #unordered()}.
+		 * by setting {@link #ignoreExpectOrder()}.
 		 */
 		MockRestServiceServerBuilder expectationManager(RequestExpectationManager manager);
 
@@ -231,7 +232,7 @@ public class MockRestServiceServer {
 
 
 		@Override
-		public MockRestServiceServerBuilder unordered() {
+		public MockRestServiceServerBuilder ignoreExpectOrder() {
 			expectationManager(new UnorderedRequestExpectationManager());
 			return this;
 		}
