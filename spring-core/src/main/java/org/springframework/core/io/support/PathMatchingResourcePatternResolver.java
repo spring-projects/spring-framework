@@ -552,7 +552,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		JarFile jarFile;
 		String jarFileUrl;
 		String rootEntryPath;
-		boolean newJarFile = false;
+		boolean closeJarFile;
 
 		if (con instanceof JarURLConnection) {
 			// Should usually be the case for traditional JAR files.
@@ -562,6 +562,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			jarFileUrl = jarCon.getJarFileURL().toExternalForm();
 			JarEntry jarEntry = jarCon.getJarEntry();
 			rootEntryPath = (jarEntry != null ? jarEntry.getName() : "");
+			closeJarFile = !jarCon.getUseCaches();
 		}
 		else {
 			// No JarURLConnection -> need to resort to URL file parsing.
@@ -581,7 +582,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 					jarFileUrl = urlFile;
 					rootEntryPath = "";
 				}
-				newJarFile = true;
+				closeJarFile = true;
 			}
 			catch (ZipException ex) {
 				if (logger.isDebugEnabled()) {
@@ -614,9 +615,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			return result;
 		}
 		finally {
-			// Close jar file, but only if freshly obtained -
-			// not from JarURLConnection, which might cache the file reference.
-			if (newJarFile) {
+			if (closeJarFile) {
 				jarFile.close();
 			}
 		}
