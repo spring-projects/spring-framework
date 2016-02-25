@@ -83,6 +83,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerBeanDefinition("testBean", new GenericBeanDefinition());
 		try {
 			bf.getBean("testBean");
+			fail("Should have thrown BeanCreationException");
 		}
 		catch (BeanCreationException ex) {
 			assertTrue(ex.getRootCause() instanceof IllegalStateException);
@@ -635,6 +636,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		}
 		catch (UnsatisfiedDependencyException ex) {
 			// expected
+			assertSame(ConstructorWithoutFallbackBean.class, ex.getInjectionPoint().getMethodParameter().getDeclaringClass());
 		}
 	}
 
@@ -838,8 +840,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 			bf.getBean("annotatedBean");
 			fail("should have failed, more than one bean of type");
 		}
-		catch (BeanCreationException ex) {
+		catch (UnsatisfiedDependencyException ex) {
 			// expected
+			assertSame(MapMethodInjectionBean.class, ex.getInjectionPoint().getMethodParameter().getDeclaringClass());
 		}
 		bf.destroySingletons();
 	}
@@ -1164,7 +1167,8 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		TestBean tb = new TestBean();
 		bf.registerSingleton("testBean", tb);
 
-		CustomAnnotationRequiredFieldResourceInjectionBean bean = (CustomAnnotationRequiredFieldResourceInjectionBean) bf.getBean("customBean");
+		CustomAnnotationRequiredFieldResourceInjectionBean bean =
+				(CustomAnnotationRequiredFieldResourceInjectionBean) bf.getBean("customBean");
 		assertSame(tb, bean.getTestBean());
 		bf.destroySingletons();
 	}
@@ -1183,10 +1187,12 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		try {
 			bf.getBean("customBean");
-			fail("expected BeanCreationException; no dependency available for required field");
+			fail("Should have thrown UnsatisfiedDependencyException");
 		}
-		catch (BeanCreationException ex) {
+		catch (UnsatisfiedDependencyException ex) {
 			// expected
+			assertSame(CustomAnnotationRequiredFieldResourceInjectionBean.class,
+					ex.getInjectionPoint().getField().getDeclaringClass());
 		}
 		bf.destroySingletons();
 	}
@@ -1209,10 +1215,13 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		try {
 			bf.getBean("customBean");
-			fail("expected BeanCreationException; multiple beans of dependency type available");
+			fail("Should have thrown UnsatisfiedDependencyException");
 		}
-		catch (BeanCreationException ex) {
+		catch (UnsatisfiedDependencyException ex) {
 			// expected
+			ex.printStackTrace();
+			assertSame(CustomAnnotationRequiredFieldResourceInjectionBean.class,
+					ex.getInjectionPoint().getField().getDeclaringClass());
 		}
 		bf.destroySingletons();
 	}
@@ -1231,7 +1240,8 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		TestBean tb = new TestBean();
 		bf.registerSingleton("testBean", tb);
 
-		CustomAnnotationRequiredMethodResourceInjectionBean bean = (CustomAnnotationRequiredMethodResourceInjectionBean) bf.getBean("customBean");
+		CustomAnnotationRequiredMethodResourceInjectionBean bean =
+				(CustomAnnotationRequiredMethodResourceInjectionBean) bf.getBean("customBean");
 		assertSame(tb, bean.getTestBean());
 		bf.destroySingletons();
 	}
@@ -1250,10 +1260,12 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		try {
 			bf.getBean("customBean");
-			fail("expected BeanCreationException; no dependency available for required method");
+			fail("Should have thrown UnsatisfiedDependencyException");
 		}
-		catch (BeanCreationException e) {
+		catch (UnsatisfiedDependencyException ex) {
 			// expected
+			assertSame(CustomAnnotationRequiredMethodResourceInjectionBean.class,
+					ex.getInjectionPoint().getMethodParameter().getDeclaringClass());
 		}
 		bf.destroySingletons();
 	}
@@ -1276,10 +1288,12 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		try {
 			bf.getBean("customBean");
-			fail("expected BeanCreationException; multiple beans of dependency type available");
+			fail("Should have thrown UnsatisfiedDependencyException");
 		}
-		catch (BeanCreationException ex) {
+		catch (UnsatisfiedDependencyException ex) {
 			// expected
+			assertSame(CustomAnnotationRequiredMethodResourceInjectionBean.class,
+					ex.getInjectionPoint().getMethodParameter().getDeclaringClass());
 		}
 		bf.destroySingletons();
 	}
@@ -1298,7 +1312,8 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		TestBean tb = new TestBean();
 		bf.registerSingleton("testBean", tb);
 
-		CustomAnnotationOptionalFieldResourceInjectionBean bean = (CustomAnnotationOptionalFieldResourceInjectionBean) bf.getBean("customBean");
+		CustomAnnotationOptionalFieldResourceInjectionBean bean =
+				(CustomAnnotationOptionalFieldResourceInjectionBean) bf.getBean("customBean");
 		assertSame(tb, bean.getTestBean3());
 		assertNull(bean.getTestBean());
 		assertNull(bean.getTestBean2());
@@ -1317,7 +1332,8 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerBeanDefinition("customBean", new RootBeanDefinition(
 				CustomAnnotationOptionalFieldResourceInjectionBean.class));
 
-		CustomAnnotationOptionalFieldResourceInjectionBean bean = (CustomAnnotationOptionalFieldResourceInjectionBean) bf.getBean("customBean");
+		CustomAnnotationOptionalFieldResourceInjectionBean bean =
+				(CustomAnnotationOptionalFieldResourceInjectionBean) bf.getBean("customBean");
 		assertNull(bean.getTestBean3());
 		assertNull(bean.getTestBean());
 		assertNull(bean.getTestBean2());
@@ -1342,10 +1358,12 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		try {
 			bf.getBean("customBean");
-			fail("expected BeanCreationException; multiple beans of dependency type available");
+			fail("Should have thrown UnsatisfiedDependencyException");
 		}
-		catch (BeanCreationException ex) {
+		catch (UnsatisfiedDependencyException ex) {
 			// expected
+			assertSame(CustomAnnotationOptionalFieldResourceInjectionBean.class,
+					ex.getInjectionPoint().getField().getDeclaringClass());
 		}
 		bf.destroySingletons();
 	}
@@ -1364,7 +1382,8 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		TestBean tb = new TestBean();
 		bf.registerSingleton("testBean", tb);
 
-		CustomAnnotationOptionalMethodResourceInjectionBean bean = (CustomAnnotationOptionalMethodResourceInjectionBean) bf.getBean("customBean");
+		CustomAnnotationOptionalMethodResourceInjectionBean bean =
+				(CustomAnnotationOptionalMethodResourceInjectionBean) bf.getBean("customBean");
 		assertSame(tb, bean.getTestBean3());
 		assertNull(bean.getTestBean());
 		assertNull(bean.getTestBean2());
@@ -1383,7 +1402,8 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		bf.registerBeanDefinition("customBean", new RootBeanDefinition(
 				CustomAnnotationOptionalMethodResourceInjectionBean.class));
 
-		CustomAnnotationOptionalMethodResourceInjectionBean bean = (CustomAnnotationOptionalMethodResourceInjectionBean) bf.getBean("customBean");
+		CustomAnnotationOptionalMethodResourceInjectionBean bean =
+				(CustomAnnotationOptionalMethodResourceInjectionBean) bf.getBean("customBean");
 		assertNull(bean.getTestBean3());
 		assertNull(bean.getTestBean());
 		assertNull(bean.getTestBean2());
@@ -1408,10 +1428,12 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 		try {
 			bf.getBean("customBean");
-			fail("expected BeanCreationException; multiple beans of dependency type available");
+			fail("Should have thrown UnsatisfiedDependencyException");
 		}
-		catch (BeanCreationException ex) {
+		catch (UnsatisfiedDependencyException ex) {
 			// expected
+			assertSame(CustomAnnotationOptionalMethodResourceInjectionBean.class,
+					ex.getInjectionPoint().getMethodParameter().getDeclaringClass());
 		}
 		bf.destroySingletons();
 	}
@@ -2644,7 +2666,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 	@Target({ElementType.METHOD, ElementType.FIELD})
 	@Retention(RetentionPolicy.RUNTIME)
-	public static @interface MyAutowired {
+	public @interface MyAutowired {
 
 		boolean optional() default false;
 	}

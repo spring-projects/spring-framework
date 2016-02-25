@@ -180,7 +180,14 @@ public class MethodParameter {
 	}
 
 	/**
-	 * Returns the wrapped member.
+	 * Return the class that declares the underlying Method or Constructor.
+	 */
+	public Class<?> getDeclaringClass() {
+		return getMember().getDeclaringClass();
+	}
+
+	/**
+	 * Return the wrapped member.
 	 * @return the Method or Constructor as Member
 	 */
 	public Member getMember() {
@@ -196,7 +203,9 @@ public class MethodParameter {
 	}
 
 	/**
-	 * Returns the wrapped annotated element.
+	 * Return the wrapped annotated element.
+	 * <p>Note: This method exposes the annotations declared on the method/constructor
+	 * itself (i.e. at the method/constructor level, not at the parameter level).
 	 * @return the Method or Constructor as AnnotatedElement
 	 */
 	public AnnotatedElement getAnnotatedElement() {
@@ -209,13 +218,6 @@ public class MethodParameter {
 		else {
 			return this.constructor;
 		}
-	}
-
-	/**
-	 * Return the class that declares the underlying Method or Constructor.
-	 */
-	public Class<?> getDeclaringClass() {
-		return getMember().getDeclaringClass();
 	}
 
 	/**
@@ -575,6 +577,12 @@ public class MethodParameter {
 	@Override
 	public int hashCode() {
 		return (getMember().hashCode() * 31 + this.parameterIndex);
+	}
+
+	@Override
+	public String toString() {
+		return (this.method != null ? "method '" + this.method.getName() + "'" : "constructor") +
+				" parameter " + this.parameterIndex;
 	}
 
 	@Override

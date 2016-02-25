@@ -1,3 +1,19 @@
+/*
+ * Copyright 2002-2016 the original author or authors.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.springframework.beans.factory;
 
 import org.junit.Test;
@@ -49,8 +65,7 @@ public class Spr5475Tests {
 		cav.addIndexedArgumentValue(1, "bogusArg2".getBytes());
 		def.setConstructorArgumentValues(cav);
 
-		assertExceptionMessageForMisconfiguredFactoryMethod(
-				def,
+		assertExceptionMessageForMisconfiguredFactoryMethod(def,
 				"Error creating bean with name 'foo': No matching factory method found: factory method 'noArgFactory(CharSequence,byte[])'. " +
 				"Check that a method with the specified name and arguments exists and that it is static.");
 	}
@@ -62,7 +77,8 @@ public class Spr5475Tests {
 		try {
 			factory.preInstantiateSingletons();
 			fail("should have failed with BeanCreationException due to incorrectly invoked factory method");
-		} catch (BeanCreationException ex) {
+		}
+		catch (BeanCreationException ex) {
 			assertThat(ex.getMessage(), equalTo(expectedMessage));
 		}
 	}
@@ -72,15 +88,17 @@ public class Spr5475Tests {
 		// calling a factory method that accepts arguments without any arguments emits an exception unlike cases
 		// where a no-arg factory method is called with arguments. Adding this test just to document the difference
 		assertExceptionMessageForMisconfiguredFactoryMethod(
-				rootBeanDefinition(Foo.class)
-					.setFactoryMethod("singleArgFactory").getBeanDefinition(),
+				rootBeanDefinition(Foo.class).
+						setFactoryMethod("singleArgFactory").getBeanDefinition(),
 				"Error creating bean with name 'foo': " +
-				"Unsatisfied dependency expressed through constructor argument with index 0 of type [java.lang.String]: " +
-				"Ambiguous factory method argument types - did you specify the correct bean references as factory method arguments?");
+				"Unsatisfied dependency expressed through method 'singleArgFactory' parameter 0: " +
+				"Ambiguous argument values for parameter of type [java.lang.String] - " +
+				"did you specify the correct bean references as arguments?");
 	}
 
 
 	static class Foo {
+
 		static Foo noArgFactory() {
 			return new Foo();
 		}

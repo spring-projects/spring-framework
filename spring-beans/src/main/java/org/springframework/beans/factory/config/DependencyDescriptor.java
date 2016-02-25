@@ -19,7 +19,6 @@ package org.springframework.beans.factory.config;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -27,13 +26,13 @@ import java.util.Map;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.core.GenericCollectionTypeResolver;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.core.ResolvableType;
-import org.springframework.util.Assert;
 
 /**
  * Descriptor for a specific dependency that is about to be injected.
@@ -44,15 +43,9 @@ import org.springframework.util.Assert;
  * @since 2.5
  */
 @SuppressWarnings("serial")
-public class DependencyDescriptor implements Serializable {
+public class DependencyDescriptor extends InjectionPoint implements Serializable {
 
-	private transient MethodParameter methodParameter;
-
-	private transient Field field;
-
-	private Class<?> declaringClass;
-
-	private Class<?> containingClass;
+	private final Class<?> declaringClass;
 
 	private String methodName;
 
@@ -68,7 +61,7 @@ public class DependencyDescriptor implements Serializable {
 
 	private int nestingLevel = 1;
 
-	private transient Annotation[] fieldAnnotations;
+	private Class<?> containingClass;
 
 
 	/**
@@ -89,10 +82,8 @@ public class DependencyDescriptor implements Serializable {
 	 * eagerly resolving potential target beans for type matching
 	 */
 	public DependencyDescriptor(MethodParameter methodParameter, boolean required, boolean eager) {
-		Assert.notNull(methodParameter, "MethodParameter must not be null");
-		this.methodParameter = methodParameter;
+		super(methodParameter);
 		this.declaringClass = methodParameter.getDeclaringClass();
-		this.containingClass = methodParameter.getContainingClass();
 		if (this.methodParameter.getMethod() != null) {
 			this.methodName = methodParameter.getMethod().getName();
 			this.parameterTypes = methodParameter.getMethod().getParameterTypes();
@@ -101,6 +92,7 @@ public class DependencyDescriptor implements Serializable {
 			this.parameterTypes = methodParameter.getConstructor().getParameterTypes();
 		}
 		this.parameterIndex = methodParameter.getParameterIndex();
+		this.containingClass = methodParameter.getContainingClass();
 		this.required = required;
 		this.eager = eager;
 	}
@@ -123,8 +115,7 @@ public class DependencyDescriptor implements Serializable {
 	 * eagerly resolving potential target beans for type matching
 	 */
 	public DependencyDescriptor(Field field, boolean required, boolean eager) {
-		Assert.notNull(field, "Field must not be null");
-		this.field = field;
+		super(field);
 		this.declaringClass = field.getDeclaringClass();
 		this.fieldName = field.getName();
 		this.required = required;
@@ -136,38 +127,18 @@ public class DependencyDescriptor implements Serializable {
 	 * @param original the original descriptor to create a copy from
 	 */
 	public DependencyDescriptor(DependencyDescriptor original) {
-		this.methodParameter = (original.methodParameter != null ? new MethodParameter(original.methodParameter) : null);
-		this.field = original.field;
+		super(original);
 		this.declaringClass = original.declaringClass;
-		this.containingClass = original.containingClass;
 		this.methodName = original.methodName;
 		this.parameterTypes = original.parameterTypes;
 		this.parameterIndex = original.parameterIndex;
 		this.fieldName = original.fieldName;
+		this.containingClass = original.containingClass;
 		this.required = original.required;
 		this.eager = original.eager;
 		this.nestingLevel = original.nestingLevel;
-		this.fieldAnnotations = original.fieldAnnotations;
 	}
 
-
-	/**
-	 * Return the wrapped MethodParameter, if any.
-	 * <p>Note: Either MethodParameter or Field is available.
-	 * @return the MethodParameter, or {@code null} if none
-	 */
-	public MethodParameter getMethodParameter() {
-		return this.methodParameter;
-	}
-
-	/**
-	 * Return the wrapped Field, if any.
-	 * <p>Note: Either MethodParameter or Field is available.
-	 * @return the Field, or {@code null} if none
-	 */
-	public Field getField() {
-		return this.field;
-	}
 
 	/**
 	 * Return whether this dependency is required.
@@ -358,19 +329,18 @@ public class DependencyDescriptor implements Serializable {
 				GenericCollectionTypeResolver.getMapValueParameterType(this.methodParameter));
 	}
 
-	/**
-	 * Obtain the annotations associated with the wrapped parameter/field, if any.
-	 */
-	public Annotation[] getAnnotations() {
-		if (this.field != null) {
-			if (this.fieldAnnotations == null) {
-				this.fieldAnnotations = this.field.getAnnotations();
-			}
-			return this.fieldAnnotations;
+
+	@Override
+	public boolean equals(Object other) {
+		if (this == other) {
+			return true;
 		}
-		else {
-			return this.methodParameter.getParameterAnnotations();
+		if (!super.equals(other)) {
+			return false;
 		}
+		DependencyDescriptor otherDesc = (DependencyDescriptor) other;
+		return (this.required == otherDesc.required && this.eager == otherDesc.eager &&
+				this.nestingLevel == otherDesc.nestingLevel && this.containingClass == otherDesc.containingClass);
 	}
 
 
