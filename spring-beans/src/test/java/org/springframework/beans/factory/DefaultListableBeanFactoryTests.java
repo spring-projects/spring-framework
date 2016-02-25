@@ -1443,6 +1443,28 @@ public class DefaultListableBeanFactoryTests {
 	}
 
 	@Test
+	public void testGetBeanByTypeWithExistingPrimaryBeanDefinition() throws Exception {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = new RootBeanDefinition(PrimaryTestBean.class);
+		bd1.setPrimary(true);
+		RootBeanDefinition bd2 = new RootBeanDefinition(TestBean.class);
+		lbf.registerBeanDefinition("bd", bd1);
+		lbf.registerBeanDefinition("bd", bd2);
+		lbf.getBean(PrimaryTestBean.class);
+	}
+
+	@Test
+	public void testGetBeanByTypeWhenOverridingNonPrimaryBeanDefinition() throws Exception {
+		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
+		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
+		RootBeanDefinition bd2 = new RootBeanDefinition(PrimaryTestBean.class);
+		bd2.setPrimary(true);
+		lbf.registerBeanDefinition("bd", bd1);
+		lbf.registerBeanDefinition("bd", bd2);
+		lbf.getBean(PrimaryTestBean.class);
+	}
+
+	@Test
 	public void testGetBeanByTypeWithMultiplePrimary() throws Exception {
 		DefaultListableBeanFactory lbf = new DefaultListableBeanFactory();
 		RootBeanDefinition bd1 = new RootBeanDefinition(TestBean.class);
@@ -3237,7 +3259,9 @@ public class DefaultListableBeanFactoryTests {
 	@Priority(500)
 	private static class LowPriorityTestBean extends TestBean {
 	}
-
+	
+	private static class PrimaryTestBean extends TestBean {
+	}
 
 	private static class NullTestBeanFactoryBean<T> implements FactoryBean<TestBean> {
 

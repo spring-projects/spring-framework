@@ -598,6 +598,12 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	@Test
+	public void testConfigurationBeanWithSameNameOverride() {
+		ApplicationContext ctx = new AnnotationConfigApplicationContext(ConfigWithPrimaryBeanSingleton.class, ConfigWithNonPrimaryBeanSingleton.class);
+		assertSame("Primary", ctx.getBean(TestBean.class).getName());
+	}
+
+	@Test
 	public void testSingletonArgumentThroughBeanMethodCall() {
 		ApplicationContext ctx = new AnnotationConfigApplicationContext(BeanArgumentConfigWithSingleton.class);
 		ctx.getBean(FooFactory.class).createFoo(new BarArgument());
@@ -1136,6 +1142,23 @@ public class ConfigurationClassPostProcessorTests {
 	}
 
 	public static class Z {
+	}
+	
+	@Configuration
+	static class ConfigWithPrimaryBeanSingleton {
+		@Bean
+		@Primary
+		TestBean testBean(){
+			return new TestBean("Primary");
+		}
+	}
+
+	@Configuration
+	static class ConfigWithNonPrimaryBeanSingleton {
+		@Bean
+		TestBean testBean(){
+			return new TestBean("NonPrimary");
+		}
 	}
 
 	@Configuration
