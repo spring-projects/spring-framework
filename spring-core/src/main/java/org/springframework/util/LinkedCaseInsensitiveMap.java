@@ -137,6 +137,11 @@ public class LinkedCaseInsensitiveMap<V> extends LinkedHashMap<String, V> {
 		super.clear();
 	}
 
+	@Override
+	public V getOrDefault(Object key, V defaultValue) {
+		V value = this.get(key);
+		return value == null ? defaultValue : value;
+	}
 
 	/**
 	 * Convert the given key to a case-insensitive key.
