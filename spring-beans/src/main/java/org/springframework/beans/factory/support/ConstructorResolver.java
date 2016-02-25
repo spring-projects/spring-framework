@@ -40,7 +40,10 @@ import org.springframework.beans.TypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
+import org.springframework.beans.factory.UnsatisfiedConstructorDependencyException;
 import org.springframework.beans.factory.UnsatisfiedDependencyException;
+import org.springframework.beans.factory.UnsatisfiedFactoryMethodDependencyException;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.ConstructorArgumentValues.ValueHolder;
 import org.springframework.beans.factory.config.DependencyDescriptor;
@@ -717,10 +720,8 @@ class ConstructorResolver {
 						// }
 					}
 					catch (TypeMismatchException ex) {
-						throw new UnsatisfiedDependencyException(
-								mbd.getResourceDescription(), beanName, paramIndex, paramType,
-								"Could not convert " + methodType + " argument value of type [" +
-								ObjectUtils.nullSafeClassName(valueHolder.getValue()) +
+						throw createUnsatisfiedDependencyException(methodOrCtor, mbd, beanName, paramIndex, paramType,
+								"Could not convert argument value of type [" + ObjectUtils.nullSafeClassName(valueHolder.getValue()) +
 								"] to required type [" + paramType.getName() + "]: " + ex.getMessage());
 					}
 				}
@@ -731,10 +732,8 @@ class ConstructorResolver {
 				// No explicit match found: we're either supposed to autowire or
 				// have to fail creating an argument array for the given constructor.
 				if (!autowiring) {
-					throw new UnsatisfiedDependencyException(
-							mbd.getResourceDescription(), beanName, paramIndex, paramType,
-							"Ambiguous " + methodType + " argument types - " +
-							"did you specify the correct bean references as " + methodType + " arguments?");
+					throw createUnsatisfiedDependencyException(methodOrCtor, mbd, beanName, paramIndex, paramType,
+							"Ambiguous argument types - did you specify the correct bean references as arguments?");
 				}
 				try {
 					MethodParameter param = MethodParameter.forMethodOrConstructor(methodOrCtor, paramIndex);
@@ -745,8 +744,12 @@ class ConstructorResolver {
 					args.resolveNecessary = true;
 				}
 				catch (BeansException ex) {
-					throw new UnsatisfiedDependencyException(
-							mbd.getResourceDescription(), beanName, paramIndex, paramType, ex);
+					if (methodOrCtor instanceof Constructor) {
+						throw new UnsatisfiedConstructorDependencyException((Constructor<?>)methodOrCtor, mbd.getResourceDescription(), beanName, paramIndex, paramType, ex);
+					}
+					else {
+						throw new UnsatisfiedFactoryMethodDependencyException((Method)methodOrCtor, mbd.getResourceDescription(), beanName, paramIndex, paramType, ex);
+					}
 				}
 			}
 		}
@@ -760,6 +763,18 @@ class ConstructorResolver {
 		}
 
 		return args;
+	}
+
+	private UnsatisfiedDependencyException createUnsatisfiedDependencyException(Object methodOrCtor, BeanDefinition mbd,
+			String beanName, int paramIndex, Class<?> paramType, String message) {
+		if (methodOrCtor instanceof Constructor) {
+			return new UnsatisfiedConstructorDependencyException((Constructor<?>)methodOrCtor, mbd.getResourceDescription(),
+					beanName, paramIndex, paramType, message);
+		}
+		else {
+			return new UnsatisfiedFactoryMethodDependencyException((Method)methodOrCtor, mbd.getResourceDescription(),
+					beanName, paramIndex, paramType, message);
+		}
 	}
 
 	/**

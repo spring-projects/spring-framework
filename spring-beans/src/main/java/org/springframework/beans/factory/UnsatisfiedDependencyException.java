@@ -92,4 +92,8 @@ public class UnsatisfiedDependencyException extends BeanCreationException {
 		initCause(ex);
 	}
 
+	protected UnsatisfiedDependencyException(String message, Throwable cause, String resourceDescription, String beanName) {
+		super(resourceDescription, beanName, message, cause);
+	}
+
 }
