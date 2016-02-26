@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.test.web.client.samples;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.core.io.ClassPathResource;
@@ -24,7 +24,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.Person;
-import org.springframework.test.web.client.ExpectedCount;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.AsyncRestTemplate;
@@ -41,20 +40,14 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
  * code.
  *
  * @author Rossen Stoyanchev
+ * @since 4.1
  */
 public class SampleAsyncTests {
 
-	private MockRestServiceServer mockServer;
+	private final AsyncRestTemplate restTemplate = new AsyncRestTemplate();
 
-	private AsyncRestTemplate restTemplate;
+	private final MockRestServiceServer mockServer = MockRestServiceServer.createServer(this.restTemplate);
 
-
-	@Before
-	public void setup() {
-		this.restTemplate = new AsyncRestTemplate();
-		this.mockServer = MockRestServiceServer.createServer(this.restTemplate);
-
-	}
 
 	@Test
 	public void performGet() throws Exception {
@@ -146,4 +139,5 @@ public class SampleAsyncTests {
 			assertTrue(error.getMessage(), error.getMessage().contains("2 unsatisfied expectation(s)"));
 		}
 	}
+
 }
