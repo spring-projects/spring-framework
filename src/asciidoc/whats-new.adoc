@@ -630,7 +630,7 @@ public @interface MyTestConfig {
 === Core Container Improvements
 
 * It is no longer necessary to specify the `@Autowired` annotation if the target
-  bean only define one constructor.
+  bean only defines one constructor.
 * `@Configuration` classes support constructor injection.
 * Any SpEL expression used to specify the `condition` of an `@EventListener` can
   now refer to beans (i.e. `@beanName.method()`).
@@ -662,6 +662,8 @@ Spring 4.3 also improves the caching abstraction as follows:
 === Web Improvements
 
 * Built-in support for <<mvc-ann-requestmapping-head-options,HTTP HEAD and HTTP OPTIONS>>.
+* New `@GetMapping`, `@PostMapping`, `@PutMapping`, `@DeleteMapping`, and `@PatchMapping`
+  _composed annotations_ for `@RequestMapping`.
 * New `@RequestScope`, `@SessionScope`, and `@ApplicationScope` _composed annotations_ for web scopes.
 * New `@RestControllerAdvice` annotation with combined `@ControllerAdvice` with `@ResponseBody` semantics.
 * `@ResponseStatus` is now supported at the class level and inherited by all methods.
@@ -684,3 +686,4 @@ Spring 4.3 also improves the caching abstraction as follows:
 * Client-side REST test support allows indicating how many times a request is expected and
   whether the order of declaration for expectations should be ignored (see <<spring-mvc-test-client>>).
 * Client-side REST Test supports expectations for form data in the request body.
+
