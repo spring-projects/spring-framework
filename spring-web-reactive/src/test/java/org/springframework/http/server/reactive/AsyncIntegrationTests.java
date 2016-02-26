@@ -23,7 +23,7 @@ import org.junit.Test;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.SchedulerGroup;
 import reactor.core.timer.Timer;
-import reactor.rx.Stream;
+import reactor.rx.Fluxion;
 
 import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
@@ -63,7 +63,7 @@ public class AsyncIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 		@Override
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-			return response.setBody(Stream.just("h", "e", "l", "l", "o")
+			return response.setBody(Fluxion.just("h", "e", "l", "l", "o")
 			                              .useTimer(Timer.global())
 			                              .throttleRequest(100)
 			                              .dispatchOn(asyncGroup)

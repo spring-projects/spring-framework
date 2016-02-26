@@ -20,8 +20,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.reactivestreams.Publisher;
+import reactor.rx.Fluxion;
 import reactor.rx.Promise;
-import reactor.rx.Stream;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
@@ -30,13 +30,13 @@ import org.springframework.core.convert.converter.GenericConverter;
  * @author Stephane Maldini
  * @author Sebastien Deleuze
  */
-public final class ReactiveStreamsToReactorStreamConverter implements GenericConverter {
+public final class ReactiveStreamsToReactorFluxionConverter implements GenericConverter {
 
 	@Override
 	public Set<GenericConverter.ConvertiblePair> getConvertibleTypes() {
 		Set<GenericConverter.ConvertiblePair> pairs = new LinkedHashSet<>();
-		pairs.add(new GenericConverter.ConvertiblePair(Publisher.class, Stream.class));
-		pairs.add(new GenericConverter.ConvertiblePair(Stream.class, Publisher.class));
+		pairs.add(new GenericConverter.ConvertiblePair(Publisher.class, Fluxion.class));
+		pairs.add(new GenericConverter.ConvertiblePair(Fluxion.class, Publisher.class));
 		pairs.add(new GenericConverter.ConvertiblePair(Publisher.class, Promise.class));
 		pairs.add(new GenericConverter.ConvertiblePair(Promise.class, Publisher.class));
 		return pairs;
@@ -47,17 +47,17 @@ public final class ReactiveStreamsToReactorStreamConverter implements GenericCon
 		if (source == null) {
 			return null;
 		}
-		if (Stream.class.isAssignableFrom(source.getClass())) {
+		if (Fluxion.class.isAssignableFrom(source.getClass())) {
 			return source;
 		}
-		else if (Stream.class.isAssignableFrom(targetType.getResolvableType().getRawClass())) {
-			return Stream.from((Publisher)source);
+		else if (Fluxion.class.isAssignableFrom(targetType.getResolvableType().getRawClass())) {
+			return Fluxion.from((Publisher)source);
 		}
 		else if (Promise.class.isAssignableFrom(source.getClass())) {
 			return source;
 		}
 		else if (Promise.class.isAssignableFrom(targetType.getResolvableType().getRawClass())) {
-			return Stream.from((Publisher)source).promise();
+			return Fluxion.from((Publisher)source).promise();
 		}
 		return null;
 	}

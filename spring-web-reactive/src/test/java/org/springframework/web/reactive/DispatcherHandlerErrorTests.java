@@ -24,8 +24,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
+import reactor.rx.Fluxion;
 import reactor.rx.Signal;
-import reactor.rx.Stream;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -49,14 +49,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.reactive.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.reactive.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.reactive.method.annotation.ResponseBodyResultHandler;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
-import org.springframework.web.server.handler.ExceptionHandlingWebHandler;
-import org.springframework.web.server.handler.FilteringWebHandler;
+import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.server.WebHandler;
-import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.adapter.DefaultServerWebExchange;
+import org.springframework.web.server.handler.ExceptionHandlingWebHandler;
+import org.springframework.web.server.handler.FilteringWebHandler;
 import org.springframework.web.server.session.WebSessionManager;
 
 import static org.hamcrest.CoreMatchers.startsWith;
@@ -192,7 +192,7 @@ public class DispatcherHandlerErrorTests {
 		WebHandler webHandler = new ExceptionHandlingWebHandler(this.dispatcherHandler, exceptionHandler);
 		Publisher<Void> publisher = webHandler.handle(this.exchange);
 
-		Stream.from(publisher).toList().get();
+		Fluxion.from(publisher).toList().get();
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatus());
 	}
 
@@ -204,13 +204,13 @@ public class DispatcherHandlerErrorTests {
 		webHandler = new ExceptionHandlingWebHandler(webHandler, new ServerError500ExceptionHandler());
 		Publisher<Void> publisher = webHandler.handle(this.exchange);
 
-		Stream.from(publisher).toList().get();
+		Fluxion.from(publisher).toList().get();
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatus());
 	}
 
 
 	private Throwable awaitErrorSignal(Publisher<?> publisher) throws Exception {
-		Signal<?> signal = Stream.from(publisher).materialize().toList().get().get(0);
+		Signal<?> signal = Fluxion.from(publisher).materialize().toList().get().get(0);
 		assertEquals("Unexpected signal: " + signal, Signal.Type.ERROR, signal.getType());
 		return signal.getThrowable();
 	}

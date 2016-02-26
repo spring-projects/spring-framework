@@ -29,8 +29,8 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.Flux;
 import reactor.core.subscriber.SubscriberBarrier;
+import reactor.rx.Fluxion;
 import reactor.rx.Signal;
-import reactor.rx.Stream;
 
 import static org.junit.Assert.*;
 
@@ -55,7 +55,7 @@ public class WriteWithOperatorTests {
 	public void errorBeforeFirstItem() throws Exception {
 		IllegalStateException error = new IllegalStateException("boo");
 		Publisher<Void> completion = Flux.<String>error(error).lift(this.operator);
-		List<Signal<Void>> signals = Stream.from(completion).materialize().toList().get();
+		List<Signal<Void>> signals = Fluxion.from(completion).materialize().toList().get();
 
 		assertEquals(1, signals.size());
 		assertSame("Unexpected signal: " + signals.get(0), error, signals.get(0).getThrowable());
@@ -64,7 +64,7 @@ public class WriteWithOperatorTests {
 	@Test
 	public void completionBeforeFirstItem() throws Exception {
 		Publisher<Void> completion = Flux.<String>empty().lift(this.operator);
-		List<Signal<Void>> signals = Stream.from(completion).materialize().toList().get();
+		List<Signal<Void>> signals = Fluxion.from(completion).materialize().toList().get();
 
 		assertEquals(1, signals.size());
 		assertTrue("Unexpected signal: " + signals.get(0), signals.get(0).isOnComplete());
@@ -76,7 +76,7 @@ public class WriteWithOperatorTests {
 	@Test
 	public void writeOneItem() throws Exception {
 		Publisher<Void> completion = Flux.just("one").lift(this.operator);
-		List<Signal<Void>> signals = Stream.from(completion).materialize().toList().get();
+		List<Signal<Void>> signals = Fluxion.from(completion).materialize().toList().get();
 
 		assertEquals(1, signals.size());
 		assertTrue("Unexpected signal: " + signals.get(0), signals.get(0).isOnComplete());
@@ -91,7 +91,7 @@ public class WriteWithOperatorTests {
 	public void writeMultipleItems() throws Exception {
 		List<String> items = Arrays.asList("one", "two", "three");
 		Publisher<Void> completion = Flux.fromIterable(items).lift(this.operator);
-		List<Signal<Void>> signals = Stream.from(completion).materialize().toList().get();
+		List<Signal<Void>> signals = Fluxion.from(completion).materialize().toList().get();
 
 		assertEquals(1, signals.size());
 		assertTrue("Unexpected signal: " + signals.get(0), signals.get(0).isOnComplete());
@@ -114,7 +114,7 @@ public class WriteWithOperatorTests {
 			}
 		}, subscriber -> new AtomicInteger());
 		Publisher<Void> completion = publisher.lift(this.operator);
-		List<Signal<Void>> signals = Stream.from(completion).materialize().toList().get();
+		List<Signal<Void>> signals = Fluxion.from(completion).materialize().toList().get();
 
 		assertEquals(1, signals.size());
 		assertSame("Unexpected signal: " + signals.get(0), error, signals.get(0).getThrowable());

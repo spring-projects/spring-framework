@@ -21,21 +21,19 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
+import reactor.rx.Fluxion;
 import reactor.rx.Signal;
-import reactor.rx.Stream;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.web.ResponseStatusException;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.WebSessionManager;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -65,7 +63,7 @@ public class ResponseStatusExceptionHandlerTests {
 		Throwable ex = new ResponseStatusException(HttpStatus.BAD_REQUEST);
 		Publisher<Void> publisher = this.handler.handle(this.exchange, ex);
 
-		Stream.from(publisher).toList().get();
+		Fluxion.from(publisher).toList().get();
 		assertEquals(HttpStatus.BAD_REQUEST, this.response.getStatus());
 	}
 
@@ -74,7 +72,7 @@ public class ResponseStatusExceptionHandlerTests {
 		Throwable ex = new IllegalStateException();
 		Publisher<Void> publisher = this.handler.handle(this.exchange, ex);
 
-		List<Signal<Void>> signals = Stream.from(publisher).materialize().toList().get();
+		List<Signal<Void>> signals = Fluxion.from(publisher).materialize().toList().get();
 		assertEquals(1, signals.size());
 		assertTrue(signals.get(0).hasError());
 		assertSame(ex, signals.get(0).getThrowable());

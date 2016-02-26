@@ -29,8 +29,8 @@ import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.rx.Fluxion;
 import reactor.rx.Promise;
-import reactor.rx.Stream;
 import rx.Observable;
 import rx.Single;
 
@@ -47,7 +47,7 @@ import org.springframework.core.codec.support.StringEncoder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutureConverter;
-import org.springframework.core.convert.support.ReactiveStreamsToReactorStreamConverter;
+import org.springframework.core.convert.support.ReactiveStreamsToReactorFluxionConverter;
 import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converter;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;
@@ -398,7 +398,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 			// TODO: test failures with DefaultConversionService
 			GenericConversionService service = new GenericConversionService();
 			service.addConverter(new ReactiveStreamsToCompletableFutureConverter());
-			service.addConverter(new ReactiveStreamsToReactorStreamConverter());
+			service.addConverter(new ReactiveStreamsToReactorFluxionConverter());
 			service.addConverter(new ReactiveStreamsToRxJava1Converter());
 			return service;
 		}
@@ -491,7 +491,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@RequestMapping("/stream-result")
 		public Publisher<Long> stringStreamResponseBody() {
-			return Flux.interval(1).as(Stream::from).take(5);
+			return Flux.interval(1).as(Fluxion::from).take(5);
 		}
 
 		@RequestMapping("/raw-flux")
@@ -540,8 +540,8 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		}
 
 		@RequestMapping("/stream")
-		public Stream<Person> reactorStreamResponseBody() {
-			return Stream.just(new Person("Robert"), new Person("Marie"));
+		public Fluxion<Person> reactorStreamResponseBody() {
+			return Fluxion.just(new Person("Robert"), new Person("Marie"));
 		}
 
 		@RequestMapping("/publisher-capitalize")
@@ -562,7 +562,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		}
 
 		@RequestMapping("/stream-capitalize")
-		public Stream<Person> streamCapitalize(@RequestBody Stream<Person> persons) {
+		public Fluxion<Person> streamCapitalize(@RequestBody Fluxion<Person> persons) {
 			return persons.map(person -> new Person(person.getName().toUpperCase()));
 		}
 
@@ -589,7 +589,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@RequestMapping("/promise-capitalize")
 		public Promise<Person> promiseCapitalize(@RequestBody Promise<Person> personFuture) {
-			return Stream.from(personFuture.map(person -> new Person(person.getName().toUpperCase()))).promise();
+			return Fluxion.from(personFuture.map(person -> new Person(person.getName().toUpperCase()))).promise();
 		}
 
 		@RequestMapping("/publisher-create")
@@ -603,7 +603,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		}
 
 		@RequestMapping("/stream-create")
-		public Publisher<Void> streamCreate(@RequestBody Stream<Person> personStream) {
+		public Publisher<Void> streamCreate(@RequestBody Fluxion<Person> personStream) {
 			return personStream.toList().doOnSuccess(persons::addAll).after();
 		}
 

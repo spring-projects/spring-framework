@@ -26,8 +26,8 @@ import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.rx.Fluxion;
 import reactor.rx.Signal;
-import reactor.rx.Stream;
 
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -37,8 +37,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.method.annotation.RequestParamArgumentResolver;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.WebSessionManager;
 
 import static org.junit.Assert.assertEquals;
@@ -73,7 +73,7 @@ public class InvocableHandlerMethodTests {
 		InvocableHandlerMethod hm = createHandlerMethod("noArgs");
 
 		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange, this.model);
-		List<HandlerResult> values = Stream.from(publisher).toList().get();
+		List<HandlerResult> values = Fluxion.from(publisher).toList().get();
 
 		assertEquals(1, values.size());
 		assertEquals("success", values.get(0).getReturnValue().get());
@@ -86,7 +86,7 @@ public class InvocableHandlerMethodTests {
 		hm.setHandlerMethodArgumentResolvers(Collections.singletonList(new RequestParamArgumentResolver()));
 
 		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange, this.model);
-		List<HandlerResult> values = Stream.from(publisher).toList().get();
+		List<HandlerResult> values = Fluxion.from(publisher).toList().get();
 
 		assertEquals(1, values.size());
 		assertEquals("success:null", values.get(0).getReturnValue().get());
@@ -98,7 +98,7 @@ public class InvocableHandlerMethodTests {
 		addResolver(hm, Mono.just("value1"));
 
 		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange, this.model);
-		List<HandlerResult> values = Stream.from(publisher).toList().get();
+		List<HandlerResult> values = Fluxion.from(publisher).toList().get();
 
 		assertEquals(1, values.size());
 		assertEquals("success:value1", values.get(0).getReturnValue().get());
@@ -110,7 +110,7 @@ public class InvocableHandlerMethodTests {
 		addResolver(hm, Flux.fromIterable(Arrays.asList("value1", "value2", "value3")));
 
 		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange, this.model);
-		List<HandlerResult> values = Stream.from(publisher).toList().get();
+		List<HandlerResult> values = Fluxion.from(publisher).toList().get();
 
 		assertEquals(1, values.size());
 		assertEquals("success:value1", values.get(0).getReturnValue().get());
@@ -200,7 +200,7 @@ public class InvocableHandlerMethodTests {
 	}
 
 	private Throwable awaitErrorSignal(Publisher<?> publisher) throws Exception {
-		Signal<?> signal = Stream.from(publisher).materialize().toList().get().get(0);
+		Signal<?> signal = Fluxion.from(publisher).materialize().toList().get().get(0);
 		assertEquals("Unexpected signal: " + signal, Signal.Type.ERROR, signal.getType());
 		return signal.getThrowable();
 	}
