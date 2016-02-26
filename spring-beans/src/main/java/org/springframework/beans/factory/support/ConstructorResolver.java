@@ -444,7 +444,7 @@ class ConstructorResolver {
 				minNrOfArgs = resolveConstructorArguments(beanName, mbd, bw, cargs, resolvedValues);
 			}
 
-			List<Exception> causes = null;
+			LinkedList<UnsatisfiedDependencyException> causes = null;
 
 			for (int i = 0; i < candidates.length; i++) {
 				Method candidate = candidates[i];
@@ -469,22 +469,12 @@ class ConstructorResolver {
 								this.beanFactory.logger.trace("Ignoring factory method [" + candidate +
 										"] of bean '" + beanName + "': " + ex);
 							}
-							if (i == candidates.length - 1 && argsHolderToUse == null) {
-								if (causes != null) {
-									for (Exception cause : causes) {
-										this.beanFactory.onSuppressedException(cause);
-									}
-								}
-								throw ex;
+							// Swallow and try next overloaded factory method.
+							if (causes == null) {
+								causes = new LinkedList<UnsatisfiedDependencyException>();
 							}
-							else {
-								// Swallow and try next overloaded factory method.
-								if (causes == null) {
-									causes = new LinkedList<Exception>();
-								}
-								causes.add(ex);
-								continue;
-							}
+							causes.add(ex);
+							continue;
 						}
 					}
 
@@ -525,6 +515,13 @@ class ConstructorResolver {
 			}
 
 			if (factoryMethodToUse == null) {
+				if (causes != null) {
+					UnsatisfiedDependencyException ex = causes.removeLast();
+					for (Exception cause : causes) {
+						this.beanFactory.onSuppressedException(cause);
+					}
+					throw ex;
+				}
 				List<String> argTypes = new ArrayList<String>(minNrOfArgs);
 				if (explicitArgs != null) {
 					for (Object arg : explicitArgs) {
