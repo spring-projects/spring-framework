@@ -22,6 +22,7 @@ import org.junit.Test;
 
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.client.MockClientHttpRequest;
+import org.springframework.test.web.servlet.result.ContentResultMatchers;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -93,6 +94,36 @@ public class ContentRequestMatchersTests {
 		this.request.getBody().write("test".getBytes());
 
 		MockRestRequestMatchers.content().bytes("Test".getBytes()).match(this.request);
+	}
+
+	@Test
+	public void testJsonLenientMatch() throws Exception {
+		this.request.getBody().write("{\n \"foo array\":[\"first\",\"second\"] , \"someExtraProperty\": \"which is allowed\" \n}".getBytes());
+
+		MockRestRequestMatchers.content().json("{\n \"foo array\":[\"second\",\"first\"] \n}").match(this.request);
+		MockRestRequestMatchers.content().json("{\n \"foo array\":[\"second\",\"first\"] \n}", false).match(this.request);
+	}
+
+	@Test
+	public void testJsonStrictMatch() throws Exception {
+		this.request.getBody().write("{\n \"foo\": \"bar\", \"foo array\":[\"first\",\"second\"] \n}".getBytes());
+
+		MockRestRequestMatchers.content().json("{\n \"foo array\":[\"first\",\"second\"] , \"foo\": \"bar\" \n}", true).match(this.request);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void testJsonLenientNoMatch() throws Exception {
+		this.request.getBody().write("{\n \"bar\" : \"foo\"  \n}".getBytes());
+
+		MockRestRequestMatchers.content().json("{\n \"foo\" : \"bar\"  \n}").match(this.request);
+		MockRestRequestMatchers.content().json("{\n \"foo\" : \"bar\"  \n}", false).match(this.request);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void testJsonStrictNoMatch() throws Exception {
+		this.request.getBody().write("{\n \"foo array\":[\"first\",\"second\"] , \"someExtraProperty\": \"which is NOT allowed\" \n}".getBytes());
+
+		MockRestRequestMatchers.content().json("{\n \"foo array\":[\"second\",\"first\"] \n}", true).match(this.request);
 	}
 
 	@Test
