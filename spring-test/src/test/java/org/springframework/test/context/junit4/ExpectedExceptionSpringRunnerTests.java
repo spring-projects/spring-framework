@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ import static org.springframework.test.context.junit4.JUnitTestingUtils.*;
 
 /**
  * Verifies proper handling of JUnit's {@link Test#expected() &#064;Test(expected=...)}
- * support in conjunction with the {@link SpringJUnit4ClassRunner}.
+ * support in conjunction with the {@link SpringRunner}.
  *
  * @author Sam Brannen
  * @since 3.0
@@ -39,7 +39,7 @@ public class ExpectedExceptionSpringRunnerTests {
 
 	@Test
 	public void expectedExceptions() throws Exception {
-		runTestsAndAssertCounters(SpringJUnit4ClassRunner.class, ExpectedExceptionSpringRunnerTestCase.class, 1, 0, 1, 0, 0);
+		runTestsAndAssertCounters(SpringRunner.class, ExpectedExceptionSpringRunnerTestCase.class, 1, 0, 1, 0, 0);
 	}
 
 

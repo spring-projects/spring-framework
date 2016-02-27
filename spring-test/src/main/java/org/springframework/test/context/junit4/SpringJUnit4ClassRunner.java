@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,6 +56,9 @@ import org.springframework.util.ReflectionUtils;
  * <em>Spring TestContext Framework</em> to standard JUnit tests by means of the
  * {@link TestContextManager} and associated support classes and annotations.
  *
+ * <p>To use this class, simply annotate a JUnit 4 based test class with
+ * {@code @RunWith(SpringJUnit4ClassRunner.class)} or {@code @RunWith(SpringRunner.class)}.
+ *
  * <p>The following list constitutes all annotations currently supported directly
  * or indirectly by {@code SpringJUnit4ClassRunner}. <em>(Note that additional
  * annotations may be supported by various
@@ -81,6 +84,7 @@ import org.springframework.util.ReflectionUtils;
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
+ * @see SpringRunner
  * @see TestContextManager
  * @see AbstractJUnit4SpringContextTests
  * @see AbstractTransactionalJUnit4SpringContextTests

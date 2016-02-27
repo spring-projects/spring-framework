@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,10 +64,10 @@ import org.springframework.transaction.annotation.Transactional;
  * <ul>
  * <li>If you do not wish for your test classes to be tied to a Spring-specific
  * class hierarchy, you may configure your own custom test classes by using
- * {@link SpringJUnit4ClassRunner}, {@link ContextConfiguration @ContextConfiguration},
+ * {@link SpringRunner}, {@link ContextConfiguration @ContextConfiguration},
  * {@link TestExecutionListeners @TestExecutionListeners}, etc.</li>
  * <li>If you wish to extend this class and use a runner other than the
- * {@link SpringJUnit4ClassRunner}, as of Spring Framework 4.2 you can use
+ * {@link SpringRunner}, as of Spring Framework 4.2 you can use
  * {@link org.springframework.test.context.junit4.rules.SpringClassRule SpringClassRule} and
  * {@link org.springframework.test.context.junit4.rules.SpringMethodRule SpringMethodRule}
  * and specify your runner of choice via {@link org.junit.runner.RunWith @RunWith(...)}.</li>

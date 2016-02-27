@@ -993,9 +993,8 @@ instead of `@PostConstruct` and `@PreDestroy`.
 [[integration-testing-annotations-junit]]
 ==== Spring JUnit Testing Annotations
 The following annotations are __only__ supported when used in conjunction with the
-<<testcontext-junit4-runner,SpringJUnit4ClassRunner>>,
-<<testcontext-junit4-rules,Spring's JUnit rules>>, or
-<<testcontext-support-classes-junit4,Spring's JUnit support classes>>.
+<<testcontext-junit4-runner,SpringRunner>>, <<testcontext-junit4-rules,Spring's JUnit
+rules>>, or <<testcontext-support-classes-junit4,Spring's JUnit support classes>>.
 
 * `@IfProfileValue`
 
@@ -1159,13 +1158,13 @@ across our JUnit-based test suite...
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	@ContextConfiguration({"/app-config.xml", "/test-data-access-config.xml"})
 	@ActiveProfiles("dev")
 	@Transactional
 	public class OrderRepositoryTests { }
 
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	@ContextConfiguration({"/app-config.xml", "/test-data-access-config.xml"})
 	@ActiveProfiles("dev")
 	@Transactional
@@ -1192,11 +1191,11 @@ configuration of individual test classes as follows:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	@TransactionalDevTest
 	public class OrderRepositoryTests { }
 
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	@TransactionalDevTest
 	public class UserRepositoryTests { }
 ----
@@ -1453,7 +1452,7 @@ on either a field or setter method. For example:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	@ContextConfiguration
 	public class MyTest {
 
@@ -1470,7 +1469,7 @@ the web application context into your test as follows:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	**@WebAppConfiguration**
 	@ContextConfiguration
 	public class MyWebAppTest {
@@ -1515,7 +1514,7 @@ prefixed with `classpath:`, `file:`, `http:`, etc.) will be used __as is__.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	// ApplicationContext will be loaded from "/app-config.xml" and
 	// "/test-config.xml" in the root of the classpath
 	**@ContextConfiguration(locations={"/app-config.xml", "/test-config.xml"})**
@@ -1533,7 +1532,7 @@ demonstrated in the following example.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	**@ContextConfiguration({"/app-config.xml", "/test-config.xml"})**
 	public class MyTest {
 		// class body...
@@ -1552,7 +1551,7 @@ a default location based on the name of the test class. If your class is named
 ----
 	package com.example;
 
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	// ApplicationContext will be loaded from
 	// "classpath:com/example/MyTest-context.xml"
 	**@ContextConfiguration**
@@ -1582,7 +1581,7 @@ TestContext Framework is enabled automatically if Groovy is on the classpath.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	// ApplicationContext will be loaded from "/AppConfig.groovy" and
 	// "/TestConfig.groovy" in the root of the classpath
 	**@ContextConfiguration({"/AppConfig.groovy", "/TestConfig.Groovy"})**
@@ -1603,7 +1602,7 @@ detect a default location based on the name of the test class. If your class is 
 ----
 	package com.example;
 
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	// ApplicationContext will be loaded from
 	// "classpath:com/example/MyTestContext.groovy"
 	**@ContextConfiguration**
@@ -1625,7 +1624,7 @@ The following listing demonstrates how to combine both in an integration test.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	// ApplicationContext will be loaded from
 	// "/app-config.xml" and "/TestConfig.groovy"
 	@ContextConfiguration({ "/app-config.xml", "/TestConfig.groovy" })
@@ -1645,7 +1644,7 @@ To load an `ApplicationContext` for your tests using __annotated classes__ (see
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	// ApplicationContext will be loaded from AppConfig and TestConfig
 	**@ContextConfiguration(classes = {AppConfig.class, TestConfig.class})**
 	public class MyTest {
@@ -1682,7 +1681,7 @@ configuration class is arbitrary. In addition, a test class can contain more tha
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	// ApplicationContext will be loaded from the
 	// static nested Config class
 	**@ContextConfiguration**
@@ -1761,7 +1760,7 @@ standard `@Priority` annotation.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	// ApplicationContext will be loaded from TestConfig
 	// and initialized by TestAppCtxInitializer
 	**@ContextConfiguration(
@@ -1781,7 +1780,7 @@ files or configuration classes.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	// ApplicationContext will be initialized by EntireAppInitializer
 	// which presumably registers beans in the context
 	**@ContextConfiguration(initializers = EntireAppInitializer.class)**
@@ -1816,7 +1815,7 @@ therefore __override__ (i.e., replace) those defined in __"base-config.xml"__.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	// ApplicationContext will be loaded from "/base-config.xml"
 	// in the root of the classpath
 	**@ContextConfiguration("/base-config.xml")**
@@ -1840,7 +1839,7 @@ override (i.e., replace) those defined in `BaseConfig`.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	// ApplicationContext will be loaded from BaseConfig
 	**@ContextConfiguration(classes = BaseConfig.class)**
 	public class BaseTest {
@@ -1863,7 +1862,7 @@ with Spring's `@Order` or the standard `@Priority` annotation.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	// ApplicationContext will be initialized by BaseInitializer
 	**@ContextConfiguration(initializers = BaseInitializer.class)**
 	public class BaseTest {
@@ -1948,7 +1947,7 @@ Let's take a look at some examples with XML configuration and `@Configuration` c
 ----
 	package com.bank.service;
 
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	// ApplicationContext will be loaded from "classpath:/app-config.xml"
 	@ContextConfiguration("/app-config.xml")
 	@ActiveProfiles("dev")
@@ -2067,7 +2066,7 @@ integration test but using `@Configuration` classes instead of XML.
 ----
 	package com.bank.service;
 
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	@ContextConfiguration(classes = {
 			TransferServiceConfig.class,
 			StandaloneDataConfig.class,
@@ -2115,7 +2114,7 @@ annotations) has been moved to an abstract superclass, `AbstractIntegrationTest`
 ----
 	package com.bank.service;
 
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	@ContextConfiguration(classes = {
 			TransferServiceConfig.class,
 			StandaloneDataConfig.class,
@@ -2406,7 +2405,7 @@ a `WebApplicationContext`.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 
 	// defaults to "file:src/main/webapp"
 	@WebAppConfiguration
@@ -2433,7 +2432,7 @@ nested `@Configuration` classes).
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 
 	// file system resource
 	@WebAppConfiguration("webapp")
@@ -2456,7 +2455,7 @@ whereas, `@ContextConfiguration` resource locations are classpath based.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 
 	// classpath resource
 	@WebAppConfiguration("classpath:test-web-resources")
@@ -2637,7 +2636,7 @@ lowest context in the hierarchy).
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	@WebAppConfiguration
 	@ContextHierarchy({
 		@ContextConfiguration(classes = TestAppConfig.class),
@@ -2672,7 +2671,7 @@ for the concrete subclasses.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	@WebAppConfiguration
 	@ContextConfiguration("file:src/main/webapp/WEB-INF/applicationContext.xml")
 	public abstract class AbstractWebTests {}
@@ -2703,7 +2702,7 @@ and `{"/user-config.xml", "/order-config.xml"}`.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	@ContextHierarchy({
 		@ContextConfiguration(name = "parent", locations = "/app-config.xml"),
 		@ContextConfiguration(name = "child", locations = "/user-config.xml")
@@ -2729,7 +2728,7 @@ application context for `ExtendedTests` will be loaded only from
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	@ContextHierarchy({
 		@ContextConfiguration(name = "parent", locations = "/app-config.xml"),
 		@ContextConfiguration(name = "child", locations = "/user-config.xml")
@@ -2811,7 +2810,7 @@ The first code listing shows a JUnit-based implementation of the test class that
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	// specifies the Spring configuration to load for this test fixture
 	**@ContextConfiguration("repository-config.xml")**
 	public class HibernateTitleRepositoryTests {
@@ -2834,7 +2833,7 @@ seen below.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	// specifies the Spring configuration to load for this test fixture
 	**@ContextConfiguration("repository-config.xml")**
 	public class HibernateTitleRepositoryTests {
@@ -2967,7 +2966,7 @@ inputs for the username and password.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	@ContextConfiguration
 	@WebAppConfiguration
 	public class RequestScopedBeanTests {
@@ -3027,7 +3026,7 @@ configured theme.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	@ContextConfiguration
 	@WebAppConfiguration
 	public class SessionScopedBeanTests {
@@ -3098,7 +3097,7 @@ See <<testing-examples-petclinic>> for an additional example.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	@ContextConfiguration(classes = TestConfig.class)
 	@Transactional
 	public class HibernateUserRepositoryTests {
@@ -3238,7 +3237,7 @@ declarative SQL script execution with default transaction rollback semantics.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	@ContextConfiguration
 	**@Transactional(transactionManager = "txMgr")**
 	**@Commit**
@@ -3434,7 +3433,7 @@ level within a JUnit-based integration test class.
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	@ContextConfiguration
 	@Sql("/test-schema.sql")
 	public class DatabaseTests {
@@ -3585,7 +3584,7 @@ be automatically rolled back by the `TransactionalTestExecutionListener` (see
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	@ContextConfiguration(classes = TestDatabaseConfig.class)
 	@Transactional
 	public class TransactionalSqlScriptsTests {
@@ -3625,13 +3624,14 @@ be automatically rolled back by the `TransactionalTestExecutionListener` (see
 
 The __Spring TestContext Framework__ offers full integration with JUnit 4 through a
 custom runner (supported on JUnit 4.12 or higher). By annotating test classes with
-`@RunWith(SpringJUnit4ClassRunner.class)`, developers can implement standard JUnit-based
-unit and integration tests and simultaneously reap the benefits of the TestContext
-framework such as support for loading application contexts, dependency injection of test
-instances, transactional test method execution, and so on. If you would like to use the
-Spring TestContext Framework with an alternative runner such as JUnit's `Parameterized`
-or third-party runners such as the `MockitoJUnitRunner`, you may optionally use
-<<testcontext-junit4-rules,Spring's support for JUnit rules>> instead.
+`@RunWith(SpringJUnit4ClassRunner.class)` or the shorter `@RunWith(SpringRunner.class)`
+variant, developers can implement standard JUnit-based unit and integration tests and
+simultaneously reap the benefits of the TestContext framework such as support for loading
+application contexts, dependency injection of test instances, transactional test method
+execution, and so on. If you would like to use the Spring TestContext Framework with an
+alternative runner such as JUnit's `Parameterized` or third-party runners such as the
+`MockitoJUnitRunner`, you may optionally use <<testcontext-junit4-rules,Spring's support
+for JUnit rules>> instead.
 
 The following code listing displays the minimal requirements for configuring a test class
 to run with the custom Spring `Runner`. `@TestExecutionListeners` is configured with an
@@ -3641,7 +3641,7 @@ empty list in order to disable the default listeners, which otherwise would requ
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @TestExecutionListeners({})
 public class SimpleTest {
 
@@ -3666,10 +3666,10 @@ The `org.springframework.test.context.junit4.rules` package provides the followi
 _Spring TestContext Framework_; whereas, `SpringMethodRule` is a JUnit `MethodRule` that
 supports instance-level and method-level features of the _Spring TestContext Framework_.
 
-In contrast to the `SpringJUnit4ClassRunner`, Spring's rule-based JUnit support has the
-advantage that it is independent of any `org.junit.runner.Runner` implementation and can
-therefore be combined with existing alternative runners like JUnit's `Parameterized` or
-third-party runners such as the `MockitoJUnitRunner`.
+In contrast to the `SpringRunner`, Spring's rule-based JUnit support has the advantage
+that it is independent of any `org.junit.runner.Runner` implementation and can therefore
+be combined with existing alternative runners like JUnit's `Parameterized` or third-party
+runners such as the `MockitoJUnitRunner`.
 
 In order to support the full functionality of the TestContext framework, a
 `SpringClassRule` must be combined with a `SpringMethodRule`. The following example
@@ -3732,7 +3732,7 @@ provides an `executeSqlScript(..)` method for executing SQL scripts against the 
 ====
 These classes are a convenience for extension. If you do not want your test classes to be
 tied to a Spring-specific class hierarchy, you can configure your own custom test classes
-by using `@RunWith(SpringJUnit4ClassRunner.class)` or <<testcontext-junit4-rules,Spring's
+by using `@RunWith(SpringRunner.class)` or <<testcontext-junit4-rules,Spring's
 JUnit rules>>.
 ====
 
@@ -3832,7 +3832,7 @@ JUnit-based example of using Spring MVC Test:
 	import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 	import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	@WebAppConfiguration
 	@ContextConfiguration("test-servlet-context.xml")
 	public class ExampleTests {
@@ -3892,7 +3892,7 @@ into the test to use to build a `MockMvc` instance:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	@WebAppConfiguration
 	@ContextConfiguration("my-servlet-context.xml")
 	public class MyWebTests {
@@ -3957,7 +3957,7 @@ expectations:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	@WebAppConfiguration
 	@ContextConfiguration("test-servlet-context.xml")
 	public class AccountTests {
