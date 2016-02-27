@@ -83,7 +83,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @see org.springframework.test.context.TestExecutionListeners
  * @see org.springframework.test.context.transaction.TransactionalTestExecutionListener
  * @see org.springframework.test.context.jdbc.SqlScriptsTestExecutionListener
- * @see org.springframework.test.context.transaction.TransactionConfiguration
  * @see org.springframework.transaction.annotation.Transactional
  * @see org.springframework.test.annotation.Commit
  * @see org.springframework.test.annotation.Rollback

@@ -79,7 +79,6 @@ import org.springframework.util.ReflectionUtils;
  * @see TestExecutionListeners
  * @see ContextConfiguration
  * @see ContextHierarchy
- * @see org.springframework.test.context.transaction.TransactionConfiguration
  */
 public class TestContextManager {
 
