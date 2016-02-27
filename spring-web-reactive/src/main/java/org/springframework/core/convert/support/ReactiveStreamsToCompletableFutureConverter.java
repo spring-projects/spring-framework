@@ -21,6 +21,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import org.reactivestreams.Publisher;
+import reactor.core.publisher.Mono;
 
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.core.convert.converter.GenericConverter;
@@ -44,7 +45,7 @@ public class ReactiveStreamsToCompletableFutureConverter implements GenericConve
 			return null;
 		}
 		else if (CompletableFuture.class.isAssignableFrom(source.getClass())) {
-			return reactor.core.converter.CompletableFutureConverter.from((CompletableFuture) source);
+			return Mono.fromCompletableFuture((CompletableFuture)source);
 		}
 		else if (CompletableFuture.class.isAssignableFrom(targetType.getResolvableType().getRawClass())) {
 			return reactor.core.converter.CompletableFutureConverter.fromSingle((Publisher) source);

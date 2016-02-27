@@ -16,9 +16,7 @@
 
 package org.springframework.web.client.reactive;
 
-import static org.junit.Assert.*;
-import static org.springframework.web.client.reactive.HttpRequestBuilders.*;
-import static org.springframework.web.client.reactive.WebResponseExtractors.*;
+import java.util.function.Consumer;
 
 import okhttp3.HttpUrl;
 import okhttp3.mockwebserver.MockResponse;
@@ -31,13 +29,18 @@ import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.test.TestSubscriber;
-import reactor.fn.Consumer;
 
 import org.springframework.core.codec.support.Pojo;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ReactorHttpClientRequestFactory;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.springframework.web.client.reactive.HttpRequestBuilders.get;
+import static org.springframework.web.client.reactive.HttpRequestBuilders.post;
+import static org.springframework.web.client.reactive.WebResponseExtractors.*;
 
 /**
  * @author Brian Clozel

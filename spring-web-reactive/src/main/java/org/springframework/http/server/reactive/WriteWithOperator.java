@@ -15,12 +15,13 @@
  */
 package org.springframework.http.server.reactive;
 
+import java.util.function.Function;
+
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.subscriber.SubscriberBarrier;
 import reactor.core.util.Assert;
-import reactor.fn.Function;
 
 
 /**
@@ -81,7 +82,8 @@ public class WriteWithOperator<T> implements Function<Subscriber<? super Void>, 
 		@Override
 		protected void doOnSubscribe(Subscription subscription) {
 			super.doOnSubscribe(subscription);
-			((Subscription) super.upstream()).request(1); // bypass doRequest
+			super.upstream()
+			     .request(1); // bypass doRequest
 		}
 
 		@Override
