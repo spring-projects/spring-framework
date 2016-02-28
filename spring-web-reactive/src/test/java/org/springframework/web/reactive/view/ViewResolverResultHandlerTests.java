@@ -57,10 +57,7 @@ import org.springframework.web.server.session.DefaultWebSessionManager;
 import org.springframework.web.server.session.WebSessionManager;
 
 import static org.hamcrest.CoreMatchers.endsWith;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 
@@ -226,7 +223,7 @@ public class ViewResolverResultHandlerTests {
 		@Override
 		public Mono<View> resolveViewName(String viewName, Locale locale) {
 			View view = this.views.get(viewName);
-			return (view != null ? Mono.just(view) : Mono.empty());
+			return Mono.justOrEmpty(view);
 		}
 	}
 

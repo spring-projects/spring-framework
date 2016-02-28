@@ -46,8 +46,7 @@ public class RequestParamArgumentResolver implements HandlerMethodArgumentResolv
 		RequestParam annotation = param.getParameterAnnotation(RequestParam.class);
 		String name = (annotation.value().length() != 0 ? annotation.value() : param.getParameterName());
 		UriComponents uriComponents = UriComponentsBuilder.fromUri(exchange.getRequest().getURI()).build();
-		String value = uriComponents.getQueryParams().getFirst(name);
-		return (value != null ? Mono.just(value) : Mono.empty());
+		return Mono.justOrEmpty(uriComponents.getQueryParams().getFirst(name));
 	}
 
 }
