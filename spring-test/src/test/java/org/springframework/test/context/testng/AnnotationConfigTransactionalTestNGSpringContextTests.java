@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -120,7 +120,7 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests extends
 	}
 
 	@BeforeTransaction
-	public void beforeTransaction() {
+	void beforeTransaction() {
 		assertNumRowsInPersonTable(1, "before a transactional test method");
 		assertAddPerson(YODA);
 	}
@@ -152,7 +152,7 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests extends
 	}
 
 	@AfterTransaction
-	public void afterTransaction() {
+	void afterTransaction() {
 		assertEquals(deletePerson(YODA), 1, "Deleting yoda");
 		assertNumRowsInPersonTable(1, "after a transactional test method");
 	}

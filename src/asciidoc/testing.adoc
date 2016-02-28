@@ -853,7 +853,7 @@ method, potentially overriding class-level `@Rollback` or `@Commit` semantics.
 
 +
 
-Indicates that the annotated `public void` method should be executed __before__ a
+Indicates that the annotated `void` method should be executed __before__ a
 transaction is started for test methods configured to run within a transaction via the
 `@Transactional` annotation.
 
@@ -863,7 +863,7 @@ transaction is started for test methods configured to run within a transaction v
 [subs="verbatim,quotes"]
 ----
 	**@BeforeTransaction**
-	public void beforeTransaction() {
+	void beforeTransaction() {
 		// logic to be executed before a transaction is started
 	}
 ----
@@ -872,7 +872,7 @@ transaction is started for test methods configured to run within a transaction v
 
 +
 
-Indicates that the annotated `public void` method should be executed __after__ a
+Indicates that the annotated `void` method should be executed __after__ a
 transaction has ended for test methods configured to run within a transaction via the
 `@Transactional` annotation.
 
@@ -882,7 +882,7 @@ transaction has ended for test methods configured to run within a transaction vi
 [subs="verbatim,quotes"]
 ----
 	**@AfterTransaction**
-	public void afterTransaction() {
+	void afterTransaction() {
 		// logic to be executed after a transaction has ended
 	}
 ----
@@ -3197,8 +3197,8 @@ but outside the transactional context -- for example, to verify the initial data
 prior to execution of your test or to verify expected transactional commit behavior after
 test execution (if the test was configured not to roll back the transaction).
 `TransactionalTestExecutionListener` supports the `@BeforeTransaction` and
-`@AfterTransaction` annotations exactly for such scenarios. Simply annotate any `public
-void` method in your test class with one of these annotations, and the
+`@AfterTransaction` annotations exactly for such scenarios. Simply annotate any `void`
+method in your test class with one of these annotations, and the
 `TransactionalTestExecutionListener` ensures that your __before transaction method__ or
 __after transaction method__ is executed at the appropriate time.
 
@@ -3244,7 +3244,7 @@ declarative SQL script execution with default transaction rollback semantics.
 	public class FictitiousTransactionalTest {
 
 		**@BeforeTransaction**
-		public void verifyInitialDatabaseState() {
+		void verifyInitialDatabaseState() {
 			// logic to verify the initial state before a transaction is started
 		}
 
@@ -3266,7 +3266,7 @@ declarative SQL script execution with default transaction rollback semantics.
 		}
 
 		**@AfterTransaction**
-		public void verifyFinalDatabaseState() {
+		void verifyFinalDatabaseState() {
 			// logic to verify the final state after transaction has rolled back
 		}
 
