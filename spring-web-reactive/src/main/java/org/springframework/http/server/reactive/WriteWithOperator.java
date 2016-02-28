@@ -20,9 +20,11 @@ import java.util.function.Function;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
+import reactor.core.publisher.MonoSource;
 import reactor.core.subscriber.SubscriberBarrier;
-import reactor.core.util.Assert;
 import reactor.core.util.EmptySubscription;
+
+import org.springframework.util.Assert;
 
 /**
  * Given a write function that accepts a source {@code Publisher<T>} to write
@@ -33,21 +35,23 @@ import reactor.core.util.EmptySubscription;
  * through the result publisher. Otherwise the write function is invoked.
  *
  * @author Rossen Stoyanchev
+ * @author Stephane Maldini
  */
-public class WriteWithOperator<T> implements Function<Subscriber<? super Void>, Subscriber<? super T>> {
+public class WriteWithOperator<T> extends MonoSource<T, Void> {
 
 	private final Function<Publisher<T>, Publisher<Void>> writeFunction;
 
 
-	public WriteWithOperator(Function<Publisher<T>, Publisher<Void>> writeFunction) {
+	public WriteWithOperator(Publisher<? extends T> source,
+			Function<Publisher<T>, Publisher<Void>> writeFunction) {
+		super(source);
 		this.writeFunction = writeFunction;
 	}
 
 	@Override
-	public Subscriber<? super T> apply(Subscriber<? super Void> subscriber) {
-		return new WriteWithBarrier(subscriber);
+	public void subscribe(Subscriber<? super Void> s) {
+		source.subscribe(new WriteWithBarrier(s));
 	}
-
 
 	private class WriteWithBarrier extends SubscriberBarrier<T, Void> implements Publisher<T> {
 

@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -58,10 +57,8 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public Mono<Void> setBody(Publisher<DataBuffer> publisher) {
-		return Flux.from(publisher)
-				.lift(new WriteWithOperator<>(writePublisher ->
-						applyBeforeCommit().after(() -> setBodyInternal(writePublisher))))
-				.after();
+		return new WriteWithOperator<>(publisher, writePublisher ->
+						applyBeforeCommit().after(() -> setBodyInternal(writePublisher)));
 	}
 
 	private Mono<Void> applyBeforeCommit() {
