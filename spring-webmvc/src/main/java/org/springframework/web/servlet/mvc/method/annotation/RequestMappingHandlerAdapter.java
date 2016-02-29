@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,8 +117,8 @@ import org.springframework.web.util.WebUtils;
 public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		implements BeanFactoryAware, InitializingBean {
 
-	private static final boolean completionStagePresent = ClassUtils.isPresent("java.util.concurrent.CompletionStage",
-			RequestMappingHandlerAdapter.class.getClassLoader());
+	private static final boolean completionStagePresent = ClassUtils.isPresent(
+			"java.util.concurrent.CompletionStage", RequestMappingHandlerAdapter.class.getClassLoader());
 
 
 	private List<HandlerMethodArgumentResolver> customArgumentResolvers;
@@ -444,7 +444,14 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 	/**
 	 * Cache content produced by {@code @SessionAttributes} annotated handlers
-	 * for the given number of seconds. Default is 0, preventing caching completely.
+	 * for the given number of seconds.
+	 * <p>Possible values are:
+	 * <ul>
+	 * <li>-1: no generation of cache-related headers</li>
+	 * <li>0 (default value): "Cache-Control: no-store" will prevent caching</li>
+	 * <li>1 or higher: "Cache-Control: max-age=seconds" will ask to cache content;
+	 * not advised when dealing with session attributes</li>
+	 * </ul>
 	 * <p>In contrast to the "cacheSeconds" property which will apply to all general
 	 * handlers (but not to {@code @SessionAttributes} annotated handlers),
 	 * this setting will apply to {@code @SessionAttributes} handlers only.
@@ -727,8 +734,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 				}
 			}
 		}
-
-		mav = invokeHandlerMethod(request, response, handlerMethod);
+		else {
+			mav = invokeHandlerMethod(request, response, handlerMethod);
+		}
 
 		if (getSessionAttributesHandler(handlerMethod).hasSessionAttributes()) {
 			applyCacheSeconds(response, this.cacheSecondsForSessionAttributeHandlers);
