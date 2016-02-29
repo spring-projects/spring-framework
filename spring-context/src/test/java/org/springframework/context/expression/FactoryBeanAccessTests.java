@@ -56,7 +56,7 @@ public class FactoryBeanAccessTests {
 		} catch (BeanIsNotAFactoryException binafe) {
 			// success
 		}
-		
+	
 		// No such bean
 		try {
 			expr = new SpelExpressionParser().parseRaw("@truck");

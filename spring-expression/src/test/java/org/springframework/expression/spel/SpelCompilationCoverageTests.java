@@ -3000,11 +3000,11 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("java.lang.String",expression.getValue());
 		assertCanCompile(expression);
 		assertEquals("java.lang.String",expression.getValue());
-		
+	
 		// These tests below verify that the chain of static accesses (either method/property or field)
 		// leave the right thing on top of the stack for processing by any outer consuming code.
 		// Here the consuming code is the String.valueOf() function.  If the wrong thing were on
-		// the stack (for example if the compiled code for static methods wasn't popping the 
+		// the stack (for example if the compiled code for static methods wasn't popping the
 		// previous thing off the stack) the valueOf() would operate on the wrong value.
 
 		String shclass = StaticsHelper.class.getName();
@@ -3042,7 +3042,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("fb",expression.getValue(StaticsHelper.sh));
 		assertCanCompile(expression);
 		assertEquals("fb",expression.getValue(StaticsHelper.sh));
-		
+	
 		expression = parser.parseExpression("T(String).valueOf(propertya.propertyb)");
 		assertEquals("pb",expression.getValue(StaticsHelper.sh));
 		assertCanCompile(expression);
@@ -3052,9 +3052,9 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		assertEquals("mb",expression.getValue(StaticsHelper.sh));
 		assertCanCompile(expression);
 		assertEquals("mb",expression.getValue(StaticsHelper.sh));
-		
-	}
 	
+	}
+
 	@Test
 	public void constructorReference_SPR12326() {
 		String type = this.getClass().getName();
@@ -5446,7 +5446,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		public static String methodb() {
 			return "mb";
 		}
-		
+	
 		public static StaticsHelper getPropertya() {
 			return sh;
 		}
@@ -5454,11 +5454,11 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 		public static String getPropertyb() {
 			return "pb";
 		}
-		
+	
 
 		public static StaticsHelper fielda = sh;
 		public static String fieldb = "fb";
-		
+	
 		public String toString() {
 			return "sh";
 		}
