@@ -135,7 +135,7 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests
 	}
 
 	@Test
-	public void modifyTestDataWithinTransaction() {
+	void modifyTestDataWithinTransaction() {
 		assertInTransaction(true);
 		assertAddPerson(JANE);
 		assertAddPerson(SUE);

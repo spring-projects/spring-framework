@@ -205,7 +205,7 @@ public class ConcreteTransactionalTestNGSpringContextTests extends AbstractTrans
 	}
 
 	@Test
-	public void modifyTestDataWithinTransaction() {
+	void modifyTestDataWithinTransaction() {
 		assertInTransaction(true);
 		assertAddPerson(JANE);
 		assertAddPerson(SUE);

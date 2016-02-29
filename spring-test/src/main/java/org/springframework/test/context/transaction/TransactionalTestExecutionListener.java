@@ -136,7 +136,8 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	@SuppressWarnings("deprecation")
 	private static final TransactionConfigurationAttributes defaultTxConfigAttributes = new TransactionConfigurationAttributes();
 
-	protected final TransactionAttributeSource attributeSource = new AnnotationTransactionAttributeSource();
+	// Do not require @Transactional test methods to be public.
+	protected final TransactionAttributeSource attributeSource = new AnnotationTransactionAttributeSource(false);
 
 	@SuppressWarnings("deprecation")
 	private TransactionConfigurationAttributes configurationAttributes;
