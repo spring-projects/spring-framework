@@ -725,7 +725,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	protected ModelAndView handleInternal(HttpServletRequest request,
 			HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
 
-		ModelAndView mav = null;
+		ModelAndView mav;
 		checkRequest(request);
 
 		// Execute invokeHandlerMethod in synchronized block if required.
@@ -737,8 +737,13 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 					mav = invokeHandlerMethod(request, response, handlerMethod);
 				}
 			}
+			else {
+				// No HttpSession available -> no mutex necessary
+				mav = invokeHandlerMethod(request, response, handlerMethod);
+			}
 		}
 		else {
+			// No synchronization on session demanded at all...
 			mav = invokeHandlerMethod(request, response, handlerMethod);
 		}
 
