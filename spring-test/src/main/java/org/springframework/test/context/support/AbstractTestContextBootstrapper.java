@@ -315,9 +315,20 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 				testClass.getName(), contextLoader.getClass().getSimpleName()));
 		}
 		List<ContextConfigurationAttributes> defaultContextConfigurationAttributes = Collections.singletonList(
-				new ContextConfigurationAttributes(testClass));
-		return buildMergedContextConfiguration(testClass, defaultContextConfigurationAttributes, null,
+				getDefaultContextConfigurationAttributes(testClass));
+		return buildMergedContextConfiguration(testClass,
+				defaultContextConfigurationAttributes, null,
 				cacheAwareContextLoaderDelegate, verify);
+	}
+
+	/**
+	 * Return the {@link ContextConfigurationAttributes} that should be used when no
+	 * {@code @ContextConfiguration} or {@code @ContextHierarchy} is defined.
+	 * @param testClass the source test class
+	 * @return the context configuration attributes
+	 */
+	protected ContextConfigurationAttributes getDefaultContextConfigurationAttributes(Class<?> testClass) {
+		return new ContextConfigurationAttributes(testClass);
 	}
 
 	/**
