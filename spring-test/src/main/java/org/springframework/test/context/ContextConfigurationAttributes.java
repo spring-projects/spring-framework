@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,10 @@ public class ContextConfigurationAttributes {
 
 	private static final Log logger = LogFactory.getLog(ContextConfigurationAttributes.class);
 
+	private static final String[] EMPTY_LOCATIONS = {};
+
+	private static final Class<?>[] EMPTY_CLASSES = {};
+
 	private final Class<?> declaringClass;
 
 	private Class<?>[] classes;
@@ -59,6 +63,19 @@ public class ContextConfigurationAttributes {
 
 	private final Class<? extends ContextLoader> contextLoaderClass;
 
+
+	/**
+	 * Construct a new {@link ContextConfigurationAttributes} instance with default
+	 * values.
+	 * @param declaringClass the test class that declared {@code @ContextConfiguration}
+	 * @param classes the annotated classes for the configuration
+	 * @since 4.3
+	 */
+	@SuppressWarnings("unchecked")
+	public ContextConfigurationAttributes(Class<?> declaringClass, Class<?>... classes) {
+		this(declaringClass, EMPTY_LOCATIONS, classes, false,
+				(Class[]) EMPTY_CLASSES, true, ContextLoader.class);
+	}
 
 	/**
 	 * Construct a new {@link ContextConfigurationAttributes} instance for the
