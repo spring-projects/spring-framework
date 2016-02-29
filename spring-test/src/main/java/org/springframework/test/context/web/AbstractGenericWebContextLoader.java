@@ -256,15 +256,13 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	 * loader <i>after</i> bean definitions have been loaded into the context but
 	 * <i>before</i> the context is refreshed.
 	 *
-	 * <p>The default implementation is empty but can be overridden in subclasses
-	 * to customize the web application context.
-	 *
 	 * @param context the newly created web application context
 	 * @param webMergedConfig the merged context configuration to use to load the
 	 * web application context
 	 * @see #loadContext(MergedContextConfiguration)
 	 */
 	protected void customizeContext(GenericWebApplicationContext context, WebMergedContextConfiguration webMergedConfig) {
+		super.customizeContext(context, webMergedConfig);
 	}
 
 	// --- ContextLoader -------------------------------------------------------
