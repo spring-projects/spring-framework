@@ -22,6 +22,8 @@ import org.junit.rules.ExpectedException;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import static org.hamcrest.CoreMatchers.*;
+
 /**
  * JUnit 4 based unit test for {@link TestContextManager}, which verifies
  * ContextConfiguration attributes are defined.
@@ -33,6 +35,15 @@ public class TestContextManagerVerifyAttributesTests {
 
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
+
+	@Test
+	public void processContextConfigurationWithMissingContextConfigAttributes() {
+		expectedException.expect(IllegalStateException.class);
+		expectedException.expectMessage(containsString("was unable to detect defaults, "
+				+ "and no ApplicationContextInitializers or ContextCustomizers were "
+				+ "declared for context configurations"));
+		new TestContextManager(MissingContextAttributes.class);
+	}
 
 	@Test
 	public void processContextConfigurationWitListener() {

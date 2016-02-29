@@ -33,6 +33,7 @@ import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ContextConfigurationAttributes;
+import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
@@ -116,6 +117,9 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * {@link org.springframework.core.Ordered Ordered} or annotated with {@link
 	 * org.springframework.core.annotation.Order @Order} will be sorted appropriately.</li>
 	 * </ul>
+	 * <li>Calls any {@link MergedContextConfiguration#getContextCustomizers()
+	 * ContextCustomizers} that are part of the {@link MergedContextConfiguration}.</li>
+	 * </ul>
 	 * @param context the newly created application context
 	 * @param mergedConfig the merged context configuration
 	 * @since 3.2
@@ -130,6 +134,9 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 		TestPropertySourceUtils.addPropertiesFilesToEnvironment(context, mergedConfig.getPropertySourceLocations());
 		TestPropertySourceUtils.addInlinedPropertiesToEnvironment(context, mergedConfig.getPropertySourceProperties());
 		invokeApplicationContextInitializers(context, mergedConfig);
+		for (ContextCustomizer contextCustomizer : mergedConfig.getContextCustomizers()) {
+			contextCustomizer.prepareContext(context, mergedConfig);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
