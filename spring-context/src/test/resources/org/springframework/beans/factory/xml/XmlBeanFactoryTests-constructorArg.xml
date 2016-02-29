@@ -227,4 +227,8 @@
 		</constructor-arg>
 	</bean>
 
+	<bean id="constructorUnresolvableName" class="java.util.concurrent.atomic.AtomicInteger" scope="prototype">
+		<constructor-arg name="initialValue" value="1"/>
+	</bean>
+
 </beans>
