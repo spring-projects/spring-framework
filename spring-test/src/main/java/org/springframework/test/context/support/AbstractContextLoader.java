@@ -116,7 +116,6 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * {@link org.springframework.core.Ordered Ordered} or annotated with {@link
 	 * org.springframework.core.annotation.Order @Order} will be sorted appropriately.</li>
 	 * </ul>
-	 * </ul>
 	 * @param context the newly created application context
 	 * @param mergedConfig the merged context configuration
 	 * @since 3.2
