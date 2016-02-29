@@ -54,8 +54,8 @@ import static org.testng.Assert.*;
  * @since 3.1
  */
 @ContextConfiguration
-public class AnnotationConfigTransactionalTestNGSpringContextTests extends
-		AbstractTransactionalTestNGSpringContextTests {
+public class AnnotationConfigTransactionalTestNGSpringContextTests
+		extends AbstractTransactionalTestNGSpringContextTests {
 
 	private static final String JANE = "jane";
 	private static final String SUE = "sue";
@@ -94,7 +94,7 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests extends
 	}
 
 	@BeforeClass
-	public void beforeClass() {
+	void beforeClass() {
 		numSetUpCalls = 0;
 		numSetUpCallsInTransaction = 0;
 		numTearDownCalls = 0;
@@ -102,7 +102,7 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests extends
 	}
 
 	@AfterClass
-	public void afterClass() {
+	void afterClass() {
 		assertEquals(numSetUpCalls, NUM_TESTS, "number of calls to setUp().");
 		assertEquals(numSetUpCallsInTransaction, NUM_TX_TESTS, "number of calls to setUp() within a transaction.");
 		assertEquals(numTearDownCalls, NUM_TESTS, "number of calls to tearDown().");
@@ -111,7 +111,7 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests extends
 
 	@Test
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
-	public void autowiringFromConfigClass() {
+	void autowiringFromConfigClass() {
 		assertNotNull(employee, "The employee should have been autowired.");
 		assertEquals(employee.getName(), "John Smith");
 
@@ -126,7 +126,7 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests extends
 	}
 
 	@BeforeMethod
-	public void setUp() throws Exception {
+	void setUp() throws Exception {
 		numSetUpCalls++;
 		if (inTransaction()) {
 			numSetUpCallsInTransaction++;
@@ -143,7 +143,7 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests extends
 	}
 
 	@AfterMethod
-	public void tearDown() throws Exception {
+	void tearDown() throws Exception {
 		numTearDownCalls++;
 		if (inTransaction()) {
 			numTearDownCallsInTransaction++;
@@ -162,7 +162,7 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests extends
 	static class ContextConfiguration {
 
 		@Bean
-		public Employee employee() {
+		Employee employee() {
 			Employee employee = new Employee();
 			employee.setName("John Smith");
 			employee.setAge(42);
@@ -171,17 +171,17 @@ public class AnnotationConfigTransactionalTestNGSpringContextTests extends
 		}
 
 		@Bean
-		public Pet pet() {
+		Pet pet() {
 			return new Pet("Fido");
 		}
 
 		@Bean
-		public PlatformTransactionManager transactionManager() {
+		PlatformTransactionManager transactionManager() {
 			return new DataSourceTransactionManager(dataSource());
 		}
 
 		@Bean
-		public DataSource dataSource() {
+		DataSource dataSource() {
 			return new EmbeddedDatabaseBuilder()//
 			.addScript("classpath:/org/springframework/test/jdbc/schema.sql")//
 			.addScript("classpath:/org/springframework/test/jdbc/data.sql")//
