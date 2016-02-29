@@ -279,6 +279,11 @@ import org.springframework.core.annotation.AliasFor;
  * @author Arjen Poutsma
  * @author Sam Brannen
  * @since 2.5
+ * @see GetMapping
+ * @see PostMapping
+ * @see PutMapping
+ * @see DeleteMapping
+ * @see PatchMapping
  * @see RequestParam
  * @see RequestAttribute
  * @see PathVariable
