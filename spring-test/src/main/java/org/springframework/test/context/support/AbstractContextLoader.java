@@ -28,11 +28,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ContextConfigurationAttributes;
+import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
@@ -107,6 +109,8 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * {@linkplain MergedContextConfiguration#getPropertySourceProperties()
 	 * inlined properties} from the supplied {@code MergedContextConfiguration}
 	 * to the {@code Environment} of the context.</li>
+	 * <li>Calls any {@link MergedContextConfiguration#getContextCustomizers()
+	 * ContextCustomizers} that are part of the {@link MergedContextConfiguration}.</li>
 	 * <li>Determines what (if any) context initializer classes have been supplied
 	 * via the {@code MergedContextConfiguration} and instantiates and
 	 * {@linkplain ApplicationContextInitializer#initialize invokes} each with the
@@ -164,6 +168,25 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 		AnnotationAwareOrderComparator.sort(initializerInstances);
 		for (ApplicationContextInitializer<ConfigurableApplicationContext> initializer : initializerInstances) {
 			initializer.initialize(context);
+		}
+	}
+
+	/**
+	 * Customize the {@link ConfigurableApplicationContext} created by this
+	 * {@code ContextLoader} <i>after</i> bean definitions have been
+	 * loaded into the context but <i>before</i> the context is refreshed.
+	 *
+	 * <p>The default implementation triggers all the
+	 * {@link MergedContextConfiguration#getContextCustomizers() context customizers} that
+	 * have been registered with the {@code mergedConfig}.
+	 *
+	 * @param context the newly created application context
+	 * @param mergedConfig the merged context configuration
+	 * @since 4.3
+	 */
+	protected void customizeContext(GenericApplicationContext context, MergedContextConfiguration mergedConfig) {
+		for (ContextCustomizer contextCustomizer : mergedConfig.getContextCustomizers()) {
+			contextCustomizer.customizeContext(context, mergedConfig);
 		}
 	}
 
