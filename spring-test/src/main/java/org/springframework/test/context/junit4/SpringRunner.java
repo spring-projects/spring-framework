@@ -25,8 +25,8 @@ import org.junit.runners.model.InitializationError;
  * {@code @RunWith(SpringRunner.class)}.
  *
  * <p>If you would like to use the Spring TestContext Framework with a runner other than
- * this one, use {@link org.springframework.test.context.junit4.rules.SpringClassRule SpringClassRule}
- * and {@link org.springframework.test.context.junit4.rules.SpringMethodRule SpringMethodRule}.
+ * this one, use {@link org.springframework.test.context.junit4.rules.SpringClassRule}
+ * and {@link org.springframework.test.context.junit4.rules.SpringMethodRule}.
  *
  * <p><strong>NOTE:</strong> This class requires JUnit 4.12 or higher.
  *

@@ -449,13 +449,12 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * <ul>
 	 * <li>-1: no generation of cache-related headers</li>
 	 * <li>0 (default value): "Cache-Control: no-store" will prevent caching</li>
-	 * <li>> 0: "Cache-Control: max-age=seconds" will ask to cache content; not advised when dealing
-	 * with session attributes</li>
+	 * <li>1 or higher: "Cache-Control: max-age=seconds" will ask to cache content;
+	 * not advised when dealing with session attributes</li>
 	 * </ul>
 	 * <p>In contrast to the "cacheSeconds" property which will apply to all general
 	 * handlers (but not to {@code @SessionAttributes} annotated handlers),
 	 * this setting will apply to {@code @SessionAttributes} handlers only.
-	 *
 	 * @see #setCacheSeconds
 	 * @see org.springframework.web.bind.annotation.SessionAttributes
 	 */
