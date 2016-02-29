@@ -117,8 +117,8 @@ import org.springframework.web.util.WebUtils;
 public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		implements BeanFactoryAware, InitializingBean {
 
-	private static final boolean completionStagePresent = ClassUtils.isPresent("java.util.concurrent.CompletionStage",
-			RequestMappingHandlerAdapter.class.getClassLoader());
+	private static final boolean completionStagePresent = ClassUtils.isPresent(
+			"java.util.concurrent.CompletionStage", RequestMappingHandlerAdapter.class.getClassLoader());
 
 
 	private List<HandlerMethodArgumentResolver> customArgumentResolvers;
@@ -739,8 +739,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 				}
 			}
 		}
-
-		mav = invokeHandlerMethod(request, response, handlerMethod);
+		else {
+			mav = invokeHandlerMethod(request, response, handlerMethod);
+		}
 
 		if (getSessionAttributesHandler(handlerMethod).hasSessionAttributes()) {
 			applyCacheSeconds(response, this.cacheSecondsForSessionAttributeHandlers);
