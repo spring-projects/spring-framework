@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,10 +25,17 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.Aware;
+import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
@@ -156,7 +163,9 @@ class ComponentScanAnnotationParser {
 				case CUSTOM:
 					Assert.isAssignable(TypeFilter.class, filterClass,
 							"An error occured while processing a @ComponentScan CUSTOM type filter: ");
-					typeFilters.add(BeanUtils.instantiateClass(filterClass, TypeFilter.class));
+					TypeFilter filter = BeanUtils.instantiateClass(filterClass, TypeFilter.class);
+					invokeAwareMethods(filter);
+					typeFilters.add(filter);
 					break;
 				default:
 					throw new IllegalArgumentException("Filter type not supported with Class value: " + filterType);
@@ -179,4 +188,27 @@ class ComponentScanAnnotationParser {
 		return typeFilters;
 	}
 
+	/**
+	 * Invoke {@link ResourceLoaderAware}, {@link BeanClassLoaderAware} and
+	 * {@link BeanFactoryAware} contracts if implemented by the given {@code filter}.
+	 */
+	private void invokeAwareMethods(TypeFilter filter) {
+		if (filter instanceof Aware) {
+			if (filter instanceof EnvironmentAware) {
+				((EnvironmentAware) filter).setEnvironment(this.environment);
+			}
+			if (filter instanceof ResourceLoaderAware) {
+				((ResourceLoaderAware) filter).setResourceLoader(this.resourceLoader);
+			}
+			if (filter instanceof BeanClassLoaderAware) {
+				ClassLoader classLoader = (this.registry instanceof ConfigurableBeanFactory ?
+						((ConfigurableBeanFactory) this.registry).getBeanClassLoader() :
+						this.resourceLoader.getClassLoader());
+				((BeanClassLoaderAware) filter).setBeanClassLoader(classLoader);
+			}
+			if (filter instanceof BeanFactoryAware && this.registry instanceof BeanFactory) {
+				((BeanFactoryAware) filter).setBeanFactory((BeanFactory) this.registry);
+			}
+		}
+	}
 }
