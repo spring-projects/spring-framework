@@ -18,6 +18,7 @@ package org.springframework.web.reactive.method.annotation;
 
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -491,7 +492,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@RequestMapping("/stream-result")
 		public Publisher<Long> stringStreamResponseBody() {
-			return Flux.interval(1).as(Fluxion::from).take(5);
+			return Flux.interval(Duration.ofSeconds(1)).as(Fluxion::from).take(5);
 		}
 
 		@RequestMapping("/raw-flux")

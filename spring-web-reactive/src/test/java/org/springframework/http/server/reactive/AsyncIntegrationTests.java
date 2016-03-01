@@ -17,6 +17,7 @@
 package org.springframework.http.server.reactive;
 
 import java.net.URI;
+import java.time.Duration;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
@@ -65,7 +66,7 @@ public class AsyncIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 			return response.setBody(Fluxion.just("h", "e", "l", "l", "o")
 			                              .useTimer(Timer.global())
-			                              .delay(1)
+			                              .delay(Duration.ofMillis(100))
 			                              .dispatchOn(asyncGroup)
 			                              .collect(allocator::allocateBuffer,
 			                               (buffer, str) -> buffer.write(str.getBytes())));
