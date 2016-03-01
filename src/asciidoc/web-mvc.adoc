@@ -160,10 +160,43 @@ pattern that Spring Web MVC shares with many other leading web frameworks).
 image::images/mvc.png[width=400]
 
 The `DispatcherServlet` is an actual `Servlet` (it inherits from the `HttpServlet` base
+class), and as such is declared in your web application. You need to map requests that
+you want the `DispatcherServlet` to handle, by using a URL mapping. Here is a standard
+Java EE Servlet configuration in a Servlet 3.0+ environment:
+
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	public class MyWebApplicationInitializer implements WebApplicationInitializer {
+
+		@Override
+		public void onStartup(ServletContext container) {
+			ServletRegistration.Dynamic registration = container.addServlet("dispatcher", new DispatcherServlet());
+			registration.setLoadOnStartup(1);
+			registration.addMapping("/example/*");
+		}
+
+	}
+----
+
+In the preceding example, all requests starting with `/example` will be handled by the
+`DispatcherServlet` instance named `example`.
+
+`WebApplicationInitializer` is an interface provided by Spring MVC that ensures your
+code-based configuration is detected and automatically used to initialize any Servlet 3
+container. An abstract base class implementation of this interface named
+`AbstractAnnotationConfigDispatcherServletInitializer` makes it even easier to register the
+`DispatcherServlet` by simply specifying its servlet mapping and listing configuration
+classes - it's even the recommended way to set up your Spring MVC application.
+See <<mvc-container-config,Code-based Servlet container initialization>> for more details.
+
+The `DispatcherServlet` is an actual `Servlet` (it inherits from the `HttpServlet` base
 class), and as such is declared in the `web.xml` of your web application. You need to
 map requests that you want the `DispatcherServlet` to handle, by using a URL mapping in
 the same `web.xml` file. This is standard Java EE Servlet configuration; the following
 example shows such a `DispatcherServlet` declaration and mapping:
+
+Below is the `web.xml` equivalent of the above code based example:
 
 [source,xml,indent=0]
 [subs="verbatim,quotes"]
@@ -183,41 +216,13 @@ example shows such a `DispatcherServlet` declaration and mapping:
 	</web-app>
 ----
 
-In the preceding example, all requests starting with `/example` will be handled by the
-`DispatcherServlet` instance named `example`. In a Servlet 3.0+ environment, you also
-have the option of configuring the Servlet container programmatically. Below is the code
-based equivalent of the above `web.xml` example:
-
-[source,java,indent=0]
-[subs="verbatim,quotes"]
-----
-	public class MyWebApplicationInitializer implements WebApplicationInitializer {
-
-		@Override
-		public void onStartup(ServletContext container) {
-			ServletRegistration.Dynamic registration = container.addServlet("dispatcher", new DispatcherServlet());
-			registration.setLoadOnStartup(1);
-			registration.addMapping("/example/*");
-		}
-
-	}
-----
-
-`WebApplicationInitializer` is an interface provided by Spring MVC that ensures your
-code-based configuration is detected and automatically used to initialize any Servlet 3
-container. An abstract base class implementation of this interface named
-`AbstractDispatcherServletInitializer` makes it even easier to register the
-`DispatcherServlet` by simply specifying its servlet mapping.
-See <<mvc-container-config,Code-based Servlet container initialization>> for more details.
-
-The above is only the first step in setting up Spring Web MVC. You now need to configure
-the various beans used by the Spring Web MVC framework (over and above the
-`DispatcherServlet` itself).
 
 As detailed in <<context-introduction>>, `ApplicationContext` instances in Spring can be
 scoped. In the Web MVC framework, each `DispatcherServlet` has its own
 `WebApplicationContext`, which inherits all the beans already defined in the root
-`WebApplicationContext`. These inherited beans can be overridden in the servlet-specific
+`WebApplicationContext`. The root `WebApplicationContext` should contain all the
+infrastructure beans that should be shared between your other contexts and Servlet
+instances. These inherited beans can be overridden in the servlet-specific
 scope, and you can define new scope-specific beans local to a given Servlet instance.
 
 .Typical context hierarchy in Spring Web MVC
@@ -295,7 +300,32 @@ a link to the `ServletContext`). The `WebApplicationContext` is bound in the
 `ServletContext`, and by using static methods on the `RequestContextUtils` class you can
 always look up the `WebApplicationContext` if you need access to it.
 
+Note that we can achieve the same with java-based configurations:
 
+[source,java,indent=0]
+[subs="verbatim,quotes"]
+----
+	public class GolfingWebAppInitializer extends AbstractAnnotationConfigDispatcherServletInitializer {
+
+		@Override
+		protected Class<?>[] getRootConfigClasses() {
+			// GolfingAppConfig defines beans that would be in root-context.xml
+			return new Class[] { GolfingAppConfig.class };
+		}
+
+		@Override
+		protected Class<?>[] getServletConfigClasses() {
+			// GolfingWebConfig defines beans that would be in golfing-servlet.xml
+			return new Class[] { GolfingWebConfig.class };
+		}
+
+		@Override
+		protected String[] getServletMappings() {
+			return new String[] { "/golfing/*" };
+		}
+
+	}
+----
 
 [[mvc-servlet-special-bean-types]]
 === Special Bean Types In the WebApplicationContext
@@ -2493,7 +2523,7 @@ Below is some example web.xml configuration:
 If using Servlet 3, Java based configuration for example via `WebApplicationInitializer`,
 you'll also need to set the "asyncSupported" flag as well as the ASYNC dispatcher type
 just like with `web.xml`. To simplify all this configuration, consider extending
-`AbstractDispatcherServletInitializer` or
+`AbstractDispatcherServletInitializer`, or better
 `AbstractAnnotationConfigDispatcherServletInitializer` which automatically
 set those options and make it very easy to register `Filter` instances.
 
@@ -4563,7 +4593,9 @@ implementation is detected and automatically used to initialize any Servlet 3 co
 An abstract base class implementation of `WebApplicationInitializer` named
 `AbstractDispatcherServletInitializer` makes it even easier to register the
 `DispatcherServlet` by simply overriding methods to specify the servlet mapping and the
-location of the `DispatcherServlet` configuration:
+location of the `DispatcherServlet` configuration.
+
+This is recommended for applications that use Java-based Spring configuration:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -4588,8 +4620,7 @@ location of the `DispatcherServlet` configuration:
 	}
 ----
 
-The above example is for an application that uses Java-based Spring configuration. If
-using XML-based Spring configuration, extend directly from
+If using XML-based Spring configuration, you should extend directly from
 `AbstractDispatcherServletInitializer`:
 
 [source,java,indent=0]
