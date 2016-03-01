@@ -189,6 +189,15 @@ public @interface ComponentScan {
 		 * </table>
 		 * <p>When multiple classes are specified, <em>OR</em> logic is applied
 		 * &mdash; for example, "include types annotated with {@code @Foo} OR {@code @Bar}".
+		 * <p>Custom {@link TypeFilter TypeFilters} may optionally implement any of the
+		 * following {@link org.springframework.beans.factory.Aware Aware} interfaces, and
+		 * their respective methods will be called prior to {@link TypeFilter#match match}:
+		 * <ul>
+		 * <li>{@link org.springframework.context.EnvironmentAware EnvironmentAware}</li>
+		 * <li>{@link org.springframework.beans.factory.BeanFactoryAware BeanFactoryAware}
+		 * <li>{@link org.springframework.beans.factory.BeanClassLoaderAware BeanClassLoaderAware}
+		 * <li>{@link org.springframework.context.ResourceLoaderAware ResourceLoaderAware}
+		 * </ul>
 		 * <p>Specifying zero classes is permitted but will have no effect on component
 		 * scanning.
 		 * @since 4.2
