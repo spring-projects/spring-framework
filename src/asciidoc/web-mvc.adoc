@@ -4449,17 +4449,24 @@ This can be achieved as follows:
 ----
 
 There are two key elements here: calling `request.checkNotModified(lastModified)` and
-returning `null`. The former sets the response status to 304 before it returns `true`.
+returning `null`. The former sets the appropriate response status and headers
+before it returns `true`.
 The latter, in combination with the former, causes Spring MVC to do no further
 processing of the request.
 
 Note that there are 3 variants for this:
 
 * `request.checkNotModified(lastModified)` compares lastModified with the
-`'If-Modified-Since'` request header
-* `request.checkNotModified(eTag)` compares eTag with the `'ETag'` request header
+`'If-Modified-Since'` or `'If-Unmodified-Since'` request header
+* `request.checkNotModified(eTag)` compares eTag with the `'If-None-Match'` request header
 * `request.checkNotModified(eTag, lastModified)` does both, meaning that both
-conditions should be valid for the server to issue an `HTTP 304 Not Modified` response
+conditions should be valid
+
+When receiving conditional `'GET'`/`'HEAD'` requests, `checkNotModified` will check
+that the resource has not been modified and if so, it will result in a `HTTP 304 Not Modified`
+response. In case of conditional `'POST'`/`'PUT'`/`'DELETE'` requests, `checkNotModified`
+will check that the resource has not been modified and if it has been, it will result in a
+`HTTP 409 Precondition Failed` response to prevent concurrent modifications.
 
 
 [[mvc-httpcaching-shallowetag]]
