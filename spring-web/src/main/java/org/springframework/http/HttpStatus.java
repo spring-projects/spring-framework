@@ -327,7 +327,7 @@ public enum HttpStatus {
 	 * @see <a href="https://tools.ietf.org/html/draft-ietf-httpbis-legally-restricted-status-04">
 	 *     An HTTP Status Code to Report Legal Obstacles</a>
 	 */
-	UNAVAILABLE_FOR_LEGAL_REASONS(451,"Unavailable For Legal Reasons"),
+	UNAVAILABLE_FOR_LEGAL_REASONS(451, "Unavailable For Legal Reasons"),
 
 	// --- 5xx Server Error ---
 
