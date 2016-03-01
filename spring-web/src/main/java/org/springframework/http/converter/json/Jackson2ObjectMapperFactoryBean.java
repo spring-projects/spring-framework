@@ -325,6 +325,15 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	}
 
 	/**
+	 * Define if a wrapper will be used for indexed (List, array) properties or not by
+	 * default (only applies to {@link XmlMapper}).
+	 * @since 4.3
+	 */
+	public void setDefaultUseWrapper(boolean defaultUseWrapper) {
+		this.builder.defaultUseWrapper(defaultUseWrapper);
+	}
+
+	/**
 	 * Specify features to enable.
 	 * @see com.fasterxml.jackson.core.JsonParser.Feature
 	 * @see com.fasterxml.jackson.core.JsonGenerator.Feature

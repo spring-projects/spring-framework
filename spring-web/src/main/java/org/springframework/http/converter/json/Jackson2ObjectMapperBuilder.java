@@ -47,6 +47,8 @@ import com.fasterxml.jackson.databind.cfg.HandlerInstantiator;
 import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.dataformat.xml.JacksonXmlModule;
+import com.fasterxml.jackson.dataformat.xml.XmlFactory;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import org.springframework.beans.BeanUtils;
@@ -126,6 +128,8 @@ public class Jackson2ObjectMapperBuilder {
 	private HandlerInstantiator handlerInstantiator;
 
 	private ApplicationContext applicationContext;
+
+	private Boolean defaultUseWrapper;
 
 
 	/**
@@ -393,6 +397,16 @@ public class Jackson2ObjectMapperBuilder {
 	}
 
 	/**
+	 * Define if a wrapper will be used for indexed (List, array) properties or not by
+	 * default (only applies to {@link XmlMapper}).
+	 * @since 4.3
+	 */
+	public Jackson2ObjectMapperBuilder defaultUseWrapper(boolean defaultUseWrapper) {
+		this.defaultUseWrapper = defaultUseWrapper;
+		return this;
+	}
+
+	/**
 	 * Specify features to enable.
 	 * @see com.fasterxml.jackson.core.JsonParser.Feature
 	 * @see com.fasterxml.jackson.core.JsonGenerator.Feature
@@ -547,7 +561,8 @@ public class Jackson2ObjectMapperBuilder {
 	public <T extends ObjectMapper> T build() {
 		ObjectMapper mapper;
 		if (this.createXmlMapper) {
-			mapper = new XmlObjectMapperInitializer().create();
+			mapper = (this.defaultUseWrapper == null ? new XmlObjectMapperInitializer().create()
+					: new XmlObjectMapperInitializer().create(this.defaultUseWrapper));
 		}
 		else {
 			mapper = new ObjectMapper();
@@ -757,11 +772,21 @@ public class Jackson2ObjectMapperBuilder {
 	private static class XmlObjectMapperInitializer {
 
 		public ObjectMapper create() {
+			return new XmlMapper(xmlInputFactory());
+		}
+
+		public ObjectMapper create(boolean defaultUseWrapper) {
+			JacksonXmlModule module = new JacksonXmlModule();
+			module.setDefaultUseWrapper(defaultUseWrapper);
+			return new XmlMapper(new XmlFactory(xmlInputFactory()), module);
+		}
+
+		private static final XMLInputFactory xmlInputFactory() {
 			XMLInputFactory inputFactory = XMLInputFactory.newInstance();
 			inputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
 			inputFactory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
 			inputFactory.setXMLResolver(NO_OP_XML_RESOLVER);
-			return new XmlMapper(inputFactory);
+			return inputFactory;
 		}
 
 		private static final XMLResolver NO_OP_XML_RESOLVER = new XMLResolver() {
