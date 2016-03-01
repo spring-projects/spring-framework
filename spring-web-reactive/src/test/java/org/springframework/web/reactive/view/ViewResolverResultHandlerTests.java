@@ -19,6 +19,7 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,7 +27,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -194,7 +194,7 @@ public class ViewResolverResultHandlerTests {
 		HandlerResult result = new HandlerResult(new Object(), value, type, this.model);
 		Mono<Void> mono = handler.handleResult(this.exchange, result);
 		TestSubscriber<Void> subscriber = new TestSubscriber<>();
-		return subscriber.bindTo(mono).await(1, TimeUnit.SECONDS);
+		return subscriber.bindTo(mono).await(Duration.ofSeconds(1));
 	}
 
 	private static DataBuffer asDataBuffer(String value) {

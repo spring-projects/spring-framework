@@ -65,7 +65,7 @@ public class AsyncIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 			return response.setBody(Fluxion.just("h", "e", "l", "l", "o")
 			                              .useTimer(Timer.global())
-			                              .throttleRequest(100)
+			                              .delay(1)
 			                              .dispatchOn(asyncGroup)
 			                              .collect(allocator::allocateBuffer,
 			                               (buffer, str) -> buffer.write(str.getBytes())));
