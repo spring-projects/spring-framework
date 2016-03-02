@@ -53,7 +53,7 @@ public class ForwardedHeaderFilterTests {
 	}
 
 	@Test
-	public void xForwardedHeaders() throws Exception {
+	public void forwardedRequest() throws Exception {
 		MockHttpServletRequest request = new MockHttpServletRequest();
 		request.setScheme("http");
 		request.setServerName("localhost");
@@ -65,10 +65,9 @@ public class ForwardedHeaderFilterTests {
 		request.addHeader("foo", "bar");
 
 		MockFilterChain chain = new MockFilterChain(new HttpServlet() {});
-
 		this.filter.doFilter(request, new MockHttpServletResponse(), chain);
-
 		HttpServletRequest actual = (HttpServletRequest) chain.getRequest();
+
 		assertEquals("https://84.198.58.199/mvc-showcase", actual.getRequestURL().toString());
 		assertEquals("https", actual.getScheme());
 		assertEquals("84.198.58.199", actual.getServerName());
