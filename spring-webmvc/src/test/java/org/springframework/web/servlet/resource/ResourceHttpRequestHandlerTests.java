@@ -503,6 +503,17 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals(0, this.response.getContentLength());
 	}
 
+	// SPR-14005
+	@Test
+	public void doOverwriteExistingCacheControlHeaders() throws Exception {
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
+		this.response.setHeader("Cache-Control", "no-store");
+
+		this.handler.handleRequest(this.request, this.response);
+
+		assertEquals("max-age=3600", this.response.getHeader("Cache-Control"));
+	}
+
 
 	private long dateHeaderAsLong(String responseHeaderName) throws Exception {
 		return dateFormat.parse(this.response.getHeader(responseHeaderName)).getTime();
