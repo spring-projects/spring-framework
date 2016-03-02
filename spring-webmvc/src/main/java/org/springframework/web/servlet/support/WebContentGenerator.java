@@ -75,7 +75,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 	private static final String HEADER_EXPIRES = "Expires";
 
-	private static final String HEADER_CACHE_CONTROL = "Cache-Control";
+	protected static final String HEADER_CACHE_CONTROL = "Cache-Control";
 
 
 	/** Set of supported HTTP methods */
@@ -372,16 +372,14 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * @since 4.2
 	 */
 	protected final void applyCacheControl(HttpServletResponse response, CacheControl cacheControl) {
-		if (!response.containsHeader(HEADER_CACHE_CONTROL)) {
-			String ccValue = cacheControl.getHeaderValue();
-			if (ccValue != null) {
-				// Set computed HTTP 1.1 Cache-Control header
-				response.setHeader(HEADER_CACHE_CONTROL, ccValue);
+		String ccValue = cacheControl.getHeaderValue();
+		if (ccValue != null) {
+			// Set computed HTTP 1.1 Cache-Control header
+			response.setHeader(HEADER_CACHE_CONTROL, ccValue);
 
-				if (response.containsHeader(HEADER_PRAGMA)) {
-					// Reset HTTP 1.0 Pragma header if present
-					response.setHeader(HEADER_PRAGMA, "");
-				}
+			if (response.containsHeader(HEADER_PRAGMA)) {
+				// Reset HTTP 1.0 Pragma header if present
+				response.setHeader(HEADER_PRAGMA, "");
 			}
 		}
 	}
@@ -397,32 +395,30 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 */
 	@SuppressWarnings("deprecation")
 	protected final void applyCacheSeconds(HttpServletResponse response, int cacheSeconds) {
-		if (!response.containsHeader(HEADER_CACHE_CONTROL)) {
-			if (this.useExpiresHeader || !this.useCacheControlHeader) {
-				// Deprecated HTTP 1.0 cache behavior, as in previous Spring versions
-				if (cacheSeconds > 0) {
-					cacheForSeconds(response, cacheSeconds);
+		if (this.useExpiresHeader || !this.useCacheControlHeader) {
+			// Deprecated HTTP 1.0 cache behavior, as in previous Spring versions
+			if (cacheSeconds > 0) {
+				cacheForSeconds(response, cacheSeconds);
+			}
+			else if (cacheSeconds == 0) {
+				preventCaching(response);
+			}
+		}
+		else {
+			CacheControl cControl;
+			if (cacheSeconds > 0) {
+				cControl = CacheControl.maxAge(cacheSeconds, TimeUnit.SECONDS);
+				if (this.alwaysMustRevalidate) {
+					cControl = cControl.mustRevalidate();
 				}
-				else if (cacheSeconds == 0) {
-					preventCaching(response);
-				}
+			}
+			else if (cacheSeconds == 0) {
+				cControl = (this.useCacheControlNoStore ? CacheControl.noStore() : CacheControl.noCache());
 			}
 			else {
-				CacheControl cControl;
-				if (cacheSeconds > 0) {
-					cControl = CacheControl.maxAge(cacheSeconds, TimeUnit.SECONDS);
-					if (this.alwaysMustRevalidate) {
-						cControl = cControl.mustRevalidate();
-					}
-				}
-				else if (cacheSeconds == 0) {
-					cControl = (this.useCacheControlNoStore ? CacheControl.noStore() : CacheControl.noCache());
-				}
-				else {
-					cControl = CacheControl.empty();
-				}
-				applyCacheControl(response, cControl);
+				cControl = CacheControl.empty();
 			}
+			applyCacheControl(response, cControl);
 		}
 	}
 

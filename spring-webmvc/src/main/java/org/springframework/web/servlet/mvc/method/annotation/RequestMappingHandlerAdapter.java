@@ -747,11 +747,13 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			mav = invokeHandlerMethod(request, response, handlerMethod);
 		}
 
-		if (getSessionAttributesHandler(handlerMethod).hasSessionAttributes()) {
-			applyCacheSeconds(response, this.cacheSecondsForSessionAttributeHandlers);
-		}
-		else {
-			prepareResponse(response);
+		if (!response.containsHeader(HEADER_CACHE_CONTROL)) {
+			if (getSessionAttributesHandler(handlerMethod).hasSessionAttributes()) {
+				applyCacheSeconds(response, this.cacheSecondsForSessionAttributeHandlers);
+			}
+			else {
+				prepareResponse(response);
+			}
 		}
 
 		return mav;
@@ -895,7 +897,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		}
 		List<InvocableHandlerMethod> initBinderMethods = new ArrayList<InvocableHandlerMethod>();
 		// Global methods first
-		for (Entry<ControllerAdviceBean, Set<Method>> entry : this.initBinderAdviceCache .entrySet()) {
+		for (Entry<ControllerAdviceBean, Set<Method>> entry : this.initBinderAdviceCache.entrySet()) {
 			if (entry.getKey().isApplicableToBeanType(handlerType)) {
 				Object bean = entry.getKey().resolveBean();
 				for (Method method : entry.getValue()) {
