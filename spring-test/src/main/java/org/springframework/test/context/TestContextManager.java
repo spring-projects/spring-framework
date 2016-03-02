@@ -124,7 +124,7 @@ public class TestContextManager {
 	/**
 	 * Get the {@link TestContext} managed by this {@code TestContextManager}.
 	 */
-	protected final TestContext getTestContext() {
+	public final TestContext getTestContext() {
 		return this.testContext;
 	}
 
