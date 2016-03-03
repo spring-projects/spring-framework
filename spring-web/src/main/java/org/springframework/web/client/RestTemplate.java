@@ -237,8 +237,12 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	}
 
 	/**
-	 * Set a custom {@link UriTemplateHandler} for expanding URI templates.
-	 * <p>By default, RestTemplate uses {@link DefaultUriTemplateHandler}.
+	 * Configure the {@link UriTemplateHandler} to use to expand URI templates.
+	 * By default the {@link DefaultUriTemplateHandler} is used which relies on
+	 * Spring's URI template support and exposes several useful properties that
+	 * customize its behavior for encoding and for prepending a common base URL.
+	 * An alternative implementation may be used to plug an external URI
+	 * template library.
 	 * @param handler the URI template handler to use
 	 */
 	public void setUriTemplateHandler(UriTemplateHandler handler) {

@@ -152,8 +152,9 @@ public class AsyncRestTemplate extends InterceptingAsyncHttpAccessor implements 
 	}
 
 	/**
-	 * Set a custom {@link UriTemplateHandler} for expanding URI templates.
-	 * <p>By default, RestTemplate uses {@link DefaultUriTemplateHandler}.
+	 * This property has the same purpose as the corresponding property on the
+	 * {@code RestTemplate}. For more details see
+	 * {@link RestTemplate#setUriTemplateHandler}.
 	 * @param handler the URI template handler to use
 	 */
 	public void setUriTemplateHandler(UriTemplateHandler handler) {

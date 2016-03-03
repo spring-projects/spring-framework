@@ -24,8 +24,8 @@ import java.util.Map;
 import org.springframework.util.Assert;
 
 /**
- * Default implementation of {@link UriTemplateHandler} that relies on
- * {@link UriComponentsBuilder} internally.
+ * Default implementation of {@link UriTemplateHandler} that uses
+ * {@link UriComponentsBuilder} to expand and encode variables.
  *
  * @author Rossen Stoyanchev
  * @since 4.2
@@ -38,14 +38,10 @@ public class DefaultUriTemplateHandler implements UriTemplateHandler {
 
 
 	/**
-	 * Configure a base URL to prepend URI templates with. The base URL should
-	 * have a scheme and host but may also contain a port and a partial path.
-	 * Individual URI templates then may provide the remaining part of the URL
-	 * including additional path, query and fragment.
-	 * <p><strong>Note: </strong>Individual URI templates are expanded and
-	 * encoded before being appended to the base URL. Therefore the base URL is
-	 * expected to be fully expanded and encoded, which can be done with the help
-	 * of {@link UriComponentsBuilder}.
+	 * Configure a base URL to prepend URI templates with. The base URL must
+	 * have a scheme and host but may optionally contain a port and a path.
+	 * The base URL must be fully expanded and encoded which can be done via
+	 * {@link UriComponentsBuilder}.
 	 * @param baseUrl the base URL.
 	 */
 	public void setBaseUrl(String baseUrl) {
@@ -68,10 +64,10 @@ public class DefaultUriTemplateHandler implements UriTemplateHandler {
 
 	/**
 	 * Whether to parse the path of a URI template string into path segments.
-	 * <p>If set to {@code true} the path of parsed URI templates is decomposed
-	 * into path segments so that URI variables expanded into the path are
-	 * treated according to path segment encoding rules. In effect that means the
-	 * "/" character is percent encoded.
+	 * <p>If set to {@code true} the URI template path is immediately decomposed
+	 * into path segments any URI variables expanded into it are then subject to
+	 * path segment encoding rules. In effect URI variables in the path have any
+	 * "/" characters percent encoded.
 	 * <p>By default this is set to {@code false} in which case the path is kept
 	 * as a full path and expanded URI variables will preserve "/" characters.
 	 * @param parsePath whether to parse the path into path segments
@@ -102,6 +98,11 @@ public class DefaultUriTemplateHandler implements UriTemplateHandler {
 		return insertBaseUrl(url);
 	}
 
+	/**
+	 * Create a {@code UriComponentsBuilder} from the UriTemplate string. The
+	 * default implementation also parses the path into path segments if
+	 * {@link #setParsePath parsePath} is enabled.
+	 */
 	protected UriComponentsBuilder initUriComponentsBuilder(String uriTemplate) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uriTemplate);
 		if (shouldParsePath()) {
@@ -114,6 +115,12 @@ public class DefaultUriTemplateHandler implements UriTemplateHandler {
 		return builder;
 	}
 
+	/**
+	 * Invoked after the URI template has been expanded and encoded to prepend
+	 * the configured {@link #setBaseUrl(String) baseUrl} if any.
+	 * @param uriComponents the expanded and encoded URI
+	 * @return the final URI
+	 */
 	protected URI insertBaseUrl(UriComponents uriComponents) {
 		if (getBaseUrl() == null || uriComponents.getHost() != null) {
 			return uriComponents.toUri();
