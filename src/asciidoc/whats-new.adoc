@@ -670,6 +670,7 @@ Spring 4.3 also improves the caching abstraction as follows:
 * New `@SessionAttribute` annotation for access to session attributes (see <<mvc-ann-sessionattrib-global, example>>).
 * New `@RequestAttribute` annotation for access to request attributes (see <<mvc-ann-requestattrib, example>>).
 * `@ModelAttribute` allows preventing data binding via `binding=false` attribute (see <<mvc-ann-modelattrib-method-args, reference>>).
+* `RestTemplate` and `AsyncRestTemplate` support strict URI variable encoding via `DefaultUriTemplateHandler`.
 * `AsyncRestTemplate` supports request interception.
 
 === WebSocket Messaging Improvements
