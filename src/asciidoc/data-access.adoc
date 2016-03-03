@@ -1296,7 +1296,7 @@ These default settings can be changed; the various properties of the `@Transacti
 annotation are summarized in the following table:
 
 [[tx-attransactional-properties]]
-.@
+.@Transactional Settings
 |===
 | Property| Type| Description
 
