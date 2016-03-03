@@ -21,10 +21,10 @@ import java.time.Duration;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.SchedulerGroup;
 import reactor.core.timer.Timer;
-import reactor.rx.Fluxion;
 
 import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
@@ -64,11 +64,11 @@ public class AsyncIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 		@Override
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
-			return response.setBody(Fluxion.just("h", "e", "l", "l", "o")
-			                              .useTimer(Timer.global())
-			                              .delay(Duration.ofMillis(100))
-			                              .dispatchOn(asyncGroup)
-			                              .collect(allocator::allocateBuffer,
+			return response.setBody(Flux.just("h", "e", "l", "l", "o")
+			                            .useTimer(Timer.global())
+			                            .delay(Duration.ofMillis(100))
+			                            .dispatchOn(asyncGroup)
+			                            .collect(allocator::allocateBuffer,
 			                               (buffer, str) -> buffer.write(str.getBytes())));
 		}
 	}

@@ -24,8 +24,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
-import reactor.rx.Fluxion;
-import reactor.rx.Signal;
+import reactor.core.publisher.Signal;
+import reactor.core.util.SignalKind;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -105,7 +105,7 @@ public class DispatcherHandlerErrorTests {
 	public void noHandler() throws Exception {
 		this.request.setUri(new URI("/does-not-exist"));
 
-		Publisher<Void> publisher = this.dispatcherHandler.handle(this.exchange);
+		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 		Throwable ex = awaitErrorSignal(publisher);
 
 		assertEquals(ResponseStatusException.class, ex.getClass());
@@ -117,7 +117,7 @@ public class DispatcherHandlerErrorTests {
 	public void noResolverForArgument() throws Exception {
 		this.request.setUri(new URI("/unknown-argument-type"));
 
-		Publisher<Void> publisher = this.dispatcherHandler.handle(this.exchange);
+		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 		Throwable ex = awaitErrorSignal(publisher);
 
 		assertEquals(IllegalStateException.class, ex.getClass());
@@ -128,7 +128,7 @@ public class DispatcherHandlerErrorTests {
 	public void controllerMethodError() throws Exception {
 		this.request.setUri(new URI("/error-signal"));
 
-		Publisher<Void> publisher = this.dispatcherHandler.handle(this.exchange);
+		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 		Throwable ex = awaitErrorSignal(publisher);
 
 		assertSame(EXCEPTION, ex);
@@ -138,7 +138,7 @@ public class DispatcherHandlerErrorTests {
 	public void controllerMethodWithThrownException() throws Exception {
 		this.request.setUri(new URI("/raise-exception"));
 
-		Publisher<Void> publisher = this.dispatcherHandler.handle(this.exchange);
+		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 		Throwable ex = awaitErrorSignal(publisher);
 
 		assertSame(EXCEPTION, ex);
@@ -148,7 +148,7 @@ public class DispatcherHandlerErrorTests {
 	public void noHandlerResultHandler() throws Exception {
 		this.request.setUri(new URI("/unknown-return-type"));
 
-		Publisher<Void> publisher = this.dispatcherHandler.handle(this.exchange);
+		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 		Throwable ex = awaitErrorSignal(publisher);
 
 		assertEquals(IllegalStateException.class, ex.getClass());
@@ -163,7 +163,7 @@ public class DispatcherHandlerErrorTests {
 				.write("body".getBytes("UTF-8"));
 		this.request.setBody(Mono.just(buffer));
 
-		Publisher<Void> publisher = this.dispatcherHandler.handle(this.exchange);
+		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 		Throwable ex = awaitErrorSignal(publisher);
 
 		assertEquals(ResponseStatusException.class, ex.getClass());
@@ -176,7 +176,7 @@ public class DispatcherHandlerErrorTests {
 		this.request.setUri(new URI("/request-body"));
 		this.request.setBody(Mono.error(EXCEPTION));
 
-		Publisher<Void> publisher = this.dispatcherHandler.handle(this.exchange);
+		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 		Throwable ex = awaitErrorSignal(publisher);
 
 		ex.printStackTrace();
@@ -190,9 +190,9 @@ public class DispatcherHandlerErrorTests {
 
 		WebExceptionHandler exceptionHandler = new ServerError500ExceptionHandler();
 		WebHandler webHandler = new ExceptionHandlingWebHandler(this.dispatcherHandler, exceptionHandler);
-		Publisher<Void> publisher = webHandler.handle(this.exchange);
+		Mono<Void> publisher = webHandler.handle(this.exchange);
 
-		Fluxion.from(publisher).toList().get();
+		publisher.get();
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatus());
 	}
 
@@ -202,16 +202,16 @@ public class DispatcherHandlerErrorTests {
 
 		WebHandler webHandler = new FilteringWebHandler(this.dispatcherHandler, new TestWebFilter());
 		webHandler = new ExceptionHandlingWebHandler(webHandler, new ServerError500ExceptionHandler());
-		Publisher<Void> publisher = webHandler.handle(this.exchange);
+		Mono<Void> publisher = webHandler.handle(this.exchange);
 
-		Fluxion.from(publisher).toList().get();
+		publisher.get();
 		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatus());
 	}
 
 
-	private Throwable awaitErrorSignal(Publisher<?> publisher) throws Exception {
-		Signal<?> signal = Fluxion.from(publisher).materialize().toList().get().get(0);
-		assertEquals("Unexpected signal: " + signal, Signal.Type.ERROR, signal.getType());
+	private Throwable awaitErrorSignal(Mono<?> mono) throws Exception {
+		Signal<?> signal = mono.materialize().get();
+		assertEquals("Unexpected signal: " + signal, SignalKind.onError, signal.getType());
 		return signal.getThrowable();
 	}
 

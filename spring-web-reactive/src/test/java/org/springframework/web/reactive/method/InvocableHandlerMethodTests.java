@@ -19,15 +19,14 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.rx.Fluxion;
-import reactor.rx.Signal;
+import reactor.core.publisher.Signal;
+import reactor.core.util.SignalKind;
 
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -42,6 +41,7 @@ import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.WebSessionManager;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -72,11 +72,11 @@ public class InvocableHandlerMethodTests {
 	public void noArgsMethod() throws Exception {
 		InvocableHandlerMethod hm = createHandlerMethod("noArgs");
 
-		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange, this.model);
-		List<HandlerResult> values = Fluxion.from(publisher).toList().get();
+		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, this.model);
+		HandlerResult value = mono.get();
 
-		assertEquals(1, values.size());
-		assertEquals("success", values.get(0).getReturnValue().get());
+		assertNotNull(value);
+		assertEquals("success", value.getReturnValue().get());
 	}
 
 	@Test
@@ -85,11 +85,11 @@ public class InvocableHandlerMethodTests {
 		InvocableHandlerMethod hm = createHandlerMethod("singleArg", String.class);
 		hm.setHandlerMethodArgumentResolvers(Collections.singletonList(new RequestParamArgumentResolver()));
 
-		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange, this.model);
-		List<HandlerResult> values = Fluxion.from(publisher).toList().get();
+		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, this.model);
+		HandlerResult value = mono.get();
 
-		assertEquals(1, values.size());
-		assertEquals("success:null", values.get(0).getReturnValue().get());
+		assertNotNull(value);
+		assertEquals("success:null", value.getReturnValue().get());
 	}
 
 	@Test
@@ -97,11 +97,11 @@ public class InvocableHandlerMethodTests {
 		InvocableHandlerMethod hm = createHandlerMethod("singleArg", String.class);
 		addResolver(hm, Mono.just("value1"));
 
-		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange, this.model);
-		List<HandlerResult> values = Fluxion.from(publisher).toList().get();
+		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, this.model);
+		HandlerResult value = mono.get();
 
-		assertEquals(1, values.size());
-		assertEquals("success:value1", values.get(0).getReturnValue().get());
+		assertNotNull(value);
+		assertEquals("success:value1", value.getReturnValue().get());
 	}
 
 	@Test
@@ -109,11 +109,11 @@ public class InvocableHandlerMethodTests {
 		InvocableHandlerMethod hm = createHandlerMethod("singleArg", String.class);
 		addResolver(hm, Flux.fromIterable(Arrays.asList("value1", "value2", "value3")));
 
-		Publisher<HandlerResult> publisher = hm.invokeForRequest(this.exchange, this.model);
-		List<HandlerResult> values = Fluxion.from(publisher).toList().get();
+		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, this.model);
+		HandlerResult value = mono.get();
 
-		assertEquals(1, values.size());
-		assertEquals("success:value1", values.get(0).getReturnValue().get());
+		assertNotNull(value);
+		assertEquals("success:value1", value.getReturnValue().get());
 	}
 
 	@Test
@@ -200,8 +200,8 @@ public class InvocableHandlerMethodTests {
 	}
 
 	private Throwable awaitErrorSignal(Publisher<?> publisher) throws Exception {
-		Signal<?> signal = Fluxion.from(publisher).materialize().toList().get().get(0);
-		assertEquals("Unexpected signal: " + signal, Signal.Type.ERROR, signal.getType());
+		Signal<?> signal = Flux.from(publisher).materialize().toList().get().get(0);
+		assertEquals("Unexpected signal: " + signal, SignalKind.onError, signal.getType());
 		return signal.getThrowable();
 	}
 

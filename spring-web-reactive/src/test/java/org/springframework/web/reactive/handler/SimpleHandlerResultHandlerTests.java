@@ -20,13 +20,12 @@ import java.util.concurrent.CompletableFuture;
 
 import org.junit.Test;
 import org.reactivestreams.Publisher;
-import reactor.rx.Fluxion;
+import reactor.core.publisher.Flux;
 import rx.Observable;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutureConverter;
-import org.springframework.core.convert.support.ReactiveStreamsToReactorFluxionConverter;
 import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converter;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.web.method.HandlerMethod;
@@ -77,7 +76,6 @@ public class SimpleHandlerResultHandlerTests {
 
 		GenericConversionService conversionService = new GenericConversionService();
 		conversionService.addConverter(new ReactiveStreamsToCompletableFutureConverter());
-		conversionService.addConverter(new ReactiveStreamsToReactorFluxionConverter());
 		conversionService.addConverter(new ReactiveStreamsToRxJava1Converter());
 		SimpleHandlerResultHandler resultHandler = new SimpleHandlerResultHandler(conversionService);
 		TestController controller = new TestController();
@@ -126,7 +124,7 @@ public class SimpleHandlerResultHandlerTests {
 			return null;
 		}
 
-		public Fluxion<Void> streamVoid() {
+		public Flux<Void> streamVoid() {
 			return null;
 		}
 

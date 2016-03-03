@@ -16,13 +16,11 @@
 package org.springframework.web.reactive;
 
 import java.net.URI;
-import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.reactivestreams.Publisher;
-import reactor.rx.Fluxion;
-import reactor.rx.Signal;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.Signal;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -61,21 +59,21 @@ public class ResponseStatusExceptionHandlerTests {
 	@Test
 	public void handleException() throws Exception {
 		Throwable ex = new ResponseStatusException(HttpStatus.BAD_REQUEST);
-		Publisher<Void> publisher = this.handler.handle(this.exchange, ex);
+		Mono<Void> publisher = this.handler.handle(this.exchange, ex);
 
-		Fluxion.from(publisher).toList().get();
+		publisher.get();
 		assertEquals(HttpStatus.BAD_REQUEST, this.response.getStatus());
 	}
 
 	@Test
 	public void unresolvedException() throws Exception {
 		Throwable ex = new IllegalStateException();
-		Publisher<Void> publisher = this.handler.handle(this.exchange, ex);
+		Mono<Void> publisher = this.handler.handle(this.exchange, ex);
 
-		List<Signal<Void>> signals = Fluxion.from(publisher).materialize().toList().get();
-		assertEquals(1, signals.size());
-		assertTrue(signals.get(0).hasError());
-		assertSame(ex, signals.get(0).getThrowable());
+		Signal<Void> signal = publisher.materialize().get();
+		assertNotNull(signal);
+		assertTrue(signal.hasError());
+		assertSame(ex, signal.getThrowable());
 	}
 
 }
