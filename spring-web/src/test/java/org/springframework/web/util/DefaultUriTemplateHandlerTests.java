@@ -49,7 +49,8 @@ public class DefaultUriTemplateHandlerTests {
 	}
 
 	@Test
-	public void expandWithFullPath() throws Exception {
+	public void parsePathOff() throws Exception {
+		this.handler.setParsePath(false);
 		Map<String, String> vars = new HashMap<>(2);
 		vars.put("hotel", "1");
 		vars.put("publicpath", "pics/logo.png");
@@ -60,7 +61,7 @@ public class DefaultUriTemplateHandlerTests {
 	}
 
 	@Test
-	public void expandWithFullPathAndParsePathEnabled() throws Exception {
+	public void parsePathOn() throws Exception {
 		this.handler.setParsePath(true);
 		Map<String, String> vars = new HashMap<>(2);
 		vars.put("hotel", "1");
@@ -69,6 +70,37 @@ public class DefaultUriTemplateHandlerTests {
 		String template = "http://example.com/hotels/{hotel}/pic/{publicpath}/size/{scale}";
 		URI actual = this.handler.expand(template, vars);
 		URI expected = new URI("http://example.com/hotels/1/pic/pics%2Flogo.png/size/150x150");
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void strictEncodingOff() throws Exception {
+		this.handler.setStrictEncoding(false);
+		Map<String, String> vars = new HashMap<>(2);
+		vars.put("userId", "john;doe");
+		String template = "http://www.example.com/user/{userId}/dashboard";
+		URI actual = this.handler.expand(template, vars);
+		URI expected = new URI("http://www.example.com/user/john;doe/dashboard");
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void strictEncodingOnWithMap() throws Exception {
+		this.handler.setStrictEncoding(true);
+		Map<String, String> vars = new HashMap<>(2);
+		vars.put("userId", "john;doe");
+		String template = "http://www.example.com/user/{userId}/dashboard";
+		URI actual = this.handler.expand(template, vars);
+		URI expected = new URI("http://www.example.com/user/john%3Bdoe/dashboard");
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void strictEncodingOnWithArray() throws Exception {
+		this.handler.setStrictEncoding(true);
+		String template = "http://www.example.com/user/{userId}/dashboard";
+		URI actual = this.handler.expand(template, "john;doe");
+		URI expected = new URI("http://www.example.com/user/john%3Bdoe/dashboard");
 		assertEquals(expected, actual);
 	}
 
