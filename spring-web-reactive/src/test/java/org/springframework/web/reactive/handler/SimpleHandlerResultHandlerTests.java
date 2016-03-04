@@ -59,7 +59,7 @@ public class SimpleHandlerResultHandlerTests {
 
 		hm = new HandlerMethod(controller, TestController.class.getMethod("streamVoid"));
 		type = ResolvableType.forMethodParameter(hm.getReturnType());
-		// Reactor Fluxion is a Publisher
+		// Reactor Flux is a Publisher
 		assertTrue(resultHandler.supports(createHandlerResult(hm, type)));
 
 		hm = new HandlerMethod(controller, TestController.class.getMethod("observableVoid"));
