@@ -15,7 +15,7 @@
  */
 package org.springframework.web.server.session;
 
-import java.util.Optional;
+import java.util.List;
 
 import org.springframework.web.server.ServerWebExchange;
 
@@ -31,11 +31,11 @@ import org.springframework.web.server.ServerWebExchange;
 public interface WebSessionIdResolver {
 
 	/**
-	 * Resolve the session id associated with the request.
+	 * Resolve the session id's associated with the request.
 	 * @param exchange the current exchange
-	 * @return the session id if present
+	 * @return the session id's or an empty list
 	 */
-	Optional<String> resolveSessionId(ServerWebExchange exchange);
+	List<String> resolveSessionId(ServerWebExchange exchange);
 
 	/**
 	 * Send the given session id to the client or if the session id is "null"

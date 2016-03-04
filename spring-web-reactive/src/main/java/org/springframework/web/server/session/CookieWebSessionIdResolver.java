@@ -18,13 +18,11 @@ package org.springframework.web.server.session;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpCookie;
 import org.springframework.http.ServerHttpCookie;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -77,10 +75,13 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 
 
 	@Override
-	public Optional<String> resolveSessionId(ServerWebExchange exchange) {
+	public List<String> resolveSessionId(ServerWebExchange exchange) {
 		MultiValueMap<String, HttpCookie> cookieMap = exchange.getRequest().getCookies();
-		HttpCookie cookie = cookieMap.getFirst(getCookieName());
-		return (cookie != null ? Optional.of(cookie.getValue()) : Optional.empty());
+		List<HttpCookie> cookies = cookieMap.get(getCookieName());
+		if (cookies == null) {
+			return Collections.emptyList();
+		}
+		return cookies.stream().map(HttpCookie::getValue).collect(Collectors.toList());
 	}
 
 	@Override

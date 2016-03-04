@@ -17,9 +17,10 @@ package org.springframework.web.server.session;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.util.Optional;
+import java.util.List;
 import java.util.UUID;
 
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.util.Assert;
@@ -98,9 +99,8 @@ public class DefaultWebSessionManager implements WebSessionManager {
 
 	@Override
 	public Mono<WebSession> getSession(ServerWebExchange exchange) {
-		return Mono.fromCallable(() -> getSessionIdResolver().resolveSessionId(exchange))
-				.where(Optional::isPresent)
-				.map(Optional::get)
+		return Flux.fromIterable(getSessionIdResolver().resolveSessionId(exchange))
+				.next()
 				.then(this.sessionStore::retrieveSession)
 				.then(session -> validateSession(exchange, session))
 				.otherwiseIfEmpty(createSession(exchange))
@@ -147,8 +147,8 @@ public class DefaultWebSessionManager implements WebSessionManager {
 		// Force explicit start
 		session.start();
 
-		Optional<String> requestedId = getSessionIdResolver().resolveSessionId(exchange);
-		if (!requestedId.isPresent() || !session.getId().equals(requestedId.get())) {
+		List<String> requestedIds = getSessionIdResolver().resolveSessionId(exchange);
+		if (requestedIds.isEmpty() || !session.getId().equals(requestedIds.get(0))) {
 			this.sessionIdResolver.setSessionId(exchange, session.getId());
 		}
 		return this.sessionStore.storeSession(session);

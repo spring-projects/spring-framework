@@ -19,7 +19,9 @@ import java.net.URI;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,9 +29,9 @@ import org.junit.Test;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
-import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebSession;
+import org.springframework.web.server.adapter.DefaultServerWebExchange;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -64,7 +66,7 @@ public class DefaultWebSessionManagerTests {
 
 	@Test
 	public void getSessionPassive() throws Exception {
-		this.idResolver.setIdToResolve(Optional.empty());
+		this.idResolver.setIdsToResolve(Collections.emptyList());
 		WebSession session = this.manager.getSession(this.exchange).get();
 
 		assertNotNull(session);
@@ -79,7 +81,7 @@ public class DefaultWebSessionManagerTests {
 
 	@Test
 	public void getSessionForceCreate() throws Exception {
-		this.idResolver.setIdToResolve(Optional.empty());
+		this.idResolver.setIdsToResolve(Collections.emptyList());
 		WebSession session = this.manager.getSession(this.exchange).get();
 		session.start();
 		session.save();
@@ -92,7 +94,7 @@ public class DefaultWebSessionManagerTests {
 
 	@Test
 	public void getSessionAddAttribute() throws Exception {
-		this.idResolver.setIdToResolve(Optional.empty());
+		this.idResolver.setIdsToResolve(Collections.emptyList());
 		WebSession session = this.manager.getSession(this.exchange).get();
 		session.getAttributes().put("foo", "bar");
 		session.save();
@@ -105,7 +107,7 @@ public class DefaultWebSessionManagerTests {
 		DefaultWebSession existing = new DefaultWebSession("1", Clock.systemDefaultZone());
 		this.manager.getSessionStore().storeSession(existing);
 
-		this.idResolver.setIdToResolve(Optional.of("1"));
+		this.idResolver.setIdsToResolve(Collections.singletonList("1"));
 		WebSession actual = this.manager.getSession(this.exchange).get();
 		assertSame(existing, actual);
 	}
@@ -118,7 +120,7 @@ public class DefaultWebSessionManagerTests {
 		existing.setLastAccessTime(Instant.now(clock).minus(Duration.ofMinutes(31)));
 		this.manager.getSessionStore().storeSession(existing);
 
-		this.idResolver.setIdToResolve(Optional.of("1"));
+		this.idResolver.setIdsToResolve(Collections.singletonList("1"));
 		WebSession actual = this.manager.getSession(this.exchange).get();
 		assertNotSame(existing, actual);
 	}
@@ -126,13 +128,13 @@ public class DefaultWebSessionManagerTests {
 
 	private static class TestWebSessionIdResolver implements WebSessionIdResolver {
 
-		private Optional<String> idToResolve = Optional.empty();
+		private List<String> idsToResolve = new ArrayList<>();
 
 		private String id = null;
 
 
-		public void setIdToResolve(Optional<String> idToResolve) {
-			this.idToResolve = idToResolve;
+		public void setIdsToResolve(List<String> idsToResolve) {
+			this.idsToResolve = idsToResolve;
 		}
 
 		public String getId() {
@@ -140,8 +142,8 @@ public class DefaultWebSessionManagerTests {
 		}
 
 		@Override
-		public Optional<String> resolveSessionId(ServerWebExchange exchange) {
-			return this.idToResolve;
+		public List<String> resolveSessionId(ServerWebExchange exchange) {
+			return this.idsToResolve;
 		}
 
 		@Override
