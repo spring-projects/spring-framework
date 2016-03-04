@@ -57,40 +57,35 @@ import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.support.WebContentGenerator;
 
 /**
- * {@link HttpRequestHandler} that serves static resources optimized for superior browser performance
- * (according to the guidelines of Page Speed, YSlow, etc.) by allowing for flexible cache settings
- * ({@linkplain #setCacheSeconds "cacheSeconds" property}, last-modified support).
+ * {@code HttpRequestHandler} that serves static resources in an optimized way
+ * according to the guidelines of Page Speed, YSlow, etc.
  *
- * <p>The {@linkplain #setLocations "locations" property} takes a list of Spring {@link Resource}
- * locations from which static resources are allowed  to be served by this handler. For a given request,
- * the list of locations will be consulted in order for the presence of the requested resource, and the
- * first found match will be written to the response, with a HTTP Caching headers
- * set as configured. The handler also properly evaluates the {@code Last-Modified} header
- * (if present) so that a {@code 304} status code will be returned as appropriate, avoiding unnecessary
- * overhead for resources that are already cached by the client. The use of {@code Resource} locations
- * allows resource requests to easily be mapped to locations other than the web application root.
- * For example, resources could be served from a classpath location such as
- * "classpath:/META-INF/public-web-resources/", allowing convenient packaging and serving of resources
- * such as a JavaScript library from within jar files.
+ * <p>The {@linkplain #setLocations "locations"} property takes a list of Spring
+ * {@link Resource} locations from which static resources are allowed to
+ * be served by this handler. Resources could be served from a classpath location,
+ * e.g. "classpath:/META-INF/public-web-resources/", allowing convenient packaging
+ * and serving of resources such as .js, .css, and others in jar files.
  *
- * <p>To ensure that users with a primed browser cache get the latest changes to application-specific
- * resources upon deployment of new versions of the application, it is recommended that a version
- * string is used in the URL  mapping pattern that selects this handler. Such patterns can be easily
- * parameterized using Spring EL. See the reference manual for further examples of this approach.
+ * <p>This request handler may also be configured with a
+ * {@link #setResourceResolvers(List) resourcesResolver} and
+ * {@link #setResourceTransformers(List) resourceTransformer} chains to support
+ * arbitrary resolution and transformation of resources being served. By default a
+ * {@link PathResourceResolver} simply finds resources based on the configured
+ * "locations". An application can configure additional resolvers and
+ * transformers such as the {@link VersionResourceResolver} which can resolve
+ * and prepare URLs for resources with a version in the URL.
  *
- * <p>For various front-end needs &mdash; such as ensuring that users with a primed browser cache
- * get the latest changes, or serving variations of resources (e.g., minified versions) &mdash;
- * {@link org.springframework.web.servlet.resource.ResourceResolver}s can be configured.
- *
- * <p>This handler can be configured through use of a
- * {@link org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry}
- * or the {@code <mvc:resources/>} XML configuration element.
+ * <p>This handler also properly evaluates the {@code Last-Modified} header (if
+ * present) so that a {@code 304} status code will be returned as appropriate,
+ * avoiding unnecessary overhead for resources that are already cached by the
+ * client.
  *
  * @author Keith Donald
  * @author Jeremy Grelle
  * @author Juergen Hoeller
  * @author Arjen Poutsma
  * @author Brian Clozel
+ * @author Rossen Stoyanchev
  * @since 3.0.4
  */
 public class ResourceHttpRequestHandler extends WebContentGenerator
@@ -113,7 +108,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	public ResourceHttpRequestHandler() {
 		super(HttpMethod.GET.name(), HttpMethod.HEAD.name());
-		this.resourceResolvers.add(new PathResourceResolver());
 	}
 
 
@@ -168,6 +162,10 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		return this.resourceTransformers;
 	}
 
+	/**
+	 * Specify the CORS configuration for resources served by this handler.
+	 * <p>By default this is not set in which allows cross-origin requests.
+	 */
 	public void setCorsConfiguration(CorsConfiguration corsConfiguration) {
 		this.corsConfiguration = corsConfiguration;
 	}
@@ -184,15 +182,16 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			logger.warn("Locations list is empty. No resources will be served unless a " +
 					"custom ResourceResolver is configured as an alternative to PathResourceResolver.");
 		}
+		if (this.resourceResolvers.isEmpty()) {
+			this.resourceResolvers.add(new PathResourceResolver());
+		}
 		initAllowedLocations();
 	}
 
 	/**
-	 * Look for a {@link org.springframework.web.servlet.resource.PathResourceResolver}
-	 * among the {@link #getResourceResolvers() resource resolvers} and configure
-	 * its {@code "allowedLocations"} to match the value of the
-	 * {@link #setLocations(java.util.List) locations} property unless the "allowed
-	 * locations" of the {@code PathResourceResolver} is non-empty.
+	 * Look for a {@code PathResourceResolver} among the configured resource
+	 * resolvers and set its {@code allowedLocations} property (if empty) to
+	 * match the {@link #setLocations locations} configured on this class.
 	 */
 	protected void initAllowedLocations() {
 		if (CollectionUtils.isEmpty(this.locations)) {
