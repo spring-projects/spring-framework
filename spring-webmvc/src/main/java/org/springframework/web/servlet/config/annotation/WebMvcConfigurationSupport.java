@@ -407,7 +407,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public HandlerMapping resourceHandlerMapping() {
-		ResourceHandlerRegistry registry = new ResourceHandlerRegistry(this.applicationContext, this.servletContext);
+		ResourceHandlerRegistry registry = new ResourceHandlerRegistry(this.applicationContext,
+				this.servletContext, mvcContentNegotiationManager());
 		addResourceHandlers(registry);
 
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();

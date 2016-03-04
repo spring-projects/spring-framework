@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.w3c.dom.Element;
 
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -165,22 +166,29 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		RootBeanDefinition resourceHandlerDef = new RootBeanDefinition(ResourceHttpRequestHandler.class);
 		resourceHandlerDef.setSource(source);
 		resourceHandlerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-		resourceHandlerDef.getPropertyValues().add("locations", locations);
+
+		MutablePropertyValues values = resourceHandlerDef.getPropertyValues();
+		values.add("locations", locations);
 
 		String cacheSeconds = element.getAttribute("cache-period");
 		if (StringUtils.hasText(cacheSeconds)) {
-			resourceHandlerDef.getPropertyValues().add("cacheSeconds", cacheSeconds);
+			values.add("cacheSeconds", cacheSeconds);
 		}
 
 		Element cacheControlElement = DomUtils.getChildElementByTagName(element, "cache-control");
 		if (cacheControlElement != null) {
 			CacheControl cacheControl = parseCacheControl(cacheControlElement);
-			resourceHandlerDef.getPropertyValues().add("cacheControl", cacheControl);
+			values.add("cacheControl", cacheControl);
 		}
 
 		Element resourceChainElement = DomUtils.getChildElementByTagName(element, "resource-chain");
 		if (resourceChainElement != null) {
 			parseResourceChain(resourceHandlerDef, parserContext, resourceChainElement, source);
+		}
+
+		Object manager = MvcNamespaceUtils.getContentNegotiationManager(parserContext);
+		if (manager != null) {
+			values.add("contentNegotiationManager", manager);
 		}
 
 		String beanName = parserContext.getReaderContext().generateBeanName(resourceHandlerDef);
