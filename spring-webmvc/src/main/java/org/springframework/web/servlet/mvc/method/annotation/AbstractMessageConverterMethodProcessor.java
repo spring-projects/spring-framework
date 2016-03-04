@@ -43,7 +43,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.accept.ContentNegotiationManager;
-import org.springframework.web.accept.ContentNegotiationStrategy;
 import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
@@ -122,12 +121,9 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 	}
 
 	private static PathExtensionContentNegotiationStrategy initPathStrategy(ContentNegotiationManager manager) {
-		for (ContentNegotiationStrategy strategy : manager.getStrategies()) {
-			if (strategy instanceof PathExtensionContentNegotiationStrategy) {
-				return (PathExtensionContentNegotiationStrategy) strategy;
-			}
-		}
-		return new PathExtensionContentNegotiationStrategy();
+		Class<PathExtensionContentNegotiationStrategy> clazz = PathExtensionContentNegotiationStrategy.class;
+		PathExtensionContentNegotiationStrategy strategy = manager.getStrategy(clazz);
+		return (strategy != null ? strategy : new PathExtensionContentNegotiationStrategy());
 	}
 
 

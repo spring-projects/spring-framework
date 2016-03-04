@@ -42,11 +42,14 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.accept.ContentNegotiationManager;
+import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
 import org.springframework.web.servlet.HandlerMapping;
 
 /**
@@ -223,6 +226,26 @@ public class ResourceHttpRequestHandlerTests {
 
 		assertEquals("text/javascript", this.response.getContentType());
 		assertEquals("function foo() { console.log(\"hello world\"); }", this.response.getContentAsString());
+	}
+
+	@Test // SPR-13658
+	public void getResourceWithRegisteredMediaType() throws Exception {
+		ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
+		factory.addMediaType("css", new MediaType("foo", "bar"));
+		factory.afterPropertiesSet();
+		ContentNegotiationManager manager = factory.getObject();
+
+		List<Resource> paths = Collections.singletonList(new ClassPathResource("test/", getClass()));
+		this.handler = new ResourceHttpRequestHandler();
+		this.handler.setLocations(paths);
+		this.handler.setContentNegotiationManager(manager);
+		this.handler.afterPropertiesSet();
+
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
+		this.handler.handleRequest(this.request, this.response);
+
+		assertEquals("foo/bar", this.response.getContentType());
+		assertEquals("h1 { color:red; }", this.response.getContentAsString());
 	}
 
 	@Test

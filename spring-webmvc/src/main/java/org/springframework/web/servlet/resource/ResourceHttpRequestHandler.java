@@ -23,8 +23,6 @@ import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
-import javax.activation.FileTypeMap;
-import javax.activation.MimetypesFileTypeMap;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -34,7 +32,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -49,7 +46,11 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpRequestHandler;
+import org.springframework.web.accept.ContentNegotiationManager;
+import org.springframework.web.accept.ContentNegotiationManagerFactoryBean;
+import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -102,6 +103,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	private final List<ResourceResolver> resourceResolvers = new ArrayList<ResourceResolver>(4);
 
 	private final List<ResourceTransformer> resourceTransformers = new ArrayList<ResourceTransformer>(4);
+
+	private ContentNegotiationManager contentNegotiationManager;
 
 	private CorsConfiguration corsConfiguration;
 
@@ -163,6 +166,28 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	}
 
 	/**
+	 * Configure a {@code ContentNegotiationManager} to determine the media types
+	 * for resources being served. If the manager contains a path
+	 * extension strategy it will be used to look up the file extension
+	 * of resources being served via
+	 * {@link PathExtensionContentNegotiationStrategy#getMediaTypeForResource
+	 * getMediaTypeForResource}. If that fails the check is then expanded
+	 * to use any configured content negotiation strategy against the request.
+	 * <p>By default a {@link ContentNegotiationManagerFactoryBean} with default
+	 * settings is used to create the manager. See the Javadoc of
+	 * {@code ContentNegotiationManagerFactoryBean} for details
+	 * @param contentNegotiationManager the manager to use
+	 * @since 4.3
+	 */
+	public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
+		this.contentNegotiationManager = contentNegotiationManager;
+	}
+
+	public ContentNegotiationManager getContentNegotiationManager() {
+		return this.contentNegotiationManager;
+	}
+
+	/**
 	 * Specify the CORS configuration for resources served by this handler.
 	 * <p>By default this is not set in which allows cross-origin requests.
 	 */
@@ -186,6 +211,10 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			this.resourceResolvers.add(new PathResourceResolver());
 		}
 		initAllowedLocations();
+
+		if (this.contentNegotiationManager == null) {
+			this.contentNegotiationManager = initContentNegotiationManager();
+		}
 	}
 
 	/**
@@ -206,6 +235,17 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 				break;
 			}
 		}
+	}
+
+	/**
+	 * Create the {@code ContentNegotiationManager} to use to resolve the
+	 * {@link MediaType} for requests. This implementation delegates to
+	 * {@link ContentNegotiationManagerFactoryBean} with default settings.
+	 */
+	protected ContentNegotiationManager initContentNegotiationManager() {
+		ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
+		factory.afterPropertiesSet();
+		return factory.getObject();
 	}
 
 
@@ -250,8 +290,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		// Apply cache settings, if any
 		prepareResponse(response);
 
-		// Check the resource's media type
-		MediaType mediaType = getMediaType(resource);
+		// Check the media type for the resource
+		MediaType mediaType = getMediaType(request, resource);
 		if (mediaType != null) {
 			if (logger.isTraceEnabled()) {
 				logger.trace("Determined media type '" + mediaType + "' for " + resource);
@@ -391,23 +431,54 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	}
 
 	/**
-	 * Determine an appropriate media type for the given resource.
+	 * Determine the media type for the given request and the resource matched
+	 * to it. This implementation first tries to determine the MediaType based
+	 * strictly on the file extension of the Resource via
+	 * {@link PathExtensionContentNegotiationStrategy#getMediaTypeForResource}
+	 * and then expands to check against the request via
+	 * {@link ContentNegotiationManager#resolveMediaTypes}.
+	 * @param request the current request
 	 * @param resource the resource to check
 	 * @return the corresponding media type, or {@code null} if none found
 	 */
-	protected MediaType getMediaType(Resource resource) {
-		MediaType mediaType = null;
-		String mimeType = getServletContext().getMimeType(resource.getFilename());
-		if (StringUtils.hasText(mimeType)) {
-			mediaType = MediaType.parseMediaType(mimeType);
+	@SuppressWarnings("deprecation")
+	protected MediaType getMediaType(HttpServletRequest request, Resource resource) {
+
+		// For backwards compatibility
+		MediaType mediaType = getMediaType(resource);
+		if (mediaType != null) {
+			return mediaType;
 		}
-		if (jafPresent && (mediaType == null || MediaType.APPLICATION_OCTET_STREAM.equals(mediaType))) {
-			MediaType jafMediaType = ActivationMediaTypeFactory.getMediaType(resource.getFilename());
-			if (jafMediaType != null && !MediaType.APPLICATION_OCTET_STREAM.equals(jafMediaType)) {
-				mediaType = jafMediaType;
+
+		Class<PathExtensionContentNegotiationStrategy> clazz = PathExtensionContentNegotiationStrategy.class;
+		PathExtensionContentNegotiationStrategy strategy = this.contentNegotiationManager.getStrategy(clazz);
+		if (strategy != null) {
+			mediaType = strategy.getMediaTypeForResource(resource);
+		}
+
+		if (mediaType == null) {
+			ServletWebRequest webRequest = new ServletWebRequest(request);
+			try {
+				getContentNegotiationManager().resolveMediaTypes(webRequest);
+			}
+			catch (HttpMediaTypeNotAcceptableException ex) {
+				// Ignore
 			}
 		}
+
 		return mediaType;
+	}
+
+	/**
+	 * Determine an appropriate media type for the given resource.
+	 * @param resource the resource to check
+	 * @return the corresponding media type, or {@code null} if none found
+	 * @deprecated as of 4.3 this method is deprecated; please override
+	 * {@link #getMediaType(HttpServletRequest, Resource)} instead.
+	 */
+	@Deprecated
+	protected MediaType getMediaType(Resource resource) {
+		return null;
 	}
 
 	/**
@@ -573,50 +644,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	@Override
 	public String toString() {
 		return "ResourceHttpRequestHandler [locations=" + getLocations() + ", resolvers=" + getResourceResolvers() + "]";
-	}
-
-
-	/**
-	 * Inner class to avoid a hard-coded JAF dependency.
-	 */
-	private static class ActivationMediaTypeFactory {
-
-		private static final FileTypeMap fileTypeMap;
-
-		static {
-			fileTypeMap = loadFileTypeMapFromContextSupportModule();
-		}
-
-		private static FileTypeMap loadFileTypeMapFromContextSupportModule() {
-			// See if we can find the extended mime.types from the context-support module...
-			Resource mappingLocation = new ClassPathResource("org/springframework/mail/javamail/mime.types");
-			if (mappingLocation.exists()) {
-				InputStream inputStream = null;
-				try {
-					inputStream = mappingLocation.getInputStream();
-					return new MimetypesFileTypeMap(inputStream);
-				}
-				catch (IOException ex) {
-					// ignore
-				}
-				finally {
-					if (inputStream != null) {
-						try {
-							inputStream.close();
-						}
-						catch (IOException ex) {
-							// ignore
-						}
-					}
-				}
-			}
-			return FileTypeMap.getDefaultFileTypeMap();
-		}
-
-		public static MediaType getMediaType(String filename) {
-			String mediaType = fileTypeMap.getContentType(filename);
-			return (StringUtils.hasText(mediaType) ? MediaType.parseMediaType(mediaType) : null);
-		}
 	}
 
 }
