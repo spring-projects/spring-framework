@@ -27,8 +27,8 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
-import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ServerHttpCookie;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
@@ -81,17 +81,17 @@ public class ServerHttpResponseTests {
 
 	@Test
 	public void beforeCommitWithSetBody() throws Exception {
-		HttpCookie cookie = HttpCookie.serverCookie("ID", "123").build();
+		ServerHttpCookie cookie = ServerHttpCookie.with("ID", "123").build();
 		TestServerHttpResponse response = new TestServerHttpResponse();
 		response.beforeCommit(() -> {
-			response.getHeaders().addCookie(cookie);
+			response.getCookies().add(cookie.getName(), cookie);
 			return Mono.empty();
 		});
 		response.setBody(Flux.just(wrap("a"), wrap("b"), wrap("c"))).get();
 
 		assertTrue(response.headersWritten);
 		assertTrue(response.cookiesWritten);
-		assertSame(cookie, response.getHeaders().getCookies().get("ID").get(0));
+		assertSame(cookie, response.getCookies().getFirst("ID"));
 
 		assertEquals(3, response.content.size());
 		assertEquals("a", new String(response.content.get(0).asByteBuffer().array(), UTF_8));
@@ -108,7 +108,7 @@ public class ServerHttpResponseTests {
 
 		assertTrue("beforeCommit action errors should be ignored", response.headersWritten);
 		assertTrue("beforeCommit action errors should be ignored", response.cookiesWritten);
-		assertNull(response.getHeaders().getCookies().get("ID"));
+		assertNull(response.getCookies().get("ID"));
 
 		assertEquals(3, response.content.size());
 		assertEquals("a", new String(response.content.get(0).asByteBuffer().array(), UTF_8));
@@ -118,10 +118,10 @@ public class ServerHttpResponseTests {
 
 	@Test
 	public void beforeCommitActionWithSetComplete() throws Exception {
-		HttpCookie cookie = HttpCookie.serverCookie("ID", "123").build();
+		ServerHttpCookie cookie = ServerHttpCookie.with("ID", "123").build();
 		TestServerHttpResponse response = new TestServerHttpResponse();
 		response.beforeCommit(() -> {
-			response.getHeaders().addCookie(cookie);
+			response.getCookies().add(cookie.getName(), cookie);
 			return Mono.empty();
 		});
 		response.setComplete().get();
@@ -129,7 +129,7 @@ public class ServerHttpResponseTests {
 		assertTrue(response.headersWritten);
 		assertTrue(response.cookiesWritten);
 		assertTrue(response.content.isEmpty());
-		assertSame(cookie, response.getHeaders().getCookies().get("ID").get(0));
+		assertSame(cookie, response.getCookies().getFirst("ID"));
 	}
 
 

@@ -20,9 +20,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.servlet.ReadListener;
@@ -45,6 +43,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
@@ -127,17 +126,13 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	protected void initCookies(Map<String, List<HttpCookie>> map) {
+	protected void initCookies(MultiValueMap<String, HttpCookie> httpCookies) {
 		Cookie[] cookies = this.request.getCookies();
 		if (cookies != null) {
 			for (Cookie cookie : cookies) {
 				String name = cookie.getName();
-				List<HttpCookie> list = map.get(name);
-				if (list == null) {
-					list = new ArrayList<>();
-					map.put(name, list);
-				}
-				list.add(HttpCookie.clientCookie(name, cookie.getValue()));
+				HttpCookie httpCookie = new HttpCookie(name, cookie.getValue());
+				httpCookies.add(name, httpCookie);
 			}
 		}
 	}

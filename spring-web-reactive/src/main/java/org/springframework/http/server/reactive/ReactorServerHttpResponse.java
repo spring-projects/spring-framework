@@ -16,6 +16,7 @@
 package org.springframework.http.server.reactive;
 
 import java.time.Duration;
+import java.util.Optional;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -26,8 +27,8 @@ import reactor.io.net.http.model.Cookie;
 import reactor.io.net.http.model.Status;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ServerHttpCookie;
 import org.springframework.util.Assert;
 
 /**
@@ -73,10 +74,10 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse {
 
 	@Override
 	protected void writeCookies() {
-		for (String name : getHeaders().getCookies().keySet()) {
-			for (HttpCookie httpCookie : getHeaders().getCookies().get(name)) {
-				Cookie reactorCookie = new ReactorCookie(httpCookie);
-				this.channel.addResponseCookie(name, reactorCookie);
+		for (String name : getCookies().keySet()) {
+			for (ServerHttpCookie httpCookie : getCookies().get(name)) {
+				Cookie cookie = new ReactorCookie(httpCookie);
+				this.channel.addResponseCookie(name, cookie);
 			}
 		}
 	}
@@ -87,10 +88,10 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse {
 	 */
 	private final static class ReactorCookie extends Cookie {
 
-		private final HttpCookie httpCookie;
+		private final ServerHttpCookie httpCookie;
 
 
-		public ReactorCookie(HttpCookie httpCookie) {
+		public ReactorCookie(ServerHttpCookie httpCookie) {
 			this.httpCookie = httpCookie;
 		}
 
@@ -117,12 +118,14 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse {
 
 		@Override
 		public String domain() {
-			return this.httpCookie.getDomain();
+			Optional<String> domain = this.httpCookie.getDomain();
+			return (domain.isPresent() ? domain.get() : null);
 		}
 
 		@Override
 		public String path() {
-			return this.httpCookie.getPath();
+			Optional<String> path = this.httpCookie.getPath();
+			return (path.isPresent() ? path.get() : null);
 		}
 
 		@Override

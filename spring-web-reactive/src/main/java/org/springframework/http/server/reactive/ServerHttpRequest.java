@@ -16,8 +16,13 @@
 
 package org.springframework.http.server.reactive;
 
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.ReactiveHttpInputMessage;
+import org.springframework.util.MultiValueMap;
 
 /**
  * Represents a reactive server-side HTTP request
@@ -25,5 +30,10 @@ import org.springframework.http.ReactiveHttpInputMessage;
  * @author Arjen Poutsma
  */
 public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage {
+
+	/**
+	 * Return a read-only map of cookies sent by the client.
+	 */
+	MultiValueMap<String, HttpCookie> getCookies();
 
 }

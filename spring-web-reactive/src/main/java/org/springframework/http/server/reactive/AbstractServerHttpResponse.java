@@ -17,6 +17,7 @@ package org.springframework.http.server.reactive;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -24,8 +25,13 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ServerHttpCookie;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 
 /**
@@ -37,6 +43,8 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	private final HttpHeaders headers;
 
+	private final MultiValueMap<String, ServerHttpCookie> cookies;
+
 	private AtomicReference<State> state = new AtomicReference<>(State.NEW);
 
 	private final List<Supplier<? extends Mono<Void>>> beforeCommitActions = new ArrayList<>(4);
@@ -44,6 +52,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	protected AbstractServerHttpResponse() {
 		this.headers = new HttpHeaders();
+		this.cookies = new LinkedMultiValueMap<String, ServerHttpCookie>();
 	}
 
 
@@ -53,6 +62,14 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 			return HttpHeaders.readOnlyHttpHeaders(this.headers);
 		}
 		return this.headers;
+	}
+
+	@Override
+	public MultiValueMap<String, ServerHttpCookie> getCookies() {
+		if (State.COMITTED.equals(this.state.get())) {
+			return CollectionUtils.unmodifiableMultiValueMap(this.cookies);
+		}
+		return this.cookies;
 	}
 
 	@Override

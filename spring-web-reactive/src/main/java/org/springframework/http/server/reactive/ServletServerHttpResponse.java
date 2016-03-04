@@ -34,9 +34,9 @@ import org.reactivestreams.Subscription;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ServerHttpCookie;
 import org.springframework.util.Assert;
 
 /**
@@ -98,17 +98,17 @@ public class ServletServerHttpResponse extends AbstractServerHttpResponse {
 
 	@Override
 	protected void writeCookies() {
-		for (String name : getHeaders().getCookies().keySet()) {
-			for (HttpCookie httpCookie : getHeaders().getCookies().get(name)) {
+		for (String name : getCookies().keySet()) {
+			for (ServerHttpCookie httpCookie : getCookies().get(name)) {
 				Cookie cookie = new Cookie(name, httpCookie.getValue());
 				if (!httpCookie.getMaxAge().isNegative()) {
 					cookie.setMaxAge((int) httpCookie.getMaxAge().getSeconds());
 				}
-				if (httpCookie.getDomain() != null) {
-					cookie.setDomain(httpCookie.getDomain());
+				if (httpCookie.getDomain().isPresent()) {
+					cookie.setDomain(httpCookie.getDomain().get());
 				}
-				if (httpCookie.getPath() != null) {
-					cookie.setPath(httpCookie.getPath());
+				if (httpCookie.getPath().isPresent()) {
+					cookie.setPath(httpCookie.getPath().get());
 				}
 				cookie.setSecure(httpCookie.isSecure());
 				cookie.setHttpOnly(httpCookie.isHttpOnly());

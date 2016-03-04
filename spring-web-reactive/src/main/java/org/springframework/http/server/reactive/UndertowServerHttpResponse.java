@@ -28,8 +28,8 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ServerHttpCookie;
 import org.springframework.util.Assert;
 
 /**
@@ -80,14 +80,18 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse {
 
 	@Override
 	protected void writeCookies() {
-		for (String name : getHeaders().getCookies().keySet()) {
-			for (HttpCookie httpCookie : getHeaders().getCookies().get(name)) {
+		for (String name : getCookies().keySet()) {
+			for (ServerHttpCookie httpCookie : getCookies().get(name)) {
 				Cookie cookie = new CookieImpl(name, httpCookie.getValue());
 				if (!httpCookie.getMaxAge().isNegative()) {
 					cookie.setMaxAge((int) httpCookie.getMaxAge().getSeconds());
 				}
-				cookie.setDomain(httpCookie.getDomain());
-				cookie.setPath(httpCookie.getPath());
+				if (httpCookie.getDomain().isPresent()) {
+					cookie.setDomain(httpCookie.getDomain().get());
+				}
+				if (httpCookie.getPath().isPresent()) {
+					cookie.setPath(httpCookie.getPath().get());
+				}
 				cookie.setSecure(httpCookie.isSecure());
 				cookie.setHttpOnly(httpCookie.isHttpOnly());
 				this.exchange.getResponseCookies().putIfAbsent(name, cookie);

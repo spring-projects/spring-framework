@@ -21,8 +21,11 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 /**
  * @author Rossen Stoyanchev
@@ -34,6 +37,8 @@ public class MockServerHttpRequest implements ServerHttpRequest {
 	private URI uri;
 
 	private HttpHeaders headers = new HttpHeaders();
+
+	private MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
 
 	private Flux<DataBuffer> body;
 
@@ -74,8 +79,9 @@ public class MockServerHttpRequest implements ServerHttpRequest {
 		return this.headers;
 	}
 
-	public void setHeaders(HttpHeaders headers) {
-		this.headers = headers;
+	@Override
+	public MultiValueMap<String, HttpCookie> getCookies() {
+		return this.cookies;
 	}
 
 	@Override

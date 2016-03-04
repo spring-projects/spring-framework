@@ -28,6 +28,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.ServerHttpCookie;
 import org.springframework.web.client.RestTemplate;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -98,12 +99,12 @@ public class CookieIntegrationTests extends AbstractHttpHandlerIntegrationTests 
 		@Override
 		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
 
-			this.requestCookies = request.getHeaders().getCookies();
+			this.requestCookies = request.getCookies();
 			this.requestCookies.size(); // Cause lazy loading
 
-			response.getHeaders().addCookie(HttpCookie.serverCookie("SID", "31d4d96e407aad42")
+			response.getCookies().add("SID", ServerHttpCookie.with("SID", "31d4d96e407aad42")
 					.path("/").secure().httpOnly().build());
-			response.getHeaders().addCookie(HttpCookie.serverCookie("lang", "en-US")
+			response.getCookies().add("lang", ServerHttpCookie.with("lang", "en-US")
 					.domain("example.com").path("/").build());
 
 			return response.setComplete();

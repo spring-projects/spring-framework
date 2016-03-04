@@ -18,12 +18,14 @@ package org.springframework.web.server.session;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.http.HttpCookie;
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.ServerHttpCookie;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -58,7 +60,7 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 
 	/**
 	 * Set the value for the "Max-Age" attribute of the cookie that holds the
-	 * session id. For the range of values see {@link HttpCookie#getMaxAge()}.
+	 * session id. For the range of values see {@link ServerHttpCookie#getMaxAge()}.
 	 * <p>By default set to -1.
 	 * @param maxAge the maxAge duration value
 	 */
@@ -76,18 +78,17 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 
 	@Override
 	public Optional<String> resolveSessionId(ServerWebExchange exchange) {
-		HttpHeaders headers = exchange.getRequest().getHeaders();
-		List<HttpCookie> cookies = headers.getCookies().get(getCookieName());
-		return (CollectionUtils.isEmpty(cookies) ?
-				Optional.empty() : Optional.of(cookies.get(0).getValue()));
+		MultiValueMap<String, HttpCookie> cookieMap = exchange.getRequest().getCookies();
+		HttpCookie cookie = cookieMap.getFirst(getCookieName());
+		return (cookie != null ? Optional.of(cookie.getValue()) : Optional.empty());
 	}
 
 	@Override
 	public void setSessionId(ServerWebExchange exchange, String id) {
 		Duration maxAge = (StringUtils.hasText(id) ? getCookieMaxAge() : Duration.ofSeconds(0));
-		HttpCookie cookie = HttpCookie.serverCookie(getCookieName(), id).maxAge(maxAge).build();
-		HttpHeaders headers = exchange.getResponse().getHeaders();
-		headers.getCookies().put(getCookieName(), Collections.singletonList(cookie));
+		ServerHttpCookie cookie = ServerHttpCookie.with(getCookieName(), id).maxAge(maxAge).build();
+		MultiValueMap<String, ServerHttpCookie> cookieMap = exchange.getResponse().getCookies();
+		cookieMap.set(getCookieName(), cookie);
 	}
 
 }

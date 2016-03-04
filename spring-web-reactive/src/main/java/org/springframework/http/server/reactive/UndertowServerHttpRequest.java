@@ -18,9 +18,6 @@ package org.springframework.http.server.reactive;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.Cookie;
@@ -33,6 +30,7 @@ import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
+import org.springframework.util.MultiValueMap;
 
 /**
  * Adapt {@link ServerHttpRequest} to the Underow {@link HttpServerExchange}.
@@ -79,15 +77,11 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	protected void initCookies(Map<String, List<HttpCookie>> map) {
+	protected void initCookies(MultiValueMap<String, HttpCookie> cookies) {
 		for (String name : this.exchange.getRequestCookies().keySet()) {
-			List<HttpCookie> list = map.get(name);
-			if (list == null) {
-				list = new ArrayList<>();
-				map.put(name, list);
-			}
 			Cookie cookie = this.exchange.getRequestCookies().get(name);
-			list.add(HttpCookie.clientCookie(name, cookie.getValue()));
+			HttpCookie httpCookie = new HttpCookie(name, cookie.getValue());
+			cookies.add(name, httpCookie);
 		}
 	}
 

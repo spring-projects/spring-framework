@@ -16,10 +16,16 @@
 
 package org.springframework.http.server.reactive;
 
+import java.util.List;
+import java.util.Map;
+
 import reactor.core.publisher.Mono;
 
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ReactiveHttpOutputMessage;
+import org.springframework.http.ServerHttpCookie;
+import org.springframework.util.MultiValueMap;
 
 /**
  * Represents a reactive server-side HTTP response.
@@ -33,6 +39,11 @@ public interface ServerHttpResponse extends ReactiveHttpOutputMessage {
 	 * @param status the HTTP status as an {@link HttpStatus} enum value
 	 */
 	void setStatusCode(HttpStatus status);
+
+	/**
+	 * Return a mutable map with cookies to be sent to the client.
+	 */
+	MultiValueMap<String, ServerHttpCookie> getCookies();
 
 	/**
 	 * Indicate that request handling is complete, allowing for any cleanup or
