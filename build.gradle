@@ -64,6 +64,7 @@ configure(allprojects) { project ->
 	ext.jtaVersion           = "1.2"
 	ext.junitVersion         = "4.12"
 	ext.nettyVersion         = "4.0.34.Final"
+    ext.okhttp3Version       = "3.2.0"
 	ext.okhttpVersion        = "2.7.5"
 	ext.openjpaVersion       = "2.4.1"
 	ext.poiVersion           = "3.14"
@@ -205,7 +206,7 @@ configure(allprojects) { project ->
 		"http://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
 		"http://ehcache.org/apidocs/${ehcacheVersion}",
 		"http://ehcache.org/apidocs/${ehcache3Version}",
-		//"http://quartz-scheduler.org/api/2.2.0/",
+		"http://quartz-scheduler.org/api/2.2.0/",
 		"http://fasterxml.github.io/jackson-core/javadoc/2.7/",
 		"http://fasterxml.github.io/jackson-databind/javadoc/2.7/",
 		"http://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.7/",
@@ -713,6 +714,7 @@ project("spring-web") {
 		optional("org.apache.httpcomponents:httpclient:${httpclientVersion}")
 		optional("org.apache.httpcomponents:httpasyncclient:${httpasyncVersion}")
 		optional("io.netty:netty-all:${nettyVersion}")
+		optional("com.squareup.okhttp3:okhttp:${okhttp3Version}")
 		optional("com.squareup.okhttp:okhttp:${okhttpVersion}")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jackson2Version}")
