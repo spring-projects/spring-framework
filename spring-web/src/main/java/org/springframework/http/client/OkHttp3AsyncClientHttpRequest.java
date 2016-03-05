@@ -19,11 +19,11 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.net.URI;
 
-import com.squareup.okhttp.Call;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -31,16 +31,16 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.SettableListenableFuture;
 
 /**
- * {@link AsyncClientHttpRequest} implementation that uses OkHttp 2.x to execute requests.
+ * {@link AsyncClientHttpRequest} implementation that uses OkHttp to execute requests.
  *
  * <p>Created via the {@link OkHttpClientHttpRequestFactory}.
  *
  * @author Luciano Leggieri
  * @author Arjen Poutsma
+ * @author Roy Clarkson
  * @since 4.3
- * @see org.springframework.http.client.OkHttp3AsyncClientHttpRequest
  */
-class OkHttpAsyncClientHttpRequest extends AbstractBufferingAsyncClientHttpRequest {
+class OkHttp3AsyncClientHttpRequest extends AbstractBufferingAsyncClientHttpRequest {
 
 	private final OkHttpClient client;
 
@@ -49,7 +49,7 @@ class OkHttpAsyncClientHttpRequest extends AbstractBufferingAsyncClientHttpReque
 	private final HttpMethod method;
 
 
-	public OkHttpAsyncClientHttpRequest(OkHttpClient client, URI uri, HttpMethod method) {
+	public OkHttp3AsyncClientHttpRequest(OkHttpClient client, URI uri, HttpMethod method) {
 		this.client = client;
 		this.uri = uri;
 		this.method = method;
@@ -70,7 +70,7 @@ class OkHttpAsyncClientHttpRequest extends AbstractBufferingAsyncClientHttpReque
 	protected ListenableFuture<ClientHttpResponse> executeInternal(HttpHeaders headers, byte[] content)
 			throws IOException {
 
-		Request request = OkHttpClientHttpRequestFactory.buildRequest(headers, content, this.uri, this.method);
+		Request request = OkHttp3ClientHttpRequestFactory.buildRequest(headers, content, this.uri, this.method);
 		return new OkHttpListenableFuture(this.client.newCall(request));
 	}
 
@@ -83,11 +83,11 @@ class OkHttpAsyncClientHttpRequest extends AbstractBufferingAsyncClientHttpReque
 			this.call = call;
 			this.call.enqueue(new Callback() {
 				@Override
-				public void onResponse(Response response) {
-					set(new OkHttpClientHttpResponse(response));
+				public void onResponse(Call call, Response response) {
+					set(new OkHttp3ClientHttpResponse(response));
 				}
 				@Override
-				public void onFailure(Request request, IOException ex) {
+				public void onFailure(Call call, IOException ex) {
 					setException(ex);
 				}
 			});
