@@ -18,6 +18,7 @@ package org.springframework.core.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -132,8 +133,16 @@ class MapAnnotationAttributeExtractor extends AbstractAliasAwareAnnotationAttrib
 			if (!ClassUtils.isAssignable(requiredReturnType, actualReturnType)) {
 				boolean converted = false;
 
+				// Single element overriding an array of the same type?
+				if (requiredReturnType.isArray() && requiredReturnType.getComponentType() == actualReturnType) {
+					Object array = Array.newInstance(requiredReturnType.getComponentType(), 1);
+					Array.set(array, 0, attributeValue);
+					attributes.put(attributeName, array);
+					converted = true;
+				}
+
 				// Nested map representing a single annotation?
-				if (Annotation.class.isAssignableFrom(requiredReturnType) &&
+				else if (Annotation.class.isAssignableFrom(requiredReturnType) &&
 						Map.class.isAssignableFrom(actualReturnType)) {
 					Class<? extends Annotation> nestedAnnotationType =
 							(Class<? extends Annotation>) requiredReturnType;

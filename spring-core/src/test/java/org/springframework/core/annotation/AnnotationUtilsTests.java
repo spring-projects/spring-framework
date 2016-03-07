@@ -465,8 +465,8 @@ public class AnnotationUtilsTests {
 		assertNotNull(attributes);
 		assertEquals(WebMapping.class, attributes.annotationType());
 		assertEquals("name attribute: ", "foo", attributes.getString("name"));
-		assertEquals("value attribute: ", "/test", attributes.getString(VALUE));
-		assertEquals("path attribute: ", "/test", attributes.getString("path"));
+		assertArrayEquals("value attribute: ", asArray("/test"), attributes.getStringArray(VALUE));
+		assertArrayEquals("path attribute: ", asArray("/test"), attributes.getStringArray("path"));
 
 		method = WebController.class.getMethod("handleMappedWithPathAttribute");
 		webMapping = method.getAnnotation(WebMapping.class);
@@ -474,15 +474,18 @@ public class AnnotationUtilsTests {
 		assertNotNull(attributes);
 		assertEquals(WebMapping.class, attributes.annotationType());
 		assertEquals("name attribute: ", "bar", attributes.getString("name"));
-		assertEquals("value attribute: ", "/test", attributes.getString(VALUE));
-		assertEquals("path attribute: ", "/test", attributes.getString("path"));
+		assertArrayEquals("value attribute: ", asArray("/test"), attributes.getStringArray(VALUE));
+		assertArrayEquals("path attribute: ", asArray("/test"), attributes.getStringArray("path"));
+	}
 
+	@Test
+	public void getAnnotationAttributesWithAttributeAliasesWithDifferentValues() throws Exception {
 		exception.expect(AnnotationConfigurationException.class);
 		exception.expectMessage(containsString("attribute 'value' and its alias 'path'"));
-		exception.expectMessage(containsString("values of [/enigma] and [/test]"));
+		exception.expectMessage(containsString("values of [{/enigma}] and [{/test}]"));
 
-		method = WebController.class.getMethod("handleMappedWithDifferentPathAndValueAttributes");
-		webMapping = method.getAnnotation(WebMapping.class);
+		Method method = WebController.class.getMethod("handleMappedWithDifferentPathAndValueAttributes");
+		WebMapping webMapping = method.getAnnotation(WebMapping.class);
 		getAnnotationAttributes(webMapping);
 	}
 
@@ -835,8 +838,8 @@ public class AnnotationUtilsTests {
 		assertSame(synthesizedWebMapping, synthesizedAgainWebMapping);
 
 		assertEquals("name attribute: ", "foo", synthesizedAgainWebMapping.name());
-		assertEquals("aliased path attribute: ", "/test", synthesizedAgainWebMapping.path());
-		assertEquals("actual value attribute: ", "/test", synthesizedAgainWebMapping.value());
+		assertArrayEquals("aliased path attribute: ", asArray("/test"), synthesizedAgainWebMapping.path());
+		assertArrayEquals("actual value attribute: ", asArray("/test"), synthesizedAgainWebMapping.value());
 	}
 
 	@Test
@@ -956,16 +959,16 @@ public class AnnotationUtilsTests {
 		assertNotSame(webMapping, synthesizedWebMapping1);
 
 		assertEquals("name attribute: ", "foo", synthesizedWebMapping1.name());
-		assertEquals("aliased path attribute: ", "/test", synthesizedWebMapping1.path());
-		assertEquals("actual value attribute: ", "/test", synthesizedWebMapping1.value());
+		assertArrayEquals("aliased path attribute: ", asArray("/test"), synthesizedWebMapping1.path());
+		assertArrayEquals("actual value attribute: ", asArray("/test"), synthesizedWebMapping1.value());
 
 		WebMapping synthesizedWebMapping2 = synthesizeAnnotation(webMapping);
 		assertThat(synthesizedWebMapping2, instanceOf(SynthesizedAnnotation.class));
 		assertNotSame(webMapping, synthesizedWebMapping2);
 
 		assertEquals("name attribute: ", "foo", synthesizedWebMapping2.name());
-		assertEquals("aliased path attribute: ", "/test", synthesizedWebMapping2.path());
-		assertEquals("actual value attribute: ", "/test", synthesizedWebMapping2.value());
+		assertArrayEquals("aliased path attribute: ", asArray("/test"), synthesizedWebMapping2.path());
+		assertArrayEquals("actual value attribute: ", asArray("/test"), synthesizedWebMapping2.value());
 	}
 
 	@Test
@@ -1183,6 +1186,21 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
+	public void synthesizeAnnotationFromMapWithAttributeAliasesThatOverrideArraysWithSingleElements() throws Exception {
+		Map<String, Object> map = Collections.singletonMap("value", "/foo");
+		Get get = synthesizeAnnotation(map, Get.class, null);
+		assertNotNull(get);
+		assertEquals("value: ", "/foo", get.value());
+		assertEquals("path: ", "/foo", get.path());
+
+		map = Collections.singletonMap("path", "/foo");
+		get = synthesizeAnnotation(map, Get.class, null);
+		assertNotNull(get);
+		assertEquals("value: ", "/foo", get.value());
+		assertEquals("path: ", "/foo", get.path());
+	}
+
+	@Test
 	public void synthesizeAnnotationFromMapWithImplicitAttributeAliases() throws Exception {
 		assertAnnotationSynthesisFromMapWithImplicitAliases("value");
 		assertAnnotationSynthesisFromMapWithImplicitAliases("location1");
@@ -1287,8 +1305,8 @@ public class AnnotationUtilsTests {
 	private void assertToStringForWebMappingWithPathAndValue(WebMapping webMapping) {
 		String string = webMapping.toString();
 		assertThat(string, startsWith("@" + WebMapping.class.getName() + "("));
-		assertThat(string, containsString("value=/test"));
-		assertThat(string, containsString("path=/test"));
+		assertThat(string, containsString("value=[/test]"));
+		assertThat(string, containsString("path=[/test]"));
 		assertThat(string, containsString("name=bar"));
 		assertThat(string, containsString("method="));
 		assertThat(string, containsString("[GET, POST]"));
@@ -1459,6 +1477,18 @@ public class AnnotationUtilsTests {
 		// Re-retrieve the array from the synthesized annotation
 		chars = synthesizedCharsContainer.chars();
 		assertArrayEquals(new char[] { 'x', 'y', 'z' }, chars);
+	}
+
+	@SafeVarargs
+	// The following "varargs" suppression is necessary for javac from OpenJDK
+	// (1.8.0_60-b27); however, Eclipse warns that it's unnecessary. See the following
+	// Eclipse issues for details.
+	//
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=344783
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=349669#c10
+	// @SuppressWarnings("varargs")
+	static <T> T[] asArray(T... arr) {
+		return arr;
 	}
 
 
@@ -1768,12 +1798,38 @@ public class AnnotationUtilsTests {
 		String name();
 
 		@AliasFor("path")
-		String value() default "";
+		String[] value() default "";
 
 		@AliasFor(attribute = "value")
-		String path() default "";
+		String[] path() default "";
 
 		RequestMethod[] method() default {};
+	}
+
+	/**
+	 * Mock of {@code org.springframework.web.bind.annotation.GetMapping}, except
+	 * that the String arrays are overridden with single String elements.
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@WebMapping(method = RequestMethod.GET, name = "")
+	@interface Get {
+
+		@AliasFor(annotation = WebMapping.class)
+		String value() default "";
+
+		@AliasFor(annotation = WebMapping.class)
+		String path() default "";
+	}
+
+	/**
+	 * Mock of {@code org.springframework.web.bind.annotation.PostMapping}, except
+	 * that the path is overridden by convention with single String element.
+	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@WebMapping(method = RequestMethod.POST, name = "")
+	@interface Post {
+
+		String path() default "";
 	}
 
 	@Component("webController")
@@ -1785,6 +1841,18 @@ public class AnnotationUtilsTests {
 
 		@WebMapping(path = "/test", name = "bar", method = { RequestMethod.GET, RequestMethod.POST })
 		public void handleMappedWithPathAttribute() {
+		}
+
+		@Get("/test")
+		public void getMappedWithValueAttribute() {
+		}
+
+		@Get(path = "/test")
+		public void getMappedWithPathAttribute() {
+		}
+
+		@Post(path = "/test")
+		public void postMappedWithPathAttribute() {
 		}
 
 		/**
