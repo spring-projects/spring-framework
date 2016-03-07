@@ -42,6 +42,9 @@ public class WebResponseExtractors {
 
 	private static final Object[] HINTS = new Object[] {UTF_8};
 
+	private static final Object EMPTY_BODY = new Object();
+
+
 	/**
 	 * Extract the response body and decode it, returning it as a {@code Mono<T>}
 	 */
@@ -68,18 +71,21 @@ public class WebResponseExtractors {
 	 * Extract the full response body as a {@code ResponseEntity}
 	 * with its body decoded as a single type {@code T}
 	 */
-	public static <T> WebResponseExtractor<Mono<ResponseEntity<T>>> response(Class<T> sourceClass) {
+	public static <T> WebResponseExtractor<Mono<ResponseEntity<T>>> response(Class<T> bodyClass) {
 
-		ResolvableType resolvableType = ResolvableType.forClass(sourceClass);
+		ResolvableType bodyType = ResolvableType.forClass(bodyClass);
 		return webResponse -> webResponse.getClientResponse()
-				.then(response ->
-						Mono.when(
-								decodeResponseBody(response, resolvableType, webResponse.getMessageDecoders()).next(),
-								Mono.just(response.getHeaders()),
-								Mono.just(response.getStatusCode())))
+				.then(response -> {
+					List<Decoder<?>> decoders = webResponse.getMessageDecoders();
+					return Mono.when(
+							decodeResponseBody(response, bodyType, decoders).next().defaultIfEmpty(EMPTY_BODY),
+							Mono.just(response.getHeaders()),
+							Mono.just(response.getStatusCode()));
+				})
 				.map(tuple -> {
+					Object body = (tuple.getT1() != EMPTY_BODY ? tuple.getT1() : null);
 					//noinspection unchecked
-					return new ResponseEntity<>((T) tuple.getT1(), tuple.getT2(), tuple.getT3());
+					return new ResponseEntity<>((T) body, tuple.getT2(), tuple.getT3());
 				});
 	}
 
