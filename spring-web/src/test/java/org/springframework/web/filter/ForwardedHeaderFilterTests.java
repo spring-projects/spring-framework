@@ -46,6 +46,7 @@ public class ForwardedHeaderFilterTests {
 
 
 	@Before
+	@SuppressWarnings("serial")
 	public void setUp() throws Exception {
 		this.request = new MockHttpServletRequest();
 		this.request.setScheme("http");
