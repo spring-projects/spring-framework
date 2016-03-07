@@ -75,7 +75,7 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 
 
 	@Override
-	public List<String> resolveSessionId(ServerWebExchange exchange) {
+	public List<String> resolveSessionIds(ServerWebExchange exchange) {
 		MultiValueMap<String, HttpCookie> cookieMap = exchange.getRequest().getCookies();
 		List<HttpCookie> cookies = cookieMap.get(getCookieName());
 		if (cookies == null) {

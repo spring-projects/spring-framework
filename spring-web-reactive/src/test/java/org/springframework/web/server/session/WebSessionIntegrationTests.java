@@ -43,8 +43,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
-
 /**
+ * Integration tests for with a server-side session.
+ *
  * @author Rossen Stoyanchev
  */
 public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTests {
@@ -95,6 +96,8 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 
 	@Test
 	public void expiredSession() throws Exception {
+
+		// First request: no session yet, new session created
 		RequestEntity<Void> request = RequestEntity.get(createUri("/")).build();
 		ResponseEntity<Void> response = this.restTemplate.exchange(request, Void.class);
 
@@ -103,11 +106,11 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		assertNotNull(id);
 		assertEquals(1, this.handler.getCount());
 
-		// Set clock back 31 minutes
+		// Set (server-side) clock back 31 minutes
 		Clock clock = this.sessionManager.getClock();
 		this.sessionManager.setClock(Clock.offset(clock, Duration.ofMinutes(-31)));
 
-		// Access again to update lastAccessTime
+		// Second request: lastAccessTime updated (with offset clock)
 		request = RequestEntity.get(createUri("/")).header("Cookie", "SESSION=" + id).build();
 		response = this.restTemplate.exchange(request, Void.class);
 
@@ -115,7 +118,7 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		assertNull(response.getHeaders().get("Set-Cookie"));
 		assertEquals(2, this.handler.getCount());
 
-		// Now it should be expired
+		// Third request: new session replaces expired session
 		request = RequestEntity.get(createUri("/")).header("Cookie", "SESSION=" + id).build();
 		response = this.restTemplate.exchange(request, Void.class);
 
@@ -124,9 +127,6 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		assertNotNull("Expected new session id", id);
 		assertEquals("Expected new session attribute", 1, this.handler.getCount());
 	}
-
-
-	// No client side HttpCookie support yet
 
 	private String extractSessionId(HttpHeaders headers) {
 		List<String> headerValues = headers.get("Set-Cookie");

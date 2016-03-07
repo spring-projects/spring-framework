@@ -99,9 +99,9 @@ public class DefaultWebSessionManager implements WebSessionManager {
 
 	@Override
 	public Mono<WebSession> getSession(ServerWebExchange exchange) {
-		return Flux.fromIterable(getSessionIdResolver().resolveSessionId(exchange))
+		return Flux.fromIterable(getSessionIdResolver().resolveSessionIds(exchange))
+				.concatMap(this.sessionStore::retrieveSession)
 				.next()
-				.then(this.sessionStore::retrieveSession)
 				.then(session -> validateSession(exchange, session))
 				.otherwiseIfEmpty(createSession(exchange))
 				.map(session -> extendSession(exchange, session));
@@ -147,7 +147,7 @@ public class DefaultWebSessionManager implements WebSessionManager {
 		// Force explicit start
 		session.start();
 
-		List<String> requestedIds = getSessionIdResolver().resolveSessionId(exchange);
+		List<String> requestedIds = getSessionIdResolver().resolveSessionIds(exchange);
 		if (requestedIds.isEmpty() || !session.getId().equals(requestedIds.get(0))) {
 			this.sessionIdResolver.setSessionId(exchange, session.getId());
 		}

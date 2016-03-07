@@ -35,7 +35,7 @@ public interface WebSessionIdResolver {
 	 * @param exchange the current exchange
 	 * @return the session id's or an empty list
 	 */
-	List<String> resolveSessionId(ServerWebExchange exchange);
+	List<String> resolveSessionIds(ServerWebExchange exchange);
 
 	/**
 	 * Send the given session id to the client or if the session id is "null"

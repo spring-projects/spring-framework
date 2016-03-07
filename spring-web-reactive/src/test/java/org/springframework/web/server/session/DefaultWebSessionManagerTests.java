@@ -20,6 +20,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,17 +46,15 @@ import static org.junit.Assert.assertSame;
  */
 public class DefaultWebSessionManagerTests {
 
-	private DefaultWebSessionManager manager;
+	private final DefaultWebSessionManager manager = new DefaultWebSessionManager();
 
-	private TestWebSessionIdResolver idResolver;
+	private final TestWebSessionIdResolver idResolver = new TestWebSessionIdResolver();
 
 	private DefaultServerWebExchange exchange;
 
 
 	@Before
 	public void setUp() throws Exception {
-		this.idResolver = new TestWebSessionIdResolver();
-		this.manager = new DefaultWebSessionManager();
 		this.manager.setSessionIdResolver(this.idResolver);
 
 		MockServerHttpRequest request = new MockServerHttpRequest(HttpMethod.GET, new URI("/path"));
@@ -65,64 +64,71 @@ public class DefaultWebSessionManagerTests {
 
 
 	@Test
-	public void getSessionPassive() throws Exception {
+	public void getSessionWithoutStarting() throws Exception {
 		this.idResolver.setIdsToResolve(Collections.emptyList());
 		WebSession session = this.manager.getSession(this.exchange).get();
-
-		assertNotNull(session);
-		assertFalse(session.isStarted());
-		assertFalse(session.isExpired());
-
 		session.save();
 
-		assertNull(this.idResolver.getId());
+		assertFalse(session.isStarted());
+		assertFalse(session.isExpired());
+		assertNull(this.idResolver.getSavedId());
 		assertNull(this.manager.getSessionStore().retrieveSession(session.getId()).get());
 	}
 
 	@Test
-	public void getSessionForceCreate() throws Exception {
+	public void startSessionExplicitly() throws Exception {
 		this.idResolver.setIdsToResolve(Collections.emptyList());
 		WebSession session = this.manager.getSession(this.exchange).get();
 		session.start();
 		session.save();
 
 		String id = session.getId();
-		assertNotNull(this.idResolver.getId());
-		assertEquals(id, this.idResolver.getId());
+		assertNotNull(this.idResolver.getSavedId());
+		assertEquals(id, this.idResolver.getSavedId());
 		assertSame(session, this.manager.getSessionStore().retrieveSession(id).get());
 	}
 
 	@Test
-	public void getSessionAddAttribute() throws Exception {
+	public void startSessionImplicitly() throws Exception {
 		this.idResolver.setIdsToResolve(Collections.emptyList());
 		WebSession session = this.manager.getSession(this.exchange).get();
 		session.getAttributes().put("foo", "bar");
 		session.save();
 
-		assertNotNull(this.idResolver.getId());
+		assertNotNull(this.idResolver.getSavedId());
 	}
 
 	@Test
-	public void getSessionExisting() throws Exception {
+	public void existingSession() throws Exception {
 		DefaultWebSession existing = new DefaultWebSession("1", Clock.systemDefaultZone());
 		this.manager.getSessionStore().storeSession(existing);
-
 		this.idResolver.setIdsToResolve(Collections.singletonList("1"));
+
 		WebSession actual = this.manager.getSession(this.exchange).get();
 		assertSame(existing, actual);
 	}
 
 	@Test
-	public void getSessionExistingExpired() throws Exception {
+	public void existingSessionIsExpired() throws Exception {
 		Clock clock = Clock.systemDefaultZone();
 		DefaultWebSession existing = new DefaultWebSession("1", clock);
 		existing.start();
 		existing.setLastAccessTime(Instant.now(clock).minus(Duration.ofMinutes(31)));
 		this.manager.getSessionStore().storeSession(existing);
-
 		this.idResolver.setIdsToResolve(Collections.singletonList("1"));
+
 		WebSession actual = this.manager.getSession(this.exchange).get();
 		assertNotSame(existing, actual);
+	}
+
+	@Test
+	public void multipleSessions() throws Exception {
+		DefaultWebSession existing = new DefaultWebSession("3", Clock.systemDefaultZone());
+		this.manager.getSessionStore().storeSession(existing);
+		this.idResolver.setIdsToResolve(Arrays.asList("1", "2", "3"));
+
+		WebSession actual = this.manager.getSession(this.exchange).get();
+		assertSame(existing, actual);
 	}
 
 
@@ -137,12 +143,12 @@ public class DefaultWebSessionManagerTests {
 			this.idsToResolve = idsToResolve;
 		}
 
-		public String getId() {
+		public String getSavedId() {
 			return this.id;
 		}
 
 		@Override
-		public List<String> resolveSessionId(ServerWebExchange exchange) {
+		public List<String> resolveSessionIds(ServerWebExchange exchange) {
 			return this.idsToResolve;
 		}
 
