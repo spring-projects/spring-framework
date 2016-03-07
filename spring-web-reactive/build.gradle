@@ -22,6 +22,7 @@ repositories {
   mavenLocal()
   mavenCentral()
   maven { url 'https://oss.jfrog.org/libs-snapshot' }  // RxNetty 0.5.x snapshots
+  maven { url 'http://repo.spring.io/milestone' }  // Reactor milestone
   maven { url 'http://repo.spring.io/snapshot' }  // Reactor snapshot
 }
 
@@ -32,13 +33,14 @@ configurations.all {
 
 ext {
 	springVersion = '4.2.3.RELEASE'
-	reactorVersion = '2.5.0.BUILD-SNAPSHOT'
+	reactorVersion = '2.5.0.M2'
+	reactorNettyVersion = '2.5.0.BUILD-SNAPSHOT'
 	tomcatVersion = '8.0.28'
 	jettyVersion = '9.3.5.v20151012'
 
 	javadocLinks = [
 		"http://docs.oracle.com/javase/8/docs/api/",
-		"http://next.projectreactor.io/core/docs/api/",
+		"http://projectreactor.io/core/docs/api/",
 		"http://docs.spring.io/spring/docs/${springVersion}/javadoc-api/",
 		"http://www.reactive-streams.org/reactive-streams-1.0.0-javadoc/"
 	] as String[]
@@ -88,8 +90,7 @@ dependencies {
 	optional 'io.reactivex:rxjava:1.1.0'
 	optional "io.reactivex:rxnetty-http:0.5.0-SNAPSHOT"
 	optional "com.fasterxml.jackson.core:jackson-databind:2.6.2"
-	optional "io.projectreactor:reactor-net:${reactorVersion}"
-	optional "io.projectreactor:reactor-io:${reactorVersion}"
+	optional "io.projectreactor:reactor-net:${reactorNettyVersion}"
 	optional "org.apache.tomcat:tomcat-util:${tomcatVersion}"
 	optional "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
 	optional 'io.undertow:undertow-core:1.3.5.Final'
