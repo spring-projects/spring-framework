@@ -32,9 +32,6 @@ import static org.springframework.web.bind.annotation.RequestMethod.PUT;
  *
  * <p>Specifically, {@code @PutMapping} is a <em>composed annotation</em> that
  * acts as a shortcut for {@code @RequestMapping(method = RequestMethod.PUT)}.
- * Furthermore, this annotation does not support the
- * {@link RequestMapping#method method} and {@link RequestMapping#produces produces}
- * attributes of {@code @RequestMapping}.
  *
  * @author Sam Brannen
  * @since 4.3
@@ -85,5 +82,11 @@ public @interface PutMapping {
 	 */
 	@AliasFor(annotation = RequestMapping.class)
 	String[] consumes() default {};
+
+	/**
+	 * Alias for {@link RequestMapping#produces}.
+	 */
+	@AliasFor(annotation = RequestMapping.class)
+	String[] produces() default {};
 
 }
