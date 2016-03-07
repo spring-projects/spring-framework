@@ -33,8 +33,7 @@ import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
  * <p>Specifically, {@code @DeleteMapping} is a <em>composed annotation</em> that
  * acts as a shortcut for {@code @RequestMapping(method = RequestMethod.DELETE)}.
  * Furthermore, this annotation does not support the
- * {@link RequestMapping#method method}, {@link RequestMapping#name name},
- * {@link RequestMapping#headers headers}, {@link RequestMapping#consumes consumes},
+ * {@link RequestMapping#method method}, {@link RequestMapping#consumes consumes},
  * and {@link RequestMapping#produces produces} attributes of {@code @RequestMapping}.
  *
  * @author Sam Brannen
@@ -50,6 +49,12 @@ import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 @Documented
 @RequestMapping(method = DELETE)
 public @interface DeleteMapping {
+
+	/**
+	 * Alias for {@link RequestMapping#name}.
+	 */
+	@AliasFor(annotation = RequestMapping.class)
+	String name() default "";
 
 	/**
 	 * Alias for {@link RequestMapping#value}.
@@ -68,5 +73,11 @@ public @interface DeleteMapping {
 	 */
 	@AliasFor(annotation = RequestMapping.class)
 	String[] params() default {};
+
+	/**
+	 * Alias for {@link RequestMapping#headers}.
+	 */
+	@AliasFor(annotation = RequestMapping.class)
+	String[] headers() default {};
 
 }

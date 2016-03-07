@@ -33,9 +33,8 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
  * <p>Specifically, {@code @GetMapping} is a <em>composed annotation</em> that
  * acts as a shortcut for {@code @RequestMapping(method = RequestMethod.GET)}.
  * Furthermore, this annotation does not support the
- * {@link RequestMapping#method method}, {@link RequestMapping#name name},
- * {@link RequestMapping#headers headers}, and {@link RequestMapping#consumes
- * consumes} attributes of {@code @RequestMapping}.
+ * {@link RequestMapping#method method} and {@link RequestMapping#consumes consumes}
+ * attributes of {@code @RequestMapping}.
  *
  * @author Sam Brannen
  * @since 4.3
@@ -50,6 +49,12 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 @Documented
 @RequestMapping(method = GET)
 public @interface GetMapping {
+
+	/**
+	 * Alias for {@link RequestMapping#name}.
+	 */
+	@AliasFor(annotation = RequestMapping.class)
+	String name() default "";
 
 	/**
 	 * Alias for {@link RequestMapping#value}.
@@ -68,6 +73,12 @@ public @interface GetMapping {
 	 */
 	@AliasFor(annotation = RequestMapping.class)
 	String[] params() default {};
+
+	/**
+	 * Alias for {@link RequestMapping#headers}.
+	 */
+	@AliasFor(annotation = RequestMapping.class)
+	String[] headers() default {};
 
 	/**
 	 * Alias for {@link RequestMapping#produces}.
