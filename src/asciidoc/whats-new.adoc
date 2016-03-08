@@ -634,6 +634,10 @@ public @interface MyTestConfig {
 * `@Configuration` classes support constructor injection.
 * Any SpEL expression used to specify the `condition` of an `@EventListener` can
   now refer to beans (i.e. `@beanName.method()`).
+* _Composed annotations_ can now override array attributes in meta-annotations
+  with a single element of the component type of the array. For example, the
+  `String[] path` attribute of `@RequestMapping` can be overridden with
+  `String path` in a composed annotation.
 
 === Data Access Improvements
 
