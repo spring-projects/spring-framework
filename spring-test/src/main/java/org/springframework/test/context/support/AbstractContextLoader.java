@@ -110,12 +110,13 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * <li>Determines what (if any) context initializer classes have been supplied
 	 * via the {@code MergedContextConfiguration} and instantiates and
 	 * {@linkplain ApplicationContextInitializer#initialize invokes} each with the
-	 * given application context.</li>
+	 * given application context.
 	 * <ul>
 	 * <li>Any {@code ApplicationContextInitializers} implementing
 	 * {@link org.springframework.core.Ordered Ordered} or annotated with {@link
 	 * org.springframework.core.annotation.Order @Order} will be sorted appropriately.</li>
 	 * </ul>
+	 * </li>
 	 * </ul>
 	 * @param context the newly created application context
 	 * @param mergedConfig the merged context configuration
