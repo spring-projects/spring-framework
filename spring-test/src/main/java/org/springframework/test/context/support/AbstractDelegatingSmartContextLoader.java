@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextConfigurationAttributes;
@@ -29,7 +28,6 @@ import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.SmartContextLoader;
 import org.springframework.util.Assert;
-import org.springframework.util.ObjectUtils;
 
 /**
  * {@code AbstractDelegatingSmartContextLoader} serves as an abstract base class
@@ -202,15 +200,6 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 					name(getAnnotationConfigLoader()), configAttributes));
 			}
 
-			// If neither loader detected defaults and no initializers were declared,
-			// throw an exception.
-			if (!configAttributes.hasResources() && ObjectUtils.isEmpty(configAttributes.getInitializers())) {
-				throw new IllegalStateException(String.format(
-					"Neither %s nor %s was able to detect defaults, and no ApplicationContextInitializers "
-							+ "were declared for context configuration %s", name(getXmlLoader()),
-					name(getAnnotationConfigLoader()), configAttributes));
-			}
-
 			if (configAttributes.hasLocations() && configAttributes.hasClasses()) {
 				String message = String.format(
 					"Configuration error: both default locations AND default configuration classes "
@@ -264,7 +253,7 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 
 		// If neither of the candidates supports the mergedConfig based on resources but
 		// ACIs were declared, then delegate to the annotation config loader.
-		if (!mergedConfig.getContextInitializerClasses().isEmpty()) {
+		if (!mergedConfig.getContextInitializerClasses().isEmpty() || !mergedConfig.getContextCustomizers().isEmpty()) {
 			return delegateLoading(getAnnotationConfigLoader(), mergedConfig);
 		}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.test.context.support;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -27,11 +28,8 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.ApplicationContextInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.support.SpringFactoriesLoader;
@@ -39,6 +37,9 @@ import org.springframework.test.context.BootstrapContext;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextConfigurationAttributes;
+import org.springframework.test.context.ContextCustomizer;
+import org.springframework.test.context.ContextCustomizerFactory;
+import org.springframework.test.context.ContextCustomizerFactoryContext;
 import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
@@ -52,6 +53,7 @@ import org.springframework.test.util.MetaAnnotationUtils;
 import org.springframework.test.util.MetaAnnotationUtils.AnnotationDescriptor;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -71,6 +73,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
+ * @author Phillip Webb
  * @since 4.1
  */
 public abstract class AbstractTestContextBootstrapper implements TestContextBootstrapper {
@@ -272,13 +275,9 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate = getCacheAwareContextLoaderDelegate();
 
 		if (MetaAnnotationUtils.findAnnotationDescriptorForTypes(testClass, ContextConfiguration.class,
-			ContextHierarchy.class) == null) {
-			if (logger.isInfoEnabled()) {
-				logger.info(String.format(
-					"Neither @ContextConfiguration nor @ContextHierarchy found for test class [%s]",
-					testClass.getName()));
-			}
-			return new MergedContextConfiguration(testClass, null, null, null, null);
+				ContextHierarchy.class) == null) {
+			return buildDefaultMergedContextConfiguration(testClass,
+					cacheAwareContextLoaderDelegate, false);
 		}
 
 		if (AnnotationUtils.findAnnotation(testClass, ContextHierarchy.class) != null) {
@@ -297,7 +296,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 				Class<?> declaringClass = reversedList.get(0).getDeclaringClass();
 
 				mergedConfig = buildMergedContextConfiguration(declaringClass, reversedList, parentConfig,
-					cacheAwareContextLoaderDelegate);
+					cacheAwareContextLoaderDelegate, true);
 				parentConfig = mergedConfig;
 			}
 
@@ -307,8 +306,33 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		else {
 			return buildMergedContextConfiguration(testClass,
 				ContextLoaderUtils.resolveContextConfigurationAttributes(testClass), null,
-				cacheAwareContextLoaderDelegate);
+				cacheAwareContextLoaderDelegate, true);
 		}
+	}
+
+	private MergedContextConfiguration buildDefaultMergedContextConfiguration(Class<?> testClass,
+			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, boolean verify) {
+		ContextLoader contextLoader = resolveContextLoader(testClass, null);
+		if (logger.isInfoEnabled()) {
+			logger.info(String.format(
+				"Neither @ContextConfiguration nor @ContextHierarchy found for test class [%s], using %s",
+				testClass.getName(), contextLoader.getClass().getSimpleName()));
+		}
+		List<ContextConfigurationAttributes> defaultContextConfigurationAttributes = Collections.singletonList(
+				getDefaultContextConfigurationAttributes(testClass));
+		return buildMergedContextConfiguration(testClass,
+				defaultContextConfigurationAttributes, null,
+				cacheAwareContextLoaderDelegate, verify);
+	}
+
+	/**
+	 * Return the {@link ContextConfigurationAttributes} that should be used when no
+	 * {@code @ContextConfiguration} or {@code @ContextHierarchy} is defined.
+	 * @param testClass the source test class
+	 * @return the context configuration attributes
+	 */
+	protected ContextConfigurationAttributes getDefaultContextConfigurationAttributes(Class<?> testClass) {
+		return new ContextConfigurationAttributes(testClass);
 	}
 
 	/**
@@ -335,11 +359,14 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 */
 	private MergedContextConfiguration buildMergedContextConfiguration(Class<?> testClass,
 			List<ContextConfigurationAttributes> configAttributesList, MergedContextConfiguration parentConfig,
-			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate) {
+			CacheAwareContextLoaderDelegate cacheAwareContextLoaderDelegate, boolean verify) {
+
+		Assert.notEmpty(configAttributesList, "ContextConfigurationAttributes list must not be empty");
 
 		ContextLoader contextLoader = resolveContextLoader(testClass, configAttributesList);
-		List<String> locationsList = new ArrayList<String>();
-		List<Class<?>> classesList = new ArrayList<Class<?>>();
+		List<String> locations = new ArrayList<String>();
+		List<Class<?>> classes = new ArrayList<Class<?>>();
+		List<Class<?>> initializers = new ArrayList<Class<?>>();
 
 		for (ContextConfigurationAttributes configAttributes : configAttributesList) {
 			if (logger.isTraceEnabled()) {
@@ -349,32 +376,71 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			if (contextLoader instanceof SmartContextLoader) {
 				SmartContextLoader smartContextLoader = (SmartContextLoader) contextLoader;
 				smartContextLoader.processContextConfiguration(configAttributes);
-				locationsList.addAll(0, Arrays.asList(configAttributes.getLocations()));
-				classesList.addAll(0, Arrays.asList(configAttributes.getClasses()));
+				locations.addAll(0, Arrays.asList(configAttributes.getLocations()));
+				classes.addAll(0, Arrays.asList(configAttributes.getClasses()));
 			}
 			else {
-				String[] processedLocations = contextLoader.processLocations(configAttributes.getDeclaringClass(),
-					configAttributes.getLocations());
-				locationsList.addAll(0, Arrays.asList(processedLocations));
+				String[] processedLocations = contextLoader.processLocations(
+						configAttributes.getDeclaringClass(), configAttributes.getLocations());
+				locations.addAll(0, Arrays.asList(processedLocations));
 				// Legacy ContextLoaders don't know how to process classes
 			}
+			initializers.addAll(0, Arrays.asList(configAttributes.getInitializers()));
 			if (!configAttributes.isInheritLocations()) {
 				break;
 			}
 		}
 
-		String[] locations = StringUtils.toStringArray(locationsList);
-		Class<?>[] classes = ClassUtils.toClassArray(classesList);
-		Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> initializerClasses = //
-		ApplicationContextInitializerUtils.resolveInitializerClasses(configAttributesList);
-		String[] activeProfiles = ActiveProfilesUtils.resolveActiveProfiles(testClass);
-		MergedTestPropertySources mergedTestPropertySources = TestPropertySourceUtils.buildMergedTestPropertySources(testClass);
+		ContextCustomizerFactoryContext customizerFactoryContext = new DefaultContextCustomizerFactoryContext(
+				testClass, configAttributesList, locations, classes, initializers);
+		Set<ContextCustomizer> contextCustomizers = getContextCustomizers(customizerFactoryContext);
 
-		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(testClass, locations, classes,
-			initializerClasses, activeProfiles, mergedTestPropertySources.getLocations(),
-			mergedTestPropertySources.getProperties(), contextLoader, cacheAwareContextLoaderDelegate, parentConfig);
+		if (verify && areAllEmpty(classes, locations, initializers, contextCustomizers)) {
+			throw new IllegalStateException(String.format(
+					"%s was unable to detect defaults, and no ApplicationContextInitializers "
+							+ "or ContextCustomizers were declared for context configurations %s",
+					contextLoader.getClass().getSimpleName(), configAttributesList));
+		}
+
+		MergedTestPropertySources mergedTestPropertySources = TestPropertySourceUtils.buildMergedTestPropertySources(testClass);
+		MergedContextConfiguration mergedConfig = new MergedContextConfiguration(testClass,
+				StringUtils.toStringArray(locations),
+				ClassUtils.toClassArray(classes),
+				ApplicationContextInitializerUtils.resolveInitializerClasses(configAttributesList),
+				ActiveProfilesUtils.resolveActiveProfiles(testClass),
+				mergedTestPropertySources.getLocations(),
+				mergedTestPropertySources.getProperties(),
+				contextCustomizers, contextLoader, cacheAwareContextLoaderDelegate, parentConfig);
 
 		return processMergedContextConfiguration(mergedConfig);
+	}
+
+	private Set<ContextCustomizer> getContextCustomizers(ContextCustomizerFactoryContext customizerFactoryContext) {
+		List<ContextCustomizerFactory> factories = geContextCustomizerFactories();
+		Set<ContextCustomizer> customizers = new LinkedHashSet<ContextCustomizer>(factories.size());
+		for (ContextCustomizerFactory factory : factories) {
+			ContextCustomizer customizer = factory.getContextCustomizer(customizerFactoryContext);
+			if(customizer != null) {
+				customizers.add(customizer);
+			}
+		}
+		return customizers;
+	}
+
+	/**
+	 * Get the default {@link ContextCustomizerFactory} instances for this bootstrapper.
+	 */
+	protected List<ContextCustomizerFactory> geContextCustomizerFactories() {
+		return SpringFactoriesLoader.loadFactories(ContextCustomizerFactory.class,
+				getClass().getClassLoader());
+	}
+
+	private boolean areAllEmpty(Collection<?>... collections) {
+		boolean allEmpty = true;
+		for (Collection<?> collection : collections) {
+			allEmpty &= collection.isEmpty();
+		}
+		return allEmpty;
 	}
 
 	/**
@@ -400,7 +466,6 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			List<ContextConfigurationAttributes> configAttributesList) {
 
 		Assert.notNull(testClass, "Class must not be null");
-		Assert.notEmpty(configAttributesList, "ContextConfigurationAttributes list must not be empty");
 
 		Class<? extends ContextLoader> contextLoaderClass = resolveExplicitContextLoaderClass(configAttributesList);
 		if (contextLoaderClass == null) {
@@ -439,20 +504,21 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	protected Class<? extends ContextLoader> resolveExplicitContextLoaderClass(
 			List<ContextConfigurationAttributes> configAttributesList) {
 
-		Assert.notEmpty(configAttributesList, "ContextConfigurationAttributes list must not be empty");
-		for (ContextConfigurationAttributes configAttributes : configAttributesList) {
-			if (logger.isTraceEnabled()) {
-				logger.trace(String.format("Resolving ContextLoader for context configuration attributes %s",
-					configAttributes));
-			}
-			Class<? extends ContextLoader> contextLoaderClass = configAttributes.getContextLoaderClass();
-			if (ContextLoader.class != contextLoaderClass) {
-				if (logger.isDebugEnabled()) {
-					logger.debug(String.format(
-						"Found explicit ContextLoader class [%s] for context configuration attributes %s",
-						contextLoaderClass.getName(), configAttributes));
+		if (configAttributesList != null) {
+			for (ContextConfigurationAttributes configAttributes : configAttributesList) {
+				if (logger.isTraceEnabled()) {
+					logger.trace(String.format("Resolving ContextLoader for context configuration attributes %s",
+						configAttributes));
 				}
-				return contextLoaderClass;
+				Class<? extends ContextLoader> contextLoaderClass = configAttributes.getContextLoaderClass();
+				if (ContextLoader.class != contextLoaderClass) {
+					if (logger.isDebugEnabled()) {
+						logger.debug(String.format(
+							"Found explicit ContextLoader class [%s] for context configuration attributes %s",
+							contextLoaderClass.getName(), configAttributes));
+					}
+					return contextLoaderClass;
+				}
 			}
 		}
 		return null;
@@ -496,6 +562,73 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	 */
 	protected MergedContextConfiguration processMergedContextConfiguration(MergedContextConfiguration mergedConfig) {
 		return mergedConfig;
+	}
+
+
+	/**
+	 * Default implementation of {@link ContextCustomizerFactoryContext}.
+	 */
+	private static class DefaultContextCustomizerFactoryContext implements ContextCustomizerFactoryContext {
+
+		private final Class<?> testClass;
+
+		private final List<ContextConfigurationAttributes> configurationAttributes;
+
+		private final List<String> locations;
+
+		private final List<Class<?>> classes;
+
+		private final List<Class<?>> initializers;
+
+		DefaultContextCustomizerFactoryContext(Class<?> testClass,
+				List<ContextConfigurationAttributes> configurationAttributes,
+				List<String> locations, List<Class<?>> classes,
+				List<Class<?>> initializers) {
+
+			this.testClass = testClass;
+			this.configurationAttributes = Collections.unmodifiableList(
+					configurationAttributes);
+			this.locations = Collections.unmodifiableList(locations);
+			this.classes = Collections.unmodifiableList(classes);
+			this.initializers = Collections.unmodifiableList(initializers);
+		}
+
+		@Override
+		public Class<?> getTestClass() {
+			return this.testClass;
+		}
+
+		@Override
+		public List<ContextConfigurationAttributes> getConfigurationAttributes() {
+			return this.configurationAttributes;
+		}
+
+		@Override
+		public boolean hasResources() {
+			return !ObjectUtils.isEmpty(getLocations())
+					|| !ObjectUtils.isEmpty(getClasses());
+		}
+
+		@Override
+		public boolean hasInitializers() {
+			return !ObjectUtils.isEmpty(initializers);
+		}
+
+		@Override
+		public List<String> getLocations() {
+			return this.locations;
+		}
+
+		@Override
+		public List<Class<?>> getClasses() {
+			return this.classes;
+		}
+
+		@Override
+		public List<Class<?>> getInitializers() {
+			return this.initializers;
+		}
+
 	}
 
 }

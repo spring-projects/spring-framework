@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,11 +40,11 @@ import static org.junit.Assert.*;
 public class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigurationUtilsTests {
 
 	@Test
-	public void buildMergedConfigWithoutAnnotation() {
+	public void buildImplicitMergedConfigWithoutAnnotation() {
 		Class<?> testClass = Enigma.class;
 		MergedContextConfiguration mergedConfig = buildMergedContextConfiguration(testClass);
 
-		assertMergedConfig(mergedConfig, testClass, EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, null);
+		assertMergedConfig(mergedConfig, testClass, EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, DelegatingSmartContextLoader.class);
 	}
 
 	@Test
