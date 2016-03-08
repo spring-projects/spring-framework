@@ -32,7 +32,7 @@ import org.springframework.jdbc.support.nativejdbc.NativeJdbcExtractor;
  * name of the table and a Map containing the column names and the column values.
  *
  * <p>The meta data processing is based on the DatabaseMetaData provided by the
- * JDBC driver. As long as the JBDC driver can provide the names of the columns
+ * JDBC driver. As long as the JDBC driver can provide the names of the columns
  * for a specified table than we can rely on this auto-detection feature. If that
  * is not the case, then the column names must be specified explicitly.
  *
