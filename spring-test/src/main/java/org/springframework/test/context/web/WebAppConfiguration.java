@@ -29,8 +29,8 @@ import java.lang.annotation.Target;
  * should be a {@link org.springframework.web.context.WebApplicationContext
  * WebApplicationContext}.
  *
- * <p>The mere presence of {@code @WebAppConfiguration} on a test class ensures
- * that a {@code WebApplicationContext} will be loaded for the test using a default
+ * <p>The presence of {@code @WebAppConfiguration} on a test class indicates that
+ * a {@code WebApplicationContext} should be loaded for the test using a default
  * for the path to the root of the web application. To override the default,
  * specify an explicit resource path via the {@link #value} attribute.
  *

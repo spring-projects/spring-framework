@@ -27,15 +27,17 @@ import org.springframework.test.context.support.DefaultTestContextBootstrapper;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.context.web.WebTestContextBootstrapper;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.context.BootstrapUtils.*;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.springframework.test.context.BootstrapUtils.resolveTestContextBootstrapper;
 
 /**
  * Unit tests for {@link BootstrapUtils}.
  *
  * @author Sam Brannen
+ * @author Phillip Webb
  * @since 4.2
  */
 public class BootstrapUtilsTests {
@@ -43,7 +45,7 @@ public class BootstrapUtilsTests {
 	private final CacheAwareContextLoaderDelegate delegate = mock(CacheAwareContextLoaderDelegate.class);
 
 	@Rule
-	public ExpectedException exception = ExpectedException.none();
+	public final ExpectedException exception = ExpectedException.none();
 
 	@Test
 	public void resolveTestContextBootstrapperForNonAnnotatedClass() {
@@ -51,8 +53,8 @@ public class BootstrapUtilsTests {
 	}
 
 	@Test
-	public void resolveTestContextBootstrapperForWithWebAppConfigurationAnnotatedClass() throws Exception {
-		assertBootstrapper(WithWebAppConfiguration.class, WebTestContextBootstrapper.class);
+	public void resolveTestContextBootstrapperForWebAppConfigurationAnnotatedClass() {
+		assertBootstrapper(WebAppConfigurationAnnotatedClass.class, WebTestContextBootstrapper.class);
 	}
 
 	@Test
@@ -132,6 +134,6 @@ public class BootstrapUtilsTests {
 	static class DoubleMetaAnnotatedBootstrapWithAnnotationClass {}
 
 	@WebAppConfiguration
-	static class WithWebAppConfiguration {}
+	static class WebAppConfigurationAnnotatedClass {}
 
 }
