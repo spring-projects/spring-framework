@@ -369,7 +369,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		else {
 			applicationEvent = new PayloadApplicationEvent<Object>(this, event);
 			if (eventType == null) {
-				eventType = ResolvableType.forClassWithGenerics(PayloadApplicationEvent.class, event.getClass());
+				eventType = ((PayloadApplicationEvent)applicationEvent).getResolvableType();
 			}
 		}
 
