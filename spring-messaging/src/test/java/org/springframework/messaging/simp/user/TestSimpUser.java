@@ -59,4 +59,19 @@ public class TestSimpUser implements SimpUser {
 		}
 	}
 
+	@Override
+	public boolean equals(Object other) {
+		return (this == other || (other instanceof SimpUser && this.name.equals(((SimpUser) other).getName())));
+	}
+
+	@Override
+	public int hashCode() {
+		return this.name.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return "name=" + this.name + ", sessions=" + this.sessions;
+	}
+
 }
