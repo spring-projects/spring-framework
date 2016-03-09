@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.context.event.test.AbstractIdentifiable;
 import org.springframework.context.event.test.AnotherTestEvent;
 import org.springframework.context.event.test.EventCollector;
+import org.springframework.context.event.test.GenericEventPojo;
 import org.springframework.context.event.test.Identifiable;
 import org.springframework.context.event.test.TestEvent;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -444,6 +445,30 @@ public class AnnotationDrivenEventListenerTests {
 	}
 
 	@Test
+	public void listenerWithResolvableTypeEvent() {
+		load(ResolvableTypeEventListener.class);
+		ResolvableTypeEventListener listener = this.context.getBean(ResolvableTypeEventListener.class);
+
+		this.eventCollector.assertNoEventReceived(listener);
+		GenericEventPojo<String> event = new GenericEventPojo<>("TEST");
+		this.context.publishEvent(event);
+		this.eventCollector.assertEvent(listener, event);
+		this.eventCollector.assertTotalEventsCount(1);
+	}
+
+	@Test
+	public void listenerWithResolvableTypeEventWrongGeneric() {
+		load(ResolvableTypeEventListener.class);
+		ResolvableTypeEventListener listener = this.context.getBean(ResolvableTypeEventListener.class);
+
+		this.eventCollector.assertNoEventReceived(listener);
+		GenericEventPojo<Long> event = new GenericEventPojo<>(123L);
+		this.context.publishEvent(event);
+		this.eventCollector.assertNoEventReceived(listener);
+		this.eventCollector.assertTotalEventsCount(0);
+	}
+
+	@Test
 	public void conditionMatch() {
 		long timestamp = System.currentTimeMillis();
 		load(ConditionalEventListener.class);
@@ -787,6 +812,16 @@ public class AnnotationDrivenEventListenerTests {
 		@EventListener
 		public void handleString(PayloadApplicationEvent<String> event) {
 			collectEvent(event.getPayload());
+		}
+	}
+
+
+	@Component
+	static class ResolvableTypeEventListener extends AbstractTestEventListener {
+
+		@EventListener
+		public void handleString(GenericEventPojo<String> value) {
+			collectEvent(value);
 		}
 	}
 
