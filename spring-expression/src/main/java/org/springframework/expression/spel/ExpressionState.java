@@ -73,7 +73,8 @@ public class ExpressionState {
 		this(context, context.getRootObject(), new SpelParserConfiguration(false, false));
 	}
 
-	public ExpressionState(EvaluationContext context, SpelParserConfiguration configuration) {
+	public ExpressionState(EvaluationContext context, 
+		SpelParserConfiguration configuration) {
 		this(context, context.getRootObject(), configuration);
 	}
 
@@ -81,7 +82,8 @@ public class ExpressionState {
 		this(context, rootObject, new SpelParserConfiguration(false, false));
 	}
 
-	public ExpressionState(EvaluationContext context, TypedValue rootObject, SpelParserConfiguration configuration) {
+	public ExpressionState(EvaluationContext context, TypedValue rootObject, 
+		SpelParserConfiguration configuration) {
 		Assert.notNull(context, "EvaluationContext must not be null");
 		Assert.notNull(configuration, "SpelParserConfiguration must not be null");
 		this.relatedContext = context;
@@ -102,7 +104,8 @@ public class ExpressionState {
 	}
 
 	/**
-	 * The active context object is what unqualified references to properties/etc are resolved against.
+	 * The active context object is what unqualified references to properties/etc 
+	 * are resolved against.
 	 */
 	public TypedValue getActiveContextObject() {
 		if (this.contextObjects == null || this.contextObjects.isEmpty()) {
@@ -158,7 +161,8 @@ public class ExpressionState {
 		return this.relatedContext.getTypeLocator().findType(type);
 	}
 
-	public Object convertValue(Object value, TypeDescriptor targetTypeDescriptor) throws EvaluationException {
+	public Object convertValue(Object value, TypeDescriptor targetTypeDescriptor) 
+	throws EvaluationException {
 		return this.relatedContext.getTypeConverter().convertValue(value,
 				TypeDescriptor.forObject(value), targetTypeDescriptor);
 	}
@@ -167,9 +171,11 @@ public class ExpressionState {
 		return this.relatedContext.getTypeConverter();
 	}
 
-	public Object convertValue(TypedValue value, TypeDescriptor targetTypeDescriptor) throws EvaluationException {
+	public Object convertValue(TypedValue value, TypeDescriptor targetTypeDescriptor) 
+	throws EvaluationException {
 		Object val = value.getValue();
-		return this.relatedContext.getTypeConverter().convertValue(val, TypeDescriptor.forObject(val), targetTypeDescriptor);
+		return this.relatedContext.getTypeConverter().convertValue(val, 
+			TypeDescriptor.forObject(val), targetTypeDescriptor);
 	}
 
 	/*
@@ -183,7 +189,8 @@ public class ExpressionState {
 
 	public void enterScope() {
 		ensureVariableScopesInitialized();
-		this.variableScopes.push(new VariableScope(Collections.<String,Object>emptyMap()));
+		this.variableScopes.push(
+			new VariableScope(Collections.<String,Object>emptyMap()));
 		this.scopeRootObjects.push(getActiveContextObject());
 	}
 
@@ -215,7 +222,8 @@ public class ExpressionState {
 		return null;
 	}
 
-	public TypedValue operate(Operation op, Object left, Object right) throws EvaluationException {
+	public TypedValue operate(Operation op, Object left, Object right) 
+	throws EvaluationException {
 		OperatorOverloader overloader = this.relatedContext.getOperatorOverloader();
 		if (overloader.overridesOperation(op, left, right)) {
 			Object returnValue = overloader.operate(op, left, right);
@@ -224,7 +232,8 @@ public class ExpressionState {
 		else {
 			String leftType = (left == null ? "null" : left.getClass().getName());
 			String rightType = (right == null? "null" : right.getClass().getName());
-			throw new SpelEvaluationException(SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES, op, leftType, rightType);
+			throw new SpelEvaluationException(
+				SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES, op, leftType, rightType);
 		}
 	}
 

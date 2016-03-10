@@ -33,7 +33,8 @@ public class SpelParseException extends ParseException {
 	private final Object[] inserts;
 
 
-	public SpelParseException(String expressionString, int position, SpelMessage message, Object... inserts) {
+	public SpelParseException(String expressionString, int position, SpelMessage message, 
+		Object... inserts) {
 		super(expressionString, position, message.formatMessage(position,inserts));
 		this.position = position;
 		this.message = message;
@@ -47,7 +48,8 @@ public class SpelParseException extends ParseException {
 		this.inserts = inserts;
 	}
 
-	public SpelParseException(int position, Throwable cause, SpelMessage message, Object... inserts) {
+	public SpelParseException(int position, Throwable cause, SpelMessage message, 
+		Object... inserts) {
 		super(position, message.formatMessage(position,inserts), cause);
 		this.position = position;
 		this.message = message;
@@ -60,8 +62,11 @@ public class SpelParseException extends ParseException {
 	 */
 	@Override
 	public String getMessage() {
-		return (this.message != null ? this.message.formatMessage(this.position, this.inserts)
-				: super.getMessage());
+		if (this.message != null) {
+			return this.message.formatMessage(this.position, this.inserts);
+		}else{
+			return super.getMessage();
+		}
 	}
 
 	/**
