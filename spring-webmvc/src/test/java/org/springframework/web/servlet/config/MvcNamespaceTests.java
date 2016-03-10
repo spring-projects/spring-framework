@@ -853,6 +853,7 @@ public class MvcNamespaceTests {
 		ContentNegotiationManager manager = (ContentNegotiationManager) accessor.getPropertyValue(beanName);
 		assertNotNull(manager);
 		assertSame(manager, this.appContext.getBean(ContentNegotiationManager.class));
+		assertSame(manager, this.appContext.getBean("mvcContentNegotiationManager"));
 	}
 
 	@Test

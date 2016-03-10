@@ -21,7 +21,7 @@
 			<xsd:annotation>
 				<xsd:documentation><![CDATA[
 	A path that maps a particular request to a handler.
-	Exact path mapping URIs (such as "/myPath") are supported as well as Ant-stype path patterns (such as /myPath/**).
+	Exact path mapping URIs (such as "/myPath") are supported as well as Ant-type path patterns (such as /myPath/**).
                 ]]></xsd:documentation>
 			</xsd:annotation>
 		</xsd:attribute>
@@ -916,9 +916,16 @@
 				<xsd:annotation>
 					<xsd:documentation><![CDATA[
 	The bean name of the UrlPathHelper to use for the HandlerMapping used to map handshake requests.
-								]]></xsd:documentation>
+					]]></xsd:documentation>
 				</xsd:annotation>
 			</xsd:attribute>
+			<xsd:attribute name="validator" type="xsd:string">
+			<xsd:annotation>
+				<xsd:documentation><![CDATA[
+	The bean name of the Validator instance used for validating @Payload arguments.
+				]]></xsd:documentation>
+			</xsd:annotation>
+		</xsd:attribute>
 		</xsd:complexType>
 	</xsd:element>
 </xsd:schema>
