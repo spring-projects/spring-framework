@@ -16,6 +16,7 @@
 
 package org.springframework.messaging.simp.user;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -54,6 +55,7 @@ public class MultiServerUserRegistryTests {
 		this.converter = new MappingJackson2MessageConverter();
 	}
 
+
 	@Test
 	public void getUserFromLocalRegistry() throws Exception {
 		SimpUser user = Mockito.mock(SimpUser.class);
@@ -85,6 +87,7 @@ public class MultiServerUserRegistryTests {
 		assertEquals(1, this.registry.getUsers().size());
 		SimpUser user = this.registry.getUser("joe");
 		assertNotNull(user);
+		assertTrue(user.hasSessions());
 		assertEquals(1, user.getSessions().size());
 		SimpSession session = user.getSession("remote-sess");
 		assertNotNull(session);
@@ -98,7 +101,7 @@ public class MultiServerUserRegistryTests {
 	}
 
 	@Test
-	public void findUserFromRemoteRegistry() throws Exception {
+	public void findSubscriptionsFromRemoteRegistry() throws Exception {
 
 		// Prepare broadcast message from remote server
 		TestSimpUser user1 = new TestSimpUser("joe");
@@ -130,6 +133,43 @@ public class MultiServerUserRegistryTests {
 		sessionIds.add(iterator.next().getSession().getId());
 		sessionIds.add(iterator.next().getSession().getId());
 		assertEquals(new HashSet<>(Arrays.asList("sess1", "sess2")), sessionIds);
+	}
+
+	@Test // SPR-13800
+	public void getSessionsWhenUserIsConnectedToMultipleServers() throws Exception {
+
+		// Add user to local registry
+		TestSimpUser localUser = new TestSimpUser("joe");
+		TestSimpSession localSession = new TestSimpSession("sess123");
+		localUser.addSessions(localSession);
+		when(this.localRegistry.getUser("joe")).thenReturn(localUser);
+
+		// Prepare broadcast message from remote server
+		TestSimpUser remoteUser = new TestSimpUser("joe");
+		TestSimpSession remoteSession = new TestSimpSession("sess456");
+		remoteUser.addSessions(remoteSession);
+		SimpUserRegistry remoteRegistry = mock(SimpUserRegistry.class);
+		when(remoteRegistry.getUsers()).thenReturn(Collections.singleton(remoteUser));
+		Object remoteRegistryDto = new MultiServerUserRegistry(remoteRegistry).getLocalRegistryDto();
+		Message<?> message = this.converter.toMessage(remoteRegistryDto, null);
+
+		// Add remote registry
+		this.registry.addRemoteRegistryDto(message, this.converter, 20000);
+
+
+		assertEquals(1, this.registry.getUsers().size());
+		SimpUser user = this.registry.getUsers().iterator().next();
+		assertTrue(user.hasSessions());
+		assertEquals(2, user.getSessions().size());
+		assertThat(user.getSessions(), containsInAnyOrder(localSession, remoteSession));
+		assertSame(localSession, user.getSession("sess123"));
+		assertEquals(remoteSession, user.getSession("sess456"));
+
+		user = this.registry.getUser("joe");
+		assertEquals(2, user.getSessions().size());
+		assertThat(user.getSessions(), containsInAnyOrder(localSession, remoteSession));
+		assertSame(localSession, user.getSession("sess123"));
+		assertEquals(remoteSession, user.getSession("sess456"));
 	}
 
 	@Test

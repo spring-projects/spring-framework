@@ -55,6 +55,9 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 
 	private final boolean delegateApplicationEvents;
 
+	/* Cross-server session lookup (e.g. same user connected to multiple servers) */
+	private final SessionLookup sessionLookup = new SessionLookup();
+
 
 	/**
 	 * Create an instance wrapping the local user registry.
@@ -109,36 +112,34 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 
 	@Override
 	public SimpUser getUser(String userName) {
-		SimpUser user = this.localRegistry.getUser(userName);
-		if (user != null) {
-			return user;
-		}
+		// Prefer remote registries due to cross-server SessionLookup
 		for (UserRegistrySnapshot registry : this.remoteRegistries.values()) {
-			user = registry.getUserMap().get(userName);
+			SimpUser user = registry.getUserMap().get(userName);
 			if (user != null) {
 				return user;
 			}
 		}
-		return null;
+		return this.localRegistry.getUser(userName);
 	}
 
 	@Override
 	public Set<SimpUser> getUsers() {
+		// Prefer remote registries due to cross-server SessionLookup
 		Set<SimpUser> result = new HashSet<SimpUser>();
-		result.addAll(this.localRegistry.getUsers());
 		for (UserRegistrySnapshot registry : this.remoteRegistries.values()) {
 			result.addAll(registry.getUserMap().values());
 		}
+		result.addAll(this.localRegistry.getUsers());
 		return result;
 	}
 
 	@Override
 	public Set<SimpSubscription> findSubscriptions(SimpSubscriptionMatcher matcher) {
 		Set<SimpSubscription> result = new HashSet<SimpSubscription>();
-		result.addAll(this.localRegistry.findSubscriptions(matcher));
 		for (UserRegistrySnapshot registry : this.remoteRegistries.values()) {
 			result.addAll(registry.findSubscriptions(matcher));
 		}
+		result.addAll(this.localRegistry.findSubscriptions(matcher));
 		return result;
 	}
 
@@ -151,7 +152,7 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 	void addRemoteRegistryDto(Message<?> message, MessageConverter converter, long expirationPeriod) {
 		UserRegistrySnapshot registry = (UserRegistrySnapshot) converter.fromMessage(message, UserRegistrySnapshot.class);
 		if (registry != null && !registry.getId().equals(this.id)) {
-			registry.init(expirationPeriod);
+			registry.init(expirationPeriod, this.sessionLookup);
 			this.remoteRegistries.put(registry.getId(), registry);
 		}
 	}
@@ -228,10 +229,10 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		}
 
 
-		public void init(long expirationPeriod) {
+		public void init(long expirationPeriod, SessionLookup sessionLookup) {
 			this.expirationTime = System.currentTimeMillis() + expirationPeriod;
 			for (TransferSimpUser user : this.users.values()) {
-				user.afterDeserialization();
+				user.afterDeserialization(sessionLookup);
 			}
 		}
 
@@ -267,7 +268,11 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		private String name;
 
+		/* User sessions from "this" registry only (i.e. one server) */
 		private Set<TransferSimpSession> sessions;
+
+		/* Cross-server session lookup (e.g. user connected to multiple servers) */
+		private SessionLookup sessionLookup;
 
 
 		/**
@@ -301,11 +306,17 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		@Override
 		public boolean hasSessions() {
+			if (this.sessionLookup != null) {
+				return !this.sessionLookup.findSessions(getName()).isEmpty();
+			}
 			return !this.sessions.isEmpty();
 		}
 
 		@Override
 		public SimpSession getSession(String sessionId) {
+			if (this.sessionLookup != null) {
+				return this.sessionLookup.findSessions(getName()).get(sessionId);
+			}
 			for (TransferSimpSession session : this.sessions) {
 				if (session.getId().equals(sessionId)) {
 					return session;
@@ -320,15 +331,27 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 
 		@Override
 		public Set<SimpSession> getSessions() {
+			if (this.sessionLookup != null) {
+				Map<String, SimpSession> sessions = this.sessionLookup.findSessions(getName());
+				return new HashSet<SimpSession>(sessions.values());
+			}
 			return new HashSet<SimpSession>(this.sessions);
 		}
 
-		private void afterDeserialization() {
+		private void afterDeserialization(SessionLookup sessionLookup) {
+			this.sessionLookup = sessionLookup;
 			for (TransferSimpSession session : this.sessions) {
 				session.setUser(this);
 				session.afterDeserialization();
 			}
 		}
+
+		private void addSessions(Map<String, SimpSession> map) {
+			for (SimpSession session : this.sessions) {
+				map.put(session.getId(), session);
+			}
+		}
+
 
 		@Override
 		public boolean equals(Object other) {
@@ -504,6 +527,31 @@ public class MultiServerUserRegistry implements SimpUserRegistry, SmartApplicati
 		public String toString() {
 			return "destination=" + this.destination;
 		}
+	}
+
+
+	/**
+	 * Helper class to find user sessions across all servers.
+	 */
+	private class SessionLookup {
+
+		public Map<String, SimpSession> findSessions(String userName) {
+			Map<String, SimpSession> map = new HashMap<String, SimpSession>(1);
+			SimpUser user = localRegistry.getUser(userName);
+			if (user != null) {
+				for (SimpSession session : user.getSessions()) {
+					map.put(session.getId(), session);
+				}
+			}
+			for (UserRegistrySnapshot registry : remoteRegistries.values()) {
+				TransferSimpUser transferUser = registry.getUserMap().get(userName);
+				if (transferUser != null) {
+					transferUser.addSessions(map);
+				}
+			}
+			return map;
+		}
+
 	}
 
 }
