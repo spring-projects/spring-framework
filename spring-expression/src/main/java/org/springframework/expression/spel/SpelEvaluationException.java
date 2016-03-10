@@ -34,7 +34,8 @@ public class SpelEvaluationException extends EvaluationException {
 
 
 	public SpelEvaluationException(SpelMessage message, Object... inserts) {
-		super(message.formatMessage(0, inserts)); // TODO poor position information, can the callers not really supply something?
+		super(message.formatMessage(0, inserts)); 
+		// TODO poor position information, can the callers not really supply something?
 		this.message = message;
 		this.inserts = inserts;
 	}
@@ -52,7 +53,8 @@ public class SpelEvaluationException extends EvaluationException {
 		this.inserts = inserts;
 	}
 
-	public SpelEvaluationException(Throwable cause, SpelMessage message, Object... inserts) {
+	public SpelEvaluationException(Throwable cause, SpelMessage message, 
+		Object... inserts) {
 		super(message.formatMessage(0,inserts),cause);
 		this.message = message;
 		this.inserts = inserts;

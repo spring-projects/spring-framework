@@ -61,7 +61,8 @@ public interface SpelNode {
 	 * @throws EvaluationException if any problem occurs evaluating the expression or
 	 * setting the new value
 	 */
-	void setValue(ExpressionState expressionState, Object newValue) throws EvaluationException;
+	void setValue(ExpressionState expressionState, Object newValue) 
+	throws EvaluationException;
 
 	/**
 	 * @return the string form of this AST node
