@@ -61,6 +61,7 @@ import org.springframework.web.context.request.ServletWebRequest;
  * See the Javadoc for individual methods in this class for details.
  *
  * @author Sam Brannen
+ * @author Phillip Webb
  * @since 3.2
  */
 public class ServletTestExecutionListener extends AbstractTestExecutionListener {
@@ -99,14 +100,16 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 		ServletTestExecutionListener.class, "createdByTheTestContextFramework");
 
 	/**
-	 * Attribute name for a {@link TestContext} attribute which indicates that
-	 * that the {@link ServletTestExecutionListener} should be activated. When
-	 * not specified activation occurs when the {@linkplain TestContext#getTestClass()
+	 * Attribute name for a {@link TestContext} attribute which indicates that that
+	 * the {@code ServletTestExecutionListener} should be activated. When not set to
+	 * {@code true}, activation occurs when the {@linkplain TestContext#getTestClass()
 	 * test class} is annotated with {@link WebAppConfiguration @WebAppConfiguration}.
-	 * @since 4.4
+	 *
+	 * <p>Permissible values include {@link Boolean#TRUE} and {@link Boolean#FALSE}.
+	 * @since 4.3
 	 */
 	public static final String ACTIVATE_LISTENER = Conventions.getQualifiedAttributeName(
-			ServletTestExecutionListener.class, "webApplicationConfiguration");
+		ServletTestExecutionListener.class, "activateListener");
 
 	private static final Log logger = LogFactory.getLog(ServletTestExecutionListener.class);
 
