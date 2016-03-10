@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,6 +61,7 @@ import org.springframework.web.context.request.ServletWebRequest;
  * See the Javadoc for individual methods in this class for details.
  *
  * @author Sam Brannen
+ * @author Phillip Webb
  * @since 3.2
  */
 public class ServletTestExecutionListener extends AbstractTestExecutionListener {
@@ -97,6 +98,18 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 	 */
 	public static final String CREATED_BY_THE_TESTCONTEXT_FRAMEWORK = Conventions.getQualifiedAttributeName(
 		ServletTestExecutionListener.class, "createdByTheTestContextFramework");
+
+	/**
+	 * Attribute name for a {@link TestContext} attribute which indicates that that
+	 * the {@code ServletTestExecutionListener} should be activated. When not set to
+	 * {@code true}, activation occurs when the {@linkplain TestContext#getTestClass()
+	 * test class} is annotated with {@link WebAppConfiguration @WebAppConfiguration}.
+	 *
+	 * <p>Permissible values include {@link Boolean#TRUE} and {@link Boolean#FALSE}.
+	 * @since 4.3
+	 */
+	public static final String ACTIVATE_LISTENER = Conventions.getQualifiedAttributeName(
+		ServletTestExecutionListener.class, "activateListener");
 
 	private static final Log logger = LogFactory.getLog(ServletTestExecutionListener.class);
 
@@ -167,8 +180,9 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 		testContext.removeAttribute(RESET_REQUEST_CONTEXT_HOLDER_ATTRIBUTE);
 	}
 
-	private boolean notAnnotatedWithWebAppConfiguration(TestContext testContext) {
-		return AnnotationUtils.findAnnotation(testContext.getTestClass(), WebAppConfiguration.class) == null;
+	private boolean isActivated(TestContext testContext) {
+		return (Boolean.TRUE.equals(testContext.getAttribute(ACTIVATE_LISTENER))
+				|| AnnotationUtils.findAnnotation(testContext.getTestClass(), WebAppConfiguration.class) != null);
 	}
 
 	private boolean alreadyPopulatedRequestContextHolder(TestContext testContext) {
@@ -176,7 +190,7 @@ public class ServletTestExecutionListener extends AbstractTestExecutionListener 
 	}
 
 	private void setUpRequestContextIfNecessary(TestContext testContext) {
-		if (notAnnotatedWithWebAppConfiguration(testContext) || alreadyPopulatedRequestContextHolder(testContext)) {
+		if (!isActivated(testContext) || alreadyPopulatedRequestContextHolder(testContext)) {
 			return;
 		}
 
