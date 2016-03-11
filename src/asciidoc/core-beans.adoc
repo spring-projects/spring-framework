@@ -7739,7 +7739,7 @@ are...
 [subs="verbatim,quotes"]
 ----
 	# in exceptions.properties
-	argument.required=The '{0}' argument is required.
+	argument.required=The {0} argument is required.
 ----
 
 A program to execute the `MessageSource` functionality is shown in the next example.
@@ -7820,7 +7820,7 @@ The resulting output from the invocation of the `execute()` method will be...
 The userDao argument is required.
 ----
 
-With regard to internationalization (i18n), Spring's various `MessageResource`
+With regard to internationalization (i18n), Spring's various `MessageSource`
 implementations follow the same locale resolution and fallback rules as the standard JDK
 `ResourceBundle`. In short, and continuing with the example `messageSource` defined
 previously, if you want to resolve messages against the British (`en-GB`) locale, you
@@ -7835,7 +7835,7 @@ resolved is specified manually.
 [subs="verbatim,quotes"]
 ----
 # in exceptions_en_GB.properties
-argument.required=Ebagum lad, the '{0}' argument is required, I say, required.
+argument.required=Ebagum lad, the {0} argument is required, I say, required.
 ----
 
 [source,java,indent=0]
