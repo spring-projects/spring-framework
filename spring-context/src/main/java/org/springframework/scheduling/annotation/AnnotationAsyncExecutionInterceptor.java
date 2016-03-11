@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,8 @@ public class AnnotationAsyncExecutionInterceptor extends AsyncExecutionIntercept
 	 * Create a new {@code AnnotationAsyncExecutionInterceptor} with the given executor
 	 * and a simple {@link AsyncUncaughtExceptionHandler}.
 	 * @param defaultExecutor the executor to be used by default if no more specific
-	 * executor has been qualified at the method level using {@link Async#value()}
+	 * executor has been qualified at the method level using {@link Async#value()};
+	 * as of 4.2.6, a local executor for this interceptor will be built otherwise
 	 */
 	public AnnotationAsyncExecutionInterceptor(Executor defaultExecutor) {
 		super(defaultExecutor);
@@ -51,7 +52,8 @@ public class AnnotationAsyncExecutionInterceptor extends AsyncExecutionIntercept
 	/**
 	 * Create a new {@code AnnotationAsyncExecutionInterceptor} with the given executor.
 	 * @param defaultExecutor the executor to be used by default if no more specific
-	 * executor has been qualified at the method level using {@link Async#value()}
+	 * executor has been qualified at the method level using {@link Async#value()};
+	 * as of 4.2.6, a local executor for this interceptor will be built otherwise
 	 * @param exceptionHandler the {@link AsyncUncaughtExceptionHandler} to use to
 	 * handle exceptions thrown by asynchronous method executions with {@code void}
 	 * return type
@@ -74,7 +76,7 @@ public class AnnotationAsyncExecutionInterceptor extends AsyncExecutionIntercept
 	 */
 	@Override
 	protected String getExecutorQualifier(Method method) {
-		// maintainer's note: changes made here should also be made in
+		// Maintainer's note: changes made here should also be made in
 		// AnnotationAsyncExecutionAspect#getExecutorQualifier
 		Async async = AnnotationUtils.findAnnotation(method, Async.class);
 		if (async == null) {

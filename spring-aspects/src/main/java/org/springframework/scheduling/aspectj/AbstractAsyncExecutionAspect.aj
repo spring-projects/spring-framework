@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,8 +54,8 @@ public abstract aspect AbstractAsyncExecutionAspect extends AsyncExecutionAspect
 	 * Apply around advice to methods matching the {@link #asyncMethod()} pointcut,
 	 * submit the actual calling of the method to the correct task executor and return
 	 * immediately to the caller.
-	 * @return {@link Future} if the original method returns {@code Future}; {@code null}
-	 * otherwise.
+	 * @return {@link Future} if the original method returns {@code Future};
+	 * {@code null} otherwise
 	 */
 	@SuppressAjWarnings("adviceDidNotMatch")
 	Object around() : asyncMethod() {
