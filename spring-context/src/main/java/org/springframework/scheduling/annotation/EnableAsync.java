@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,26 +41,28 @@ import org.springframework.core.Ordered;
  * &#064;Configuration
  * &#064;EnableAsync
  * public class AppConfig {
+ *
  *     &#064;Bean
  *     public MyAsyncBean asyncBean() {
  *         return new MyAsyncBean();
  *     }
  * }</pre>
  *
- *
  * <p>The {@link #mode} attribute controls how advice is applied; if the mode is
  * {@link AdviceMode#PROXY} (the default), then the other attributes control the behavior
  * of the proxying.
  *
- * <p>Note that if the {@linkplain #mode} is set to {@link AdviceMode#ASPECTJ}, then
- * the value of the {@link #proxyTargetClass} attribute will be ignored. Note also
- * that in this case the {@code spring-aspects} module JAR must be present on the
- * classpath.
+ * <p>Note that if the {@linkplain #mode} is set to {@link AdviceMode#ASPECTJ}, then the
+ * value of the {@link #proxyTargetClass} attribute will be ignored. Note also that in
+ * this case the {@code spring-aspects} module JAR must be present on the classpath.
  *
- * <p>By default, a {@link org.springframework.core.task.SimpleAsyncTaskExecutor
- * SimpleAsyncTaskExecutor} will be used to process async method invocations. Besides,
- * annotated methods having a {@code void} return type cannot transmit any exception
- * back to the caller. By default, such uncaught exceptions are only logged.
+ * <p>By default, Spring will be searching for an associated thread pool definition:
+ * either a unique {@link org.springframework.core.task.TaskExecutor} bean in the context,
+ * or an {@link java.util.concurrent.Executor} bean named "taskExecutor" otherwise. If
+ * neither of the two is resolvable, a {@link org.springframework.core.task.SimpleAsyncTaskExecutor}
+ * will be used to process async method invocations. Besides, annotated methods having a
+ * {@code void} return type cannot transmit any exception back to the caller. By default,
+ * such uncaught exceptions are only logged.
  *
  * <p>To customize all this, implement {@link AsyncConfigurer} and
  * provide:
@@ -129,6 +131,7 @@ import org.springframework.core.Ordered;
  * through direct access to actual componentry.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @author Stephane Nicoll
  * @author Sam Brannen
  * @since 3.1
@@ -175,9 +178,8 @@ public @interface EnableAsync {
 	AdviceMode mode() default AdviceMode.PROXY;
 
 	/**
-	 * Indicate the order in which the
-	 * {@link org.springframework.scheduling.annotation.AsyncAnnotationBeanPostProcessor
-	 * AsyncAnnotationBeanPostProcessor} should be applied.
+	 * Indicate the order in which the {@link AsyncAnnotationBeanPostProcessor}
+	 * should be applied.
 	 * <p>The default is {@link Ordered#LOWEST_PRECEDENCE} in order to run
 	 * after all other post-processors, so that it can add an advisor to
 	 * existing proxies rather than double-proxy.
