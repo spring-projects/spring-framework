@@ -243,6 +243,26 @@ public class DefaultConversionServiceTests {
 	public void testEnumToString() {
 		assertEquals("BAR", conversionService.convert(Foo.BAR, String.class));
 	}
+	
+	@Test
+	public void testIntegerToEnum() throws Exception {
+		assertEquals(Foo.BAR, conversionService.convert(0, Foo.class));
+	}
+	
+	@Test
+	public void testIntegerToEnumWithSubclass() throws Exception {
+		assertEquals(SubFoo.BAZ, conversionService.convert(1, SubFoo.BAR.getClass()));
+	}
+	
+	@Test
+	public void testIntegerToEnumNull() {
+		assertEquals(null, conversionService.convert(null, Foo.class));
+	}
+	
+	@Test
+	public void testEnumToInteger() {
+		assertEquals(0, conversionService.convert(Foo.BAR, Integer.class));
+	}
 
 	@Test
 	public void testStringToEnumSet() throws Exception {
