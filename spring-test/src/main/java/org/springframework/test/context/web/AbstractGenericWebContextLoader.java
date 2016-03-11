@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ import org.springframework.web.context.support.GenericWebApplicationContext;
  * {@link #loadBeanDefinitions}.
  *
  * @author Sam Brannen
+ * @author Phillip Webb
  * @since 3.2
  * @see #loadContext(MergedContextConfiguration)
  * @see #loadContext(String...)
@@ -256,10 +257,14 @@ public abstract class AbstractGenericWebContextLoader extends AbstractContextLoa
 	 * loader <i>after</i> bean definitions have been loaded into the context but
 	 * <i>before</i> the context is refreshed.
 	 *
+	 * <p>The default implementation simply delegates to
+	 * {@link AbstractContextLoader#customizeContext(ConfigurableApplicationContext, MergedContextConfiguration)}.
+	 *
 	 * @param context the newly created web application context
 	 * @param webMergedConfig the merged context configuration to use to load the
 	 * web application context
 	 * @see #loadContext(MergedContextConfiguration)
+	 * @see #customizeContext(ConfigurableApplicationContext, MergedContextConfiguration)
 	 */
 	protected void customizeContext(GenericWebApplicationContext context, WebMergedContextConfiguration webMergedConfig) {
 		super.customizeContext(context, webMergedConfig);

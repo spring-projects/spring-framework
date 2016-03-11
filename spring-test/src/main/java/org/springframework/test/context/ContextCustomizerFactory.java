@@ -18,29 +18,35 @@ package org.springframework.test.context;
 
 import java.util.List;
 
-import org.springframework.context.ConfigurableApplicationContext;
-
 /**
- * Factory registered in {@code spring.factories} that is used to create
- * {@link ContextCustomizer ContextCustomizers}. Factories are called after
- * {@link ContextLoader ContextLoaders} have been triggered but before the
+ * Factory for creating {@link ContextCustomizer ContextCustomizers}.
+ *
+ * <p>Factories are invoked after {@link ContextLoader ContextLoaders} have
+ * processed context configuration attributes but before the
  * {@link MergedContextConfiguration} is created.
  *
+ * <p>By default, the Spring TestContext Framework will use the
+ * {@link org.springframework.core.io.support.SpringFactoriesLoader SpringFactoriesLoader}
+ * mechanism for loading factories configured in all {@code META-INF/spring.factories}
+ * files on the classpath.
+ *
  * @author Phillip Webb
+ * @author Sam Brannen
  * @since 4.3
  */
 public interface ContextCustomizerFactory {
 
 	/**
-	 * Get the {@link ContextCustomizer} (if any) that should be used to customize the
-	 * {@link ConfigurableApplicationContext} when it is created.
+	 * Create a {@link ContextCustomizer} that should be used to customize a
+	 * {@link org.springframework.context.ConfigurableApplicationContext ConfigurableApplicationContext}
+	 * before it is refreshed.
 	 * @param testClass the test class
-	 * @param configurationAttributes he list of context configuration attributes for the
-	 * test class, ordered <em>bottom-up</em> (i.e., as if we were traversing up the class
-	 * hierarchy); never {@code null} or empty.
-	 * @return a {@link ContextCustomizer} or {@code null}
+	 * @param configAttributes the list of context configuration attributes for
+	 * the test class, ordered <em>bottom-up</em> (i.e., as if we were traversing
+	 * up the class hierarchy); never {@code null} or empty
+	 * @return a {@link ContextCustomizer} or {@code null} if no customizer should
+	 * be used
 	 */
-	ContextCustomizer getContextCustomizer(Class<?> testClass,
-			List<ContextConfigurationAttributes> configurationAttributes);
+	ContextCustomizer createContextCustomizer(Class<?> testClass, List<ContextConfigurationAttributes> configAttributes);
 
 }

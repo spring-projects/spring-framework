@@ -253,7 +253,8 @@ public abstract class AbstractDelegatingSmartContextLoader implements SmartConte
 		}
 
 		// If neither of the candidates supports the mergedConfig based on resources but
-		// ACIs were declared, then delegate to the annotation config loader.
+		// ACIs or customizers were declared, then delegate to the annotation config
+		// loader.
 		if (!mergedConfig.getContextInitializerClasses().isEmpty() || !mergedConfig.getContextCustomizers().isEmpty()) {
 			return delegateLoading(getAnnotationConfigLoader(), mergedConfig);
 		}

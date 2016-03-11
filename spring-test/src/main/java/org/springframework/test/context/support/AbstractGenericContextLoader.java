@@ -16,7 +16,6 @@
 
 package org.springframework.test.context.support;
 
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -53,6 +52,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
+ * @author Phillip Webb
  * @since 2.5
  * @see #loadContext(MergedContextConfiguration)
  * @see #loadContext(String...)
@@ -92,6 +92,8 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * annotation configuration processors.</li>
 	 * <li>Calls {@link #customizeContext(GenericApplicationContext)} to allow for customizing the context
 	 * before it is refreshed.</li>
+	 * <li>Calls {@link #customizeContext(ConfigurableApplicationContext, MergedContextConfiguration)} to
+	 * allow for customizing the context before it is refreshed.</li>
 	 * <li>{@link ConfigurableApplicationContext#refresh Refreshes} the
 	 * context and registers a JVM shutdown hook for it.</li>
 	 * </ul>
@@ -206,6 +208,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * @see GenericApplicationContext#setAllowBeanDefinitionOverriding
 	 * @see GenericApplicationContext#setResourceLoader
 	 * @see GenericApplicationContext#setId
+	 * @see #prepareContext(ConfigurableApplicationContext, MergedContextConfiguration)
 	 * @since 2.5
 	 */
 	protected void prepareContext(GenericApplicationContext context) {
@@ -279,6 +282,7 @@ public abstract class AbstractGenericContextLoader extends AbstractContextLoader
 	 * @param context the newly created application context
 	 * @see #loadContext(MergedContextConfiguration)
 	 * @see #loadContext(String...)
+	 * @see #customizeContext(ConfigurableApplicationContext, MergedContextConfiguration)
 	 * @since 2.5
 	 */
 	protected void customizeContext(GenericApplicationContext context) {

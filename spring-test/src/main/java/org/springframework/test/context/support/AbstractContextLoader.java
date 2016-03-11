@@ -28,7 +28,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.PropertySource;
@@ -58,10 +57,13 @@ import org.springframework.util.ResourceUtils;
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
+ * @author Phillip Webb
  * @since 2.5
  * @see #generateDefaultLocations
  * @see #getResourceSuffixes
  * @see #modifyLocations
+ * @see #prepareContext
+ * @see #customizeContext
  */
 public abstract class AbstractContextLoader implements SmartContextLoader {
 
@@ -109,8 +111,6 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 	 * {@linkplain MergedContextConfiguration#getPropertySourceProperties()
 	 * inlined properties} from the supplied {@code MergedContextConfiguration}
 	 * to the {@code Environment} of the context.</li>
-	 * <li>Calls any {@link MergedContextConfiguration#getContextCustomizers()
-	 * ContextCustomizers} that are part of the {@link MergedContextConfiguration}.</li>
 	 * <li>Determines what (if any) context initializer classes have been supplied
 	 * via the {@code MergedContextConfiguration} and instantiates and
 	 * {@linkplain ApplicationContextInitializer#initialize invokes} each with the
@@ -173,18 +173,16 @@ public abstract class AbstractContextLoader implements SmartContextLoader {
 
 	/**
 	 * Customize the {@link ConfigurableApplicationContext} created by this
-	 * {@code ContextLoader} <i>after</i> bean definitions have been
-	 * loaded into the context but <i>before</i> the context is refreshed.
-	 *
-	 * <p>The default implementation triggers all the
-	 * {@link MergedContextConfiguration#getContextCustomizers() context customizers} that
-	 * have been registered with the {@code mergedConfig}.
-	 *
+	 * {@code ContextLoader} <em>after</em> bean definitions have been loaded
+	 * into the context but <em>before</em> the context has been refreshed.
+	 * <p>The default implementation delegates to all
+	 * {@link MergedContextConfiguration#getContextCustomizers context customizers}
+	 * that have been registered with the supplied {@code mergedConfig}.
 	 * @param context the newly created application context
 	 * @param mergedConfig the merged context configuration
 	 * @since 4.3
 	 */
-	protected void customizeContext(GenericApplicationContext context, MergedContextConfiguration mergedConfig) {
+	protected void customizeContext(ConfigurableApplicationContext context, MergedContextConfiguration mergedConfig) {
 		for (ContextCustomizer contextCustomizer : mergedConfig.getContextCustomizers()) {
 			contextCustomizer.customizeContext(context, mergedConfig);
 		}

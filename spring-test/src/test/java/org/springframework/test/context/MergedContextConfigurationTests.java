@@ -39,6 +39,7 @@ import static org.mockito.Mockito.*;
  * {@link org.springframework.test.context.cache.ContextCache ContextCache}.
  *
  * @author Sam Brannen
+ * @author Phillip Webb
  * @since 3.1
  */
 public class MergedContextConfigurationTests {
@@ -402,32 +403,31 @@ public class MergedContextConfigurationTests {
 		assertNotEquals(mergedConfig2, mergedConfig1);
 	}
 
+	/**
+	 * @since 4.3
+	 */
 	@Test
 	public void equalsWithSameContextCustomizers() {
-		Set<ContextCustomizer> customizers1 = Collections.singleton(
-				mock(ContextCustomizer.class));
-		MergedContextConfiguration mergedConfig1 = new MergedContextConfiguration(
-				getClass(), EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, null,
-				EMPTY_STRING_ARRAY, null, null, customizers1, loader, null, null);
-		MergedContextConfiguration mergedConfig2 = new MergedContextConfiguration(
-				getClass(), EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, null,
-				EMPTY_STRING_ARRAY, null, null, customizers1, loader, null, null);
+		Set<ContextCustomizer> customizers = Collections.singleton(mock(ContextCustomizer.class));
+		MergedContextConfiguration mergedConfig1 = new MergedContextConfiguration(getClass(), EMPTY_STRING_ARRAY,
+			EMPTY_CLASS_ARRAY, null, EMPTY_STRING_ARRAY, null, null, customizers, loader, null, null);
+		MergedContextConfiguration mergedConfig2 = new MergedContextConfiguration(getClass(), EMPTY_STRING_ARRAY,
+			EMPTY_CLASS_ARRAY, null, EMPTY_STRING_ARRAY, null, null, customizers, loader, null, null);
 		assertEquals(mergedConfig1, mergedConfig2);
 	}
 
+	/**
+	 * @since 4.3
+	 */
 	@Test
 	public void equalsWithDifferentContextCustomizers() {
-		Set<ContextCustomizer> customizers1 = Collections.singleton(
-				mock(ContextCustomizer.class));
-		Set<ContextCustomizer> customizers2 = Collections.singleton(
-				mock(ContextCustomizer.class));
+		Set<ContextCustomizer> customizers1 = Collections.singleton(mock(ContextCustomizer.class));
+		Set<ContextCustomizer> customizers2 = Collections.singleton(mock(ContextCustomizer.class));
 
-		MergedContextConfiguration mergedConfig1 = new MergedContextConfiguration(
-				getClass(), EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, null,
-				EMPTY_STRING_ARRAY, null, null, customizers1, loader, null, null);
-		MergedContextConfiguration mergedConfig2 = new MergedContextConfiguration(
-				getClass(), EMPTY_STRING_ARRAY, EMPTY_CLASS_ARRAY, null,
-				EMPTY_STRING_ARRAY, null, null, customizers2, loader, null, null);
+		MergedContextConfiguration mergedConfig1 = new MergedContextConfiguration(getClass(), EMPTY_STRING_ARRAY,
+			EMPTY_CLASS_ARRAY, null, EMPTY_STRING_ARRAY, null, null, customizers1, loader, null, null);
+		MergedContextConfiguration mergedConfig2 = new MergedContextConfiguration(getClass(), EMPTY_STRING_ARRAY,
+			EMPTY_CLASS_ARRAY, null, EMPTY_STRING_ARRAY, null, null, customizers2, loader, null, null);
 		assertNotEquals(mergedConfig1, mergedConfig2);
 		assertNotEquals(mergedConfig2, mergedConfig1);
 	}

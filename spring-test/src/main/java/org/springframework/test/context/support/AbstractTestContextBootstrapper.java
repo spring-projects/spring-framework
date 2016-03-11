@@ -410,12 +410,16 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 		return processMergedContextConfiguration(mergedConfig);
 	}
 
+	/**
+	 * @since 4.3
+	 */
 	private Set<ContextCustomizer> getContextCustomizers(Class<?> testClass,
-			List<ContextConfigurationAttributes> configurationAttributes) {
-		List<ContextCustomizerFactory> factories = geContextCustomizerFactories();
+			List<ContextConfigurationAttributes> configAttributes) {
+
+		List<ContextCustomizerFactory> factories = getContextCustomizerFactories();
 		Set<ContextCustomizer> customizers = new LinkedHashSet<ContextCustomizer>(factories.size());
 		for (ContextCustomizerFactory factory : factories) {
-			ContextCustomizer customizer = factory.getContextCustomizer(testClass, configurationAttributes);
+			ContextCustomizer customizer = factory.createContextCustomizer(testClass, configAttributes);
 			if (customizer != null) {
 				customizers.add(customizer);
 			}
@@ -424,13 +428,20 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 	}
 
 	/**
-	 * Get the default {@link ContextCustomizerFactory} instances for this bootstrapper.
+	 * Get the {@link ContextCustomizerFactory} instances for this bootstrapper.
+	 * <p>The default implementation uses the {@link SpringFactoriesLoader} mechanism
+	 * for loading factories configured in all {@code META-INF/spring.factories}
+	 * files on the classpath.
+	 * @since 4.3
+	 * @see SpringFactoriesLoader#loadFactories
 	 */
-	protected List<ContextCustomizerFactory> geContextCustomizerFactories() {
-		return SpringFactoriesLoader.loadFactories(ContextCustomizerFactory.class,
-				getClass().getClassLoader());
+	protected List<ContextCustomizerFactory> getContextCustomizerFactories() {
+		return SpringFactoriesLoader.loadFactories(ContextCustomizerFactory.class, getClass().getClassLoader());
 	}
 
+	/**
+	 * @since 4.3
+	 */
 	private boolean areAllEmpty(Collection<?>... collections) {
 		for (Collection<?> collection : collections) {
 			if (!collection.isEmpty()) {

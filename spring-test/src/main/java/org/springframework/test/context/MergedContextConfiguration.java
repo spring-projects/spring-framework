@@ -55,6 +55,7 @@ import org.springframework.util.StringUtils;
  * that was loaded using properties of this {@code MergedContextConfiguration}.
  *
  * @author Sam Brannen
+ * @author Phillip Webb
  * @since 3.1
  * @see ContextConfiguration
  * @see ContextHierarchy
@@ -73,6 +74,8 @@ public class MergedContextConfiguration implements Serializable {
 
 	private static final Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> EMPTY_INITIALIZER_CLASSES =
 			Collections.<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> emptySet();
+
+	private static final Set<ContextCustomizer> EMPTY_CONTEXT_CUSTOMIZERS = Collections.<ContextCustomizer> emptySet();
 
 
 	private final Class<?> testClass;
@@ -111,6 +114,11 @@ public class MergedContextConfiguration implements Serializable {
 
 		return (contextInitializerClasses != null ?
 				Collections.unmodifiableSet(contextInitializerClasses) : EMPTY_INITIALIZER_CLASSES);
+	}
+
+	private static Set<ContextCustomizer> processContextCustomizers(Set<ContextCustomizer> contextCustomizers) {
+		return (contextCustomizers != null ?
+				Collections.unmodifiableSet(contextCustomizers) : EMPTY_CONTEXT_CUSTOMIZERS);
 	}
 
 	private static String[] processActiveProfiles(String[] activeProfiles) {
@@ -247,8 +255,8 @@ public class MergedContextConfiguration implements Serializable {
 	 * <p>If a {@code null} value is supplied for {@code locations},
 	 * {@code classes}, {@code activeProfiles}, {@code propertySourceLocations},
 	 * or {@code propertySourceProperties} an empty array will be stored instead.
-	 * If a {@code null} value is supplied for the
-	 * {@code contextInitializerClasses} an empty set will be stored instead.
+	 * If a {@code null} value is supplied for {@code contextInitializerClasses}
+	 * or {@code contextCustomizers}, an empty set will be stored instead.
 	 * Furthermore, active profiles will be sorted, and duplicate profiles
 	 * will be removed.
 	 * @param testClass the test class for which the configuration was merged
@@ -258,11 +266,12 @@ public class MergedContextConfiguration implements Serializable {
 	 * @param activeProfiles the merged active bean definition profiles
 	 * @param propertySourceLocations the merged {@code PropertySource} locations
 	 * @param propertySourceProperties the merged {@code PropertySource} properties
+	 * @param contextCustomizers the context customizers
 	 * @param contextLoader the resolved {@code ContextLoader}
 	 * @param cacheAwareContextLoaderDelegate a cache-aware context loader
 	 * delegate with which to retrieve the parent context
 	 * @param parent the parent configuration or {@code null} if there is no parent
-	 * @since 4.2
+	 * @since 4.3
 	 */
 	public MergedContextConfiguration(Class<?> testClass, String[] locations, Class<?>[] classes,
 			Set<Class<? extends ApplicationContextInitializer<? extends ConfigurableApplicationContext>>> contextInitializerClasses,
@@ -277,7 +286,7 @@ public class MergedContextConfiguration implements Serializable {
 		this.activeProfiles = processActiveProfiles(activeProfiles);
 		this.propertySourceLocations = processStrings(propertySourceLocations);
 		this.propertySourceProperties = processStrings(propertySourceProperties);
-		this.contextCustomizers = Collections.unmodifiableSet(contextCustomizers);
+		this.contextCustomizers = processContextCustomizers(contextCustomizers);
 		this.contextLoader = contextLoader;
 		this.cacheAwareContextLoaderDelegate = cacheAwareContextLoaderDelegate;
 		this.parent = parent;
@@ -390,7 +399,7 @@ public class MergedContextConfiguration implements Serializable {
 	 * when the application context is loaded.
 	 */
 	public Set<ContextCustomizer> getContextCustomizers() {
-		return contextCustomizers;
+		return this.contextCustomizers;
 	}
 
 	/**
@@ -515,6 +524,7 @@ public class MergedContextConfiguration implements Serializable {
 	 * {@linkplain #getActiveProfiles() active profiles},
 	 * {@linkplain #getPropertySourceLocations() property source locations},
 	 * {@linkplain #getPropertySourceProperties() property source properties},
+	 * {@linkplain #getContextCustomizers() context customizers},
 	 * the name of the {@link #getContextLoader() ContextLoader}, and the
 	 * {@linkplain #getParent() parent configuration}.
 	 */
@@ -528,6 +538,7 @@ public class MergedContextConfiguration implements Serializable {
 				.append("activeProfiles", ObjectUtils.nullSafeToString(this.activeProfiles))
 				.append("propertySourceLocations", ObjectUtils.nullSafeToString(this.propertySourceLocations))
 				.append("propertySourceProperties", ObjectUtils.nullSafeToString(this.propertySourceProperties))
+				.append("contextCustomizers", this.contextCustomizers)
 				.append("contextLoader", nullSafeToString(this.contextLoader))
 				.append("parent", this.parent)
 				.toString();

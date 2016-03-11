@@ -16,73 +16,50 @@
 
 package org.springframework.test.context.junit4;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.BootstrapWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.ContextConfigurationAttributes;
 import org.springframework.test.context.ContextCustomizer;
 import org.springframework.test.context.ContextCustomizerFactory;
-import org.springframework.test.context.MergedContextConfiguration;
 import org.springframework.test.context.junit4.ContextCustomizerSpringRunnerTests.CustomTestContextBootstrapper;
 import org.springframework.test.context.support.DefaultTestContextBootstrapper;
 
+import static java.util.Collections.*;
 import static org.junit.Assert.*;
 
 /**
  * JUnit 4 based integration test which verifies support of
  * {@link ContextCustomizerFactory} and {@link ContextCustomizer}.
  *
+ * @author Sam Brannen
  * @author Phillip Webb
  * @since 4.3
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @BootstrapWith(CustomTestContextBootstrapper.class)
-@ContextConfiguration
 public class ContextCustomizerSpringRunnerTests {
 
-	@Autowired
-	private MyBean myBean;
+	@Autowired String foo;
+
 
 	@Test
-	public void injectedMyBean() throws Exception {
-		assertNotNull(this.myBean);
+	public void injectedBean() {
+		assertEquals("foo", foo);
 	}
 
-	public static class CustomTestContextBootstrapper
-			extends DefaultTestContextBootstrapper {
+
+	static class CustomTestContextBootstrapper extends DefaultTestContextBootstrapper {
 
 		@Override
-		protected List<ContextCustomizerFactory> geContextCustomizerFactories() {
-			return Collections.singletonList(new ContextCustomizerFactory() {
-
-				@Override
-				public ContextCustomizer getContextCustomizer(Class<?> testClass,
-						List<ContextConfigurationAttributes> configurationAttributes) {
-					return new TestContextCustomizers();
-				}
-
-			});
+		protected List<ContextCustomizerFactory> getContextCustomizerFactories() {
+			return singletonList((testClass, configAttributes) ->
+				// ContextCustomizer as lambda expression:
+				(context, mergedConfig) -> context.getBeanFactory().registerSingleton("foo", "foo"));
 		}
-
-	}
-
-	public static class TestContextCustomizers implements ContextCustomizer {
-
-		@Override
-		public void customizeContext(ConfigurableApplicationContext context,
-				MergedContextConfiguration mergedContextConfiguration) {
-			context.getBeanFactory().registerSingleton("mybean", new MyBean());
-		}
-
-	}
-
-	public static class MyBean {
 	}
 
 }
