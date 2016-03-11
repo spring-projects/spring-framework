@@ -90,7 +90,7 @@ dependencies {
 	optional 'io.reactivex:rxjava:1.1.0'
 	optional "io.reactivex:rxnetty-http:0.5.0-SNAPSHOT"
 	optional "com.fasterxml.jackson.core:jackson-databind:2.6.2"
-	optional "io.projectreactor:reactor-net:${reactorNettyVersion}"
+	optional "io.projectreactor:reactor-netty:${reactorNettyVersion}"
 	optional "org.apache.tomcat:tomcat-util:${tomcatVersion}"
 	optional "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
 	optional 'io.undertow:undertow-core:1.3.5.Final'
