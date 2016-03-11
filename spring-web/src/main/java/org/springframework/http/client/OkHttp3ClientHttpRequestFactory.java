@@ -24,9 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.http.HttpHeaders;
@@ -36,17 +36,17 @@ import org.springframework.util.StringUtils;
 
 /**
  * {@link ClientHttpRequestFactory} implementation that uses
- * <a href="http://square.github.io/okhttp/">OkHttp</a> 2.x to create requests.
+ * <a href="http://square.github.io/okhttp/">OkHttp</a> 3.x to create requests.
  *
  * @author Luciano Leggieri
  * @author Arjen Poutsma
- * @since 4.2
- * @see org.springframework.http.client.OkHttp3ClientHttpRequestFactory
+ * @author Roy Clarkson
+ * @since 4.3
  */
-public class OkHttpClientHttpRequestFactory
+public class OkHttp3ClientHttpRequestFactory
 		implements ClientHttpRequestFactory, AsyncClientHttpRequestFactory, DisposableBean {
 
-	private final OkHttpClient client;
+	private OkHttpClient client;
 
 	private final boolean defaultClient;
 
@@ -54,7 +54,7 @@ public class OkHttpClientHttpRequestFactory
 	/**
 	 * Create a factory with a default {@link OkHttpClient} instance.
 	 */
-	public OkHttpClientHttpRequestFactory() {
+	public OkHttp3ClientHttpRequestFactory() {
 		this.client = new OkHttpClient();
 		this.defaultClient = true;
 	}
@@ -63,7 +63,7 @@ public class OkHttpClientHttpRequestFactory
 	 * Create a factory with the given {@link OkHttpClient} instance.
 	 * @param client the client to use
 	 */
-	public OkHttpClientHttpRequestFactory(OkHttpClient client) {
+	public OkHttp3ClientHttpRequestFactory(OkHttpClient client) {
 		Assert.notNull(client, "OkHttpClient must not be null");
 		this.client = client;
 		this.defaultClient = false;
@@ -73,39 +73,45 @@ public class OkHttpClientHttpRequestFactory
 	/**
 	 * Sets the underlying read timeout in milliseconds.
 	 * A value of 0 specifies an infinite timeout.
-	 * @see OkHttpClient#setReadTimeout(long, TimeUnit)
+	 * @see okhttp3.OkHttpClient.Builder#readTimeout(long, TimeUnit)
 	 */
 	public void setReadTimeout(int readTimeout) {
-		this.client.setReadTimeout(readTimeout, TimeUnit.MILLISECONDS);
+		this.client = this.client.newBuilder()
+				.readTimeout(readTimeout, TimeUnit.MILLISECONDS)
+				.build();
 	}
 
 	/**
 	 * Sets the underlying write timeout in milliseconds.
 	 * A value of 0 specifies an infinite timeout.
-	 * @see OkHttpClient#setWriteTimeout(long, TimeUnit)
+	 * @see okhttp3.OkHttpClient.Builder#writeTimeout(long, TimeUnit)
 	 */
 	public void setWriteTimeout(int writeTimeout) {
-		this.client.setWriteTimeout(writeTimeout, TimeUnit.MILLISECONDS);
+		this.client = this.client.newBuilder()
+				.writeTimeout(writeTimeout, TimeUnit.MILLISECONDS)
+				.build();
 	}
 
 	/**
 	 * Sets the underlying connect timeout in milliseconds.
 	 * A value of 0 specifies an infinite timeout.
-	 * @see OkHttpClient#setConnectTimeout(long, TimeUnit)
+	 * @see okhttp3.OkHttpClient.Builder#connectTimeout(long, TimeUnit)
 	 */
 	public void setConnectTimeout(int connectTimeout) {
-		this.client.setConnectTimeout(connectTimeout, TimeUnit.MILLISECONDS);
+		this.client = this.client.newBuilder()
+				.connectTimeout(connectTimeout, TimeUnit.MILLISECONDS)
+				.build();
 	}
 
 
 	@Override
 	public ClientHttpRequest createRequest(URI uri, HttpMethod httpMethod) {
-		return new OkHttpClientHttpRequest(this.client, uri, httpMethod);
+		return new OkHttp3ClientHttpRequest(this.client, uri, httpMethod);
 	}
 
 	@Override
 	public AsyncClientHttpRequest createAsyncRequest(URI uri, HttpMethod httpMethod) {
-		return new OkHttpAsyncClientHttpRequest(this.client, uri, httpMethod);
+		return new OkHttp3AsyncClientHttpRequest(this.client, uri, httpMethod);
 	}
 
 
@@ -113,10 +119,10 @@ public class OkHttpClientHttpRequestFactory
 	public void destroy() throws IOException {
 		if (this.defaultClient) {
 			// Clean up the client if we created it in the constructor
-			if (this.client.getCache() != null) {
-				this.client.getCache().close();
+			if (this.client.cache() != null) {
+				this.client.cache().close();
 			}
-			this.client.getDispatcher().getExecutorService().shutdown();
+			this.client.dispatcher().executorService().shutdown();
 		}
 	}
 
@@ -124,7 +130,7 @@ public class OkHttpClientHttpRequestFactory
 	static Request buildRequest(HttpHeaders headers, byte[] content, URI uri,
 			HttpMethod method) throws MalformedURLException {
 
-		com.squareup.okhttp.MediaType contentType = getContentType(headers);
+		okhttp3.MediaType contentType = getContentType(headers);
 		RequestBody body = (content.length > 0 ? RequestBody.create(contentType, content) : null);
 
 		URL url = uri.toURL();
@@ -141,10 +147,9 @@ public class OkHttpClientHttpRequestFactory
 		return builder.build();
 	}
 
-	private static com.squareup.okhttp.MediaType getContentType(HttpHeaders headers) {
+	private static okhttp3.MediaType getContentType(HttpHeaders headers) {
 		String rawContentType = headers.getFirst(HttpHeaders.CONTENT_TYPE);
-		return (StringUtils.hasText(rawContentType) ?
-				com.squareup.okhttp.MediaType.parse(rawContentType) : null);
+		return (StringUtils.hasText(rawContentType) ? okhttp3.MediaType.parse(rawContentType) : null);
 	}
 
 }

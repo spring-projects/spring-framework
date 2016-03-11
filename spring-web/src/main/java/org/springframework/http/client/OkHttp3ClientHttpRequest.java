@@ -19,23 +19,23 @@ package org.springframework.http.client;
 import java.io.IOException;
 import java.net.URI;
 
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 
 /**
- * {@link ClientHttpRequest} implementation that uses OkHttp 2.x to execute requests.
+ * {@link ClientHttpRequest} implementation that uses OkHttp 3.x to execute requests.
  *
- * <p>Created via the {@link OkHttpClientHttpRequestFactory}.
+ * <p>Created via the {@link OkHttp3ClientHttpRequestFactory}.
  *
  * @author Luciano Leggieri
  * @author Arjen Poutsma
- * @since 4.2
- * @see org.springframework.http.client.OkHttp3ClientHttpRequest
+ * @author Roy Clarkson
+ * @since 4.3
  */
-class OkHttpClientHttpRequest extends AbstractBufferingClientHttpRequest {
+class OkHttp3ClientHttpRequest extends AbstractBufferingClientHttpRequest {
 
 	private final OkHttpClient client;
 
@@ -44,7 +44,7 @@ class OkHttpClientHttpRequest extends AbstractBufferingClientHttpRequest {
 	private final HttpMethod method;
 
 
-	public OkHttpClientHttpRequest(OkHttpClient client, URI uri, HttpMethod method) {
+	public OkHttp3ClientHttpRequest(OkHttpClient client, URI uri, HttpMethod method) {
 		this.client = client;
 		this.uri = uri;
 		this.method = method;
@@ -64,8 +64,8 @@ class OkHttpClientHttpRequest extends AbstractBufferingClientHttpRequest {
 
 	@Override
 	protected ClientHttpResponse executeInternal(HttpHeaders headers, byte[] content) throws IOException {
-		Request request = OkHttpClientHttpRequestFactory.buildRequest(headers, content, this.uri, this.method);
-		return new OkHttpClientHttpResponse(this.client.newCall(request).execute());
+		Request request = OkHttp3ClientHttpRequestFactory.buildRequest(headers, content, this.uri, this.method);
+		return new OkHttp3ClientHttpResponse(this.client.newCall(request).execute());
 	}
 
 }
