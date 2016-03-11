@@ -38,6 +38,8 @@ import org.springframework.test.context.BootstrapContext;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextConfigurationAttributes;
+import org.springframework.test.context.ContextCustomizer;
+import org.springframework.test.context.ContextCustomizerFactory;
 import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.context.ContextLoader;
 import org.springframework.test.context.MergedContextConfiguration;
@@ -385,10 +387,13 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			}
 		}
 
-		if (requireLocationsClassesOrInitializers && areAllEmpty(locations, classes, initializers)) {
+		Set<ContextCustomizer> contextCustomizers = getContextCustomizers(testClass,
+				Collections.unmodifiableList(configAttributesList));
+
+		if (requireLocationsClassesOrInitializers && areAllEmpty(locations, classes, initializers, contextCustomizers)) {
 			throw new IllegalStateException(String.format(
 					"%s was unable to detect defaults, and no ApplicationContextInitializers "
-							+ "were declared for context configuration attributes %s",
+							+ "or ContextCustomizers were declared for context configuration attributes %s",
 					contextLoader.getClass().getSimpleName(), configAttributesList));
 		}
 
@@ -400,9 +405,38 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 				ActiveProfilesUtils.resolveActiveProfiles(testClass),
 				mergedTestPropertySources.getLocations(),
 				mergedTestPropertySources.getProperties(),
-				contextLoader, cacheAwareContextLoaderDelegate, parentConfig);
+				contextCustomizers, contextLoader, cacheAwareContextLoaderDelegate, parentConfig);
 
 		return processMergedContextConfiguration(mergedConfig);
+	}
+
+	/**
+	 * @since 4.3
+	 */
+	private Set<ContextCustomizer> getContextCustomizers(Class<?> testClass,
+			List<ContextConfigurationAttributes> configAttributes) {
+
+		List<ContextCustomizerFactory> factories = getContextCustomizerFactories();
+		Set<ContextCustomizer> customizers = new LinkedHashSet<ContextCustomizer>(factories.size());
+		for (ContextCustomizerFactory factory : factories) {
+			ContextCustomizer customizer = factory.createContextCustomizer(testClass, configAttributes);
+			if (customizer != null) {
+				customizers.add(customizer);
+			}
+		}
+		return customizers;
+	}
+
+	/**
+	 * Get the {@link ContextCustomizerFactory} instances for this bootstrapper.
+	 * <p>The default implementation uses the {@link SpringFactoriesLoader} mechanism
+	 * for loading factories configured in all {@code META-INF/spring.factories}
+	 * files on the classpath.
+	 * @since 4.3
+	 * @see SpringFactoriesLoader#loadFactories
+	 */
+	protected List<ContextCustomizerFactory> getContextCustomizerFactories() {
+		return SpringFactoriesLoader.loadFactories(ContextCustomizerFactory.class, getClass().getClassLoader());
 	}
 
 	/**
