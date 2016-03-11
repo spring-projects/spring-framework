@@ -63,7 +63,7 @@ public class BootstrapTestUtilsMergedConfigTests extends AbstractContextConfigur
 	public void buildMergedConfigWithContextConfigurationWithoutLocationsClassesOrInitializers() {
 		exception.expect(IllegalStateException.class);
 		exception.expectMessage(startsWith("DelegatingSmartContextLoader was unable to detect defaults, "
-				+ "and no ApplicationContextInitializers were declared for context configuration attributes"));
+				+ "and no ApplicationContextInitializers or ContextCustomizers were declared for context configuration attribute"));
 
 		buildMergedContextConfiguration(MissingContextAttributesTestCase.class);
 	}
