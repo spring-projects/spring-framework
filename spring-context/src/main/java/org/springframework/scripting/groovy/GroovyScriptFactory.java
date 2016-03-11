@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -150,10 +150,9 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 	public Object getScriptedObject(ScriptSource scriptSource, Class<?>... actualInterfaces)
 			throws IOException, ScriptCompilationException {
 
-		try {
-			Class<?> scriptClassToExecute;
-
-			synchronized (this.scriptClassMonitor) {
+		synchronized (this.scriptClassMonitor) {
+			try {
+				Class<?> scriptClassToExecute;
 				this.wasModifiedForTypeCheck = false;
 
 				if (this.cachedResult != null) {
@@ -178,21 +177,23 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 					}
 				}
 				scriptClassToExecute = this.scriptClass;
-			}
 
-			// Process re-execution outside of the synchronized block.
-			return executeScript(scriptSource, scriptClassToExecute);
-		}
-		catch (CompilationFailedException ex) {
-			throw new ScriptCompilationException(scriptSource, ex);
+				// Process re-execution outside of the synchronized block.
+				return executeScript(scriptSource, scriptClassToExecute);
+			}
+			catch (CompilationFailedException ex) {
+				this.scriptClass = null;
+				this.scriptResultClass = null;
+				throw new ScriptCompilationException(scriptSource, ex);
+			}
 		}
 	}
 
 	public Class<?> getScriptedObjectType(ScriptSource scriptSource)
 			throws IOException, ScriptCompilationException {
 
-		try {
-			synchronized (this.scriptClassMonitor) {
+		synchronized (this.scriptClassMonitor) {
+			try {
 				if (this.scriptClass == null || scriptSource.isModified()) {
 					// New script content...
 					this.wasModifiedForTypeCheck = true;
@@ -211,9 +212,12 @@ public class GroovyScriptFactory implements ScriptFactory, BeanFactoryAware, Bea
 				}
 				return this.scriptResultClass;
 			}
-		}
-		catch (CompilationFailedException ex) {
-			throw new ScriptCompilationException(scriptSource, ex);
+			catch (CompilationFailedException ex) {
+				this.scriptClass = null;
+				this.scriptResultClass = null;
+				this.cachedResult = null;
+				throw new ScriptCompilationException(scriptSource, ex);
+			}
 		}
 	}
 

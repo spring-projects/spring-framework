@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -114,9 +114,9 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 	public Object getScriptedObject(ScriptSource scriptSource, Class<?>... actualInterfaces)
 			throws IOException, ScriptCompilationException {
 
-		try {
-			Class<?> clazz;
+		Class<?> clazz;
 
+		try {
 			synchronized (this.scriptClassMonitor) {
 				boolean requiresScriptEvaluation = (this.wasModifiedForTypeCheck && this.scriptClass == null);
 				this.wasModifiedForTypeCheck = false;
@@ -140,33 +140,39 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 				}
 				clazz = this.scriptClass;
 			}
+		}
+		catch (EvalError ex) {
+			this.scriptClass = null;
+			throw new ScriptCompilationException(scriptSource, ex);
+		}
 
-			if (clazz != null) {
-				// A Class: We need to create an instance for every call.
-				try {
-					return clazz.newInstance();
-				}
-				catch (Throwable ex) {
-					throw new ScriptCompilationException(
-							scriptSource, "Could not instantiate script class: " + clazz.getName(), ex);
-				}
+		if (clazz != null) {
+			// A Class: We need to create an instance for every call.
+			try {
+				return clazz.newInstance();
 			}
-			else {
-				// Not a Class: We need to evaluate the script for every call.
+			catch (Throwable ex) {
+				throw new ScriptCompilationException(
+						scriptSource, "Could not instantiate script class: " + clazz.getName(), ex);
+			}
+		}
+		else {
+			// Not a Class: We need to evaluate the script for every call.
+			try {
 				return BshScriptUtils.createBshObject(
 						scriptSource.getScriptAsString(), actualInterfaces, this.beanClassLoader);
 			}
-		}
-		catch (EvalError ex) {
-			throw new ScriptCompilationException(scriptSource, ex);
+			catch (EvalError ex) {
+				throw new ScriptCompilationException(scriptSource, ex);
+			}
 		}
 	}
 
 	public Class<?> getScriptedObjectType(ScriptSource scriptSource)
 			throws IOException, ScriptCompilationException {
 
-		try {
-			synchronized (this.scriptClassMonitor) {
+		synchronized (this.scriptClassMonitor) {
+			try {
 				if (scriptSource.isModified()) {
 					// New script content: Let's check whether it evaluates to a Class.
 					this.wasModifiedForTypeCheck = true;
@@ -174,9 +180,10 @@ public class BshScriptFactory implements ScriptFactory, BeanClassLoaderAware {
 				}
 				return this.scriptClass;
 			}
-		}
-		catch (EvalError ex) {
-			throw new ScriptCompilationException(scriptSource, ex);
+			catch (EvalError ex) {
+				this.scriptClass = null;
+				throw new ScriptCompilationException(scriptSource, ex);
+			}
 		}
 	}
 
