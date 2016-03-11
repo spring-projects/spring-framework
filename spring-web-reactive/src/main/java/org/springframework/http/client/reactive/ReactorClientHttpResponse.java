@@ -20,7 +20,7 @@ import java.nio.ByteBuffer;
 
 import reactor.core.publisher.Flux;
 import reactor.io.buffer.Buffer;
-import reactor.io.net.http.HttpChannel;
+import reactor.io.netty.http.HttpChannel;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;
@@ -31,7 +31,7 @@ import org.springframework.http.HttpStatus;
  * {@link ClientHttpResponse} implementation for the Reactor Net HTTP client
  *
  * @author Brian Clozel
- * @see reactor.io.net.http.HttpClient
+ * @see reactor.io.netty.http.HttpClient
  */
 public class ReactorClientHttpResponse implements ClientHttpResponse {
 

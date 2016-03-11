@@ -19,7 +19,7 @@ package org.springframework.http.server.reactive.boot;
 import reactor.core.flow.Loopback;
 import reactor.core.state.Completable;
 import reactor.io.buffer.Buffer;
-import reactor.io.net.ReactiveNet;
+import reactor.io.netty.ReactiveNet;
 
 import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
@@ -34,7 +34,7 @@ public class ReactorHttpServer extends HttpServerSupport
 
 	private ReactorHttpHandlerAdapter reactorHandler;
 
-	private reactor.io.net.http.HttpServer<Buffer, Buffer> reactorServer;
+	private reactor.io.netty.http.HttpServer<Buffer, Buffer> reactorServer;
 
 	private DataBufferAllocator allocator = new DefaultDataBufferAllocator();
 

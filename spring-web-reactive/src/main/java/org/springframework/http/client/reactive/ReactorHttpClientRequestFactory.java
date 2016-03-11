@@ -18,8 +18,8 @@ package org.springframework.http.client.reactive;
 
 import java.net.URI;
 
-import reactor.io.net.ReactiveNet;
-import reactor.io.net.http.HttpClient;
+import reactor.io.netty.ReactiveNet;
+import reactor.io.netty.http.HttpClient;
 
 import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.core.io.buffer.DefaultDataBufferAllocator;

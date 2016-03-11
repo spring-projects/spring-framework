@@ -21,8 +21,8 @@ import java.nio.ByteBuffer;
 
 import reactor.core.publisher.Flux;
 import reactor.io.buffer.Buffer;
-import reactor.io.net.http.HttpChannel;
-import reactor.io.net.http.model.Cookie;
+import reactor.io.netty.http.HttpChannel;
+import reactor.io.netty.http.model.Cookie;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;

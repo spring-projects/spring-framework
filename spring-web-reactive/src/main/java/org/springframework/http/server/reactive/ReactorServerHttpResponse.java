@@ -22,9 +22,9 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.io.buffer.Buffer;
-import reactor.io.net.http.HttpChannel;
-import reactor.io.net.http.model.Cookie;
-import reactor.io.net.http.model.Status;
+import reactor.io.netty.http.HttpChannel;
+import reactor.io.netty.http.model.Cookie;
+import reactor.io.netty.http.model.Status;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpStatus;

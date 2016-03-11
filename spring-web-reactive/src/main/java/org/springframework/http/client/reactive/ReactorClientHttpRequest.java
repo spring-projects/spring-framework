@@ -22,8 +22,8 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.io.buffer.Buffer;
-import reactor.io.net.http.HttpClient;
-import reactor.io.net.http.model.Method;
+import reactor.io.netty.http.HttpClient;
+import reactor.io.netty.http.model.Method;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;

@@ -17,8 +17,8 @@ package org.springframework.http.server.reactive;
 
 import reactor.core.publisher.Mono;
 import reactor.io.buffer.Buffer;
-import reactor.io.net.ReactiveChannelHandler;
-import reactor.io.net.http.HttpChannel;
+import reactor.io.ipc.ChannelFluxHandler;
+import reactor.io.netty.http.HttpChannel;
 
 import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.util.Assert;
@@ -27,7 +27,7 @@ import org.springframework.util.Assert;
  * @author Stephane Maldini
  */
 public class ReactorHttpHandlerAdapter
-		implements ReactiveChannelHandler<Buffer, Buffer, HttpChannel<Buffer, Buffer>> {
+		implements ChannelFluxHandler<Buffer, Buffer, HttpChannel<Buffer, Buffer>> {
 
 	private final HttpHandler httpHandler;
 
