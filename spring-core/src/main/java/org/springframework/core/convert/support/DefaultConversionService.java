@@ -142,6 +142,9 @@ public class DefaultConversionService extends GenericConversionService {
 
 		converterRegistry.addConverterFactory(new StringToEnumConverterFactory());
 		converterRegistry.addConverter(new EnumToStringConverter((ConversionService) converterRegistry));
+		
+		converterRegistry.addConverterFactory(new IntegerToEnumConverterFactory());
+		converterRegistry.addConverter(new EnumToIntegerConverter((ConversionService) converterRegistry));
 
 		converterRegistry.addConverter(new StringToLocaleConverter());
 		converterRegistry.addConverter(Locale.class, String.class, new ObjectToStringConverter());
