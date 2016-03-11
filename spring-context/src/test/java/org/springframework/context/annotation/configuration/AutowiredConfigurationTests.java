@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import javax.inject.Provider;
 import org.junit.Test;
 
 import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
@@ -101,6 +102,18 @@ public class AutowiredConfigurationTests {
 		ctx.registerBeanDefinition("config2", new RootBeanDefinition(ColorConfig.class));
 		ctx.refresh();
 		assertSame(ctx.getBean(AutowiredConstructorConfig.class).colour, ctx.getBean(Colour.class));
+	}
+
+	@Test
+	public void testObjectFactoryConstructorWithTypeVariable() {
+		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		new XmlBeanDefinitionReader(factory).loadBeanDefinitions(
+				new ClassPathResource("annotation-config.xml", ObjectFactoryConstructorConfig.class));
+		GenericApplicationContext ctx = new GenericApplicationContext(factory);
+		ctx.registerBeanDefinition("config1", new RootBeanDefinition(ObjectFactoryConstructorConfig.class));
+		ctx.registerBeanDefinition("config2", new RootBeanDefinition(ColorConfig.class));
+		ctx.refresh();
+		assertSame(ctx.getBean(ObjectFactoryConstructorConfig.class).colour, ctx.getBean(Colour.class));
 	}
 
 	@Test
@@ -253,6 +266,18 @@ public class AutowiredConfigurationTests {
 		// @Autowired
 		AutowiredConstructorConfig(Colour colour) {
 			this.colour = colour;
+		}
+	}
+
+
+	@Configuration
+	static class ObjectFactoryConstructorConfig {
+
+		Colour colour;
+
+		// @Autowired
+		ObjectFactoryConstructorConfig(ObjectFactory<Colour> colourFactory) {
+			this.colour = colourFactory.getObject();
 		}
 	}
 

@@ -182,8 +182,8 @@ class ConstructorResolver {
 								paramNames = pnd.getParameterNames(candidate);
 							}
 						}
-						argsHolder = createArgumentArray(
-								beanName, mbd, resolvedValues, bw, paramTypes, paramNames, candidate, autowiring);
+						argsHolder = createArgumentArray(beanName, mbd, resolvedValues, bw, paramTypes, paramNames,
+								getUserDeclaredConstructor(candidate), autowiring);
 					}
 					catch (UnsatisfiedDependencyException ex) {
 						if (this.beanFactory.logger.isTraceEnabled()) {
@@ -446,8 +446,7 @@ class ConstructorResolver {
 
 			LinkedList<UnsatisfiedDependencyException> causes = null;
 
-			for (int i = 0; i < candidates.length; i++) {
-				Method candidate = candidates[i];
+			for (Method candidate : candidates) {
 				Class<?>[] paramTypes = candidate.getParameterTypes();
 
 				if (paramTypes.length >= minNrOfArgs) {
@@ -798,6 +797,21 @@ class ConstructorResolver {
 			}
 		}
 		return resolvedArgs;
+	}
+
+	protected Constructor<?> getUserDeclaredConstructor(Constructor<?> constructor) {
+		Class<?> declaringClass = constructor.getDeclaringClass();
+		Class<?> userClass = ClassUtils.getUserClass(declaringClass);
+		if (userClass != declaringClass) {
+			try {
+				return userClass.getDeclaredConstructor(constructor.getParameterTypes());
+			}
+			catch (NoSuchMethodException ex) {
+				// No equivalent constructor on user class (superclass)...
+				// Let's proceed with the given constructor as we usually would.
+			}
+		}
+		return constructor;
 	}
 
 	/**
