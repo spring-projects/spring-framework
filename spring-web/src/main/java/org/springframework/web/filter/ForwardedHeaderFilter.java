@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.filter;
 
 import java.io.IOException;
@@ -36,7 +37,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UrlPathHelper;
-
 
 /**
  * Filter that wraps the request in order to override its
@@ -70,11 +70,9 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 	/**
 	 * Configure a contextPath value that will replace the contextPath of
 	 * proxy-forwarded requests.
-	 *
 	 * <p>This is useful when external clients are not aware of the application
 	 * context path. However a proxy forwards the request to a URL that includes
 	 * a contextPath.
-	 *
 	 * @param contextPath the context path; the given value will be sanitized to
 	 * ensure it starts with a '/' but does not end with one, or if the context
 	 * path is empty (default, root context) it is left as-is.
@@ -117,10 +115,6 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 
 	private static class ForwardedHeaderRequestWrapper extends HttpServletRequestWrapper {
 
-		public static final Enumeration<String> EMPTY_HEADER_VALUES =
-				Collections.enumeration(Collections.<String>emptyList());
-
-
 		private final String scheme;
 
 		private final boolean secure;
@@ -136,7 +130,6 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		private final StringBuffer requestUrl;
 
 		private final Map<String, List<String>> headers;
-
 
 		public ForwardedHeaderRequestWrapper(HttpServletRequest request, ContextPathHelper pathHelper) {
 			super(request);
@@ -228,7 +221,7 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		@Override
 		public Enumeration<String> getHeaders(String name) {
 			List<String> value = this.headers.get(name);
-			return (CollectionUtils.isEmpty(value) ? EMPTY_HEADER_VALUES : Collections.enumeration(value));
+			return (Collections.enumeration(value != null ? value : Collections.<String>emptySet()));
 		}
 
 		@Override
@@ -243,7 +236,6 @@ public class ForwardedHeaderFilter extends OncePerRequestFilter {
 		private final String contextPath;
 
 		private final UrlPathHelper urlPathHelper;
-
 
 		public ContextPathHelper(String contextPath) {
 			Assert.notNull(contextPath);
