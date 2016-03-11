@@ -17,7 +17,6 @@
 package org.springframework.scheduling.aspectj;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 
 import org.aspectj.lang.annotation.SuppressAjWarnings;
@@ -29,26 +28,31 @@ import org.springframework.core.task.AsyncTaskExecutor;
 /**
  * Abstract aspect that routes selected methods asynchronously.
  *
- * <p>This aspect needs to be injected with an implementation of
- * {@link Executor} to activate it for a specific thread pool.
- * Otherwise it will simply delegate all calls synchronously.
+ * <p>This aspect needs to be injected with an implementation of a task-oriented
+ * {@link java.util.concurrent.Executor} to activate it for a specific thread pool,
+ * or with a {@link org.springframework.beans.factory.BeanFactory} for default
+ * executor lookup. Otherwise it will simply delegate all calls synchronously.
  *
  * @author Ramnivas Laddad
  * @author Juergen Hoeller
  * @author Chris Beams
  * @author Stephane Nicoll
  * @since 3.0.5
+ * @see #setExecutor
+ * @see #setBeanFactory
+ * @see #getDefaultExecutor
  */
 public abstract aspect AbstractAsyncExecutionAspect extends AsyncExecutionAspectSupport {
 
 	/**
-	 * Create an {@code AnnotationAsyncExecutionAspect} with a {@code null} default
-	 * executor, which should instead be set via {@code #aspectOf} and
-	 * {@link #setExecutor(Executor)}. The same applies for {@link #setExceptionHandler}
+	 * Create an {@code AnnotationAsyncExecutionAspect} with a {@code null}
+	 * default executor, which should instead be set via {@code #aspectOf} and
+	 * {@link #setExecutor}. The same applies for {@link #setExceptionHandler}.
 	 */
 	public AbstractAsyncExecutionAspect() {
 		super(null);
 	}
+
 
 	/**
 	 * Apply around advice to methods matching the {@link #asyncMethod()} pointcut,

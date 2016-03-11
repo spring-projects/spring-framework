@@ -119,6 +119,7 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	 * executor will be looked up at invocation time against the enclosing bean factory
 	 * @see #getExecutorQualifier(Method)
 	 * @see #setBeanFactory(BeanFactory)
+	 * @see #getDefaultExecutor(BeanFactory)
 	 */
 	public void setExecutor(Executor defaultExecutor) {
 		this.defaultExecutor = defaultExecutor;
@@ -133,7 +134,10 @@ public abstract class AsyncExecutionAspectSupport implements BeanFactoryAware {
 	}
 
 	/**
-	 * Set the {@link BeanFactory} to be used when looking up executors by qualifier.
+	 * Set the {@link BeanFactory} to be used when looking up executors by qualifier
+	 * or when relying on the default executor lookup algorithm.
+	 * @see #findQualifiedExecutor(BeanFactory, String)
+	 * @see #getDefaultExecutor(BeanFactory)
 	 */
 	@Override
 	public void setBeanFactory(BeanFactory beanFactory) {
