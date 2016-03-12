@@ -19,7 +19,6 @@ package org.springframework.http.server.reactive.boot;
 import reactor.core.flow.Loopback;
 import reactor.core.state.Completable;
 import reactor.io.buffer.Buffer;
-import reactor.io.netty.ReactiveNet;
 
 import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
@@ -50,8 +49,8 @@ public class ReactorHttpServer extends HttpServerSupport
 		Assert.notNull(getHttpHandler());
 		this.reactorHandler = new ReactorHttpHandlerAdapter(getHttpHandler(), allocator);
 
-		this.reactorServer = (getPort() != -1 ? ReactiveNet.httpServer(getPort()) :
-				ReactiveNet.httpServer());
+		this.reactorServer = (getPort() != -1 ? reactor.io.netty.http.HttpServer.create(getPort()) :
+				reactor.io.netty.http.HttpServer.create());
 	}
 
 	@Override

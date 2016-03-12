@@ -18,7 +18,6 @@ package org.springframework.http.client.reactive;
 
 import java.net.URI;
 
-import reactor.io.netty.ReactiveNet;
 import reactor.io.netty.http.HttpClient;
 
 import org.springframework.core.io.buffer.DataBufferAllocator;
@@ -43,7 +42,7 @@ public class ReactorHttpClientRequestFactory implements ClientHttpRequestFactory
 	}
 
 	public ReactorHttpClientRequestFactory(DataBufferAllocator allocator) {
-		this(allocator, ReactiveNet.httpClient());
+		this(allocator, reactor.io.netty.http.HttpClient.create());
 	}
 
 	protected ReactorHttpClientRequestFactory(DataBufferAllocator allocator, HttpClient httpClient) {
