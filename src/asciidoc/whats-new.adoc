@@ -685,10 +685,15 @@ Spring 4.3 also improves the caching abstraction as follows:
 === Testing Improvements
 
 * The JUnit support in the _Spring TestContext Framework_ now requires JUnit 4.12 or higher.
-* New `SpringRunner` __alias__ for the `SpringJUnit4ClassRunner`.
+* New `SpringRunner` _alias_ for the `SpringJUnit4ClassRunner`.
 * An empty declaration of `@ContextConfiguration` can now be completely omitted if default
   XML files, Groovy scripts, or `@Configuration` classes are detected.
+* `@Transactional` test methods are no longer required to be `public` (in TestNG and JUnit 5).
 * `@BeforeTransaction` and `@AfterTransaction` methods are no longer required to be `public`.
+* New `ContextCustomizer` API for customizing a test `ApplicationContext` _after_ bean
+  definitions have been loaded into the context but _before_ the context has been refreshed.
+  Customizers can be registered globally by third parties, foregoing the need to implement a
+  custom `ContextLoader`.
 * Server-side Spring MVC Test supports expectations on response headers with multiple values.
 * Server-side Spring MVC Test parses form data request content and populates request parameters.
 * Client-side REST test support allows indicating how many times a request is expected and
