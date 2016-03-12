@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,28 +24,28 @@ import org.springframework.web.servlet.RequestToViewNameTranslator;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
- * {@link org.springframework.web.servlet.RequestToViewNameTranslator}
- * that simply transforms the URI of the incoming request into a view name.
+ * {@link RequestToViewNameTranslator} that simply transforms the URI of
+ * the incoming request into a view name.
  *
- * <p>Can be explicitly defined as the "viewNameTranslator" bean in a
+ * <p>Can be explicitly defined as the {@code viewNameTranslator} bean in a
  * {@link org.springframework.web.servlet.DispatcherServlet} context.
  * Otherwise, a plain default instance will be used.
  *
  * <p>The default transformation simply strips leading and trailing slashes
  * as well as the file extension of the URI, and returns the result as the
- * view name with the configured {@link #setPrefix "prefix"} and a
- * {@link #setSuffix "suffix"} added as appropriate.
+ * view name with the configured {@link #setPrefix prefix} and a
+ * {@link #setSuffix suffix} added as appropriate.
  *
  * <p>The stripping of the leading slash and file extension can be disabled
- * using the {@link #setStripLeadingSlash "stripLeadingSlash"} and
- * {@link #setStripExtension "stripExtension"} properties, respectively.
+ * using the {@link #setStripLeadingSlash stripLeadingSlash} and
+ * {@link #setStripExtension stripExtension} properties, respectively.
  *
  * <p>Find below some examples of request to view name translation.
- *
- * <pre class="code">http://localhost:8080/gamecast/display.html -> display
- * http://localhost:8080/gamecast/displayShoppingCart.html -> displayShoppingCart
- * http://localhost:8080/gamecast/admin/index.html -> admin/index
- * </pre>
+ * <ul>
+ * <li>{@code http://localhost:8080/gamecast/display.html} &raquo; {@code display}</li>
+ * <li>{@code http://localhost:8080/gamecast/displayShoppingCart.html} &raquo; {@code displayShoppingCart}</li>
+ * <li>{@code http://localhost:8080/gamecast/admin/index.html} &raquo; {@code admin/index}</li>
+ * </ul>
  *
  * @author Rob Harrop
  * @author Juergen Hoeller

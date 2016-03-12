@@ -579,7 +579,7 @@ The format of an execution expression is:
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-	execution(modifiers-pattern? ret-type-pattern declaring-type-pattern? name-pattern(param-pattern)
+	execution(modifiers-pattern? ret-type-pattern declaring-type-pattern?name-pattern(param-pattern)
 				throws-pattern?)
 ----
 
@@ -589,7 +589,9 @@ what the return type of the method must be in order for a join point to be match
 frequently you will use `{asterisk}` as the returning type pattern, which matches any return
 type. A fully-qualified type name will match only when the method returns the given
 type. The name pattern matches the method name. You can use the `{asterisk}` wildcard as all or
-part of a name pattern. The parameters pattern is slightly more complex: `()` matches a
+part of a name pattern. If specifying a declaring type pattern
+then include a trailing `.` to join it to the name pattern component.
+The parameters pattern is slightly more complex: `()` matches a
 method that takes no parameters, whereas `(..)` matches any number of parameters (zero
 or more). The pattern `({asterisk})` matches a method taking one parameter of any type,
 `(*,String)` matches a method taking two parameters, the first can be of any type, the
@@ -2714,7 +2716,7 @@ can do so directly in the annotation:
 	}
 ----
 
-Spring will now look for a bean definition named " `account`" and use that as the
+Spring will now look for a bean definition named "account" and use that as the
 definition to configure new `Account` instances.
 
 You can also use autowiring to avoid having to specify a dedicated bean definition at

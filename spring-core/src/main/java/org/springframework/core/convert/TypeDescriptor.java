@@ -248,20 +248,17 @@ public class TypeDescriptor implements Serializable {
 	}
 
 	/**
-	 * Obtain the annotation of the specified {@code annotationType} that is
-	 * on this type descriptor.
-	 * <p>As of Spring Framework 4.2, this method supports arbitrary levels
-	 * of meta-annotations.
+	 * Obtain the annotation of the specified {@code annotationType} that is on this type descriptor.
+	 * <p>As of Spring Framework 4.2, this method supports arbitrary levels of meta-annotations.
 	 * @param annotationType the annotation type
 	 * @return the annotation, or {@code null} if no such annotation exists on this type descriptor
 	 */
 	@SuppressWarnings("unchecked")
 	public <T extends Annotation> T getAnnotation(Class<T> annotationType) {
 		// Search in annotations that are "present" (i.e., locally declared or inherited)
-		//
 		// NOTE: this unfortunately favors inherited annotations over locally declared composed annotations.
 		for (Annotation annotation : getAnnotations()) {
-			if (annotation.annotationType().equals(annotationType)) {
+			if (annotation.annotationType() == annotationType) {
 				return (T) annotation;
 			}
 		}
@@ -471,7 +468,7 @@ public class TypeDescriptor implements Serializable {
 			return false;
 		}
 		for (Annotation ann : getAnnotations()) {
-			if (other.getAnnotation(ann.annotationType()) == null) {
+			if (!ann.equals(other.getAnnotation(ann.annotationType()))) {
 				return false;
 			}
 		}

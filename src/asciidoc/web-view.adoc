@@ -39,7 +39,7 @@ This requires Groovy 2.3.1+ on the the classpath.
 [[view-groovymarkup-configuration]]
 === Configuration
 
-Configuring the Groovy Markup Teplate Engine is quite easy:
+Configuring the Groovy Markup Template Engine is quite easy:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]

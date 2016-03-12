@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,16 +24,18 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
 
-import static org.springframework.beans.BeanUtils.*;
+import static org.springframework.beans.BeanUtils.instantiateClass;
 
 /**
  * {@code BootstrapUtils} is a collection of utility methods to assist with
  * bootstrapping the <em>Spring TestContext Framework</em>.
  *
  * @author Sam Brannen
+ * @author Phillip Webb
  * @since 4.1
  * @see BootstrapWith
  * @see BootstrapContext
@@ -46,6 +48,10 @@ abstract class BootstrapUtils {
 	private static final String DEFAULT_CACHE_AWARE_CONTEXT_LOADER_DELEGATE_CLASS_NAME = "org.springframework.test.context.cache.DefaultCacheAwareContextLoaderDelegate";
 
 	private static final String DEFAULT_TEST_CONTEXT_BOOTSTRAPPER_CLASS_NAME = "org.springframework.test.context.support.DefaultTestContextBootstrapper";
+
+	private static final String DEFAULT_WEB_TEST_CONTEXT_BOOTSTRAPPER_CLASS_NAME = "org.springframework.test.context.web.WebTestContextBootstrapper";
+
+	private static final String WEB_APP_CONFIGURATION_ANNOTATION_CLASS_NAME = "org.springframework.test.context.web.WebAppConfiguration";
 
 	private static final Log logger = LogFactory.getLog(BootstrapUtils.class);
 
@@ -111,37 +117,25 @@ abstract class BootstrapUtils {
 	 * <p>If the {@link BootstrapWith @BootstrapWith} annotation is present on
 	 * the test class, either directly or as a meta-annotation, then its
 	 * {@link BootstrapWith#value value} will be used as the bootstrapper type.
-	 * Otherwise, the {@link org.springframework.test.context.support.DefaultTestContextBootstrapper
-	 * DefaultTestContextBootstrapper} will be used.
+	 * Otherwise, either the
+	 * {@link org.springframework.test.context.support.DefaultTestContextBootstrapper
+	 * DefaultTestContextBootstrapper} or the
+	 * {@link org.springframework.test.context.web.WebTestContextBootstrapper
+	 * WebTestContextBootstrapper} will be used, depending on the presence of
+	 * {@link org.springframework.test.context.web.WebAppConfiguration @WebAppConfiguration}.
 	 *
 	 * @param bootstrapContext the bootstrap context to use
 	 * @return a fully configured {@code TestContextBootstrapper}
 	 */
-	@SuppressWarnings("unchecked")
 	static TestContextBootstrapper resolveTestContextBootstrapper(BootstrapContext bootstrapContext) {
 		Class<?> testClass = bootstrapContext.getTestClass();
 
-		Class<? extends TestContextBootstrapper> clazz = null;
+		Class<?> clazz = null;
 		try {
-
-			MultiValueMap<String, Object> attributesMultiMap = AnnotatedElementUtils.getAllAnnotationAttributes(
-				testClass, BootstrapWith.class.getName());
-			List<Object> values = (attributesMultiMap == null ? null : attributesMultiMap.get(AnnotationUtils.VALUE));
-
-			if (values != null) {
-				if (values.size() != 1) {
-					String msg = String.format(
-						"Configuration error: found multiple declarations of @BootstrapWith on test class [%s] with values %s",
-						testClass.getName(), values);
-					throw new IllegalStateException(msg);
-				}
-				clazz = (Class<? extends TestContextBootstrapper>) values.get(0);
+			clazz = resolveExplicitTestContextBootstrapper(testClass);
+			if (clazz == null) {
+				clazz = resolveDefaultTestContextBootstrapper(testClass);
 			}
-			else {
-				clazz = (Class<? extends TestContextBootstrapper>) ClassUtils.forName(
-					DEFAULT_TEST_CONTEXT_BOOTSTRAPPER_CLASS_NAME, BootstrapUtils.class.getClassLoader());
-			}
-
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("Instantiating TestContextBootstrapper for test class [%s] from class [%s]",
 					testClass.getName(), clazz.getName()));
@@ -152,15 +146,40 @@ abstract class BootstrapUtils {
 
 			return testContextBootstrapper;
 		}
-		catch (Throwable t) {
-			if (t instanceof IllegalStateException) {
-				throw (IllegalStateException) t;
+		catch (Throwable ex) {
+			if (ex instanceof IllegalStateException) {
+				throw (IllegalStateException) ex;
 			}
-
 			throw new IllegalStateException("Could not load TestContextBootstrapper [" + clazz
 					+ "]. Specify @BootstrapWith's 'value' attribute "
-					+ "or make the default bootstrapper class available.", t);
+					+ "or make the default bootstrapper class available.", ex);
 		}
+	}
+
+	/**
+	 * @since 4.3
+	 */
+	private static Class<?> resolveExplicitTestContextBootstrapper(Class<?> testClass) {
+		MultiValueMap<String, Object> attributesMultiMap = AnnotatedElementUtils.getAllAnnotationAttributes(
+				testClass, BootstrapWith.class.getName());
+		List<Object> values = (attributesMultiMap == null ? null : attributesMultiMap.get(AnnotationUtils.VALUE));
+		if (values == null) {
+			return null;
+		}
+		Assert.state(values.size() == 1, String.format("Configuration error: found multiple declarations of "
+				+ "@BootstrapWith on test class [%s] with values %s", testClass.getName(), values));
+		return (Class<?>) values.get(0);
+	}
+
+	/**
+	 * @since 4.3
+	 */
+	private static Class<?> resolveDefaultTestContextBootstrapper(Class<?> testClass) throws Exception {
+		ClassLoader classLoader = BootstrapUtils.class.getClassLoader();
+		if (AnnotatedElementUtils.isAnnotated(testClass, WEB_APP_CONFIGURATION_ANNOTATION_CLASS_NAME)) {
+			return ClassUtils.forName(DEFAULT_WEB_TEST_CONTEXT_BOOTSTRAPPER_CLASS_NAME, classLoader);
+		}
+		return ClassUtils.forName(DEFAULT_TEST_CONTEXT_BOOTSTRAPPER_CLASS_NAME, classLoader);
 	}
 
 }

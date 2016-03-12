@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.cors.CorsUtils;
 
 /**
  * A logical conjunction (' && ') request condition that matches a request against
@@ -37,6 +38,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * @since 3.1
  */
 public final class HeadersRequestCondition extends AbstractRequestCondition<HeadersRequestCondition> {
+
+	private final static HeadersRequestCondition PRE_FLIGHT_MATCH = new HeadersRequestCondition();
+
 
 	private final Set<HeaderExpression> expressions;
 
@@ -105,6 +109,9 @@ public final class HeadersRequestCondition extends AbstractRequestCondition<Head
 	 */
 	@Override
 	public HeadersRequestCondition getMatchingCondition(HttpServletRequest request) {
+		if (CorsUtils.isPreFlightRequest(request)) {
+			return PRE_FLIGHT_MATCH;
+		}
 		for (HeaderExpression expression : expressions) {
 			if (!expression.match(request)) {
 				return null;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,15 +108,24 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	 */
 	protected final HttpSession getSession(boolean allowCreate) {
 		if (isRequestActive()) {
-			return this.request.getSession(allowCreate);
+			HttpSession session = this.request.getSession(allowCreate);
+			this.session = session;
+			return session;
 		}
 		else {
 			// Access through stored session reference, if any...
-			if (this.session == null && allowCreate) {
-				throw new IllegalStateException(
-						"No session found and request already completed - cannot create new session!");
+			HttpSession session = this.session;
+			if (session == null) {
+				if (allowCreate) {
+					throw new IllegalStateException(
+							"No session found and request already completed - cannot create new session!");
+				}
+				else {
+					session = this.request.getSession(false);
+					this.session = session;
+				}
 			}
-			return this.session;
+			return session;
 		}
 	}
 
@@ -251,25 +260,26 @@ public class ServletRequestAttributes extends AbstractRequestAttributes {
 	 */
 	@Override
 	protected void updateAccessedSessionAttributes() {
-		// Store session reference for access after request completion.
-		this.session = this.request.getSession(false);
-		// Update all affected session attributes.
-		if (this.session != null) {
-			try {
-				for (Map.Entry<String, Object> entry : this.sessionAttributesToUpdate.entrySet()) {
-					String name = entry.getKey();
-					Object newValue = entry.getValue();
-					Object oldValue = this.session.getAttribute(name);
-					if (oldValue == newValue && !isImmutableSessionAttribute(name, newValue)) {
-						this.session.setAttribute(name, newValue);
+		if (!this.sessionAttributesToUpdate.isEmpty()) {
+			// Update all affected session attributes.
+			HttpSession session = getSession(false);
+			if (session != null) {
+				try {
+					for (Map.Entry<String, Object> entry : this.sessionAttributesToUpdate.entrySet()) {
+						String name = entry.getKey();
+						Object newValue = entry.getValue();
+						Object oldValue = session.getAttribute(name);
+						if (oldValue == newValue && !isImmutableSessionAttribute(name, newValue)) {
+							session.setAttribute(name, newValue);
+						}
 					}
 				}
+				catch (IllegalStateException ex) {
+					// Session invalidated - shouldn't usually happen.
+				}
 			}
-			catch (IllegalStateException ex) {
-				// Session invalidated - shouldn't usually happen.
-			}
+			this.sessionAttributesToUpdate.clear();
 		}
-		this.sessionAttributesToUpdate.clear();
 	}
 
 	/**

@@ -16,6 +16,11 @@
 
 package org.springframework.cache.jcache;
 
+import java.util.concurrent.Callable;
+import javax.cache.processor.EntryProcessor;
+import javax.cache.processor.EntryProcessorException;
+import javax.cache.processor.MutableEntry;
+
 import org.springframework.cache.support.AbstractValueAdaptingCache;
 import org.springframework.util.Assert;
 
@@ -70,6 +75,16 @@ public class JCacheCache extends AbstractValueAdaptingCache {
 	}
 
 	@Override
+	public <T> T get(Object key, Callable<T> valueLoader) {
+		try {
+			return this.cache.invoke(key, new ValueLoaderEntryProcessor<T>(), valueLoader);
+		}
+		catch (EntryProcessorException ex) {
+			throw new ValueRetrievalException(key, valueLoader, ex.getCause());
+		}
+	}
+
+	@Override
 	public void put(Object key, Object value) {
 		this.cache.put(key, toStoreValue(value));
 	}
@@ -88,6 +103,32 @@ public class JCacheCache extends AbstractValueAdaptingCache {
 	@Override
 	public void clear() {
 		this.cache.removeAll();
+	}
+
+
+	private class ValueLoaderEntryProcessor<T> implements EntryProcessor<Object, Object, T> {
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public T process(MutableEntry<Object, Object> entry, Object... arguments)
+				throws EntryProcessorException {
+			Callable<T> valueLoader = (Callable<T>) arguments[0];
+			if (entry.exists()) {
+				return (T) fromStoreValue(entry.getValue());
+			}
+			else {
+				T value;
+				try {
+					value = valueLoader.call();
+				}
+				catch (Exception ex) {
+					throw new EntryProcessorException("Value loader '" + valueLoader + "' failed " +
+							"to compute  value for key '" + entry.getKey() + "'", ex);
+				}
+				entry.setValue(toStoreValue(value));
+				return value;
+			}
+		}
 	}
 
 }

@@ -28,6 +28,7 @@ import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -42,7 +43,6 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.method.HandlerMethodSelector;
 import org.springframework.web.method.support.HandlerMethodArgumentResolverComposite;
 import org.springframework.web.method.support.InvocableHandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
@@ -119,7 +119,7 @@ public class ModelFactoryOrderingTests {
 		WebDataBinderFactory dataBinderFactory = new DefaultDataBinderFactory(null);
 
 		Class<?> type = controller.getClass();
-		Set<Method> methods = HandlerMethodSelector.selectMethods(type, METHOD_FILTER);
+		Set<Method> methods = MethodIntrospector.selectMethods(type, METHOD_FILTER);
 		List<InvocableHandlerMethod> modelMethods = new ArrayList<InvocableHandlerMethod>();
 		for (Method method : methods) {
 			InvocableHandlerMethod modelMethod = new InvocableHandlerMethod(controller, method);

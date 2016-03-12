@@ -207,7 +207,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		if (StringUtils.hasText(condition)) {
 			Assert.notNull(this.evaluator, "EventExpressionEvaluator must no be null");
 			EvaluationContext evaluationContext = this.evaluator.createEvaluationContext(
-					event, this.targetClass, this.method, args);
+					event, this.targetClass, this.method, args, this.applicationContext);
 			return this.evaluator.condition(condition, this.methodKey, evaluationContext);
 		}
 		return true;
@@ -302,7 +302,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 		Class<?> targetBeanClass = targetBean.getClass();
 		if (!methodDeclaringClass.isAssignableFrom(targetBeanClass)) {
 			String msg = "The event listener method class '" + methodDeclaringClass.getName() +
-					"' is not an instance of the actual bean instance '" +
+					"' is not an instance of the actual bean class '" +
 					targetBeanClass.getName() + "'. If the bean requires proxying " +
 					"(e.g. due to @Transactional), please use class-based proxying.";
 			throw new IllegalStateException(getInvocationErrorMessage(targetBean, msg, args));

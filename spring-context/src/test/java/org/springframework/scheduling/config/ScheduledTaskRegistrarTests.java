@@ -28,11 +28,21 @@ import static org.mockito.Mockito.*;
  * Unit tests for {@link ScheduledTaskRegistrar}.
  *
  * @author Tobias Montagna-Hay
+ * @author Juergen Hoeller
  * @since 4.2
  */
 public class ScheduledTaskRegistrarTests {
 
 	private final ScheduledTaskRegistrar taskRegistrar = new ScheduledTaskRegistrar();
+
+
+	@Test
+	public void emptyTaskLists() {
+		assertTrue(this.taskRegistrar.getTriggerTaskList().isEmpty());
+		assertTrue(this.taskRegistrar.getCronTaskList().isEmpty());
+		assertTrue(this.taskRegistrar.getFixedRateTaskList().isEmpty());
+		assertTrue(this.taskRegistrar.getFixedDelayTaskList().isEmpty());
+	}
 
 	@Test
 	public void getTriggerTasks() {

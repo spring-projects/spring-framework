@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -175,7 +175,8 @@ public class HttpEntityMethodProcessorMockTests {
 		assertFalse("The requestHandled flag shouldn't change", mavContainer.isRequestHandled());
 		RequestEntity<?> requestEntity = (RequestEntity<?>) result;
 		assertEquals("Invalid method", HttpMethod.GET, requestEntity.getMethod());
-		assertEquals("Invalid url", new URI("http", null, "www.example.com", 80, "/path", null, null), requestEntity.getUrl());
+		// using default port (which is 80), so do not need to append the port (-1 means ignore)
+		assertEquals("Invalid url", new URI("http", null, "www.example.com", -1, "/path", null, null), requestEntity.getUrl());
 		assertEquals("Invalid argument", body, requestEntity.getBody());
 	}
 
@@ -349,11 +350,9 @@ public class HttpEntityMethodProcessorMockTests {
 
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
 
-		assertTrue(mavContainer.isRequestHandled());
-		assertEquals(HttpStatus.NOT_MODIFIED.value(), servletResponse.getStatus());
+		assertResponseNotModified();
 		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.LAST_MODIFIED).size());
 		assertEquals(dateFormat.format(oneMinuteAgo), servletResponse.getHeader(HttpHeaders.LAST_MODIFIED));
-		assertEquals(0, servletResponse.getContentAsByteArray().length);
 	}
 
 	@Test
@@ -370,11 +369,9 @@ public class HttpEntityMethodProcessorMockTests {
 
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
 
-		assertTrue(mavContainer.isRequestHandled());
-		assertEquals(HttpStatus.NOT_MODIFIED.value(), servletResponse.getStatus());
+		assertResponseNotModified();
 		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
 		assertEquals(etagValue, servletResponse.getHeader(HttpHeaders.ETAG));
-		assertEquals(0, servletResponse.getContentAsByteArray().length);
 	}
 
 	@Test
@@ -395,13 +392,11 @@ public class HttpEntityMethodProcessorMockTests {
 
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
 
-		assertTrue(mavContainer.isRequestHandled());
-		assertEquals(HttpStatus.NOT_MODIFIED.value(), servletResponse.getStatus());
+		assertResponseNotModified();
 		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.LAST_MODIFIED).size());
 		assertEquals(dateFormat.format(oneMinuteAgo), servletResponse.getHeader(HttpHeaders.LAST_MODIFIED));
 		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
 		assertEquals(etagValue, servletResponse.getHeader(HttpHeaders.ETAG));
-		assertEquals(0, servletResponse.getContentAsByteArray().length);
 	}
 
 	@Test
@@ -420,12 +415,16 @@ public class HttpEntityMethodProcessorMockTests {
 
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
 
-		assertTrue(mavContainer.isRequestHandled());
-		assertEquals(HttpStatus.NOT_MODIFIED.value(), servletResponse.getStatus());
+		assertResponseNotModified();
 		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.LAST_MODIFIED).size());
 		assertEquals(dateFormat.format(oneMinuteAgo), servletResponse.getHeader(HttpHeaders.LAST_MODIFIED));
 		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
 		assertEquals(etagValue, servletResponse.getHeader(HttpHeaders.ETAG));
+	}
+
+	private void assertResponseNotModified() {
+		assertTrue(mavContainer.isRequestHandled());
+		assertEquals(HttpStatus.NOT_MODIFIED.value(), servletResponse.getStatus());
 		assertEquals(0, servletResponse.getContentAsByteArray().length);
 	}
 
@@ -472,15 +471,81 @@ public class HttpEntityMethodProcessorMockTests {
 		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
 		given(messageConverter.canWrite(String.class, MediaType.TEXT_PLAIN)).willReturn(true);
 
+		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
+
+		assertResponseOkWithBody("body");
+		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
+		assertEquals(etagValue, servletResponse.getHeader(HttpHeaders.ETAG));
+	}
+
+	// SPR-13626
+	@Test
+	public void handleReturnTypeGetIfNoneMatchWildcard() throws Exception {
+		String wildcardValue = "*";
+		String etagValue = "\"some-etag\"";
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, wildcardValue);
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.set(HttpHeaders.ETAG, etagValue);
+		ResponseEntity<String> returnValue = new ResponseEntity<String>("body", responseHeaders, HttpStatus.OK);
+
+		given(messageConverter.canWrite(String.class, null)).willReturn(true);
+		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		given(messageConverter.canWrite(String.class, MediaType.TEXT_PLAIN)).willReturn(true);
 
 		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
 
-		assertTrue(mavContainer.isRequestHandled());
-		assertEquals(HttpStatus.OK.value(), servletResponse.getStatus());
+		assertResponseOkWithBody("body");
 		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
 		assertEquals(etagValue, servletResponse.getHeader(HttpHeaders.ETAG));
+	}
+
+	// SPR-13626
+	@Test
+	public void handleReturnTypeIfNoneMatchIfMatch() throws Exception {
+		String etagValue = "\"some-etag\"";
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, etagValue);
+		servletRequest.addHeader(HttpHeaders.IF_MATCH, "ifmatch");
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.set(HttpHeaders.ETAG, etagValue);
+		ResponseEntity<String> returnValue = new ResponseEntity<String>("body", responseHeaders, HttpStatus.OK);
+
+		given(messageConverter.canWrite(String.class, null)).willReturn(true);
+		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		given(messageConverter.canWrite(String.class, MediaType.TEXT_PLAIN)).willReturn(true);
+
+		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
+
+		assertResponseOkWithBody("body");
+		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
+		assertEquals(etagValue, servletResponse.getHeader(HttpHeaders.ETAG));
+	}
+
+	// SPR-13626
+	@Test
+	public void handleReturnTypeIfNoneMatchIfUnmodifiedSince() throws Exception {
+		String etagValue = "\"some-etag\"";
+		servletRequest.addHeader(HttpHeaders.IF_NONE_MATCH, etagValue);
+		servletRequest.addHeader(HttpHeaders.IF_UNMODIFIED_SINCE, dateFormat.format(new Date().getTime()));
+		HttpHeaders responseHeaders = new HttpHeaders();
+		responseHeaders.set(HttpHeaders.ETAG, etagValue);
+		ResponseEntity<String> returnValue = new ResponseEntity<String>("body", responseHeaders, HttpStatus.OK);
+
+		given(messageConverter.canWrite(String.class, null)).willReturn(true);
+		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
+		given(messageConverter.canWrite(String.class, MediaType.TEXT_PLAIN)).willReturn(true);
+
+		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
+
+		assertResponseOkWithBody("body");
+		assertEquals(1, servletResponse.getHeaderValues(HttpHeaders.ETAG).size());
+		assertEquals(etagValue, servletResponse.getHeader(HttpHeaders.ETAG));
+	}
+
+	private void assertResponseOkWithBody(String body) throws Exception {
+		assertTrue(mavContainer.isRequestHandled());
+		assertEquals(HttpStatus.OK.value(), servletResponse.getStatus());
 		ArgumentCaptor<HttpOutputMessage> outputMessage = ArgumentCaptor.forClass(HttpOutputMessage.class);
-		verify(messageConverter).write(eq("body"), eq(MediaType.TEXT_PLAIN),  outputMessage.capture());
+		verify(messageConverter).write(eq("body"), eq(MediaType.TEXT_PLAIN), outputMessage.capture());
 	}
 
 	@SuppressWarnings("unused")

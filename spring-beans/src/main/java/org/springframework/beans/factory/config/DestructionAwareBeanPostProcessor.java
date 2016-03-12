@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,5 +42,25 @@ public interface DestructionAwareBeanPostProcessor extends BeanPostProcessor {
 	 * @see org.springframework.beans.factory.support.AbstractBeanDefinition#setDestroyMethodName
 	 */
 	void postProcessBeforeDestruction(Object bean, String beanName) throws BeansException;
+
+	/**
+	 * Determine whether the given bean instance requires destruction by this
+	 * post-processor.
+	 * <p><b>NOTE:</b> Even as a late addition, this method has been introduced on
+	 * {@code DestructionAwareBeanPostProcessor} itself instead of on a SmartDABPP
+	 * subinterface. This allows existing {@code DestructionAwareBeanPostProcessor}
+	 * implementations to easily provide {@code requiresDestruction} logic while
+	 * retaining compatibility with Spring <4.3, and it is also an easier onramp to
+	 * declaring {@code requiresDestruction} as a Java 8 default method in Spring 5.
+	 * <p>If an implementation of {@code DestructionAwareBeanPostProcessor} does
+	 * not provide a concrete implementation of this method, Spring's invocation
+	 * mechanism silently assumes a method returning {@code true} (the effective
+	 * default before 4.3, and the to-be-default in the Java 8 method in Spring 5).
+	 * @param bean the bean instance to check
+	 * @return {@code true} if {@link #postProcessBeforeDestruction} is supposed to
+	 * be called for this bean instance eventually, or {@code false} if not needed
+	 * @since 4.3
+	 */
+	boolean requiresDestruction(Object bean);
 
 }

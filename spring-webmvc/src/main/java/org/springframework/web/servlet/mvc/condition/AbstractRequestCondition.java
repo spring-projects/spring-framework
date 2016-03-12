@@ -33,7 +33,7 @@ public abstract class AbstractRequestCondition<T extends AbstractRequestConditio
 		if (this == obj) {
 			return true;
 		}
-		if (obj != null && getClass().equals(obj.getClass())) {
+		if (obj != null && getClass() == obj.getClass()) {
 			AbstractRequestCondition<?> other = (AbstractRequestCondition<?>) obj;
 			return getContent().equals(other.getContent());
 		}

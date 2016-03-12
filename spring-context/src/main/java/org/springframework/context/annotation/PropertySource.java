@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import org.springframework.core.io.support.PropertySourceFactory;
 
 /**
  * Annotation providing a convenient and declarative mechanism for adding a
@@ -133,6 +135,7 @@ import java.lang.annotation.Target;
  * javadocs for details.
  *
  * @author Chris Beams
+ * @author Juergen Hoeller
  * @author Phillip Webb
  * @since 3.1
  * @see PropertySources
@@ -148,9 +151,8 @@ import java.lang.annotation.Target;
 public @interface PropertySource {
 
 	/**
-	 * Indicate the name of this property source. If omitted, a name
-	 * will be generated based on the description of the underlying
-	 * resource.
+	 * Indicate the name of this property source. If omitted, a name will
+	 * be generated based on the description of the underlying resource.
 	 * @see org.springframework.core.env.PropertySource#getName()
 	 * @see org.springframework.core.io.Resource#getDescription()
 	 */
@@ -178,5 +180,20 @@ public @interface PropertySource {
 	 * @since 4.0
 	 */
 	boolean ignoreResourceNotFound() default false;
+
+	/**
+	 * A specific character encoding for the given resources, e.g. "UTF-8".
+	 * @since 4.3
+	 */
+	String encoding() default "";
+
+	/**
+	 * Specify a custom {@link PropertySourceFactory}, if any.
+	 * <p>By default, a default factory for standard resource files will be used.
+	 * @since 4.3
+	 * @see org.springframework.core.io.support.DefaultPropertySourceFactory
+	 * @see org.springframework.core.io.support.ResourcePropertySource
+	 */
+	Class<? extends PropertySourceFactory> factory() default PropertySourceFactory.class;
 
 }

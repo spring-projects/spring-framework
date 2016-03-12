@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ import org.springframework.util.Assert;
  * Specialization of {@link MapPropertySource} designed for use with
  * {@linkplain AbstractEnvironment#getSystemEnvironment() system environment variables}.
  * Compensates for constraints in Bash and other shells that do not allow for variables
- * containing the period character; also allows for uppercase variations on property
- * names for more idiomatic shell use.
+ * containing the period character and/or hyphen character; also allows for uppercase
+ * variations on property names for more idiomatic shell use.
  *
  * <p>For example, a call to {@code getProperty("foo.bar")} will attempt to find a value
  * for the original property or any 'equivalent' property, returning the first found:
@@ -35,8 +35,9 @@ import org.springframework.util.Assert;
  * <li>{@code FOO.BAR} - original, with upper case</li>
  * <li>{@code FOO_BAR} - with underscores and upper case</li>
  * </ul>
+ * Any hyphen variant of the above would work as well, or even mix dot/hyphen variants.
  *
- * The same applies for calls to {@link #containsProperty(String)}, which returns
+ * <p>The same applies for calls to {@link #containsProperty(String)}, which returns
  * {@code true} if any of the above properties are present, otherwise {@code false}.
  *
  * <p>This feature is particularly useful when specifying active or default profiles as
@@ -102,29 +103,42 @@ public class SystemEnvironmentPropertySource extends MapPropertySource {
 	 */
 	private String resolvePropertyName(String name) {
 		Assert.notNull(name, "Property name must not be null");
+		String resolvedName = checkPropertyName(name);
+		if (resolvedName != null) {
+			return resolvedName;
+		}
+		String uppercasedName = name.toUpperCase();
+		if (!name.equals(uppercasedName)) {
+			resolvedName = checkPropertyName(uppercasedName);
+			if (resolvedName != null) {
+				return resolvedName;
+			}
+		}
+		return name;
+	}
+
+	private String checkPropertyName(String name) {
+		// Check name as-is
 		if (containsKey(name)) {
 			return name;
 		}
-
-		String usName = name.replace('.', '_');
-		if (!name.equals(usName) && containsKey(usName)) {
-			return usName;
+		// Check name with just dots replaced
+		String noDotName = name.replace('.', '_');
+		if (!name.equals(noDotName) && containsKey(noDotName)) {
+			return noDotName;
 		}
-
-		String ucName = name.toUpperCase();
-		if (!name.equals(ucName)) {
-			if (containsKey(ucName)) {
-				return ucName;
-			}
-			else {
-				String usUcName = ucName.replace('.', '_');
-				if (!ucName.equals(usUcName) && containsKey(usUcName)) {
-					return usUcName;
-				}
-			}
+		// Check name with just hyphens replaced
+		String noHyphenName = name.replace('-', '_');
+		if (!name.equals(noHyphenName) && containsKey(noHyphenName)) {
+			return noHyphenName;
 		}
-
-		return name;
+		// Check name with dots and hyphens replaced
+		String noDotNoHyphenName = noDotName.replace('-', '_');
+		if (!noDotName.equals(noDotNoHyphenName) && containsKey(noDotNoHyphenName)) {
+			return noDotNoHyphenName;
+		}
+		// Give up
+		return null;
 	}
 
 	private boolean containsKey(String name) {

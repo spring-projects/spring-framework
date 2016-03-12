@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -93,6 +93,15 @@ public class ServletInvocableHandlerMethodTests {
 	}
 
 	@Test
+	public void invokeAndHandle_VoidWithTypeLevelResponseStatus() throws Exception {
+		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new ResponseStatusHandler(), "handle");
+		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
+
+		assertTrue(this.mavContainer.isRequestHandled());
+		assertEquals(HttpStatus.BAD_REQUEST.value(), this.response.getStatus());
+	}
+
+	@Test
 	public void invokeAndHandle_VoidWithHttpServletResponseArgument() throws Exception {
 		this.argumentResolvers.addResolver(new ServletResponseMethodArgumentResolver());
 
@@ -169,7 +178,7 @@ public class ServletInvocableHandlerMethodTests {
 	}
 
 	private void wrapConcurrentResult_ResponseBody(Object handler) throws Exception {
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new StringHttpMessageConverter());
 		this.returnValueHandlers.addHandler(new RequestResponseBodyMethodProcessor(converters));
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(handler, "handle");
@@ -181,7 +190,7 @@ public class ServletInvocableHandlerMethodTests {
 
 	@Test
 	public void wrapConcurrentResult_ResponseEntity() throws Exception {
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new StringHttpMessageConverter());
 		this.returnValueHandlers.addHandler(new HttpEntityMethodProcessor(converters));
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new ResponseEntityHandler(), "handleDeferred");
@@ -195,7 +204,7 @@ public class ServletInvocableHandlerMethodTests {
 
 	@Test
 	public void wrapConcurrentResult_ResponseEntityNullBody() throws Exception {
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new StringHttpMessageConverter());
 		List<Object> advice = Collections.singletonList(mock(ResponseBodyAdvice.class));
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters, null, advice);
@@ -210,7 +219,7 @@ public class ServletInvocableHandlerMethodTests {
 
 	@Test
 	public void wrapConcurrentResult_ResponseEntityNullReturnValue() throws Exception {
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new StringHttpMessageConverter());
 		List<Object> advice = Collections.singletonList(mock(ResponseBodyAdvice.class));
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters, null, advice);
@@ -225,7 +234,7 @@ public class ServletInvocableHandlerMethodTests {
 
 	@Test
 	public void wrapConcurrentResult_ResponseBodyEmitter() throws Exception {
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new StringHttpMessageConverter());
 		this.returnValueHandlers.addHandler(new ResponseBodyEmitterReturnValueHandler(converters));
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new AsyncHandler(), "handleWithEmitter");
@@ -272,6 +281,7 @@ public class ServletInvocableHandlerMethodTests {
 		return handlerMethod;
 	}
 
+	@SuppressWarnings("unused")
 	@ResponseStatus
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface ComposedResponseStatus {
@@ -311,6 +321,14 @@ public class ServletInvocableHandlerMethodTests {
 		}
 	}
 
+	@SuppressWarnings("unused")
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	private static class ResponseStatusHandler {
+
+		public void handle() {
+		}
+	}
+
 	private static class MethodLevelResponseBodyHandler {
 
 		@ResponseBody
@@ -324,7 +342,7 @@ public class ServletInvocableHandlerMethodTests {
 	private static class TypeLevelResponseBodyHandler {
 
 		public DeferredResult<String> handle() {
-			return new DeferredResult<String>();
+			return new DeferredResult<>();
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -70,7 +70,8 @@ public class GsonHttpMessageConverter extends AbstractGenericHttpMessageConverte
 	 * Construct a new {@code GsonHttpMessageConverter}.
 	 */
 	public GsonHttpMessageConverter() {
-		super(MediaType.APPLICATION_JSON_UTF8, new MediaType("application", "*+json", DEFAULT_CHARSET));
+		super(MediaType.APPLICATION_JSON, new MediaType("application", "*+json"));
+		this.setDefaultCharset(DEFAULT_CHARSET);
 	}
 
 

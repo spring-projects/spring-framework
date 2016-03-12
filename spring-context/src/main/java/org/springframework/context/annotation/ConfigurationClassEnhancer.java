@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,8 +79,6 @@ class ConfigurationClassEnhancer {
 
 	private static final ConditionalCallbackFilter CALLBACK_FILTER = new ConditionalCallbackFilter(CALLBACKS);
 
-	private static final DefaultGeneratorStrategy GENERATOR_STRATEGY = new BeanFactoryAwareGeneratorStrategy();
-
 	private static final String BEAN_FACTORY_FIELD = "$$beanFactory";
 
 
@@ -94,7 +92,7 @@ class ConfigurationClassEnhancer {
 	 * container-aware callbacks capable of respecting scoping and other bean semantics.
 	 * @return the enhanced subclass
 	 */
-	public Class<?> enhance(Class<?> configClass) {
+	public Class<?> enhance(Class<?> configClass, ClassLoader classLoader) {
 		if (EnhancedConfiguration.class.isAssignableFrom(configClass)) {
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("Ignoring request to enhance %s as it has " +
@@ -106,7 +104,7 @@ class ConfigurationClassEnhancer {
 			}
 			return configClass;
 		}
-		Class<?> enhancedClass = createClass(newEnhancer(configClass));
+		Class<?> enhancedClass = createClass(newEnhancer(configClass, classLoader));
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("Successfully enhanced %s; enhanced class name is: %s",
 					configClass.getName(), enhancedClass.getName()));
@@ -117,13 +115,13 @@ class ConfigurationClassEnhancer {
 	/**
 	 * Creates a new CGLIB {@link Enhancer} instance.
 	 */
-	private Enhancer newEnhancer(Class<?> superclass) {
+	private Enhancer newEnhancer(Class<?> superclass, ClassLoader classLoader) {
 		Enhancer enhancer = new Enhancer();
 		enhancer.setSuperclass(superclass);
 		enhancer.setInterfaces(new Class<?>[] {EnhancedConfiguration.class});
 		enhancer.setUseFactory(false);
 		enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
-		enhancer.setStrategy(GENERATOR_STRATEGY);
+		enhancer.setStrategy(new BeanFactoryAwareGeneratorStrategy(classLoader));
 		enhancer.setCallbackFilter(CALLBACK_FILTER);
 		enhancer.setCallbackTypes(CALLBACK_FILTER.getCallbackTypes());
 		return enhancer;
@@ -144,7 +142,7 @@ class ConfigurationClassEnhancer {
 
 	/**
 	 * Marker interface to be implemented by all @Configuration CGLIB subclasses.
-	 * Facilitates idempotent behavior for {@link ConfigurationClassEnhancer#enhance(Class)}
+	 * Facilitates idempotent behavior for {@link ConfigurationClassEnhancer#enhance}
 	 * through checking to see if candidate classes are already assignable to it, e.g.
 	 * have already been enhanced.
 	 * <p>Also extends {@link BeanFactoryAware}, as all enhanced {@code @Configuration}
@@ -204,8 +202,16 @@ class ConfigurationClassEnhancer {
 
 	/**
 	 * Custom extension of CGLIB's DefaultGeneratorStrategy, introducing a {@link BeanFactory} field.
+	 * Also exposes the application ClassLoader as thread context ClassLoader for the time of
+	 * class generation (in order for ASM to pick it up when doing common superclass resolution).
 	 */
 	private static class BeanFactoryAwareGeneratorStrategy extends DefaultGeneratorStrategy {
+
+		private final ClassLoader classLoader;
+
+		public BeanFactoryAwareGeneratorStrategy(ClassLoader classLoader) {
+			this.classLoader = classLoader;
+		}
 
 		@Override
 		protected ClassGenerator transform(ClassGenerator cg) throws Exception {
@@ -217,6 +223,37 @@ class ConfigurationClassEnhancer {
 				}
 			};
 			return new TransformingClassGenerator(cg, transformer);
+		}
+
+		@Override
+		public byte[] generate(ClassGenerator cg) throws Exception {
+			if (this.classLoader == null) {
+				return super.generate(cg);
+			}
+
+			Thread currentThread = Thread.currentThread();
+			ClassLoader threadContextClassLoader;
+			try {
+				threadContextClassLoader = currentThread.getContextClassLoader();
+			}
+			catch (Throwable ex) {
+				// Cannot access thread context ClassLoader - falling back...
+				return super.generate(cg);
+			}
+
+			boolean overrideClassLoader = !this.classLoader.equals(threadContextClassLoader);
+			if (overrideClassLoader) {
+				currentThread.setContextClassLoader(this.classLoader);
+			}
+			try {
+				return super.generate(cg);
+			}
+			finally {
+				if (overrideClassLoader) {
+					// Reset original thread context ClassLoader.
+					currentThread.setContextClassLoader(threadContextClassLoader);
+				}
+			}
 		}
 	}
 
@@ -327,8 +364,20 @@ class ConfigurationClassEnhancer {
 					if (alreadyInCreation) {
 						beanFactory.setCurrentlyInCreation(beanName, false);
 					}
-					Object beanInstance = (!ObjectUtils.isEmpty(beanMethodArgs) ?
-							beanFactory.getBean(beanName, beanMethodArgs) : beanFactory.getBean(beanName));
+					boolean useArgs = !ObjectUtils.isEmpty(beanMethodArgs);
+					if (useArgs && beanFactory.isSingleton(beanName)) {
+						// Stubbed null arguments just for reference purposes,
+						// expecting them to be autowired for regular singleton references?
+						// A safe assumption since @Bean singleton arguments cannot be optional...
+						for (Object arg : beanMethodArgs) {
+							if (arg == null) {
+								useArgs = false;
+								break;
+							}
+						}
+					}
+					Object beanInstance = (useArgs ? beanFactory.getBean(beanName, beanMethodArgs) :
+							beanFactory.getBean(beanName));
 					if (beanInstance != null && !ClassUtils.isAssignableValue(beanMethod.getReturnType(), beanInstance)) {
 						String msg = String.format("@Bean method %s.%s called as a bean reference " +
 									"for type [%s] but overridden by non-compatible bean instance of type [%s].",

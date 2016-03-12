@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -525,7 +525,7 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 	// parse: @beanname @'bean.name'
 	// quoted if dotted
 	private boolean maybeEatBeanReference() {
-		if (peekToken(TokenKind.BEAN_REF)) {
+		if (peekToken(TokenKind.BEAN_REF) || peekToken(TokenKind.FACTORY_BEAN_REF)) {
 			Token beanRefToken = nextToken();
 			Token beanNameToken = null;
 			String beanName = null;
@@ -543,7 +543,14 @@ class InternalSpelExpressionParser extends TemplateAwareExpressionParser {
 						SpelMessage.INVALID_BEAN_REFERENCE);
 			}
 
-			BeanReference beanReference = new BeanReference(toPos(beanNameToken) ,beanName);
+			BeanReference beanReference = null;
+			if (beanRefToken.getKind() == TokenKind.FACTORY_BEAN_REF) {
+				String beanNameString = new StringBuilder().append(TokenKind.FACTORY_BEAN_REF.tokenChars).append(beanName).toString();
+				beanReference = new BeanReference(toPos(beanRefToken.startPos,beanNameToken.endPos),beanNameString);
+			}
+			else {
+				beanReference = new BeanReference(toPos(beanNameToken) ,beanName);
+			}
 			this.constructedNodes.push(beanReference);
 			return true;
 		}

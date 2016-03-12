@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,6 +73,8 @@ public class AntPathMatcher implements PathMatcher {
 	private static final int CACHE_TURNOFF_THRESHOLD = 65536;
 
 	private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{[^/]+?\\}");
+
+	private static final char[] WILDCARD_CHARS = { '*', '?', '{' };
 
 
 	private String pathSeparator;
@@ -188,6 +190,10 @@ public class AntPathMatcher implements PathMatcher {
 		}
 
 		String[] pattDirs = tokenizePattern(pattern);
+		if (fullMatch && this.caseSensitive && !isPotentialMatch(path, pattDirs)) {
+			return false;
+		}
+
 		String[] pathDirs = tokenizePath(path);
 
 		int pattIdxStart = 0;
@@ -305,6 +311,49 @@ public class AntPathMatcher implements PathMatcher {
 		}
 
 		return true;
+	}
+
+	private boolean isPotentialMatch(String path, String[] pattDirs) {
+		char[] pathChars = path.toCharArray();
+		int pos = 0;
+		for (String pattDir : pattDirs) {
+			int count = countStartsWith(pathChars, pos, this.pathSeparator, false);
+			pos += (count == this.pathSeparator.length() ? count : 0);
+			count = countStartsWith(pathChars, pos, pattDir, true);
+			if (count < pattDir.length()) {
+				if (count > 0) {
+					return true;
+				}
+				return (pattDir.length() > 0) && isWildcardChar(pattDir.charAt(0));
+			}
+			pos += count;
+		}
+		return true;
+	}
+
+	private int countStartsWith(char[] chars, int pos, String prefix, boolean stopOnWildcard) {
+		int count = 0;
+		for (char c : prefix.toCharArray()) {
+			if (stopOnWildcard && isWildcardChar(c)) {
+				return count;
+			}
+			if (pos + count >= chars.length) {
+				return 0;
+			}
+			if (chars[pos + count] == c) {
+				count++;
+			}
+		}
+		return count;
+	}
+
+	private boolean isWildcardChar(char c) {
+		for (char candidate : WILDCARD_CHARS) {
+			if (c == candidate) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

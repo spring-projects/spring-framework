@@ -231,7 +231,7 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 			logger.trace("Processing request " + request.getURI() + " with headers=" + headers);
 		}
 		try {
-			if (!HttpMethod.GET.equals(request.getMethod())) {
+			if (HttpMethod.GET != request.getMethod()) {
 				response.setStatusCode(HttpStatus.METHOD_NOT_ALLOWED);
 				response.getHeaders().setAllow(Collections.singleton(HttpMethod.GET));
 				if (logger.isErrorEnabled()) {
@@ -320,8 +320,8 @@ public abstract class AbstractHandshakeHandler implements HandshakeHandler, Life
 					". Supported versions: " + Arrays.toString(getSupportedVersions()));
 		}
 		response.setStatusCode(HttpStatus.UPGRADE_REQUIRED);
-		response.getHeaders().put(WebSocketHttpHeaders.SEC_WEBSOCKET_VERSION,
-				Arrays.asList(StringUtils.arrayToCommaDelimitedString(getSupportedVersions())));
+		response.getHeaders().set(WebSocketHttpHeaders.SEC_WEBSOCKET_VERSION,
+				StringUtils.arrayToCommaDelimitedString(getSupportedVersions()));
 	}
 
 	/**

@@ -39,7 +39,6 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
 
-
 /**
  * {@link org.springframework.http.client.ClientHttpRequestFactory} implementation that
  * uses <a href="http://netty.io/">Netty 4</a> to create requests.
@@ -69,11 +68,11 @@ public class Netty4ClientHttpRequestFactory implements ClientHttpRequestFactory,
 
 	private SslContext sslContext;
 
-	private volatile Bootstrap bootstrap;
-
 	private int connectTimeout = -1;
 
 	private int readTimeout = -1;
+
+	private volatile Bootstrap bootstrap;
 
 
 	/**

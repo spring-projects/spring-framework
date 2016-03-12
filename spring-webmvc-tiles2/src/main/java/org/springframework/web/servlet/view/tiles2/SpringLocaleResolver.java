@@ -36,6 +36,9 @@ import org.springframework.web.servlet.support.RequestContextUtils;
  * If you are using standard Tiles bootstrap, specify the name of this class
  * as value for the init-param "org.apache.tiles.locale.LocaleResolver".
  *
+ * <p><b>NOTE: Tiles 2 support is deprecated in favor of Tiles 3 and will be removed
+ * as of Spring Framework 5.0.</b>.
+ *
  * @author Juergen Hoeller
  * @since 2.5
  * @see org.apache.tiles.definition.UrlDefinitionsFactory#LOCALE_RESOLVER_IMPL_PROPERTY

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ public final class MethodInvocationTests {
 
 	@Test
 	public void testValidInvocation() throws Throwable {
-		Method m = Object.class.getMethod("hashCode", (Class[]) null);
+		Method m = Object.class.getMethod("hashCode");
 		Object proxy = new Object();
 		final Object returnValue = new Object();
 		List<Object> is = new LinkedList<Object>();
@@ -67,7 +67,7 @@ public final class MethodInvocationTests {
 		};
 		List<Object> is = new LinkedList<Object>();
 
-		Method m = Object.class.getMethod("hashCode", (Class[]) null);
+		Method m = Object.class.getMethod("hashCode");
 		Object proxy = new Object();
 		ReflectiveMethodInvocation invocation =
 			new ReflectiveMethodInvocation(proxy, target, m, null, null, is);

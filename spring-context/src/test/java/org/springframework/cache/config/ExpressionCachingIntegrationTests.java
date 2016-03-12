@@ -92,6 +92,7 @@ public class ExpressionCachingIntegrationTests {
 			this.id = id;
 		}
 
+		@SuppressWarnings("unused")
 		public String getId() {
 			return id;
 		}
@@ -104,6 +105,7 @@ public class ExpressionCachingIntegrationTests {
 			this.id = id;
 		}
 
+		@SuppressWarnings("unused")
 		public String getId() {
 			return id;
 		}

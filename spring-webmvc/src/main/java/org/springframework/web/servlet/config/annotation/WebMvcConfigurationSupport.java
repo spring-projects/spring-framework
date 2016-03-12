@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -199,6 +199,10 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
 	private ContentNegotiationManager contentNegotiationManager;
 
+	private List<HandlerMethodArgumentResolver> argumentResolvers;
+
+	private List<HandlerMethodReturnValueHandler> returnValueHandlers;
+
 	private List<HttpMessageConverter<?>> messageConverters;
 
 	private Map<String, CorsConfiguration> corsConfigurations;
@@ -364,6 +368,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	@Bean
 	public HandlerMapping viewControllerHandlerMapping() {
 		ViewControllerRegistry registry = new ViewControllerRegistry();
+		registry.setApplicationContext(this.applicationContext);
 		addViewControllers(registry);
 
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
@@ -402,7 +407,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public HandlerMapping resourceHandlerMapping() {
-		ResourceHandlerRegistry registry = new ResourceHandlerRegistry(this.applicationContext, this.servletContext);
+		ResourceHandlerRegistry registry = new ResourceHandlerRegistry(this.applicationContext,
+				this.servletContext, mvcContentNegotiationManager());
 		addResourceHandlers(registry);
 
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
@@ -473,18 +479,12 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 */
 	@Bean
 	public RequestMappingHandlerAdapter requestMappingHandlerAdapter() {
-		List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<HandlerMethodArgumentResolver>();
-		addArgumentResolvers(argumentResolvers);
-
-		List<HandlerMethodReturnValueHandler> returnValueHandlers = new ArrayList<HandlerMethodReturnValueHandler>();
-		addReturnValueHandlers(returnValueHandlers);
-
-		RequestMappingHandlerAdapter adapter = new RequestMappingHandlerAdapter();
+		RequestMappingHandlerAdapter adapter = createRequestMappingHandlerAdapter();
 		adapter.setContentNegotiationManager(mvcContentNegotiationManager());
 		adapter.setMessageConverters(getMessageConverters());
 		adapter.setWebBindingInitializer(getConfigurableWebBindingInitializer());
-		adapter.setCustomArgumentResolvers(argumentResolvers);
-		adapter.setCustomReturnValueHandlers(returnValueHandlers);
+		adapter.setCustomArgumentResolvers(getArgumentResolvers());
+		adapter.setCustomReturnValueHandlers(getReturnValueHandlers());
 
 		if (jackson2Present) {
 			List<RequestBodyAdvice> requestBodyAdvices = new ArrayList<RequestBodyAdvice>();
@@ -509,6 +509,14 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		adapter.setDeferredResultInterceptors(configurer.getDeferredResultInterceptors());
 
 		return adapter;
+	}
+
+	/**
+	 * Protected method for plugging in a custom sub-class of
+	 * {@link RequestMappingHandlerAdapter}.
+	 */
+	protected RequestMappingHandlerAdapter createRequestMappingHandlerAdapter() {
+		return new RequestMappingHandlerAdapter();
 	}
 
 	/**
@@ -617,6 +625,20 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
+	 * Provide access to the shared custom argument resolvers used by the
+	 * {@link RequestMappingHandlerAdapter} and the
+	 * {@link ExceptionHandlerExceptionResolver}. This method cannot be
+	 * overridden, use {@link #addArgumentResolvers(List)} instead.
+	 */
+	protected final List<HandlerMethodArgumentResolver> getArgumentResolvers() {
+		if (this.argumentResolvers == null) {
+			this.argumentResolvers = new ArrayList<HandlerMethodArgumentResolver>();
+			addArgumentResolvers(this.argumentResolvers);
+		}
+		return this.argumentResolvers;
+	}
+
+	/**
 	 * Add custom {@link HandlerMethodArgumentResolver}s to use in addition to
 	 * the ones registered by default.
 	 * <p>Custom argument resolvers are invoked before built-in resolvers
@@ -628,6 +650,20 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * 	initially an empty list.
 	 */
 	protected void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
+	}
+
+	/**
+	 * Provide access to the shared return value handlers used by the
+	 * {@link RequestMappingHandlerAdapter} and the
+	 * {@link ExceptionHandlerExceptionResolver}. This method cannot be
+	 * overridden, use {@link #addReturnValueHandlers(List)} instead.
+	 */
+	protected final List<HandlerMethodReturnValueHandler> getReturnValueHandlers() {
+		if (this.returnValueHandlers == null) {
+			this.returnValueHandlers = new ArrayList<HandlerMethodReturnValueHandler>();
+			addReturnValueHandlers(this.returnValueHandlers);
+		}
+		return this.returnValueHandlers;
 	}
 
 	/**
@@ -678,6 +714,14 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	protected void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
 	}
 
+	/**
+	 * Override this method to extend or modify the list of converters after it
+	 * has been configured. This may be useful for example to allow default
+	 * converters to be registered and then insert a custom converter through
+	 * this method.
+	 * @param converters the list of configured converters to extend.
+	 * @since 4.1.3
+	 */
 	protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
 	}
 
@@ -778,6 +822,7 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 			addDefaultHandlerExceptionResolvers(exceptionResolvers);
 		}
 
+		extendHandlerExceptionResolvers(exceptionResolvers);
 		HandlerExceptionResolverComposite composite = new HandlerExceptionResolverComposite();
 		composite.setOrder(0);
 		composite.setExceptionResolvers(exceptionResolvers);
@@ -797,6 +842,17 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
+	 * Override this method to extend or modify the list of
+	 * {@link HandlerExceptionResolver}s after it has been configured. This may
+	 * be useful for example to allow default resolvers to be registered and then
+	 * insert a custom one through this method.
+	 * @param exceptionResolvers the list of configured resolvers to extend.
+	 * @since 4.3.1
+	 */
+	protected void extendHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
+	}
+
+	/**
 	 * A method available to subclasses for adding default {@link HandlerExceptionResolver}s.
 	 * <p>Adds the following exception resolvers:
 	 * <ul>
@@ -809,23 +865,33 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	 * </ul>
 	 */
 	protected final void addDefaultHandlerExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
-		ExceptionHandlerExceptionResolver exceptionHandlerExceptionResolver = new ExceptionHandlerExceptionResolver();
-		exceptionHandlerExceptionResolver.setContentNegotiationManager(mvcContentNegotiationManager());
-		exceptionHandlerExceptionResolver.setMessageConverters(getMessageConverters());
+		ExceptionHandlerExceptionResolver exceptionHandlerResolver = createExceptionHandlerExceptionResolver();
+		exceptionHandlerResolver.setContentNegotiationManager(mvcContentNegotiationManager());
+		exceptionHandlerResolver.setMessageConverters(getMessageConverters());
+		exceptionHandlerResolver.setCustomArgumentResolvers(getArgumentResolvers());
+		exceptionHandlerResolver.setCustomReturnValueHandlers(getReturnValueHandlers());
 		if (jackson2Present) {
 			List<ResponseBodyAdvice<?>> interceptors = new ArrayList<ResponseBodyAdvice<?>>();
 			interceptors.add(new JsonViewResponseBodyAdvice());
-			exceptionHandlerExceptionResolver.setResponseBodyAdvice(interceptors);
+			exceptionHandlerResolver.setResponseBodyAdvice(interceptors);
 		}
-		exceptionHandlerExceptionResolver.setApplicationContext(this.applicationContext);
-		exceptionHandlerExceptionResolver.afterPropertiesSet();
-		exceptionResolvers.add(exceptionHandlerExceptionResolver);
+		exceptionHandlerResolver.setApplicationContext(this.applicationContext);
+		exceptionHandlerResolver.afterPropertiesSet();
+		exceptionResolvers.add(exceptionHandlerResolver);
 
-		ResponseStatusExceptionResolver responseStatusExceptionResolver = new ResponseStatusExceptionResolver();
-		responseStatusExceptionResolver.setMessageSource(this.applicationContext);
-		exceptionResolvers.add(responseStatusExceptionResolver);
+		ResponseStatusExceptionResolver responseStatusResolver = new ResponseStatusExceptionResolver();
+		responseStatusResolver.setMessageSource(this.applicationContext);
+		exceptionResolvers.add(responseStatusResolver);
 
 		exceptionResolvers.add(new DefaultHandlerExceptionResolver());
+	}
+
+	/**
+	 * Protected method for plugging in a custom sub-class of
+	 * {@link ExceptionHandlerExceptionResolver}.
+	 */
+	protected ExceptionHandlerExceptionResolver createExceptionHandlerExceptionResolver() {
+		return new ExceptionHandlerExceptionResolver();
 	}
 
 	/**

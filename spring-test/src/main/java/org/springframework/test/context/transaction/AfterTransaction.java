@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 
 /**
- * <p>Test annotation to indicate that the annotated {@code public void} method
+ * <p>Test annotation to indicate that the annotated {@code void} method
  * should be executed <em>after</em> a transaction is ended for a test method
  * configured to run within a transaction via the {@code @Transactional} annotation.
  *

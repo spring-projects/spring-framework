@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -31,7 +29,10 @@ import org.junit.Test;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -45,7 +46,10 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test fixture with {@link HttpEntityMethodProcessor} delegating to
@@ -75,7 +79,7 @@ public class HttpEntityMethodProcessorTests {
 
 	@Before
 	public void setUp() throws Exception {
-		Method method = getClass().getMethod("handle", HttpEntity.class, HttpEntity.class);
+		Method method = getClass().getDeclaredMethod("handle", HttpEntity.class, HttpEntity.class);
 		paramList = new MethodParameter(method, 0);
 		paramSimpleBean = new MethodParameter(method, 1);
 
@@ -85,8 +89,8 @@ public class HttpEntityMethodProcessorTests {
 		servletResponse = new MockHttpServletResponse();
 		servletRequest.setMethod("POST");
 		webRequest = new ServletWebRequest(servletRequest, servletResponse);
-
 	}
+
 
 	@Test
 	public void resolveArgument() throws Exception {
@@ -94,7 +98,7 @@ public class HttpEntityMethodProcessorTests {
 		this.servletRequest.setContent(content.getBytes("UTF-8"));
 		this.servletRequest.setContentType("application/json");
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2HttpMessageConverter());
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
 
@@ -113,7 +117,8 @@ public class HttpEntityMethodProcessorTests {
 		this.servletRequest.setContent(new byte[0]);
 		this.servletRequest.setContentType("application/json");
 
-		List<HttpMessageConverter<?>> converters = Collections.singletonList(new MappingJackson2HttpMessageConverter());
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
+		converters.add(new MappingJackson2HttpMessageConverter());
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
 
 		HttpEntity<?> result = (HttpEntity<?>) processor.resolveArgument(this.paramSimpleBean,
@@ -129,7 +134,7 @@ public class HttpEntityMethodProcessorTests {
 		this.servletRequest.setContent(content.getBytes("UTF-8"));
 		this.servletRequest.setContentType("application/json");
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2HttpMessageConverter());
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
 
@@ -152,7 +157,7 @@ public class HttpEntityMethodProcessorTests {
 		this.servletRequest.setContent(content.getBytes("UTF-8"));
 		this.servletRequest.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2HttpMessageConverter());
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
 
@@ -170,7 +175,7 @@ public class HttpEntityMethodProcessorTests {
 		HandlerMethod handlerMethod = new HandlerMethod(new JacksonController(), method);
 		MethodParameter methodReturnType = handlerMethod.getReturnType();
 
-		List<HttpMessageConverter<?>> converters = new ArrayList<HttpMessageConverter<?>>();
+		List<HttpMessageConverter<?>> converters = new ArrayList<>();
 		converters.add(new MappingJackson2HttpMessageConverter());
 		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
 
@@ -182,9 +187,33 @@ public class HttpEntityMethodProcessorTests {
 		assertTrue(content.contains("\"type\":\"bar\""));
 	}
 
+	// SPR-13423
+
+	@Test
+	public void handleReturnValueCharSequence() throws Exception {
+		List<HttpMessageConverter<?>>converters = new ArrayList<>();
+		converters.add(new ByteArrayHttpMessageConverter());
+		converters.add(new StringHttpMessageConverter());
+
+		Method method = getClass().getDeclaredMethod("handle");
+		MethodParameter returnType = new MethodParameter(method, -1);
+		ResponseEntity<StringBuilder> returnValue = ResponseEntity.ok(new StringBuilder("Foo"));
+
+		HttpEntityMethodProcessor processor = new HttpEntityMethodProcessor(converters);
+		processor.handleReturnValue(returnValue, returnType, mavContainer, webRequest);
+
+		assertEquals("text/plain;charset=ISO-8859-1", servletResponse.getHeader("Content-Type"));
+		assertEquals("Foo", servletResponse.getContentAsString());
+	}
+
+
 
 	@SuppressWarnings("unused")
-	public void handle(HttpEntity<List<SimpleBean>> arg1, HttpEntity<SimpleBean> arg2) {
+	private void handle(HttpEntity<List<SimpleBean>> arg1, HttpEntity<SimpleBean> arg2) {
+	}
+
+	private ResponseEntity<CharSequence> handle() {
+		return null;
 	}
 
 	@SuppressWarnings("unused")

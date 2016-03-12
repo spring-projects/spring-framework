@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,8 @@ public class EnableMBeanExportConfigurationTests {
 			ObjectName oname = ObjectNameManager.getInstance("bean:name=testBean4");
 			assertNotNull(server.getObjectInstance(oname));
 			assertEquals("TEST", server.getAttribute(oname, "Name"));
-		} finally {
+		}
+		finally {
 			ctx.close();
 		}
 	}
@@ -142,7 +143,8 @@ public class EnableMBeanExportConfigurationTests {
 			assertNotNull(server.getObjectInstance(oname));
 			String name = (String) server.getAttribute(oname, "Name");
 			assertNull(name);
-		} finally {
+		}
+		finally {
 			ctx.close();
 		}
 	}

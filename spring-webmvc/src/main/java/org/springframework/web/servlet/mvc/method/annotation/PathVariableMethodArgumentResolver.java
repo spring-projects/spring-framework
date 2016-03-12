@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,6 @@ import org.springframework.web.bind.annotation.ValueConstants;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver;
-import org.springframework.web.method.annotation.RequestParamMapMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.method.support.UriComponentsContributor;
 import org.springframework.web.servlet.HandlerMapping;
@@ -43,22 +42,18 @@ import org.springframework.web.util.UriComponentsBuilder;
 /**
  * Resolves method arguments annotated with an @{@link PathVariable}.
  *
- * <p>An @{@link PathVariable} is a named value that gets resolved from a URI
- * template variable. It is always required and does not have a default value
- * to fall back on. See the base class
+ * <p>An @{@link PathVariable} is a named value that gets resolved from a URI template variable.
+ * It is always required and does not have a default value to fall back on. See the base class
  * {@link org.springframework.web.method.annotation.AbstractNamedValueMethodArgumentResolver}
  * for more information on how named values are processed.
  *
- * <p>If the method parameter type is {@link Map}, the name specified in the
- * annotation is used to resolve the URI variable String value. The value is
- * then converted to a {@link Map} via type conversion assuming a suitable
- * {@link Converter} or {@link PropertyEditor} has been registered.
- * Or if the annotation does not specify name the
- * {@link RequestParamMapMethodArgumentResolver} is used instead to provide
- * access to all URI variables in a map.
+ * <p>If the method parameter type is {@link Map}, the name specified in the annotation is used
+ * to resolve the URI variable String value. The value is then converted to a {@link Map} via
+ * type conversion, assuming a suitable {@link Converter} or {@link PropertyEditor} has been
+ * registered.
  *
- * <p>A {@link WebDataBinder} is invoked to apply type conversion to resolved
- * path variable values that don't yet match the method parameter type.
+ * <p>A {@link WebDataBinder} is invoked to apply type conversion to resolved path variable
+ * values that don't yet match the method parameter type.
  *
  * @author Rossen Stoyanchev
  * @author Arjen Poutsma
@@ -79,7 +74,7 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 		if (!parameter.hasParameterAnnotation(PathVariable.class)) {
 			return false;
 		}
-		if (Map.class.isAssignableFrom(parameter.getParameterType())) {
+		if (Map.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType())) {
 			String paramName = parameter.getParameterAnnotation(PathVariable.class).value();
 			return StringUtils.hasText(paramName);
 		}
@@ -95,10 +90,9 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 	@Override
 	@SuppressWarnings("unchecked")
 	protected Object resolveName(String name, MethodParameter parameter, NativeWebRequest request) throws Exception {
-		Map<String, String> uriTemplateVars =
-			(Map<String, String>) request.getAttribute(
-					HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
-		return (uriTemplateVars != null) ? uriTemplateVars.get(name) : null;
+		Map<String, String> uriTemplateVars = (Map<String, String>) request.getAttribute(
+				HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, RequestAttributes.SCOPE_REQUEST);
+		return (uriTemplateVars != null ? uriTemplateVars.get(name) : null);
 	}
 
 	@Override
@@ -127,7 +121,7 @@ public class PathVariableMethodArgumentResolver extends AbstractNamedValueMethod
 	public void contributeMethodArgument(MethodParameter parameter, Object value,
 			UriComponentsBuilder builder, Map<String, Object> uriVariables, ConversionService conversionService) {
 
-		if (Map.class.isAssignableFrom(parameter.getParameterType())) {
+		if (Map.class.isAssignableFrom(parameter.getNestedParameterType())) {
 			return;
 		}
 

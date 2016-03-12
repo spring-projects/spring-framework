@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,8 +23,9 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.util.ClassUtils;
 
 /**
- * Calls {@link Enum#name()} to convert a source Enum to a String.  This converter will
- * not match enums with interfaces that can be converterd.
+ * Calls {@link Enum#name()} to convert a source Enum to a String.
+ * This converter will not match enums with interfaces that can be converted.
+ *
  * @author Keith Donald
  * @author Phillip Webb
  * @since 3.0
@@ -33,14 +34,16 @@ final class EnumToStringConverter implements Converter<Enum<?>, String>, Conditi
 
 	private final ConversionService conversionService;
 
+
 	public EnumToStringConverter(ConversionService conversionService) {
 		this.conversionService = conversionService;
 	}
 
+
 	@Override
 	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
 		for (Class<?> interfaceType : ClassUtils.getAllInterfacesForClass(sourceType.getType())) {
-			if (conversionService.canConvert(TypeDescriptor.valueOf(interfaceType), targetType)) {
+			if (this.conversionService.canConvert(TypeDescriptor.valueOf(interfaceType), targetType)) {
 				return false;
 			}
 		}

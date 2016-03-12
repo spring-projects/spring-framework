@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 			if (ann == null || ann.required()) {
 				String paramName = getParameterName(parameter);
 				BindingResult bindingResult = new BeanPropertyBindingResult(payload, paramName);
-				bindingResult.addError(new ObjectError(paramName, "@Payload param is required"));
+				bindingResult.addError(new ObjectError(paramName, "Payload value must not be empty"));
 				throw new MethodArgumentNotValidException(message, parameter, bindingResult);
 			}
 			else {
@@ -111,9 +111,13 @@ public class PayloadArgumentResolver implements HandlerMethodArgumentResolver {
 			return payload;
 		}
 		else {
-			payload = (this.converter instanceof SmartMessageConverter ?
-					((SmartMessageConverter) this.converter).fromMessage(message, targetClass, parameter) :
-					this.converter.fromMessage(message, targetClass));
+			if (this.converter instanceof SmartMessageConverter) {
+				SmartMessageConverter smartConverter = (SmartMessageConverter) this.converter;
+				payload = smartConverter.fromMessage(message, targetClass, parameter);
+			}
+			else {
+				payload = this.converter.fromMessage(message, targetClass);
+			}
 			if (payload == null) {
 				throw new MessageConversionException(message,
 						"No converter found to convert to " + targetClass + ", message=" + message);

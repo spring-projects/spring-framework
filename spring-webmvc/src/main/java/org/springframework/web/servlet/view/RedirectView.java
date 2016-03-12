@@ -104,6 +104,8 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 
 	private boolean propagateQueryParams = false;
 
+	private String[] hosts;
+
 
 	/**
 	 * Constructor for use as a bean.
@@ -250,6 +252,27 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	 */
 	public boolean isPropagateQueryProperties() {
 		return this.propagateQueryParams;
+	}
+
+	/**
+	 * Configure one or more hosts associated with the application. All other
+	 * hosts will be considered external hosts. In effect this property
+	 * provides a way turn off encoding via
+	 * {@link HttpServletResponse#encodeRedirectURL} for URLs that have a host
+	 * and that host is not listed as a known host.
+	 * <p>If not set (the default) all URLs are encoded through the response.
+	 * @param hosts one or more application hosts
+	 * @since 4.3
+	 */
+	public void setHosts(String[] hosts) {
+		this.hosts = hosts;
+	}
+
+	/**
+	 * Return the configured application hosts.
+	 */
+	public String[] getHosts() {
+		return this.hosts;
 	}
 
 	/**
@@ -583,27 +606,53 @@ public class RedirectView extends AbstractUrlBasedView implements SmartView {
 	protected void sendRedirect(HttpServletRequest request, HttpServletResponse response,
 			String targetUrl, boolean http10Compatible) throws IOException {
 
-		String encodedRedirectURL = response.encodeRedirectURL(targetUrl);
+		String encodedURL = (isRemoteHost(targetUrl) ? targetUrl : response.encodeRedirectURL(targetUrl));
 		if (http10Compatible) {
 			HttpStatus attributeStatusCode = (HttpStatus) request.getAttribute(View.RESPONSE_STATUS_ATTRIBUTE);
 			if (this.statusCode != null) {
 				response.setStatus(this.statusCode.value());
-				response.setHeader("Location", encodedRedirectURL);
+				response.setHeader("Location", encodedURL);
 			}
 			else if (attributeStatusCode != null) {
 				response.setStatus(attributeStatusCode.value());
-				response.setHeader("Location", encodedRedirectURL);
+				response.setHeader("Location", encodedURL);
 			}
 			else {
 				// Send status code 302 by default.
-				response.sendRedirect(encodedRedirectURL);
+				response.sendRedirect(encodedURL);
 			}
 		}
 		else {
 			HttpStatus statusCode = getHttp11StatusCode(request, response, targetUrl);
 			response.setStatus(statusCode.value());
-			response.setHeader("Location", encodedRedirectURL);
+			response.setHeader("Location", encodedURL);
 		}
+	}
+
+	/**
+	 * Whether the given targetUrl has a host that is a "foreign" system in which
+	 * case {@link HttpServletResponse#encodeRedirectURL} will not be applied.
+	 * This method returns {@code true} if the {@link #setHosts(String[])}
+	 * property is configured and the target URL has a host that does not match.
+	 * @param targetUrl the target redirect URL
+	 * @return {@code true} the target URL has a remote host, {@code false} if it
+	 * the URL does not have a host or the "host" property is not configured.
+	 * @since 4.3
+	 */
+	protected boolean isRemoteHost(String targetUrl) {
+		if (ObjectUtils.isEmpty(getHosts())) {
+			return false;
+		}
+		String targetHost = UriComponentsBuilder.fromUriString(targetUrl).build().getHost();
+		if (StringUtils.isEmpty(targetHost)) {
+			return false;
+		}
+		for (String host : getHosts()) {
+			if (targetHost.equals(host)) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**

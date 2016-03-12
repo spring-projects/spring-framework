@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package org.springframework.web.servlet.i18n;
 
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
 import java.util.Locale;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,14 +34,60 @@ import org.springframework.web.servlet.LocaleResolver;
  * can only be changed through changing the client's locale settings.
  *
  * @author Juergen Hoeller
+ * @author Rossen Stoyanchev
  * @since 27.02.2003
  * @see javax.servlet.http.HttpServletRequest#getLocale()
  */
 public class AcceptHeaderLocaleResolver implements LocaleResolver {
 
+	private final List<Locale> supportedLocales = new ArrayList<Locale>();
+
+
+	/**
+	 * Configure supported locales to check against the requested locales
+	 * determined via {@link HttpServletRequest#getLocales()}. If this is not
+	 * configured then {@link HttpServletRequest#getLocale()} is used instead.
+	 * @param locales the supported locales
+	 * @since 4.3
+	 */
+	public void setSupportedLocales(List<Locale> locales) {
+		this.supportedLocales.clear();
+		if (locales != null) {
+			this.supportedLocales.addAll(locales);
+		}
+	}
+
+	/**
+	 * Return the configured list of supported locales.
+	 * @since 4.3
+	 */
+	public List<Locale> getSupportedLocales() {
+		return this.supportedLocales;
+	}
+
+
 	@Override
 	public Locale resolveLocale(HttpServletRequest request) {
-		return request.getLocale();
+		Locale locale = request.getLocale();
+		if (!isSupportedLocale(locale)) {
+			locale = findSupportedLocale(request, locale);
+		}
+		return locale;
+	}
+
+	private boolean isSupportedLocale(Locale locale) {
+		return (getSupportedLocales().isEmpty() || getSupportedLocales().contains(locale));
+	}
+
+	private Locale findSupportedLocale(HttpServletRequest request, Locale fallback) {
+		Enumeration<Locale> requestLocales = request.getLocales();
+		while (requestLocales.hasMoreElements()) {
+			Locale locale = requestLocales.nextElement();
+			if (getSupportedLocales().contains(locale)) {
+				return locale;
+			}
+		}
+		return fallback;
 	}
 
 	@Override

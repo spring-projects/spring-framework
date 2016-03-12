@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,24 +84,30 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 
 	@Override
 	public Object resolveArgument(MethodParameter parameter, Message<?> message) throws Exception {
-		Class<?> paramType = parameter.getParameterType();
 		NamedValueInfo namedValueInfo = getNamedValueInfo(parameter);
+		MethodParameter nestedParameter = parameter.nestedIfOptional();
 
-		Object arg = resolveArgumentInternal(parameter, message, namedValueInfo.name);
+		Object resolvedName = resolveStringValue(namedValueInfo.name);
+		if (resolvedName == null) {
+			throw new IllegalArgumentException(
+					"Specified name must not resolve to null: [" + namedValueInfo.name + "]");
+		}
+
+		Object arg = resolveArgumentInternal(nestedParameter, message, resolvedName.toString());
 		if (arg == null) {
 			if (namedValueInfo.defaultValue != null) {
-				arg = resolveDefaultValue(namedValueInfo.defaultValue);
+				arg = resolveStringValue(namedValueInfo.defaultValue);
 			}
-			else if (namedValueInfo.required && !parameter.getParameterType().getName().equals("java.util.Optional")) {
-				handleMissingValue(namedValueInfo.name, parameter, message);
+			else if (namedValueInfo.required && !nestedParameter.isOptional()) {
+				handleMissingValue(namedValueInfo.name, nestedParameter, message);
 			}
-			arg = handleNullValue(namedValueInfo.name, arg, paramType);
+			arg = handleNullValue(namedValueInfo.name, arg, nestedParameter.getNestedParameterType());
 		}
 		else if ("".equals(arg) && namedValueInfo.defaultValue != null) {
-			arg = resolveDefaultValue(namedValueInfo.defaultValue);
+			arg = resolveStringValue(namedValueInfo.defaultValue);
 		}
 
-		if (!ClassUtils.isAssignableValue(paramType, arg)) {
+		if (!ClassUtils.isAssignableValue(parameter.getParameterType(), arg)) {
 			arg = this.conversionService.convert(
 					arg, TypeDescriptor.valueOf(arg.getClass()), new TypeDescriptor(parameter));
 		}
@@ -149,6 +155,22 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	}
 
 	/**
+	 * Resolve the given annotation-specified value,
+	 * potentially containing placeholders and expressions.
+	 */
+	private Object resolveStringValue(String value) {
+		if (this.configurableBeanFactory == null) {
+			return value;
+		}
+		String placeholdersResolved = this.configurableBeanFactory.resolveEmbeddedValue(value);
+		BeanExpressionResolver exprResolver = this.configurableBeanFactory.getBeanExpressionResolver();
+		if (exprResolver == null) {
+			return value;
+		}
+		return exprResolver.evaluate(placeholdersResolved, this.expressionContext);
+	}
+
+	/**
 	 * Resolves the given parameter type and value name into an argument value.
 	 * @param parameter the method parameter to resolve to an argument value
 	 * @param message the current request
@@ -158,21 +180,6 @@ public abstract class AbstractNamedValueMethodArgumentResolver implements Handle
 	 */
 	protected abstract Object resolveArgumentInternal(MethodParameter parameter, Message<?> message, String name)
 			throws Exception;
-
-	/**
-	 * Resolves the given default value into an argument value.
-	 */
-	private Object resolveDefaultValue(String defaultValue) {
-		if (this.configurableBeanFactory == null) {
-			return defaultValue;
-		}
-		String placeholdersResolved = this.configurableBeanFactory.resolveEmbeddedValue(defaultValue);
-		BeanExpressionResolver exprResolver = this.configurableBeanFactory.getBeanExpressionResolver();
-		if (exprResolver == null) {
-			return defaultValue;
-		}
-		return exprResolver.evaluate(placeholdersResolved, this.expressionContext);
-	}
 
 	/**
 	 * Invoked when a named value is required, but

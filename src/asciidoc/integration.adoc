@@ -2796,6 +2796,9 @@ as follow to automatically send a response:
 	}
 ----
 
+TIP: If you have several `@JmsListener`-annotated methods, you can also place the `@SendTo`
+annotation at class-level to share a default reply destination.
+
 If you need to set additional headers in a transport-independent manner, you could return a
 `Message` instead, something like:
 
@@ -8160,6 +8163,7 @@ materialized by the `org.springframework.cache.Cache` and
 There are <<cache-store-configuration,a few implementations>> of that abstraction
 available out of the box: JDK `java.util.concurrent.ConcurrentMap` based caches,
 http://ehcache.org/[EhCache], Gemfire cache,
+https://github.com/ben-manes/caffeine/wiki[Caffeine],
 https://code.google.com/p/guava-libraries/wiki/CachesExplained[Guava caches] and
 JSR-107 compliant caches. See <<cache-plug>> for more information on plugging in
 other cache stores/providers.
@@ -8462,10 +8466,10 @@ conditional computations:
 
 | __argument name__
 | evaluation context
-| Name of any of the method argument. If for some reason the names are not available
-  (ex: no debug information), the argument names are also available under the `a<#arg>`
+| Name of any of the method arguments. If for some reason the names are not available
+  (e.g. no debug information), the argument names are also available under the `#a<#arg>`
   where __#arg__ stands for the argument index (starting from 0).
-| `iban` or `a0` (one can also use `p0` or `p<#arg>` notation as an alias).
+| `#iban` or `#a0` (one can also use `#p0` or `#p<#arg>` notation as an alias).
 
 | result
 | evaluation context
@@ -8814,7 +8818,7 @@ up its declaration at runtime and understands its meaning. Note that as mentione
 === JCache (JSR-107) annotations
 
 Since the Spring Framework 4.1, the caching abstraction fully supports the JCache
-standard annotations: these are `@CacheResult`, `@CacheEvict`, `@CacheRemove` and
+standard annotations: these are `@CacheResult`, `@CachePut`, `@CacheRemove` and
 `@CacheRemoveAll` as well as the `@CacheDefaults`, `@CacheKey` and `@CacheValue`
 companions. These annotations can be used right the way without migrating your
 cache store to JSR-107: the internal implementation uses Spring's caching abstraction
@@ -8996,7 +9000,7 @@ we did in the example above by defining the target cache through the `cache:defi
 
 [[cache-store-configuration]]
 === Configuring the cache storage
-Out of the box, the cache abstraction provides several storages integration. To use
+Out of the box, the cache abstraction provides several storage integration. To use
 them, one needs to simply declare an appropriate `CacheManager` - an entity that
 controls and manages ++Cache++s and can be used to retrieve these for storage.
 
@@ -9053,6 +9057,42 @@ Again, to use it, one simply needs to declare the appropriate `CacheManager`:
 This setup bootstraps the ehcache library inside Spring IoC (through the `ehcache` bean) which
 is then wired into the dedicated `CacheManager` implementation. Note the entire
 ehcache-specific configuration is read from `ehcache.xml`.
+
+[[cache-store-configuration-caffeine]]
+==== Caffeine Cache
+
+Caffeine is a Java 8 rewrite of Guava's cache and its implementation is located under
+`org.springframework.cache.caffeine` package and provides access to several features
+of Caffeine.
+
+Configuring a `CacheManager` that creates the cache on demand is straightforward:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean id="cacheManager"
+	      class="org.springframework.cache.caffeine.CaffeineCacheManager"/>
+----
+
+It is also possible to provide the caches to use explicitly. In that case, only those
+will be made available by the manager:
+
+[source,xml,indent=0]
+[subs="verbatim,quotes"]
+----
+	<bean id="cacheManager" class="org.springframework.cache.caffeine.CaffeineCacheManager">
+		<property name="caches">
+			<set>
+				<value>default</value>
+				<value>books</value>
+			</set>
+		</property>
+	</bean>
+----
+
+The Caffeine `CacheManager` also supports customs `Caffeine` and `CacheLoader`. See
+the https://github.com/ben-manes/caffeine/wiki[Caffeine documentation] for more
+information about those.
 
 [[cache-store-configuration-guava]]
 ==== Guava Cache

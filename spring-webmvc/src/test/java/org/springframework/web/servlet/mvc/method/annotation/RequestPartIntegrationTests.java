@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.servlet.MultipartConfigElement;
 
 import org.eclipse.jetty.server.Connector;
@@ -88,7 +89,6 @@ public class RequestPartIntegrationTests {
 
 	@BeforeClass
 	public static void startServer() throws Exception {
-
 		// Let server pick its own random, available port.
 		server = new Server(0);
 
@@ -144,19 +144,18 @@ public class RequestPartIntegrationTests {
 
 	@Test
 	public void commonsMultipartResolver() throws Exception {
-		testCreate(baseUrl + "/commons-resolver/test");
+		testCreate(baseUrl + "/commons-resolver/test", "Jason");
+		testCreate(baseUrl + "/commons-resolver/test", "Arjen");
 	}
 
 	@Test
 	public void standardMultipartResolver() throws Exception {
-		testCreate(baseUrl + "/standard-resolver/test");
+		testCreate(baseUrl + "/standard-resolver/test", "Jason");
+		testCreate(baseUrl + "/standard-resolver/test", "Arjen");
 	}
 
-	// SPR-13319
-
-	@Test
+	@Test  // SPR-13319
 	public void standardMultipartResolverWithEncodedFileName() throws Exception {
-
 		byte[] boundary = MimeTypeUtils.generateMultipartBoundary();
 		String boundaryText = new String(boundary, "US-ASCII");
 		Map<String, String> params = Collections.singletonMap("boundary", boundaryText);
@@ -183,10 +182,10 @@ public class RequestPartIntegrationTests {
 		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 	}
 
-	private void testCreate(String url) {
+	private void testCreate(String url, String basename) {
 		MultiValueMap<String, Object> parts = new LinkedMultiValueMap<String, Object>();
-		parts.add("json-data", new HttpEntity<TestData>(new TestData("Jason")));
-		parts.add("file-data", new ClassPathResource("logo.jpg", this.getClass()));
+		parts.add("json-data", new HttpEntity<TestData>(new TestData(basename)));
+		parts.add("file-data", new ClassPathResource("logo.jpg", getClass()));
 		parts.add("empty-data", new HttpEntity<byte[]>(new byte[0])); // SPR-12860
 
 		HttpHeaders headers = new HttpHeaders();
@@ -194,7 +193,7 @@ public class RequestPartIntegrationTests {
 		parts.add("iso-8859-1-data", new HttpEntity<byte[]>(new byte[] {(byte) 0xC4}, headers)); // SPR-13096
 
 		URI location = restTemplate.postForLocation(url, parts);
-		assertEquals("http://localhost:8080/test/Jason/logo.jpg", location.toString());
+		assertEquals("http://localhost:8080/test/" + basename + "/logo.jpg", location.toString());
 	}
 
 
@@ -208,6 +207,7 @@ public class RequestPartIntegrationTests {
 		}
 	}
 
+
 	@Configuration
 	@SuppressWarnings("unused")
 	static class CommonsMultipartResolverTestConfig extends RequestPartTestConfig {
@@ -217,6 +217,7 @@ public class RequestPartIntegrationTests {
 			return new CommonsMultipartResolver();
 		}
 	}
+
 
 	@Configuration
 	@SuppressWarnings("unused")
@@ -228,19 +229,20 @@ public class RequestPartIntegrationTests {
 		}
 	}
 
+
 	@Controller
 	@SuppressWarnings("unused")
 	private static class RequestPartTestController {
 
-		@RequestMapping(value = "/test", method = POST, consumes = { "multipart/mixed", "multipart/form-data" })
+		@RequestMapping(value = "/test", method = POST, consumes = {"multipart/mixed", "multipart/form-data"})
 		public ResponseEntity<Object> create(@RequestPart(name = "json-data") TestData testData,
-				@RequestPart("file-data") MultipartFile file,
+				@RequestPart("file-data") Optional<MultipartFile> file,
 				@RequestPart(name = "empty-data", required = false) TestData emptyData,
 				@RequestPart(name = "iso-8859-1-data") byte[] iso88591Data) {
 
 			Assert.assertArrayEquals(new byte[]{(byte) 0xC4}, iso88591Data);
 
-			String url = "http://localhost:8080/test/" + testData.getName() + "/" + file.getOriginalFilename();
+			String url = "http://localhost:8080/test/" + testData.getName() + "/" + file.get().getOriginalFilename();
 			HttpHeaders headers = new HttpHeaders();
 			headers.setLocation(URI.create(url));
 			return new ResponseEntity<Object>(headers, HttpStatus.CREATED);
@@ -252,6 +254,7 @@ public class RequestPartIntegrationTests {
 			return ResponseEntity.ok().build();
 		}
 	}
+
 
 	@SuppressWarnings("unused")
 	private static class TestData {

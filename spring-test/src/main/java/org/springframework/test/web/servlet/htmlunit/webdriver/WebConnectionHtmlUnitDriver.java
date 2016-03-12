@@ -16,14 +16,13 @@
 
 package org.springframework.test.web.servlet.htmlunit.webdriver;
 
+import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebConnection;
 import org.openqa.selenium.Capabilities;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
 import org.springframework.util.Assert;
-
-import com.gargoylesoftware.htmlunit.BrowserVersion;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebConnection;
 
 /**
  * {@code WebConnectionHtmlUnitDriver} enables configuration of the
@@ -57,6 +56,7 @@ public class WebConnectionHtmlUnitDriver extends HtmlUnitDriver {
 	public WebConnectionHtmlUnitDriver(Capabilities capabilities) {
 		super(capabilities);
 	}
+
 
 	/**
 	 * Modify the supplied {@link WebClient} and retain a reference to it

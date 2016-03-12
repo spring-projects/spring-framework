@@ -33,6 +33,7 @@ import static org.springframework.test.util.AssertionErrors.*;
  * @author Keesun Baik
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @author Brian Clozel
  * @since 3.2
  */
 public class StatusResultMatchers {
@@ -559,6 +560,14 @@ public class StatusResultMatchers {
 	 */
 	public ResultMatcher isRequestHeaderFieldsTooLarge() {
 		return matcher(HttpStatus.valueOf(431));
+	}
+
+	/**
+	 * Assert the response status code is {@code HttpStatus.UNAVAILABLE_FOR_LEGAL_REASONS} (451).
+	 * @since 4.3
+	 */
+	public ResultMatcher isUnavailableForLegalReasons() {
+		return matcher(HttpStatus.valueOf(451));
 	}
 
 	/**

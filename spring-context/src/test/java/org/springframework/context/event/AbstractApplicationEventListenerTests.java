@@ -117,13 +117,13 @@ public abstract class AbstractApplicationEventListenerTests {
 		}
 	}
 
+	@SuppressWarnings("rawtypes")
 	static class RawApplicationListener implements ApplicationListener {
 		@Override
 		public void onApplicationEvent(ApplicationEvent event) {
 		}
 	}
 
-	@SuppressWarnings("unused")
 	static class TestEvents {
 
 		public ApplicationEvent applicationEvent;

@@ -22,11 +22,14 @@ import org.apache.tiles.preparer.ViewPreparer;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
- * Tiles2 {@link org.apache.tiles.preparer.PreparerFactory} implementation
+ * Tiles {@link org.apache.tiles.preparer.PreparerFactory} implementation
  * that expects preparer bean names and obtains preparer beans from the
  * Spring ApplicationContext. The full bean creation process will be in
  * the control of the Spring application context in this case, allowing
  * for the use of scoped beans etc.
+ *
+ * <p><b>NOTE: Tiles 2 support is deprecated in favor of Tiles 3 and will be removed
+ * as of Spring Framework 5.0.</b>.
  *
  * @author Juergen Hoeller
  * @since 2.5

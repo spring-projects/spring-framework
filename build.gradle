@@ -10,6 +10,10 @@ buildscript {
 	}
 }
 
+plugins {
+	id "org.sonarqube" version "1.1"
+}
+
 ext {
 	linkHomepage = 'https://projects.spring.io/spring-framework'
 	linkCi = 'https://build.spring.io/browse/SPR'
@@ -27,54 +31,55 @@ configure(allprojects) { project ->
 	group = "org.springframework"
 	version = qualifyVersionIfNecessary(version)
 
-	ext.aspectjVersion       = "1.8.7"
+	ext.aspectjVersion       = "1.9.0.BETA-3"
+	ext.caffeineVersion      = "2.2.2"
 	ext.eclipselinkVersion   = "2.4.2"
 	ext.ehcacheVersion       = "2.10.1"
 	ext.ehcachejcacheVersion = "1.0.1"
-	ext.ehcache3Version      = "3.0.0.m3"
+	ext.ehcache3Version      = "3.0.0.m5"
 	ext.ejbApiVersion        = "3.0"
 	ext.fileuploadVersion    = "1.3.1"
 	ext.freemarkerVersion    = "2.3.23"
-	ext.groovyVersion        = "2.4.5"
-	ext.gsonVersion          = "2.4"
-	ext.guavaVersion         = "18.0"
+	ext.groovyVersion        = "2.4.6"
+	ext.gsonVersion          = "2.6.2"
+	ext.guavaVersion         = "19.0"
 	ext.hamcrestVersion      = "1.3"
 	ext.hibernate3Version    = "3.6.10.Final"
 	ext.hibernate4Version    = "4.3.11.Final"
-	ext.hibernate5Version    = "5.0.3.Final"
+	ext.hibernate5Version    = "5.1.0.Final"
 	ext.hibval4Version       = "4.3.2.Final"
-	ext.hibval5Version       = "5.2.2.Final"
+	ext.hibval5Version       = "5.2.4.Final"
 	ext.hsqldbVersion        = "2.3.3"
-	ext.htmlunitVersion      = "2.18"
-	ext.httpasyncVersion     = "4.1"
+	ext.htmlunitVersion      = "2.19"
+	ext.httpasyncVersion     = "4.1.1"
 	ext.httpclientVersion    = "4.5.1"
-	ext.jackson2Version      = "2.6.3"
-	ext.jasperreportsVersion = "6.1.1"
-	ext.javamailVersion      = "1.5.4"
-	ext.jettyVersion         = "9.3.5.v20151012"
-	ext.jodaVersion          = "2.9"
-	ext.jrubyVersion         = "1.7.22"  // JRuby 9000 only supported through JSR-223 (StandardScriptFactory)
+	ext.jackson2Version      = "2.7.2"
+	ext.jasperreportsVersion = "6.2.0"
+	ext.javamailVersion      = "1.5.5"
+	ext.jettyVersion         = "9.3.7.v20160115"
+	ext.jodaVersion          = "2.9.2"
+	ext.jrubyVersion         = "1.7.23"  // JRuby 9000 only supported through JSR-223 (StandardScriptFactory)
 	ext.jsonassertVersion    = "1.2.3"
-	ext.jsonpathVersion      = "2.0.0"
+	ext.jsonpathVersion      = "2.1.0"
 	ext.jtaVersion           = "1.2"
 	ext.junitVersion         = "4.12"
-	ext.nettyVersion         = "4.0.33.Final"
-	ext.okhttpVersion        = "2.5.0"
-	ext.openjpaVersion       = "2.4.0"
+	ext.nettyVersion         = "4.0.34.Final"
+	ext.okhttpVersion        = "2.7.5"
+	ext.openjpaVersion       = "2.4.1"
 	ext.poiVersion           = "3.13"
 	ext.protobufVersion      = "2.6.1"
-	ext.reactorVersion       = "2.0.6.RELEASE"
+	ext.reactorVersion       = "2.0.7.RELEASE"
 	ext.romeVersion          = "1.5.1"
 	ext.seleniumVersion      = "2.48.2"
-	ext.slf4jVersion         = "1.7.12"
-	ext.snakeyamlVersion     = "1.16"
+	ext.slf4jVersion         = "1.7.16"
+	ext.snakeyamlVersion     = "1.17"
 	ext.snifferVersion       = "1.14"
-	ext.testngVersion        = "6.9.9"
+	ext.testngVersion        = "6.9.10"
 	ext.tiles2Version        = "2.2.2"
 	ext.tiles3Version        = "3.0.5"
-	ext.tomcatVersion        = "8.0.28"
+	ext.tomcatVersion        = "8.0.32"
 	ext.tyrusVersion         = "1.3.5"  // constrained by WebLogic 12.1.3 support
-	ext.undertowVersion      = "1.3.4.Final"
+	ext.undertowVersion      = "1.3.18.Final"
 	ext.woodstoxVersion      = "5.0.1"
 	ext.xmlunitVersion       = "1.6"
 	ext.xstreamVersion       = "1.4.8"
@@ -197,7 +202,6 @@ configure(allprojects) { project ->
 		"http://portals.apache.org/pluto/portlet-2.0-apidocs/",
 		"http://tiles.apache.org/tiles-request/apidocs/",
 		"http://tiles.apache.org/framework/apidocs/",
-		"http://aopalliance.sourceforge.net/doc/",
 		"http://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
 		"http://ehcache.org/apidocs/",
 		"http://quartz-scheduler.org/api/2.2.0/",
@@ -217,11 +221,11 @@ configure(subprojects - project(":spring-build-src")) { subproject ->
 	}
 
 	dependencies {
-		jacoco("org.jacoco:org.jacoco.agent:0.7.1.201405082137:runtime")
+		jacoco("org.jacoco:org.jacoco.agent:0.7.5.201505241946:runtime")
 	}
 
 	gradle.taskGraph.whenReady {taskGraph ->
-		if (taskGraph.hasTask(':sonarRunner')) {
+		if (taskGraph.hasTask(':sonarqube')) {
 			test.jvmArgs "-javaagent:${configurations.jacoco.asPath}=destfile=${buildDir}/jacoco.exec,includes=org.springframework.*"
 		}
 	}
@@ -423,7 +427,6 @@ project("spring-aop") {
 		compile(project(":spring-core"))
 		compile(files(project(":spring-core").cglibRepackJar))
 		compile(files(project(":spring-core").objenesisRepackJar))
-		compile("aopalliance:aopalliance:1.0")
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("commons-pool:commons-pool:1.6")
 		optional("org.apache.commons:commons-pool2:2.4.2")
@@ -545,7 +548,6 @@ project("spring-tx") {
 		compile(project(":spring-core"))
 		optional(project(":spring-aop"))
 		optional(project(":spring-context"))  // for JCA, @EnableTransactionManagement
-		optional("aopalliance:aopalliance:1.0")
 		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
 		optional("javax.resource:connector-api:1.5")
 		optional("javax.ejb:ejb-api:${ejbApiVersion}")
@@ -574,7 +576,7 @@ project("spring-oxm") {
 	dependencies {
 		compile(project(":spring-beans"))
 		compile(project(":spring-core"))
-		optional("org.codehaus.castor:castor-xml:1.3.3")  {
+		optional("org.codehaus.castor:castor-xml:1.4.0")  {
 			exclude group: 'stax', module: 'stax-api'
 			exclude group: "org.springframework", module: "spring-context"
 		}
@@ -612,7 +614,6 @@ project("spring-jms") {
 		compile(project(":spring-tx"))
 		provided("javax.jms:jms-api:1.1-rev-1")
 		optional(project(":spring-oxm"))
-		optional("aopalliance:aopalliance:1.0")
 		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
 		optional("javax.resource:connector-api:1.5")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
@@ -628,7 +629,7 @@ project("spring-jdbc") {
 		compile(project(":spring-tx"))
 		optional(project(":spring-context"))  // for JndiDataSourceLookup
 		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
-		optional("com.mchange:c3p0:0.9.5.1")
+		optional("com.mchange:c3p0:0.9.5.2")
 		optional("org.hsqldb:hsqldb:${hsqldbVersion}")
 		optional("com.h2database:h2:1.4.190")
 		optional("org.apache.derby:derby:10.12.1.1")
@@ -648,8 +649,9 @@ project("spring-context-support") {
 		optional("javax.mail:javax.mail-api:${javamailVersion}")
 		optional("javax.cache:cache-api:1.0.0")
 		optional("com.google.guava:guava:${guavaVersion}")
+		optional("com.github.ben-manes.caffeine:caffeine:${caffeineVersion}")
 		optional("net.sf.ehcache:ehcache:${ehcacheVersion}")
-		optional("org.quartz-scheduler:quartz:2.2.1")
+		optional("org.quartz-scheduler:quartz:2.2.2")
 		optional("org.codehaus.fabric3.api:commonj:1.1.0")
 		optional("org.apache.velocity:velocity:1.7")
 		optional("org.freemarker:freemarker:${freemarkerVersion}")
@@ -704,7 +706,6 @@ project("spring-web") {
 		optional("javax.el:javax.el-api:2.2.5")
 		optional("javax.faces:javax.faces-api:2.2")
 		optional("javax.validation:validation-api:1.0.0.GA")
-		optional("aopalliance:aopalliance:1.0")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("com.caucho:hessian:4.0.38")
 		optional("commons-fileupload:commons-fileupload:${fileuploadVersion}")
@@ -733,7 +734,6 @@ project("spring-web") {
 			exclude group: "org.apache.taglibs", module: "taglibs-standard-spec"
 		}
 		testCompile("com.fasterxml.jackson.datatype:jackson-datatype-joda:${jackson2Version}")
-		testCompile("com.fasterxml.jackson.datatype:jackson-datatype-jdk7:${jackson2Version}")
 		testCompile("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jackson2Version}")
 		testRuntime("com.sun.mail:javax.mail:${javamailVersion}")
 	}
@@ -796,7 +796,6 @@ project("spring-orm") {
 		optional(project(":spring-aop"))
 		optional(project(":spring-context"))
 		optional(project(":spring-web"))
-		optional("aopalliance:aopalliance:1.0")
 		optional("org.eclipse.persistence:javax.persistence:2.0.5")
 		optional("org.eclipse.persistence:org.eclipse.persistence.core:${eclipselinkVersion}")
 		optional("org.eclipse.persistence:org.eclipse.persistence.jpa:${eclipselinkVersion}") {
@@ -837,7 +836,6 @@ project("spring-orm-hibernate4") {
 		optional("org.hibernate:hibernate-core:${hibernate4Version}")
 		optional("org.hibernate:hibernate-entitymanager:${hibernate4Version}")
 		optional("javax.servlet:javax.servlet-api:3.0.1")
-        optional("aopalliance:aopalliance:1.0")
 		testCompile("javax.validation:validation-api:1.1.0.GA")
 		testCompile("org.hibernate:hibernate-validator:${hibval5Version}")
 		testCompile("javax.el:javax.el-api:2.2.5")
@@ -856,7 +854,7 @@ project("spring-orm-hibernate5") {
 		optional("org.hibernate:hibernate-core:${hibernate5Version}")
 		optional("org.hibernate:hibernate-entitymanager:${hibernate5Version}")
 		optional("javax.servlet:javax.servlet-api:3.0.1")
-		optional("aopalliance:aopalliance:1.0")
+		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
 	}
 }
 
@@ -864,6 +862,7 @@ project("spring-webmvc") {
 	description = "Spring Web MVC"
 
 	dependencies {
+		compile(project(":spring-aop"))
 		compile(project(":spring-beans"))
 		compile(project(":spring-context"))
 		compile(project(":spring-core"))
@@ -913,7 +912,6 @@ project("spring-webmvc") {
 			exclude group: "org.springframework", module: "spring-web"
 		}
 		optional('org.webjars:webjars-locator:0.28')
-		testCompile(project(":spring-aop"))
 		testCompile("rhino:js:1.7R1")
 		testCompile("xmlunit:xmlunit:${xmlunitVersion}")
 		testCompile("dom4j:dom4j:1.6.1") {
@@ -1044,6 +1042,7 @@ project("spring-test") {
 		testCompile("org.apache.httpcomponents:httpclient:${httpclientVersion}")
 		testCompile("javax.cache:cache-api:1.0.0")
 		testRuntime("org.ehcache:ehcache:${ehcache3Version}")
+		testRuntime("org.terracotta:management-model:2.0.0")
 	}
 
 	task testNG(type: Test) {
@@ -1078,9 +1077,9 @@ project("spring-aspects") {
 
 	dependencies {
 		aspects(project(":spring-orm"))
-		ajc("org.aspectj:aspectjtools:1.9.0.BETA-2")  // for the ability to build on JDK 9, not exposed in the POMs yet
-		rt("org.aspectj:aspectjrt:${aspectjVersion}")  // regular AspectJ version here, to be exposed in the POMs
-		compile("org.aspectj:aspectjweaver:${aspectjVersion}")
+		ajc("org.aspectj:aspectjtools:${aspectjVersion}")  // for the ability to build on JDK 9, not exposed in the POMs yet
+		rt("org.aspectj:aspectjrt:1.8.7")  // regular AspectJ version here, to be exposed in the POMs
+		compile("org.aspectj:aspectjweaver:1.8.7")
 		provided("org.eclipse.persistence:javax.persistence:2.0.0")
 		optional(project(":spring-aop"))  // for @Async support
 		optional(project(":spring-beans"))  // for @Configurable support
@@ -1137,10 +1136,8 @@ project("spring-framework-bom") {
 	}
 }
 
-apply plugin: 'sonar-runner'
-
-sonarRunner {
-	sonarProperties {
+sonarqube {
+	properties {
 		property "sonar.projectName", "Spring Framework"
 		property "sonar.profile", "Spring Framework"
 		property "sonar.jacoco.reportPath", "${buildDir.name}/jacoco.exec"
@@ -1379,7 +1376,7 @@ configure(rootProject) {
 
 	task wrapper(type: Wrapper) {
 		description = "Generates gradlew[.bat] scripts"
-		gradleVersion = "2.5"
+		gradleVersion = "2.10"
 
 		doLast() {
 			def gradleOpts = "-XX:MaxMetaspaceSize=1024m -Xmx1024m"
@@ -1396,14 +1393,14 @@ configure(rootProject) {
 }
 
 configure([project(':spring-build-src'), project(':spring-framework-bom')]) {
-	sonarRunner {
+	sonarqube {
 		skipProject = true
 	}
 }
 
 configure(project(':spring-core')) {
-	sonarRunner {
-		sonarProperties {
+	sonarqube {
+		properties {
 			property "sonar.exclusions",
 					"src/main/java/org/springframework/cglib/**/*,src/main/java/org/springframework/asm/**/*"
 		}

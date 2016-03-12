@@ -211,6 +211,7 @@ public abstract class CommonsFileUploadSupport {
 		if (encoding != null && !encoding.equals(fileUpload.getHeaderEncoding())) {
 			actualFileUpload = newFileUpload(getFileItemFactory());
 			actualFileUpload.setSizeMax(fileUpload.getSizeMax());
+			actualFileUpload.setFileSizeMax(fileUpload.getFileSizeMax());
 			actualFileUpload.setHeaderEncoding(encoding);
 		}
 

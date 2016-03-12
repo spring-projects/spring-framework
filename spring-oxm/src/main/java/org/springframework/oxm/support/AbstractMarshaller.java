@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -130,12 +130,13 @@ public abstract class AbstractMarshaller implements Marshaller, Unmarshaller {
 	 */
 	protected Document buildDocument() {
 		try {
+			DocumentBuilder documentBuilder;
 			synchronized (this.documentBuilderFactoryMonitor) {
 				if (this.documentBuilderFactory == null) {
 					this.documentBuilderFactory = createDocumentBuilderFactory();
 				}
+				documentBuilder = createDocumentBuilder(this.documentBuilderFactory);
 			}
-			DocumentBuilder documentBuilder = createDocumentBuilder(this.documentBuilderFactory);
 			return documentBuilder.newDocument();
 		}
 		catch (ParserConfigurationException ex) {

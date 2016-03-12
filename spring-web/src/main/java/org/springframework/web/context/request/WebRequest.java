@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,10 +126,10 @@ public interface WebRequest extends RequestAttributes {
 	boolean isSecure();
 
 	/**
-	 * Check whether the request qualifies as not modified given the
+	 * Check whether the requested resource has been modified given the
 	 * supplied last-modified timestamp (as determined by the application).
-	 * <p>This will also transparently set the appropriate response headers,
-	 * for both the modified case and the not-modified case.
+	 * <p>This will also transparently set the "Last-Modified" response header
+	 * and HTTP status when applicable.
 	 * <p>Typical usage:
 	 * <pre class="code">
 	 * public String myHandleMethod(WebRequest webRequest, Model model) {
@@ -142,6 +142,8 @@ public interface WebRequest extends RequestAttributes {
 	 *   model.addAttribute(...);
 	 *   return "myViewName";
 	 * }</pre>
+	 * <p>This method works with conditional GET/HEAD requests, but
+	 * also with conditional POST/PUT/DELETE requests.
 	 * <p><strong>Note:</strong> you can use either
 	 * this {@code #checkNotModified(long)} method; or
 	 * {@link #checkNotModified(String)}. If you want enforce both
@@ -160,10 +162,10 @@ public interface WebRequest extends RequestAttributes {
 	boolean checkNotModified(long lastModifiedTimestamp);
 
 	/**
-	 * Check whether the request qualifies as not modified given the
+	 * Check whether the requested resource has been modified given the
 	 * supplied {@code ETag} (entity tag), as determined by the application.
-	 * <p>This will also transparently set the appropriate response headers,
-	 * for both the modified case and the not-modified case.
+	 * <p>This will also transparently set the "ETag" response header
+	 * and HTTP status when applicable.
 	 * <p>Typical usage:
 	 * <pre class="code">
 	 * public String myHandleMethod(WebRequest webRequest, Model model) {
@@ -185,18 +187,16 @@ public interface WebRequest extends RequestAttributes {
 	 * @param etag the entity tag that the application determined
 	 * for the underlying resource. This parameter will be padded
 	 * with quotes (") if necessary.
-	 * @return whether the request qualifies as not modified,
-	 * allowing to abort request processing and relying on the response
-	 * telling the client that the content has not been modified
+	 * @return true if the request does not require further processing.
 	 */
 	boolean checkNotModified(String etag);
 
 	/**
-	 * Check whether the request qualifies as not modified given the
+	 * Check whether the requested resource has been modified given the
 	 * supplied {@code ETag} (entity tag) and last-modified timestamp,
 	 * as determined by the application.
 	 * <p>This will also transparently set the "ETag" and "Last-Modified"
-	 * response headers, for both the modified case and the not-modified case.
+	 * response headers, and HTTP status when applicable.
 	 * <p>Typical usage:
 	 * <pre class="code">
 	 * public String myHandleMethod(WebRequest webRequest, Model model) {
@@ -210,6 +210,8 @@ public interface WebRequest extends RequestAttributes {
 	 *   model.addAttribute(...);
 	 *   return "myViewName";
 	 * }</pre>
+	 * <p>This method works with conditional GET/HEAD requests, but
+	 * also with conditional POST/PUT/DELETE requests.
 	 * <p><strong>Note:</strong> The HTTP specification recommends
 	 * setting both ETag and Last-Modified values, but you can also
 	 * use {@code #checkNotModified(String)} or
@@ -219,9 +221,7 @@ public interface WebRequest extends RequestAttributes {
 	 * with quotes (") if necessary.
 	 * @param lastModifiedTimestamp the last-modified timestamp that
 	 * the application determined for the underlying resource
-	 * @return whether the request qualifies as not modified,
-	 * allowing to abort request processing and relying on the response
-	 * telling the client that the content has not been modified
+	 * @return true if the request does not require further processing.
 	 * @since 4.2
 	 */
 	boolean checkNotModified(String etag, long lastModifiedTimestamp);

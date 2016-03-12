@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,9 +29,9 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.socket.messaging.SubProtocolWebSocketHandler;
-import org.springframework.web.socket.server.support.OriginHandshakeInterceptor;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 import org.springframework.web.socket.server.support.HttpSessionHandshakeInterceptor;
+import org.springframework.web.socket.server.support.OriginHandshakeInterceptor;
 import org.springframework.web.socket.server.support.WebSocketHttpRequestHandler;
 import org.springframework.web.socket.sockjs.support.SockJsHttpRequestHandler;
 import org.springframework.web.socket.sockjs.transport.TransportHandler;
@@ -117,7 +117,7 @@ public class WebMvcStompWebSocketEndpointRegistrationTests {
 		SockJsHttpRequestHandler requestHandler = (SockJsHttpRequestHandler)mappings.entrySet().iterator().next().getKey();
 		assertNotNull(requestHandler.getSockJsService());
 		DefaultSockJsService sockJsService = (DefaultSockJsService)requestHandler.getSockJsService();
-		assertEquals(Arrays.asList(origin), sockJsService.getAllowedOrigins());
+		assertTrue(sockJsService.getAllowedOrigins().contains(origin));
 		assertFalse(sockJsService.shouldSuppressCors());
 
 		registration =
@@ -128,7 +128,7 @@ public class WebMvcStompWebSocketEndpointRegistrationTests {
 		requestHandler = (SockJsHttpRequestHandler)mappings.entrySet().iterator().next().getKey();
 		assertNotNull(requestHandler.getSockJsService());
 		sockJsService = (DefaultSockJsService)requestHandler.getSockJsService();
-		assertEquals(Arrays.asList(origin), sockJsService.getAllowedOrigins());
+		assertTrue(sockJsService.getAllowedOrigins().contains(origin));
 		assertFalse(sockJsService.shouldSuppressCors());
 	}
 
@@ -255,7 +255,7 @@ public class WebMvcStompWebSocketEndpointRegistrationTests {
 		assertEquals(interceptor, sockJsService.getHandshakeInterceptors().get(0));
 		assertEquals(OriginHandshakeInterceptor.class,
 				sockJsService.getHandshakeInterceptors().get(1).getClass());
-		assertEquals(Arrays.asList(origin), sockJsService.getAllowedOrigins());
+		assertTrue(sockJsService.getAllowedOrigins().contains(origin));
 	}
 
 }

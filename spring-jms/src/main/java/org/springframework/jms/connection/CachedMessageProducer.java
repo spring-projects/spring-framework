@@ -276,7 +276,7 @@ class CachedMessageProducer implements MessageProducer, QueueSender, TopicPublis
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			try {
 				if (method.getName().equals("send") && args != null &&
-						completionListenerClass.equals(method.getParameterTypes()[args.length - 1])) {
+						completionListenerClass == method.getParameterTypes()[args.length - 1]) {
 					switch (args.length) {
 						case 2: // send(message, completionListener)
 							return sendWithCompletionListenerMethod.invoke(

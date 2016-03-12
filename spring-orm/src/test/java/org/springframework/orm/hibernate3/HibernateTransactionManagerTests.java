@@ -65,8 +65,10 @@ import static org.mockito.BDDMockito.*;
  * @author Juergen Hoeller
  * @author Phillip Webb
  * @since 05.03.2005
+ * @deprecated as of Spring 4.3, in favor of Hibernate 4.x/5.x
  */
-@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
+@Deprecated
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class HibernateTransactionManagerTests {
 
 	@After

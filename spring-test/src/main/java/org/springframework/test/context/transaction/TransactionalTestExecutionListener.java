@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
@@ -43,7 +44,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.StringUtils;
 
-import static org.springframework.core.annotation.AnnotationUtils.*;
+import static org.springframework.core.annotation.AnnotationUtils.findAnnotation;
+import static org.springframework.core.annotation.AnnotationUtils.getAnnotation;
 
 /**
  * {@code TestExecutionListener} that provides support for executing tests
@@ -83,8 +85,9 @@ import static org.springframework.core.annotation.AnnotationUtils.*;
  * <h3>Declarative Rollback and Commit Behavior</h3>
  * <p>By default, test transactions will be automatically <em>rolled back</em>
  * after completion of the test; however, transactional commit and rollback
- * behavior can be configured declaratively via the {@link Rollback @Rollback}
- * annotation at the class level and at the method level.
+ * behavior can be configured declaratively via the {@link Commit @Commit}
+ * and {@link Rollback @Rollback} annotations at the class level and at the
+ * method level.
  *
  * <h3>Programmatic Transaction Management</h3>
  * <p>As of Spring Framework 4.1, it is possible to interact with test-managed
@@ -133,7 +136,8 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	@SuppressWarnings("deprecation")
 	private static final TransactionConfigurationAttributes defaultTxConfigAttributes = new TransactionConfigurationAttributes();
 
-	protected final TransactionAttributeSource attributeSource = new AnnotationTransactionAttributeSource();
+	// Do not require @Transactional test methods to be public.
+	protected final TransactionAttributeSource attributeSource = new AnnotationTransactionAttributeSource(false);
 
 	@SuppressWarnings("deprecation")
 	private TransactionConfigurationAttributes configurationAttributes;
@@ -186,6 +190,12 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 			}
 
 			tm = getTransactionManager(testContext, transactionAttribute.getQualifier());
+
+			if (tm == null) {
+				throw new IllegalStateException(String.format(
+					"Failed to retrieve PlatformTransactionManager for @Transactional test for test context %s.",
+					testContext));
+			}
 		}
 
 		if (tm != null) {
@@ -240,6 +250,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 				if (logger.isDebugEnabled()) {
 					logger.debug("Executing @BeforeTransaction method [" + method + "] for test context " + testContext);
 				}
+				ReflectionUtils.makeAccessible(method);
 				method.invoke(testContext.getTestInstance());
 			}
 		}
@@ -267,6 +278,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 				if (logger.isDebugEnabled()) {
 					logger.debug("Executing @AfterTransaction method [" + method + "] for test context " + testContext);
 				}
+				ReflectionUtils.makeAccessible(method);
 				method.invoke(testContext.getTestInstance());
 			}
 			catch (InvocationTargetException ex) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Juergen Hoeller
  * @author Arjen Poutsma
+ * @author Rossen Stoyanchev
  * @since 2.5.2
  * @deprecated as of Spring 3.2, together with {@link DefaultAnnotationHandlerMapping},
  * {@link AnnotationMethodHandlerAdapter}, and {@link AnnotationMethodHandlerExceptionResolver}.
@@ -43,11 +44,12 @@ abstract class ServletAnnotationMappingUtils {
 	 * @param request the current HTTP request to check
 	 */
 	public static boolean checkRequestMethod(RequestMethod[] methods, HttpServletRequest request) {
-		if (ObjectUtils.isEmpty(methods)) {
+		String inputMethod = request.getMethod();
+		if (ObjectUtils.isEmpty(methods) && !RequestMethod.OPTIONS.name().equals(inputMethod)) {
 			return true;
 		}
 		for (RequestMethod method : methods) {
-			if (method.name().equals(request.getMethod())) {
+			if (method.name().equals(inputMethod)) {
 				return true;
 			}
 		}

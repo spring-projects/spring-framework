@@ -21,15 +21,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
-
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.WebResponseData;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 
 /**
  * @author Rob Winch
@@ -48,8 +48,8 @@ final class MockWebResponseBuilder {
 
 
 	public MockWebResponseBuilder(long startTime, WebRequest webRequest, MockHttpServletResponse response) {
-		Assert.notNull(webRequest, "webRequest must not be null");
-		Assert.notNull(response, "response must not be null");
+		Assert.notNull(webRequest, "WebRequest must not be null");
+		Assert.notNull(response, "HttpServletResponse must not be null");
 		this.startTime = startTime;
 		this.webRequest = webRequest;
 		this.response = response;
@@ -63,8 +63,8 @@ final class MockWebResponseBuilder {
 
 	private WebResponseData webResponseData() throws IOException {
 		List<NameValuePair> responseHeaders = responseHeaders();
-		int statusCode = (this.response.getRedirectedUrl() != null ? HttpStatus.MOVED_PERMANENTLY.value()
-				: this.response.getStatus());
+		int statusCode = (this.response.getRedirectedUrl() != null ?
+				HttpStatus.MOVED_PERMANENTLY.value() : this.response.getStatus());
 		String statusMessage = statusMessage(statusCode);
 		return new WebResponseData(this.response.getContentAsByteArray(), statusCode, statusMessage, responseHeaders);
 	}

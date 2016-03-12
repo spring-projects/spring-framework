@@ -107,7 +107,7 @@ public class EnableAsyncTests {
 	@Test
 	public void customAsyncAnnotationIsPropagated() {
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
-		ctx.register(CustomAsyncAnnotationConfig.class);
+		ctx.register(CustomAsyncAnnotationConfig.class, CustomAsyncBean.class);
 		ctx.refresh();
 
 		Object bean = ctx.getBean(CustomAsyncBean.class);
@@ -200,14 +200,8 @@ public class EnableAsyncTests {
 	}
 
 
-	@Configuration
 	@EnableAsync(annotation = CustomAsync.class)
 	static class CustomAsyncAnnotationConfig {
-
-		@Bean
-		public CustomAsyncBean asyncBean() {
-			return new CustomAsyncBean();
-		}
 	}
 
 

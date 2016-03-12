@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import org.springframework.context.i18n.SimpleLocaleContext;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.util.Assert;
+import org.springframework.http.HttpMethod;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
@@ -427,9 +427,11 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 	/**
 	 * Set whether this servlet should dispatch an HTTP OPTIONS request to
 	 * the {@link #doService} method.
-	 * <p>Default is "false", applying {@link javax.servlet.http.HttpServlet}'s
-	 * default behavior (i.e. enumerating all standard HTTP request methods
-	 * as a response to the OPTIONS request).
+	 * <p>Default in the {@code FrameworkServlet} is "false", applying
+	 * {@link javax.servlet.http.HttpServlet}'s default behavior (i.e.enumerating
+	 * all standard HTTP request methods as a response to the OPTIONS request).
+	 * Note however that as of 4.3 the {@code DispatcherServlet} sets this
+	 * property to "true" by default due to its built-in support for OPTIONS.
 	 * <p>Turn this flag on if you prefer OPTIONS requests to go through the
 	 * regular dispatching chain, just like other HTTP requests. This usually
 	 * means that your controllers will receive those requests; make sure
@@ -737,17 +739,17 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			Class<?> initializerClass = ClassUtils.forName(className, wac.getClassLoader());
 			Class<?> initializerContextClass =
 					GenericTypeResolver.resolveTypeArgument(initializerClass, ApplicationContextInitializer.class);
-			if (initializerContextClass != null) {
-				Assert.isAssignable(initializerContextClass, wac.getClass(), String.format(
-						"Could not add context initializer [%s] since its generic parameter [%s] " +
+			if (initializerContextClass != null && !initializerContextClass.isInstance(wac)) {
+				throw new ApplicationContextException(String.format(
+						"Could not apply context initializer [%s] since its generic parameter [%s] " +
 						"is not assignable from the type of application context used by this " +
-						"framework servlet [%s]: ", initializerClass.getName(), initializerContextClass.getName(),
+						"framework servlet: [%s]", initializerClass.getName(), initializerContextClass.getName(),
 						wac.getClass().getName()));
 			}
 			return BeanUtils.instantiateClass(initializerClass, ApplicationContextInitializer.class);
 		}
-		catch (Exception ex) {
-			throw new IllegalArgumentException(String.format("Could not instantiate class [%s] specified " +
+		catch (ClassNotFoundException ex) {
+			throw new ApplicationContextException(String.format("Could not load class [%s] specified " +
 					"via 'contextInitializerClasses' init-param", className), ex);
 		}
 	}
@@ -831,15 +833,14 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 
 
 	/**
-	 * Override the parent class implementation in order to intercept PATCH
-	 * requests.
+	 * Override the parent class implementation in order to intercept PATCH requests.
 	 */
 	@Override
 	protected void service(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
-		String method = request.getMethod();
-		if (method.equalsIgnoreCase(RequestMethod.PATCH.name())) {
+		HttpMethod httpMethod = HttpMethod.resolve(request.getMethod());
+		if (HttpMethod.PATCH == httpMethod || httpMethod == null) {
 			processRequest(request, response);
 		}
 		else {

@@ -16,13 +16,12 @@
 
 package org.springframework.test.web.servlet.result;
 
+import com.jayway.jsonpath.JsonPath;
 import org.hamcrest.Matcher;
 
 import org.springframework.test.util.JsonPathExpectationsHelper;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultMatcher;
-
-import com.jayway.jsonpath.JsonPath;
 
 /**
  * Factory for assertions on the response content using
@@ -63,7 +62,7 @@ public class JsonPathResultMatchers {
 			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
-				JsonPathResultMatchers.this.jsonPathHelper.assertValue(content, matcher);
+				jsonPathHelper.assertValue(content, matcher);
 			}
 		};
 	}
@@ -76,8 +75,7 @@ public class JsonPathResultMatchers {
 		return new ResultMatcher() {
 			@Override
 			public void match(MvcResult result) throws Exception {
-				JsonPathResultMatchers.this.jsonPathHelper.assertValue(result.getResponse().getContentAsString(),
-					expectedValue);
+				jsonPathHelper.assertValue(result.getResponse().getContentAsString(), expectedValue);
 			}
 		};
 	}
@@ -94,7 +92,7 @@ public class JsonPathResultMatchers {
 			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
-				JsonPathResultMatchers.this.jsonPathHelper.exists(content);
+				jsonPathHelper.exists(content);
 			}
 		};
 	}
@@ -111,7 +109,7 @@ public class JsonPathResultMatchers {
 			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
-				JsonPathResultMatchers.this.jsonPathHelper.doesNotExist(content);
+				jsonPathHelper.doesNotExist(content);
 			}
 		};
 	}
@@ -131,7 +129,7 @@ public class JsonPathResultMatchers {
 			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
-				JsonPathResultMatchers.this.jsonPathHelper.assertValueIsEmpty(content);
+				jsonPathHelper.assertValueIsEmpty(content);
 			}
 		};
 	}
@@ -151,7 +149,7 @@ public class JsonPathResultMatchers {
 			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
-				JsonPathResultMatchers.this.jsonPathHelper.assertValueIsNotEmpty(content);
+				jsonPathHelper.assertValueIsNotEmpty(content);
 			}
 		};
 	}
@@ -166,7 +164,7 @@ public class JsonPathResultMatchers {
 			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
-				JsonPathResultMatchers.this.jsonPathHelper.assertValueIsString(content);
+				jsonPathHelper.assertValueIsString(content);
 			}
 		};
 	}
@@ -181,7 +179,7 @@ public class JsonPathResultMatchers {
 			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
-				JsonPathResultMatchers.this.jsonPathHelper.assertValueIsBoolean(content);
+				jsonPathHelper.assertValueIsBoolean(content);
 			}
 		};
 	}
@@ -196,7 +194,7 @@ public class JsonPathResultMatchers {
 			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
-				JsonPathResultMatchers.this.jsonPathHelper.assertValueIsNumber(content);
+				jsonPathHelper.assertValueIsNumber(content);
 			}
 		};
 	}
@@ -210,7 +208,7 @@ public class JsonPathResultMatchers {
 			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
-				JsonPathResultMatchers.this.jsonPathHelper.assertValueIsArray(content);
+				jsonPathHelper.assertValueIsArray(content);
 			}
 		};
 	}
@@ -225,7 +223,7 @@ public class JsonPathResultMatchers {
 			@Override
 			public void match(MvcResult result) throws Exception {
 				String content = result.getResponse().getContentAsString();
-				JsonPathResultMatchers.this.jsonPathHelper.assertValueIsMap(content);
+				jsonPathHelper.assertValueIsMap(content);
 			}
 		};
 	}

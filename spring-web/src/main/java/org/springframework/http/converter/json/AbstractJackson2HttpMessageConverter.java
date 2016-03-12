@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,20 +18,22 @@ package org.springframework.http.converter.json;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.nio.charset.Charset;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.PrettyPrinter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 
+import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -41,14 +43,13 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.TypeUtils;
 
 /**
  * Abstract base class for Jackson based and content type independent
  * {@link HttpMessageConverter} implementations.
  *
- * <p>Compatible with Jackson 2.1 and higher.
+ * <p>Compatible with Jackson 2.6 and higher, as of Spring 4.3.
  *
  * @author Arjen Poutsma
  * @author Keith Donald
@@ -62,14 +63,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 
 	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
-	// Check for Jackson 2.3's overloaded canDeserialize/canSerialize variants with cause reference
-	private static final boolean jackson23Available = ClassUtils.hasMethod(ObjectMapper.class,
-			"canDeserialize", JavaType.class, AtomicReference.class);
-
-	// Check for Jackson 2.6+ for support of generic type aware serialization of polymorphic collections
-	private static final boolean jackson26Available = ClassUtils.hasMethod(ObjectMapper.class,
-			"setDefaultPrettyPrinter", PrettyPrinter.class);
-
 
 	protected ObjectMapper objectMapper;
 
@@ -78,16 +71,19 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 
 	protected AbstractJackson2HttpMessageConverter(ObjectMapper objectMapper) {
 		this.objectMapper = objectMapper;
+		this.setDefaultCharset(DEFAULT_CHARSET);
 	}
 
 	protected AbstractJackson2HttpMessageConverter(ObjectMapper objectMapper, MediaType supportedMediaType) {
 		super(supportedMediaType);
 		this.objectMapper = objectMapper;
+		this.setDefaultCharset(DEFAULT_CHARSET);
 	}
 
 	protected AbstractJackson2HttpMessageConverter(ObjectMapper objectMapper, MediaType... supportedMediaTypes) {
 		super(supportedMediaTypes);
 		this.objectMapper = objectMapper;
+		this.setDefaultCharset(DEFAULT_CHARSET);
 	}
 
 
@@ -144,7 +140,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	@Override
 	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
 		JavaType javaType = getJavaType(type, contextClass);
-		if (!jackson23Available || !logger.isWarnEnabled()) {
+		if (!logger.isWarnEnabled()) {
 			return (this.objectMapper.canDeserialize(javaType) && canRead(mediaType));
 		}
 		AtomicReference<Throwable> causeRef = new AtomicReference<Throwable>();
@@ -166,7 +162,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 
 	@Override
 	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
-		if (!jackson23Available || !logger.isWarnEnabled()) {
+		if (!logger.isWarnEnabled()) {
 			return (this.objectMapper.canSerialize(clazz) && canWrite(mediaType));
 		}
 		AtomicReference<Throwable> causeRef = new AtomicReference<Throwable>();
@@ -208,13 +204,12 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		return readJavaType(javaType, inputMessage);
 	}
 
-	@SuppressWarnings("deprecation")
 	private Object readJavaType(JavaType javaType, HttpInputMessage inputMessage) {
 		try {
 			if (inputMessage instanceof MappingJacksonInputMessage) {
 				Class<?> deserializationView = ((MappingJacksonInputMessage) inputMessage).getDeserializationView();
 				if (deserializationView != null) {
-					return this.objectMapper.readerWithView(deserializationView).withType(javaType).
+					return this.objectMapper.readerWithView(deserializationView).forType(javaType).
 							readValue(inputMessage.getBody());
 				}
 			}
@@ -226,7 +221,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
 	protected void writeInternal(Object object, Type type, HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
@@ -245,7 +239,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 				serializationView = container.getSerializationView();
 				filters = container.getFilters();
 			}
-			if (jackson26Available && type != null && value != null && TypeUtils.isAssignable(type, value.getClass())) {
+			if (type != null && value != null && TypeUtils.isAssignable(type, value.getClass())) {
 				javaType = getJavaType(type, null);
 			}
 			ObjectWriter objectWriter;
@@ -259,7 +253,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 				objectWriter = this.objectMapper.writer();
 			}
 			if (javaType != null && javaType.isContainerType()) {
-				objectWriter = objectWriter.withType(javaType);
+				objectWriter = objectWriter.forType(javaType);
 			}
 			objectWriter.writeValue(generator, value);
 
@@ -278,7 +272,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	 * @param object the object to write to the output message.
 	 */
 	protected void writePrefix(JsonGenerator generator, Object object) throws IOException {
-
 	}
 
 	/**
@@ -287,7 +280,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	 * @param object the object to write to the output message.
 	 */
 	protected void writeSuffix(JsonGenerator generator, Object object) throws IOException {
-
 	}
 
 	/**
@@ -304,14 +296,42 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 	 *   }
 	 * }
 	 * </pre>
-	 * @param type the type to return the java type for
+	 * @param type the generic type to return the Jackson JavaType for
 	 * @param contextClass a context class for the target type, for example a class
-	 * in which the target type appears in a method signature, can be {@code null}
-	 * signature, can be {@code null}
-	 * @return the java type
+	 * in which the target type appears in a method signature (can be {@code null})
+	 * @return the Jackson JavaType
 	 */
 	protected JavaType getJavaType(Type type, Class<?> contextClass) {
-		return this.objectMapper.getTypeFactory().constructType(type, contextClass);
+		TypeFactory typeFactory = this.objectMapper.getTypeFactory();
+		if (type instanceof TypeVariable && contextClass != null) {
+			ResolvableType resolvedType = resolveVariable(
+					(TypeVariable<?>) type, ResolvableType.forClass(contextClass));
+			if (resolvedType != ResolvableType.NONE) {
+				return typeFactory.constructType(resolvedType.resolve());
+			}
+		}
+		return typeFactory.constructType(type);
+	}
+
+	private ResolvableType resolveVariable(TypeVariable<?> typeVariable, ResolvableType contextType) {
+		ResolvableType resolvedType;
+		if (contextType.hasGenerics()) {
+			resolvedType = ResolvableType.forType(typeVariable, contextType);
+			if (resolvedType.resolve() != null) {
+				return resolvedType;
+			}
+		}
+		resolvedType = resolveVariable(typeVariable, contextType.getSuperType());
+		if (resolvedType.resolve() != null) {
+			return resolvedType;
+		}
+		for (ResolvableType ifc : contextType.getInterfaces()) {
+			resolvedType = resolveVariable(typeVariable, ifc);
+			if (resolvedType.resolve() != null) {
+				return resolvedType;
+			}
+		}
+		return ResolvableType.NONE;
 	}
 
 	/**

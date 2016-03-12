@@ -97,13 +97,13 @@ import org.springframework.context.ApplicationContextAware;
  * &lt;bean class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean">
  *   &lt;property name="featuresToEnable">
  *     &lt;array>
- *       &lt;util:constant static-field="com.fasterxml.jackson.databind.SerializationFeature$WRAP_ROOT_VALUE"/>
- *       &lt;util:constant static-field="com.fasterxml.jackson.databind.SerializationFeature$CLOSE_CLOSEABLE"/>
+ *       &lt;util:constant static-field="com.fasterxml.jackson.databind.SerializationFeature.WRAP_ROOT_VALUE"/>
+ *       &lt;util:constant static-field="com.fasterxml.jackson.databind.SerializationFeature.CLOSE_CLOSEABLE"/>
  *     &lt;/array>
  *   &lt;/property>
  *   &lt;property name="featuresToDisable">
  *     &lt;array>
- *       &lt;util:constant static-field="com.fasterxml.jackson.databind.MapperFeature$USE_ANNOTATIONS"/>
+ *       &lt;util:constant static-field="com.fasterxml.jackson.databind.MapperFeature.USE_ANNOTATIONS"/>
  *     &lt;/array>
  *   &lt;/property>
  * &lt;/bean>
@@ -113,9 +113,9 @@ import org.springframework.context.ApplicationContextAware;
  * detected on the classpath:
  * <ul>
  * <li><a href="https://github.com/FasterXML/jackson-datatype-jdk7">jackson-datatype-jdk7</a>: support for Java 7 types like {@link java.nio.file.Path}</li>
- * <li><a href="https://github.com/FasterXML/jackson-datatype-joda">jackson-datatype-joda</a>: support for Joda-Time types</li>
- * <li><a href="https://github.com/FasterXML/jackson-datatype-jsr310">jackson-datatype-jsr310</a>: support for Java 8 Date & Time API types</li>
  * <li><a href="https://github.com/FasterXML/jackson-datatype-jdk8">jackson-datatype-jdk8</a>: support for other Java 8 types like {@link java.util.Optional}</li>
+ * <li><a href="https://github.com/FasterXML/jackson-datatype-jsr310">jackson-datatype-jsr310</a>: support for Java 8 Date & Time API types</li>
+ * <li><a href="https://github.com/FasterXML/jackson-datatype-joda">jackson-datatype-joda</a>: support for Joda-Time types</li>
  * </ul>
  *
  * <p>In case you want to configure Jackson's {@link ObjectMapper} with a custom {@link Module},
@@ -127,7 +127,7 @@ import org.springframework.context.ApplicationContextAware;
  * &lt;/bean
  * </pre>
  *
- * <p>Tested against Jackson 2.2, 2.3, 2.4, 2.5, 2.6; compatible with Jackson 2.0 and higher.
+ * <p>Compatible with Jackson 2.6 and higher, as of Spring 4.3.
  *
  * @author <a href="mailto:dmitry.katsubo@gmail.com">Dmitry Katsubo</a>
  * @author Rossen Stoyanchev
@@ -325,6 +325,15 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	}
 
 	/**
+	 * Define if a wrapper will be used for indexed (List, array) properties or not by
+	 * default (only applies to {@link XmlMapper}).
+	 * @since 4.3
+	 */
+	public void setDefaultUseWrapper(boolean defaultUseWrapper) {
+		this.builder.defaultUseWrapper(defaultUseWrapper);
+	}
+
+	/**
 	 * Specify features to enable.
 	 * @see com.fasterxml.jackson.core.JsonParser.Feature
 	 * @see com.fasterxml.jackson.core.JsonGenerator.Feature
@@ -397,8 +406,9 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	}
 
 	/**
-	 * Customize the construction of Jackson handlers ({@link JsonSerializer}, {@link JsonDeserializer},
-	 * {@link KeyDeserializer}, {@code TypeResolverBuilder} and {@code TypeIdResolver}).
+	 * Customize the construction of Jackson handlers
+	 * ({@link JsonSerializer}, {@link JsonDeserializer}, {@link KeyDeserializer},
+	 * {@code TypeResolverBuilder} and {@code TypeIdResolver}).
 	 * @since 4.1.3
 	 * @see Jackson2ObjectMapperFactoryBean#setApplicationContext(ApplicationContext)
 	 */
@@ -407,8 +417,9 @@ public class Jackson2ObjectMapperFactoryBean implements FactoryBean<ObjectMapper
 	}
 
 	/**
-	 * Set the builder {@link ApplicationContext} in order to autowire Jackson handlers ({@link JsonSerializer},
-	 * {@link JsonDeserializer}, {@link KeyDeserializer}, {@code TypeResolverBuilder} and {@code TypeIdResolver}).
+	 * Set the builder {@link ApplicationContext} in order to autowire Jackson handlers
+	 * ({@link JsonSerializer}, {@link JsonDeserializer}, {@link KeyDeserializer},
+	 * {@code TypeResolverBuilder} and {@code TypeIdResolver}).
 	 * @since 4.1.3
 	 * @see Jackson2ObjectMapperBuilder#applicationContext(ApplicationContext)
 	 * @see SpringHandlerInstantiator

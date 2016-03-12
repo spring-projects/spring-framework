@@ -154,7 +154,7 @@ public class MockHttpServletResponse implements HttpServletResponse {
 	 * <p>If {@code false}, {@link #getCharacterEncoding()} will return a default encoding value.
 	 */
 	public boolean isCharset() {
-		return charset;
+		return this.charset;
 	}
 
 	@Override
@@ -552,11 +552,12 @@ public class MockHttpServletResponse implements HttpServletResponse {
 
 	private boolean setSpecialHeader(String name, Object value) {
 		if (CONTENT_TYPE_HEADER.equalsIgnoreCase(name)) {
-			setContentType((String) value);
+			setContentType(value.toString());
 			return true;
 		}
 		else if (CONTENT_LENGTH_HEADER.equalsIgnoreCase(name)) {
-			setContentLength(Integer.parseInt((String) value));
+			setContentLength(value instanceof Number ? ((Number) value).intValue() :
+					Integer.parseInt(value.toString()));
 			return true;
 		}
 		else {

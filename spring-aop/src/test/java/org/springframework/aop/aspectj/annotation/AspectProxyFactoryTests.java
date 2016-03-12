@@ -16,13 +16,13 @@
 
 package org.springframework.aop.aspectj.annotation;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.junit.Ignore;
 import org.junit.Test;
 import test.aop.PerThisAspect;
 
@@ -80,7 +80,18 @@ public class AspectProxyFactoryTests {
 	}
 
 	@Test
-	@Ignore  // InstantiationModelAwarePointcutAdvisorImpl not serializable yet
+	@SuppressWarnings("unchecked")
+	public void testSerializable() throws Exception {
+		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
+		proxyFactory.addAspect(LoggingAspectOnVarargs.class);
+		ITestBean proxy = proxyFactory.getProxy();
+		assertTrue(proxy.doWithVarargs(MyEnum.A, MyOtherEnum.C));
+		ITestBean tb = (ITestBean) SerializationTestUtils.serializeAndDeserialize(proxy);
+		assertTrue(tb.doWithVarargs(MyEnum.A, MyOtherEnum.C));
+	}
+
+	@Test
+	@SuppressWarnings("unchecked")
 	public void testWithInstance() throws Exception {
 		MultiplyReturnValue aspect = new MultiplyReturnValue();
 		int multiple = 3;
@@ -106,6 +117,7 @@ public class AspectProxyFactoryTests {
 	}
 
 	@Test  // SPR-13328
+	@SuppressWarnings("unchecked")
 	public void testProxiedVarargsWithEnumArray() throws Exception {
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
 		proxyFactory.addAspect(LoggingAspectOnVarargs.class);
@@ -114,6 +126,7 @@ public class AspectProxyFactoryTests {
 	}
 
 	@Test  // SPR-13328
+	@SuppressWarnings("unchecked")
 	public void testUnproxiedVarargsWithEnumArray() throws Exception {
 		AspectJProxyFactory proxyFactory = new AspectJProxyFactory(new TestBean());
 		proxyFactory.addAspect(LoggingAspectOnSetter.class);
@@ -126,11 +139,13 @@ public class AspectProxyFactoryTests {
 
 		int getAge();
 
+		@SuppressWarnings("unchecked")
 		<V extends MyInterface> boolean doWithVarargs(V... args);
 	}
 
 
-	public static class TestBean implements ITestBean {
+	@SuppressWarnings("serial")
+	public static class TestBean implements ITestBean, Serializable {
 
 		private int age;
 
@@ -168,7 +183,8 @@ public class AspectProxyFactoryTests {
 
 
 	@Aspect
-	public static class LoggingAspectOnVarargs {
+	@SuppressWarnings("serial")
+	public static class LoggingAspectOnVarargs implements Serializable {
 
 		@Around("execution(* doWithVarargs(*))")
 		public Object doLog(ProceedingJoinPoint pjp) throws Throwable {
@@ -190,11 +206,9 @@ public class AspectProxyFactoryTests {
 }
 
 
-/**
- * @author Rod Johnson
- */
 @Aspect
-class MultiplyReturnValue {
+@SuppressWarnings("serial")
+class MultiplyReturnValue implements Serializable {
 
 	private int multiple = 2;
 

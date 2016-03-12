@@ -528,7 +528,7 @@ public class CachingConnectionFactory extends SingleConnectionFactory {
 		}
 
 		protected boolean destinationEquals(DestinationCacheKey otherKey) {
-			return (this.destination.getClass().equals(otherKey.destination.getClass()) &&
+			return (this.destination.getClass() == otherKey.destination.getClass() &&
 					(this.destination.equals(otherKey.destination) ||
 							getDestinationString().equals(otherKey.getDestinationString())));
 		}

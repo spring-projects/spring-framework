@@ -52,6 +52,7 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 	@Rule
 	public final ExpectedException thrown = ExpectedException.none();
 
+
 	@Test
 	public abstract void sampleConfiguration();
 
@@ -79,6 +80,7 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 	@Test
 	public abstract void jmsListeners();
 
+
 	/**
 	 * Test for {@link SampleBean} discovery. If a factory with the default name
 	 * is set, an endpoint will use it automatically
@@ -90,18 +92,6 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 				context.getBean("simpleFactory", JmsListenerContainerTestFactory.class);
 		assertEquals(1, defaultFactory.getListenerContainers().size());
 		assertEquals(1, simpleFactory.getListenerContainers().size());
-	}
-
-	@Component
-	static class SampleBean {
-
-		@JmsListener(destination = "myQueue")
-		public void defaultHandle(String msg) {
-		}
-
-		@JmsListener(containerFactory = "simpleFactory", destination = "myQueue")
-		public void simpleHandle(String msg) {
-		}
 	}
 
 	/**
@@ -125,29 +115,6 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 		ReflectionUtils.makeAccessible(m);
 		Object destination = ReflectionUtils.invokeMethod(m, endpoint);
 		assertEquals("queueOut", destination);
-	}
-
-	@Component
-	static class FullBean {
-
-		@JmsListener(id = "listener1", containerFactory = "simpleFactory", destination = "queueIn",
-				selector = "mySelector", subscription = "mySubscription", concurrency = "1-10")
-		@SendTo("queueOut")
-		public String fullHandle(String msg) {
-			return "reply";
-		}
-	}
-
-	@Component
-	static class FullConfigurableBean {
-
-		@JmsListener(id = "${jms.listener.id}", containerFactory = "${jms.listener.containerFactory}",
-				destination = "${jms.listener.destination}", selector = "${jms.listener.selector}",
-				subscription = "${jms.listener.subscription}", concurrency = "${jms.listener.concurrency}")
-		@SendTo("${jms.listener.sendTo}")
-		public String fullHandle(String msg) {
-			return "reply";
-		}
 	}
 
 	/**
@@ -179,14 +146,6 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 				customRegistry.getListenerContainer("myCustomEndpointId"));
 	}
 
-	@Component
-	static class CustomBean {
-
-		@JmsListener(id = "listenerId", containerFactory = "customFactory", destination = "myQueue")
-		public void customHandle(String msg) {
-		}
-	}
-
 	/**
 	 * Test for {@link DefaultBean} that does not define the container
 	 * factory to use as a default is registered with an explicit
@@ -208,13 +167,6 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 		assertEquals(1, defaultFactory.getListenerContainers().size());
 	}
 
-	static class DefaultBean {
-
-		@JmsListener(destination = "myQueue")
-		public void handleIt(String msg) {
-		}
-	}
-
 	/**
 	 * Test for {@link ValidationBean} with a validator ({@link TestValidator}) specified
 	 * in a custom {@link org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory}.
@@ -232,14 +184,6 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 		endpoint.setupListenerContainer(container);
 		MessagingMessageListenerAdapter listener = (MessagingMessageListenerAdapter) container.getMessageListener();
 		listener.onMessage(new StubTextMessage("failValidation"), mock(Session.class));
-	}
-
-	@Component
-	static class ValidationBean {
-
-		@JmsListener(containerFactory = "defaultFactory", destination = "myQueue")
-		public void defaultHandle(@Validated String msg) {
-		}
 	}
 
 	/**
@@ -264,6 +208,71 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 		assertEquals("2-10", second.getConcurrency());
 	}
 
+
+	@Component
+	static class SampleBean {
+
+		@JmsListener(destination = "myQueue")
+		public void defaultHandle(String msg) {
+		}
+
+		@JmsListener(containerFactory = "simpleFactory", destination = "myQueue")
+		public void simpleHandle(String msg) {
+		}
+	}
+
+
+	@Component
+	static class FullBean {
+
+		@JmsListener(id = "listener1", containerFactory = "simpleFactory", destination = "queueIn",
+				selector = "mySelector", subscription = "mySubscription", concurrency = "1-10")
+		@SendTo("queueOut")
+		public String fullHandle(String msg) {
+			return "reply";
+		}
+	}
+
+
+	@Component
+	static class FullConfigurableBean {
+
+		@JmsListener(id = "${jms.listener.id}", containerFactory = "${jms.listener.containerFactory}",
+				destination = "${jms.listener.destination}", selector = "${jms.listener.selector}",
+				subscription = "${jms.listener.subscription}", concurrency = "${jms.listener.concurrency}")
+		@SendTo("${jms.listener.sendTo}")
+		public String fullHandle(String msg) {
+			return "reply";
+		}
+	}
+
+
+	@Component
+	static class CustomBean {
+
+		@JmsListener(id = "listenerId", containerFactory = "customFactory", destination = "myQueue")
+		public void customHandle(String msg) {
+		}
+	}
+
+
+	static class DefaultBean {
+
+		@JmsListener(destination = "myQueue")
+		public void handleIt(String msg) {
+		}
+	}
+
+
+	@Component
+	static class ValidationBean {
+
+		@JmsListener(containerFactory = "defaultFactory", destination = "myQueue")
+		public void defaultHandle(@Validated String msg) {
+		}
+	}
+
+
 	@Component
 	static class JmsListenerRepeatableBean {
 
@@ -271,8 +280,8 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 		@JmsListener(id = "second", destination = "anotherQueue", concurrency = "2-10")
 		public void repeatableHandle(String msg) {
 		}
-
 	}
+
 
 	@Component
 	static class JmsListenersBean {
@@ -283,8 +292,8 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 		})
 		public void repeatableHandle(String msg) {
 		}
-
 	}
+
 
 	static class TestValidator implements Validator {
 
@@ -301,4 +310,5 @@ public abstract class AbstractJmsAnnotationDrivenTests {
 			}
 		}
 	}
+
 }

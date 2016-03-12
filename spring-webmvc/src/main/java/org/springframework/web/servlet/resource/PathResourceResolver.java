@@ -158,7 +158,7 @@ public class PathResourceResolver extends AbstractResourceResolver {
 	}
 
 	private boolean isResourceUnderLocation(Resource resource, Resource location) throws IOException {
-		if (!resource.getClass().equals(location.getClass())) {
+		if (resource.getClass() != location.getClass()) {
 			return false;
 		}
 

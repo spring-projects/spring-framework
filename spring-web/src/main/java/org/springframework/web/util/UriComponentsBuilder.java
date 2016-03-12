@@ -584,8 +584,9 @@ public class UriComponentsBuilder implements Cloneable {
 	}
 
 	/**
-	 * Append the given path segments to the existing path of this builder.
-	 * Each given path segment may contain URI template variables.
+	 * Append path segments to the existing path. Each path segment may contain
+	 * URI template variables and should not contain any slashes.
+	 * Use {@code path("/")} subsequently to ensure a trailing slash.
 	 * @param pathSegments the URI path segments
 	 * @return this UriComponentsBuilder
 	 */
@@ -604,8 +605,9 @@ public class UriComponentsBuilder implements Cloneable {
 	 * be parsed unambiguously. Such values should be substituted for URI
 	 * variables to enable correct parsing:
 	 * <pre class="code">
-	 * String uriString = &quot;/hotels/42?filter={value}&quot;;
-	 * UriComponentsBuilder.fromUriString(uriString).buildAndExpand(&quot;hot&amp;cold&quot;);
+	 * UriComponentsBuilder.fromUriString(&quot;/hotels/42&quot;)
+	 * 	.query(&quot;filter={value}&quot;)
+	 * 	.buildAndExpand(&quot;hot&amp;cold&quot;);
 	 * </pre>
 	 * @param query the query string
 	 * @return this UriComponentsBuilder

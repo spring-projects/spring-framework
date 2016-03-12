@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,14 @@
 
 package org.springframework.format.datetime.standard;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.MonthDay;
+import java.time.Period;
+import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -64,7 +68,6 @@ public class DateTimeFormattingTests {
 	private void setUp(DateTimeFormatterRegistrar registrar) {
 		conversionService = new FormattingConversionService();
 		DefaultConversionService.addDefaultConverters(conversionService);
-
 		registrar.registerFormatters(conversionService);
 
 		DateTimeBean bean = new DateTimeBean();
@@ -290,6 +293,14 @@ public class DateTimeFormattingTests {
 	}
 
 	@Test
+	public void testBindDateTimeOverflow() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("dateTimeAnnotatedPattern", "02/29/09 12:00 PM");
+		binder.bind(propertyValues);
+		assertEquals(1, binder.getBindingResult().getErrorCount());
+	}
+
+	@Test
 	public void testBindISODate() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("isoDate", "2009-10-31");
@@ -334,6 +345,42 @@ public class DateTimeFormattingTests {
 		assertTrue(binder.getBindingResult().getFieldValue("instant").toString().startsWith("2009-10-31"));
 	}
 
+	@Test
+	public void testBindPeriod() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("period", "P6Y3M1D");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertTrue(binder.getBindingResult().getFieldValue("period").toString().equals("P6Y3M1D"));
+	}
+
+	@Test
+	public void testBindDuration() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("duration", "PT8H6M12.345S");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertTrue(binder.getBindingResult().getFieldValue("duration").toString().equals("PT8H6M12.345S"));
+	}
+
+	@Test
+	public void testBindYearMonth() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("yearMonth", "2007-12");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertTrue(binder.getBindingResult().getFieldValue("yearMonth").toString().equals("2007-12"));
+	}
+
+	@Test
+	public void testBindMonthDay() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("monthDay", "--12-03");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertTrue(binder.getBindingResult().getFieldValue("monthDay").toString().equals("--12-03"));
+	}
+
 
 	public static class DateTimeBean {
 
@@ -365,6 +412,14 @@ public class DateTimeFormattingTests {
 		private LocalDateTime isoDateTime;
 
 		private Instant instant;
+
+		private Period period;
+
+		private Duration duration;
+
+		private YearMonth yearMonth;
+
+		private MonthDay monthDay;
 
 		private final List<DateTimeBean> children = new ArrayList<DateTimeBean>();
 
@@ -454,6 +509,38 @@ public class DateTimeFormattingTests {
 
 		public void setInstant(Instant instant) {
 			this.instant = instant;
+		}
+
+		public Period getPeriod() {
+			return period;
+		}
+
+		public void setPeriod(Period period) {
+			this.period = period;
+		}
+
+		public Duration getDuration() {
+			return duration;
+		}
+
+		public void setDuration(Duration duration) {
+			this.duration = duration;
+		}
+
+		public YearMonth getYearMonth() {
+			return yearMonth;
+		}
+
+		public void setYearMonth(YearMonth yearMonth) {
+			this.yearMonth = yearMonth;
+		}
+
+		public MonthDay getMonthDay() {
+			return monthDay;
+		}
+
+		public void setMonthDay(MonthDay monthDay) {
+			this.monthDay = monthDay;
 		}
 
 		public List<DateTimeBean> getChildren() {

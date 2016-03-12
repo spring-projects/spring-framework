@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,10 @@
 
 package org.springframework.web.servlet.support;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import javax.servlet.ServletException;
@@ -25,6 +27,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.CacheControl;
+import org.springframework.http.HttpMethod;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.HttpSessionRequiredException;
@@ -51,6 +55,7 @@ import org.springframework.web.context.support.WebApplicationObjectSupport;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Brian Clozel
+ * @author Rossen Stoyanchev
  * @see #setCacheSeconds
  * @see #setCacheControl
  * @see #setRequireSession
@@ -70,11 +75,13 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 	private static final String HEADER_EXPIRES = "Expires";
 
-	private static final String HEADER_CACHE_CONTROL = "Cache-Control";
+	protected static final String HEADER_CACHE_CONTROL = "Cache-Control";
 
 
 	/** Set of supported HTTP methods */
 	private Set<String> supportedMethods;
+
+	private String allowHeader;
 
 	private boolean requireSession = false;
 
@@ -110,11 +117,12 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 */
 	public WebContentGenerator(boolean restrictDefaultSupportedMethods) {
 		if (restrictDefaultSupportedMethods) {
-			this.supportedMethods = new HashSet<String>(4);
+			this.supportedMethods = new LinkedHashSet<String>(4);
 			this.supportedMethods.add(METHOD_GET);
 			this.supportedMethods.add(METHOD_HEAD);
 			this.supportedMethods.add(METHOD_POST);
 		}
+		initAllowHeader();
 	}
 
 	/**
@@ -122,7 +130,28 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * @param supportedMethods the supported HTTP methods for this content generator
 	 */
 	public WebContentGenerator(String... supportedMethods) {
-		this.supportedMethods = new HashSet<String>(Arrays.asList(supportedMethods));
+		setSupportedMethods(supportedMethods);
+	}
+
+	private void initAllowHeader() {
+		Collection<String> allowedMethods;
+		if (this.supportedMethods == null) {
+			allowedMethods = new ArrayList<String>(HttpMethod.values().length - 1);
+			for (HttpMethod method : HttpMethod.values()) {
+				if (!HttpMethod.TRACE.equals(method)) {
+					allowedMethods.add(method.name());
+				}
+			}
+		}
+		else if (this.supportedMethods.contains(HttpMethod.OPTIONS.name())) {
+			allowedMethods = this.supportedMethods;
+		}
+		else {
+			allowedMethods = new ArrayList<String>(this.supportedMethods);
+			allowedMethods.add(HttpMethod.OPTIONS.name());
+
+		}
+		this.allowHeader = StringUtils.collectionToCommaDelimitedString(allowedMethods);
 	}
 
 
@@ -132,12 +161,13 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * unrestricted for general controllers and interceptors.
 	 */
 	public final void setSupportedMethods(String... methods) {
-		if (methods != null) {
-			this.supportedMethods = new HashSet<String>(Arrays.asList(methods));
+		if (!ObjectUtils.isEmpty(methods)) {
+			this.supportedMethods = new LinkedHashSet<String>(Arrays.asList(methods));
 		}
 		else {
 			this.supportedMethods = null;
 		}
+		initAllowHeader();
 	}
 
 	/**
@@ -145,6 +175,19 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 */
 	public final String[] getSupportedMethods() {
 		return StringUtils.toStringArray(this.supportedMethods);
+	}
+
+	/**
+	 * Return the "Allow" header value to use in response to an HTTP OPTIONS
+	 * request based on the configured {@link #setSupportedMethods supported
+	 * methods} also automatically adding "OPTIONS" to the list even if not
+	 * present as a supported method. This means sub-classes don't have to
+	 * explicitly list "OPTIONS" as a supported method as long as HTTP OPTIONS
+	 * requests are handled before making a call to
+	 * {@link #checkRequest(HttpServletRequest)}.
+	 */
+	protected String getAllowHeader() {
+		return this.allowHeader;
 	}
 
 	/**

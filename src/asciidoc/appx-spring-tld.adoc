@@ -15,12 +15,14 @@ http://www.w3.org/TR/xhtml1/dtds.html#a_dtd_XHTML-1.0-Strict[DTD].
 
 This appendix describes the `spring.tld` tag library.
 
+* <<spring.tld.argument>>
 * <<spring.tld.bind>>
 * <<spring.tld.escapeBody>>
 * <<spring.tld.hasBindErrors>>
 * <<spring.tld.htmlEscape>>
 * <<spring.tld.message>>
 * <<spring.tld.nestedPath>>
+* <<spring.tld.param>>
 * <<spring.tld.theme>>
 * <<spring.tld.transform>>
 * <<spring.tld.url>>
@@ -45,7 +47,7 @@ inside the message and theme tags.
 | false
 | true
 | The value of the argument.
-
+|===
 
 
 
@@ -324,7 +326,7 @@ inside the url tag.
 | false
 | true
 | The value of the parameter.
-
+|===
 
 
 

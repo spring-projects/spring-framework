@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,11 +20,16 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import org.junit.Test;
 
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
@@ -32,6 +37,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.json.MappingJacksonValue;
@@ -215,7 +221,7 @@ public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 		bean.setWith2("with");
 		bean.setWithout("without");
 		HttpEntity<MySampleBean> entity = new HttpEntity<MySampleBean>(bean, entityHeaders);
-		String s = template.postForObject(baseUrl + "/jsonpost", entity, String.class, "post");
+		String s = template.postForObject(baseUrl + "/jsonpost", entity, String.class);
 		assertTrue(s.contains("\"with1\":\"with\""));
 		assertTrue(s.contains("\"with2\":\"with\""));
 		assertTrue(s.contains("\"without\":\"without\""));
@@ -229,7 +235,7 @@ public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 		MappingJacksonValue jacksonValue = new MappingJacksonValue(bean);
 		jacksonValue.setSerializationView(MyJacksonView1.class);
 		HttpEntity<MappingJacksonValue> entity = new HttpEntity<MappingJacksonValue>(jacksonValue, entityHeaders);
-		String s = template.postForObject(baseUrl + "/jsonpost", entity, String.class, "post");
+		String s = template.postForObject(baseUrl + "/jsonpost", entity, String.class);
 		assertTrue(s.contains("\"with1\":\"with\""));
 		assertFalse(s.contains("\"with2\":\"with\""));
 		assertFalse(s.contains("\"without\":\"without\""));
@@ -241,6 +247,21 @@ public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 	public void serverPort() {
 		String s = template.getForObject("http://localhost:{port}/get", String.class, port);
 		assertEquals("Invalid content", helloWorld, s);
+	}
+
+	@Test  // SPR-13154
+	public void jsonPostForObjectWithJacksonTypeInfoList() throws URISyntaxException {
+		List<ParentClass> list = new ArrayList<>();
+		list.add(new Foo("foo"));
+		list.add(new Bar("bar"));
+		ParameterizedTypeReference<?> typeReference = new ParameterizedTypeReference<List<ParentClass>>() {};
+		RequestEntity<List<ParentClass>> entity = RequestEntity
+				.post(new URI(baseUrl + "/jsonpost"))
+				.contentType(new MediaType("application", "json", Charset.forName("UTF-8")))
+				.body(list, typeReference.getType());
+		String content = template.exchange(entity, String.class).getBody();
+		assertTrue(content.contains("\"type\":\"foo\""));
+		assertTrue(content.contains("\"type\":\"bar\""));
 	}
 
 	public interface MyJacksonView1 {};
@@ -287,6 +308,49 @@ public class RestTemplateIntegrationTests extends AbstractJettyServerTestCase {
 
 		public void setWithout(String without) {
 			this.without = without;
+		}
+	}
+
+	@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+	public static class ParentClass {
+
+		private String parentProperty;
+
+		public ParentClass() {
+		}
+
+		public ParentClass(String parentProperty) {
+			this.parentProperty = parentProperty;
+		}
+
+		public String getParentProperty() {
+			return parentProperty;
+		}
+
+		public void setParentProperty(String parentProperty) {
+			this.parentProperty = parentProperty;
+		}
+	}
+
+	@JsonTypeName("foo")
+	public static class Foo extends ParentClass {
+
+		public Foo() {
+		}
+
+		public Foo(String parentProperty) {
+			super(parentProperty);
+		}
+	}
+
+	@JsonTypeName("bar")
+	public static class Bar extends ParentClass {
+
+		public Bar() {
+		}
+
+		public Bar(String parentProperty) {
+			super(parentProperty);
 		}
 	}
 

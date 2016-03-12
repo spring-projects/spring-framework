@@ -54,6 +54,7 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 	@Rule
 	public final ExpectedException thrown = ExpectedException.none();
 
+
 	@Override
 	@Test
 	public void sampleConfiguration() {
@@ -113,6 +114,7 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 	}
 
 	@Override
+	@Test
 	public void jmsListenerIsRepeatable() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
 				EnableJmsDefaultContainerFactoryConfig.class, JmsListenerRepeatableBean.class);
@@ -120,6 +122,7 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 	}
 
 	@Override
+	@Test
 	public void jmsListeners() {
 		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
 				EnableJmsDefaultContainerFactoryConfig.class, JmsListenersBean.class);
@@ -150,6 +153,7 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 		assertTrue("Should have been stopped " + container, container.isStopped());
 	}
 
+
 	@EnableJms
 	@Configuration
 	static class EnableJmsSampleConfig {
@@ -165,6 +169,7 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 		}
 	}
 
+
 	@EnableJms
 	@Configuration
 	static class EnableJmsFullConfig {
@@ -174,6 +179,7 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 			return new JmsListenerContainerTestFactory();
 		}
 	}
+
 
 	@EnableJms
 	@Configuration
@@ -190,6 +196,7 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 			return new PropertySourcesPlaceholderConfigurer();
 		}
 	}
+
 
 	@Configuration
 	@EnableJms
@@ -228,6 +235,7 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 		}
 	}
 
+
 	@Configuration
 	@EnableJms
 	static class EnableJmsCustomContainerFactoryConfig implements JmsListenerConfigurer {
@@ -243,6 +251,7 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 		}
 	}
 
+
 	@Configuration
 	@EnableJms
 	static class EnableJmsDefaultContainerFactoryConfig {
@@ -252,6 +261,7 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 			return new JmsListenerContainerTestFactory();
 		}
 	}
+
 
 	@Configuration
 	@EnableJms
@@ -274,6 +284,7 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 			return new JmsListenerContainerTestFactory();
 		}
 	}
+
 
 	@Component
 	@Lazy

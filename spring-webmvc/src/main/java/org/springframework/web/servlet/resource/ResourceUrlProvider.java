@@ -19,7 +19,7 @@ package org.springframework.web.servlet.resource;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
@@ -55,7 +55,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 
 	private PathMatcher pathMatcher = new AntPathMatcher();
 
-	private final Map<String, ResourceHttpRequestHandler> handlerMap = new HashMap<String, ResourceHttpRequestHandler>();
+	private final Map<String, ResourceHttpRequestHandler> handlerMap = new LinkedHashMap<String, ResourceHttpRequestHandler>();
 
 	private boolean autodetect = true;
 
@@ -165,11 +165,11 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 * URL path to expose for public use.
 	 * @param request the current request
 	 * @param requestUrl the request URL path to resolve
-	 * @return the resolved public URL path or {@code null} if unresolved
+	 * @return the resolved public URL path, or {@code null} if unresolved
 	 */
 	public final String getForRequestUrl(HttpServletRequest request, String requestUrl) {
 		if (logger.isTraceEnabled()) {
-			logger.trace("Getting resource URL for requestURL=" + requestUrl);
+			logger.trace("Getting resource URL for request URL \"" + requestUrl + "\"");
 		}
 		int prefixIndex = getLookupPathIndex(request);
 		int suffixIndex = getQueryParamsIndex(requestUrl);
@@ -177,7 +177,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		String suffix = requestUrl.substring(suffixIndex);
 		String lookupPath = requestUrl.substring(prefixIndex, suffixIndex);
 		String resolvedLookupPath = getForLookupPath(lookupPath);
-		return (resolvedLookupPath != null) ? prefix + resolvedLookupPath + suffix : null;
+		return (resolvedLookupPath != null ? prefix + resolvedLookupPath + suffix : null);
 	}
 
 	private int getLookupPathIndex(HttpServletRequest request) {
@@ -205,14 +205,16 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 	 */
 	public final String getForLookupPath(String lookupPath) {
 		if (logger.isTraceEnabled()) {
-			logger.trace("Getting resource URL for lookupPath=" + lookupPath);
+			logger.trace("Getting resource URL for lookup path \"" + lookupPath + "\"");
 		}
+
 		List<String> matchingPatterns = new ArrayList<String>();
 		for (String pattern : this.handlerMap.keySet()) {
 			if (getPathMatcher().match(pattern, lookupPath)) {
 				matchingPatterns.add(pattern);
 			}
 		}
+
 		if (!matchingPatterns.isEmpty()) {
 			Comparator<String> patternComparator = getPathMatcher().getPatternComparator(lookupPath);
 			Collections.sort(matchingPatterns, patternComparator);
@@ -220,7 +222,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 				String pathWithinMapping = getPathMatcher().extractPathWithinPattern(pattern, lookupPath);
 				String pathMapping = lookupPath.substring(0, lookupPath.indexOf(pathWithinMapping));
 				if (logger.isTraceEnabled()) {
-					logger.trace("Invoking ResourceResolverChain for URL pattern=\"" + pattern + "\"");
+					logger.trace("Invoking ResourceResolverChain for URL pattern \"" + pattern + "\"");
 				}
 				ResourceHttpRequestHandler handler = this.handlerMap.get(pattern);
 				ResourceResolverChain chain = new DefaultResourceResolverChain(handler.getResourceResolvers());
@@ -229,12 +231,15 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 					continue;
 				}
 				if (logger.isTraceEnabled()) {
-					logger.trace("Resolved public resource URL path=\"" + resolved + "\"");
+					logger.trace("Resolved public resource URL path \"" + resolved + "\"");
 				}
 				return pathMapping + resolved;
 			}
 		}
-		logger.debug("No matching resource mapping");
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("No matching resource mapping for lookup path \"" + lookupPath + "\"");
+		}
 		return null;
 	}
 

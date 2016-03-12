@@ -98,6 +98,35 @@ public class AnnotatedElementUtils {
 
 
 	/**
+	 * Build an adapted {@link AnnotatedElement} for the given annotations,
+	 * typically for use with other methods on {@link AnnotatedElementUtils}.
+	 * @param annotations the annotations to expose through the {@code AnnotatedElement}
+	 * @since 4.3
+	 */
+	public static AnnotatedElement forAnnotations(final Annotation... annotations) {
+		return new AnnotatedElement() {
+			@Override
+			@SuppressWarnings("unchecked")
+			public <T extends Annotation> T getAnnotation(Class<T> annotationClass) {
+				for (Annotation ann : annotations) {
+					if (ann.annotationType() == annotationClass) {
+						return (T) ann;
+					}
+				}
+				return null;
+			}
+			@Override
+			public Annotation[] getAnnotations() {
+				return annotations;
+			}
+			@Override
+			public Annotation[] getDeclaredAnnotations() {
+				return annotations;
+			}
+		};
+	}
+
+	/**
 	 * Get the fully qualified class names of all meta-annotation types
 	 * <em>present</em> on the annotation (of the specified {@code annotationType})
 	 * on the supplied {@link AnnotatedElement}.
@@ -296,7 +325,7 @@ public class AnnotatedElementUtils {
 	 */
 	public static <A extends Annotation> A getMergedAnnotation(AnnotatedElement element, Class<A> annotationType) {
 		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, annotationType);
-		return (attributes != null ? AnnotationUtils.synthesizeAnnotation(attributes, annotationType, element) : null);
+		return AnnotationUtils.synthesizeAnnotation(attributes, annotationType, element);
 	}
 
 	/**
@@ -391,18 +420,17 @@ public class AnnotatedElementUtils {
 	 * the result back into an annotation of the specified {@code annotationType}.
 	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both
 	 * within a single annotation and within the annotation hierarchy.
-	 * <p>This method delegates to {@link #findMergedAnnotation(AnnotatedElement, String)}.
 	 * @param element the annotated element
 	 * @param annotationType the annotation type to find
 	 * @return the merged, synthesized {@code Annotation}, or {@code null} if not found
 	 * @since 4.2
-	 * @see #findMergedAnnotation(AnnotatedElement, String)
 	 * @see #findMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
 	 * @see #getMergedAnnotationAttributes(AnnotatedElement, Class)
 	 */
 	public static <A extends Annotation> A findMergedAnnotation(AnnotatedElement element, Class<A> annotationType) {
 		Assert.notNull(annotationType, "annotationType must not be null");
-		return findMergedAnnotation(element, annotationType.getName());
+		AnnotationAttributes attributes = findMergedAnnotationAttributes(element, annotationType, false, false);
+		return AnnotationUtils.synthesizeAnnotation(attributes, annotationType, element);
 	}
 
 	/**
@@ -423,12 +451,13 @@ public class AnnotatedElementUtils {
 	 * @see #findMergedAnnotation(AnnotatedElement, Class)
 	 * @see #findMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
 	 * @see AnnotationUtils#synthesizeAnnotation(Map, Class, AnnotatedElement)
+	 * @deprecated As of Spring Framework 4.2.3, use {@link #findMergedAnnotation(AnnotatedElement, Class)} instead.
 	 */
+	@Deprecated
 	@SuppressWarnings("unchecked")
 	public static <A extends Annotation> A findMergedAnnotation(AnnotatedElement element, String annotationName) {
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(element, annotationName, false, false);
-		return (attributes != null ?
-				AnnotationUtils.synthesizeAnnotation(attributes, (Class<A>) attributes.annotationType(), element) : null);
+		return AnnotationUtils.synthesizeAnnotation(attributes, (Class<A>) attributes.annotationType(), element);
 	}
 
 	/**
@@ -459,13 +488,11 @@ public class AnnotatedElementUtils {
 	 * @since 4.2
 	 * @see #findMergedAnnotation(AnnotatedElement, Class)
 	 * @see #getMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
-	 * @deprecated as of 4.2.3; use {@link #findMergedAnnotation(AnnotatedElement, Class)} instead
 	 */
-	@Deprecated
 	public static AnnotationAttributes findMergedAnnotationAttributes(AnnotatedElement element,
 			Class<? extends Annotation> annotationType, boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
 
-		AnnotationAttributes attributes = searchWithFindSemantics(element, annotationType, null,
+		AnnotationAttributes attributes = searchWithFindSemantics(element, annotationType, annotationType.getName(),
 				new MergedAnnotationAttributesProcessor(annotationType, null, classValuesAsString, nestedAnnotationsAsMap));
 		AnnotationUtils.postProcessAnnotationAttributes(element, attributes, classValuesAsString, nestedAnnotationsAsMap);
 		return attributes;

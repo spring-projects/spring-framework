@@ -60,7 +60,6 @@ import org.springframework.messaging.tcp.ReconnectStrategy;
 import org.springframework.messaging.tcp.TcpConnectionHandler;
 import org.springframework.messaging.tcp.TcpOperations;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 
@@ -81,7 +80,6 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 	public static final Class<NettyTcpClient> REACTOR_TCP_CLIENT_TYPE = NettyTcpClient.class;
 
 	private static final Method eventLoopGroupMethod = initEventLoopGroupMethod();
-
 
 
 	private final EventLoopGroup eventLoopGroup;
@@ -107,7 +105,6 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 	 * @param codec the codec to use for encoding and decoding the TCP stream
 	 */
 	public Reactor2TcpClient(final String host, final int port, final Codec<Buffer, Message<P>, Message<P>> codec) {
-
 		// Reactor 2.0.5 requires NioEventLoopGroup vs 2.0.6+ requires EventLoopGroup
 		final NioEventLoopGroup nioEventLoopGroup = initEventLoopGroup();
 		this.eventLoopGroup = nioEventLoopGroup;
@@ -182,8 +179,8 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 		return new PassThroughPromiseToListenableFutureAdapter<Void>(
 				promise.onError(new Consumer<Throwable>() {
 					@Override
-					public void accept(Throwable throwable) {
-						connectionHandler.afterConnectFailure(throwable);
+					public void accept(Throwable ex) {
+						connectionHandler.afterConnectFailure(ex);
 					}
 				})
 		);
@@ -262,7 +259,7 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 				return method;
 			}
 		}
-		throw new IllegalStateException("No compatible Reactor version found.");
+		throw new IllegalStateException("No compatible Reactor version found");
 	}
 
 
@@ -270,8 +267,8 @@ public class Reactor2TcpClient<P> implements TcpOperations<P> {
 
 		@Override
 		public ReactorConfiguration read() {
-			return new ReactorConfiguration(Collections.<DispatcherConfiguration>emptyList(),
-					"sync", new Properties());
+			return new ReactorConfiguration(
+					Collections.<DispatcherConfiguration>emptyList(), "sync", new Properties());
 		}
 	}
 

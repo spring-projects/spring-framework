@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,6 +28,14 @@ import org.springframework.core.annotation.AliasFor;
  * Marks the annotated method or type as permitting cross origin requests.
  *
  * <p>By default, all origins and headers are permitted.
+ *
+ * <p><b>NOTE:</b> {@code @CrossOrigin} will only be processed if an an appropriate
+ * {@code HandlerMapping}-{@code HandlerAdapter} pair is configured such as the
+ * {@code RequestMappingHandlerMapping}-{@code RequestMappingHandlerAdapter} pair
+ * which are the default in the MVC Java config and the MVC namespace.
+ * In particular {@code @CrossOrigin} is not supported with the
+ * {@code DefaultAnnotationHandlerMapping}-{@code AnnotationMethodHandlerAdapter}
+ * pair both of which are also deprecated.
  *
  * @author Russell Allen
  * @author Sebastien Deleuze

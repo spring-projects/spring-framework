@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.net.URI;
 import java.util.List;
 
 import org.springframework.core.MethodParameter;
@@ -122,9 +121,8 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 		Object body = readWithMessageConverters(webRequest, parameter, paramType);
 		if (RequestEntity.class == parameter.getParameterType()) {
-			URI url = inputMessage.getURI();
-			HttpMethod httpMethod = inputMessage.getMethod();
-			return new RequestEntity<Object>(body, inputMessage.getHeaders(), httpMethod, url);
+			return new RequestEntity<Object>(body, inputMessage.getHeaders(),
+					inputMessage.getMethod(), inputMessage.getURI());
 		}
 		else {
 			return new HttpEntity<Object>(body, inputMessage.getHeaders());
@@ -172,8 +170,9 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		Object body = responseEntity.getBody();
 		if (responseEntity instanceof ResponseEntity) {
 			outputMessage.setStatusCode(((ResponseEntity<?>) responseEntity).getStatusCode());
-			if (inputMessage.getMethod() == HttpMethod.GET &&
-					isResourceNotModified(inputMessage, outputMessage)) {
+			HttpMethod method = inputMessage.getMethod();
+			boolean isGetOrHead = (HttpMethod.GET == method || HttpMethod.HEAD == method);
+			if (isGetOrHead && isResourceNotModified(inputMessage, outputMessage)) {
 				outputMessage.setStatusCode(HttpStatus.NOT_MODIFIED);
 				// Ensure headers are flushed, no body should be written.
 				outputMessage.flush();
@@ -196,7 +195,11 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		long lastModified = outputMessage.getHeaders().getLastModified();
 		boolean notModified = false;
 
-		if (lastModified != -1 && StringUtils.hasLength(eTag)) {
+		if (!ifNoneMatch.isEmpty() && (inputMessage.getHeaders().containsKey(HttpHeaders.IF_UNMODIFIED_SINCE)
+				|| inputMessage.getHeaders().containsKey(HttpHeaders.IF_MATCH))) {
+			// invalid conditional request, do not process
+		}
+		else if (lastModified != -1 && StringUtils.hasLength(eTag)) {
 			notModified = isETagNotModified(ifNoneMatch, eTag) && isTimeStampNotModified(ifModifiedSince, lastModified);
 		}
 		else if (lastModified != -1) {
@@ -213,8 +216,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 			for (String clientETag : ifNoneMatch) {
 				// Compare weak/strong ETags as per https://tools.ietf.org/html/rfc7232#section-2.3
 				if (StringUtils.hasLength(clientETag) &&
-						(clientETag.replaceFirst("^W/", "").equals(etag.replaceFirst("^W/", "")) ||
-								clientETag.equals("*"))) {
+						(clientETag.replaceFirst("^W/", "").equals(etag.replaceFirst("^W/", "")))) {
 					return true;
 				}
 			}

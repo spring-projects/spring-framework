@@ -147,7 +147,7 @@ public class StandardServletAsyncWebRequestTests {
 	}
 
 	// SPR-13292
-	
+
 	@Test
 	public void onCompletionHandlerAfterOnErrorEvent() throws Exception {
 		Runnable handler = mock(Runnable.class);

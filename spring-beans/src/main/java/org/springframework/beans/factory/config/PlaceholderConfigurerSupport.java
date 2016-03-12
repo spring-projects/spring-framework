@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -107,6 +107,8 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 	/** Defaults to {@value #DEFAULT_VALUE_SEPARATOR} */
 	protected String valueSeparator = DEFAULT_VALUE_SEPARATOR;
 
+	protected boolean trimValues = false;
+
 	protected String nullValue;
 
 	protected boolean ignoreUnresolvablePlaceholders = false;
@@ -140,6 +142,16 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 	 */
 	public void setValueSeparator(String valueSeparator) {
 		this.valueSeparator = valueSeparator;
+	}
+
+	/**
+	 * Specify whether to trim resolved values before applying them,
+	 * removing superfluous whitespace from the beginning and end.
+	 * <p>Default is {@code false}.
+	 * @since 4.3
+	 */
+	public void setTrimValues(boolean trimValues) {
+		this.trimValues = trimValues;
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,10 +24,14 @@ import java.util.Locale;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Duration;
 import org.joda.time.Instant;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
+import org.joda.time.MonthDay;
+import org.joda.time.Period;
+import org.joda.time.YearMonth;
 import org.joda.time.chrono.ISOChronology;
 import org.junit.After;
 import org.junit.Before;
@@ -66,7 +70,6 @@ public class JodaTimeFormattingTests {
 	private void setUp(JodaTimeFormatterRegistrar registrar) {
 		conversionService = new FormattingConversionService();
 		DefaultConversionService.addDefaultConverters(conversionService);
-
 		registrar.registerFormatters(conversionService);
 
 		JodaTimeBean bean = new JodaTimeBean();
@@ -315,6 +318,14 @@ public class JodaTimeFormattingTests {
 	}
 
 	@Test
+	public void testBindDateTimeOverflow() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("dateTimeAnnotatedPattern", "02/29/09 12:00 PM");
+		binder.bind(propertyValues);
+		assertEquals(1, binder.getBindingResult().getErrorCount());
+	}
+
+	@Test
 	public void testBindDateTimeAnnotatedDefault() {
 		MutablePropertyValues propertyValues = new MutablePropertyValues();
 		propertyValues.add("dateTimeAnnotatedDefault", new DateTime(2009, 10, 31, 12, 0, ISOChronology.getInstanceUTC()));
@@ -457,6 +468,42 @@ public class JodaTimeFormattingTests {
 		assertNotNull(date);
 	}
 
+	@Test
+	public void testBindPeriod() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("period", "P6Y3M1D");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertTrue(binder.getBindingResult().getFieldValue("period").toString().equals("P6Y3M1D"));
+	}
+
+	@Test
+	public void testBindDuration() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("duration", "PT72.345S");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertTrue(binder.getBindingResult().getFieldValue("duration").toString().equals("PT72.345S"));
+	}
+
+	@Test
+	public void testBindYearMonth() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("yearMonth", "2007-12");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertTrue(binder.getBindingResult().getFieldValue("yearMonth").toString().equals("2007-12"));
+	}
+
+	@Test
+	public void testBindMonthDay() {
+		MutablePropertyValues propertyValues = new MutablePropertyValues();
+		propertyValues.add("monthDay", "--12-03");
+		binder.bind(propertyValues);
+		assertEquals(0, binder.getBindingResult().getErrorCount());
+		assertTrue(binder.getBindingResult().getFieldValue("monthDay").toString().equals("--12-03"));
+	}
+
 
 	@SuppressWarnings("unused")
 	private static class JodaTimeBean {
@@ -514,6 +561,14 @@ public class JodaTimeFormattingTests {
 
 		@DateTimeFormat(iso=ISO.DATE_TIME)
 		private Instant mutableDateTimeAnnotated;
+
+		private Period period;
+
+		private Duration duration;
+
+		private YearMonth yearMonth;
+
+		private MonthDay monthDay;
 
 		private final List<JodaTimeBean> children = new ArrayList<JodaTimeBean>();
 
@@ -676,6 +731,38 @@ public class JodaTimeFormattingTests {
 
 		public void setMutableDateTimeAnnotated(Instant mutableDateTimeAnnotated) {
 			this.mutableDateTimeAnnotated = mutableDateTimeAnnotated;
+		}
+
+		public Period getPeriod() {
+			return period;
+		}
+
+		public void setPeriod(Period period) {
+			this.period = period;
+		}
+
+		public Duration getDuration() {
+			return duration;
+		}
+
+		public void setDuration(Duration duration) {
+			this.duration = duration;
+		}
+
+		public YearMonth getYearMonth() {
+			return yearMonth;
+		}
+
+		public void setYearMonth(YearMonth yearMonth) {
+			this.yearMonth = yearMonth;
+		}
+
+		public MonthDay getMonthDay() {
+			return monthDay;
+		}
+
+		public void setMonthDay(MonthDay monthDay) {
+			this.monthDay = monthDay;
 		}
 
 		public List<JodaTimeBean> getChildren() {

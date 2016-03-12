@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -347,6 +347,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	public DispatcherServlet() {
 		super();
+		this.setDispatchOptionsRequest(true);
 	}
 
 	/**
@@ -390,6 +391,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	public DispatcherServlet(WebApplicationContext webApplicationContext) {
 		super(webApplicationContext);
+		this.setDispatchOptionsRequest(true);
 	}
 
 	/**
@@ -1137,9 +1139,8 @@ public class DispatcherServlet extends FrameworkServlet {
 					"] in DispatcherServlet with name '" + getServletName() + "'");
 		}
 		if (this.throwExceptionIfNoHandlerFound) {
-			ServletServerHttpRequest sshr = new ServletServerHttpRequest(request);
-			throw new NoHandlerFoundException(
-					sshr.getMethod().name(), sshr.getServletRequest().getRequestURI(), sshr.getHeaders());
+			throw new NoHandlerFoundException(request.getMethod(), getRequestUri(request),
+					new ServletServerHttpRequest(request).getHeaders());
 		}
 		else {
 			response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -1241,6 +1242,9 @@ public class DispatcherServlet extends FrameworkServlet {
 			logger.debug("Rendering view [" + view + "] in DispatcherServlet with name '" + getServletName() + "'");
 		}
 		try {
+			if (mv.getStatus() != null) {
+				response.setStatus(mv.getStatus().value());
+			}
 			view.render(mv.getModelInternal(), request, response);
 		}
 		catch (Exception ex) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2011 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,9 @@ import org.springframework.util.StringValueResolver;
  * @author Juergen Hoeller
  * @author Chris Beams
  * @since 3.0.3
- * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#resolveEmbeddedValue
+ * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#resolveEmbeddedValue(String)
+ * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#getBeanExpressionResolver()
+ * @see org.springframework.beans.factory.config.EmbeddedValueResolver
  */
 public interface EmbeddedValueResolverAware extends Aware {
 

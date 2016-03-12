@@ -27,6 +27,7 @@ import org.springframework.beans.factory.BeanInitializationException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.util.Assert;
 import org.springframework.web.HttpRequestHandler;
+import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.servlet.HandlerMapping;
 import org.springframework.web.servlet.handler.AbstractHandlerMapping;
 import org.springframework.web.servlet.handler.SimpleUrlHandlerMapping;
@@ -55,15 +56,23 @@ public class ResourceHandlerRegistry {
 
 	private final ApplicationContext appContext;
 
+	private final ContentNegotiationManager contentNegotiationManager;
+
 	private final List<ResourceHandlerRegistration> registrations = new ArrayList<ResourceHandlerRegistration>();
 
 	private int order = Integer.MAX_VALUE -1;
 
 
 	public ResourceHandlerRegistry(ApplicationContext applicationContext, ServletContext servletContext) {
+		this(applicationContext, servletContext, null);
+	}
+
+	public ResourceHandlerRegistry(ApplicationContext applicationContext, ServletContext servletContext,
+			ContentNegotiationManager contentNegotiationManager) {
 		Assert.notNull(applicationContext, "ApplicationContext is required");
 		this.appContext = applicationContext;
 		this.servletContext = servletContext;
+		this.contentNegotiationManager = contentNegotiationManager;
 	}
 
 
@@ -113,6 +122,7 @@ public class ResourceHandlerRegistry {
 				ResourceHttpRequestHandler handler = registration.getRequestHandler();
 				handler.setServletContext(this.servletContext);
 				handler.setApplicationContext(this.appContext);
+				handler.setContentNegotiationManager(this.contentNegotiationManager);
 				try {
 					handler.afterPropertiesSet();
 				}
