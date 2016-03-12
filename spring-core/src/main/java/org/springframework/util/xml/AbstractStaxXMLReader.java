@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 
 	private static final String IS_STANDALONE_FEATURE_NAME = "http://xml.org/sax/features/is-standalone";
 
+	private static final String STRING_INTERNING_FEATURE_NAME = "http://xml.org/sax/features/string-interning";
 
 	private boolean namespacesFeature = true;
 
@@ -73,6 +74,9 @@ abstract class AbstractStaxXMLReader extends AbstractXMLReader {
 			else {
 				throw new SAXNotSupportedException("startDocument() callback not completed yet");
 			}
+		}
+		else if (STRING_INTERNING_FEATURE_NAME.equals(name)) {
+			return false;
 		}
 		else {
 			return super.getFeature(name);
