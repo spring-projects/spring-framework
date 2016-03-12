@@ -56,9 +56,10 @@ public class ContextCustomizerSpringRunnerTests {
 
 		@Override
 		protected List<ContextCustomizerFactory> getContextCustomizerFactories() {
-			return singletonList((testClass, configAttributes) ->
-				// ContextCustomizer as lambda expression:
-				(context, mergedConfig) -> context.getBeanFactory().registerSingleton("foo", "foo"));
+			return singletonList(
+				(ContextCustomizerFactory) (testClass, configAttributes) ->
+					(ContextCustomizer) (context, mergedConfig) -> context.getBeanFactory().registerSingleton("foo", "foo")
+			);
 		}
 	}
 
