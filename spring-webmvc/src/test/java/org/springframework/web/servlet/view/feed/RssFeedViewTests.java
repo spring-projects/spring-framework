@@ -16,25 +16,25 @@
 
 package org.springframework.web.servlet.view.feed;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.rometools.rome.feed.rss.Channel;
 import com.rometools.rome.feed.rss.Description;
 import com.rometools.rome.feed.rss.Item;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
+import org.xmlunit.matchers.CompareMatcher;
 
-import static org.custommonkey.xmlunit.XMLAssert.*;
-import static org.custommonkey.xmlunit.XMLUnit.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
+import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
 /**
  * @author Arjen Poutsma
@@ -46,7 +46,6 @@ public class RssFeedViewTests {
 	@Before
 	public void createView() throws Exception {
 		view = new MyRssFeedView();
-		setIgnoreWhitespace(true);
 	}
 
 	@Test
@@ -64,7 +63,7 @@ public class RssFeedViewTests {
 				"<channel><title>Test Feed</title><link>http://example.com</link><description>Test feed description</description>" +
 				"<item><title>2</title><description>This is entry 2</description></item>" +
 				"<item><title>1</title><description>This is entry 1</description></item>" + "</channel></rss>";
-		assertXMLEqual(expected, response.getContentAsString());
+		assertThat(response.getContentAsString(), isSimilarTo(expected).ignoreWhitespace());
 	}
 
 

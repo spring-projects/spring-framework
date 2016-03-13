@@ -16,6 +16,8 @@
 
 package org.springframework.http.converter.feed;
 
+import static org.junit.Assert.*;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -25,18 +27,14 @@ import java.util.List;
 
 import com.rometools.rome.feed.rss.Channel;
 import com.rometools.rome.feed.rss.Item;
-import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.xml.sax.SAXException;
+import org.xmlunit.matchers.CompareMatcher;
 
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
-
-import static org.custommonkey.xmlunit.XMLAssert.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Arjen Poutsma
@@ -49,7 +47,6 @@ public class RssChannelHttpMessageConverterTests {
 	@Before
 	public void setUp() {
 		converter = new RssChannelHttpMessageConverter();
-		XMLUnit.setIgnoreWhitespace(true);
 	}
 
 
@@ -113,7 +110,7 @@ public class RssChannelHttpMessageConverterTests {
 				"<item><title>title1</title></item>" +
 				"<item><title>title2</title></item>" +
 				"</channel></rss>";
-		assertXMLEqual(expected, outputMessage.getBodyAsString(StandardCharsets.UTF_8));
+		assertThat(outputMessage.getBodyAsString(StandardCharsets.UTF_8), isSimilarTo(expected));
 	}
 
 	@Test
@@ -136,4 +133,8 @@ public class RssChannelHttpMessageConverterTests {
 				outputMessage.getHeaders().getContentType());
 	}
 
+	private static CompareMatcher isSimilarTo(final String content) {
+		return CompareMatcher.isSimilarTo(content)
+				.ignoreWhitespace();
+	}
 }
