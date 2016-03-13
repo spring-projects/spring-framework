@@ -912,6 +912,7 @@ project("spring-webmvc") {
 			exclude group: "org.springframework", module: "spring-web"
 		}
 		optional('org.webjars:webjars-locator:0.28')
+		optional('io.reactivex:rxjava:1.1.1')
 		testCompile("rhino:js:1.7R1")
 		testCompile("xmlunit:xmlunit:${xmlunitVersion}")
 		testCompile("dom4j:dom4j:1.6.1") {

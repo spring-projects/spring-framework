@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import rx.Observable;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
@@ -37,6 +38,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.async.DeferredResult;
 import org.springframework.web.context.request.async.WebAsyncUtils;
@@ -46,8 +48,9 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
  * Handler for return values of type {@link ResponseBodyEmitter} (and the
- * {@code ResponseEntity<ResponseBodyEmitter>} sub-class) as well as any other
- * async type with a {@link #getAdapterMap() registered adapter}.
+ * {@code ResponseEntity<ResponseBodyEmitter>} sub-class), {@link rx.Observable},
+ * as well as any other async type with a {@link #getAdapterMap()
+ * registered adapter}.
  *
  * @author Rossen Stoyanchev
  * @since 4.2
@@ -67,6 +70,9 @@ public class ResponseBodyEmitterReturnValueHandler implements AsyncHandlerMethod
 		this.messageConverters = messageConverters;
 		this.adapterMap = new HashMap<Class<?>, ResponseBodyEmitterAdapter>(3);
 		this.adapterMap.put(ResponseBodyEmitter.class, new SimpleResponseBodyEmitterAdapter());
+		if (ClassUtils.isPresent("rx.Observable", getClass().getClassLoader())) {
+			this.adapterMap.put(Observable.class, new RxJavaReturnValueAdapter());
+		}
 	}
 
 

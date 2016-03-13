@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.concurrent.CompletionStage;
 import java.util.function.BiFunction;
 
+import rx.Single;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.UsesJava8;
 import org.springframework.util.Assert;
@@ -35,8 +37,8 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 
 /**
  * Handler for return values of type {@link DeferredResult}, {@link ListenableFuture},
- * {@link CompletionStage} and any other async type with a {@link #getAdapterMap()
- * registered adapter}.
+ * {@link CompletionStage}, {@link rx.Single} and any other async type with a
+ * {@link #getAdapterMap() registered adapter}.
  *
  * @author Rossen Stoyanchev
  * @since 3.2
@@ -52,6 +54,9 @@ public class DeferredResultMethodReturnValueHandler implements AsyncHandlerMetho
 		this.adapterMap.put(ListenableFuture.class, new ListenableFutureAdapter());
 		if (ClassUtils.isPresent("java.util.concurrent.CompletionStage", getClass().getClassLoader())) {
 			this.adapterMap.put(CompletionStage.class, new CompletionStageAdapter());
+		}
+		if (ClassUtils.isPresent("rx.Single", getClass().getClassLoader())) {
+			this.adapterMap.put(Single.class, new RxJavaReturnValueAdapter());
 		}
 	}
 

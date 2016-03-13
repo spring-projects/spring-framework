@@ -20,6 +20,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.junit.Before;
 import org.junit.Test;
+import rx.Single;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -70,6 +71,7 @@ public class DeferredResultReturnValueHandlerTests {
 		assertTrue(this.handler.supportsReturnType(returnType("handleDeferredResult")));
 		assertTrue(this.handler.supportsReturnType(returnType("handleListenableFuture")));
 		assertTrue(this.handler.supportsReturnType(returnType("handleCompletableFuture")));
+		assertTrue(this.handler.supportsReturnType(returnType("handleSingle")));
 		assertFalse(this.handler.supportsReturnType(returnType("handleString")));
 	}
 
@@ -160,6 +162,29 @@ public class DeferredResultReturnValueHandlerTests {
 		assertSame(ex, WebAsyncUtils.getAsyncManager(this.webRequest).getConcurrentResult());
 	}
 
+	@Test
+	public void single() throws Exception {
+		MethodParameter returnType = returnType("handleSingle");
+		Single<String> single = Single.just("foo");
+		handleReturnValue(single, returnType);
+
+		assertTrue(this.request.isAsyncStarted());
+		assertTrue(WebAsyncUtils.getAsyncManager(this.webRequest).hasConcurrentResult());
+		assertEquals("foo", WebAsyncUtils.getAsyncManager(this.webRequest).getConcurrentResult());
+	}
+
+	@Test
+	public void singleWithError() throws Exception {
+		MethodParameter returnType = returnType("handleSingle");
+		IllegalStateException ex = new IllegalStateException();
+		Single<String> single = Single.error(ex);
+		handleReturnValue(single, returnType);
+
+		assertTrue(this.request.isAsyncStarted());
+		assertTrue(WebAsyncUtils.getAsyncManager(this.webRequest).hasConcurrentResult());
+		assertSame(ex, WebAsyncUtils.getAsyncManager(this.webRequest).getConcurrentResult());
+	}
+
 
 	private void handleReturnValue(Object returnValue, MethodParameter returnType) throws Exception {
 		ModelAndViewContainer mavContainer = new ModelAndViewContainer();
@@ -191,6 +216,9 @@ public class DeferredResultReturnValueHandlerTests {
 			return null;
 		}
 
+		private Single<String> handleSingle() {
+			return null;
+		}
 
 	}
 
