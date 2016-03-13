@@ -16,21 +16,10 @@
 
 package org.springframework.http.converter.xml;
 
-import java.nio.charset.Charset;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-import javax.xml.bind.annotation.adapters.XmlAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.AopProxy;
 import org.springframework.aop.framework.DefaultAopProxyFactory;
@@ -40,11 +29,32 @@ import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.xmlunit.diff.Comparison;
+import org.xmlunit.diff.ComparisonResult;
+import org.xmlunit.diff.ComparisonType;
+import org.xmlunit.diff.DifferenceEvaluator;
 
-import static org.custommonkey.xmlunit.XMLAssert.*;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.adapters.XmlAdapter;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.EnumSet;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.xmlunit.diff.ComparisonType.XML_STANDALONE;
+import static org.xmlunit.diff.DifferenceEvaluators.Default;
+import static org.xmlunit.diff.DifferenceEvaluators.chain;
+import static org.xmlunit.diff.DifferenceEvaluators.downgradeDifferencesToEqual;
+import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
 /**
  * Tests for {@link Jaxb2RootElementHttpMessageConverter}.
@@ -175,8 +185,9 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 		converter.write(rootElement, null, outputMessage);
 		assertEquals("Invalid content-type", new MediaType("application", "xml"),
 				outputMessage.getHeaders().getContentType());
-		assertXMLEqual("Invalid result", "<rootElement><type s=\"Hello World\"/></rootElement>",
-				outputMessage.getBodyAsString(Charset.forName("UTF-8")));
+		DifferenceEvaluator ev = chain(Default, downgradeDifferencesToEqual(XML_STANDALONE));
+		assertThat("Invalid result", outputMessage.getBodyAsString(Charset.forName("UTF-8")),
+				isSimilarTo("<rootElement><type s=\"Hello World\"/></rootElement>").withDifferenceEvaluator(ev));
 	}
 
 	@Test
@@ -185,8 +196,9 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 		converter.write(rootElementCglib, null, outputMessage);
 		assertEquals("Invalid content-type", new MediaType("application", "xml"),
 				outputMessage.getHeaders().getContentType());
-		assertXMLEqual("Invalid result", "<rootElement><type s=\"Hello World\"/></rootElement>",
-				outputMessage.getBodyAsString(Charset.forName("UTF-8")));
+		DifferenceEvaluator ev = chain(Default, downgradeDifferencesToEqual(XML_STANDALONE));
+		assertThat("Invalid result", outputMessage.getBodyAsString(Charset.forName("UTF-8")),
+				isSimilarTo("<rootElement><type s=\"Hello World\"/></rootElement>").withDifferenceEvaluator(ev));
 	}
 
 	// SPR-11488
@@ -196,8 +208,9 @@ public class Jaxb2RootElementHttpMessageConverterTests {
 		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
 		MyJaxb2RootElementHttpMessageConverter myConverter = new MyJaxb2RootElementHttpMessageConverter();
 		myConverter.write(new MyRootElement(new MyCustomElement("a", "b")), null, outputMessage);
-		assertXMLEqual("Invalid result", "<myRootElement><element>a|||b</element></myRootElement>",
-				outputMessage.getBodyAsString(Charset.forName("UTF-8")));
+		DifferenceEvaluator ev = chain(Default, downgradeDifferencesToEqual(XML_STANDALONE));
+		assertThat("Invalid result", outputMessage.getBodyAsString(Charset.forName("UTF-8")),
+				isSimilarTo("<myRootElement><element>a|||b</element></myRootElement>").withDifferenceEvaluator(ev));
 	}
 
 	@Test

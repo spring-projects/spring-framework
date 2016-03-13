@@ -16,9 +16,13 @@
 
 package org.springframework.util.xml;
 
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.net.Socket;
+import org.junit.Assume;
+import org.junit.Before;
+import org.junit.Test;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.XMLReaderFactory;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -26,17 +30,13 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.Result;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stream.StreamResult;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.net.Socket;
 
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertThat;
+import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
-import org.xml.sax.XMLReader;
-import org.xml.sax.helpers.XMLReaderFactory;
-
-import static org.custommonkey.xmlunit.XMLAssert.*;
 
 /**
  * @author Arjen Poutsma
@@ -77,7 +77,7 @@ public abstract class AbstractStaxHandlerTestCase {
 
 		xmlReader.parse(new InputSource(new StringReader(COMPLEX_XML)));
 
-		assertXMLEqual(COMPLEX_XML, stringWriter.toString());
+		assertThat(stringWriter.toString(), isSimilarTo(COMPLEX_XML));
 	}
 
 	private static boolean wwwSpringframeworkOrgIsAccessible() {
@@ -104,7 +104,7 @@ public abstract class AbstractStaxHandlerTestCase {
 
 		xmlReader.parse(new InputSource(new StringReader(COMPLEX_XML)));
 
-		assertXMLEqual(COMPLEX_XML, stringWriter.toString());
+		assertThat(stringWriter.toString(), isSimilarTo(COMPLEX_XML));
 	}
 
 	@Test
@@ -126,7 +126,7 @@ public abstract class AbstractStaxHandlerTestCase {
 
 		xmlReader.parse(new InputSource(new StringReader(SIMPLE_XML)));
 
-		assertXMLEqual(expected, result);
+		assertThat(result, isSimilarTo(expected));
 	}
 
 	@Test
@@ -148,7 +148,7 @@ public abstract class AbstractStaxHandlerTestCase {
 
 		xmlReader.parse(new InputSource(new StringReader(SIMPLE_XML)));
 
-		assertXMLEqual(expected, result);
+		assertThat(expected, isSimilarTo(result));
 	}
 
 

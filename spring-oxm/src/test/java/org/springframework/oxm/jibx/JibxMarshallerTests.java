@@ -16,21 +16,19 @@
 
 package org.springframework.oxm.jibx;
 
-import java.io.StringWriter;
-import javax.xml.transform.stream.StreamResult;
-
-import org.custommonkey.xmlunit.XMLUnit;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
-
 import org.springframework.oxm.AbstractMarshallerTests;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 
-import static org.custommonkey.xmlunit.XMLAssert.*;
+import javax.xml.transform.stream.StreamResult;
+import java.io.StringWriter;
+
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
 /**
  * NOTE: These tests fail under Eclipse/IDEA because JiBX binding does not occur by
@@ -74,11 +72,10 @@ public class JibxMarshallerTests extends AbstractMarshallerTests<JibxMarshaller>
 		marshaller.setIndent(4);
 		StringWriter writer = new StringWriter();
 		marshaller.marshal(flights, new StreamResult(writer));
-		XMLUnit.setIgnoreWhitespace(false);
 		String expected =
 				"<?xml version=\"1.0\"?>\n" + "<flights xmlns=\"http://samples.springframework.org/flight\">\n" +
 						"    <flight>\n" + "        <number>42</number>\n" + "    </flight>\n" + "</flights>";
-		assertXMLEqual(expected, writer.toString());
+		assertThat(writer.toString(), isSimilarTo(expected).ignoreWhitespace());
 	}
 
 	@Test

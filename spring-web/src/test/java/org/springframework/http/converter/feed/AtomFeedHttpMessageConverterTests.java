@@ -16,26 +16,28 @@
 
 package org.springframework.http.converter.feed;
 
+import com.rometools.rome.feed.atom.Entry;
+import com.rometools.rome.feed.atom.Feed;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.http.MediaType;
+import org.springframework.http.MockHttpInputMessage;
+import org.springframework.http.MockHttpOutputMessage;
+import org.xml.sax.SAXException;
+import org.xmlunit.diff.DefaultNodeMatcher;
+import org.xmlunit.diff.ElementSelectors;
+import org.xmlunit.diff.NodeMatcher;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.rometools.rome.feed.atom.Entry;
-import com.rometools.rome.feed.atom.Feed;
-import org.custommonkey.xmlunit.XMLUnit;
-import org.junit.Before;
-import org.junit.Test;
-import org.xml.sax.SAXException;
-
-import org.springframework.http.MediaType;
-import org.springframework.http.MockHttpInputMessage;
-import org.springframework.http.MockHttpOutputMessage;
-
-import static org.custommonkey.xmlunit.XMLAssert.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.xmlunit.matchers.CompareMatcher.isSimilarTo;
 
 /**
  * @author Arjen Poutsma
@@ -50,7 +52,6 @@ public class AtomFeedHttpMessageConverterTests {
 	public void setUp() {
 		utf8 = Charset.forName("UTF-8");
 		converter = new AtomFeedHttpMessageConverter();
-		XMLUnit.setIgnoreWhitespace(true);
 	}
 
 	@Test
@@ -111,7 +112,9 @@ public class AtomFeedHttpMessageConverterTests {
 		String expected = "<feed xmlns=\"http://www.w3.org/2005/Atom\">" + "<title>title</title>" +
 				"<entry><id>id1</id><title>title1</title></entry>" +
 				"<entry><id>id2</id><title>title2</title></entry></feed>";
-		assertXMLEqual(expected, outputMessage.getBodyAsString(utf8));
+		NodeMatcher nm = new DefaultNodeMatcher(ElementSelectors.byName);
+		assertThat(outputMessage.getBodyAsString(utf8),
+				isSimilarTo(expected).ignoreWhitespace().withNodeMatcher(nm));
 	}
 
 	@Test
