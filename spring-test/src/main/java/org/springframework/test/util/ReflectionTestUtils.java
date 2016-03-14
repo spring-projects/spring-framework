@@ -159,8 +159,10 @@ public class ReflectionTestUtils {
 		Assert.isTrue(targetObject != null || targetClass != null,
 			"Either targetObject or targetClass for the field must be specified");
 
+		Object ultimateTargetObject = AopTestUtils.getUltimateTargetObject(targetObject);
+
 		if (targetClass == null) {
-			targetClass = targetObject.getClass();
+			targetClass = ultimateTargetObject.getClass();
 		}
 
 		Field field = ReflectionUtils.findField(targetClass, name, type);
@@ -176,7 +178,7 @@ public class ReflectionTestUtils {
 					targetObject, targetClass, value));
 		}
 		ReflectionUtils.makeAccessible(field);
-		ReflectionUtils.setField(field, targetObject, value);
+		ReflectionUtils.setField(field, ultimateTargetObject, value);
 	}
 
 	/**
@@ -234,8 +236,10 @@ public class ReflectionTestUtils {
 		Assert.isTrue(targetObject != null || targetClass != null,
 			"Either targetObject or targetClass for the field must be specified");
 
+		Object ultimateTargetObject = AopTestUtils.getUltimateTargetObject(targetObject);
+
 		if (targetClass == null) {
-			targetClass = targetObject.getClass();
+			targetClass = ultimateTargetObject.getClass();
 		}
 
 		Field field = ReflectionUtils.findField(targetClass, name);
@@ -250,7 +254,7 @@ public class ReflectionTestUtils {
 					targetObject, targetClass));
 		}
 		ReflectionUtils.makeAccessible(field);
-		return ReflectionUtils.getField(field, targetObject);
+		return ReflectionUtils.getField(field, ultimateTargetObject);
 	}
 
 	/**
