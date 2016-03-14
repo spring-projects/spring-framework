@@ -26,8 +26,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.Before;
 import org.junit.Test;
+import rx.Observable;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -81,6 +83,8 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		assertTrue(this.handler.supportsReturnType(returnType("handleResponseEntity")));
 		assertFalse(this.handler.supportsReturnType(returnType("handleResponseEntityString")));
 		assertFalse(this.handler.supportsReturnType(returnType("handleResponseEntityParameterized")));
+		assertTrue(this.handler.supportsReturnType(returnType("handleObservable")));
+		assertTrue(this.handler.supportsReturnType(returnType("handleObservableSse")));
 	}
 
 	@Test
@@ -92,20 +96,13 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		assertTrue(this.request.isAsyncStarted());
 		assertEquals("", this.response.getContentAsString());
 
-		SimpleBean bean = new SimpleBean();
-		bean.setId(1L);
-		bean.setName("Joe");
-		emitter.send(bean);
+		emitter.send(new SimpleBean(1L, "Joe"));
 		emitter.send("\n");
 
-		bean.setId(2L);
-		bean.setName("John");
-		emitter.send(bean);
+		emitter.send(new SimpleBean(2L, "John"));
 		emitter.send("\n");
 
-		bean.setId(3L);
-		bean.setName("Jason");
-		emitter.send(bean);
+		emitter.send(new SimpleBean(3L, "Jason"));
 
 		assertEquals("{\"id\":1,\"name\":\"Joe\"}\n" +
 						"{\"id\":2,\"name\":\"John\"}\n" +
@@ -148,13 +145,8 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		assertEquals(200, this.response.getStatus());
 		assertEquals("text/event-stream", this.response.getContentType());
 
-		SimpleBean bean1 = new SimpleBean();
-		bean1.setId(1L);
-		bean1.setName("Joe");
-
-		SimpleBean bean2 = new SimpleBean();
-		bean2.setId(2L);
-		bean2.setName("John");
+		SimpleBean bean1 = new SimpleBean(1L, "Joe");
+		SimpleBean bean2 = new SimpleBean(2L, "John");
 
 		emitter.send(event().comment("a test").name("update").id("1").reconnectTime(5000L).data(bean1).data(bean2));
 
@@ -188,6 +180,43 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 
 		assertFalse(this.request.isAsyncStarted());
 		assertEquals(204, this.response.getStatus());
+	}
+
+	@Test
+	public void observable() throws Exception {
+		SimpleBean bean1 = new SimpleBean(1L, "Joe");
+		SimpleBean bean2 = new SimpleBean(2L, "John");
+		SimpleBean bean3 = new SimpleBean(3L, "Jason");
+
+		MethodParameter returnType = returnType("handleObservable");
+		Observable<SimpleBean> observable = Observable.just(bean1, bean2, bean3);
+		handleReturnValue(observable, returnType);
+
+		assertTrue(this.request.isAsyncStarted());
+		String json = "{\"id\":1,\"name\":\"Joe\"}{\"id\":2,\"name\":\"John\"}{\"id\":3,\"name\":\"Jason\"}";
+		assertEquals(json, this.response.getContentAsString());
+		MockAsyncContext asyncContext = (MockAsyncContext) this.request.getAsyncContext();
+		assertNotNull(asyncContext.getDispatchedPath());
+	}
+
+	@Test
+	public void observableWithSse() throws Exception {
+		SimpleBean bean1 = new SimpleBean(1L, "Joe");
+		SimpleBean bean2 = new SimpleBean(2L, "John");
+		SimpleBean bean3 = new SimpleBean(3L, "Jason");
+
+		MethodParameter returnType = returnType("handleObservableSse");
+		ResponseEntity<Observable<SimpleBean>> entity = ResponseEntity.ok()
+				.contentType(new MediaType("text", "event-stream"))
+				.body(Observable.just(bean1, bean2, bean3));
+		handleReturnValue(entity, returnType);
+
+		assertTrue(this.request.isAsyncStarted());
+		assertEquals("data:{\"id\":1,\"name\":\"Joe\"}\n\n" +
+				"data:{\"id\":2,\"name\":\"John\"}\n\n" +
+				"data:{\"id\":3,\"name\":\"Jason\"}\n\n", this.response.getContentAsString());
+		MockAsyncContext asyncContext = (MockAsyncContext) this.request.getAsyncContext();
+		assertNotNull(asyncContext.getDispatchedPath());
 	}
 
 	private void handleReturnValue(Object returnValue, MethodParameter returnType) throws Exception {
@@ -229,6 +258,13 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 			return null;
 		}
 
+		private Observable<SimpleBean> handleObservable() {
+			return null;
+		}
+
+		private ResponseEntity<Observable<SimpleBean>> handleObservableSse() {
+			return null;
+		}
 	}
 
 	private static class SimpleBean {
@@ -236,6 +272,11 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		private Long id;
 
 		private String name;
+
+		public SimpleBean(Long id, String name) {
+			this.id = id;
+			this.name = name;
+		}
 
 		public Long getId() {
 			return id;
