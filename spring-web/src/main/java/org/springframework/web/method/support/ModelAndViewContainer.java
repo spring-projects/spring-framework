@@ -126,7 +126,10 @@ public class ModelAndViewContainer {
 			return this.defaultModel;
 		}
 		else {
-			return (this.redirectModel != null) ? this.redirectModel : new ModelMap();
+			if (this.redirectModel == null) {
+				this.redirectModel = new ModelMap();
+			}
+			return this.redirectModel;
 		}
 	}
 
