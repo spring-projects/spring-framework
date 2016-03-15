@@ -8560,10 +8560,8 @@ and thus requires a result.
 
 There are cases when multiple annotations of the same type, such as `@CacheEvict` or
 `@CachePut` need to be specified, for example because the condition or the key
-expression is different between different caches. Unfortunately Java does not support
-such declarations however there is a workaround - using an __enclosing__ annotation, in
-this case, `@Caching`. `@Caching` allows multiple nested `@Cacheable`, `@CachePut` and
-`@CacheEvict` to be used on the same method:
+expression is different between different caches. `@Caching` allows multiple nested
+`@Cacheable`, `@CachePut` and `@CacheEvict` to be used on the same method:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
