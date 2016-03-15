@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,11 @@
 
 package org.springframework.web.servlet.mvc.method.annotation;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
 import java.lang.reflect.Method;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.ui.ModelMap;
@@ -34,6 +29,8 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributesModelMap;
 import org.springframework.web.servlet.view.RedirectView;
+
+import static org.junit.Assert.*;
 
 /**
  * Test fixture with {@link ModelAndViewMethodReturnValueHandler}.
@@ -50,6 +47,7 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 
 	private MethodParameter returnParamModelAndView;
 
+
 	@Before
 	public void setUp() throws Exception {
 		this.handler = new ModelAndViewMethodReturnValueHandler();
@@ -57,6 +55,7 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 		this.webRequest = new ServletWebRequest(new MockHttpServletRequest());
 		this.returnParamModelAndView = getReturnValueParam("modelAndView");
 	}
+
 
 	@Test
 	public void supportsReturnType() throws Exception {
@@ -131,16 +130,33 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 		assertNotSame("RedirectAttributes should not be used if controller doesn't redirect", redirectAttributes, model);
 	}
 
+	@Test  // SPR-14045
+	public void handleRedirectWithIgnoreDefaultModel() throws Exception {
+		mavContainer.setIgnoreDefaultModelOnRedirect(true);
+
+		RedirectView redirectView = new RedirectView();
+		ModelAndView mav = new ModelAndView(redirectView, "name", "value");
+		handler.handleReturnValue(mav, returnParamModelAndView, mavContainer, webRequest);
+
+		ModelMap model = mavContainer.getModel();
+		assertSame(redirectView, mavContainer.getView());
+		assertEquals(1, model.size());
+		assertEquals("value", model.get("name"));
+	}
+
 
 	private MethodParameter getReturnValueParam(String methodName) throws Exception {
 		Method method = getClass().getDeclaredMethod(methodName);
 		return new MethodParameter(method, -1);
 	}
 
+
+	@SuppressWarnings("unused")
 	ModelAndView modelAndView() {
 		return null;
 	}
 
+	@SuppressWarnings("unused")
 	String viewName() {
 		return null;
 	}
