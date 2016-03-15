@@ -19,6 +19,7 @@ package org.springframework.jmx.export.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Set;
 
@@ -40,6 +41,7 @@ import org.springframework.util.StringValueResolver;
  * @author Rob Harrop
  * @author Juergen Hoeller
  * @author Jennifer Hickey
+ * @author Stephane Nicoll
  * @since 1.2
  * @see ManagedResource
  * @see ManagedAttribute
@@ -63,6 +65,11 @@ public class AnnotationJmxAttributeSource implements JmxAttributeSource, BeanFac
 		ManagedResource ann = AnnotationUtils.findAnnotation(beanClass, ManagedResource.class);
 		if (ann == null) {
 			return null;
+		}
+		Class<?> declaringClass = AnnotationUtils.findAnnotationDeclaringClass(ManagedResource.class, beanClass);
+		Class<?> target = (declaringClass != null && !declaringClass.isInterface() ? declaringClass : beanClass);
+		if (!Modifier.isPublic(target.getModifiers())) {
+			throw new InvalidMetadataException("@ManagedResource class '" + target.getName() + "' must be public");
 		}
 		org.springframework.jmx.export.metadata.ManagedResource managedResource = new org.springframework.jmx.export.metadata.ManagedResource();
 		AnnotationBeanUtils.copyPropertiesToBean(ann, managedResource, this.embeddedValueResolver);

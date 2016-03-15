@@ -3508,6 +3508,9 @@ be marked with the `ManagedAttribute` annotation. When marking properties you ca
 either the annotation of the getter or the setter to create a write-only or read-only
 attribute respectively.
 
+NOTE: A `ManagedResource` annotated bean must be public as well as the methods exposing
+an operation or an attribute.
+
 The example below shows the annotated version of the `JmxTestBean` class that you saw
 earlier:
 
