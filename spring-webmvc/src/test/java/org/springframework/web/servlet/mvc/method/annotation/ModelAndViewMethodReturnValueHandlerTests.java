@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -141,6 +141,20 @@ public class ModelAndViewMethodReturnValueHandlerTests {
 		assertEquals(null, mavContainer.getView());
 		assertTrue(mavContainer.getModel().isEmpty());
 		assertNotSame("RedirectAttributes should not be used if controller doesn't redirect", redirectAttributes, model);
+	}
+
+	@Test // SPR-14045
+	public void handleRedirectWithIgnoreDefaultModel() throws Exception {
+		mavContainer.setIgnoreDefaultModelOnRedirect(true);
+
+		RedirectView redirectView = new RedirectView();
+		ModelAndView mav = new ModelAndView(redirectView, "name", "value");
+		handler.handleReturnValue(mav, returnParamModelAndView, mavContainer, webRequest);
+
+		ModelMap model = mavContainer.getModel();
+		assertSame(redirectView, mavContainer.getView());
+		assertEquals(1, model.size());
+		assertEquals("value", model.get("name"));
 	}
 
 
