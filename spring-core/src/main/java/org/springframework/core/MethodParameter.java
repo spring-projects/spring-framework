@@ -48,15 +48,18 @@ import org.springframework.util.ClassUtils;
  */
 public class MethodParameter {
 
-	private static Class<?> javaUtilOptionalClass = null;
+	private static final Class<?> javaUtilOptionalClass;
 
 	static {
+		Class<?> clazz;
 		try {
-			javaUtilOptionalClass = ClassUtils.forName("java.util.Optional", MethodParameter.class.getClassLoader());
+			clazz = ClassUtils.forName("java.util.Optional", MethodParameter.class.getClassLoader());
 		}
 		catch (ClassNotFoundException ex) {
 			// Java 8 not available - Optional references simply not supported then.
+			clazz = null;
 		}
+		javaUtilOptionalClass = clazz;
 	}
 
 
@@ -312,7 +315,7 @@ public class MethodParameter {
 	}
 
 	/**
-	 * Return whether this method parameter is declared as optiona
+	 * Return whether this method parameter is declared as optional
 	 * in the form of Java 8's {@link java.util.Optional}.
 	 * @since 4.3
 	 */
