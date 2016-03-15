@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,8 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.TestPrincipal;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 
 /**
@@ -71,9 +73,23 @@ public class DefaultUserDestinationResolverTests {
 		assertEquals(user.getName(), actual.getUser());
 	}
 
-	// SPR-11325
+	@Test // SPR-14044
+	public void handleSubscribeForDestinationWithoutLeadingSlash() {
+		AntPathMatcher pathMatcher = new AntPathMatcher();
+		pathMatcher.setPathSeparator(".");
+		this.resolver.setPathMatcher(pathMatcher);
 
-	@Test
+		TestPrincipal user = new TestPrincipal("joe");
+		String destination = "/user/jms.queue.call";
+		Message<?> message = createMessage(SimpMessageType.SUBSCRIBE, user, "123", destination);
+		UserDestinationResult actual = this.resolver.resolveDestination(message);
+
+		assertEquals(1, actual.getTargetDestinations().size());
+		assertEquals("jms.queue.call-user123", actual.getTargetDestinations().iterator().next());
+		assertEquals(destination, actual.getSubscribeDestination());
+	}
+
+	@Test // SPR-11325
 	public void handleSubscribeOneUserMultipleSessions() {
 
 		TestSimpUser simpUser = new TestSimpUser("joe");
@@ -125,9 +141,23 @@ public class DefaultUserDestinationResolverTests {
 		assertEquals(user.getName(), actual.getUser());
 	}
 
-	// SPR-12444
+	@Test // SPR-14044
+	public void handleMessageForDestinationWithDotSeparator() {
+		AntPathMatcher pathMatcher = new AntPathMatcher();
+		pathMatcher.setPathSeparator(".");
+		this.resolver.setPathMatcher(pathMatcher);
 
-	@Test
+		TestPrincipal user = new TestPrincipal("joe");
+		String destination = "/user/joe/jms.queue.call";
+		Message<?> message = createMessage(SimpMessageType.MESSAGE, user, "123", destination);
+		UserDestinationResult actual = this.resolver.resolveDestination(message);
+
+		assertEquals(1, actual.getTargetDestinations().size());
+		assertEquals("jms.queue.call-user123", actual.getTargetDestinations().iterator().next());
+		assertEquals("/user/jms.queue.call", actual.getSubscribeDestination());
+	}
+
+	@Test // SPR-12444
 	public void handleMessageToOtherUser() {
 
 		TestSimpUser otherSimpUser = new TestSimpUser("anna");

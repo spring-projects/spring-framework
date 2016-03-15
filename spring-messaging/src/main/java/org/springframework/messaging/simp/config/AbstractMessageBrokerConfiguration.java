@@ -384,6 +384,7 @@ public abstract class AbstractMessageBrokerConfiguration implements ApplicationC
 		if (prefix != null) {
 			resolver.setUserDestinationPrefix(prefix);
 		}
+		resolver.setPathMatcher(getBrokerRegistry().getPathMatcher());
 		return resolver;
 	}
 

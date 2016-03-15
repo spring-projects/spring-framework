@@ -573,6 +573,10 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		if (brokerElem.hasAttribute("user-destination-prefix")) {
 			beanDef.getPropertyValues().add("userDestinationPrefix", brokerElem.getAttribute("user-destination-prefix"));
 		}
+		if (brokerElem.hasAttribute("path-matcher")) {
+			String pathMatcherRef = brokerElem.getAttribute("path-matcher");
+			beanDef.getPropertyValues().add("pathMatcher", new RuntimeBeanReference(pathMatcherRef));
+		}
 		return new RuntimeBeanReference(registerBeanDef(beanDef, context, source));
 	}
 
