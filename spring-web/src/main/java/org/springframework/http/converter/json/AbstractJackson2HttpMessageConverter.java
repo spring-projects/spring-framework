@@ -20,18 +20,9 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.nio.charset.Charset;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicReference;
-
-import com.fasterxml.jackson.core.JsonEncoding;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.ser.FilterProvider;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.http.HttpInputMessage;
@@ -44,6 +35,17 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.util.Assert;
 import org.springframework.util.TypeUtils;
+
+import com.fasterxml.jackson.core.JsonEncoding;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.ser.FilterProvider;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 
 /**
  * Abstract base class for Jackson based and content type independent
@@ -232,25 +234,41 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			Class<?> serializationView = null;
 			FilterProvider filters = null;
 			Object value = object;
+			Map<Class<?>, Class<?>> mixins = null;
 			JavaType javaType = null;
 			if (object instanceof MappingJacksonValue) {
 				MappingJacksonValue container = (MappingJacksonValue) object;
 				value = container.getValue();
+				mixins = container.getMixIns();
 				serializationView = container.getSerializationView();
 				filters = container.getFilters();
 			}
 			if (type != null && value != null && TypeUtils.isAssignable(type, value.getClass())) {
 				javaType = getJavaType(type, null);
 			}
+			ObjectMapper objectMapper;
+			if(mixins != null) {
+				if(mixins.size() > 0) {
+					objectMapper = this.objectMapper.copy();
+				} else {
+					objectMapper = this.objectMapper;
+				}
+				
+				for(Entry<Class<?>, Class<?>> entry : mixins.entrySet()) {
+					objectMapper.addMixIn(entry.getKey(), entry.getValue());
+				}
+			} else {
+				objectMapper = this.objectMapper;
+			}
 			ObjectWriter objectWriter;
 			if (serializationView != null) {
-				objectWriter = this.objectMapper.writerWithView(serializationView);
+				objectWriter = objectMapper.writerWithView(serializationView);
 			}
 			else if (filters != null) {
-				objectWriter = this.objectMapper.writer(filters);
+				objectWriter = objectMapper.writer(filters);
 			}
 			else {
-				objectWriter = this.objectMapper.writer();
+				objectWriter = objectMapper.writer();
 			}
 			if (javaType != null && javaType.isContainerType()) {
 				objectWriter = objectWriter.forType(javaType);

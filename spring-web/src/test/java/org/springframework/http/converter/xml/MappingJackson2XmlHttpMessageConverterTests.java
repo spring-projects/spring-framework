@@ -20,12 +20,9 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
 
-import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -34,6 +31,12 @@ import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.json.MappingJacksonValue;
+
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonView;
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -185,6 +188,24 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 		this.thrown.expect(HttpMessageNotReadableException.class);
 		this.converter.read(MyBean.class, inputMessage);
 	}
+	
+	@Test
+	public void mixIn() throws Exception {
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		JacksonMixInBean bean = new JacksonMixInBean();
+		bean.setWithMixIn1("with");
+		bean.setWithoutMixIn("without");
+		bean.setWithMixIn2("with");
+
+		MappingJacksonValue jacksonValue = new MappingJacksonValue(bean);
+		jacksonValue.addMixIn(JacksonMixInBean.class, JacksonMixInBeanMixIn.class);
+		this.converter.write(jacksonValue, null, outputMessage);
+
+		String result = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
+		assertThat(result, containsString("<withMixIn1>with</withMixIn1>"));
+		assertThat(result, (containsString("<withMixIn2>with</withMixIn2>")));
+		assertThat(result, not(containsString("<withoutMixIn>without</withoutMixIn>")));
+	}
 
 
 	private void writeInternal(Object object, HttpOutputMessage outputMessage) throws Exception {
@@ -303,6 +324,47 @@ public class MappingJackson2XmlHttpMessageConverterTests {
 
 	@SuppressWarnings("serial")
 	private static class MyXmlMapper extends XmlMapper {
+	}
+
+
+	@SuppressWarnings("unused")
+	private static class JacksonMixInBean {
+
+		private String withMixIn1;
+		private String withoutMixIn;
+		private String withMixIn2;
+
+		public String getWithMixIn1() {
+			return withMixIn1;
+		}
+		
+		public void setWithMixIn1(String withMixIn1) {
+			this.withMixIn1 = withMixIn1;
+		}
+		
+		public String getWithoutMixIn() {
+			return withoutMixIn;
+		}
+		
+		public void setWithoutMixIn(String withoutMixIn) {
+			this.withoutMixIn = withoutMixIn;
+		}
+		
+		public String getWithMixIn2() {
+			return withMixIn2;
+		}
+		
+		public void setWithMixIn2(String withMixIn2) {
+			this.withMixIn2 = withMixIn2;
+		}
+	}
+	
+	@JsonAutoDetect(fieldVisibility = Visibility.NONE, getterVisibility = Visibility.NONE)
+	private static class JacksonMixInBeanMixIn {
+		@JsonProperty
+		private String withMixIn1;
+		@JsonProperty
+		private String withMixIn2;
 	}
 
 }

@@ -24,7 +24,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFilter;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -353,6 +356,24 @@ public class MappingJackson2HttpMessageConverterTests {
 		assertTrue(result.contains("\"number\":123"));
 	}
 
+	@Test
+	public void mixIn() throws Exception {
+		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
+		JacksonMixInBean bean = new JacksonMixInBean();
+		bean.setWithMixIn1("with");
+		bean.setWithoutMixIn("without");
+		bean.setWithMixIn2("with");
+
+		MappingJacksonValue jacksonValue = new MappingJacksonValue(bean);
+		jacksonValue.addMixIn(JacksonMixInBean.class, JacksonMixInBeanMixIn.class);
+		this.converter.writeInternal(jacksonValue, null, outputMessage);
+
+		String result = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
+		assertThat(result, containsString("\"withMixIn1\":\"with\""));
+		assertThat(result, (containsString("\"withMixIn2\":\"with\"")));
+		assertThat(result, not(containsString("\"withoutMixIn\":\"without\"")));
+	}
+
 
 	interface MyInterface {
 
@@ -500,6 +521,46 @@ public class MappingJackson2HttpMessageConverterTests {
 		public void setProperty2(String property2) {
 			this.property2 = property2;
 		}
+	}
+	
+	@SuppressWarnings("unused")
+	private static class JacksonMixInBean {
+
+		private String withMixIn1;
+		private String withoutMixIn;
+		private String withMixIn2;
+
+		public String getWithMixIn1() {
+			return withMixIn1;
+		}
+		
+		public void setWithMixIn1(String withMixIn1) {
+			this.withMixIn1 = withMixIn1;
+		}
+		
+		public String getWithoutMixIn() {
+			return withoutMixIn;
+		}
+		
+		public void setWithoutMixIn(String withoutMixIn) {
+			this.withoutMixIn = withoutMixIn;
+		}
+		
+		public String getWithMixIn2() {
+			return withMixIn2;
+		}
+		
+		public void setWithMixIn2(String withMixIn2) {
+			this.withMixIn2 = withMixIn2;
+		}
+	}
+	
+	@JsonAutoDetect(fieldVisibility = Visibility.NONE, getterVisibility = Visibility.NONE)
+	private static class JacksonMixInBeanMixIn {
+		@JsonProperty
+		private String withMixIn1;
+		@JsonProperty
+		private String withMixIn2;
 	}
 
 }

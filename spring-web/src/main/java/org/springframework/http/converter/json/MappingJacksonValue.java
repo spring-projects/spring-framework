@@ -16,6 +16,9 @@
 
 package org.springframework.http.converter.json;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.ser.FilterProvider;
 
 /**
@@ -42,6 +45,8 @@ public class MappingJacksonValue {
 	private FilterProvider filters;
 
 	private String jsonpFunction;
+
+	private Map<Class<?>, Class<?>> mixins;
 
 
 	/**
@@ -118,6 +123,27 @@ public class MappingJacksonValue {
 	 */
 	public String getJsonpFunction() {
 		return this.jsonpFunction;
+	}
+	
+	/**
+	 * Add mix-in annotations to use for augmenting specified class or interface.
+	 * @see com.fasterxml.jackson.databind.ObjectMapper#addMixInAnnotations(Class, Class)
+	 */
+	public void addMixIn(Class<?> target, Class<?> mixinSource) {
+		if (mixinSource != null) {
+			if(mixins == null) {
+				mixins = new HashMap<Class<?>, Class<?>>();
+			}
+			this.mixins.put(target, mixinSource);
+		}
+	}
+
+	/**
+	 * Return a map with the MixIns to use.
+	 * @see com.fasterxml.jackson.databind.ObjectMapper#addMixIn(Class, Class)
+	 */
+	public Map<Class<?>, Class<?>> getMixIns() {
+		return this.mixins;
 	}
 
 }
