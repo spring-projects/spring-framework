@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import org.springframework.aop.framework.ProxyCreatorSupport;
 import org.springframework.aop.framework.ProxyFactory;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.test.util.subpackage.Component;
 import org.springframework.test.util.subpackage.LegacyEntity;
 import org.springframework.test.util.subpackage.Person;
@@ -129,6 +127,37 @@ public class ReflectionTestUtilsTests {
 		assertEquals("blue", getField(person, "eyeColor"));
 		assertEquals(Boolean.TRUE, getField(person, "likesPets"));
 		assertEquals(PI, getField(person, "favoriteNumber"));
+	}
+
+	@Test
+	public void setFieldAndGetFieldOnCglibProxiedInstance() throws Exception {
+		ProxyFactory pf = new ProxyFactory(this.person);
+		pf.setProxyTargetClass(true);
+		Person proxyPerson = (Person) pf.getProxy();
+
+		// Set reflectively via Proxy
+		setField(proxyPerson, "id", new Long(99), long.class);
+		setField(proxyPerson, "name", "Tom");
+		setField(proxyPerson, "age", new Integer(42));
+		setField(proxyPerson, "eyeColor", "blue", String.class);
+		setField(proxyPerson, "likesPets", Boolean.TRUE);
+		setField(proxyPerson, "favoriteNumber", PI, Number.class);
+
+		// Get directly from Target via getter methods
+		assertEquals("ID (private field in a superclass)", 99, this.person.getId());
+		assertEquals("name (protected field)", "Tom", this.person.getName());
+		assertEquals("age (private field)", 42, this.person.getAge());
+		assertEquals("eye color (package private field)", "blue", this.person.getEyeColor());
+		assertEquals("'likes pets' flag (package private boolean field)", true, this.person.likesPets());
+		assertEquals("'favorite number' (package field)", PI, this.person.getFavoriteNumber());
+
+		// Get reflectively via Proxy
+		assertEquals(new Long(99), getField(proxyPerson, "id"));
+		assertEquals("Tom", getField(proxyPerson, "name"));
+		assertEquals(new Integer(42), getField(proxyPerson, "age"));
+		assertEquals("blue", getField(proxyPerson, "eyeColor"));
+		assertEquals(Boolean.TRUE, getField(proxyPerson, "likesPets"));
+		assertEquals(PI, getField(proxyPerson, "favoriteNumber"));
 	}
 
 	@Test
@@ -360,37 +389,6 @@ public class ReflectionTestUtilsTests {
 		exception.expect(IllegalStateException.class);
 		exception.expectMessage(startsWith("Method not found"));
 		invokeMethod(component, "configure", new Integer(42), "enigma", "baz", "quux");
-	}
-
-	@Test
-	public void setAndGetFieldOnProxiedInstance() throws Exception  {
-		ProxyFactory pf = new ProxyFactory(this.person);
-		pf.setProxyTargetClass(true);
-
-		Person proxyPerson = (Person) pf.getProxy();
-
-		setField(proxyPerson, "id", new Long(99), long.class);
-		setField(proxyPerson, "name", "Tom");
-		setField(proxyPerson, "age", new Integer(42));
-		setField(proxyPerson, "eyeColor", "blue", String.class);
-		setField(proxyPerson, "likesPets", Boolean.TRUE);
-		setField(proxyPerson, "favoriteNumber", PI, Number.class);
-
-		assertEquals("ID (private field in a superclass)", 99, person.getId());
-		assertEquals("name (protected field)", "Tom", person.getName());
-		assertEquals("age (private field)", 42, person.getAge());
-		assertEquals("eye color (package private field)", "blue", person.getEyeColor());
-		assertEquals("'likes pets' flag (package private boolean field)", true, person.likesPets());
-		assertEquals("'favorite number' (package field)", PI, person.getFavoriteNumber());
-
-		assertEquals(new Long(99), getField(proxyPerson, "id"));
-		assertEquals("Tom", getField(proxyPerson, "name"));
-		assertEquals(new Integer(42), getField(proxyPerson, "age"));
-		assertEquals("blue", getField(proxyPerson, "eyeColor"));
-		assertEquals(Boolean.TRUE, getField(proxyPerson, "likesPets"));
-		assertEquals(PI, getField(proxyPerson, "favoriteNumber"));
-
-
 	}
 
 }
