@@ -160,7 +160,8 @@ public class ReflectionTestUtils {
 		Assert.isTrue(targetObject != null || targetClass != null,
 			"Either targetObject or targetClass for the field must be specified");
 
-		Object ultimateTargetObject = AopTestUtils.getUltimateTargetObject(targetObject);
+		Object ultimateTargetObject = (targetObject == null ? null
+				: AopTestUtils.getUltimateTargetObject(targetObject));
 
 		if (targetClass == null) {
 			targetClass = ultimateTargetObject.getClass();
@@ -237,7 +238,8 @@ public class ReflectionTestUtils {
 		Assert.isTrue(targetObject != null || targetClass != null,
 			"Either targetObject or targetClass for the field must be specified");
 
-		Object ultimateTargetObject = AopTestUtils.getUltimateTargetObject(targetObject);
+		Object ultimateTargetObject = (targetObject == null ? null
+				: AopTestUtils.getUltimateTargetObject(targetObject));
 
 		if (targetClass == null) {
 			targetClass = ultimateTargetObject.getClass();
