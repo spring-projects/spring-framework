@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.aop.scope.ScopedProxyUtils;
@@ -33,6 +34,7 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.core.annotation.AliasFor;
 
 import static org.junit.Assert.*;
 
@@ -42,6 +44,7 @@ import static org.junit.Assert.*;
  * @author Mark Fisher
  * @author Juergen Hoeller
  * @author Chris Beams
+ * @author Sam Brannen
  */
 public class QualifierAnnotationAutowireContextTests {
 
@@ -49,6 +52,7 @@ public class QualifierAnnotationAutowireContextTests {
 
 	private static final String MARK = "mark";
 
+	private static final String SAM = "sam";
 
 	@Test
 	public void testAutowiredFieldWithSingleNonQualifiedCandidate() {
@@ -306,6 +310,24 @@ public class QualifierAnnotationAutowireContextTests {
 		context.refresh();
 		MetaQualifiedFieldTestBean bean = (MetaQualifiedFieldTestBean) context.getBean("autowired");
 		assertEquals(JUERGEN, bean.getPerson().getName());
+	}
+
+	/**
+	 * @see SpringBean
+	 */
+	@Test
+	@Ignore("Disabled until SPR-14058 is resolved")
+	public void autowiredFieldResolutionIgnoresEmptyQualifierFromComposedQualifierAnnotation() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
+		cavs1.addGenericArgumentValue(SAM);
+		RootBeanDefinition person1 = new RootBeanDefinition(Person.class, cavs1, null);
+		context.registerBeanDefinition(SAM, person1);
+		context.registerBeanDefinition("autowired", new RootBeanDefinition(ComposedAnnotationQualifiedFieldTestBean.class));
+		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
+		context.refresh();
+		ComposedAnnotationQualifiedFieldTestBean bean = context.getBean(ComposedAnnotationQualifiedFieldTestBean.class);
+		assertEquals(SAM, bean.getPerson().getName());
 	}
 
 	@Test
@@ -632,6 +654,37 @@ public class QualifierAnnotationAutowireContextTests {
 	@TestQualifier
 	@Retention(RetentionPolicy.RUNTIME)
 	public static @interface MyAutowired {
+	}
+
+
+	/**
+	 * {@code @SpringBean} is a composed annotation that combines the semantics of
+	 * {@code Autowired @Autowired} and {@code Qualifier @Qualifier}
+	 */
+	@Autowired
+	@Qualifier
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface SpringBean {
+
+		@AliasFor(annotation = Qualifier.class)
+		String value() default "";
+
+		@AliasFor(annotation = Qualifier.class, attribute = "value")
+		String qualifier() default "";
+
+		@AliasFor(annotation = Autowired.class)
+		boolean required() default true;
+
+	}
+
+	private static class ComposedAnnotationQualifiedFieldTestBean {
+
+		@SpringBean
+		private Person person;
+
+		public Person getPerson() {
+			return this.person;
+		}
 	}
 
 
