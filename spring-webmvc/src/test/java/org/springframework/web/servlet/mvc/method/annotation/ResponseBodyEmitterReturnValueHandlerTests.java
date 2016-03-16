@@ -81,6 +81,7 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		assertTrue(this.handler.supportsReturnType(returnType("handleResponseEntity")));
 		assertFalse(this.handler.supportsReturnType(returnType("handleResponseEntityString")));
 		assertFalse(this.handler.supportsReturnType(returnType("handleResponseEntityParameterized")));
+		assertFalse(this.handler.supportsReturnType(returnType("handleRawResponseEntity")));
 	}
 
 	@Test
@@ -226,6 +227,10 @@ public class ResponseBodyEmitterReturnValueHandlerTests {
 		}
 
 		private ResponseEntity<AtomicReference<String>> handleResponseEntityParameterized() {
+			return null;
+		}
+
+		private ResponseEntity handleRawResponseEntity() {
 			return null;
 		}
 

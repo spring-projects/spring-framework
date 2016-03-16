@@ -81,9 +81,11 @@ public class ResponseBodyEmitterReturnValueHandler implements AsyncHandlerMethod
 	}
 
 	private ResponseBodyEmitterAdapter getAdapterFor(Class<?> type) {
-		for (Class<?> adapteeType : getAdapterMap().keySet()) {
-			if (adapteeType.isAssignableFrom(type)) {
-				return getAdapterMap().get(adapteeType);
+		if (type != null) {
+			for (Class<?> adapteeType : getAdapterMap().keySet()) {
+				if (adapteeType.isAssignableFrom(type)) {
+					return getAdapterMap().get(adapteeType);
+				}
 			}
 		}
 		return null;
