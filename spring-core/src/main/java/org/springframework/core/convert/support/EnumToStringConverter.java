@@ -17,10 +17,7 @@
 package org.springframework.core.convert.support;
 
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.ConditionalConverter;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.util.ClassUtils;
 
 /**
  * Calls {@link Enum#name()} to convert a source Enum to a String.
@@ -30,24 +27,10 @@ import org.springframework.util.ClassUtils;
  * @author Phillip Webb
  * @since 3.0
  */
-final class EnumToStringConverter implements Converter<Enum<?>, String>, ConditionalConverter {
-
-	private final ConversionService conversionService;
-
+final class EnumToStringConverter extends AbstractConditionalEnumConverter implements Converter<Enum<?>, String> {
 
 	public EnumToStringConverter(ConversionService conversionService) {
-		this.conversionService = conversionService;
-	}
-
-
-	@Override
-	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		for (Class<?> interfaceType : ClassUtils.getAllInterfacesForClass(sourceType.getType())) {
-			if (this.conversionService.canConvert(TypeDescriptor.valueOf(interfaceType), targetType)) {
-				return false;
-			}
-		}
-		return true;
+		super(conversionService);
 	}
 
 	@Override

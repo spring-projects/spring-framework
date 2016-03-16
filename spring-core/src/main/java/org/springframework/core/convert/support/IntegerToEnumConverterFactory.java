@@ -22,7 +22,8 @@ import org.springframework.core.convert.converter.ConverterFactory;
 /**
  * Converts from a Integer to a {@link java.lang.Enum} by calling {@link Class#getEnumConstants()}.
  *
- * @author Yanming Zhou (zhouyanming@gmail.com)
+ * @author Yanming Zhou
+ * @author Stephane Nicoll
  * @since 4.3
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
@@ -30,15 +31,7 @@ final class IntegerToEnumConverterFactory implements ConverterFactory<Integer, E
 
 	@Override
 	public <T extends Enum> Converter<Integer, T> getConverter(Class<T> targetType) {
-		Class<?> enumType = targetType;
-		while (enumType != null && !enumType.isEnum()) {
-			enumType = enumType.getSuperclass();
-		}
-		if (enumType == null) {
-			throw new IllegalArgumentException(
-					"The target type " + targetType.getName() + " does not refer to an enum");
-		}
-		return new IntegerToEnum(enumType);
+		return new IntegerToEnum(ConversionUtils.getEnumType(targetType));
 	}
 
 
@@ -52,10 +45,7 @@ final class IntegerToEnumConverterFactory implements ConverterFactory<Integer, E
 
 		@Override
 		public T convert(Integer source) {
-			if (source == null) {
-				return null;
-			}
-			return enumType.getEnumConstants()[source];
+			return this.enumType.getEnumConstants()[source];
 		}
 	}
 

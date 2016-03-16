@@ -17,36 +17,19 @@
 package org.springframework.core.convert.support;
 
 import org.springframework.core.convert.ConversionService;
-import org.springframework.core.convert.TypeDescriptor;
-import org.springframework.core.convert.converter.ConditionalConverter;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.util.ClassUtils;
 
 /**
  * Calls {@link Enum#ordinal()} to convert a source Enum to a Integer.
  * This converter will not match enums with interfaces that can be converted.
  *
- * @author Yanming Zhou (zhouyanming@gmail.com)
+ * @author Yanming Zhou
  * @since 4.3
  */
-final class EnumToIntegerConverter implements Converter<Enum<?>, Integer>, ConditionalConverter {
-
-	private final ConversionService conversionService;
-
+final class EnumToIntegerConverter extends AbstractConditionalEnumConverter implements Converter<Enum<?>, Integer> {
 
 	public EnumToIntegerConverter(ConversionService conversionService) {
-		this.conversionService = conversionService;
-	}
-
-
-	@Override
-	public boolean matches(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		for (Class<?> interfaceType : ClassUtils.getAllInterfacesForClass(sourceType.getType())) {
-			if (this.conversionService.canConvert(TypeDescriptor.valueOf(interfaceType), targetType)) {
-				return false;
-			}
-		}
-		return true;
+		super(conversionService);
 	}
 
 	@Override
