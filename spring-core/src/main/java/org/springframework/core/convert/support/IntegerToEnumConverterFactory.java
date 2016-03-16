@@ -20,36 +20,32 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterFactory;
 
 /**
- * Converts from a String to a {@link java.lang.Enum} by calling {@link Enum#valueOf(Class, String)}.
+ * Converts from a Integer to a {@link java.lang.Enum} by calling {@link Class#getEnumConstants()}.
  *
- * @author Keith Donald
+ * @author Yanming Zhou
  * @author Stephane Nicoll
- * @since 3.0
+ * @since 4.3
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
-final class StringToEnumConverterFactory implements ConverterFactory<String, Enum> {
+final class IntegerToEnumConverterFactory implements ConverterFactory<Integer, Enum> {
 
 	@Override
-	public <T extends Enum> Converter<String, T> getConverter(Class<T> targetType) {
-		return new StringToEnum(ConversionUtils.getEnumType(targetType));
+	public <T extends Enum> Converter<Integer, T> getConverter(Class<T> targetType) {
+		return new IntegerToEnum(ConversionUtils.getEnumType(targetType));
 	}
 
 
-	private class StringToEnum<T extends Enum> implements Converter<String, T> {
+	private class IntegerToEnum<T extends Enum> implements Converter<Integer, T> {
 
 		private final Class<T> enumType;
 
-		public StringToEnum(Class<T> enumType) {
+		public IntegerToEnum(Class<T> enumType) {
 			this.enumType = enumType;
 		}
 
 		@Override
-		public T convert(String source) {
-			if (source.length() == 0) {
-				// It's an empty enum identifier: reset the enum value to null.
-				return null;
-			}
-			return (T) Enum.valueOf(this.enumType, source.trim());
+		public T convert(Integer source) {
+			return this.enumType.getEnumConstants()[source];
 		}
 	}
 
