@@ -173,10 +173,10 @@ public abstract class AbstractCacheManager implements CacheManager, Initializing
 	/**
 	 * Return a missing cache with the specified {@code name} or {@code null} if
 	 * such cache does not exist or could not be created on the fly.
-	 * <p>Some caches may be created at runtime in the native provided. If a lookup
-	 * by name does not yield any result, a subclass gets a chance to register
-	 * such a cache at runtime. The returned cache will be automatically added to
-	 * this instance.
+	 * <p>Some caches may be created at runtime if the native provider supports
+	 * it. If a lookup by name does not yield any result, a subclass gets a chance
+	 * to register such a cache at runtime. The returned cache will be automatically
+	 * added to this instance.
 	 * @param name the name of the cache to retrieve
 	 * @return the missing cache or {@code null} if no such cache exists or could be
 	 * created
