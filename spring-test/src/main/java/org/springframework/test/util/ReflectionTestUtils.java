@@ -164,27 +164,26 @@ public class ReflectionTestUtils {
 		Assert.isTrue(targetObject != null || targetClass != null,
 			"Either targetObject or targetClass for the field must be specified");
 
-		Object ultimateTargetObject = (targetObject == null ? null
-				: AopTestUtils.getUltimateTargetObject(targetObject));
+		Object ultimateTarget = (targetObject != null ? AopTestUtils.getUltimateTargetObject(targetObject) : null);
 
 		if (targetClass == null) {
-			targetClass = ultimateTargetObject.getClass();
+			targetClass = ultimateTarget.getClass();
 		}
 
 		Field field = ReflectionUtils.findField(targetClass, name, type);
 		if (field == null) {
 			throw new IllegalArgumentException(String.format(
 					"Could not find field '%s' of type [%s] on target object [%s] or target class [%s]", name, type,
-					targetObject, targetClass));
+					ultimateTarget, targetClass));
 		}
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format(
 					"Setting field '%s' of type [%s] on target object [%s] or target class [%s] to value [%s]", name, type,
-					targetObject, targetClass, value));
+					ultimateTarget, targetClass, value));
 		}
 		ReflectionUtils.makeAccessible(field);
-		ReflectionUtils.setField(field, ultimateTargetObject, value);
+		ReflectionUtils.setField(field, ultimateTarget, value);
 	}
 
 	/**
@@ -245,26 +244,25 @@ public class ReflectionTestUtils {
 		Assert.isTrue(targetObject != null || targetClass != null,
 			"Either targetObject or targetClass for the field must be specified");
 
-		Object ultimateTargetObject = (targetObject == null ? null
-				: AopTestUtils.getUltimateTargetObject(targetObject));
+		Object ultimateTarget = (targetObject != null ? AopTestUtils.getUltimateTargetObject(targetObject) : null);
 
 		if (targetClass == null) {
-			targetClass = ultimateTargetObject.getClass();
+			targetClass = ultimateTarget.getClass();
 		}
 
 		Field field = ReflectionUtils.findField(targetClass, name);
 		if (field == null) {
 			throw new IllegalArgumentException(
 				String.format("Could not find field '%s' on target object [%s] or target class [%s]", name,
-						targetObject, targetClass));
+					ultimateTarget, targetClass));
 		}
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(String.format("Getting field '%s' from target object [%s] or target class [%s]", name,
-					targetObject, targetClass));
+					ultimateTarget, targetClass));
 		}
 		ReflectionUtils.makeAccessible(field);
-		return ReflectionUtils.getField(field, ultimateTargetObject);
+		return ReflectionUtils.getField(field, ultimateTarget);
 	}
 
 	/**
