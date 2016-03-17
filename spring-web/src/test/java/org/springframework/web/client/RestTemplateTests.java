@@ -730,4 +730,20 @@ public class RestTemplateTests {
 
 		verify(response).close();
 	}
+
+	@Test
+	public void enableSslVerify() {
+		boolean enabled = true;
+		ClientHttpRequestFactory unexpected = template.getRequestFactory();
+		template.setSslVerify(enabled);
+		assertNotEquals(unexpected, template.getRequestFactory());
+	}
+
+	@Test
+	public void disableSslVerify() {
+		boolean enabled = false;
+		ClientHttpRequestFactory unexpected = template.getRequestFactory();
+		template.setSslVerify(enabled);
+		assertNotEquals(unexpected, template.getRequestFactory());
+	}
 }

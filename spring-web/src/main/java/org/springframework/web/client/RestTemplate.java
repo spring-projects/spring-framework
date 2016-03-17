@@ -18,11 +18,21 @@ package org.springframework.web.client;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.net.HttpURLConnection;
 import java.net.URI;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 import javax.xml.transform.Source;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -35,6 +45,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.client.support.InterceptingHttpAccessor;
 import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.GenericHttpMessageConverter;
@@ -248,6 +259,59 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	public void setUriTemplateHandler(UriTemplateHandler handler) {
 		Assert.notNull(handler, "UriTemplateHandler must not be null");
 		this.uriTemplateHandler = handler;
+	}
+
+	/**
+	 * Provides a way to easily disable/enable SSL verification.
+	 * @param false to disable SSL checking.
+	 */
+	public void setSslVerify(boolean enabled) {
+		if(enabled) {
+			setRequestFactory(new SimpleClientHttpRequestFactory());
+		} else {
+			setRequestFactory(createClientHttpRequestFactory());
+		}
+	}
+
+	/**
+	 * Helper method that configures {@link ClientHttpRequestFactory} with SSL checking
+	 * disabled.
+	 */
+	private static ClientHttpRequestFactory createClientHttpRequestFactory() {
+		TrustManager[] byPassTrustManagers = new TrustManager[] { new X509TrustManager() {
+
+			public X509Certificate[] getAcceptedIssuers() {
+				return new X509Certificate[0];
+			}
+			public void checkClientTrusted(X509Certificate[] chain, String authType) {}
+			public void checkServerTrusted(X509Certificate[] chain, String authType) {}
+		} };
+		final SSLContext sslContext;
+		try {
+			sslContext = SSLContext.getInstance("TLS");
+			sslContext.init(null, byPassTrustManagers, new SecureRandom());
+			sslContext.getSocketFactory();
+		}
+		catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException(e);
+		}
+		catch (KeyManagementException e) {
+			throw new RuntimeException(e);
+		}
+
+		ClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory() {
+
+			@Override
+			protected void prepareConnection(HttpURLConnection connection,
+					String httpMethod) throws IOException {
+				super.prepareConnection(connection, httpMethod);
+				if (connection instanceof HttpsURLConnection) {
+					((HttpsURLConnection) connection).setSSLSocketFactory(
+							sslContext.getSocketFactory());
+				}
+			}
+		};
+		return factory;
 	}
 
 	/**
