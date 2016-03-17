@@ -28,7 +28,7 @@ import reactor.io.netty.http.model.Status;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ServerHttpCookie;
+import org.springframework.http.ResponseCookie;
 import org.springframework.util.Assert;
 
 /**
@@ -75,7 +75,7 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse {
 	@Override
 	protected void writeCookies() {
 		for (String name : getCookies().keySet()) {
-			for (ServerHttpCookie httpCookie : getCookies().get(name)) {
+			for (ResponseCookie httpCookie : getCookies().get(name)) {
 				Cookie cookie = new ReactorCookie(httpCookie);
 				this.channel.addResponseCookie(name, cookie);
 			}
@@ -88,10 +88,10 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse {
 	 */
 	private final static class ReactorCookie extends Cookie {
 
-		private final ServerHttpCookie httpCookie;
+		private final ResponseCookie httpCookie;
 
 
-		public ReactorCookie(ServerHttpCookie httpCookie) {
+		public ReactorCookie(ResponseCookie httpCookie) {
 			this.httpCookie = httpCookie;
 		}
 

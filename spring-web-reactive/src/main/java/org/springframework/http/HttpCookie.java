@@ -18,10 +18,9 @@ package org.springframework.http;
 import org.springframework.util.Assert;
 
 /**
- * Represents an HTTP Cookie with a name and value.
- *
- * <p>The {@link ServerHttpCookie} sub-class exposes the extra attributes that
- * a server can include in a Set-Cookie response header.
+ * Represents an HTTP cookie as a name-value pair consistent with the content of
+ * the "Cookie" request header. The {@link ResponseCookie} sub-class has the
+ * additional attributes expected in the "Set-Cookie" response header.
  *
  * @author Rossen Stoyanchev
  * @see <a href="https://tools.ietf.org/html/rfc6265">RFC 6265</a>

@@ -28,7 +28,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ServerHttpCookie;
+import org.springframework.http.ResponseCookie;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
@@ -81,7 +81,7 @@ public class ServerHttpResponseTests {
 
 	@Test
 	public void beforeCommitWithSetBody() throws Exception {
-		ServerHttpCookie cookie = ServerHttpCookie.with("ID", "123").build();
+		ResponseCookie cookie = ResponseCookie.from("ID", "123").build();
 		TestServerHttpResponse response = new TestServerHttpResponse();
 		response.beforeCommit(() -> {
 			response.getCookies().add(cookie.getName(), cookie);
@@ -118,7 +118,7 @@ public class ServerHttpResponseTests {
 
 	@Test
 	public void beforeCommitActionWithSetComplete() throws Exception {
-		ServerHttpCookie cookie = ServerHttpCookie.with("ID", "123").build();
+		ResponseCookie cookie = ResponseCookie.from("ID", "123").build();
 		TestServerHttpResponse response = new TestServerHttpResponse();
 		response.beforeCommit(() -> {
 			response.getCookies().add(cookie.getName(), cookie);

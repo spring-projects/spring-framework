@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpCookie;
-import org.springframework.http.ServerHttpCookie;
+import org.springframework.http.ResponseCookie;
 import org.springframework.util.Assert;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
@@ -58,7 +58,7 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 
 	/**
 	 * Set the value for the "Max-Age" attribute of the cookie that holds the
-	 * session id. For the range of values see {@link ServerHttpCookie#getMaxAge()}.
+	 * session id. For the range of values see {@link ResponseCookie#getMaxAge()}.
 	 * <p>By default set to -1.
 	 * @param maxAge the maxAge duration value
 	 */
@@ -87,8 +87,8 @@ public class CookieWebSessionIdResolver implements WebSessionIdResolver {
 	@Override
 	public void setSessionId(ServerWebExchange exchange, String id) {
 		Duration maxAge = (StringUtils.hasText(id) ? getCookieMaxAge() : Duration.ofSeconds(0));
-		ServerHttpCookie cookie = ServerHttpCookie.with(getCookieName(), id).maxAge(maxAge).build();
-		MultiValueMap<String, ServerHttpCookie> cookieMap = exchange.getResponse().getCookies();
+		ResponseCookie cookie = ResponseCookie.from(getCookieName(), id).maxAge(maxAge).build();
+		MultiValueMap<String, ResponseCookie> cookieMap = exchange.getResponse().getCookies();
 		cookieMap.set(getCookieName(), cookie);
 	}
 

@@ -24,7 +24,7 @@ import reactor.core.publisher.Mono;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ServerHttpCookie;
+import org.springframework.http.ResponseCookie;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -37,7 +37,7 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 
 	private HttpHeaders headers = new HttpHeaders();
 
-	private MultiValueMap<String, ServerHttpCookie> cookies = new LinkedMultiValueMap<>();
+	private MultiValueMap<String, ResponseCookie> cookies = new LinkedMultiValueMap<>();
 
 	private Publisher<DataBuffer> body;
 
@@ -57,7 +57,7 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 	}
 
 	@Override
-	public MultiValueMap<String, ServerHttpCookie> getCookies() {
+	public MultiValueMap<String, ResponseCookie> getCookies() {
 		return this.cookies;
 	}
 

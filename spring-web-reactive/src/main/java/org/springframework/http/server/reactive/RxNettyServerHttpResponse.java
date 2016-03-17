@@ -30,7 +30,7 @@ import rx.Observable;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBuffer;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ServerHttpCookie;
+import org.springframework.http.ResponseCookie;
 import org.springframework.util.Assert;
 
 /**
@@ -86,7 +86,7 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 	@Override
 	protected void writeCookies() {
 		for (String name : getCookies().keySet()) {
-			for (ServerHttpCookie httpCookie : getCookies().get(name)) {
+			for (ResponseCookie httpCookie : getCookies().get(name)) {
 				Cookie cookie = new DefaultCookie(name, httpCookie.getValue());
 				if (!httpCookie.getMaxAge().isNegative()) {
 					cookie.setMaxAge(httpCookie.getMaxAge().getSeconds());

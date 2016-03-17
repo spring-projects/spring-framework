@@ -22,15 +22,14 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
- * Represents a server-side cookie with extra attributes that a server can
- * include in a Set-Cookie response header.
- *
- * <p>Use {@link #with} to create a {@code ServerHttpCookie}.
+ * An {@code HttpCookie} sub-class with the additional attributes allowed in
+ * the "Set-Cookie" response header. To build an instance use the {@link #from}
+ * static method.
  *
  * @author Rossen Stoyanchev
  * @see <a href="https://tools.ietf.org/html/rfc6265">RFC 6265</a>
  */
-public final class ServerHttpCookie extends HttpCookie {
+public final class ResponseCookie extends HttpCookie {
 
 	private final Duration maxAge;
 
@@ -44,9 +43,9 @@ public final class ServerHttpCookie extends HttpCookie {
 
 
 	/**
-	 * Private constructor. See {@link #with(String, String)}.
+	 * Private constructor. See {@link #from(String, String)}.
 	 */
-	private ServerHttpCookie(String name, String value, Duration maxAge, String domain,
+	private ResponseCookie(String name, String value, Duration maxAge, String domain,
 			String path, boolean secure, boolean httpOnly) {
 
 		super(name, value);
@@ -113,10 +112,10 @@ public final class ServerHttpCookie extends HttpCookie {
 		if (this == other) {
 			return true;
 		}
-		if (!(other instanceof ServerHttpCookie)) {
+		if (!(other instanceof ResponseCookie)) {
 			return false;
 		}
-		ServerHttpCookie otherCookie = (ServerHttpCookie) other;
+		ResponseCookie otherCookie = (ResponseCookie) other;
 		return (getName().equalsIgnoreCase(otherCookie.getName()) &&
 				ObjectUtils.nullSafeEquals(this.path, otherCookie.getPath()) &&
 				ObjectUtils.nullSafeEquals(this.domain, otherCookie.getDomain()));
@@ -130,9 +129,9 @@ public final class ServerHttpCookie extends HttpCookie {
 	 * @param value the cookie value
 	 * @return the created cookie instance
 	 */
-	public static ServerHttpCookieBuilder with(final String name, final String value) {
+	public static ResponseCookieBuilder from(final String name, final String value) {
 
-		return new ServerHttpCookieBuilder() {
+		return new ResponseCookieBuilder() {
 
 			private Duration maxAge = Duration.ofSeconds(-1);
 
@@ -146,38 +145,38 @@ public final class ServerHttpCookie extends HttpCookie {
 
 
 			@Override
-			public ServerHttpCookieBuilder maxAge(Duration maxAge) {
+			public ResponseCookieBuilder maxAge(Duration maxAge) {
 				this.maxAge = maxAge;
 				return this;
 			}
 
 			@Override
-			public ServerHttpCookieBuilder domain(String domain) {
+			public ResponseCookieBuilder domain(String domain) {
 				this.domain = domain;
 				return this;
 			}
 
 			@Override
-			public ServerHttpCookieBuilder path(String path) {
+			public ResponseCookieBuilder path(String path) {
 				this.path = path;
 				return this;
 			}
 
 			@Override
-			public ServerHttpCookieBuilder secure() {
+			public ResponseCookieBuilder secure() {
 				this.secure = true;
 				return this;
 			}
 
 			@Override
-			public ServerHttpCookieBuilder httpOnly() {
+			public ResponseCookieBuilder httpOnly() {
 				this.httpOnly = true;
 				return this;
 			}
 
 			@Override
-			public ServerHttpCookie build() {
-				return new ServerHttpCookie(name, value, this.maxAge, this.domain, this.path,
+			public ResponseCookie build() {
+				return new ResponseCookie(name, value, this.maxAge, this.domain, this.path,
 						this.secure, this.httpOnly);
 			}
 		};
@@ -186,7 +185,7 @@ public final class ServerHttpCookie extends HttpCookie {
 	/**
 	 * A builder for a server-defined HttpCookie with attributes.
 	 */
-	public interface ServerHttpCookieBuilder {
+	public interface ResponseCookieBuilder {
 
 		/**
 		 * Set the cookie "Max-Age" attribute.
@@ -196,33 +195,33 @@ public final class ServerHttpCookie extends HttpCookie {
 		 * immediately. A negative value results in no "Max-Age" attribute in
 		 * which case the cookie is removed when the browser is closed.
 		 */
-		ServerHttpCookieBuilder maxAge(Duration maxAge);
+		ResponseCookieBuilder maxAge(Duration maxAge);
 
 		/**
 		 * Set the cookie "Path" attribute.
 		 */
-		ServerHttpCookieBuilder path(String path);
+		ResponseCookieBuilder path(String path);
 
 		/**
 		 * Set the cookie "Domain" attribute.
 		 */
-		ServerHttpCookieBuilder domain(String domain);
+		ResponseCookieBuilder domain(String domain);
 
 		/**
 		 * Add the "Secure" attribute to the cookie.
 		 */
-		ServerHttpCookieBuilder secure();
+		ResponseCookieBuilder secure();
 
 		/**
 		 * Add the "HttpOnly" attribute to the cookie.
 		 * @see <a href="http://www.owasp.org/index.php/HTTPOnly">http://www.owasp.org/index.php/HTTPOnly</a>
 		 */
-		ServerHttpCookieBuilder httpOnly();
+		ResponseCookieBuilder httpOnly();
 
 		/**
 		 * Create the HttpCookie.
 		 */
-		ServerHttpCookie build();
+		ResponseCookie build();
 	}
 
 }

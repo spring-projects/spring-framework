@@ -29,7 +29,7 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ServerHttpCookie;
+import org.springframework.http.ResponseCookie;
 import org.springframework.util.Assert;
 
 /**
@@ -81,7 +81,7 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse {
 	@Override
 	protected void writeCookies() {
 		for (String name : getCookies().keySet()) {
-			for (ServerHttpCookie httpCookie : getCookies().get(name)) {
+			for (ResponseCookie httpCookie : getCookies().get(name)) {
 				Cookie cookie = new CookieImpl(name, httpCookie.getValue());
 				if (!httpCookie.getMaxAge().isNegative()) {
 					cookie.setMaxAge((int) httpCookie.getMaxAge().getSeconds());
