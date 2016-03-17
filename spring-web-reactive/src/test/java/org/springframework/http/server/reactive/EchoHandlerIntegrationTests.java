@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,13 @@ import java.net.URI;
 import java.util.Random;
 
 import org.junit.Test;
+import reactor.core.publisher.Mono;
 
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
 
 
 public class EchoHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
@@ -43,7 +43,7 @@ public class EchoHandlerIntegrationTests extends AbstractHttpHandlerIntegrationT
 
 
 	@Test
-	public void echoBytes() throws Exception {
+	public void echo() throws Exception {
 		RestTemplate restTemplate = new RestTemplate();
 
 		byte[] body = randomBytes();
@@ -53,36 +53,6 @@ public class EchoHandlerIntegrationTests extends AbstractHttpHandlerIntegrationT
 		assertArrayEquals(body, response.getBody());
 	}
 
-	@Test
-	public void echoString() throws Exception {
-		RestTemplate restTemplate = new RestTemplate();
-
-		String body = randomString();
-		RequestEntity<String> request = RequestEntity.post(new URI("http://localhost:" + port)).body(body);
-		ResponseEntity<String> response = restTemplate.exchange(request, String.class);
-
-		assertEquals(body, response.getBody());
-	}
-
-	private String randomString() {
-		StringBuilder builder = new StringBuilder();
-		int i = 1;
-		while (builder.length() < REQUEST_SIZE) {
-			builder.append(randomChar());
-			if (i % 5 == 0) {
-				builder.append(' ');
-			}
-			if (i % 80 == 0) {
-				builder.append('\n');
-			}
-			i++;
-		}
-		return builder.toString();
-	}
-
-	private char randomChar() {
-		return (char) (rnd.nextInt(26) + 'a');
-	}
 
 	private byte[] randomBytes() {
 		byte[] buffer = new byte[REQUEST_SIZE];
@@ -90,4 +60,14 @@ public class EchoHandlerIntegrationTests extends AbstractHttpHandlerIntegrationT
 		return buffer;
 	}
 
+	/**
+	 * @author Arjen Poutsma
+	 */
+	public static class EchoHandler implements HttpHandler {
+
+		@Override
+		public Mono<Void> handle(ServerHttpRequest request, ServerHttpResponse response) {
+			return response.setBody(request.getBody());
+		}
+	}
 }

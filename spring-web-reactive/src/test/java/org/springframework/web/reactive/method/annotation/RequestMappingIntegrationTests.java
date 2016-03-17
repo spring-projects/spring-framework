@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -170,8 +169,6 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 	}
 
 	@Test
-	@Ignore
-	//FIXME Fail with Jetty and Tomcat
 	public void streamResult() throws Exception {
 		RestTemplate restTemplate = new RestTemplate();
 
@@ -468,7 +465,13 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@RequestMapping("/stream-result")
 		public Publisher<Long> stringStreamResponseBody() {
-			return Flux.interval(Duration.ofMillis(100)).take(5);
+			/*
+			TODO: replace the following line with:
+		    return Flux.interval(Duration.ofMillis(100)).take(5);
+		    to make the build last shorter. Unfortunately, this hangs the build as of
+		    20160317.
+			*/
+			return Flux.interval(Duration.ofSeconds(1)).take(5);
 		}
 
 		@RequestMapping("/raw-flux")
