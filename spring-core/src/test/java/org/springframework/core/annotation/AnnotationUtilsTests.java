@@ -779,6 +779,25 @@ public class AnnotationUtilsTests {
 	}
 
 	@Test
+	public void getAttributeAliasNamesFromComposedAnnotationWithImplicitAliasesWithImpliedAliasNamesOmitted()
+			throws Exception {
+
+		Method value = ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig.class.getDeclaredMethod("value");
+		Method location = ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig.class.getDeclaredMethod("location");
+		Method xmlFile = ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig.class.getDeclaredMethod("xmlFile");
+
+		// Meta-annotation attribute overrides
+		assertEquals("value", getAttributeOverrideName(value, ContextConfig.class));
+		assertEquals("location", getAttributeOverrideName(location, ContextConfig.class));
+		assertEquals("location", getAttributeOverrideName(xmlFile, ContextConfig.class));
+
+		// Implicit aliases
+		assertThat(getAttributeAliasNames(value), containsInAnyOrder("location", "xmlFile"));
+		assertThat(getAttributeAliasNames(location), containsInAnyOrder("value", "xmlFile"));
+		assertThat(getAttributeAliasNames(xmlFile), containsInAnyOrder("value", "location"));
+	}
+
+	@Test
 	public void getAttributeAliasNamesFromComposedAnnotationWithTransitiveImplicitAliases() throws Exception {
 		Method xml = TransitiveImplicitAliasesContextConfig.class.getDeclaredMethod("xml");
 		Method groovy = TransitiveImplicitAliasesContextConfig.class.getDeclaredMethod("groovy");
@@ -808,6 +827,26 @@ public class AnnotationUtilsTests {
 		// Transitive implicit aliases
 		assertThat(getAttributeAliasNames(xml), containsInAnyOrder("groovy"));
 		assertThat(getAttributeAliasNames(groovy), containsInAnyOrder("xml"));
+	}
+
+	@Test
+	public void getAttributeAliasNamesFromComposedAnnotationWithTransitiveImplicitAliasesWithImpliedAliasNamesOmitted()
+			throws Exception {
+
+		Method xml = TransitiveImplicitAliasesWithImpliedAliasNamesOmittedContextConfig.class.getDeclaredMethod("xml");
+		Method groovy = TransitiveImplicitAliasesWithImpliedAliasNamesOmittedContextConfig.class.getDeclaredMethod("groovy");
+
+		// Meta-annotation attribute overrides
+		assertEquals("location", getAttributeOverrideName(xml, ContextConfig.class));
+		assertEquals("location", getAttributeOverrideName(groovy, ContextConfig.class));
+
+		// Explicit meta-annotation attribute overrides
+		assertEquals("xmlFile", getAttributeOverrideName(xml, ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig.class));
+		assertEquals("location", getAttributeOverrideName(groovy, ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig.class));
+
+		// Transitive implicit aliases
+		assertThat(getAttributeAliasNames(groovy), containsInAnyOrder("xml"));
+		assertThat(getAttributeAliasNames(xml), containsInAnyOrder("groovy"));
 	}
 
 	@Test
@@ -990,6 +1029,31 @@ public class AnnotationUtilsTests {
 		assertEquals("location1: ", expected, synthesizedConfig.location1());
 		assertEquals("xmlFile: ", expected, synthesizedConfig.xmlFile());
 		assertEquals("groovyScript: ", expected, synthesizedConfig.groovyScript());
+	}
+
+	@Test
+	public void synthesizeAnnotationWithImplicitAliasesWithImpliedAliasNamesOmitted() throws Exception {
+		assertAnnotationSynthesisWithImplicitAliasesWithImpliedAliasNamesOmitted(
+			ValueImplicitAliasesWithImpliedAliasNamesOmittedContextConfigClass.class, "value");
+		assertAnnotationSynthesisWithImplicitAliasesWithImpliedAliasNamesOmitted(
+			LocationsImplicitAliasesWithImpliedAliasNamesOmittedContextConfigClass.class, "location");
+		assertAnnotationSynthesisWithImplicitAliasesWithImpliedAliasNamesOmitted(
+			XmlFilesImplicitAliasesWithImpliedAliasNamesOmittedContextConfigClass.class, "xmlFile");
+	}
+
+	private void assertAnnotationSynthesisWithImplicitAliasesWithImpliedAliasNamesOmitted(Class<?> clazz,
+			String expected) throws Exception {
+
+		ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig config = clazz.getAnnotation(
+			ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig.class);
+		assertNotNull(config);
+
+		ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig synthesizedConfig = synthesizeAnnotation(config);
+		assertThat(synthesizedConfig, instanceOf(SynthesizedAnnotation.class));
+
+		assertEquals("value: ", expected, synthesizedConfig.value());
+		assertEquals("locations: ", expected, synthesizedConfig.location());
+		assertEquals("xmlFiles: ", expected, synthesizedConfig.xmlFile());
 	}
 
 	@Test
@@ -2111,6 +2175,48 @@ public class AnnotationUtilsTests {
 	// Attribute value intentionally matches attribute name:
 	@ImplicitAliasesContextConfig(location3 = "location3")
 	static class Location3ImplicitAliasesContextConfigClass {
+	}
+
+	@ContextConfig
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig {
+
+		// intentionally omitted: attribute = "value"
+		@AliasFor(annotation = ContextConfig.class)
+		String value() default "";
+
+		// intentionally omitted: attribute = "locations"
+		@AliasFor(annotation = ContextConfig.class)
+		String location() default "";
+
+		@AliasFor(annotation = ContextConfig.class, attribute = "location")
+		String xmlFile() default "";
+	}
+
+	@ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig
+	@Retention(RetentionPolicy.RUNTIME)
+	@interface TransitiveImplicitAliasesWithImpliedAliasNamesOmittedContextConfig {
+
+		@AliasFor(annotation = ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig.class, attribute = "xmlFile")
+		String xml() default "";
+
+		@AliasFor(annotation = ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig.class, attribute = "location")
+		String groovy() default "";
+	}
+
+	// Attribute value intentionally matches attribute name:
+	@ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig("value")
+	static class ValueImplicitAliasesWithImpliedAliasNamesOmittedContextConfigClass {
+	}
+
+	// Attribute value intentionally matches attribute name:
+	@ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig(location = "location")
+	static class LocationsImplicitAliasesWithImpliedAliasNamesOmittedContextConfigClass {
+	}
+
+	// Attribute value intentionally matches attribute name:
+	@ImplicitAliasesWithImpliedAliasNamesOmittedContextConfig(xmlFile = "xmlFile")
+	static class XmlFilesImplicitAliasesWithImpliedAliasNamesOmittedContextConfigClass {
 	}
 
 	@ContextConfig
