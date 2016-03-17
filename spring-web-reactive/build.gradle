@@ -26,17 +26,13 @@ repositories {
   maven { url 'http://repo.spring.io/snapshot' }  // Reactor snapshot
 }
 
-configurations.all {
-	// check for updates every build
-	resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-}
-
 ext {
 	springVersion = '4.2.3.RELEASE'
 	reactorVersion = '2.5.0.M2'
 	reactorNettyVersion = '2.5.0.BUILD-SNAPSHOT'
 	tomcatVersion = '8.0.28'
 	jettyVersion = '9.3.5.v20151012'
+	nettyVersion = '4.1.0.CR3'
 
 	javadocLinks = [
 		"http://docs.oracle.com/javase/8/docs/api/",
@@ -44,6 +40,18 @@ ext {
 		"http://docs.spring.io/spring/docs/${springVersion}/javadoc-api/",
 		"http://www.reactive-streams.org/reactive-streams-1.0.0-javadoc/"
 	] as String[]
+}
+
+configurations.all {
+	// check for updates every build
+	resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+	resolutionStrategy.eachDependency { DependencyResolveDetails details ->
+		// consistent netty version to avoid issues with clashes in netty-all vs
+		// netty-common for example
+		if (details.requested.group == 'io.netty') {
+			details.useVersion nettyVersion
+		}
+	}
 }
 
 uploadArchives {
