@@ -17,6 +17,9 @@
 package org.springframework.core.io.buffer.support;
 
 import java.io.InputStream;
+import java.io.SequenceInputStream;
+import java.util.Enumeration;
+import java.util.Iterator;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -62,7 +65,33 @@ public abstract class DataBufferUtils {
 	 * @return the input stream
 	 */
 	public static InputStream toInputStream(Publisher<DataBuffer> publisher) {
-		return new DataBufferPublisherInputStream(publisher);
+		Iterable<InputStream> streams = Flux.from(publisher).
+				map(DataBuffer::asInputStream).
+				toIterable();
+
+		Enumeration<InputStream> enumeration =
+				new IteratorEnumeration<InputStream>(streams);
+
+		return new SequenceInputStream(enumeration);
+	}
+
+	private static class IteratorEnumeration<T> implements Enumeration<T> {
+
+		private final Iterator<T> delegate;
+
+		public IteratorEnumeration(Iterable<T> iterable) {
+			this.delegate = iterable.iterator();
+		}
+
+		@Override
+		public boolean hasMoreElements() {
+			return delegate.hasNext();
+		}
+
+		@Override
+		public T nextElement() {
+			return delegate.next();
+		}
 	}
 
 }
