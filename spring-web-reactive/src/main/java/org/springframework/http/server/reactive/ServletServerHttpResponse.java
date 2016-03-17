@@ -32,6 +32,7 @@ import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.Mono;
+import reactor.core.util.BackpressureUtils;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;
@@ -61,7 +62,6 @@ public class ServletServerHttpResponse extends AbstractServerHttpResponse {
 		this.response = (HttpServletResponse) synchronizer.getResponse();
 		this.responseBodySubscriber =
 				new ResponseBodySubscriber(synchronizer, bufferSize);
-		this.response.getOutputStream().setWriteListener(responseBodySubscriber);
 	}
 
 	public HttpServletResponse getServletResponse() {
@@ -118,39 +118,46 @@ public class ServletServerHttpResponse extends AbstractServerHttpResponse {
 		}
 	}
 
-	private static class ResponseBodySubscriber
-			implements WriteListener, Subscriber<DataBuffer> {
+	private static class ResponseBodySubscriber implements Subscriber<DataBuffer> {
+
+		private final ResponseBodyWriteListener writeListener =
+				new ResponseBodyWriteListener();
 
 		private final ServletAsyncContextSynchronizer synchronizer;
 
 		private final int bufferSize;
 
+		private volatile DataBuffer dataBuffer;
+
+		private volatile boolean completed = false;
+
 		private Subscription subscription;
 
-		private DataBuffer dataBuffer;
-
-		private volatile boolean subscriberComplete = false;
-
 		public ResponseBodySubscriber(ServletAsyncContextSynchronizer synchronizer,
-				int bufferSize) {
+				int bufferSize) throws IOException {
 			this.synchronizer = synchronizer;
 			this.bufferSize = bufferSize;
+			synchronizer.getResponse().getOutputStream().setWriteListener(writeListener);
 		}
 
 		@Override
 		public void onSubscribe(Subscription subscription) {
-			this.subscription = subscription;
-			this.subscription.request(1);
+			logger.trace("onSubscribe. Subscription: " + subscription);
+			if (BackpressureUtils.validate(this.subscription, subscription)) {
+				this.subscription = subscription;
+				this.subscription.request(1);
+			}
 		}
 
 		@Override
 		public void onNext(DataBuffer dataBuffer) {
-			Assert.isNull(this.dataBuffer);
+			Assert.state(this.dataBuffer == null);
+
 			logger.trace("onNext. buffer: " + dataBuffer);
 
 			this.dataBuffer = dataBuffer;
 			try {
-				onWritePossible();
+				this.writeListener.onWritePossible();
 			}
 			catch (IOException e) {
 				onError(e);
@@ -158,66 +165,93 @@ public class ServletServerHttpResponse extends AbstractServerHttpResponse {
 		}
 
 		@Override
-		public void onComplete() {
-			logger.trace("onComplete. buffer: " + dataBuffer);
-
-			this.subscriberComplete = true;
-
-			if (dataBuffer == null) {
-				this.synchronizer.writeComplete();
-			}
-		}
-
-		@Override
-		public void onWritePossible() throws IOException {
-			ServletOutputStream output = this.synchronizer.getOutputStream();
-
-			boolean ready = output.isReady();
-			logger.trace("onWritePossible. ready: " + ready + " buffer: " + dataBuffer);
-
-			if (ready) {
-				if (this.dataBuffer != null) {
-					int toBeWritten = this.dataBuffer.readableByteCount();
-					InputStream input = this.dataBuffer.asInputStream();
-					int writeCount = write(input, output);
-					logger.trace("written: " + writeCount + " total: " + toBeWritten);
-					if (writeCount == toBeWritten) {
-						this.dataBuffer = null;
-						if (!this.subscriberComplete) {
-							this.subscription.request(1);
-						}
-						else {
-							this.synchronizer.writeComplete();
-						}
-					}
-				}
-				else if (this.subscription != null) {
-					this.subscription.request(1);
-				}
-			}
-		}
-
-		private int write(InputStream in, ServletOutputStream output) throws IOException {
-			int byteCount = 0;
-			byte[] buffer = new byte[bufferSize];
-			int bytesRead = -1;
-			while (output.isReady() && (bytesRead = in.read(buffer)) != -1) {
-				output.write(buffer, 0, bytesRead);
-				byteCount += bytesRead;
-			}
-			return byteCount;
-		}
-
-		@Override
-		public void onError(Throwable ex) {
-			if (this.subscription != null) {
-				this.subscription.cancel();
-			}
-			logger.error("ResponseBodySubscriber error", ex);
+		public void onError(Throwable t) {
+			logger.error("onError", t);
 			HttpServletResponse response =
 					(HttpServletResponse) this.synchronizer.getResponse();
 			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 			this.synchronizer.complete();
+
+		}
+
+		@Override
+		public void onComplete() {
+			logger.trace("onComplete. buffer: " + this.dataBuffer);
+
+			this.completed = true;
+
+			if (this.dataBuffer != null) {
+				try {
+					this.writeListener.onWritePossible();
+				}
+				catch (IOException ex) {
+					onError(ex);
+				}
+			}
+
+			if (this.dataBuffer == null) {
+				this.synchronizer.writeComplete();
+			}
+		}
+
+		private class ResponseBodyWriteListener implements WriteListener {
+
+			@Override
+			public void onWritePossible() throws IOException {
+				logger.trace("onWritePossible");
+				ServletOutputStream output = synchronizer.getResponse().getOutputStream();
+
+				boolean ready = output.isReady();
+				logger.trace("ready: " + ready + " buffer: " + dataBuffer);
+
+				if (ready) {
+					if (dataBuffer != null) {
+
+						int total = dataBuffer.readableByteCount();
+						int written = writeDataBuffer();
+
+						logger.trace("written: " + written + " total: " + total);
+						if (written == total) {
+							releaseBuffer();
+							if (!completed) {
+								subscription.request(1);
+							}
+							else {
+								synchronizer.writeComplete();
+							}
+						}
+					}
+					else if (subscription != null) {
+						subscription.request(1);
+					}
+				}
+			}
+
+			private int writeDataBuffer() throws IOException {
+				InputStream input = dataBuffer.asInputStream();
+				ServletOutputStream output = synchronizer.getResponse().getOutputStream();
+
+				int bytesWritten = 0;
+				byte[] buffer = new byte[bufferSize];
+				int bytesRead = -1;
+
+				while (output.isReady() && (bytesRead = input.read(buffer)) != -1) {
+					output.write(buffer, 0, bytesRead);
+					bytesWritten += bytesRead;
+				}
+
+				return bytesWritten;
+			}
+
+			private void releaseBuffer() {
+				// TODO: call PooledDataBuffer.release() when we it is introduced
+				dataBuffer = null;
+			}
+
+			@Override
+			public void onError(Throwable ex) {
+				logger.error("ResponseBodyWriteListener error", ex);
+			}
 		}
 	}
 }
