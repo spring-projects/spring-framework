@@ -468,7 +468,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@RequestMapping("/stream-result")
 		public Publisher<Long> stringStreamResponseBody() {
-			return Flux.interval(Duration.ofSeconds(1)).take(5);
+			return Flux.interval(Duration.ofMillis(100)).take(5);
 		}
 
 		@RequestMapping("/raw-flux")
