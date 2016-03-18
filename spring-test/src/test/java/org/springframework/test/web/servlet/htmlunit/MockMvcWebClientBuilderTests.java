@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -18,9 +18,12 @@ package org.springframework.test.web.servlet.htmlunit;
 
 import java.io.IOException;
 import java.net.URL;
-
 import javax.servlet.http.HttpServletRequest;
 
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebRequest;
+import com.gargoylesoftware.htmlunit.WebResponse;
+import com.gargoylesoftware.htmlunit.util.Cookie;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,32 +37,28 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebRequest;
-import com.gargoylesoftware.htmlunit.WebResponse;
-
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.test.web.servlet.htmlunit.MockMvcWebClientBuilder.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertThat;
 
 /**
  * Integration tests for {@link MockMvcWebClientBuilder}.
  *
  * @author Rob Winch
  * @author Sam Brannen
+ * @author Rossen Stoyanchev
  * @since 4.2
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @WebAppConfiguration
 public class MockMvcWebClientBuilderTests {
-
-	private WebClient webClient;
 
 	@Autowired
 	private WebApplicationContext wac;
@@ -72,43 +71,55 @@ public class MockMvcWebClientBuilderTests {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 	}
 
+
 	@Test(expected = IllegalArgumentException.class)
 	public void mockMvcSetupNull() {
-		mockMvcSetup(null);
+		MockMvcWebClientBuilder.mockMvcSetup(null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void webAppContextSetupNull() {
-		webAppContextSetup(null);
+		MockMvcWebClientBuilder.webAppContextSetup(null);
 	}
 
 	@Test
 	public void mockMvcSetupWithDefaultWebClientDelegate() throws Exception {
-		this.webClient = mockMvcSetup(this.mockMvc).build();
+		WebClient client = MockMvcWebClientBuilder.mockMvcSetup(this.mockMvc).build();
 
-		assertMvcProcessed("http://localhost/test");
-		Assume.group(TestGroup.PERFORMANCE, () -> assertDelegateProcessed("http://example.com/"));
+		assertMockMvcUsed(client, "http://localhost/test");
+		Assume.group(TestGroup.PERFORMANCE, () -> assertMockMvcNotUsed(client, "http://example.com/"));
 	}
 
 	@Test
 	public void mockMvcSetupWithCustomWebClientDelegate() throws Exception {
-		WebClient preconfiguredWebClient = new WebClient();
-		this.webClient = mockMvcSetup(this.mockMvc).withDelegate(preconfiguredWebClient).build();
+		WebClient otherClient = new WebClient();
+		WebClient client = MockMvcWebClientBuilder.mockMvcSetup(this.mockMvc).withDelegate(otherClient).build();
 
-		assertMvcProcessed("http://localhost/test");
-		Assume.group(TestGroup.PERFORMANCE, () -> assertDelegateProcessed("http://example.com/"));
+		assertMockMvcUsed(client, "http://localhost/test");
+		Assume.group(TestGroup.PERFORMANCE, () -> assertMockMvcNotUsed(client, "http://example.com/"));
 	}
 
-	private void assertMvcProcessed(String url) throws Exception {
-		assertThat(getWebResponse(url).getContentAsString(), equalTo("mvc"));
+	@Test // SPR-14066
+	public void cookieManagerShared() throws Exception {
+		this.mockMvc = MockMvcBuilders.standaloneSetup(new CookieController()).build();
+		WebClient client = MockMvcWebClientBuilder.mockMvcSetup(this.mockMvc).build();
+
+		assertThat(getResponse(client, "http://localhost/").getContentAsString(), equalTo(""));
+		client.getCookieManager().addCookie(new Cookie("localhost", "cookie", "cookieManagerShared"));
+		assertThat(getResponse(client, "http://localhost/").getContentAsString(), equalTo("cookieManagerShared"));
 	}
 
-	private void assertDelegateProcessed(String url) throws Exception {
-		assertThat(getWebResponse(url).getContentAsString(), not(equalTo("mvc")));
+
+	private void assertMockMvcUsed(WebClient client, String url) throws Exception {
+		assertThat(getResponse(client, url).getContentAsString(), equalTo("mvc"));
 	}
 
-	private WebResponse getWebResponse(String url) throws IOException {
-		return this.webClient.getWebConnection().getResponse(new WebRequest(new URL(url)));
+	private void assertMockMvcNotUsed(WebClient client, String url) throws Exception {
+		assertThat(getResponse(client, url).getContentAsString(), not(equalTo("mvc")));
+	}
+
+	private WebResponse getResponse(WebClient client, String url) throws IOException {
+		return client.getWebConnection().getResponse(new WebRequest(new URL(url)));
 	}
 
 
@@ -126,4 +137,11 @@ public class MockMvcWebClientBuilderTests {
 		}
 	}
 
+	@RestController
+	static class CookieController {
+		@RequestMapping("/")
+		public String cookie(@CookieValue("cookie") String cookie) {
+			return cookie;
+		}
+	}
 }

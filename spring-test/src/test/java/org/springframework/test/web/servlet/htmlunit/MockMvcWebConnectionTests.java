@@ -36,6 +36,7 @@ import static org.junit.Assert.assertThat;
  * @author Rob Winch
  * @since 4.2
  */
+@SuppressWarnings("deprecation")
 public class MockMvcWebConnectionTests {
 
 	private final WebClient webClient = new WebClient();
@@ -50,7 +51,7 @@ public class MockMvcWebConnectionTests {
 
 	@Test
 	public void contextPathNull() throws IOException {
-		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, null));
+		this.webClient.setWebConnection(new MockMvcWebConnection(this.mockMvc, (String) null));
 
 		Page page = this.webClient.getPage("http://localhost/context/a");
 
