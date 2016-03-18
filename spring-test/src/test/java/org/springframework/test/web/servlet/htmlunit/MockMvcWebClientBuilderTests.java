@@ -34,6 +34,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
@@ -42,6 +43,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
+import com.gargoylesoftware.htmlunit.util.Cookie;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -99,6 +101,17 @@ public class MockMvcWebClientBuilderTests {
 		Assume.group(TestGroup.PERFORMANCE, () -> assertDelegateProcessed("http://example.com/"));
 	}
 
+	// SPR-14066
+	@Test
+	public void cookieManagerShared() throws Exception {
+		this.mockMvc = MockMvcBuilders.standaloneSetup(new CookieController()).build();
+		this.webClient = mockMvcSetup(this.mockMvc).build();
+
+		assertThat(getWebResponse("http://localhost/").getContentAsString(), equalTo(""));
+		this.webClient.getCookieManager().addCookie(new Cookie("localhost", "cookie", "cookieManagerShared"));
+		assertThat(getWebResponse("http://localhost/").getContentAsString(), equalTo("cookieManagerShared"));
+	}
+
 	private void assertMvcProcessed(String url) throws Exception {
 		assertThat(getWebResponse(url).getContentAsString(), equalTo("mvc"));
 	}
@@ -126,4 +139,11 @@ public class MockMvcWebClientBuilderTests {
 		}
 	}
 
+	@RestController
+	static class CookieController {
+		@RequestMapping("/")
+		public String cookie(@CookieValue("cookie") String cookie) {
+			return cookie;
+		}
+	}
 }
