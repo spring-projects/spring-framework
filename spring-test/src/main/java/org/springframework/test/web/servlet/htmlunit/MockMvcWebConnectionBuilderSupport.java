@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -23,6 +23,7 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebConnection;
 
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.htmlunit.DelegatingWebConnection.DelegateWebConnection;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcConfigurer;
 import org.springframework.util.Assert;
@@ -44,7 +45,7 @@ public abstract class MockMvcWebConnectionBuilderSupport<T extends MockMvcWebCon
 
 	private final MockMvc mockMvc;
 
-	private final List<WebRequestMatcher> mockMvcRequestMatchers = new ArrayList<WebRequestMatcher>();
+	private final List<WebRequestMatcher> requestMatchers = new ArrayList<WebRequestMatcher>();
 
 	private String contextPath = "";
 
@@ -58,7 +59,7 @@ public abstract class MockMvcWebConnectionBuilderSupport<T extends MockMvcWebCon
 	protected MockMvcWebConnectionBuilderSupport(MockMvc mockMvc) {
 		Assert.notNull(mockMvc, "MockMvc must not be null");
 		this.mockMvc = mockMvc;
-		this.mockMvcRequestMatchers.add(new HostRequestMatcher("localhost"));
+		this.requestMatchers.add(new HostRequestMatcher("localhost"));
 	}
 
 	/**
@@ -117,7 +118,7 @@ public abstract class MockMvcWebConnectionBuilderSupport<T extends MockMvcWebCon
 	@SuppressWarnings("unchecked")
 	public T useMockMvc(WebRequestMatcher... matchers) {
 		for (WebRequestMatcher matcher : matchers) {
-			this.mockMvcRequestMatchers.add(matcher);
+			this.requestMatchers.add(matcher);
 		}
 		return (T) this;
 	}
@@ -131,7 +132,7 @@ public abstract class MockMvcWebConnectionBuilderSupport<T extends MockMvcWebCon
 	 */
 	@SuppressWarnings("unchecked")
 	public T useMockMvcForHosts(String... hosts) {
-		this.mockMvcRequestMatchers.add(new HostRequestMatcher(hosts));
+		this.requestMatchers.add(new HostRequestMatcher(hosts));
 		return (T) this;
 	}
 
@@ -165,38 +166,23 @@ public abstract class MockMvcWebConnectionBuilderSupport<T extends MockMvcWebCon
 	 * @see #alwaysUseMockMvc()
 	 * @see #useMockMvc(WebRequestMatcher...)
 	 * @see #useMockMvcForHosts(String...)
+	 * @since 4.3
 	 */
 	protected final WebConnection createConnection(WebClient webClient) {
 		Assert.notNull(webClient, "WebClient must not be null");
 		return createConnection(webClient, webClient.getWebConnection());
 	}
 
-	/**
-	 * Create a new {@link WebConnection} that will use a {@link MockMvc}
-	 * instance if one of the specified {@link WebRequestMatcher} instances
-	 * matches.
-	 * @param webClient the WebClient to use if none of
-	 * the specified {@code WebRequestMatcher} instances matches; never {@code null}
-	 * @param defaultConnection the WebConnection to use
-	 * @return a new {@code WebConnection} that will use a {@code MockMvc}
-	 * instance if one of the specified {@code WebRequestMatcher} matches
-	 * @see #alwaysUseMockMvc()
-	 * @see #useMockMvc(WebRequestMatcher...)
-	 * @see #useMockMvcForHosts(String...)
-	 */
 	private WebConnection createConnection(WebClient webClient, WebConnection defaultConnection) {
-		MockMvcWebConnection mockMvcWebConnection = new MockMvcWebConnection(this.mockMvc, webClient, this.contextPath);
-
+		WebConnection connection = new MockMvcWebConnection(this.mockMvc, webClient, this.contextPath);
 		if (this.alwaysUseMockMvc) {
-			return mockMvcWebConnection;
+			return connection;
 		}
-
-		List<DelegatingWebConnection.DelegateWebConnection> delegates = new ArrayList<DelegatingWebConnection.DelegateWebConnection>(
-			this.mockMvcRequestMatchers.size());
-		for (WebRequestMatcher matcher : this.mockMvcRequestMatchers) {
-			delegates.add(new DelegatingWebConnection.DelegateWebConnection(matcher, mockMvcWebConnection));
+		List<DelegateWebConnection> delegates = new ArrayList<DelegateWebConnection>(this.requestMatchers.size());
+		for (WebRequestMatcher matcher : this.requestMatchers) {
+			delegates.add(new DelegateWebConnection(matcher, connection));
 		}
-
 		return new DelegatingWebConnection(defaultConnection, delegates);
 	}
+
 }
