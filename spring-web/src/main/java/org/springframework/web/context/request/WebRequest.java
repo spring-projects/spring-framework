@@ -153,8 +153,9 @@ public interface WebRequest extends RequestAttributes {
 	 * <p>If the "If-Modified-Since" header is set but cannot be parsed
 	 * to a date value, this method will ignore the header and proceed
 	 * with setting the last-modified timestamp on the response.
-	 * @param lastModifiedTimestamp the last-modified timestamp that
-	 * the application determined for the underlying resource
+	 * @param lastModifiedTimestamp the last-modified timestamp in
+	 * milliseconds that the application determined for the underlying
+	 * resource
 	 * @return whether the request qualifies as not modified,
 	 * allowing to abort request processing and relying on the response
 	 * telling the client that the content has not been modified
@@ -219,8 +220,9 @@ public interface WebRequest extends RequestAttributes {
 	 * @param etag the entity tag that the application determined
 	 * for the underlying resource. This parameter will be padded
 	 * with quotes (") if necessary.
-	 * @param lastModifiedTimestamp the last-modified timestamp that
-	 * the application determined for the underlying resource
+	 * @param lastModifiedTimestamp the last-modified timestamp in
+	 * milliseconds that the application determined for the underlying
+	 * resource
 	 * @return true if the request does not require further processing.
 	 * @since 4.2
 	 */
