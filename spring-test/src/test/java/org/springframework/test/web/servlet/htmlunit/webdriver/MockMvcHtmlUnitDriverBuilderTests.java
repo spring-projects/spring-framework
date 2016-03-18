@@ -124,7 +124,7 @@ public class MockMvcHtmlUnitDriverBuilderTests {
 		assertThat(get("http://localhost/"), equalTo(""));
 		Cookie cookie = new Cookie("localhost", "cookie", "cookieManagerShared");
 		otherDriver.getWebClient().getCookieManager().addCookie(cookie);
-		assertThat(get("http://localhost/"), equalTo("cookieManagerShared"));
+		assertThat(get("http://localhost/"), containsString("cookieManagerShared"));
 	}
 
 
