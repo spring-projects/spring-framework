@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -207,11 +207,11 @@ public class AnnotatedElementUtils {
 	/**
 	 * Determine if the supplied {@link AnnotatedElement} is annotated with
 	 * a <em>composed annotation</em> that is meta-annotated with an
-	 * annotation of the specified {@code annotationName}.
+	 * annotation of the specified {@code annotationType}.
 	 * <p>This method follows <em>get semantics</em> as described in the
 	 * {@linkplain AnnotatedElementUtils class-level javadoc}.
 	 * @param element the annotated element
-	 * @param annotationType the annotation type on which to find meta-annotations
+	 * @param annotationType the meta-annotation type to find
 	 * @return {@code true} if a matching meta-annotation is present
 	 * @since 4.2.3
 	 * @see #getMetaAnnotationTypes
@@ -255,7 +255,7 @@ public class AnnotatedElementUtils {
 	}
 
 	/**
-	 * Determine if an annotation of the specified {@code annotationName}
+	 * Determine if an annotation of the specified {@code annotationType}
 	 * is <em>present</em> on the supplied {@link AnnotatedElement} or
 	 * within the annotation hierarchy <em>above</em> the specified element.
 	 * <p>If this method returns {@code true}, then {@link #getMergedAnnotationAttributes}
@@ -263,7 +263,7 @@ public class AnnotatedElementUtils {
 	 * <p>This method follows <em>get semantics</em> as described in the
 	 * {@linkplain AnnotatedElementUtils class-level javadoc}.
 	 * @param element the annotated element
-	 * @param annotationType the annotation type on which to find meta-annotations
+	 * @param annotationType the annotation type to find
 	 * @return {@code true} if a matching annotation is present
 	 * @since 4.2.3
 	 */
@@ -461,7 +461,7 @@ public class AnnotatedElementUtils {
 	}
 
 	/**
-	 * Find the first annotation of the specified {@code annotationName} within
+	 * Find the first annotation of the specified {@code annotationType} within
 	 * the annotation hierarchy <em>above</em> the supplied {@code element} and
 	 * merge that annotation's attributes with <em>matching</em> attributes from
 	 * annotations in lower levels of the annotation hierarchy.
@@ -472,8 +472,8 @@ public class AnnotatedElementUtils {
 	 * <p>In contrast to {@link #getAllAnnotationAttributes}, the search
 	 * algorithm used by this method will stop searching the annotation
 	 * hierarchy once the first annotation of the specified
-	 * {@code annotationName} has been found. As a consequence, additional
-	 * annotations of the specified {@code annotationName} will be ignored.
+	 * {@code annotationType} has been found. As a consequence, additional
+	 * annotations of the specified {@code annotationType} will be ignored.
 	 * <p>This method follows <em>find semantics</em> as described in the
 	 * {@linkplain AnnotatedElementUtils class-level javadoc}.
 	 * @param element the annotated element
@@ -613,10 +613,11 @@ public class AnnotatedElementUtils {
 	}
 
 	/**
-	 * Search for annotations of the specified {@code annotationName} on
-	 * the specified {@code element}, following <em>get semantics</em>.
+	 * Search for annotations of the specified {@code annotationName} or
+	 * {@code annotationType} on the specified {@code element}, following
+	 * <em>get semantics</em>.
 	 * @param element the annotated element
-	 * @param annotationType the annotation type on which to find meta-annotations
+	 * @param annotationType the annotation type to find
 	 * @param annotationName the fully qualified class name of the annotation
 	 * type to find (as an alternative to {@code annotationType})
 	 * @param processor the processor to delegate to
@@ -642,7 +643,7 @@ public class AnnotatedElementUtils {
 	 * <p>The {@code metaDepth} parameter is explained in the
 	 * {@link Processor#process process()} method of the {@link Processor} API.
 	 * @param element the annotated element
-	 * @param annotationType the annotation type on which to find meta-annotations
+	 * @param annotationType the annotation type to find
 	 * @param annotationName the fully qualified class name of the annotation
 	 * type to find (as an alternative to {@code annotationType})
 	 * @param processor the processor to delegate to
@@ -702,7 +703,7 @@ public class AnnotatedElementUtils {
 	 * @param annotatedElement the element that is annotated with the supplied
 	 * annotations, used for contextual logging; may be {@code null} if unknown
 	 * @param annotations the annotations to search in
-	 * @param annotationType the annotation type on which to find meta-annotations
+	 * @param annotationType the annotation type to find
 	 * @param annotationName the fully qualified class name of the annotation
 	 * type to find (as an alternative to {@code annotationType})
 	 * @param processor the processor to delegate to
@@ -744,10 +745,11 @@ public class AnnotatedElementUtils {
 	}
 
 	/**
-	 * Search for annotations of the specified {@code annotationName} on
-	 * the specified {@code element}, following <em>find semantics</em>.
+	 * Search for annotations of the specified {@code annotationName} or
+	 * {@code annotationType} on the specified {@code element}, following
+	 * <em>find semantics</em>.
 	 * @param element the annotated element
-	 * @param annotationType the annotation type on which to find meta-annotations
+	 * @param annotationType the annotation type to find
 	 * @param annotationName the fully qualified class name of the annotation
 	 * type to find (as an alternative to {@code annotationType})
 	 * @param processor the processor to delegate to
@@ -774,7 +776,7 @@ public class AnnotatedElementUtils {
 	 * <p>The {@code metaDepth} parameter is explained in the
 	 * {@link Processor#process process()} method of the {@link Processor} API.
 	 * @param element the annotated element
-	 * @param annotationType the annotation type on which to find meta-annotations
+	 * @param annotationType the annotation type to find
 	 * @param annotationName the fully qualified class name of the annotation
 	 * type to find (as an alternative to {@code annotationType})
 	 * @param processor the processor to delegate to
@@ -1004,7 +1006,7 @@ public class AnnotatedElementUtils {
 	 * annotation attributes from lower levels in the annotation hierarchy
 	 * during the {@link #postProcess} phase.
 	 * @since 4.2
-	 * @see AnnotationUtils#retrieveAnnotationAttributes(AnnotatedElement, Annotation, boolean, boolean)
+	 * @see AnnotationUtils#retrieveAnnotationAttributes
 	 * @see AnnotationUtils#postProcessAnnotationAttributes
 	 */
 	private static class MergedAnnotationAttributesProcessor implements Processor<AnnotationAttributes> {
