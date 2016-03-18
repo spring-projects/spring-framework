@@ -139,7 +139,7 @@ public class MockMvcWebClientBuilderTests {
 
 	@RestController
 	static class CookieController {
-		@RequestMapping("/")
+		@RequestMapping(value="/", produces="text/plain")
 		public String cookie(@CookieValue("cookie") String cookie) {
 			return cookie;
 		}
