@@ -18,6 +18,8 @@ package org.springframework.http.client.reactive;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ReactiveHttpInputMessage;
+import org.springframework.http.ResponseCookie;
+import org.springframework.util.MultiValueMap;
 
 /**
  * Represents a reactive client-side HTTP response.
@@ -30,5 +32,10 @@ public interface ClientHttpResponse extends ReactiveHttpInputMessage {
 	 * @return the HTTP status as an {@link HttpStatus} enum value
 	 */
 	HttpStatus getStatusCode();
+
+	/**
+	 * Return a read-only map of response cookies received from the server.
+	 */
+	MultiValueMap<String, ResponseCookie> getCookies();
 
 }

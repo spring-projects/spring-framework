@@ -103,7 +103,7 @@ public class CookieIntegrationTests extends AbstractHttpHandlerIntegrationTests 
 			this.requestCookies.size(); // Cause lazy loading
 
 			response.getCookies().add("SID", ResponseCookie.from("SID", "31d4d96e407aad42")
-					.path("/").secure().httpOnly().build());
+					.path("/").secure(true).httpOnly(true).build());
 			response.getCookies().add("lang", ResponseCookie.from("lang", "en-US")
 					.domain("example.com").path("/").build());
 

@@ -17,16 +17,19 @@
 package org.springframework.http.client.reactive;
 
 import java.net.URI;
+import java.util.Collection;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.io.buffer.Buffer;
 import reactor.io.netty.http.HttpClient;
+import reactor.io.netty.http.model.Cookie;
 import reactor.io.netty.http.model.Method;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 
@@ -96,13 +99,13 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 						channel.headers().removeTransferEncodingChunked();
 					}
 					return applyBeforeCommit()
-							.after(() ->
-									{
-										getHeaders().entrySet().stream()
-												.forEach(e -> channel.headers().set(e.getKey(), e.getValue()));
-										return Mono.empty();
-									}
-							)
+							.after(() -> {
+								getHeaders().entrySet().stream().forEach(e ->
+										channel.headers().set(e.getKey(), e.getValue()));
+								getCookies().values().stream().flatMap(Collection::stream).forEach(cookie ->
+										channel.addCookie(cookie.getName(), new ReactorCookie(cookie)));
+								return Mono.empty();
+							})
 							.after(() -> {
 								if (body != null) {
 									return channel.writeBufferWith(body);
@@ -113,6 +116,30 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 							});
 				})
 				.map(httpChannel -> new ReactorClientHttpResponse(httpChannel, allocator));
+	}
+
+
+	/**
+	 * At present Reactor does not provide a {@link Cookie} implementation.
+	 */
+	private final static class ReactorCookie extends Cookie {
+
+		private final HttpCookie httpCookie;
+
+
+		public ReactorCookie(HttpCookie httpCookie) {
+			this.httpCookie = httpCookie;
+		}
+
+		@Override
+		public String name() {
+			return this.httpCookie.getName();
+		}
+
+		@Override
+		public String value() {
+			return this.httpCookie.getValue();
+		}
 	}
 
 }

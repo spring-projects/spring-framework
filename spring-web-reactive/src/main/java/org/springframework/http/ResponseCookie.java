@@ -151,6 +151,12 @@ public final class ResponseCookie extends HttpCookie {
 			}
 
 			@Override
+			public ResponseCookieBuilder maxAge(long maxAgeSeconds) {
+				this.maxAge = maxAgeSeconds >= 0 ? Duration.ofSeconds(maxAgeSeconds) : Duration.ofSeconds(-1);
+				return this;
+			}
+
+			@Override
 			public ResponseCookieBuilder domain(String domain) {
 				this.domain = domain;
 				return this;
@@ -163,14 +169,14 @@ public final class ResponseCookie extends HttpCookie {
 			}
 
 			@Override
-			public ResponseCookieBuilder secure() {
-				this.secure = true;
+			public ResponseCookieBuilder secure(boolean secure) {
+				this.secure = secure;
 				return this;
 			}
 
 			@Override
-			public ResponseCookieBuilder httpOnly() {
-				this.httpOnly = true;
+			public ResponseCookieBuilder httpOnly(boolean httpOnly) {
+				this.httpOnly = httpOnly;
 				return this;
 			}
 
@@ -198,6 +204,11 @@ public final class ResponseCookie extends HttpCookie {
 		ResponseCookieBuilder maxAge(Duration maxAge);
 
 		/**
+		 * Set the cookie "Max-Age" attribute in seconds.
+		 */
+		ResponseCookieBuilder maxAge(long maxAgeSeconds);
+
+		/**
 		 * Set the cookie "Path" attribute.
 		 */
 		ResponseCookieBuilder path(String path);
@@ -210,13 +221,13 @@ public final class ResponseCookie extends HttpCookie {
 		/**
 		 * Add the "Secure" attribute to the cookie.
 		 */
-		ResponseCookieBuilder secure();
+		ResponseCookieBuilder secure(boolean secure);
 
 		/**
 		 * Add the "HttpOnly" attribute to the cookie.
 		 * @see <a href="http://www.owasp.org/index.php/HTTPOnly">http://www.owasp.org/index.php/HTTPOnly</a>
 		 */
-		ResponseCookieBuilder httpOnly();
+		ResponseCookieBuilder httpOnly(boolean httpOnly);
 
 		/**
 		 * Create the HttpCookie.

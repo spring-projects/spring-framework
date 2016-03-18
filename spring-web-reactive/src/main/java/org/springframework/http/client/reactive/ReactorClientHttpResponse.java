@@ -17,6 +17,7 @@
 package org.springframework.http.client.reactive;
 
 import java.nio.ByteBuffer;
+import java.util.Collection;
 
 import reactor.core.publisher.Flux;
 import reactor.io.buffer.Buffer;
@@ -26,6 +27,10 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 /**
  * {@link ClientHttpResponse} implementation for the Reactor Net HTTP client
@@ -63,9 +68,26 @@ public class ReactorClientHttpResponse implements ClientHttpResponse {
 	}
 
 	@Override
+	public MultiValueMap<String, ResponseCookie> getCookies() {
+		MultiValueMap<String, ResponseCookie> result = new LinkedMultiValueMap<>();
+		this.channel.cookies().values().stream().flatMap(Collection::stream)
+				.forEach(cookie -> {
+					ResponseCookie responseCookie = ResponseCookie.from(cookie.name(), cookie.value())
+							.domain(cookie.domain())
+							.path(cookie.path())
+							.maxAge(cookie.maxAge())
+							.secure(cookie.secure())
+							.httpOnly(cookie.httpOnly())
+							.build();
+					result.add(cookie.name(), responseCookie);
+				});
+		return CollectionUtils.unmodifiableMultiValueMap(result);
+	}
+
+	@Override
 	public String toString() {
 		return "ReactorClientHttpResponse{" +
-				"request=" + this.channel.method() + " " + this.channel.uri().toString() + "," +
+				"request=" + this.channel.method() + " " + this.channel.uri() + "," +
 				"status=" + getStatusCode() +
 				'}';
 	}

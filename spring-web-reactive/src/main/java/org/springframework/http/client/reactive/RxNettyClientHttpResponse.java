@@ -16,6 +16,8 @@
 
 package org.springframework.http.client.reactive;
 
+import java.util.Collection;
+
 import io.netty.buffer.ByteBuf;
 import io.reactivex.netty.protocol.http.client.HttpClientResponse;
 import reactor.core.converter.RxJava1ObservableConverter;
@@ -25,7 +27,11 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferAllocator;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 /**
  * {@link ClientHttpResponse} implementation for the RxNetty HTTP client
@@ -38,7 +44,10 @@ public class RxNettyClientHttpResponse implements ClientHttpResponse {
 
 	private final HttpHeaders headers;
 
+	private final MultiValueMap<String, ResponseCookie> cookies;
+
 	private final NettyDataBufferAllocator allocator;
+
 
 	public RxNettyClientHttpResponse(HttpClientResponse<ByteBuf> response,
 			NettyDataBufferAllocator allocator) {
@@ -48,7 +57,25 @@ public class RxNettyClientHttpResponse implements ClientHttpResponse {
 		this.response = response;
 		this.headers = new HttpHeaders();
 		this.response.headerIterator().forEachRemaining(e -> this.headers.set(e.getKey(), e.getValue()));
+		this.cookies = initCookies(response);
 	}
+
+	private static MultiValueMap<String, ResponseCookie> initCookies(HttpClientResponse<ByteBuf> response) {
+		MultiValueMap<String, ResponseCookie> result = new LinkedMultiValueMap<>();
+		response.getCookies().values().stream().flatMap(Collection::stream)
+				.forEach(cookie -> {
+					ResponseCookie responseCookie = ResponseCookie.from(cookie.name(), cookie.value())
+							.domain(cookie.domain())
+							.path(cookie.path())
+							.maxAge(cookie.maxAge())
+							.secure(cookie.isSecure())
+							.httpOnly(cookie.isHttpOnly())
+							.build();
+					result.add(cookie.name(), responseCookie);
+				});
+		return CollectionUtils.unmodifiableMultiValueMap(result);
+	}
+
 
 	@Override
 	public HttpStatus getStatusCode() {
@@ -64,4 +91,10 @@ public class RxNettyClientHttpResponse implements ClientHttpResponse {
 	public HttpHeaders getHeaders() {
 		return this.headers;
 	}
+
+	@Override
+	public MultiValueMap<String, ResponseCookie> getCookies() {
+		return this.cookies;
+	}
+
 }

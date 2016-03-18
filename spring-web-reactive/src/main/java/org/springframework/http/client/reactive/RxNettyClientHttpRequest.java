@@ -17,10 +17,12 @@
 package org.springframework.http.client.reactive;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.handler.codec.http.cookie.DefaultCookie;
 import io.reactivex.netty.protocol.http.client.HttpClient;
 import io.reactivex.netty.protocol.http.client.HttpClientRequest;
 import org.reactivestreams.Publisher;
@@ -31,6 +33,7 @@ import rx.Observable;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.NettyDataBufferAllocator;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 
@@ -100,6 +103,11 @@ public class RxNettyClientHttpRequest extends AbstractClientHttpRequest {
 						for (Map.Entry<String, List<String>> entry : getHeaders().entrySet()) {
 							for (String value : entry.getValue()) {
 								req = req.addHeader(entry.getKey(), value);
+							}
+						}
+						for (Map.Entry<String, List<HttpCookie>> entry : getCookies().entrySet()) {
+							for (HttpCookie cookie : entry.getValue()) {
+								req.addCookie(new DefaultCookie(cookie.getName(), cookie.getValue()));
 							}
 						}
 						return req;

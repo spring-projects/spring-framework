@@ -20,8 +20,10 @@ import java.net.URI;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ReactiveHttpOutputMessage;
+import org.springframework.util.MultiValueMap;
 
 /**
  * Represents a reactive client-side HTTP request.
@@ -40,6 +42,11 @@ public interface ClientHttpRequest extends ReactiveHttpOutputMessage {
 	 * Return the URI of the request.
 	 */
 	URI getURI();
+
+	/**
+	 * Return a mutable map of request cookies to send to the server.
+	 */
+	MultiValueMap<String, HttpCookie> getCookies();
 
 	/**
 	 * Execute this request, resulting in a reactive stream of a single

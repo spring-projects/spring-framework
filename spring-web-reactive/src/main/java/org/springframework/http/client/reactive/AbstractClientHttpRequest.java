@@ -23,8 +23,12 @@ import java.util.function.Supplier;
 
 import reactor.core.publisher.Mono;
 
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 /**
  * Base class for {@link ClientHttpRequest} implementations.
@@ -35,6 +39,8 @@ import org.springframework.util.Assert;
 public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 
 	private final HttpHeaders headers;
+
+	private final MultiValueMap<String, HttpCookie> cookies;
 
 	private AtomicReference<State> state = new AtomicReference<>(State.NEW);
 
@@ -47,6 +53,7 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 		else {
 			this.headers = httpHeaders;
 		}
+		this.cookies = new LinkedMultiValueMap<>();
 	}
 
 	@Override
@@ -55,6 +62,14 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 			return HttpHeaders.readOnlyHttpHeaders(this.headers);
 		}
 		return this.headers;
+	}
+
+	@Override
+	public MultiValueMap<String, HttpCookie> getCookies() {
+		if (State.COMITTED.equals(this.state.get())) {
+			return CollectionUtils.unmodifiableMultiValueMap(this.cookies);
+		}
+		return this.cookies;
 	}
 
 	protected Mono<Void> applyBeforeCommit() {
