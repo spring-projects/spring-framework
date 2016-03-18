@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.springframework.core.OrderComparator;
+import org.springframework.core.DecoratingProxy;
 
 /**
  * {@code AnnotationAwareOrderComparator} is an extension of
@@ -81,10 +82,13 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 			}
 		}
 		else if (obj != null) {
-			return OrderUtils.getOrder(obj.getClass());
+			order = OrderUtils.getOrder(obj.getClass());
+			if (order == null && obj instanceof DecoratingProxy) {
+				order = OrderUtils.getOrder(((DecoratingProxy) obj).getDecoratedClass());
+			}
 		}
 
-		return null;
+		return order;
 	}
 
 	/**
@@ -94,13 +98,17 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 	 * multiple matches but only one object to be returned.
 	 */
 	public Integer getPriority(Object obj) {
+		Integer priority = null;
 		if (obj instanceof Class) {
-			return OrderUtils.getPriority((Class<?>) obj);
+			priority = OrderUtils.getPriority((Class<?>) obj);
 		}
 		else if (obj != null) {
-			return OrderUtils.getPriority(obj.getClass());
+			priority = OrderUtils.getPriority(obj.getClass());
+			if (priority == null && obj instanceof DecoratingProxy) {
+				priority = OrderUtils.getOrder(((DecoratingProxy) obj).getDecoratedClass());
+			}
 		}
-		return null;
+		return priority;
 	}
 
 
