@@ -154,11 +154,11 @@ public class ReflectionTestUtils {
 	 * @param value the value to set
 	 * @param type the type of the field to set; may be {@code null} if
 	 * {@code name} is specified
+	 * @since 4.2
 	 * @see ReflectionUtils#findField(Class, String, Class)
 	 * @see ReflectionUtils#makeAccessible(Field)
 	 * @see ReflectionUtils#setField(Field, Object, Object)
 	 * @see AopTestUtils#getUltimateTargetObject(Object)
-	 * @since 4.2
 	 */
 	public static void setField(Object targetObject, Class<?> targetClass, String name, Object value, Class<?> type) {
 		Assert.isTrue(targetObject != null || targetClass != null,
@@ -239,6 +239,7 @@ public class ReflectionTestUtils {
 	 * @see ReflectionUtils#findField(Class, String, Class)
 	 * @see ReflectionUtils#makeAccessible(Field)
 	 * @see ReflectionUtils#getField(Field, Object)
+	 * @see AopTestUtils#getUltimateTargetObject(Object)
 	 */
 	public static Object getField(Object targetObject, Class<?> targetClass, String name) {
 		Assert.isTrue(targetObject != null || targetClass != null,
