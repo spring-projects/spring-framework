@@ -40,6 +40,18 @@ public abstract class NumberUtils {
 
 	private static final BigInteger LONG_MAX = BigInteger.valueOf(Long.MAX_VALUE);
 
+	private static final BigInteger INT_MIN = BigInteger.valueOf(Integer.MIN_VALUE);
+
+	private static final BigInteger INT_MAX = BigInteger.valueOf(Integer.MAX_VALUE);
+
+	private static final BigInteger SHORT_MIN = BigInteger.valueOf(Short.MIN_VALUE);
+
+	private static final BigInteger SHORT_MAX = BigInteger.valueOf(Short.MAX_VALUE);
+
+	private static final BigInteger BYTE_MIN = BigInteger.valueOf(Byte.MIN_VALUE);
+
+	private static final BigInteger BYTE_MAX = BigInteger.valueOf(Byte.MAX_VALUE);
+
 	/**
 	 * Standard number types (all immutable):
 	 * Byte, Short, Integer, Long, BigInteger, Float, Double, BigDecimal.
@@ -87,34 +99,49 @@ public abstract class NumberUtils {
 			return (T) number;
 		}
 		else if (Byte.class == targetClass) {
-			long value = number.longValue();
-			if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) {
-				raiseOverflowException(number, targetClass);
+			BigInteger bigInt = getBigInteger(number);
+			if (bigInt != null) {
+				if(bigInt.compareTo(BYTE_MIN) < 0 || bigInt.compareTo(BYTE_MAX) > 0) {
+					raiseOverflowException(number, targetClass);
+				}
+			} else {
+				long value = number.longValue();
+				if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) {
+					raiseOverflowException(number, targetClass);
+				}
 			}
 			return (T) Byte.valueOf(number.byteValue());
 		}
 		else if (Short.class == targetClass) {
-			long value = number.longValue();
-			if (value < Short.MIN_VALUE || value > Short.MAX_VALUE) {
-				raiseOverflowException(number, targetClass);
+			BigInteger bigInt = getBigInteger(number);
+			if (bigInt != null) {
+				if(bigInt.compareTo(SHORT_MIN) < 0 || bigInt.compareTo(SHORT_MAX) > 0) {
+					raiseOverflowException(number, targetClass);
+				}
+			} else {
+				long value = number.longValue();
+				if (value < Short.MIN_VALUE || value > Short.MAX_VALUE) {
+					raiseOverflowException(number, targetClass);
+				}
 			}
 			return (T) Short.valueOf(number.shortValue());
 		}
 		else if (Integer.class == targetClass) {
-			long value = number.longValue();
-			if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
-				raiseOverflowException(number, targetClass);
+			BigInteger bigInt = getBigInteger(number);
+			if (bigInt != null) {
+				if(bigInt.compareTo(INT_MIN) < 0 || bigInt.compareTo(INT_MAX) > 0) {
+					raiseOverflowException(number, targetClass);
+				}
+			} else {
+				long value = number.longValue();
+				if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
+					raiseOverflowException(number, targetClass);
+				}
 			}
 			return (T) Integer.valueOf(number.intValue());
 		}
 		else if (Long.class == targetClass) {
-			BigInteger bigInt = null;
-			if (number instanceof BigInteger) {
-				bigInt = (BigInteger) number;
-			}
-			else if (number instanceof BigDecimal) {
-				bigInt = ((BigDecimal) number).toBigInteger();
-			}
+			BigInteger bigInt = getBigInteger(number);
 			// Effectively analogous to JDK 8's BigInteger.longValueExact()
 			if (bigInt != null && (bigInt.compareTo(LONG_MIN) < 0 || bigInt.compareTo(LONG_MAX) > 0)) {
 				raiseOverflowException(number, targetClass);
@@ -146,6 +173,17 @@ public abstract class NumberUtils {
 			throw new IllegalArgumentException("Could not convert number [" + number + "] of type [" +
 					number.getClass().getName() + "] to unsupported target class [" + targetClass.getName() + "]");
 		}
+	}
+
+	private static BigInteger getBigInteger(Number number) {
+		BigInteger bigInt = null;
+		if (number instanceof BigInteger) {
+			bigInt = (BigInteger) number;
+		}
+		else if (number instanceof BigDecimal) {
+			bigInt = ((BigDecimal) number).toBigInteger();
+		}
+		return bigInt;
 	}
 
 	/**
