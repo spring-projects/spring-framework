@@ -23,13 +23,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import reactor.core.test.TestSubscriber;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 
 import static org.junit.Assert.*;
-import reactor.core.test.TestSubscriber;
 
 /**
  * @author Sebastien Deleuze
@@ -40,7 +40,7 @@ public class ByteBufferEncoderTests extends AbstractAllocatingTestCase {
 
 	@Before
 	public void createEncoder() {
-		encoder = new ByteBufferEncoder(allocator);
+		encoder = new ByteBufferEncoder();
 	}
 
 	@Test
@@ -57,7 +57,7 @@ public class ByteBufferEncoderTests extends AbstractAllocatingTestCase {
 		Flux<ByteBuffer> source =
 				Flux.just(ByteBuffer.wrap(fooBytes), ByteBuffer.wrap(barBytes));
 
-		Flux<DataBuffer> output = encoder.encode(source,
+		Flux<DataBuffer> output = encoder.encode(source, allocator,
 				ResolvableType.forClassWithGenerics(Publisher.class, ByteBuffer.class),
 				null);
 		TestSubscriber<DataBuffer> testSubscriber = new TestSubscriber<>();

@@ -21,11 +21,12 @@ import java.nio.charset.StandardCharsets;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.test.TestSubscriber;
 
 import org.springframework.http.MediaType;
 
-import static org.junit.Assert.*;
-import reactor.core.test.TestSubscriber;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Sebastien Deleuze
@@ -36,7 +37,7 @@ public class JacksonJsonEncoderTests extends AbstractAllocatingTestCase {
 
 	@Before
 	public void createEncoder() {
-		encoder = new JacksonJsonEncoder(allocator);
+		encoder = new JacksonJsonEncoder();
 	}
 
 	@Test
@@ -48,7 +49,7 @@ public class JacksonJsonEncoderTests extends AbstractAllocatingTestCase {
 	@Test
 	public void write() {
 		Flux<Pojo> source = Flux.just(new Pojo("foofoo", "barbar"), new Pojo("foofoofoo", "barbarbar"));
-		Flux<String> output = encoder.encode(source, null, null).map(chunk -> {
+		Flux<String> output = encoder.encode(source, allocator, null, null).map(chunk -> {
 			byte[] b = new byte[chunk.readableByteCount()];
 			chunk.read(b);
 			return new String(b, StandardCharsets.UTF_8);

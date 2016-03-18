@@ -43,23 +43,22 @@ import org.springframework.util.MimeTypeUtils;
  * @author Sebastien Deleuze
  * @see Jaxb2Decoder
  */
-public class Jaxb2Encoder extends AbstractAllocatingEncoder<Object> {
+public class Jaxb2Encoder extends AbstractEncoder<Object> {
 
 	private final ConcurrentMap<Class<?>, JAXBContext> jaxbContexts = new ConcurrentHashMap<>(64);
 
-	public Jaxb2Encoder(DataBufferAllocator allocator) {
-		super(allocator, MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML);
+	public Jaxb2Encoder() {
+		super(MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML);
 	}
 
-
 	@Override
-	public Flux<DataBuffer> encode(Publisher<? extends Object> messageStream,
-			ResolvableType type,
-			MimeType mimeType, Object... hints) {
+	public Flux<DataBuffer> encode(Publisher<?> inputStream,
+			DataBufferAllocator allocator, ResolvableType type, MimeType mimeType,
+			Object... hints) {
 
-		return Flux.from(messageStream).map(value -> {
+		return Flux.from(inputStream).map(value -> {
 			try {
-				DataBuffer buffer = allocator().allocateBuffer(1024);
+				DataBuffer buffer = allocator.allocateBuffer(1024);
 				OutputStream outputStream = buffer.asOutputStream();
 				Class<?> clazz = ClassUtils.getUserClass(value);
 				Marshaller marshaller = createMarshaller(clazz);

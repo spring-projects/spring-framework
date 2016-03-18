@@ -42,21 +42,22 @@ import org.springframework.util.MimeType;
  *
  * @see JsonObjectDecoder
  */
-public class JsonObjectEncoder extends AbstractAllocatingEncoder<DataBuffer> {
+public class JsonObjectEncoder extends AbstractEncoder<DataBuffer> {
 
-	public JsonObjectEncoder(DataBufferAllocator allocator) {
-		super(allocator, new MimeType("application", "json", StandardCharsets.UTF_8),
+	public JsonObjectEncoder() {
+		super(new MimeType("application", "json", StandardCharsets.UTF_8),
 				new MimeType("application", "*+json", StandardCharsets.UTF_8));
 	}
 
 	@Override
 	public Flux<DataBuffer> encode(Publisher<? extends DataBuffer> inputStream,
+			DataBufferAllocator allocator,
 			ResolvableType type, MimeType mimeType, Object... hints) {
 		if (inputStream instanceof Mono) {
 			return Flux.from(inputStream);
 		}
 		return Flux.from(inputStream)
-				.lift(s -> new JsonArrayEncoderBarrier(s, allocator()));
+				.lift(s -> new JsonArrayEncoderBarrier(s, allocator));
 	}
 
 	private static class JsonArrayEncoderBarrier

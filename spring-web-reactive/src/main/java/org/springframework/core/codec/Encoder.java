@@ -16,7 +16,6 @@
 
 package org.springframework.core.codec;
 
-import java.nio.ByteBuffer;
 import java.util.List;
 
 import org.reactivestreams.Publisher;
@@ -24,6 +23,7 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.util.MimeType;
 
 /**
@@ -44,14 +44,16 @@ public interface Encoder<T> {
 	boolean canEncode(ResolvableType type, MimeType mimeType, Object... hints);
 
 	/**
-	 * Encode an input stream of {@code T} to an output {@link ByteBuffer} stream.
+	 * Encode an input stream of {@code T} to an output {@link DataBuffer} stream.
 	 * @param inputStream the input stream to process.
+	 * @param allocator a buffer allocator used to create the output
 	 * @param type the stream element type to process.
 	 * @param mimeType the mime type to process.
 	 * @param hints Additional information about how to do decode, optional.
 	 * @return the output stream
 	 */
-	Flux<DataBuffer> encode(Publisher<? extends T> inputStream, ResolvableType type,
+	Flux<DataBuffer> encode(Publisher<? extends T> inputStream,
+			DataBufferAllocator allocator, ResolvableType type,
 			MimeType mimeType, Object... hints);
 
 	/**

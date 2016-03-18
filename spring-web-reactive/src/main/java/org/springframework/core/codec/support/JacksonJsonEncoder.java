@@ -30,6 +30,7 @@ import org.springframework.core.codec.CodecException;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
 import org.springframework.util.MimeType;
 
 /**
@@ -38,41 +39,46 @@ import org.springframework.util.MimeType;
  * @author Sebastien Deleuze
  * @see JacksonJsonDecoder
  */
-public class JacksonJsonEncoder extends AbstractAllocatingEncoder<Object> {
+public class JacksonJsonEncoder extends AbstractEncoder<Object> {
 
 	private final ObjectMapper mapper;
 
 	private Encoder<DataBuffer> postProcessor;
 
-	public JacksonJsonEncoder(DataBufferAllocator allocator) {
-		this(allocator, new ObjectMapper(), null);
+	public JacksonJsonEncoder() {
+		this(new ObjectMapper(), null);
 	}
 
-	public JacksonJsonEncoder(DataBufferAllocator allocator,
-			Encoder<DataBuffer> postProcessor) {
-		this(allocator, new ObjectMapper(), postProcessor);
+	public JacksonJsonEncoder(Encoder<DataBuffer> postProcessor) {
+		this(new ObjectMapper(), postProcessor);
 	}
 
-	public JacksonJsonEncoder(DataBufferAllocator allocator, ObjectMapper mapper,
+	public JacksonJsonEncoder(ObjectMapper mapper,
 			Encoder<DataBuffer> postProcessor) {
-		super(allocator, new MimeType("application", "json", StandardCharsets.UTF_8),
+		super(new MimeType("application", "json", StandardCharsets.UTF_8),
 				new MimeType("application", "*+json", StandardCharsets.UTF_8));
 		this.mapper = mapper;
 		this.postProcessor = postProcessor;
 	}
 
 	@Override
-	public Flux<DataBuffer> encode(Publisher<? extends Object> inputStream,
-			ResolvableType type, MimeType mimeType, Object... hints) {
+	public Flux<DataBuffer> encode(Publisher<?> inputStream,
+			DataBufferAllocator allocator, ResolvableType type, MimeType mimeType,
+			Object... hints) {
 
 		Publisher<DataBuffer> stream = (inputStream instanceof Mono ?
-				((Mono<?>)inputStream).map(this::serialize) :
-				Flux.from(inputStream).map(this::serialize));
-		return (this.postProcessor == null ? Flux.from(stream) : this.postProcessor.encode(stream, type, mimeType, hints));
+				((Mono<?>) inputStream).map(value -> serialize(value, allocator)) :
+				Flux.from(inputStream).map(value -> serialize(value, allocator)));
+		// TODO: figure out why using the parameter allocator for the postprocessor
+		// commits the response too early
+		DefaultDataBufferAllocator tempAllocator = new DefaultDataBufferAllocator();
+
+		return (this.postProcessor == null ? Flux.from(stream) :
+				this.postProcessor.encode(stream, tempAllocator, type, mimeType, hints));
 	}
 
-	private DataBuffer serialize(Object value) {
-		DataBuffer buffer = allocator().allocateBuffer();
+	private DataBuffer serialize(Object value, DataBufferAllocator allocator) {
+		DataBuffer buffer = allocator.allocateBuffer();
 		OutputStream outputStream = buffer.asOutputStream();
 		try {
 			this.mapper.writeValue(outputStream, value);

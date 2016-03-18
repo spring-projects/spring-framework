@@ -33,12 +33,12 @@ import org.springframework.util.MimeType;
  * @author Sebastien Deleuze
  * @see StringDecoder
  */
-public class StringEncoder extends AbstractAllocatingEncoder<String> {
+public class StringEncoder extends AbstractEncoder<String> {
 
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-	public StringEncoder(DataBufferAllocator allocator) {
-		super(allocator, new MimeType("text", "plain", DEFAULT_CHARSET));
+	public StringEncoder() {
+		super(new MimeType("text", "plain", DEFAULT_CHARSET));
 	}
 
 
@@ -49,9 +49,9 @@ public class StringEncoder extends AbstractAllocatingEncoder<String> {
 	}
 
 	@Override
-	public Flux<DataBuffer> encode(Publisher<? extends String> elementStream,
-			ResolvableType type, MimeType mimeType, Object... hints) {
-
+	public Flux<DataBuffer> encode(Publisher<? extends String> inputStream,
+			DataBufferAllocator allocator, ResolvableType type, MimeType mimeType,
+			Object... hints) {
 		Charset charset;
 		if (mimeType != null && mimeType.getCharSet() != null) {
 			charset = mimeType.getCharSet();
@@ -59,9 +59,9 @@ public class StringEncoder extends AbstractAllocatingEncoder<String> {
 		else {
 			 charset = DEFAULT_CHARSET;
 		}
-		return Flux.from(elementStream).map(s -> {
+		return Flux.from(inputStream).map(s -> {
 			byte[] bytes = s.getBytes(charset);
-			DataBuffer dataBuffer = allocator().allocateBuffer(bytes.length);
+			DataBuffer dataBuffer = allocator.allocateBuffer(bytes.length);
 			dataBuffer.write(bytes);
 			return dataBuffer;
 		});

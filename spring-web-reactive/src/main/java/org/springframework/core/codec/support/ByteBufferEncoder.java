@@ -30,10 +30,10 @@ import org.springframework.util.MimeTypeUtils;
 /**
  * @author Sebastien Deleuze
  */
-public class ByteBufferEncoder extends AbstractAllocatingEncoder<ByteBuffer> {
+public class ByteBufferEncoder extends AbstractEncoder<ByteBuffer> {
 
-	public ByteBufferEncoder(DataBufferAllocator allocator) {
-		super(allocator, MimeTypeUtils.ALL);
+	public ByteBufferEncoder() {
+		super(MimeTypeUtils.ALL);
 	}
 
 
@@ -45,12 +45,11 @@ public class ByteBufferEncoder extends AbstractAllocatingEncoder<ByteBuffer> {
 
 	@Override
 	public Flux<DataBuffer> encode(Publisher<? extends ByteBuffer> inputStream,
-			ResolvableType type,
-			MimeType mimeType, Object... hints) {
-
+			DataBufferAllocator allocator, ResolvableType type, MimeType mimeType,
+			Object... hints) {
 		//noinspection unchecked
 		return Flux.from(inputStream).map(byteBuffer -> {
-			DataBuffer dataBuffer = allocator().allocateBuffer(byteBuffer.remaining());
+			DataBuffer dataBuffer = allocator.allocateBuffer(byteBuffer.remaining());
 			dataBuffer.write(byteBuffer);
 			return dataBuffer;
 		});

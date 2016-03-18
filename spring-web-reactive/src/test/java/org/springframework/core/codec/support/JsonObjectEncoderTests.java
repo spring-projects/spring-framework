@@ -22,10 +22,9 @@ import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.test.TestSubscriber;
 
 import org.springframework.core.io.buffer.DataBuffer;
-
-import reactor.core.test.TestSubscriber;
 
 /**
  * @author Sebastien Deleuze
@@ -36,14 +35,15 @@ public class JsonObjectEncoderTests extends AbstractAllocatingTestCase {
 
 	@Before
 	public void createEncoder() {
-		encoder = new JsonObjectEncoder(allocator);
+		encoder = new JsonObjectEncoder();
 	}
 
 	@Test
 	public void encodeSingleElementFlux() throws InterruptedException {
 		Flux<DataBuffer> source =
 				Flux.just(stringBuffer("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"));
-		Flux<String> output = Flux.from(encoder.encode(source, null, null)).map(chunk -> {
+		Flux<String> output =
+				Flux.from(encoder.encode(source, allocator, null, null)).map(chunk -> {
 			byte[] b = new byte[chunk.readableByteCount()];
 			chunk.read(b);
 			return new String(b, StandardCharsets.UTF_8);
@@ -57,7 +57,8 @@ public class JsonObjectEncoderTests extends AbstractAllocatingTestCase {
 	public void encodeSingleElementMono() throws InterruptedException {
 		Mono<DataBuffer> source =
 				Mono.just(stringBuffer("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"));
-		Flux<String> output = Flux.from(encoder.encode(source, null, null)).map(chunk -> {
+		Flux<String> output =
+				Flux.from(encoder.encode(source, allocator, null, null)).map(chunk -> {
 			byte[] b = new byte[chunk.readableByteCount()];
 			chunk.read(b);
 			return new String(b, StandardCharsets.UTF_8);
@@ -72,7 +73,8 @@ public class JsonObjectEncoderTests extends AbstractAllocatingTestCase {
 		Flux<DataBuffer> source =
 				Flux.just(stringBuffer("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"),
 						stringBuffer("{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}"));
-		Flux<String> output = Flux.from(encoder.encode(source, null, null)).map(chunk -> {
+		Flux<String> output =
+				Flux.from(encoder.encode(source, allocator, null, null)).map(chunk -> {
 			byte[] b = new byte[chunk.readableByteCount()];
 			chunk.read(b);
 			return new String(b, StandardCharsets.UTF_8);
@@ -91,7 +93,8 @@ public class JsonObjectEncoderTests extends AbstractAllocatingTestCase {
 						stringBuffer("{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}"),
 						stringBuffer("{\"foo\": \"foofoofoofoo\", \"bar\": \"barbarbarbar\"}")
 		);
-		Flux<String> output = Flux.from(encoder.encode(source, null, null)).map(chunk -> {
+		Flux<String> output =
+				Flux.from(encoder.encode(source, allocator, null, null)).map(chunk -> {
 			byte[] b = new byte[chunk.readableByteCount()];
 			chunk.read(b);
 			return new String(b, StandardCharsets.UTF_8);

@@ -23,12 +23,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import reactor.core.publisher.Flux;
+import reactor.core.test.TestSubscriber;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.http.MediaType;
 
-import static org.junit.Assert.*;
-import reactor.core.test.TestSubscriber;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Sebastien Deleuze
@@ -40,7 +41,7 @@ public class StringEncoderTests extends AbstractAllocatingTestCase {
 
 	@Before
 	public void createEncoder() {
-		encoder = new StringEncoder(allocator);
+		encoder = new StringEncoder();
 	}
 
 	@Test
@@ -52,7 +53,9 @@ public class StringEncoderTests extends AbstractAllocatingTestCase {
 
 	@Test
 	public void write() throws InterruptedException {
-		Flux<String> output = Flux.from(encoder.encode(Flux.just("foo"), null, null)).map(chunk -> {
+		Flux<String> output =
+				Flux.from(encoder.encode(Flux.just("foo"), allocator, null, null))
+						.map(chunk -> {
 			byte[] b = new byte[chunk.readableByteCount()];
 			chunk.read(b);
 			return new String(b, StandardCharsets.UTF_8);
