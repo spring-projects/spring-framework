@@ -24,6 +24,7 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.util.Cookie;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,7 +32,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -55,7 +56,7 @@ import static org.junit.Assert.assertThat;
  * @author Rossen Stoyanchev
  * @since 4.2
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @ContextConfiguration
 @WebAppConfiguration
 public class MockMvcWebClientBuilderTests {
@@ -139,9 +140,11 @@ public class MockMvcWebClientBuilderTests {
 
 	@RestController
 	static class CookieController {
-		@RequestMapping(value="/", produces="text/plain")
-		public String cookie(@CookieValue("cookie") String cookie) {
+
+		@RequestMapping(path = "/", produces = "text/plain")
+		String cookie(@CookieValue("cookie") String cookie) {
 			return cookie;
 		}
 	}
+
 }

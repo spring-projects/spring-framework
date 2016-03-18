@@ -28,7 +28,7 @@ import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -54,7 +54,7 @@ import static org.junit.Assert.assertTrue;
  * @author Sam Brannen
  * @since 4.2
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @ContextConfiguration
 @WebAppConfiguration
 public class MockMvcHtmlUnitDriverBuilderTests {
@@ -124,7 +124,7 @@ public class MockMvcHtmlUnitDriverBuilderTests {
 		assertThat(get("http://localhost/"), equalTo(""));
 		Cookie cookie = new Cookie("localhost", "cookie", "cookieManagerShared");
 		otherDriver.getWebClient().getCookieManager().addCookie(cookie);
-		assertThat(get("http://localhost/"), containsString("cookieManagerShared"));
+		assertThat(get("http://localhost/"), equalTo("cookieManagerShared"));
 	}
 
 
@@ -158,9 +158,11 @@ public class MockMvcHtmlUnitDriverBuilderTests {
 
 	@RestController
 	static class CookieController {
-		@RequestMapping(value="/", produces="text/plain")
-		public String cookie(@CookieValue("cookie") String cookie) {
+
+		@RequestMapping(path = "/", produces = "text/plain")
+		String cookie(@CookieValue("cookie") String cookie) {
 			return cookie;
 		}
 	}
+
 }
