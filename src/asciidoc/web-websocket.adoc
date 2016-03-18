@@ -1884,41 +1884,40 @@ to access information about the message.
 [[websocket-stomp-client]]
 === STOMP Client
 
-Spring provides STOMP/WebSocket client and STOMP/TCP client support with the
-following built-in choices (other libraries can be adapted):
+Spring provides a STOMP over WebSocket client and a STOMP over TCP client.
 
-* `WebSocketStompClient` built on the Spring WebSocket API with
-  support for standard JSR-356 WebSocket, Jetty 9, as well as SockJS
-  for HTTP-based WebSocket emulation (see <<websocket-fallback-sockjs-client>>).
-* `Reactor11TcpStompClient` built on `NettyTcpClient` from the reactor-net project.
-
-To begin, create and configure the client:
+To begin create and configure `WebSocketStompClient`:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-WebSocketClient transport = new StandardWebSocketClient();
-WebSocketStompClient stompClient = new WebSocketStompClient(transport);
+WebSocketClient webSocketClient = new StandardWebSocketClient();
+WebSocketStompClient stompClient = new WebSocketStompClient(webSocketClient);
 stompClient.setMessageConverter(new StringMessageConverter());
-stompClient.setTaskScheduler(taskScheduler); // for heartbeats, receipts
+stompClient.setTaskScheduler(taskScheduler); // for heartbeats
 ----
 
-Then connect to the WebSocket and provide a handler for the STOMP session:
+In the above example `StandardWebSocketClient` could be replaced with `SockJsClient`
+since that is also an implementation of `WebSocketClient`. The `SockJsClient` can
+use WebSocket or HTTP-based transport as a fallback. For more details see
+<<websocket-fallback-sockjs-client>>.
+
+Next establish a connection and provide a handler for the STOMP session:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
 String url = "ws://127.0.0.1:8080/endpoint";
-StompSessionHandler handler = ... ;
-stompClient.connect(url, handler);
+StompSessionHandler sessionHandler = new MyStompSessionHandler();
+stompClient.connect(url, sessionHandler);
 ----
 
-When the session is ready for use, the handler is notified:
+When the session is ready for use the handler is notified:
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
 ----
-public class MySessionHandler extends StompSessionHandlerAdapter {
+public class MyStompSessionHandler extends StompSessionHandlerAdapter {
 
     @Override
     public void afterConnected(StompSession session, StompHeaders connectedHeaders) {
@@ -1927,7 +1926,8 @@ public class MySessionHandler extends StompSessionHandlerAdapter {
 }
 ----
 
-Send any Object as the payload and it will be serialized with a `MessageConverter`:
+Once the session is established any payload can be sent and that will be
+serialized with the configured `MessageConverter`:
  
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1935,10 +1935,10 @@ Send any Object as the payload and it will be serialized with a `MessageConverte
 session.send("/topic/foo", "payload");
 ----
 
-The subscribe methods take a `StompFrameHandler` for messages on the subscription
-and return a `Subscription` handle for unsubscribing. For each received message,
-the handler must help to select the target type and then handle the
-deserialized payload:
+You can also subscribe to destinations. The `subscribe` methods require a handler
+for messages on the subscription and return a `Subscription` handle that can be
+used to unsubscribe. For each received message the handler can specify the target
+Object type the payload should be deserialized to:
  
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1958,11 +1958,19 @@ session.subscribe("/topic/foo", new StompFrameHandler() {
 });
 ----
 
-STOMP supports heartbeats. To use this feature simply configure the
-`WebSocketStompClient` with a `TaskScheduler` and if desired customize the
-default heartbeat intervals (10, 10 seconds respectively by default) for
-write inactivity which causes a heartbeat to be sent and for read
-inactivity which closes the connection.
+To enable STOMP heartbeat configure `WebSocketStompClient` with a `TaskScheduler`
+and optionally customize the heartbeat intervals, 10 seconds for write inactivity
+which causes a heartbeat to be sent and 10 seconds for read inactivity which
+closes the connection.
+
+[NOTE]
+====
+When using `WebSocketStompClient` for performance tests to simulate thousands
+of clients from the same machine consider turning off heartbeats since each
+connection schedules its own heartbeat tasks and that's not optimized for a
+a large number of clients running on the same machine.
+====
+
 
 The STOMP protocol also supports receipts where the client must add a "receipt"
 header to which the server responds with a RECEIPT frame after the send or
