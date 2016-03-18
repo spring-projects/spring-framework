@@ -891,7 +891,7 @@ public class AnnotatedElementUtilsTests {
 		@AliasFor(annotation = ContextConfig.class)
 		String[] locations() default {};
 
-		// TODO Determine why transitive implicit alias does not work
+		// TODO [SPR-14069] Determine why transitive implicit alias does not work
 		// hoping to be able to omit: attribute = "locations"
 		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
 		String[] value() default {};
