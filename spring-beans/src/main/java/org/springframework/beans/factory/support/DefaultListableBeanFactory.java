@@ -54,6 +54,7 @@ import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.beans.factory.CannotLoadBeanClassException;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.NoUniqueBeanDefinitionException;
 import org.springframework.beans.factory.ObjectFactory;
@@ -1042,37 +1043,43 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 			return multipleBeans;
 		}
 
-		Map<String, Object> matchingBeans = findAutowireCandidates(beanName, type, descriptor);
-		if (matchingBeans.isEmpty()) {
-			if (descriptor.isRequired()) {
-				raiseNoSuchBeanDefinitionException(type, descriptor.getResolvableType().toString(), descriptor);
-			}
-			return null;
-		}
-		if (matchingBeans.size() > 1) {
-			String primaryBeanName = determineAutowireCandidate(matchingBeans, descriptor);
-			if (primaryBeanName == null) {
-				if (descriptor.isRequired() || !indicatesMultipleBeans(type)) {
-					return descriptor.resolveNotUnique(type, matchingBeans);
+		InjectionPoint previousInjectionPoint = ConstructorResolver.setCurrentInjectionPoint(descriptor);
+		try {
+			Map<String, Object> matchingBeans = findAutowireCandidates(beanName, type, descriptor);
+			if (matchingBeans.isEmpty()) {
+				if (descriptor.isRequired()) {
+					raiseNoSuchBeanDefinitionException(type, descriptor.getResolvableType().toString(), descriptor);
 				}
-				else {
-					// In case of an optional Collection/Map, silently ignore a non-unique case:
-					// possibly it was meant to be an empty collection of multiple regular beans
-					// (before 4.3 in particular when we didn't even look for collection beans).
-					return null;
-				}
+				return null;
 			}
+			if (matchingBeans.size() > 1) {
+				String primaryBeanName = determineAutowireCandidate(matchingBeans, descriptor);
+				if (primaryBeanName == null) {
+					if (descriptor.isRequired() || !indicatesMultipleBeans(type)) {
+						return descriptor.resolveNotUnique(type, matchingBeans);
+					}
+					else {
+						// In case of an optional Collection/Map, silently ignore a non-unique case:
+						// possibly it was meant to be an empty collection of multiple regular beans
+						// (before 4.3 in particular when we didn't even look for collection beans).
+						return null;
+					}
+				}
+				if (autowiredBeanNames != null) {
+					autowiredBeanNames.add(primaryBeanName);
+				}
+				return matchingBeans.get(primaryBeanName);
+			}
+			// We have exactly one match.
+			Map.Entry<String, Object> entry = matchingBeans.entrySet().iterator().next();
 			if (autowiredBeanNames != null) {
-				autowiredBeanNames.add(primaryBeanName);
+				autowiredBeanNames.add(entry.getKey());
 			}
-			return matchingBeans.get(primaryBeanName);
+			return entry.getValue();
 		}
-		// We have exactly one match.
-		Map.Entry<String, Object> entry = matchingBeans.entrySet().iterator().next();
-		if (autowiredBeanNames != null) {
-			autowiredBeanNames.add(entry.getKey());
+		finally {
+			ConstructorResolver.setCurrentInjectionPoint(previousInjectionPoint);
 		}
-		return entry.getValue();
 	}
 
 	private Object resolveMultipleBeans(DependencyDescriptor descriptor, String beanName,

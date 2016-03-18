@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,13 @@ import org.junit.Test;
 import org.springframework.beans.factory.BeanClassLoaderAware;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InjectionPoint;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.QualifierAnnotationAutowireCandidateResolver;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.beans.factory.annotation.RequiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,6 +41,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.beans.factory.config.DependencyDescriptor;
 import org.springframework.beans.factory.config.ListFactoryBean;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.beans.factory.parsing.BeanDefinitionParsingException;
@@ -71,7 +77,7 @@ public class ConfigurationClassProcessingTests {
 	 * When complete, the factory is ready to service requests for any {@link Bean} methods
 	 * declared by <var>configClasses</var>.
 	 */
-	private ListableBeanFactory initBeanFactory(Class<?>... configClasses) {
+	private DefaultListableBeanFactory initBeanFactory(Class<?>... configClasses) {
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		for (Class<?> configClass : configClasses) {
 			String configBeanName = configClass.getName();
@@ -203,6 +209,20 @@ public class ConfigurationClassProcessingTests {
 	}
 
 	@Test
+	public void configurationWithAdaptivePrototypes() {
+		DefaultListableBeanFactory factory =
+				initBeanFactory(ConfigWithPrototypeBean.class, AdaptiveInjectionPoints.class);
+		AutowiredAnnotationBeanPostProcessor aabpp = new AutowiredAnnotationBeanPostProcessor();
+		aabpp.setBeanFactory(factory);
+		factory.setAutowireCandidateResolver(new QualifierAnnotationAutowireCandidateResolver());
+		factory.addBeanPostProcessor(aabpp);
+
+		AdaptiveInjectionPoints adaptive = factory.getBean(AdaptiveInjectionPoints.class);
+		assertEquals("adaptiveInjectionPoint1", adaptive.adaptiveInjectionPoint1.getName());
+		assertEquals("adaptiveInjectionPoint2", adaptive.adaptiveInjectionPoint2.getName());
+	}
+
+	@Test
 	public void configurationWithPostProcessor() {
 		AnnotationConfigApplicationContext factory = new AnnotationConfigApplicationContext();
 		factory.register(ConfigWithPostProcessor.class);
@@ -324,6 +344,26 @@ public class ConfigurationClassProcessingTests {
 		public TestBean baz() {
 			return new TestBean("baz");
 		}
+
+		@Bean @Scope("prototype")
+		public TestBean adaptive1(InjectionPoint ip) {
+			return new TestBean(ip.getMember().getName());
+		}
+
+		@Bean @Scope("prototype")
+		public TestBean adaptive2(DependencyDescriptor dd) {
+			return new TestBean(dd.getMember().getName());
+		}
+	}
+
+
+	static class AdaptiveInjectionPoints {
+
+		@Autowired @Qualifier("adaptive1")
+		public TestBean adaptiveInjectionPoint1;
+
+		@Autowired @Qualifier("adaptive2")
+		public TestBean adaptiveInjectionPoint2;
 	}
 
 
