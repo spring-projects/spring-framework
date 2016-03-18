@@ -101,7 +101,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 
 			List<Decoder<?>> decoders = Arrays.asList(new ByteBufferDecoder(),
 					new StringDecoder(allocator),
-					new JacksonJsonDecoder(new JsonObjectDecoder(allocator)));
+					new JacksonJsonDecoder(new JsonObjectDecoder()));
 
 			this.argumentResolvers.add(new RequestParamArgumentResolver());
 			this.argumentResolvers.add(new RequestBodyArgumentResolver(decoders, this.conversionService));

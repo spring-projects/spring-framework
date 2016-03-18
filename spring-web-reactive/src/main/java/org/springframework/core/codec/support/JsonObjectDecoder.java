@@ -55,23 +55,21 @@ public class JsonObjectDecoder extends AbstractDecoder<DataBuffer> {
 
 	private static final int ST_DECODING_ARRAY_STREAM = 2;
 
-	private final DataBufferAllocator allocator;
-
 	private final int maxObjectLength;
 
 	private final boolean streamArrayElements;
 
-	public JsonObjectDecoder(DataBufferAllocator allocator) {
+	public JsonObjectDecoder() {
 		// 1 MB
-		this(allocator, 1024 * 1024);
+		this(1024 * 1024);
 	}
 
-	public JsonObjectDecoder(DataBufferAllocator allocator, int maxObjectLength) {
-		this(allocator, maxObjectLength, true);
+	public JsonObjectDecoder(int maxObjectLength) {
+		this(maxObjectLength, true);
 	}
 
-	public JsonObjectDecoder(DataBufferAllocator allocator, boolean streamArrayElements) {
-		this(allocator, 1024 * 1024, streamArrayElements);
+	public JsonObjectDecoder(boolean streamArrayElements) {
+		this(1024 * 1024, streamArrayElements);
 	}
 
 
@@ -84,11 +82,10 @@ public class JsonObjectDecoder extends AbstractDecoder<DataBuffer> {
 	 * is an array, each of its entries is passed through the pipeline individually
 	 * and immediately after it was fully received, allowing for arrays with
 	 */
-	public JsonObjectDecoder(DataBufferAllocator allocator, int maxObjectLength,
+	public JsonObjectDecoder(int maxObjectLength,
 			boolean streamArrayElements) {
 		super(new MimeType("application", "json", StandardCharsets.UTF_8),
 				new MimeType("application", "*+json", StandardCharsets.UTF_8));
-		this.allocator = allocator;
 		if (maxObjectLength < 1) {
 			throw new IllegalArgumentException("maxObjectLength must be a positive int");
 		}
@@ -133,6 +130,7 @@ public class JsonObjectDecoder extends AbstractDecoder<DataBuffer> {
 					return Flux.error(new IllegalStateException("object length exceeds " +
 							maxObjectLength + ": " + this.writerIndex + " bytes discarded"));
 				}
+				DataBufferAllocator allocator = b.allocator();
 				for (/* use current index */; this.index < this.writerIndex; this.index++) {
 					byte c = this.input.getByte(this.index);
 					if (this.state == ST_DECODING_NORMAL) {

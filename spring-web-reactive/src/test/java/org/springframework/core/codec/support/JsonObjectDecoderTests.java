@@ -20,10 +20,9 @@ import java.nio.charset.StandardCharsets;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.test.TestSubscriber;
 
 import org.springframework.core.io.buffer.DataBuffer;
-
-import reactor.core.test.TestSubscriber;
 
 /**
  * @author Sebastien Deleuze
@@ -33,7 +32,7 @@ public class JsonObjectDecoderTests extends AbstractAllocatingTestCase {
 
 	@Test
 	public void decodeSingleChunkToJsonObject()  {
-		JsonObjectDecoder decoder = new JsonObjectDecoder(allocator);
+		JsonObjectDecoder decoder = new JsonObjectDecoder();
 		Flux<DataBuffer> source =
 				Flux.just(stringBuffer("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"));
 		Flux<String> output =
@@ -45,7 +44,7 @@ public class JsonObjectDecoderTests extends AbstractAllocatingTestCase {
 
 	@Test
 	public void decodeMultipleChunksToJsonObject() throws InterruptedException {
-		JsonObjectDecoder decoder = new JsonObjectDecoder(allocator);
+		JsonObjectDecoder decoder = new JsonObjectDecoder();
 		Flux<DataBuffer> source = Flux.just(stringBuffer("{\"foo\": \"foofoo\""),
 				stringBuffer(", \"bar\": \"barbar\"}"));
 		Flux<String> output =
@@ -57,7 +56,7 @@ public class JsonObjectDecoderTests extends AbstractAllocatingTestCase {
 
 	@Test
 	public void decodeSingleChunkToArray() throws InterruptedException {
-		JsonObjectDecoder decoder = new JsonObjectDecoder(allocator);
+		JsonObjectDecoder decoder = new JsonObjectDecoder();
 		Flux<DataBuffer> source = Flux.just(stringBuffer(
 				"[{\"foo\": \"foofoo\", \"bar\": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"));
 		Flux<String> output =
@@ -70,7 +69,7 @@ public class JsonObjectDecoderTests extends AbstractAllocatingTestCase {
 
 	@Test
 	public void decodeMultipleChunksToArray() throws InterruptedException {
-		JsonObjectDecoder decoder = new JsonObjectDecoder(allocator);
+		JsonObjectDecoder decoder = new JsonObjectDecoder();
 		Flux<DataBuffer> source =
 				Flux.just(stringBuffer("[{\"foo\": \"foofoo\", \"bar\""), stringBuffer(
 						": \"barbar\"},{\"foo\": \"foofoofoo\", \"bar\": \"barbarbar\"}]"));
