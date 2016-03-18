@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.server.reactive;
 
 import java.util.function.Supplier;
@@ -22,6 +23,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -40,6 +43,8 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 	private MultiValueMap<String, ResponseCookie> cookies = new LinkedMultiValueMap<>();
 
 	private Publisher<DataBuffer> body;
+
+	private DataBufferAllocator allocator = new DefaultDataBufferAllocator();
 
 
 	@Override
@@ -78,6 +83,11 @@ public class MockServerHttpResponse implements ServerHttpResponse {
 	@Override
 	public Mono<Void> setComplete() {
 		return Mono.empty();
+	}
+
+	@Override
+	public DataBufferAllocator allocator() {
+		return this.allocator;
 	}
 
 }

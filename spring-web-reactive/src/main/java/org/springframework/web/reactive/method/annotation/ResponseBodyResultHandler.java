@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
@@ -192,7 +193,10 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 			if (encoder != null) {
 				ServerHttpResponse response = exchange.getResponse();
 				response.getHeaders().setContentType(selectedMediaType);
-				return response.setBody(encoder.encode((Publisher) publisher, elementType, selectedMediaType));
+				DataBufferAllocator allocator = response.allocator();
+				return response.setBody(
+						encoder.encode((Publisher) publisher, allocator, elementType,
+								selectedMediaType));
 			}
 		}
 

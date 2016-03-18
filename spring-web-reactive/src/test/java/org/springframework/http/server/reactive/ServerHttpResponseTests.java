@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.server.reactive;
 
 import java.nio.ByteBuffer;
@@ -31,10 +32,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 
 /**
  * @author Rossen Stoyanchev
@@ -147,6 +145,9 @@ public class ServerHttpResponseTests {
 
 		private final List<DataBuffer> content = new ArrayList<>();
 
+		public TestServerHttpResponse() {
+			super(new DefaultDataBufferAllocator());
+		}
 
 		@Override
 		public void setStatusCode(HttpStatus status) {

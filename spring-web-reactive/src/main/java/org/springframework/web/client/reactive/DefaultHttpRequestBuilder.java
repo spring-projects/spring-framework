@@ -30,6 +30,7 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.Encoder;
+import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -146,7 +147,10 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
 			Optional<Encoder<?>> messageEncoder = resolveEncoder(requestBodyType, mediaType);
 
 			if (messageEncoder.isPresent()) {
-				request.setBody(messageEncoder.get().encode(this.contentPublisher, requestBodyType, mediaType));
+				DataBufferAllocator allocator = request.allocator();
+				request.setBody(messageEncoder.get()
+						.encode(this.contentPublisher, allocator, requestBodyType,
+								mediaType));
 			}
 			else {
 				// TODO: wrap with client exception?

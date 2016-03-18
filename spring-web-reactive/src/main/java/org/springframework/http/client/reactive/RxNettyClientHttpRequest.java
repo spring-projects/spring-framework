@@ -17,7 +17,6 @@
 package org.springframework.http.client.reactive;
 
 import java.net.URI;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +31,7 @@ import reactor.core.publisher.Mono;
 import rx.Observable;
 
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.core.io.buffer.NettyDataBufferAllocator;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
@@ -58,6 +58,11 @@ public class RxNettyClientHttpRequest extends AbstractClientHttpRequest {
 		this.httpMethod = httpMethod;
 		this.uri = uri;
 		this.allocator = allocator;
+	}
+
+	@Override
+	public DataBufferAllocator allocator() {
+		return this.allocator;
 	}
 
 	/**

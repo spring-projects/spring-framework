@@ -22,6 +22,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferAllocator;
 
 /**
  * A "reactive" HTTP output message that accepts output as a {@link Publisher}.
@@ -47,5 +48,12 @@ public interface ReactiveHttpOutputMessage extends HttpMessage {
 	 * @return a publisher that indicates completion or error.
 	 */
 	Mono<Void> setBody(Publisher<DataBuffer> body);
+
+	/**
+	 * Returns a {@link DataBufferAllocator} that can be used for creating the body.
+	 * @return a buffer allocator
+	 * @see #setBody(Publisher)
+	 */
+	DataBufferAllocator allocator();
 
 }

@@ -62,6 +62,11 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 	}
 
 	@Override
+	public DataBufferAllocator allocator() {
+		return this.allocator;
+	}
+
+	@Override
 	public HttpMethod getMethod() {
 		return this.httpMethod;
 	}

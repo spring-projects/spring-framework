@@ -379,9 +379,8 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@Bean
 		public ResponseBodyResultHandler responseBodyResultHandler() {
-			List<Encoder<?>> encoders = Arrays.asList(
-					new ByteBufferEncoder(this.allocator), new StringEncoder(this.allocator),
-					new JacksonJsonEncoder(this.allocator, new JsonObjectEncoder(this.allocator)));
+			List<Encoder<?>> encoders = Arrays.asList(new ByteBufferEncoder(),
+					new StringEncoder(), new JacksonJsonEncoder(new JsonObjectEncoder()));
 			ResponseBodyResultHandler resultHandler = new ResponseBodyResultHandler(encoders, conversionService());
 			resultHandler.setOrder(1);
 			return resultHandler;
@@ -458,8 +457,9 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@RequestMapping("/raw")
 		public Publisher<ByteBuffer> rawResponseBody() {
-			JacksonJsonEncoder encoder = new JacksonJsonEncoder(new DefaultDataBufferAllocator());
-			return encoder.encode(Mono.just(new Person("Robert")),
+			DataBufferAllocator allocator = new DefaultDataBufferAllocator();
+			JacksonJsonEncoder encoder = new JacksonJsonEncoder();
+			return encoder.encode(Mono.just(new Person("Robert")), allocator,
 					ResolvableType.forClass(Person.class), MediaType.APPLICATION_JSON).map(DataBuffer::asByteBuffer);
 		}
 

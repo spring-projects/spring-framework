@@ -34,6 +34,7 @@ import org.reactivestreams.Subscription;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseCookie;
@@ -53,7 +54,8 @@ public class ServletServerHttpResponse extends AbstractServerHttpResponse {
 	private final ResponseBodySubscriber responseBodySubscriber;
 
 	public ServletServerHttpResponse(ServletAsyncContextSynchronizer synchronizer,
-			int bufferSize) throws IOException {
+			int bufferSize, DataBufferAllocator allocator) throws IOException {
+		super(allocator);
 		Assert.notNull(synchronizer, "'synchronizer' must not be null");
 
 		this.response = (HttpServletResponse) synchronizer.getResponse();
@@ -61,7 +63,6 @@ public class ServletServerHttpResponse extends AbstractServerHttpResponse {
 				new ResponseBodySubscriber(synchronizer, bufferSize);
 		this.response.getOutputStream().setWriteListener(responseBodySubscriber);
 	}
-
 
 	public HttpServletResponse getServletResponse() {
 		return this.response;

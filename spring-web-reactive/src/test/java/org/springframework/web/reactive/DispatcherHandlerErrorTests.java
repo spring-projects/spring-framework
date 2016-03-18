@@ -232,8 +232,7 @@ public class DispatcherHandlerErrorTests {
 
 		@Bean
 		public ResponseBodyResultHandler resultHandler() {
-			List<Encoder<?>> encoders = Collections
-					.singletonList(new StringEncoder(new DefaultDataBufferAllocator()));
+			List<Encoder<?>> encoders = Collections.singletonList(new StringEncoder());
 			return new ResponseBodyResultHandler(encoders, new DefaultConversionService());
 		}
 

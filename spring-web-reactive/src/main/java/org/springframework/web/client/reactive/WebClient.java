@@ -86,8 +86,8 @@ public final class WebClient {
 	public WebClient(ClientHttpRequestFactory requestFactory) {
 		this.requestFactory = requestFactory;
 		DataBufferAllocator allocator = new DefaultDataBufferAllocator();
-		this.messageEncoders = Arrays.asList(new ByteBufferEncoder(allocator), new StringEncoder(allocator),
-				new JacksonJsonEncoder(allocator));
+		this.messageEncoders = Arrays.asList(new ByteBufferEncoder(), new StringEncoder(),
+				new JacksonJsonEncoder());
 		this.messageDecoders = Arrays.asList(new ByteBufferDecoder(), new StringDecoder(allocator),
 				new JacksonJsonDecoder(new JsonObjectDecoder()));
 	}

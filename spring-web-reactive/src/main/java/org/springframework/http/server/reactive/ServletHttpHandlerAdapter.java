@@ -82,7 +82,8 @@ public class ServletHttpHandlerAdapter extends HttpServlet {
 						this.bufferSize);
 
 		ServletServerHttpResponse response =
-				new ServletServerHttpResponse(synchronizer, this.bufferSize);
+				new ServletServerHttpResponse(synchronizer, this.bufferSize,
+						this.allocator);
 
 		HandlerResultSubscriber resultSubscriber =
 				new HandlerResultSubscriber(synchronizer);

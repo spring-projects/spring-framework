@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.server.reactive;
 
 import reactor.core.publisher.Mono;
@@ -44,7 +45,8 @@ public class ReactorHttpHandlerAdapter
 	public Mono<Void> apply(HttpChannel<Buffer, Buffer> channel) {
 		ReactorServerHttpRequest adaptedRequest =
 				new ReactorServerHttpRequest(channel, allocator);
-		ReactorServerHttpResponse adaptedResponse = new ReactorServerHttpResponse(channel);
+		ReactorServerHttpResponse adaptedResponse =
+				new ReactorServerHttpResponse(channel, allocator);
 		return this.httpHandler.handle(adaptedRequest, adaptedResponse);
 	}
 

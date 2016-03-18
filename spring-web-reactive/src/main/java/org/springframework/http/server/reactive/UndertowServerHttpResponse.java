@@ -28,6 +28,7 @@ import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.util.Assert;
@@ -44,10 +45,10 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse {
 
 	private final Function<Publisher<DataBuffer>, Mono<Void>> responseBodyWriter;
 
-
 	public UndertowServerHttpResponse(HttpServerExchange exchange,
-			Function<Publisher<DataBuffer>, Mono<Void>> responseBodyWriter) {
-
+			Function<Publisher<DataBuffer>, Mono<Void>> responseBodyWriter,
+			DataBufferAllocator allocator) {
+		super(allocator);
 		Assert.notNull(exchange, "'exchange' is required.");
 		Assert.notNull(responseBodyWriter, "'responseBodyWriter' must not be null");
 		this.exchange = exchange;

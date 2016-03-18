@@ -13,17 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.server.reactive;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.util.Assert;
@@ -39,32 +41,48 @@ import org.springframework.util.MultiValueMap;
  */
 public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
+	private static final int STATE_NEW = 1;
+
+	private static final int STATE_COMMITTING = 2;
+
+	private static final int STATE_COMMITTED = 3;
+
 	private final HttpHeaders headers;
 
 	private final MultiValueMap<String, ResponseCookie> cookies;
 
-	private AtomicReference<State> state = new AtomicReference<>(State.NEW);
+	private final AtomicInteger state = new AtomicInteger(STATE_NEW);
 
 	private final List<Supplier<? extends Mono<Void>>> beforeCommitActions = new ArrayList<>(4);
 
+	private final DataBufferAllocator allocator;
 
-	protected AbstractServerHttpResponse() {
+	public AbstractServerHttpResponse(DataBufferAllocator allocator) {
+		Assert.notNull(allocator, "'allocator' must not be null");
+
+		this.allocator = allocator;
 		this.headers = new HttpHeaders();
 		this.cookies = new LinkedMultiValueMap<String, ResponseCookie>();
 	}
 
+	@Override
+	public final DataBufferAllocator allocator() {
+		return this.allocator;
+	}
 
 	@Override
 	public HttpHeaders getHeaders() {
-		if (State.COMITTED.equals(this.state.get())) {
+		if (STATE_COMMITTED == this.state.get()) {
 			return HttpHeaders.readOnlyHttpHeaders(this.headers);
 		}
-		return this.headers;
+		else {
+			return this.headers;
+		}
 	}
 
 	@Override
 	public MultiValueMap<String, ResponseCookie> getCookies() {
-		if (State.COMITTED.equals(this.state.get())) {
+		if (STATE_COMMITTED == this.state.get()) {
 			return CollectionUtils.unmodifiableMultiValueMap(this.cookies);
 		}
 		return this.cookies;
@@ -78,16 +96,16 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	private Mono<Void> applyBeforeCommit() {
 		Mono<Void> mono = Mono.empty();
-		if (this.state.compareAndSet(State.NEW, State.COMMITTING)) {
+		if (this.state.compareAndSet(STATE_NEW, STATE_COMMITTING)) {
 			for (Supplier<? extends Mono<Void>> action : this.beforeCommitActions) {
-				mono = mono.after(() -> action.get());
+				mono = mono.after(action);
 			}
 			mono = mono.otherwise(ex -> {
 				// Ignore errors from beforeCommit actions
 				return Mono.empty();
 			});
 			mono = mono.after(() -> {
-				this.state.set(State.COMITTED);
+				this.state.set(STATE_COMMITTED);
 				writeHeaders();
 				writeCookies();
 				return Mono.empty();
@@ -124,8 +142,5 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	public Mono<Void> setComplete() {
 		return applyBeforeCommit();
 	}
-
-
-	private enum State { NEW, COMMITTING, COMITTED }
 
 }

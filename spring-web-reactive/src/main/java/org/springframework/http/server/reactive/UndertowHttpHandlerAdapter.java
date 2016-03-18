@@ -57,6 +57,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 	private final HttpHandler delegate;
 
+	// TODO: use UndertowDBA when introduced
 	private final DataBufferAllocator allocator;
 
 	public UndertowHttpHandlerAdapter(HttpHandler delegate,
@@ -76,7 +77,9 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 		ResponseBodySubscriber responseBodySubscriber = new ResponseBodySubscriber(exchange);
 		ServerHttpResponse response = new UndertowServerHttpResponse(exchange,
-				publisher -> Mono.from(subscriber -> publisher.subscribe(responseBodySubscriber)));
+				publisher -> Mono
+						.from(subscriber -> publisher.subscribe(responseBodySubscriber)),
+				allocator);
 
 		exchange.dispatch();
 

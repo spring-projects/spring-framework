@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.http.server.reactive;
 
 import java.time.Duration;
@@ -27,6 +28,7 @@ import reactor.io.netty.http.model.Cookie;
 import reactor.io.netty.http.model.Status;
 
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.util.Assert;
@@ -41,8 +43,9 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse {
 
 	private final HttpChannel<?, Buffer> channel;
 
-
-	public ReactorServerHttpResponse(HttpChannel<?, Buffer> response) {
+	public ReactorServerHttpResponse(HttpChannel<?, Buffer> response,
+			DataBufferAllocator allocator) {
+		super(allocator);
 		Assert.notNull("'response' must not be null.");
 		this.channel = response;
 	}
