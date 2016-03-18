@@ -19,6 +19,7 @@ package org.springframework.test.web.servlet.htmlunit;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebConnection;
 
 import org.springframework.test.web.servlet.MockMvc;
@@ -145,10 +146,46 @@ public abstract class MockMvcWebConnectionBuilderSupport<T extends MockMvcWebCon
 	 * @see #alwaysUseMockMvc()
 	 * @see #useMockMvc(WebRequestMatcher...)
 	 * @see #useMockMvcForHosts(String...)
+	 * @deprecated Use {@link #createConnection(WebClient)} instead
 	 */
+	@Deprecated
 	protected final WebConnection createConnection(WebConnection defaultConnection) {
 		Assert.notNull(defaultConnection, "Default WebConnection must not be null");
-		MockMvcWebConnection mockMvcWebConnection = new MockMvcWebConnection(this.mockMvc, this.contextPath);
+		return createConnection(new WebClient(), defaultConnection);
+	}
+
+	/**
+	 * Create a new {@link WebConnection} that will use a {@link MockMvc}
+	 * instance if one of the specified {@link WebRequestMatcher} instances
+	 * matches.
+	 * @param webClient the WebClient to use if none of
+	 * the specified {@code WebRequestMatcher} instances matches; never {@code null}
+	 * @return a new {@code WebConnection} that will use a {@code MockMvc}
+	 * instance if one of the specified {@code WebRequestMatcher} matches
+	 * @see #alwaysUseMockMvc()
+	 * @see #useMockMvc(WebRequestMatcher...)
+	 * @see #useMockMvcForHosts(String...)
+	 */
+	protected final WebConnection createConnection(WebClient webClient) {
+		Assert.notNull(webClient, "WebClient must not be null");
+		return createConnection(webClient, webClient.getWebConnection());
+	}
+
+	/**
+	 * Create a new {@link WebConnection} that will use a {@link MockMvc}
+	 * instance if one of the specified {@link WebRequestMatcher} instances
+	 * matches.
+	 * @param webClient the WebClient to use if none of
+	 * the specified {@code WebRequestMatcher} instances matches; never {@code null}
+	 * @param defaultConnection the WebConnection to use
+	 * @return a new {@code WebConnection} that will use a {@code MockMvc}
+	 * instance if one of the specified {@code WebRequestMatcher} matches
+	 * @see #alwaysUseMockMvc()
+	 * @see #useMockMvc(WebRequestMatcher...)
+	 * @see #useMockMvcForHosts(String...)
+	 */
+	private WebConnection createConnection(WebClient webClient, WebConnection defaultConnection) {
+		MockMvcWebConnection mockMvcWebConnection = new MockMvcWebConnection(this.mockMvc, webClient, this.contextPath);
 
 		if (this.alwaysUseMockMvc) {
 			return mockMvcWebConnection;
@@ -162,5 +199,4 @@ public abstract class MockMvcWebConnectionBuilderSupport<T extends MockMvcWebCon
 
 		return new DelegatingWebConnection(defaultConnection, delegates);
 	}
-
 }

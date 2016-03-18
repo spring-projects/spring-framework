@@ -129,7 +129,7 @@ public class MockMvcHtmlUnitDriverBuilder extends MockMvcWebConnectionBuilderSup
 	public MockMvcHtmlUnitDriverBuilder withDelegate(WebConnectionHtmlUnitDriver driver) {
 		Assert.notNull(driver, "HtmlUnitDriver must not be null");
 		driver.setJavascriptEnabled(this.javascriptEnabled);
-		driver.setWebConnection(createConnection(driver.getWebConnection()));
+		driver.setWebConnection(createConnection(driver.getWebClient()));
 		this.driver = driver;
 		return this;
 	}

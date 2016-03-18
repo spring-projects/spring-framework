@@ -41,7 +41,6 @@ public class WebConnectionHtmlUnitDriver extends HtmlUnitDriver {
 
 	private WebClient webClient;
 
-
 	public WebConnectionHtmlUnitDriver(BrowserVersion browserVersion) {
 		super(browserVersion);
 	}
@@ -107,4 +106,11 @@ public class WebConnectionHtmlUnitDriver extends HtmlUnitDriver {
 		this.webClient.setWebConnection(webConnection);
 	}
 
+	/**
+	 * Gets the current {@link WebClient}
+	 * @return the current {@link WebClient}
+	 */
+	public WebClient getWebClient() {
+		return this.webClient;
+	}
 }

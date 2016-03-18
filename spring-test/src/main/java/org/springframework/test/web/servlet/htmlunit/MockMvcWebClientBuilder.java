@@ -106,7 +106,7 @@ public class MockMvcWebClientBuilder extends MockMvcWebConnectionBuilderSupport<
 	 */
 	public MockMvcWebClientBuilder withDelegate(WebClient webClient) {
 		Assert.notNull(webClient, "WebClient must not be null");
-		webClient.setWebConnection(createConnection(webClient.getWebConnection()));
+		webClient.setWebConnection(createConnection(webClient));
 		this.webClient = webClient;
 		return this;
 	}

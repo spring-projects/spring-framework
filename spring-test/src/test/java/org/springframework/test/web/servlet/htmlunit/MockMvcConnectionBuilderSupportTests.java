@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
+import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebConnection;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
@@ -45,6 +46,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Integration tests for {@link MockMvcWebConnectionBuilderSupport}.
@@ -55,10 +57,12 @@ import static org.mockito.Mockito.mock;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @WebAppConfiguration
-@SuppressWarnings("rawtypes")
+@SuppressWarnings({"rawtypes","deprecation"})
 public class MockMvcConnectionBuilderSupportTests {
 
-	private final WebConnection delegateConnection = mock(WebConnection.class);
+	private WebConnection delegateConnection;
+
+	private WebClient webClient;
 
 	@Autowired
 	private WebApplicationContext wac;
@@ -69,10 +73,16 @@ public class MockMvcConnectionBuilderSupportTests {
 
 	@Before
 	public void setup() {
+		delegateConnection = mock(WebConnection.class);
+
+		webClient = mock(WebClient.class);
+		when(webClient.getWebConnection()).thenReturn(delegateConnection);
+
+
 		mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
 
 		connection = new MockMvcWebConnectionBuilderSupport(mockMvc){}
-				.createConnection(delegateConnection);
+				.createConnection(webClient);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -86,9 +96,60 @@ public class MockMvcConnectionBuilderSupportTests {
 	}
 
 	@Test
-	public void context() throws Exception {
+	public void contextDeprecated() throws Exception {
+		connection = new MockMvcWebConnectionBuilderSupport(wac) {}
+				.createConnection(webClient);
+
+		assertMvcProcessed("http://localhost/");
+		assertDelegateProcessed("http://example.com/");
+	}
+
+	@Test
+	public void mockMvcDeprecated() throws Exception {
+		assertMvcProcessed("http://localhost/");
+		assertDelegateProcessed("http://example.com/");
+	}
+
+	@Test
+	public void mockMvcExampleDotComDeprecated() throws Exception {
+		connection = new MockMvcWebConnectionBuilderSupport(wac) {}
+				.useMockMvcForHosts("example.com")
+				.createConnection(delegateConnection);
+
+		assertMvcProcessed("http://localhost/");
+		assertMvcProcessed("http://example.com/");
+		assertDelegateProcessed("http://other.com/");
+	}
+
+	@Test
+	public void mockMvcAlwaysUseMockMvcDeprecated() throws Exception {
+		connection = new MockMvcWebConnectionBuilderSupport(wac) {}
+				.alwaysUseMockMvc()
+				.createConnection(delegateConnection);
+
+		assertMvcProcessed("http://other.com/");
+	}
+
+	@Test
+	public void defaultContextPathEmptyDeprecated() throws Exception {
 		connection = new MockMvcWebConnectionBuilderSupport(wac) {}
 				.createConnection(delegateConnection);
+
+		assertThat(getWebResponse("http://localhost/abc").getContentAsString(), equalTo(""));
+	}
+
+	@Test
+	public void defaultContextPathCustomDeprecated() throws Exception {
+		connection = new MockMvcWebConnectionBuilderSupport(wac) {}
+				.contextPath("/abc").createConnection(delegateConnection);
+
+		assertThat(getWebResponse("http://localhost/abc/def").getContentAsString(), equalTo("/abc"));
+	}
+
+	@Test
+	public void context() throws Exception {
+		connection = new MockMvcWebConnectionBuilderSupport(wac) {}
+				.createConnection(webClient);
 
 		assertMvcProcessed("http://localhost/");
 		assertDelegateProcessed("http://example.com/");
@@ -104,7 +165,7 @@ public class MockMvcConnectionBuilderSupportTests {
 	public void mockMvcExampleDotCom() throws Exception {
 		connection = new MockMvcWebConnectionBuilderSupport(wac) {}
 				.useMockMvcForHosts("example.com")
-				.createConnection(delegateConnection);
+				.createConnection(webClient);
 
 		assertMvcProcessed("http://localhost/");
 		assertMvcProcessed("http://example.com/");
@@ -115,7 +176,7 @@ public class MockMvcConnectionBuilderSupportTests {
 	public void mockMvcAlwaysUseMockMvc() throws Exception {
 		connection = new MockMvcWebConnectionBuilderSupport(wac) {}
 				.alwaysUseMockMvc()
-				.createConnection(delegateConnection);
+				.createConnection(webClient);
 
 		assertMvcProcessed("http://other.com/");
 	}
@@ -123,7 +184,7 @@ public class MockMvcConnectionBuilderSupportTests {
 	@Test
 	public void defaultContextPathEmpty() throws Exception {
 		connection = new MockMvcWebConnectionBuilderSupport(wac) {}
-				.createConnection(delegateConnection);
+				.createConnection(webClient);
 
 		assertThat(getWebResponse("http://localhost/abc").getContentAsString(), equalTo(""));
 	}
@@ -131,7 +192,7 @@ public class MockMvcConnectionBuilderSupportTests {
 	@Test
 	public void defaultContextPathCustom() throws Exception {
 		connection = new MockMvcWebConnectionBuilderSupport(wac) {}
-				.contextPath("/abc").createConnection(delegateConnection);
+				.contextPath("/abc").createConnection(webClient);
 
 		assertThat(getWebResponse("http://localhost/abc/def").getContentAsString(), equalTo("/abc"));
 	}
