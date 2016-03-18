@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -328,8 +328,6 @@ public class NumberUtilsTests {
 		assertEquals(Integer.valueOf(Integer.MIN_VALUE), NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(Integer.MAX_VALUE + 1), Integer.class));
 		assertEquals(Integer.valueOf(Integer.MIN_VALUE), NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(Integer.MIN_VALUE), Integer.class));
 		assertEquals(Integer.valueOf(Integer.MAX_VALUE), NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(Integer.MIN_VALUE - 1), Integer.class));
-		assertToNumberOverflow(BigInteger.valueOf(Integer.MAX_VALUE).add(BigInteger.ONE), Integer.class);
-		assertToNumberOverflow(BigInteger.valueOf(Integer.MIN_VALUE).subtract(BigInteger.ONE), Integer.class);
 
 		assertEquals(Integer.valueOf(Integer.valueOf(-1)), NumberUtils.convertNumberToTargetClass(Long.valueOf(-1), Integer.class));
 		assertEquals(Integer.valueOf(Integer.valueOf(0)), NumberUtils.convertNumberToTargetClass(Long.valueOf(0), Integer.class));
@@ -338,8 +336,6 @@ public class NumberUtilsTests {
 		assertEquals(Integer.valueOf(Integer.MIN_VALUE), NumberUtils.convertNumberToTargetClass(Long.valueOf(Integer.MAX_VALUE + 1), Integer.class));
 		assertEquals(Integer.valueOf(Integer.MIN_VALUE), NumberUtils.convertNumberToTargetClass(Long.valueOf(Integer.MIN_VALUE), Integer.class));
 		assertEquals(Integer.valueOf(Integer.MAX_VALUE), NumberUtils.convertNumberToTargetClass(Long.valueOf(Integer.MIN_VALUE - 1), Integer.class));
-		assertToNumberOverflow(Long.valueOf(Long.MAX_VALUE + 1), Integer.class);
-		assertToNumberOverflow(Long.valueOf(Long.MIN_VALUE - 1), Integer.class);
 
 		assertEquals(Integer.valueOf(Integer.valueOf(-1)), NumberUtils.convertNumberToTargetClass(Integer.valueOf(-1), Integer.class));
 		assertEquals(Integer.valueOf(Integer.valueOf(0)), NumberUtils.convertNumberToTargetClass(Integer.valueOf(0), Integer.class));
@@ -364,6 +360,12 @@ public class NumberUtilsTests {
 		assertEquals(Integer.valueOf(Byte.MIN_VALUE), NumberUtils.convertNumberToTargetClass(Byte.valueOf((byte) (Byte.MAX_VALUE + 1)), Integer.class));
 		assertEquals(Integer.valueOf(Byte.MIN_VALUE), NumberUtils.convertNumberToTargetClass(Byte.valueOf(Byte.MIN_VALUE), Integer.class));
 		assertEquals(Integer.valueOf(Byte.MAX_VALUE), NumberUtils.convertNumberToTargetClass(Byte.valueOf((byte) (Byte.MIN_VALUE - 1)), Integer.class));
+
+		assertToNumberOverflow(Long.valueOf(Long.MAX_VALUE + 1), Integer.class);
+		assertToNumberOverflow(Long.valueOf(Long.MIN_VALUE - 1), Integer.class);
+		assertToNumberOverflow(BigInteger.valueOf(Integer.MAX_VALUE).add(BigInteger.ONE), Integer.class);
+		assertToNumberOverflow(BigInteger.valueOf(Integer.MIN_VALUE).subtract(BigInteger.ONE), Integer.class);
+		assertToNumberOverflow(new BigDecimal("18446744073709551611"), Integer.class);
 	}
 
 	@Test
@@ -375,9 +377,6 @@ public class NumberUtilsTests {
 		assertEquals(Long.valueOf(Long.MIN_VALUE), NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(Long.MAX_VALUE + 1), Long.class));
 		assertEquals(Long.valueOf(Long.MIN_VALUE), NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(Long.MIN_VALUE), Long.class));
 		assertEquals(Long.valueOf(Long.MAX_VALUE), NumberUtils.convertNumberToTargetClass(BigInteger.valueOf(Long.MIN_VALUE - 1), Long.class));
-
-		assertToNumberOverflow(BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE), Long.class);
-		assertToNumberOverflow(BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.ONE), Long.class);
 
 		assertEquals(Long.valueOf(Long.valueOf(-1)), NumberUtils.convertNumberToTargetClass(Long.valueOf(-1), Long.class));
 		assertEquals(Long.valueOf(Long.valueOf(0)), NumberUtils.convertNumberToTargetClass(Long.valueOf(0), Long.class));
@@ -410,6 +409,10 @@ public class NumberUtilsTests {
 		assertEquals(Long.valueOf(Byte.MIN_VALUE), NumberUtils.convertNumberToTargetClass(Byte.valueOf((byte) (Byte.MAX_VALUE + 1)), Long.class));
 		assertEquals(Long.valueOf(Byte.MIN_VALUE), NumberUtils.convertNumberToTargetClass(Byte.valueOf(Byte.MIN_VALUE), Long.class));
 		assertEquals(Long.valueOf(Byte.MAX_VALUE), NumberUtils.convertNumberToTargetClass(Byte.valueOf((byte) (Byte.MIN_VALUE - 1)), Long.class));
+
+		assertToNumberOverflow(BigInteger.valueOf(Long.MAX_VALUE).add(BigInteger.ONE), Long.class);
+		assertToNumberOverflow(BigInteger.valueOf(Long.MIN_VALUE).subtract(BigInteger.ONE), Long.class);
+		assertToNumberOverflow(new BigDecimal("18446744073709551611"), Long.class);
 	}
 
 
