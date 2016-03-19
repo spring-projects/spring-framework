@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package org.springframework.scheduling.annotation;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -36,8 +36,12 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.both;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.assertThat;
 
 /**
  * Tests use of @EnableScheduling on @Configuration classes.
@@ -52,14 +56,10 @@ public class EnableSchedulingTests {
 	public final ExpectedException exception = ExpectedException.none();
 
 
-	@Before
-	public void setUp() {
-		Assume.group(TestGroup.PERFORMANCE);
-	}
-
-
 	@Test
 	public void withFixedRateTask() throws InterruptedException {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(FixedRateTaskConfig.class);
 
 		Thread.sleep(100);
@@ -86,6 +86,8 @@ public class EnableSchedulingTests {
 
 	@Test
 	public void withSubclass() throws InterruptedException {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(FixedRateTaskConfigSubclass.class);
 
 		Thread.sleep(100);
@@ -101,6 +103,8 @@ public class EnableSchedulingTests {
 
 	@Test
 	public void withExplicitScheduler() throws InterruptedException {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(ExplicitSchedulerConfig.class);
 
 		Thread.sleep(100);
@@ -136,6 +140,7 @@ public class EnableSchedulingTests {
 	}
 
 
+	@Ignore("Disabled until SPR-14030 is resolved")
 	@Test
 	@SuppressWarnings("resource")
 	public void withExplicitSchedulerAmbiguity_andSchedulingEnabled() {
@@ -171,6 +176,8 @@ public class EnableSchedulingTests {
 
 	@Test
 	public void withExplicitScheduledTaskRegistrar() throws InterruptedException {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
 				ExplicitScheduledTaskRegistrarConfig.class);
 
@@ -251,6 +258,7 @@ public class EnableSchedulingTests {
 	}
 
 
+	@Ignore("Disabled until SPR-14030 is resolved")
 	@Test
 	@SuppressWarnings("resource")
 	public void withAmbiguousTaskSchedulers_andSingleTask() {
@@ -286,6 +294,8 @@ public class EnableSchedulingTests {
 
 	@Test
 	public void withAmbiguousTaskSchedulers_andSingleTask_disambiguatedByScheduledTaskRegistrarBean() throws InterruptedException {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
 				SchedulingEnabled_withAmbiguousTaskSchedulers_andSingleTask_disambiguatedByScheduledTaskRegistrar.class);
 
@@ -338,6 +348,8 @@ public class EnableSchedulingTests {
 
 	@Test
 	public void withAmbiguousTaskSchedulers_andSingleTask_disambiguatedBySchedulerNameAttribute() throws InterruptedException {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
 				SchedulingEnabled_withAmbiguousTaskSchedulers_andSingleTask_disambiguatedBySchedulerNameAttribute.class);
 
@@ -384,6 +396,8 @@ public class EnableSchedulingTests {
 
 	@Test
 	public void withTaskAddedVia_configureTasks() throws InterruptedException {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
 				SchedulingEnabled_withTaskAddedVia_configureTasks.class);
 
@@ -424,6 +438,8 @@ public class EnableSchedulingTests {
 
 	@Test
 	public void withTriggerTask() throws InterruptedException {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(TriggerTaskConfig.class);
 
 		Thread.sleep(100);
@@ -464,6 +480,8 @@ public class EnableSchedulingTests {
 
 	@Test
 	public void withInitiallyDelayedFixedRateTask() throws InterruptedException {
+		Assume.group(TestGroup.PERFORMANCE);
+
 		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
 				FixedRateTaskConfig_withInitialDelay.class);
 
