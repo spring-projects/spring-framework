@@ -1079,12 +1079,10 @@ public class AnnotatedElementUtils {
 			}
 		}
 
-		private void overrideAttributes(AnnotatedElement element, Annotation annotation, AnnotationAttributes attributes,
-				String sourceAttributeName, List<String> targetAttributeNames) {
+		private void overrideAttributes(AnnotatedElement element, Annotation annotation,
+				AnnotationAttributes attributes, String sourceAttributeName, List<String> targetAttributeNames) {
 
-			Object value = AnnotationUtils.getValue(annotation, sourceAttributeName);
-			Object adaptedValue = AnnotationUtils.adaptValue(element, value, this.classValuesAsString,
-				this.nestedAnnotationsAsMap);
+			Object adaptedValue = getAdaptedValue(element, annotation, sourceAttributeName);
 
 			for (String targetAttributeName : targetAttributeNames) {
 				attributes.put(targetAttributeName, adaptedValue);
@@ -1094,10 +1092,12 @@ public class AnnotatedElementUtils {
 		private void overrideAttribute(AnnotatedElement element, Annotation annotation, AnnotationAttributes attributes,
 				String sourceAttributeName, String targetAttributeName) {
 
+			attributes.put(targetAttributeName, getAdaptedValue(element, annotation, sourceAttributeName));
+		}
+
+		private Object getAdaptedValue(AnnotatedElement element, Annotation annotation, String sourceAttributeName) {
 			Object value = AnnotationUtils.getValue(annotation, sourceAttributeName);
-			Object adaptedValue = AnnotationUtils.adaptValue(element, value, this.classValuesAsString,
-				this.nestedAnnotationsAsMap);
-			attributes.put(targetAttributeName, adaptedValue);
+			return AnnotationUtils.adaptValue(element, value, this.classValuesAsString, this.nestedAnnotationsAsMap);
 		}
 
 	}
