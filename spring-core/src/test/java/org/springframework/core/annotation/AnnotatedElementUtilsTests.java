@@ -55,6 +55,8 @@ import static org.springframework.core.annotation.AnnotationUtilsTests.*;
  * @author Sam Brannen
  * @author Rossen Stoyanchev
  * @since 4.0.3
+ * @see AnnotationUtilsTests
+ * @see MultipleComposedAnnotationsOnSingleAnnotatedElementTests
  */
 public class AnnotatedElementUtilsTests {
 
