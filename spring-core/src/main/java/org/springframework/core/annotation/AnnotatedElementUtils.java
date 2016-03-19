@@ -1041,15 +1041,36 @@ public class AnnotatedElementUtils {
 			annotation = AnnotationUtils.synthesizeAnnotation(annotation, element);
 			Class<? extends Annotation> targetAnnotationType = attributes.annotationType();
 
+			// Track which attribute values have already been replaced so that we can short
+			// circuit the search algorithms.
+			Set<String> valuesAlreadyReplaced = new HashSet<String>();
+
 			for (Method attributeMethod : AnnotationUtils.getAttributeMethods(annotation.annotationType())) {
 				String attributeName = attributeMethod.getName();
 				String attributeOverrideName = AnnotationUtils.getAttributeOverrideName(attributeMethod, targetAnnotationType);
 
 				// Explicit annotation attribute override declared via @AliasFor
 				if (attributeOverrideName != null) {
-					if (attributes.containsKey(attributeOverrideName)) {
-						overrideAttribute(element, annotation, attributes, attributeName, attributeOverrideName);
+					if (valuesAlreadyReplaced.contains(attributeOverrideName)) {
+						continue;
 					}
+
+					List<String> targetAttributeNames = new ArrayList<String>();
+					targetAttributeNames.add(attributeOverrideName);
+					valuesAlreadyReplaced.add(attributeOverrideName);
+
+					// Ensure all aliased attributes in the target annotation are also overridden. (SPR-14069)
+					List<String> aliases = AnnotationUtils.getAttributeAliasMap(targetAnnotationType).get(attributeOverrideName);
+					if (aliases != null) {
+						for (String alias : aliases) {
+							if (!valuesAlreadyReplaced.contains(alias)) {
+								targetAttributeNames.add(alias);
+								valuesAlreadyReplaced.add(alias);
+							}
+						}
+					}
+
+					overrideAttributes(element, annotation, attributes, attributeName, targetAttributeNames);
 				}
 				// Implicit annotation attribute override based on convention
 				else if (!AnnotationUtils.VALUE.equals(attributeName) && attributes.containsKey(attributeName)) {
@@ -1058,14 +1079,27 @@ public class AnnotatedElementUtils {
 			}
 		}
 
-		private void overrideAttribute(AnnotatedElement element, Annotation annotation,
-				AnnotationAttributes attributes, String sourceAttributeName, String targetAttributeName) {
+		private void overrideAttributes(AnnotatedElement element, Annotation annotation, AnnotationAttributes attributes,
+				String sourceAttributeName, List<String> targetAttributeNames) {
 
 			Object value = AnnotationUtils.getValue(annotation, sourceAttributeName);
-			Object adaptedValue = AnnotationUtils.adaptValue(
-					element, value, this.classValuesAsString, this.nestedAnnotationsAsMap);
+			Object adaptedValue = AnnotationUtils.adaptValue(element, value, this.classValuesAsString,
+				this.nestedAnnotationsAsMap);
+
+			for (String targetAttributeName : targetAttributeNames) {
+				attributes.put(targetAttributeName, adaptedValue);
+			}
+		}
+
+		private void overrideAttribute(AnnotatedElement element, Annotation annotation, AnnotationAttributes attributes,
+				String sourceAttributeName, String targetAttributeName) {
+
+			Object value = AnnotationUtils.getValue(annotation, sourceAttributeName);
+			Object adaptedValue = AnnotationUtils.adaptValue(element, value, this.classValuesAsString,
+				this.nestedAnnotationsAsMap);
 			attributes.put(targetAttributeName, adaptedValue);
 		}
+
 	}
 
 }

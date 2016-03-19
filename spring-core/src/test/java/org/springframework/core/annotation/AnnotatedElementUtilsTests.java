@@ -442,15 +442,15 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	@Test
-	public void getMergedAnnotationAttributesWithInvalidAliasedComposedAnnotation() {
-		Class<?> element = InvalidAliasedComposedContextConfigClass.class;
-		exception.expect(AnnotationConfigurationException.class);
-		exception.expectMessage(either(containsString("attribute 'value' and its alias 'locations'")).or(
-				containsString("attribute 'locations' and its alias 'value'")));
-		exception.expectMessage(either(containsString("values of [{duplicateDeclaration}] and [{test.xml}]")).or(
-				containsString("values of [{test.xml}] and [{duplicateDeclaration}]")));
-		exception.expectMessage(containsString("but only one is permitted"));
-		getMergedAnnotationAttributes(element, ContextConfig.class);
+	public void getMergedAnnotationAttributesWithShadowedAliasComposedAnnotation() {
+		Class<?> element = ShadowedAliasComposedContextConfigClass.class;
+		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, ContextConfig.class);
+
+		String[] expected = asArray("test.xml");
+
+		assertNotNull("Should find @ContextConfig on " + element.getSimpleName(), attributes);
+		assertArrayEquals("locations", expected, attributes.getStringArray("locations"));
+		assertArrayEquals("value", expected, attributes.getStringArray("value"));
 	}
 
 	@Test
@@ -891,9 +891,8 @@ public class AnnotatedElementUtilsTests {
 		@AliasFor(annotation = ContextConfig.class)
 		String[] locations() default {};
 
-		// TODO [SPR-14069] Determine why transitive implicit alias does not work
-		// hoping to be able to omit: attribute = "locations"
-		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
+		// intentionally omitted: attribute = "locations" (SPR-14069)
+		@AliasFor(annotation = ContextConfig.class)
 		String[] value() default {};
 	}
 
@@ -947,14 +946,16 @@ public class AnnotatedElementUtilsTests {
 	}
 
 	/**
-	 * Invalid because the configuration declares a value for 'value' and
-	 * requires a value for the aliased 'locations'. So we likely end up with
-	 * both 'value' and 'locations' being present in {@link AnnotationAttributes}
-	 * but with different values, which violates the contract of {@code @AliasFor}.
+	 * Although the configuration declares an explicit value for 'value' and
+	 * requires a value for the aliased 'locations', this does not result in
+	 * an error since 'locations' effectively <em>shadows</em> the 'value'
+	 * attribute (which cannot be set via the composed annotation anyway).
+	 *
+	 * If 'value' were not shadowed, such a declaration would not make sense.
 	 */
 	@ContextConfig(value = "duplicateDeclaration")
 	@Retention(RetentionPolicy.RUNTIME)
-	@interface InvalidAliasedComposedContextConfig {
+	@interface ShadowedAliasComposedContextConfig {
 
 		@AliasFor(annotation = ContextConfig.class, attribute = "locations")
 		String[] xmlConfigFiles();
@@ -1217,8 +1218,8 @@ public class AnnotatedElementUtilsTests {
 	static class ComposedImplicitAliasesContextConfigClass {
 	}
 
-	@InvalidAliasedComposedContextConfig(xmlConfigFiles = "test.xml")
-	static class InvalidAliasedComposedContextConfigClass {
+	@ShadowedAliasComposedContextConfig(xmlConfigFiles = "test.xml")
+	static class ShadowedAliasComposedContextConfigClass {
 	}
 
 	@AliasedComposedContextConfigAndTestPropSource(xmlConfigFiles = "test.xml")
