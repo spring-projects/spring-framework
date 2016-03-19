@@ -75,7 +75,7 @@ public class ToStringCreatorTests {
 				stringy.toString());
 	}
 
-	private Map getMap() {
+	private static Map getMap() {
 		Map map = new LinkedHashMap(3);
 		map.put("Keri", "Softball");
 		map.put("Scot", "Fishing");

@@ -86,7 +86,7 @@ public final class SimpleAsyncTaskExecutorTests {
 		new SimpleAsyncTaskExecutor().execute(null);
 	}
 
-	private void executeAndWait(SimpleAsyncTaskExecutor executor, Runnable task, Object monitor) {
+	private static void executeAndWait(SimpleAsyncTaskExecutor executor, Runnable task, Object monitor) {
 		synchronized (monitor) {
 			executor.execute(task);
 			try {

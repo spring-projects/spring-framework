@@ -197,7 +197,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @throws IllegalArgumentException in case of illegal characters
 	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-2.2">HTTP 1.1, section 2.2</a>
 	 */
-	private void checkToken(String token) {
+	private static void checkToken(String token) {
 		for (int i=0; i < token.length(); i++ ) {
 			char ch = token.charAt(i);
 			if (!TOKEN.get(ch)) {
@@ -219,7 +219,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		}
 	}
 
-	private boolean isQuotedString(String s) {
+	private static boolean isQuotedString(String s) {
 		if (s.length() < 2) {
 			return false;
 		}
@@ -502,7 +502,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 		appendTo(this.parameters, builder);
 	}
 
-	private void appendTo(Map<String, String> map, StringBuilder builder) {
+	private static void appendTo(Map<String, String> map, StringBuilder builder) {
 		for (Map.Entry<String, String> entry : map.entrySet()) {
 			builder.append(';');
 			builder.append(entry.getKey());

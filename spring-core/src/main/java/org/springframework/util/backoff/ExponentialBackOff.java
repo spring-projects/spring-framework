@@ -168,7 +168,7 @@ public class ExponentialBackOff implements BackOff {
 		return new ExponentialBackOffExecution();
 	}
 
-	private void checkMultiplier(double multiplier) {
+	private static void checkMultiplier(double multiplier) {
 		if (multiplier < 1) {
 			throw new IllegalArgumentException("Invalid multiplier '" + multiplier + "'. Should be equal" +
 					"or higher than 1. A multiplier of 1 is equivalent to a fixed interval");

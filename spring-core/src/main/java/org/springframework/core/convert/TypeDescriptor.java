@@ -128,7 +128,7 @@ public class TypeDescriptor implements Serializable {
 	}
 
 
-	private Annotation[] nullSafeAnnotations(Annotation[] annotations) {
+	private static Annotation[] nullSafeAnnotations(Annotation[] annotations) {
 		return (annotations != null ? annotations : EMPTY_ANNOTATION_ARRAY);
 	}
 
@@ -307,7 +307,7 @@ public class TypeDescriptor implements Serializable {
 		}
 	}
 
-	private boolean isNestedAssignable(TypeDescriptor nestedTypeDescriptor, TypeDescriptor otherNestedTypeDescriptor) {
+	private static boolean isNestedAssignable(TypeDescriptor nestedTypeDescriptor, TypeDescriptor otherNestedTypeDescriptor) {
 		if (nestedTypeDescriptor == null || otherNestedTypeDescriptor == null) {
 			return true;
 		}
