@@ -20,9 +20,7 @@ import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.After;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -47,9 +45,6 @@ import static org.junit.Assert.*;
  * @since 3.1
  */
 public class EnableSchedulingTests {
-
-	@Rule
-	public final ExpectedException exception = ExpectedException.none();
 
 	private AnnotationConfigApplicationContext ctx;
 
