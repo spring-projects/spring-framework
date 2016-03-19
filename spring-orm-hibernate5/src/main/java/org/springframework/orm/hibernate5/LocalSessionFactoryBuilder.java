@@ -43,6 +43,7 @@ import org.hibernate.boot.registry.BootstrapServiceRegistryBuilder;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
+import org.hibernate.engine.jdbc.connections.spi.MultiTenantConnectionProvider;
 import org.hibernate.engine.spi.SessionFactoryImplementor;
 
 import org.springframework.core.io.Resource;
@@ -184,11 +185,20 @@ public class LocalSessionFactoryBuilder extends Configuration {
 	}
 
 	/**
+	 * Set a {@link MultiTenantConnectionProvider} to be passed on to the SessionFactory.
+	 * @since 4.3
+	 * @see AvailableSettings#MULTI_TENANT_CONNECTION_PROVIDER
+	 */
+	public LocalSessionFactoryBuilder setMultiTenantConnectionProvider(MultiTenantConnectionProvider multiTenantConnectionProvider) {
+		getProperties().put(AvailableSettings.MULTI_TENANT_CONNECTION_PROVIDER, multiTenantConnectionProvider);
+		return this;
+	}
+
+	/**
 	 * Specify custom type filters for Spring-based scanning for entity classes.
 	 * <p>Default is to search all specified packages for classes annotated with
 	 * {@code @javax.persistence.Entity}, {@code @javax.persistence.Embeddable}
 	 * or {@code @javax.persistence.MappedSuperclass}.
-	 * @since 4.2
 	 * @see #scanPackages
 	 */
 	public LocalSessionFactoryBuilder setEntityTypeFilters(TypeFilter... entityTypeFilters) {
