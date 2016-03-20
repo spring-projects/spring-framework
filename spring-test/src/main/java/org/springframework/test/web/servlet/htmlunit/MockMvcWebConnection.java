@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -41,8 +41,7 @@ import org.springframework.util.Assert;
  * <pre class="code">
  * WebClient webClient = new WebClient();
  * MockMvc mockMvc = ...
- * MockMvcWebConnection webConnection = new MockMvcWebConnection(mockMvc);
- * mockConnection.setWebClient(webClient);
+ * MockMvcWebConnection webConnection = new MockMvcWebConnection(mockMvc, webClient);
  * webClient.setWebConnection(webConnection);
  *
  * // Use webClient as normal ...

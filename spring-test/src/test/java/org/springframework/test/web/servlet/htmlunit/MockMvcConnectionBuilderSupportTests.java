@@ -24,6 +24,7 @@ import com.gargoylesoftware.htmlunit.WebClient;
 import com.gargoylesoftware.htmlunit.WebConnection;
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,19 +58,19 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @WebAppConfiguration
+@SuppressWarnings("rawtypes")
 public class MockMvcConnectionBuilderSupportTests {
+
+	private final WebClient client = mock(WebClient.class);
+
+	private MockMvcWebConnectionBuilderSupport builder;
 
 	@Autowired
 	private WebApplicationContext wac;
 
-	private WebClient client;
-
-	private MockMvcWebConnectionBuilderSupport builder;
-
 
 	@Before
 	public void setup() {
-		this.client = mock(WebClient.class);
 		when(this.client.getWebConnection()).thenReturn(mock(WebConnection.class));
 		this.builder = new MockMvcWebConnectionBuilderSupport(this.wac) {};
 	}
@@ -145,7 +146,6 @@ public class MockMvcConnectionBuilderSupportTests {
 
 	@Configuration
 	@EnableWebMvc
-	@SuppressWarnings("unused")
 	static class Config {
 
 		@RestController
