@@ -424,6 +424,7 @@ public class AnnotatedElementUtils {
 	 * @param annotationType the annotation type to find
 	 * @return the merged, synthesized {@code Annotation}, or {@code null} if not found
 	 * @since 4.2
+	 * @see #findAllMergedAnnotations(AnnotatedElement, Class)
 	 * @see #findMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
 	 * @see #getMergedAnnotationAttributes(AnnotatedElement, Class)
 	 */
@@ -458,6 +459,41 @@ public class AnnotatedElementUtils {
 	public static <A extends Annotation> A findMergedAnnotation(AnnotatedElement element, String annotationName) {
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(element, annotationName, false, false);
 		return AnnotationUtils.synthesizeAnnotation(attributes, (Class<A>) attributes.annotationType(), element);
+	}
+
+	/**
+	 * Find <strong>all</strong> annotations of the specified {@code annotationType}
+	 * within the annotation hierarchy <em>above</em> the supplied {@code element};
+	 * and for each annotation found, merge that annotation's attributes with
+	 * <em>matching</em> attributes from annotations in lower levels of the annotation
+	 * hierarchy, and synthesize the result back into an annotation of the specified
+	 * {@code annotationType}.
+	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both within a
+	 * single annotation and within the annotation hierarchy.
+	 * @param element the annotated element; never {@code null}
+	 * @param annotationType the annotation type to find; never {@code null}
+	 * @return the set of all merged, synthesized {@code Annotations} found, or an empty
+	 * set if none were found
+	 * @since 4.3
+	 * @see #findMergedAnnotation(AnnotatedElement, Class)
+	 */
+	public static <A extends Annotation> Set<A> findAllMergedAnnotations(AnnotatedElement element,
+			Class<A> annotationType) {
+
+		Assert.notNull(element, "AnnotatedElement must not be null");
+		Assert.notNull(annotationType, "annotationType must not be null");
+
+		MergedAnnotationAttributesProcessor processor = new MergedAnnotationAttributesProcessor(annotationType, null,
+			false, false, true);
+
+		searchWithFindSemantics(element, annotationType, annotationType.getName(), processor);
+
+		Set<A> annotations = new LinkedHashSet<A>();
+		for (AnnotationAttributes attributes : processor.getAggregatedResults()) {
+			AnnotationUtils.postProcessAnnotationAttributes(element, attributes, false, false);
+			annotations.add(AnnotationUtils.synthesizeAnnotation(attributes, annotationType, element));
+		}
+		return annotations;
 	}
 
 	/**
@@ -796,6 +832,8 @@ public class AnnotatedElementUtils {
 				// Locally declared annotations (ignoring @Inherited)
 				Annotation[] annotations = element.getDeclaredAnnotations();
 
+				List<T> aggregatedResults = processor.aggregates() ? new ArrayList<T>() : null;
+
 				// Search in local annotations
 				for (Annotation annotation : annotations) {
 					if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation) &&
@@ -804,7 +842,12 @@ public class AnnotatedElementUtils {
 							metaDepth > 0)) {
 						T result = processor.process(element, annotation, metaDepth);
 						if (result != null) {
-							return result;
+							if (processor.aggregates() && metaDepth == 0) {
+								aggregatedResults.add(result);
+							}
+							else {
+								return result;
+							}
 						}
 					}
 				}
@@ -816,9 +859,18 @@ public class AnnotatedElementUtils {
 								annotation.annotationType(), annotationType, annotationName, processor, visited, metaDepth + 1);
 						if (result != null) {
 							processor.postProcess(annotation.annotationType(), annotation, result);
-							return result;
+							if (processor.aggregates() && metaDepth == 0) {
+								aggregatedResults.add(result);
+							}
+							else {
+								return result;
+							}
 						}
 					}
+				}
+
+				if (processor.aggregates()) {
+					processor.getAggregatedResults().addAll(0, aggregatedResults);
 				}
 
 				if (element instanceof Method) {
@@ -930,11 +982,16 @@ public class AnnotatedElementUtils {
 	 * annotations, or all annotations discovered by the currently executing
 	 * search. The term "target" in this context refers to a matching
 	 * annotation (i.e., a specific annotation type that was found during
-	 * the search). Returning a non-null value from the {@link #process}
+	 * the search).
+	 * <p>Returning a non-null value from the {@link #process}
 	 * method instructs the search algorithm to stop searching further;
 	 * whereas, returning {@code null} from the {@link #process} method
 	 * instructs the search algorithm to continue searching for additional
-	 * annotations.
+	 * annotations. One exception to this rule applies to processors
+	 * that {@linkplain #aggregates aggregate} results. If an aggregating
+	 * processor returns a non-null value, that value will be added to the
+	 * list of {@linkplain #getAggregatedResults aggregated results}
+	 * and the search algorithm will continue.
 	 * <p>Processors can optionally {@linkplain #postProcess post-process}
 	 * the result of the {@link #process} method as the search algorithm
 	 * goes back down the annotation hierarchy from an invocation of
@@ -983,12 +1040,38 @@ public class AnnotatedElementUtils {
 		 * @param result the result to post-process
 		 */
 		void postProcess(AnnotatedElement annotatedElement, Annotation annotation, T result);
+
+		/**
+		 * Determine if this processor aggregates the results returned by {@link #process}.
+		 * <p>If this method returns {@code true}, then {@link #getAggregatedResults()}
+		 * must return a non-null value.
+		 * <p>WARNING: aggregation is currently only supported for <em>find semantics</em>.
+		 * @return {@code true} if this processor supports aggregated results
+		 * @see #getAggregatedResults
+		 * @since 4.3
+		 */
+		boolean aggregates();
+
+		/**
+		 * Get the list of results aggregated by this processor.
+		 * <p>NOTE: the processor does not aggregate the results itself.
+		 * Rather, the search algorithm that uses this processor is responsible
+		 * for asking this processor if it {@link #aggregates} results and then
+		 * adding the post-processed results to the list returned by this
+		 * method.
+		 * <p>WARNING: aggregation is currently only supported for <em>find semantics</em>.
+		 * @return the list of results aggregated by this processor; never
+		 * {@code null} unless {@link #aggregates} returns {@code false}
+		 * @see #aggregates
+		 * @since 4.3
+		 */
+		List<T> getAggregatedResults();
 	}
 
-
 	/**
-	 * {@link Processor} that {@linkplain #process processes} annotations
-	 * but does not {@linkplain #postProcess post-process} results.
+	 * {@link Processor} that {@linkplain #process(AnnotatedElement, Annotation, int)
+	 * processes} annotations but does not {@linkplain #postProcess post-process} or
+	 * {@linkplain #aggregates aggregate} results.
 	 * @since 4.2
 	 */
 	private abstract static class SimpleAnnotationProcessor<T> implements Processor<T> {
@@ -996,6 +1079,16 @@ public class AnnotatedElementUtils {
 		@Override
 		public final void postProcess(AnnotatedElement annotatedElement, Annotation annotation, T result) {
 			// no-op
+		}
+
+		@Override
+		public final boolean aggregates() {
+			return false;
+		}
+
+		@Override
+		public List<T> getAggregatedResults() {
+			throw new UnsupportedOperationException("SimpleAnnotationProcessor does not support aggregated results");
 		}
 	}
 
@@ -1019,13 +1112,33 @@ public class AnnotatedElementUtils {
 
 		private final boolean nestedAnnotationsAsMap;
 
+		private final List<AnnotationAttributes> aggregatedResults;
+
+
 		MergedAnnotationAttributesProcessor(Class<? extends Annotation> annotationType, String annotationName,
 				boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
+
+			this(annotationType, annotationName, classValuesAsString, nestedAnnotationsAsMap, false);
+		}
+
+		MergedAnnotationAttributesProcessor(Class<? extends Annotation> annotationType, String annotationName,
+				boolean classValuesAsString, boolean nestedAnnotationsAsMap, boolean aggregates) {
 
 			this.annotationType = annotationType;
 			this.annotationName = annotationName;
 			this.classValuesAsString = classValuesAsString;
 			this.nestedAnnotationsAsMap = nestedAnnotationsAsMap;
+			this.aggregatedResults = (aggregates ? new ArrayList<AnnotationAttributes>() : null);
+		}
+
+		@Override
+		public boolean aggregates() {
+			return this.aggregatedResults != null;
+		}
+
+		@Override
+		public List<AnnotationAttributes> getAggregatedResults() {
+			return this.aggregatedResults;
 		}
 
 		@Override

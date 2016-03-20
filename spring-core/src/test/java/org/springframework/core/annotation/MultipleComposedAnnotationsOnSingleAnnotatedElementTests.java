@@ -22,6 +22,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Method;
+import java.util.Iterator;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -43,36 +46,76 @@ public class MultipleComposedAnnotationsOnSingleAnnotatedElementTests {
 
 	@Test
 	public void multipleComposedAnnotationsOnClass() {
-		assertMultipleComposedAnnotations(MultipleCachesClass.class);
+		assertMultipleComposedAnnotations(MultipleComposedCachesClass.class);
+	}
+
+	@Test
+	public void composedPlusLocalAnnotationsOnClass() {
+		assertMultipleComposedAnnotations(ComposedPlusLocalCachesClass.class);
+	}
+
+	@Test
+	public void multipleComposedAnnotationsOnInterface() {
+		assertMultipleComposedAnnotations(MultipleComposedCachesOnInterfaceClass.class);
+	}
+
+	@Test
+	public void composedCacheOnInterfaceAndLocalCacheOnClass() {
+		assertMultipleComposedAnnotations(ComposedCacheOnInterfaceAndLocalCacheClass.class);
 	}
 
 	@Test
 	public void multipleComposedAnnotationsOnMethod() throws Exception {
-		AnnotatedElement element = getClass().getDeclaredMethod("multipleCachesMethod");
+		AnnotatedElement element = getClass().getDeclaredMethod("multipleComposedCachesMethod");
 		assertMultipleComposedAnnotations(element);
+	}
+
+	@Test
+	public void composedPlusLocalAnnotationsOnMethod() throws Exception {
+		AnnotatedElement element = getClass().getDeclaredMethod("composedPlusLocalCachesMethod");
+		assertMultipleComposedAnnotations(element);
+	}
+
+	/**
+	 * Bridge/bridged method setup code copied from
+	 * {@link org.springframework.core.BridgeMethodResolverTests#testWithGenericParameter()}.
+	 */
+	@Test
+	public void multipleComposedAnnotationsBridgeMethod() throws NoSuchMethodException {
+		Method[] methods = StringGenericParameter.class.getMethods();
+		Method bridgeMethod = null;
+		Method bridgedMethod = null;
+
+		for (Method method : methods) {
+			if ("getFor".equals(method.getName()) && !method.getParameterTypes()[0].equals(Integer.class)) {
+				if (method.getReturnType().equals(Object.class)) {
+					bridgeMethod = method;
+				}
+				else {
+					bridgedMethod = method;
+				}
+			}
+		}
+		assertTrue(bridgeMethod != null && bridgeMethod.isBridge());
+		assertTrue(bridgedMethod != null && !bridgedMethod.isBridge());
+
+		assertMultipleComposedAnnotations(bridgeMethod);
 	}
 
 	private void assertMultipleComposedAnnotations(AnnotatedElement element) {
 		assertNotNull(element);
 
-		// Prerequisites
-		FooCache fooCache = element.getAnnotation(FooCache.class);
-		BarCache barCache = element.getAnnotation(BarCache.class);
-		assertNotNull(fooCache);
-		assertNotNull(barCache);
-		assertEquals("fooKey", fooCache.key());
-		assertEquals("barKey", barCache.key());
+		Set<Cacheable> cacheables = findAllMergedAnnotations(element, Cacheable.class);
+		assertNotNull(cacheables);
+		assertEquals(2, cacheables.size());
 
-		// Assert the status quo for finding the 1st merged annotation.
-		Cacheable cacheable = findMergedAnnotation(element, Cacheable.class);
-		assertNotNull(cacheable);
-		assertEquals("fooCache", cacheable.value());
-		assertEquals("fooKey", cacheable.key());
-
-		// TODO Introduce findMergedAnnotations(...) in AnnotatedElementUtils.
-
-		// assertEquals("barCache", cacheable.value());
-		// assertEquals("barKey", cacheable.key());
+		Iterator<Cacheable> iterator = cacheables.iterator();
+		Cacheable fooCacheable = iterator.next();
+		Cacheable barCacheable = iterator.next();
+		assertEquals("fooKey", fooCacheable.key());
+		assertEquals("fooCache", fooCacheable.value());
+		assertEquals("barKey", barCacheable.key());
+		assertEquals("barCache", barCacheable.value());
 	}
 
 
@@ -86,7 +129,11 @@ public class MultipleComposedAnnotationsOnSingleAnnotatedElementTests {
 	@Inherited
 	@interface Cacheable {
 
-		String value();
+		@AliasFor("cacheName")
+		String value() default "";
+
+		@AliasFor("value")
+		String cacheName() default "";
 
 		String key() default "";
 	}
@@ -113,13 +160,60 @@ public class MultipleComposedAnnotationsOnSingleAnnotatedElementTests {
 
 	@FooCache(key = "fooKey")
 	@BarCache(key = "barKey")
-	private static class MultipleCachesClass {
+	private static class MultipleComposedCachesClass {
+	}
+
+	@Cacheable(cacheName = "fooCache", key = "fooKey")
+	@BarCache(key = "barKey")
+	private static class ComposedPlusLocalCachesClass {
+	}
+
+	@FooCache(key = "fooKey")
+	@BarCache(key = "barKey")
+	private interface MultipleComposedCachesInterface {
+	}
+
+	private static class MultipleComposedCachesOnInterfaceClass implements MultipleComposedCachesInterface {
+	}
+
+	@Cacheable(cacheName = "fooCache", key = "fooKey")
+	private interface ComposedCacheInterface {
+	}
+
+	@BarCache(key = "barKey")
+	private static class ComposedCacheOnInterfaceAndLocalCacheClass implements ComposedCacheInterface {
 	}
 
 
 	@FooCache(key = "fooKey")
 	@BarCache(key = "barKey")
-	private void multipleCachesMethod() {
+	private void multipleComposedCachesMethod() {
+	}
+
+	@Cacheable(cacheName = "fooCache", key = "fooKey")
+	@BarCache(key = "barKey")
+	private void composedPlusLocalCachesMethod() {
+	}
+
+
+	public interface GenericParameter<T> {
+
+		T getFor(Class<T> cls);
+	}
+
+	@SuppressWarnings("unused")
+	private static class StringGenericParameter implements GenericParameter<String> {
+
+		@FooCache(key = "fooKey")
+		@BarCache(key = "barKey")
+		@Override
+		public String getFor(Class<String> cls) {
+			return "foo";
+		}
+
+		public String getFor(Integer integer) {
+			return "foo";
+		}
 	}
 
 }
