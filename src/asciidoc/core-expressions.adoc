@@ -442,7 +442,7 @@ form `#{ <expression string> }`.
 A property or constructor-arg value can be set using expressions as shown below.
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<bean id="numberGuess" class="org.spring.samples.NumberGuess">
 		<property name="randomNumber" value="#{ T(java.lang.Math).random() * 100.0 }"/>
@@ -456,7 +456,7 @@ shown below. Note that you do not have to prefix the predefined variable with th
 symbol in this context.
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<bean id="taxCalculator" class="org.spring.samples.TaxCalculator">
 		<property name="defaultLocale" value="#{ systemProperties['user.region'] }"/>
@@ -468,7 +468,7 @@ symbol in this context.
 You can also refer to other bean properties by name, for example.
 
 [source,xml,indent=0]
-[subs="verbatim,quotes"]
+[subs="verbatim"]
 ----
 	<bean id="numberGuess" class="org.spring.samples.NumberGuess">
 		<property name="randomNumber" value="#{ T(java.lang.Math).random() * 100.0 }"/>
