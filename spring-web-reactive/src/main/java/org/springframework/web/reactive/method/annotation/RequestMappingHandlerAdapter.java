@@ -31,6 +31,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.support.ByteBufferDecoder;
 import org.springframework.core.codec.support.JacksonJsonDecoder;
+import org.springframework.core.codec.support.Jaxb2Decoder;
 import org.springframework.core.codec.support.JsonObjectDecoder;
 import org.springframework.core.codec.support.StringDecoder;
 import org.springframework.core.convert.ConversionService;
@@ -100,7 +101,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 		if (ObjectUtils.isEmpty(this.argumentResolvers)) {
 
 			List<Decoder<?>> decoders = Arrays.asList(new ByteBufferDecoder(),
-					new StringDecoder(),
+					new StringDecoder(), new Jaxb2Decoder(),
 					new JacksonJsonDecoder(new JsonObjectDecoder()));
 
 			this.argumentResolvers.add(new RequestParamArgumentResolver());

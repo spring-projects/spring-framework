@@ -18,12 +18,11 @@ package org.springframework.core.codec.support;
 
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.MarshalException;
 import javax.xml.bind.Marshaller;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -32,7 +31,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.CodecException;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
@@ -41,14 +39,28 @@ import org.springframework.util.MimeTypeUtils;
  * Encode from an {@code Object} stream to a byte stream of XML elements.
  *
  * @author Sebastien Deleuze
+ * @author Arjen Poutsma
  * @see Jaxb2Decoder
  */
 public class Jaxb2Encoder extends AbstractEncoder<Object> {
 
-	private final ConcurrentMap<Class<?>, JAXBContext> jaxbContexts = new ConcurrentHashMap<>(64);
+	private final JaxbContextContainer jaxbContexts = new JaxbContextContainer();
 
 	public Jaxb2Encoder() {
 		super(MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML);
+	}
+
+	@Override
+	public boolean canEncode(ResolvableType type, MimeType mimeType, Object... hints) {
+		if (super.canEncode(type, mimeType, hints)) {
+			Class<?> outputClass = type.getRawClass();
+			return outputClass.isAnnotationPresent(XmlRootElement.class) ||
+					outputClass.isAnnotationPresent(XmlType.class);
+		}
+		else {
+			return false;
+		}
+
 	}
 
 	@Override
@@ -56,12 +68,14 @@ public class Jaxb2Encoder extends AbstractEncoder<Object> {
 			DataBufferAllocator allocator, ResolvableType type, MimeType mimeType,
 			Object... hints) {
 
-		return Flux.from(inputStream).map(value -> {
+		return Flux.from(inputStream).
+				take(1). // only map 1 value to ensure valid XML output
+				map(value -> {
 			try {
 				DataBuffer buffer = allocator.allocateBuffer(1024);
 				OutputStream outputStream = buffer.asOutputStream();
 				Class<?> clazz = ClassUtils.getUserClass(value);
-				Marshaller marshaller = createMarshaller(clazz);
+				Marshaller marshaller = jaxbContexts.createMarshaller(clazz);
 				marshaller.setProperty(Marshaller.JAXB_ENCODING, StandardCharsets.UTF_8.name());
 				marshaller.marshal(value, outputStream);
 				return buffer;
@@ -75,32 +89,7 @@ public class Jaxb2Encoder extends AbstractEncoder<Object> {
 		});
 	}
 
-	protected final Marshaller createMarshaller(Class<?> clazz) {
-		try {
-			JAXBContext jaxbContext = getJaxbContext(clazz);
-			return jaxbContext.createMarshaller();
-		}
-		catch (JAXBException ex) {
-			throw new CodecException("Could not create Marshaller for class " +
-					"[" + clazz + "]: " + ex.getMessage(), ex);
-		}
-	}
 
-	protected final JAXBContext getJaxbContext(Class<?> clazz) {
-		Assert.notNull(clazz, "'clazz' must not be null");
-		JAXBContext jaxbContext = this.jaxbContexts.get(clazz);
-		if (jaxbContext == null) {
-			try {
-				jaxbContext = JAXBContext.newInstance(clazz);
-				this.jaxbContexts.putIfAbsent(clazz, jaxbContext);
-			}
-			catch (JAXBException ex) {
-				throw new CodecException("Could not instantiate JAXBContext for class " +
-						"[" + clazz + "]: " + ex.getMessage(), ex);
-			}
-		}
-		return jaxbContext;
-	}
 
 }
 

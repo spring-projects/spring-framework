@@ -24,6 +24,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -114,7 +116,8 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		RestTemplate restTemplate = new RestTemplate();
 
 		URI url = new URI("http://localhost:" + port + "/raw");
-		RequestEntity<Void> request = RequestEntity.get(url).build();
+		RequestEntity<Void> request =
+				RequestEntity.get(url).accept(MediaType.APPLICATION_JSON).build();
 		Person person = restTemplate.exchange(request, Person.class).getBody();
 
 		assertEquals(new Person("Robert"), person);
@@ -262,17 +265,32 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 	@Test
 	public void publisherCreate() throws Exception {
-		create("http://localhost:" + this.port + "/publisher-create");
+		createJson("http://localhost:" + this.port + "/publisher-create");
+	}
+
+	@Test
+	public void publisherCreateXml() throws Exception {
+		createXml("http://localhost:" + this.port + "/publisher-create");
 	}
 
 	@Test
 	public void fluxCreate() throws Exception {
-		create("http://localhost:" + this.port + "/flux-create");
+		createJson("http://localhost:" + this.port + "/flux-create");
+	}
+
+	@Test
+	public void fluxCreateXml() throws Exception {
+		createXml("http://localhost:" + this.port + "/flux-create");
 	}
 
 	@Test
 	public void observableCreate() throws Exception {
-		create("http://localhost:" + this.port + "/observable-create");
+		createJson("http://localhost:" + this.port + "/observable-create");
+	}
+
+	@Test
+	public void observableCreateXml() throws Exception {
+		createXml("http://localhost:" + this.port + "/observable-create");
 	}
 
 	@Test
@@ -337,12 +355,27 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		assertEquals("MARIE", results.get(1).getName());
 	}
 
-	private void create(String requestUrl) throws Exception {
+	private void createJson(String requestUrl) throws Exception {
 		RestTemplate restTemplate = new RestTemplate();
 		URI url = new URI(requestUrl);
 		RequestEntity<List<Person>> request = RequestEntity.post(url)
 				.contentType(MediaType.APPLICATION_JSON)
 				.body(Arrays.asList(new Person("Robert"), new Person("Marie")));
+		ResponseEntity<Void> response = restTemplate.exchange(request, Void.class);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertEquals(2, this.wac.getBean(TestRestController.class).persons.size());
+	}
+
+	private void createXml(String requestUrl) throws Exception {
+		RestTemplate restTemplate = new RestTemplate();
+		URI url = new URI(requestUrl);
+		People people = new People();
+		people.getPerson().add(new Person("Robert"));
+		people.getPerson().add(new Person("Marie"));
+		RequestEntity<People> request =
+				RequestEntity.post(url).contentType(MediaType.APPLICATION_XML)
+						.body(people);
 		ResponseEntity<Void> response = restTemplate.exchange(request, Void.class);
 
 		assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -609,6 +642,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 	}
 
+	@XmlRootElement
 	private static class Person {
 
 		private String name;
@@ -653,5 +687,17 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 					'}';
 		}
 	}
+
+	@XmlRootElement
+	private static class People {
+
+		private List<Person> persons = new ArrayList<>();
+
+		@XmlElement
+		public List<Person> getPerson() {
+			return this.persons;
+		}
+	}
+
 
 }
