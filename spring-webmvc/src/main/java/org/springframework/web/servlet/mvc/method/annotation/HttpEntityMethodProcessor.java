@@ -26,9 +26,12 @@ import java.util.Map;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpRange;
+import org.springframework.http.HttpRangeResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -191,6 +194,19 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 				// Ensure headers are flushed, no body should be written.
 				outputMessage.flush();
 				// Skip call to converters, as they may update the body.
+				return;
+			}
+		}
+		if(inputMessage.getHeaders().containsKey(HttpHeaders.RANGE) &&
+				Resource.class.isAssignableFrom(body.getClass())) {
+			try {
+				List<HttpRange> httpRanges = inputMessage.getHeaders().getRange();
+				Resource bodyResource = (Resource) body;
+				body = new HttpRangeResource(httpRanges, bodyResource);
+				outputMessage.setStatusCode(HttpStatus.PARTIAL_CONTENT);
+			} catch (IllegalArgumentException exc) {
+				outputMessage.setStatusCode(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
+				outputMessage.flush();
 				return;
 			}
 		}

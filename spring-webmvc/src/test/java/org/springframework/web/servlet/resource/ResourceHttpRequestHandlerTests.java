@@ -17,12 +17,8 @@
 package org.springframework.web.servlet.resource;
 
 import static org.junit.Assert.*;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -529,47 +525,6 @@ public class ResourceHttpRequestHandlerTests {
 		assertEquals("Content-Type: text/plain", ranges[9]);
 		assertEquals("Content-Range: bytes 8-9/10", ranges[10]);
 		assertEquals("t.", ranges[11]);
-	}
-
-	// SPR-12999
-	@Test @SuppressWarnings("unchecked")
-	public void writeContentNotGettingInputStream() throws Exception {
-		Resource resource = mock(Resource.class);
-		given(resource.getInputStream()).willThrow(FileNotFoundException.class);
-
-		this.handler.writeContent(this.response, resource);
-
-		assertEquals(200, this.response.getStatus());
-		assertEquals(0, this.response.getContentLength());
-	}
-
-	// SPR-12999
-	@Test
-	public void writeContentNotClosingInputStream() throws Exception {
-		Resource resource = mock(Resource.class);
-		InputStream inputStream = mock(InputStream.class);
-		given(resource.getInputStream()).willReturn(inputStream);
-		given(inputStream.read(any())).willReturn(-1);
-		doThrow(new NullPointerException()).when(inputStream).close();
-
-		this.handler.writeContent(this.response, resource);
-
-		assertEquals(200, this.response.getStatus());
-		assertEquals(0, this.response.getContentLength());
-	}
-
-	// SPR-13620
-	@Test @SuppressWarnings("unchecked")
-	public void writeContentInputStreamThrowingNullPointerException() throws Exception {
-		Resource resource = mock(Resource.class);
-		InputStream in = mock(InputStream.class);
-		given(resource.getInputStream()).willReturn(in);
-		given(in.read(any())).willThrow(NullPointerException.class);
-
-		this.handler.writeContent(this.response, resource);
-
-		assertEquals(200, this.response.getStatus());
-		assertEquals(0, this.response.getContentLength());
 	}
 
 	// SPR-14005
