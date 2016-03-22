@@ -105,7 +105,7 @@ public class UriTemplate implements Serializable {
      * <p>Example:
      * <pre class="code">
      * UriTemplate template = new UriTemplate("http://example.com/hotels/{hotel}/bookings/{booking}");
-     * System.out.println(template.expand("Rest & Relax", "42));
+     * System.out.println(template.expand("Rest & Relax", 42));
      * </pre>
      * will print: <blockquote>{@code http://example.com/hotels/Rest%20%26%20Relax/bookings/42}</blockquote>
      * @param uriVariableValues the array of URI variables
