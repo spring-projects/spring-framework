@@ -202,7 +202,8 @@
  -->
 <#macro formTextarea path attributes="">
     <@bind path/>
-    <textarea id="${status.expression?replace('[','')?replace(']','')}" name="${status.expression}" ${attributes}>${stringStatusValue}</textarea>
+    <textarea id="${status.expression?replace('[','')?replace(']','')}" name="${status.expression}" ${attributes}>
+${stringStatusValue}</textarea>
 </#macro>
 
 <#--

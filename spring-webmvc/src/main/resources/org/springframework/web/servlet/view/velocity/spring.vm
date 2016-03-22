@@ -161,7 +161,8 @@
  *#
 #macro( springFormTextarea $path $attributes )
     #springBind($path)
-    <textarea id="#springXmlId(${status.expression})" name="${status.expression}" ${attributes}>$!status.value</textarea>
+    <textarea id="#springXmlId(${status.expression})" name="${status.expression}" ${attributes}>
+$!status.value</textarea>
 #end
 
 #**
