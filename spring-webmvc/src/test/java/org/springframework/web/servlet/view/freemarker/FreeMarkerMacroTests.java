@@ -211,12 +211,12 @@ public class FreeMarkerMacroTests {
 
 	@Test
 	public void testForm3() throws Exception {
-		assertEquals("<textarea id=\"name\" name=\"name\" >Darren</textarea>", getMacroOutput("FORM3"));
+		assertEquals("<textarea id=\"name\" name=\"name\" >\nDarren</textarea>", getMacroOutput("FORM3"));
 	}
 
 	@Test
 	public void testForm4() throws Exception {
-		assertEquals("<textarea id=\"name\" name=\"name\" rows=10 cols=30>Darren</textarea>", getMacroOutput("FORM4"));
+		assertEquals("<textarea id=\"name\" name=\"name\" rows=10 cols=30>\nDarren</textarea>", getMacroOutput("FORM4"));
 	}
 
 	// TODO verify remaining output (fix whitespace)
