@@ -18,14 +18,15 @@ package org.springframework.web.servlet.support;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.CacheControl;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.HttpSessionRequiredException;
@@ -133,8 +134,8 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * unrestricted for general controllers and interceptors.
 	 */
 	public final void setSupportedMethods(String... methods) {
-		if (methods != null) {
-			this.supportedMethods = new HashSet<String>(Arrays.asList(methods));
+		if (!ObjectUtils.isEmpty(methods)) {
+			this.supportedMethods = new LinkedHashSet<String>(Arrays.asList(methods));
 		}
 		else {
 			this.supportedMethods = null;
