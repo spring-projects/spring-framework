@@ -64,14 +64,13 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 	public void handleRequest(HttpServerExchange exchange) throws Exception {
 
 		RequestBodyPublisher requestBody = new RequestBodyPublisher(exchange, allocator);
+		requestBody.registerListener();
 		ServerHttpRequest request = new UndertowServerHttpRequest(exchange, requestBody);
 
-		ResponseBodySubscriber responseBodySubscriber =
-				new ResponseBodySubscriber(exchange);
-
+		ResponseBodySubscriber responseBody = new ResponseBodySubscriber(exchange);
+		responseBody.registerListener();
 		ServerHttpResponse response = new UndertowServerHttpResponse(exchange,
-				publisher -> Mono
-						.from(subscriber -> publisher.subscribe(responseBodySubscriber)),
+				publisher -> Mono.from(subscriber -> publisher.subscribe(responseBody)),
 				allocator);
 
 		this.delegate.handle(request, response).subscribe(new Subscriber<Void>() {
@@ -104,7 +103,7 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 		});
 	}
 
-	private static class RequestBodyPublisher extends AbstractResponseBodyPublisher {
+	private static class RequestBodyPublisher extends AbstractRequestBodyPublisher {
 
 		private static final Log logger = LogFactory.getLog(RequestBodyPublisher.class);
 
@@ -120,11 +119,14 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 		public RequestBodyPublisher(HttpServerExchange exchange,
 				DataBufferAllocator allocator) {
 			this.requestChannel = exchange.getRequestChannel();
-			this.requestChannel.getReadSetter().set(listener);
-			this.requestChannel.resumeReads();
 			this.pooledByteBuffer =
 					exchange.getConnection().getByteBufferPool().allocate();
 			this.allocator = allocator;
+		}
+
+		public void registerListener() {
+			this.requestChannel.getReadSetter().set(listener);
+			this.requestChannel.resumeReads();
 		}
 
 		private void close() {
@@ -203,9 +205,13 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 		public ResponseBodySubscriber(HttpServerExchange exchange) {
 			this.exchange = exchange;
 			this.responseChannel = exchange.getResponseChannel();
+		}
+
+		public void registerListener() {
 			this.responseChannel.getWriteSetter().set(listener);
 			this.responseChannel.resumeWrites();
 		}
+
 
 		@Override
 		public void onSubscribe(Subscription subscription) {

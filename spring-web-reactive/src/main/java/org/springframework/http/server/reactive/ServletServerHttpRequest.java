@@ -16,23 +16,20 @@
 
 package org.springframework.http.server.reactive;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.Map;
-import javax.servlet.ReadListener;
-import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -55,15 +52,12 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final Flux<DataBuffer> requestBodyPublisher;
 
-	public ServletServerHttpRequest(ServletAsyncContextSynchronizer synchronizer,
-			DataBufferAllocator allocator, int bufferSize) throws IOException {
-		Assert.notNull(synchronizer, "'synchronizer' must not be null");
-		Assert.notNull(allocator, "'allocator' must not be null");
-
-		this.request = (HttpServletRequest) synchronizer.getRequest();
-		RequestBodyPublisher bodyPublisher =
-				new RequestBodyPublisher(synchronizer, allocator, bufferSize);
-		this.requestBodyPublisher = Flux.from(bodyPublisher);
+	public ServletServerHttpRequest(HttpServletRequest request,
+			Publisher<DataBuffer> body) {
+		Assert.notNull(request, "'request' must not be null.");
+		Assert.notNull(body, "'body' must not be null.");
+		this.request = request;
+		this.requestBodyPublisher = Flux.from(body);
 	}
 
 
@@ -137,89 +131,4 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 		return this.requestBodyPublisher;
 	}
 
-	private static class RequestBodyPublisher extends AbstractResponseBodyPublisher {
-
-		private final RequestBodyReadListener readListener =
-				new RequestBodyReadListener();
-
-		private final ServletAsyncContextSynchronizer synchronizer;
-
-		private final DataBufferAllocator allocator;
-
-		private final byte[] buffer;
-
-		public RequestBodyPublisher(ServletAsyncContextSynchronizer synchronizer,
-				DataBufferAllocator allocator, int bufferSize) throws IOException {
-			this.synchronizer = synchronizer;
-			this.allocator = allocator;
-			this.buffer = new byte[bufferSize];
-			synchronizer.getRequest().getInputStream().setReadListener(readListener);
-		}
-
-		@Override
-		protected void noLongerStalled() {
-			try {
-				readListener.onDataAvailable();
-			}
-			catch (IOException ex) {
-				readListener.onError(ex);
-			}
-		}
-
-		private class RequestBodyReadListener implements ReadListener {
-
-			@Override
-			public void onDataAvailable() throws IOException {
-				if (isSubscriptionCancelled()) {
-					return;
-				}
-				logger.trace("onDataAvailable");
-				ServletInputStream input = synchronizer.getRequest().getInputStream();
-
-				while (true) {
-					if (!checkSubscriptionForDemand()) {
-						break;
-					}
-
-					boolean ready = input.isReady();
-					logger.trace(
-							"Input ready: " + ready + " finished: " + input.isFinished());
-
-					if (!ready) {
-						break;
-					}
-
-					int read = input.read(buffer);
-					logger.trace("Input read:" + read);
-
-					if (read == -1) {
-						break;
-					}
-					else if (read > 0) {
-						DataBuffer dataBuffer = allocator.allocateBuffer(read);
-						dataBuffer.write(buffer, 0, read);
-
-						publishOnNext(dataBuffer);
-					}
-				}
-			}
-
-			@Override
-			public void onAllDataRead() throws IOException {
-				logger.trace("All data read");
-				synchronizer.readComplete();
-
-				publishOnComplete();
-			}
-
-			@Override
-			public void onError(Throwable t) {
-				logger.trace("RequestBodyReadListener Error", t);
-				synchronizer.readComplete();
-
-				publishOnError(t);
-			}
-		}
-
-	}
 }

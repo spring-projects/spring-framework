@@ -36,7 +36,7 @@ import org.springframework.util.Assert;
  * @see ServletServerHttpRequest
  * @see UndertowHttpHandlerAdapter
  */
-abstract class AbstractResponseBodyPublisher implements Publisher<DataBuffer> {
+abstract class AbstractRequestBodyPublisher implements Publisher<DataBuffer> {
 
 	private ResponseBodySubscription subscription;
 

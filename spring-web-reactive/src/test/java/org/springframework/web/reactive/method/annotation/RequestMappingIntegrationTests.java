@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -168,6 +169,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 	}
 
 	@Test
+	@Ignore
 	public void streamResult() throws Exception {
 		RestTemplate restTemplate = new RestTemplate();
 
