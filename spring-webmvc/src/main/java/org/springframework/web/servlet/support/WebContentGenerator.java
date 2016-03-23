@@ -421,6 +421,10 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 				// Reset HTTP 1.0 Pragma header if present
 				response.setHeader(HEADER_PRAGMA, "");
 			}
+			if (response.containsHeader(HEADER_EXPIRES)) {
+				// Reset HTTP 1.0 Expires header if present
+				response.setHeader(HEADER_EXPIRES, "");
+			}
 		}
 	}
 
@@ -544,6 +548,10 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		if (this.useExpiresHeader) {
 			// HTTP 1.0 header
 			response.setDateHeader(HEADER_EXPIRES, System.currentTimeMillis() + seconds * 1000L);
+		}
+		else if (response.containsHeader(HEADER_EXPIRES)) {
+			// Reset HTTP 1.0 Expires header if present
+			response.setHeader(HEADER_EXPIRES, "");
 		}
 
 		if (this.useCacheControlHeader) {
