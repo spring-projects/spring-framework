@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.core.Conventions;
 import org.springframework.core.MethodParameter;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRange;
@@ -114,8 +114,8 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		return (AnnotationUtils.findAnnotation(returnType.getContainingClass(), ResponseBody.class) != null ||
-				returnType.getMethodAnnotation(ResponseBody.class) != null);
+		return (AnnotatedElementUtils.hasAnnotation(returnType.getContainingClass(), ResponseBody.class) ||
+				returnType.hasMethodAnnotation(ResponseBody.class));
 	}
 
 	/**
@@ -173,14 +173,15 @@ public class RequestResponseBodyMethodProcessor extends AbstractMessageConverter
 		ServletServerHttpRequest inputMessage = createInputMessage(webRequest);
 		ServletServerHttpResponse outputMessage = createOutputMessage(webRequest);
 
-		if(inputMessage.getHeaders().containsKey(HttpHeaders.RANGE) &&
+		if (inputMessage.getHeaders().containsKey(HttpHeaders.RANGE) &&
 				Resource.class.isAssignableFrom(returnValue.getClass())) {
 			try {
 				List<HttpRange> httpRanges = inputMessage.getHeaders().getRange();
 				Resource bodyResource = (Resource) returnValue;
 				returnValue = new HttpRangeResource(httpRanges, bodyResource);
 				outputMessage.setStatusCode(HttpStatus.PARTIAL_CONTENT);
-			} catch (IllegalArgumentException exc) {
+			}
+			catch (IllegalArgumentException ex) {
 				outputMessage.setStatusCode(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
 				outputMessage.flush();
 				return;

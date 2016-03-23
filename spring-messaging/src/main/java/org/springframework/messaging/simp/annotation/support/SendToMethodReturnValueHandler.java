@@ -21,6 +21,7 @@ import java.security.Principal;
 import java.util.Map;
 
 import org.springframework.core.MethodParameter;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -132,13 +133,13 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		if (returnType.getMethodAnnotation(SendTo.class) != null ||
-				AnnotationUtils.getAnnotation(returnType.getDeclaringClass(), SendTo.class) != null ||
-				returnType.getMethodAnnotation(SendToUser.class) != null ||
-				AnnotationUtils.getAnnotation(returnType.getDeclaringClass(), SendToUser.class) != null) {
+		if (returnType.hasMethodAnnotation(SendTo.class) ||
+				AnnotatedElementUtils.hasAnnotation(returnType.getDeclaringClass(), SendTo.class) ||
+				returnType.hasMethodAnnotation(SendToUser.class) ||
+				AnnotatedElementUtils.hasAnnotation(returnType.getDeclaringClass(), SendToUser.class)) {
 			return true;
 		}
-		return (!this.annotationRequired);
+		return !this.annotationRequired;
 	}
 
 	@Override
@@ -186,24 +187,24 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 	}
 
 	private SendToUser getSendToUser(MethodParameter returnType) {
-		SendToUser annot = returnType.getMethodAnnotation(SendToUser.class);
-		if (annot != null && !ObjectUtils.isEmpty((annot.value()))) {
+		SendToUser annot = AnnotatedElementUtils.findMergedAnnotation(returnType.getMethod(), SendToUser.class);
+		if (annot != null && !ObjectUtils.isEmpty(annot.value())) {
 			return annot;
 		}
-		SendToUser typeAnnot = AnnotationUtils.getAnnotation(returnType.getDeclaringClass(), SendToUser.class);
-		if (typeAnnot != null && !ObjectUtils.isEmpty((typeAnnot.value()))) {
+		SendToUser typeAnnot = AnnotatedElementUtils.findMergedAnnotation(returnType.getDeclaringClass(), SendToUser.class);
+		if (typeAnnot != null && !ObjectUtils.isEmpty(typeAnnot.value())) {
 			return typeAnnot;
 		}
 		return (annot != null ? annot : typeAnnot);
 	}
 
 	private SendTo getSendTo(MethodParameter returnType) {
-		SendTo sendTo = returnType.getMethodAnnotation(SendTo.class);
-		if (sendTo != null && !ObjectUtils.isEmpty((sendTo.value()))) {
+		SendTo sendTo = AnnotatedElementUtils.findMergedAnnotation(returnType.getMethod(), SendTo.class);
+		if (sendTo != null && !ObjectUtils.isEmpty(sendTo.value())) {
 			return sendTo;
 		}
 		else {
-			return AnnotationUtils.getAnnotation(returnType.getDeclaringClass(), SendTo.class);
+			return AnnotatedElementUtils.findMergedAnnotation(returnType.getDeclaringClass(), SendTo.class);
 		}
 	}
 

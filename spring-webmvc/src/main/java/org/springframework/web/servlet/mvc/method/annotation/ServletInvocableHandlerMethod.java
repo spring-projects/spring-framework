@@ -242,6 +242,14 @@ public class ServletInvocableHandlerMethod extends InvocableHandlerMethod {
 		public <A extends Annotation> A getMethodAnnotation(Class<A> annotationType) {
 			return ServletInvocableHandlerMethod.this.getMethodAnnotation(annotationType);
 		}
+
+		/**
+		 * Bridge to controller method-level annotations.
+		 */
+		@Override
+		public <A extends Annotation> boolean hasMethodAnnotation(Class<A> annotationType) {
+			return ServletInvocableHandlerMethod.this.hasMethodAnnotation(annotationType);
+		}
 	}
 
 

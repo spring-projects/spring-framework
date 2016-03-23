@@ -54,6 +54,7 @@ import org.springframework.context.event.test.GenericEventPojo;
 import org.springframework.context.event.test.Identifiable;
 import org.springframework.context.event.test.TestEvent;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.core.annotation.Order;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -868,6 +869,16 @@ public class AnnotationDrivenEventListenerTests {
 	}
 
 
+
+	@EventListener
+	@Retention(RetentionPolicy.RUNTIME)
+	public @interface ConditionalEvent {
+
+		@AliasFor(annotation = EventListener.class, attribute = "condition")
+		String value();
+	}
+
+
 	@Component
 	static class ConditionalEventListener extends TestEventListener {
 
@@ -883,12 +894,12 @@ public class AnnotationDrivenEventListenerTests {
 			super.handleString(payload);
 		}
 
-		@EventListener(condition = "#root.event.timestamp > #p0")
+		@ConditionalEvent("#root.event.timestamp > #p0")
 		public void handleTimestamp(Long timestamp) {
 			collectEvent(timestamp);
 		}
 
-		@EventListener(condition = "@conditionEvaluator.valid(#p0)")
+		@ConditionalEvent("@conditionEvaluator.valid(#p0)")
 		public void handleRatio(Double ratio) {
 			collectEvent(ratio);
 		}

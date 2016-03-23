@@ -102,8 +102,8 @@ public class ModelAttributeMethodProcessor
 				createAttribute(name, parameter, binderFactory, webRequest));
 
 		if (!mavContainer.isBindingDisabled(name)) {
-			ModelAttribute annotation = parameter.getParameterAnnotation(ModelAttribute.class);
-			if (annotation != null && !annotation.binding()) {
+			ModelAttribute ann = parameter.getParameterAnnotation(ModelAttribute.class);
+			if (ann != null && !ann.binding()) {
 				mavContainer.setBindingDisabled(name);
 			}
 		}
@@ -192,8 +192,8 @@ public class ModelAttributeMethodProcessor
 	 */
 	@Override
 	public boolean supportsReturnType(MethodParameter returnType) {
-		return (returnType.getMethodAnnotation(ModelAttribute.class) != null ||
-				this.annotationNotRequired && !BeanUtils.isSimpleProperty(returnType.getParameterType()));
+		return (returnType.hasMethodAnnotation(ModelAttribute.class) ||
+				(this.annotationNotRequired && !BeanUtils.isSimpleProperty(returnType.getParameterType())));
 	}
 
 	/**

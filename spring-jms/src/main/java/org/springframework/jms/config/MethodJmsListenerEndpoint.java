@@ -25,7 +25,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.EmbeddedValueResolver;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.jms.listener.MessageListenerContainer;
 import org.springframework.jms.listener.adapter.MessagingMessageListenerAdapter;
 import org.springframework.jms.support.converter.MessageConverter;
@@ -187,13 +187,11 @@ public class MethodJmsListenerEndpoint extends AbstractJmsListenerEndpoint imple
 	}
 
 	private SendTo getSendTo(Method specificMethod) {
-		SendTo ann = AnnotationUtils.getAnnotation(specificMethod, SendTo.class);
-		if (ann != null) {
-			return ann;
+		SendTo ann = AnnotatedElementUtils.findMergedAnnotation(specificMethod, SendTo.class);
+		if (ann == null) {
+			ann = AnnotatedElementUtils.findMergedAnnotation(specificMethod.getDeclaringClass(), SendTo.class);
 		}
-		else {
-			return AnnotationUtils.getAnnotation(specificMethod.getDeclaringClass(), SendTo.class);
-		}
+		return ann;
 	}
 
 	private String resolve(String value) {

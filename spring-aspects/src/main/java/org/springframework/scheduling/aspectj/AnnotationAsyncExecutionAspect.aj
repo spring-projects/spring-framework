@@ -19,7 +19,7 @@ package org.springframework.scheduling.aspectj;
 import java.lang.reflect.Method;
 import java.util.concurrent.Future;
 
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.scheduling.annotation.Async;
 
 /**
@@ -68,9 +68,9 @@ public aspect AnnotationAsyncExecutionAspect extends AbstractAsyncExecutionAspec
 	protected String getExecutorQualifier(Method method) {
 		// Maintainer's note: changes made here should also be made in
 		// AnnotationAsyncExecutionInterceptor#getExecutorQualifier
-		Async async = AnnotationUtils.findAnnotation(method, Async.class);
+		Async async = AnnotatedElementUtils.findMergedAnnotation(method, Async.class);
 		if (async == null) {
-			async = AnnotationUtils.findAnnotation(method.getDeclaringClass(), Async.class);
+			async = AnnotatedElementUtils.findMergedAnnotation(method.getDeclaringClass(), Async.class);
 		}
 		return (async != null ? async.value() : null);
 	}

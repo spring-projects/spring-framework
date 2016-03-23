@@ -21,7 +21,7 @@ import java.util.concurrent.Executor;
 
 import org.springframework.aop.interceptor.AsyncExecutionInterceptor;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 
 /**
  * Specialization of {@link AsyncExecutionInterceptor} that delegates method execution to
@@ -78,9 +78,9 @@ public class AnnotationAsyncExecutionInterceptor extends AsyncExecutionIntercept
 	protected String getExecutorQualifier(Method method) {
 		// Maintainer's note: changes made here should also be made in
 		// AnnotationAsyncExecutionAspect#getExecutorQualifier
-		Async async = AnnotationUtils.findAnnotation(method, Async.class);
+		Async async = AnnotatedElementUtils.findMergedAnnotation(method, Async.class);
 		if (async == null) {
-			async = AnnotationUtils.findAnnotation(method.getDeclaringClass(), Async.class);
+			async = AnnotatedElementUtils.findMergedAnnotation(method.getDeclaringClass(), Async.class);
 		}
 		return (async != null ? async.value() : null);
 	}

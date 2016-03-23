@@ -271,10 +271,15 @@ public class AnnotatedElementUtils {
 		Assert.notNull(element, "AnnotatedElement must not be null");
 		Assert.notNull(annotationType, "annotationType must not be null");
 
+		// Shortcut: directly present on the element, with no processing needed?
+		if (element.isAnnotationPresent(annotationType)) {
+			return true;
+		}
+
 		return Boolean.TRUE.equals(searchWithGetSemantics(element, annotationType, null, new SimpleAnnotationProcessor<Boolean>() {
 			@Override
 			public Boolean process(AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
-				boolean found = annotation.annotationType() == annotationType;
+				boolean found = (annotation.annotationType() == annotationType);
 				return (found ? Boolean.TRUE : CONTINUE);
 			}
 		}));
@@ -324,6 +329,15 @@ public class AnnotatedElementUtils {
 	 * @see AnnotationUtils#synthesizeAnnotation(Map, Class, AnnotatedElement)
 	 */
 	public static <A extends Annotation> A getMergedAnnotation(AnnotatedElement element, Class<A> annotationType) {
+		Assert.notNull(annotationType, "annotationType must not be null");
+
+		// Shortcut: directly present on the element, with no merging needed?
+		A annotation = element.getAnnotation(annotationType);
+		if (annotation != null) {
+			return AnnotationUtils.synthesizeAnnotation(annotation, element);
+		}
+
+		// Exhaustive retrieval of merged annotation attributes...
 		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, annotationType);
 		return AnnotationUtils.synthesizeAnnotation(attributes, annotationType, element);
 	}
@@ -413,6 +427,38 @@ public class AnnotatedElementUtils {
 	}
 
 	/**
+	 * Determine if an annotation of the specified {@code annotationType}
+	 * is <em>available</em> on the supplied {@link AnnotatedElement} or
+	 * within the annotation hierarchy <em>above</em> the specified element.
+	 * <p>If this method returns {@code true}, then {@link #findMergedAnnotationAttributes}
+	 * will return a non-null value.
+	 * <p>This method follows <em>find semantics</em> as described in the
+	 * {@linkplain AnnotatedElementUtils class-level javadoc}.
+	 * @param element the annotated element
+	 * @param annotationType the annotation type to find
+	 * @return {@code true} if a matching annotation is present
+	 * @since 4.3
+	 */
+	public static boolean hasAnnotation(AnnotatedElement element, final Class<? extends Annotation> annotationType) {
+		Assert.notNull(element, "AnnotatedElement must not be null");
+		Assert.notNull(annotationType, "annotationType must not be null");
+
+		// Shortcut: directly present on the element, with no processing needed?
+		if (element.isAnnotationPresent(annotationType)) {
+			return true;
+		}
+
+		return Boolean.TRUE.equals(searchWithFindSemantics(element, annotationType, annotationType.getName(),
+				new SimpleAnnotationProcessor<Boolean>() {
+					@Override
+					public Boolean process(AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
+						boolean found = (annotation.annotationType() == annotationType);
+						return (found ? Boolean.TRUE : CONTINUE);
+					}
+				}));
+	}
+
+	/**
 	 * Find the first annotation of the specified {@code annotationType} within
 	 * the annotation hierarchy <em>above</em> the supplied {@code element},
 	 * merge that annotation's attributes with <em>matching</em> attributes from
@@ -430,6 +476,14 @@ public class AnnotatedElementUtils {
 	 */
 	public static <A extends Annotation> A findMergedAnnotation(AnnotatedElement element, Class<A> annotationType) {
 		Assert.notNull(annotationType, "annotationType must not be null");
+
+		// Shortcut: directly present on the element, with no merging needed?
+		A annotation = element.getDeclaredAnnotation(annotationType);
+		if (annotation != null) {
+			return AnnotationUtils.synthesizeAnnotation(annotation, element);
+		}
+
+		// Exhaustive retrieval of merged annotation attributes...
 		AnnotationAttributes attributes = findMergedAnnotationAttributes(element, annotationType, false, false);
 		return AnnotationUtils.synthesizeAnnotation(attributes, annotationType, element);
 	}
@@ -483,9 +537,8 @@ public class AnnotatedElementUtils {
 		Assert.notNull(element, "AnnotatedElement must not be null");
 		Assert.notNull(annotationType, "annotationType must not be null");
 
-		MergedAnnotationAttributesProcessor processor = new MergedAnnotationAttributesProcessor(annotationType, null,
-			false, false, true);
-
+		MergedAnnotationAttributesProcessor processor =
+				new MergedAnnotationAttributesProcessor(annotationType, null, false, false, true);
 		searchWithFindSemantics(element, annotationType, annotationType.getName(), processor);
 
 		Set<A> annotations = new LinkedHashSet<A>();
@@ -831,8 +884,7 @@ public class AnnotatedElementUtils {
 			try {
 				// Locally declared annotations (ignoring @Inherited)
 				Annotation[] annotations = element.getDeclaredAnnotations();
-
-				List<T> aggregatedResults = processor.aggregates() ? new ArrayList<T>() : null;
+				List<T> aggregatedResults = (processor.aggregates() ? new ArrayList<T>() : null);
 
 				// Search in local annotations
 				for (Annotation annotation : annotations) {

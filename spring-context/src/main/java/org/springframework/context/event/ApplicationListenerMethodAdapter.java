@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.util.Assert;
@@ -214,7 +213,7 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 	}
 
 	protected <A extends Annotation> A getMethodAnnotation(Class<A> annotationType) {
-		return AnnotationUtils.findAnnotation(this.method, annotationType);
+		return AnnotatedElementUtils.findMergedAnnotation(this.method, annotationType);
 	}
 
 	/**

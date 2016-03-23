@@ -226,12 +226,22 @@ public class HandlerMethod {
 	 * if no annotation can be found on the given method itself.
 	 * <p>Also supports <em>merged</em> composed annotations with attribute
 	 * overrides as of Spring Framework 4.2.2.
-	 * @param annotationType the type of annotation to introspect the method for.
+	 * @param annotationType the type of annotation to introspect the method for
 	 * @return the annotation, or {@code null} if none found
 	 * @see AnnotatedElementUtils#findMergedAnnotation
 	 */
 	public <A extends Annotation> A getMethodAnnotation(Class<A> annotationType) {
 		return AnnotatedElementUtils.findMergedAnnotation(this.method, annotationType);
+	}
+
+	/**
+	 * Return whether the parameter is declared with the given annotation type.
+	 * @param annotationType the annotation type to look for
+	 * @since 4.3
+	 * @see AnnotatedElementUtils#hasAnnotation
+	 */
+	public <A extends Annotation> boolean hasMethodAnnotation(Class<A> annotationType) {
+		return AnnotatedElementUtils.hasAnnotation(this.method, annotationType);
 	}
 
 	/**
@@ -245,6 +255,15 @@ public class HandlerMethod {
 			handler = this.beanFactory.getBean(beanName);
 		}
 		return new HandlerMethod(this, handler);
+	}
+
+	/**
+	 * Return a short representation of this handler method for log message purposes.
+	 * @since 4.3
+	 */
+	public String getShortLogMessage() {
+		int args = this.method.getParameterTypes().length;
+		return getBeanType().getName() + "#" + this.method.getName() + "[" + args + " args]";
 	}
 
 
@@ -292,6 +311,11 @@ public class HandlerMethod {
 		@Override
 		public <T extends Annotation> T getMethodAnnotation(Class<T> annotationType) {
 			return HandlerMethod.this.getMethodAnnotation(annotationType);
+		}
+
+		@Override
+		public <T extends Annotation> boolean hasMethodAnnotation(Class<T> annotationType) {
+			return HandlerMethod.this.hasMethodAnnotation(annotationType);
 		}
 
 		@Override

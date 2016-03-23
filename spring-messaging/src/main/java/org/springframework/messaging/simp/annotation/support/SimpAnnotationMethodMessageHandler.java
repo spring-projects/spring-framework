@@ -29,7 +29,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.context.SmartLifecycle;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.DefaultFormattingConversionService;
 import org.springframework.messaging.Message;
@@ -360,14 +360,14 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 
 	@Override
 	protected boolean isHandler(Class<?> beanType) {
-		return (AnnotationUtils.findAnnotation(beanType, Controller.class) != null);
+		return AnnotatedElementUtils.hasAnnotation(beanType, Controller.class);
 	}
 
 	@Override
 	protected SimpMessageMappingInfo getMappingForMethod(Method method, Class<?> handlerType) {
-		MessageMapping messageAnn = AnnotationUtils.findAnnotation(method, MessageMapping.class);
+		MessageMapping messageAnn = AnnotatedElementUtils.findMergedAnnotation(method, MessageMapping.class);
 		if (messageAnn != null) {
-			MessageMapping typeAnn = AnnotationUtils.findAnnotation(handlerType, MessageMapping.class);
+			MessageMapping typeAnn = AnnotatedElementUtils.findMergedAnnotation(handlerType, MessageMapping.class);
 			// Only actually register it if there are destinations specified;
 			// otherwise @MessageMapping is just being used as a (meta-annotation) marker.
 			if (messageAnn.value().length > 0 || (typeAnn != null && typeAnn.value().length > 0)) {
@@ -379,9 +379,9 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 			}
 		}
 
-		SubscribeMapping subscribeAnn = AnnotationUtils.findAnnotation(method, SubscribeMapping.class);
+		SubscribeMapping subscribeAnn = AnnotatedElementUtils.findMergedAnnotation(method, SubscribeMapping.class);
 		if (subscribeAnn != null) {
-			MessageMapping typeAnn = AnnotationUtils.findAnnotation(handlerType, MessageMapping.class);
+			MessageMapping typeAnn = AnnotatedElementUtils.findMergedAnnotation(handlerType, MessageMapping.class);
 			// Only actually register it if there are destinations specified;
 			// otherwise @SubscribeMapping is just being used as a (meta-annotation) marker.
 			if (subscribeAnn.value().length > 0 || (typeAnn != null && typeAnn.value().length > 0)) {
