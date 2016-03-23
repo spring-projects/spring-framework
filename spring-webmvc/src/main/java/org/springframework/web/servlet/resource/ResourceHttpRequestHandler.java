@@ -485,7 +485,10 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		if (mediaType == null) {
 			ServletWebRequest webRequest = new ServletWebRequest(request);
 			try {
-				getContentNegotiationManager().resolveMediaTypes(webRequest);
+				List<MediaType> mediaTypes = getContentNegotiationManager().resolveMediaTypes(webRequest);
+				if(!mediaTypes.isEmpty()) {
+					mediaType = mediaTypes.get(0);
+				}
 			}
 			catch (HttpMediaTypeNotAcceptableException ex) {
 				// Ignore

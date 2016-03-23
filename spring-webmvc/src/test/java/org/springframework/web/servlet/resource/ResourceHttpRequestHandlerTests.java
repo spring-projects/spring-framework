@@ -54,6 +54,7 @@ import org.springframework.web.servlet.HandlerMapping;
  * @author Keith Donald
  * @author Jeremy Grelle
  * @author Rossen Stoyanchev
+ * @author Brian Clozel
  */
 public class ResourceHttpRequestHandlerTests {
 
@@ -228,6 +229,27 @@ public class ResourceHttpRequestHandlerTests {
 	public void getResourceWithRegisteredMediaType() throws Exception {
 		ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
 		factory.addMediaType("css", new MediaType("foo", "bar"));
+		factory.afterPropertiesSet();
+		ContentNegotiationManager manager = factory.getObject();
+
+		List<Resource> paths = Collections.singletonList(new ClassPathResource("test/", getClass()));
+		this.handler = new ResourceHttpRequestHandler();
+		this.handler.setLocations(paths);
+		this.handler.setContentNegotiationManager(manager);
+		this.handler.afterPropertiesSet();
+
+		this.request.setAttribute(HandlerMapping.PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE, "foo.css");
+		this.handler.handleRequest(this.request, this.response);
+
+		assertEquals("foo/bar", this.response.getContentType());
+		assertEquals("h1 { color:red; }", this.response.getContentAsString());
+	}
+
+	@Test // SPR-13658
+	public void getResourceWithRegisteredMediaTypeDefaultStrategy() throws Exception {
+		ContentNegotiationManagerFactoryBean factory = new ContentNegotiationManagerFactoryBean();
+		factory.setFavorPathExtension(false);
+		factory.setDefaultContentType(new MediaType("foo", "bar"));
 		factory.afterPropertiesSet();
 		ContentNegotiationManager manager = factory.getObject();
 
