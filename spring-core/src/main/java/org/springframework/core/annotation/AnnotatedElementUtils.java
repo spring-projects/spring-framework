@@ -332,9 +332,13 @@ public class AnnotatedElementUtils {
 		Assert.notNull(annotationType, "annotationType must not be null");
 
 		// Shortcut: directly present on the element, with no merging needed?
-		A annotation = element.getAnnotation(annotationType);
-		if (annotation != null) {
-			return AnnotationUtils.synthesizeAnnotation(annotation, element);
+		if (!(element instanceof Class)) {
+			// Do not use this shortcut against a Class: Inherited annotations
+			// would get preferred over locally declared composed annotations.
+			A annotation = element.getAnnotation(annotationType);
+			if (annotation != null) {
+				return AnnotationUtils.synthesizeAnnotation(annotation, element);
+			}
 		}
 
 		// Exhaustive retrieval of merged annotation attributes...
@@ -478,9 +482,13 @@ public class AnnotatedElementUtils {
 		Assert.notNull(annotationType, "annotationType must not be null");
 
 		// Shortcut: directly present on the element, with no merging needed?
-		A annotation = element.getDeclaredAnnotation(annotationType);
-		if (annotation != null) {
-			return AnnotationUtils.synthesizeAnnotation(annotation, element);
+		if (!(element instanceof Class)) {
+			// Do not use this shortcut against a Class: Inherited annotations
+			// would get preferred over locally declared composed annotations.
+			A annotation = element.getAnnotation(annotationType);
+			if (annotation != null) {
+				return AnnotationUtils.synthesizeAnnotation(annotation, element);
+			}
 		}
 
 		// Exhaustive retrieval of merged annotation attributes...
