@@ -126,8 +126,6 @@ public abstract class GenericTypeResolver {
 		Assert.notNull(args, "Argument array must not be null");
 
 		TypeVariable<Method>[] declaredTypeVariables = method.getTypeParameters();
-		Type genericReturnType = method.getGenericReturnType();
-		Type[] methodArgumentTypes = method.getGenericParameterTypes();
 
 		// No declared type variables to inspect, so just return the standard return type.
 		if (declaredTypeVariables.length == 0) {
@@ -136,12 +134,14 @@ public abstract class GenericTypeResolver {
 
 		// The supplied argument list is too short for the method's signature, so
 		// return null, since such a method invocation would fail.
+		Type[] methodArgumentTypes = method.getGenericParameterTypes();
 		if (args.length < methodArgumentTypes.length) {
 			return null;
 		}
 
 		// Ensure that the type variable (e.g., T) is declared directly on the method
 		// itself (e.g., via <T>), not on the enclosing class or interface.
+		Type genericReturnType = method.getGenericReturnType();
 		boolean locallyDeclaredTypeVariableMatchesReturnType = false;
 		for (TypeVariable<Method> currentTypeVariable : declaredTypeVariables) {
 			if (currentTypeVariable.equals(genericReturnType)) {
