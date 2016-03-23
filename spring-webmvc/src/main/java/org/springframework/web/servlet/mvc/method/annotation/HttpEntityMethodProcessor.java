@@ -19,7 +19,10 @@ package org.springframework.web.servlet.mvc.method.annotation;
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
@@ -39,6 +42,8 @@ import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
+
+import static org.springframework.http.HttpHeaders.VARY;
 
 /**
  * Resolves {@link HttpEntity} and {@link RequestEntity} method argument values
@@ -162,9 +167,18 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		Assert.isInstanceOf(HttpEntity.class, returnValue);
 		HttpEntity<?> responseEntity = (HttpEntity<?>) returnValue;
 
+		HttpHeaders outputHeaders = outputMessage.getHeaders();
 		HttpHeaders entityHeaders = responseEntity.getHeaders();
+		if (outputHeaders.containsKey(VARY) && entityHeaders.containsKey(VARY)) {
+			List<String> values = getVaryRequestHeadersToAdd(outputHeaders, entityHeaders);
+			if (!values.isEmpty()) {
+				outputHeaders.setVary(values);
+			}
+		}
 		if (!entityHeaders.isEmpty()) {
-			outputMessage.getHeaders().putAll(entityHeaders);
+			for (Map.Entry<String, List<String>> entry : entityHeaders.entrySet()) {
+				outputHeaders.putIfAbsent(entry.getKey(), entry.getValue());
+			}
 		}
 
 		Object body = responseEntity.getBody();
@@ -186,6 +200,27 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 		// Ensure headers are flushed even if no body was written.
 		outputMessage.flush();
+	}
+
+	private List<String> getVaryRequestHeadersToAdd(HttpHeaders responseHeaders, HttpHeaders entityHeaders) {
+		if (!responseHeaders.containsKey(HttpHeaders.VARY)) {
+			return entityHeaders.getVary();
+		}
+		List<String> entityHeadersVary = entityHeaders.getVary();
+		List<String> result = new ArrayList<String>(entityHeadersVary);
+		for (String header : responseHeaders.get(HttpHeaders.VARY)) {
+			for (String existing : StringUtils.tokenizeToStringArray(header, ",")) {
+				if ("*".equals(existing)) {
+					return Collections.emptyList();
+				}
+				for (String value : entityHeadersVary) {
+					if (value.equalsIgnoreCase(existing)) {
+						result.remove(value);
+					}
+				}
+			}
+		}
+		return result;
 	}
 
 	private boolean isResourceNotModified(ServletServerHttpRequest inputMessage, ServletServerHttpResponse outputMessage) {

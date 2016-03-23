@@ -21,6 +21,7 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -517,6 +518,47 @@ public class HttpEntityMethodProcessorMockTests {
 		assertEquals(etagValue, servletResponse.getHeader(HttpHeaders.ETAG));
 	}
 
+	@Test
+	public void varyHeader() throws Exception {
+		String[] entityValues = {"Accept-Language", "User-Agent"};
+		String[] existingValues = {};
+		String[] expected = {"Accept-Language, User-Agent"};
+		testVaryHeader(entityValues, existingValues, expected);
+	}
+
+	@Test
+	public void varyHeaderWithExistingWildcard() throws Exception {
+		String[] entityValues = {"Accept-Language"};
+		String[] existingValues = {"*"};
+		String[] expected = {"*"};
+		testVaryHeader(entityValues, existingValues, expected);
+	}
+
+	@Test
+	public void varyHeaderWithExistingCommaValues() throws Exception {
+		String[] entityValues = {"Accept-Language", "User-Agent"};
+		String[] existingValues = {"Accept-Encoding", "Accept-Language"};
+		String[] expected = {"Accept-Encoding", "Accept-Language", "User-Agent"};
+		testVaryHeader(entityValues, existingValues, expected);
+	}
+
+	@Test
+	public void varyHeaderWithExistingCommaSeparatedValues() throws Exception {
+		String[] entityValues = {"Accept-Language", "User-Agent"};
+		String[] existingValues = {"Accept-Encoding, Accept-Language"};
+		String[] expected = {"Accept-Encoding, Accept-Language", "User-Agent"};
+		testVaryHeader(entityValues, existingValues, expected);
+	}
+
+	@Test
+	public void handleReturnValueVaryHeader() throws Exception {
+		String[] entityValues = {"Accept-Language", "User-Agent"};
+		String[] existingValues = {"Accept-Encoding, Accept-Language"};
+		String[] expected = {"Accept-Encoding, Accept-Language", "User-Agent"};
+		testVaryHeader(entityValues, existingValues, expected);
+	}
+
+
 	private void initStringMessageConversion(MediaType accepted) {
 		given(messageConverter.canWrite(String.class, null)).willReturn(true);
 		given(messageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.TEXT_PLAIN));
@@ -535,6 +577,20 @@ public class HttpEntityMethodProcessorMockTests {
 		ArgumentCaptor<HttpOutputMessage> outputMessage = ArgumentCaptor.forClass(HttpOutputMessage.class);
 		verify(messageConverter).write(eq(body), eq(MediaType.TEXT_PLAIN), outputMessage.capture());
 	}
+
+	private void testVaryHeader(String[] entityValues, String[] existingValues, String[] expected) throws Exception {
+		ResponseEntity<String> returnValue = ResponseEntity.ok().varyBy(entityValues).body("Foo");
+		for (String value : existingValues) {
+			servletResponse.addHeader("Vary", value);
+		}
+		initStringMessageConversion(MediaType.TEXT_PLAIN);
+		processor.handleReturnValue(returnValue, returnTypeResponseEntity, mavContainer, webRequest);
+
+		assertTrue(mavContainer.isRequestHandled());
+		assertEquals(Arrays.asList(expected), servletResponse.getHeaders("Vary"));
+		verify(messageConverter).write(eq("Foo"), eq(MediaType.TEXT_PLAIN), isA(HttpOutputMessage.class));
+	}
+
 
 	@SuppressWarnings("unused")
 	public ResponseEntity<String> handle1(HttpEntity<String> httpEntity, ResponseEntity<String> entity,

@@ -19,6 +19,7 @@ package org.springframework.web.servlet.support;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -27,7 +28,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.http.CacheControl;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -77,6 +80,10 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 
 	protected static final String HEADER_CACHE_CONTROL = "Cache-Control";
 
+	/** Checking for Servlet 3.0+ HttpServletResponse.getHeaders(String) */
+	private static final boolean servlet3Present =
+			ClassUtils.hasMethod(HttpServletResponse.class, "getHeaders", String.class);
+
 
 	/** Set of supported HTTP methods */
 	private Set<String> supportedMethods;
@@ -88,6 +95,11 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	private CacheControl cacheControl;
 
 	private int cacheSeconds = -1;
+
+	private String[] varyByRequestHeaders;
+
+
+	// deprecated fields
 
 	/** Use HTTP 1.0 expires header? */
 	private boolean useExpiresHeader = false;
@@ -246,6 +258,29 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	}
 
 	/**
+	 * Configure one or more request header names (e.g. "Accept-Language") to
+	 * add to the "Vary" response header to inform clients that the response is
+	 * subject to content negotiation and variances based on the value of the
+	 * given request headers. The configured request header names are added only
+	 * if not already present in the response "Vary" header.
+	 *
+	 * <p><strong>Note:</strong> this property is only supported on Servlet 3.0+
+	 * which allows checking existing response header values.
+	 * @param varyByRequestHeaders one or more request header names
+	 * @since 4.3
+	 */
+	public void setVaryByRequestHeaders(String... varyByRequestHeaders) {
+		this.varyByRequestHeaders = varyByRequestHeaders;
+	}
+
+	/**
+	 * Return the configured request header names for the "Vary" response header.
+	 */
+	public String[] getVaryByRequestHeaders() {
+		return this.varyByRequestHeaders;
+	}
+
+	/**
 	 * Set whether to use the HTTP 1.0 expires header. Default is "false",
 	 * as of 4.2.
 	 * <p>Note: Cache headers will only get applied if caching is enabled
@@ -362,6 +397,11 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 		}
 		else {
 			applyCacheSeconds(response, this.cacheSeconds);
+		}
+		if (servlet3Present && this.varyByRequestHeaders != null) {
+			for (String value : getVaryRequestHeadersToAdd(response)) {
+				response.addHeader("Vary", value);
+			}
 		}
 	}
 
@@ -544,6 +584,27 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 				response.addHeader(HEADER_CACHE_CONTROL, "no-store");
 			}
 		}
+	}
+
+	private Collection<String> getVaryRequestHeadersToAdd(HttpServletResponse response) {
+		if (!response.containsHeader(HttpHeaders.VARY)) {
+			return Arrays.asList(getVaryByRequestHeaders());
+		}
+		Collection<String> result = new ArrayList<String>(getVaryByRequestHeaders().length);
+		Collections.addAll(result, getVaryByRequestHeaders());
+		for (String header : response.getHeaders(HttpHeaders.VARY)) {
+			for (String existing : StringUtils.tokenizeToStringArray(header, ",")) {
+				if ("*".equals(existing)) {
+					return Collections.emptyList();
+				}
+				for (String value : getVaryByRequestHeaders()) {
+					if (value.equalsIgnoreCase(existing)) {
+						result.remove(value);
+					}
+				}
+			}
+		}
+		return result;
 	}
 
 }

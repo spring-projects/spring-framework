@@ -38,6 +38,7 @@ import java.util.TimeZone;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -945,6 +946,24 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public String getUpgrade() {
 		return getFirst(UPGRADE);
+	}
+
+	/**
+	 * Set the request header names (e.g. "Accept-Language") for which the
+	 * response is subject to content negotiation and variances based on the
+	 * value of those request headers.
+	 * @param requestHeaders the request header names
+	 * @since 4.3
+	 */
+	public void setVary(List<String> requestHeaders) {
+		set(VARY, toCommaDelimitedString(requestHeaders));
+	}
+
+	/**
+	 * Return the request header names subject to content negotiation.
+	 */
+	public List<String> getVary() {
+		return getFirstValueAsList(VARY);
 	}
 
 	/**

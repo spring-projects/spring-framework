@@ -333,6 +333,17 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 		B cacheControl(CacheControl cacheControl);
 
 		/**
+		 * Configure one or more request header names (e.g. "Accept-Language") to
+		 * add to the "Vary" response header to inform clients that the response is
+		 * subject to content negotiation and variances based on the value of the
+		 * given request headers. The configured request header names are added only
+		 * if not already present in the response "Vary" header.
+		 * @param requestHeaders request header names
+		 * @since 4.3
+		 */
+		B varyBy(String... requestHeaders);
+
+		/**
 		 * Build the response entity with no body.
 		 * @return the response entity
 		 * @see BodyBuilder#body(Object)
@@ -451,6 +462,12 @@ public class ResponseEntity<T> extends HttpEntity<T> {
 			if (ccValue != null) {
 				this.headers.setCacheControl(cacheControl.getHeaderValue());
 			}
+			return this;
+		}
+
+		@Override
+		public BodyBuilder varyBy(String... requestHeaders) {
+			this.headers.setVary(Arrays.asList(requestHeaders));
 			return this;
 		}
 
