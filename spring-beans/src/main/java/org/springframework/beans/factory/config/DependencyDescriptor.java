@@ -180,6 +180,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 	 * @param beanName the bean name, as a candidate result for this dependency
 	 * @param beanFactory the associated factory
 	 * @return the bean instance (never {@code null})
+	 * @since 4.3
 	 * @see BeanFactory#getBean(String)
 	 */
 	public Object resolveCandidate(String beanName, BeanFactory beanFactory) {
@@ -278,6 +279,7 @@ public class DependencyDescriptor extends InjectionPoint implements Serializable
 						Type[] args = ((ParameterizedType) type).getActualTypeArguments();
 						type = args[args.length - 1];
 					}
+					// TODO: Object.class if unresolvable
 				}
 				if (type instanceof Class) {
 					return (Class<?>) type;
