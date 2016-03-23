@@ -18,18 +18,11 @@ package org.springframework.http.server.reactive;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLongFieldUpdater;
 
 import io.undertow.connector.PooledByteBuffer;
 import io.undertow.server.HttpServerExchange;
-import io.undertow.util.SameThreadExecutor;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import org.xnio.ChannelListener;
@@ -38,9 +31,7 @@ import org.xnio.IoUtils;
 import org.xnio.channels.StreamSinkChannel;
 import org.xnio.channels.StreamSourceChannel;
 import reactor.core.publisher.Mono;
-import reactor.core.subscriber.BaseSubscriber;
 import reactor.core.util.BackpressureUtils;
-import reactor.core.util.Exceptions;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;
@@ -73,15 +64,14 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 	public void handleRequest(HttpServerExchange exchange) throws Exception {
 
 		RequestBodyPublisher requestBody = new RequestBodyPublisher(exchange, allocator);
+		requestBody.registerListener();
 		ServerHttpRequest request = new UndertowServerHttpRequest(exchange, requestBody);
 
-		ResponseBodySubscriber responseBodySubscriber = new ResponseBodySubscriber(exchange);
+		ResponseBodySubscriber responseBody = new ResponseBodySubscriber(exchange);
+		responseBody.registerListener();
 		ServerHttpResponse response = new UndertowServerHttpResponse(exchange,
-				publisher -> Mono
-						.from(subscriber -> publisher.subscribe(responseBodySubscriber)),
+				publisher -> Mono.from(subscriber -> publisher.subscribe(responseBody)),
 				allocator);
-
-		exchange.dispatch();
 
 		this.delegate.handle(request, response).subscribe(new Subscriber<Void>() {
 
@@ -113,375 +103,219 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 		});
 	}
 
-	private static class RequestBodyPublisher implements Publisher<DataBuffer> {
+	private static class RequestBodyPublisher extends AbstractRequestBodyPublisher {
 
-		private static final AtomicLongFieldUpdater<RequestBodySubscription> DEMAND =
-				AtomicLongFieldUpdater.newUpdater(RequestBodySubscription.class, "demand");
+		private static final Log logger = LogFactory.getLog(RequestBodyPublisher.class);
 
+		private final ChannelListener<StreamSourceChannel> listener =
+				new RequestBodyListener();
 
-		private final HttpServerExchange exchange;
+		private final StreamSourceChannel requestChannel;
 
 		private final DataBufferAllocator allocator;
 
-		private Subscriber<? super DataBuffer> subscriber;
+		private final PooledByteBuffer pooledByteBuffer;
 
 		public RequestBodyPublisher(HttpServerExchange exchange,
 				DataBufferAllocator allocator) {
-			this.exchange = exchange;
+			this.requestChannel = exchange.getRequestChannel();
+			this.pooledByteBuffer =
+					exchange.getConnection().getByteBufferPool().allocate();
 			this.allocator = allocator;
 		}
 
-		@Override
-		public void subscribe(Subscriber<? super DataBuffer> subscriber) {
-			if (subscriber == null) {
-				throw Exceptions.argumentIsNullException();
-			}
-			if (this.subscriber != null) {
-				subscriber.onError(new IllegalStateException("Only one subscriber allowed"));
-			}
-
-			this.subscriber = subscriber;
-			this.subscriber.onSubscribe(new RequestBodySubscription());
+		public void registerListener() {
+			this.requestChannel.getReadSetter().set(listener);
+			this.requestChannel.resumeReads();
 		}
 
-
-		private class RequestBodySubscription implements Subscription, Runnable,
-				ChannelListener<StreamSourceChannel> {
-
-			volatile long demand;
-
-			private PooledByteBuffer pooledBuffer;
-
-			private StreamSourceChannel channel;
-
-			private boolean subscriptionClosed;
-
-			private boolean draining;
-
-
-			@Override
-			public void request(long n) {
-				BackpressureUtils.checkRequest(n, subscriber);
-				if (this.subscriptionClosed) {
-					return;
-				}
-				BackpressureUtils.getAndAdd(DEMAND, this, n);
-				scheduleNextMessage();
+		private void close() {
+			if (this.pooledByteBuffer != null) {
+				IoUtils.safeClose(this.pooledByteBuffer);
 			}
-
-			private void scheduleNextMessage() {
-				exchange.dispatch(exchange.isInIoThread() ? SameThreadExecutor.INSTANCE :
-						exchange.getIoThread(), this);
+			if (this.requestChannel != null) {
+				IoUtils.safeClose(this.requestChannel);
 			}
+		}
 
-			@Override
-			public void cancel() {
-				this.subscriptionClosed = true;
-				close();
-			}
+		@Override
+		protected void noLongerStalled() {
+			listener.handleEvent(requestChannel);
+		}
 
-			private void close() {
-				if (this.pooledBuffer != null) {
-					IoUtils.safeClose(this.pooledBuffer);
-					this.pooledBuffer = null;
-				}
-				if (this.channel != null) {
-					IoUtils.safeClose(this.channel);
-					this.channel = null;
-				}
-			}
-
-			@Override
-			public void run() {
-				if (this.subscriptionClosed || this.draining) {
-					return;
-				}
-				if (0 == BackpressureUtils.getAndSub(DEMAND, this, 1)) {
-					return;
-				}
-
-				this.draining = true;
-
-				if (this.channel == null) {
-					this.channel = exchange.getRequestChannel();
-
-					if (this.channel == null) {
-						if (exchange.isRequestComplete()) {
-							return;
-						}
-						else {
-							throw new IllegalStateException("Failed to acquire channel!");
-						}
-					}
-				}
-				if (this.pooledBuffer == null) {
-					this.pooledBuffer = exchange.getConnection().getByteBufferPool().allocate();
-				}
-				else {
-					this.pooledBuffer.getBuffer().clear();
-				}
-
-				try {
-					ByteBuffer buffer = this.pooledBuffer.getBuffer();
-					int count;
-					do {
-						count = this.channel.read(buffer);
-						if (count == 0) {
-							this.channel.getReadSetter().set(this);
-							this.channel.resumeReads();
-						}
-						else if (count == -1) {
-							if (buffer.position() > 0) {
-								doOnNext(buffer);
-							}
-							doOnComplete();
-						}
-						else {
-							if (buffer.remaining() == 0) {
-								if (this.demand == 0) {
-									this.channel.suspendReads();
-								}
-								doOnNext(buffer);
-								if (this.demand > 0) {
-									scheduleNextMessage();
-								}
-								break;
-							}
-						}
-					} while (count > 0);
-				}
-				catch (IOException e) {
-					doOnError(e);
-				}
-			}
-
-			private void doOnNext(ByteBuffer buffer) {
-				this.draining = false;
-				buffer.flip();
-				DataBuffer dataBuffer = allocator.wrap(buffer);
-				subscriber.onNext(dataBuffer);
-			}
-
-			private void doOnComplete() {
-				this.subscriptionClosed = true;
-				try {
-					subscriber.onComplete();
-				}
-				finally {
-					close();
-				}
-			}
-
-			private void doOnError(Throwable t) {
-				this.subscriptionClosed = true;
-				try {
-					subscriber.onError(t);
-				}
-				finally {
-					close();
-				}
-			}
+		private class RequestBodyListener
+				implements ChannelListener<StreamSourceChannel> {
 
 			@Override
 			public void handleEvent(StreamSourceChannel channel) {
-				if (this.subscriptionClosed) {
+				if (isSubscriptionCancelled()) {
 					return;
 				}
-
+				logger.trace("handleEvent");
+				ByteBuffer byteBuffer = pooledByteBuffer.getBuffer();
 				try {
-					ByteBuffer buffer = this.pooledBuffer.getBuffer();
-					int count;
-					do {
-						count = channel.read(buffer);
-						if (count == 0) {
-							return;
+					while (true) {
+						if (!checkSubscriptionForDemand()) {
+							break;
 						}
-						else if (count == -1) {
-							if (buffer.position() > 0) {
-								doOnNext(buffer);
-							}
-							doOnComplete();
+						int read = channel.read(byteBuffer);
+						logger.trace("Input read:" + read);
+
+						if (read == -1) {
+							publishOnComplete();
+							close();
+							break;
+						}
+						else if (read == 0) {
+							// input not ready, wait until we are invoked again
+							break;
 						}
 						else {
-							if (buffer.remaining() == 0) {
-								if (this.demand == 0) {
-									channel.suspendReads();
-								}
-								doOnNext(buffer);
-								if (this.demand > 0) {
-									scheduleNextMessage();
-								}
-								break;
-							}
+							byteBuffer.flip();
+							DataBuffer dataBuffer = allocator.wrap(byteBuffer);
+							publishOnNext(dataBuffer);
 						}
-					} while (count > 0);
+					}
 				}
-				catch (IOException e) {
-					doOnError(e);
+				catch (IOException ex) {
+					publishOnError(ex);
 				}
 			}
 		}
+
 	}
 
-	private static class ResponseBodySubscriber
-			implements ChannelListener<StreamSinkChannel>, BaseSubscriber<DataBuffer>{
+	private static class ResponseBodySubscriber implements Subscriber<DataBuffer> {
+
+		private static final Log logger = LogFactory.getLog(ResponseBodySubscriber.class);
+
+		private final ChannelListener<StreamSinkChannel> listener =
+				new ResponseBodyListener();
 
 		private final HttpServerExchange exchange;
 
+		private final StreamSinkChannel responseChannel;
+
+		private volatile ByteBuffer byteBuffer;
+
+		private volatile boolean completed = false;
+
 		private Subscription subscription;
-
-		private final Queue<PooledByteBuffer> buffers = new ConcurrentLinkedQueue<>();
-
-		private final AtomicInteger writing = new AtomicInteger();
-
-		private final AtomicBoolean closing = new AtomicBoolean();
-
-		private StreamSinkChannel responseChannel;
-
 
 		public ResponseBodySubscriber(HttpServerExchange exchange) {
 			this.exchange = exchange;
+			this.responseChannel = exchange.getResponseChannel();
 		}
+
+		public void registerListener() {
+			this.responseChannel.getWriteSetter().set(listener);
+			this.responseChannel.resumeWrites();
+		}
+
 
 		@Override
 		public void onSubscribe(Subscription subscription) {
-			BaseSubscriber.super.onSubscribe(subscription);
-			this.subscription = subscription;
-			this.subscription.request(1);
+			logger.trace("onSubscribe. Subscription: " + subscription);
+			if (BackpressureUtils.validate(this.subscription, subscription)) {
+				this.subscription = subscription;
+				this.subscription.request(1);
+			}
 		}
 
 		@Override
 		public void onNext(DataBuffer dataBuffer) {
-			BaseSubscriber.super.onNext(dataBuffer);
+			Assert.state(this.byteBuffer == null);
+			logger.trace("onNext. buffer: " + dataBuffer);
 
-			ByteBuffer buffer = dataBuffer.asByteBuffer();
-
-			if (this.responseChannel == null) {
-				this.responseChannel = exchange.getResponseChannel();
-			}
-
-			this.writing.incrementAndGet();
-			try {
-				int c;
-				do {
-					c = this.responseChannel.write(buffer);
-				} while (buffer.hasRemaining() && c > 0);
-
-				if (buffer.hasRemaining()) {
-					this.writing.incrementAndGet();
-					enqueue(buffer);
-					this.responseChannel.getWriteSetter().set(this);
-					this.responseChannel.resumeWrites();
-				}
-				else {
-					this.subscription.request(1);
-				}
-
-			}
-			catch (IOException ex) {
-				onError(ex);
-			}
-			finally {
-				this.writing.decrementAndGet();
-				if (this.closing.get()) {
-					closeIfDone();
-				}
-			}
-		}
-
-		private void enqueue(ByteBuffer src) {
-			do {
-				PooledByteBuffer buffer = exchange.getConnection().getByteBufferPool().allocate();
-				ByteBuffer dst = buffer.getBuffer();
-				copy(dst, src);
-				dst.flip();
-				this.buffers.add(buffer);
-			} while (src.remaining() > 0);
-		}
-
-		private void copy(ByteBuffer dst, ByteBuffer src) {
-			int n = Math.min(dst.capacity(), src.remaining());
-			for (int i = 0; i < n; i++) {
-				dst.put(src.get());
-			}
+			this.byteBuffer = dataBuffer.asByteBuffer();
 		}
 
 		@Override
-		public void handleEvent(StreamSinkChannel channel) {
-			try {
-				int c;
-				do {
-					ByteBuffer buffer = this.buffers.peek().getBuffer();
-					do {
-						c = channel.write(buffer);
-					} while (buffer.hasRemaining() && c > 0);
-
-					if (!buffer.hasRemaining()) {
-						IoUtils.safeClose(this.buffers.remove());
-					}
-				} while (!this.buffers.isEmpty() && c > 0);
-
-				if (!this.buffers.isEmpty()) {
-					channel.resumeWrites();
-				}
-				else {
-					this.writing.decrementAndGet();
-
-					if (this.closing.get()) {
-						closeIfDone();
-					}
-					else {
-						this.subscription.request(1);
-					}
-				}
-			}
-			catch (IOException ex) {
-				onError(ex);
-			}
-		}
-
-		@Override
-		public void onError(Throwable ex) {
-			BaseSubscriber.super.onError(ex);
-			logger.error("ResponseBodySubscriber error", ex);
+		public void onError(Throwable t) {
+			logger.error("onError", t);
 			if (!exchange.isResponseStarted() && exchange.getStatusCode() < 500) {
 				exchange.setStatusCode(500);
 			}
+			closeChannel(responseChannel);
 		}
 
 		@Override
 		public void onComplete() {
-			if (this.responseChannel != null) {
-				this.closing.set(true);
-				closeIfDone();
+			logger.trace("onComplete. buffer: " + this.byteBuffer);
+
+			this.completed = true;
+
+			if (this.byteBuffer == null) {
+				closeChannel(responseChannel);
 			}
 		}
 
-		private void closeIfDone() {
-			if (this.writing.get() == 0) {
-				if (this.closing.compareAndSet(true, false)) {
-					closeChannel();
-				}
-			}
-		}
-
-		private void closeChannel() {
+		private void closeChannel(StreamSinkChannel channel) {
 			try {
-				this.responseChannel.shutdownWrites();
+				channel.shutdownWrites();
 
-				if (!this.responseChannel.flush()) {
-					this.responseChannel.getWriteSetter().set(ChannelListeners
-							.flushingChannelListener(
-									o -> IoUtils.safeClose(this.responseChannel),
+				if (!channel.flush()) {
+					channel.getWriteSetter().set(ChannelListeners
+							.flushingChannelListener(o -> IoUtils.safeClose(channel),
 									ChannelListeners.closingChannelExceptionHandler()));
-					this.responseChannel.resumeWrites();
+					channel.resumeWrites();
 				}
-				this.responseChannel = null;
 			}
-			catch (IOException ex) {
-				onError(ex);
+			catch (IOException ignored) {
+				logger.error(ignored, ignored);
+
 			}
 		}
+
+		private class ResponseBodyListener implements ChannelListener<StreamSinkChannel> {
+
+			@Override
+			public void handleEvent(StreamSinkChannel channel) {
+				if (byteBuffer != null) {
+					try {
+						int total = byteBuffer.remaining();
+						int written = writeByteBuffer(channel);
+
+						logger.trace("written: " + written + " total: " + total);
+
+						if (written == total) {
+							releaseBuffer();
+							if (!completed) {
+								subscription.request(1);
+							}
+							else {
+								closeChannel(channel);
+							}
+						}
+					}
+					catch (IOException ex) {
+						onError(ex);
+					}
+				}
+				else if (subscription != null) {
+					subscription.request(1);
+				}
+
+			}
+
+			private void releaseBuffer() {
+				byteBuffer = null;
+
+			}
+
+			private int writeByteBuffer(StreamSinkChannel channel) throws IOException {
+				int written;
+				int totalWritten = 0;
+				do {
+					written = channel.write(byteBuffer);
+					totalWritten += written;
+				}
+				while (byteBuffer.hasRemaining() && written > 0);
+				return totalWritten;
+			}
+
+		}
+
 	}
 
 }

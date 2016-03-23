@@ -87,12 +87,8 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse {
 				if (!httpCookie.getMaxAge().isNegative()) {
 					cookie.setMaxAge((int) httpCookie.getMaxAge().getSeconds());
 				}
-				if (httpCookie.getDomain().isPresent()) {
-					cookie.setDomain(httpCookie.getDomain().get());
-				}
-				if (httpCookie.getPath().isPresent()) {
-					cookie.setPath(httpCookie.getPath().get());
-				}
+				httpCookie.getDomain().ifPresent(cookie::setDomain);
+				httpCookie.getPath().ifPresent(cookie::setPath);
 				cookie.setSecure(httpCookie.isSecure());
 				cookie.setHttpOnly(httpCookie.isHttpOnly());
 				this.exchange.getResponseCookies().putIfAbsent(name, cookie);

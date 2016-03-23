@@ -16,11 +16,8 @@
 
 package org.springframework.http.server.reactive;
 
-import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.servlet.AsyncContext;
-import javax.servlet.ServletInputStream;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
@@ -56,30 +53,18 @@ final class ServletAsyncContextSynchronizer {
 		this.asyncContext = asyncContext;
 	}
 
+	/**
+	 * Returns the request of this synchronizer.
+	 */
 	public ServletRequest getRequest() {
 		return this.asyncContext.getRequest();
 	}
 
+	/**
+	 * Returns the response of this synchronizer.
+	 */
 	public ServletResponse getResponse() {
 		return this.asyncContext.getResponse();
-	}
-
-	/**
-	 * Returns the input stream of this synchronizer.
-	 * @return the input stream
-	 * @throws IOException if an input or output exception occurred
-	 */
-	public ServletInputStream getInputStream() throws IOException {
-		return getRequest().getInputStream();
-	}
-
-	/**
-	 * Returns the output stream of this synchronizer.
-	 * @return the output stream
-	 * @throws IOException if an input or output exception occurred
-	 */
-	public ServletOutputStream getOutputStream() throws IOException {
-		return getResponse().getOutputStream();
 	}
 
 	/**
