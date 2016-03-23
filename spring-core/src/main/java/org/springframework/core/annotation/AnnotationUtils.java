@@ -111,6 +111,7 @@ public abstract class AnnotationUtils {
 	 */
 	public static final String VALUE = "value";
 
+	private static final String REPEATABLE_CLASS_NAME = "java.lang.annotation.Repeatable";
 
 	private static final Map<AnnotationCacheKey, Annotation> findAnnotationCache =
 			new ConcurrentReferenceHashMap<AnnotationCacheKey, Annotation>(256);
@@ -1721,6 +1722,29 @@ public abstract class AnnotationUtils {
 	}
 
 	/**
+	 * Resolve the container type for the supplied repeatable {@code annotationType}.
+	 * <p>Automatically detects a <em>container annotation</em> declared via
+	 * {@link java.lang.annotation.Repeatable}. If the supplied annotation type
+	 * is not annotated with {@code @Repeatable}, this method simply returns
+	 * {@code null}.
+	 * @since 4.2
+	 */
+	@SuppressWarnings("unchecked")
+	static Class<? extends Annotation> resolveContainerAnnotationType(Class<? extends Annotation> annotationType) {
+		try {
+			Annotation repeatable = getAnnotation(annotationType, REPEATABLE_CLASS_NAME);
+			if (repeatable != null) {
+				Object value = AnnotationUtils.getValue(repeatable);
+				return (Class<? extends Annotation>) value;
+			}
+		}
+		catch (Exception ex) {
+			handleIntrospectionFailure(annotationType, ex);
+		}
+		return null;
+	}
+
+	/**
 	 * <p>If the supplied throwable is an {@link AnnotationConfigurationException},
 	 * it will be cast to an {@code AnnotationConfigurationException} and thrown,
 	 * allowing it to propagate to the caller.
@@ -1806,8 +1830,6 @@ public abstract class AnnotationUtils {
 
 	private static class AnnotationCollector<A extends Annotation> {
 
-		private static final String REPEATABLE_CLASS_NAME = "java.lang.annotation.Repeatable";
-
 		private final Class<A> annotationType;
 
 		private final Class<? extends Annotation> containerAnnotationType;
@@ -1823,21 +1845,6 @@ public abstract class AnnotationUtils {
 			this.containerAnnotationType = (containerAnnotationType != null ? containerAnnotationType :
 					resolveContainerAnnotationType(annotationType));
 			this.declaredMode = declaredMode;
-		}
-
-		@SuppressWarnings("unchecked")
-		static Class<? extends Annotation> resolveContainerAnnotationType(Class<? extends Annotation> annotationType) {
-			try {
-				Annotation repeatable = getAnnotation(annotationType, REPEATABLE_CLASS_NAME);
-				if (repeatable != null) {
-					Object value = AnnotationUtils.getValue(repeatable);
-					return (Class<? extends Annotation>) value;
-				}
-			}
-			catch (Exception ex) {
-				handleIntrospectionFailure(annotationType, ex);
-			}
-			return null;
 		}
 
 		Set<A> getResult(AnnotatedElement element) {
