@@ -54,6 +54,7 @@ public class QualifierAnnotationAutowireContextTests {
 
 	private static final String SAM = "sam";
 
+
 	@Test
 	public void autowiredFieldWithSingleNonQualifiedCandidate() {
 		GenericApplicationContext context = new GenericApplicationContext();
@@ -310,24 +311,6 @@ public class QualifierAnnotationAutowireContextTests {
 		context.refresh();
 		MetaQualifiedFieldTestBean bean = (MetaQualifiedFieldTestBean) context.getBean("autowired");
 		assertEquals(JUERGEN, bean.getPerson().getName());
-	}
-
-	/**
-	 * @see SpringBean
-	 */
-	@Test
-	@Ignore("Disabled until SPR-14058 is resolved")
-	public void autowiredFieldResolutionIgnoresEmptyQualifierFromComposedQualifierAnnotation() {
-		GenericApplicationContext context = new GenericApplicationContext();
-		ConstructorArgumentValues cavs1 = new ConstructorArgumentValues();
-		cavs1.addGenericArgumentValue(SAM);
-		RootBeanDefinition person1 = new RootBeanDefinition(Person.class, cavs1, null);
-		context.registerBeanDefinition(SAM, person1);
-		context.registerBeanDefinition("autowired", new RootBeanDefinition(ComposedAnnotationQualifiedFieldTestBean.class));
-		AnnotationConfigUtils.registerAnnotationConfigProcessors(context);
-		context.refresh();
-		ComposedAnnotationQualifiedFieldTestBean bean = context.getBean(ComposedAnnotationQualifiedFieldTestBean.class);
-		assertEquals(SAM, bean.getPerson().getName());
 	}
 
 	@Test
@@ -654,37 +637,6 @@ public class QualifierAnnotationAutowireContextTests {
 	@TestQualifier
 	@Retention(RetentionPolicy.RUNTIME)
 	@interface MyAutowired {
-	}
-
-
-	/**
-	 * {@code @SpringBean} is a composed annotation that combines the semantics of
-	 * {@code Autowired @Autowired} and {@code Qualifier @Qualifier}
-	 */
-	@Autowired
-	@Qualifier
-	@Retention(RetentionPolicy.RUNTIME)
-	public @interface SpringBean {
-
-		@AliasFor(annotation = Qualifier.class)
-		String value() default "";
-
-		@AliasFor(annotation = Qualifier.class, attribute = "value")
-		String qualifier() default "";
-
-		@AliasFor(annotation = Autowired.class)
-		boolean required() default true;
-
-	}
-
-	private static class ComposedAnnotationQualifiedFieldTestBean {
-
-		@SpringBean
-		private Person person;
-
-		public Person getPerson() {
-			return this.person;
-		}
 	}
 
 
