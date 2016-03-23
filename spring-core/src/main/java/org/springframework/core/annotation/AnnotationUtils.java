@@ -71,11 +71,11 @@ import org.springframework.util.StringUtils;
  * <em>meta-present</em> on the other annotation.
  *
  * <h3>Meta-annotation Support</h3>
- * <p>Most {@code find*()} methods and some {@code get*()} methods in this
- * class provide support for finding annotations used as meta-annotations.
- * Consult the Javadoc for each method in this class for details. For support
- * for meta-annotations with <em>attribute overrides</em> in
- * <em>composed annotations</em>, use {@link AnnotatedElementUtils} instead.
+ * <p>Most {@code find*()} methods and some {@code get*()} methods in this class
+ * provide support for finding annotations used as meta-annotations. Consult the
+ * javadoc for each method in this class for details. For fine-grained support for
+ * meta-annotations with <em>attribute overrides</em> in <em>composed annotations</em>,
+ * consider using {@link AnnotatedElementUtils}'s more specific methods instead.
  *
  * <h3>Attribute Aliases</h3>
  * <p>All public methods in this class that return annotations, arrays of

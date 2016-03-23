@@ -132,10 +132,10 @@ public final class ModelFactory {
 
 		while (!this.modelMethods.isEmpty()) {
 			InvocableHandlerMethod modelMethod = getNextModelMethod(container).getHandlerMethod();
-			ModelAttribute annotation = modelMethod.getMethodAnnotation(ModelAttribute.class);
-			if (container.containsAttribute(annotation.name())) {
-				if (!annotation.binding()) {
-					container.setBindingDisabled(annotation.name());
+			ModelAttribute ann = modelMethod.getMethodAnnotation(ModelAttribute.class);
+			if (container.containsAttribute(ann.name())) {
+				if (!ann.binding()) {
+					container.setBindingDisabled(ann.name());
 				}
 				continue;
 			}
@@ -144,7 +144,7 @@ public final class ModelFactory {
 
 			if (!modelMethod.isVoid()){
 				String returnValueName = getNameForReturnValue(returnValue, modelMethod.getReturnType());
-				if (!annotation.binding()) {
+				if (!ann.binding()) {
 					container.setBindingDisabled(returnValueName);
 				}
 				if (!container.containsAttribute(returnValueName)) {
@@ -193,32 +193,32 @@ public final class ModelFactory {
 	/**
 	 * Derives the model attribute name for a method parameter based on:
 	 * <ol>
-	 * 	<li>The parameter {@code @ModelAttribute} annotation value
-	 * 	<li>The parameter type
+	 * <li>The parameter {@code @ModelAttribute} annotation value
+	 * <li>The parameter type
 	 * </ol>
 	 * @return the derived name; never {@code null} or an empty string
 	 */
 	public static String getNameForParameter(MethodParameter parameter) {
-		ModelAttribute annot = parameter.getParameterAnnotation(ModelAttribute.class);
-		String name = (annot != null) ? annot.value() : null;
+		ModelAttribute ann = parameter.getParameterAnnotation(ModelAttribute.class);
+		String name = (ann != null ? ann.value() : null);
 		return StringUtils.hasText(name) ? name : Conventions.getVariableNameForParameter(parameter);
 	}
 
 	/**
 	 * Derive the model attribute name for the given return value using one of:
 	 * <ol>
-	 * 	<li>The method {@code ModelAttribute} annotation value
-	 * 	<li>The declared return type if it is more specific than {@code Object}
-	 * 	<li>The actual return value type
+	 * <li>The method {@code ModelAttribute} annotation value
+	 * <li>The declared return type if it is more specific than {@code Object}
+	 * <li>The actual return value type
 	 * </ol>
 	 * @param returnValue the value returned from a method invocation
 	 * @param returnType the return type of the method
 	 * @return the model name, never {@code null} nor empty
 	 */
 	public static String getNameForReturnValue(Object returnValue, MethodParameter returnType) {
-		ModelAttribute annotation = returnType.getMethodAnnotation(ModelAttribute.class);
-		if (annotation != null && StringUtils.hasText(annotation.value())) {
-			return annotation.value();
+		ModelAttribute ann = returnType.getMethodAnnotation(ModelAttribute.class);
+		if (ann != null && StringUtils.hasText(ann.value())) {
+			return ann.value();
 		}
 		else {
 			Method method = returnType.getMethod();

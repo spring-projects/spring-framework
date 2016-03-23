@@ -148,7 +148,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	@Override
 	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
 		return supports(clazz) && canWrite(mediaType);
-		}
+	}
 
 	/**
 	 * Returns {@code true} if the given media type includes any of the

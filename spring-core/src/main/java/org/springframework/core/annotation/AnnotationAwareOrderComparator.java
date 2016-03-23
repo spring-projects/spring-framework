@@ -22,8 +22,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.springframework.core.OrderComparator;
 import org.springframework.core.DecoratingProxy;
+import org.springframework.core.OrderComparator;
 
 /**
  * {@code AnnotationAwareOrderComparator} is an extension of

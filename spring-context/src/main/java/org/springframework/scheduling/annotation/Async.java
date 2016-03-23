@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public @interface Async {
 	 * bean definition.
 	 * <p>When specified on a class level {@code @Async} annotation, indicates that the
 	 * given executor should be used for all methods within the class. Method level use
-	 * of {@link Async#value} always overrides any value set at the class level.
+	 * of {@code Async#value} always overrides any value set at the class level.
 	 * @since 3.1.2
 	 */
 	String value() default "";

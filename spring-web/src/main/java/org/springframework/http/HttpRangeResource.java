@@ -27,15 +27,15 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.Assert;
 
 /**
- * Holder that combines a {@link Resource} descriptor with
- * {@link HttpRange} information to be used for reading
- * selected parts of the resource.
+ * Holder that combines a {@link Resource} descriptor with {@link HttpRange}
+ * information to be used for reading selected parts of the resource.
  *
  * <p>Used as an argument for partial conversion operations in
  * {@link org.springframework.http.converter.ResourceHttpMessageConverter}.
  *
  * @author Brian Clozel
- * @since 4.3.0
+ * @since 4.3
+ * @see HttpRange
  */
 public class HttpRangeResource implements Resource {
 
@@ -43,77 +43,81 @@ public class HttpRangeResource implements Resource {
 
 	private final Resource resource;
 
+
 	public HttpRangeResource(List<HttpRange> httpRanges, Resource resource) {
-		Assert.notEmpty(httpRanges, "list of HTTP Ranges should not be empty");
+		Assert.notEmpty(httpRanges, "List of HTTP Ranges should not be empty");
 		this.httpRanges = httpRanges;
 		this.resource = resource;
 	}
+
 
 	/**
 	 * Return the list of HTTP (byte) ranges describing the requested
 	 * parts of the Resource, as provided by the HTTP Range request.
 	 */
 	public final List<HttpRange> getHttpRanges() {
-		return httpRanges;
+		return this.httpRanges;
 	}
+
 
 	@Override
 	public boolean exists() {
-		return resource.exists();
+		return this.resource.exists();
 	}
 
 	@Override
 	public boolean isReadable() {
-		return resource.isReadable();
+		return this.resource.isReadable();
 	}
 
 	@Override
 	public boolean isOpen() {
-		return resource.isOpen();
+		return this.resource.isOpen();
 	}
 
 	@Override
 	public URL getURL() throws IOException {
-		return resource.getURL();
+		return this.resource.getURL();
 	}
 
 	@Override
 	public URI getURI() throws IOException {
-		return resource.getURI();
+		return this.resource.getURI();
 	}
 
 	@Override
 	public File getFile() throws IOException {
-		return resource.getFile();
+		return this.resource.getFile();
 	}
 
 	@Override
 	public long contentLength() throws IOException {
-		return resource.contentLength();
+		return this.resource.contentLength();
 	}
 
 	@Override
 	public long lastModified() throws IOException {
-		return resource.lastModified();
+		return this.resource.lastModified();
 	}
 
 	@Override
 	public Resource createRelative(String relativePath) throws IOException {
-		return resource.createRelative(relativePath);
+		return this.resource.createRelative(relativePath);
 	}
 
 	@Override
 	public String getFilename() {
-		return resource.getFilename();
+		return this.resource.getFilename();
 	}
 
 	@Override
 	public String getDescription() {
-		return resource.getDescription();
+		return this.resource.getDescription();
 	}
 
 	@Override
 	public InputStream getInputStream() throws IOException {
-		return resource.getInputStream();
+		return this.resource.getInputStream();
 	}
+
 }
