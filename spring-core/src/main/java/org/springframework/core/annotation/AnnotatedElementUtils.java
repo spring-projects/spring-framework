@@ -314,39 +314,21 @@ public class AnnotatedElementUtils {
 	}
 
 	/**
-	 * Get the first annotation of the specified {@code annotationType} within
-	 * the annotation hierarchy <em>above</em> the supplied {@code element},
-	 * merge that annotation's attributes with <em>matching</em> attributes from
-	 * annotations in lower levels of the annotation hierarchy, and synthesize
-	 * the result back into an annotation of the specified {@code annotationType}.
-	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both
-	 * within a single annotation and within the annotation hierarchy.
-	 * <p>This method delegates to {@link #getMergedAnnotationAttributes(AnnotatedElement, Class)}
-	 * and {@link AnnotationUtils#synthesizeAnnotation(Map, Class, AnnotatedElement)}.
-	 * @param element the annotated element
-	 * @param annotationType the annotation type to find
-	 * @return the merged, synthesized {@code Annotation}, or {@code null} if not found
-	 * @since 4.2
-	 * @see #getMergedAnnotationAttributes(AnnotatedElement, Class)
-	 * @see #findMergedAnnotation(AnnotatedElement, Class)
-	 * @see AnnotationUtils#synthesizeAnnotation(Map, Class, AnnotatedElement)
+	 * @deprecated As of Spring Framework 4.2, use {@link #getMergedAnnotationAttributes(AnnotatedElement, String)} instead.
 	 */
-	public static <A extends Annotation> A getMergedAnnotation(AnnotatedElement element, Class<A> annotationType) {
-		Assert.notNull(annotationType, "annotationType must not be null");
+	@Deprecated
+	public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement element, String annotationName) {
+		return getMergedAnnotationAttributes(element, annotationName);
+	}
 
-		// Shortcut: directly present on the element, with no merging needed?
-		if (!(element instanceof Class)) {
-			// Do not use this shortcut against a Class: Inherited annotations
-			// would get preferred over locally declared composed annotations.
-			A annotation = element.getAnnotation(annotationType);
-			if (annotation != null) {
-				return AnnotationUtils.synthesizeAnnotation(annotation, element);
-			}
-		}
+	/**
+	 * @deprecated As of Spring Framework 4.2, use {@link #getMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)} instead.
+	 */
+	@Deprecated
+	public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement element, String annotationName,
+			boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
 
-		// Exhaustive retrieval of merged annotation attributes...
-		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, annotationType);
-		return AnnotationUtils.synthesizeAnnotation(attributes, annotationType, element);
+		return getMergedAnnotationAttributes(element, annotationName, classValuesAsString, nestedAnnotationsAsMap);
 	}
 
 	/**
@@ -434,6 +416,102 @@ public class AnnotatedElementUtils {
 	}
 
 	/**
+	 * Get the first annotation of the specified {@code annotationType} within
+	 * the annotation hierarchy <em>above</em> the supplied {@code element},
+	 * merge that annotation's attributes with <em>matching</em> attributes from
+	 * annotations in lower levels of the annotation hierarchy, and synthesize
+	 * the result back into an annotation of the specified {@code annotationType}.
+	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both
+	 * within a single annotation and within the annotation hierarchy.
+	 * <p>This method delegates to {@link #getMergedAnnotationAttributes(AnnotatedElement, Class)}
+	 * and {@link AnnotationUtils#synthesizeAnnotation(Map, Class, AnnotatedElement)}.
+	 * @param element the annotated element
+	 * @param annotationType the annotation type to find
+	 * @return the merged, synthesized {@code Annotation}, or {@code null} if not found
+	 * @since 4.2
+	 * @see #getMergedAnnotationAttributes(AnnotatedElement, Class)
+	 * @see #findMergedAnnotation(AnnotatedElement, Class)
+	 * @see AnnotationUtils#synthesizeAnnotation(Map, Class, AnnotatedElement)
+	 */
+	public static <A extends Annotation> A getMergedAnnotation(AnnotatedElement element, Class<A> annotationType) {
+		Assert.notNull(annotationType, "annotationType must not be null");
+
+		// Shortcut: directly present on the element, with no merging needed?
+		if (!(element instanceof Class)) {
+			// Do not use this shortcut against a Class: Inherited annotations
+			// would get preferred over locally declared composed annotations.
+			A annotation = element.getAnnotation(annotationType);
+			if (annotation != null) {
+				return AnnotationUtils.synthesizeAnnotation(annotation, element);
+			}
+		}
+
+		// Exhaustive retrieval of merged annotation attributes...
+		AnnotationAttributes attributes = getMergedAnnotationAttributes(element, annotationType);
+		return AnnotationUtils.synthesizeAnnotation(attributes, annotationType, element);
+	}
+
+	/**
+	 * Get the annotation attributes of <strong>all</strong> annotations of the specified
+	 * {@code annotationName} in the annotation hierarchy above the supplied
+	 * {@link AnnotatedElement} and store the results in a {@link MultiValueMap}.
+	 * <p>Note: in contrast to {@link #getMergedAnnotationAttributes(AnnotatedElement, String)},
+	 * this method does <em>not</em> support attribute overrides.
+	 * <p>This method follows <em>get semantics</em> as described in the
+	 * {@linkplain AnnotatedElementUtils class-level javadoc}.
+	 * @param element the annotated element
+	 * @param annotationName the fully qualified class name of the annotation type to find
+	 * @return a {@link MultiValueMap} keyed by attribute name, containing the annotation
+	 * attributes from all annotations found, or {@code null} if not found
+	 * @see #getAllAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
+	 */
+	public static MultiValueMap<String, Object> getAllAnnotationAttributes(AnnotatedElement element, String annotationName) {
+		return getAllAnnotationAttributes(element, annotationName, false, false);
+	}
+
+	/**
+	 * Get the annotation attributes of <strong>all</strong> annotations of
+	 * the specified {@code annotationName} in the annotation hierarchy above
+	 * the supplied {@link AnnotatedElement} and store the results in a
+	 * {@link MultiValueMap}.
+	 * <p>Note: in contrast to {@link #getMergedAnnotationAttributes(AnnotatedElement, String)},
+	 * this method does <em>not</em> support attribute overrides.
+	 * <p>This method follows <em>get semantics</em> as described in the
+	 * {@linkplain AnnotatedElementUtils class-level javadoc}.
+	 * @param element the annotated element
+	 * @param annotationName the fully qualified class name of the annotation type to find
+	 * @param classValuesAsString whether to convert Class references into Strings or to
+	 * preserve them as Class references
+	 * @param nestedAnnotationsAsMap whether to convert nested Annotation instances into
+	 * {@code AnnotationAttributes} maps or to preserve them as Annotation instances
+	 * @return a {@link MultiValueMap} keyed by attribute name, containing the annotation
+	 * attributes from all annotations found, or {@code null} if not found
+	 */
+	public static MultiValueMap<String, Object> getAllAnnotationAttributes(AnnotatedElement element,
+			final String annotationName, final boolean classValuesAsString, final boolean nestedAnnotationsAsMap) {
+
+		final MultiValueMap<String, Object> attributesMap = new LinkedMultiValueMap<String, Object>();
+
+		searchWithGetSemantics(element, null, annotationName, new SimpleAnnotationProcessor<Void>() {
+			@Override
+			public Void process(AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
+				boolean found = annotation.annotationType().getName().equals(annotationName);
+				if (found) {
+					AnnotationAttributes annotationAttributes = AnnotationUtils.getAnnotationAttributes(
+							annotation, classValuesAsString, nestedAnnotationsAsMap);
+					for (Map.Entry<String, Object> entry : annotationAttributes.entrySet()) {
+						attributesMap.add(entry.getKey(), entry.getValue());
+					}
+				}
+				// Continue searching...
+				return null;
+			}
+		});
+
+		return (!attributesMap.isEmpty() ? attributesMap : null);
+	}
+
+	/**
 	 * Determine if an annotation of the specified {@code annotationType}
 	 * is <em>available</em> on the supplied {@link AnnotatedElement} or
 	 * within the annotation hierarchy <em>above</em> the specified element.
@@ -464,6 +542,80 @@ public class AnnotatedElementUtils {
 						return (found ? Boolean.TRUE : CONTINUE);
 					}
 				}));
+	}
+
+	/**
+	 * Find the first annotation of the specified {@code annotationType} within
+	 * the annotation hierarchy <em>above</em> the supplied {@code element} and
+	 * merge that annotation's attributes with <em>matching</em> attributes from
+	 * annotations in lower levels of the annotation hierarchy.
+	 * <p>Attributes from lower levels in the annotation hierarchy override
+	 * attributes of the same name from higher levels, and
+	 * {@link AliasFor @AliasFor} semantics are fully supported, both
+	 * within a single annotation and within the annotation hierarchy.
+	 * <p>In contrast to {@link #getAllAnnotationAttributes}, the search
+	 * algorithm used by this method will stop searching the annotation
+	 * hierarchy once the first annotation of the specified
+	 * {@code annotationType} has been found. As a consequence, additional
+	 * annotations of the specified {@code annotationType} will be ignored.
+	 * <p>This method follows <em>find semantics</em> as described in the
+	 * {@linkplain AnnotatedElementUtils class-level javadoc}.
+	 * @param element the annotated element
+	 * @param annotationType the annotation type to find
+	 * @param classValuesAsString whether to convert Class references into
+	 * Strings or to preserve them as Class references
+	 * @param nestedAnnotationsAsMap whether to convert nested Annotation
+	 * instances into {@code AnnotationAttributes} maps or to preserve them
+	 * as Annotation instances
+	 * @return the merged {@code AnnotationAttributes}, or {@code null} if
+	 * not found
+	 * @since 4.2
+	 * @see #findMergedAnnotation(AnnotatedElement, Class)
+	 * @see #getMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
+	 */
+	public static AnnotationAttributes findMergedAnnotationAttributes(AnnotatedElement element,
+			Class<? extends Annotation> annotationType, boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
+
+		AnnotationAttributes attributes = searchWithFindSemantics(element, annotationType, annotationType.getName(),
+				new MergedAnnotationAttributesProcessor(annotationType, null, classValuesAsString, nestedAnnotationsAsMap));
+		AnnotationUtils.postProcessAnnotationAttributes(element, attributes, classValuesAsString, nestedAnnotationsAsMap);
+		return attributes;
+	}
+
+	/**
+	 * Find the first annotation of the specified {@code annotationName} within
+	 * the annotation hierarchy <em>above</em> the supplied {@code element} and
+	 * merge that annotation's attributes with <em>matching</em> attributes from
+	 * annotations in lower levels of the annotation hierarchy.
+	 * <p>Attributes from lower levels in the annotation hierarchy override
+	 * attributes of the same name from higher levels, and
+	 * {@link AliasFor @AliasFor} semantics are fully supported, both
+	 * within a single annotation and within the annotation hierarchy.
+	 * <p>In contrast to {@link #getAllAnnotationAttributes}, the search
+	 * algorithm used by this method will stop searching the annotation
+	 * hierarchy once the first annotation of the specified
+	 * {@code annotationName} has been found. As a consequence, additional
+	 * annotations of the specified {@code annotationName} will be ignored.
+	 * <p>This method follows <em>find semantics</em> as described in the
+	 * {@linkplain AnnotatedElementUtils class-level javadoc}.
+	 * @param element the annotated element
+	 * @param annotationName the fully qualified class name of the annotation type to find
+	 * @param classValuesAsString whether to convert Class references into Strings or to
+	 * preserve them as Class references
+	 * @param nestedAnnotationsAsMap whether to convert nested Annotation instances into
+	 * {@code AnnotationAttributes} maps or to preserve them as Annotation instances
+	 * @return the merged {@code AnnotationAttributes}, or {@code null} if not found
+	 * @since 4.2
+	 * @see #findMergedAnnotation(AnnotatedElement, Class)
+	 * @see #getMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
+	 */
+	public static AnnotationAttributes findMergedAnnotationAttributes(AnnotatedElement element,
+			String annotationName, boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
+
+		AnnotationAttributes attributes = searchWithFindSemantics(element, null, annotationName,
+				new MergedAnnotationAttributesProcessor(null, annotationName, classValuesAsString, nestedAnnotationsAsMap));
+		AnnotationUtils.postProcessAnnotationAttributes(element, attributes, classValuesAsString, nestedAnnotationsAsMap);
+		return attributes;
 	}
 
 	/**
@@ -630,20 +782,14 @@ public class AnnotatedElementUtils {
 		Assert.notNull(annotationType, "annotationType must not be null");
 
 		if (containerType == null) {
-			containerType = AnnotationUtils.resolveContainerAnnotationType(annotationType);
-			if (containerType == null) {
-				throw new IllegalArgumentException(
-					"annotationType must be a repeatable annotation: failed to resolve container type for "
-							+ annotationType.getName());
-			}
+			containerType = resolveContainerType(annotationType);
 		}
 		else {
 			validateRepeatableContainerType(annotationType, containerType);
 		}
 
-		MergedAnnotationAttributesProcessor processor = new MergedAnnotationAttributesProcessor(annotationType, null,
-			false, false, true);
-
+		MergedAnnotationAttributesProcessor processor =
+				new MergedAnnotationAttributesProcessor(annotationType, null, false, false, true);
 		searchWithFindSemantics(element, annotationType, annotationType.getName(), containerType, processor);
 
 		Set<A> annotations = new LinkedHashSet<A>();
@@ -652,158 +798,6 @@ public class AnnotatedElementUtils {
 			annotations.add(AnnotationUtils.synthesizeAnnotation(attributes, annotationType, element));
 		}
 		return annotations;
-	}
-
-	/**
-	 * Find the first annotation of the specified {@code annotationType} within
-	 * the annotation hierarchy <em>above</em> the supplied {@code element} and
-	 * merge that annotation's attributes with <em>matching</em> attributes from
-	 * annotations in lower levels of the annotation hierarchy.
-	 * <p>Attributes from lower levels in the annotation hierarchy override
-	 * attributes of the same name from higher levels, and
-	 * {@link AliasFor @AliasFor} semantics are fully supported, both
-	 * within a single annotation and within the annotation hierarchy.
-	 * <p>In contrast to {@link #getAllAnnotationAttributes}, the search
-	 * algorithm used by this method will stop searching the annotation
-	 * hierarchy once the first annotation of the specified
-	 * {@code annotationType} has been found. As a consequence, additional
-	 * annotations of the specified {@code annotationType} will be ignored.
-	 * <p>This method follows <em>find semantics</em> as described in the
-	 * {@linkplain AnnotatedElementUtils class-level javadoc}.
-	 * @param element the annotated element
-	 * @param annotationType the annotation type to find
-	 * @param classValuesAsString whether to convert Class references into
-	 * Strings or to preserve them as Class references
-	 * @param nestedAnnotationsAsMap whether to convert nested Annotation
-	 * instances into {@code AnnotationAttributes} maps or to preserve them
-	 * as Annotation instances
-	 * @return the merged {@code AnnotationAttributes}, or {@code null} if
-	 * not found
-	 * @since 4.2
-	 * @see #findMergedAnnotation(AnnotatedElement, Class)
-	 * @see #getMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
-	 */
-	public static AnnotationAttributes findMergedAnnotationAttributes(AnnotatedElement element,
-			Class<? extends Annotation> annotationType, boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
-
-		AnnotationAttributes attributes = searchWithFindSemantics(element, annotationType, annotationType.getName(),
-				new MergedAnnotationAttributesProcessor(annotationType, null, classValuesAsString, nestedAnnotationsAsMap));
-		AnnotationUtils.postProcessAnnotationAttributes(element, attributes, classValuesAsString, nestedAnnotationsAsMap);
-		return attributes;
-	}
-
-	/**
-	 * Find the first annotation of the specified {@code annotationName} within
-	 * the annotation hierarchy <em>above</em> the supplied {@code element} and
-	 * merge that annotation's attributes with <em>matching</em> attributes from
-	 * annotations in lower levels of the annotation hierarchy.
-	 * <p>Attributes from lower levels in the annotation hierarchy override
-	 * attributes of the same name from higher levels, and
-	 * {@link AliasFor @AliasFor} semantics are fully supported, both
-	 * within a single annotation and within the annotation hierarchy.
-	 * <p>In contrast to {@link #getAllAnnotationAttributes}, the search
-	 * algorithm used by this method will stop searching the annotation
-	 * hierarchy once the first annotation of the specified
-	 * {@code annotationName} has been found. As a consequence, additional
-	 * annotations of the specified {@code annotationName} will be ignored.
-	 * <p>This method follows <em>find semantics</em> as described in the
-	 * {@linkplain AnnotatedElementUtils class-level javadoc}.
-	 * @param element the annotated element
-	 * @param annotationName the fully qualified class name of the annotation type to find
-	 * @param classValuesAsString whether to convert Class references into Strings or to
-	 * preserve them as Class references
-	 * @param nestedAnnotationsAsMap whether to convert nested Annotation instances into
-	 * {@code AnnotationAttributes} maps or to preserve them as Annotation instances
-	 * @return the merged {@code AnnotationAttributes}, or {@code null} if not found
-	 * @since 4.2
-	 * @see #findMergedAnnotation(AnnotatedElement, Class)
-	 * @see #getMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
-	 */
-	public static AnnotationAttributes findMergedAnnotationAttributes(AnnotatedElement element,
-			String annotationName, boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
-
-		AnnotationAttributes attributes = searchWithFindSemantics(element, null, annotationName,
-				new MergedAnnotationAttributesProcessor(null, annotationName, classValuesAsString, nestedAnnotationsAsMap));
-		AnnotationUtils.postProcessAnnotationAttributes(element, attributes, classValuesAsString, nestedAnnotationsAsMap);
-		return attributes;
-	}
-
-	/**
-	 * @deprecated As of Spring Framework 4.2, use {@link #getMergedAnnotationAttributes(AnnotatedElement, String)} instead.
-	 */
-	@Deprecated
-	public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement element, String annotationName) {
-		return getMergedAnnotationAttributes(element, annotationName);
-	}
-
-	/**
-	 * @deprecated As of Spring Framework 4.2, use {@link #getMergedAnnotationAttributes(AnnotatedElement, String, boolean, boolean)} instead.
-	 */
-	@Deprecated
-	public static AnnotationAttributes getAnnotationAttributes(AnnotatedElement element, String annotationName,
-			boolean classValuesAsString, boolean nestedAnnotationsAsMap) {
-
-		return getMergedAnnotationAttributes(element, annotationName, classValuesAsString, nestedAnnotationsAsMap);
-	}
-
-	/**
-	 * Get the annotation attributes of <strong>all</strong> annotations of the specified
-	 * {@code annotationName} in the annotation hierarchy above the supplied
-	 * {@link AnnotatedElement} and store the results in a {@link MultiValueMap}.
-	 * <p>Note: in contrast to {@link #getMergedAnnotationAttributes(AnnotatedElement, String)},
-	 * this method does <em>not</em> support attribute overrides.
-	 * <p>This method follows <em>get semantics</em> as described in the
-	 * {@linkplain AnnotatedElementUtils class-level javadoc}.
-	 * @param element the annotated element
-	 * @param annotationName the fully qualified class name of the annotation type to find
-	 * @return a {@link MultiValueMap} keyed by attribute name, containing the annotation
-	 * attributes from all annotations found, or {@code null} if not found
-	 * @see #getAllAnnotationAttributes(AnnotatedElement, String, boolean, boolean)
-	 */
-	public static MultiValueMap<String, Object> getAllAnnotationAttributes(AnnotatedElement element, String annotationName) {
-		return getAllAnnotationAttributes(element, annotationName, false, false);
-	}
-
-	/**
-	 * Get the annotation attributes of <strong>all</strong> annotations of
-	 * the specified {@code annotationName} in the annotation hierarchy above
-	 * the supplied {@link AnnotatedElement} and store the results in a
-	 * {@link MultiValueMap}.
-	 * <p>Note: in contrast to {@link #getMergedAnnotationAttributes(AnnotatedElement, String)},
-	 * this method does <em>not</em> support attribute overrides.
-	 * <p>This method follows <em>get semantics</em> as described in the
-	 * {@linkplain AnnotatedElementUtils class-level javadoc}.
-	 * @param element the annotated element
-	 * @param annotationName the fully qualified class name of the annotation type to find
-	 * @param classValuesAsString whether to convert Class references into Strings or to
-	 * preserve them as Class references
-	 * @param nestedAnnotationsAsMap whether to convert nested Annotation instances into
-	 * {@code AnnotationAttributes} maps or to preserve them as Annotation instances
-	 * @return a {@link MultiValueMap} keyed by attribute name, containing the annotation
-	 * attributes from all annotations found, or {@code null} if not found
-	 */
-	public static MultiValueMap<String, Object> getAllAnnotationAttributes(AnnotatedElement element,
-			final String annotationName, final boolean classValuesAsString, final boolean nestedAnnotationsAsMap) {
-
-		final MultiValueMap<String, Object> attributesMap = new LinkedMultiValueMap<String, Object>();
-
-		searchWithGetSemantics(element, null, annotationName, new SimpleAnnotationProcessor<Void>() {
-			@Override
-			public Void process(AnnotatedElement annotatedElement, Annotation annotation, int metaDepth) {
-				boolean found = annotation.annotationType().getName().equals(annotationName);
-				if (found) {
-					AnnotationAttributes annotationAttributes = AnnotationUtils.getAnnotationAttributes(
-							annotation, classValuesAsString, nestedAnnotationsAsMap);
-					for (Map.Entry<String, Object> entry : annotationAttributes.entrySet()) {
-						attributesMap.add(entry.getKey(), entry.getValue());
-					}
-				}
-				// Continue searching...
-				return null;
-			}
-		});
-
-		return (!attributesMap.isEmpty() ? attributesMap : null);
 	}
 
 	/**
@@ -1190,6 +1184,24 @@ public class AnnotatedElementUtils {
 		}
 		// Unable to read value from repeating annotation container -> ignore it.
 		return (A[]) EMPTY_ANNOTATION_ARRAY;
+	}
+
+	/**
+	 * Resolve the container type for the supplied repeatable {@code annotationType}.
+	 * <p>Delegates to {@link AnnotationUtils#resolveContainerAnnotationType(Class)}.
+	 * @param annotationType the annotation type to resolve the container for
+	 * @return the container type; never {@code null}
+	 * @throws IllegalArgumentException if the container type cannot be resolved
+	 * @since 4.3
+	 */
+	private static Class<? extends Annotation> resolveContainerType(Class<? extends Annotation> annotationType) {
+		Class<? extends Annotation> containerType = AnnotationUtils.resolveContainerAnnotationType(annotationType);
+		if (containerType == null) {
+			throw new IllegalArgumentException(
+				"annotationType must be a repeatable annotation: failed to resolve container type for "
+						+ annotationType.getName());
+		}
+		return containerType;
 	}
 
 	/**
