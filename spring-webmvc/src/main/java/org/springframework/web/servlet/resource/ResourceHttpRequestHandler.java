@@ -170,7 +170,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	}
 
 	public ResourceHttpMessageConverter getResourceHttpMessageConverter() {
-		return resourceHttpMessageConverter;
+		return this.resourceHttpMessageConverter;
 	}
 
 
