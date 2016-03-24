@@ -452,6 +452,38 @@ public class AnnotatedElementUtils {
 	}
 
 	/**
+	 * Get <strong>all</strong> annotations of the specified {@code annotationType}
+	 * within the annotation hierarchy <em>above</em> the supplied {@code element};
+	 * and for each annotation found, merge that annotation's attributes with
+	 * <em>matching</em> attributes from annotations in lower levels of the annotation
+	 * hierarchy and synthesize the results back into an annotation of the specified
+	 * {@code annotationType}.
+	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both within a
+	 * single annotation and within annotation hierarchies.
+	 * <p>This method follows <em>get semantics</em> as described in the
+	 * {@linkplain AnnotatedElementUtils class-level javadoc}.
+	 * @param element the annotated element; never {@code null}
+	 * @param annotationType the annotation type to find; never {@code null}
+	 * @return the set of all merged, synthesized {@code Annotations} found, or an empty
+	 * set if none were found
+	 * @since 4.3
+	 * @see #getMergedAnnotation(AnnotatedElement, Class)
+	 * @see #getAllAnnotationAttributes(AnnotatedElement, String)
+	 * @see #findAllMergedAnnotations(AnnotatedElement, Class)
+	 */
+	public static <A extends Annotation> Set<A> getAllMergedAnnotations(AnnotatedElement element,
+			Class<A> annotationType) {
+
+		Assert.notNull(element, "AnnotatedElement must not be null");
+		Assert.notNull(annotationType, "annotationType must not be null");
+
+		MergedAnnotationAttributesProcessor processor =
+				new MergedAnnotationAttributesProcessor(annotationType, null, false, false, true);
+		searchWithGetSemantics(element, annotationType, null, processor);
+		return postProcessAndSynthesizeAggregatedResults(element, annotationType, processor.getAggregatedResults());
+	}
+
+	/**
 	 * Get the annotation attributes of <strong>all</strong> annotations of the specified
 	 * {@code annotationName} in the annotation hierarchy above the supplied
 	 * {@link AnnotatedElement} and store the results in a {@link MultiValueMap}.
@@ -688,7 +720,7 @@ public class AnnotatedElementUtils {
 	 * within the annotation hierarchy <em>above</em> the supplied {@code element};
 	 * and for each annotation found, merge that annotation's attributes with
 	 * <em>matching</em> attributes from annotations in lower levels of the annotation
-	 * hierarchy and synthesize the result back into an annotation of the specified
+	 * hierarchy and synthesize the results back into an annotation of the specified
 	 * {@code annotationType}.
 	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both within a
 	 * single annotation and within annotation hierarchies.
@@ -700,6 +732,7 @@ public class AnnotatedElementUtils {
 	 * set if none were found
 	 * @since 4.3
 	 * @see #findMergedAnnotation(AnnotatedElement, Class)
+	 * @see #getAllMergedAnnotations(AnnotatedElement, Class)
 	 */
 	public static <A extends Annotation> Set<A> findAllMergedAnnotations(AnnotatedElement element,
 			Class<A> annotationType) {
@@ -710,13 +743,7 @@ public class AnnotatedElementUtils {
 		MergedAnnotationAttributesProcessor processor =
 				new MergedAnnotationAttributesProcessor(annotationType, null, false, false, true);
 		searchWithFindSemantics(element, annotationType, annotationType.getName(), processor);
-
-		Set<A> annotations = new LinkedHashSet<A>();
-		for (AnnotationAttributes attributes : processor.getAggregatedResults()) {
-			AnnotationUtils.postProcessAnnotationAttributes(element, attributes, false, false);
-			annotations.add(AnnotationUtils.synthesizeAnnotation(attributes, annotationType, element));
-		}
-		return annotations;
+		return postProcessAndSynthesizeAggregatedResults(element, annotationType, processor.getAggregatedResults());
 	}
 
 	/**
@@ -724,7 +751,7 @@ public class AnnotatedElementUtils {
 	 * within the annotation hierarchy <em>above</em> the supplied {@code element};
 	 * and for each annotation found, merge that annotation's attributes with
 	 * <em>matching</em> attributes from annotations in lower levels of the annotation
-	 * hierarchy and synthesize the result back into an annotation of the specified
+	 * hierarchy and synthesize the results back into an annotation of the specified
 	 * {@code annotationType}.
 	 * <p>The container type that holds the repeatable annotations will be looked up
 	 * via {@link java.lang.annotation.Repeatable}.
@@ -754,7 +781,7 @@ public class AnnotatedElementUtils {
 	 * within the annotation hierarchy <em>above</em> the supplied {@code element};
 	 * and for each annotation found, merge that annotation's attributes with
 	 * <em>matching</em> attributes from annotations in lower levels of the annotation
-	 * hierarchy and synthesize the result back into an annotation of the specified
+	 * hierarchy and synthesize the results back into an annotation of the specified
 	 * {@code annotationType}.
 	 * <p>{@link AliasFor @AliasFor} semantics are fully supported, both within a
 	 * single annotation and within annotation hierarchies.
@@ -791,13 +818,7 @@ public class AnnotatedElementUtils {
 		MergedAnnotationAttributesProcessor processor =
 				new MergedAnnotationAttributesProcessor(annotationType, null, false, false, true);
 		searchWithFindSemantics(element, annotationType, annotationType.getName(), containerType, processor);
-
-		Set<A> annotations = new LinkedHashSet<A>();
-		for (AnnotationAttributes attributes : processor.getAggregatedResults()) {
-			AnnotationUtils.postProcessAnnotationAttributes(element, attributes, false, false);
-			annotations.add(AnnotationUtils.synthesizeAnnotation(attributes, annotationType, element));
-		}
-		return annotations;
+		return postProcessAndSynthesizeAggregatedResults(element, annotationType, processor.getAggregatedResults());
 	}
 
 	/**
@@ -906,13 +927,18 @@ public class AnnotatedElementUtils {
 
 		// Search in annotations
 		for (Annotation annotation : annotations) {
+			// Note: we only check for (metaDepth > 0) due to the nuances of getMetaAnnotationTypes().
 			if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation) &&
-					((annotationType != null ? annotation.annotationType() == annotationType :
-					annotation.annotationType().getName().equals(annotationName)) ||
-					metaDepth > 0)) {
+					((annotation.annotationType() == annotationType
+							|| annotation.annotationType().getName().equals(annotationName)) || metaDepth > 0)) {
 				T result = processor.process(annotatedElement, annotation, metaDepth);
 				if (result != null) {
-					return result;
+					if (processor.aggregates() && metaDepth == 0) {
+						processor.getAggregatedResults().add(result);
+					}
+					else {
+						return result;
+					}
 				}
 			}
 		}
@@ -924,7 +950,12 @@ public class AnnotatedElementUtils {
 						annotationName, processor, visited, metaDepth + 1);
 				if (result != null) {
 					processor.postProcess(annotatedElement, annotation, result);
-					return result;
+					if (processor.aggregates() && metaDepth == 0) {
+						processor.getAggregatedResults().add(result);
+					}
+					else {
+						return result;
+					}
 				}
 			}
 		}
@@ -1234,6 +1265,20 @@ public class AnnotatedElementUtils {
 		}
 	}
 
+	/**
+	 * @since 4.3
+	 */
+	private static <A extends Annotation> Set<A> postProcessAndSynthesizeAggregatedResults(AnnotatedElement element,
+			Class<A> annotationType, List<AnnotationAttributes> aggregatedResults) {
+
+		Set<A> annotations = new LinkedHashSet<A>();
+		for (AnnotationAttributes attributes : aggregatedResults) {
+			AnnotationUtils.postProcessAnnotationAttributes(element, attributes, false, false);
+			annotations.add(AnnotationUtils.synthesizeAnnotation(attributes, annotationType, element));
+		}
+		return annotations;
+	}
+
 
 	/**
 	 * Callback interface that is used to process annotations during a search.
@@ -1305,7 +1350,6 @@ public class AnnotatedElementUtils {
 		 * Determine if this processor aggregates the results returned by {@link #process}.
 		 * <p>If this method returns {@code true}, then {@link #getAggregatedResults()}
 		 * must return a non-null value.
-		 * <p>WARNING: aggregation is currently only supported for <em>find semantics</em>.
 		 * @return {@code true} if this processor supports aggregated results
 		 * @see #getAggregatedResults
 		 * @since 4.3
@@ -1319,7 +1363,6 @@ public class AnnotatedElementUtils {
 		 * responsible for asking this processor if it {@link #aggregates} results
 		 * and then adding the post-processed results to the list returned by this
 		 * method.
-		 * <p>WARNING: aggregation is currently only supported for <em>find semantics</em>.
 		 * @return the list of results aggregated by this processor; never
 		 * {@code null} unless {@link #aggregates} returns {@code false}
 		 * @see #aggregates
