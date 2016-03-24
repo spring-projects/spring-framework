@@ -702,8 +702,8 @@ final class HierarchicalUriComponents extends UriComponents {
 		public int hashCode() {
 			return getPath().hashCode();
 		}
-
 	}
+
 
 	/**
 	 * Represents a path backed by a string list (i.e. path segments).
@@ -882,6 +882,7 @@ final class HierarchicalUriComponents extends UriComponents {
 			return 42;
 		}
 	};
+
 
 	private static class QueryUriTemplateVariables implements UriTemplateVariables {
 

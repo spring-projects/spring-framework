@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
-
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -224,7 +223,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		if (this.contentNegotiationManager == null) {
 			this.contentNegotiationManager = initContentNegotiationManager();
 		}
-		if ( this.resourceHttpMessageConverter == null) {
+		if (this.resourceHttpMessageConverter == null) {
 			this.resourceHttpMessageConverter = new ResourceHttpMessageConverter();
 		}
 	}
