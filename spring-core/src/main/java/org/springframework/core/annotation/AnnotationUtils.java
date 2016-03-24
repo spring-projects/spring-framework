@@ -309,6 +309,7 @@ public abstract class AnnotationUtils {
 	 * @since 4.2
 	 * @see #getRepeatableAnnotations(AnnotatedElement, Class, Class)
 	 * @see #getDeclaredRepeatableAnnotations(AnnotatedElement, Class, Class)
+	 * @see AnnotatedElementUtils#getMergedRepeatableAnnotations(AnnotatedElement, Class)
 	 * @see org.springframework.core.BridgeMethodResolver#findBridgedMethod
 	 * @see java.lang.annotation.Repeatable
 	 * @see java.lang.reflect.AnnotatedElement#getAnnotationsByType
@@ -344,6 +345,7 @@ public abstract class AnnotationUtils {
 	 * @see #getRepeatableAnnotations(AnnotatedElement, Class)
 	 * @see #getDeclaredRepeatableAnnotations(AnnotatedElement, Class)
 	 * @see #getDeclaredRepeatableAnnotations(AnnotatedElement, Class, Class)
+	 * @see AnnotatedElementUtils#getMergedRepeatableAnnotations(AnnotatedElement, Class, Class)
 	 * @see org.springframework.core.BridgeMethodResolver#findBridgedMethod
 	 * @see java.lang.annotation.Repeatable
 	 * @see java.lang.reflect.AnnotatedElement#getAnnotationsByType
@@ -389,6 +391,7 @@ public abstract class AnnotationUtils {
 	 * @see #getRepeatableAnnotations(AnnotatedElement, Class)
 	 * @see #getRepeatableAnnotations(AnnotatedElement, Class, Class)
 	 * @see #getDeclaredRepeatableAnnotations(AnnotatedElement, Class, Class)
+	 * @see AnnotatedElementUtils#getMergedRepeatableAnnotations(AnnotatedElement, Class)
 	 * @see org.springframework.core.BridgeMethodResolver#findBridgedMethod
 	 * @see java.lang.annotation.Repeatable
 	 * @see java.lang.reflect.AnnotatedElement#getDeclaredAnnotationsByType
@@ -424,6 +427,7 @@ public abstract class AnnotationUtils {
 	 * @see #getRepeatableAnnotations(AnnotatedElement, Class)
 	 * @see #getRepeatableAnnotations(AnnotatedElement, Class, Class)
 	 * @see #getDeclaredRepeatableAnnotations(AnnotatedElement, Class)
+	 * @see AnnotatedElementUtils#getMergedRepeatableAnnotations(AnnotatedElement, Class, Class)
 	 * @see org.springframework.core.BridgeMethodResolver#findBridgedMethod
 	 * @see java.lang.annotation.Repeatable
 	 * @see java.lang.reflect.AnnotatedElement#getDeclaredAnnotationsByType
