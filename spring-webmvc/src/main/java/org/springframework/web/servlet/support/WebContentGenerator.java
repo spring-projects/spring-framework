@@ -263,8 +263,7 @@ public abstract class WebContentGenerator extends WebApplicationObjectSupport {
 	 * subject to content negotiation and variances based on the value of the
 	 * given request headers. The configured request header names are added only
 	 * if not already present in the response "Vary" header.
-	 *
-	 * <p><strong>Note:</strong> this property is only supported on Servlet 3.0+
+	 * <p><strong>Note:</strong> This property is only supported on Servlet 3.0+
 	 * which allows checking existing response header values.
 	 * @param varyByRequestHeaders one or more request header names
 	 * @since 4.3
