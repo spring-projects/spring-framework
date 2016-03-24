@@ -25,6 +25,7 @@ import java.util.Set;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.cors.CorsUtils;
 
@@ -103,7 +104,6 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 */
 	@Override
 	public RequestMethodsRequestCondition getMatchingCondition(HttpServletRequest request) {
-
 		if (CorsUtils.isPreFlightRequest(request)) {
 			return matchPreFlight(request);
 		}
@@ -131,28 +131,19 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 		return matchRequestMethod(expectedMethod);
 	}
 
-	private RequestMethodsRequestCondition matchRequestMethod(String httpMethod) {
-		RequestMethod requestMethod = getRequestMethod(httpMethod);
-		if (requestMethod != null) {
+	private RequestMethodsRequestCondition matchRequestMethod(String httpMethodValue) {
+		HttpMethod httpMethod = HttpMethod.resolve(httpMethodValue);
+		if (httpMethod != null) {
 			for (RequestMethod method : getMethods()) {
-				if (method.equals(requestMethod)) {
+				if (httpMethod.matches(method.name())) {
 					return new RequestMethodsRequestCondition(method);
 				}
 			}
-			if (RequestMethod.HEAD.equals(requestMethod) && getMethods().contains(RequestMethod.GET)) {
+			if (httpMethod == HttpMethod.HEAD && getMethods().contains(RequestMethod.GET)) {
 				return HEAD_CONDITION;
 			}
 		}
 		return null;
-	}
-
-	private RequestMethod getRequestMethod(String httpMethod) {
-		try {
-			return RequestMethod.valueOf(httpMethod);
-		}
-		catch (IllegalArgumentException ex) {
-			return null;
-		}
 	}
 
 	/**
