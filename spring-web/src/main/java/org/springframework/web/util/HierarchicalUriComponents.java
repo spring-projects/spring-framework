@@ -288,7 +288,7 @@ final class HierarchicalUriComponents extends UriComponents {
 			return;
 		}
 		int length = source.length();
-		for (int i=0; i < length; i++) {
+		for (int i = 0; i < length; i++) {
 			char ch = source.charAt(i);
 			if (ch == '%') {
 				if ((i + 2) < length) {

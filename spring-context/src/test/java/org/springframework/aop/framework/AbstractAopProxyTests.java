@@ -400,7 +400,8 @@ public abstract class AbstractAopProxyTests {
 			public Object invoke(MethodInvocation invocation) throws Throwable {
 				if (!context) {
 					assertNoInvocationContext();
-				} else {
+				}
+				else {
 					assertNotNull("have context", ExposeInvocationInterceptor.currentInvocation());
 				}
 				return s;

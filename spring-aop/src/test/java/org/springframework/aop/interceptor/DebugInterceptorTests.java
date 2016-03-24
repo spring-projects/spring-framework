@@ -61,7 +61,8 @@ public final class DebugInterceptorTests {
 		try {
 			interceptor.invoke(methodInvocation);
 			fail("Must have propagated the IllegalArgumentException.");
-		} catch (IllegalArgumentException expected) {
+		}
+		catch (IllegalArgumentException expected) {
 		}
 		checkCallCountTotal(interceptor);
 

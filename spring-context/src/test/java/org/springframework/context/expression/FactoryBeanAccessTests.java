@@ -53,7 +53,8 @@ public class FactoryBeanAccessTests {
 		try {
 			assertEquals(Boat.class.getName(), expr.getValue(context));
 			fail("Expected BeanIsNotAFactoryException");
-		} catch (BeanIsNotAFactoryException binafe) {
+		}
+		catch (BeanIsNotAFactoryException binafe) {
 			// success
 		}
 	

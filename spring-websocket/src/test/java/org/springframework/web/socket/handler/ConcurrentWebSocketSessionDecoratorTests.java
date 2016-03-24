@@ -88,7 +88,7 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 		assertTrue(concurrentSession.getTimeSinceSendStarted() > 0);
 
 		TextMessage payload = new TextMessage("payload");
-		for (int i=0; i < 5; i++) {
+		for (int i = 0; i < 5; i++) {
 			concurrentSession.sendMessage(payload);
 		}
 
@@ -166,7 +166,7 @@ public class ConcurrentWebSocketSessionDecoratorTests {
 		assertTrue(sentMessageLatch.await(5, TimeUnit.SECONDS));
 
 		StringBuilder sb = new StringBuilder();
-		for (int i=0 ; i < 1023; i++) {
+		for (int i = 0 ; i < 1023; i++) {
 			sb.append("a");
 		}
 

@@ -140,7 +140,8 @@ public class ExpressionStateTests extends AbstractExpressionTests {
 		try {
 			state.popActiveContextObject();
 			fail("stack should be empty...");
-		} catch (EmptyStackException ese) {
+		}
+		catch (EmptyStackException ese) {
 			// success
 		}
 
@@ -221,7 +222,8 @@ public class ExpressionStateTests extends AbstractExpressionTests {
 		try {
 			state.operate(Operation.ADD,1,2);
 			fail("should have failed");
-		} catch (EvaluationException ee) {
+		}
+		catch (EvaluationException ee) {
 			SpelEvaluationException sEx = (SpelEvaluationException)ee;
 			assertEquals(SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES,sEx.getMessageCode());
 		}
@@ -229,7 +231,8 @@ public class ExpressionStateTests extends AbstractExpressionTests {
 		try {
 			state.operate(Operation.ADD,null,null);
 			fail("should have failed");
-		} catch (EvaluationException ee) {
+		}
+		catch (EvaluationException ee) {
 			SpelEvaluationException sEx = (SpelEvaluationException)ee;
 			assertEquals(SpelMessage.OPERATOR_NOT_SUPPORTED_BETWEEN_TYPES,sEx.getMessageCode());
 		}
@@ -249,7 +252,8 @@ public class ExpressionStateTests extends AbstractExpressionTests {
 		try {
 			state.findType("someMadeUpName");
 			fail("Should have failed to find it");
-		} catch (EvaluationException ee) {
+		}
+		catch (EvaluationException ee) {
 			SpelEvaluationException sEx = (SpelEvaluationException)ee;
 			assertEquals(SpelMessage.TYPE_NOT_FOUND,sEx.getMessageCode());
 		}

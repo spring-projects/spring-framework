@@ -111,7 +111,8 @@ public class PropertySourceTests {
 					equalTo(String.format("%s [name='%s']",
 							ps.getClass().getSimpleName(),
 							name)));
-		} finally {
+		}
+		finally {
 			logger.setLevel(original);
 		}
 	}

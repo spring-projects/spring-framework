@@ -275,7 +275,7 @@ public class MethodMessageHandlerTests {
 		private static Map<Class<? extends Throwable>, Method> initExceptionMappings(Class<?> handlerType) {
 			Map<Class<? extends Throwable>, Method> result = new HashMap<Class<? extends Throwable>, Method>();
 			for (Method method : MethodIntrospector.selectMethods(handlerType, EXCEPTION_HANDLER_METHOD_FILTER)) {
-				for(Class<? extends Throwable> exception : getExceptionsFromMethodSignature(method)) {
+				for (Class<? extends Throwable> exception : getExceptionsFromMethodSignature(method)) {
 					result.put(exception, method);
 				}
 			}

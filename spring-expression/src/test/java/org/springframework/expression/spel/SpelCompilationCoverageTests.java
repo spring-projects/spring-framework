@@ -4267,7 +4267,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 //		// time it interpreted
 //		long stime = System.currentTimeMillis();
-//		for (int i=0;i<100000;i++) {
+//		for (int i = 0;i<100000;i++) {
 //			v = expression.getValue(ctx,holder);
 //		}
 //		System.out.println((System.currentTimeMillis()-stime));
@@ -4278,7 +4278,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 //
 //		// time it compiled
 //		stime = System.currentTimeMillis();
-//		for (int i=0;i<100000;i++) {
+//		for (int i = 0;i<100000;i++) {
 //			v = expression.getValue(ctx,holder);
 //		}
 //		System.out.println((System.currentTimeMillis()-stime));
@@ -5014,7 +5014,7 @@ public class SpelCompilationCoverageTests extends AbstractExpressionTests {
 
 		public void reset() {
 			i = 0;
-			_i=0;
+			_i = 0;
 			s = null;
 			_s = null;
 			field = null;

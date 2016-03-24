@@ -123,9 +123,9 @@ public class VersionResourceResolver extends AbstractResourceResolver {
 		List<String> patternsList = Arrays.asList(pathPatterns);
 		List<String> prefixedPatterns = new ArrayList<String>(pathPatterns.length);
 		String versionPrefix = "/" + version;
-		for(String pattern : patternsList) {
+		for (String pattern : patternsList) {
 			prefixedPatterns.add(pattern);
-			if(!pattern.startsWith(versionPrefix) && !patternsList.contains(versionPrefix + pattern)) {
+			if (!pattern.startsWith(versionPrefix) && !patternsList.contains(versionPrefix + pattern)) {
 				prefixedPatterns.add(versionPrefix + pattern);
 			}
 		}

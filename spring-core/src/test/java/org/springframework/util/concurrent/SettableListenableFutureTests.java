@@ -169,7 +169,8 @@ public class SettableListenableFutureTests {
 				try {
 					Thread.sleep(20L);
 					settableListenableFuture.set(string);
-				} catch (InterruptedException ex) {
+				}
+				catch (InterruptedException ex) {
 					throw new RuntimeException(ex);
 				}
 			}
@@ -183,7 +184,8 @@ public class SettableListenableFutureTests {
 		try {
 			settableListenableFuture.get(1L, TimeUnit.MILLISECONDS);
 			fail("Expected TimeoutException");
-		} catch (TimeoutException ex) {
+		}
+		catch (TimeoutException ex) {
 			// expected
 		}
 	}
@@ -197,7 +199,8 @@ public class SettableListenableFutureTests {
 				try {
 					Thread.sleep(20L);
 					settableListenableFuture.set(string);
-				} catch (InterruptedException ex) {
+				}
+				catch (InterruptedException ex) {
 					throw new RuntimeException(ex);
 				}
 			}
@@ -278,7 +281,8 @@ public class SettableListenableFutureTests {
 				try {
 					Thread.sleep(20L);
 					settableListenableFuture.cancel(true);
-				} catch (InterruptedException ex) {
+				}
+				catch (InterruptedException ex) {
 					throw new RuntimeException(ex);
 				}
 			}
@@ -286,7 +290,8 @@ public class SettableListenableFutureTests {
 		try {
 			settableListenableFuture.get(100L, TimeUnit.MILLISECONDS);
 			fail("Expected CancellationException");
-		} catch (CancellationException ex) {
+		}
+		catch (CancellationException ex) {
 			// expected
 		}
 	}

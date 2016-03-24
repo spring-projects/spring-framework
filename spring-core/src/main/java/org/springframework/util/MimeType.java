@@ -198,7 +198,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-2.2">HTTP 1.1, section 2.2</a>
 	 */
 	private void checkToken(String token) {
-		for (int i=0; i < token.length(); i++ ) {
+		for (int i = 0; i < token.length(); i++ ) {
 			char ch = token.charAt(i);
 			if (!TOKEN.get(ch)) {
 				throw new IllegalArgumentException("Invalid token character '" + ch + "' in token \"" + token + "\"");

@@ -72,7 +72,7 @@ public class PropertySourceAnnotationTests {
 		do {
 			name = iterator.next().getName();
 		}
-		while(iterator.hasNext());
+		while (iterator.hasNext());
 
 		assertThat(name, is("p1"));
 	}

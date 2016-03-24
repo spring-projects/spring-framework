@@ -326,7 +326,7 @@ public class StompBrokerRelayMessageHandlerIntegrationTests {
 		}
 
 		public boolean matchMessage(Message<?> message) {
-			for (int i=0 ; i < this.expected.length; i++) {
+			for (int i = 0 ; i < this.expected.length; i++) {
 				if (this.expected[i].match(message)) {
 					this.actual[i] = message;
 					return true;

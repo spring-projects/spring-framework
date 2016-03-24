@@ -1968,7 +1968,8 @@ public class SpelReproTests extends AbstractExpressionTests {
 		try {
 			expr = new SpelExpressionParser().parseRaw("&@foo");
 			fail("Illegal syntax, error expected");
-		} catch (SpelParseException spe) {
+		}
+		catch (SpelParseException spe) {
 			assertEquals(SpelMessage.INVALID_BEAN_REFERENCE,spe.getMessageCode());
 			assertEquals(0,spe.getPosition());
 		}
@@ -1976,7 +1977,8 @@ public class SpelReproTests extends AbstractExpressionTests {
 		try {
 			expr = new SpelExpressionParser().parseRaw("@&foo");
 			fail("Illegal syntax, error expected");
-		} catch (SpelParseException spe) {
+		}
+		catch (SpelParseException spe) {
 			assertEquals(SpelMessage.INVALID_BEAN_REFERENCE,spe.getMessageCode());
 			assertEquals(0,spe.getPosition());
 		}	

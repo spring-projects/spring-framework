@@ -1042,7 +1042,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 						result[i] = rowsAffected.get(i);
 					}
 					return result;
-				} finally {
+				}
+				finally {
 					if (pss instanceof ParameterDisposer) {
 						((ParameterDisposer) pss).cleanupParameters();
 					}

@@ -166,7 +166,8 @@ public class HibernateJtaTransactionTests {
 
 		if (readOnly) {
 			verify(session).setFlushMode(FlushMode.MANUAL);
-		} else {
+		}
+		else {
 			verify(session).flush();
 		}
 		verify(session).close();
@@ -188,7 +189,8 @@ public class HibernateJtaTransactionTests {
 		UserTransaction ut = mock(UserTransaction.class);
 		if (status == Status.STATUS_NO_TRANSACTION) {
 			given(ut.getStatus()).willReturn(status, status, Status.STATUS_ACTIVE);
-		} else {
+		}
+		else {
 			given(ut.getStatus()).willReturn(status);
 		}
 
@@ -520,13 +522,13 @@ public class HibernateJtaTransactionTests {
 		verify(ut).commit();
 
 		if (flushNever) {
-			if(!readOnly) {
+			if (!readOnly) {
 				InOrder ordered = inOrder(session);
 				ordered.verify(session).setFlushMode(FlushMode.AUTO);
 				ordered.verify(session).setFlushMode(FlushMode.MANUAL);
 			}
 		}
-		if(!flushNever && !readOnly) {
+		if (!flushNever && !readOnly) {
 			verify(session).flush();
 		}
 		verify(session).afterTransactionCompletion(true, null);
@@ -716,7 +718,7 @@ public class HibernateJtaTransactionTests {
 		}
 		verify(session1).disconnect();
 		verify(session1).close();
-		if(!rollback) {
+		if (!rollback) {
 			verify(session1).flush();
 			verify(session2, atLeastOnce()).flush();
 		}
@@ -792,7 +794,7 @@ public class HibernateJtaTransactionTests {
 		}
 
 		verify(ut, atLeastOnce()).begin();
-		if(!suspendException) {
+		if (!suspendException) {
 			verify(tm).resume(tx);
 		}
 		verify(ut).rollback();
@@ -1448,10 +1450,11 @@ public class HibernateJtaTransactionTests {
 		assertTrue("Hasn't thread session", !TransactionSynchronizationManager.hasResource(sf));
 
 		InOrder ordered = inOrder(session);
-		if(flushNever) {
+		if (flushNever) {
 			ordered.verify(session).setFlushMode(FlushMode.AUTO);
 			ordered.verify(session).setFlushMode(FlushMode.MANUAL);
-		} else {
+		}
+		else {
 			ordered.verify(session).flush();
 		}
 		ordered.verify(session).disconnect();

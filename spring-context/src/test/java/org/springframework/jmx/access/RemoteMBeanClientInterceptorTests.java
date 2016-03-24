@@ -63,7 +63,8 @@ public class RemoteMBeanClientInterceptorTests extends MBeanClientInterceptorTes
 		this.connectorServer = JMXConnectorServerFactory.newJMXConnectorServer(getServiceUrl(), null, getServer());
 		try {
 			this.connectorServer.start();
-		} catch (BindException ex) {
+		}
+		catch (BindException ex) {
 			System.out.println("Skipping remote JMX tests because binding to local port ["
 					+ SERVICE_PORT + "] failed: " + ex.getMessage());
 			runTests = false;

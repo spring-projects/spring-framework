@@ -70,7 +70,7 @@ public class CollectingReaderEventListener implements ReaderEventListener {
 	@Override
 	public void aliasRegistered(AliasDefinition aliasDefinition) {
 		List aliases = (List) this.aliasMap.get(aliasDefinition.getBeanName());
-		if(aliases == null) {
+		if (aliases == null) {
 			aliases = new ArrayList();
 			this.aliasMap.put(aliasDefinition.getBeanName(), aliases);
 		}

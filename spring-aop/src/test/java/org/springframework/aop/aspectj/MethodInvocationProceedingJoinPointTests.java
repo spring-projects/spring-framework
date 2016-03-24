@@ -215,7 +215,8 @@ public final class MethodInvocationProceedingJoinPointTests {
 		itb.setSpouse(new TestBean());
 		try {
 			itb.unreliableFileOperation();
-		} catch (IOException ex) {
+		}
+		catch (IOException ex) {
 			// we don't realy care...
 		}
 	}

@@ -224,7 +224,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		if (this.contentNegotiationManager == null) {
 			this.contentNegotiationManager = initContentNegotiationManager();
 		}
-		if( this.resourceHttpMessageConverter == null) {
+		if ( this.resourceHttpMessageConverter == null) {
 			this.resourceHttpMessageConverter = new ResourceHttpMessageConverter();
 		}
 	}
@@ -486,7 +486,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			ServletWebRequest webRequest = new ServletWebRequest(request);
 			try {
 				List<MediaType> mediaTypes = getContentNegotiationManager().resolveMediaTypes(webRequest);
-				if(!mediaTypes.isEmpty()) {
+				if (!mediaTypes.isEmpty()) {
 					mediaType = mediaTypes.get(0);
 				}
 			}

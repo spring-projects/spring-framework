@@ -354,7 +354,8 @@ public abstract class AbstractCacheAnnotationTests {
 		try {
 			service.throwCheckedSync(arg);
 			fail("Excepted exception");
-		} catch (Exception ex) {
+		}
+		catch (Exception ex) {
 			ex.printStackTrace();
 			assertEquals("Wrong exception type", IOException.class, ex.getClass());
 			assertEquals(arg, ex.getMessage());
@@ -365,7 +366,8 @@ public abstract class AbstractCacheAnnotationTests {
 		try {
 			service.throwUncheckedSync(Long.valueOf(1));
 			fail("Excepted exception");
-		} catch (RuntimeException ex) {
+		}
+		catch (RuntimeException ex) {
 			assertEquals("Wrong exception type", UnsupportedOperationException.class, ex.getClass());
 			assertEquals("1", ex.getMessage());
 		}

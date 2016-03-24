@@ -307,7 +307,8 @@ public class AspectJAdviceParameterNameDiscovererTests {
 		try {
 			discoverer.getParameterNames(m);
 			fail("Expecting " + exceptionType.getName() + " with message '" + message + "'");
-		} catch (RuntimeException expected) {
+		}
+		catch (RuntimeException expected) {
 			assertEquals("Expecting exception of type " + exceptionType.getName(),
 					exceptionType, expected.getClass());
 			assertEquals("Exception message does not match expected", message, expected.getMessage());

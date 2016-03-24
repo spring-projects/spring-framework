@@ -152,7 +152,7 @@ public class DataSourceTransactionManagerTests  {
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(dsToUse));
 		assertTrue("Synchronization not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
-		if(autoCommit && (!lazyConnection || createStatement)) {
+		if (autoCommit && (!lazyConnection || createStatement)) {
 			InOrder ordered = inOrder(con);
 			ordered.verify(con).setAutoCommit(false);
 			ordered.verify(con).commit();
@@ -244,7 +244,7 @@ public class DataSourceTransactionManagerTests  {
 		assertTrue("Hasn't thread connection", !TransactionSynchronizationManager.hasResource(ds));
 		assertTrue("Synchronization not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
-		if(autoCommit && (!lazyConnection || createStatement)) {
+		if (autoCommit && (!lazyConnection || createStatement)) {
 			InOrder ordered = inOrder(con);
 			ordered.verify(con).setAutoCommit(false);
 			ordered.verify(con).rollback();

@@ -117,7 +117,7 @@ public class ConfigurationClassProcessingTests {
 		BeanFactory factory = initBeanFactory(ConfigWithBeanWithAliases.class);
 		assertSame(factory.getBean("name1"), ConfigWithBeanWithAliases.testBean);
 		String[] aliases = factory.getAliases("name1");
-		for(String alias : aliases)
+		for (String alias : aliases)
 			assertSame(factory.getBean(alias), ConfigWithBeanWithAliases.testBean);
 
 		// method name should not be registered

@@ -147,11 +147,11 @@ public class ScriptTemplateViewTests {
 		this.view.setApplicationContext(this.wac);
 		ExecutorService executor = Executors.newFixedThreadPool(4);
 		List<Future<Boolean>> results = new ArrayList<>();
-		for(int i = 0; i < iterations; i++) {
+		for (int i = 0; i < iterations; i++) {
 			results.add(executor.submit(() -> view.getEngine() != null));
 		}
 		assertEquals(iterations, results.size());
-		for(int i = 0; i < iterations; i++) {
+		for (int i = 0; i < iterations; i++) {
 			assertTrue(results.get(i).get());
 		}
 		executor.shutdown();

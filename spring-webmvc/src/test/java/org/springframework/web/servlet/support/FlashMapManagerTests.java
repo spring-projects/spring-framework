@@ -181,7 +181,7 @@ public class FlashMapManagerTests {
 	@Test
 	public void retrieveAndUpdateRemoveExpired() throws InterruptedException {
 		List<FlashMap> flashMaps = new ArrayList<FlashMap>();
-		for (int i=0; i < 5; i++) {
+		for (int i = 0; i < 5; i++) {
 			FlashMap expiredFlashMap = new FlashMap();
 			expiredFlashMap.startExpirationPeriod(-1);
 			flashMaps.add(expiredFlashMap);

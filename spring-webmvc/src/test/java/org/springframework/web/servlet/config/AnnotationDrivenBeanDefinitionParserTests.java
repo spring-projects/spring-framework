@@ -176,7 +176,8 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		List<HttpMessageConverter<?>> converters = (List<HttpMessageConverter<?>>) value;
 		if (hasDefaultRegistrations) {
 			assertTrue("Default and custom converter expected", converters.size() > 2);
-		} else {
+		}
+		else {
 			assertTrue("Only custom converters expected", converters.size() == 2);
 		}
 		assertTrue(converters.get(0) instanceof StringHttpMessageConverter);
