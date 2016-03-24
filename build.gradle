@@ -205,7 +205,7 @@ configure(allprojects) { project ->
 		"http://www.eclipse.org/aspectj/doc/released/aspectj5rt-api/",
 		"http://ehcache.org/apidocs/${ehcacheVersion}",
 		"http://ehcache.org/apidocs/${ehcache3Version}",
-		"http://quartz-scheduler.org/api/2.2.0/",
+		//"http://quartz-scheduler.org/api/2.2.0/",
 		"http://fasterxml.github.io/jackson-core/javadoc/2.7/",
 		"http://fasterxml.github.io/jackson-databind/javadoc/2.7/",
 		"http://fasterxml.github.io/jackson-dataformat-xml/javadoc/2.7/",
