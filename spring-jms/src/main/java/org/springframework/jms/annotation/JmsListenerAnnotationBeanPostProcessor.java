@@ -39,7 +39,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.config.EmbeddedValueResolver;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.Ordered;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.jms.config.JmsListenerConfigUtils;
 import org.springframework.jms.config.JmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerEndpointRegistrar;
@@ -206,7 +206,7 @@ public class JmsListenerAnnotationBeanPostProcessor
 						@Override
 						public Set<JmsListener> inspect(Method method) {
 							Set<JmsListener> listenerMethods =
-									AnnotationUtils.getRepeatableAnnotations(method, JmsListener.class, JmsListeners.class);
+									AnnotatedElementUtils.getMergedRepeatableAnnotations(method, JmsListener.class, JmsListeners.class);
 							return (!listenerMethods.isEmpty() ? listenerMethods : null);
 						}
 					});
