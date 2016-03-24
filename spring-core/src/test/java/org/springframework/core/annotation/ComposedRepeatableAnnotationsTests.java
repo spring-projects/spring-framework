@@ -54,7 +54,7 @@ public class ComposedRepeatableAnnotationsTests {
 
 
 	@Test
-	public void nonRepeatableAnnotation() {
+	public void findNonRepeatableAnnotation() {
 		exception.expect(IllegalArgumentException.class);
 		exception.expectMessage(startsWith("annotationType must be a repeatable annotation"));
 		exception.expectMessage(containsString("failed to resolve container type for"));
@@ -63,7 +63,7 @@ public class ComposedRepeatableAnnotationsTests {
 	}
 
 	@Test
-	public void invalidRepeatableAnnotationContainerMissingValueAttribute() {
+	public void findInvalidRepeatableAnnotationContainerMissingValueAttribute() {
 		exception.expect(AnnotationConfigurationException.class);
 		exception.expectMessage(startsWith("Invalid declaration of container type"));
 		exception.expectMessage(containsString(ContainerMissingValueAttribute.class.getName()));
@@ -74,7 +74,7 @@ public class ComposedRepeatableAnnotationsTests {
 	}
 
 	@Test
-	public void invalidRepeatableAnnotationContainerWithNonArrayValueAttribute() {
+	public void findInvalidRepeatableAnnotationContainerWithNonArrayValueAttribute() {
 		exception.expect(AnnotationConfigurationException.class);
 		exception.expectMessage(startsWith("Container type"));
 		exception.expectMessage(containsString(ContainerWithNonArrayValueAttribute.class.getName()));
@@ -84,7 +84,7 @@ public class ComposedRepeatableAnnotationsTests {
 	}
 
 	@Test
-	public void invalidRepeatableAnnotationContainerWithArrayValueAttributeButWrongComponentType() {
+	public void findInvalidRepeatableAnnotationContainerWithArrayValueAttributeButWrongComponentType() {
 		exception.expect(AnnotationConfigurationException.class);
 		exception.expectMessage(startsWith("Container type"));
 		exception.expectMessage(containsString(ContainerWithArrayValueAttributeButWrongComponentType.class.getName()));
@@ -95,31 +95,31 @@ public class ComposedRepeatableAnnotationsTests {
 	}
 
 	@Test
-	public void repeatableAnnotationsOnClass() {
-		assertRepeatableAnnotations(RepeatableClass.class);
+	public void findRepeatableAnnotationsOnClass() {
+		assertFindRepeatableAnnotations(RepeatableClass.class);
 	}
 
 	@Test
-	public void repeatableAnnotationsOnSuperclass() {
-		assertRepeatableAnnotations(SubRepeatableClass.class);
+	public void findRepeatableAnnotationsOnSuperclass() {
+		assertFindRepeatableAnnotations(SubRepeatableClass.class);
 	}
 
 	@Test
-	public void composedRepeatableAnnotationsOnClass() {
-		assertRepeatableAnnotations(ComposedRepeatableClass.class);
+	public void findComposedRepeatableAnnotationsOnClass() {
+		assertFindRepeatableAnnotations(ComposedRepeatableClass.class);
 	}
 
 	@Test
-	public void composedRepeatableAnnotationsMixedWithContainerOnClass() {
-		assertRepeatableAnnotations(ComposedRepeatableMixedWithContainerClass.class);
+	public void findComposedRepeatableAnnotationsMixedWithContainerOnClass() {
+		assertFindRepeatableAnnotations(ComposedRepeatableMixedWithContainerClass.class);
 	}
 
 	@Test
-	public void composedContainerForRepeatableAnnotationsOnClass() {
-		assertRepeatableAnnotations(ComposedContainerClass.class);
+	public void findComposedContainerForRepeatableAnnotationsOnClass() {
+		assertFindRepeatableAnnotations(ComposedContainerClass.class);
 	}
 
-	private void assertRepeatableAnnotations(AnnotatedElement element) {
+	private void assertFindRepeatableAnnotations(AnnotatedElement element) {
 		assertNotNull(element);
 
 		Set<PeteRepeat> peteRepeats = findMergedRepeatableAnnotations(element, PeteRepeat.class);
