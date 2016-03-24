@@ -50,9 +50,7 @@ import org.springframework.core.annotation.AliasFor;
  * multiple instances of {@code @Sql}.
  *
  * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
- * <em>composed annotations</em>; however, attribute overrides are not currently
- * supported for {@linkplain Repeatable repeatable} annotations that are used as
- * meta-annotations.
+ * <em>composed annotations</em>.
  *
  * @author Sam Brannen
  * @since 4.1

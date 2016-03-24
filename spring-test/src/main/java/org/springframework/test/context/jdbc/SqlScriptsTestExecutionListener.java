@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
@@ -129,10 +129,10 @@ public class SqlScriptsTestExecutionListener extends AbstractTestExecutionListen
 	private void executeSqlScripts(TestContext testContext, ExecutionPhase executionPhase) throws Exception {
 		boolean classLevel = false;
 
-		Set<Sql> sqlAnnotations = AnnotationUtils.getRepeatableAnnotations(testContext.getTestMethod(), Sql.class,
+		Set<Sql> sqlAnnotations = AnnotatedElementUtils.getMergedRepeatableAnnotations(testContext.getTestMethod(), Sql.class,
 			SqlGroup.class);
 		if (sqlAnnotations.isEmpty()) {
-			sqlAnnotations = AnnotationUtils.getRepeatableAnnotations(testContext.getTestClass(), Sql.class,
+			sqlAnnotations = AnnotatedElementUtils.getMergedRepeatableAnnotations(testContext.getTestClass(), Sql.class,
 				SqlGroup.class);
 			if (!sqlAnnotations.isEmpty()) {
 				classLevel = true;
