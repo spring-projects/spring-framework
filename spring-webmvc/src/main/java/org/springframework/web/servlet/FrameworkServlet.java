@@ -46,7 +46,6 @@ import org.springframework.http.HttpMethod;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.ConfigurableWebApplicationContext;
 import org.springframework.web.context.ConfigurableWebEnvironment;
 import org.springframework.web.context.ContextLoader;
@@ -916,7 +915,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			@Override
 			public void setHeader(String name, String value) {
 				if ("Allow".equals(name)) {
-					value = (StringUtils.hasLength(value) ? value + ", " : "") + RequestMethod.PATCH.name();
+					value = (StringUtils.hasLength(value) ? value + ", " : "") + HttpMethod.PATCH.name();
 				}
 				super.setHeader(name, value);
 			}
