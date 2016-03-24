@@ -31,12 +31,12 @@ configure(allprojects) { project ->
 	ext.eclipselinkVersion   = "2.4.2"
 	ext.ehcacheVersion       = "2.10.1"
 	ext.ehcachejcacheVersion = "1.0.1"
-	ext.ehcache3Version      = "3.0.0.m5"
+	ext.ehcache3Version      = "3.0.0.rc1"
 	ext.ejbApiVersion        = "3.0"
 	ext.fileuploadVersion    = "1.3.1"
 	ext.freemarkerVersion    = "2.3.23"
 	ext.groovyVersion        = "2.4.6"
-	ext.gsonVersion          = "2.6.1"
+	ext.gsonVersion          = "2.6.2"
 	ext.guavaVersion         = "19.0"
 	ext.hamcrestVersion      = "1.3"
 	ext.hibernate3Version    = "3.6.10.Final"
@@ -47,26 +47,26 @@ configure(allprojects) { project ->
 	ext.hsqldbVersion        = "2.3.3"
 	ext.htmlunitVersion      = "2.19"
 	ext.httpasyncVersion     = "4.1.1"
-	ext.httpclientVersion    = "4.5.1"
+	ext.httpclientVersion    = "4.5.2"
 	ext.jackson2Version      = "2.6.5"
-	ext.jasperreportsVersion = "6.2.0"
+	ext.jasperreportsVersion = "6.2.1"
 	ext.javamailVersion      = "1.5.5"
-	ext.jettyVersion         = "9.3.7.v20160115"
+	ext.jettyVersion         = "9.3.8.v20160314"
 	ext.jodaVersion          = "2.9.2"
-	ext.jrubyVersion         = "1.7.23"  // JRuby 9000 only supported through JSR-223 (StandardScriptFactory)
+	ext.jrubyVersion         = "1.7.24"  // JRuby 9000 only supported through JSR-223 (StandardScriptFactory)
 	ext.jsonassertVersion    = "1.2.3"
 	ext.jsonpathVersion      = "2.1.0"
 	ext.jtaVersion           = "1.2"
 	ext.junitVersion         = "4.12"
 	ext.nettyVersion         = "4.0.34.Final"
-	ext.okhttpVersion        = "2.7.4"
-	ext.openjpaVersion       = "2.4.0"
+	ext.okhttpVersion        = "2.7.5"
+	ext.openjpaVersion       = "2.4.1"
 	ext.poiVersion           = "3.13"
 	ext.protobufVersion      = "2.6.1"
 	ext.reactorVersion       = "2.0.7.RELEASE"
 	ext.romeVersion          = "1.5.1"
 	ext.seleniumVersion      = "2.48.2"
-	ext.slf4jVersion         = "1.7.16"
+	ext.slf4jVersion         = "1.7.19"
 	ext.snakeyamlVersion     = "1.17"
 	ext.snifferVersion       = "1.14"
 	ext.testngVersion        = "6.9.10"
@@ -74,10 +74,10 @@ configure(allprojects) { project ->
 	ext.tiles3Version        = "3.0.5"
 	ext.tomcatVersion        = "8.0.32"
 	ext.tyrusVersion         = "1.3.5"  // constrained by WebLogic 12.1.3 support
-	ext.undertowVersion      = "1.3.18.Final"
+	ext.undertowVersion      = "1.3.19.Final"
 	ext.woodstoxVersion      = "5.0.1"
 	ext.xmlunitVersion       = "1.6"
-	ext.xstreamVersion       = "1.4.8"
+	ext.xstreamVersion       = "1.4.9"
 
 	ext.gradleScriptDir = "${rootProject.projectDir}/gradle"
 
@@ -630,7 +630,7 @@ project("spring-jdbc") {
 		optional("javax.transaction:javax.transaction-api:${jtaVersion}")
 		optional("com.mchange:c3p0:0.9.5.2")
 		optional("org.hsqldb:hsqldb:${hsqldbVersion}")
-		optional("com.h2database:h2:1.4.190")
+		optional("com.h2database:h2:1.4.191")
 		optional("org.apache.derby:derby:10.12.1.1")
 		optional("org.apache.derby:derbyclient:10.12.1.1")
 	}
