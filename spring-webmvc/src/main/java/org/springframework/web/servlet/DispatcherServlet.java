@@ -328,6 +328,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	/** List of ViewResolvers used by this servlet */
 	private List<ViewResolver> viewResolvers;
 
+
 	/**
 	 * Create a new {@code DispatcherServlet} that will create its own internal web
 	 * application context based on defaults and values provided through servlet
@@ -347,7 +348,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	public DispatcherServlet() {
 		super();
-		this.setDispatchOptionsRequest(true);
+		setDispatchOptionsRequest(true);
 	}
 
 	/**
@@ -391,8 +392,9 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	public DispatcherServlet(WebApplicationContext webApplicationContext) {
 		super(webApplicationContext);
-		this.setDispatchOptionsRequest(true);
+		setDispatchOptionsRequest(true);
 	}
+
 
 	/**
 	 * Set whether to detect all HandlerMapping beans in this servlet's context. Otherwise,
@@ -464,6 +466,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	public void setCleanupAfterInclude(boolean cleanupAfterInclude) {
 		this.cleanupAfterInclude = cleanupAfterInclude;
 	}
+
 
 	/**
 	 * This implementation calls {@link #initStrategies}.
@@ -549,9 +552,8 @@ public class DispatcherServlet extends FrameworkServlet {
 			// We need to use the default.
 			this.themeResolver = getDefaultStrategy(context, ThemeResolver.class);
 			if (logger.isDebugEnabled()) {
-				logger.debug(
-						"Unable to locate ThemeResolver with name '" + THEME_RESOLVER_BEAN_NAME + "': using default [" +
-								this.themeResolver + "]");
+				logger.debug("Unable to locate ThemeResolver with name '" + THEME_RESOLVER_BEAN_NAME +
+						"': using default [" + this.themeResolver + "]");
 			}
 		}
 	}
@@ -739,8 +741,7 @@ public class DispatcherServlet extends FrameworkServlet {
 	 */
 	private void initFlashMapManager(ApplicationContext context) {
 		try {
-			this.flashMapManager =
-					context.getBean(FLASH_MAP_MANAGER_BEAN_NAME, FlashMapManager.class);
+			this.flashMapManager = context.getBean(FLASH_MAP_MANAGER_BEAN_NAME, FlashMapManager.class);
 			if (logger.isDebugEnabled()) {
 				logger.debug("Using FlashMapManager [" + this.flashMapManager + "]");
 			}
@@ -840,7 +841,8 @@ public class DispatcherServlet extends FrameworkServlet {
 
 	/**
 	 * Create a default strategy.
-	 * <p>The default implementation uses {@link org.springframework.beans.factory.config.AutowireCapableBeanFactory#createBean}.
+	 * <p>The default implementation uses
+	 * {@link org.springframework.beans.factory.config.AutowireCapableBeanFactory#createBean}.
 	 * @param context the current WebApplicationContext
 	 * @param clazz the strategy implementation class to instantiate
 	 * @return the fully configured strategy instance
@@ -1101,7 +1103,8 @@ public class DispatcherServlet extends FrameworkServlet {
 	 * @see MultipartResolver#cleanupMultipart
 	 */
 	protected void cleanupMultipart(HttpServletRequest request) {
-		MultipartHttpServletRequest multipartRequest = WebUtils.getNativeRequest(request, MultipartHttpServletRequest.class);
+		MultipartHttpServletRequest multipartRequest =
+				WebUtils.getNativeRequest(request, MultipartHttpServletRequest.class);
 		if (multipartRequest != null) {
 			this.multipartResolver.cleanupMultipart(multipartRequest);
 		}
