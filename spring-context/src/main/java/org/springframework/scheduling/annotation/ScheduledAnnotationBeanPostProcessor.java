@@ -43,7 +43,7 @@ import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.Ordered;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.config.CronTask;
@@ -258,7 +258,7 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 						@Override
 						public Set<Scheduled> inspect(Method method) {
 							Set<Scheduled> scheduledMethods =
-									AnnotationUtils.getRepeatableAnnotations(method, Scheduled.class, Schedules.class);
+									AnnotatedElementUtils.getMergedRepeatableAnnotations(method, Scheduled.class, Schedules.class);
 							return (!scheduledMethods.isEmpty() ? scheduledMethods : null);
 						}
 					});
