@@ -46,8 +46,6 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import static org.springframework.http.HttpHeaders.VARY;
-
 /**
  * Resolves {@link HttpEntity} and {@link RequestEntity} method argument values
  * and also handles {@link HttpEntity} and {@link ResponseEntity} return values.
@@ -172,7 +170,7 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 
 		HttpHeaders outputHeaders = outputMessage.getHeaders();
 		HttpHeaders entityHeaders = responseEntity.getHeaders();
-		if (outputHeaders.containsKey(VARY) && entityHeaders.containsKey(VARY)) {
+		if (outputHeaders.containsKey(HttpHeaders.VARY) && entityHeaders.containsKey(HttpHeaders.VARY)) {
 			List<String> values = getVaryRequestHeadersToAdd(outputHeaders, entityHeaders);
 			if (!values.isEmpty()) {
 				outputHeaders.setVary(values);
@@ -180,7 +178,9 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 		}
 		if (!entityHeaders.isEmpty()) {
 			for (Map.Entry<String, List<String>> entry : entityHeaders.entrySet()) {
-				outputHeaders.putIfAbsent(entry.getKey(), entry.getValue());
+				if (!outputHeaders.containsKey(entry.getKey())) {
+					outputHeaders.put(entry.getKey(), entry.getValue());
+				}
 			}
 		}
 
@@ -197,14 +197,15 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 				return;
 			}
 		}
-		if(inputMessage.getHeaders().containsKey(HttpHeaders.RANGE) &&
+		if (inputMessage.getHeaders().containsKey(HttpHeaders.RANGE) &&
 				Resource.class.isAssignableFrom(body.getClass())) {
 			try {
 				List<HttpRange> httpRanges = inputMessage.getHeaders().getRange();
 				Resource bodyResource = (Resource) body;
 				body = new HttpRangeResource(httpRanges, bodyResource);
 				outputMessage.setStatusCode(HttpStatus.PARTIAL_CONTENT);
-			} catch (IllegalArgumentException exc) {
+			}
+			catch (IllegalArgumentException ex) {
 				outputMessage.setStatusCode(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);
 				outputMessage.flush();
 				return;
