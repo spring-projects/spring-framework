@@ -26,6 +26,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLConnection;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashSet;
@@ -750,6 +751,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			}
 			return;
 		}
+		Arrays.sort(dirContents);
 		for (File content : dirContents) {
 			String currPath = StringUtils.replace(content.getAbsolutePath(), File.separator, "/");
 			if (content.isDirectory() && getPathMatcher().matchStart(fullPattern, currPath + "/")) {
