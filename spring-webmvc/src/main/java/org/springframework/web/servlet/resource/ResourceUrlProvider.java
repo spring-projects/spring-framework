@@ -218,7 +218,7 @@ public class ResourceUrlProvider implements ApplicationListener<ContextRefreshed
 		if (!matchingPatterns.isEmpty()) {
 			Comparator<String> patternComparator = getPathMatcher().getPatternComparator(lookupPath);
 			Collections.sort(matchingPatterns, patternComparator);
-			for(String pattern : matchingPatterns) {
+			for (String pattern : matchingPatterns) {
 				String pathWithinMapping = getPathMatcher().extractPathWithinPattern(pattern, lookupPath);
 				String pathMapping = lookupPath.substring(0, lookupPath.indexOf(pathWithinMapping));
 				if (logger.isTraceEnabled()) {

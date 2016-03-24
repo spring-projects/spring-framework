@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -180,7 +180,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-2.2">HTTP 1.1, section 2.2</a>
 	 */
 	private void checkToken(String token) {
-		for (int i=0; i < token.length(); i++ ) {
+		for (int i = 0; i < token.length(); i++ ) {
 			char ch = token.charAt(i);
 			if (!TOKEN.get(ch)) {
 				throw new IllegalArgumentException("Invalid token character '" + ch + "' in token \"" + token + "\"");

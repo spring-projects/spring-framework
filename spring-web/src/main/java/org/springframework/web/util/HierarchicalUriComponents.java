@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -288,7 +288,7 @@ final class HierarchicalUriComponents extends UriComponents {
 			return;
 		}
 		int length = source.length();
-		for (int i=0; i < length; i++) {
+		for (int i = 0; i < length; i++) {
 			char ch = source.charAt(i);
 			if (ch == '%') {
 				if ((i + 2) < length) {
@@ -701,8 +701,8 @@ final class HierarchicalUriComponents extends UriComponents {
 		public int hashCode() {
 			return getPath().hashCode();
 		}
-
 	}
+
 
 	/**
 	 * Represents a path backed by a string list (i.e. path segments).

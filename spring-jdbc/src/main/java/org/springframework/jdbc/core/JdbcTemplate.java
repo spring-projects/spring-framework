@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -1038,7 +1038,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 						result[i] = rowsAffected.get(i);
 					}
 					return result;
-				} finally {
+				}
+				finally {
 					if (pss instanceof ParameterDisposer) {
 						((ParameterDisposer) pss).cleanupParameters();
 					}
