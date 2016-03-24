@@ -76,7 +76,7 @@ public class JacksonJsonEncoder extends AbstractEncoder<Object> {
 			Flux<DataBuffer> array = Flux.zip(serializedObjects, arraySeparators)
 					.flatMap(tuple -> Flux.just(tuple.getT1(), tuple.getT2()));
 
-			Flux<DataBuffer> arrayWithoutLastSeparator = Flux.from(array).skipLast(1);
+			Flux<DataBuffer> arrayWithoutLastSeparator = array.skipLast(1);
 
 			return Flux.concat(startArray, arrayWithoutLastSeparator, endArray);
 		}
