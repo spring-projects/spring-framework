@@ -42,6 +42,7 @@ import static org.springframework.core.annotation.AnnotatedElementUtils.*;
  * @since 4.3
  * @see AnnotatedElementUtils
  * @see AnnotatedElementUtilsTests
+ * @see ComposedRepeatableAnnotationsTests
  */
 public class MultipleComposedAnnotationsOnSingleAnnotatedElementTests {
 
