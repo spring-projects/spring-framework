@@ -336,10 +336,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 				this.resourceHttpMessageConverter.write(rangeResource, mediaType, outputMessage);
 			}
 			catch (IllegalArgumentException ex) {
-				Long contentLength = resource.contentLength();
-				if (contentLength != null) {
-					response.addHeader("Content-Range", "bytes */" + resource.contentLength());
-				}
+				response.addHeader("Content-Range", "bytes */" + resource.contentLength());
 				response.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
 			}
 		}
