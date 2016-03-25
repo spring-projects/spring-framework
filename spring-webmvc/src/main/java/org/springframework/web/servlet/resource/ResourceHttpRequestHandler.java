@@ -162,7 +162,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	/**
 	 * Configure the {@link ResourceHttpMessageConverter} to use.
 	 * <p>By default a {@link ResourceHttpMessageConverter} will be configured.
-	 * @since 4.3.0
+	 * @since 4.3
 	 */
 	public void setResourceHttpMessageConverter(ResourceHttpMessageConverter resourceHttpMessageConverter) {
 		this.resourceHttpMessageConverter = resourceHttpMessageConverter;
@@ -171,7 +171,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	public ResourceHttpMessageConverter getResourceHttpMessageConverter() {
 		return this.resourceHttpMessageConverter;
 	}
-
 
 	/**
 	 * Configure a {@code ContentNegotiationManager} to determine the media types
@@ -185,7 +184,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 * settings is used to create the manager. See the Javadoc of
 	 * {@code ContentNegotiationManagerFactoryBean} for details
 	 * @param contentNegotiationManager the manager to use
-	 * @since 4.3.0
+	 * @since 4.3
 	 */
 	public void setContentNegotiationManager(ContentNegotiationManager contentNegotiationManager) {
 		this.contentNegotiationManager = contentNegotiationManager;
@@ -335,10 +334,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 				this.resourceHttpMessageConverter.write(rangeResource, mediaType, outputMessage);
 			}
 			catch (IllegalArgumentException ex) {
-				Long contentLength = resource.contentLength();
-				if (contentLength != null) {
-					response.addHeader("Content-Range", "bytes */" + resource.contentLength());
-				}
+				response.addHeader("Content-Range", "bytes */" + resource.contentLength());
 				response.sendError(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
 			}
 		}
@@ -468,7 +464,6 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	 */
 	@SuppressWarnings("deprecation")
 	protected MediaType getMediaType(HttpServletRequest request, Resource resource) {
-
 		// For backwards compatibility
 		MediaType mediaType = getMediaType(resource);
 		if (mediaType != null) {
@@ -534,6 +529,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		}
 		response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
 	}
+
 
 	@Override
 	public String toString() {

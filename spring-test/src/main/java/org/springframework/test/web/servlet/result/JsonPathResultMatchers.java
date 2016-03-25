@@ -47,6 +47,7 @@ public class JsonPathResultMatchers {
 
 	private String prefix;
 
+
 	/**
 	 * Protected constructor.
 	 * <p>Use {@link MockMvcResultMatchers#jsonPath(String, Object...)} or
@@ -65,7 +66,7 @@ public class JsonPathResultMatchers {
 	 * <p>Use this method if the JSON payloads are prefixed to avoid
 	 * Cross Site Script Inclusion (XSSI) attacks.
 	 * @param prefix the string prefix prepended to the actual JSON payload
-	 * @since 4.3.0
+	 * @since 4.3
 	 */
 	public JsonPathResultMatchers prefix(String prefix) {
 		this.prefix = prefix;
@@ -252,14 +253,14 @@ public class JsonPathResultMatchers {
 		String content = result.getResponse().getContentAsString();
 		if (StringUtils.hasLength(this.prefix)) {
 			try {
-				String reason = String.format("Expected a JSON payload prefixed with \"%s\" but found: %s", this.prefix,
-						StringUtils.quote(content.substring(0, this.prefix.length())));
+				String reason = String.format("Expected a JSON payload prefixed with \"%s\" but found: %s",
+						this.prefix, StringUtils.quote(content.substring(0, this.prefix.length())));
 				MatcherAssert.assertThat(reason, content, StringStartsWith.startsWith(this.prefix));
 				return content.substring(this.prefix.length());
 			}
 			catch (StringIndexOutOfBoundsException oobe) {
-				String message = "JSON prefix \"" + this.prefix + "\" not found, exception: ";
-				throw new AssertionError(message + oobe.getMessage());
+				throw new AssertionError(
+						"JSON prefix \"" + this.prefix + "\" not found, exception: " + oobe.getMessage());
 			}
 		}
 		else {

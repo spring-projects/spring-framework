@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import org.springframework.util.ObjectUtils;
  *
  * @author Costin Leau
  * @author Stephane Nicoll
- * @since 4.2.0
+ * @since 4.2
  * @see CachedExpressionEvaluator
  */
 public final class AnnotatedElementKey {
@@ -36,12 +36,13 @@ public final class AnnotatedElementKey {
 
 	private final Class<?> targetClass;
 
+
 	/**
 	 * Create a new instance with the specified {@link AnnotatedElement} and
 	 * optional target {@link Class}.
 	 */
 	public AnnotatedElementKey(AnnotatedElement element, Class<?> targetClass) {
-		Assert.notNull(element, "AnnotatedElement must be set.");
+		Assert.notNull(element, "AnnotatedElement must not be null");
 		this.element = element;
 		this.targetClass = targetClass;
 	}
