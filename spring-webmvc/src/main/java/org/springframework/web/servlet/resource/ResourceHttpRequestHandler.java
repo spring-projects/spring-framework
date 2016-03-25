@@ -187,17 +187,15 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	}
 
 	/**
-	 * Look for a {@link org.springframework.web.servlet.resource.PathResourceResolver}
-	 * among the {@link #getResourceResolvers() resource resolvers} and configure
-	 * its {@code "allowedLocations"} to match the value of the
-	 * {@link #setLocations(java.util.List) locations} property unless the "allowed
-	 * locations" of the {@code PathResourceResolver} is non-empty.
+	 * Look for a {@code PathResourceResolver} among the configured resource
+	 * resolvers and set its {@code allowedLocations} property (if empty) to
+	 * match the {@link #setLocations locations} configured on this class.
 	 */
 	protected void initAllowedLocations() {
 		if (CollectionUtils.isEmpty(this.locations)) {
 			return;
 		}
-		for (int i = getResourceResolvers().size()-1; i >= 0; i--) {
+		for (int i = getResourceResolvers().size() - 1; i >= 0; i--) {
 			if (getResourceResolvers().get(i) instanceof PathResourceResolver) {
 				PathResourceResolver pathResolver = (PathResourceResolver) getResourceResolvers().get(i);
 				if (ObjectUtils.isEmpty(pathResolver.getAllowedLocations())) {
@@ -245,7 +243,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		// Apply cache settings, if any
 		prepareResponse(response);
 
-		// Check the resource's media type
+		// Check the media type for the resource
 		MediaType mediaType = getMediaType(resource);
 		if (mediaType != null) {
 			if (logger.isTraceEnabled()) {

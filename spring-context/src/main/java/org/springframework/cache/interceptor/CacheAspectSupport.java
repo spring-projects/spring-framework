@@ -374,18 +374,15 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		for (CacheOperationContext context : cachePutContexts) {
 			try {
 				if (!context.isConditionPassing(ExpressionEvaluator.RESULT_UNAVAILABLE)) {
-	                excluded.add(context);
+					excluded.add(context);
 				}
 			}
 			catch (VariableNotAvailableException e) {
-				// Ignoring failure due to missing result, consider the cache put has
-				// to proceed
+				// Ignoring failure due to missing result, consider the cache put has to proceed
 			}
 		}
-		// check if  all puts have been excluded by condition
-		return cachePutContexts.size() != excluded.size();
-
-
+		// Check if all puts have been excluded by condition
+		return (cachePutContexts.size() != excluded.size());
 	}
 
 	private void processCacheEvicts(Collection<CacheOperationContext> contexts, boolean beforeInvocation, Object result) {
@@ -710,4 +707,5 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 			return (this.cacheOperation.hashCode() * 31 + this.methodCacheKey.hashCode());
 		}
 	}
+
 }
