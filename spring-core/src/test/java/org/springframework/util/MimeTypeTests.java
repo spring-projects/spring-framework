@@ -165,6 +165,11 @@ public class MimeTypeTests {
 	}
 
 	@Test(expected = InvalidMimeTypeException.class)
+	public void parseMimeTypeNoType() {
+		MimeTypeUtils.parseMimeType(";");
+	}
+
+	@Test(expected = InvalidMimeTypeException.class)
 	public void parseMimeTypeNoSubtype() {
 		MimeTypeUtils.parseMimeType("audio");
 	}
