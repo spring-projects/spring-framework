@@ -212,6 +212,7 @@ public class MappingJackson2MessageConverter implements SmartMessageConverter, B
 	 */
 	public Message toMessage(Object object, Session session, Class<?> jsonView)
 			throws JMSException, MessageConversionException {
+
 		if (jsonView != null) {
 			return toMessage(object, session, this.objectMapper.writerWithView(jsonView));
 		}

@@ -293,8 +293,8 @@ public abstract class AbstractAdaptableMessageListener
 	/**
 	 * Pre-process the given result before it is converted to a {@link Message}.
 	 * @param result the result of the invocation
-	 * @return the payload response to handle, either the {@code result} argument or any other
-	 * object (for instance wrapping the result).
+	 * @return the payload response to handle, either the {@code result} argument
+	 * or any other object (for instance wrapping the result).
 	 * @since 4.3
 	 */
 	protected Object preProcessResponse(Object result) {

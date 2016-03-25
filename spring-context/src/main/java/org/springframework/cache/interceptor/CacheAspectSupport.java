@@ -406,13 +406,11 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 				}
 			}
 			catch (VariableNotAvailableException e) {
-				// Ignoring failure due to missing result, consider the cache put has
-				// to proceed
+				// Ignoring failure due to missing result, consider the cache put has to proceed
 			}
 		}
-		// check if  all puts have been excluded by condition
-		return cachePutContexts.size() != excluded.size();
-
+		// Check if all puts have been excluded by condition
+		return (cachePutContexts.size() != excluded.size());
 	}
 
 	private void processCacheEvicts(Collection<CacheOperationContext> contexts, boolean beforeInvocation, Object result) {
