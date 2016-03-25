@@ -17,56 +17,56 @@
 package org.springframework.test.context.jdbc;
 
 import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
 
 import org.junit.Test;
 
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 
-import static java.lang.annotation.ElementType.*;
 import static java.lang.annotation.RetentionPolicy.*;
 import static org.junit.Assert.*;
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.*;
 
 /**
- * Integration tests that verify support for using {@link Sql @Sql} and
- * {@link SqlGroup @SqlGroup} as meta-annotations.
+ * Integration tests that verify support for using {@link Sql @Sql} as a
+ * merged, composed annotation.
  *
  * @author Sam Brannen
- * @since 4.1
+ * @since 4.3
  */
 @ContextConfiguration(classes = EmptyDatabaseConfig.class)
 @DirtiesContext
-public class MetaAnnotationSqlScriptsTests extends AbstractTransactionalJUnit4SpringContextTests {
+public class ComposedAnnotationSqlScriptsTests extends AbstractTransactionalJUnit4SpringContextTests {
 
 	@Test
-	@MetaSql
-	public void metaSqlAnnotation() {
-		assertNumUsers(1);
-	}
-
-	@Test
-	@MetaSqlGroup
-	public void metaSqlGroupAnnotation() {
-		assertNumUsers(1);
-	}
-
-	protected void assertNumUsers(int expected) {
-		assertEquals("Number of rows in the 'user' table.", expected, countRowsInTable("user"));
+	@ComposedSql(
+		scripts = { "drop-schema.sql", "schema.sql" },
+		statements = "INSERT INTO user VALUES('Dilbert')",
+		executionPhase = BEFORE_TEST_METHOD
+	)
+	public void composedSqlAnnotation() {
+		assertEquals("Number of rows in the 'user' table.", 1, countRowsInTable("user"));
 	}
 
 
-	@Sql({ "drop-schema.sql", "schema.sql", "data.sql" })
+	@Sql
 	@Retention(RUNTIME)
-	@Target(METHOD)
-	static @interface MetaSql {
-	}
+	@interface ComposedSql {
 
-	@SqlGroup({ @Sql("drop-schema.sql"), @Sql("schema.sql"), @Sql("data.sql") })
-	@Retention(RUNTIME)
-	@Target(METHOD)
-	static @interface MetaSqlGroup {
+		@AliasFor(annotation = Sql.class)
+		String[] value() default {};
+
+		@AliasFor(annotation = Sql.class)
+		String[] scripts() default {};
+
+		@AliasFor(annotation = Sql.class)
+		String[] statements() default {};
+
+		@AliasFor(annotation = Sql.class)
+		ExecutionPhase executionPhase();
 	}
 
 }
