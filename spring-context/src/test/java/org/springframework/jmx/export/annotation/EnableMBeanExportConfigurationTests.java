@@ -82,6 +82,7 @@ public class EnableMBeanExportConfigurationTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void testPackagePrivateExtensionCantBeExposed() {
 		this.thrown.expect(InvalidMetadataException.class);
 		this.thrown.expectMessage(PackagePrivateTestBean.class.getName());
@@ -90,6 +91,7 @@ public class EnableMBeanExportConfigurationTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void testPackagePrivateImplementationCantBeExposed() {
 		this.thrown.expect(InvalidMetadataException.class);
 		this.thrown.expectMessage(PackagePrivateAnnotationTestBean.class.getName());
