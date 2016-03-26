@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,14 @@
 
 package org.springframework.jms.annotation;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 import javax.jms.JMSException;
 import javax.jms.MessageListener;
 
 import org.hamcrest.core.Is;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -32,10 +36,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.annotation.AliasFor;
 import org.springframework.jms.config.JmsListenerContainerTestFactory;
 import org.springframework.jms.config.JmsListenerEndpointRegistrar;
 import org.springframework.jms.config.JmsListenerEndpointRegistry;
 import org.springframework.jms.config.MessageListenerTestContainer;
+import org.springframework.jms.config.MethodJmsListenerEndpoint;
 import org.springframework.jms.config.SimpleJmsListenerEndpoint;
 import org.springframework.jms.listener.adapter.ListenerExecutionFailedException;
 import org.springframework.jms.listener.adapter.MessageListenerAdapter;
@@ -48,6 +54,7 @@ import static org.junit.Assert.*;
 
 /**
  * @author Stephane Nicoll
+ * @author Sam Brannen
  */
 public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 
@@ -130,11 +137,33 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 	}
 
 	@Test
+	public void composedJmsListeners() {
+		try (ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
+			EnableJmsDefaultContainerFactoryConfig.class, ComposedJmsListenersBean.class)) {
+			JmsListenerContainerTestFactory simpleFactory = context.getBean("jmsListenerContainerFactory",
+				JmsListenerContainerTestFactory.class);
+			assertEquals(2, simpleFactory.getListenerContainers().size());
+
+			MethodJmsListenerEndpoint first = (MethodJmsListenerEndpoint) simpleFactory.getListenerContainer(
+				"first").getEndpoint();
+			assertEquals("first", first.getId());
+			assertEquals("orderQueue", first.getDestination());
+			assertNull(first.getConcurrency());
+
+			MethodJmsListenerEndpoint second = (MethodJmsListenerEndpoint) simpleFactory.getListenerContainer(
+				"second").getEndpoint();
+			assertEquals("second", second.getId());
+			assertEquals("billingQueue", second.getDestination());
+			assertEquals("2-10", second.getConcurrency());
+		}
+	}
+
+	@Test
+	@SuppressWarnings("resource")
 	public void unknownFactory() {
 		thrown.expect(BeanCreationException.class);
 		thrown.expectMessage("customFactory"); // Not found
-		new AnnotationConfigApplicationContext(
-				EnableJmsSampleConfig.class, CustomBean.class);
+		new AnnotationConfigApplicationContext(EnableJmsSampleConfig.class, CustomBean.class);
 	}
 
 	@Test
@@ -292,6 +321,38 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 
 		@JmsListener(destination = "myQueue")
 		public void handle(String msg) {
+		}
+	}
+
+
+	@JmsListener(destination = "orderQueue")
+	@Retention(RetentionPolicy.RUNTIME)
+	private @interface OrderQueueListener {
+
+		@AliasFor(annotation = JmsListener.class)
+		String id() default "";
+
+		@AliasFor(annotation = JmsListener.class)
+		String concurrency() default "";
+	}
+
+	@JmsListener(destination = "billingQueue")
+	@Retention(RetentionPolicy.RUNTIME)
+	private @interface BillingQueueListener {
+
+		@AliasFor(annotation = JmsListener.class)
+		String id() default "";
+
+		@AliasFor(annotation = JmsListener.class)
+		String concurrency() default "";
+	}
+
+	@Component
+	static class ComposedJmsListenersBean {
+
+		@OrderQueueListener(id = "first")
+		@BillingQueueListener(id = "second", concurrency = "2-10")
+		public void repeatableHandle(String msg) {
 		}
 	}
 
