@@ -30,6 +30,7 @@ public class CacheableOperation extends CacheOperation {
 
 	private boolean sync;
 
+
 	public CacheableOperation(CacheableOperation.Builder b) {
 		super(b);
 		this.unless = b.unless;
@@ -76,4 +77,5 @@ public class CacheableOperation extends CacheOperation {
 			return new CacheableOperation(this);
 		}
 	}
+
 }

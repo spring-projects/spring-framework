@@ -30,7 +30,7 @@ import org.springframework.util.ObjectUtils;
  * @since 4.2
  * @see CachedExpressionEvaluator
  */
-public final class AnnotatedElementKey {
+public final class AnnotatedElementKey implements Comparable<AnnotatedElementKey> {
 
 	private final AnnotatedElement element;
 
@@ -64,6 +64,20 @@ public final class AnnotatedElementKey {
 	@Override
 	public int hashCode() {
 		return this.element.hashCode() + (this.targetClass != null ? this.targetClass.hashCode() * 29 : 0);
+	}
+
+	@Override
+	public String toString() {
+		return this.element + (this.targetClass != null ? " on " + this.targetClass : "");
+	}
+
+	@Override
+	public int compareTo(AnnotatedElementKey other) {
+		int result = this.element.toString().compareTo(other.element.toString());
+		if (result == 0 && this.targetClass != null) {
+			result = this.targetClass.getName().compareTo(other.targetClass.getName());
+		}
+		return result;
 	}
 
 }

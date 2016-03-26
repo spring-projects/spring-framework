@@ -435,7 +435,7 @@ public class GenericConversionService implements ConfigurableConversionService {
 	/**
 	 * Key for use with the converter cache.
 	 */
-	private static final class ConverterCacheKey {
+	private static final class ConverterCacheKey implements Comparable<ConverterCacheKey> {
 
 		private final TypeDescriptor sourceType;
 
@@ -469,6 +469,17 @@ public class GenericConversionService implements ConfigurableConversionService {
 		public String toString() {
 			return ("ConverterCacheKey [sourceType = " + this.sourceType +
 					", targetType = " + this.targetType + "]");
+		}
+
+		@Override
+		public int compareTo(ConverterCacheKey other) {
+			int result = this.sourceType.getResolvableType().toString().compareTo(
+					other.sourceType.getResolvableType().toString());
+			if (result == 0) {
+				result = this.targetType.getResolvableType().toString().compareTo(
+						other.targetType.getResolvableType().toString());
+			}
+			return result;
 		}
 	}
 

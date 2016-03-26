@@ -1802,7 +1802,7 @@ public abstract class AnnotationUtils {
 	/**
 	 * Cache key for the AnnotatedElement cache.
 	 */
-	private static class AnnotationCacheKey {
+	private static final class AnnotationCacheKey implements Comparable<AnnotationCacheKey> {
 
 		private final AnnotatedElement element;
 
@@ -1828,6 +1828,20 @@ public abstract class AnnotationUtils {
 		@Override
 		public int hashCode() {
 			return (this.element.hashCode() * 29 + this.annotationType.hashCode());
+		}
+
+		@Override
+		public String toString() {
+			return "@" + this.annotationType + " on " + this.element;
+		}
+
+		@Override
+		public int compareTo(AnnotationCacheKey other) {
+			int result = this.element.toString().compareTo(other.element.toString());
+			if (result == 0) {
+				result = this.annotationType.getName().compareTo(other.annotationType.getName());
+			}
+			return result;
 		}
 	}
 

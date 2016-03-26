@@ -101,6 +101,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 	CacheableOperation parseCacheableAnnotation(AnnotatedElement ae, DefaultCacheConfig defaultConfig, Cacheable cacheable) {
 		CacheableOperation.Builder builder = new CacheableOperation.Builder();
 
+		builder.setName(ae.toString());
 		builder.setCacheNames(cacheable.cacheNames());
 		builder.setCondition(cacheable.condition());
 		builder.setUnless(cacheable.unless());
@@ -109,7 +110,6 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		builder.setCacheManager(cacheable.cacheManager());
 		builder.setCacheResolver(cacheable.cacheResolver());
 		builder.setSync(cacheable.sync());
-		builder.setName(ae.toString());
 
 		defaultConfig.applyDefault(builder);
 		CacheableOperation op = builder.build();
@@ -121,6 +121,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 	CacheEvictOperation parseEvictAnnotation(AnnotatedElement ae, DefaultCacheConfig defaultConfig, CacheEvict cacheEvict) {
 		CacheEvictOperation.Builder builder = new CacheEvictOperation.Builder();
 
+		builder.setName(ae.toString());
 		builder.setCacheNames(cacheEvict.cacheNames());
 		builder.setCondition(cacheEvict.condition());
 		builder.setKey(cacheEvict.key());
@@ -129,7 +130,6 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		builder.setCacheResolver(cacheEvict.cacheResolver());
 		builder.setCacheWide(cacheEvict.allEntries());
 		builder.setBeforeInvocation(cacheEvict.beforeInvocation());
-		builder.setName(ae.toString());
 
 		defaultConfig.applyDefault(builder);
 		CacheEvictOperation op = builder.build();
@@ -141,6 +141,7 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 	CacheOperation parsePutAnnotation(AnnotatedElement ae, DefaultCacheConfig defaultConfig, CachePut cachePut) {
 		CachePutOperation.Builder builder = new CachePutOperation.Builder();
 
+		builder.setName(ae.toString());
 		builder.setCacheNames(cachePut.cacheNames());
 		builder.setCondition(cachePut.condition());
 		builder.setUnless(cachePut.unless());
@@ -148,7 +149,6 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		builder.setKeyGenerator(cachePut.keyGenerator());
 		builder.setCacheManager(cachePut.cacheManager());
 		builder.setCacheResolver(cachePut.cacheResolver());
-		builder.setName(ae.toString());
 
 		defaultConfig.applyDefault(builder);
 		CachePutOperation op = builder.build();

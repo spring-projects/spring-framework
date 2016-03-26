@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,7 @@ import org.springframework.jmx.support.JmxUtils;
 import org.springframework.jmx.support.ObjectNameManager;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link org.aopalliance.intercept.MethodInterceptor} that routes calls to an
@@ -609,7 +610,7 @@ public class MBeanClientInterceptor
 	 * Simple wrapper class around a method name and its signature.
 	 * Used as the key when caching methods.
 	 */
-	private static class MethodCacheKey {
+	private static final class MethodCacheKey implements Comparable<MethodCacheKey> {
 
 		private final String name;
 
@@ -628,7 +629,7 @@ public class MBeanClientInterceptor
 
 		@Override
 		public boolean equals(Object other) {
-			if (other == this) {
+			if (this == other) {
 				return true;
 			}
 			MethodCacheKey otherKey = (MethodCacheKey) other;
@@ -638,6 +639,32 @@ public class MBeanClientInterceptor
 		@Override
 		public int hashCode() {
 			return this.name.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return this.name + "(" + StringUtils.arrayToCommaDelimitedString(this.parameterTypes) + ")";
+		}
+
+		@Override
+		public int compareTo(MethodCacheKey other) {
+			int result = this.name.compareTo(other.name);
+			if (result != 0) {
+				return result;
+			}
+			if (this.parameterTypes.length < other.parameterTypes.length) {
+				return -1;
+			}
+			if (this.parameterTypes.length > other.parameterTypes.length) {
+				return 1;
+			}
+			for (int i = 0; i < this.parameterTypes.length; i++) {
+				result = this.parameterTypes[i].getName().compareTo(other.parameterTypes[i].getName());
+				if (result != 0) {
+					return result;
+				}
+			}
+			return 0;
 		}
 	}
 

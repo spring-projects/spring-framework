@@ -29,6 +29,13 @@ public class CacheEvictOperation extends CacheOperation {
 
 	private final boolean beforeInvocation;
 
+
+	public CacheEvictOperation(CacheEvictOperation.Builder b) {
+		super(b);
+		this.cacheWide = b.cacheWide;
+		this.beforeInvocation = b.beforeInvocation;
+	}
+
 	public boolean isCacheWide() {
 		return this.cacheWide;
 	}
@@ -37,12 +44,10 @@ public class CacheEvictOperation extends CacheOperation {
 		return this.beforeInvocation;
 	}
 
-	public CacheEvictOperation(CacheEvictOperation.Builder b) {
-		super(b);
-		this.cacheWide = b.cacheWide;
-		this.beforeInvocation = b.beforeInvocation;
-	}
 
+	/**
+	 * @since 4.3
+	 */
 	public static class Builder extends CacheOperation.Builder {
 
 		private boolean cacheWide = false;
@@ -71,4 +76,5 @@ public class CacheEvictOperation extends CacheOperation {
 			return new CacheEvictOperation(this);
 		}
 	}
+
 }

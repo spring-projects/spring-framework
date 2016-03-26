@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -203,7 +203,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 	/**
 	 * Default cache key for the TransactionAttribute cache.
 	 */
-	private static class DefaultCacheKey {
+	private static final class DefaultCacheKey implements Comparable<DefaultCacheKey> {
 
 		private final Method method;
 
@@ -230,6 +230,23 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 		@Override
 		public int hashCode() {
 			return this.method.hashCode() + (this.targetClass != null ? this.targetClass.hashCode() * 29 : 0);
+		}
+
+		@Override
+		public String toString() {
+			return this.method + (this.targetClass != null ? " on " + this.targetClass : "");
+		}
+
+		@Override
+		public int compareTo(DefaultCacheKey other) {
+			int result = this.method.getName().compareTo(other.method.getName());
+			if (result == 0) {
+				result = this.method.toString().compareTo(other.method.toString());
+				if (result == 0 && this.targetClass != null) {
+					result = this.targetClass.getName().compareTo(other.targetClass.getName());
+				}
+			}
+			return result;
 		}
 	}
 

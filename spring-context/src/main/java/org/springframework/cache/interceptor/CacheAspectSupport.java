@@ -746,7 +746,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	}
 
 
-	private static class CacheOperationCacheKey {
+	private static final class CacheOperationCacheKey implements Comparable<CacheOperationCacheKey> {
 
 		private final CacheOperation cacheOperation;
 
@@ -773,6 +773,20 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 		@Override
 		public int hashCode() {
 			return (this.cacheOperation.hashCode() * 31 + this.methodCacheKey.hashCode());
+		}
+
+		@Override
+		public String toString() {
+			return this.cacheOperation + " on " + this.methodCacheKey;
+		}
+
+		@Override
+		public int compareTo(CacheOperationCacheKey other) {
+			int result = this.cacheOperation.getName().compareTo(other.cacheOperation.getName());
+			if (result == 0) {
+				result = this.methodCacheKey.compareTo(other.methodCacheKey);
+			}
+			return result;
 		}
 	}
 
