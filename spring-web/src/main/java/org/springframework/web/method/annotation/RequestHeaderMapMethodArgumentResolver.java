@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -66,8 +66,11 @@ public class RequestHeaderMapMethodArgumentResolver implements HandlerMethodArgu
 			}
 			for (Iterator<String> iterator = webRequest.getHeaderNames(); iterator.hasNext();) {
 				String headerName = iterator.next();
-				for (String headerValue : webRequest.getHeaderValues(headerName)) {
-					result.add(headerName, headerValue);
+				String[] headerValues = webRequest.getHeaderValues(headerName);
+				if (headerValues != null) {
+					for (String headerValue : headerValues) {
+						result.add(headerName, headerValue);
+					}
 				}
 			}
 			return result;
@@ -77,7 +80,9 @@ public class RequestHeaderMapMethodArgumentResolver implements HandlerMethodArgu
 			for (Iterator<String> iterator = webRequest.getHeaderNames(); iterator.hasNext();) {
 				String headerName = iterator.next();
 				String headerValue = webRequest.getHeader(headerName);
-				result.put(headerName, headerValue);
+				if (headerValue != null) {
+					result.put(headerName, headerValue);
+				}
 			}
 			return result;
 		}
