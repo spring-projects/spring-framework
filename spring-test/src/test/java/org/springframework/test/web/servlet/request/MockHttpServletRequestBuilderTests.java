@@ -201,10 +201,10 @@ public class MockHttpServletRequestBuilderTests {
 
 	@Test
 	public void requestParameterUriString() throws Exception {
-		this.builder.param("foo", "bar", "baz");
+		this.builder.param("foo", "1").param("bar", "2").param("baz", "3");
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
-		assertEquals(request.getQueryString(), "foo&bar&baz");
+		assertEquals(request.getQueryString(), "foo=1&bar=2&baz=3");
 	}
 
 	@Test
