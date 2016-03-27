@@ -200,6 +200,20 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
+	public void requestUriQueryParamsAndBuilderParametersMerged() throws Exception {
+		MockHttpServletRequestBuilder customBuilder = new MockHttpServletRequestBuilder(HttpMethod.GET, "/foo/bar?foo=1");
+		customBuilder.param("bar", "1").param("baz", "1");
+
+		MockHttpServletRequest request = customBuilder.buildRequest(this.servletContext);
+		assertEquals(request.getQueryString(), "foo=1&bar=1&baz=1");
+
+		Map<String, String[]> parameterMap = request.getParameterMap();
+		assertArrayEquals(new String[] {"1"}, parameterMap.get("foo"));
+		assertArrayEquals(new String[] {"1"}, parameterMap.get("bar"));
+		assertArrayEquals(new String[] {"1"}, parameterMap.get("baz"));
+	}
+
+	@Test
 	public void requestParameterUriString() throws Exception {
 		this.builder.param("foo", "1").param("bar", "2").param("baz", "3");
 
