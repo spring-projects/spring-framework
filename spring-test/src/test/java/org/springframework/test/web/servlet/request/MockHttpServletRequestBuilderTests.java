@@ -214,7 +214,7 @@ public class MockHttpServletRequestBuilderTests {
 	}
 
 	@Test
-	public void requestParameterUriString() throws Exception {
+	public void requestParameterQueryString() throws Exception {
 		this.builder.param("foo", "1").param("bar", "2").param("baz", "3");
 
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
