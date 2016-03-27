@@ -30,6 +30,7 @@ import javax.script.Invocable;
 import javax.script.ScriptEngine;
 
 import org.hamcrest.Matchers;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -47,7 +48,6 @@ import org.springframework.web.servlet.DispatcherServlet;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.mock;
 
 /**
  * Unit tests for {@link ScriptTemplateView}.
@@ -147,11 +147,11 @@ public class ScriptTemplateViewTests {
 		this.view.setApplicationContext(this.wac);
 		ExecutorService executor = Executors.newFixedThreadPool(4);
 		List<Future<Boolean>> results = new ArrayList<>();
-		for(int i = 0; i < iterations; i++) {
+		for (int i = 0; i < iterations; i++) {
 			results.add(executor.submit(() -> view.getEngine() != null));
 		}
 		assertEquals(iterations, results.size());
-		for(int i = 0; i < iterations; i++) {
+		for (int i = 0; i < iterations; i++) {
 			assertTrue(results.get(i).get());
 		}
 		executor.shutdown();
@@ -212,6 +212,7 @@ public class ScriptTemplateViewTests {
 	}
 
 	@Test
+	@SuppressWarnings("resource")
 	public void parentLoader() {
 		this.view.setEngine(mock(InvocableScriptEngine.class));
 		this.view.setRenderFunction("render");

@@ -30,7 +30,6 @@ import java.rmi.UnknownHostException;
 import java.rmi.UnmarshalException;
 
 import org.aopalliance.intercept.MethodInvocation;
-
 import org.junit.Test;
 
 import org.springframework.remoting.RemoteAccessException;
@@ -342,7 +341,7 @@ public class RmiSupportTests {
 			client.afterPropertiesSet();
 			fail("url isn't set, expected IllegalArgumentException");
 		}
-		catch(IllegalArgumentException e){
+		catch (IllegalArgumentException ex){
 			// expected
 		}
 	}

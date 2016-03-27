@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -19,21 +19,25 @@ package org.springframework.test.web.servlet.htmlunit;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.util.Assert;
-import org.springframework.util.StringUtils;
+import javax.servlet.http.Cookie;
 
 import com.gargoylesoftware.htmlunit.WebRequest;
 import com.gargoylesoftware.htmlunit.WebResponse;
 import com.gargoylesoftware.htmlunit.WebResponseData;
 import com.gargoylesoftware.htmlunit.util.NameValuePair;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
+
 /**
  * @author Rob Winch
  * @author Sam Brannen
+ * @author Rossen Stoyanchev
  * @since 4.2
  */
 final class MockWebResponseBuilder {
@@ -48,8 +52,8 @@ final class MockWebResponseBuilder {
 
 
 	public MockWebResponseBuilder(long startTime, WebRequest webRequest, MockHttpServletResponse response) {
-		Assert.notNull(webRequest, "webRequest must not be null");
-		Assert.notNull(response, "response must not be null");
+		Assert.notNull(webRequest, "WebRequest must not be null");
+		Assert.notNull(response, "HttpServletResponse must not be null");
 		this.startTime = startTime;
 		this.webRequest = webRequest;
 		this.response = response;
@@ -63,8 +67,8 @@ final class MockWebResponseBuilder {
 
 	private WebResponseData webResponseData() throws IOException {
 		List<NameValuePair> responseHeaders = responseHeaders();
-		int statusCode = (this.response.getRedirectedUrl() != null ? HttpStatus.MOVED_PERMANENTLY.value()
-				: this.response.getStatus());
+		int statusCode = (this.response.getRedirectedUrl() != null ?
+				HttpStatus.MOVED_PERMANENTLY.value() : this.response.getStatus());
 		String statusMessage = statusMessage(statusCode);
 		return new WebResponseData(this.response.getContentAsByteArray(), statusCode, statusMessage, responseHeaders);
 	}
@@ -98,7 +102,20 @@ final class MockWebResponseBuilder {
 		if (location != null) {
 			responseHeaders.add(new NameValuePair("Location", location));
 		}
+		for (Cookie cookie : this.response.getCookies()) {
+			responseHeaders.add(new NameValuePair("Set-Cookie", valueOfCookie(cookie)));
+		}
 		return responseHeaders;
+	}
+
+	private String valueOfCookie(Cookie cookie) {
+		Date expires = null;
+		if (cookie.getMaxAge() > -1) {
+			expires = new Date(System.currentTimeMillis() + cookie.getMaxAge() * 1000);
+		}
+		return new com.gargoylesoftware.htmlunit.util.Cookie(
+				cookie.getDomain(), cookie.getName(), cookie.getValue(),
+				cookie.getPath(), expires, cookie.getSecure(), cookie.isHttpOnly()).toString();
 	}
 
 }

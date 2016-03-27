@@ -179,7 +179,7 @@ public class FastByteArrayOutputStreamTests {
 	public void updateMessageDigestManyBuffers() throws Exception {
 		StringBuilder builder = new StringBuilder("\"0");
 		// filling at least one 256 buffer
-		for( int i=0; i < 30; i++) {
+		for ( int i = 0; i < 30; i++) {
 			this.os.write(helloBytes);
 		}
 		InputStream inputStream = this.os.getInputStream();

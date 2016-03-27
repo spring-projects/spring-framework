@@ -383,9 +383,9 @@ public class CommonsMultipartResolverTests {
 					MockFileItem fileItem1x = new MockFileItem(
 						"field1", "type1", empty ? "" : "field1.txt", empty ? "" : "text1");
 					MockFileItem fileItem2 = new MockFileItem(
-						"field2", "type2", empty ? "" : "C:/field2.txt", empty ? "" : "text2");
+						"field2", "type2", empty ? "" : "C:\\mypath/field2.txt", empty ? "" : "text2");
 					MockFileItem fileItem2x = new MockFileItem(
-						"field2x", "type2", empty ? "" : "C:\\field2x.txt", empty ? "" : "text2");
+						"field2x", "type2", empty ? "" : "C:/mypath\\field2x.txt", empty ? "" : "text2");
 					MockFileItem fileItem3 = new MockFileItem("field3", null, null, "value3");
 					MockFileItem fileItem4 = new MockFileItem("field4", "text/html; charset=iso-8859-1", null, "value4");
 					MockFileItem fileItem5 = new MockFileItem("field4", null, null, "value5");

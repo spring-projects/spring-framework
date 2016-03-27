@@ -191,8 +191,9 @@ public class IndexingTests {
 		expression = parser.parseExpression("property[0]");
 		try {
 			expression.setValue(this, "4");
-		} catch (EvaluationException e) {
-			assertTrue(e.getMessage().startsWith("EL1053E"));
+		}
+		catch (EvaluationException ex) {
+			assertTrue(ex.getMessage().startsWith("EL1053E"));
 		}
 	}
 
@@ -251,8 +252,9 @@ public class IndexingTests {
 		expression = parser.parseExpression("property[0]");
 		try {
 			assertEquals("bar", expression.getValue(this));
-		} catch (EvaluationException e) {
-			assertTrue(e.getMessage().startsWith("EL1027E"));
+		}
+		catch (EvaluationException ex) {
+			assertTrue(ex.getMessage().startsWith("EL1027E"));
 		}
 	}
 
@@ -268,8 +270,9 @@ public class IndexingTests {
 		expression = parser.parseExpression("property[0]");
 		try {
 			assertEquals("bar", expression.getValue(this));
-		} catch (EvaluationException e) {
-			assertTrue(e.getMessage().startsWith("EL1053E"));
+		}
+		catch (EvaluationException ex) {
+			assertTrue(ex.getMessage().startsWith("EL1053E"));
 		}
 	}
 
@@ -285,8 +288,9 @@ public class IndexingTests {
 		expression = parser.parseExpression("property2[0]");
 		try {
 			assertEquals("bar", expression.getValue(this));
-		} catch (EvaluationException e) {
-			assertTrue(e.getMessage().startsWith("EL1053E"));
+		}
+		catch (EvaluationException ex) {
+			assertTrue(ex.getMessage().startsWith("EL1053E"));
 		}
 	}
 

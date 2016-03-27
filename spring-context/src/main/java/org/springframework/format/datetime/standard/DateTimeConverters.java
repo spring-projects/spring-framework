@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,6 +85,7 @@ final class DateTimeConverters {
 		}
 	}
 
+
 	@UsesJava8
 	private static class LocalDateTimeToLocalDateConverter implements Converter<LocalDateTime, LocalDate> {
 
@@ -93,6 +94,7 @@ final class DateTimeConverters {
 			return source.toLocalDate();
 		}
 	}
+
 
 	@UsesJava8
 	private static class LocalDateTimeToLocalTimeConverter implements Converter<LocalDateTime, LocalTime> {
@@ -103,6 +105,7 @@ final class DateTimeConverters {
 		}
 	}
 
+
 	@UsesJava8
 	private static class ZonedDateTimeToLocalDateConverter implements Converter<ZonedDateTime, LocalDate> {
 
@@ -112,6 +115,7 @@ final class DateTimeConverters {
 		}
 	}
 
+
 	@UsesJava8
 	private static class ZonedDateTimeToLocalTimeConverter implements Converter<ZonedDateTime, LocalTime> {
 
@@ -120,6 +124,7 @@ final class DateTimeConverters {
 			return source.toLocalTime();
 		}
 	}
+
 
 	@UsesJava8
 	private static class ZonedDateTimeToLocalDateTimeConverter implements Converter<ZonedDateTime, LocalDateTime> {
@@ -139,6 +144,7 @@ final class DateTimeConverters {
 		}
 	}
 
+
 	@UsesJava8
 	private static class ZonedDateTimeToInstantConverter implements Converter<ZonedDateTime, Instant> {
 
@@ -149,6 +155,7 @@ final class DateTimeConverters {
 		}
 	}
 
+
 	@UsesJava8
 	private static class OffsetDateTimeToLocalDateConverter implements Converter<OffsetDateTime, LocalDate> {
 
@@ -157,6 +164,7 @@ final class DateTimeConverters {
 			return source.toLocalDate();
 		}
 	}
+
 
 	@UsesJava8
 	private static class OffsetDateTimeToLocalTimeConverter implements Converter<OffsetDateTime, LocalTime> {
@@ -167,6 +175,7 @@ final class DateTimeConverters {
 		}
 	}
 
+
 	@UsesJava8
 	private static class OffsetDateTimeToLocalDateTimeConverter implements Converter<OffsetDateTime, LocalDateTime> {
 
@@ -175,6 +184,7 @@ final class DateTimeConverters {
 			return source.toLocalDateTime();
 		}
 	}
+
 
 	@UsesJava8
 	private static class OffsetDateTimeToZonedDateTimeConverter implements Converter<OffsetDateTime, ZonedDateTime> {
@@ -185,6 +195,7 @@ final class DateTimeConverters {
 		}
 	}
 
+
 	@UsesJava8
 	private static class OffsetDateTimeToInstantConverter implements Converter<OffsetDateTime, Instant> {
 
@@ -193,6 +204,7 @@ final class DateTimeConverters {
 			return source.toInstant();
 		}
 	}
+
 
 	@UsesJava8
 	private static class CalendarToZonedDateTimeConverter implements Converter<Calendar, ZonedDateTime> {
@@ -203,6 +215,7 @@ final class DateTimeConverters {
 		}
 	}
 
+
 	@UsesJava8
 	private static class CalendarToOffsetDateTimeConverter implements Converter<Calendar, OffsetDateTime> {
 
@@ -211,6 +224,7 @@ final class DateTimeConverters {
 			return calendarToZonedDateTime(source).toOffsetDateTime();
 		}
 	}
+
 
 	@UsesJava8
 	private static class CalendarToLocalDateConverter implements Converter<Calendar, LocalDate> {
@@ -221,6 +235,7 @@ final class DateTimeConverters {
 		}
 	}
 
+
 	@UsesJava8
 	private static class CalendarToLocalTimeConverter implements Converter<Calendar, LocalTime> {
 
@@ -230,6 +245,7 @@ final class DateTimeConverters {
 		}
 	}
 
+
 	@UsesJava8
 	private static class CalendarToLocalDateTimeConverter implements Converter<Calendar, LocalDateTime> {
 
@@ -238,6 +254,7 @@ final class DateTimeConverters {
 			return calendarToZonedDateTime(source).toLocalDateTime();
 		}
 	}
+
 
 	@UsesJava8
 	private static class CalendarToInstantConverter implements Converter<Calendar, Instant> {

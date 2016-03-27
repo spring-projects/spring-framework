@@ -15,6 +15,7 @@ http://www.w3.org/TR/xhtml1/dtds.html#a_dtd_XHTML-1.0-Strict[DTD].
 
 This appendix describes the `spring-form.tld` tag library.
 
+* <<spring-form.tld.button>>
 * <<spring-form.tld.checkbox>>
 * <<spring-form.tld.checkboxes>>
 * <<spring-form.tld.errors>>

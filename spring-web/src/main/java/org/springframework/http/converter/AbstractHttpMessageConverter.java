@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.http.converter;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -51,6 +52,8 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 
 	private List<MediaType> supportedMediaTypes = Collections.emptyList();
 
+	private Charset defaultCharset;
+
 
 	/**
 	 * Construct an {@code AbstractHttpMessageConverter} with no supported media types.
@@ -75,6 +78,11 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 		setSupportedMediaTypes(Arrays.asList(supportedMediaTypes));
 	}
 
+	protected AbstractHttpMessageConverter(Charset defaultCharset, MediaType... supportedMediaTypes) {
+		this.defaultCharset = defaultCharset;
+		setSupportedMediaTypes(Arrays.asList(supportedMediaTypes));
+	}
+
 
 	/**
 	 * Set the list of {@link MediaType} objects supported by this converter.
@@ -89,6 +97,16 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 		return Collections.unmodifiableList(this.supportedMediaTypes);
 	}
 
+	/**
+	 * Set the default character set if any.
+	 */
+	public void setDefaultCharset(Charset defaultCharset) {
+		this.defaultCharset = defaultCharset;
+	}
+
+	public Charset getDefaultCharset() {
+		return defaultCharset;
+	}
 
 	/**
 	 * This implementation checks if the given class is {@linkplain #supports(Class) supported},
@@ -130,7 +148,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	@Override
 	public boolean canWrite(Class<?> clazz, MediaType mediaType) {
 		return supports(clazz) && canWrite(mediaType);
-		}
+	}
 
 	/**
 	 * Returns {@code true} if the given media type includes any of the
@@ -200,7 +218,8 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	/**
 	 * Add default headers to the output message.
 	 * <p>This implementation delegates to {@link #getDefaultContentType(Object)} if a content
-	 * type was not provided, calls {@link #getContentLength}, and sets the corresponding headers
+	 * type was not provided, set if necessary the default character set, calls
+	 * {@link #getContentLength}, and sets the corresponding headers.
 	 * @since 4.2
 	 */
 	protected void addDefaultHeaders(HttpHeaders headers, T t, MediaType contentType) throws IOException{
@@ -214,10 +233,13 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 				contentTypeToUse = (mediaType != null ? mediaType : contentTypeToUse);
 			}
 			if (contentTypeToUse != null) {
+				if (contentTypeToUse.getCharSet() == null && this.defaultCharset != null) {
+					contentTypeToUse = new MediaType(contentTypeToUse, this.defaultCharset);
+				}
 				headers.setContentType(contentTypeToUse);
 			}
 		}
-		if (headers.getContentLength() == -1) {
+		if (headers.getContentLength() < 0) {
 			Long contentLength = getContentLength(t, headers.getContentType());
 			if (contentLength != null) {
 				headers.setContentLength(contentLength);

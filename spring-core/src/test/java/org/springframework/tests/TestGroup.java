@@ -93,7 +93,8 @@ public enum TestGroup {
 		for (String group : value.split(",")) {
 			try {
 				groups.add(valueOf(group.trim().toUpperCase()));
-			} catch (IllegalArgumentException e) {
+			}
+			catch (IllegalArgumentException ex) {
 				throw new IllegalArgumentException(format(
 						"Unable to find test group '%s' when parsing testGroups value: '%s'. " +
 						"Available groups include: [%s]", group.trim(), value,

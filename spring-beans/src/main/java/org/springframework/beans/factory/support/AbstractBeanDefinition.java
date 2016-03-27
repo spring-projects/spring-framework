@@ -826,7 +826,7 @@ public abstract class AbstractBeanDefinition extends BeanMetadataAttributeAccess
 	/**
 	 * Set whether this bean definition is 'synthetic', that is, not defined
 	 * by the application itself (for example, an infrastructure bean such
-	 * as a helper for auto-proxying, created through {@code &ltaop:config&gt;}).
+	 * as a helper for auto-proxying, created through {@code <aop:config>}).
 	 */
 	public void setSynthetic(boolean synthetic) {
 		this.synthetic = synthetic;

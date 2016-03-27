@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,17 +91,17 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	}
 
 	@Override
-	public boolean matches(Method method, Class<?> targetClass, Object[] args) {
-		++this.evaluations;
+	public boolean matches(Method method, Class<?> targetClass, Object... args) {
+		this.evaluations++;
 		ControlFlow cflow = ControlFlowFactory.createControlFlow();
-		return (this.methodName != null) ? cflow.under(this.clazz, this.methodName) : cflow.under(this.clazz);
+		return (this.methodName != null ? cflow.under(this.clazz, this.methodName) : cflow.under(this.clazz));
 	}
 
 	/**
 	 * It's useful to know how many times we've fired, for optimization.
 	 */
 	public int getEvaluations() {
-		return evaluations;
+		return this.evaluations;
 	}
 
 
@@ -114,6 +114,7 @@ public class ControlFlowPointcut implements Pointcut, ClassFilter, MethodMatcher
 	public MethodMatcher getMethodMatcher() {
 		return this;
 	}
+
 
 	@Override
 	public boolean equals(Object other) {

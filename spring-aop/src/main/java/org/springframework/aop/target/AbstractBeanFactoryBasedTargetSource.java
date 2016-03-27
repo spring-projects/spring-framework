@@ -165,7 +165,7 @@ public abstract class AbstractBeanFactoryBasedTargetSource implements TargetSour
 		if (this == other) {
 			return true;
 		}
-		if (other == null || !getClass().equals(other.getClass())) {
+		if (other == null || getClass() != other.getClass()) {
 			return false;
 		}
 		AbstractBeanFactoryBasedTargetSource otherTargetSource = (AbstractBeanFactoryBasedTargetSource) other;

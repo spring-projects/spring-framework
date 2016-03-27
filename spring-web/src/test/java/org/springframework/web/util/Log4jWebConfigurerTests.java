@@ -101,7 +101,8 @@ public class Log4jWebConfigurerTests {
 
 		try {
 			assertLogOutput();
-		} finally {
+		}
+		finally {
 			Log4jWebConfigurer.shutdownLogging(sc);
 		}
 		assertTrue(MockLog4jAppender.closeCalled);
@@ -132,7 +133,8 @@ public class Log4jWebConfigurerTests {
 
 		try {
 			assertLogOutput();
-		} finally {
+		}
+		finally {
 			listener.contextDestroyed(new ServletContextEvent(sc));
 		}
 		assertTrue(MockLog4jAppender.closeCalled);

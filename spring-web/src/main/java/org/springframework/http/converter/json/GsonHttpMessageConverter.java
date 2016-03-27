@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -45,7 +45,8 @@ import org.springframework.util.Assert;
  * {@link Gson} class.
  *
  * <p>This converter can be used to bind to typed beans or untyped {@code HashMap}s.
- * By default, it supports {@code application/json} and {@code application/*+json}.
+ * By default, it supports {@code application/json} and {@code application/*+json} with
+ * {@code UTF-8} character set.
  *
  * <p>Tested against Gson 2.3; compatible with Gson 2.0 and higher.
  *
@@ -69,8 +70,8 @@ public class GsonHttpMessageConverter extends AbstractGenericHttpMessageConverte
 	 * Construct a new {@code GsonHttpMessageConverter}.
 	 */
 	public GsonHttpMessageConverter() {
-		super(new MediaType("application", "json", DEFAULT_CHARSET),
-				new MediaType("application", "*+json", DEFAULT_CHARSET));
+		super(MediaType.APPLICATION_JSON, new MediaType("application", "*+json"));
+		this.setDefaultCharset(DEFAULT_CHARSET);
 	}
 
 

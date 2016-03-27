@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ import org.springframework.util.concurrent.SuccessCallback;
  * to the caller.
  *
  * @author Juergen Hoeller
+ * @author Rossen Stoyanchev
  * @since 3.0
  * @see Async
  * @see #forValue(Object)
@@ -103,10 +104,16 @@ public class AsyncResult<V> implements ListenableFuture<V> {
 	@Override
 	public void addCallback(SuccessCallback<? super V> successCallback, FailureCallback failureCallback) {
 		try {
-			successCallback.onSuccess(this.value);
+			if (this.executionException != null) {
+				Throwable cause = this.executionException.getCause();
+				failureCallback.onFailure(cause != null ? cause : this.executionException);
+			}
+			else {
+				successCallback.onSuccess(this.value);
+			}
 		}
 		catch (Throwable ex) {
-			failureCallback.onFailure(ex);
+			// Ignore
 		}
 	}
 

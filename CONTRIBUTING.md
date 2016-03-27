@@ -6,6 +6,10 @@ to expect from the Spring team when evaluating your submission._
 _Please refer back to this document as a checklist before issuing any pull
 request; this will save time for everyone!_
 
+## Code of Conduct
+This project adheres to the Contributor Covenant [code of conduct](CODE_OF_CONDUCT.adoc).
+By participating, you  are expected to uphold this code. Please report unacceptable behavior to spring-code-of-conduct@pivotal.io.
+
 ## Take Your First Steps
 
 ### Understand the basics
@@ -13,8 +17,15 @@ request; this will save time for everyone!_
 Not sure what a pull request is, or how to submit one? Take a look at GitHub's
 excellent [help documentation][] first.
 
+### Search Stack Overflow first; discuss if necessary
 
-### Search JIRA first; create an issue if necessary
+If you're unsure why something isn't working or wondering if there is a better
+way of doing it please check on Stack Overflow first and if necessary start
+a discussion. This is the official list of
+[Spring project tags](https://spring.io/questions). In short the issue tracker
+should be used to report issues and make feature requests.
+
+### Search JIRA; create an issue if necessary
 
 Is there already an issue that addresses your concern? Do a bit of searching
 in our [JIRA issue tracker][] to see if you can find something similar. If you

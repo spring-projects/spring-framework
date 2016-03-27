@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -219,12 +219,14 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	/**
-	 * Set the fetch size for this JdbcTemplate. This is important for processing
-	 * large result sets: Setting this higher than the default value will increase
-	 * processing speed at the cost of memory consumption; setting this lower can
-	 * avoid transferring row data that will never be read by the application.
-	 * <p>Default is -1, indicating to use the JDBC driver's default
-	 * (i.e. to not pass a specific fetch size setting on the driver).
+	 * Set the fetch size for this JdbcTemplate. This is important for processing large
+	 * result sets: Setting this higher than the default value will increase processing
+	 * speed at the cost of memory consumption; setting this lower can avoid transferring
+	 * row data that will never be read by the application.
+	 * <p>Default is -1, indicating to use the JDBC driver's default configuration
+	 * (i.e. to not pass a specific fetch size setting on to the driver).
+	 * <p>Note: As of 4.3, negative values other than -1 will get passed on to the
+	 * driver, since e.g. MySQL supports special behavior for {@code Integer.MIN_VALUE}.
 	 * @see java.sql.Statement#setFetchSize
 	 */
 	public void setFetchSize(int fetchSize) {
@@ -239,13 +241,15 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	}
 
 	/**
-	 * Set the maximum number of rows for this JdbcTemplate. This is important
-	 * for processing subsets of large result sets, avoiding to read and hold
-	 * the entire result set in the database or in the JDBC driver if we're
-	 * never interested in the entire result in the first place (for example,
-	 * when performing searches that might return a large number of matches).
-	 * <p>Default is -1, indicating to use the JDBC driver's default
-	 * (i.e. to not pass a specific max rows setting on the driver).
+	 * Set the maximum number of rows for this JdbcTemplate. This is important for
+	 * processing subsets of large result sets, avoiding to read and hold the entire
+	 * result set in the database or in the JDBC driver if we're never interested in
+	 * the entire result in the first place (for example, when performing searches
+	 * that might return a large number of matches).
+	 * <p>Default is -1, indicating to use the JDBC driver's default configuration
+	 * (i.e. to not pass a specific max rows setting on to the driver).
+	 * <p>Note: As of 4.3, negative values other than -1 will get passed on to the
+	 * driver, in sync with {@link #setFetchSize}'s support for special MySQL values.
 	 * @see java.sql.Statement#setMaxRows
 	 */
 	public void setMaxRows(int maxRows) {
@@ -1038,7 +1042,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 						result[i] = rowsAffected.get(i);
 					}
 					return result;
-				} finally {
+				}
+				finally {
 					if (pss instanceof ParameterDisposer) {
 						((ParameterDisposer) pss).cleanupParameters();
 					}
@@ -1348,11 +1353,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 	 */
 	protected void applyStatementSettings(Statement stmt) throws SQLException {
 		int fetchSize = getFetchSize();
-		if (fetchSize >= 0) {
+		if (fetchSize != -1) {
 			stmt.setFetchSize(fetchSize);
 		}
 		int maxRows = getMaxRows();
-		if (maxRows >= 0) {
+		if (maxRows != -1) {
 			stmt.setMaxRows(maxRows);
 		}
 		DataSourceUtils.applyTimeout(stmt, getDataSource(), getQueryTimeout());

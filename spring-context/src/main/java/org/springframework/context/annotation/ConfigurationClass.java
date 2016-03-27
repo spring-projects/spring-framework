@@ -103,7 +103,7 @@ final class ConfigurationClass {
 	public ConfigurationClass(Class<?> clazz, String beanName) {
 		Assert.hasText(beanName, "Bean name must not be null");
 		this.metadata = new StandardAnnotationMetadata(clazz, true);
-		this.resource = new DescriptiveResource(clazz.toString());
+		this.resource = new DescriptiveResource(clazz.getName());
 		this.beanName = beanName;
 	}
 
@@ -117,7 +117,7 @@ final class ConfigurationClass {
 	 */
 	public ConfigurationClass(Class<?> clazz, ConfigurationClass importedBy) {
 		this.metadata = new StandardAnnotationMetadata(clazz, true);
-		this.resource = new DescriptiveResource(clazz.toString());
+		this.resource = new DescriptiveResource(clazz.getName());
 		this.importedBy.add(importedBy);
 	}
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,6 @@ import java.util.List;
 
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
-import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -109,7 +108,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	@Override
 	public void setEmbeddedValueResolver(StringValueResolver resolver) {
-		this.embeddedValueResolver  = resolver;
+		this.embeddedValueResolver = resolver;
 	}
 
 	@Override
@@ -168,8 +167,8 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	 */
 	@Override
 	protected boolean isHandler(Class<?> beanType) {
-		return ((AnnotationUtils.findAnnotation(beanType, Controller.class) != null) ||
-				(AnnotationUtils.findAnnotation(beanType, RequestMapping.class) != null));
+		return (AnnotatedElementUtils.hasAnnotation(beanType, Controller.class) ||
+				AnnotatedElementUtils.hasAnnotation(beanType, RequestMapping.class));
 	}
 
 	/**
@@ -314,19 +313,19 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			return;
 		}
 		for (String origin : annotation.origins()) {
-			config.addAllowedOrigin(origin);
+			config.addAllowedOrigin(resolveCorsAnnotationValue(origin));
 		}
 		for (RequestMethod method : annotation.methods()) {
 			config.addAllowedMethod(method.name());
 		}
 		for (String header : annotation.allowedHeaders()) {
-			config.addAllowedHeader(header);
+			config.addAllowedHeader(resolveCorsAnnotationValue(header));
 		}
 		for (String header : annotation.exposedHeaders()) {
-			config.addExposedHeader(header);
+			config.addExposedHeader(resolveCorsAnnotationValue(header));
 		}
 
-		String allowCredentials = annotation.allowCredentials();
+		String allowCredentials = resolveCorsAnnotationValue(annotation.allowCredentials());
 		if ("true".equalsIgnoreCase(allowCredentials)) {
 			config.setAllowCredentials(true);
 		}
@@ -334,13 +333,17 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 			config.setAllowCredentials(false);
 		}
 		else if (!allowCredentials.isEmpty()) {
-			throw new IllegalStateException("@CrossOrigin's allowCredentials value must be \"true\", \"false\", "
-					+ "or an empty string (\"\"); current value is [" + allowCredentials + "].");
+			throw new IllegalStateException("@CrossOrigin's allowCredentials value must be \"true\", \"false\", " +
+					"or an empty string (\"\"): current value is [" + allowCredentials + "]");
 		}
 
 		if (annotation.maxAge() >= 0 && config.getMaxAge() == null) {
 			config.setMaxAge(annotation.maxAge());
 		}
+	}
+
+	private String resolveCorsAnnotationValue(String value) {
+		return (this.embeddedValueResolver != null ? this.embeddedValueResolver.resolveStringValue(value) : value);
 	}
 
 }

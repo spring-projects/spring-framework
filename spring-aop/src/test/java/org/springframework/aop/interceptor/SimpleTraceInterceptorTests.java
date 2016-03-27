@@ -60,7 +60,8 @@ public final class SimpleTraceInterceptorTests {
 		try {
 			interceptor.invokeUnderTrace(mi, log);
 			fail("Must have propagated the IllegalArgumentException.");
-		} catch (IllegalArgumentException expected) {
+		}
+		catch (IllegalArgumentException expected) {
 		}
 
 		verify(log).trace(anyString());

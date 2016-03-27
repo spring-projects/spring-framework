@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,14 +27,14 @@ import static org.junit.Assert.*;
 
 /**
  * Verifies support for JUnit 4.7 {@link Rule Rules} in conjunction with the
- * {@link SpringJUnit4ClassRunner}. The body of this test class is taken from
- * the JUnit 4.7 release notes.
+ * {@link SpringRunner}. The body of this test class is taken from the
+ * JUnit 4.7 release notes.
  *
  * @author JUnit 4.7 Team
  * @author Sam Brannen
  * @since 3.0
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @TestExecutionListeners( {})
 public class SpringJUnit47ClassRunnerRuleTests {
 

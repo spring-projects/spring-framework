@@ -22,6 +22,7 @@ import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.concurrent.Callable;
 
 import org.springframework.core.annotation.AliasFor;
 
@@ -30,14 +31,14 @@ import org.springframework.core.annotation.AliasFor;
  * in a class) can be cached.
  *
  * <p>Each time an advised method is invoked, caching behavior will be applied,
- * checking whether the method has been already invoked for the given arguments. A
- * sensible default simply uses the method parameters to compute the key, but a SpEL
- * expression can be provided via the {@link #key} attribute, or a custom
- * {@link org.springframework.cache.interceptor.KeyGenerator KeyGenerator} implementation
- * can replace the default one (see {@link #keyGenerator}).
+ * checking whether the method has been already invoked for the given arguments.
+ * A sensible default simply uses the method parameters to compute the key, but
+ * a SpEL expression can be provided via the {@link #key} attribute, or a custom
+ * {@link org.springframework.cache.interceptor.KeyGenerator} implementation can
+ * replace the default one (see {@link #keyGenerator}).
  *
- * <p>If no value is found in the cache for the computed key, the method is invoked
- * and the returned value is used as the cache value.
+ * <p>If no value is found in the cache for the computed key, the target method
+ * will be invoked and the returned value stored in the associated cache.
  *
  * @author Costin Leau
  * @author Phillip Webb
@@ -73,11 +74,24 @@ public @interface Cacheable {
 	 * Spring Expression Language (SpEL) expression for computing the key dynamically.
 	 * <p>Default is {@code ""}, meaning all method parameters are considered as a key,
 	 * unless a custom {@link #keyGenerator} has been configured.
+	 * <p>The SpEL expression evaluates against a dedicated context that provides the
+	 * following meta-data:
+	 * <ul>
+	 * <li>{@code #root.method}, {@code #root.target}, and {@code #root.caches} for
+	 * references to the {@link java.lang.reflect.Method method}, target object, and
+	 * affected cache(s) respectively.</li>
+	 * <li>Shortcuts for the method name ({@code #root.methodName}) and target class
+	 * ({@code #root.targetClass}) are also available.
+	 * <li>Method arguments can be accessed by index. For instance the second argument
+	 * can be accessed via {@code #root.args[1]}, {@code #p1} or {@code #a1}. Arguments
+	 * can also be accessed by name if that information is available.</li>
+	 * </ul>
 	 */
 	String key() default "";
 
 	/**
-	 * The bean name of the custom {@link org.springframework.cache.interceptor.KeyGenerator} to use.
+	 * The bean name of the custom {@link org.springframework.cache.interceptor.KeyGenerator}
+	 * to use.
 	 * <p>Mutually exclusive with the {@link #key} attribute.
 	 * @see CacheConfig#keyGenerator
 	 */
@@ -94,7 +108,8 @@ public @interface Cacheable {
 	String cacheManager() default "";
 
 	/**
-	 * The bean name of the custom {@link org.springframework.cache.interceptor.CacheResolver} to use.
+	 * The bean name of the custom {@link org.springframework.cache.interceptor.CacheResolver}
+	 * to use.
 	 * @see CacheConfig#cacheResolver
 	 */
 	String cacheResolver() default "";
@@ -103,6 +118,18 @@ public @interface Cacheable {
 	 * Spring Expression Language (SpEL) expression used for making the method
 	 * caching conditional.
 	 * <p>Default is {@code ""}, meaning the method result is always cached.
+	 * <p>The SpEL expression evaluates against a dedicated context that provides the
+	 * following meta-data:
+	 * <ul>
+	 * <li>{@code #root.method}, {@code #root.target}, and {@code #root.caches} for
+	 * references to the {@link java.lang.reflect.Method method}, target object, and
+	 * affected cache(s) respectively.</li>
+	 * <li>Shortcuts for the method name ({@code #root.methodName}) and target class
+	 * ({@code #root.targetClass}) are also available.
+	 * <li>Method arguments can be accessed by index. For instance the second argument
+	 * can be accessed via {@code #root.args[1]}, {@code #p1} or {@code #a1}. Arguments
+	 * can also be accessed by name if that information is available.</li>
+	 * </ul>
 	 */
 	String condition() default "";
 
@@ -111,8 +138,38 @@ public @interface Cacheable {
 	 * <p>Unlike {@link #condition}, this expression is evaluated after the method
 	 * has been called and can therefore refer to the {@code result}.
 	 * <p>Default is {@code ""}, meaning that caching is never vetoed.
+	 * <p>The SpEL expression evaluates against a dedicated context that provides the
+	 * following meta-data:
+	 * <ul>
+	 * <li>{@code #result} for a reference to the result of the method invocation.</li>
+	 * <li>{@code #root.method}, {@code #root.target}, and {@code #root.caches} for
+	 * references to the {@link java.lang.reflect.Method method}, target object, and
+	 * affected cache(s) respectively.</li>
+	 * <li>Shortcuts for the method name ({@code #root.methodName}) and target class
+	 * ({@code #root.targetClass}) are also available.
+	 * <li>Method arguments can be accessed by index. For instance the second argument
+	 * can be accessed via {@code #root.args[1]}, {@code #p1} or {@code #a1}. Arguments
+	 * can also be accessed by name if that information is available.</li>
+	 * </ul>
 	 * @since 3.2
 	 */
 	String unless() default "";
+
+	/**
+	 * Synchronize the invocation of the underlying method if several threads are
+	 * attempting to load a value for the same key. The synchronization leads to
+	 * a couple of limitations:
+	 * <ol>
+	 * <li>{@link #unless()} is not supported</li>
+	 * <li>Only one cache may be specified</li>
+	 * <li>No other cache-related operation can be combined</li>
+	 * </ol>
+	 * This is effectively a hint and the actual cache provider that you are
+	 * using may not support it in a synchronized fashion. Check your provider
+	 * documentation for more details on the actual semantics.
+	 * @since 4.3
+	 * @see org.springframework.cache.Cache#get(Object, Callable)
+	 */
+	boolean sync() default false;
 
 }

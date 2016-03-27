@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -232,7 +232,7 @@ public abstract class SharedEntityManagerCreator {
 			else if (method.getName().equals("unwrap")) {
 				// JPA 2.0: handle unwrap method - could be a proxy match.
 				Class<?> targetClass = (Class<?>) args[0];
-				if (targetClass == null || targetClass.isInstance(proxy)) {
+				if (targetClass != null && targetClass.isInstance(proxy)) {
 					return proxy;
 				}
 			}
@@ -263,6 +263,10 @@ public abstract class SharedEntityManagerCreator {
 				return target;
 			}
 			else if (method.getName().equals("unwrap")) {
+				Class<?> targetClass = (Class<?>) args[0];
+				if (targetClass == null) {
+					return (target != null ? target : proxy);
+				}
 				// We need a transactional target now.
 				if (target == null) {
 					throw new IllegalStateException("No transactional EntityManager available");
@@ -272,7 +276,8 @@ public abstract class SharedEntityManagerCreator {
 			else if (transactionRequiringMethods.contains(method.getName())) {
 				// We need a transactional target now, according to the JPA spec.
 				// Otherwise, the operation would get accepted but remain unflushed...
-				if (target == null || !TransactionSynchronizationManager.isActualTransactionActive()) {
+				if (target == null || (!TransactionSynchronizationManager.isActualTransactionActive() &&
+						!target.getTransaction().isActive())) {
 					throw new TransactionRequiredException("No EntityManager with actual transaction available " +
 							"for current thread - cannot reliably process '" + method.getName() + "' call");
 				}
@@ -354,7 +359,10 @@ public abstract class SharedEntityManagerCreator {
 			else if (method.getName().equals("unwrap")) {
 				// Handle JPA 2.0 unwrap method - could be a proxy match.
 				Class<?> targetClass = (Class<?>) args[0];
-				if (targetClass == null || targetClass.isInstance(proxy)) {
+				if (targetClass == null) {
+					return this.target;
+				}
+				else if (targetClass.isInstance(proxy)) {
 					return proxy;
 				}
 			}

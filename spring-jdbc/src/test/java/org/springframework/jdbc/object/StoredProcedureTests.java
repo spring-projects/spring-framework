@@ -81,7 +81,7 @@ public class StoredProcedureTests {
 
 	@After
 	public void verifyClosed() throws Exception {
-		if(verifyClosedAfter) {
+		if (verifyClosedAfter) {
 			verify(callableStatement).close();
 			verify(connection, atLeastOnce()).close();
 		}

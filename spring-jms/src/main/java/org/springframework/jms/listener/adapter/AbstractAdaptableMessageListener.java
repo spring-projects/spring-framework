@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package org.springframework.jms.listener.adapter;
 
+import javax.jms.BytesMessage;
 import javax.jms.Destination;
 import javax.jms.InvalidDestinationException;
 import javax.jms.JMSException;
@@ -35,6 +36,7 @@ import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessagingMessageConverter;
 import org.springframework.jms.support.converter.SimpleMessageConverter;
+import org.springframework.jms.support.converter.SmartMessageConverter;
 import org.springframework.jms.support.destination.DestinationResolver;
 import org.springframework.jms.support.destination.DynamicDestinationResolver;
 import org.springframework.util.Assert;
@@ -204,9 +206,9 @@ public abstract class AbstractAdaptableMessageListener
 	/**
 	 * Extract the message body from the given JMS message.
 	 * @param message the JMS {@code Message}
-	 * @return the content of the message, to be passed into the
-	 * listener method as argument
-	 * @throws MessageConversionException if the message could not be unmarshaled
+	 * @return the content of the message, to be passed into the listener method
+	 * as an argument
+	 * @throws MessageConversionException if the message could not be extracted
 	 */
 	protected Object extractMessage(Message message)  {
 		try {
@@ -268,14 +270,17 @@ public abstract class AbstractAdaptableMessageListener
 	 * @see #setMessageConverter
 	 */
 	protected Message buildMessage(Session session, Object result) throws JMSException {
-		Object content = (result instanceof JmsResponse ? ((JmsResponse<?>) result).getResponse() : result);
-		if (content instanceof org.springframework.messaging.Message) {
-			return this.messagingMessageConverter.toMessage(content, session);
-		}
+		Object content = preProcessResponse(result instanceof JmsResponse
+				? ((JmsResponse<?>) result).getResponse() : result);
 
 		MessageConverter converter = getMessageConverter();
 		if (converter != null) {
-			return converter.toMessage(content, session);
+			if (content instanceof org.springframework.messaging.Message) {
+				return this.messagingMessageConverter.toMessage(content, session);
+			}
+			else {
+				return converter.toMessage(content, session);
+			}
 		}
 
 		if (!(content instanceof Message)) {
@@ -283,6 +288,17 @@ public abstract class AbstractAdaptableMessageListener
 					"No MessageConverter specified - cannot handle message [" + content + "]");
 		}
 		return (Message) content;
+	}
+
+	/**
+	 * Pre-process the given result before it is converted to a {@link Message}.
+	 * @param result the result of the invocation
+	 * @return the payload response to handle, either the {@code result} argument
+	 * or any other object (for instance wrapping the result).
+	 * @since 4.3
+	 */
+	protected Object preProcessResponse(Object result) {
+		return result;
 	}
 
 	/**
@@ -408,16 +424,33 @@ public abstract class AbstractAdaptableMessageListener
 
 		@Override
 		protected Object extractPayload(Message message) throws JMSException {
-			return extractMessage(message);
+			Object payload = extractMessage(message);
+			if (message instanceof BytesMessage) {
+				try {
+					// In case the BytesMessage is going to be received as a user argument:
+					// reset it, otherwise it would appear empty to such processing code...
+					((BytesMessage) message).reset();
+				}
+				catch (JMSException ex) {
+					// Continue since the BytesMessage typically won't be used any further.
+					logger.debug("Failed to reset BytesMessage after payload extraction", ex);
+				}
+			}
+			return payload;
 		}
 
 		@Override
-		protected Message createMessageForPayload(Object payload, Session session) throws JMSException {
+		protected Message createMessageForPayload(Object payload, Session session, Object conversionHint)
+				throws JMSException {
 			MessageConverter converter = getMessageConverter();
-			if (converter != null) {
-				return converter.toMessage(payload, session);
+			if (converter == null) {
+				throw new IllegalStateException("No message converter, cannot handle '" + payload + "'");
 			}
-			throw new IllegalStateException("No message converter - cannot handle [" + payload + "]");
+			if (converter instanceof SmartMessageConverter) {
+				return ((SmartMessageConverter) converter).toMessage(payload, session, conversionHint);
+
+			}
+			return converter.toMessage(payload, session);
 		}
 	}
 

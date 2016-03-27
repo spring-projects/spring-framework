@@ -156,9 +156,7 @@ public class FreeMarkerViewTests {
 		wac.getBeanFactory().registerSingleton("configurer", configurer);
 		wac.refresh();
 
-		FreeMarkerViewResolver vr = new FreeMarkerViewResolver();
-		vr.setPrefix("prefix_");
-		vr.setSuffix("_suffix");
+		FreeMarkerViewResolver vr = new FreeMarkerViewResolver("prefix_", "_suffix");
 		vr.setApplicationContext(wac);
 
 		View view = vr.resolveViewName("test", Locale.CANADA);

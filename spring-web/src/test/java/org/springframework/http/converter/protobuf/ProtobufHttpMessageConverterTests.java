@@ -61,7 +61,8 @@ public class ProtobufHttpMessageConverterTests {
 	public void extensionRegistryNull() {
 	     try {
 	     	new ProtobufHttpMessageConverter(null);
-	     } catch (Exception e) {
+	     }
+		 catch (Exception ex) {
 	     	fail("Unable to create ProtobufHttpMessageConverter with null extensionRegistry");
 	     }
 	}

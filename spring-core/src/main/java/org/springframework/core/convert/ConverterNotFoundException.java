@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2010 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,11 @@
 package org.springframework.core.convert;
 
 /**
- * Thrown when a suitable converter could not be found in a conversion service.
+ * Exception to be thrown when a suitable converter could not be found
+ * in a given conversion service.
  *
  * @author Keith Donald
+ * @author Juergen Hoeller
  * @since 3.0
  */
 @SuppressWarnings("serial")
@@ -36,21 +38,21 @@ public final class ConverterNotFoundException extends ConversionException {
 	 * @param targetType the target type requested to convert to
 	 */
 	public ConverterNotFoundException(TypeDescriptor sourceType, TypeDescriptor targetType) {
-		super("No converter found capable of converting from type " + sourceType + " to type " + targetType);
+		super("No converter found capable of converting from type [" + sourceType + "] to type [" + targetType + "]");
 		this.sourceType = sourceType;
 		this.targetType = targetType;
 	}
 
 
 	/**
-	 * Returns the source type that was requested to convert from.
+	 * Return the source type that was requested to convert from.
 	 */
 	public TypeDescriptor getSourceType() {
 		return this.sourceType;
 	}
 
 	/**
-	 * Returns the target type that was requested to convert to.
+	 * Return the target type that was requested to convert to.
 	 */
 	public TypeDescriptor getTargetType() {
 		return this.targetType;

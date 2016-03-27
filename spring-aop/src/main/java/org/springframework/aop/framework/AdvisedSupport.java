@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,7 +113,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Create a AdvisedSupport instance with the given parameters.
 	 * @param interfaces the proxied interfaces
 	 */
-	public AdvisedSupport(Class<?>[] interfaces) {
+	public AdvisedSupport(Class<?>... interfaces) {
 		this();
 		setInterfaces(interfaces);
 	}
@@ -586,7 +586,7 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 	 * Simple wrapper class around a Method. Used as the key when
 	 * caching methods, for efficient equals and hashCode comparisons.
 	 */
-	private static class MethodCacheKey {
+	private static final class MethodCacheKey implements Comparable<MethodCacheKey> {
 
 		private final Method method;
 
@@ -599,16 +599,27 @@ public class AdvisedSupport extends ProxyConfig implements Advised {
 
 		@Override
 		public boolean equals(Object other) {
-			if (other == this) {
-				return true;
-			}
-			MethodCacheKey otherKey = (MethodCacheKey) other;
-			return (this.method == otherKey.method);
+			return (this == other || (other instanceof MethodCacheKey &&
+					this.method == ((MethodCacheKey) other).method));
 		}
 
 		@Override
 		public int hashCode() {
 			return this.hashCode;
+		}
+
+		@Override
+		public String toString() {
+			return this.method.toString();
+		}
+
+		@Override
+		public int compareTo(MethodCacheKey other) {
+			int result = this.method.getName().compareTo(other.method.getName());
+			if (result == 0) {
+				result = this.method.toString().compareTo(other.method.toString());
+			}
+			return result;
 		}
 	}
 

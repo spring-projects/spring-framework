@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.client;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 
 import org.springframework.http.HttpHeaders;
@@ -28,21 +27,9 @@ import org.springframework.http.HttpStatus;
  * @author Rossen Stoyanchev
  * @since 3.2
  */
-public class UnknownHttpStatusCodeException extends RestClientException {
+public class UnknownHttpStatusCodeException extends RestClientResponseException {
 
-	private static final long serialVersionUID = 4702443689088991600L;
-
-	private static final String DEFAULT_CHARSET = "ISO-8859-1";
-
-	private final int rawStatusCode;
-
-	private final String statusText;
-
-	private final byte[] responseBody;
-
-	private final HttpHeaders responseHeaders;
-
-	private final String responseCharset;
+	private static final long serialVersionUID = 7103980251635005491L;
 
 
 	/**
@@ -57,54 +44,8 @@ public class UnknownHttpStatusCodeException extends RestClientException {
 	public UnknownHttpStatusCodeException(int rawStatusCode, String statusText,
 			HttpHeaders responseHeaders, byte[] responseBody, Charset responseCharset) {
 
-		super("Unknown status code [" + String.valueOf(rawStatusCode) + "]" + " " + statusText);
-		this.rawStatusCode = rawStatusCode;
-		this.statusText = statusText;
-		this.responseHeaders = responseHeaders;
-		this.responseBody = responseBody != null ? responseBody : new byte[0];
-		this.responseCharset = responseCharset != null ? responseCharset.name() : DEFAULT_CHARSET;
-	}
-
-
-	/**
-	 * Return the raw HTTP status code value.
-	 */
-	public int getRawStatusCode() {
-		return this.rawStatusCode;
-	}
-
-	/**
-	 * Return the HTTP status text.
-	 */
-	public String getStatusText() {
-		return this.statusText;
-	}
-
-	/**
-	 * Return the HTTP response headers.
-	 */
-	public HttpHeaders getResponseHeaders() {
-		return this.responseHeaders;
-	}
-
-	/**
-	 * Return the response body as a byte array.
-	 */
-	public byte[] getResponseBodyAsByteArray() {
-		return this.responseBody;
-	}
-
-	/**
-	 * Return the response body as a string.
-	 */
-	public String getResponseBodyAsString() {
-		try {
-			return new String(this.responseBody, this.responseCharset);
-		}
-		catch (UnsupportedEncodingException ex) {
-			// should not occur
-			throw new IllegalStateException(ex);
-		}
+		super("Unknown status code [" + String.valueOf(rawStatusCode) + "]" + " " + statusText,
+				rawStatusCode, statusText, responseHeaders, responseBody, responseCharset);
 	}
 
 }

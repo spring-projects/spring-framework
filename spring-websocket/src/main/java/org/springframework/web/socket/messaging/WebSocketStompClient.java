@@ -70,7 +70,7 @@ import org.springframework.web.util.UriComponentsBuilder;
  */
 public class WebSocketStompClient extends StompClientSupport implements SmartLifecycle {
 
-	private static Log logger = LogFactory.getLog(WebSocketStompClient.class);
+	private static final Log logger = LogFactory.getLog(WebSocketStompClient.class);
 
 
 	private final WebSocketClient webSocketClient;

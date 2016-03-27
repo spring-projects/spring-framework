@@ -428,7 +428,7 @@ public abstract class ClassUtils {
 	 * @see java.beans.Introspector#decapitalize(String)
 	 */
 	public static String getShortNameAsProperty(Class<?> clazz) {
-		String shortName = ClassUtils.getShortName(clazz);
+		String shortName = getShortName(clazz);
 		int dotIndex = shortName.lastIndexOf(PACKAGE_SEPARATOR);
 		shortName = (dotIndex != -1 ? shortName.substring(dotIndex + 1) : shortName);
 		return Introspector.decapitalize(shortName);
@@ -498,7 +498,7 @@ public abstract class ClassUtils {
 		StringBuilder result = new StringBuilder();
 		while (clazz.isArray()) {
 			clazz = clazz.getComponentType();
-			result.append(ClassUtils.ARRAY_SUFFIX);
+			result.append(ARRAY_SUFFIX);
 		}
 		result.insert(0, clazz.getName());
 		return result.toString();
@@ -762,7 +762,7 @@ public abstract class ClassUtils {
 	 */
 	public static Method getMostSpecificMethod(Method method, Class<?> targetClass) {
 		if (method != null && isOverridable(method, targetClass) &&
-				targetClass != null && !targetClass.equals(method.getDeclaringClass())) {
+				targetClass != null && targetClass != method.getDeclaringClass()) {
 			try {
 				if (Modifier.isPublic(method.getModifiers())) {
 					try {
@@ -914,7 +914,7 @@ public abstract class ClassUtils {
 		}
 		if (lhsType.isPrimitive()) {
 			Class<?> resolvedPrimitive = primitiveWrapperTypeMap.get(rhsType);
-			if (resolvedPrimitive != null && lhsType.equals(resolvedPrimitive)) {
+			if (lhsType == resolvedPrimitive) {
 				return true;
 			}
 		}
@@ -1222,7 +1222,7 @@ public abstract class ClassUtils {
 	 * @see org.springframework.aop.support.AopUtils#isCglibProxy(Object)
 	 */
 	public static boolean isCglibProxy(Object object) {
-		return ClassUtils.isCglibProxyClass(object.getClass());
+		return isCglibProxyClass(object.getClass());
 	}
 
 	/**

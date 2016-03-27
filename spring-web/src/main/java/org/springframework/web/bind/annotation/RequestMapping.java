@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -126,6 +126,12 @@ import org.springframework.core.annotation.AliasFor;
  * {@link org.springframework.validation.Errors} argument.
  * Instead a {@link org.springframework.web.bind.MethodArgumentNotValidException}
  * exception is raised.
+ * <li>{@link SessionAttribute @SessionAttribute} annotated parameters for access
+ * to existing, permanent session attributes (e.g. user authentication object)
+ * as opposed to model attributes temporarily stored in the session as part of
+ * a controller workflow via {@link SessionAttributes}.
+ * <li>{@link RequestAttribute @RequestAttribute} annotated parameters for access
+ * to request attributes.
  * <li>{@link org.springframework.http.HttpEntity HttpEntity&lt;?&gt;} parameters
  * (Servlet-only) for access to the Servlet request HTTP headers and contents.
  * The request stream will be converted to the entity body using
@@ -273,8 +279,16 @@ import org.springframework.core.annotation.AliasFor;
  * @author Arjen Poutsma
  * @author Sam Brannen
  * @since 2.5
+ * @see GetMapping
+ * @see PostMapping
+ * @see PutMapping
+ * @see DeleteMapping
+ * @see PatchMapping
  * @see RequestParam
+ * @see RequestAttribute
+ * @see PathVariable
  * @see ModelAttribute
+ * @see SessionAttribute
  * @see SessionAttributes
  * @see InitBinder
  * @see org.springframework.web.context.request.WebRequest
@@ -414,8 +428,11 @@ public @interface RequestMapping {
 	 * <pre class="code">
 	 * produces = "text/plain"
 	 * produces = {"text/plain", "application/*"}
+	 * produces = "application/json; charset=UTF-8"
 	 * </pre>
-	 * Expressions can be negated by using the "!" operator, as in "!text/plain", which matches
+	 * <p>It affects the actual content type written, for example to produce a JSON response
+	 * with UTF-8 encoding, {@code "application/json; charset=UTF-8"} should be used.
+	 * <p>Expressions can be negated by using the "!" operator, as in "!text/plain", which matches
 	 * all requests with a {@code Accept} other than "text/plain".
 	 * <p><b>Supported at the type level as well as at the method level!</b>
 	 * When used at the type level, all method-level mappings override

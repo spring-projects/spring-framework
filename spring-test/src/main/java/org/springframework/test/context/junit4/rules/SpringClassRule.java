@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import org.junit.Rule;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
@@ -76,7 +77,7 @@ import org.springframework.util.ClassUtils;
  * <li>{@link org.springframework.test.annotation.IfProfileValue @IfProfileValue}</li>
  * </ul>
  *
- * <p><strong>NOTE:</strong> This class requires JUnit 4.9 or higher.
+ * <p><strong>NOTE:</strong> As of Spring Framework 4.3, this class requires JUnit 4.12 or higher.
  *
  * @author Sam Brannen
  * @author Philippe Marschall
@@ -96,16 +97,9 @@ public class SpringClassRule implements TestRule {
 	private static final Map<Class<?>, TestContextManager> testContextManagerCache =
 			new ConcurrentHashMap<Class<?>, TestContextManager>(64);
 
-	// Used by RunAfterTestClassCallbacks
-	private static final String MULTIPLE_FAILURE_EXCEPTION_CLASS_NAME = "org.junit.runners.model.MultipleFailureException";
-
 	static {
-		boolean junit4dot9Present = ClassUtils.isPresent(MULTIPLE_FAILURE_EXCEPTION_CLASS_NAME,
-			SpringClassRule.class.getClassLoader());
-		if (!junit4dot9Present) {
-			throw new IllegalStateException(String.format(
-				"Failed to find class [%s]: SpringClassRule requires JUnit 4.9 or higher.",
-				MULTIPLE_FAILURE_EXCEPTION_CLASS_NAME));
+		if (!ClassUtils.isPresent("org.junit.internal.Throwables", SpringClassRule.class.getClassLoader())) {
+			throw new IllegalStateException("SpringClassRule requires JUnit 4.12 or higher.");
 		}
 	}
 

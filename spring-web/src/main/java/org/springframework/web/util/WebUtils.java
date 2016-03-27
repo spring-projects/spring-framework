@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.http.HttpRequest;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
@@ -811,18 +812,31 @@ public abstract class WebUtils {
 		if (origin == null) {
 			return true;
 		}
-		UriComponents actualUrl = UriComponentsBuilder.fromHttpRequest(request).build();
+		UriComponentsBuilder urlBuilder;
+		if (request instanceof ServletServerHttpRequest) {
+			// Build more efficiently if we can: we only need scheme, host, port for origin comparison
+			HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
+			urlBuilder = new UriComponentsBuilder().
+					scheme(servletRequest.getScheme()).
+					host(servletRequest.getServerName()).
+					port(servletRequest.getServerPort()).
+					adaptFromForwardedHeaders(request.getHeaders());
+		}
+		else {
+			urlBuilder = UriComponentsBuilder.fromHttpRequest(request);
+		}
+		UriComponents actualUrl = urlBuilder.build();
 		UriComponents originUrl = UriComponentsBuilder.fromOriginHeader(origin).build();
 		return (actualUrl.getHost().equals(originUrl.getHost()) && getPort(actualUrl) == getPort(originUrl));
 	}
 
-	private static int getPort(UriComponents component) {
-		int port = component.getPort();
+	private static int getPort(UriComponents uri) {
+		int port = uri.getPort();
 		if (port == -1) {
-			if ("http".equals(component.getScheme()) || "ws".equals(component.getScheme())) {
+			if ("http".equals(uri.getScheme()) || "ws".equals(uri.getScheme())) {
 				port = 80;
 			}
-			else if ("https".equals(component.getScheme()) || "wss".equals(component.getScheme())) {
+			else if ("https".equals(uri.getScheme()) || "wss".equals(uri.getScheme())) {
 				port = 443;
 			}
 		}

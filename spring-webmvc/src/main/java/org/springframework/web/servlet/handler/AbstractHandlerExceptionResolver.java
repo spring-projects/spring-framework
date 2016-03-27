@@ -53,7 +53,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 
 	private Class<?>[] mappedHandlerClasses;
 
-	private Log warnLogger = LogFactory.getLog(getClass());
+	private Log warnLogger;
 
 	private boolean preventResponseCaching = false;
 
@@ -88,7 +88,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * as a fallback for all exceptions; any further HandlerExceptionResolvers in the chain will be
 	 * ignored in this case.
 	 */
-	public void setMappedHandlerClasses(Class<?>[] mappedHandlerClasses) {
+	public void setMappedHandlerClasses(Class<?>... mappedHandlerClasses) {
 		this.mappedHandlerClasses = mappedHandlerClasses;
 	}
 
@@ -96,15 +96,14 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * Set the log category for warn logging. The name will be passed to the underlying logger
 	 * implementation through Commons Logging, getting interpreted as a log category according
 	 * to the logger's configuration.
-	 * <p>Default is warn logging using the {@link AbstractHandlerExceptionResolver} class name derived logger.
-	 * <p>Set to {@code null} to disable warn logging.
-	 * <p>Override the {@link #logException} method for custom logging.
+	 * <p>Default is no warn logging. Specify this setting to activate warn logging into a specific
+	 * category. Alternatively, override the {@link #logException} method for custom logging.
 	 * @see org.apache.commons.logging.LogFactory#getLog(String)
 	 * @see org.apache.log4j.Logger#getLogger(String)
 	 * @see java.util.logging.Logger#getLogger(String)
 	 */
 	public void setWarnLogCategory(String loggerName) {
-		this.warnLogger = (loggerName != null ? LogFactory.getLog(loggerName) : null);
+		this.warnLogger = LogFactory.getLog(loggerName);
 	}
 
 	/**
@@ -117,6 +116,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 		this.preventResponseCaching = preventResponseCaching;
 	}
 
+
 	/**
 	 * Check whether this resolver is supposed to apply (i.e. if the supplied handler
 	 * matches any of the configured {@linkplain #setMappedHandlers handlers} or
@@ -128,17 +128,13 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 			Object handler, Exception ex) {
 
 		if (shouldApplyTo(request, handler)) {
-			// Log exception at debug log level
+			// Log exception, both at debug log level and at warn level, if desired.
 			if (this.logger.isDebugEnabled()) {
 				this.logger.debug("Resolving exception from handler [" + handler + "]: " + ex);
 			}
+			logException(ex, request);
 			prepareResponse(ex, response);
-			ModelAndView mav = doResolveException(request, response, handler, ex);
-			if (mav != null) {
-				// Log exception message at warn log level
-				logException(ex, request);
-			}
-			return mav;
+			return doResolveException(request, response, handler, ex);
 		}
 		else {
 			return null;
@@ -176,7 +172,8 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	}
 
 	/**
-	 * Log the given exception message at warn level.
+	 * Log the given exception at warn level, provided that warn logging has been
+	 * activated through the {@link #setWarnLogCategory "warnLogCategory"} property.
 	 * <p>Calls {@link #buildLogMessage} in order to determine the concrete message to log.
 	 * @param ex the exception that got thrown during handler execution
 	 * @param request current HTTP request (useful for obtaining metadata)
@@ -197,8 +194,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	 * @return the log message to use
 	 */
 	protected String buildLogMessage(Exception ex, HttpServletRequest request) {
-		String message = (ex != null ? ex.getMessage() : "null");
-		return "Handler execution resulted in exception: " + (message != null ? message : "null");
+		return "Handler execution resulted in exception: " + ex;
 	}
 
 	/**
@@ -224,6 +220,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	protected void preventCaching(HttpServletResponse response) {
 		response.addHeader(HEADER_CACHE_CONTROL, "no-store");
 	}
+
 
 	/**
 	 * Actually resolve the given exception that got thrown during handler execution,

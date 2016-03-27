@@ -38,7 +38,6 @@ import javax.imageio.stream.ImageOutputStream;
 import javax.imageio.stream.MemoryCacheImageInputStream;
 import javax.imageio.stream.MemoryCacheImageOutputStream;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -209,29 +208,35 @@ public class BufferedImageHttpMessageConverter implements HttpMessageConverter<B
 			final HttpOutputMessage outputMessage)
 			throws IOException, HttpMessageNotWritableException {
 
+		final MediaType selectedContentType = getContentType(contentType);
+		outputMessage.getHeaders().setContentType(selectedContentType);
+
 		if (outputMessage instanceof StreamingHttpOutputMessage) {
 			StreamingHttpOutputMessage streamingOutputMessage = (StreamingHttpOutputMessage) outputMessage;
 			streamingOutputMessage.setBody(new StreamingHttpOutputMessage.Body() {
 				@Override
 				public void writeTo(OutputStream outputStream) throws IOException {
-					writeInternal(image, contentType, outputMessage.getHeaders(), outputStream);
+					writeInternal(image, selectedContentType, outputStream);
 				}
 			});
 		}
 		else {
-			writeInternal(image, contentType, outputMessage.getHeaders(), outputMessage.getBody());
+			writeInternal(image, selectedContentType, outputMessage.getBody());
 		}
 	}
 
-	private void writeInternal(BufferedImage image, MediaType contentType, HttpHeaders headers,
-			OutputStream body) throws IOException, HttpMessageNotWritableException {
-
+	private MediaType getContentType(MediaType contentType) {
 		if (contentType == null || contentType.isWildcardType() || contentType.isWildcardSubtype()) {
 			contentType = getDefaultContentType();
 		}
-		Assert.notNull(contentType,
-				"Count not determine Content-Type, set one using the 'defaultContentType' property");
-		headers.setContentType(contentType);
+		Assert.notNull(contentType, "Could not select Content-Type. " +
+				"Please specify one through the 'defaultContentType' property.");
+		return contentType;
+	}
+
+	private void writeInternal(BufferedImage image, MediaType contentType, OutputStream body)
+			throws IOException, HttpMessageNotWritableException {
+
 		ImageOutputStream imageOutputStream = null;
 		ImageWriter imageWriter = null;
 		try {

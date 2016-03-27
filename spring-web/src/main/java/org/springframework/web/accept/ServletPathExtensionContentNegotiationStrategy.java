@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.accept;
 import java.util.Map;
 import javax.servlet.ServletContext;
 
+import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
@@ -78,6 +79,28 @@ public class ServletPathExtensionContentNegotiationStrategy
 			if (superMediaType != null) {
 				mediaType = superMediaType;
 			}
+		}
+		return mediaType;
+	}
+
+	/**
+	 * Extends the base class
+	 * {@link PathExtensionContentNegotiationStrategy#getMediaTypeForResource}
+	 * with the ability to also look up through the ServletContext.
+	 * @param resource the resource to look up
+	 * @return the MediaType for the extension or {@code null}.
+	 * @since 4.3
+	 */
+	public MediaType getMediaTypeForResource(Resource resource) {
+		MediaType mediaType = super.getMediaTypeForResource(resource);
+		if (mediaType == null) {
+			String mimeType = this.servletContext.getMimeType(resource.getFilename());
+			if (StringUtils.hasText(mimeType)) {
+				mediaType = MediaType.parseMediaType(mimeType);
+			}
+		}
+		if (MediaType.APPLICATION_OCTET_STREAM.equals(mediaType)) {
+			mediaType = null;
 		}
 		return mediaType;
 	}

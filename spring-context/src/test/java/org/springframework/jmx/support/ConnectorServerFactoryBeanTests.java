@@ -67,7 +67,8 @@ public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 
 		try {
 			checkServerConnection(getServer());
-		} finally {
+		}
+		finally {
 			bean.destroy();
 		}
 	}
@@ -84,7 +85,8 @@ public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 
 		try {
 			checkServerConnection(getServer());
-		} finally {
+		}
+		finally {
 			bean.destroy();
 		}
 	}
@@ -102,7 +104,8 @@ public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 			// Try to get the connector bean.
 			ObjectInstance instance = getServer().getObjectInstance(ObjectName.getInstance(OBJECT_NAME));
 			assertNotNull("ObjectInstance should not be null", instance);
-		} finally {
+		}
+		finally {
 			bean.destroy();
 		}
 	}
@@ -116,9 +119,11 @@ public class ConnectorServerFactoryBeanTests extends AbstractMBeanServerTests {
 			// Try to get the connector bean.
 			getServer().getObjectInstance(ObjectName.getInstance(OBJECT_NAME));
 			fail("Instance should not be found");
-		} catch (InstanceNotFoundException ex) {
+		}
+		catch (InstanceNotFoundException ex) {
 			// expected
-		} finally {
+		}
+		finally {
 			bean.destroy();
 		}
 	}

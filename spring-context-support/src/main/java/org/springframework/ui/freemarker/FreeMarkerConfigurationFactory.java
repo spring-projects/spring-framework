@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -316,12 +316,8 @@ public class FreeMarkerConfigurationFactory {
 	 * @throws TemplateException on FreeMarker initialization failure
 	 * @see #createConfiguration()
 	 */
-	@SuppressWarnings("deprecation")
 	protected Configuration newConfiguration() throws IOException, TemplateException {
-		// The default Configuration constructor is deprecated as of FreeMarker 2.3.21,
-		// in favor of specifying a compatibility version - which is a 2.3.21 feature.
-		// We won't be able to call that for a long while, but custom subclasses can.
-		return new Configuration();
+		return new Configuration(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
 	}
 
 	/**

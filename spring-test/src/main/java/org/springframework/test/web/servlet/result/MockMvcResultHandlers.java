@@ -41,7 +41,7 @@ import org.springframework.util.CollectionUtils;
  */
 public abstract class MockMvcResultHandlers {
 
-	private static final Log logger = LogFactory.getLog(MockMvcResultHandlers.class.getPackage().getName());
+	private static final Log logger = LogFactory.getLog("org.springframework.test.web.servlet.result");
 
 
 	/**
@@ -96,7 +96,7 @@ public abstract class MockMvcResultHandlers {
 	 */
 	private static class PrintWriterPrintingResultHandler extends PrintingResultHandler {
 
-		PrintWriterPrintingResultHandler(final PrintWriter writer) {
+		public PrintWriterPrintingResultHandler(final PrintWriter writer) {
 			super(new ResultValuePrinter() {
 				@Override
 				public void printHeading(String heading) {
@@ -114,12 +114,14 @@ public abstract class MockMvcResultHandlers {
 		}
 	}
 
+
 	/**
 	 * A {@link ResultHandler} that logs {@link MvcResult} details at
 	 * {@code DEBUG} level via Apache Commons Logging.
 	 *
 	 * <p>Delegates to a {@link PrintWriterPrintingResultHandler} for
 	 * building the log message.
+	 *
 	 * @since 4.2
 	 */
 	private static class LoggingResultHandler implements ResultHandler {
@@ -128,8 +130,8 @@ public abstract class MockMvcResultHandlers {
 		public void handle(MvcResult result) throws Exception {
 			if (logger.isDebugEnabled()) {
 				StringWriter stringWriter = new StringWriter();
-				ResultHandler printingResultHandler = new PrintWriterPrintingResultHandler(
-					new PrintWriter(stringWriter));
+				ResultHandler printingResultHandler =
+						new PrintWriterPrintingResultHandler(new PrintWriter(stringWriter));
 				printingResultHandler.handle(result);
 				logger.debug("MvcResult details:\n" + stringWriter);
 			}

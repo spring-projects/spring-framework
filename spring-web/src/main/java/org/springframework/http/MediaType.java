@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,6 +40,7 @@ import org.springframework.util.comparator.CompoundComparator;
  * @author Arjen Poutsma
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
+ * @author Sebastien Deleuze
  * @since 3.0
  * @see <a href="http://tools.ietf.org/html/rfc7231#section-3.1.1.1">HTTP 1.1: Semantics
  * and Content, section 3.1.1.1</a>
@@ -80,13 +81,25 @@ public class MediaType extends MimeType implements Serializable {
 
 	/**
 	 * Public constant media type for {@code application/json}.
-	 * */
+	 * @see #APPLICATION_JSON_UTF8
+	 */
 	public final static MediaType APPLICATION_JSON;
 
 	/**
 	 * A String equivalent of {@link MediaType#APPLICATION_JSON}.
+	 * @see #APPLICATION_JSON_UTF8_VALUE
 	 */
 	public final static String APPLICATION_JSON_VALUE = "application/json";
+
+	/**
+	 * Public constant media type for {@code application/json;charset=UTF-8}.
+	 */
+	public final static MediaType APPLICATION_JSON_UTF8;
+
+	/**
+	 * A String equivalent of {@link MediaType#APPLICATION_JSON_UTF8}.
+	 */
+	public final static String APPLICATION_JSON_UTF8_VALUE = APPLICATION_JSON_VALUE + ";charset=UTF-8";
 
 	/**
 	 * Public constant media type for {@code application/octet-stream}.
@@ -97,6 +110,16 @@ public class MediaType extends MimeType implements Serializable {
 	 * A String equivalent of {@link MediaType#APPLICATION_OCTET_STREAM}.
 	 */
 	public final static String APPLICATION_OCTET_STREAM_VALUE = "application/octet-stream";
+
+	/**
+	 * Public constant media type for {@code application/pdf}.
+	 *  */
+	public final static MediaType APPLICATION_PDF;
+
+	/**
+	 * A String equivalent of {@link MediaType#APPLICATION_PDF}.
+	 */
+	public final static String APPLICATION_PDF_VALUE = "application/pdf";
 
 	/**
 	 * Public constant media type for {@code application/xhtml+xml}.
@@ -197,7 +220,9 @@ public class MediaType extends MimeType implements Serializable {
 		APPLICATION_ATOM_XML = valueOf(APPLICATION_ATOM_XML_VALUE);
 		APPLICATION_FORM_URLENCODED = valueOf(APPLICATION_FORM_URLENCODED_VALUE);
 		APPLICATION_JSON = valueOf(APPLICATION_JSON_VALUE);
+		APPLICATION_JSON_UTF8 = valueOf(APPLICATION_JSON_UTF8_VALUE);
 		APPLICATION_OCTET_STREAM = valueOf(APPLICATION_OCTET_STREAM_VALUE);
+		APPLICATION_PDF = valueOf(APPLICATION_PDF_VALUE);
 		APPLICATION_XHTML_XML = valueOf(APPLICATION_XHTML_XML_VALUE);
 		APPLICATION_XML = valueOf(APPLICATION_XML_VALUE);
 		IMAGE_GIF = valueOf(IMAGE_GIF_VALUE);
@@ -251,6 +276,17 @@ public class MediaType extends MimeType implements Serializable {
 	 */
 	public MediaType(String type, String subtype, double qualityValue) {
 		this(type, subtype, Collections.singletonMap(PARAM_QUALITY_FACTOR, Double.toString(qualityValue)));
+	}
+
+	/**
+	 * Copy-constructor that copies the type, subtype and parameters of the given
+	 * {@code MediaType}, and allows to set the specified character set.
+	 * @param other the other media type
+	 * @param charset the character set
+	 * @throws IllegalArgumentException if any of the parameters contain illegal characters
+	 */
+	public MediaType(MediaType other, Charset charset) {
+		super(other, charset);
 	}
 
 	/**

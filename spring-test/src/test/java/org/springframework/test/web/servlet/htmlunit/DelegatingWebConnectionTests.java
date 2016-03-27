@@ -131,8 +131,7 @@ public class DelegatingWebConnectionTests {
 		WebClient webClient = new WebClient();
 
 		MockMvc mockMvc = MockMvcBuilders.standaloneSetup(TestController.class).build();
-		MockMvcWebConnection mockConnection = new MockMvcWebConnection(mockMvc);
-		mockConnection.setWebClient(webClient);
+		MockMvcWebConnection mockConnection = new MockMvcWebConnection(mockMvc, webClient);
 
 		WebRequestMatcher cdnMatcher = new UrlRegexRequestMatcher(".*?//code.jquery.com/.*");
 		WebConnection httpConnection = new HttpWebConnection(webClient);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import org.springframework.aop.TargetClassAware;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.aop.target.SingletonTargetSource;
+import org.springframework.core.DecoratingProxy;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
@@ -78,11 +79,29 @@ public abstract class AopProxyUtils {
 	 * <p>This will always add the {@link Advised} interface unless the AdvisedSupport's
 	 * {@link AdvisedSupport#setOpaque "opaque"} flag is on. Always adds the
 	 * {@link org.springframework.aop.SpringProxy} marker interface.
+	 * @param advised the proxy config
 	 * @return the complete set of interfaces to proxy
+	 * @see SpringProxy
 	 * @see Advised
-	 * @see org.springframework.aop.SpringProxy
 	 */
 	public static Class<?>[] completeProxiedInterfaces(AdvisedSupport advised) {
+		return completeProxiedInterfaces(advised, false);
+	}
+
+	/**
+	 * Determine the complete set of interfaces to proxy for the given AOP configuration.
+	 * <p>This will always add the {@link Advised} interface unless the AdvisedSupport's
+	 * {@link AdvisedSupport#setOpaque "opaque"} flag is on. Always adds the
+	 * {@link org.springframework.aop.SpringProxy} marker interface.
+	 * @param advised the proxy config
+	 * @param decoratingProxy whether to expose the {@link DecoratingProxy} interface
+	 * @return the complete set of interfaces to proxy
+	 * @since 4.3
+	 * @see SpringProxy
+	 * @see Advised
+	 * @see DecoratingProxy
+	 */
+	static Class<?>[] completeProxiedInterfaces(AdvisedSupport advised, boolean decoratingProxy) {
 		Class<?>[] specifiedInterfaces = advised.getProxiedInterfaces();
 		if (specifiedInterfaces.length == 0) {
 			// No user-specified interfaces: check whether target class is an interface.
@@ -99,6 +118,7 @@ public abstract class AopProxyUtils {
 		}
 		boolean addSpringProxy = !advised.isInterfaceProxied(SpringProxy.class);
 		boolean addAdvised = !advised.isOpaque() && !advised.isInterfaceProxied(Advised.class);
+		boolean addDecoratingProxy = (decoratingProxy && !advised.isInterfaceProxied(DecoratingProxy.class));
 		int nonUserIfcCount = 0;
 		if (addSpringProxy) {
 			nonUserIfcCount++;
@@ -106,13 +126,22 @@ public abstract class AopProxyUtils {
 		if (addAdvised) {
 			nonUserIfcCount++;
 		}
+		if (addDecoratingProxy) {
+			nonUserIfcCount++;
+		}
 		Class<?>[] proxiedInterfaces = new Class<?>[specifiedInterfaces.length + nonUserIfcCount];
 		System.arraycopy(specifiedInterfaces, 0, proxiedInterfaces, 0, specifiedInterfaces.length);
+		int index = specifiedInterfaces.length;
 		if (addSpringProxy) {
-			proxiedInterfaces[specifiedInterfaces.length] = SpringProxy.class;
+			proxiedInterfaces[index] = SpringProxy.class;
+			index++;
 		}
 		if (addAdvised) {
-			proxiedInterfaces[proxiedInterfaces.length - 1] = Advised.class;
+			proxiedInterfaces[index] = Advised.class;
+			index++;
+		}
+		if (addDecoratingProxy) {
+			proxiedInterfaces[index] = DecoratingProxy.class;
 		}
 		return proxiedInterfaces;
 	}
@@ -132,6 +161,9 @@ public abstract class AopProxyUtils {
 			nonUserIfcCount++;
 		}
 		if (proxy instanceof Advised) {
+			nonUserIfcCount++;
+		}
+		if (proxy instanceof DecoratingProxy) {
 			nonUserIfcCount++;
 		}
 		Class<?>[] userInterfaces = new Class<?>[proxyInterfaces.length - nonUserIfcCount];

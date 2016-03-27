@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -203,7 +203,7 @@ public class OrderComparator implements Comparator<Object> {
 	 * Strategy interface to provide an order source for a given object.
 	 * @since 4.1
 	 */
-	public static interface OrderSourceProvider {
+	public interface OrderSourceProvider {
 
 		/**
 		 * Return an order source for the specified object, i.e. an object that

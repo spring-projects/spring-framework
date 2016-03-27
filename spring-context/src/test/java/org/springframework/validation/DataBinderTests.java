@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -1051,6 +1052,27 @@ public class DataBinderTests {
 	}
 
 	@Test
+	public void testOptionalProperty() {
+		OptionalHolder bean = new OptionalHolder();
+		DataBinder binder = new DataBinder(bean);
+		binder.setConversionService(new DefaultConversionService());
+
+		MutablePropertyValues pvs = new MutablePropertyValues();
+		pvs.add("id", "1");
+		pvs.add("name", null);
+		binder.bind(pvs);
+		assertEquals("1", bean.getId());
+		assertFalse(bean.getName().isPresent());
+
+		pvs = new MutablePropertyValues();
+		pvs.add("id", "2");
+		pvs.add("name", "myName");
+		binder.bind(pvs);
+		assertEquals("2", bean.getId());
+		assertEquals("myName", bean.getName().get());
+	}
+
+	@Test
 	public void testValidatorNoErrors() {
 		TestBean tb = new TestBean();
 		tb.setAge(33);
@@ -1915,7 +1937,6 @@ public class DataBinderTests {
 	}
 
 
-	@SuppressWarnings("unused")
 	private static class Book {
 
 		private String Title;
@@ -1946,6 +1967,30 @@ public class DataBinderTests {
 
 		public void setNInStock(int nInStock) {
 			this.nInStock = nInStock;
+		}
+	}
+
+
+	private static class OptionalHolder {
+
+		private String id;
+
+		private Optional<String> name;
+
+		public String getId() {
+			return id;
+		}
+
+		public void setId(String id) {
+			this.id = id;
+		}
+
+		public Optional<String> getName() {
+			return name;
+		}
+
+		public void setName(Optional<String> name) {
+			this.name = name;
 		}
 	}
 

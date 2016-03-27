@@ -56,7 +56,7 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMetho
 	@Override
 	public boolean supportsParameter(MethodParameter parameter) {
 		return (parameter.hasParameterAnnotation(RequestHeader.class) &&
-				!Map.class.isAssignableFrom(parameter.getParameterType()));
+				!Map.class.isAssignableFrom(parameter.nestedIfOptional().getNestedParameterType()));
 	}
 
 	@Override
@@ -79,7 +79,7 @@ public class RequestHeaderMethodArgumentResolver extends AbstractNamedValueMetho
 	@Override
 	protected void handleMissingValue(String name, MethodParameter parameter) throws ServletRequestBindingException {
 		throw new ServletRequestBindingException("Missing request header '" + name +
-				"' for method parameter of type " + parameter.getParameterType().getSimpleName());
+				"' for method parameter of type " + parameter.getNestedParameterType().getSimpleName());
 	}
 
 

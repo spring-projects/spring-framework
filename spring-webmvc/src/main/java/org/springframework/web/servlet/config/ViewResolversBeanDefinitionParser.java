@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,6 @@ import org.w3c.dom.Element;
 
 import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.parsing.CompositeComponentDefinition;
 import org.springframework.beans.factory.support.ManagedList;
@@ -39,7 +38,6 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 import org.springframework.web.servlet.view.groovy.GroovyMarkupViewResolver;
 import org.springframework.web.servlet.view.script.ScriptTemplateViewResolver;
 import org.springframework.web.servlet.view.tiles3.TilesViewResolver;
-import org.springframework.web.servlet.view.velocity.VelocityViewResolver;
 
 /**
  * Parse the {@code view-resolvers} MVC namespace element and register
@@ -69,6 +67,7 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 	public static final String VIEW_RESOLVER_BEAN_NAME = "mvcViewResolver";
 
 
+	@SuppressWarnings("deprecation")
 	public BeanDefinition parse(Element element, ParserContext context) {
 		Object source = context.extractSource(element);
 		context.pushContainingComponent(new CompositeComponentDefinition(element.getTagName(), source));
@@ -100,7 +99,7 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 				addUrlBasedViewResolverProperties(resolverElement, resolverBeanDef);
 			}
 			else if ("velocity".equals(name)) {
-				resolverBeanDef = new RootBeanDefinition(VelocityViewResolver.class);
+				resolverBeanDef = new RootBeanDefinition(org.springframework.web.servlet.view.velocity.VelocityViewResolver.class);
 				resolverBeanDef.getPropertyValues().add("suffix", ".vm");
 				addUrlBasedViewResolverProperties(resolverElement, resolverBeanDef);
 			}
@@ -192,24 +191,11 @@ public class ViewResolversBeanDefinitionParser implements BeanDefinitionParser {
 		if (resolverElement.hasAttribute("use-not-acceptable")) {
 			values.add("useNotAcceptableStatusCode", resolverElement.getAttribute("use-not-acceptable"));
 		}
-		Object manager = getContentNegotiationManager(context);
+		Object manager = MvcNamespaceUtils.getContentNegotiationManager(context);
 		if (manager != null) {
 			values.add("contentNegotiationManager", manager);
 		}
 		return beanDef;
-	}
-
-	private Object getContentNegotiationManager(ParserContext context) {
-		String name = AnnotationDrivenBeanDefinitionParser.HANDLER_MAPPING_BEAN_NAME;
-		if (context.getRegistry().containsBeanDefinition(name)) {
-			BeanDefinition handlerMappingBeanDef = context.getRegistry().getBeanDefinition(name);
-			return handlerMappingBeanDef.getPropertyValues().get("contentNegotiationManager");
-		}
-		name = AnnotationDrivenBeanDefinitionParser.CONTENT_NEGOTIATION_MANAGER_BEAN_NAME;
-		if (context.getRegistry().containsBeanDefinition(name)) {
-			return new RuntimeBeanReference(name);
-		}
-		return null;
 	}
 
 }

@@ -16,6 +16,8 @@
 
 package org.springframework.test.web.servlet.htmlunit.webdriver;
 
+import com.gargoylesoftware.htmlunit.BrowserVersion;
+import com.gargoylesoftware.htmlunit.WebClient;
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
 import org.springframework.test.web.servlet.MockMvc;
@@ -24,9 +26,6 @@ import org.springframework.test.web.servlet.htmlunit.WebRequestMatcher;
 import org.springframework.test.web.servlet.setup.MockMvcConfigurer;
 import org.springframework.util.Assert;
 import org.springframework.web.context.WebApplicationContext;
-
-import com.gargoylesoftware.htmlunit.BrowserVersion;
-import com.gargoylesoftware.htmlunit.WebClient;
 
 /**
  * {@code MockMvcHtmlUnitDriverBuilder} simplifies the building of an
@@ -66,6 +65,7 @@ public class MockMvcHtmlUnitDriverBuilder extends MockMvcWebConnectionBuilderSup
 		super(context, configurer);
 	}
 
+
 	/**
 	 * Create a new {@code MockMvcHtmlUnitDriverBuilder} based on the supplied
 	 * {@link MockMvc} instance.
@@ -99,6 +99,7 @@ public class MockMvcHtmlUnitDriverBuilder extends MockMvcWebConnectionBuilderSup
 	 */
 	public static MockMvcHtmlUnitDriverBuilder webAppContextSetup(WebApplicationContext context,
 			MockMvcConfigurer configurer) {
+
 		Assert.notNull(context, "WebApplicationContext must not be null");
 		Assert.notNull(configurer, "MockMvcConfigurer must not be null");
 		return new MockMvcHtmlUnitDriverBuilder(context, configurer);
@@ -126,9 +127,9 @@ public class MockMvcHtmlUnitDriverBuilder extends MockMvcWebConnectionBuilderSup
 	 * @see #build()
 	 */
 	public MockMvcHtmlUnitDriverBuilder withDelegate(WebConnectionHtmlUnitDriver driver) {
-		Assert.notNull(driver, "driver must not be null");
+		Assert.notNull(driver, "HtmlUnitDriver must not be null");
 		driver.setJavascriptEnabled(this.javascriptEnabled);
-		driver.setWebConnection(createConnection(driver.getWebConnection()));
+		driver.setWebConnection(createConnection(driver.getWebClient()));
 		this.driver = driver;
 		return this;
 	}
@@ -146,8 +147,8 @@ public class MockMvcHtmlUnitDriverBuilder extends MockMvcWebConnectionBuilderSup
 	 * @see #withDelegate(WebConnectionHtmlUnitDriver)
 	 */
 	public HtmlUnitDriver build() {
-		return (this.driver != null ? this.driver
-				: withDelegate(new WebConnectionHtmlUnitDriver(BrowserVersion.CHROME)).build());
+		return (this.driver != null ? this.driver :
+				withDelegate(new WebConnectionHtmlUnitDriver(BrowserVersion.CHROME)).build());
 	}
 
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,12 +28,13 @@ import org.springframework.util.ObjectUtils;
  * are defined on {@link java.lang.reflect.AnnotatedElement}.
  *
  * @author Stephane Nicoll
- * @since 4.2.0
+ * @since 4.2
  * @see AnnotatedElementKey
  */
 public abstract class CachedExpressionEvaluator {
 
 	private final SpelExpressionParser parser;
+
 
 	/**
 	 * Create a new instance with the specified {@link SpelExpressionParser}.
@@ -50,12 +51,14 @@ public abstract class CachedExpressionEvaluator {
 		this(new SpelExpressionParser());
 	}
 
+
 	/**
 	 * Return the {@link SpelExpressionParser} to use.
 	 */
 	protected SpelExpressionParser getParser() {
 		return this.parser;
 	}
+
 
 	/**
 	 * Return the {@link Expression} for the specified SpEL value
@@ -66,6 +69,7 @@ public abstract class CachedExpressionEvaluator {
 	 */
 	protected Expression getExpression(Map<ExpressionKey, Expression> cache,
 			AnnotatedElementKey elementKey, String expression) {
+
 		ExpressionKey expressionKey = createKey(elementKey, expression);
 		Expression expr = cache.get(expressionKey);
 		if (expr == null) {
@@ -78,6 +82,7 @@ public abstract class CachedExpressionEvaluator {
 	private ExpressionKey createKey(AnnotatedElementKey elementKey, String expression) {
 		return new ExpressionKey(elementKey, expression);
 	}
+
 
 	protected static class ExpressionKey {
 
@@ -105,7 +110,7 @@ public abstract class CachedExpressionEvaluator {
 
 		@Override
 		public int hashCode() {
-			return this.key.hashCode() * 29 + (this.expression != null ? this.expression.hashCode() : 0);
+			return this.key.hashCode() + (this.expression != null ? this.expression.hashCode() * 29 : 0);
 		}
 	}
 

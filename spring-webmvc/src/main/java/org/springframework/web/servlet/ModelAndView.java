@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.springframework.web.servlet;
 
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.CollectionUtils;
 
@@ -36,6 +37,7 @@ import org.springframework.util.CollectionUtils;
  * @author Rod Johnson
  * @author Juergen Hoeller
  * @author Rob Harrop
+ * @author Rossen Stoyanchev
  * @see DispatcherServlet
  * @see ViewResolver
  * @see HandlerAdapter#handle
@@ -48,6 +50,9 @@ public class ModelAndView {
 
 	/** Model Map */
 	private ModelMap model;
+
+	/** Optional status for the response */
+	private HttpStatus status;
 
 	/** Indicates whether or not this instance has been cleared with a call to {@link #clear()} */
 	private boolean cleared = false;
@@ -113,6 +118,24 @@ public class ModelAndView {
 		if (model != null) {
 			getModelMap().addAllAttributes(model);
 		}
+	}
+
+
+	/**
+	 * Creates new ModelAndView given a view name, model, and status.
+	 * @param viewName name of the View to render, to be resolved
+	 * by the DispatcherServlet's ViewResolver
+	 * @param model Map of model names (Strings) to model objects
+	 * (Objects). Model entries may not be {@code null}, but the
+	 * model Map may be {@code null} if there is no model data.
+	 * @param status an alternative status code to use for the response.
+	 */
+	public ModelAndView(String viewName, Map<String, ?> model, HttpStatus status) {
+		this.view = viewName;
+		if (model != null) {
+			getModelMap().addAllAttributes(model);
+		}
+		this.status = status;
 	}
 
 	/**
@@ -213,6 +236,21 @@ public class ModelAndView {
 	 */
 	public Map<String, Object> getModel() {
 		return getModelMap();
+	}
+
+	/**
+	 * Set the status to use for the response.
+	 * @since 4.3
+	 */
+	public void setStatus(HttpStatus status) {
+		this.status = status;
+	}
+
+	/**
+	 * Return the configured status for the response.
+	 */
+	public HttpStatus getStatus() {
+		return this.status;
 	}
 
 

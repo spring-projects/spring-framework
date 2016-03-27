@@ -17,11 +17,10 @@
 package org.springframework.test.annotation;
 
 import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.*;
 
 /**
  * {@code @Commit} is a test annotation that is used to indicate that a
@@ -49,9 +48,9 @@ import static java.lang.annotation.RetentionPolicy.*;
  * @see Rollback
  * @see org.springframework.test.context.transaction.TransactionalTestExecutionListener
  */
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
 @Documented
-@Retention(RUNTIME)
-@Target({ TYPE, METHOD })
 @Rollback(false)
 public @interface Commit {
 }

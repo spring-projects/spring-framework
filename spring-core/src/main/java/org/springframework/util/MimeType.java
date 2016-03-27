@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.BitSet;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -126,11 +127,28 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * Create a new {@code MimeType} for the given type, subtype, and character set.
 	 * @param type the primary type
 	 * @param subtype the subtype
-	 * @param charSet the character set
+	 * @param charset the character set
 	 * @throws IllegalArgumentException if any of the parameters contains illegal characters
 	 */
-	public MimeType(String type, String subtype, Charset charSet) {
-		this(type, subtype, Collections.singletonMap(PARAM_CHARSET, charSet.name()));
+	public MimeType(String type, String subtype, Charset charset) {
+		this(type, subtype, Collections.singletonMap(PARAM_CHARSET, charset.name()));
+	}
+
+	/**
+	 * Copy-constructor that copies the type, subtype, parameters of the given {@code MimeType},
+	 * and allows to set the specified character set.
+	 * @param other the other media type
+	 * @param charset the character set
+	 * @throws IllegalArgumentException if any of the parameters contains illegal characters
+	 */
+	public MimeType(MimeType other, Charset charset) {
+		this(other.getType(), other.getSubtype(), addCharsetParameter(charset, other.getParameters()));
+	}
+
+	private static Map<String, String> addCharsetParameter(Charset charset, Map<String, String> parameters) {
+		Map<String, String> map = new LinkedHashMap<String, String>(parameters);
+		map.put(PARAM_CHARSET, charset.name());
+		return map;
 	}
 
 	/**
@@ -180,7 +198,7 @@ public class MimeType implements Comparable<MimeType>, Serializable {
 	 * @see <a href="http://tools.ietf.org/html/rfc2616#section-2.2">HTTP 1.1, section 2.2</a>
 	 */
 	private void checkToken(String token) {
-		for (int i=0; i < token.length(); i++ ) {
+		for (int i = 0; i < token.length(); i++ ) {
 			char ch = token.charAt(i);
 			if (!TOKEN.get(ch)) {
 				throw new IllegalArgumentException("Invalid token character '" + ch + "' in token \"" + token + "\"");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.test.web.servlet.StubMvcResult;
  * @author Rossen Stoyanchev
  * @author Craig Andrews
  * @author Sam Brannen
+ * @author Brian Clozel
  */
 public class JsonPathResultMatchersTests {
 
@@ -41,7 +42,7 @@ public class JsonPathResultMatchersTests {
 			"'emptyString': '',              " + //
 			"'emptyArray':  [],              " + //
 			"'emptyMap':    {}               " + //
-	"}";
+			"}";
 
 	private static final StubMvcResult stubMvcResult;
 
@@ -56,7 +57,6 @@ public class JsonPathResultMatchersTests {
 			throw new IllegalStateException(e);
 		}
 	}
-
 
 	@Test
 	public void value() throws Exception {
@@ -231,6 +231,44 @@ public class JsonPathResultMatchersTests {
 	@Test(expected = AssertionError.class)
 	public void isStringNoMatch() throws Exception {
 		new JsonPathResultMatchers("$.arr").isString().match(stubMvcResult);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void valueWithJsonPrefixNotConfigured() throws Exception {
+		String jsonPrefix = "prefix";
+		StubMvcResult result = createPrefixedStubMvcResult(jsonPrefix);
+		new JsonPathResultMatchers("$.str").value("foo").match(result);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void valueWithJsonWrongPrefix() throws Exception {
+		String jsonPrefix = "prefix";
+		StubMvcResult result = createPrefixedStubMvcResult(jsonPrefix);
+		new JsonPathResultMatchers("$.str").prefix("wrong").value("foo").match(result);
+	}
+
+	@Test
+	public void valueWithJsonPrefix() throws Exception {
+		String jsonPrefix = "prefix";
+		StubMvcResult result = createPrefixedStubMvcResult(jsonPrefix);
+		new JsonPathResultMatchers("$.str").prefix(jsonPrefix).value("foo").match(result);
+	}
+
+	@Test(expected = AssertionError.class)
+	public void prefixWithPayloadNotLongEnough() throws Exception {
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		response.addHeader("Content-Type", "application/json");
+		response.getWriter().print(new String("test".getBytes("ISO-8859-1")));
+		StubMvcResult result =  new StubMvcResult(null, null, null, null, null, null, response);
+
+		new JsonPathResultMatchers("$.str").prefix("prefix").value("foo").match(result);
+	}
+
+	private StubMvcResult createPrefixedStubMvcResult(String jsonPrefix) throws Exception {
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		response.addHeader("Content-Type", "application/json");
+		response.getWriter().print(jsonPrefix + new String(RESPONSE_CONTENT.getBytes("ISO-8859-1")));
+		return new StubMvcResult(null, null, null, null, null, null, response);
 	}
 
 }

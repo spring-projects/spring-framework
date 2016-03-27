@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ public class ComponentScanParserWithUserDefinedStrategiesTests {
 					"org/springframework/context/annotation/invalidConstructorNameGeneratorTests.xml");
 			fail("should have failed: no-arg constructor is required");
 		}
-		catch (BeansException e) {
+		catch (BeansException ex) {
 			// expected
 		}
 	}
@@ -65,7 +65,7 @@ public class ComponentScanParserWithUserDefinedStrategiesTests {
 					"org/springframework/context/annotation/invalidClassNameScopeResolverTests.xml");
 			fail("should have failed: no such class");
 		}
-		catch (BeansException e) {
+		catch (BeansException ex) {
 			// expected
 		}
 	}

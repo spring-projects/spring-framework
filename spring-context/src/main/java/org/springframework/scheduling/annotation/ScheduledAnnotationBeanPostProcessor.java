@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,7 @@
 package org.springframework.scheduling.annotation;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
@@ -43,8 +41,9 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.core.MethodIntrospector;
 import org.springframework.core.Ordered;
-import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.Trigger;
 import org.springframework.scheduling.config.CronTask;
@@ -53,8 +52,6 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.support.CronTrigger;
 import org.springframework.scheduling.support.ScheduledMethodRunnable;
 import org.springframework.util.Assert;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.util.ReflectionUtils.MethodCallback;
 import org.springframework.util.StringUtils;
 import org.springframework.util.StringValueResolver;
 
@@ -92,6 +89,7 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 	 * The default name of the {@link TaskScheduler} bean to pick up: "taskScheduler".
 	 * <p>Note that the initial lookup happens by type; this is just the fallback
 	 * in case of multiple scheduler beans found in the context.
+	 * @since 4.2
 	 */
 	public static final String DEFAULT_TASK_SCHEDULER_BEAN_NAME = "taskScheduler";
 
@@ -121,6 +119,12 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 	 * Set the {@link org.springframework.scheduling.TaskScheduler} that will invoke
 	 * the scheduled methods, or a {@link java.util.concurrent.ScheduledExecutorService}
 	 * to be wrapped as a TaskScheduler.
+	 * <p>If not specified, default scheduler resolution will apply: searching for a
+	 * unique {@link TaskScheduler} bean in the context, or for a {@link TaskScheduler}
+	 * bean named "taskScheduler" otherwise; the same lookup will also be performed for
+	 * a {@link ScheduledExecutorService} bean. If neither of the two is resolvable,
+	 * a local single-threaded default scheduler will be created within the registrar.
+	 * @see #DEFAULT_TASK_SCHEDULER_BEAN_NAME
 	 */
 	public void setScheduler(Object scheduler) {
 		this.scheduler = scheduler;
@@ -198,10 +202,13 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 							this.beanFactory.getBean(DEFAULT_TASK_SCHEDULER_BEAN_NAME, TaskScheduler.class));
 				}
 				catch (NoSuchBeanDefinitionException ex2) {
-					throw new IllegalStateException("More than one TaskScheduler bean exists within the context, and " +
-							"none is named 'taskScheduler'. Mark one of them as primary or name it 'taskScheduler' "+
-							"(possibly as an alias); or implement the SchedulingConfigurer interface and call " +
-							"ScheduledTaskRegistrar#setScheduler explicitly within the configureTasks() callback.", ex);
+					if (logger.isInfoEnabled()) {
+						logger.info("More than one TaskScheduler bean exists within the context, and " +
+								"none is named 'taskScheduler'. Mark one of them as primary or name it 'taskScheduler' " +
+								"(possibly as an alias); or implement the SchedulingConfigurer interface and call " +
+								"ScheduledTaskRegistrar#setScheduler explicitly within the configureTasks() callback: " +
+								ex.getBeanNamesFound());
+					}
 				}
 			}
 			catch (NoSuchBeanDefinitionException ex) {
@@ -211,14 +218,24 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 					this.registrar.setScheduler(this.beanFactory.getBean(ScheduledExecutorService.class));
 				}
 				catch (NoUniqueBeanDefinitionException ex2) {
-					throw new IllegalStateException("More than one ScheduledExecutorService bean exists within " +
-							"the context. Mark one of them as primary; or implement the SchedulingConfigurer " +
-							"interface and call ScheduledTaskRegistrar#setScheduler explicitly within the " +
-							"configureTasks() callback.", ex);
+					try {
+						this.registrar.setScheduler(
+								this.beanFactory.getBean(DEFAULT_TASK_SCHEDULER_BEAN_NAME, ScheduledExecutorService.class));
+					}
+					catch (NoSuchBeanDefinitionException ex3) {
+						if (logger.isInfoEnabled()) {
+							logger.info("More than one ScheduledExecutorService bean exists within the context, and " +
+									"none is named 'taskScheduler'. Mark one of them as primary or name it 'taskScheduler' " +
+									"(possibly as an alias); or implement the SchedulingConfigurer interface and call " +
+									"ScheduledTaskRegistrar#setScheduler explicitly within the configureTasks() callback: " +
+									ex2.getBeanNamesFound());
+						}
+					}
 				}
 				catch (NoSuchBeanDefinitionException ex2) {
-					logger.debug("Could not find default ScheduledExecutorService bean", ex);
+					logger.debug("Could not find default ScheduledExecutorService bean", ex2);
 					// Giving up -> falling back to default scheduler within the registrar...
+					logger.info("No TaskScheduler/ScheduledExecutorService bean found for scheduled processing");
 				}
 			}
 		}
@@ -236,17 +253,15 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 	public Object postProcessAfterInitialization(final Object bean, String beanName) {
 		Class<?> targetClass = AopUtils.getTargetClass(bean);
 		if (!this.nonAnnotatedClasses.contains(targetClass)) {
-			final Set<Method> annotatedMethods = new LinkedHashSet<Method>(1);
-			ReflectionUtils.doWithMethods(targetClass, new MethodCallback() {
-				@Override
-				public void doWith(Method method) throws IllegalArgumentException, IllegalAccessException {
-					for (Scheduled scheduled :
-							AnnotationUtils.getRepeatableAnnotations(method, Scheduled.class, Schedules.class)) {
-						processScheduled(scheduled, method, bean);
-						annotatedMethods.add(method);
-					}
-				}
-			});
+			Map<Method, Set<Scheduled>> annotatedMethods = MethodIntrospector.selectMethods(targetClass,
+					new MethodIntrospector.MetadataLookup<Set<Scheduled>>() {
+						@Override
+						public Set<Scheduled> inspect(Method method) {
+							Set<Scheduled> scheduledMethods =
+									AnnotatedElementUtils.getMergedRepeatableAnnotations(method, Scheduled.class, Schedules.class);
+							return (!scheduledMethods.isEmpty() ? scheduledMethods : null);
+						}
+					});
 			if (annotatedMethods.isEmpty()) {
 				this.nonAnnotatedClasses.add(targetClass);
 				if (logger.isTraceEnabled()) {
@@ -255,6 +270,12 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 			}
 			else {
 				// Non-empty set of methods
+				for (Map.Entry<Method, Set<Scheduled>> entry : annotatedMethods.entrySet()) {
+					Method method = entry.getKey();
+					for (Scheduled scheduled : entry.getValue()) {
+						processScheduled(scheduled, method, bean);
+					}
+				}
 				if (logger.isDebugEnabled()) {
 					logger.debug(annotatedMethods.size() + " @Scheduled methods processed on bean '" + beanName +
 							"': " + annotatedMethods);
@@ -271,35 +292,8 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 			Assert.isTrue(method.getParameterTypes().length == 0,
 					"Only no-arg methods may be annotated with @Scheduled");
 
-			if (AopUtils.isJdkDynamicProxy(bean)) {
-				try {
-					// Found a @Scheduled method on the target class for this JDK proxy ->
-					// is it also present on the proxy itself?
-					method = bean.getClass().getMethod(method.getName(), method.getParameterTypes());
-				}
-				catch (SecurityException ex) {
-					ReflectionUtils.handleReflectionException(ex);
-				}
-				catch (NoSuchMethodException ex) {
-					throw new IllegalStateException(String.format(
-							"@Scheduled method '%s' found on bean target class '%s' but not " +
-							"found in any interface(s) for a dynamic proxy. Either pull the " +
-							"method up to a declared interface or switch to subclass (CGLIB) " +
-							"proxies by setting proxy-target-class/proxyTargetClass to 'true'",
-							method.getName(), method.getDeclaringClass().getSimpleName()));
-				}
-			}
-			else if (AopUtils.isCglibProxy(bean)) {
-				// Common problem: private methods end up in the proxy instance, not getting delegated.
-				if (Modifier.isPrivate(method.getModifiers())) {
-					throw new IllegalStateException(String.format(
-							"@Scheduled method '%s' found on CGLIB proxy for target class '%s' but cannot " +
-							"be delegated to target bean. Switch its visibility to package or protected.",
-							method.getName(), method.getDeclaringClass().getSimpleName()));
-				}
-			}
-
-			Runnable runnable = new ScheduledMethodRunnable(bean, method);
+			Method invocableMethod = AopUtils.selectInvocableMethod(method, bean.getClass());
+			Runnable runnable = new ScheduledMethodRunnable(bean, invocableMethod);
 			boolean processedSchedule = false;
 			String errorMessage =
 					"Exactly one of the 'cron', 'fixedDelay(String)', or 'fixedRate(String)' attributes is required";

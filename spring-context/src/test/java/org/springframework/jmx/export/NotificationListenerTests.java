@@ -172,7 +172,8 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 				if (notification instanceof AttributeChangeNotification) {
 					AttributeChangeNotification changeNotification = (AttributeChangeNotification) notification;
 					return "Name".equals(changeNotification.getAttributeName());
-				} else {
+				}
+				else {
 					return false;
 				}
 			}
@@ -200,7 +201,8 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 		try {
 			new NotificationListenerBean().afterPropertiesSet();
 			fail("Must have thrown an IllegalArgumentException (no NotificationListener supplied)");
-		} catch (IllegalArgumentException expected) {
+		}
+		catch (IllegalArgumentException expected) {
 		}
 	}
 
@@ -463,7 +465,8 @@ public class NotificationListenerTests extends AbstractMBeanServerTests {
 				if (currentCount != null) {
 					int count = currentCount.intValue() + 1;
 					this.attributeCounts.put(attributeName, new Integer(count));
-				} else {
+				}
+				else {
 					this.attributeCounts.put(attributeName, new Integer(1));
 				}
 

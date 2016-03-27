@@ -33,6 +33,9 @@ import org.springframework.web.context.support.ServletContextResourcePatternReso
 /**
  * Spring-specific subclass of the Tiles ServletTilesApplicationContext.
  *
+ * <p><b>NOTE: Tiles 2 support is deprecated in favor of Tiles 3 and will be removed
+ * as of Spring Framework 5.0.</b>.
+ *
  * @author Juergen Hoeller
  * @since 4.0.1
  * @deprecated as of Spring 4.2, in favor of Tiles 3

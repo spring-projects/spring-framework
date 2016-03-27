@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.util.Assert;
+import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 
 /**
@@ -56,6 +57,8 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 	private final SimpUserRegistry userRegistry;
 
 	private String prefix = "/user/";
+
+	private boolean keepLeadingSlash = true;
 
 
 	/**
@@ -92,6 +95,26 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 	 */
 	public String getDestinationPrefix() {
 		return this.prefix;
+	}
+
+	/**
+	 * Provide the {@code PathMatcher} in use for working with destinations
+	 * which in turn helps to determine whether the leading slash should be
+	 * kept in actual destinations after removing the
+	 * {@link #setUserDestinationPrefix userDestinationPrefix}.
+	 * <p>By default actual destinations have a leading slash, e.g.
+	 * {@code /queue/position-updates} which makes sense with brokers that
+	 * support destinations with slash as separator. When a {@code PathMatcher}
+	 * is provided that supports an alternative separator, then resulting
+	 * destinations won't have a leading slash, e.g. {@code
+	 * jms.queue.position-updates}.
+	 * @param pathMatcher the PathMatcher used to work with destinations
+	 * @since 4.3
+	 */
+	public void setPathMatcher(PathMatcher pathMatcher) {
+		if (pathMatcher != null) {
+			this.keepLeadingSlash = pathMatcher.combine("1", "2").equals("1/2");
+		}
 	}
 
 
@@ -131,6 +154,9 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 			}
 			int prefixEnd = this.prefix.length() - 1;
 			String actualDestination = destination.substring(prefixEnd);
+			if (!this.keepLeadingSlash) {
+				actualDestination = actualDestination.substring(1);
+			}
 			String user = (principal != null ? principal.getName() : null);
 			return new ParseResult(actualDestination, destination, Collections.singleton(sessionId), user);
 		}
@@ -164,6 +190,9 @@ public class DefaultUserDestinationResolver implements UserDestinationResolver {
 				else {
 					sessionIds = Collections.<String>emptySet();
 				}
+			}
+			if (!this.keepLeadingSlash) {
+				actualDestination = actualDestination.substring(1);
 			}
 			return new ParseResult(actualDestination, subscribeDestination, sessionIds, userName);
 		}

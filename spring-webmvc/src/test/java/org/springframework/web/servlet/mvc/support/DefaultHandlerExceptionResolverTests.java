@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,9 @@ import org.springframework.web.servlet.mvc.multiaction.NoSuchRequestHandlingMeth
 
 import static org.junit.Assert.*;
 
-/** @author Arjen Poutsma */
+/**
+ * @author Arjen Poutsma
+ */
 public class DefaultHandlerExceptionResolverTests {
 
 	private DefaultHandlerExceptionResolver exceptionResolver;
@@ -174,7 +176,9 @@ public class DefaultHandlerExceptionResolverTests {
 		assertNotNull("No ModelAndView returned", mav);
 		assertTrue("No Empty ModelAndView returned", mav.isEmpty());
 		assertEquals("Invalid status code", 400, response.getStatus());
-		assertEquals("Required request part 'name' is not present.", response.getErrorMessage());
+		assertTrue(response.getErrorMessage().contains("request part"));
+		assertTrue(response.getErrorMessage().contains("name"));
+		assertTrue(response.getErrorMessage().contains("not present"));
 	}
 
 	@Test
@@ -210,6 +214,7 @@ public class DefaultHandlerExceptionResolverTests {
 		// SPR-9653
 		assertSame(ex, request.getAttribute("javax.servlet.error.exception"));
 	}
+
 
 	@SuppressWarnings("unused")
 	public void handle(String arg) {

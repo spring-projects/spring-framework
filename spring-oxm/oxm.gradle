@@ -5,7 +5,7 @@ configurations {
 	jibx
 }
 dependencies {
-	castor "org.codehaus.castor:castor-anttasks:1.3.3"
+	castor "org.codehaus.castor:castor-anttasks:1.4.0"
 	castor "org.apache.velocity:velocity:1.7"
 	xjc "com.sun.xml.bind:jaxb-xjc:2.1.17"
 	xmlbeans "org.apache.xmlbeans:xmlbeans:2.6.0"

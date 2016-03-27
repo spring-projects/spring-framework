@@ -918,7 +918,7 @@ public class CodeFlow implements Opcodes {
 	 */
 	public static boolean isReferenceTypeArray(String arraytype) {
 		int length = arraytype.length();
-		for (int i=0;i<length;i++) {
+		for (int i = 0; i < length; i++) {
 			char ch = arraytype.charAt(i);
 			if (ch == '[') continue;
 			return ch=='L';

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +19,14 @@ package org.springframework.jms.listener.adapter;
 import javax.jms.JMSException;
 import javax.jms.Session;
 
+import org.springframework.core.MethodParameter;
 import org.springframework.jms.support.JmsHeaderMapper;
 import org.springframework.jms.support.converter.MessageConversionException;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
+import org.springframework.messaging.core.AbstractMessageSendingTemplate;
 import org.springframework.messaging.handler.invocation.InvocableHandlerMethod;
+import org.springframework.messaging.support.MessageBuilder;
 
 /**
  * A {@link javax.jms.MessageListener} adapter that invokes a configurable
@@ -70,6 +73,17 @@ public class MessagingMessageListenerAdapter extends AbstractAdaptableMessageLis
 		else {
 			logger.trace("No result object given - no result to handle");
 		}
+	}
+
+	@Override
+	protected Object preProcessResponse(Object result) {
+		MethodParameter returnType = this.handlerMethod.getReturnType();
+		if (result instanceof Message) {
+			return MessageBuilder.fromMessage((Message<?>) result)
+					.setHeader(AbstractMessageSendingTemplate.CONVERSION_HINT_HEADER, returnType).build();
+		}
+		return MessageBuilder.withPayload(result).setHeader(
+				AbstractMessageSendingTemplate.CONVERSION_HINT_HEADER, returnType).build();
 	}
 
 	protected Message<?> toMessagingMessage(javax.jms.Message jmsMessage) {

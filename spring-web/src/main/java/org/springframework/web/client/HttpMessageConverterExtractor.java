@@ -76,7 +76,7 @@ public class HttpMessageConverterExtractor<T> implements ResponseExtractor<T> {
 
 
 	@Override
-	@SuppressWarnings({"unchecked", "rawtypes"})
+	@SuppressWarnings({"unchecked", "rawtypes", "resource"})
 	public T extractData(ClientHttpResponse response) throws IOException {
 		MessageBodyClientHttpResponseWrapper responseWrapper = new MessageBodyClientHttpResponseWrapper(response);
 		if (!responseWrapper.hasMessageBody() || responseWrapper.hasEmptyMessageBody()) {

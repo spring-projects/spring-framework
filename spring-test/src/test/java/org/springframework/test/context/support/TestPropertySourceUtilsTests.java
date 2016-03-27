@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -140,7 +140,7 @@ public class TestPropertySourceUtilsTests {
 	public void addInlinedPropertiesToEnvironmentWithContextAndNullInlinedProperties() {
 		expectedException.expect(IllegalArgumentException.class);
 		expectedException.expectMessage("inlined");
-		addInlinedPropertiesToEnvironment(mock(ConfigurableApplicationContext.class), null);
+		addInlinedPropertiesToEnvironment(mock(ConfigurableApplicationContext.class), (String[]) null);
 	}
 
 	/**
@@ -160,7 +160,7 @@ public class TestPropertySourceUtilsTests {
 	public void addInlinedPropertiesToEnvironmentWithEnvironmentAndNullInlinedProperties() {
 		expectedException.expect(IllegalArgumentException.class);
 		expectedException.expectMessage("inlined");
-		addInlinedPropertiesToEnvironment(new MockEnvironment(), null);
+		addInlinedPropertiesToEnvironment(new MockEnvironment(), (String[]) null);
 	}
 
 	/**
@@ -202,7 +202,7 @@ public class TestPropertySourceUtilsTests {
 	public void convertInlinedPropertiesToMapWithNullInlinedProperties() {
 		expectedException.expect(IllegalArgumentException.class);
 		expectedException.expectMessage("inlined");
-		convertInlinedPropertiesToMap(null);
+		convertInlinedPropertiesToMap((String[]) null);
 	}
 
 	// -------------------------------------------------------------------

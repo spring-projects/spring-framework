@@ -22,9 +22,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -437,6 +439,16 @@ public class Jackson2ObjectMapperBuilderTests {
 		assertTrue(xmlObjectMapper.getClass().isAssignableFrom(XmlMapper.class));
 	}
 
+	@Test  // SPR-13975
+	public void defaultUseWrapper() throws JsonProcessingException {
+		ObjectMapper objectMapper = Jackson2ObjectMapperBuilder.xml().defaultUseWrapper(false).build();
+		assertNotNull(objectMapper);
+		assertEquals(XmlMapper.class, objectMapper.getClass());
+		ListContainer<String> container = new ListContainer<>(Arrays.asList("foo", "bar"));
+		String output = objectMapper.writeValueAsString(container);
+		assertThat(output, containsString("<list>foo</list><list>bar</list></ListContainer>"));
+	}
+
 
 	public static class CustomIntegerModule extends Module {
 
@@ -498,6 +510,26 @@ public class Jackson2ObjectMapperBuilderTests {
 
 		public void setProperty2(String property2) {
 			this.property2 = property2;
+		}
+	}
+
+	public static class ListContainer<T> {
+
+		private List<T> list;
+
+		public ListContainer() {
+		}
+
+		public ListContainer(List<T> list) {
+			this.list = list;
+		}
+
+		public List<T> getList() {
+			return list;
+		}
+
+		public void setList(List<T> list) {
+			this.list = list;
 		}
 	}
 

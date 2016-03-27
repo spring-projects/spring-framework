@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
@@ -174,7 +173,7 @@ public abstract class TestPropertySourceUtils {
 	 * @throws IllegalStateException if an error occurs while processing a properties file
 	 */
 	public static void addPropertiesFilesToEnvironment(ConfigurableApplicationContext context,
-			String[] locations) {
+			String... locations) {
 		Assert.notNull(context, "context must not be null");
 		Assert.notNull(locations, "locations must not be null");
 		try {
@@ -204,7 +203,7 @@ public abstract class TestPropertySourceUtils {
 	 * @see #addInlinedPropertiesToEnvironment(ConfigurableEnvironment, String[])
 	 */
 	public static void addInlinedPropertiesToEnvironment(ConfigurableApplicationContext context,
-			String[] inlinedProperties) {
+			String... inlinedProperties) {
 		Assert.notNull(context, "context must not be null");
 		Assert.notNull(inlinedProperties, "inlinedProperties must not be null");
 		addInlinedPropertiesToEnvironment(context.getEnvironment(), inlinedProperties);
@@ -226,7 +225,7 @@ public abstract class TestPropertySourceUtils {
 	 * @see TestPropertySource#properties
 	 * @see #convertInlinedPropertiesToMap
 	 */
-	public static void addInlinedPropertiesToEnvironment(ConfigurableEnvironment environment, String[] inlinedProperties) {
+	public static void addInlinedPropertiesToEnvironment(ConfigurableEnvironment environment, String... inlinedProperties) {
 		Assert.notNull(environment, "environment must not be null");
 		Assert.notNull(inlinedProperties, "inlinedProperties must not be null");
 		if (!ObjectUtils.isEmpty(inlinedProperties)) {
@@ -234,9 +233,13 @@ public abstract class TestPropertySourceUtils {
 				logger.debug("Adding inlined properties to environment: "
 						+ ObjectUtils.nullSafeToString(inlinedProperties));
 			}
-			MapPropertySource ps = new MapPropertySource(INLINED_PROPERTIES_PROPERTY_SOURCE_NAME,
-				convertInlinedPropertiesToMap(inlinedProperties));
-			environment.getPropertySources().addFirst(ps);
+			MapPropertySource ps = (MapPropertySource) environment.getPropertySources().get(INLINED_PROPERTIES_PROPERTY_SOURCE_NAME);
+			if (ps == null) {
+				ps = new MapPropertySource(INLINED_PROPERTIES_PROPERTY_SOURCE_NAME,
+						new LinkedHashMap<String, Object>());
+				environment.getPropertySources().addFirst(ps);
+			}
+			ps.getSource().putAll(convertInlinedPropertiesToMap(inlinedProperties));
 		}
 	}
 
@@ -257,7 +260,7 @@ public abstract class TestPropertySourceUtils {
 	 * a given inlined property contains multiple key-value pairs
 	 * @see #addInlinedPropertiesToEnvironment(ConfigurableEnvironment, String[])
 	 */
-	public static Map<String, Object> convertInlinedPropertiesToMap(String[] inlinedProperties) {
+	public static Map<String, Object> convertInlinedPropertiesToMap(String... inlinedProperties) {
 		Assert.notNull(inlinedProperties, "inlinedProperties must not be null");
 		Map<String, Object> map = new LinkedHashMap<String, Object>();
 

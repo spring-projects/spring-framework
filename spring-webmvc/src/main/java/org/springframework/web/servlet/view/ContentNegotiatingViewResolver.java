@@ -119,6 +119,10 @@ public class ContentNegotiatingViewResolver extends WebApplicationObjectSupport
 		this.contentNegotiationManager = contentNegotiationManager;
 	}
 
+	/**
+	 * Return the {@link ContentNegotiationManager} to use to determine requested media types.
+	 * @since 4.1.9
+	 */
 	public ContentNegotiationManager getContentNegotiationManager() {
 		return this.contentNegotiationManager;
 	}

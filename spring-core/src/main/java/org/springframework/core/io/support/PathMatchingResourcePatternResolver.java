@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLConnection;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.LinkedHashSet;
@@ -144,6 +145,9 @@ import org.springframework.util.StringUtils;
  * root of expanded directories. This originates from a limitation in the JDK's
  * {@code ClassLoader.getResources()} method which only returns file system
  * locations for a passed-in empty String (indicating potential roots to search).
+ * This {@code ResourcePatternResolver} implementation is trying to mitigate the
+ * jar root lookup limitation through {@link URLClassLoader} introspection and
+ * "java.class.path" manifest evaluation; however, without portability guarantees.
  *
  * <p><b>WARNING:</b> Ant-style patterns with "classpath:" resources are not
  * guaranteed to find matching resources if the root package to search is available
@@ -156,9 +160,9 @@ import org.springframework.util.StringUtils;
  *     classpath:com/mycompany/**&#47;service-context.xml
  * </pre>
  * is used to try to resolve it, the resolver will work off the (first) URL
- * returned by {@code getResource("com/mycompany");}. If this base package
- * node exists in multiple classloader locations, the actual end resource may
- * not be underneath. Therefore, preferably, use "{@code classpath*:}" with the same
+ * returned by {@code getResource("com/mycompany");}. If this base package node
+ * exists in multiple classloader locations, the actual end resource may not be
+ * underneath. Therefore, preferably, use "{@code classpath*:}" with the same
  * Ant-style pattern in such a case, which will search <i>all</i> class path
  * locations that contain the root package.
  *
@@ -166,6 +170,7 @@ import org.springframework.util.StringUtils;
  * @author Colin Sampaleanu
  * @author Marius Bogoevici
  * @author Costin Leau
+ * @author Phil Webb
  * @since 1.0.2
  * @see #CLASSPATH_ALL_URL_PREFIX
  * @see org.springframework.util.AntPathMatcher
@@ -308,6 +313,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			path = path.substring(1);
 		}
 		Set<Resource> result = doFindAllClassPathResources(path);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Resolved classpath location [" + location + "] to resources " + result);
+		}
 		return result.toArray(new Resource[result.size()]);
 	}
 
@@ -316,6 +324,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * Called by {@link #findAllClassPathResources(String)}.
 	 * @param path the absolute path within the classpath (never a leading slash)
 	 * @return a mutable Set of matching Resource instances
+	 * @since 4.1.1
 	 */
 	protected Set<Resource> doFindAllClassPathResources(String path) throws IOException {
 		Set<Resource> result = new LinkedHashSet<Resource>(16);
@@ -350,6 +359,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * given set of resources in the form of pointers to the root of the jar file content.
 	 * @param classLoader the ClassLoader to search (including its ancestors)
 	 * @param result the set of resources to add jar roots to
+	 * @since 4.1.1
 	 */
 	protected void addAllClassLoaderJarRoots(ClassLoader classLoader, Set<Resource> result) {
 		if (classLoader instanceof URLClassLoader) {
@@ -379,8 +389,15 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				}
 			}
 		}
+
+		if (classLoader == ClassLoader.getSystemClassLoader()) {
+			// "java.class.path" manifest evaluation...
+			addClassPathManifestEntries(result);
+		}
+
 		if (classLoader != null) {
 			try {
+				// Hierarchy traversal...
 				addAllClassLoaderJarRoots(classLoader.getParent(), result);
 			}
 			catch (Exception ex) {
@@ -388,6 +405,41 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 					logger.debug("Cannot introspect jar files in parent ClassLoader since [" + classLoader +
 							"] does not support 'getParent()': " + ex);
 				}
+			}
+		}
+	}
+
+	/**
+	 * Determine jar file references from the "java.class.path." manifest property and add them
+	 * to the given set of resources in the form of pointers to the root of the jar file content.
+	 * @param result the set of resources to add jar roots to
+	 * @since 4.3
+	 */
+	protected void addClassPathManifestEntries(Set<Resource> result) {
+		try {
+			String javaClassPathProperty = System.getProperty("java.class.path");
+			for (String url : StringUtils.delimitedListToStringArray(
+					javaClassPathProperty, System.getProperty("path.separator"))) {
+				try {
+					if (url.endsWith(ResourceUtils.JAR_FILE_EXTENSION)) {
+						UrlResource jarResource = new UrlResource(ResourceUtils.JAR_URL_PREFIX +
+								ResourceUtils.FILE_URL_PREFIX + url + ResourceUtils.JAR_URL_SEPARATOR);
+						if (jarResource.exists()) {
+							result.add(jarResource);
+						}
+					}
+				}
+				catch (MalformedURLException ex) {
+					if (logger.isDebugEnabled()) {
+						logger.debug("Cannot search for matching files underneath [" + url +
+								"] because it cannot be converted to a valid 'jar:' URL: " + ex.getMessage());
+					}
+				}
+			}
+		}
+		catch (Exception ex) {
+			if (logger.isDebugEnabled()) {
+				logger.debug("Failed to evaluate 'java.class.path' manifest entries: " + ex);
 			}
 		}
 	}
@@ -501,7 +553,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		JarFile jarFile;
 		String jarFileUrl;
 		String rootEntryPath;
-		boolean newJarFile = false;
+		boolean closeJarFile;
 
 		if (con instanceof JarURLConnection) {
 			// Should usually be the case for traditional JAR files.
@@ -511,6 +563,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			jarFileUrl = jarCon.getJarFileURL().toExternalForm();
 			JarEntry jarEntry = jarCon.getJarEntry();
 			rootEntryPath = (jarEntry != null ? jarEntry.getName() : "");
+			closeJarFile = !jarCon.getUseCaches();
 		}
 		else {
 			// No JarURLConnection -> need to resort to URL file parsing.
@@ -530,7 +583,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 					jarFileUrl = urlFile;
 					rootEntryPath = "";
 				}
-				newJarFile = true;
+				closeJarFile = true;
 			}
 			catch (ZipException ex) {
 				if (logger.isDebugEnabled()) {
@@ -563,9 +616,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			return result;
 		}
 		finally {
-			// Close jar file, but only if freshly obtained -
-			// not from JarURLConnection, which might cache the file reference.
-			if (newJarFile) {
+			if (closeJarFile) {
 				jarFile.close();
 			}
 		}
@@ -700,6 +751,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			}
 			return;
 		}
+		Arrays.sort(dirContents);
 		for (File content : dirContents) {
 			String currPath = StringUtils.replace(content.getAbsolutePath(), File.separator, "/");
 			if (content.isDirectory() && getPathMatcher().matchStart(fullPattern, currPath + "/")) {

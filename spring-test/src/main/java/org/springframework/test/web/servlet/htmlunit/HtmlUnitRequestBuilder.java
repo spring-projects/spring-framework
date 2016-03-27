@@ -34,6 +34,11 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import com.gargoylesoftware.htmlunit.CookieManager;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.WebRequest;
+import com.gargoylesoftware.htmlunit.util.NameValuePair;
+
 import org.springframework.beans.Mergeable;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -45,11 +50,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import com.gargoylesoftware.htmlunit.CookieManager;
-import com.gargoylesoftware.htmlunit.WebClient;
-import com.gargoylesoftware.htmlunit.WebRequest;
-import com.gargoylesoftware.htmlunit.util.NameValuePair;
 
 /**
  * Internal class used to transform a {@link WebRequest} into a
@@ -91,9 +91,9 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 	 * {@link MockHttpServletRequest}; never {@code null}
 	 */
 	public HtmlUnitRequestBuilder(Map<String, MockHttpSession> sessions, WebClient webClient, WebRequest webRequest) {
-		Assert.notNull(sessions, "sessions map must not be null");
-		Assert.notNull(webClient, "webClient must not be null");
-		Assert.notNull(webRequest, "webRequest must not be null");
+		Assert.notNull(sessions, "Sessions Map must not be null");
+		Assert.notNull(webClient, "WebClient must not be null");
+		Assert.notNull(webRequest, "WebRequest must not be null");
 
 		this.sessions = sessions;
 		this.webClient = webClient;

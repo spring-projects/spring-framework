@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.w3c.dom.Element;
 
+import org.springframework.beans.MutablePropertyValues;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.beans.factory.config.RuntimeBeanReference;
@@ -165,22 +166,29 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		RootBeanDefinition resourceHandlerDef = new RootBeanDefinition(ResourceHttpRequestHandler.class);
 		resourceHandlerDef.setSource(source);
 		resourceHandlerDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-		resourceHandlerDef.getPropertyValues().add("locations", locations);
+
+		MutablePropertyValues values = resourceHandlerDef.getPropertyValues();
+		values.add("locations", locations);
 
 		String cacheSeconds = element.getAttribute("cache-period");
 		if (StringUtils.hasText(cacheSeconds)) {
-			resourceHandlerDef.getPropertyValues().add("cacheSeconds", cacheSeconds);
+			values.add("cacheSeconds", cacheSeconds);
 		}
 
 		Element cacheControlElement = DomUtils.getChildElementByTagName(element, "cache-control");
 		if (cacheControlElement != null) {
 			CacheControl cacheControl = parseCacheControl(cacheControlElement);
-			resourceHandlerDef.getPropertyValues().add("cacheControl", cacheControl);
+			values.add("cacheControl", cacheControl);
 		}
 
 		Element resourceChainElement = DomUtils.getChildElementByTagName(element, "resource-chain");
 		if (resourceChainElement != null) {
 			parseResourceChain(resourceHandlerDef, parserContext, resourceChainElement, source);
+		}
+
+		Object manager = MvcNamespaceUtils.getContentNegotiationManager(parserContext);
+		if (manager != null) {
+			values.add("contentNegotiationManager", manager);
 		}
 
 		String beanName = parserContext.getReaderContext().generateBeanName(resourceHandlerDef);
@@ -241,6 +249,14 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		}
 		if (element.hasAttribute("s-maxage")) {
 			cacheControl = cacheControl.sMaxAge(Long.parseLong(element.getAttribute("s-maxage")), TimeUnit.SECONDS);
+		}
+		if (element.hasAttribute("stale-while-revalidate")) {
+			cacheControl = cacheControl.staleWhileRevalidate(
+					Long.parseLong(element.getAttribute("stale-while-revalidate")), TimeUnit.SECONDS);
+		}
+		if (element.hasAttribute("stale-if-error")) {
+			cacheControl = cacheControl.staleIfError(
+					Long.parseLong(element.getAttribute("stale-if-error")), TimeUnit.SECONDS);
 		}
 		return cacheControl;
 	}

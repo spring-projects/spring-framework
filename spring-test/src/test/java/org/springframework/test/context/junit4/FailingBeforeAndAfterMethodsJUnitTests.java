@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ public class FailingBeforeAndAfterMethodsJUnitTests {
 	}
 
 	protected Class<? extends Runner> getRunnerClass() {
-		return SpringJUnit4ClassRunner.class;
+		return SpringRunner.class;
 	}
 
 	@Test
@@ -133,7 +133,7 @@ public class FailingBeforeAndAfterMethodsJUnitTests {
 		}
 	}
 
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	@TestExecutionListeners({})
 	public static abstract class BaseTestCase {
 
@@ -168,7 +168,7 @@ public class FailingBeforeAndAfterMethodsJUnitTests {
 	}
 
 	@Ignore("TestCase classes are run manually by the enclosing test class")
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	@ContextConfiguration("FailingBeforeAndAfterMethodsTests-context.xml")
 	@Transactional
 	public static class FailingBeforeTransactionTestCase {
@@ -184,7 +184,7 @@ public class FailingBeforeAndAfterMethodsJUnitTests {
 	}
 
 	@Ignore("TestCase classes are run manually by the enclosing test class")
-	@RunWith(SpringJUnit4ClassRunner.class)
+	@RunWith(SpringRunner.class)
 	@ContextConfiguration("FailingBeforeAndAfterMethodsTests-context.xml")
 	@Transactional
 	public static class FailingAfterTransactionTestCase {

@@ -79,10 +79,12 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 
 			assertEquals("hello world", value);
 			assertEquals(String.class, value.getClass());
-		} catch (EvaluationException ee) {
+		}
+		catch (EvaluationException ee) {
 			ee.printStackTrace();
 			fail("Unexpected Exception: " + ee.getMessage());
-		} catch (ParseException pe) {
+		}
+		catch (ParseException pe) {
 			pe.printStackTrace();
 			fail("Unexpected Exception: " + pe.getMessage());
 		}
@@ -186,10 +188,12 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 			Object value = expr.getValue(ctx);
 			assertEquals("hellohello", value);
 
-		} catch (EvaluationException ee) {
+		}
+		catch (EvaluationException ee) {
 			ee.printStackTrace();
 			fail("Unexpected Exception: " + ee.getMessage());
-		} catch (ParseException pe) {
+		}
+		catch (ParseException pe) {
 			pe.printStackTrace();
 			fail("Unexpected Exception: " + pe.getMessage());
 		}
@@ -213,7 +217,8 @@ public class ExpressionLanguageScenarioTests extends AbstractExpressionTests {
 		try {
 			expr.setValue(ctx, Color.blue);
 			fail("Should not be allowed to set oranges to be blue !");
-		} catch (SpelEvaluationException ee) {
+		}
+		catch (SpelEvaluationException ee) {
 			assertEquals(ee.getMessageCode(), SpelMessage.PROPERTY_OR_FIELD_NOT_WRITABLE_ON_NULL);
 		}
 	}

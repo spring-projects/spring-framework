@@ -102,7 +102,9 @@ import org.springframework.util.StringUtils;
  * @see #setJtaTransactionManager
  * @see org.hibernate.SessionFactory#getCurrentSession()
  * @see HibernateTransactionManager
+ * @deprecated as of Spring 4.3, in favor of Hibernate 4.x/5.x
  */
+@Deprecated
 public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implements BeanClassLoaderAware {
 
 	private static final ThreadLocal<DataSource> configTimeDataSourceHolder =
@@ -871,7 +873,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 				new HibernateCallback<Object>() {
 					@Override
 					public Object doInHibernate(Session session) throws HibernateException, SQLException {
-						@SuppressWarnings("deprecation")
 						Connection con = session.connection();
 						DatabaseMetadata metadata = new DatabaseMetadata(con, dialect);
 						String[] sql = getConfiguration().generateSchemaUpdateScript(dialect, metadata);
@@ -917,7 +918,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 				new HibernateCallback<Object>() {
 					@Override
 					public Object doInHibernate(Session session) throws HibernateException, SQLException {
-						@SuppressWarnings("deprecation")
 						Connection con = session.connection();
 						DatabaseMetadata metadata = new DatabaseMetadata(con, dialect, false);
 						getConfiguration().validateSchema(dialect, metadata);
@@ -955,7 +955,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 			new HibernateCallback<Object>() {
 				@Override
 				public Object doInHibernate(Session session) throws HibernateException, SQLException {
-					@SuppressWarnings("deprecation")
 					Connection con = session.connection();
 					String[] sql = getConfiguration().generateDropSchemaScript(dialect);
 					executeSchemaScript(con, sql);
@@ -993,7 +992,6 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 				new HibernateCallback<Object>() {
 					@Override
 					public Object doInHibernate(Session session) throws HibernateException, SQLException {
-						@SuppressWarnings("deprecation")
 						Connection con = session.connection();
 						String[] sql = getConfiguration().generateSchemaCreationScript(dialect);
 						executeSchemaScript(con, sql);

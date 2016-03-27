@@ -60,7 +60,7 @@ import org.springframework.context.access.ContextSingletonBeanFactoryLocator;
  *
  * <p><b>WARNING: Do not define the same bean as Spring-managed bean and as
  * EJB3 session bean in the same deployment unit.</b> In particular, be
- * careful when using the {@code &lt;context:component-scan&gt;} feature
+ * careful when using the {@code <context:component-scan>} feature
  * in combination with the deployment of Spring-based EJB3 session beans:
  * Make sure that the EJB3 session beans are <i>not</i> autodetected as
  * Spring-managed beans as well, using appropriate package restrictions.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -171,7 +171,7 @@ public class ClassLevelDirtiesContextTestNGTests {
 	@TestExecutionListeners(listeners = { DependencyInjectionTestExecutionListener.class,
 		DirtiesContextTestExecutionListener.class }, inheritListeners = false)
 	@ContextConfiguration
-	public static abstract class BaseTestCase extends AbstractTestNGSpringContextTests {
+	static abstract class BaseTestCase extends AbstractTestNGSpringContextTests {
 
 		@Configuration
 		static class Config {
@@ -189,75 +189,75 @@ public class ClassLevelDirtiesContextTestNGTests {
 		}
 	}
 
-	public static final class CleanTestCase extends BaseTestCase {
+	static final class CleanTestCase extends BaseTestCase {
 
 		@org.testng.annotations.Test
-		public void verifyContextWasAutowired() {
+		void verifyContextWasAutowired() {
 			assertApplicationContextWasAutowired();
 		}
 
 	}
 
 	@DirtiesContext
-	public static class ClassLevelDirtiesContextWithCleanMethodsAndDefaultModeTestCase extends BaseTestCase {
+	static class ClassLevelDirtiesContextWithCleanMethodsAndDefaultModeTestCase extends BaseTestCase {
 
 		@org.testng.annotations.Test
-		public void verifyContextWasAutowired() {
+		void verifyContextWasAutowired() {
 			assertApplicationContextWasAutowired();
 		}
 	}
 
-	public static class InheritedClassLevelDirtiesContextWithCleanMethodsAndDefaultModeTestCase extends
+	static class InheritedClassLevelDirtiesContextWithCleanMethodsAndDefaultModeTestCase extends
 			ClassLevelDirtiesContextWithCleanMethodsAndDefaultModeTestCase {
 	}
 
 	@DirtiesContext(classMode = ClassMode.AFTER_CLASS)
-	public static class ClassLevelDirtiesContextWithCleanMethodsAndAfterClassModeTestCase extends BaseTestCase {
+	static class ClassLevelDirtiesContextWithCleanMethodsAndAfterClassModeTestCase extends BaseTestCase {
 
 		@org.testng.annotations.Test
-		public void verifyContextWasAutowired() {
+		void verifyContextWasAutowired() {
 			assertApplicationContextWasAutowired();
 		}
 	}
 
-	public static class InheritedClassLevelDirtiesContextWithCleanMethodsAndAfterClassModeTestCase extends
+	static class InheritedClassLevelDirtiesContextWithCleanMethodsAndAfterClassModeTestCase extends
 			ClassLevelDirtiesContextWithCleanMethodsAndAfterClassModeTestCase {
 	}
 
 	@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
-	public static class ClassLevelDirtiesContextWithAfterEachTestMethodModeTestCase extends BaseTestCase {
+	static class ClassLevelDirtiesContextWithAfterEachTestMethodModeTestCase extends BaseTestCase {
 
 		@org.testng.annotations.Test
-		public void verifyContextWasAutowired1() {
+		void verifyContextWasAutowired1() {
 			assertApplicationContextWasAutowired();
 		}
 
 		@org.testng.annotations.Test
-		public void verifyContextWasAutowired2() {
+		void verifyContextWasAutowired2() {
 			assertApplicationContextWasAutowired();
 		}
 
 		@org.testng.annotations.Test
-		public void verifyContextWasAutowired3() {
+		void verifyContextWasAutowired3() {
 			assertApplicationContextWasAutowired();
 		}
 	}
 
-	public static class InheritedClassLevelDirtiesContextWithAfterEachTestMethodModeTestCase extends
+	static class InheritedClassLevelDirtiesContextWithAfterEachTestMethodModeTestCase extends
 			ClassLevelDirtiesContextWithAfterEachTestMethodModeTestCase {
 	}
 
 	@DirtiesContext
-	public static class ClassLevelDirtiesContextWithDirtyMethodsTestCase extends BaseTestCase {
+	static class ClassLevelDirtiesContextWithDirtyMethodsTestCase extends BaseTestCase {
 
 		@org.testng.annotations.Test
 		@DirtiesContext
-		public void dirtyContext() {
+		void dirtyContext() {
 			assertApplicationContextWasAutowired();
 		}
 	}
 
-	public static class InheritedClassLevelDirtiesContextWithDirtyMethodsTestCase extends
+	static class InheritedClassLevelDirtiesContextWithDirtyMethodsTestCase extends
 			ClassLevelDirtiesContextWithDirtyMethodsTestCase {
 	}
 

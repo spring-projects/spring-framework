@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,18 @@
  */
 package org.springframework.test.web.client.match;
 
+import java.nio.charset.Charset;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.client.MockClientHttpRequest;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import static org.hamcrest.Matchers.*;
+
 
 /**
  * Unit tests for {@link ContentRequestMatchers}.
@@ -32,10 +37,12 @@ public class ContentRequestMatchersTests {
 
 	private MockClientHttpRequest request;
 
+
 	@Before
 	public void setUp() {
 		this.request = new MockClientHttpRequest();
 	}
+
 
 	@Test
 	public void testContentType() throws Exception {
@@ -86,6 +93,22 @@ public class ContentRequestMatchersTests {
 		this.request.getBody().write("test".getBytes());
 
 		MockRestRequestMatchers.content().bytes("Test".getBytes()).match(this.request);
+	}
+
+	@Test
+	public void testFormData() throws Exception {
+		String contentType = "application/x-www-form-urlencoded;charset=UTF-8";
+		String body = "name+1=value+1&name+2=value+A&name+2=value+B&name+3";
+
+		this.request.getHeaders().setContentType(MediaType.parseMediaType(contentType));
+		this.request.getBody().write(body.getBytes(Charset.forName("UTF-8")));
+
+		MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
+		map.add("name 1", "value 1");
+		map.add("name 2", "value A");
+		map.add("name 2", "value B");
+		map.add("name 3", null);
+		MockRestRequestMatchers.content().formData(map).match(this.request);
 	}
 
 	@Test

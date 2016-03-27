@@ -68,7 +68,8 @@ public class EnableTransactionManagementIntegrationTests {
 		try {
 			assertTxProxying(ctx);
 			fail("expected exception");
-		} catch (AssertionError ex) {
+		}
+		catch (AssertionError ex) {
 			assertThat(ex.getMessage(), equalTo("FooRepository is not a TX proxy"));
 		}
 	}

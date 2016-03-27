@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,14 +20,15 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import reactor.fn.Consumer;
+import reactor.rx.Promise;
+
 import org.springframework.util.Assert;
 import org.springframework.util.concurrent.FailureCallback;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.ListenableFutureCallback;
 import org.springframework.util.concurrent.ListenableFutureCallbackRegistry;
 import org.springframework.util.concurrent.SuccessCallback;
-import reactor.fn.Consumer;
-import reactor.rx.Promise;
 
 /**
  * Adapts a reactor {@link Promise} to {@link ListenableFuture} optionally converting
@@ -52,24 +53,26 @@ abstract class AbstractPromiseToListenableFutureAdapter<S, T> implements Listena
 		this.promise.onSuccess(new Consumer<S>() {
 			@Override
 			public void accept(S result) {
+				T adapted;
 				try {
-					registry.success(adapt(result));
+					adapted = adapt(result);
 				}
-				catch (Throwable t) {
-					registry.failure(t);
+				catch (Throwable ex) {
+					registry.failure(ex);
+					return;
 				}
+				registry.success(adapted);
 			}
 		});
 
 		this.promise.onError(new Consumer<Throwable>() {
 			@Override
-			public void accept(Throwable t) {
-				registry.failure(t);
+			public void accept(Throwable ex) {
+				registry.failure(ex);
 			}
 		});
 	}
 
-	protected abstract T adapt(S result);
 
 	@Override
 	public T get() throws InterruptedException {
@@ -111,5 +114,8 @@ abstract class AbstractPromiseToListenableFutureAdapter<S, T> implements Listena
 		this.registry.addSuccessCallback(successCallback);
 		this.registry.addFailureCallback(failureCallback);
 	}
+
+
+	protected abstract T adapt(S result);
 
 }

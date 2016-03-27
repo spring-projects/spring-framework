@@ -221,14 +221,15 @@ public class ReflectiveMethodResolver implements MethodResolver {
 	private Collection<Method> getMethods(Class<?> type, Object targetObject) {
 		if (targetObject instanceof Class) {
 			Set<Method> result = new LinkedHashSet<Method>();
-			result.addAll(Arrays.asList(getMethods(targetObject.getClass())));
-			// Add these also so that static result are invocable on the type: e.g. Float.valueOf(..)
+			// Add these so that static methods are invocable on the type: e.g. Float.valueOf(..)
 			Method[] methods = getMethods(type);
 			for (Method method : methods) {
 				if (Modifier.isStatic(method.getModifiers())) {
 					result.add(method);
 				}
 			}
+			// Also expose methods from java.lang.Class itself
+			result.addAll(Arrays.asList(getMethods(Class.class)));
 			return result;
 		}
 		else {

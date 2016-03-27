@@ -38,6 +38,7 @@ import java.util.TimeZone;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -470,7 +471,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Returns the value of the {@code Access-Control-Allow-Methods} response header.
+	 * Return the value of the {@code Access-Control-Allow-Methods} response header.
 	 */
 	public List<HttpMethod> getAccessControlAllowMethods() {
 		List<HttpMethod> result = new ArrayList<HttpMethod>();
@@ -478,7 +479,10 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		if (value != null) {
 			String[] tokens = value.split(",\\s*");
 			for (String token : tokens) {
-				result.add(HttpMethod.valueOf(token));
+				HttpMethod resolved = HttpMethod.resolve(token);
+				if (resolved != null) {
+					result.add(resolved);
+				}
 			}
 		}
 		return result;
@@ -492,7 +496,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Returns the value of the {@code Access-Control-Allow-Origin} response header.
+	 * Return the value of the {@code Access-Control-Allow-Origin} response header.
 	 */
 	public String getAccessControlAllowOrigin() {
 		return getFirst(ACCESS_CONTROL_ALLOW_ORIGIN);
@@ -550,11 +554,10 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Returns the value of the {@code Access-Control-Request-Method} request header.
+	 * Return the value of the {@code Access-Control-Request-Method} request header.
 	 */
 	public HttpMethod getAccessControlRequestMethod() {
-		String value = getFirst(ACCESS_CONTROL_REQUEST_METHOD);
-		return (value != null ? HttpMethod.valueOf(value) : null);
+		return HttpMethod.resolve(getFirst(ACCESS_CONTROL_REQUEST_METHOD));
 	}
 
 	/**
@@ -615,12 +618,15 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	public Set<HttpMethod> getAllow() {
 		String value = getFirst(ALLOW);
 		if (!StringUtils.isEmpty(value)) {
-			List<HttpMethod> allowedMethod = new ArrayList<HttpMethod>(5);
+			List<HttpMethod> result = new LinkedList<HttpMethod>();
 			String[] tokens = value.split(",\\s*");
 			for (String token : tokens) {
-				allowedMethod.add(HttpMethod.valueOf(token));
+				HttpMethod resolved = HttpMethod.resolve(token);
+				if (resolved != null) {
+					result.add(resolved);
+				}
 			}
-			return EnumSet.copyOf(allowedMethod);
+			return EnumSet.copyOf(result);
 		}
 		else {
 			return EnumSet.noneOf(HttpMethod.class);
@@ -635,7 +641,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Returns the value of the {@code Cache-Control} header.
+	 * Return the value of the {@code Cache-Control} header.
 	 */
 	public String getCacheControl() {
 		return getFirst(CACHE_CONTROL);
@@ -656,7 +662,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Returns the value of the {@code Connection} header.
+	 * Return the value of the {@code Connection} header.
 	 */
 	public List<String> getConnection() {
 		return getFirstValueAsList(CONNECTION);
@@ -920,7 +926,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Returns the value of the {@code Range} header.
+	 * Return the value of the {@code Range} header.
 	 * <p>Returns an empty list when the range is unknown.
 	 */
 	public List<HttpRange> getRange() {
@@ -936,10 +942,28 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
-	 * Returns the value of the {@code Upgrade} header.
+	 * Return the value of the {@code Upgrade} header.
 	 */
 	public String getUpgrade() {
 		return getFirst(UPGRADE);
+	}
+
+	/**
+	 * Set the request header names (e.g. "Accept-Language") for which the
+	 * response is subject to content negotiation and variances based on the
+	 * value of those request headers.
+	 * @param requestHeaders the request header names
+	 * @since 4.3
+	 */
+	public void setVary(List<String> requestHeaders) {
+		set(VARY, toCommaDelimitedString(requestHeaders));
+	}
+
+	/**
+	 * Return the request header names subject to content negotiation.
+	 */
+	public List<String> getVary() {
+		return getFirstValueAsList(VARY);
 	}
 
 	/**

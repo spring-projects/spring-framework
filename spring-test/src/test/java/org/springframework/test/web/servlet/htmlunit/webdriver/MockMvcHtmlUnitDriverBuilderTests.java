@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not
  * use this file except in compliance with the License. You may obtain a copy of
@@ -17,32 +17,35 @@
 package org.springframework.test.web.servlet.htmlunit.webdriver;
 
 import java.io.IOException;
-
 import javax.servlet.http.HttpServletRequest;
 
+import com.gargoylesoftware.htmlunit.util.Cookie;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.tests.Assume;
 import org.springframework.tests.TestGroup;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
-import static org.springframework.test.web.servlet.htmlunit.webdriver.MockMvcHtmlUnitDriverBuilder.*;
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Integration tests for {@link MockMvcHtmlUnitDriverBuilder}.
@@ -51,7 +54,7 @@ import static org.springframework.test.web.servlet.htmlunit.webdriver.MockMvcHtm
  * @author Sam Brannen
  * @since 4.2
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith(SpringRunner.class)
 @ContextConfiguration
 @WebAppConfiguration
 public class MockMvcHtmlUnitDriverBuilderTests {
@@ -65,57 +68,71 @@ public class MockMvcHtmlUnitDriverBuilderTests {
 
 	private HtmlUnitDriver driver;
 
+
 	@Before
 	public void setup() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 	}
 
+
 	@Test(expected = IllegalArgumentException.class)
 	public void webAppContextSetupNull() {
-		webAppContextSetup(null);
+		MockMvcHtmlUnitDriverBuilder.webAppContextSetup(null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void mockMvcSetupNull() {
-		mockMvcSetup(null);
+		MockMvcHtmlUnitDriverBuilder.mockMvcSetup(null);
 	}
 
 	@Test
 	public void mockMvcSetupWithCustomDriverDelegate() throws Exception {
-		WebConnectionHtmlUnitDriver preconfiguredDriver = new WebConnectionHtmlUnitDriver();
-		this.driver = mockMvcSetup(this.mockMvc).withDelegate(preconfiguredDriver).build();
+		WebConnectionHtmlUnitDriver otherDriver = new WebConnectionHtmlUnitDriver();
+		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc).withDelegate(otherDriver).build();
 
-		assertMvcProcessed("http://localhost/test");
-		Assume.group(TestGroup.PERFORMANCE, () -> assertDelegateProcessed("http://example.com/"));
+		assertMockMvcUsed("http://localhost/test");
+		Assume.group(TestGroup.PERFORMANCE, () -> assertMockMvcNotUsed("http://example.com/"));
 	}
 
 	@Test
 	public void mockMvcSetupWithDefaultDriverDelegate() throws Exception {
-		this.driver = mockMvcSetup(this.mockMvc).build();
+		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc).build();
 
-		assertMvcProcessed("http://localhost/test");
-		Assume.group(TestGroup.PERFORMANCE, () -> assertDelegateProcessed("http://example.com/"));
+		assertMockMvcUsed("http://localhost/test");
+		Assume.group(TestGroup.PERFORMANCE, () -> assertMockMvcNotUsed("http://example.com/"));
 	}
 
 	@Test
 	public void javaScriptEnabledByDefault() {
-		this.driver = mockMvcSetup(this.mockMvc).build();
-
+		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc).build();
 		assertTrue(this.driver.isJavascriptEnabled());
 	}
 
 	@Test
 	public void javaScriptDisabled() {
-		this.driver = mockMvcSetup(this.mockMvc).javascriptEnabled(false).build();
-
+		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc).javascriptEnabled(false).build();
 		assertFalse(this.driver.isJavascriptEnabled());
 	}
 
-	private void assertMvcProcessed(String url) throws Exception {
+	@Test // SPR-14066
+	public void cookieManagerShared() throws Exception {
+		WebConnectionHtmlUnitDriver otherDriver = new WebConnectionHtmlUnitDriver();
+		this.mockMvc = MockMvcBuilders.standaloneSetup(new CookieController()).build();
+		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc)
+				.withDelegate(otherDriver).build();
+
+		assertThat(get("http://localhost/"), equalTo(""));
+		Cookie cookie = new Cookie("localhost", "cookie", "cookieManagerShared");
+		otherDriver.getWebClient().getCookieManager().addCookie(cookie);
+		assertThat(get("http://localhost/"), equalTo("cookieManagerShared"));
+	}
+
+
+	private void assertMockMvcUsed(String url) throws Exception {
 		assertThat(get(url), containsString(EXPECTED_BODY));
 	}
 
-	private void assertDelegateProcessed(String url) throws Exception {
+	private void assertMockMvcNotUsed(String url) throws Exception {
 		assertThat(get(url), not(containsString(EXPECTED_BODY)));
 	}
 
@@ -136,6 +153,15 @@ public class MockMvcHtmlUnitDriverBuilderTests {
 			public String contextPath(HttpServletRequest request) {
 				return EXPECTED_BODY;
 			}
+		}
+	}
+
+	@RestController
+	static class CookieController {
+
+		@RequestMapping(path = "/", produces = "text/plain")
+		String cookie(@CookieValue("cookie") String cookie) {
+			return cookie;
 		}
 	}
 

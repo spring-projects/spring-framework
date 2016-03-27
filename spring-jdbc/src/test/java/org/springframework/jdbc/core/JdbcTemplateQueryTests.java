@@ -150,7 +150,8 @@ public class JdbcTemplateQueryTests {
 		this.thrown.expect(IncorrectResultSizeDataAccessException.class);
 		try {
 			this.template.queryForObject(sql, String.class);
-		} finally {
+		}
+		finally {
 			verify(this.resultSet).close();
 			verify(this.statement).close();
 		}

@@ -4,7 +4,7 @@
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
 		http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket.xsd">
 
-	<websocket:message-broker application-destination-prefix="/app" user-destination-prefix="/personal">
+	<websocket:message-broker application-destination-prefix="/app" user-destination-prefix="/personal" validator="myValidator">
 		<websocket:stomp-endpoint path="/foo,/bar">
 			<websocket:handshake-handler ref="myHandler"/>
 		</websocket:stomp-endpoint>
@@ -30,5 +30,7 @@
 	<bean id="myHandler" class="org.springframework.web.socket.config.TestHandshakeHandler"/>
 
 	<bean id="myInterceptor" class="org.springframework.web.socket.config.TestChannelInterceptor"/>
+
+	<bean id="myValidator" class="org.springframework.web.socket.config.TestValidator"/>
 
 </beans>

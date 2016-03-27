@@ -79,7 +79,7 @@ public class MockFilterChainTests {
 			chain.doFilter(this.request, this.response);
 			fail("Expected Exception");
 		}
-		catch(IllegalStateException ex) {
+		catch (IllegalStateException ex) {
 			assertEquals("This FilterChain has already been called!", ex.getMessage());
 		}
 	}
@@ -94,7 +94,7 @@ public class MockFilterChainTests {
 			chain.doFilter(this.request, this.response);
 			fail("Expected Exception");
 		}
-		catch(IllegalStateException ex) {
+		catch (IllegalStateException ex) {
 			assertEquals("This FilterChain has already been called!", ex.getMessage());
 		}
 	}
@@ -118,7 +118,7 @@ public class MockFilterChainTests {
 			chain.doFilter(this.request, this.response);
 			fail("Expected Exception");
 		}
-		catch(IllegalStateException ex) {
+		catch (IllegalStateException ex) {
 			assertEquals("This FilterChain has already been called!", ex.getMessage());
 		}
 	}

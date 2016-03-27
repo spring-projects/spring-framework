@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -108,6 +108,9 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 
 	private static final boolean jackson2Present = ClassUtils.isPresent(
 			"com.fasterxml.jackson.databind.ObjectMapper", MessageBrokerBeanDefinitionParser.class.getClassLoader());
+
+	private static final boolean javaxValidationPresent =
+			ClassUtils.isPresent("javax.validation.Validator", MessageBrokerBeanDefinitionParser.class.getClassLoader());
 
 
 	@Override
@@ -516,6 +519,11 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 			beanDef.getPropertyValues().add("pathMatcher", new RuntimeBeanReference(pathMatcherRef));
 		}
 
+		RuntimeBeanReference validatorRef = getValidator(messageBrokerElement, source, context);
+		if (validatorRef != null) {
+			beanDef.getPropertyValues().add("validator", validatorRef);
+		}
+
 		Element resolversElement = DomUtils.getChildElementByTagName(messageBrokerElement, "argument-resolvers");
 		if (resolversElement != null) {
 			values.add("customArgumentResolvers", extractBeanSubElements(resolversElement, context));
@@ -527,6 +535,24 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		}
 
 		registerBeanDef(beanDef, context, source);
+	}
+
+	private RuntimeBeanReference getValidator(Element messageBrokerElement, Object source, ParserContext parserContext) {
+		if (messageBrokerElement.hasAttribute("validator")) {
+			return new RuntimeBeanReference(messageBrokerElement.getAttribute("validator"));
+		}
+		else if (javaxValidationPresent) {
+			RootBeanDefinition validatorDef = new RootBeanDefinition(
+					"org.springframework.validation.beanvalidation.OptionalValidatorFactoryBean");
+			validatorDef.setSource(source);
+			validatorDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+			String validatorName = parserContext.getReaderContext().registerWithGeneratedName(validatorDef);
+			parserContext.registerComponent(new BeanComponentDefinition(validatorDef, validatorName));
+			return new RuntimeBeanReference(validatorName);
+		}
+		else {
+			return null;
+		}
 	}
 
 	private ManagedList<Object> extractBeanSubElements(Element parentElement, ParserContext parserContext) {
@@ -546,6 +572,10 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		beanDef.getConstructorArgumentValues().addIndexedArgumentValue(0, userRegistry);
 		if (brokerElem.hasAttribute("user-destination-prefix")) {
 			beanDef.getPropertyValues().add("userDestinationPrefix", brokerElem.getAttribute("user-destination-prefix"));
+		}
+		if (brokerElem.hasAttribute("path-matcher")) {
+			String pathMatcherRef = brokerElem.getAttribute("path-matcher");
+			beanDef.getPropertyValues().add("pathMatcher", new RuntimeBeanReference(pathMatcherRef));
 		}
 		return new RuntimeBeanReference(registerBeanDef(beanDef, context, source));
 	}

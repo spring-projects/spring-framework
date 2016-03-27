@@ -292,13 +292,14 @@ public class DataSourceJtaTransactionTests {
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 		verify(userTransaction, times(6)).begin();
 		verify(transactionManager, times(5)).resume(transaction);
-		if(rollback) {
+		if (rollback) {
 			verify(userTransaction, times(5)).commit();
 			verify(userTransaction).rollback();
-		} else {
+		}
+		else {
 			verify(userTransaction, times(6)).commit();
 		}
-		if(accessAfterResume && !openOuterConnection) {
+		if (accessAfterResume && !openOuterConnection) {
 			verify(connection, times(7)).close();
 		}
 		else {
@@ -528,7 +529,7 @@ public class DataSourceJtaTransactionTests {
 		assertTrue("JTA synchronizations not active", !TransactionSynchronizationManager.isSynchronizationActive());
 
 		verify(userTransaction).begin();
-		if(suspendException) {
+		if (suspendException) {
 			verify(userTransaction).rollback();
 		}
 
