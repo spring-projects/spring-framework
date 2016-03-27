@@ -15,23 +15,8 @@
  */
 package org.springframework.test.web.servlet.request;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.charset.Charset;
-import java.security.Principal;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import javax.servlet.ServletContext;
-import javax.servlet.http.Cookie;
-
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -45,10 +30,21 @@ import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import javax.servlet.ServletContext;
+import javax.servlet.http.Cookie;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.security.Principal;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for building a {@link MockHttpServletRequest} with
@@ -201,6 +197,14 @@ public class MockHttpServletRequestBuilderTests {
 		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
 
 		assertEquals("/foo", request.getRequestURI());
+	}
+
+	@Test
+	public void requestParameterUriString() throws Exception {
+		this.builder.param("foo", "bar", "baz");
+
+		MockHttpServletRequest request = this.builder.buildRequest(this.servletContext);
+		assertEquals(request.getQueryString(), "foo&bar&baz");
 	}
 
 	@Test
