@@ -81,13 +81,12 @@ abstract class ContextLoaderUtils {
 	 * (must not be {@code null})
 	 * @return the list of lists of configuration attributes for the specified class;
 	 * never {@code null}
-	 * @throws IllegalArgumentException if the supplied class is {@code null}; if
+	 * @throws IllegalArgumentException if the supplied class is {@code null}; or if
 	 * neither {@code @ContextConfiguration} nor {@code @ContextHierarchy} is
-	 * <em>present</em> on the supplied class; or if a test class or composed annotation
+	 * <em>present</em> on the supplied class
+	 * @throws IllegalStateException if a test class or composed annotation
 	 * in the class hierarchy declares both {@code @ContextConfiguration} and
 	 * {@code @ContextHierarchy} as top-level annotations.
-	 * @throws IllegalStateException if no class in the class hierarchy declares
-	 * {@code @ContextHierarchy}.
 	 * @since 3.2.2
 	 * @see #buildContextHierarchyMap(Class)
 	 * @see #resolveContextConfigurationAttributes(Class)

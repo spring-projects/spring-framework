@@ -31,8 +31,8 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.BeanInstantiationException;
 import org.springframework.beans.BeanUtils;
-import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.io.support.SpringFactoriesLoader;
 import org.springframework.test.context.BootstrapContext;
 import org.springframework.test.context.CacheAwareContextLoaderDelegate;
@@ -278,7 +278,7 @@ public abstract class AbstractTestContextBootstrapper implements TestContextBoot
 			return buildDefaultMergedContextConfiguration(testClass, cacheAwareContextLoaderDelegate);
 		}
 
-		if (AnnotatedElementUtils.findMergedAnnotation(testClass, ContextHierarchy.class) != null) {
+		if (AnnotationUtils.findAnnotation(testClass, ContextHierarchy.class) != null) {
 			Map<String, List<ContextConfigurationAttributes>> hierarchyMap = ContextLoaderUtils.buildContextHierarchyMap(testClass);
 			MergedContextConfiguration parentConfig = null;
 			MergedContextConfiguration mergedConfig = null;
