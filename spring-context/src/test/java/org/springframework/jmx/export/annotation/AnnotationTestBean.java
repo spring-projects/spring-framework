@@ -16,13 +16,7 @@
 
 package org.springframework.jmx.export.annotation;
 
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-
-import org.springframework.core.annotation.AliasFor;
 import org.springframework.jmx.IJmxTestBean;
-import org.springframework.jmx.export.annotation.AnnotationTestBean.MyManagedNotification;
 import org.springframework.jmx.support.MetricType;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +28,7 @@ import org.springframework.stereotype.Service;
 @ManagedResource(objectName = "bean:name=testBean4", description = "My Managed Bean", log = true,
 		logFile = "jmx.log", currencyTimeLimit = 15, persistPolicy = "OnUpdate", persistPeriod = 200,
 		persistLocation = "./foo", persistName = "bar.jmx")
-@MyManagedNotification(notificationTypes = { "type.foo", "type.bar" })
+@ManagedNotification(name = "My Notification", notificationTypes = { "type.foo", "type.bar" })
 public class AnnotationTestBean implements IJmxTestBean {
 
 	private String name;
@@ -121,19 +115,6 @@ public class AnnotationTestBean implements IJmxTestBean {
 	@ManagedMetric
 	public int getCacheEntries() {
 		return 3;
-	}
-
-
-	@ManagedNotification(name = "My Notification", notificationTypes = {})
-	@Retention(RetentionPolicy.RUNTIME)
-	@Inherited
-	public static @interface MyManagedNotification {
-
-		@AliasFor(annotation = ManagedNotification.class)
-		String description() default "";
-
-		@AliasFor(annotation = ManagedNotification.class)
-		String[] notificationTypes();
 	}
 
 }
