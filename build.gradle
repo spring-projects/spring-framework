@@ -993,6 +993,7 @@ project("spring-webmvc-portlet") {
 
 project("spring-test") {
 	description = "Spring TestContext Framework"
+	apply plugin: "groovy"
 
 	dependencies {
 		compile(project(":spring-core"))
@@ -1046,6 +1047,21 @@ project("spring-test") {
 		testCompile("javax.cache:cache-api:1.0.0")
 		testRuntime("org.ehcache:ehcache:${ehcache3Version}")
 		testRuntime("org.terracotta:management-model:2.0.0")
+	}
+
+	// this module's Java and Groovy sources need to be compiled together
+	compileTestJava.enabled=false
+	sourceSets {
+		test {
+			groovy {
+				srcDirs = ["src/test/java", "src/test/groovy"]
+			}
+		}
+	}
+
+	compileGroovy {
+		sourceCompatibility = 1.6
+		targetCompatibility = 1.6
 	}
 
 	task testNG(type: Test) {
