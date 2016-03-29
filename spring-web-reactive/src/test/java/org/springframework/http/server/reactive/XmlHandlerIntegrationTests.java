@@ -19,6 +19,8 @@ package org.springframework.http.server.reactive;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -69,9 +71,7 @@ public class XmlHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTe
 		ResponseEntity<Person> response = restTemplate.exchange(request, Person.class);
 		assertEquals(janeDoe, response.getBody());
 
-		while (!handler.requestComplete) {
-			Thread.sleep(100);
-		}
+		handler.requestComplete.await(10, TimeUnit.SECONDS);
 		if (handler.requestError != null) {
 			throw handler.requestError;
 		}
@@ -81,7 +81,7 @@ public class XmlHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTe
 
 	private static class XmlHandler implements HttpHandler {
 
-		private volatile boolean requestComplete = false;
+		private CountDownLatch requestComplete = new CountDownLatch(1);
 
 		private Person requestPerson;
 
@@ -108,7 +108,7 @@ public class XmlHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTe
 						requestError = ex;
 					}
 					finally {
-						requestComplete = true;
+						requestComplete.countDown();
 					}
 				};
 
