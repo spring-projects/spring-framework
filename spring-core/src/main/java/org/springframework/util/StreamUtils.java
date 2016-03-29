@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -128,6 +128,25 @@ public abstract class StreamUtils {
 			byteCount += bytesRead;
 		}
 		out.flush();
+		return byteCount;
+	}
+
+	/**
+	 * Drain the remaining content of the given InputStream.
+	 * Leaves the InputStream open when done.
+	 * @param in the InputStream to drain
+	 * @return the number of bytes read
+	 * @throws IOException in case of I/O errors
+	 * @since 4.3.0
+	 */
+	public static int drain(InputStream in) throws IOException {
+		Assert.notNull(in, "No InputStream specified");
+		byte[] buffer = new byte[BUFFER_SIZE];
+		int bytesRead = -1;
+		int byteCount = 0;
+		while ((bytesRead = in.read(buffer)) != -1) {
+			byteCount += bytesRead;
+		}
 		return byteCount;
 	}
 
