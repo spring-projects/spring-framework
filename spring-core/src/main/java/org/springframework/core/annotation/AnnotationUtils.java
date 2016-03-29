@@ -1738,7 +1738,7 @@ public abstract class AnnotationUtils {
 		try {
 			Annotation repeatable = getAnnotation(annotationType, REPEATABLE_CLASS_NAME);
 			if (repeatable != null) {
-				Object value = AnnotationUtils.getValue(repeatable);
+				Object value = getValue(repeatable);
 				return (Class<? extends Annotation>) value;
 			}
 		}
