@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,9 @@ import org.springframework.core.annotation.AliasFor;
  * <p>In contrast to the {@link Cacheable @Cacheable} annotation, this annotation
  * does not cause the advised method to be skipped. Rather, it always causes the
  * method to be invoked and its result to be stored in the associated cache.
+ *
+ * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
+ * <em>composed annotations</em> with attribute overrides.
  *
  * @author Costin Leau
  * @author Phillip Webb

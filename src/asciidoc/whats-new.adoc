@@ -641,7 +641,6 @@ public @interface MyTestConfig {
 * `@Scheduled` and `@Schedules` may now be used as _meta-annotations_ to create
   custom _composed annotations_ with attribute overrides.
 
-
 === Data Access Improvements
 
 * `jdbc:initialize-database` and `jdbc:embedded-database` support a configurable
@@ -661,6 +660,8 @@ Spring 4.3 also improves the caching abstraction as follows:
   `@beanName.method()`).
 * `ConcurrentMapCacheManager` and `ConcurrentMapCache` now support the serialization
   of cache entries via a new `storeByValue` attribute.
+* `@Cacheable`, `@CacheEvict`, `@CachePut`, and `@Caching` may now be used as
+  _meta-annotations_ to create custom _composed annotations_ with attribute overrides.
 
 === JMS Improvements
 
@@ -706,4 +707,3 @@ Spring 4.3 also improves the caching abstraction as follows:
 * Client-side REST test support allows indicating how many times a request is expected and
   whether the order of declaration for expectations should be ignored (see <<spring-mvc-test-client>>).
 * Client-side REST Test supports expectations for form data in the request body.
-
