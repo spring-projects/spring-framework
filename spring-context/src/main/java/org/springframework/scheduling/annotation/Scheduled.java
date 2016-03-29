@@ -36,6 +36,9 @@ import java.lang.annotation.Target;
  * done manually or, more conveniently, through the {@code <task:annotation-driven/>}
  * element or @{@link EnableScheduling} annotation.
  *
+ * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
+ * <em>composed annotations</em> with attribute overrides.
+ *
  * @author Mark Fisher
  * @author Dave Syer
  * @author Chris Beams

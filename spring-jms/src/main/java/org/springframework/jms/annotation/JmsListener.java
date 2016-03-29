@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,9 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
  * is not set, a default destination can be provided by adding
  * {@link org.springframework.messaging.handler.annotation.SendTo @SendTo} to the
  * method declaration.
+ *
+ * <p>This annotation may be used as a <em>meta-annotation</em> to create custom
+ * <em>composed annotations</em> with attribute overrides.
  *
  * @author Stephane Nicoll
  * @since 4.1
