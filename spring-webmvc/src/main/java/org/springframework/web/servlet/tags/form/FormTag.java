@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -147,7 +147,9 @@ public class FormTag extends AbstractHtmlElementTag {
 	 * Set the name of the form attribute in the model.
 	 * <p>May be a runtime expression.
 	 * @see #setModelAttribute
+	 * @deprecated as of Spring 4.3, in favor of {@link #setModelAttribute}
 	 */
+	@Deprecated
 	public void setCommandName(String commandName) {
 		this.modelAttribute = commandName;
 	}
@@ -155,7 +157,9 @@ public class FormTag extends AbstractHtmlElementTag {
 	/**
 	 * Get the name of the form attribute in the model.
 	 * @see #getModelAttribute
+	 * @deprecated as of Spring 4.3, in favor of {@link #getModelAttribute}
 	 */
+	@Deprecated
 	protected String getCommandName() {
 		return this.modelAttribute;
 	}
