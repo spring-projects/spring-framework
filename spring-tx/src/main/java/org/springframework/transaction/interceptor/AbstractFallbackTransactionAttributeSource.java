@@ -155,7 +155,7 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 
 		// Second try is the transaction attribute on the target class.
 		txAtt = findTransactionAttribute(specificMethod.getDeclaringClass());
-		if (txAtt != null) {
+		if (txAtt != null && ClassUtils.isUserLevelMethod(method)) {
 			return txAtt;
 		}
 
@@ -166,8 +166,12 @@ public abstract class AbstractFallbackTransactionAttributeSource implements Tran
 				return txAtt;
 			}
 			// Last fallback is the class of the original method.
-			return findTransactionAttribute(method.getDeclaringClass());
+			txAtt = findTransactionAttribute(method.getDeclaringClass());
+			if (txAtt != null && ClassUtils.isUserLevelMethod(method)) {
+				return txAtt;
+			}
 		}
+
 		return null;
 	}
 
