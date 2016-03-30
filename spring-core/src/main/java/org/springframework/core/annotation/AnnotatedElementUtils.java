@@ -966,9 +966,8 @@ public class AnnotatedElementUtils {
 	}
 
 	/**
-	 * This method is invoked by
-	 * {@link #searchWithGetSemantics(AnnotatedElement, Class, String, Processor, Set, int)}
-	 * to perform the actual search within the supplied list of annotations.
+	 * This method is invoked by {@link #searchWithGetSemantics} to perform
+	 * the actual search within the supplied list of annotations.
 	 * <p>This method should be invoked first with locally declared annotations
 	 * and then subsequently with inherited annotations, thereby allowing
 	 * local annotations to take precedence over inherited annotations.
@@ -996,10 +995,9 @@ public class AnnotatedElementUtils {
 		// Search in annotations
 		for (Annotation annotation : annotations) {
 			if (!AnnotationUtils.isInJavaLangAnnotationPackage(annotation)) {
-				if ((annotation.annotationType() == annotationType
-						|| annotation.annotationType().getName().equals(annotationName))
-						|| processor.alwaysProcesses()) {
-
+				if (annotation.annotationType() == annotationType ||
+						annotation.annotationType().getName().equals(annotationName) ||
+						processor.alwaysProcesses()) {
 					T result = processor.process(element, annotation, metaDepth);
 					if (result != null) {
 						if (processor.aggregates() && metaDepth == 0) {
