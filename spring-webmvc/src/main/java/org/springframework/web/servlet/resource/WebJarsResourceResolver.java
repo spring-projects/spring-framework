@@ -17,6 +17,7 @@
 package org.springframework.web.servlet.resource;
 
 import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.webjars.MultipleMatchesException;
@@ -49,8 +50,23 @@ public class WebJarsResourceResolver extends AbstractResourceResolver {
 
 	private final static int WEBJARS_LOCATION_LENGTH = WEBJARS_LOCATION.length();
 
-	private final WebJarAssetLocator webJarAssetLocator = new WebJarAssetLocator();
+	private final WebJarAssetLocator webJarAssetLocator;
 
+	/**
+	 * Create a {@code WebJarsResourceResolver} with a default {@code WebJarAssetLocator} instance.
+	 */
+	public WebJarsResourceResolver() {
+		this(new WebJarAssetLocator());
+	}
+
+	/**
+	 * Create a {@code WebJarsResourceResolver} with a custom {@code WebJarAssetLocator} instance,
+	 * e.g. with a custom index.
+	 * @since 4.3.0
+	 */
+	public WebJarsResourceResolver(WebJarAssetLocator webJarAssetLocator) {
+		this.webJarAssetLocator = webJarAssetLocator;
+	}
 
 	@Override
 	protected Resource resolveResourceInternal(HttpServletRequest request, String requestPath,
