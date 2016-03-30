@@ -84,14 +84,14 @@ public abstract class CachedExpressionEvaluator {
 	}
 
 
-	protected static class ExpressionKey {
+	protected static class ExpressionKey implements Comparable<ExpressionKey> {
 
-		private final AnnotatedElementKey key;
+		private final AnnotatedElementKey element;
 
 		private final String expression;
 
-		protected ExpressionKey(AnnotatedElementKey key, String expression) {
-			this.key = key;
+		protected ExpressionKey(AnnotatedElementKey element, String expression) {
+			this.element = element;
 			this.expression = expression;
 		}
 
@@ -104,13 +104,27 @@ public abstract class CachedExpressionEvaluator {
 				return false;
 			}
 			ExpressionKey otherKey = (ExpressionKey) other;
-			return (this.key.equals(otherKey.key) &&
+			return (this.element.equals(otherKey.element) &&
 					ObjectUtils.nullSafeEquals(this.expression, otherKey.expression));
 		}
 
 		@Override
 		public int hashCode() {
-			return this.key.hashCode() + (this.expression != null ? this.expression.hashCode() * 29 : 0);
+			return this.element.hashCode() + (this.expression != null ? this.expression.hashCode() * 29 : 0);
+		}
+
+		@Override
+		public String toString() {
+			return this.element + (this.expression != null ? " with expression \"" + this.expression : "\"");
+		}
+
+		@Override
+		public int compareTo(ExpressionKey other) {
+			int result = this.element.toString().compareTo(other.element.toString());
+			if (result == 0 && this.expression != null) {
+				result = this.expression.compareTo(other.expression);
+			}
+			return result;
 		}
 	}
 
