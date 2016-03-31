@@ -47,12 +47,8 @@ public class ByteBufferEncoder extends AbstractEncoder<ByteBuffer> {
 	public Flux<DataBuffer> encode(Publisher<? extends ByteBuffer> inputStream,
 			DataBufferAllocator allocator, ResolvableType type, MimeType mimeType,
 			Object... hints) {
-		//noinspection unchecked
-		return Flux.from(inputStream).map(byteBuffer -> {
-			DataBuffer dataBuffer = allocator.allocateBuffer(byteBuffer.remaining());
-			dataBuffer.write(byteBuffer);
-			return dataBuffer;
-		});
+
+		return Flux.from(inputStream).map(allocator::wrap);
 	}
 
 }
