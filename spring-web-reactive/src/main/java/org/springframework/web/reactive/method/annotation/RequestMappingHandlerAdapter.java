@@ -100,7 +100,7 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 		if (ObjectUtils.isEmpty(this.argumentResolvers)) {
 
 			List<Decoder<?>> decoders = Arrays.asList(new ByteBufferDecoder(),
-					new StringDecoder(allocator),
+					new StringDecoder(),
 					new JacksonJsonDecoder(new JsonObjectDecoder()));
 
 			this.argumentResolvers.add(new RequestParamArgumentResolver());

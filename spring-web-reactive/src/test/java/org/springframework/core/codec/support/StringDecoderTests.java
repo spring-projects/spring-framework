@@ -18,9 +18,9 @@ package org.springframework.core.codec.support;
 
 import org.junit.Before;
 import org.junit.Test;
+import reactor.core.converter.RxJava1SingleConverter;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.converter.RxJava1SingleConverter;
 import reactor.core.test.TestSubscriber;
 import rx.Single;
 
@@ -40,7 +40,7 @@ public class StringDecoderTests extends AbstractAllocatingTestCase {
 
 	@Before
 	public void createEncoder() {
-		decoder = new StringDecoder(allocator);
+		decoder = new StringDecoder();
 	}
 
 
@@ -53,29 +53,33 @@ public class StringDecoderTests extends AbstractAllocatingTestCase {
 
 	@Test
 	public void decode() throws InterruptedException {
-		Flux<DataBuffer> source = Flux.just(stringBuffer("foo"), stringBuffer("bar"));
-		Flux<String> output = this.decoder.decode(source, ResolvableType.forClassWithGenerics(Flux.class, String.class), null);
+		Flux<DataBuffer> source =
+				Flux.just(stringBuffer("foo"), stringBuffer("bar"), stringBuffer("baz"));
+		Flux<String> output =
+				this.decoder.decode(source, ResolvableType.forClass(String.class), null);
 		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(output).assertValues("foobar");
+		testSubscriber.bindTo(output).assertValues("foobarbaz");
 	}
 
 	@Test
 	public void decodeDoNotBuffer() throws InterruptedException {
-		StringDecoder decoder = new StringDecoder(allocator, false);
+		StringDecoder decoder = new StringDecoder(false);
 		Flux<DataBuffer> source = Flux.just(stringBuffer("foo"), stringBuffer("bar"));
-		Flux<String> output = decoder.decode(source, ResolvableType.forClassWithGenerics(Flux.class, String.class), null);
+		Flux<String> output =
+				decoder.decode(source, ResolvableType.forClass(String.class), null);
 		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
 		testSubscriber.bindTo(output).assertValues("foo", "bar");
 	}
 
 	@Test
 	public void decodeMono() throws InterruptedException {
-		Flux<DataBuffer> source = Flux.just(stringBuffer("foo"), stringBuffer("bar"));
+		Flux<DataBuffer> source =
+				Flux.just(stringBuffer("foo"), stringBuffer("bar"), stringBuffer("baz"));
 		Mono<String> mono = Mono.from(this.decoder.decode(source,
 				ResolvableType.forClassWithGenerics(Mono.class, String.class),
 				MediaType.TEXT_PLAIN));
 		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(mono).assertValues("foobar");
+		testSubscriber.bindTo(mono).assertValues("foobarbaz");
 	}
 
 	@Test

@@ -88,7 +88,7 @@ public final class WebClient {
 		DataBufferAllocator allocator = new DefaultDataBufferAllocator();
 		this.messageEncoders = Arrays.asList(new ByteBufferEncoder(), new StringEncoder(),
 				new JacksonJsonEncoder());
-		this.messageDecoders = Arrays.asList(new ByteBufferDecoder(), new StringDecoder(allocator),
+		this.messageDecoders = Arrays.asList(new ByteBufferDecoder(), new StringDecoder(),
 				new JacksonJsonDecoder(new JsonObjectDecoder()));
 	}
 

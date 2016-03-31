@@ -20,13 +20,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
 import reactor.core.publisher.Flux;
-import reactor.core.subscriber.SubscriberBarrier;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.util.MimeType;
 
 /**
@@ -40,15 +37,14 @@ import org.springframework.util.MimeType;
  *
  * @author Sebastien Deleuze
  * @author Brian Clozel
+ * @author Arjen Poutsma
  * @see StringEncoder
  */
-public class StringDecoder extends AbstractRawByteStreamDecoder<String> {
+public class StringDecoder extends AbstractDecoder<String> {
 
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-	public final boolean reduceToSingleBuffer;
-
-	private final DataBufferAllocator allocator;
+	private final boolean reduceToSingleBuffer;
 
 	/**
 	 * Create a {@code StringDecoder} that decodes a bytes stream to a String stream
@@ -56,8 +52,8 @@ public class StringDecoder extends AbstractRawByteStreamDecoder<String> {
 	 * <p>By default, this decoder will buffer bytes and
 	 * emit a single String as a result.
 	 */
-	public StringDecoder(DataBufferAllocator allocator) {
-		this(allocator, true);
+	public StringDecoder() {
+		this(true);
 	}
 
 	/**
@@ -66,45 +62,39 @@ public class StringDecoder extends AbstractRawByteStreamDecoder<String> {
 	 * @param reduceToSingleBuffer whether this decoder should buffer all received items
 	 * and decode a single consolidated String or re-emit items as they are provided
 	 */
-	public StringDecoder(DataBufferAllocator allocator, boolean reduceToSingleBuffer) {
-		super(allocator, new MimeType("text", "plain", DEFAULT_CHARSET));
+	public StringDecoder(boolean reduceToSingleBuffer) {
+		super(new MimeType("text", "plain", DEFAULT_CHARSET));
 		this.reduceToSingleBuffer = reduceToSingleBuffer;
-		this.allocator = allocator;
 	}
 
 	@Override
 	public boolean canDecode(ResolvableType type, MimeType mimeType, Object... hints) {
-		return super.canDecode(type, mimeType, hints)
-				&& String.class.isAssignableFrom(type.getRawClass());
+		return super.canDecode(type, mimeType, hints) &&
+				String.class.equals(type.getRawClass());
 	}
 
 	@Override
-	public SubscriberBarrier<DataBuffer, DataBuffer> subscriberBarrier(
-			Subscriber<? super DataBuffer> subscriber) {
-		if (reduceToSingleBuffer) {
-			return new ReduceSingleByteStreamBarrier(subscriber, allocator);
+	public Flux<String> decode(Publisher<DataBuffer> inputStream, ResolvableType type,
+			MimeType mimeType, Object... hints) {
+		Flux<DataBuffer> inputFlux = Flux.from(inputStream);
+		if (this.reduceToSingleBuffer) {
+			inputFlux = Flux.from(inputFlux.reduce(DataBuffer::write));
 		}
-		else {
-			return new SubscriberBarrier<DataBuffer, DataBuffer>(subscriber);
-		}
-
-	}
-
-	@Override
-	public Flux<String> decodeInternal(Publisher<DataBuffer> inputStream,
-			ResolvableType type, MimeType mimeType, Object... hints) {
-		Charset charset;
-		if (mimeType != null && mimeType.getCharSet() != null) {
-			charset = mimeType.getCharSet();
-		}
-		else {
-			charset = DEFAULT_CHARSET;
-		}
-		return Flux.from(inputStream).map(content -> {
+		Charset charset = getCharset(mimeType);
+		return inputFlux.map(content -> {
 			byte[] bytes = new byte[content.readableByteCount()];
 			content.read(bytes);
 			return new String(bytes, charset);
 		});
+	}
+
+	private Charset getCharset(MimeType mimeType) {
+		if (mimeType != null && mimeType.getCharSet() != null) {
+			return mimeType.getCharSet();
+		}
+		else {
+			return DEFAULT_CHARSET;
+		}
 	}
 
 }
