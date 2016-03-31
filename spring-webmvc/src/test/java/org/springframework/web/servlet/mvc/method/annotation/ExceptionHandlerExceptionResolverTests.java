@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,12 +42,9 @@ import org.springframework.web.method.annotation.ModelMethodProcessor;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.util.NestedServletException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Test fixture with {@link ExceptionHandlerExceptionResolver}.
@@ -241,6 +238,22 @@ public class ExceptionHandlerExceptionResolverTests {
 	}
 
 	@Test
+	public void resolveExceptionWithAssertionError() throws Exception {
+		AnnotationConfigApplicationContext cxt = new AnnotationConfigApplicationContext(MyConfig.class);
+		this.resolver.setApplicationContext(cxt);
+		this.resolver.afterPropertiesSet();
+
+		AssertionError err = new AssertionError("argh");
+		HandlerMethod handlerMethod = new HandlerMethod(new ResponseBodyController(), "handle");
+		ModelAndView mav = this.resolver.resolveException(this.request, this.response, handlerMethod,
+				new NestedServletException("Handler dispatch failed", err));
+
+		assertNotNull("Exception was not handled", mav);
+		assertTrue(mav.isEmpty());
+		assertEquals(err.toString(), this.response.getContentAsString());
+	}
+
+	@Test
 	public void resolveExceptionControllerAdviceHandler() throws Exception {
 		AnnotationConfigApplicationContext cxt = new AnnotationConfigApplicationContext(MyControllerAdviceConfig.class);
 		this.resolver.setApplicationContext(cxt);
@@ -348,6 +361,11 @@ public class ExceptionHandlerExceptionResolverTests {
 		@ExceptionHandler(ArrayIndexOutOfBoundsException.class)
 		public String handleWithHandlerMethod(HandlerMethod handlerMethod) {
 			return "HandlerMethod: " + handlerMethod.getMethod().getName();
+		}
+
+		@ExceptionHandler(AssertionError.class)
+		public String handleAssertionError(Error err) {
+			return err.toString();
 		}
 	}
 

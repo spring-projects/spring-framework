@@ -95,7 +95,7 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 
 	public ExceptionHandlerExceptionResolver() {
 		StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter();
-		stringHttpMessageConverter.setWriteAcceptCharset(false); // See SPR-7316
+		stringHttpMessageConverter.setWriteAcceptCharset(false);  // see SPR-7316
 
 		this.messageConverters = new ArrayList<HttpMessageConverter<?>>();
 		this.messageConverters.add(new ByteArrayHttpMessageConverter());
@@ -364,7 +364,15 @@ public class ExceptionHandlerExceptionResolver extends AbstractHandlerMethodExce
 			if (logger.isDebugEnabled()) {
 				logger.debug("Invoking @ExceptionHandler method: " + exceptionHandlerMethod);
 			}
-			exceptionHandlerMethod.invokeAndHandle(webRequest, mavContainer, exception, handlerMethod);
+			if (exception.getCause() != null) {
+				// Expose root cause as provided argument as well
+				exceptionHandlerMethod.invokeAndHandle(
+						webRequest, mavContainer, exception, exception.getCause(), handlerMethod);
+			}
+			else {
+				// Otherwise, just the given exception as-is
+				exceptionHandlerMethod.invokeAndHandle(webRequest, mavContainer, exception, handlerMethod);
+			}
 		}
 		catch (Exception invocationEx) {
 			if (logger.isDebugEnabled()) {

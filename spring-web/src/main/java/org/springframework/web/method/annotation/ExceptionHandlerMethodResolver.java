@@ -31,6 +31,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils.MethodFilter;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.util.NestedServletException;
 
 /**
  * Discovers {@linkplain ExceptionHandler @ExceptionHandler} methods in a given class,
@@ -98,8 +99,8 @@ public class ExceptionHandlerMethodResolver {
 	}
 
 	protected void detectAnnotationExceptionMappings(Method method, List<Class<? extends Throwable>> result) {
-		ExceptionHandler annot = AnnotationUtils.findAnnotation(method, ExceptionHandler.class);
-		result.addAll(Arrays.asList(annot.value()));
+		ExceptionHandler ann = AnnotationUtils.findAnnotation(method, ExceptionHandler.class);
+		result.addAll(Arrays.asList(ann.value()));
 	}
 
 	private void addExceptionMapping(Class<? extends Throwable> exceptionType, Method method) {
@@ -124,7 +125,11 @@ public class ExceptionHandlerMethodResolver {
 	 * @return a Method to handle the exception, or {@code null} if none found
 	 */
 	public Method resolveMethod(Exception exception) {
-		return resolveMethodByExceptionType(exception.getClass());
+		Method method = resolveMethodByExceptionType(exception.getClass());
+		if (method == null && exception instanceof NestedServletException && exception.getCause() != null) {
+			method = resolveMethodByExceptionType(exception.getCause().getClass());
+		}
+		return method;
 	}
 
 	/**
@@ -133,7 +138,7 @@ public class ExceptionHandlerMethodResolver {
 	 * @param exceptionType the exception type
 	 * @return a Method to handle the exception, or {@code null} if none found
 	 */
-	public Method resolveMethodByExceptionType(Class<? extends Exception> exceptionType) {
+	public Method resolveMethodByExceptionType(Class<? extends Throwable> exceptionType) {
 		Method method = this.exceptionLookupCache.get(exceptionType);
 		if (method == null) {
 			method = getMappedMethod(exceptionType);
@@ -145,7 +150,7 @@ public class ExceptionHandlerMethodResolver {
 	/**
 	 * Return the {@link Method} mapped to the given exception type, or {@code null} if none.
 	 */
-	private Method getMappedMethod(Class<? extends Exception> exceptionType) {
+	private Method getMappedMethod(Class<? extends Throwable> exceptionType) {
 		List<Class<? extends Throwable>> matches = new ArrayList<Class<? extends Throwable>>();
 		for (Class<? extends Throwable> mappedException : this.mappedMethods.keySet()) {
 			if (mappedException.isAssignableFrom(exceptionType)) {
