@@ -16,23 +16,6 @@
 
 package org.springframework.test.web.servlet.request;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.security.Principal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletRequest;
-import javax.servlet.http.Cookie;
-
 import org.springframework.beans.Mergeable;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.http.HttpHeaders;
@@ -56,8 +39,26 @@ import org.springframework.web.servlet.DispatcherServlet;
 import org.springframework.web.servlet.FlashMap;
 import org.springframework.web.servlet.FlashMapManager;
 import org.springframework.web.servlet.support.SessionFlashMapManager;
+import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.Cookie;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Default builder for {@link MockHttpServletRequest} required as input to perform
@@ -608,16 +609,16 @@ public class MockHttpServletRequestBuilder
 			}
 		}
 
-		if (this.url.getRawQuery() != null) {
-			request.setQueryString(this.url.getRawQuery());
-		}
-		addRequestParams(request, UriComponentsBuilder.fromUri(this.url).build().getQueryParams());
-
+		final UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUri(this.url);
 		for (String name : this.parameters.keySet()) {
 			for (String value : this.parameters.get(name)) {
-				request.addParameter(name, value);
+				uriComponentsBuilder.queryParam(name, value);
 			}
 		}
+
+		UriComponents uriComponents = uriComponentsBuilder.build();
+		request.setQueryString(uriComponents.getQuery());
+		addRequestParams(request, uriComponents.getQueryParams());
 
 		request.setContentType(this.contentType);
 		request.setContent(this.content);
