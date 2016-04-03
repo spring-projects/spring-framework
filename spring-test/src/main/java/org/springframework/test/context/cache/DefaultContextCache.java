@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@
 package org.springframework.test.context.cache;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,12 +39,18 @@ import org.springframework.util.Assert;
 /**
  * Default implementation of the {@link ContextCache} API.
  *
- * <p>Uses {@link ConcurrentHashMap ConcurrentHashMaps} to cache
- * {@link ApplicationContext} and {@link MergedContextConfiguration} instances.
+ * <p>Uses a synchronized {@link Map} configured with a maximum size
+ * and a <em>least recently used</em> (LRU) eviction policy to cache
+ * {@link ApplicationContext} instances.
+ *
+ * <p>The maximum size may be supplied as a {@linkplain #DefaultContextCache(int)
+ * constructor argument} or set via a system property or Spring property named
+ * {@code spring.test.context.cache.maxSize}.
  *
  * @author Sam Brannen
  * @author Juergen Hoeller
  * @since 2.5
+ * @see ContextCacheUtils#retrieveMaxCacheSize()
  */
 public class DefaultContextCache implements ContextCache {
 
@@ -52,7 +60,7 @@ public class DefaultContextCache implements ContextCache {
 	 * Map of context keys to Spring {@code ApplicationContext} instances.
 	 */
 	private final Map<MergedContextConfiguration, ApplicationContext> contextMap =
-			new ConcurrentHashMap<MergedContextConfiguration, ApplicationContext>(64);
+			Collections.synchronizedMap(new LruCache(32, 0.75f));
 
 	/**
 	 * Map of parent keys to sets of children keys, representing a top-down <em>tree</em>
@@ -61,11 +69,39 @@ public class DefaultContextCache implements ContextCache {
 	 * of other contexts.
 	 */
 	private final Map<MergedContextConfiguration, Set<MergedContextConfiguration>> hierarchyMap =
-			new ConcurrentHashMap<MergedContextConfiguration, Set<MergedContextConfiguration>>(64);
+			new ConcurrentHashMap<MergedContextConfiguration, Set<MergedContextConfiguration>>(32);
+
+	private final int maxSize;
 
 	private final AtomicInteger hitCount = new AtomicInteger();
 
 	private final AtomicInteger missCount = new AtomicInteger();
+
+
+	/**
+	 * Create a new {@code DefaultContextCache} using the maximum cache size
+	 * obtained via {@link ContextCacheUtils#retrieveMaxCacheSize()}.
+	 * @since 4.3
+	 * @see #DefaultContextCache(int)
+	 * @see ContextCacheUtils#retrieveMaxCacheSize()
+	 */
+	public DefaultContextCache() {
+		this(ContextCacheUtils.retrieveMaxCacheSize());
+	}
+
+	/**
+	 * Create a new {@code DefaultContextCache} using the supplied maximum
+	 * cache size.
+	 * @param maxSize the maximum cache size
+	 * @throws IllegalArgumentException if the supplied {@code maxSize} value
+	 * is not positive
+	 * @since 4.3
+	 * @see #DefaultContextCache()
+	 */
+	public DefaultContextCache(int maxSize) {
+		Assert.isTrue(maxSize > 0, "maxSize must be positive");
+		this.maxSize = maxSize;
+	}
 
 
 	/**
@@ -182,6 +218,13 @@ public class DefaultContextCache implements ContextCache {
 	}
 
 	/**
+	 * Get the maximum size of this cache.
+	 */
+	public int getMaxSize() {
+		return this.maxSize;
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	@Override
@@ -210,7 +253,7 @@ public class DefaultContextCache implements ContextCache {
 	 */
 	@Override
 	public void reset() {
-		synchronized (contextMap) {
+		synchronized (this.contextMap) {
 			clear();
 			clearStatistics();
 		}
@@ -221,7 +264,7 @@ public class DefaultContextCache implements ContextCache {
 	 */
 	@Override
 	public void clear() {
-		synchronized (contextMap) {
+		synchronized (this.contextMap) {
 			this.contextMap.clear();
 			this.hierarchyMap.clear();
 		}
@@ -232,7 +275,7 @@ public class DefaultContextCache implements ContextCache {
 	 */
 	@Override
 	public void clearStatistics() {
-		synchronized (contextMap) {
+		synchronized (this.contextMap) {
 			this.hitCount.set(0);
 			this.missCount.set(0);
 		}
@@ -259,10 +302,46 @@ public class DefaultContextCache implements ContextCache {
 	public String toString() {
 		return new ToStringCreator(this)
 				.append("size", size())
+				.append("maxSize", getMaxSize())
 				.append("parentContextCount", getParentContextCount())
 				.append("hitCount", getHitCount())
 				.append("missCount", getMissCount())
 				.toString();
+	}
+
+
+	/**
+	 * Simple cache implementation based on {@link LinkedHashMap} with a maximum
+	 * size and a <em>least recently used</em> (LRU) eviction policy that
+	 * properly closes application contexts.
+	 *
+	 * @author Sam Brannen
+	 * @since 4.3
+	 */
+	@SuppressWarnings("serial")
+	private class LruCache extends LinkedHashMap<MergedContextConfiguration, ApplicationContext> {
+
+		/**
+		 * Create a new {@code LruCache} with the supplied initial capacity and
+		 * load factor.
+		 * @param initialCapacity the initial capacity
+		 * @param loadFactor the load factor
+		 */
+		LruCache(int initialCapacity, float loadFactor) {
+			super(initialCapacity, loadFactor, true);
+		}
+
+		@Override
+		protected boolean removeEldestEntry(Map.Entry<MergedContextConfiguration, ApplicationContext> eldest) {
+			if (this.size() > DefaultContextCache.this.getMaxSize()) {
+				// Do NOT delete "DefaultContextCache.this."; otherwise, we accidentally
+				// invoke java.util.Map.remove(Object, Object).
+				DefaultContextCache.this.remove(eldest.getKey(), HierarchyMode.CURRENT_LEVEL);
+			}
+
+			// Return false since we invoke a custom eviction algorithm.
+			return false;
+		}
 	}
 
 }
