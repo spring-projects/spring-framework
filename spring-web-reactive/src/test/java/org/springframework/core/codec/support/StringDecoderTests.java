@@ -95,12 +95,11 @@ public class StringDecoderTests extends AbstractAllocatingTestCase {
 
 	@Test
 	public void decodeEmpty() throws InterruptedException {
-		Flux<DataBuffer> source = Flux.just(stringBuffer(""));
-		Single<String> single = RxJava1SingleConverter.from(this.decoder.decode(source,
-				ResolvableType.forClassWithGenerics(Single.class, String.class),
-				MediaType.TEXT_PLAIN));
-		String result = single.toBlocking().value();
-		assertEquals("", result);
+		Mono<DataBuffer> source = Mono.just(stringBuffer(""));
+		Flux<String> output =
+				this.decoder.decode(source, ResolvableType.forClass(String.class), null);
+		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
+		testSubscriber.bindTo(output).assertValues("");
 	}
 
 }

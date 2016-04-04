@@ -45,7 +45,6 @@ import org.springframework.util.MimeType;
 public class StringDecoder extends AbstractDecoder<String> {
 
 	public static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
-	public static final String EMPTY = "";
 
 	private final boolean reduceToSingleBuffer;
 
@@ -85,11 +84,6 @@ public class StringDecoder extends AbstractDecoder<String> {
 		}
 		Charset charset = getCharset(mimeType);
 		return inputFlux.map(content -> {
-			// fast-path exit.
-			if(content.readableByteCount() == 0) {
-				return EMPTY;
-			}
-
 			CharBuffer charBuffer = charset.decode(content.asByteBuffer());
 			return charBuffer.toString();
 		});
