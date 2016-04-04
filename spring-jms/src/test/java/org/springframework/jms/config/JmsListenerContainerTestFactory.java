@@ -31,9 +31,11 @@ public class JmsListenerContainerTestFactory implements JmsListenerContainerFact
 	private final Map<String, MessageListenerTestContainer> listenerContainers =
 			new LinkedHashMap<>();
 
+
 	public void setAutoStartup(boolean autoStartup) {
 		this.autoStartup = autoStartup;
 	}
+
 
 	public List<MessageListenerTestContainer> getListenerContainers() {
 		return new ArrayList<>(this.listenerContainers.values());

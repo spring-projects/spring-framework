@@ -26,8 +26,7 @@ import org.springframework.jms.support.destination.DestinationResolver;
 /**
  * @author Stephane Nicoll
  */
-public class MessageListenerTestContainer
-		implements MessageListenerContainer, InitializingBean, DisposableBean {
+public class MessageListenerTestContainer implements MessageListenerContainer, InitializingBean, DisposableBean {
 
 	private final JmsListenerEndpoint endpoint;
 
@@ -41,9 +40,11 @@ public class MessageListenerTestContainer
 
 	private boolean destroyInvoked;
 
+
 	MessageListenerTestContainer(JmsListenerEndpoint endpoint) {
 		this.endpoint = endpoint;
 	}
+
 
 	public void setAutoStartup(boolean autoStartup) {
 		this.autoStartup = autoStartup;
@@ -133,8 +134,7 @@ public class MessageListenerTestContainer
 	@Override
 	public void destroy() {
 		if (!stopInvoked) {
-			throw new IllegalStateException("Stop should have been invoked before " +
-					"destroy on " + this);
+			throw new IllegalStateException("Stop should have been invoked before " + "destroy on " + this);
 		}
 		destroyInvoked = true;
 	}
@@ -150,4 +150,5 @@ public class MessageListenerTestContainer
 		sb.append('}');
 		return sb.toString();
 	}
+
 }
