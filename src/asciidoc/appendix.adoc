@@ -3321,7 +3321,7 @@ creating a bean in the container, identified by the name `'dateFormat'` of type
 [subs="verbatim,quotes"]
 ----
 	<bean id="dateFormat" class="java.text.SimpleDateFormat">
-		<constructor-arg value="yyyy-HH-dd HH:mm"/>
+		<constructor-arg value="yyyy-MM-dd HH:mm"/>
 		<property name="lenient" value="true"/>
 	</bean>
 ----
