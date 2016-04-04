@@ -63,7 +63,7 @@ public class StringDecoder extends AbstractDecoder<String> {
 	 * and decode a single consolidated String or re-emit items as they are provided
 	 */
 	public StringDecoder(boolean reduceToSingleBuffer) {
-		super(new MimeType("text", "plain", DEFAULT_CHARSET));
+		super(new MimeType("text", "*", DEFAULT_CHARSET));
 		this.reduceToSingleBuffer = reduceToSingleBuffer;
 	}
 

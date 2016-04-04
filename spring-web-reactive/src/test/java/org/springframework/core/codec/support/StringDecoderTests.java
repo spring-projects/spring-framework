@@ -47,6 +47,7 @@ public class StringDecoderTests extends AbstractAllocatingTestCase {
 	@Test
 	public void canDecode() {
 		assertTrue(decoder.canDecode(ResolvableType.forClass(String.class), MediaType.TEXT_PLAIN));
+		assertTrue(decoder.canDecode(ResolvableType.forClass(String.class), MediaType.TEXT_HTML));
 		assertFalse(decoder.canDecode(ResolvableType.forClass(Integer.class), MediaType.TEXT_PLAIN));
 		assertFalse(decoder.canDecode(ResolvableType.forClass(String.class), MediaType.APPLICATION_JSON));
 	}
