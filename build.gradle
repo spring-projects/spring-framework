@@ -739,6 +739,7 @@ project("spring-web") {
 		}
 		testCompile("com.fasterxml.jackson.datatype:jackson-datatype-joda:${jackson2Version}")
 		testCompile("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jackson2Version}")
+		testCompile("com.fasterxml.jackson.module:jackson-module-kotlin:${jackson2Version}")
 		testRuntime("com.sun.mail:javax.mail:${javamailVersion}")
 	}
 }
