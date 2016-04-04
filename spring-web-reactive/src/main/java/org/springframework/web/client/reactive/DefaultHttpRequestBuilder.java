@@ -170,10 +170,9 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
 								mediaType));
 			}
 			else {
-				// TODO: wrap with client exception?
-				request.setBody(Flux.error(new IllegalStateException("Can't write request body" +
+				throw new WebClientException("Can't write request body " +
 						"of type '" + requestBodyType.toString() +
-						"' for content-type '" + mediaType.toString() + "'")));
+						"' for content-type '" + mediaType.toString() + "'");
 			}
 		}
 
