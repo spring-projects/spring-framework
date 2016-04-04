@@ -285,6 +285,7 @@ public class Jackson2ObjectMapperFactoryBeanTests {
 		Map<Class<?>, Class<?>> mixIns = new HashMap<Class<?>, Class<?>>();
 		mixIns.put(target, mixinSource);
 
+		this.factory.setModules(Collections.emptyList());
 		this.factory.setMixIns(mixIns);
 		this.factory.afterPropertiesSet();
 		ObjectMapper objectMapper = this.factory.getObject();
