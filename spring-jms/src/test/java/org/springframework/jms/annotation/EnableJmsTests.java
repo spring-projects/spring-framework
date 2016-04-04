@@ -109,6 +109,31 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 		testDefaultContainerFactoryConfiguration(context);
 	}
 
+	@Test
+	public void containerAreStartedByDefault() {
+		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
+				EnableJmsDefaultContainerFactoryConfig.class, DefaultBean.class);
+		JmsListenerContainerTestFactory factory =
+				context.getBean(JmsListenerContainerTestFactory.class);
+		MessageListenerTestContainer container = factory.getListenerContainers().get(0);
+		assertTrue(container.isAutoStartup());
+		assertTrue(container.isStarted());
+	}
+
+	@Test
+	public void containerCanBeStarterViaTheRegistry() {
+		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
+				EnableJmsAutoStartupFalseConfig.class, DefaultBean.class);
+		JmsListenerContainerTestFactory factory =
+				context.getBean(JmsListenerContainerTestFactory.class);
+		MessageListenerTestContainer container = factory.getListenerContainers().get(0);
+		assertFalse(container.isAutoStartup());
+		assertFalse(container.isStarted());
+		JmsListenerEndpointRegistry registry = context.getBean(JmsListenerEndpointRegistry.class);
+		registry.start();
+		assertTrue(container.isStarted());
+	}
+
 	@Override
 	@Test
 	public void jmsHandlerMethodFactoryConfiguration() throws JMSException {
@@ -311,6 +336,23 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 		@Bean
 		public JmsListenerContainerTestFactory defaultFactory() {
 			return new JmsListenerContainerTestFactory();
+		}
+	}
+
+	@Configuration
+	@EnableJms
+	static class EnableJmsAutoStartupFalseConfig implements JmsListenerConfigurer {
+
+		@Override
+		public void configureJmsListeners(JmsListenerEndpointRegistrar registrar) {
+			registrar.setContainerFactory(simpleFactory());
+		}
+
+		@Bean
+		public JmsListenerContainerTestFactory simpleFactory() {
+			JmsListenerContainerTestFactory factory = new JmsListenerContainerTestFactory();
+			factory.setAutoStartup(false);
+			return factory;
 		}
 	}
 
