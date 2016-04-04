@@ -38,6 +38,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.client.reactive.ClientHttpRequestFactory;
+import org.springframework.util.Assert;
 import org.springframework.web.client.RestClientException;
 
 /**
@@ -134,6 +135,21 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
 
 	public DefaultHttpRequestBuilder contentStream(Publisher content) {
 		this.contentPublisher = Flux.from(content);
+		return this;
+	}
+
+	/**
+	 * Allows performing more complex operations with a strategy. For example, a
+	 * {@link RequestPostProcessor} implementation might accept the arguments of
+	 * username and password and set an HTTP Basic authentication header.
+	 *
+	 * @param postProcessor the {@link RequestPostProcessor} to use. Cannot be null.
+	 *
+	 * @return this instance for further modifications.
+	 */
+	public DefaultHttpRequestBuilder apply(RequestPostProcessor postProcessor) {
+		Assert.notNull(postProcessor, "`postProcessor` is required");
+		postProcessor.postProcess(this);
 		return this;
 	}
 
