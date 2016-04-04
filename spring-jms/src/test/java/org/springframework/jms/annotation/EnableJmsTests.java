@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -102,6 +102,31 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 		testDefaultContainerFactoryConfiguration(context);
 	}
 
+	@Test
+	public void containerAreStartedByDefault() {
+		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
+				EnableJmsDefaultContainerFactoryConfig.class, DefaultBean.class);
+		JmsListenerContainerTestFactory factory =
+				context.getBean(JmsListenerContainerTestFactory.class);
+		MessageListenerTestContainer container = factory.getListenerContainers().get(0);
+		assertTrue(container.isAutoStartup());
+		assertTrue(container.isStarted());
+	}
+
+	@Test
+	public void containerCanBeStarterViaTheRegistry() {
+		ConfigurableApplicationContext context = new AnnotationConfigApplicationContext(
+				EnableJmsAutoStartupFalseConfig.class, DefaultBean.class);
+		JmsListenerContainerTestFactory factory =
+				context.getBean(JmsListenerContainerTestFactory.class);
+		MessageListenerTestContainer container = factory.getListenerContainers().get(0);
+		assertFalse(container.isAutoStartup());
+		assertFalse(container.isStarted());
+		JmsListenerEndpointRegistry registry = context.getBean(JmsListenerEndpointRegistry.class);
+		registry.start();
+		assertTrue(container.isStarted());
+	}
+
 	@Override
 	@Test
 	public void jmsHandlerMethodFactoryConfiguration() throws JMSException {
@@ -132,9 +157,8 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 	@Test
 	public void unknownFactory() {
 		thrown.expect(BeanCreationException.class);
-		thrown.expectMessage("customFactory"); // Not found
-		new AnnotationConfigApplicationContext(
-				EnableJmsSampleConfig.class, CustomBean.class);
+		thrown.expectMessage("customFactory");  // not found
+		new AnnotationConfigApplicationContext(EnableJmsSampleConfig.class, CustomBean.class);
 	}
 
 	@Test
@@ -145,11 +169,11 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 				context.getBean("jmsListenerContainerFactory", JmsListenerContainerTestFactory.class);
 		assertEquals(0, defaultFactory.getListenerContainers().size());
 
-		context.getBean(LazyBean.class); // trigger lazy resolution
+		context.getBean(LazyBean.class);  // trigger lazy resolution
 		assertEquals(1, defaultFactory.getListenerContainers().size());
 		MessageListenerTestContainer container = defaultFactory.getListenerContainers().get(0);
 		assertTrue("Should have been started " + container, container.isStarted());
-		context.close(); // Close and stop the listeners
+		context.close();  // close and stop the listeners
 		assertTrue("Should have been stopped " + container, container.isStopped());
 	}
 
@@ -282,6 +306,24 @@ public class EnableJmsTests extends AbstractJmsAnnotationDrivenTests {
 		@Bean
 		public JmsListenerContainerTestFactory defaultFactory() {
 			return new JmsListenerContainerTestFactory();
+		}
+	}
+
+
+	@Configuration
+	@EnableJms
+	static class EnableJmsAutoStartupFalseConfig implements JmsListenerConfigurer {
+
+		@Override
+		public void configureJmsListeners(JmsListenerEndpointRegistrar registrar) {
+			registrar.setContainerFactory(simpleFactory());
+		}
+
+		@Bean
+		public JmsListenerContainerTestFactory simpleFactory() {
+			JmsListenerContainerTestFactory factory = new JmsListenerContainerTestFactory();
+			factory.setAutoStartup(false);
+			return factory;
 		}
 	}
 
