@@ -45,6 +45,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.core.Ordered;
+import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
 import org.springframework.tests.sample.beans.ITestBean;
@@ -1397,6 +1398,8 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		assertSame(1, bean.stringRepositoryMap.size());
 		assertSame(repo, bean.repositoryMap.get("repo"));
 		assertSame(repo, bean.stringRepositoryMap.get("repo"));
+
+		assertArrayEquals(new String[] {"repo"}, bf.getBeanNamesForType(ResolvableType.forClassWithGenerics(Repository.class, String.class)));
 	}
 
 	@Test
@@ -1777,6 +1780,9 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 		GenericInterface1Impl bean1 = (GenericInterface1Impl) bf.getBean("bean1");
 		GenericInterface2Impl bean2 = (GenericInterface2Impl) bf.getBean("bean2");
 		assertSame(bean2, bean1.gi2);
+
+		assertArrayEquals(new String[] {"bean1"}, bf.getBeanNamesForType(ResolvableType.forClassWithGenerics(GenericInterface1.class, String.class)));
+		assertArrayEquals(new String[] {"bean2"}, bf.getBeanNamesForType(ResolvableType.forClassWithGenerics(GenericInterface2.class, String.class)));
 	}
 
 	@Test
@@ -2765,7 +2771,7 @@ public class AutowiredAnnotationBeanPostProcessorTests {
 
 	public interface GenericInterface1<T> {
 
-		public String doSomethingGeneric(T o);
+		String doSomethingGeneric(T o);
 	}
 
 
