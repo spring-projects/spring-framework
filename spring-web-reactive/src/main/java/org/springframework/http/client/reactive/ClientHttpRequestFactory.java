@@ -17,6 +17,8 @@ package org.springframework.http.client.reactive;
 
 import java.net.URI;
 
+import org.reactivestreams.Publisher;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 
@@ -29,6 +31,8 @@ public interface ClientHttpRequestFactory {
 
 	/**
 	 * Create a new {@link ClientHttpRequest} for the specified HTTP method, URI and headers
+	 * <p>The returned request can be {@link ClientHttpRequest#setBody(Publisher) written to},
+	 * and then executed by calling {@link ClientHttpRequest#execute()}
 	 *
 	 * @param httpMethod the HTTP method to execute
 	 * @param uri the URI to create a request for
