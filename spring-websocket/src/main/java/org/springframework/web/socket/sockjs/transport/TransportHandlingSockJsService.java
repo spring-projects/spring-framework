@@ -359,14 +359,15 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 			if (this.sessionCleanupTask != null) {
 				return;
 			}
-			final List<String> removedSessionIds = new ArrayList<String>();
 			this.sessionCleanupTask = getTaskScheduler().scheduleAtFixedRate(new Runnable() {
 				@Override
 				public void run() {
+					List<String> removedIds = new ArrayList<String>();
 					for (SockJsSession session : sessions.values()) {
 						try {
 							if (session.getTimeSinceLastActive() > getDisconnectDelay()) {
 								sessions.remove(session.getId());
+								removedIds.add(session.getId());
 								session.close();
 							}
 						}
@@ -375,9 +376,8 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 							logger.debug("Failed to close " + session, ex);
 						}
 					}
-					if (logger.isDebugEnabled() && !removedSessionIds.isEmpty()) {
-						logger.debug("Closed " + removedSessionIds.size() + " sessions " + removedSessionIds);
-						removedSessionIds.clear();
+					if (logger.isDebugEnabled() && !removedIds.isEmpty()) {
+						logger.debug("Closed " + removedIds.size() + " sessions: " + removedIds);
 					}
 				}
 			}, getDisconnectDelay());
