@@ -47,33 +47,47 @@ public class WebResponseExtractors {
 
 	/**
 	 * Extract the response body and decode it, returning it as a {@code Mono<T>}
+	 * @see ResolvableType#forClassWithGenerics(Class, Class[])
 	 */
-	public static <T> WebResponseExtractor<Mono<T>> body(Class<T> sourceClass) {
-
-		ResolvableType resolvableType = ResolvableType.forClass(sourceClass);
+	public static <T> WebResponseExtractor<Mono<T>> body(ResolvableType bodyType) {
 		//noinspection unchecked
 		return webResponse -> (Mono<T>) webResponse.getClientResponse()
-				.flatMap(resp -> decodeResponseBody(resp, resolvableType, webResponse.getMessageDecoders()))
+				.flatMap(resp -> decodeResponseBody(resp, bodyType, webResponse.getMessageDecoders()))
 				.next();
+	}
+
+	/**
+	 * Extract the response body and decode it, returning it as a {@code Mono<T>}
+	 */
+	public static <T> WebResponseExtractor<Mono<T>> body(Class<T> sourceClass) {
+		ResolvableType bodyType = ResolvableType.forClass(sourceClass);
+		return body(bodyType);
+	}
+
+
+	/**
+	 * Extract the response body and decode it, returning it as a {@code Flux<T>}
+	 * @see ResolvableType#forClassWithGenerics(Class, Class[])
+	 */
+	public static <T> WebResponseExtractor<Flux<T>> bodyStream(ResolvableType bodyType) {
+		return webResponse -> webResponse.getClientResponse()
+				.flatMap(resp -> decodeResponseBody(resp, bodyType, webResponse.getMessageDecoders()));
 	}
 
 	/**
 	 * Extract the response body and decode it, returning it as a {@code Flux<T>}
 	 */
 	public static <T> WebResponseExtractor<Flux<T>> bodyStream(Class<T> sourceClass) {
-
-		ResolvableType resolvableType = ResolvableType.forClass(sourceClass);
-		return webResponse -> webResponse.getClientResponse()
-				.flatMap(resp -> decodeResponseBody(resp, resolvableType, webResponse.getMessageDecoders()));
+		ResolvableType bodyType = ResolvableType.forClass(sourceClass);
+		return bodyStream(bodyType);
 	}
 
 	/**
 	 * Extract the full response body as a {@code ResponseEntity}
 	 * with its body decoded as a single type {@code T}
+	 * @see ResolvableType#forClassWithGenerics(Class, Class[])
 	 */
-	public static <T> WebResponseExtractor<Mono<ResponseEntity<T>>> response(Class<T> bodyClass) {
-
-		ResolvableType bodyType = ResolvableType.forClass(bodyClass);
+	public static <T> WebResponseExtractor<Mono<ResponseEntity<T>>> response(ResolvableType bodyType) {
 		return webResponse -> webResponse.getClientResponse()
 				.then(response -> {
 					List<Decoder<?>> decoders = webResponse.getMessageDecoders();
@@ -91,14 +105,32 @@ public class WebResponseExtractors {
 
 	/**
 	 * Extract the full response body as a {@code ResponseEntity}
+	 * with its body decoded as a single type {@code T}
+	 */
+	public static <T> WebResponseExtractor<Mono<ResponseEntity<T>>> response(Class<T> bodyClass) {
+		ResolvableType bodyType = ResolvableType.forClass(bodyClass);
+		return response(bodyType);
+	}
+
+	/**
+	 * Extract the full response body as a {@code ResponseEntity}
+	 * with its body decoded as a {@code Flux<T>}
+	 * @see ResolvableType#forClassWithGenerics(Class, Class[])
+	 */
+	public static <T> WebResponseExtractor<Mono<ResponseEntity<Flux<T>>>> responseStream(ResolvableType type) {
+		return webResponse -> webResponse.getClientResponse()
+				.map(response -> new ResponseEntity<>(
+						decodeResponseBody(response, type, webResponse.getMessageDecoders()),
+						response.getHeaders(), response.getStatusCode()));
+	}
+
+	/**
+	 * Extract the full response body as a {@code ResponseEntity}
 	 * with its body decoded as a {@code Flux<T>}
 	 */
 	public static <T> WebResponseExtractor<Mono<ResponseEntity<Flux<T>>>> responseStream(Class<T> sourceClass) {
 		ResolvableType resolvableType = ResolvableType.forClass(sourceClass);
-		return webResponse -> webResponse.getClientResponse()
-				.map(response -> new ResponseEntity<>(
-						decodeResponseBody(response, resolvableType, webResponse.getMessageDecoders()),
-						response.getHeaders(), response.getStatusCode()));
+		return responseStream(resolvableType);
 	}
 
 	/**
