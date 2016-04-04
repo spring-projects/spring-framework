@@ -16,25 +16,24 @@
 
 package org.springframework.http.converter.feed;
 
+import com.rometools.rome.feed.rss.Channel;
+import com.rometools.rome.feed.rss.Item;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.http.MediaType;
+import org.springframework.http.MockHttpInputMessage;
+import org.springframework.http.MockHttpOutputMessage;
+import org.xml.sax.SAXException;
+import org.xmlunit.matchers.CompareMatcher;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.rometools.rome.feed.rss.Channel;
-import com.rometools.rome.feed.rss.Item;
-import org.custommonkey.xmlunit.XMLUnit;
-import org.junit.Before;
-import org.junit.Test;
-import org.xml.sax.SAXException;
-
-import org.springframework.http.MediaType;
-import org.springframework.http.MockHttpInputMessage;
-import org.springframework.http.MockHttpOutputMessage;
-
-import static org.custommonkey.xmlunit.XMLAssert.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -50,7 +49,6 @@ public class RssChannelHttpMessageConverterTests {
 	public void setUp() {
 		utf8 = Charset.forName("UTF-8");
 		converter = new RssChannelHttpMessageConverter();
-		XMLUnit.setIgnoreWhitespace(true);
 	}
 
 	@Test
@@ -98,7 +96,7 @@ public class RssChannelHttpMessageConverterTests {
 		Item item2 = new Item();
 		item2.setTitle("title2");
 
-		List<Item> items = new ArrayList<Item>(2);
+		List<Item> items = new ArrayList<>(2);
 		items.add(item1);
 		items.add(item2);
 		channel.setItems(items);
@@ -113,7 +111,7 @@ public class RssChannelHttpMessageConverterTests {
 				"<item><title>title1</title></item>" +
 				"<item><title>title2</title></item>" +
 				"</channel></rss>";
-		assertXMLEqual(expected, outputMessage.getBodyAsString(utf8));
+		assertThat(outputMessage.getBodyAsString(utf8), isSimilarTo(expected));
 	}
 
 	@Test
@@ -136,4 +134,8 @@ public class RssChannelHttpMessageConverterTests {
 				outputMessage.getHeaders().getContentType());
 	}
 
+	private static CompareMatcher isSimilarTo(final String content) {
+		return CompareMatcher.isSimilarTo(content)
+				.ignoreWhitespace();
+	}
 }
