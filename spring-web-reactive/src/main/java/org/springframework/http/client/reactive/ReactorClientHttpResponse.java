@@ -52,7 +52,7 @@ public class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		return Flux.from(channel.input()).map(b -> allocator.wrap(b.byteBuffer()));
+		return channel.input().map(b -> allocator.wrap(b.byteBuffer()));
 	}
 
 	@Override
@@ -87,7 +87,7 @@ public class ReactorClientHttpResponse implements ClientHttpResponse {
 	@Override
 	public String toString() {
 		return "ReactorClientHttpResponse{" +
-				"request=" + this.channel.method() + " " + this.channel.uri() + "," +
+				"request=" + this.channel.method().getName() + " " + this.channel.uri() + "," +
 				"status=" + getStatusCode() +
 				'}';
 	}

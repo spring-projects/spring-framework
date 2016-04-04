@@ -16,6 +16,10 @@
 
 package org.springframework.web.client.reactive;
 
+import static org.junit.Assert.*;
+import static org.springframework.web.client.reactive.HttpRequestBuilders.*;
+import static org.springframework.web.client.reactive.WebResponseExtractors.*;
+
 import java.util.function.Consumer;
 
 import okhttp3.HttpUrl;
@@ -35,12 +39,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.reactive.ReactorHttpClientRequestFactory;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.springframework.web.client.reactive.HttpRequestBuilders.get;
-import static org.springframework.web.client.reactive.HttpRequestBuilders.post;
-import static org.springframework.web.client.reactive.WebResponseExtractors.*;
 
 /**
  * @author Brian Clozel
@@ -77,6 +75,7 @@ public class WebClientIntegrationTests {
 		).assertComplete();
 
 		RecordedRequest request = server.takeRequest();
+		assertEquals(1, server.getRequestCount());
 		assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
 		assertEquals("/greeting?name=Spring", request.getPath());
 	}
@@ -98,6 +97,7 @@ public class WebClientIntegrationTests {
 		ts.awaitAndAssertNextValues("Hello Spring!").assertComplete();
 
 		RecordedRequest request = server.takeRequest();
+		assertEquals(1, server.getRequestCount());
 		assertEquals("testvalue", request.getHeader("X-Test-Header"));
 		assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
 		assertEquals("/greeting?name=Spring", request.getPath());
@@ -125,6 +125,7 @@ public class WebClientIntegrationTests {
 			}
 		});
 		RecordedRequest request = server.takeRequest();
+		assertEquals(1, server.getRequestCount());
 		assertEquals("/greeting?name=Spring", request.getPath());
 		assertEquals("text/plain", request.getHeader(HttpHeaders.ACCEPT));
 	}
@@ -145,6 +146,7 @@ public class WebClientIntegrationTests {
 		result.subscribe(ts);
 		ts.awaitAndAssertNextValuesWith(p -> assertEquals("barbar", p.getBar())).assertComplete();
 		RecordedRequest request = server.takeRequest();
+		assertEquals(1, server.getRequestCount());
 		assertEquals("/pojo", request.getPath());
 		assertEquals("application/json", request.getHeader(HttpHeaders.ACCEPT));
 	}
@@ -168,6 +170,7 @@ public class WebClientIntegrationTests {
 				p -> assertThat(p.getBar(), Matchers.is("bar2"))
 		).assertValueCount(2).assertComplete();
 		RecordedRequest request = server.takeRequest();
+		assertEquals(1, server.getRequestCount());
 		assertEquals("/pojos", request.getPath());
 		assertEquals("application/json", request.getHeader(HttpHeaders.ACCEPT));
 	}
@@ -193,6 +196,7 @@ public class WebClientIntegrationTests {
 				}
 		).assertComplete();
 		RecordedRequest request = server.takeRequest();
+		assertEquals(1, server.getRequestCount());
 		assertEquals("/pojos", request.getPath());
 		assertEquals("application/json", request.getHeader(HttpHeaders.ACCEPT));
 	}
@@ -216,6 +220,7 @@ public class WebClientIntegrationTests {
 		ts.awaitAndAssertNextValuesWith(p -> assertEquals("BARBAR", p.getBar())).assertComplete();
 
 		RecordedRequest request = server.takeRequest();
+		assertEquals(1, server.getRequestCount());
 		assertEquals("/pojo/capitalize", request.getPath());
 		assertEquals("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}", request.getBody().readUtf8());
 		assertEquals("chunked", request.getHeader(HttpHeaders.TRANSFER_ENCODING));
@@ -240,6 +245,7 @@ public class WebClientIntegrationTests {
 		ts.await().assertError();
 
 		RecordedRequest request = server.takeRequest();
+		assertEquals(1, server.getRequestCount());
 		assertEquals("*/*", request.getHeader(HttpHeaders.ACCEPT));
 		assertEquals("/greeting?name=Spring", request.getPath());
 	}
