@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,7 +132,7 @@ public class TransportHandlingSockJsService extends AbstractSockJsService implem
 
 	public SockJsMessageCodec getMessageCodec() {
 		Assert.state(this.messageCodec != null, "A SockJsMessageCodec is required but not available: " +
-				"Add Jackson 2 to the classpath, or configure a custom SockJsMessageCodec.");
+				"Add Jackson to the classpath, or configure a custom SockJsMessageCodec.");
 		return this.messageCodec;
 	}
 

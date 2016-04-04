@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -398,7 +398,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	/**
 	 * Various reference types supported by this map.
 	 */
-	public static enum ReferenceType {
+	public enum ReferenceType {
 
 		/** Use {@link SoftReference}s */
 		SOFT,
@@ -636,7 +636,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	 * A reference to an {@link Entry} contained in the map. Implementations are usually
 	 * wrappers around specific Java reference implementations (e.g., {@link SoftReference}).
 	 */
-	protected static interface Reference<K, V> {
+	protected interface Reference<K, V> {
 
 		/**
 		 * Returns the referenced entry or {@code null} if the entry is no longer
@@ -765,7 +765,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	/**
 	 * Various options supported by a {@code Task}.
 	 */
-	private static enum TaskOption {
+	private enum TaskOption {
 
 		RESTRUCTURE_BEFORE, RESTRUCTURE_AFTER, SKIP_IF_EMPTY, RESIZE
 	}
@@ -912,7 +912,7 @@ public class ConcurrentReferenceHashMap<K, V> extends AbstractMap<K, V> implemen
 	/**
 	 * The types of restructuring that can be performed.
 	 */
-	protected static enum Restructure {
+	protected enum Restructure {
 
 		WHEN_NECESSARY, NEVER
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import java.lang.annotation.Target;
  * <p>Each attribute is mutually exclusive, so only set one attribute per annotation instance
  * (the one most convenient one for your formatting needs).
  * When the pattern attribute is specified, it takes precedence over both the style and ISO attribute.
- * When the {@link #iso} attribute is specified, if takes precedence over the style attribute.
+ * When the {@link #iso} attribute is specified, it takes precedence over the style attribute.
  * When no annotation attributes are specified, the default format applied is style-based
  * with a style code of 'SS' (short date, short time).
  *
