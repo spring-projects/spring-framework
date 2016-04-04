@@ -16,6 +16,9 @@
 
 package org.springframework.web.client.reactive;
 
+import java.util.List;
+
+import org.springframework.core.codec.Encoder;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.client.reactive.ClientHttpRequestFactory;
 
@@ -29,6 +32,9 @@ public interface HttpRequestBuilder {
 
 	/**
 	 * Build a {@link ClientHttpRequest}
+	 *
+	 * @param factory the factory that creates the actual {@link ClientHttpRequest}
+	 * @param messageEncoders the {@link Encoder}s to use for encoding the request body
 	 */
-	ClientHttpRequest build(ClientHttpRequestFactory factory);
+	ClientHttpRequest build(ClientHttpRequestFactory factory, List<Encoder<?>> messageEncoders);
 }

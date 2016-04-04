@@ -18,7 +18,6 @@ package org.springframework.web.client.reactive;
 
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -40,6 +39,8 @@ import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.client.reactive.ClientHttpRequestFactory;
 import org.springframework.util.Assert;
 import org.springframework.web.client.RestClientException;
+import org.springframework.web.util.DefaultUriTemplateHandler;
+import org.springframework.web.util.UriTemplateHandler;
 
 /**
  * Builds a {@link ClientHttpRequest}
@@ -51,6 +52,8 @@ import org.springframework.web.client.RestClientException;
  */
 public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
 
+	private final UriTemplateHandler uriTemplateHandler = new DefaultUriTemplateHandler();
+
 	protected HttpMethod httpMethod;
 
 	protected HttpHeaders httpHeaders;
@@ -58,8 +61,6 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
 	protected URI url;
 
 	protected Publisher contentPublisher;
-
-	protected List<Encoder<?>> messageEncoders;
 
 	protected final List<HttpCookie> cookies = new ArrayList<HttpCookie>();
 
@@ -69,31 +70,13 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
 	public DefaultHttpRequestBuilder(HttpMethod httpMethod, String urlTemplate, Object... urlVariables) throws RestClientException {
 		this.httpMethod = httpMethod;
 		this.httpHeaders = new HttpHeaders();
-		this.url = parseURI(urlTemplate);
+		this.url = this.uriTemplateHandler.expand(urlTemplate, urlVariables);
 	}
 
 	public DefaultHttpRequestBuilder(HttpMethod httpMethod, URI url) {
 		this.httpMethod = httpMethod;
 		this.httpHeaders = new HttpHeaders();
 		this.url = url;
-	}
-
-	protected DefaultHttpRequestBuilder setMessageEncoders(List<Encoder<?>> messageEncoders) {
-		this.messageEncoders = messageEncoders;
-		return this;
-	}
-
-	private URI parseURI(String uri) throws RestClientException {
-		try {
-			return new URI(uri);
-		}
-		catch (URISyntaxException e) {
-			throw new RestClientException("could not parse URL template", e);
-		}
-	}
-
-	public DefaultHttpRequestBuilder param(String name, String... values) {
-		return this;
 	}
 
 	public DefaultHttpRequestBuilder header(String name, String... values) {
@@ -133,7 +116,7 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
 		return this;
 	}
 
-	public DefaultHttpRequestBuilder contentStream(Publisher content) {
+	public DefaultHttpRequestBuilder contentStream(Publisher<?> content) {
 		this.contentPublisher = Flux.from(content);
 		return this;
 	}
@@ -153,7 +136,7 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
 		return this;
 	}
 
-	public ClientHttpRequest build(ClientHttpRequestFactory factory) {
+	public ClientHttpRequest build(ClientHttpRequestFactory factory, List<Encoder<?>> messageEncoders) {
 		ClientHttpRequest request = factory.createRequest(this.httpMethod, this.url, this.httpHeaders);
 		request.getHeaders().putAll(this.httpHeaders);
 
@@ -161,7 +144,10 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
 			ResolvableType requestBodyType = ResolvableType.forInstance(this.contentPublisher);
 			MediaType mediaType = request.getHeaders().getContentType();
 
-			Optional<Encoder<?>> messageEncoder = resolveEncoder(requestBodyType, mediaType);
+			Optional<Encoder<?>> messageEncoder = messageEncoders
+					.stream()
+					.filter(e -> e.canEncode(requestBodyType, mediaType))
+					.findFirst();
 
 			if (messageEncoder.isPresent()) {
 				DataBufferAllocator allocator = request.allocator();
@@ -175,13 +161,7 @@ public class DefaultHttpRequestBuilder implements HttpRequestBuilder {
 						"' for content-type '" + mediaType.toString() + "'");
 			}
 		}
-
 		return request;
-	}
-
-	protected Optional<Encoder<?>> resolveEncoder(ResolvableType type, MediaType mediaType) {
-		return this.messageEncoders.stream()
-				.filter(e -> e.canEncode(type, mediaType)).findFirst();
 	}
 
 }

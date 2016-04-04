@@ -31,8 +31,6 @@ import org.springframework.core.codec.support.JacksonJsonEncoder;
 import org.springframework.core.codec.support.JsonObjectDecoder;
 import org.springframework.core.codec.support.StringDecoder;
 import org.springframework.core.codec.support.StringEncoder;
-import org.springframework.core.io.buffer.DataBufferAllocator;
-import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.reactive.ClientHttpRequest;
 import org.springframework.http.client.reactive.ClientHttpRequestFactory;
@@ -85,7 +83,6 @@ public final class WebClient {
 	 */
 	public WebClient(ClientHttpRequestFactory requestFactory) {
 		this.requestFactory = requestFactory;
-		DataBufferAllocator allocator = new DefaultDataBufferAllocator();
 		this.messageEncoders = Arrays.asList(new ByteBufferEncoder(), new StringEncoder(),
 				new JacksonJsonEncoder());
 		this.messageDecoders = Arrays.asList(new ByteBufferDecoder(), new StringDecoder(),
@@ -116,9 +113,9 @@ public final class WebClient {
 	 *     <li>returning the response with a publisher of the body</li>
 	 * </ul>
 	 */
-	public WebResponseActions perform(DefaultHttpRequestBuilder builder) {
+	public WebResponseActions perform(HttpRequestBuilder builder) {
 
-		ClientHttpRequest request = builder.setMessageEncoders(messageEncoders).build(requestFactory);
+		ClientHttpRequest request = builder.build(this.requestFactory, this.messageEncoders);
 		final Mono<ClientHttpResponse> clientResponse = request.execute()
 				.log("org.springframework.http.client.reactive");
 
