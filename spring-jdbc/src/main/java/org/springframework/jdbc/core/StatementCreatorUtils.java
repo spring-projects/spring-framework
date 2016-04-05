@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -362,6 +362,14 @@ public abstract class StatementCreatorUtils {
 			}
 			else {
 				ps.setObject(paramIndex, inValue, sqlType);
+			}
+		}
+		else if (sqlType == Types.BOOLEAN) {
+			if (inValue instanceof Boolean) {
+				ps.setBoolean(paramIndex, (Boolean) inValue);
+			}
+			else {
+				ps.setObject(paramIndex, inValue, Types.BOOLEAN);
 			}
 		}
 		else if (sqlType == Types.DATE) {
