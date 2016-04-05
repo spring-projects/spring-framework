@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package org.springframework.beans.factory.support;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +58,7 @@ import org.springframework.util.StringUtils;
 public class StaticListableBeanFactory implements ListableBeanFactory {
 
 	/** Map from bean name to bean instance */
-	private final Map<String, Object> beans = new HashMap<String, Object>();
+	private final Map<String, Object> beans = new LinkedHashMap<String, Object>();
 
 
 	/**
@@ -265,7 +264,7 @@ public class StaticListableBeanFactory implements ListableBeanFactory {
 			throws BeansException {
 
 		boolean isFactoryType = (type != null && FactoryBean.class.isAssignableFrom(type));
-		Map<String, T> matches = new HashMap<String, T>();
+		Map<String, T> matches = new LinkedHashMap<String, T>();
 
 		for (Map.Entry<String, Object> entry : this.beans.entrySet()) {
 			String beanName = entry.getKey();
