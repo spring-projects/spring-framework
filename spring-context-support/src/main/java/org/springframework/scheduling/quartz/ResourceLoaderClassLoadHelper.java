@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.scheduling.quartz;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -82,32 +81,41 @@ public class ResourceLoaderClassLoadHelper implements ClassLoadHelper {
 
 	public URL getResource(String name) {
 		Resource resource = this.resourceLoader.getResource(name);
-		try {
-			return resource.getURL();
+		if (resource.exists()) {
+			try {
+				return resource.getURL();
+			}
+			catch (IOException ex) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Could not load " + resource);
+				}
+				return null;
+			}
 		}
-		catch (FileNotFoundException ex) {
-			return null;
-		}
-		catch (IOException ex) {
-			logger.warn("Could not load " + resource);
-			return null;
+		else {
+			return getClassLoader().getResource(name);
 		}
 	}
 
 	public InputStream getResourceAsStream(String name) {
 		Resource resource = this.resourceLoader.getResource(name);
-		try {
-			return resource.getInputStream();
+		if (resource.exists()) {
+			try {
+				return resource.getInputStream();
+			}
+			catch (IOException ex) {
+				if (logger.isWarnEnabled()) {
+					logger.warn("Could not load " + resource);
+				}
+				return null;
+			}
 		}
-		catch (FileNotFoundException ex) {
-			return null;
-		}
-		catch (IOException ex) {
-			logger.warn("Could not load " + resource);
-			return null;
+		else {
+			return getClassLoader().getResourceAsStream(name);
 		}
 	}
 
+	@Override
 	public ClassLoader getClassLoader() {
 		return this.resourceLoader.getClassLoader();
 	}
