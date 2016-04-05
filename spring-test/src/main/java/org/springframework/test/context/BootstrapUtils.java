@@ -22,13 +22,11 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.MultiValueMap;
-
-import static org.springframework.beans.BeanUtils.instantiateClass;
 
 /**
  * {@code BootstrapUtils} is a collection of utility methods to assist with
@@ -80,7 +78,7 @@ abstract class BootstrapUtils {
 			if (logger.isDebugEnabled()) {
 				logger.debug(String.format("Instantiating BootstrapContext using constructor [%s]", constructor));
 			}
-			return instantiateClass(constructor, testClass, cacheAwareContextLoaderDelegate);
+			return BeanUtils.instantiateClass(constructor, testClass, cacheAwareContextLoaderDelegate);
 		}
 		catch (Throwable ex) {
 			throw new IllegalStateException("Could not load BootstrapContext [" + clazz + "]", ex);
@@ -98,7 +96,7 @@ abstract class BootstrapUtils {
 				logger.debug(String.format("Instantiating CacheAwareContextLoaderDelegate from class [%s]",
 					clazz.getName()));
 			}
-			return instantiateClass(clazz, CacheAwareContextLoaderDelegate.class);
+			return BeanUtils.instantiateClass(clazz, CacheAwareContextLoaderDelegate.class);
 		}
 		catch (Throwable ex) {
 			throw new IllegalStateException("Could not load CacheAwareContextLoaderDelegate [" + clazz + "]", ex);
@@ -134,7 +132,8 @@ abstract class BootstrapUtils {
 				logger.debug(String.format("Instantiating TestContextBootstrapper for test class [%s] from class [%s]",
 						testClass.getName(), clazz.getName()));
 			}
-			TestContextBootstrapper testContextBootstrapper = instantiateClass(clazz, TestContextBootstrapper.class);
+			TestContextBootstrapper testContextBootstrapper =
+					BeanUtils.instantiateClass(clazz, TestContextBootstrapper.class);
 			testContextBootstrapper.setBootstrapContext(bootstrapContext);
 			return testContextBootstrapper;
 		}

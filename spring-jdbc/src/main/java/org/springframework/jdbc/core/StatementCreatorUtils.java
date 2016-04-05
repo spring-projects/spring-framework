@@ -369,7 +369,7 @@ public abstract class StatementCreatorUtils {
 				ps.setBoolean(paramIndex, (Boolean) inValue);
 			}
 			else {
-				ps.setObject(paramIndex, inValue,  Types.BOOLEAN);
+				ps.setObject(paramIndex, inValue, Types.BOOLEAN);
 			}
 		}
 		else if (sqlType == Types.DATE) {
