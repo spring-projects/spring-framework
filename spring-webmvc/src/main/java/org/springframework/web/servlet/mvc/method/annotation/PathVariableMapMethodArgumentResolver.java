@@ -27,7 +27,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.method.support.AbstractAnnotationBasedHandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerMapping;
 
@@ -40,10 +40,10 @@ import org.springframework.web.servlet.HandlerMapping;
  * @since 3.2
  * @see PathVariableMethodArgumentResolver
  */
-public class PathVariableMapMethodArgumentResolver implements HandlerMethodArgumentResolver {
+public class PathVariableMapMethodArgumentResolver extends AbstractAnnotationBasedHandlerMethodArgumentResolver {
 
 	@Override
-	public boolean supportsParameter(MethodParameter parameter) {
+	protected boolean supportsLocalParameter(MethodParameter parameter) {
 		PathVariable ann = parameter.getParameterAnnotation(PathVariable.class);
 		return (ann != null && (Map.class.isAssignableFrom(parameter.getParameterType()))
 				&& !StringUtils.hasText(ann.value()));
@@ -53,8 +53,9 @@ public class PathVariableMapMethodArgumentResolver implements HandlerMethodArgum
 	 * Return a Map with all URI template variables or an empty map.
 	 */
 	@Override
-	public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
-			NativeWebRequest webRequest, WebDataBinderFactory binderFactory) throws Exception {
+	protected Object resolveLocalArgument(MethodParameter parameter,
+			ModelAndViewContainer mavContainer, NativeWebRequest webRequest,
+			WebDataBinderFactory binderFactory) throws Exception {
 
 		@SuppressWarnings("unchecked")
 		Map<String, String> uriTemplateVars =

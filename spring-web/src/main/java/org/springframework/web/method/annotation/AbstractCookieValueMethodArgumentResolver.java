@@ -50,7 +50,7 @@ public abstract class AbstractCookieValueMethodArgumentResolver extends Abstract
 
 
 	@Override
-	public boolean supportsParameter(MethodParameter parameter) {
+	protected boolean supportsLocalParameter(MethodParameter parameter) {
 		return parameter.hasParameterAnnotation(CookieValue.class);
 	}
 

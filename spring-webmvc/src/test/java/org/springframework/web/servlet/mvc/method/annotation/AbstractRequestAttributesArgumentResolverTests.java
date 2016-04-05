@@ -16,13 +16,18 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.junit.Before;
 import org.junit.Test;
-
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.GenericTypeResolver;
 import org.springframework.core.MethodParameter;
@@ -57,7 +62,20 @@ import static org.mockito.Mockito.mock;
  * @author Rossen Stoyanchev
  * @since 4.3
  */
+@RunWith(Parameterized.class)
 public abstract class AbstractRequestAttributesArgumentResolverTests {
+
+	@Parameters(name = "{0}")
+	public static List<Object[]> createParameters() {
+		List<Object[]> parameters = new ArrayList<Object[]>();
+		parameters.add(new Object[] { A.class });
+		parameters.add(new Object[] { B.class });
+		parameters.add(new Object[] { C.class });
+		return parameters;
+	}
+
+	@Parameter(0)
+	public Class<?> target;
 
 	private ServletWebRequest webRequest;
 
@@ -72,8 +90,8 @@ public abstract class AbstractRequestAttributesArgumentResolverTests {
 		HttpServletResponse response = new MockHttpServletResponse();
 		this.webRequest = new ServletWebRequest(request, response);
 		this.resolver = createResolver();
-		this.handleMethod = AbstractRequestAttributesArgumentResolverTests.class
-				.getDeclaredMethod(getHandleMethodName(), Foo.class, Foo.class, Foo.class, Optional.class);
+		this.handleMethod = target.getMethod(getHandleMethodName(), Foo.class, Foo.class,
+				Foo.class, Optional.class);
 	}
 
 
@@ -164,20 +182,35 @@ public abstract class AbstractRequestAttributesArgumentResolverTests {
 	}
 
 
-	@SuppressWarnings("unused")
-	private void handleWithRequestAttribute(
-			@RequestAttribute Foo foo,
-			@RequestAttribute("specialFoo") Foo namedFoo,
-			@RequestAttribute(name="foo", required = false) Foo notRequiredFoo,
-			@RequestAttribute(name="foo") Optional<Foo> optionalFoo) {
+	public interface A {
+		void handleWithRequestAttribute(
+				@RequestAttribute Foo foo,
+				@RequestAttribute("specialFoo") Foo namedFoo,
+				@RequestAttribute(name="foo", required = false) Foo notRequiredFoo,
+				@RequestAttribute(name="foo") Optional<Foo> optionalFoo);
+
+		void handleWithSessionAttribute(
+				@SessionAttribute Foo foo,
+				@SessionAttribute("specialFoo") Foo namedFoo,
+				@SessionAttribute(name="foo", required = false) Foo notRequiredFoo,
+				@SessionAttribute(name="foo") Optional<Foo> optionalFoo);
 	}
 
-	@SuppressWarnings("unused")
-	private void handleWithSessionAttribute(
-			@SessionAttribute Foo foo,
-			@SessionAttribute("specialFoo") Foo namedFoo,
-			@SessionAttribute(name="foo", required = false) Foo notRequiredFoo,
-			@SessionAttribute(name="foo") Optional<Foo> optionalFoo) {
+	public static abstract class B implements A {
+	}
+
+	public static class C extends B {
+
+		@Override
+		public void handleWithRequestAttribute(Foo foo, Foo namedFoo, Foo notRequiredFoo,
+				Optional<Foo> optionalFoo) {
+		}
+
+		@Override
+		public void handleWithSessionAttribute(Foo foo, Foo namedFoo, Foo notRequiredFoo,
+				Optional<Foo> optionalFoo) {
+		}
+
 	}
 
 	private static class Foo {

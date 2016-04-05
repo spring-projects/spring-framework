@@ -17,11 +17,16 @@
 package org.springframework.web.method.annotation;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -38,7 +43,20 @@ import static org.junit.Assert.*;
  *
  * @author Rossen Stoyanchev
  */
+@RunWith(Parameterized.class)
 public class ExpressionValueMethodArgumentResolverTests {
+
+	@Parameters(name = "{0}")
+	public static List<Object[]> createParameters() {
+		List<Object[]> parameters = new ArrayList<Object[]>();
+		parameters.add(new Object[] { Foo.class });
+		parameters.add(new Object[] { Bar.class });
+		parameters.add(new Object[] { Baz.class });
+		return parameters;
+	}
+
+	@Parameter(0)
+	public Class<?> target;
 
 	private ExpressionValueMethodArgumentResolver resolver;
 
@@ -57,7 +75,7 @@ public class ExpressionValueMethodArgumentResolverTests {
 		context.refresh();
 		resolver = new ExpressionValueMethodArgumentResolver(context.getBeanFactory());
 
-		Method method = getClass().getMethod("params", int.class, String.class, String.class);
+		Method method = target.getMethod("params", int.class, String.class, String.class);
 		paramSystemProperty = new MethodParameter(method, 0);
 		paramContextPath = new MethodParameter(method, 1);
 		paramNotSupported = new MethodParameter(method, 2);
@@ -97,9 +115,19 @@ public class ExpressionValueMethodArgumentResolverTests {
 		assertEquals("/contextPath", value);
 	}
 
-	public void params(@Value("#{systemProperties.systemProperty}") int param1,
-					   @Value("#{request.contextPath}") String param2,
-					   String notSupported) {
+	public interface Foo {
+		void params(@Value("#{systemProperties.systemProperty}") int param1,
+						   @Value("#{request.contextPath}") String param2,
+						   String notSupported);
 	}
 
+	public static abstract class Bar implements Foo {
+	}
+
+	public static class Baz extends Bar {
+
+		@Override
+		public void params(int param1, String param2, String notSupported) {
+		}
+	}
 }

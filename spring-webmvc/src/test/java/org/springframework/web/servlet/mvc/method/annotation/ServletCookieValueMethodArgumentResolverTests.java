@@ -17,11 +17,17 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.servlet.http.Cookie;
 
 import org.junit.Before;
 import org.junit.Test;
-
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
@@ -37,7 +43,20 @@ import static org.junit.Assert.*;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
+@RunWith(Parameterized.class)
 public class ServletCookieValueMethodArgumentResolverTests {
+
+	@Parameters
+	public static List<Object[]> createParameters() {
+		List<Object[]> parameters = new ArrayList<Object[]>();
+		parameters.add(new Object[] { Foo.class });
+		parameters.add(new Object[] { Bar.class });
+		parameters.add(new Object[] { Baz.class });
+		return parameters;
+	}
+
+	@Parameter(0)
+	public Class<?> target;
 
 	private ServletCookieValueMethodArgumentResolver resolver;
 
@@ -54,7 +73,7 @@ public class ServletCookieValueMethodArgumentResolverTests {
 	public void setUp() throws Exception {
 		resolver = new ServletCookieValueMethodArgumentResolver(null);
 
-		Method method = getClass().getMethod("params", Cookie.class, String.class);
+		Method method = target.getMethod("params", Cookie.class, String.class);
 		cookieParameter = new SynthesizingMethodParameter(method, 0);
 		cookieStringParameter = new SynthesizingMethodParameter(method, 1);
 
@@ -81,9 +100,19 @@ public class ServletCookieValueMethodArgumentResolverTests {
 		assertEquals("Invalid result", cookie.getValue(), result);
 	}
 
+	public interface Foo {
 
-	public void params(@CookieValue("name") Cookie cookie,
-			@CookieValue(name = "name", defaultValue = "bar") String cookieString) {
+		void params(@CookieValue("name") Cookie cookie,
+				@CookieValue(name = "name", defaultValue = "bar") String cookieString);
 	}
 
+	public static abstract class Bar implements Foo {
+	}
+
+	public static class Baz extends Bar {
+
+		@Override
+		public void params(Cookie cookie, String cookieString) {
+		}
+	}
 }

@@ -17,13 +17,18 @@
 package org.springframework.web.servlet.mvc.method.annotation;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
-
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 import org.springframework.core.MethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
@@ -39,7 +44,20 @@ import static org.junit.Assert.*;
  *
  * @author Rossen Stoyanchev
  */
+@RunWith(Parameterized.class)
 public class PathVariableMapMethodArgumentResolverTests {
+
+	@Parameters(name = "{0}")
+	public static List<Object[]> createParameters() {
+		List<Object[]> parameters = new ArrayList<Object[]>();
+		parameters.add(new Object[] { Foo.class });
+		parameters.add(new Object[] { Bar.class });
+		parameters.add(new Object[] { Baz.class });
+		return parameters;
+	}
+
+	@Parameter(0)
+	public Class<?> target;
 
 	private PathVariableMapMethodArgumentResolver resolver;
 
@@ -59,7 +77,7 @@ public class PathVariableMapMethodArgumentResolverTests {
 	public void setUp() throws Exception {
 		resolver = new PathVariableMapMethodArgumentResolver();
 
-		Method method = getClass().getMethod("handle", Map.class, Map.class, Map.class);
+		Method method = target.getMethod("handle", Map.class, Map.class, Map.class);
 		paramMap = new MethodParameter(method, 0);
 		paramNamedMap = new MethodParameter(method, 1);
 		paramMapNoAnnot = new MethodParameter(method, 2);
@@ -97,10 +115,22 @@ public class PathVariableMapMethodArgumentResolverTests {
 	}
 
 
-	public void handle(
+	public interface Foo {
+		void handle(
 			@PathVariable Map<String, String> map,
 			@PathVariable(value = "name") Map<String, String> namedMap,
-			Map<String, String> mapWithoutAnnotat) {
+			Map<String, String> mapWithoutAnnotat);
 	}
 
+	public static abstract class Bar implements Foo {
+	}
+
+	public class Baz extends Bar {
+
+		@Override
+		public void handle(Map<String, String> map, Map<String, String> namedMap,
+				Map<String, String> mapWithoutAnnotat) {
+		}
+
+	}
 }

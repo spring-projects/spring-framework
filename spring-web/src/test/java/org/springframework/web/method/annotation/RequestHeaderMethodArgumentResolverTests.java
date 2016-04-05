@@ -17,17 +17,21 @@
 package org.springframework.web.method.annotation;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameter;
+import org.junit.runners.Parameterized.Parameters;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.annotation.SynthesizingMethodParameter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockHttpServletResponse;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -43,8 +47,20 @@ import static org.junit.Assert.*;
  * @author Arjen Poutsma
  * @author Rossen Stoyanchev
  */
+@RunWith(Parameterized.class)
 public class RequestHeaderMethodArgumentResolverTests {
 
+	@Parameters(name = "{0}")
+	public static List<Object[]> createParameters() {
+		List<Object[]> parameters = new ArrayList<Object[]>();
+		parameters.add(new Object[] { Foo.class });
+		parameters.add(new Object[] { Bar.class });
+		parameters.add(new Object[] { Baz.class });
+		return parameters;
+	}
+
+	@Parameter(0)
+	public Class<?> target;
 	private RequestHeaderMethodArgumentResolver resolver;
 
 	private MethodParameter paramNamedDefaultValueStringHeader;
@@ -66,7 +82,8 @@ public class RequestHeaderMethodArgumentResolverTests {
 		context.refresh();
 		resolver = new RequestHeaderMethodArgumentResolver(context.getBeanFactory());
 
-		Method method = ReflectionUtils.findMethod(getClass(), "params", (Class<?>[]) null);
+		Method method = target.getMethod("params", String.class, String[].class,
+				String.class, String.class, String.class, Map.class);
 		paramNamedDefaultValueStringHeader = new SynthesizingMethodParameter(method, 0);
 		paramNamedValueStringArray = new SynthesizingMethodParameter(method, 1);
 		paramSystemProperty = new SynthesizingMethodParameter(method, 2);
@@ -165,13 +182,25 @@ public class RequestHeaderMethodArgumentResolverTests {
 	}
 
 
-	public void params(
-			@RequestHeader(name = "name", defaultValue = "bar") String param1,
-			@RequestHeader("name") String[] param2,
-			@RequestHeader(name = "name", defaultValue="#{systemProperties.systemProperty}") String param3,
-			@RequestHeader(name = "name", defaultValue="#{request.contextPath}") String param4,
-			@RequestHeader("#{systemProperties.systemProperty}") String param5,
-			@RequestHeader("name") Map<?, ?> unsupported) {
+	public interface Foo {
+		void params(
+				@RequestHeader(name = "name", defaultValue = "bar") String param1,
+				@RequestHeader("name") String[] param2,
+				@RequestHeader(name = "name", defaultValue="#{systemProperties.systemProperty}") String param3,
+				@RequestHeader(name = "name", defaultValue="#{request.contextPath}") String param4,
+				@RequestHeader("#{systemProperties.systemProperty}") String param5,
+				@RequestHeader("name") Map<?, ?> unsupported);
 	}
 
+	public static abstract class Bar implements Foo {
+	}
+
+	public static class Baz extends Bar {
+
+		@Override
+		public void params(String param1, String[] param2, String param3, String param4,
+				String param5, Map<?, ?> unsupported) {
+		}
+
+	}
 }
