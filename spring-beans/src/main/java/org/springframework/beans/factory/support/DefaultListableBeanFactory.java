@@ -1449,16 +1449,14 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 
 		private Object readResolve() {
 			Reference<?> ref = serializableFactories.get(this.id);
-			if (ref == null) {
-				throw new IllegalStateException(
-						"Cannot deserialize BeanFactory with id " + this.id + ": no factory registered for this id");
+			if (ref != null) {
+				Object result = ref.get();
+				if (result != null) {
+					return result;
+				}
 			}
-			Object result = ref.get();
-			if (result == null) {
-				throw new IllegalStateException(
-						"Cannot deserialize BeanFactory with id " + this.id + ": factory has been garbage-collected");
-			}
-			return result;
+			// Lenient fallback: dummy factory in case of original factory not found...
+			return new StaticListableBeanFactory(Collections.<String, Object> emptyMap());
 		}
 	}
 
