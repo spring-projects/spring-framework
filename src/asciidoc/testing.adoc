@@ -1143,6 +1143,7 @@ Each of the following may be used as meta-annotations in conjunction with the
 * `@Transactional`
 * `@BeforeTransaction`
 * `@AfterTransaction`
+* `@Commit`
 * `@Rollback`
 * `@Sql`
 * `@SqlConfig`
@@ -1321,9 +1322,12 @@ by default, exactly in this order.
 
 * `ServletTestExecutionListener`: configures Servlet API mocks for a
   `WebApplicationContext`
+* `DirtiesContextBeforeModesTestExecutionListener`: handles the `@DirtiesContext` annotation for
+  _before_ modes
 * `DependencyInjectionTestExecutionListener`: provides dependency injection for the test
   instance
-* `DirtiesContextTestExecutionListener`: handles the `@DirtiesContext` annotation
+* `DirtiesContextTestExecutionListener`: handles the `@DirtiesContext` annotation for
+  _after_ modes
 * `TransactionalTestExecutionListener`: provides transactional test execution with
   default rollback semantics
 * `SqlScriptsTestExecutionListener`: executes SQL scripts configured via the `@Sql`
@@ -1382,6 +1386,7 @@ any custom listeners. The following listing demonstrates this style of configura
 	@TestExecutionListeners({
 		MyCustomTestExecutionListener.class,
 		ServletTestExecutionListener.class,
+		DirtiesContextBeforeModesTestExecutionListener.class,
 		DependencyInjectionTestExecutionListener.class,
 		DirtiesContextTestExecutionListener.class,
 		TransactionalTestExecutionListener.class,
@@ -2591,8 +2596,8 @@ you can annotate your test class or test method with `@DirtiesContext` (see the
 discussion of `@DirtiesContext` in <<integration-testing-annotations-spring>>). This
 instructs Spring to remove the context from the cache and rebuild the application
 context before executing the next test. Note that support for the `@DirtiesContext`
-annotation is provided by the `DirtiesContextTestExecutionListener` which is enabled by
-default.
+annotation is provided by the `DirtiesContextBeforeModesTestExecutionListener` and the
+`DirtiesContextTestExecutionListener` which are enabled by default.
 
 
 [[testcontext-ctx-management-ctx-hierarchies]]
