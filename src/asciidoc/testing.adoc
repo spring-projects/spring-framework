@@ -1231,30 +1231,30 @@ management>>), <<testcontext-support-classes,support classes>>, and
 
 [[testcontext-key-abstractions]]
 ==== Key abstractions
-The core of the framework consists of the `TestContext` and `TestContextManager` classes
-and the `TestExecutionListener`, `ContextLoader`, and `SmartContextLoader` interfaces. A
-`TestContextManager` is created on a per-test basis (e.g., for the execution of a single
-test method in JUnit). The `TestContextManager` in turn manages a `TestContext` that
-holds the context of the current test. The `TestContextManager` also updates the state
-of the `TestContext` as the test progresses and delegates to ++TestExecutionListener++s,
-which instrument the actual test execution by providing dependency injection, managing
-transactions, and so on. A `ContextLoader` (or `SmartContextLoader`) is responsible for
-loading an `ApplicationContext` for a given test class. Consult the javadocs and the
-Spring test suite for further information and examples of various implementations.
+The core of the framework consists of the `TestContextManager` class and the
+`TestContext`, `TestExecutionListener`, and `SmartContextLoader` interfaces. A
+`TestContextManager` is created per test class (e.g., for the execution of all test
+methods within a single test class in JUnit). The `TestContextManager` in turn manages a
+`TestContext` that holds the context of the current test. The `TestContextManager` also
+updates the state of the `TestContext` as the test progresses and delegates to
+++TestExecutionListener++s, which instrument the actual test execution by providing
+dependency injection, managing transactions, and so on. A `SmartContextLoader` is
+responsible for loading an `ApplicationContext` for a given test class. Consult the
+javadocs and the Spring test suite for further information and examples of various
+implementations.
 
 * `TestContext`: Encapsulates the context in which a test is executed, agnostic of the
   actual testing framework in use, and provides context management and caching support
-  for the test instance for which it is responsible. The `TestContext` also delegates to
-  a `ContextLoader` (or `SmartContextLoader`) to load an `ApplicationContext` if
-  requested.
+  for the test instance for which it is responsible. The `TestContext` also delegates to a
+  `SmartContextLoader` to load an `ApplicationContext` if requested.
 * `TestContextManager`: The main entry point into the __Spring TestContext Framework__,
   which manages a single `TestContext` and signals events to all registered
   ++TestExecutionListener++s at well-defined test execution points:
-** prior to any __before class methods__ of a particular testing framework
-** test instance preparation
-** prior to any __before methods__ of a particular testing framework
-** after any __after methods__ of a particular testing framework
-** after any __after class methods__ of a particular testing framework
+** prior to any __before class__ or __before all__ methods of a particular testing framework
+** test instance post-processing
+** prior to any __before__ or __before each__ methods of a particular testing framework
+** after any __after__ or __after each__ methods of a particular testing framework
+** after any __after class__ or __after all__ methods of a particular testing framework
 * `TestExecutionListener`: Defines a __listener__ API for reacting to test execution
   events published by the `TestContextManager` with which the listener is registered. See
   <<testcontext-tel-config>>.
