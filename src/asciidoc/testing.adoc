@@ -2588,6 +2588,13 @@ framework will not be able to cache application contexts between test classes an
 build process will run significantly slower as a result.
 ====
 
+Since Spring Framework 4.3, the size of the context cache is bounded with a default
+maximum size of 32. Whenever the maximum size is reached, a _least recently used_ (LRU)
+eviction policy is used to evict and close stale contexts. The maximum size can be
+configured from the command line or a build script by setting a JVM system property named
+`spring.test.context.cache.maxSize`. As an alternative, the same property can be set
+programmatically via the `SpringProperties` API.
+
 Since having a large number of application contexts loaded within a given test suite can
 cause the suite to take an unnecessarily long time to execute, it is often beneficial to
 know exactly how many contexts have been loaded and cached. To view the statistics for
