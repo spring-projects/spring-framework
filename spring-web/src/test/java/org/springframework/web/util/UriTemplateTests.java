@@ -50,7 +50,7 @@ public class UriTemplateTests {
 
 	// SPR-9712
 
-	@Test @SuppressWarnings("PrimitiveArrayArgumentToVariableArgMethod")
+	@Test
 	public void expandVarArgsWithArrayValue() throws Exception {
 		UriTemplate template = new UriTemplate("/sum?numbers={numbers}");
 		URI result = template.expand(new int[] {1, 2, 3});

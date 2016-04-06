@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,11 +38,10 @@ import java.util.TimeZone;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
- * Represents HTTP request and response headers, mapping string header names to list of string values.
+ * Represents HTTP request and response headers, mapping string header names to a list of string values.
  *
  * <p>In addition to the normal methods defined by {@link Map}, this class offers the following
  * convenience methods:
@@ -52,7 +51,7 @@ import org.springframework.util.StringUtils;
  * <li>{@link #set(String, String)} sets the header value to a single string value</li>
  * </ul>
  *
- * <p>Inspired by {@link com.sun.net.httpserver.Headers}.
+ * <p>Inspired by {@code com.sun.net.httpserver.Headers}.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
