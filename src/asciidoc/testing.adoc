@@ -201,10 +201,11 @@ project with 50 to 100 Hibernate mapping files might take 10 to 20 seconds to lo
 mapping files, and incurring that cost before running every test in every test fixture
 leads to slower overall test runs that reduce developer productivity.
 
-Test classes typically declare either an array of __resource locations__ for XML
+Test classes typically declare either an array of __resource locations__ for XML or Groovy
 configuration metadata -- often in the classpath -- or an array of __annotated classes__
 that is used to configure the application. These locations or classes are the same as or
-similar to those specified in `web.xml` or other deployment configuration files.
+similar to those specified in `web.xml` or other configuration files for production
+deployments.
 
 By default, once loaded, the configured `ApplicationContext` is reused for each test.
 Thus the setup cost is incurred only once per test suite, and subsequent test execution
@@ -341,10 +342,10 @@ that will be used to load the context.
 
 +
 
-Resource locations are typically XML configuration files located in the classpath;
-whereas, annotated classes are typically `@Configuration` classes. However, resource
-locations can also refer to files in the file system, and annotated classes can be
-component classes, etc.
+Resource locations are typically XML configuration files or Groovy scripts located in
+the classpath; whereas, annotated classes are typically `@Configuration` classes. However,
+resource locations can also refer to files and scripts in the file system, and annotated
+classes can be component classes, etc.
 
 +
 
@@ -1500,9 +1501,10 @@ addition to context resource `locations` and annotated `classes`, an application
 can also be configured via application context `initializers`.
 
 The following sections explain how to configure an `ApplicationContext` via XML
-configuration files, annotated classes (typically `@Configuration` classes), or context
-initializers using Spring's `@ContextConfiguration` annotation. Alternatively, you can
-implement and configure your own custom `SmartContextLoader` for advanced use cases.
+configuration files, Groovy scripts, annotated classes (typically `@Configuration`
+classes), or context initializers using Spring's `@ContextConfiguration` annotation.
+Alternatively, you can implement and configure your own custom `SmartContextLoader` for
+advanced use cases.
 
 [[testcontext-ctx-management-xml]]
 ===== Context configuration with XML resources
@@ -1742,11 +1744,11 @@ classes to configure your tests, you will have to pick one as the __entry point_
 that one will have to include or import the other. For example, in XML or Groovy scripts
 you can include `@Configuration` classes via component scanning or define them as normal
 Spring beans; whereas, in a `@Configuration` class you can use `@ImportResource` to
-import XML configuration files. Note that this behavior is semantically equivalent to how
-you configure your application in production: in production configuration you will define
-either a set of XML or Groovy resource locations or a set of `@Configuration` classes
-that your production `ApplicationContext` will be loaded from, but you still have the
-freedom to include or import the other type of configuration.
+import XML configuration files or Groovy scripts. Note that this behavior is semantically
+equivalent to how you configure your application in production: in production
+configuration you will define either a set of XML or Groovy resource locations or a set
+of `@Configuration` classes that your production `ApplicationContext` will be loaded
+from, but you still have the freedom to include or import the other type of configuration.
 
 [[testcontext-ctx-management-initializers]]
 ===== Context configuration with context initializers
@@ -1776,8 +1778,8 @@ or the standard `@Priority` annotation.
 	}
 ----
 
-It is also possible to omit the declaration of XML configuration files or annotated
-classes in `@ContextConfiguration` entirely and instead declare only
+It is also possible to omit the declaration of XML configuration files, Groovy scripts,
+or annotated classes in `@ContextConfiguration` entirely and instead declare only
 `ApplicationContextInitializer` classes which are then responsible for registering beans
 in the context -- for example, by programmatically loading bean definitions from XML
 files or configuration classes.
