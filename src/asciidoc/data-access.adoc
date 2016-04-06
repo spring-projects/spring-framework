@@ -1778,7 +1778,7 @@ a transaction. You then pass an instance of your custom `TransactionCallback` to
 
 		// use constructor-injection to supply the PlatformTransactionManager
 		public SimpleService(PlatformTransactionManager transactionManager) {
-			Assert.notNull(transactionManager, "The ''transactionManager'' argument must not be null.");
+			Assert.notNull(transactionManager, "The 'transactionManager' argument must not be null.");
 			this.transactionTemplate = new TransactionTemplate(transactionManager);
 		}
 
@@ -1845,7 +1845,7 @@ a specific `TransactionTemplate:`
 		private final TransactionTemplate transactionTemplate;
 
 		public SimpleService(PlatformTransactionManager transactionManager) {
-			Assert.notNull(transactionManager, "The ''transactionManager'' argument must not be null.");
+			Assert.notNull(transactionManager, "The 'transactionManager' argument must not be null.");
 			this.transactionTemplate = new TransactionTemplate(transactionManager);
 
 			// the transaction settings can be set here explicitly if so desired

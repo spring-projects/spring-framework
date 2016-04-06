@@ -1991,7 +1991,7 @@ proceed with the method call: the presence of this parameter is an indication th
 	public class SimpleProfiler {
 
 		public Object profile(ProceedingJoinPoint call, String name, int age) throws Throwable {
-			StopWatch clock = new StopWatch("Profiling for ''" + name + "'' and ''" + age + "''");
+			StopWatch clock = new StopWatch("Profiling for '" + name + "' and '" + age + "'");
 			try {
 				clock.start(call.toShortString());
 				return call.proceed();

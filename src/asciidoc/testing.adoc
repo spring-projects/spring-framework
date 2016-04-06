@@ -2949,8 +2949,8 @@ framework.
 				c:loginAction-ref="loginAction" />
 
 		<bean id="loginAction" class="com.example.LoginAction"
-				c:username="#{request.getParameter(''user'')}"
-				c:password="#{request.getParameter(''pswd'')}"
+				c:username="#{request.getParameter('user')}"
+				c:password="#{request.getParameter('pswd')}"
 				scope="request">
 			<aop:scoped-proxy />
 		</bean>
@@ -3011,7 +3011,7 @@ framework.
 
 		<bean id="userPreferences"
 				class="com.example.UserPreferences"
-				c:theme="#{session.getAttribute(''theme'')}"
+				c:theme="#{session.getAttribute('theme')}"
 				scope="session">
 			<aop:scoped-proxy />
 		</bean>
@@ -4160,7 +4160,7 @@ be verified using JsonPath expressions:
 [subs="verbatim,quotes"]
 ----
 	mockMvc.perform(get("/people").accept(MediaType.APPLICATION_JSON))
-		.andExpect(jsonPath("$.links[?(@.rel == ''self'')].href").value("http://localhost:8080/people"));
+		.andExpect(jsonPath("$.links[?(@.rel == 'self')].href").value("http://localhost:8080/people"));
 ----
 
 When XML response content contains hypermedia links created with
@@ -4172,7 +4172,7 @@ be verified using XPath expressions:
 ----
 	Map<String, String> ns = Collections.singletonMap("ns", "http://www.w3.org/2005/Atom");
 	mockMvc.perform(get("/handle").accept(MediaType.APPLICATION_XML))
-		.andExpect(xpath("/person/ns:link[@rel=''self'']/@href", ns).string("http://localhost:8080/people"));
+		.andExpect(xpath("/person/ns:link[@rel='self']/@href", ns).string("http://localhost:8080/people"));
 ----
 
 [[spring-mvc-test-server-filters]]

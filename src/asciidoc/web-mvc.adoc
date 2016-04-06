@@ -3376,7 +3376,7 @@ You can prepare a link from a JSP as follows:
 ----
 <%@ taglib uri="http://www.springframework.org/tags" prefix="s" %>
 ...
-<a href="${s:mvcUrl(''PAC#getAddress'').arg(0,''US'').buildAndExpand(''123'')}">Get Address</a>
+<a href="${s:mvcUrl('PAC#getAddress').arg(0,'US').buildAndExpand('123')}">Get Address</a>
 ----
 
 The above example relies on the `mvcUrl` JSP function declared in the Spring tag library
@@ -3574,9 +3574,9 @@ defined in the previous example to customize the look and feel:
 	<%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 	<html>
 		<head>
-			<link rel="stylesheet" href="<spring:theme code=''styleSheet''/>" type="text/css"/>
+			<link rel="stylesheet" href="<spring:theme code='styleSheet'/>" type="text/css"/>
 		</head>
-		<body style="background=<spring:theme code=''background''/>">
+		<body style="background=<spring:theme code='background'/>">
 			...
 		</body>
 	</html>

@@ -3707,7 +3707,7 @@ Find below the custom `BeanPostProcessor` implementation class definition:
 
 		public Object postProcessAfterInitialization(Object bean,
 				String beanName) throws BeansException {
-			System.out.println("Bean ''" + beanName + "'' created : " + bean.toString());
+			System.out.println("Bean '" + beanName + "' created : " + bean.toString());
 			return bean;
 		}
 
@@ -7499,7 +7499,7 @@ hierarchy of property sources. To explain fully, consider the following:
 ApplicationContext ctx = new GenericApplicationContext();
 Environment env = ctx.getEnvironment();
 boolean containsFoo = env.containsProperty("foo");
-System.out.println("Does my environment contain the ''foo'' property? " + containsFoo);
+System.out.println("Does my environment contain the 'foo' property? " + containsFoo);
 ----
 
 In the snippet above, we see a high-level way of asking Spring whether the `foo` property is
