@@ -1759,8 +1759,8 @@ the concrete `ConfigurableApplicationContext` type supported by each declared
 initializer must be compatible with the type of `ApplicationContext` created by the
 `SmartContextLoader` in use (i.e., typically a `GenericApplicationContext`).
 Furthermore, the order in which the initializers are invoked depends on whether they
-implement Spring's `Ordered` interface, are annotated with Spring's `@Order` or the
-standard `@Priority` annotation.
+implement Spring's `Ordered` interface or are annotated with Spring's `@Order` annotation
+or the standard `@Priority` annotation.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
@@ -1861,8 +1861,8 @@ override (i.e., replace) those defined in `BaseConfig`.
 In the following example that uses context initializers, the `ApplicationContext` for
 `ExtendedTest` will be initialized using `BaseInitializer` __and__
 `ExtendedInitializer`. Note, however, that the order in which the initializers are
-invoked depends on whether they implement Spring's `Ordered` interface, are annotated
-with Spring's `@Order` or the standard `@Priority` annotation.
+invoked depends on whether they implement Spring's `Ordered` interface or are annotated
+with Spring's `@Order` annotation or the standard `@Priority` annotation.
 
 [source,java,indent=0]
 [subs="verbatim,quotes"]
