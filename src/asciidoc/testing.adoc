@@ -2769,7 +2769,7 @@ application context that you configured with `@ContextConfiguration`. You may us
 injection, field injection, or both, depending on which annotations you choose and
 whether you place them on setter methods or fields. For consistency with the annotation
 support introduced in Spring 2.5 and 3.0, you can use Spring's `@Autowired` annotation
-or the `@Inject` annotation from JSR 300.
+or the `@Inject` annotation from JSR 330.
 
 [TIP]
 ====
