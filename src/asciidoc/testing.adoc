@@ -75,7 +75,7 @@ The `org.springframework.mock.web` package contains a comprehensive set of Servl
 mock objects, which are useful for testing web contexts, controllers, and filters. These
 mock objects are targeted at usage with Spring's Web MVC framework and are generally more
 convenient to use than dynamic mock objects such as http://www.easymock.org[EasyMock] or
-alternative Servlet API mock objects such as http://www.mockobjects.com[MockObjects]. As of
+alternative Servlet API mock objects such as http://www.mockobjects.com[MockObjects]. Since
 Spring Framework 4.0, the set of mocks in the `org.springframework.mock.web` package is
 based on the Servlet 3.0 API.
 
@@ -1127,7 +1127,7 @@ well as any __set up__ or __tear down__ of the test fixture.
 
 [[integration-testing-annotations-meta]]
 ==== Meta-Annotation Support for Testing
-As of Spring Framework 4.0, it is possible to use test-related annotations as
+Since Spring Framework 4.0, it is possible to use test-related annotations as
 <<beans-meta-annotations,meta-annotations>> in order to create custom _composed annotations_
 and reduce configuration duplication across a test suite.
 
@@ -1347,8 +1347,8 @@ via the `@TestExecutionListeners` annotation. See
 
 Registering custom ++TestExecutionListener++s via `@TestExecutionListeners` is suitable
 for custom listeners that are used in limited testing scenarios; however, it can become
-cumbersome if a custom listener needs to be used across a test suite. To address this
-issue, Spring Framework 4.1 supports automatic discovery of _default_
+cumbersome if a custom listener needs to be used across a test suite. Since Spring
+Framework 4.1, this issue is addressed via support for automatic discovery of _default_
 `TestExecutionListener` implementations via the `SpringFactoriesLoader` mechanism.
 
 Specifically, the `spring-test` module declares all core default
@@ -1401,7 +1401,8 @@ any custom listeners. The following listing demonstrates this style of configura
 The challenge with this approach is that it requires that the developer know exactly
 which listeners are registered by default. Moreover, the set of default listeners can
 change from release to release -- for example, `SqlScriptsTestExecutionListener` was
-introduced in Spring Framework 4.1. Furthermore, third-party frameworks like Spring
+introduced in Spring Framework 4.1, and `DirtiesContextBeforeModesTestExecutionListener`
+was introduced in Spring Framework 4.2. Furthermore, third-party frameworks like Spring
 Security register their own default ++TestExecutionListener++s via the aforementioned
 <<testcontext-tel-config-automatic-discovery, automatic discovery mechanism>>.
 
@@ -2548,6 +2549,7 @@ the context cache key:
 * `locations` __(from @ContextConfiguration)__
 * `classes` __(from @ContextConfiguration)__
 * `contextInitializerClasses` __(from @ContextConfiguration)__
+* `contextCustomizers` __(from ContextCustomizerFactory)__
 * `contextLoader` __(from @ContextConfiguration)__
 * `parent` __(from @ContextHierarchy)__
 * `activeProfiles` __(from @ActiveProfiles)__
@@ -2617,7 +2619,7 @@ components. Another use case can be found in Spring Batch applications where you
 have a parent context that provides configuration for shared batch infrastructure and a
 child context for the configuration of a specific batch job.
 
-As of Spring Framework 3.2.2, it is possible to write integration tests that use context
+Since Spring Framework 3.2.2, it is possible to write integration tests that use context
 hierarchies by declaring context configuration via the `@ContextHierarchy` annotation,
 either on an individual test class or within a test class hierarchy. If a context
 hierarchy is declared on multiple classes within a test class hierarchy it is also
@@ -2921,9 +2923,8 @@ bean by name there (as shown above, assuming that "myDataSource" is the bean id)
 ==== Testing request and session scoped beans
 
 <<beans-factory-scopes-other,Request and session scoped beans>> have been supported by
-Spring for several years now, but it's always been a bit non-trivial to test them. As of
-Spring 3.2 it's a breeze to test your request-scoped and session-scoped beans by
-following these steps.
+Spring since the early years, and since Spring 3.2 it's a breeze to test your
+request-scoped and session-scoped beans by following these steps.
 
 * Ensure that a `WebApplicationContext` is loaded for your test by annotating your test
   class with `@WebAppConfiguration`.
@@ -3155,7 +3156,7 @@ via the `@Commit` and `@Rollback` annotations. See the corresponding entries in 
 
 [[testcontext-tx-programmatic-tx-mgt]]
 ===== Programmatic transaction management
-As of Spring Framework 4.1, it is possible to interact with test-managed transactions
+Since Spring Framework 4.1, it is possible to interact with test-managed transactions
 _programmatically_ via the static methods in `TestTransaction`. For example,
 `TestTransaction` may be used within _test_ methods, _before_ methods, and _after_
 methods to start or end the current test-managed transaction or to configure the current
@@ -4119,7 +4120,7 @@ This can be done as follows, where `print()` is a static import from
 ----
 
 As long as request processing does not cause an unhandled exception, the `print()` method
-will print all the available result data to `System.out`. Spring Framework 4.2 introduces
+will print all the available result data to `System.out`. Spring Framework 4.2 introduced
 a `log()` method and two additional variants of the `print()` method, one that accepts
 an `OutputStream` and one that accepts a `Writer`. For example, invoking
 `print(System.err)` will print the result data to `System.err`; while invoking
