@@ -27,12 +27,13 @@ repositories {
 }
 
 ext {
-	springVersion = '4.2.3.RELEASE'
+	springVersion = '4.3.0.RC1'
 	reactorVersion = '2.5.0.BUILD-SNAPSHOT'
 	reactorNettyVersion = '2.5.0.BUILD-SNAPSHOT'
 	tomcatVersion = '8.0.33'
-	jettyVersion = '9.3.5.v20151012'
-	nettyVersion = '4.1.0.CR3'
+	jettyVersion = '9.3.8.v20160314'
+	nettyVersion = '4.1.0.CR6'
+	jacksonVersion = '2.7.3'
 
 	javadocLinks = [
 		"http://docs.oracle.com/javase/8/docs/api/",
@@ -97,11 +98,12 @@ dependencies {
 	optional "org.springframework:spring-context-support:${springVersion}" // for FreeMarker
 	optional 'io.reactivex:rxjava:1.1.0'
 	optional "io.reactivex:rxnetty-http:0.5.2-SNAPSHOT"
-	optional "com.fasterxml.jackson.core:jackson-databind:2.6.2"
+	optional "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
+	optional "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
 	optional "io.projectreactor:reactor-netty:${reactorNettyVersion}"
 	optional "org.apache.tomcat:tomcat-util:${tomcatVersion}"
 	optional "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
-	optional 'io.undertow:undertow-core:1.3.5.Final'
+	optional 'io.undertow:undertow-core:1.3.20.Final'
 	optional "org.eclipse.jetty:jetty-server:${jettyVersion}"
 	optional "org.eclipse.jetty:jetty-servlet:${jettyVersion}"
 	optional("org.freemarker:freemarker:2.3.23")
