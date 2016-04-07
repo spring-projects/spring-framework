@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -136,7 +136,30 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	@Override
 	public void setWrappedInstance(Object object, String nestedPath, Object rootObject) {
 		super.setWrappedInstance(object, nestedPath, rootObject);
-		setIntrospectionClass(getWrappedInstance().getClass());
+		setIntrospectionClass(getWrappedClass());
+	}
+
+	/**
+	 * Set the class to introspect.
+	 * Needs to be called when the target object changes.
+	 * @param clazz the class to introspect
+	 */
+	protected void setIntrospectionClass(Class<?> clazz) {
+		if (this.cachedIntrospectionResults != null && this.cachedIntrospectionResults.getBeanClass() != clazz) {
+			this.cachedIntrospectionResults = null;
+		}
+	}
+
+	/**
+	 * Obtain a lazily initializted CachedIntrospectionResults instance
+	 * for the wrapped object.
+	 */
+	private CachedIntrospectionResults getCachedIntrospectionResults() {
+		Assert.state(getWrappedInstance() != null, "BeanWrapper does not hold a bean instance");
+		if (this.cachedIntrospectionResults == null) {
+			this.cachedIntrospectionResults = CachedIntrospectionResults.forClass(getWrappedClass());
+		}
+		return this.cachedIntrospectionResults;
 	}
 
 	/**
@@ -153,30 +176,6 @@ public class BeanWrapperImpl extends AbstractNestablePropertyAccessor implements
 	 */
 	public AccessControlContext getSecurityContext() {
 		return this.acc;
-	}
-
-	/**
-	 * Set the class to introspect.
-	 * Needs to be called when the target object changes.
-	 * @param clazz the class to introspect
-	 */
-	protected void setIntrospectionClass(Class<?> clazz) {
-		if (this.cachedIntrospectionResults != null &&
-				!clazz.equals(this.cachedIntrospectionResults.getBeanClass())) {
-			this.cachedIntrospectionResults = null;
-		}
-	}
-
-	/**
-	 * Obtain a lazily initializted CachedIntrospectionResults instance
-	 * for the wrapped object.
-	 */
-	private CachedIntrospectionResults getCachedIntrospectionResults() {
-		Assert.state(getWrappedInstance() != null, "BeanWrapper does not hold a bean instance");
-		if (this.cachedIntrospectionResults == null) {
-			this.cachedIntrospectionResults = CachedIntrospectionResults.forClass(getWrappedClass());
-		}
-		return this.cachedIntrospectionResults;
 	}
 
 

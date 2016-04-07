@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -87,10 +87,10 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		}
 	}
 
+
 	private int autoGrowCollectionLimit = Integer.MAX_VALUE;
 
-	/** The wrapped object */
-	private Object object;
+	private Object wrappedObject;
 
 	private String nestedPath = "";
 
@@ -204,23 +204,23 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	public void setWrappedInstance(Object object, String nestedPath, Object rootObject) {
 		Assert.notNull(object, "Target object must not be null");
 		if (object.getClass() == javaUtilOptionalClass) {
-			this.object = OptionalUnwrapper.unwrap(object);
+			this.wrappedObject = OptionalUnwrapper.unwrap(object);
 		}
 		else {
-			this.object = object;
+			this.wrappedObject = object;
 		}
 		this.nestedPath = (nestedPath != null ? nestedPath : "");
-		this.rootObject = (!"".equals(this.nestedPath) ? rootObject : this.object);
+		this.rootObject = (!"".equals(this.nestedPath) ? rootObject : this.wrappedObject);
 		this.nestedPropertyAccessors = null;
-		this.typeConverterDelegate = new TypeConverterDelegate(this, this.object);
+		this.typeConverterDelegate = new TypeConverterDelegate(this, this.wrappedObject);
 	}
 
 	public final Object getWrappedInstance() {
-		return this.object;
+		return this.wrappedObject;
 	}
 
 	public final Class<?> getWrappedClass() {
-		return (this.object != null ? this.object.getClass() : null);
+		return (this.wrappedObject != null ? this.wrappedObject.getClass() : null);
 	}
 
 	/**
@@ -303,7 +303,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 			catch (NotReadablePropertyException ex) {
 				throw new NotWritablePropertyException(getRootClass(), this.nestedPath + propertyName,
 						"Cannot access indexed value in property referenced " +
-								"in indexed property path '" + propertyName + "'", ex);
+						"in indexed property path '" + propertyName + "'", ex);
 			}
 			// Set value for last key.
 			String key = tokens.keys[tokens.keys.length - 1];
@@ -318,7 +318,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 				else {
 					throw new NullValueInNestedPathException(getRootClass(), this.nestedPath + propertyName,
 							"Cannot access indexed value in property referenced " +
-									"in indexed property path '" + propertyName + "': returned null");
+							"in indexed property path '" + propertyName + "': returned null");
 				}
 			}
 			if (propValue.getClass().isArray()) {
@@ -367,8 +367,8 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 						catch (NullPointerException ex) {
 							throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 									"Cannot set element with index " + index + " in List of size " +
-											size + ", accessed using property path '" + propertyName +
-											"': List does not support filling up gaps with null elements");
+									size + ", accessed using property path '" + propertyName +
+									"': List does not support filling up gaps with null elements");
 						}
 					}
 					list.add(convertedValue);
@@ -405,7 +405,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 			else {
 				throw new InvalidPropertyException(getRootClass(), this.nestedPath + propertyName,
 						"Property referenced in indexed property path '" + propertyName +
-								"' is neither an array nor a List nor a Map; returned value was [" + propValue + "]");
+						"' is neither an array nor a List nor a Map; returned value was [" + propValue + "]");
 			}
 		}
 
@@ -451,7 +451,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 					}
 					pv.getOriginalPropertyValue().conversionNecessary = (valueToApply != originalValue);
 				}
-				ph.setValue(object, valueToApply);
+				ph.setValue(this.wrappedObject, valueToApply);
 			}
 			catch (TypeMismatchException ex) {
 				throw ex;
@@ -953,10 +953,9 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 		tokens.actualName = (actualName != null ? actualName : propertyName);
 		tokens.canonicalName = tokens.actualName;
 		if (!keys.isEmpty()) {
-			tokens.canonicalName +=
-					PROPERTY_KEY_PREFIX +
-							StringUtils.collectionToDelimitedString(keys, PROPERTY_KEY_SUFFIX + PROPERTY_KEY_PREFIX) +
-							PROPERTY_KEY_SUFFIX;
+			tokens.canonicalName += PROPERTY_KEY_PREFIX +
+					StringUtils.collectionToDelimitedString(keys, PROPERTY_KEY_SUFFIX + PROPERTY_KEY_PREFIX) +
+					PROPERTY_KEY_SUFFIX;
 			tokens.keys = StringUtils.toStringArray(keys);
 		}
 		return tokens;
@@ -965,8 +964,8 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(getClass().getName());
-		if (this.object != null) {
-			sb.append(": wrapping object [").append(ObjectUtils.identityToString(this.object)).append("]");
+		if (this.wrappedObject != null) {
+			sb.append(": wrapping object [").append(ObjectUtils.identityToString(this.wrappedObject)).append("]");
 		}
 		else {
 			sb.append(": no wrapped object set");
