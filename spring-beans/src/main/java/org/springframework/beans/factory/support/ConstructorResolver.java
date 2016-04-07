@@ -272,7 +272,7 @@ class ConstructorResolver {
 						mbd, beanName, this.beanFactory, constructorToUse, argsToUse);
 			}
 
-			bw.setWrappedInstance(beanInstance);
+			bw.setBeanInstance(beanInstance);
 			return bw;
 		}
 		catch (Throwable ex) {
@@ -592,7 +592,7 @@ class ConstructorResolver {
 			if (beanInstance == null) {
 				return null;
 			}
-			bw.setWrappedInstance(beanInstance);
+			bw.setBeanInstance(beanInstance);
 			return bw;
 		}
 		catch (Throwable ex) {
