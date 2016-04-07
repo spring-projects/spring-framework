@@ -94,7 +94,9 @@ import org.springframework.web.multipart.MultipartRequest;
  * @author Arjen Poutsma
  * @since 2.5.2
  * @see #invokeHandlerMethod
+ * @deprecated as of 4.3, in favor of the {@code HandlerMethod}-based MVC infrastructure
  */
+@Deprecated
 public class HandlerMethodInvoker {
 
 	private static final String MODEL_KEY_PREFIX_STALE = SessionAttributeStore.class.getName() + ".STALE.";

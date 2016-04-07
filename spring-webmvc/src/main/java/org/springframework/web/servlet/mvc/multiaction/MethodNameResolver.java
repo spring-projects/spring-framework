@@ -28,7 +28,9 @@ import javax.servlet.http.HttpServletRequest;
  *
  * @author Rod Johnson
  * @see MultiActionController#setMethodNameResolver
+ * @deprecated as of 4.3, in favor of annotation-driven handler methods
  */
+@Deprecated
 public interface MethodNameResolver {
 
 	/**

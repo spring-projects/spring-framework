@@ -37,7 +37,9 @@ import org.springframework.util.StringUtils;
  * @since 2.5.3
  * @see ControllerClassNameHandlerMapping
  * @see org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping
+ * @deprecated as of 4.3, in favor of annotation-driven handler methods
  */
+@Deprecated
 public class ControllerBeanNameHandlerMapping extends AbstractControllerUrlHandlerMapping {
 
 	private String urlPrefix = "";

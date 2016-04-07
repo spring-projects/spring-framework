@@ -35,7 +35,9 @@ import org.springframework.web.util.WebUtils;
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
-*/
+ * @deprecated as of 4.3, in favor of annotation-driven handler methods
+ */
+@Deprecated
 public class InternalPathMethodNameResolver extends AbstractUrlMethodNameResolver {
 
 	private String prefix = "";

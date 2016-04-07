@@ -45,7 +45,9 @@ import org.springframework.util.PathMatcher;
  * @author Juergen Hoeller
  * @see java.util.Properties
  * @see org.springframework.util.AntPathMatcher
+ * @deprecated as of 4.3, in favor of annotation-driven handler methods
  */
+@Deprecated
 public class PropertiesMethodNameResolver extends AbstractUrlMethodNameResolver
 		implements InitializingBean {
 

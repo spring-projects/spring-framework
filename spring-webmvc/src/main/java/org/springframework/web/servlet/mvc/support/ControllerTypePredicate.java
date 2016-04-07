@@ -17,22 +17,24 @@
 package org.springframework.web.servlet.mvc.support;
 
 import org.springframework.web.servlet.mvc.Controller;
-import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 
 /**
  * Internal helper class that identifies controller types.
  *
  * @author Juergen Hoeller
  * @since 2.5.3
+ * @deprecated as of 4.3, in favor of annotation-driven handler methods
  */
+@Deprecated
 class ControllerTypePredicate {
 
 	public boolean isControllerType(Class<?> beanClass) {
 		return Controller.class.isAssignableFrom(beanClass);
 	}
 
+	@SuppressWarnings("deprecation")
 	public boolean isMultiActionControllerType(Class<?> beanClass) {
-		return MultiActionController.class.isAssignableFrom(beanClass);
+		return org.springframework.web.servlet.mvc.multiaction.MultiActionController.class.isAssignableFrom(beanClass);
 	}
 
 }

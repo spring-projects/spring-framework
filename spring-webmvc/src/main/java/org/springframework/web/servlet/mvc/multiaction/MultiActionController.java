@@ -127,7 +127,9 @@ import org.springframework.web.servlet.mvc.LastModified;
  * @see ParameterMethodNameResolver
  * @see org.springframework.web.servlet.mvc.LastModified#getLastModified
  * @see org.springframework.web.bind.ServletRequestDataBinder
+ * @deprecated as of 4.3, in favor of annotation-driven handler methods
  */
+@Deprecated
 public class MultiActionController extends AbstractController implements LastModified {
 
 	/** Suffix for last-modified methods */
