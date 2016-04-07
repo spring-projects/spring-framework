@@ -30,7 +30,7 @@ ext {
 	springVersion = '4.2.3.RELEASE'
 	reactorVersion = '2.5.0.BUILD-SNAPSHOT'
 	reactorNettyVersion = '2.5.0.BUILD-SNAPSHOT'
-	tomcatVersion = '8.0.28'
+	tomcatVersion = '8.0.33'
 	jettyVersion = '9.3.5.v20151012'
 	nettyVersion = '4.1.0.CR3'
 
@@ -96,7 +96,7 @@ dependencies {
 
 	optional "org.springframework:spring-context-support:${springVersion}" // for FreeMarker
 	optional 'io.reactivex:rxjava:1.1.0'
-	optional "io.reactivex:rxnetty-http:0.5.0-SNAPSHOT"
+	optional "io.reactivex:rxnetty-http:0.5.2-SNAPSHOT"
 	optional "com.fasterxml.jackson.core:jackson-databind:2.6.2"
 	optional "io.projectreactor:reactor-netty:${reactorNettyVersion}"
 	optional "org.apache.tomcat:tomcat-util:${tomcatVersion}"

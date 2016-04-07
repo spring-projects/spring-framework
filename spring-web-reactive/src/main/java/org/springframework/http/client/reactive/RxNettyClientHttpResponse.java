@@ -56,7 +56,7 @@ public class RxNettyClientHttpResponse implements ClientHttpResponse {
 		this.allocator = allocator;
 		this.response = response;
 		this.headers = new HttpHeaders();
-		this.response.headerIterator().forEachRemaining(e -> this.headers.set(e.getKey(), e.getValue()));
+		this.response.headerIterator().forEachRemaining(e -> this.headers.set(e.getKey().toString(), e.getValue().toString()));
 		this.cookies = initCookies(response);
 	}
 
