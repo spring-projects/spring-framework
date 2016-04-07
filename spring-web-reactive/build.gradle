@@ -28,7 +28,7 @@ repositories {
 
 ext {
 	springVersion = '4.2.3.RELEASE'
-	reactorVersion = '2.5.0.M2'
+	reactorVersion = '2.5.0.BUILD-SNAPSHOT'
 	reactorNettyVersion = '2.5.0.BUILD-SNAPSHOT'
 	tomcatVersion = '8.0.28'
 	jettyVersion = '9.3.5.v20151012'
