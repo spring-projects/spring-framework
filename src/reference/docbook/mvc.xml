@@ -2751,7 +2751,7 @@ deferredResult.setResult(data);
     <para>The following example shows how to configure an interceptor:</para>
 
     <programlisting language="xml">&lt;beans&gt;
-  &lt;bean id="handlerMapping" class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"&gt;
+  &lt;bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"&gt;
     &lt;property name="interceptors"&gt;
       &lt;bean class="example.MyInterceptor"/&gt;
     &lt;/property&gt;

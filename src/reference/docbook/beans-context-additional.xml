@@ -150,7 +150,7 @@
 message=Alligators rock!</programlisting>
 
     <programlisting language="java"><lineannotation># in exceptions.properties</lineannotation>
-argument.required=The '{0}' argument is required.</programlisting>
+argument.required=The {0} argument is required.</programlisting>
 
     <para>A program to execute the <classname>MessageSource</classname>
       functionality is shown in the next example. Remember that all
@@ -219,7 +219,7 @@ argument.required=The '{0}' argument is required.</programlisting>
     <programlisting>The userDao argument is required.</programlisting>
 
     <para>With regard to internationalization (i18n), Spring's various
-      <classname>MessageResource</classname> implementations follow the same
+      <classname>MessageSource</classname> implementations follow the same
       locale resolution and fallback rules as the standard JDK
       <classname>ResourceBundle</classname>. In short, and continuing with the
       example <literal>messageSource</literal> defined previously, if you want
@@ -233,7 +233,7 @@ argument.required=The '{0}' argument is required.</programlisting>
       messages will be resolved is specified manually.</para>
 
     <programlisting><lineannotation># in exceptions_en_GB.properties</lineannotation>
-argument.required=Ebagum lad, the '{0}' argument is required, I say, required.</programlisting>
+argument.required=Ebagum lad, the {0} argument is required, I say, required.</programlisting>
 
     <programlisting language="java">public static void main(final String[] args) {
   MessageSource resources = new ClassPathXmlApplicationContext("beans.xml");
