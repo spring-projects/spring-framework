@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
-
 import javax.activation.FileTypeMap;
 import javax.activation.MimetypesFileTypeMap;
 
@@ -108,9 +107,6 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 			return null;
 		}
 		long contentLength = resource.contentLength();
-		if (contentLength > Integer.MAX_VALUE) {
-			throw new IOException("Resource content too long (beyond Integer.MAX_VALUE): " + resource);
-		}
 		return (contentLength < 0 ? null : contentLength);
 	}
 
@@ -158,9 +154,7 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 	 * @throws IOException in case of errors while writing the content
 	 */
 	protected void writePartialContent(HttpRangeResource resource, HttpOutputMessage outputMessage) throws IOException {
-
 		Assert.notNull(resource, "Resource should not be null");
-
 		List<HttpRange> ranges = resource.getHttpRanges();
 		HttpHeaders responseHeaders = outputMessage.getHeaders();
 		MediaType contentType = responseHeaders.getContentType();
@@ -168,14 +162,11 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 
 		if (ranges.size() == 1) {
 			HttpRange range = ranges.get(0);
-
 			long start = range.getRangeStart(length);
 			long end = range.getRangeEnd(length);
 			long rangeLength = end - start + 1;
-
 			responseHeaders.add("Content-Range", "bytes " + start + "-" + end + "/" + length);
-			responseHeaders.setContentLength((int) rangeLength);
-
+			responseHeaders.setContentLength(rangeLength);
 			InputStream in = resource.getInputStream();
 			try {
 				copyRange(in, outputMessage.getBody(), start, end);
@@ -192,15 +183,11 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 		else {
 			String boundaryString = MimeTypeUtils.generateMultipartBoundaryString();
 			responseHeaders.set(HttpHeaders.CONTENT_TYPE, "multipart/byteranges; boundary=" + boundaryString);
-
 			OutputStream out = outputMessage.getBody();
-
 			for (HttpRange range : ranges) {
 				long start = range.getRangeStart(length);
 				long end = range.getRangeEnd(length);
-
 				InputStream in = resource.getInputStream();
-
 				// Writing MIME header.
 				println(out);
 				print(out, "--" + boundaryString);
@@ -212,7 +199,6 @@ public class ResourceHttpMessageConverter extends AbstractHttpMessageConverter<R
 				print(out, "Content-Range: bytes " + start + "-" + end + "/" + length);
 				println(out);
 				println(out);
-
 				// Printing content
 				copyRange(in, out, start, end);
 			}

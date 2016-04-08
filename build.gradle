@@ -744,52 +744,6 @@ project("spring-web") {
 	}
 }
 
-project("spring-websocket") {
-	description = "Spring WebSocket"
-
-	dependencies {
-		compile(project(":spring-core"))
-		compile(project(":spring-context"))
-		compile(project(":spring-web"))
-		optional(project(":spring-messaging"))
-		optional(project(":spring-webmvc"))
-		optional("javax.servlet:javax.servlet-api:3.1.0")
-		optional("javax.websocket:javax.websocket-api:1.0")
-		optional("org.apache.tomcat:tomcat-websocket:${tomcatVersion}") {
-			exclude group: "org.apache.tomcat", module: "tomcat-websocket-api"
-			exclude group: "org.apache.tomcat", module: "tomcat-servlet-api"
-		}
-		optional("org.glassfish.tyrus:tyrus-spi:${tyrusVersion}")
-		optional("org.glassfish.tyrus:tyrus-core:${tyrusVersion}")
-		optional("org.glassfish.tyrus:tyrus-server:${tyrusVersion}")
-		optional("org.glassfish.tyrus:tyrus-container-servlet:${tyrusVersion}")
-		optional("org.eclipse.jetty:jetty-webapp:${jettyVersion}") {
-			exclude group: "javax.servlet", module: "javax.servlet"
-		}
-		optional("org.eclipse.jetty.websocket:websocket-server:${jettyVersion}") {
-			exclude group: "javax.servlet", module: "javax.servlet"
-		}
-		optional("org.eclipse.jetty.websocket:websocket-client:${jettyVersion}")
-		optional("org.eclipse.jetty:jetty-client:${jettyVersion}")
-		optional("io.undertow:undertow-core:${undertowVersion}")
-		optional("io.undertow:undertow-servlet:${undertowVersion}") {
-			exclude group: "org.jboss.spec.javax.servlet", module: "jboss-servlet-api_3.1_spec"
-			exclude group: "org.jboss.spec.javax.annotation", module: "jboss-annotations-api_1.2_spec"
-		}
-		optional("io.undertow:undertow-websockets-jsr:${undertowVersion}") {
-			exclude group: "org.jboss.spec.javax.websocket", module: "jboss-websocket-api_1.1_spec"
-		}
-		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
-		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
-		testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
-		testCompile("org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}")
-		testCompile("io.projectreactor:reactor-net:${reactorVersion}")
-		testCompile("io.netty:netty-all:${nettyVersion}")
-		testCompile("log4j:log4j:1.2.17")
-		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
-	}
-}
-
 project("spring-orm") {
 	description = "Spring Object/Relational Mapping"
 
@@ -874,7 +828,7 @@ project("spring-webmvc") {
 		compile(files(project(":spring-core").objenesisRepackJar))
 		compile(project(":spring-expression"))
 		compile(project(":spring-web"))
-		provided("javax.servlet:javax.servlet-api:3.0.1")
+		provided("javax.servlet:javax.servlet-api:3.1.0")
 		optional(project(":spring-context-support"))  // for Velocity support
 		optional(project(":spring-oxm"))  // for MarshallingView
 		optional("javax.servlet.jsp:javax.servlet.jsp-api:2.2.1")
@@ -990,6 +944,52 @@ project("spring-webmvc-portlet") {
 		provided("javax.servlet:javax.servlet-api:3.0.1")
 		provided("javax.portlet:portlet-api:2.0")
 		optional("commons-fileupload:commons-fileupload:${fileuploadVersion}")
+	}
+}
+
+project("spring-websocket") {
+	description = "Spring WebSocket"
+
+	dependencies {
+		compile(project(":spring-core"))
+		compile(project(":spring-context"))
+		compile(project(":spring-web"))
+		optional(project(":spring-messaging"))
+		optional(project(":spring-webmvc"))
+		optional("javax.servlet:javax.servlet-api:3.1.0")
+		optional("javax.websocket:javax.websocket-api:1.0")
+		optional("org.apache.tomcat:tomcat-websocket:${tomcatVersion}") {
+			exclude group: "org.apache.tomcat", module: "tomcat-websocket-api"
+			exclude group: "org.apache.tomcat", module: "tomcat-servlet-api"
+		}
+		optional("org.glassfish.tyrus:tyrus-spi:${tyrusVersion}")
+		optional("org.glassfish.tyrus:tyrus-core:${tyrusVersion}")
+		optional("org.glassfish.tyrus:tyrus-server:${tyrusVersion}")
+		optional("org.glassfish.tyrus:tyrus-container-servlet:${tyrusVersion}")
+		optional("org.eclipse.jetty:jetty-webapp:${jettyVersion}") {
+			exclude group: "javax.servlet", module: "javax.servlet"
+		}
+		optional("org.eclipse.jetty.websocket:websocket-server:${jettyVersion}") {
+			exclude group: "javax.servlet", module: "javax.servlet"
+		}
+		optional("org.eclipse.jetty.websocket:websocket-client:${jettyVersion}")
+		optional("org.eclipse.jetty:jetty-client:${jettyVersion}")
+		optional("io.undertow:undertow-core:${undertowVersion}")
+		optional("io.undertow:undertow-servlet:${undertowVersion}") {
+			exclude group: "org.jboss.spec.javax.servlet", module: "jboss-servlet-api_3.1_spec"
+			exclude group: "org.jboss.spec.javax.annotation", module: "jboss-annotations-api_1.2_spec"
+		}
+		optional("io.undertow:undertow-websockets-jsr:${undertowVersion}") {
+			exclude group: "org.jboss.spec.javax.websocket", module: "jboss-websocket-api_1.1_spec"
+		}
+		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
+		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
+		testCompile("org.apache.tomcat.embed:tomcat-embed-websocket:${tomcatVersion}")
+		testCompile("org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}")
+		testCompile("io.projectreactor:reactor-net:${reactorVersion}")
+		testCompile("io.netty:netty-all:${nettyVersion}")
+		testCompile("log4j:log4j:1.2.17")
+		testCompile("org.slf4j:slf4j-jcl:${slf4jVersion}")
 	}
 }
 
