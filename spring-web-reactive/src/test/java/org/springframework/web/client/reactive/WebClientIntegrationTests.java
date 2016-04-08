@@ -131,6 +131,28 @@ public class WebClientIntegrationTests {
 	}
 
 	@Test
+	public void shouldGetJsonAsMonoOfString() throws Exception {
+
+		HttpUrl baseUrl = server.url("/json");
+		String content = "{\"bar\":\"barbar\",\"foo\":\"foofoo\"}";
+		this.server.enqueue(new MockResponse().setHeader("Content-Type", "application/json")
+				.setBody(content));
+
+		Mono<String> result = this.webClient
+				.perform(get(baseUrl.toString())
+						.accept(MediaType.APPLICATION_JSON))
+				.extract(body(String.class));
+
+		TestSubscriber<String> ts = new TestSubscriber();
+		result.subscribe(ts);
+		ts.awaitAndAssertNextValues(content).assertComplete();
+		RecordedRequest request = server.takeRequest();
+		assertEquals(1, server.getRequestCount());
+		assertEquals("/json", request.getPath());
+		assertEquals("application/json", request.getHeader(HttpHeaders.ACCEPT));
+	}
+
+	@Test
 	public void shouldGetJsonAsMonoOfPojo() throws Exception {
 
 		HttpUrl baseUrl = server.url("/pojo");

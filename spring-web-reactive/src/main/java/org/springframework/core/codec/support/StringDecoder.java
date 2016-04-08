@@ -25,6 +25,7 @@ import reactor.core.publisher.Flux;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils;
 
 /**
  * Decode from a bytes stream to a String stream.
@@ -63,7 +64,7 @@ public class StringDecoder extends AbstractDecoder<String> {
 	 * and decode a single consolidated String or re-emit items as they are provided
 	 */
 	public StringDecoder(boolean reduceToSingleBuffer) {
-		super(new MimeType("text", "*", DEFAULT_CHARSET));
+		super(new MimeType("text", "*", DEFAULT_CHARSET), MimeTypeUtils.ALL);
 		this.reduceToSingleBuffer = reduceToSingleBuffer;
 	}
 
