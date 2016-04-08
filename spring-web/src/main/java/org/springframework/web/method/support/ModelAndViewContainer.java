@@ -153,6 +153,7 @@ public class ModelAndViewContainer {
 
 	/**
 	 * Whether binding is disabled for the given model attribute.
+	 * @since 4.3
 	 */
 	public boolean isBindingDisabled(String name) {
 		return this.bindingDisabledAttributes.contains(name);
@@ -172,7 +173,8 @@ public class ModelAndViewContainer {
 	 * model (redirect URL preparation). Use of this method may be needed for
 	 * advanced cases when access to the "default" model is needed regardless,
 	 * e.g. to save model attributes specified via {@code @SessionAttributes}.
-	 * @return the default model, never {@code null}
+	 * @return the default model (never {@code null})
+	 * @since 4.1.4
 	 */
 	public ModelMap getDefaultModel() {
 		return this.defaultModel;
@@ -215,6 +217,7 @@ public class ModelAndViewContainer {
 
 	/**
 	 * Return the configured HTTP status, if any.
+	 * @since 4.3
 	 */
 	public HttpStatus getStatus() {
 		return this.status;

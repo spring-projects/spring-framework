@@ -16,13 +16,12 @@
 
 package org.springframework.web.method.support;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.ui.ModelMap;
 
+import static org.junit.Assert.*;
 
 /**
  * Test fixture for {@link ModelAndViewContainer}.
@@ -76,7 +75,7 @@ public class ModelAndViewContainerTests {
 		assertTrue(this.mavContainer.getModel().isEmpty());
 	}
 
-	@Test // SPR-14045
+	@Test  // SPR-14045
 	public void ignoreDefaultModelAndWithoutRedirectModel() {
 		this.mavContainer.setIgnoreDefaultModelOnRedirect(true);
 		this.mavContainer.setRedirectModelScenario(true);

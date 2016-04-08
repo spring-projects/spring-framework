@@ -64,9 +64,7 @@ public class ServletServerHttpRequestTests {
 		assertEquals("Invalid uri", uri, request.getURI());
 	}
 
-	// SPR-13876
-
-	@Test
+	@Test  // SPR-13876
 	public void getUriWithEncoding() throws Exception {
         URI uri = new URI("https://example.com/%E4%B8%AD%E6%96%87" +
 				"?redirect=https%3A%2F%2Fgithub.com%2Fspring-projects%2Fspring-framework");

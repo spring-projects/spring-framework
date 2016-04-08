@@ -29,7 +29,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 
-import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
 /**
@@ -196,9 +196,7 @@ public class InvocableHandlerMethodTests {
 		}
 	}
 
-	// SPR-13917
-
-	@Test
+	@Test  // SPR-13917
 	public void invocationErrorMessage() throws Exception {
 		HandlerMethodArgumentResolverComposite composite = new HandlerMethodArgumentResolverComposite();
 		composite.addResolver(new StubArgumentResolver(double.class, null));
