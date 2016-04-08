@@ -19,14 +19,6 @@ in our [JIRA issue tracker][] to see if you can find something similar. If not,
 please create a new issue before submitting a pull request unless the change is
 truly trivial, e.g. typo fixes, removing compiler warnings, etc.
 
-## Discuss non-trivial contribution ideas with committers
-
-If you're considering anything more than correcting a typo or fixing a minor
-bug, please discuss it on the [spring-framework-contrib][] mailing list before
-submitting a pull request. We're happy to provide guidance, but please spend an
-hour or two researching the subject on your own including searching the mailing
-list for prior discussions.
-
 ## Sign the Contributor License Agreement
 
 If you have not previously done so, please fill out and submit the
