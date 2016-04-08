@@ -147,7 +147,8 @@ public class ModelAndViewContainer {
 	 * model (redirect URL preparation). Use of this method may be needed for
 	 * advanced cases when access to the "default" model is needed regardless,
 	 * e.g. to save model attributes specified via {@code @SessionAttributes}.
-	 * @return the default model, never {@code null}
+	 * @return the default model (never {@code null})
+	 * @since 4.1.4
 	 */
 	public ModelMap getDefaultModel() {
 		return this.defaultModel;
