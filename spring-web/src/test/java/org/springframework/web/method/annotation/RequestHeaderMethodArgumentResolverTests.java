@@ -51,7 +51,8 @@ public class RequestHeaderMethodArgumentResolverTests {
 	private MethodParameter paramNamedValueStringArray;
 	private MethodParameter paramSystemProperty;
 	private MethodParameter paramContextPath;
-	private MethodParameter paramResolvedName;
+	private MethodParameter paramResolvedNameWithExpression;
+	private MethodParameter paramResolvedNameWithPlaceholder;
 	private MethodParameter paramNamedValueMap;
 
 	private MockHttpServletRequest servletRequest;
@@ -71,8 +72,9 @@ public class RequestHeaderMethodArgumentResolverTests {
 		paramNamedValueStringArray = new SynthesizingMethodParameter(method, 1);
 		paramSystemProperty = new SynthesizingMethodParameter(method, 2);
 		paramContextPath = new SynthesizingMethodParameter(method, 3);
-		paramResolvedName = new SynthesizingMethodParameter(method, 4);
-		paramNamedValueMap = new SynthesizingMethodParameter(method, 5);
+		paramResolvedNameWithExpression = new SynthesizingMethodParameter(method, 4);
+		paramResolvedNameWithPlaceholder = new SynthesizingMethodParameter(method, 5);
+		paramNamedValueMap = new SynthesizingMethodParameter(method, 6);
 
 		servletRequest = new MockHttpServletRequest();
 		webRequest = new ServletWebRequest(servletRequest, new MockHttpServletResponse());
@@ -135,13 +137,29 @@ public class RequestHeaderMethodArgumentResolverTests {
 	}
 
 	@Test
-	public void resolveNameFromSystemProperty() throws Exception {
+	public void resolveNameFromSystemPropertyThroughExpression() throws Exception {
 		String expected = "foo";
 		servletRequest.addHeader("bar", expected);
 
 		System.setProperty("systemProperty", "bar");
 		try {
-			Object result = resolver.resolveArgument(paramResolvedName, null, webRequest, null);
+			Object result = resolver.resolveArgument(paramResolvedNameWithExpression, null, webRequest, null);
+			assertTrue(result instanceof String);
+			assertEquals("Invalid result", expected, result);
+		}
+		finally {
+			System.clearProperty("systemProperty");
+		}
+	}
+
+	@Test
+	public void resolveNameFromSystemPropertyThroughPlaceholder() throws Exception {
+		String expected = "foo";
+		servletRequest.addHeader("bar", expected);
+
+		System.setProperty("systemProperty", "bar");
+		try {
+			Object result = resolver.resolveArgument(paramResolvedNameWithPlaceholder, null, webRequest, null);
 			assertTrue(result instanceof String);
 			assertEquals("Invalid result", expected, result);
 		}
@@ -171,6 +189,7 @@ public class RequestHeaderMethodArgumentResolverTests {
 			@RequestHeader(name = "name", defaultValue="#{systemProperties.systemProperty}") String param3,
 			@RequestHeader(name = "name", defaultValue="#{request.contextPath}") String param4,
 			@RequestHeader("#{systemProperties.systemProperty}") String param5,
+			@RequestHeader("${systemProperty}") String param6,
 			@RequestHeader("name") Map<?, ?> unsupported) {
 	}
 
