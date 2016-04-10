@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -236,18 +236,18 @@ public class CglibProxyTests extends AbstractAopProxyTests implements Serializab
 
 	@Test
 	public void testMultipleProxiesForIntroductionAdvisor() {
-		TestBean target = new TestBean();
-		target.setAge(20);
+		TestBean target1 = new TestBean();
+		target1.setAge(20);
 		TestBean target2 = new TestBean();
 		target2.setAge(21);
 
-		ITestBean proxy1 = getIntroductionAdvisorProxy(target);
+		ITestBean proxy1 = getIntroductionAdvisorProxy(target1);
 		ITestBean proxy2 = getIntroductionAdvisorProxy(target2);
 		assertSame("Incorrect duplicate creation of proxy classes", proxy1.getClass(), proxy2.getClass());
 	}
 
 	private ITestBean getIntroductionAdvisorProxy(TestBean target) {
-		ProxyFactory pf = new ProxyFactory(new Class<?>[] {ITestBean.class});
+		ProxyFactory pf = new ProxyFactory(ITestBean.class);
 		pf.setProxyTargetClass(true);
 
 		pf.addAdvisor(new LockMixinAdvisor());
