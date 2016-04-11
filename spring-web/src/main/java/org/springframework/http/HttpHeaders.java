@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
 /**
- * Represents HTTP request and response headers, mapping string header names to list of string values.
+ * Represents HTTP request and response headers, mapping string header names to a list of string values.
  *
  * <p>In addition to the normal methods defined by {@link Map}, this class offers the following
  * convenience methods:
@@ -51,7 +51,7 @@ import org.springframework.util.StringUtils;
  * <li>{@link #set(String, String)} sets the header value to a single string value</li>
  * </ul>
  *
- * <p>Inspired by {@link com.sun.net.httpserver.Headers}.
+ * <p>Inspired by {@code com.sun.net.httpserver.Headers}.
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
@@ -367,9 +367,9 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * @see <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1">Section 7.1.1.1 of RFC 7231</a>
 	 */
 	private static final String[] DATE_FORMATS = new String[] {
-		"EEE, dd MMM yyyy HH:mm:ss zzz",
-		"EEE, dd-MMM-yy HH:mm:ss zzz",
-		"EEE MMM dd HH:mm:ss yyyy"
+			"EEE, dd MMM yyyy HH:mm:ss zzz",
+			"EEE, dd-MMM-yy HH:mm:ss zzz",
+			"EEE MMM dd HH:mm:ss yyyy"
 	};
 
 	private static TimeZone GMT = TimeZone.getTimeZone("GMT");
@@ -779,12 +779,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * January 1, 1970 GMT. Returns -1 when the date is unknown.
 	 */
 	public long getExpires() {
-		try {
-			return getFirstDate(EXPIRES);
-		}
-		catch (IllegalArgumentException ex) {
-			return -1;
-		}
+		return getFirstDate(EXPIRES, false);
 	}
 
 	/**
@@ -802,7 +797,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * January 1, 1970 GMT. Returns -1 when the date is unknown.
 	 */
 	public long getIfModifiedSince() {
-		return getFirstDate(IF_MODIFIED_SINCE);
+		return getFirstDate(IF_MODIFIED_SINCE, false);
 	}
 
 	/**
@@ -867,7 +862,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * January 1, 1970 GMT. Returns -1 when the date is unknown.
 	 */
 	public long getLastModified() {
-		return getFirstDate(LAST_MODIFIED);
+		return getFirstDate(LAST_MODIFIED, false);
 	}
 
 	/**
@@ -951,24 +946,49 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Parse the first header value for the given header name as a date,
 	 * return -1 if there is no value, or raise {@link IllegalArgumentException}
 	 * if the value cannot be parsed as a date.
+	 * @param headerName the header name
+	 * @return the parsed date header, or -1 if none
 	 */
 	public long getFirstDate(String headerName) {
+		return getFirstDate(headerName, true);
+	}
+
+	/**
+	 * Parse the first header value for the given header name as a date,
+	 * return -1 if there is no value or also in case of an invalid value
+	 * (if {@code rejectInvalid=false}), or raise {@link IllegalArgumentException}
+	 * if the value cannot be parsed as a date.
+	 * @param headerName the header name
+	 * @param rejectInvalid whether to reject invalid values with an
+	 * {@link IllegalArgumentException} ({@code true}) or rather return -1
+	 * in that case ({@code false})
+	 * @return the parsed date header, or -1 if none (or invalid)
+ 	 */
+	private long getFirstDate(String headerName, boolean rejectInvalid) {
 		String headerValue = getFirst(headerName);
 		if (headerValue == null) {
+			// No header value sent at all
 			return -1;
 		}
-		for (String dateFormat : DATE_FORMATS) {
-			SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.US);
-			simpleDateFormat.setTimeZone(GMT);
-			try {
-				return simpleDateFormat.parse(headerValue).getTime();
-			}
-			catch (ParseException ex) {
-				// ignore
+		if (headerValue.length() >= 3) {
+			// Short "0" or "-1" like values are never valid HTTP date headers...
+			// Let's only bother with SimpleDateFormat parsing for long enough values.
+			for (String dateFormat : DATE_FORMATS) {
+				SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.US);
+				simpleDateFormat.setTimeZone(GMT);
+				try {
+					return simpleDateFormat.parse(headerValue).getTime();
+				}
+				catch (ParseException ex) {
+					// ignore
+				}
 			}
 		}
-		throw new IllegalArgumentException("Cannot parse date value \"" + headerValue +
-				"\" for \"" + headerName + "\" header");
+		if (rejectInvalid) {
+			throw new IllegalArgumentException("Cannot parse date value \"" + headerValue +
+					"\" for \"" + headerName + "\" header");
+		}
+		return -1;
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,14 +30,9 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import org.hamcrest.Matchers;
-
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 /**
  * Unit tests for {@link org.springframework.http.HttpHeaders}.
@@ -215,9 +210,7 @@ public class HttpHeadersTests {
 		assertEquals("Invalid Expires header", "Thu, 18 Dec 2008 10:20:00 GMT", headers.getFirst("expires"));
 	}
 
-	// SPR-10648 (example is from INT-3063)
-
-	@Test
+	@Test  // SPR-10648 (example is from INT-3063)
 	public void expiresInvalidDate() {
 		headers.set("Expires", "-1");
 		assertEquals(-1, headers.getExpires());
@@ -232,6 +225,18 @@ public class HttpHeadersTests {
 		assertEquals("Invalid If-Modified-Since header", date, headers.getIfModifiedSince());
 		assertEquals("Invalid If-Modified-Since header", "Thu, 18 Dec 2008 10:20:00 GMT",
 				headers.getFirst("if-modified-since"));
+	}
+
+	@Test  // SPR-14144
+	public void invalidIfModifiedSinceHeader() {
+		headers.set(HttpHeaders.IF_MODIFIED_SINCE, "0");
+		assertEquals(-1, headers.getIfModifiedSince());
+
+		headers.set(HttpHeaders.IF_MODIFIED_SINCE, "-1");
+		assertEquals(-1, headers.getIfModifiedSince());
+
+		headers.set(HttpHeaders.IF_MODIFIED_SINCE, "XXX");
+		assertEquals(-1, headers.getIfModifiedSince());
 	}
 
 	@Test
