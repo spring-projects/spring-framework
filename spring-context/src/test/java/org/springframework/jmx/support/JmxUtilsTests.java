@@ -1,17 +1,17 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.springframework.jmx.support;
@@ -193,7 +193,7 @@ public class JmxUtilsTests {
 	}
 
 
-	public static interface FooMBean {
+	public interface FooMBean {
 
 		String getName();
 	}
@@ -208,7 +208,7 @@ public class JmxUtilsTests {
 	}
 
 
-	public static interface FooMXBean {
+	public interface FooMXBean {
 
 		String getName();
 	}
@@ -224,37 +224,30 @@ public class JmxUtilsTests {
 
 
 	public static class Bar extends Foo {
-
 	}
 
 
 	public static class Abc extends Bar {
-
 	}
 
 
-	private static interface JmxInterfaceMBean {
-
+	private interface JmxInterfaceMBean {
 	}
 
 
-	private static interface JmxInterface extends JmxInterfaceMBean {
-
+	private interface JmxInterface extends JmxInterfaceMBean {
 	}
 
 
-	private static interface SpecializedJmxInterface extends JmxInterface {
-
+	private interface SpecializedJmxInterface extends JmxInterface {
 	}
 
 
-	private static interface JmxClassMBean {
-
+	private interface JmxClassMBean {
 	}
 
 
 	private static class JmxClass implements JmxClassMBean {
-
 	}
 
 }

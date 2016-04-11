@@ -30,6 +30,7 @@ import java.lang.annotation.Target;
  * conjunction with @{@link Configuration} classes.
  *
  * <h3>Example usage</h3>
+ *
  * <p>Given a file {@code app.properties} containing the key/value pair
  * {@code testbean.name=myTestBean}, the following {@code @Configuration} class
  * uses {@code @PropertySource} to contribute {@code app.properties} to the
@@ -56,6 +57,7 @@ import java.lang.annotation.Target;
  * the configuration above, a call to {@code testBean.getName()} will return "myTestBean".
  *
  * <h3>Resolving ${...} placeholders in {@code <bean>} and {@code @Value} annotations</h3>
+ *
  * In order to resolve ${...} placeholders in {@code <bean>} definitions or {@code @Value}
  * annotations using properties from a {@code PropertySource}, one must register
  * a {@code PropertySourcesPlaceholderConfigurer}. This happens automatically when using
@@ -66,9 +68,11 @@ import java.lang.annotation.Target;
  * for details and examples.
  *
  * <h3>Resolving ${...} placeholders within {@code @PropertySource} resource locations</h3>
+ *
  * Any ${...} placeholders present in a {@code @PropertySource} {@linkplain #value()
  * resource location} will be resolved against the set of property sources already
- * registered against the environment.  For example:
+ * registered against the environment. For example:
+ *
  * <pre class="code">
  * &#064;Configuration
  * &#064;PropertySource("classpath:/com/${my.placeholder:default/path}/app.properties")
@@ -92,6 +96,7 @@ import java.lang.annotation.Target;
  * IllegalArgumentException} will be thrown.
  *
  * <h3>A note on property overriding with @PropertySource</h3>
+ *
  * In cases where a given property key exists in more than one {@code .properties}
  * file, the last {@code @PropertySource} annotation processed will 'win' and override.
  *

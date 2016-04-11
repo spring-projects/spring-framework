@@ -1,29 +1,27 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.springframework.test.web.servlet.htmlunit.webdriver;
 
 import java.io.IOException;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +40,6 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
-import static org.springframework.test.web.servlet.htmlunit.webdriver.MockMvcHtmlUnitDriverBuilder.*;
 
 /**
  * Integration tests for {@link MockMvcHtmlUnitDriverBuilder}.
@@ -65,25 +62,27 @@ public class MockMvcHtmlUnitDriverBuilderTests {
 
 	private HtmlUnitDriver driver;
 
+
 	@Before
 	public void setup() {
 		this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
 	}
 
+
 	@Test(expected = IllegalArgumentException.class)
 	public void webAppContextSetupNull() {
-		webAppContextSetup(null);
+		MockMvcHtmlUnitDriverBuilder.webAppContextSetup(null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void mockMvcSetupNull() {
-		mockMvcSetup(null);
+		MockMvcHtmlUnitDriverBuilder.mockMvcSetup(null);
 	}
 
 	@Test
 	public void mockMvcSetupWithCustomDriverDelegate() throws Exception {
-		WebConnectionHtmlUnitDriver preconfiguredDriver = new WebConnectionHtmlUnitDriver();
-		this.driver = mockMvcSetup(this.mockMvc).withDelegate(preconfiguredDriver).build();
+		WebConnectionHtmlUnitDriver otherDriver = new WebConnectionHtmlUnitDriver();
+		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc).withDelegate(otherDriver).build();
 
 		assertMvcProcessed("http://localhost/test");
 		Assume.group(TestGroup.PERFORMANCE, () -> assertDelegateProcessed("http://example.com/"));
@@ -91,7 +90,7 @@ public class MockMvcHtmlUnitDriverBuilderTests {
 
 	@Test
 	public void mockMvcSetupWithDefaultDriverDelegate() throws Exception {
-		this.driver = mockMvcSetup(this.mockMvc).build();
+		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc).build();
 
 		assertMvcProcessed("http://localhost/test");
 		Assume.group(TestGroup.PERFORMANCE, () -> assertDelegateProcessed("http://example.com/"));
@@ -99,15 +98,13 @@ public class MockMvcHtmlUnitDriverBuilderTests {
 
 	@Test
 	public void javaScriptEnabledByDefault() {
-		this.driver = mockMvcSetup(this.mockMvc).build();
-
+		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc).build();
 		assertTrue(this.driver.isJavascriptEnabled());
 	}
 
 	@Test
 	public void javaScriptDisabled() {
-		this.driver = mockMvcSetup(this.mockMvc).javascriptEnabled(false).build();
-
+		this.driver = MockMvcHtmlUnitDriverBuilder.mockMvcSetup(this.mockMvc).javascriptEnabled(false).build();
 		assertFalse(this.driver.isJavascriptEnabled());
 	}
 

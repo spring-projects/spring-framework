@@ -1,17 +1,17 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not
- * use this file except in compliance with the License. You may obtain a copy of
- * the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
- * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
- * License for the specific language governing permissions and limitations under
- * the License.
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package org.springframework.test.web.servlet.htmlunit.webdriver;
@@ -69,7 +69,7 @@ public class MockMvcHtmlUnitDriverBuilder extends MockMvcWebConnectionBuilderSup
 	/**
 	 * Create a new {@code MockMvcHtmlUnitDriverBuilder} based on the supplied
 	 * {@link MockMvc} instance.
-	 * @param mockMvc the {@code MockMvc} instance to use; never {@code null}
+	 * @param mockMvc the {@code MockMvc} instance to use (never {@code null})
 	 * @return the MockMvcHtmlUnitDriverBuilder to customize
 	 */
 	public static MockMvcHtmlUnitDriverBuilder mockMvcSetup(MockMvc mockMvc) {
@@ -81,7 +81,7 @@ public class MockMvcHtmlUnitDriverBuilder extends MockMvcWebConnectionBuilderSup
 	 * Create a new {@code MockMvcHtmlUnitDriverBuilder} based on the supplied
 	 * {@link WebApplicationContext}.
 	 * @param context the {@code WebApplicationContext} to create a {@link MockMvc}
-	 * instance from; never {@code null}
+	 * instance from (never {@code null})
 	 * @return the MockMvcHtmlUnitDriverBuilder to customize
 	 */
 	public static MockMvcHtmlUnitDriverBuilder webAppContextSetup(WebApplicationContext context) {
@@ -93,8 +93,8 @@ public class MockMvcHtmlUnitDriverBuilder extends MockMvcWebConnectionBuilderSup
 	 * Create a new {@code MockMvcHtmlUnitDriverBuilder} based on the supplied
 	 * {@link WebApplicationContext} and {@link MockMvcConfigurer}.
 	 * @param context the {@code WebApplicationContext} to create a {@link MockMvc}
-	 * instance from; never {@code null}
-	 * @param configurer the {@code MockMvcConfigurer} to apply; never {@code null}
+	 * instance from (never {@code null})
+	 * @param configurer the {@code MockMvcConfigurer} to apply (never {@code null})
 	 * @return the MockMvcHtmlUnitDriverBuilder to customize
 	 */
 	public static MockMvcHtmlUnitDriverBuilder webAppContextSetup(WebApplicationContext context,
@@ -122,7 +122,7 @@ public class MockMvcHtmlUnitDriverBuilder extends MockMvcWebConnectionBuilderSup
 	 * {@linkplain #build built} by this builder should delegate to when
 	 * processing non-{@linkplain WebRequestMatcher matching} requests.
 	 * @param driver the {@code WebConnectionHtmlUnitDriver} to delegate to
-	 * for requests that do not match; never {@code null}
+	 * for requests that do not match (never {@code null})
 	 * @return this builder for further customizations
 	 * @see #build()
 	 */
