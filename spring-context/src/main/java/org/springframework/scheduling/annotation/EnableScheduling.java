@@ -163,16 +163,25 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  *
  * <p>For reference, the example above can be compared to the following Spring XML
  * configuration:
+ *
  * <pre class="code">
  * {@code
  * <beans>
+ *
  *     <task:annotation-driven scheduler="taskScheduler"/>
+ *
  *     <task:scheduler id="taskScheduler" pool-size="42"/>
- *     <task:scheduled ref="myTask" method="work" fixed-rate="1000"/>
+ *
+ *     <task:scheduled-tasks scheduler="taskScheduler">
+ *         <task:scheduled ref="myTask" method="work" fixed-rate="1000"/>
+ *     </task:scheduled-tasks>
+ *
  *     <bean id="myTask" class="com.foo.MyTask"/>
+ *
  * </beans>
  * }</pre>
- * the examples are equivalent save that in XML a <em>fixed-rate</em> period is used
+ *
+ * The examples are equivalent save that in XML a <em>fixed-rate</em> period is used
  * instead of a custom <em>{@code Trigger}</em> implementation; this is because the
  * {@code task:} namespace {@code scheduled} cannot easily expose such support. This is
  * but one demonstration how the code-based approach allows for maximum configurability
