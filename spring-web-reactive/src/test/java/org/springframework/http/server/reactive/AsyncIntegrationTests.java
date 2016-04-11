@@ -67,7 +67,7 @@ public class AsyncIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 			return response.setBody(Flux.just("h", "e", "l", "l", "o")
 			                            .useTimer(Timer.global())
 			                            .delay(Duration.ofMillis(100))
-			                            .dispatchOn(asyncGroup)
+			                            .publishOn(asyncGroup)
 			                            .collect(allocator::allocateBuffer,
 			                               (buffer, str) -> buffer.write(str.getBytes())));
 		}
