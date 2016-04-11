@@ -972,7 +972,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 */
 	public long getFirstDate(String headerName) {
 		String headerValue = getFirst(headerName);
-		if (headerValue == null) {
+		if (headerValue == null || headerValue.equals("0")) {
 			return -1;
 		}
 		for (String dateFormat : DATE_FORMATS) {

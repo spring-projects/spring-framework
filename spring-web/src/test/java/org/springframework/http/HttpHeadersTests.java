@@ -234,6 +234,13 @@ public class HttpHeadersTests {
 				headers.getFirst("if-modified-since"));
 	}
 
+	// SPR-14144
+	@Test
+	public void ifModifiedSinceHeaderIsZero() {
+		headers.set(HttpHeaders.IF_MODIFIED_SINCE, "0");
+		assertEquals(-1, headers.getFirstDate(HttpHeaders.IF_MODIFIED_SINCE));
+	}
+
 	@Test
 	public void pragma() {
 		String pragma = "no-cache";
