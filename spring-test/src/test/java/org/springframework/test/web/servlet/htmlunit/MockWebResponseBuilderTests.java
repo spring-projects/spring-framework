@@ -49,9 +49,9 @@ public class MockWebResponseBuilderTests {
 	@Before
 	public void setUp() throws Exception {
 		this.webRequest = new WebRequest(new URL("http://example.com:80/test/this/here"));
-
 		this.responseBuilder = new MockWebResponseBuilder(System.currentTimeMillis(), this.webRequest, this.response);
 	}
+
 
 	// --- constructor
 
@@ -64,6 +64,7 @@ public class MockWebResponseBuilderTests {
 	public void constructorWithNullResponse() throws Exception {
 		new MockWebResponseBuilder(0L, new WebRequest(new URL("http://example.com:80/test/this/here")), null);
 	}
+
 
 	// --- build
 

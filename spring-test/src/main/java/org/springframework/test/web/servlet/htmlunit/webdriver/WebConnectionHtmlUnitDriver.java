@@ -89,6 +89,7 @@ public class WebConnectionHtmlUnitDriver extends HtmlUnitDriver {
 
 	/**
 	 * Return the current {@link WebClient}.
+	 * @since 4.3
 	 */
 	public WebClient getWebClient() {
 		return this.webClient;

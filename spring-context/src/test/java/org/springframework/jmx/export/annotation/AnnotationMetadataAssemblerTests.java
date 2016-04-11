@@ -36,6 +36,7 @@ public class AnnotationMetadataAssemblerTests extends AbstractMetadataAssemblerT
 
 	private static final String OBJECT_NAME = "bean:name=testBean4";
 
+
 	@Test
 	public void testAttributeFromInterface() throws Exception {
 		ModelMBeanInfo inf = getMBeanInfoFromAssembler();
