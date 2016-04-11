@@ -31,9 +31,9 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.util.concurrent.SettableListenableFuture;
 
 /**
- * {@link AsyncClientHttpRequest} implementation that uses OkHttp to execute requests.
+ * {@link AsyncClientHttpRequest} implementation that uses OkHttp 3.x to execute requests.
  *
- * <p>Created via the {@link OkHttpClientHttpRequestFactory}.
+ * <p>Created via the {@link OkHttp3ClientHttpRequestFactory}.
  *
  * @author Luciano Leggieri
  * @author Arjen Poutsma
