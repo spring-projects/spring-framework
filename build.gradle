@@ -71,7 +71,7 @@ configure(allprojects) { project ->
 	ext.protobufVersion      = "2.6.1"
 	ext.reactorVersion       = "2.0.7.RELEASE"
 	ext.romeVersion          = "1.6.0"
-	ext.seleniumVersion      = "2.52.0"
+	ext.seleniumVersion      = "2.53.0"
 	ext.slf4jVersion         = "1.7.21"
 	ext.snakeyamlVersion     = "1.17"
 	ext.snifferVersion       = "1.15"
@@ -1020,11 +1020,12 @@ project("spring-test") {
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("org.hamcrest:hamcrest-core:${hamcrestVersion}")
-		optional("com.jayway.jsonpath:json-path:${jsonpathVersion}")
-		optional("org.skyscreamer:jsonassert:${jsonassertVersion}")
-		optional("xmlunit:xmlunit:${xmlunitVersion}")
+		optional("org.seleniumhq.selenium:selenium-java:${seleniumVersion}")
+		optional("org.seleniumhq.selenium:htmlunit-driver:${htmlunitVersion}")
 		optional("net.sourceforge.htmlunit:htmlunit:${htmlunitVersion}")
-		optional("org.seleniumhq.selenium:selenium-htmlunit-driver:${seleniumVersion}")
+		optional("xmlunit:xmlunit:${xmlunitVersion}")
+		optional("org.skyscreamer:jsonassert:${jsonassertVersion}")
+		optional("com.jayway.jsonpath:json-path:${jsonpathVersion}")
 		testCompile(project(":spring-context-support"))
 		testCompile(project(":spring-oxm"))
 		testCompile("javax.mail:javax.mail-api:${javamailVersion}")
