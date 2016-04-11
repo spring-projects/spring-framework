@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,13 +28,15 @@ import org.springframework.core.Ordered;
 
 /**
  * Enables Spring's annotation-driven transaction management capability, similar to
- * the support found in Spring's {@code <tx:*>} XML namespace. To be used
- * on @{@link org.springframework.context.annotation.Configuration Configuration} classes
+ * the support found in Spring's {@code <tx:*>} XML namespace. To be used on
+ * @{@link org.springframework.context.annotation.Configuration Configuration} classes
  * as follows:
+ *
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableTransactionManagement
  * public class AppConfig {
+ *
  *     &#064;Bean
  *     public FooRepository fooRepository() {
  *         // configure and return a class having &#064;Transactional methods
@@ -54,19 +56,26 @@ import org.springframework.core.Ordered;
  *
  * <p>For reference, the example above can be compared to the following Spring XML
  * configuration:
+ *
  * <pre class="code">
  * {@code
  * <beans>
+ *
  *     <tx:annotation-driven/>
+ *
  *     <bean id="fooRepository" class="com.foo.JdbcFooRepository">
  *         <constructor-arg ref="dataSource"/>
  *     </bean>
+ *
  *     <bean id="dataSource" class="com.vendor.VendorDataSource"/>
+ *
  *     <bean id="transactionManager" class="org.sfwk...DataSourceTransactionManager">
  *         <constructor-arg ref="dataSource"/>
  *     </bean>
+ *
  * </beans>
  * }</pre>
+ *
  * In both of the scenarios above, {@code @EnableTransactionManagement} and {@code
  * <tx:annotation-driven/>} are responsible for registering the necessary Spring
  * components that power annotation-driven transaction management, such as the
@@ -87,10 +96,12 @@ import org.springframework.core.Ordered;
  * {@code @EnableTransactionManagement} and the exact transaction manager bean to be used,
  * the {@link TransactionManagementConfigurer} callback interface may be implemented -
  * notice the {@code implements} clause and the {@code @Override}-annotated method below:
+ *
  * <pre class="code">
  * &#064;Configuration
  * &#064;EnableTransactionManagement
  * public class AppConfig implements TransactionManagementConfigurer {
+ *
  *     &#064;Bean
  *     public FooRepository fooRepository() {
  *         // configure and return a class having &#064;Transactional methods
@@ -112,6 +123,7 @@ import org.springframework.core.Ordered;
  *         return txManager();
  *     }
  * }</pre>
+ *
  * This approach may be desirable simply because it is more explicit, or it may be
  * necessary in order to distinguish between two {@code PlatformTransactionManager} beans
  * present in the same container.  As the name suggests, the

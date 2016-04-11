@@ -64,8 +64,7 @@ import org.springframework.core.Ordered;
  * {@code void} return type cannot transmit any exception back to the caller. By default,
  * such uncaught exceptions are only logged.
  *
- * <p>To customize all this, implement {@link AsyncConfigurer} and
- * provide:
+ * <p>To customize all this, implement {@link AsyncConfigurer} and provide:
  * <ul>
  * <li>your own {@link java.util.concurrent.Executor Executor} through the
  * {@link AsyncConfigurer#getAsyncExecutor getAsyncExecutor()} method, and</li>
@@ -114,13 +113,19 @@ import org.springframework.core.Ordered;
  *
  * <p>For reference, the example above can be compared to the following Spring XML
  * configuration:
+ *
  * <pre class="code">
  * {@code
  * <beans>
+ *
  *     <task:annotation-driven executor="myExecutor" exception-handler="exceptionHandler"/>
+ *
  *     <task:executor id="myExecutor" pool-size="7-42" queue-capacity="11"/>
+ *
  *     <bean id="asyncBean" class="com.foo.MyAsyncBean"/>
+ *
  *     <bean id="exceptionHandler" class="com.foo.MyAsyncUncaughtExceptionHandler"/>
+ *
  * </beans>
  * }</pre>
  *
@@ -148,8 +153,8 @@ public @interface EnableAsync {
 	/**
 	 * Indicate the 'async' annotation type to be detected at either class
 	 * or method level.
-	 * <p>By default, both Spring's @{@link Async} annotation and the EJB
-	 * 3.1 {@code @javax.ejb.Asynchronous} annotation will be detected.
+	 * <p>By default, both Spring's @{@link Async} annotation and the EJB 3.1
+	 * {@code @javax.ejb.Asynchronous} annotation will be detected.
 	 * <p>This attribute exists so that developers can provide their own
 	 * custom annotation type to indicate that a method (or all methods of
 	 * a given class) should be invoked asynchronously.
