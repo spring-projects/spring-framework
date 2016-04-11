@@ -168,7 +168,9 @@ import org.springframework.scheduling.config.ScheduledTaskRegistrar;
  * <beans>
  *     <task:annotation-driven scheduler="taskScheduler"/>
  *     <task:scheduler id="taskScheduler" pool-size="42"/>
- *     <task:scheduled ref="myTask" method="work" fixed-rate="1000"/>
+ *     <task:scheduled-tasks scheduler="taskScheduler">
+ *         <task:scheduled ref="myTask" method="work" fixed-rate="1000"/>
+ *     </task:scheduled-tasks>
  *     <bean id="myTask" class="com.foo.MyTask"/>
  * </beans>
  * }</pre>
