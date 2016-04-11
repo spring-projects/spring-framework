@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.util.Assert;
 
 /**
- * {@link org.springframework.http.client.ClientHttpResponse} implementation that uses
- * Netty 4 to execute requests.
+ * {@link org.springframework.http.client.ClientHttpResponse} implementation
+ * that uses Netty 4 to parse responses.
  *
  * @author Arjen Poutsma
  * @since 4.1.2
