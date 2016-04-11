@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,8 @@ import org.springframework.util.FileCopyUtils;
 public class OverridingClassLoader extends DecoratingClassLoader {
 
 	/** Packages that are excluded by default */
-	public static final String[] DEFAULT_EXCLUDED_PACKAGES = new String[] {"java.", "javax.", "sun.", "oracle."};
+	public static final String[] DEFAULT_EXCLUDED_PACKAGES = new String[]
+			{"java.", "javax.", "sun.", "oracle.", "javassist.", "org.springframework.core."};
 
 	private static final String CLASS_FILE_SUFFIX = ".class";
 
@@ -49,12 +50,26 @@ public class OverridingClassLoader extends DecoratingClassLoader {
 	}
 
 
+	private final ClassLoader overrideDelegate;
+
+
 	/**
 	 * Create a new OverridingClassLoader for the given ClassLoader.
 	 * @param parent the ClassLoader to build an overriding ClassLoader for
 	 */
 	public OverridingClassLoader(ClassLoader parent) {
+		this(parent, null);
+	}
+
+	/**
+	 * Create a new OverridingClassLoader for the given ClassLoader.
+	 * @param parent the ClassLoader to build an overriding ClassLoader for
+	 * @param overrideDelegate the ClassLoader to delegate to for overriding
+	 * @since 4.3
+	 */
+	public OverridingClassLoader(ClassLoader parent, ClassLoader overrideDelegate) {
 		super(parent);
+		this.overrideDelegate = overrideDelegate;
 		for (String packageName : DEFAULT_EXCLUDED_PACKAGES) {
 			excludePackage(packageName);
 		}
@@ -62,20 +77,25 @@ public class OverridingClassLoader extends DecoratingClassLoader {
 
 
 	@Override
+	public Class<?> loadClass(String name) throws ClassNotFoundException {
+		if (this.overrideDelegate != null && isEligibleForOverriding(name)) {
+			return this.overrideDelegate.loadClass(name);
+		}
+		return super.loadClass(name);
+	}
+
+	@Override
 	protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
-		Class<?> result = null;
 		if (isEligibleForOverriding(name)) {
-			result = loadClassForOverriding(name);
-		}
-		if (result != null) {
-			if (resolve) {
-				resolveClass(result);
+			Class<?> result = loadClassForOverriding(name);
+			if (result != null) {
+				if (resolve) {
+					resolveClass(result);
+				}
+				return result;
 			}
-			return result;
 		}
-		else {
-			return super.loadClass(name, resolve);
-		}
+		return super.loadClass(name, resolve);
 	}
 
 	/**
