@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -86,7 +86,10 @@ public class SpringCacheAnnotationParser implements CacheAnnotationParser, Seria
 		if (cachings != null) {
 			ops = lazyInit(ops);
 			for (Caching caching : cachings) {
-				ops.addAll(parseCachingAnnotation(ae, cachingConfig, caching));
+				Collection<CacheOperation> cachingOps = parseCachingAnnotation(ae, cachingConfig, caching);
+				if (cachingOps != null) {
+					ops.addAll(cachingOps);
+				}
 			}
 		}
 
