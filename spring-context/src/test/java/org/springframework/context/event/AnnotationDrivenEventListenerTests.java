@@ -156,6 +156,19 @@ public class AnnotationDrivenEventListenerTests {
 	}
 
 	@Test
+	public void asyncWithReplyEventListener() {
+		AnnotationConfigApplicationContext failingContext =
+				new AnnotationConfigApplicationContext();
+		failingContext.register(BasicConfiguration.class,
+				InvalidAsyncEventListener.class);
+
+		this.thrown.expect(BeanInitializationException.class);
+		this.thrown.expectMessage(InvalidAsyncEventListener.class.getName());
+		this.thrown.expectMessage("asyncCannotUseReply");
+		failingContext.refresh();
+	}
+
+	@Test
 	public void simpleReply() {
 		load(TestEventListener.class, ReplyEventListener.class);
 		AnotherTestEvent event = new AnotherTestEvent(this, "dummy");
@@ -656,6 +669,17 @@ public class AnnotationDrivenEventListenerTests {
 		}
 	}
 
+	@Component
+	static class InvalidAsyncEventListener {
+
+		@EventListener
+		@Async
+		public Integer asyncCannotUseReply(String payload) {
+			return 42;
+		}
+
+	}
+
 
 	@Component
 	static class ReplyEventListener extends AbstractTestEventListener {
@@ -766,6 +790,7 @@ public class AnnotationDrivenEventListenerTests {
 			this.eventCollector.addEvent(this, event);
 			this.countDownLatch.countDown();
 		}
+
 	}
 
 
@@ -867,7 +892,6 @@ public class AnnotationDrivenEventListenerTests {
 			collectEvent(value);
 		}
 	}
-
 
 
 	@EventListener

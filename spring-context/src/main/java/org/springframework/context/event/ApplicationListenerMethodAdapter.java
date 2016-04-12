@@ -35,8 +35,10 @@ import org.springframework.context.expression.AnnotatedElementKey;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.annotation.AnnotatedElementUtils;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.annotation.Order;
 import org.springframework.expression.EvaluationContext;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
@@ -82,12 +84,21 @@ public class ApplicationListenerMethodAdapter implements GenericApplicationListe
 
 
 	public ApplicationListenerMethodAdapter(String beanName, Class<?> targetClass, Method method) {
+		validateMethod(method);
 		this.beanName = beanName;
 		this.method = method;
 		this.targetClass = targetClass;
 		this.bridgedMethod = BridgeMethodResolver.findBridgedMethod(method);
 		this.declaredEventTypes = resolveDeclaredEventTypes();
 		this.methodKey = new AnnotatedElementKey(this.method, this.targetClass);
+	}
+
+	private static void validateMethod(Method method) {
+		if (method.getReturnType() != void.class &&
+				AnnotationUtils.findAnnotation(method, Async.class) != null) {
+			throw new IllegalStateException(
+					"Asynchronous @EventListener method is not allowed to return reply events: " + method);
+		}
 	}
 
 
