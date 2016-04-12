@@ -20,6 +20,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Role;
+import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 import org.springframework.scheduling.config.TaskManagementConfigUtils;
 
 /**
@@ -31,6 +32,7 @@ import org.springframework.scheduling.config.TaskManagementConfigUtils;
  * for complete usage details.
  *
  * @author Chris Beams
+ * @author Tobias Montagna-Hay
  * @since 3.1
  * @see EnableScheduling
  * @see ScheduledAnnotationBeanPostProcessor
@@ -42,7 +44,13 @@ public class SchedulingConfiguration {
 	@Bean(name = TaskManagementConfigUtils.SCHEDULED_ANNOTATION_PROCESSOR_BEAN_NAME)
 	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
 	public ScheduledAnnotationBeanPostProcessor scheduledAnnotationProcessor() {
-		return new ScheduledAnnotationBeanPostProcessor();
+		return new ScheduledAnnotationBeanPostProcessor(scheduledTaskRegistrar());
+	}
+	
+	@Bean(name = TaskManagementConfigUtils.SCHEDULED_TASK_REGISTRAR_BEAN_NAME)
+	@Role(BeanDefinition.ROLE_INFRASTRUCTURE)
+	public ScheduledTaskRegistrar scheduledTaskRegistrar() {
+		return new ScheduledTaskRegistrar();
 	}
 
 }

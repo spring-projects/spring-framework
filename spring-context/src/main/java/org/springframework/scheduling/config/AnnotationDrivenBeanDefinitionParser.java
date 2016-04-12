@@ -37,6 +37,7 @@ import org.springframework.util.StringUtils;
  * @author Ramnivas Laddad
  * @author Chris Beams
  * @author Stephane Nicoll
+ * @author Tobias Montagna-Hay
  * @since 3.0
  */
 public class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParser {
@@ -94,6 +95,7 @@ public class AnnotationDrivenBeanDefinitionParser implements BeanDefinitionParse
 			BeanDefinitionBuilder builder = BeanDefinitionBuilder.genericBeanDefinition(
 					"org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProcessor");
 			builder.getRawBeanDefinition().setSource(source);
+			builder.addConstructorArgValue(new ScheduledTaskRegistrar());
 			String scheduler = element.getAttribute("scheduler");
 			if (StringUtils.hasText(scheduler)) {
 				builder.addPropertyReference("scheduler", scheduler);

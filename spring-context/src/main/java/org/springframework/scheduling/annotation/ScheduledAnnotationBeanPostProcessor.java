@@ -73,6 +73,7 @@ import org.springframework.util.StringValueResolver;
  * @author Juergen Hoeller
  * @author Chris Beams
  * @author Elizabeth Chatman
+ * @author Tobias Montagna-Hay
  * @since 3.0
  * @see Scheduled
  * @see EnableScheduling
@@ -104,11 +105,14 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 
 	private ApplicationContext applicationContext;
 
-	private final ScheduledTaskRegistrar registrar = new ScheduledTaskRegistrar();
+	private ScheduledTaskRegistrar registrar;
 
 	private final Set<Class<?>> nonAnnotatedClasses =
 			Collections.newSetFromMap(new ConcurrentHashMap<Class<?>, Boolean>(64));
 
+	public ScheduledAnnotationBeanPostProcessor(ScheduledTaskRegistrar scheduledTaskRegistrar) {
+		registrar = scheduledTaskRegistrar;
+	}
 
 	@Override
 	public int getOrder() {
