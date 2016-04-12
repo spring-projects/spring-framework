@@ -594,8 +594,7 @@ public class AnnotatedElementUtilsTests {
 
 	@Test
 	public void findMergedAnnotationAttributesOnClassWithAttributeAliasInComposedAnnotationAndNestedAnnotationsInTargetAnnotation() {
-		AnnotationAttributes attributes = assertComponentScanAttributes(TestComponentScanClass.class,
-			"com.example.app.test");
+		AnnotationAttributes attributes = assertComponentScanAttributes(TestComponentScanClass.class, "com.example.app.test");
 
 		Filter[] excludeFilters = attributes.getAnnotationArray("excludeFilters", Filter.class);
 		assertNotNull(excludeFilters);
