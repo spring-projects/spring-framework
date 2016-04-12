@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -97,15 +97,14 @@ public class ReflectiveLoadTimeWeaver implements LoadTimeWeaver {
 		Assert.notNull(classLoader, "ClassLoader must not be null");
 		this.classLoader = classLoader;
 		this.addTransformerMethod = ClassUtils.getMethodIfAvailable(
-				this.classLoader.getClass(), ADD_TRANSFORMER_METHOD_NAME,
-				new Class<?>[] {ClassFileTransformer.class});
+				this.classLoader.getClass(), ADD_TRANSFORMER_METHOD_NAME, ClassFileTransformer.class);
 		if (this.addTransformerMethod == null) {
 			throw new IllegalStateException(
 					"ClassLoader [" + classLoader.getClass().getName() + "] does NOT provide an " +
 					"'addTransformer(ClassFileTransformer)' method.");
 		}
 		this.getThrowawayClassLoaderMethod = ClassUtils.getMethodIfAvailable(
-				this.classLoader.getClass(), GET_THROWAWAY_CLASS_LOADER_METHOD_NAME, new Class<?>[0]);
+				this.classLoader.getClass(), GET_THROWAWAY_CLASS_LOADER_METHOD_NAME);
 		// getThrowawayClassLoader method is optional
 		if (this.getThrowawayClassLoaderMethod == null) {
 			if (logger.isInfoEnabled()) {
