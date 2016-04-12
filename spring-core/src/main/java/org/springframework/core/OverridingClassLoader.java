@@ -23,12 +23,12 @@ import org.springframework.lang.UsesJava7;
 import org.springframework.util.FileCopyUtils;
 
 /**
- * {@code ClassLoader} that does <i>not</i> always delegate to the
- * parent loader, as normal class loaders do. This enables, for example,
- * instrumentation to be forced in the overriding ClassLoader, or a
- * "throwaway" class loading behavior, where selected classes are
- * temporarily loaded in the overriding ClassLoader, in order to load
- * an instrumented version of the class in the parent ClassLoader later on.
+ * {@code ClassLoader} that does <i>not</i> always delegate to the parent loader
+ * as normal class loaders do. This enables, for example, instrumentation to be
+ * forced in the overriding ClassLoader, or a "throwaway" class loading behavior
+ * where selected application classes are temporarily loaded in the overriding
+ * {@code ClassLoader} for introspection purposes before eventually loading an
+ * instrumented version of the class in the given parent {@code ClassLoader}.
  *
  * @author Rod Johnson
  * @author Juergen Hoeller
@@ -39,7 +39,7 @@ public class OverridingClassLoader extends DecoratingClassLoader {
 
 	/** Packages that are excluded by default */
 	public static final String[] DEFAULT_EXCLUDED_PACKAGES = new String[]
-			{"java.", "javax.", "sun.", "oracle.", "javassist.", "org.springframework.core."};
+			{"java.", "javax.", "sun.", "oracle.", "javassist.", "org.aspectj.", "net.sf.cglib."};
 
 	private static final String CLASS_FILE_SUFFIX = ".class";
 
