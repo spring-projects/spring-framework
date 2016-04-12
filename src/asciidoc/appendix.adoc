@@ -3163,9 +3163,9 @@ the correct schema so that the tags in the `cache` namespace are available to yo
 	<?xml version="1.0" encoding="UTF-8"?>
 	<beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		__xmlns:jdbc="http://www.springframework.org/schema/cache"__ xsi:schemaLocation="
+		__xmlns:cache="http://www.springframework.org/schema/cache"__ xsi:schemaLocation="
 			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-			__http://www.springframework.org/schema/cache http://www.springframework.org/schema/jdbc/spring-cache.xsd"__> <!-- bean definitions here -->
+			__http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd"__> <!-- bean definitions here -->
 
 	</beans>
 ----
