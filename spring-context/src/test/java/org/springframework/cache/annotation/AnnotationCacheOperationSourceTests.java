@@ -33,7 +33,6 @@ import org.springframework.cache.interceptor.CacheEvictOperation;
 import org.springframework.cache.interceptor.CacheOperation;
 import org.springframework.cache.interceptor.CacheableOperation;
 import org.springframework.core.annotation.AliasFor;
-import org.springframework.util.ReflectionUtils;
 
 import static org.junit.Assert.*;
 
@@ -49,17 +48,6 @@ public class AnnotationCacheOperationSourceTests {
 
 	private final AnnotationCacheOperationSource source = new AnnotationCacheOperationSource();
 
-
-	private Collection<CacheOperation> getOps(Class<?> target, String name, int expectedNumberOfOperations) {
-		Collection<CacheOperation> result = getOps(target, name);
-		assertEquals("Wrong number of operation(s) for '" + name + "'", expectedNumberOfOperations, result.size());
-		return result;
-	}
-
-	private Collection<CacheOperation> getOps(Class<?> target, String name) {
-		Method method = ReflectionUtils.findMethod(target, name);
-		return source.getCacheOperations(method, target);
-	}
 
 	@Test
 	public void singularAnnotation() throws Exception {
@@ -234,6 +222,22 @@ public class AnnotationCacheOperationSourceTests {
 	}
 
 
+	private Collection<CacheOperation> getOps(Class<?> target, String name, int expectedNumberOfOperations) {
+		Collection<CacheOperation> result = getOps(target, name);
+		assertEquals("Wrong number of operation(s) for '" + name + "'", expectedNumberOfOperations, result.size());
+		return result;
+	}
+
+	private Collection<CacheOperation> getOps(Class<?> target, String name) {
+		try {
+			Method method = target.getMethod(name);
+			return source.getCacheOperations(method, target);
+		}
+		catch (NoSuchMethodException ex) {
+			throw new IllegalStateException(ex);
+		}
+	}
+
 	private void assertSharedConfig(CacheOperation actual, String keyGenerator, String cacheManager,
 			String cacheResolver, String... cacheNames) {
 
@@ -241,8 +245,8 @@ public class AnnotationCacheOperationSourceTests {
 		assertEquals("Wrong cache manager", cacheManager, actual.getCacheManager());
 		assertEquals("Wrong cache resolver", cacheResolver, actual.getCacheResolver());
 		assertEquals("Wrong number of cache names", cacheNames.length, actual.getCacheNames().size());
-		Arrays.stream(cacheNames).forEach(
-				cacheName -> assertTrue("Cache '" + cacheName + "' not found in " + actual.getCacheNames(),
+		Arrays.stream(cacheNames).forEach(cacheName ->
+				assertTrue("Cache '" + cacheName + "' not found in " + actual.getCacheNames(),
 						actual.getCacheNames().contains(cacheName)));
 	}
 
