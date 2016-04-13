@@ -71,13 +71,20 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	}
 
 	/**
-	 * Construct an {@code AbstractHttpMessageConverter} with multiple supported media type.
+	 * Construct an {@code AbstractHttpMessageConverter} with multiple supported media types.
 	 * @param supportedMediaTypes the supported media types
 	 */
 	protected AbstractHttpMessageConverter(MediaType... supportedMediaTypes) {
 		setSupportedMediaTypes(Arrays.asList(supportedMediaTypes));
 	}
 
+	/**
+	 * Construct an {@code AbstractHttpMessageConverter} with a default charset and
+	 * multiple supported media types.
+	 * @param defaultCharset the default character set
+	 * @param supportedMediaTypes the supported media types
+	 * @since 4.3
+	 */
 	protected AbstractHttpMessageConverter(Charset defaultCharset, MediaType... supportedMediaTypes) {
 		this.defaultCharset = defaultCharset;
 		setSupportedMediaTypes(Arrays.asList(supportedMediaTypes));
@@ -98,15 +105,21 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	}
 
 	/**
-	 * Set the default character set if any.
+	 * Set the default character set, if any.
+	 * @since 4.3
 	 */
 	public void setDefaultCharset(Charset defaultCharset) {
 		this.defaultCharset = defaultCharset;
 	}
 
+	/**
+	 * Return the default character set, if any.
+	 * @since 4.3
+	 */
 	public Charset getDefaultCharset() {
-		return defaultCharset;
+		return this.defaultCharset;
 	}
+
 
 	/**
 	 * This implementation checks if the given class is {@linkplain #supports(Class) supported},
@@ -119,7 +132,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	}
 
 	/**
-	 * Returns true if any of the {@linkplain #setSupportedMediaTypes(List)
+	 * Returns {@code true} if any of the {@linkplain #setSupportedMediaTypes(List)
 	 * supported} media types {@link MediaType#includes(MediaType) include} the
 	 * given media type.
 	 * @param mediaType the media type to read, can be {@code null} if not specified.
