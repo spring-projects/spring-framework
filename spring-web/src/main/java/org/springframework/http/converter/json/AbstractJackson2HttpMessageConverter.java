@@ -58,8 +58,7 @@ import org.springframework.util.TypeUtils;
  * @author Sebastien Deleuze
  * @since 4.1
  */
-public abstract class AbstractJackson2HttpMessageConverter extends AbstractGenericHttpMessageConverter<Object>
-		implements GenericHttpMessageConverter<Object> {
+public abstract class AbstractJackson2HttpMessageConverter extends AbstractGenericHttpMessageConverter<Object> {
 
 	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
@@ -71,19 +70,19 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 
 	protected AbstractJackson2HttpMessageConverter(ObjectMapper objectMapper) {
 		this.objectMapper = objectMapper;
-		this.setDefaultCharset(DEFAULT_CHARSET);
+		setDefaultCharset(DEFAULT_CHARSET);
 	}
 
 	protected AbstractJackson2HttpMessageConverter(ObjectMapper objectMapper, MediaType supportedMediaType) {
 		super(supportedMediaType);
 		this.objectMapper = objectMapper;
-		this.setDefaultCharset(DEFAULT_CHARSET);
+		setDefaultCharset(DEFAULT_CHARSET);
 	}
 
 	protected AbstractJackson2HttpMessageConverter(ObjectMapper objectMapper, MediaType... supportedMediaTypes) {
 		super(supportedMediaTypes);
 		this.objectMapper = objectMapper;
-		this.setDefaultCharset(DEFAULT_CHARSET);
+		setDefaultCharset(DEFAULT_CHARSET);
 	}
 
 

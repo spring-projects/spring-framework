@@ -48,15 +48,14 @@ import org.springframework.util.Assert;
  * By default, it supports {@code application/json} and {@code application/*+json} with
  * {@code UTF-8} character set.
  *
- * <p>Tested against Gson 2.3; compatible with Gson 2.0 and higher.
+ * <p>Tested against Gson 2.6; compatible with Gson 2.0 and higher.
  *
  * @author Roy Clarkson
  * @since 4.1
  * @see #setGson
  * @see #setSupportedMediaTypes
  */
-public class GsonHttpMessageConverter extends AbstractGenericHttpMessageConverter<Object>
-		implements GenericHttpMessageConverter<Object> {
+public class GsonHttpMessageConverter extends AbstractGenericHttpMessageConverter<Object> {
 
 	public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
