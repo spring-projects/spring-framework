@@ -1,5 +1,5 @@
 /*
- * Copyright 2011 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 
 package org.springframework.cache.annotation;
 
-import static org.junit.Assert.*;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -27,22 +25,20 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import org.junit.Test;
+
 import org.springframework.cache.interceptor.CacheEvictOperation;
 import org.springframework.cache.interceptor.CacheOperation;
 import org.springframework.cache.interceptor.CacheableOperation;
-import org.springframework.util.ReflectionUtils;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Costin Leau
  */
 public class AnnotationCacheOperationSourceTests {
 
-	private AnnotationCacheOperationSource source = new AnnotationCacheOperationSource();
+	private final AnnotationCacheOperationSource source = new AnnotationCacheOperationSource();
 
-	private Collection<CacheOperation> getOps(String name) {
-		Method method = ReflectionUtils.findMethod(AnnotatedClass.class, name);
-		return source.getCacheOperations(method, AnnotatedClass.class);
-	}
 
 	@Test
 	public void testSingularAnnotation() throws Exception {
@@ -70,6 +66,12 @@ public class AnnotationCacheOperationSourceTests {
 	}
 
 	@Test
+	public void testEmptyCaching() throws Exception {
+		Collection<CacheOperation> ops = getOps("emptyCaching");
+		assertTrue(ops.isEmpty());
+	}
+
+	@Test
 	public void testSingularStereotype() throws Exception {
 		Collection<CacheOperation> ops = getOps("singleStereotype");
 		assertEquals(1, ops.size());
@@ -90,7 +92,15 @@ public class AnnotationCacheOperationSourceTests {
 		assertTrue(next.getCacheNames().contains("bar"));
 	}
 
+
+	private Collection<CacheOperation> getOps(String name) throws Exception {
+		Method method = AnnotatedClass.class.getMethod(name);
+		return source.getCacheOperations(method, AnnotatedClass.class);
+	}
+
+
 	private static class AnnotatedClass {
+
 		@Cacheable("test")
 		public void singular() {
 		}
@@ -100,13 +110,16 @@ public class AnnotationCacheOperationSourceTests {
 		public void multiple() {
 		}
 
-		@Caching(cacheable = { @Cacheable("test") }, evict = { @CacheEvict("test") })
+		@Caching(cacheable = @Cacheable("test"), evict = @CacheEvict("test"))
 		public void caching() {
+		}
+
+		@Caching
+		public void emptyCaching() {
 		}
 
 		@EvictFoo
 		public void singleStereotype() {
-
 		}
 
 		@EvictFoo
@@ -120,21 +133,25 @@ public class AnnotationCacheOperationSourceTests {
 		}
 	}
 
+
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
 	@Cacheable("foo")
 	public @interface CacheableFoo {
 	}
 
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.METHOD)
-	@CacheEvict(value = "foo")
-	public @interface EvictFoo {
-	}
 
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.METHOD)
-	@CacheEvict(value = "bar")
+	@CacheEvict("foo")
+	public @interface EvictFoo {
+	}
+
+
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.METHOD)
+	@CacheEvict("bar")
 	public @interface EvictBar {
 	}
+
 }
