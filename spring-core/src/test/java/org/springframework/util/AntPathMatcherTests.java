@@ -53,6 +53,7 @@ public class AntPathMatcherTests {
 		// test exact matching
 		assertTrue(pathMatcher.match("test", "test"));
 		assertTrue(pathMatcher.match("/test", "/test"));
+		assertTrue(pathMatcher.match("http://example.org", "http://example.org")); // SPR-14141
 		assertFalse(pathMatcher.match("/test.jpg", "test.jpg"));
 		assertFalse(pathMatcher.match("test", "/test"));
 		assertFalse(pathMatcher.match("/test", "test"));
