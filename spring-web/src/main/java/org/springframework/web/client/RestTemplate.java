@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -773,7 +773,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 				if (!requestHeaders.isEmpty()) {
 					httpHeaders.putAll(requestHeaders);
 				}
-				if (httpHeaders.getContentLength() == -1) {
+				if (httpHeaders.getContentLength() < 0) {
 					httpHeaders.setContentLength(0L);
 				}
 			}

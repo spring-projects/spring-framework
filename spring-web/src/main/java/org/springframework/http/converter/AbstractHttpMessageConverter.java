@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	}
 
 	/**
-	 * Construct an {@code AbstractHttpMessageConverter} with multiple supported media type.
+	 * Construct an {@code AbstractHttpMessageConverter} with multiple supported media types.
 	 * @param supportedMediaTypes the supported media types
 	 */
 	protected AbstractHttpMessageConverter(MediaType... supportedMediaTypes) {
@@ -101,7 +101,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 	}
 
 	/**
-	 * Returns true if any of the {@linkplain #setSupportedMediaTypes(List)
+	 * Returns {@code true} if any of the {@linkplain #setSupportedMediaTypes(List)
 	 * supported} media types {@link MediaType#includes(MediaType) include} the
 	 * given media type.
 	 * @param mediaType the media type to read, can be {@code null} if not specified.
@@ -217,7 +217,7 @@ public abstract class AbstractHttpMessageConverter<T> implements HttpMessageConv
 				headers.setContentType(contentTypeToUse);
 			}
 		}
-		if (headers.getContentLength() == -1) {
+		if (headers.getContentLength() < 0) {
 			Long contentLength = getContentLength(t, headers.getContentType());
 			if (contentLength != null) {
 				headers.setContentLength(contentLength);
