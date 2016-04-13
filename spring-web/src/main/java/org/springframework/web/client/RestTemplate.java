@@ -780,7 +780,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 				if (!requestHeaders.isEmpty()) {
 					httpHeaders.putAll(requestHeaders);
 				}
-				if (httpHeaders.getContentLength() == -1) {
+				if (httpHeaders.getContentLength() < 0) {
 					httpHeaders.setContentLength(0L);
 				}
 			}

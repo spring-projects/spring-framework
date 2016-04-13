@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ abstract class AbstractBufferingAsyncClientHttpRequest extends AbstractAsyncClie
 	@Override
 	protected ListenableFuture<ClientHttpResponse> executeInternal(HttpHeaders headers) throws IOException {
 		byte[] bytes = this.bufferedOutput.toByteArray();
-		if (headers.getContentLength() == -1) {
+		if (headers.getContentLength() < 0) {
 			headers.setContentLength(bytes.length);
 		}
 		ListenableFuture<ClientHttpResponse> result = executeInternal(headers, bytes);

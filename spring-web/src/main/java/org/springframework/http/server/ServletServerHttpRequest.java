@@ -132,7 +132,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 					this.headers.setContentType(newContentType);
 				}
 			}
-			if (this.headers.getContentLength() == -1) {
+			if (this.headers.getContentLength() < 0) {
 				int requestContentLength = this.servletRequest.getContentLength();
 				if (requestContentLength != -1) {
 					this.headers.setContentLength(requestContentLength);
