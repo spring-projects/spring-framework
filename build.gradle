@@ -867,9 +867,9 @@ project("spring-webmvc") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 			exclude group: "org.springframework", module: "spring-web"
 		}
-		optional('org.webjars:webjars-locator:0.28')
+		optional('org.webjars:webjars-locator:0.30')
 		testCompile(project(":spring-aop"))
-		testCompile("rhino:js:1.7R1")
+		testCompile("org.mozilla:rhino:1.7.7.1")
 		testCompile("xmlunit:xmlunit:${xmlunitVersion}")
 		testCompile("dom4j:dom4j:1.6.1") {
 			exclude group: "xml-apis", module: "xml-apis"
@@ -1018,11 +1018,11 @@ project("spring-test") {
 		optional("org.aspectj:aspectjweaver:${aspectjVersion}")
 		optional("org.codehaus.groovy:groovy-all:${groovyVersion}")
 		optional("org.hamcrest:hamcrest-core:${hamcrestVersion}")
-		optional("com.jayway.jsonpath:json-path:${jsonpathVersion}")
-		optional("org.skyscreamer:jsonassert:${jsonassertVersion}")
-		optional("xmlunit:xmlunit:${xmlunitVersion}")
-		optional("net.sourceforge.htmlunit:htmlunit:${htmlunitVersion}")
 		optional("org.seleniumhq.selenium:selenium-htmlunit-driver:${seleniumVersion}")
+		optional("net.sourceforge.htmlunit:htmlunit:${htmlunitVersion}")
+		optional("xmlunit:xmlunit:${xmlunitVersion}")
+		optional("org.skyscreamer:jsonassert:${jsonassertVersion}")
+		optional("com.jayway.jsonpath:json-path:${jsonpathVersion}")
 		testCompile(project(":spring-context-support"))
 		testCompile(project(":spring-oxm"))
 		testCompile("javax.mail:javax.mail-api:${javamailVersion}")
@@ -1080,8 +1080,8 @@ project("spring-aspects") {
 
 	dependencies {
 		aspects(project(":spring-orm"))
-		ajc("org.aspectj:aspectjtools:1.9.0.BETA-3")  // for the ability to build on JDK 9, not exposed in the POMs yet
-		rt("org.aspectj:aspectjrt:${aspectjVersion}")  // regular AspectJ version here, to be exposed in the POMs
+		ajc("org.aspectj:aspectjtools:${aspectjVersion}")
+		rt("org.aspectj:aspectjrt:${aspectjVersion}")
 		compile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		provided("org.eclipse.persistence:javax.persistence:2.0.0")
 		optional(project(":spring-aop"))  // for @Async support
@@ -1099,8 +1099,7 @@ project("spring-aspects") {
 
 	eclipse.project {
 		natures += "org.eclipse.ajdt.ui.ajnature"
-		buildCommands = [new org.gradle.plugins.ide.eclipse.model.
-				BuildCommand("org.eclipse.ajdt.core.ajbuilder")]
+		buildCommands = [new org.gradle.plugins.ide.eclipse.model.BuildCommand("org.eclipse.ajdt.core.ajbuilder")]
 	}
 }
 
