@@ -715,8 +715,8 @@ project("spring-web") {
 		optional("org.apache.httpcomponents:httpclient:${httpclientVersion}")
 		optional("org.apache.httpcomponents:httpasyncclient:${httpasyncVersion}")
 		optional("io.netty:netty-all:${nettyVersion}")
-		optional("com.squareup.okhttp3:okhttp:${okhttp3Version}")
 		optional("com.squareup.okhttp:okhttp:${okhttpVersion}")
+		optional("com.squareup.okhttp3:okhttp:${okhttp3Version}")
 		optional("com.fasterxml.jackson.core:jackson-databind:${jackson2Version}")
 		optional("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:${jackson2Version}")
 		optional("com.google.code.gson:gson:${gsonVersion}")
@@ -870,8 +870,8 @@ project("spring-webmvc") {
 			exclude group: "org.slf4j", module: "jcl-over-slf4j"
 			exclude group: "org.springframework", module: "spring-web"
 		}
-		optional('org.webjars:webjars-locator:0.28')
-		testCompile("rhino:js:1.7R1")
+		optional('org.webjars:webjars-locator:0.30')
+		testCompile("org.mozilla:rhino:1.7.7.1")
 		testCompile("xmlunit:xmlunit:${xmlunitVersion}")
 		testCompile("dom4j:dom4j:1.6.1") {
 			exclude group: "xml-apis", module: "xml-apis"
@@ -1084,8 +1084,8 @@ project("spring-aspects") {
 	dependencies {
 		aspects(project(":spring-orm"))
 		ajc("org.aspectj:aspectjtools:${aspectjVersion}")  // for the ability to build on JDK 9, not exposed in the POMs yet
-		rt("org.aspectj:aspectjrt:1.8.7")  // regular AspectJ version here, to be exposed in the POMs
-		compile("org.aspectj:aspectjweaver:1.8.7")
+		rt("org.aspectj:aspectjrt:1.8.9")  // regular AspectJ version here, to be exposed in the POMs
+		compile("org.aspectj:aspectjweaver:1.8.9")
 		provided("org.eclipse.persistence:javax.persistence:2.0.0")
 		optional(project(":spring-aop"))  // for @Async support
 		optional(project(":spring-beans"))  // for @Configurable support
