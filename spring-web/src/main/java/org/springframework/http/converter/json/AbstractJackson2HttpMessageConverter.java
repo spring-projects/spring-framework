@@ -86,7 +86,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		this.setDefaultCharset(DEFAULT_CHARSET);
 	}
 
-
 	/**
 	 * Set the {@code ObjectMapper} for this view.
 	 * If not set, a default {@link ObjectMapper#ObjectMapper() ObjectMapper} is used.
@@ -148,14 +147,8 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			return true;
 		}
 		Throwable cause = causeRef.get();
-		if (cause != null) {
-			String msg = "Failed to evaluate deserialization for type " + javaType;
-			if (logger.isDebugEnabled()) {
-				logger.warn(msg, cause);
-			}
-			else {
-				logger.warn(msg + ": " + cause);
-			}
+		if (cause != null && logger.isDebugEnabled()) {
+			logger.warn("Failed to evaluate deserialization for type " + javaType, cause);
 		}
 		return false;
 	}
@@ -170,14 +163,8 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 			return true;
 		}
 		Throwable cause = causeRef.get();
-		if (cause != null) {
-			String msg = "Failed to evaluate serialization for type [" + clazz + "]";
-			if (logger.isDebugEnabled()) {
-				logger.warn(msg, cause);
-			}
-			else {
-				logger.warn(msg + ": " + cause);
-			}
+		if (cause != null && logger.isDebugEnabled()) {
+			logger.warn("Failed to evaluate serialization for type [" + clazz + "]", cause);
 		}
 		return false;
 	}
