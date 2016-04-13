@@ -31,7 +31,7 @@ configure(allprojects) { project ->
 	group = "org.springframework"
 	version = qualifyVersionIfNecessary(version)
 
-	ext.aspectjVersion       = "1.9.0.BETA-3"
+	ext.aspectjVersion       = "1.8.9"
 	ext.caffeineVersion      = "2.2.6"
 	ext.eclipselinkVersion   = "2.4.2"
 	ext.ehcacheVersion       = "2.10.1"
@@ -136,8 +136,6 @@ configure(allprojects) { project ->
 
 	repositories {
 		maven { url "https://repo.spring.io/libs-release" }
-		maven { url "https://repo.spring.io/milestone" }
-		maven { url "https://repo.spring.io/snapshot" }   // reactor 2.0.6 snapshot
 	}
 
 	dependencies {
@@ -569,11 +567,6 @@ project("spring-oxm") {
 		// see http://jira.codehaus.org/browse/JIBX-465
 		sourceCompatibility = 1.6
 		targetCompatibility = 1.6
-	}
-
-	if (!System.getProperty("java.version").contains("1.8.")) {
-		// necessary because castor and xjc tasks cannot find the JDK's compiler on JDK 9
-		compileTestJava.enabled = false
 	}
 
 	dependencies {
@@ -1083,9 +1076,9 @@ project("spring-aspects") {
 
 	dependencies {
 		aspects(project(":spring-orm"))
-		ajc("org.aspectj:aspectjtools:${aspectjVersion}")  // for the ability to build on JDK 9, not exposed in the POMs yet
-		rt("org.aspectj:aspectjrt:1.8.9")  // regular AspectJ version here, to be exposed in the POMs
-		compile("org.aspectj:aspectjweaver:1.8.9")
+		ajc("org.aspectj:aspectjtools:${aspectjVersion}")
+		rt("org.aspectj:aspectjrt:${aspectjVersion}")
+		compile("org.aspectj:aspectjweaver:${aspectjVersion}")
 		provided("org.eclipse.persistence:javax.persistence:2.0.0")
 		optional(project(":spring-aop"))  // for @Async support
 		optional(project(":spring-beans"))  // for @Configurable support
