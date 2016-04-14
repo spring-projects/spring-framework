@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,20 +142,20 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 
 	@Override
 	protected boolean canConvertFrom(Message<?> message, Class<?> targetClass) {
-		if (targetClass == null) {
+		if (targetClass == null || !supportsMimeType(message.getHeaders())) {
 			return false;
 		}
 		JavaType javaType = this.objectMapper.constructType(targetClass);
 		if (!jackson23Available || !logger.isWarnEnabled()) {
-			return (this.objectMapper.canDeserialize(javaType) && supportsMimeType(message.getHeaders()));
+			return this.objectMapper.canDeserialize(javaType);
 		}
 		AtomicReference<Throwable> causeRef = new AtomicReference<Throwable>();
-		if (this.objectMapper.canDeserialize(javaType, causeRef) && supportsMimeType(message.getHeaders())) {
+		if (this.objectMapper.canDeserialize(javaType, causeRef)) {
 			return true;
 		}
 		Throwable cause = causeRef.get();
 		if (cause != null) {
-			String msg = "Failed to evaluate deserialization for type " + javaType;
+			String msg = "Failed to evaluate Jackson deserialization for type " + javaType;
 			if (logger.isDebugEnabled()) {
 				logger.warn(msg, cause);
 			}
@@ -168,16 +168,19 @@ public class MappingJackson2MessageConverter extends AbstractMessageConverter {
 
 	@Override
 	protected boolean canConvertTo(Object payload, MessageHeaders headers) {
+		if (payload == null || !supportsMimeType(headers)) {
+			return false;
+		}
 		if (!jackson23Available || !logger.isWarnEnabled()) {
-			return (this.objectMapper.canSerialize(payload.getClass()) && supportsMimeType(headers));
+			return this.objectMapper.canSerialize(payload.getClass());
 		}
 		AtomicReference<Throwable> causeRef = new AtomicReference<Throwable>();
-		if (this.objectMapper.canSerialize(payload.getClass(), causeRef) && supportsMimeType(headers)) {
+		if (this.objectMapper.canSerialize(payload.getClass(), causeRef)) {
 			return true;
 		}
 		Throwable cause = causeRef.get();
 		if (cause != null) {
-			String msg = "Failed to evaluate serialization for type [" + payload.getClass() + "]";
+			String msg = "Failed to evaluate Jackson serialization for type [" + payload.getClass() + "]";
 			if (logger.isDebugEnabled()) {
 				logger.warn(msg, cause);
 			}

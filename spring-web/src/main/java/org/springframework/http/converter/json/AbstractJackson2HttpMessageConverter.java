@@ -142,10 +142,10 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 
 	@Override
 	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
-		JavaType javaType = getJavaType(type, contextClass);
 		if (!canRead(mediaType)) {
 			return false;
 		}
+		JavaType javaType = getJavaType(type, contextClass);
 		if (!jackson23Available || !logger.isWarnEnabled()) {
 			return this.objectMapper.canDeserialize(javaType);
 		}
@@ -155,7 +155,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		}
 		Throwable cause = causeRef.get();
 		if (cause != null) {
-			String msg = "Failed to evaluate deserialization for type " + javaType;
+			String msg = "Failed to evaluate Jackson deserialization for type " + javaType;
 			if (logger.isDebugEnabled()) {
 				logger.warn(msg, cause);
 			}
@@ -180,7 +180,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		}
 		Throwable cause = causeRef.get();
 		if (cause != null) {
-			String msg = "Failed to evaluate serialization for type [" + clazz + "]";
+			String msg = "Failed to evaluate Jackson serialization for type [" + clazz + "]";
 			if (logger.isDebugEnabled()) {
 				logger.warn(msg, cause);
 			}
