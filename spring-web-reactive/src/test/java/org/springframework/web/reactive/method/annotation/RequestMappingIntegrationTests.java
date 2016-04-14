@@ -67,7 +67,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.ViewResolver;
-import org.springframework.web.reactive.handler.SimpleHandlerResultHandler;
+import org.springframework.web.reactive.handler.SimpleResultHandler;
 import org.springframework.web.reactive.view.ViewResolverResultHandler;
 import org.springframework.web.reactive.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.reactive.view.freemarker.FreeMarkerViewResolver;
@@ -421,8 +421,8 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		}
 
 		@Bean
-		public SimpleHandlerResultHandler simpleHandlerResultHandler() {
-			SimpleHandlerResultHandler resultHandler = new SimpleHandlerResultHandler(conversionService());
+		public SimpleResultHandler simpleHandlerResultHandler() {
+			SimpleResultHandler resultHandler = new SimpleResultHandler(conversionService());
 			resultHandler.setOrder(2);
 			return resultHandler;
 		}

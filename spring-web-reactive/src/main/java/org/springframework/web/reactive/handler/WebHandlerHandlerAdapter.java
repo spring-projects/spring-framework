@@ -29,13 +29,12 @@ import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * Support use of {@link org.springframework.web.server.WebHandler} through the
- * {@link DispatcherHandler}.
+ * Adapter to use a {@link WebHandler} through the {@link DispatcherHandler}.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  */
-public class HttpHandlerHandlerAdapter implements HandlerAdapter {
+public class WebHandlerHandlerAdapter implements HandlerAdapter {
 
 	private static final ResolvableType PUBLISHER_VOID = ResolvableType.forClassWithGenerics(
 			Publisher.class, Void.class);
@@ -49,9 +48,8 @@ public class HttpHandlerHandlerAdapter implements HandlerAdapter {
 	@Override
 	public Mono<HandlerResult> handle(ServerWebExchange exchange, Object handler) {
 		WebHandler webHandler = (WebHandler) handler;
-		Mono<Void> completion = webHandler.handle(exchange);
-		ModelMap model = new ExtendedModelMap();
-		return Mono.just(new HandlerResult(webHandler, completion, PUBLISHER_VOID, model));
+		Mono<Void> mono = webHandler.handle(exchange);
+		return Mono.just(new HandlerResult(webHandler, mono, PUBLISHER_VOID));
 	}
 
 }

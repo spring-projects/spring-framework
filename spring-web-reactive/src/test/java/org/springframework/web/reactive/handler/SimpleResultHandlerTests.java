@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,7 +27,6 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutureConverter;
 import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converter;
-import org.springframework.ui.ExtendedModelMap;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
 
@@ -37,12 +36,12 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Sebastien Deleuze
  */
-public class SimpleHandlerResultHandlerTests {
+public class SimpleResultHandlerTests {
 
 	@Test
 	public void supports() throws NoSuchMethodException {
 
-		SimpleHandlerResultHandler resultHandler = new SimpleHandlerResultHandler();
+		SimpleResultHandler resultHandler = new SimpleResultHandler();
 		TestController controller = new TestController();
 
 		HandlerMethod hm = new HandlerMethod(controller, TestController.class.getMethod("voidReturnValue"));
@@ -77,7 +76,7 @@ public class SimpleHandlerResultHandlerTests {
 		GenericConversionService conversionService = new GenericConversionService();
 		conversionService.addConverter(new ReactiveStreamsToCompletableFutureConverter());
 		conversionService.addConverter(new ReactiveStreamsToRxJava1Converter());
-		SimpleHandlerResultHandler resultHandler = new SimpleHandlerResultHandler(conversionService);
+		SimpleResultHandler resultHandler = new SimpleResultHandler(conversionService);
 		TestController controller = new TestController();
 
 		HandlerMethod hm = new HandlerMethod(controller, TestController.class.getMethod("voidReturnValue"));
@@ -106,7 +105,7 @@ public class SimpleHandlerResultHandlerTests {
 	}
 
 	private HandlerResult createHandlerResult(HandlerMethod hm, ResolvableType type) {
-		return new HandlerResult(hm, null, type, new ExtendedModelMap());
+		return new HandlerResult(hm, null, type);
 	}
 
 

@@ -49,16 +49,25 @@ public class HandlerResult {
 	 * @param handler the handler that handled the request
 	 * @param returnValue the return value from the handler possibly {@code null}
 	 * @param returnValueType the return value type
+	 */
+	public HandlerResult(Object handler, Object returnValue, ResolvableType returnValueType) {
+		this(handler, returnValue, returnValueType, null);
+	}
+
+	/**
+	 * Create a new {@code HandlerResult}.
+	 * @param handler the handler that handled the request
+	 * @param returnValue the return value from the handler possibly {@code null}
+	 * @param returnValueType the return value type
 	 * @param model the model used for request handling
 	 */
 	public HandlerResult(Object handler, Object returnValue, ResolvableType returnValueType, ModelMap model) {
 		Assert.notNull(handler, "'handler' is required");
 		Assert.notNull(returnValueType, "'returnValueType' is required");
-		Assert.notNull(model, "'model' is required");
 		this.handler = handler;
 		this.returnValue = Optional.ofNullable(returnValue);
 		this.returnValueType = returnValueType;
-		this.model = model;
+		this.model = (model != null ? model : new ExtendedModelMap());
 	}
 
 

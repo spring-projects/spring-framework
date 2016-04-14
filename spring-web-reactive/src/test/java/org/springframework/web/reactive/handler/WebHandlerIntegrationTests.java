@@ -47,9 +47,11 @@ import static org.junit.Assert.assertEquals;
 
 
 /**
+ * Integration tests with simple WebHandler's processing requests.
+ *
  * @author Rossen Stoyanchev
  */
-public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandlerIntegrationTests {
+public class WebHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	private static final Charset UTF_8 = Charset.forName("UTF-8");
 
@@ -59,14 +61,14 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 
 		StaticApplicationContext wac = new StaticApplicationContext();
 		wac.registerSingleton("hm", TestHandlerMapping.class);
-		wac.registerSingleton("ha", HttpHandlerHandlerAdapter.class);
-		wac.registerSingleton("rh", SimpleHandlerResultHandler.class);
+		wac.registerSingleton("ha", WebHandlerHandlerAdapter.class);
+		wac.registerSingleton("rh", SimpleResultHandler.class);
 		wac.refresh();
 
-		DispatcherHandler webHandler = new DispatcherHandler();
-		webHandler.setApplicationContext(wac);
+		DispatcherHandler dispatcherHandler = new DispatcherHandler();
+		dispatcherHandler.setApplicationContext(wac);
 
-		return WebHttpHandlerBuilder.webHandler(webHandler)
+		return WebHttpHandlerBuilder.webHandler(dispatcherHandler)
 				.exceptionHandlers(new ResponseStatusExceptionHandler())
 				.build();
 	}
@@ -137,12 +139,16 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 		}
 	}
 
+
+	private static DataBuffer asDataBuffer(String text) {
+		return new DefaultDataBufferAllocator().allocateBuffer().write(text.getBytes(StandardCharsets.UTF_8));
+	}
+
 	private static class FooHandler implements WebHandler {
 
 		@Override
 		public Mono<Void> handle(ServerWebExchange exchange) {
-			DataBuffer buffer = new DefaultDataBufferAllocator().allocateBuffer()
-					.write("foo".getBytes(StandardCharsets.UTF_8));
+			DataBuffer buffer = asDataBuffer("foo");
 			return exchange.getResponse().setBody(Flux.just(buffer));
 		}
 	}
@@ -151,8 +157,7 @@ public class SimpleUrlHandlerMappingIntegrationTests extends AbstractHttpHandler
 
 		@Override
 		public Mono<Void> handle(ServerWebExchange exchange) {
-			DataBuffer buffer = new DefaultDataBufferAllocator().allocateBuffer()
-					.write("bar".getBytes(StandardCharsets.UTF_8));
+			DataBuffer buffer = asDataBuffer("bar");
 			return exchange.getResponse().setBody(Flux.just(buffer));
 		}
 	}

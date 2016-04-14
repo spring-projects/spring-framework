@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,24 +29,28 @@ import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
 import org.springframework.web.server.ServerWebExchange;
 
+
 /**
- * Supports {@link HandlerResult} with a {@code void} or {@code Publisher<Void>} value.
- * An optional {link ConversionService} can be used to support types that can be converted to
- * {@code Publisher<Void>}, like {@code Observable<Void>} or {@code CompletableFuture<Void>}.
+ * A simple handler for return values of type {@code void}, or
+ * {@code Publisher<Void>}, or if a {link ConversionService} is provided, also
+ * of any other async return value types that can be converted to
+ * {@code Publisher<Void>} such as {@code Observable<Void>} or
+ * {@code CompletableFuture<Void>}.
  *
  * @author Sebastien Deleuze
+ * @author Rossen Stoyanchev
  */
-public class SimpleHandlerResultHandler implements Ordered, HandlerResultHandler {
+public class SimpleResultHandler implements Ordered, HandlerResultHandler {
 
 	private int order = Ordered.LOWEST_PRECEDENCE;
 
 	private ConversionService conversionService;
 
 
-	public SimpleHandlerResultHandler() {
+	public SimpleResultHandler() {
 	}
 
-	public SimpleHandlerResultHandler(ConversionService conversionService) {
+	public SimpleResultHandler(ConversionService conversionService) {
 		Assert.notNull(conversionService, "'conversionService' is required.");
 		this.conversionService = conversionService;
 	}
@@ -61,30 +65,36 @@ public class SimpleHandlerResultHandler implements Ordered, HandlerResultHandler
 		return this.order;
 	}
 
+
 	@Override
 	public boolean supports(HandlerResult result) {
 		ResolvableType type = result.getReturnValueType();
-		return (type != null && Void.TYPE.equals(type.getRawClass()) ||
-				(isConvertibleToPublisher(type) && Void.class.isAssignableFrom(type.getGeneric(0).getRawClass())));
+		return (type != null && (Void.TYPE.equals(type.getRawClass()) || isConvertibleToVoidPublisher(type)));
+	}
+
+	private boolean isConvertibleToVoidPublisher(ResolvableType type) {
+		return (isConvertibleToPublisher(type) &&
+				Void.class.isAssignableFrom(type.getGeneric(0).getRawClass()));
 	}
 
 	private boolean isConvertibleToPublisher(ResolvableType type) {
-		return Publisher.class.isAssignableFrom(type.getRawClass()) ||
-				((this.conversionService != null) &&
-						this.conversionService.canConvert(type.getRawClass(), Publisher.class));
+		Class<?> clazz = type.getRawClass();
+		return (Publisher.class.isAssignableFrom(clazz) ||
+				((this.conversionService != null) && this.conversionService.canConvert(clazz, Publisher.class)));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public Mono<Void> handleResult(ServerWebExchange exchange, HandlerResult result) {
-		Optional<Object> value = result.getReturnValue();
-		if (!value.isPresent() || Void.TYPE.equals(result.getReturnValueType().getRawClass())) {
+		Optional<Object> optional = result.getReturnValue();
+		if (!optional.isPresent()) {
 			return Mono.empty();
 		}
-		if (value.get() instanceof Mono) {
-			return (Mono<Void>) value.get();
+		Object returnValue = optional.get();
+		if (returnValue instanceof Mono) {
+			return (Mono<Void>) returnValue;
 		}
-		return Mono.from(this.conversionService.convert(value.get(), Publisher.class));
+		return Mono.from(this.conversionService.convert(returnValue, Publisher.class));
 	}
 
 }
