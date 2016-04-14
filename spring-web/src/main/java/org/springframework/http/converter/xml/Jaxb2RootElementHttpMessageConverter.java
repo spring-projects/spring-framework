@@ -195,8 +195,8 @@ public class Jaxb2RootElementHttpMessageConverter extends AbstractJaxb2HttpMessa
 	}
 
 	private void setCharset(MediaType contentType, Marshaller marshaller) throws PropertyException {
-		if (contentType != null && contentType.getCharSet() != null) {
-			marshaller.setProperty(Marshaller.JAXB_ENCODING, contentType.getCharSet().name());
+		if (contentType != null && contentType.getCharset() != null) {
+			marshaller.setProperty(Marshaller.JAXB_ENCODING, contentType.getCharset().name());
 		}
 	}
 

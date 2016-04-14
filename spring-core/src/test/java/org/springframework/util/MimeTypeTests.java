@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,7 +75,7 @@ public class MimeTypeTests {
 		MimeType mimeType = MimeType.valueOf(s);
 		assertEquals("Invalid type", "text", mimeType.getType());
 		assertEquals("Invalid subtype", "html", mimeType.getSubtype());
-		assertEquals("Invalid charset", Charset.forName("ISO-8859-1"), mimeType.getCharSet());
+		assertEquals("Invalid charset", Charset.forName("ISO-8859-1"), mimeType.getCharset());
 	}
 
 	@Test
@@ -84,7 +84,7 @@ public class MimeTypeTests {
 		MimeType mimeType = MimeType.valueOf(s);
 		assertEquals("Invalid type", "application", mimeType.getType());
 		assertEquals("Invalid subtype", "xml", mimeType.getSubtype());
-		assertEquals("Invalid charset", Charset.forName("UTF-8"), mimeType.getCharSet());
+		assertEquals("Invalid charset", Charset.forName("UTF-8"), mimeType.getCharset());
 	}
 
 	@Test

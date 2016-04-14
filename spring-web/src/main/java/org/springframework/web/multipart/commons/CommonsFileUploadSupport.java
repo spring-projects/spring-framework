@@ -304,7 +304,7 @@ public abstract class CommonsFileUploadSupport {
 			return defaultEncoding;
 		}
 		MediaType contentType = MediaType.parseMediaType(contentTypeHeader);
-		Charset charset = contentType.getCharSet();
+		Charset charset = contentType.getCharset();
 		return (charset != null ? charset.name() : defaultEncoding);
 	}
 

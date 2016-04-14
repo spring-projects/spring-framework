@@ -121,7 +121,7 @@ public class ServletServerHttpRequest implements ServerHttpRequest {
 					this.headers.setContentType(contentType);
 				}
 			}
-			if (contentType != null && contentType.getCharSet() == null) {
+			if (contentType != null && contentType.getCharset() == null) {
 				String requestEncoding = this.servletRequest.getCharacterEncoding();
 				if (StringUtils.hasLength(requestEncoding)) {
 					Charset charSet = Charset.forName(requestEncoding);

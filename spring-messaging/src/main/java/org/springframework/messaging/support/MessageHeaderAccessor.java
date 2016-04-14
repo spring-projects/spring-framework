@@ -501,7 +501,7 @@ public class MessageHeaderAccessor {
 		else if (payload instanceof byte[]) {
 			byte[] bytes = (byte[]) payload;
 			if (isReadableContentType()) {
-				Charset charset = getContentType().getCharSet();
+				Charset charset = getContentType().getCharset();
 				charset = (charset != null ? charset : DEFAULT_CHARSET);
 				return (bytes.length < 80) ?
 						" payload=" + new String(bytes, charset) :
@@ -526,7 +526,7 @@ public class MessageHeaderAccessor {
 		else if (payload instanceof byte[]) {
 			byte[] bytes = (byte[]) payload;
 			if (isReadableContentType()) {
-				Charset charset = getContentType().getCharSet();
+				Charset charset = getContentType().getCharset();
 				charset = (charset != null ? charset : DEFAULT_CHARSET);
 				return " payload=" + new String(bytes, charset);
 			}

@@ -735,7 +735,7 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 			List<MediaType> supportedMediaTypes = messageConverter.getSupportedMediaTypes();
 			List<MediaType> result = new ArrayList<MediaType>(supportedMediaTypes.size());
 			for (MediaType supportedMediaType : supportedMediaTypes) {
-				if (supportedMediaType.getCharSet() != null) {
+				if (supportedMediaType.getCharset() != null) {
 					supportedMediaType =
 							new MediaType(supportedMediaType.getType(), supportedMediaType.getSubtype());
 				}

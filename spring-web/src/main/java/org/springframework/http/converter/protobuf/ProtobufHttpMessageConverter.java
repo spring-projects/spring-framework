@@ -116,7 +116,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		if (contentType == null) {
 			contentType = PROTOBUF;
 		}
-		Charset charset = contentType.getCharSet();
+		Charset charset = contentType.getCharset();
 		if (charset == null) {
 			charset = DEFAULT_CHARSET;
 		}
@@ -160,7 +160,7 @@ public class ProtobufHttpMessageConverter extends AbstractHttpMessageConverter<M
 		if (contentType == null) {
 			contentType = getDefaultContentType(message);
 		}
-		Charset charset = contentType.getCharSet();
+		Charset charset = contentType.getCharset();
 		if (charset == null) {
 			charset = DEFAULT_CHARSET;
 		}

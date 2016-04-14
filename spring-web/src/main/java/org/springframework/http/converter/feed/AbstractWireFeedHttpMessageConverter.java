@@ -66,7 +66,7 @@ public abstract class AbstractWireFeedHttpMessageConverter<T extends WireFeed> e
 		WireFeedInput feedInput = new WireFeedInput();
 		MediaType contentType = inputMessage.getHeaders().getContentType();
 		Charset charset =
-				(contentType != null && contentType.getCharSet() != null? contentType.getCharSet() : DEFAULT_CHARSET);
+				(contentType != null && contentType.getCharset() != null? contentType.getCharset() : DEFAULT_CHARSET);
 		try {
 			Reader reader = new InputStreamReader(inputMessage.getBody(), charset);
 			return (T) feedInput.build(reader);
