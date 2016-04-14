@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.reactive.handler;
+package org.springframework.web.reactive.result;
 
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -38,6 +38,9 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.ResponseStatusExceptionHandler;
+import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
+import org.springframework.web.reactive.result.SimpleResultHandler;
+import org.springframework.web.reactive.result.WebHandlerHandlerAdapter;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;

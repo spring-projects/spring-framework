@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.reactive.method.annotation;
+package org.springframework.web.reactive.result.method.annotation;
 
 import java.util.Collections;
 

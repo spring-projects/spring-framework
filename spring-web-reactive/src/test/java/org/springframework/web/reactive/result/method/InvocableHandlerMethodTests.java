@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.web.reactive.method;
+package org.springframework.web.reactive.result.method;
 
 import java.lang.reflect.Method;
 import java.net.URI;
@@ -35,7 +35,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
-import org.springframework.web.reactive.method.annotation.RequestParamArgumentResolver;
+import org.springframework.web.reactive.result.method.annotation.RequestParamArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.WebSessionManager;

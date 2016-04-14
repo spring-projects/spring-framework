@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.reactive.handler;
+package org.springframework.web.reactive.result;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -29,6 +29,7 @@ import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutu
 import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converter;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
+import org.springframework.web.reactive.result.SimpleResultHandler;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

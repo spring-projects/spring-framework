@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.reactive.handler;
+package org.springframework.web.reactive.result;
 
 import java.util.Optional;
 

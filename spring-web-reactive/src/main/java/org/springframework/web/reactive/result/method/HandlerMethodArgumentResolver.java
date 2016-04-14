@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.reactive.method;
+package org.springframework.web.reactive.result.method;
 
 import reactor.core.publisher.Mono;
 

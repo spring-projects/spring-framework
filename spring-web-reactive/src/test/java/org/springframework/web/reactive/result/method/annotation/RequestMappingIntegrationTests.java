@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.springframework.web.reactive.method.annotation;
+package org.springframework.web.reactive.result.method.annotation;
 
 import java.net.URI;
 import java.nio.ByteBuffer;
@@ -67,7 +67,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.ViewResolver;
-import org.springframework.web.reactive.handler.SimpleResultHandler;
+import org.springframework.web.reactive.result.SimpleResultHandler;
 import org.springframework.web.reactive.view.ViewResolverResultHandler;
 import org.springframework.web.reactive.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.reactive.view.freemarker.FreeMarkerViewResolver;
