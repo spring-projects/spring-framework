@@ -140,7 +140,7 @@ public interface WebRequest extends RequestAttributes {
 	 * and HTTP status when applicable.
 	 * <p>Typical usage:
 	 * <pre class="code">
-	 * public String myHandleMethod(WebRequest webRequest, Model model) {
+	 * public String myHandleMethod(WebRequest request, Model model) {
 	 *   long lastModified = // application-specific calculation
 	 *   if (request.checkNotModified(lastModified)) {
 	 *     // shortcut exit - no further processing necessary
@@ -177,7 +177,7 @@ public interface WebRequest extends RequestAttributes {
 	 * and HTTP status when applicable.
 	 * <p>Typical usage:
 	 * <pre class="code">
-	 * public String myHandleMethod(WebRequest webRequest, Model model) {
+	 * public String myHandleMethod(WebRequest request, Model model) {
 	 *   String eTag = // application-specific calculation
 	 *   if (request.checkNotModified(eTag)) {
 	 *     // shortcut exit - no further processing necessary
@@ -208,7 +208,7 @@ public interface WebRequest extends RequestAttributes {
 	 * response headers, and HTTP status when applicable.
 	 * <p>Typical usage:
 	 * <pre class="code">
-	 * public String myHandleMethod(WebRequest webRequest, Model model) {
+	 * public String myHandleMethod(WebRequest request, Model model) {
 	 *   String eTag = // application-specific calculation
 	 *   long lastModified = // application-specific calculation
 	 *   if (request.checkNotModified(eTag, lastModified)) {

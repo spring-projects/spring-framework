@@ -4813,7 +4813,7 @@ as the following example shows:
 .Java
 ----
 	@RequestMapping
-	public String myHandleMethod(WebRequest webRequest, Model model) {
+	public String myHandleMethod(WebRequest request, Model model) {
 
 		long eTag = ... // <1>
 
@@ -4833,7 +4833,7 @@ as the following example shows:
 .Kotlin
 ----
 	@RequestMapping
-	fun myHandleMethod(webRequest: WebRequest, model: Model): String? {
+	fun myHandleMethod(request: WebRequest, model: Model): String? {
 
 		val eTag: Long = ... // <1>
 
