@@ -4463,7 +4463,7 @@ This can be achieved as follows:
 [subs="verbatim,quotes"]
 ----
 	@RequestMapping
-	public String myHandleMethod(WebRequest webRequest, Model model) {
+	public String myHandleMethod(WebRequest request, Model model) {
 
 		long lastModified = // 1. application-specific calculation
 
