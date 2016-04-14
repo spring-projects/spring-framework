@@ -27,6 +27,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -148,16 +149,7 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		if (this.objectMapper.canDeserialize(javaType, causeRef)) {
 			return true;
 		}
-		Throwable cause = causeRef.get();
-		if (cause != null) {
-			String msg = "Failed to evaluate deserialization for type " + javaType;
-			if (logger.isDebugEnabled()) {
-				logger.warn(msg, cause);
-			}
-			else {
-				logger.warn(msg + ": " + cause);
-			}
-		}
+		logWarningIfNecessary(javaType, causeRef.get());
 		return false;
 	}
 
@@ -173,9 +165,22 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 		if (this.objectMapper.canSerialize(clazz, causeRef)) {
 			return true;
 		}
-		Throwable cause = causeRef.get();
-		if (cause != null) {
-			String msg = "Failed to evaluate serialization for type [" + clazz + "]";
+		logWarningIfNecessary(clazz, causeRef.get());
+		return false;
+	}
+
+	/**
+	 * Determine whether to log the given exception coming from a
+	 * {@link ObjectMapper#canDeserialize} / {@link ObjectMapper#canSerialize} check.
+	 * @param type the class that Jackson tested for (de-)serializability
+	 * @param cause the Jackson-thrown exception to evaluate
+	 * (typically a {@link JsonMappingException})
+	 * @since 4.3
+	 */
+	protected void logWarningIfNecessary(Type type, Throwable cause) {
+		if (cause != null && !(cause instanceof JsonMappingException && cause.getMessage().startsWith("Can not find"))) {
+			String msg = "Failed to evaluate Jackson " + (type instanceof JavaType ? "de" : "") +
+					"serialization for type [" + type + "]";
 			if (logger.isDebugEnabled()) {
 				logger.warn(msg, cause);
 			}
@@ -183,7 +188,6 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 				logger.warn(msg + ": " + cause);
 			}
 		}
-		return false;
 	}
 
 	@Override
