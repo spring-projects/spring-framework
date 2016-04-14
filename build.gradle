@@ -48,7 +48,7 @@ configure(allprojects) { project ->
 	ext.htmlunitVersion      = "2.19"
 	ext.httpasyncVersion     = "4.1.1"
 	ext.httpclientVersion    = "4.5.2"
-	ext.jackson2Version      = "2.6.5"
+	ext.jackson2Version      = "2.6.6"
 	ext.jasperreportsVersion = "6.2.1"
 	ext.javamailVersion      = "1.5.5"
 	ext.jettyVersion         = "9.3.8.v20160314"
@@ -716,7 +716,7 @@ project("spring-web") {
 			exclude group: "javax.servlet", module: "javax.servlet-api"
 		}
 		optional("log4j:log4j:1.2.17")
-		optional("com.googlecode.protobuf-java-format:protobuf-java-format:1.2")
+		optional("com.googlecode.protobuf-java-format:protobuf-java-format:1.4")
 		optional("com.google.protobuf:protobuf-java:${protobufVersion}")
 		optional("javax.mail:javax.mail-api:${javamailVersion}")
 		testCompile(project(":spring-context-support"))  // for JafMediaTypeFactory
