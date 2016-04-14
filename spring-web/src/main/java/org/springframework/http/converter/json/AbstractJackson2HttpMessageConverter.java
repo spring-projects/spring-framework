@@ -138,10 +138,10 @@ public abstract class AbstractJackson2HttpMessageConverter extends AbstractGener
 
 	@Override
 	public boolean canRead(Type type, Class<?> contextClass, MediaType mediaType) {
-		JavaType javaType = getJavaType(type, contextClass);
 		if (!canRead(mediaType)) {
 			return false;
 		}
+		JavaType javaType = getJavaType(type, contextClass);
 		if (!logger.isWarnEnabled()) {
 			return this.objectMapper.canDeserialize(javaType);
 		}
