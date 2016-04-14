@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -222,6 +222,11 @@ public abstract class AopUtils {
 		}
 
 		MethodMatcher methodMatcher = pc.getMethodMatcher();
+		if (methodMatcher == MethodMatcher.TRUE) {
+			// No need to iterate the methods if we're matching any method anyway...
+			return true;
+		}
+
 		IntroductionAwareMethodMatcher introductionAwareMethodMatcher = null;
 		if (methodMatcher instanceof IntroductionAwareMethodMatcher) {
 			introductionAwareMethodMatcher = (IntroductionAwareMethodMatcher) methodMatcher;
@@ -230,7 +235,7 @@ public abstract class AopUtils {
 		Set<Class<?>> classes = new LinkedHashSet<Class<?>>(ClassUtils.getAllInterfacesForClassAsSet(targetClass));
 		classes.add(targetClass);
 		for (Class<?> clazz : classes) {
-			Method[] methods = clazz.getMethods();
+			Method[] methods = ReflectionUtils.getAllDeclaredMethods(clazz);
 			for (Method method : methods) {
 				if ((introductionAwareMethodMatcher != null &&
 						introductionAwareMethodMatcher.matches(method, targetClass, hasIntroductions)) ||
