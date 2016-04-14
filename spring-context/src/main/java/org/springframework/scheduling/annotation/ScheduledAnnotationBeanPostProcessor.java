@@ -287,8 +287,6 @@ public class ScheduledAnnotationBeanPostProcessor implements BeanPostProcessor, 
 
 	protected void processScheduled(Scheduled scheduled, Method method, Object bean) {
 		try {
-			Assert.isTrue(void.class == method.getReturnType(),
-					"Only void-returning methods may be annotated with @Scheduled");
 			Assert.isTrue(method.getParameterTypes().length == 0,
 					"Only no-arg methods may be annotated with @Scheduled");
 
