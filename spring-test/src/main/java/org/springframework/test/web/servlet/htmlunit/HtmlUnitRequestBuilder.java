@@ -360,18 +360,23 @@ final class HtmlUnitRequestBuilder implements RequestBuilder, Mergeable {
 	private void params(MockHttpServletRequest request, UriComponents uriComponents) {
 		for (Entry<String, List<String>> entry : uriComponents.getQueryParams().entrySet()) {
 			String name = entry.getKey();
+			String urlDecodedName = urlDecode(name);
 			for (String value : entry.getValue()) {
-				try {
-					value = (value != null ? URLDecoder.decode(value, "UTF-8") : "");
-					request.addParameter(name, value);
-				}
-				catch (UnsupportedEncodingException e) {
-					throw new RuntimeException(e);
-				}
+				value = (value != null ? urlDecode(value) : "");
+				request.addParameter(urlDecodedName, value);
 			}
 		}
 		for (NameValuePair param : this.webRequest.getRequestParameters()) {
 			request.addParameter(param.getName(), param.getValue());
+		}
+	}
+
+	private String urlDecode(String value) {
+		try {
+			return URLDecoder.decode(value, "UTF-8");
+		}
+		catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
