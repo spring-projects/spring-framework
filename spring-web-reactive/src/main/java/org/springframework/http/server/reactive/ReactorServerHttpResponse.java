@@ -85,7 +85,7 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse {
 				httpCookie.getPath().ifPresent(cookie::setPath);
 				cookie.setSecure(httpCookie.isSecure());
 				cookie.setHttpOnly(httpCookie.isHttpOnly());
-				this.channel.addResponseCookie(name, cookie);
+				this.channel.addResponseCookie(cookie);
 			}
 		}
 	}

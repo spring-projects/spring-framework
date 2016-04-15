@@ -17,11 +17,9 @@
 package org.springframework.http.client.reactive;
 
 import java.net.URI;
-import java.time.Duration;
 import java.util.Collection;
-import java.util.Optional;
 
-import io.netty.handler.codec.http.cookie.Cookie;
+import io.netty.handler.codec.http.cookie.DefaultCookie;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -30,10 +28,8 @@ import reactor.io.netty.http.HttpClient;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;
-import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseCookie;
 
 /**
  * {@link ClientHttpRequest} implementation for the Reactor Net HTTP client
@@ -110,7 +106,7 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 								getHeaders().entrySet().stream().forEach(e ->
 										channel.headers().set(e.getKey(), e.getValue()));
 								getCookies().values().stream().flatMap(Collection::stream).forEach(cookie ->
-										channel.addCookie(cookie.getName(), new NettyCookie(cookie)));
+										channel.addCookie(new DefaultCookie(cookie.getName(), cookie.getValue())));
 								return Mono.empty();
 							})
 							.after(() -> {
@@ -125,95 +121,7 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 				.map(httpChannel -> new ReactorClientHttpResponse(httpChannel, allocator));
 	}
 
-	private final static class NettyCookie implements Cookie {
 
-		private final HttpCookie httpCookie;
-
-
-		public NettyCookie(HttpCookie httpCookie) {
-			this.httpCookie = httpCookie;
-		}
-
-		@Override
-		public String name() {
-			return this.httpCookie.getName();
-		}
-
-		@Override
-		public String value() {
-			return this.httpCookie.getValue();
-		}
-
-		@Override
-		public boolean isHttpOnly() {
-			return true;
-		}
-
-		@Override
-		public long maxAge() {
-			return -1;
-		}
-
-		@Override
-		public String domain() {
-			return null;
-		}
-
-		@Override
-		public String path() {
-			return null;
-		}
-
-		@Override
-		public void setValue(String value) {
-			throw new UnsupportedOperationException("Read-Only Cookie");
-		}
-
-		@Override
-		public boolean wrap() {
-			return false;
-		}
-
-		@Override
-		public void setWrap(boolean wrap) {
-			throw new UnsupportedOperationException("Read-Only Cookie");
-		}
-
-		@Override
-		public void setDomain(String domain) {
-			throw new UnsupportedOperationException("Read-Only Cookie");
-		}
-
-		@Override
-		public void setPath(String path) {
-			throw new UnsupportedOperationException("Read-Only Cookie");
-		}
-
-		@Override
-		public void setMaxAge(long maxAge) {
-			throw new UnsupportedOperationException("Read-Only Cookie");
-		}
-
-		@Override
-		public void setSecure(boolean secure) {
-			throw new UnsupportedOperationException("Read-Only Cookie");
-		}
-
-		@Override
-		public void setHttpOnly(boolean httpOnly) {
-			throw new UnsupportedOperationException("Read-Only Cookie");
-		}
-
-		@Override
-		public int compareTo(Cookie o) {
-			return httpCookie.getName().compareTo(o.name());
-		}
-
-		@Override
-		public boolean isSecure() {
-			return false;
-		}
-	}
 
 }
 
