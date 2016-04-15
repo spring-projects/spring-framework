@@ -16,11 +16,9 @@
 
 package org.springframework.http.server.reactive;
 
-import java.time.Duration;
-import java.util.Optional;
-
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.cookie.Cookie;
+import io.netty.handler.codec.http.cookie.DefaultCookie;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -79,102 +77,17 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse {
 	protected void writeCookies() {
 		for (String name : getCookies().keySet()) {
 			for (ResponseCookie httpCookie : getCookies().get(name)) {
-				Cookie cookie = new NettyCookie(httpCookie);
+				Cookie cookie = new DefaultCookie(name, httpCookie.getValue());
+				if (!httpCookie.getMaxAge().isNegative()) {
+					cookie.setMaxAge(httpCookie.getMaxAge().getSeconds());
+				}
+				httpCookie.getDomain().ifPresent(cookie::setDomain);
+				httpCookie.getPath().ifPresent(cookie::setPath);
+				cookie.setSecure(httpCookie.isSecure());
+				cookie.setHttpOnly(httpCookie.isHttpOnly());
 				this.channel.addResponseCookie(name, cookie);
 			}
 		}
 	}
 
-	private final static class NettyCookie implements Cookie {
-
-		private final ResponseCookie httpCookie;
-
-
-		public NettyCookie(ResponseCookie httpCookie) {
-			this.httpCookie = httpCookie;
-		}
-
-		@Override
-		public String name() {
-			return this.httpCookie.getName();
-		}
-
-		@Override
-		public String value() {
-			return this.httpCookie.getValue();
-		}
-
-		@Override
-		public boolean isHttpOnly() {
-			return this.httpCookie.isHttpOnly();
-		}
-
-		@Override
-		public long maxAge() {
-			Duration maxAge = this.httpCookie.getMaxAge();
-			return (!maxAge.isNegative() ?  maxAge.getSeconds() : -1);
-		}
-
-		@Override
-		public String domain() {
-			Optional<String> domain = this.httpCookie.getDomain();
-			return (domain.isPresent() ? domain.get() : null);
-		}
-
-		@Override
-		public String path() {
-			Optional<String> path = this.httpCookie.getPath();
-			return (path.isPresent() ? path.get() : null);
-		}
-
-		@Override
-		public void setValue(String value) {
-
-		}
-
-		@Override
-		public boolean wrap() {
-			return false;
-		}
-
-		@Override
-		public void setWrap(boolean wrap) {
-			throw new UnsupportedOperationException("Read-Only Cookie");
-		}
-
-		@Override
-		public void setDomain(String domain) {
-			throw new UnsupportedOperationException("Read-Only Cookie");
-		}
-
-		@Override
-		public void setPath(String path) {
-			throw new UnsupportedOperationException("Read-Only Cookie");
-		}
-
-		@Override
-		public void setMaxAge(long maxAge) {
-			throw new UnsupportedOperationException("Read-Only Cookie");
-		}
-
-		@Override
-		public void setSecure(boolean secure) {
-			throw new UnsupportedOperationException("Read-Only Cookie");
-		}
-
-		@Override
-		public void setHttpOnly(boolean httpOnly) {
-			throw new UnsupportedOperationException("Read-Only Cookie");
-		}
-
-		@Override
-		public int compareTo(Cookie o) {
-			return httpCookie.getName().compareTo(o.name());
-		}
-
-		@Override
-		public boolean isSecure() {
-			return this.httpCookie.isSecure();
-		}
-	}
 }
