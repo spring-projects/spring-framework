@@ -33,7 +33,7 @@ public class ReactorHttpServer extends HttpServerSupport
 
 	private ReactorHttpHandlerAdapter reactorHandler;
 
-	private reactor.io.netty.http.HttpServer<Buffer, Buffer> reactorServer;
+	private reactor.io.netty.http.HttpServer reactorServer;
 
 	private DataBufferAllocator allocator = new DefaultDataBufferAllocator();
 

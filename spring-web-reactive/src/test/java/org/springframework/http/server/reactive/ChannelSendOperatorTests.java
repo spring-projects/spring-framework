@@ -39,7 +39,7 @@ import static org.junit.Assert.*;
  * @author Stephane Maldini
  */
 @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-public class WriteWithOperatorTests {
+public class ChannelSendOperatorTests {
 
 	private OneByOneAsyncWriter writer;
 
@@ -49,14 +49,14 @@ public class WriteWithOperatorTests {
 		this.writer = new OneByOneAsyncWriter();
 	}
 
-	private <T> Mono<Void> writeWithOperator(Publisher<String> source){
-		return new WriteWithOperator<>(source, writer::writeWith);
+	private <T> Mono<Void> sendOperator(Publisher<String> source){
+		return new ChannelSendOperator<>(source, writer::send);
 	}
 
 	@Test
 	public void errorBeforeFirstItem() throws Exception {
 		IllegalStateException error = new IllegalStateException("boo");
-		Mono<Void> completion = Mono.<String>error(error).as(this::writeWithOperator);
+		Mono<Void> completion = Mono.<String>error(error).as(this::sendOperator);
 		Signal<Void> signal = completion.materialize().get();
 
 		assertNotNull(signal);
@@ -65,7 +65,7 @@ public class WriteWithOperatorTests {
 
 	@Test
 	public void completionBeforeFirstItem() throws Exception {
-		Mono<Void> completion = Flux.<String>empty().as(this::writeWithOperator);
+		Mono<Void> completion = Flux.<String>empty().as(this::sendOperator);
 		Signal<Void> signal = completion.materialize().get();
 
 		assertNotNull(signal);
@@ -77,7 +77,7 @@ public class WriteWithOperatorTests {
 
 	@Test
 	public void writeOneItem() throws Exception {
-		Mono<Void> completion = Flux.just("one").as(this::writeWithOperator);
+		Mono<Void> completion = Flux.just("one").as(this::sendOperator);
 		Signal<Void> signal = completion.materialize().get();
 
 		assertNotNull(signal);
@@ -92,7 +92,7 @@ public class WriteWithOperatorTests {
 	@Test
 	public void writeMultipleItems() throws Exception {
 		List<String> items = Arrays.asList("one", "two", "three");
-		Mono<Void> completion = Flux.fromIterable(items).as(this::writeWithOperator);
+		Mono<Void> completion = Flux.fromIterable(items).as(this::sendOperator);
 		Signal<Void> signal = completion.materialize().get();
 
 		assertNotNull(signal);
@@ -115,7 +115,7 @@ public class WriteWithOperatorTests {
 				subscriber.onError(error);
 			}
 		}, subscriber -> new AtomicInteger());
-		Mono<Void> completion = publisher.as(this::writeWithOperator);
+		Mono<Void> completion = publisher.as(this::sendOperator);
 		Signal<Void> signal = completion.materialize().get();
 
 		assertNotNull(signal);
@@ -138,10 +138,9 @@ public class WriteWithOperatorTests {
 		private Throwable error;
 
 
-		public Publisher<Void> writeWith(Publisher<String> publisher) {
+		public Publisher<Void> send(Publisher<String> publisher) {
 			return subscriber -> {
-				Executors.newSingleThreadScheduledExecutor().schedule(
-						(Runnable) () -> publisher.subscribe(new WriteSubscriber(subscriber)),
+				Executors.newSingleThreadScheduledExecutor().schedule(() -> publisher.subscribe(new WriteSubscriber(subscriber)),
 						50, TimeUnit.MILLISECONDS);
 			};
 		}

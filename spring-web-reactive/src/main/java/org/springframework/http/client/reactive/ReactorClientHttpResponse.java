@@ -16,11 +16,9 @@
 
 package org.springframework.http.client.reactive;
 
-import java.nio.ByteBuffer;
 import java.util.Collection;
 
 import reactor.core.publisher.Flux;
-import reactor.io.buffer.Buffer;
 import reactor.io.netty.http.HttpChannel;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -42,7 +40,7 @@ public class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	private final DataBufferAllocator allocator;
 
-	private final HttpChannel<Buffer, ByteBuffer> channel;
+	private final HttpChannel channel;
 
 
 	public ReactorClientHttpResponse(HttpChannel channel, DataBufferAllocator allocator) {
@@ -52,7 +50,7 @@ public class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		return channel.input().map(b -> allocator.wrap(b.byteBuffer()));
+		return channel.receive().map(b -> allocator.wrap(b.byteBuffer()));
 	}
 
 	@Override
@@ -64,7 +62,7 @@ public class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	@Override
 	public HttpStatus getStatusCode() {
-		return HttpStatus.valueOf(this.channel.responseStatus().getCode());
+		return HttpStatus.valueOf(this.channel.responseStatus().code());
 	}
 
 	@Override
@@ -76,8 +74,8 @@ public class ReactorClientHttpResponse implements ClientHttpResponse {
 							.domain(cookie.domain())
 							.path(cookie.path())
 							.maxAge(cookie.maxAge())
-							.secure(cookie.secure())
-							.httpOnly(cookie.httpOnly())
+							.secure(cookie.isSecure())
+							.httpOnly(cookie.isHttpOnly())
 							.build();
 					result.add(cookie.name(), responseCookie);
 				});
@@ -87,7 +85,7 @@ public class ReactorClientHttpResponse implements ClientHttpResponse {
 	@Override
 	public String toString() {
 		return "ReactorClientHttpResponse{" +
-				"request=" + this.channel.method().getName() + " " + this.channel.uri() + "," +
+				"request=" + this.channel.method().name() + " " + this.channel.uri() + "," +
 				"status=" + getStatusCode() +
 				'}';
 	}

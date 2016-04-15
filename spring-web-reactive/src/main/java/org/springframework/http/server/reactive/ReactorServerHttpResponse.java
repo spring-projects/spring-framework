@@ -19,13 +19,13 @@ package org.springframework.http.server.reactive;
 import java.time.Duration;
 import java.util.Optional;
 
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.cookie.Cookie;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.io.buffer.Buffer;
 import reactor.io.netty.http.HttpChannel;
-import reactor.io.netty.http.model.Cookie;
-import reactor.io.netty.http.model.Status;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;
@@ -41,9 +41,9 @@ import org.springframework.util.Assert;
  */
 public class ReactorServerHttpResponse extends AbstractServerHttpResponse {
 
-	private final HttpChannel<?, Buffer> channel;
+	private final HttpChannel channel;
 
-	public ReactorServerHttpResponse(HttpChannel<?, Buffer> response,
+	public ReactorServerHttpResponse(HttpChannel response,
 			DataBufferAllocator allocator) {
 		super(allocator);
 		Assert.notNull("'response' must not be null.");
@@ -51,18 +51,18 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse {
 	}
 
 
-	public HttpChannel<?, Buffer> getReactorChannel() {
+	public HttpChannel getReactorChannel() {
 		return this.channel;
 	}
 
 	@Override
 	public void setStatusCode(HttpStatus status) {
-		getReactorChannel().responseStatus(Status.valueOf(status.value()));
+		getReactorChannel().responseStatus(HttpResponseStatus.valueOf(status.value()));
 	}
 
 	@Override
 	protected Mono<Void> setBodyInternal(Publisher<DataBuffer> publisher) {
-		return Mono.from(this.channel.writeWith(
+		return Mono.from(this.channel.send(
 				Flux.from(publisher).map(buffer -> new Buffer(buffer.asByteBuffer()))));
 	}
 
@@ -79,22 +79,18 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse {
 	protected void writeCookies() {
 		for (String name : getCookies().keySet()) {
 			for (ResponseCookie httpCookie : getCookies().get(name)) {
-				Cookie cookie = new ReactorCookie(httpCookie);
+				Cookie cookie = new NettyCookie(httpCookie);
 				this.channel.addResponseCookie(name, cookie);
 			}
 		}
 	}
 
-
-	/**
-	 * At present Reactor does not provide a {@link Cookie} implementation.
-	 */
-	private final static class ReactorCookie extends Cookie {
+	private final static class NettyCookie implements Cookie {
 
 		private final ResponseCookie httpCookie;
 
 
-		public ReactorCookie(ResponseCookie httpCookie) {
+		public NettyCookie(ResponseCookie httpCookie) {
 			this.httpCookie = httpCookie;
 		}
 
@@ -109,7 +105,7 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse {
 		}
 
 		@Override
-		public boolean httpOnly() {
+		public boolean isHttpOnly() {
 			return this.httpCookie.isHttpOnly();
 		}
 
@@ -132,7 +128,52 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse {
 		}
 
 		@Override
-		public boolean secure() {
+		public void setValue(String value) {
+
+		}
+
+		@Override
+		public boolean wrap() {
+			return false;
+		}
+
+		@Override
+		public void setWrap(boolean wrap) {
+			throw new UnsupportedOperationException("Read-Only Cookie");
+		}
+
+		@Override
+		public void setDomain(String domain) {
+			throw new UnsupportedOperationException("Read-Only Cookie");
+		}
+
+		@Override
+		public void setPath(String path) {
+			throw new UnsupportedOperationException("Read-Only Cookie");
+		}
+
+		@Override
+		public void setMaxAge(long maxAge) {
+			throw new UnsupportedOperationException("Read-Only Cookie");
+		}
+
+		@Override
+		public void setSecure(boolean secure) {
+			throw new UnsupportedOperationException("Read-Only Cookie");
+		}
+
+		@Override
+		public void setHttpOnly(boolean httpOnly) {
+			throw new UnsupportedOperationException("Read-Only Cookie");
+		}
+
+		@Override
+		public int compareTo(Cookie o) {
+			return httpCookie.getName().compareTo(o.name());
+		}
+
+		@Override
+		public boolean isSecure() {
 			return this.httpCookie.isSecure();
 		}
 	}

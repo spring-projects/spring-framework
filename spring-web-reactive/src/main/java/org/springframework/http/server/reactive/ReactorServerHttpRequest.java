@@ -19,10 +19,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 
+import io.netty.handler.codec.http.cookie.Cookie;
 import reactor.core.publisher.Flux;
-import reactor.io.buffer.Buffer;
 import reactor.io.netty.http.HttpChannel;
-import reactor.io.netty.http.model.Cookie;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;
@@ -39,11 +38,11 @@ import org.springframework.util.MultiValueMap;
  */
 public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
-	private final HttpChannel<Buffer, ?> channel;
+	private final HttpChannel channel;
 
 	private final DataBufferAllocator allocator;
 
-	public ReactorServerHttpRequest(HttpChannel<Buffer, ?> request,
+	public ReactorServerHttpRequest(HttpChannel request,
 			DataBufferAllocator allocator) {
 		Assert.notNull("'request' must not be null");
 		Assert.notNull(allocator, "'allocator' must not be null");
@@ -52,13 +51,13 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 
-	public HttpChannel<Buffer, ?> getReactorChannel() {
+	public HttpChannel getReactorChannel() {
 		return this.channel;
 	}
 
 	@Override
 	public HttpMethod getMethod() {
-		return HttpMethod.valueOf(this.channel.method().getName());
+		return HttpMethod.valueOf(this.channel.method().name());
 	}
 
 	@Override
@@ -75,17 +74,17 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	protected void initCookies(MultiValueMap<String, HttpCookie> cookies) {
-		for (String name : this.channel.cookies().keySet()) {
+		for (CharSequence name : this.channel.cookies().keySet()) {
 			for (Cookie cookie : this.channel.cookies().get(name)) {
-				HttpCookie httpCookie = new HttpCookie(name, cookie.value());
-				cookies.add(name, httpCookie);
+				HttpCookie httpCookie = new HttpCookie(name.toString(), cookie.value());
+				cookies.add(name.toString(), httpCookie);
 			}
 		}
 	}
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		return Flux.from(this.channel.input()).map(bytes -> {
+		return Flux.from(this.channel.receive()).map(bytes -> {
 			ByteBuffer byteBuffer = bytes.byteBuffer();
 			return allocator.wrap(byteBuffer);
 		});

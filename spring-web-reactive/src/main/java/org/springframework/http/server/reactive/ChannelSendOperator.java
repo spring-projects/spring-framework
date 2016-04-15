@@ -37,12 +37,12 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @author Stephane Maldini
  */
-public class WriteWithOperator<T> extends MonoSource<T, Void> {
+public class ChannelSendOperator<T> extends MonoSource<T, Void> {
 
 	private final Function<Publisher<T>, Publisher<Void>> writeFunction;
 
 
-	public WriteWithOperator(Publisher<? extends T> source,
+	public ChannelSendOperator(Publisher<? extends T> source,
 			Function<Publisher<T>, Publisher<Void>> writeFunction) {
 		super(source);
 		this.writeFunction = writeFunction;

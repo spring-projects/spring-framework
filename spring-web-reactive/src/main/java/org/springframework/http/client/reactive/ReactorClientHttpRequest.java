@@ -17,21 +17,23 @@
 package org.springframework.http.client.reactive;
 
 import java.net.URI;
+import java.time.Duration;
 import java.util.Collection;
+import java.util.Optional;
 
+import io.netty.handler.codec.http.cookie.Cookie;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.io.buffer.Buffer;
 import reactor.io.netty.http.HttpClient;
-import reactor.io.netty.http.model.Cookie;
-import reactor.io.netty.http.model.Method;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseCookie;
 
 /**
  * {@link ClientHttpRequest} implementation for the Reactor Net HTTP client
@@ -47,7 +49,7 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 
 	private final URI uri;
 
-	private final HttpClient<Buffer, Buffer> httpClient;
+	private final HttpClient httpClient;
 
 	private Flux<Buffer> body;
 
@@ -97,23 +99,23 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 	@Override
 	public Mono<ClientHttpResponse> execute() {
 
-		return this.httpClient.request(new Method(httpMethod.toString()), uri.toString(),
+		return this.httpClient.request(new io.netty.handler.codec.http.HttpMethod(httpMethod.toString()), uri.toString(),
 				channel -> {
 					// see https://github.com/reactor/reactor-io/pull/8
 					if (body == null) {
-						channel.headers().removeTransferEncodingChunked();
+						channel.removeTransferEncodingChunked();
 					}
 					return applyBeforeCommit()
 							.after(() -> {
 								getHeaders().entrySet().stream().forEach(e ->
 										channel.headers().set(e.getKey(), e.getValue()));
 								getCookies().values().stream().flatMap(Collection::stream).forEach(cookie ->
-										channel.addCookie(cookie.getName(), new ReactorCookie(cookie)));
+										channel.addCookie(cookie.getName(), new NettyCookie(cookie)));
 								return Mono.empty();
 							})
 							.after(() -> {
 								if (body != null) {
-									return channel.writeBufferWith(body);
+									return channel.send(body);
 								}
 								else {
 									return channel.writeHeaders();
@@ -123,16 +125,12 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 				.map(httpChannel -> new ReactorClientHttpResponse(httpChannel, allocator));
 	}
 
-
-	/**
-	 * At present Reactor does not provide a {@link Cookie} implementation.
-	 */
-	private final static class ReactorCookie extends Cookie {
+	private final static class NettyCookie implements Cookie {
 
 		private final HttpCookie httpCookie;
 
 
-		public ReactorCookie(HttpCookie httpCookie) {
+		public NettyCookie(HttpCookie httpCookie) {
 			this.httpCookie = httpCookie;
 		}
 
@@ -144,6 +142,76 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 		@Override
 		public String value() {
 			return this.httpCookie.getValue();
+		}
+
+		@Override
+		public boolean isHttpOnly() {
+			return true;
+		}
+
+		@Override
+		public long maxAge() {
+			return -1;
+		}
+
+		@Override
+		public String domain() {
+			return null;
+		}
+
+		@Override
+		public String path() {
+			return null;
+		}
+
+		@Override
+		public void setValue(String value) {
+			throw new UnsupportedOperationException("Read-Only Cookie");
+		}
+
+		@Override
+		public boolean wrap() {
+			return false;
+		}
+
+		@Override
+		public void setWrap(boolean wrap) {
+			throw new UnsupportedOperationException("Read-Only Cookie");
+		}
+
+		@Override
+		public void setDomain(String domain) {
+			throw new UnsupportedOperationException("Read-Only Cookie");
+		}
+
+		@Override
+		public void setPath(String path) {
+			throw new UnsupportedOperationException("Read-Only Cookie");
+		}
+
+		@Override
+		public void setMaxAge(long maxAge) {
+			throw new UnsupportedOperationException("Read-Only Cookie");
+		}
+
+		@Override
+		public void setSecure(boolean secure) {
+			throw new UnsupportedOperationException("Read-Only Cookie");
+		}
+
+		@Override
+		public void setHttpOnly(boolean httpOnly) {
+			throw new UnsupportedOperationException("Read-Only Cookie");
+		}
+
+		@Override
+		public int compareTo(Cookie o) {
+			return httpCookie.getName().compareTo(o.name());
+		}
+
+		@Override
+		public boolean isSecure() {
+			return false;
 		}
 	}
 

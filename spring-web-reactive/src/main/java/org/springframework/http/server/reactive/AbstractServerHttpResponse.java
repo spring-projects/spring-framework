@@ -90,7 +90,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 
 	@Override
 	public Mono<Void> setBody(Publisher<DataBuffer> publisher) {
-		return new WriteWithOperator<>(publisher, writePublisher ->
+		return new ChannelSendOperator<>(publisher, writePublisher ->
 						applyBeforeCommit().after(() -> setBodyInternal(writePublisher)));
 	}
 

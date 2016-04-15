@@ -28,7 +28,7 @@ import org.springframework.util.Assert;
  * @author Stephane Maldini
  */
 public class ReactorHttpHandlerAdapter
-		implements ChannelFluxHandler<Buffer, Buffer, HttpChannel<Buffer, Buffer>> {
+		implements ChannelFluxHandler<Buffer, Buffer, HttpChannel> {
 
 	private final HttpHandler httpHandler;
 
@@ -42,7 +42,7 @@ public class ReactorHttpHandlerAdapter
 	}
 
 	@Override
-	public Mono<Void> apply(HttpChannel<Buffer, Buffer> channel) {
+	public Mono<Void> apply(HttpChannel channel) {
 		ReactorServerHttpRequest adaptedRequest =
 				new ReactorServerHttpRequest(channel, allocator);
 		ReactorServerHttpResponse adaptedResponse =
