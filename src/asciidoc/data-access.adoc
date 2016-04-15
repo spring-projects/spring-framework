@@ -5130,7 +5130,9 @@ chapter will then cover the other ORM technologies, showing briefer examples the
 
 [NOTE]
 ====
-As of Spring 4.0, Spring requires Hibernate 3.6 or later. We recommend Hibernate 5.0+.
+As of Spring 4.0, Spring requires Hibernate 3.6 or later. Note that the Hibernate team
+stopped supporting Hibernate 3 years ago and even phased out support for Hibernate 4.x
+in late 2015. We therefore recommend Hibernate 5.1 and higher from a 2016+ perspective.
 ====
 
 
