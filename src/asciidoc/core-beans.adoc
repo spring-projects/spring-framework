@@ -8240,7 +8240,7 @@ Be aware of the following limitations when using asynchronous events:
   manually.
 
 
-[[context-functionality-events-order]
+[[context-functionality-events-order]]
 ==== Ordering Listeners
 
 If you need the listener to be invoked before another one, just add the `@Order`
