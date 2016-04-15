@@ -17,14 +17,15 @@ package org.springframework.http.server.reactive;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
-import org.springframework.util.LinkedCaseInsensitiveMap;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 
 /**
  * Common base class for {@link ServerHttpRequest} implementations.
@@ -33,7 +34,12 @@ import org.springframework.util.MultiValueMap;
  */
 public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 
+	private static final Pattern QUERY_PATTERN = Pattern.compile("([^&=]+)(=?)([^&]+)?");
+
+
 	private URI uri;
+
+	private MultiValueMap<String, String> queryParams;
 
 	private HttpHeaders headers;
 
@@ -61,6 +67,30 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	protected abstract URI initUri() throws URISyntaxException;
 
 	@Override
+	public MultiValueMap<String, String> getQueryParams() {
+		if (this.queryParams == null) {
+			this.queryParams = CollectionUtils.unmodifiableMultiValueMap(initQueryParams());
+		}
+		return this.queryParams;
+	}
+
+	protected MultiValueMap<String, String> initQueryParams() {
+		MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+		String query = getURI().getRawQuery();
+		if (query != null) {
+			Matcher matcher = QUERY_PATTERN.matcher(query);
+			while (matcher.find()) {
+				String name = matcher.group(1);
+				String eq = matcher.group(2);
+				String value = matcher.group(3);
+				value = (value != null ? value : (StringUtils.hasLength(eq) ? "" : null));
+				queryParams.add(name, value);
+			}
+		}
+		return queryParams;
+	}
+
+	@Override
 	public HttpHeaders getHeaders() {
 		if (this.headers == null) {
 			this.headers = new HttpHeaders();
@@ -79,7 +109,7 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	@Override
 	public MultiValueMap<String, HttpCookie> getCookies() {
 		if (this.cookies == null) {
-			this.cookies = new LinkedMultiValueMap<String, HttpCookie>();
+			this.cookies = new LinkedMultiValueMap<>();
 			initCookies(this.cookies);
 		}
 		return this.cookies;

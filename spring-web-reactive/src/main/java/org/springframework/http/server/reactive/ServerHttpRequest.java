@@ -16,9 +16,6 @@
 
 package org.springframework.http.server.reactive;
 
-import java.util.List;
-import java.util.Map;
-
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.ReactiveHttpInputMessage;
@@ -30,6 +27,11 @@ import org.springframework.util.MultiValueMap;
  * @author Arjen Poutsma
  */
 public interface ServerHttpRequest extends HttpRequest, ReactiveHttpInputMessage {
+
+	/**
+	 * Return a read-only map with parsed and decoded query parameter values.
+	 */
+	MultiValueMap<String, String> getQueryParams();
 
 	/**
 	 * Return a read-only map of cookies sent by the client.

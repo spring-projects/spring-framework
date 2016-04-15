@@ -36,6 +36,8 @@ public class MockServerHttpRequest implements ServerHttpRequest {
 
 	private URI uri;
 
+	private MultiValueMap<String, String> queryParams = new LinkedMultiValueMap<>();
+
 	private HttpHeaders headers = new HttpHeaders();
 
 	private MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
@@ -77,6 +79,11 @@ public class MockServerHttpRequest implements ServerHttpRequest {
 	@Override
 	public HttpHeaders getHeaders() {
 		return this.headers;
+	}
+
+	@Override
+	public MultiValueMap<String, String> getQueryParams() {
+		return this.queryParams;
 	}
 
 	@Override
