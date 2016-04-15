@@ -24,8 +24,6 @@ import java.util.Map;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 
@@ -36,6 +34,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 
@@ -45,8 +44,6 @@ import org.springframework.util.StringUtils;
  * @author Rossen Stoyanchev
  */
 public class ServletServerHttpRequest extends AbstractServerHttpRequest {
-
-	private static final Log logger = LogFactory.getLog(ServletServerHttpRequest.class);
 
 	private final HttpServletRequest request;
 
@@ -81,7 +78,8 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	protected void initHeaders(HttpHeaders headers) {
+	protected HttpHeaders initHeaders() {
+		HttpHeaders headers = new HttpHeaders();
 		for (Enumeration<?> names = getServletRequest().getHeaderNames(); names.hasMoreElements(); ) {
 			String name = (String) names.nextElement();
 			for (Enumeration<?> values = getServletRequest().getHeaders(name); values.hasMoreElements(); ) {
@@ -112,10 +110,12 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 				headers.setContentLength(contentLength);
 			}
 		}
+		return headers;
 	}
 
 	@Override
-	protected void initCookies(MultiValueMap<String, HttpCookie> httpCookies) {
+	protected MultiValueMap<String, HttpCookie> initCookies() {
+		MultiValueMap<String, HttpCookie> httpCookies = new LinkedMultiValueMap<>();
 		Cookie[] cookies = this.request.getCookies();
 		if (cookies != null) {
 			for (Cookie cookie : cookies) {
@@ -124,6 +124,7 @@ public class ServletServerHttpRequest extends AbstractServerHttpRequest {
 				httpCookies.add(name, httpCookie);
 			}
 		}
+		return httpCookies;
 	}
 
 	@Override

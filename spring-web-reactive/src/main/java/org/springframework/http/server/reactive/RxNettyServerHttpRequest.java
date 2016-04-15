@@ -32,6 +32,7 @@ import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -70,20 +71,24 @@ public class RxNettyServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	protected void initHeaders(HttpHeaders headers) {
+	protected HttpHeaders initHeaders() {
+		HttpHeaders headers = new HttpHeaders();
 		for (String name : this.request.getHeaderNames()) {
 			headers.put(name, this.request.getAllHeaderValues(name));
 		}
+		return headers;
 	}
 
 	@Override
-	protected void initCookies(MultiValueMap<String, HttpCookie> cookies) {
+	protected MultiValueMap<String, HttpCookie> initCookies() {
+		MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
 		for (String name : this.request.getCookies().keySet()) {
 			for (Cookie cookie : this.request.getCookies().get(name)) {
 				HttpCookie httpCookie = new HttpCookie(name, cookie.value());
 				cookies.add(name, httpCookie);
 			}
 		}
+		return cookies;
 	}
 
 	@Override

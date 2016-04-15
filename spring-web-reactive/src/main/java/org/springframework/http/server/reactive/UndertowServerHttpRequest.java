@@ -30,6 +30,7 @@ import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -70,19 +71,23 @@ public class UndertowServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	protected void initHeaders(HttpHeaders headers) {
+	protected HttpHeaders initHeaders() {
+		HttpHeaders headers = new HttpHeaders();
 		for (HeaderValues values : this.getUndertowExchange().getRequestHeaders()) {
 			headers.put(values.getHeaderName().toString(), values);
 		}
+		return headers;
 	}
 
 	@Override
-	protected void initCookies(MultiValueMap<String, HttpCookie> cookies) {
+	protected MultiValueMap<String, HttpCookie> initCookies() {
+		MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
 		for (String name : this.exchange.getRequestCookies().keySet()) {
 			Cookie cookie = this.exchange.getRequestCookies().get(name);
 			HttpCookie httpCookie = new HttpCookie(name, cookie.getValue());
 			cookies.add(name, httpCookie);
 		}
+		return cookies;
 	}
 
 	@Override

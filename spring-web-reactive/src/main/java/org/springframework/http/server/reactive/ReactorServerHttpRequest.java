@@ -29,6 +29,7 @@ import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 /**
@@ -66,20 +67,24 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 	}
 
 	@Override
-	protected void initHeaders(HttpHeaders headers) {
+	protected HttpHeaders initHeaders() {
+		HttpHeaders headers = new HttpHeaders();
 		for (String name : this.channel.headers().names()) {
 			headers.put(name, this.channel.headers().getAll(name));
 		}
+		return headers;
 	}
 
 	@Override
-	protected void initCookies(MultiValueMap<String, HttpCookie> cookies) {
+	protected MultiValueMap<String, HttpCookie> initCookies() {
+		MultiValueMap<String, HttpCookie> cookies = new LinkedMultiValueMap<>();
 		for (CharSequence name : this.channel.cookies().keySet()) {
 			for (Cookie cookie : this.channel.cookies().get(name)) {
 				HttpCookie httpCookie = new HttpCookie(name.toString(), cookie.value());
 				cookies.add(name.toString(), httpCookie);
 			}
 		}
+		return cookies;
 	}
 
 	@Override

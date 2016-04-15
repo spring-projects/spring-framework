@@ -93,8 +93,7 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	@Override
 	public HttpHeaders getHeaders() {
 		if (this.headers == null) {
-			this.headers = new HttpHeaders();
-			initHeaders(this.headers);
+			this.headers = HttpHeaders.readOnlyHttpHeaders(initHeaders());
 		}
 		return this.headers;
 	}
@@ -102,15 +101,13 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	/**
 	 * Initialize the headers from the underlying request. Invoked lazily on the
 	 * first call to {@link #getHeaders()} and then cached.
-	 * @param headers the map to add headers to
 	 */
-	protected abstract void initHeaders(HttpHeaders headers);
+	protected abstract HttpHeaders initHeaders();
 
 	@Override
 	public MultiValueMap<String, HttpCookie> getCookies() {
 		if (this.cookies == null) {
-			this.cookies = new LinkedMultiValueMap<>();
-			initCookies(this.cookies);
+			this.cookies = CollectionUtils.unmodifiableMultiValueMap(initCookies());
 		}
 		return this.cookies;
 	}
@@ -118,8 +115,7 @@ public abstract class AbstractServerHttpRequest implements ServerHttpRequest {
 	/**
 	 * Initialize the cookies from the underlying request. Invoked lazily on the
 	 * first access to cookies via {@link #getHeaders()} and then cached.
-	 * @param cookies the map to add cookies to
 	 */
-	protected abstract void initCookies(MultiValueMap<String, HttpCookie> cookies);
+	protected abstract MultiValueMap<String, HttpCookie> initCookies();
 
 }
