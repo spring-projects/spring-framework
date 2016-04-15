@@ -55,7 +55,7 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse {
 
 	@Override
 	public void setStatusCode(HttpStatus status) {
-		getReactorChannel().responseStatus(HttpResponseStatus.valueOf(status.value()));
+		getReactorChannel().status(HttpResponseStatus.valueOf(status.value()));
 	}
 
 	@Override

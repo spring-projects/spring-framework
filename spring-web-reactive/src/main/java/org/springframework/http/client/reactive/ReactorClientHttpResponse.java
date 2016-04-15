@@ -19,7 +19,7 @@ package org.springframework.http.client.reactive;
 import java.util.Collection;
 
 import reactor.core.publisher.Flux;
-import reactor.io.netty.http.HttpChannel;
+import reactor.io.netty.http.HttpInbound;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;
@@ -40,29 +40,29 @@ public class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	private final DataBufferAllocator allocator;
 
-	private final HttpChannel channel;
+	private final HttpInbound channel;
 
 
-	public ReactorClientHttpResponse(HttpChannel channel, DataBufferAllocator allocator) {
+	public ReactorClientHttpResponse(HttpInbound channel, DataBufferAllocator allocator) {
 		this.allocator = allocator;
 		this.channel = channel;
 	}
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		return channel.receive().map(b -> allocator.wrap(b.byteBuffer()));
+		return channel.receiveBody().map(b -> allocator.wrap(b.byteBuffer()));
 	}
 
 	@Override
 	public HttpHeaders getHeaders() {
 		HttpHeaders headers = new HttpHeaders();
-		this.channel.responseHeaders().entries().stream().forEach(e -> headers.add(e.getKey(), e.getValue()));
+		this.channel.headers().entries().stream().forEach(e -> headers.add(e.getKey(), e.getValue()));
 		return headers;
 	}
 
 	@Override
 	public HttpStatus getStatusCode() {
-		return HttpStatus.valueOf(this.channel.responseStatus().code());
+		return HttpStatus.valueOf(this.channel.status().code());
 	}
 
 	@Override
