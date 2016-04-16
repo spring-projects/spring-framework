@@ -56,7 +56,7 @@ public class ReactorClientHttpResponse implements ClientHttpResponse {
 	@Override
 	public HttpHeaders getHeaders() {
 		HttpHeaders headers = new HttpHeaders();
-		this.channel.headers().entries().stream().forEach(e -> headers.add(e.getKey(), e.getValue()));
+		this.channel.responseHeaders().entries().stream().forEach(e -> headers.add(e.getKey(), e.getValue()));
 		return headers;
 	}
 
