@@ -39,8 +39,8 @@ import org.springframework.web.cors.CorsUtils;
  */
 public final class RequestMethodsRequestCondition extends AbstractRequestCondition<RequestMethodsRequestCondition> {
 
-	private static final RequestMethodsRequestCondition HEAD_CONDITION =
-			new RequestMethodsRequestCondition(RequestMethod.HEAD);
+	private static final RequestMethodsRequestCondition GET_CONDITION =
+			new RequestMethodsRequestCondition(RequestMethod.GET);
 
 
 	private final Set<RequestMethod> methods;
@@ -140,7 +140,7 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 				}
 			}
 			if (httpMethod == HttpMethod.HEAD && getMethods().contains(RequestMethod.GET)) {
-				return HEAD_CONDITION;
+				return GET_CONDITION;
 			}
 		}
 		return null;
@@ -159,7 +159,18 @@ public final class RequestMethodsRequestCondition extends AbstractRequestConditi
 	 */
 	@Override
 	public int compareTo(RequestMethodsRequestCondition other, HttpServletRequest request) {
-		return (other.methods.size() - this.methods.size());
+		if (other.methods.size() != this.methods.size()) {
+			return other.methods.size() - this.methods.size();
+		}
+		else if (this.methods.size() == 1) {
+			if (this.methods.contains(RequestMethod.HEAD) && other.methods.contains(RequestMethod.GET)) {
+				return -1;
+			}
+			else if (this.methods.contains(RequestMethod.GET) && other.methods.contains(RequestMethod.HEAD)) {
+				return 1;
+			}
+		}
+		return 0;
 	}
 
 }

@@ -1777,6 +1777,18 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 	}
 
 	@Test
+	public void httpHeadExplicit() throws ServletException, IOException {
+		initServletWithControllers(ResponseEntityController.class);
+
+		MockHttpServletRequest request = new MockHttpServletRequest("HEAD", "/stores");
+		MockHttpServletResponse response = new MockHttpServletResponse();
+		getServlet().service(request, response);
+
+		assertEquals(200, response.getStatus());
+		assertEquals("v1", response.getHeader("h1"));
+	}
+
+	@Test
 	public void httpOptions() throws ServletException, IOException {
 		initServletWithControllers(ResponseEntityController.class);
 
@@ -3099,6 +3111,16 @@ public class ServletAnnotationControllerHandlerMethodTests extends AbstractServl
 		@RequestMapping(path = "/baz", method = RequestMethod.GET)
 		public ResponseEntity<String> baz() {
 			return ResponseEntity.ok().header("MyResponseHeader", "MyValue").body("body");
+		}
+
+		@RequestMapping(path = "/stores", method = RequestMethod.HEAD)
+		public ResponseEntity<Void> headResource() {
+			return ResponseEntity.ok().header("h1", "v1").build();
+		}
+
+		@RequestMapping(path = "/stores", method = RequestMethod.GET)
+		public ResponseEntity<String> getResource() {
+			return ResponseEntity.ok().body("body");
 		}
 	}
 
