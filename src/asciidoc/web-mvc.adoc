@@ -4688,9 +4688,9 @@ the MVC Java config and the MVC XML namespace.
 
 The MVC Java config and the MVC namespace provide similar default configuration that
 overrides the `DispatcherServlet` defaults. The goal is to spare most applications from
-having to having to create the same configuration and also to provide higher-level
-constructs for configuring Spring MVC that serve as a simple starting point and require
-little or no prior knowledge of the underlying configuration.
+having to create the same configuration and also to provide higher-level constructs for
+configuring Spring MVC that serve as a simple starting point and require little or no
+prior knowledge of the underlying configuration.
 
 You can choose either the MVC Java config or the MVC namespace depending on your
 preference. Also as you will see further below, with the MVC Java config it is easier to
