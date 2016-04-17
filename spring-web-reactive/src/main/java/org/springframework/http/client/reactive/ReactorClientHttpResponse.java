@@ -50,7 +50,7 @@ public class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		return channel.receiveBody().map(b -> allocator.wrap(b.byteBuffer()));
+		return channel.receive().map(b -> allocator.wrap(b.byteBuffer()));
 	}
 
 	@Override

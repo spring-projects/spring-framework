@@ -111,7 +111,7 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 							})
 							.after(() -> {
 								if (body != null) {
-									return channel.sendBody(body);
+									return channel.send(body);
 								}
 								else {
 									return channel.sendHeaders();
