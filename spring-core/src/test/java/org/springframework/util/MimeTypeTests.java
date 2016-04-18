@@ -190,6 +190,11 @@ public class MimeTypeTests {
 	}
 
 	@Test(expected = InvalidMimeTypeException.class)
+	public void parseMimeTypeMissingTypeAndSubtype() throws Exception {
+		MimeTypeUtils.parseMimeType("     ;a=b");
+	}
+
+	@Test(expected = InvalidMimeTypeException.class)
 	public void parseMimeTypeEmptyParameterAttribute() {
 		MimeTypeUtils.parseMimeType("audio/*;=value");
 	}
@@ -263,13 +268,13 @@ public class MimeTypeTests {
 
 		assertTrue("Invalid comparison result", audioBasicLevel.compareTo(audio) > 0);
 
-		List<MimeType> expected = new ArrayList<MimeType>();
+		List<MimeType> expected = new ArrayList<>();
 		expected.add(audio);
 		expected.add(audioBasic);
 		expected.add(audioBasicLevel);
 		expected.add(audioWave);
 
-		List<MimeType> result = new ArrayList<MimeType>(expected);
+		List<MimeType> result = new ArrayList<>(expected);
 		Random rnd = new Random();
 		// shuffle & sort 10 times
 		for (int i = 0; i < 10; i++) {
