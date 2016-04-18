@@ -81,7 +81,7 @@ public class RequestMappingHandlerMappingTests {
 
 		assertTrue(this.handlerMapping.useSuffixPatternMatch());
 		assertTrue(this.handlerMapping.useRegisteredSuffixPatternMatch());
-		assertEquals(Collections.singletonList("json"), this.handlerMapping.getFileExtensions());
+		assertEquals(Collections.singleton("json"), this.handlerMapping.getFileExtensions());
 	}
 
 	@Test

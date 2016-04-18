@@ -28,6 +28,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.reactive.accept.CompositeContentTypeResolverBuilder;
 import org.springframework.web.reactive.accept.ContentTypeResolver;
 import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
 import org.springframework.web.server.ServerWebExchange;
@@ -96,7 +97,8 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 
 		this.expressions = new ArrayList<>(expressions);
 		Collections.sort(this.expressions);
-		this.contentTypeResolver = (resolver != null ? resolver : new HeaderContentTypeResolver());
+		this.contentTypeResolver = (resolver != null ?
+				resolver : new CompositeContentTypeResolverBuilder().build());
 	}
 
 

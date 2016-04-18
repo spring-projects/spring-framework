@@ -27,6 +27,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringValueResolver;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
+import org.springframework.web.reactive.accept.CompositeContentTypeResolverBuilder;
 import org.springframework.web.reactive.accept.ContentTypeResolver;
 import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
 import org.springframework.web.reactive.result.condition.RequestCondition;
@@ -49,7 +51,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 
 	private boolean useTrailingSlashMatch = true;
 
-	private ContentTypeResolver contentTypeResolver = new HeaderContentTypeResolver();
+	private ContentTypeResolver contentTypeResolver = new CompositeContentTypeResolverBuilder().build();
 
 	private StringValueResolver embeddedValueResolver;
 

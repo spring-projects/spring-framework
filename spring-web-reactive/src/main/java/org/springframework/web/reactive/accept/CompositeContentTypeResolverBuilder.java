@@ -27,7 +27,55 @@ import org.springframework.util.CollectionUtils;
 
 
 /**
- * Builder for {@link CompositeContentTypeResolver}.
+ * Factory to create a {@link CompositeContentTypeResolver} and configure it with
+ * one or more {@link ContentTypeResolver} instances with build style methods.
+ * The following table shows methods, resulting strategy instances, and if in
+ * use by default:
+ *
+ * <table>
+ * <tr>
+ *     <th>Property Setter</th>
+ *     <th>Underlying Strategy</th>
+ *     <th>Default Setting</th>
+ * </tr>
+ * <tr>
+ *     <td>{@link #favorPathExtension}</td>
+ *     <td>{@link PathExtensionContentTypeResolver Path Extension resolver}</td>
+ *     <td>On</td>
+ * </tr>
+ * <tr>
+ *     <td>{@link #favorParameter}</td>
+ *     <td>{@link ParameterContentTypeResolver Parameter resolver}</td>
+ *     <td>Off</td>
+ * </tr>
+ * <tr>
+ *     <td>{@link #ignoreAcceptHeader}</td>
+ *     <td>{@link HeaderContentTypeResolver Header resolver}</td>
+ *     <td>On</td>
+ * </tr>
+ * <tr>
+ *     <td>{@link #defaultContentType}</td>
+ *     <td>{@link FixedContentTypeResolver Fixed content resolver}</td>
+ *     <td>Not set</td>
+ * </tr>
+ * <tr>
+ *     <td>{@link #defaultContentTypeResolver}</td>
+ *     <td>{@link ContentTypeResolver}</td>
+ *     <td>Not set</td>
+ * </tr>
+ * </table>
+ *
+ * <p>The order in which resolvers are configured is fixed. Config methods may only
+ * turn individual resolvers on or off. If you need a custom order for any
+ * reason simply instantiate {@code {@link CompositeContentTypeResolver}} directly.
+ *
+ * <p>For the path extension and parameter resolvers you may explicitly add
+ * {@link #mediaTypes(Map)}. This will be used to resolve path extensions or a
+ * parameter value such as "json" to a media type such as "application/json".
+ *
+ * <p>The path extension strategy will also use the Java Activation framework
+ * (JAF), if available, to resolve a path extension to a MediaType. You may
+ * {@link #useJaf suppress} the use of JAF.
  *
  * @author Rossen Stoyanchev
  */
