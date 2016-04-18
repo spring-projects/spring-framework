@@ -30,6 +30,45 @@ import org.springframework.web.server.ServerWebExchange;
 public interface HandlerMapping {
 
 	/**
+	 * Name of the {@link ServerWebExchange} attribute that contains the
+	 * best matching pattern within the handler mapping.
+	 * <p>Note: This attribute is not required to be supported by all
+	 * HandlerMapping implementations. URL-based HandlerMappings will
+	 * typically support it, but handlers should not necessarily expect
+	 * this request attribute to be present in all scenarios.
+	 */
+	String BEST_MATCHING_PATTERN_ATTRIBUTE = HandlerMapping.class.getName() + ".bestMatchingPattern";
+
+	/**
+	 * Name of the {@link ServerWebExchange} attribute that contains the URI
+	 * templates map, mapping variable names to values.
+	 * <p>Note: This attribute is not required to be supported by all
+	 * HandlerMapping implementations. URL-based HandlerMappings will
+	 * typically support it, but handlers should not necessarily expect
+	 * this request attribute to be present in all scenarios.
+	 */
+	String URI_TEMPLATE_VARIABLES_ATTRIBUTE = HandlerMapping.class.getName() + ".uriTemplateVariables";
+
+	/**
+	 * Name of the {@link ServerWebExchange} attribute that contains a map with
+	 * URI matrix variables.
+	 * <p>Note: This attribute is not required to be supported by all
+	 * HandlerMapping implementations and may also not be present depending on
+	 * whether the HandlerMapping is configured to keep matrix variable content
+	 * in the request URI.
+	 */
+	String MATRIX_VARIABLES_ATTRIBUTE = HandlerMapping.class.getName() + ".matrixVariables";
+
+	/**
+	 * Name of the {@link ServerWebExchange} attribute that contains the set of
+	 * producible MediaTypes applicable to the mapped handler.
+	 * <p>Note: This attribute is not required to be supported by all
+	 * HandlerMapping implementations. Handlers should not necessarily expect
+	 * this request attribute to be present in all scenarios.
+	 */
+	String PRODUCIBLE_MEDIA_TYPES_ATTRIBUTE = HandlerMapping.class.getName() + ".producibleMediaTypes";
+
+	/**
 	 * Return a handler for this request.
 	 * @param exchange current server exchange
 	 * @return A {@link Mono} that emits one value or none in case the request

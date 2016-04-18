@@ -16,7 +16,11 @@
 package org.springframework.web.util;
 
 import java.io.UnsupportedEncodingException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -49,11 +53,12 @@ public class HttpRequestPathHelper {
 
 
 	public String getLookupPathForRequest(ServerWebExchange exchange) {
-		String path = exchange.getRequest().getURI().getPath();
-		return (this.shouldUrlDecode() ? decode(path) : path);
+		String path = exchange.getRequest().getURI().getRawPath();
+		return (this.shouldUrlDecode() ? decode(exchange, path) : path);
 	}
 
-	private String decode(String path) {
+	private String decode(ServerWebExchange exchange, String path) {
+		// TODO: look up request encoding?
 		try {
 			return UriUtils.decode(path, "UTF-8");
 		}
@@ -61,6 +66,50 @@ public class HttpRequestPathHelper {
 			// Should not happen
 			throw new IllegalStateException("Could not decode request string [" + path + "]");
 		}
+	}
+
+	/**
+	 * Decode the given URI path variables unless {@link #setUrlDecode(boolean)}
+	 * is set to {@code true} in which case it is assumed the URL path from
+	 * which the variables were extracted is already decoded through a call to
+	 * {@link #getLookupPathForRequest(ServerWebExchange)}.
+	 * @param exchange current exchange
+	 * @param vars URI variables extracted from the URL path
+	 * @return the same Map or a new Map instance
+	 */
+	public Map<String, String> decodePathVariables(ServerWebExchange exchange, Map<String, String> vars) {
+		if (this.urlDecode) {
+			return vars;
+		}
+		Map<String, String> decodedVars = new LinkedHashMap<>(vars.size());
+		for (Map.Entry<String, String> entry : vars.entrySet()) {
+			decodedVars.put(entry.getKey(), decode(exchange, entry.getValue()));
+		}
+		return decodedVars;
+	}
+
+	/**
+	 * Decode the given matrix variables unless {@link #setUrlDecode(boolean)}
+	 * is set to {@code true} in which case it is assumed the URL path from
+	 * which the variables were extracted is already decoded through a call to
+	 * {@link #getLookupPathForRequest(ServerWebExchange)}.
+	 * @param exchange current exchange
+	 * @param vars URI variables extracted from the URL path
+	 * @return the same Map or a new Map instance
+	 */
+	public MultiValueMap<String, String> decodeMatrixVariables(ServerWebExchange exchange,
+			MultiValueMap<String, String> vars) {
+
+		if (this.urlDecode) {
+			return vars;
+		}
+		MultiValueMap<String, String> decodedVars = new LinkedMultiValueMap<>(vars.size());
+		for (String key : vars.keySet()) {
+			for (String value : vars.get(key)) {
+				decodedVars.add(key, decode(exchange, value));
+			}
+		}
+		return decodedVars;
 	}
 
 }
