@@ -19,7 +19,7 @@ package org.springframework.web.reactive.result.condition;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Collections;
-import java.util.List;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -131,7 +131,7 @@ public class PatternsRequestConditionTests {
 	@Test
 	public void matchSuffixPatternUsingFileExtensions() throws Exception {
 		String[] patterns = new String[] {"/jobs/{jobName}"};
-		List<String> extensions = Collections.singletonList("json");
+		Set<String> extensions = Collections.singleton("json");
 		PatternsRequestCondition condition = new PatternsRequestCondition(patterns, null, null, true, false, extensions);
 
 		ServerWebExchange exchange = createExchange("/jobs/my.job");
@@ -150,7 +150,7 @@ public class PatternsRequestConditionTests {
 	@Test
 	public void matchSuffixPatternUsingFileExtensions2() throws Exception {
 		PatternsRequestCondition condition1 = new PatternsRequestCondition(
-				new String[] {"/prefix"}, null, null, true, false, Collections.singletonList("json"));
+				new String[] {"/prefix"}, null, null, true, false, Collections.singleton("json"));
 
 		PatternsRequestCondition condition2 = new PatternsRequestCondition(
 				new String[] {"/suffix"}, null, null, true, false, null);

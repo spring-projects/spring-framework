@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -50,7 +51,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 
 	private final boolean useTrailingSlashMatch;
 
-	private final List<String> fileExtensions = new ArrayList<String>();
+	private final Set<String> fileExtensions = new HashSet<>();
 
 
 	/**
@@ -74,7 +75,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 */
 	public PatternsRequestCondition(String[] patterns, HttpRequestPathHelper pathHelper,
 			PathMatcher pathMatcher, boolean useSuffixPatternMatch, boolean useTrailingSlashMatch,
-			List<String> extensions) {
+			Set<String> extensions) {
 
 		this(asList(patterns), pathHelper, pathMatcher, useSuffixPatternMatch, useTrailingSlashMatch, extensions);
 	}
@@ -84,7 +85,7 @@ public final class PatternsRequestCondition extends AbstractRequestCondition<Pat
 	 */
 	private PatternsRequestCondition(Collection<String> patterns, HttpRequestPathHelper pathHelper,
 			PathMatcher pathMatcher, boolean useSuffixPatternMatch, boolean useTrailingSlashMatch,
-			List<String> fileExtensions) {
+			Set<String> fileExtensions) {
 
 		this.patterns = Collections.unmodifiableSet(prependLeadingSlash(patterns));
 		this.pathHelper = (pathHelper != null ? pathHelper : new HttpRequestPathHelper());

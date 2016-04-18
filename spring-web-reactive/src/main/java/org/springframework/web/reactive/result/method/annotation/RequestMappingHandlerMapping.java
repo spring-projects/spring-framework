@@ -18,7 +18,7 @@ package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
-import java.util.List;
+import java.util.Set;
 
 import org.springframework.context.EmbeddedValueResolverAware;
 import org.springframework.core.annotation.AnnotatedElementUtils;
@@ -149,7 +149,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	/**
 	 * Return the file extensions to use for suffix pattern matching.
 	 */
-	public List<String> getFileExtensions() {
+	public Set<String> getFileExtensions() {
 		return this.config.getFileExtensions();
 	}
 

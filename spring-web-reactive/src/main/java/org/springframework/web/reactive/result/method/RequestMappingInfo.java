@@ -16,13 +16,13 @@
 
 package org.springframework.web.reactive.result.method;
 
-import java.util.List;
+import java.util.Set;
 
 import org.springframework.util.PathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.reactive.accept.ContentTypeResolver;
-import org.springframework.web.reactive.accept.FileExtensionContentTypeResolver;
+import org.springframework.web.reactive.accept.MappingContentTypeResolver;
 import org.springframework.web.reactive.result.condition.ConsumesRequestCondition;
 import org.springframework.web.reactive.result.condition.HeadersRequestCondition;
 import org.springframework.web.reactive.result.condition.ParamsRequestCondition;
@@ -576,11 +576,11 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		 * {@code registeredSuffixPatternMatch=true}, the extensions are obtained
 		 * from the configured {@code contentTypeResolver}.
 		 */
-		public List<String> getFileExtensions() {
+		public Set<String> getFileExtensions() {
 			ContentTypeResolver resolver = getContentTypeResolver();
 			if (useRegisteredSuffixPatternMatch() && resolver != null) {
-				if (resolver instanceof FileExtensionContentTypeResolver) {
-					return ((FileExtensionContentTypeResolver) resolver).getAllFileExtensions();
+				if (resolver instanceof MappingContentTypeResolver) {
+					return ((MappingContentTypeResolver) resolver).getKeys();
 				}
 			}
 			return null;

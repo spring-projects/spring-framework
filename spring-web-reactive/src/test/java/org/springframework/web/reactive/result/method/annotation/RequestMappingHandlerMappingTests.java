@@ -39,7 +39,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.context.support.StaticWebApplicationContext;
-import org.springframework.web.reactive.accept.FileExtensionContentTypeResolver;
+import org.springframework.web.reactive.accept.MappingContentTypeResolver;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -73,8 +73,8 @@ public class RequestMappingHandlerMappingTests {
 		assertTrue(this.handlerMapping.useSuffixPatternMatch());
 		assertTrue(this.handlerMapping.useRegisteredSuffixPatternMatch());
 
-		FileExtensionContentTypeResolver contentTypeResolver = mock(FileExtensionContentTypeResolver.class);
-		when(contentTypeResolver.getAllFileExtensions()).thenReturn(Collections.singletonList("json"));
+		MappingContentTypeResolver contentTypeResolver = mock(MappingContentTypeResolver.class);
+		when(contentTypeResolver.getKeys()).thenReturn(Collections.singleton("json"));
 
 		this.handlerMapping.setContentTypeResolver(contentTypeResolver);
 		this.handlerMapping.afterPropertiesSet();
@@ -86,8 +86,8 @@ public class RequestMappingHandlerMappingTests {
 
 	@Test
 	public void useRegisteredSuffixPatternMatchInitialization() {
-		FileExtensionContentTypeResolver contentTypeResolver = mock(FileExtensionContentTypeResolver.class);
-		when(contentTypeResolver.getAllFileExtensions()).thenReturn(Collections.singletonList("json"));
+		MappingContentTypeResolver contentTypeResolver = mock(MappingContentTypeResolver.class);
+		when(contentTypeResolver.getKeys()).thenReturn(Collections.singleton("json"));
 
 		final Set<String> actualExtensions = new HashSet<>();
 		RequestMappingHandlerMapping localHandlerMapping = new RequestMappingHandlerMapping() {
