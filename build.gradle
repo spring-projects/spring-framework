@@ -32,11 +32,11 @@ configure(allprojects) { project ->
 	version = qualifyVersionIfNecessary(version)
 
 	ext.aspectjVersion       = "1.8.9"
-	ext.caffeineVersion      = "2.2.6"
+	ext.caffeineVersion      = "2.2.7"
 	ext.eclipselinkVersion   = "2.4.2"
 	ext.ehcacheVersion       = "2.10.1"
 	ext.ehcachejcacheVersion = "1.0.1"
-	ext.ehcache3Version      = "3.0.0.rc3"
+	ext.ehcache3Version      = "3.0.0"
 	ext.ejbApiVersion        = "3.0"
 	ext.fileuploadVersion    = "1.3.1"
 	ext.freemarkerVersion    = "2.3.23"
