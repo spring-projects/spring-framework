@@ -24,6 +24,7 @@ import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.SchedulerGroup;
+import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Timer;
 
 import org.springframework.core.io.buffer.DataBufferAllocator;
@@ -41,7 +42,7 @@ import static org.junit.Assert.assertThat;
  */
 public class AsyncIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
-	private final SchedulerGroup asyncGroup = SchedulerGroup.async();
+	private final Scheduler asyncGroup = SchedulerGroup.async();
 
 	private final DataBufferAllocator allocator = new DefaultDataBufferAllocator();
 
