@@ -22,6 +22,7 @@ import reactor.io.netty.http.HttpClient;
 
 import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
+import org.springframework.core.io.buffer.NettyDataBufferAllocator;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.util.Assert;
@@ -33,20 +34,13 @@ import org.springframework.util.Assert;
  */
 public class ReactorHttpClientRequestFactory implements ClientHttpRequestFactory {
 
-	private final DataBufferAllocator allocator;
-
 	private final HttpClient httpClient;
 
 	public ReactorHttpClientRequestFactory() {
-		this(new DefaultDataBufferAllocator());
+		this(reactor.io.netty.http.HttpClient.create());
 	}
 
-	public ReactorHttpClientRequestFactory(DataBufferAllocator allocator) {
-		this(allocator, reactor.io.netty.http.HttpClient.create());
-	}
-
-	protected ReactorHttpClientRequestFactory(DataBufferAllocator allocator, HttpClient httpClient) {
-		this.allocator = allocator;
+	protected ReactorHttpClientRequestFactory(HttpClient httpClient) {
 		this.httpClient = httpClient;
 	}
 
@@ -56,7 +50,7 @@ public class ReactorHttpClientRequestFactory implements ClientHttpRequestFactory
 		Assert.notNull(uri, "request URI is required");
 		Assert.notNull(headers, "request headers are required");
 
-		return new ReactorClientHttpRequest(httpMethod, uri, this.httpClient, headers, this.allocator);
+		return new ReactorClientHttpRequest(httpMethod, uri, this.httpClient, headers);
 	}
 
 }

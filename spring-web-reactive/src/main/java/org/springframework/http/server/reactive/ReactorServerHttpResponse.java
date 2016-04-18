@@ -16,17 +16,19 @@
 
 package org.springframework.http.server.reactive;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.cookie.Cookie;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.io.buffer.Buffer;
 import reactor.io.netty.http.HttpChannel;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.NettyDataBuffer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.util.Assert;
@@ -60,8 +62,7 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse {
 
 	@Override
 	protected Mono<Void> setBodyInternal(Publisher<DataBuffer> publisher) {
-		return Mono.from(this.channel.send(
-				Flux.from(publisher).map(buffer -> new Buffer(buffer.asByteBuffer()))));
+		return this.channel.send(Flux.from(publisher).map(this::toByteBuf));
 	}
 
 	@Override
@@ -90,4 +91,12 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse {
 		}
 	}
 
+	private ByteBuf toByteBuf(DataBuffer buffer) {
+		if (buffer instanceof NettyDataBuffer) {
+			return ((NettyDataBuffer) buffer).getNativeBuffer();
+		}
+		else {
+			return Unpooled.wrappedBuffer(buffer.asByteBuffer());
+		}
+	}
 }

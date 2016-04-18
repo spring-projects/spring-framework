@@ -65,7 +65,7 @@ public class WebClientIntegrationTests {
 				.perform(get(baseUrl.toString()))
 				.extract(headers());
 
-		TestSubscriber<HttpHeaders> ts = new TestSubscriber();
+		TestSubscriber<HttpHeaders> ts = new TestSubscriber<>();
 		result.subscribe(ts);
 		ts.awaitAndAssertNextValuesWith(
 				httpHeaders -> {
@@ -92,7 +92,7 @@ public class WebClientIntegrationTests {
 				.extract(body(String.class));
 
 
-		TestSubscriber<String> ts = new TestSubscriber();
+		TestSubscriber<String> ts = new TestSubscriber<>();
 		result.subscribe(ts);
 		ts.awaitAndAssertNextValues("Hello Spring!").assertComplete();
 
@@ -114,15 +114,12 @@ public class WebClientIntegrationTests {
 						.accept(MediaType.TEXT_PLAIN))
 				.extract(response(String.class));
 
-		TestSubscriber<ResponseEntity<String>> ts = new TestSubscriber();
+		TestSubscriber<ResponseEntity<String>> ts = new TestSubscriber<>();
 		result.subscribe(ts);
-		ts.awaitAndAssertNextValuesWith(new Consumer<ResponseEntity<String>>() {
-			@Override
-			public void accept(ResponseEntity<String> response) {
-				assertEquals(200, response.getStatusCode().value());
-				assertEquals(MediaType.TEXT_PLAIN, response.getHeaders().getContentType());
-				assertEquals("Hello Spring!", response.getBody());
-			}
+		ts.awaitAndAssertNextValuesWith((Consumer<ResponseEntity<String>>) response -> {
+			assertEquals(200, response.getStatusCode().value());
+			assertEquals(MediaType.TEXT_PLAIN, response.getHeaders().getContentType());
+			assertEquals("Hello Spring!", response.getBody());
 		});
 		RecordedRequest request = server.takeRequest();
 		assertEquals(1, server.getRequestCount());
@@ -143,7 +140,7 @@ public class WebClientIntegrationTests {
 						.accept(MediaType.APPLICATION_JSON))
 				.extract(body(String.class));
 
-		TestSubscriber<String> ts = new TestSubscriber();
+		TestSubscriber<String> ts = new TestSubscriber<>();
 		result.subscribe(ts);
 		ts.awaitAndAssertNextValues(content).assertComplete();
 		RecordedRequest request = server.takeRequest();
@@ -164,7 +161,7 @@ public class WebClientIntegrationTests {
 						.accept(MediaType.APPLICATION_JSON))
 				.extract(body(Pojo.class));
 
-		TestSubscriber<Pojo> ts = new TestSubscriber();
+		TestSubscriber<Pojo> ts = new TestSubscriber<>();
 		result.subscribe(ts);
 		ts.awaitAndAssertNextValuesWith(p -> assertEquals("barbar", p.getBar())).assertComplete();
 		RecordedRequest request = server.takeRequest();
@@ -185,7 +182,7 @@ public class WebClientIntegrationTests {
 						.accept(MediaType.APPLICATION_JSON))
 				.extract(bodyStream(Pojo.class));
 
-		TestSubscriber<Pojo> ts = new TestSubscriber();
+		TestSubscriber<Pojo> ts = new TestSubscriber<>();
 		result.subscribe(ts);
 		ts.awaitAndAssertNextValuesWith(
 				p -> assertThat(p.getBar(), Matchers.is("bar1")),
@@ -209,7 +206,7 @@ public class WebClientIntegrationTests {
 						.accept(MediaType.APPLICATION_JSON))
 				.extract(responseStream(Pojo.class));
 
-		TestSubscriber<ResponseEntity<Flux<Pojo>>> ts = new TestSubscriber();
+		TestSubscriber<ResponseEntity<Flux<Pojo>>> ts = new TestSubscriber<>();
 		result.subscribe(ts);
 		ts.awaitAndAssertNextValuesWith(
 				response -> {
@@ -237,7 +234,7 @@ public class WebClientIntegrationTests {
 						.accept(MediaType.APPLICATION_JSON))
 				.extract(body(Pojo.class));
 
-		TestSubscriber<Pojo> ts = new TestSubscriber();
+		TestSubscriber<Pojo> ts = new TestSubscriber<>();
 		result.subscribe(ts);
 		ts.awaitAndAssertNextValuesWith(p -> assertEquals("BARBAR", p.getBar())).assertComplete();
 
@@ -261,7 +258,7 @@ public class WebClientIntegrationTests {
 				.extract(body(String.class));
 
 
-		TestSubscriber<String> ts = new TestSubscriber();
+		TestSubscriber<String> ts = new TestSubscriber<>();
 		result.subscribe(ts);
 		// TODO: error message should be converted to a ClientException
 		ts.await().assertError();

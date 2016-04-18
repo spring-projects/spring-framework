@@ -23,6 +23,7 @@ import reactor.io.netty.http.HttpInbound;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.NettyDataBufferAllocator;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -50,7 +51,7 @@ public class ReactorClientHttpResponse implements ClientHttpResponse {
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		return channel.receive().map(b -> allocator.wrap(b.byteBuffer()));
+		return channel.receiveByteBuffer().map(allocator::wrap);
 	}
 
 	@Override

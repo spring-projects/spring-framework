@@ -25,6 +25,7 @@ import reactor.io.netty.http.HttpChannel;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.NettyDataBufferAllocator;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -41,10 +42,10 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 	private final HttpChannel channel;
 
-	private final DataBufferAllocator allocator;
+	private final NettyDataBufferAllocator allocator;
 
 	public ReactorServerHttpRequest(HttpChannel request,
-			DataBufferAllocator allocator) {
+			NettyDataBufferAllocator allocator) {
 		Assert.notNull("'request' must not be null");
 		Assert.notNull(allocator, "'allocator' must not be null");
 		this.channel = request;
@@ -89,10 +90,7 @@ public class ReactorServerHttpRequest extends AbstractServerHttpRequest {
 
 	@Override
 	public Flux<DataBuffer> getBody() {
-		return Flux.from(this.channel.receive()).map(bytes -> {
-			ByteBuffer byteBuffer = bytes.byteBuffer();
-			return allocator.wrap(byteBuffer);
-		});
+		return this.channel.receive().map(allocator::wrap);
 	}
 
 }

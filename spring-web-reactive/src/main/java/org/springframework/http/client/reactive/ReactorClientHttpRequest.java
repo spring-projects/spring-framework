@@ -19,15 +19,19 @@ package org.springframework.http.client.reactive;
 import java.net.URI;
 import java.util.Collection;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.cookie.DefaultCookie;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.io.buffer.Buffer;
 import reactor.io.netty.http.HttpClient;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
+import org.springframework.core.io.buffer.NettyDataBuffer;
+import org.springframework.core.io.buffer.NettyDataBufferAllocator;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 
@@ -47,13 +51,13 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 
 	private final HttpClient httpClient;
 
-	private Flux<Buffer> body;
+	private Flux<ByteBuf> body;
 
 
-	public ReactorClientHttpRequest(HttpMethod httpMethod, URI uri, HttpClient httpClient, HttpHeaders headers,
-			DataBufferAllocator allocator) {
+	public ReactorClientHttpRequest(HttpMethod httpMethod, URI uri, HttpClient httpClient, HttpHeaders headers) {
 		super(headers);
-		this.allocator = allocator;
+		//FIXME use Netty allocator
+		this.allocator = new DefaultDataBufferAllocator();
 		this.httpMethod = httpMethod;
 		this.uri = uri;
 		this.httpClient = httpClient;
@@ -88,7 +92,7 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 	@Override
 	public Mono<Void> setBody(Publisher<DataBuffer> body) {
 
-		this.body = Flux.from(body).map(b -> new Buffer(b.asByteBuffer()));
+		this.body = Flux.from(body).map(this::toByteBuf);
 		return Mono.empty();
 	}
 
@@ -121,7 +125,14 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 				.map(httpChannel -> new ReactorClientHttpResponse(httpChannel, allocator));
 	}
 
-
+	private ByteBuf toByteBuf(DataBuffer buffer) {
+		if (buffer instanceof NettyDataBuffer) {
+			return ((NettyDataBuffer) buffer).getNativeBuffer();
+		}
+		else {
+			return Unpooled.wrappedBuffer(buffer.asByteBuffer());
+		}
+	}
 
 }
 

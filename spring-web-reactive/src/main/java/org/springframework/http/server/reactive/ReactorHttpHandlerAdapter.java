@@ -16,33 +16,32 @@
 
 package org.springframework.http.server.reactive;
 
+import io.netty.buffer.ByteBuf;
 import reactor.core.publisher.Mono;
-import reactor.io.buffer.Buffer;
 import reactor.io.ipc.ChannelHandler;
 import reactor.io.netty.http.HttpChannel;
 
-import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.core.io.buffer.NettyDataBufferAllocator;
 import org.springframework.util.Assert;
 
 /**
  * @author Stephane Maldini
  */
 public class ReactorHttpHandlerAdapter
-		implements ChannelHandler<Buffer, Buffer, HttpChannel> {
+		implements ChannelHandler<ByteBuf, ByteBuf, HttpChannel> {
 
 	private final HttpHandler httpHandler;
 
-	private final DataBufferAllocator allocator;
-
-	public ReactorHttpHandlerAdapter(HttpHandler httpHandler,
-			DataBufferAllocator allocator) {
+	public ReactorHttpHandlerAdapter(HttpHandler httpHandler) {
 		Assert.notNull(httpHandler, "'httpHandler' is required.");
 		this.httpHandler = httpHandler;
-		this.allocator = allocator;
 	}
 
 	@Override
 	public Mono<Void> apply(HttpChannel channel) {
+		NettyDataBufferAllocator allocator =
+				new NettyDataBufferAllocator(channel.delegate().alloc());
+
 		ReactorServerHttpRequest adaptedRequest =
 				new ReactorServerHttpRequest(channel, allocator);
 		ReactorServerHttpResponse adaptedResponse =
