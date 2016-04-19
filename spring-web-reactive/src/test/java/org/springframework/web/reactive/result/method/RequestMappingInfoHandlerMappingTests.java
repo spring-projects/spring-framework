@@ -379,7 +379,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		assertError(mono, UnsupportedMediaTypeStatusException.class, ex ->
 				assertEquals("Invalid supported consumable media types",
 						Collections.singletonList(new MediaType("application", "xml")),
-						ex.getSupportedContentTypes()));
+						ex.getSupportedMediaTypes()));
 	}
 
 	private void testHttpOptions(String requestURI, String allowHeader) throws Exception {
