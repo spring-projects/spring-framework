@@ -22,7 +22,7 @@ import org.junit.Test;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
-import org.springframework.web.ResponseStatusException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 import static org.junit.Assert.assertEquals;
@@ -47,7 +47,7 @@ public class DispatcherHandlerExceptionMapperTests {
 		ex = this.mapper.apply(ex);
 
 		assertEquals(ResponseStatusException.class, ex.getClass());
-		assertEquals(HttpStatus.NOT_FOUND, ((ResponseStatusException) ex).getHttpStatus());
+		assertEquals(HttpStatus.NOT_FOUND, ((ResponseStatusException) ex).getStatus());
 	}
 
 
@@ -57,7 +57,7 @@ public class DispatcherHandlerExceptionMapperTests {
 		ex = this.mapper.apply(ex);
 
 		assertEquals(ResponseStatusException.class, ex.getClass());
-		assertEquals(HttpStatus.NOT_ACCEPTABLE, ((ResponseStatusException) ex).getHttpStatus());
+		assertEquals(HttpStatus.NOT_ACCEPTABLE, ((ResponseStatusException) ex).getStatus());
 	}
 
 	@Test
@@ -66,7 +66,7 @@ public class DispatcherHandlerExceptionMapperTests {
 		ex = this.mapper.apply(ex);
 
 		assertEquals(ResponseStatusException.class, ex.getClass());
-		assertEquals(HttpStatus.BAD_REQUEST, ((ResponseStatusException) ex).getHttpStatus());
+		assertEquals(HttpStatus.BAD_REQUEST, ((ResponseStatusException) ex).getStatus());
 	}
 
 	@Test
@@ -75,7 +75,7 @@ public class DispatcherHandlerExceptionMapperTests {
 		ex = this.mapper.apply(ex);
 
 		assertEquals(ResponseStatusException.class, ex.getClass());
-		assertEquals(HttpStatus.BAD_REQUEST, ((ResponseStatusException) ex).getHttpStatus());
+		assertEquals(HttpStatus.BAD_REQUEST, ((ResponseStatusException) ex).getStatus());
 	}
 
 

@@ -17,7 +17,7 @@ package org.springframework.web.reactive;
 
 import reactor.core.publisher.Mono;
 
-import org.springframework.web.ResponseStatusException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.ServerWebExchange;
 
@@ -32,7 +32,7 @@ public class ResponseStatusExceptionHandler implements WebExceptionHandler {
 	@Override
 	public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
 		if (ex instanceof ResponseStatusException) {
-			exchange.getResponse().setStatusCode(((ResponseStatusException) ex).getHttpStatus());
+			exchange.getResponse().setStatusCode(((ResponseStatusException) ex).getStatus());
 			return Mono.empty();
 		}
 		return Mono.error(ex);
