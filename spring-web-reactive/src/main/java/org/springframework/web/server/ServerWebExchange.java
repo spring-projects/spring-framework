@@ -16,6 +16,7 @@
 package org.springframework.web.server;
 
 import java.util.Map;
+import java.util.Optional;
 
 import reactor.core.publisher.Mono;
 
@@ -45,6 +46,14 @@ public interface ServerWebExchange {
 	 * Return a mutable map of request attributes for the current exchange.
 	 */
 	Map<String, Object> getAttributes();
+
+	/**
+	 * Return the request attribute value if present.
+	 * @param name the attribute name
+	 * @param <T> the attribute type
+	 * @return the attribute value
+	 */
+	<T> Optional<T> getAttribute(String name);
 
 	/**
 	 * Return the web session for the current request. Always guaranteed  to

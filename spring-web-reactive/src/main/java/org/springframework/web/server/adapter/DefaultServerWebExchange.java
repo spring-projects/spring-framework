@@ -16,6 +16,7 @@
 package org.springframework.web.server.adapter;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import reactor.core.publisher.EmitterProcessor;
@@ -76,6 +77,11 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 	@Override
 	public Map<String, Object> getAttributes() {
 		return this.attributes;
+	}
+
+	@Override @SuppressWarnings("unchecked")
+	public <T> Optional<T> getAttribute(String name) {
+		return Optional.ofNullable((T) this.attributes.get(name));
 	}
 
 	@Override

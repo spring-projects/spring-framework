@@ -20,6 +20,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -99,6 +100,11 @@ public class DefaultWebSession implements ConfigurableWebSession, Serializable {
 	@Override
 	public Map<String, Object> getAttributes() {
 		return this.attributes;
+	}
+
+	@Override @SuppressWarnings("unchecked")
+	public <T> Optional<T> getAttribute(String name) {
+		return Optional.ofNullable((T) this.attributes.get(name));
 	}
 
 	@Override

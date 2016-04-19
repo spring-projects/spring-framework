@@ -18,6 +18,7 @@ package org.springframework.web.server;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Optional;
 
 import reactor.core.publisher.Mono;
 
@@ -43,6 +44,14 @@ public interface WebSession {
 	 * Return a map that holds session attributes.
 	 */
 	Map<String, Object> getAttributes();
+
+	/**
+	 * Return the attribute value if present.
+	 * @param name the attribute name
+	 * @param <T> the attribute type
+	 * @return the attribute value
+	 */
+	<T> Optional<T> getAttribute(String name);
 
 	/**
 	 * Force the creation of a session causing the session id to be sent when
