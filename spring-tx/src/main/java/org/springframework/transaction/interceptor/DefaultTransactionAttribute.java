@@ -57,7 +57,7 @@ public class DefaultTransactionAttribute extends DefaultTransactionDefinition im
 	}
 
 	/**
-	 * Create a new DefaultTransactionAttribute with the the given
+	 * Create a new DefaultTransactionAttribute with the given
 	 * propagation behavior. Can be modified through bean property setters.
 	 * @param propagationBehavior one of the propagation constants in the
 	 * TransactionDefinition interface

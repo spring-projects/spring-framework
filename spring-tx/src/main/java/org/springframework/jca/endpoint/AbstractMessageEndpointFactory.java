@@ -58,7 +58,7 @@ public abstract class AbstractMessageEndpointFactory implements MessageEndpointF
 
 
 	/**
-	 * Set the the XA transaction manager to use for wrapping endpoint
+	 * Set the XA transaction manager to use for wrapping endpoint
 	 * invocations, enlisting the endpoint resource in each such transaction.
 	 * <p>The passed-in object may be a transaction manager which implements
 	 * Spring's {@link org.springframework.transaction.jta.TransactionFactory}

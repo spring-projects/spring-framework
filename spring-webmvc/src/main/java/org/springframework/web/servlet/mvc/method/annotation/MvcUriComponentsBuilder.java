@@ -304,7 +304,7 @@ public class MvcUriComponentsBuilder {
 	 * <p>Note that it's not necessary to specify all arguments. Only the ones
 	 * required to prepare the URL, mainly {@code @RequestParam} and {@code @PathVariable}).
 	 * @param mappingName the mapping name
-	 * @return a builder to to prepare the URI String
+	 * @return a builder to prepare the URI String
 	 * @throws IllegalArgumentException if the mapping name is not found or
 	 * if there is no unique match
 	 * @since 4.1
@@ -321,7 +321,7 @@ public class MvcUriComponentsBuilder {
 	 * @param builder the builder for the base URL; the builder will be cloned
 	 * and therefore not modified and may be re-used for further calls.
 	 * @param name the mapping name
-	 * @return a builder to to prepare the URI String
+	 * @return a builder to prepare the URI String
 	 * @throws IllegalArgumentException if the mapping name is not found or
 	 * if there is no unique match
 	 * @since 4.2

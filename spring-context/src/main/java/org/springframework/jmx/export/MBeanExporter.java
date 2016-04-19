@@ -570,7 +570,7 @@ public class MBeanExporter extends MBeanRegistrationSupport implements MBeanExpo
 	 * should be exposed to the {@code MBeanServer}. Specifically, if the
 	 * supplied {@code mapValue} is the name of a bean that is configured
 	 * for lazy initialization, then a proxy to the resource is registered with
-	 * the {@code MBeanServer} so that the the lazy load behavior is
+	 * the {@code MBeanServer} so that the lazy load behavior is
 	 * honored. If the bean is already an MBean then it will be registered
 	 * directly with the {@code MBeanServer} without any intervention. For
 	 * all other beans or bean names, the resource itself is registered with

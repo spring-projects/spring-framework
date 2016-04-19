@@ -189,7 +189,7 @@ public class StoredProcedureTests {
 		TestJdbcTemplate t = new TestJdbcTemplate();
 		t.setDataSource(dataSource);
 		// Will fail without the following, because we're not able to get a connection
-		// from the DataSource here if we need to to create an ExceptionTranslator
+		// from the DataSource here if we need to create an ExceptionTranslator
 		t.setExceptionTranslator(new SQLStateSQLExceptionTranslator());
 		StoredProcedureConfiguredViaJdbcTemplate sp = new StoredProcedureConfiguredViaJdbcTemplate(t);
 

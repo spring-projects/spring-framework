@@ -3592,7 +3592,7 @@ manual, the javadocs for `@SqlConfig` and `SqlScriptsTestExecutionListener` prov
 detailed information, and the following example demonstrates a typical testing scenario
 using JUnit and transactional tests with `@Sql`. Note that there is no need to clean up
 the database after the `usersTest()` method is executed since any changes made to the
-database (either within the the test method or within the `/test-data.sql` script) will
+database (either within the test method or within the `/test-data.sql` script) will
 be automatically rolled back by the `TransactionalTestExecutionListener` (see
 <<testcontext-tx,transaction management>> for details).
 

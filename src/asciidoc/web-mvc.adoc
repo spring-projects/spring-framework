@@ -1300,7 +1300,7 @@ multiple requests are allowed to access a session concurrently.
   methods and/or the HandlerAdapter configuration. See the `webBindingInitializer`
   property on `RequestMappingHandlerAdapter`. Such command objects along with their
   validation results will be exposed as model attributes by default, using the command
-  class class name - e.g. model attribute "orderAddress" for a command object of type
+  class name - e.g. model attribute "orderAddress" for a command object of type
   "some.package.OrderAddress". The `ModelAttribute` annotation can be used on a method
   argument to customize the model attribute name used.
 * `org.springframework.validation.Errors` /
@@ -1685,7 +1685,7 @@ Given the above example where can the Pet instance come from? There are several 
   more detail below).
 * It may be instantiated using its default constructor.
 
-An `@ModelAttribute` method is a common way to to retrieve an attribute from the
+An `@ModelAttribute` method is a common way to retrieve an attribute from the
 database, which may optionally be stored between requests through the use of
 `@SessionAttributes`. In some cases it may be convenient to retrieve the attribute by
 using an URI template variable and a type converter. Here is an example:
@@ -3929,7 +3929,7 @@ raised the status code may indicate a client error (4xx) or a server error (5xx)
 
 The `DefaultHandlerExceptionResolver` translates Spring MVC exceptions to specific error
 status codes. It is registered by default with the MVC namespace, the MVC Java config,
-and also by the the `DispatcherServlet` (i.e. when not using the MVC namespace or Java
+and also by the `DispatcherServlet` (i.e. when not using the MVC namespace or Java
 config). Listed below are some of the exceptions handled by this resolver and the
 corresponding status codes:
 

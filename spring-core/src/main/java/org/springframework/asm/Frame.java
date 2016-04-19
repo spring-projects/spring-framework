@@ -163,7 +163,7 @@ final class Frame {
     private static final int LOCAL = 0x2000000;
 
     /**
-     * Kind of the the types that are relative to the stack of an input stack
+     * Kind of the types that are relative to the stack of an input stack
      * map frame. The value of such types is a position relatively to the top of
      * this stack.
      */

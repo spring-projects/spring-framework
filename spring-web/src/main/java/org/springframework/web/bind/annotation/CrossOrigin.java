@@ -29,7 +29,7 @@ import org.springframework.core.annotation.AliasFor;
  *
  * <p>By default, all origins and headers are permitted.
  *
- * <p><b>NOTE:</b> {@code @CrossOrigin} will only be processed if an an appropriate
+ * <p><b>NOTE:</b> {@code @CrossOrigin} will only be processed if an appropriate
  * {@code HandlerMapping}-{@code HandlerAdapter} pair is configured such as the
  * {@code RequestMappingHandlerMapping}-{@code RequestMappingHandlerAdapter} pair
  * which are the default in the MVC Java config and the MVC namespace.

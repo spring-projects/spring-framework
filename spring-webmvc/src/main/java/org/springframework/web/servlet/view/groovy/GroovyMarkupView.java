@@ -54,7 +54,7 @@ public class GroovyMarkupView extends AbstractTemplateView {
 
 	/**
 	 * Set the MarkupTemplateEngine to use in this view.
-	 * <p>If not set, the engine is auto-detected by looking up up a single
+	 * <p>If not set, the engine is auto-detected by looking up a single
 	 * {@link GroovyMarkupConfig} bean in the web application context and using
 	 * it to obtain the configured {@code MarkupTemplateEngine} instance.
 	 * @see GroovyMarkupConfig

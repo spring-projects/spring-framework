@@ -292,7 +292,7 @@ public class DefaultLifecycleProcessor implements LifecycleProcessor, BeanFactor
 	 * <p>The default implementation checks for the {@link Phased} interface.
 	 * Can be overridden to apply other/further policies.
 	 * @param bean the bean to introspect
-	 * @return the phase an an integer value. The suggested default is 0.
+	 * @return the phase an integer value. The suggested default is 0.
 	 * @see Phased
 	 * @see SmartLifecycle
 	 */

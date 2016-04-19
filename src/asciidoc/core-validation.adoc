@@ -1317,7 +1317,7 @@ See <<mvc-config-conversion>> in the Spring MVC chapter.
 [[format-configuring-formatting-globaldatetimeformat]]
 == Configuring a global date & time format
 By default, date and time fields that are not annotated with `@DateTimeFormat` are
-converted from strings using the the `DateFormat.SHORT` style. If you prefer, you can
+converted from strings using the `DateFormat.SHORT` style. If you prefer, you can
 change this by defining your own global format.
 
 You will need to ensure that Spring does not register default formatters, and instead

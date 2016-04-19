@@ -110,7 +110,7 @@ public abstract class BeanUtils {
 
 	/**
 	 * Instantiate a class using its no-arg constructor and return the new instance
-	 * as the the specified assignable type.
+	 * as the specified assignable type.
 	 * <p>Useful in cases where
 	 * the type of the class to instantiate (clazz) is not available, but the type
 	 * desired (assignableTo) is known.
