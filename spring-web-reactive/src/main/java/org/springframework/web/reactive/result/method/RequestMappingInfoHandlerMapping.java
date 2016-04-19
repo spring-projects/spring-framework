@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpHeaders;
@@ -35,7 +36,9 @@ import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerMapping;
@@ -45,7 +48,6 @@ import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.UnsupportedMediaTypeStatusException;
-import org.springframework.web.util.WebUtils;
 
 /**
  * Abstract base class for classes for which {@link RequestMappingInfo} defines
@@ -156,8 +158,39 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 				uriVariables.put(uriVar.getKey(), uriVarValue.substring(0, semicolonIndex));
 			}
 
-			MultiValueMap<String, String> vars = WebUtils.parseMatrixVariables(matrixVariables);
+			MultiValueMap<String, String> vars = parseMatrixVariables(matrixVariables);
 			result.put(uriVar.getKey(), getPathHelper().decodeMatrixVariables(exchange, vars));
+		}
+		return result;
+	}
+
+	/**
+	 * Parse the given string with matrix variables. An example string would look
+	 * like this {@code "q1=a;q1=b;q2=a,b,c"}. The resulting map would contain
+	 * keys {@code "q1"} and {@code "q2"} with values {@code ["a","b"]} and
+	 * {@code ["a","b","c"]} respectively.
+	 * @param matrixVariables the unparsed matrix variables string
+	 * @return a map with matrix variable names and values (never {@code null})
+	 */
+	private static MultiValueMap<String, String> parseMatrixVariables(String matrixVariables) {
+		MultiValueMap<String, String> result = new LinkedMultiValueMap<>();
+		if (!StringUtils.hasText(matrixVariables)) {
+			return result;
+		}
+		StringTokenizer pairs = new StringTokenizer(matrixVariables, ";");
+		while (pairs.hasMoreTokens()) {
+			String pair = pairs.nextToken();
+			int index = pair.indexOf('=');
+			if (index != -1) {
+				String name = pair.substring(0, index);
+				String rawValue = pair.substring(index + 1);
+				for (String value : StringUtils.commaDelimitedListToStringArray(rawValue)) {
+					result.add(name, value);
+				}
+			}
+			else {
+				result.add(pair, "");
+			}
 		}
 		return result;
 	}

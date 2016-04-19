@@ -25,12 +25,9 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.util.StringValueResolver;
-import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.reactive.accept.CompositeContentTypeResolver;
 import org.springframework.web.reactive.accept.CompositeContentTypeResolverBuilder;
 import org.springframework.web.reactive.accept.ContentTypeResolver;
-import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
 import org.springframework.web.reactive.result.condition.RequestCondition;
 import org.springframework.web.reactive.result.method.RequestMappingInfo;
 import org.springframework.web.reactive.result.method.RequestMappingInfoHandlerMapping;
@@ -93,7 +90,7 @@ public class RequestMappingHandlerMapping extends RequestMappingInfoHandlerMappi
 	}
 
 	/**
-	 * Set the {@link ContentNegotiationManager} to use to determine requested media types.
+	 * Set the {@link ContentTypeResolver} to use to determine requested media types.
 	 * If not set, the default constructor is used.
 	 */
 	public void setContentTypeResolver(ContentTypeResolver contentTypeResolver) {
