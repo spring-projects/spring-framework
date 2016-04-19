@@ -19,7 +19,6 @@ package org.springframework.web.reactive;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -31,9 +30,11 @@ import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.web.server.WebHandler;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebHandler;
 
 /**
  * Central dispatcher for HTTP request handlers/controllers. Dispatches to registered
@@ -64,29 +65,12 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 
 	private List<HandlerResultHandler> resultHandlers;
 
-	private Function<Throwable, Throwable> errorMapper = new DispatcherHandlerExceptionMapper();
-
 
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		initStrategies(applicationContext);
 	}
 
-	/**
-	 * Configure a function to map error signals from the {@code DispatcherHandler}.
-	 * <p>By default this is set to {@link DispatcherHandlerExceptionMapper}.
-	 * @param errorMapper the function
-	 */
-	public void setErrorMapper(Function<Throwable, Throwable> errorMapper) {
-		this.errorMapper = errorMapper;
-	}
-
-	/**
-	 * Return the configured function for mapping exceptions.
-	 */
-	public Function<Throwable, Throwable> getErrorMapper() {
-		return this.errorMapper;
-	}
 
 	protected void initStrategies(ApplicationContext context) {
 
@@ -121,8 +105,7 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 				.concatMap(mapping -> mapping.getHandler(exchange))
 				.next()
 				.then(handler -> invokeHandler(exchange, handler))
-				.then(result -> handleResult(exchange, result))
-				.otherwise(ex -> Mono.error(this.errorMapper.apply(ex)));
+				.then(result -> handleResult(exchange, result));
 	}
 
 	private Mono<HandlerResult> invokeHandler(ServerWebExchange exchange, Object handler) {
@@ -153,7 +136,8 @@ public class DispatcherHandler implements WebHandler, ApplicationContextAware {
 	private static class NotFoundHandlerMapping implements HandlerMapping {
 
 		@SuppressWarnings("ThrowableInstanceNeverThrown")
-		private static final Exception HANDLER_NOT_FOUND_EXCEPTION = new HandlerNotFoundException();
+		private static final Exception HANDLER_NOT_FOUND_EXCEPTION =
+				new ResponseStatusException(HttpStatus.NOT_FOUND, "No matching handler");
 
 
 		@Override
