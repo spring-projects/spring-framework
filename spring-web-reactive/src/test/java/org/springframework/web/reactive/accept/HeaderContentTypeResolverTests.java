@@ -27,7 +27,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.WebSessionManager;
@@ -63,7 +63,7 @@ public class HeaderContentTypeResolverTests {
 		assertEquals("text/plain;q=0.5", mediaTypes.get(3).toString());
 	}
 
-	@Test(expected=HttpMediaTypeNotAcceptableException.class)
+	@Test(expected=NotAcceptableStatusException.class)
 	public void resolveMediaTypesParseError() throws Exception {
 		ServerWebExchange exchange = createExchange("textplain; q=0.5");
 		this.resolver.resolveMediaTypes(exchange);

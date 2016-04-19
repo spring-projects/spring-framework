@@ -28,7 +28,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.WebSessionManager;
@@ -41,7 +41,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Rossen Stoyanchev
  */
-public class PathExtensionContentNegotiationStrategyTests {
+public class PathExtensionContentTypeResolverTests {
 
 	@Test
 	public void resolveMediaTypesFromMapping() throws Exception {
@@ -101,7 +101,7 @@ public class PathExtensionContentNegotiationStrategyTests {
 		assertEquals(Collections.<MediaType>emptyList(), mediaTypes);
 	}
 
-	@Test(expected = HttpMediaTypeNotAcceptableException.class)
+	@Test(expected = NotAcceptableStatusException.class)
 	public void resolveMediaTypesDoNotIgnoreUnknownExtension() throws Exception {
 		ServerWebExchange exchange = createExchange("test.xyz");
 		PathExtensionContentTypeResolver resolver = new PathExtensionContentTypeResolver();

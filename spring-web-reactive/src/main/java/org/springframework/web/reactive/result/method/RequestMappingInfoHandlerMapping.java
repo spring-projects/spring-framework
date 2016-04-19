@@ -36,16 +36,16 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.HttpMediaTypeNotAcceptableException;
-import org.springframework.web.HttpMediaTypeNotSupportedException;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
-import org.springframework.web.bind.UnsatisfiedServletRequestParameterException;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.result.condition.NameValueExpression;
 import org.springframework.web.reactive.result.condition.ParamsRequestCondition;
+import org.springframework.web.server.BadRequestStatusException;
+import org.springframework.web.server.MethodNotAllowedException;
+import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.util.WebUtils;
 
 /**
@@ -166,10 +166,13 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	/**
 	 * Iterate all RequestMappingInfos once again, look if any match by URL at
 	 * least and raise exceptions accordingly.
-	 * @throws HttpRequestMethodNotSupportedException if there are matches by URL
-	 * but not by HTTP method
-	 * @throws HttpMediaTypeNotAcceptableException if there are matches by URL
-	 * but not by consumable/producible media types
+	 * @throws MethodNotAllowedException for matches by URL but not by HTTP method
+	 * @throws UnsupportedMediaTypeStatusException if there are matches by URL
+	 * and HTTP method but not by consumable media types
+	 * @throws NotAcceptableStatusException if there are matches by URL and HTTP
+	 * method but not by producible media types
+	 * @throws BadRequestStatusException if there are matches by URL and HTTP
+	 * method but not by query parameter conditions
 	 */
 	@Override
 	protected HandlerMethod handleNoMatch(Set<RequestMappingInfo> requestMappingInfos,
@@ -205,7 +208,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 				return new HandlerMethod(handler, HTTP_OPTIONS_HANDLE_METHOD);
 			}
 			else if (!allowedMethods.isEmpty()) {
-				throw new HttpRequestMethodNotSupportedException(httpMethod.name(), allowedMethods);
+				throw new MethodNotAllowedException(httpMethod.name(), allowedMethods);
 			}
 		}
 
@@ -230,12 +233,12 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 				contentType = request.getHeaders().getContentType();
 			}
 			catch (InvalidMediaTypeException ex) {
-				throw new HttpMediaTypeNotSupportedException(ex.getMessage());
+				throw new UnsupportedMediaTypeStatusException(ex.getMessage());
 			}
-			throw new HttpMediaTypeNotSupportedException(contentType, new ArrayList<>(consumableMediaTypes));
+			throw new UnsupportedMediaTypeStatusException(contentType, new ArrayList<>(consumableMediaTypes));
 		}
 		else if (!producibleMediaTypes.isEmpty()) {
-			throw new HttpMediaTypeNotAcceptableException(new ArrayList<>(producibleMediaTypes));
+			throw new NotAcceptableStatusException(new ArrayList<>(producibleMediaTypes));
 		}
 		else {
 			if (!CollectionUtils.isEmpty(paramConditions)) {
@@ -243,7 +246,8 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 						.collect(Collectors.toMap(Entry::getKey,
 								entry -> entry.getValue().toArray(new String[entry.getValue().size()]))
 				);
-				throw new UnsatisfiedServletRequestParameterException(paramConditions, params);
+				throw new BadRequestStatusException("Unsatisfied query parameter conditions: " +
+						paramConditions + ", actual: " + params);
 			}
 			else {
 				return null;
@@ -308,7 +312,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		}
 
 		private static Set<HttpMethod> initAllowedHttpMethods(Set<String> declaredMethods) {
-			Set<HttpMethod> result = new LinkedHashSet<HttpMethod>(declaredMethods.size());
+			Set<HttpMethod> result = new LinkedHashSet<>(declaredMethods.size());
 			if (declaredMethods.isEmpty()) {
 				for (HttpMethod method : HttpMethod.values()) {
 					if (!HttpMethod.TRACE.equals(method)) {

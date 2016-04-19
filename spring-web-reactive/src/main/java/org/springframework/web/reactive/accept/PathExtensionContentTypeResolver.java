@@ -31,8 +31,7 @@ import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.HttpMediaTypeNotAcceptableException;
-import org.springframework.web.accept.PathExtensionContentNegotiationStrategy;
+import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.util.WebUtils;
 
@@ -49,11 +48,10 @@ import org.springframework.web.util.WebUtils;
  */
 public class PathExtensionContentTypeResolver extends AbstractMappingContentTypeResolver {
 
-	private static final Log logger = LogFactory.getLog(PathExtensionContentNegotiationStrategy.class);
+	private static final Log logger = LogFactory.getLog(PathExtensionContentTypeResolver.class);
 
-	private static final boolean JAF_PRESENT = ClassUtils.isPresent(
-			"javax.activation.FileTypeMap",
-			PathExtensionContentNegotiationStrategy.class.getClassLoader());
+	private static final boolean JAF_PRESENT = ClassUtils.isPresent("javax.activation.FileTypeMap",
+			PathExtensionContentTypeResolver.class.getClassLoader());
 
 
 	private boolean useJaf = true;
@@ -104,7 +102,7 @@ public class PathExtensionContentTypeResolver extends AbstractMappingContentType
 	}
 
 	@Override
-	protected MediaType handleNoMatch(String key) throws HttpMediaTypeNotAcceptableException {
+	protected MediaType handleNoMatch(String key) throws NotAcceptableStatusException {
 		if (this.useJaf && JAF_PRESENT) {
 			MediaType mediaType = JafMediaTypeFactory.getMediaType("file." + key);
 			if (mediaType != null && !MediaType.APPLICATION_OCTET_STREAM.equals(mediaType)) {
@@ -112,7 +110,7 @@ public class PathExtensionContentTypeResolver extends AbstractMappingContentType
 			}
 		}
 		if (!this.ignoreUnknownExtensions) {
-			throw new HttpMediaTypeNotAcceptableException(getMediaTypes());
+			throw new NotAcceptableStatusException(getMediaTypes());
 		}
 		return null;
 	}

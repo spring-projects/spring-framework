@@ -22,12 +22,12 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -44,10 +44,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.HttpMediaTypeNotAcceptableException;
-import org.springframework.web.HttpMediaTypeNotSupportedException;
-import org.springframework.web.HttpRequestMethodNotSupportedException;
-import org.springframework.web.bind.UnsatisfiedServletRequestParameterException;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -55,17 +51,19 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.result.method.RequestMappingInfo.BuilderConfiguration;
+import org.springframework.web.server.BadRequestStatusException;
+import org.springframework.web.server.MethodNotAllowedException;
+import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.WebSessionManager;
 import org.springframework.web.util.HttpRequestPathHelper;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertArrayEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -151,8 +149,8 @@ public class RequestMappingInfoHandlerMappingTests {
 	public void getHandlerRequestMethodNotAllowed() throws Exception {
 		ServerWebExchange exchange = createExchange(HttpMethod.POST, "/bar");
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
-		assertError(mono, HttpRequestMethodNotSupportedException.class,
-				ex -> assertArrayEquals(new String[]{"GET", "HEAD"}, ex.getSupportedMethods()));
+		assertError(mono, MethodNotAllowedException.class,
+				ex -> assertEquals(new HashSet<>(Arrays.asList("GET", "HEAD")), ex.getSupportedMethods()));
 	}
 
 	// SPR-9603
@@ -166,7 +164,7 @@ public class RequestMappingInfoHandlerMappingTests {
 
 		TestSubscriber<Object> subscriber = new TestSubscriber<>();
 		mono.subscribeWith(subscriber);
-		subscriber.assertError(HttpMediaTypeNotAcceptableException.class);
+		subscriber.assertError(NotAcceptableStatusException.class);
 	}
 
 	// SPR-8462
@@ -191,8 +189,10 @@ public class RequestMappingInfoHandlerMappingTests {
 		ServerWebExchange exchange = createExchange(HttpMethod.PUT, "/person/1");
 		exchange.getRequest().getHeaders().add("Content-Type", "bogus");
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
-		assertError(mono, HttpMediaTypeNotSupportedException.class,
-				ex -> assertEquals("Invalid mime type \"bogus\": does not contain '/'", ex.getMessage()));
+		assertError(mono, UnsupportedMediaTypeStatusException.class,
+				ex -> assertEquals("Request failure [status: 415, " +
+						"reason: \"Invalid mime type \"bogus\": does not contain '/'\"]",
+						ex.getMessage()));
 	}
 
 	// SPR-8462
@@ -210,11 +210,8 @@ public class RequestMappingInfoHandlerMappingTests {
 	public void getHandlerUnsatisfiedServletRequestParameterException() throws Exception {
 		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/params");
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
-		assertError(mono, UnsatisfiedServletRequestParameterException.class, ex -> {
-			List<String[]> groups = ex.getParamConditionGroups();
-			assertEquals(2, groups.size());
-			assertThat(Arrays.asList("foo=bar", "bar=baz"),
-					containsInAnyOrder(groups.get(0)[0], groups.get(1)[0]));
+		assertError(mono, BadRequestStatusException.class, ex -> {
+			assertThat(ex.getReason(), Matchers.startsWith("Unsatisfied query parameter conditions:"));
 		});
 	}
 
@@ -380,10 +377,10 @@ public class RequestMappingInfoHandlerMappingTests {
 		exchange.getRequest().getHeaders().setContentType(MediaType.APPLICATION_JSON);
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
 
-		assertError(mono, HttpMediaTypeNotSupportedException.class, ex ->
+		assertError(mono, UnsupportedMediaTypeStatusException.class, ex ->
 				assertEquals("Invalid supported consumable media types",
 						Collections.singletonList(new MediaType("application", "xml")),
-						ex.getSupportedMediaTypes()));
+						ex.getSupportedContentTypes()));
 	}
 
 	private void testHttpOptions(String requestURI, String allowHeader) throws Exception {
@@ -407,7 +404,7 @@ public class RequestMappingInfoHandlerMappingTests {
 		exchange.getRequest().getHeaders().setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
 
-		assertError(mono, HttpMediaTypeNotAcceptableException.class, ex ->
+		assertError(mono, NotAcceptableStatusException.class, ex ->
 				assertEquals("Invalid supported producible media types",
 						Collections.singletonList(new MediaType("application", "xml")),
 						ex.getSupportedMediaTypes()));

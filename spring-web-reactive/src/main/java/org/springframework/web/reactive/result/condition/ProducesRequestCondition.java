@@ -25,12 +25,12 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.http.MediaType;
-import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.accept.ContentNegotiationManager;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.reactive.accept.CompositeContentTypeResolverBuilder;
 import org.springframework.web.reactive.accept.ContentTypeResolver;
 import org.springframework.web.reactive.accept.HeaderContentTypeResolver;
+import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -234,14 +234,14 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 			}
 			return 0;
 		}
-		catch (HttpMediaTypeNotAcceptableException ex) {
+		catch (NotAcceptableStatusException ex) {
 			// should never happen
 			throw new IllegalStateException("Cannot compare without having any requested media types", ex);
 		}
 	}
 
 	private List<MediaType> getAcceptedMediaTypes(ServerWebExchange exchange)
-			throws HttpMediaTypeNotAcceptableException {
+			throws NotAcceptableStatusException {
 
 		List<MediaType> mediaTypes = this.contentTypeResolver.resolveMediaTypes(exchange);
 		return mediaTypes.isEmpty() ? Collections.singletonList(MediaType.ALL) : mediaTypes;
@@ -306,7 +306,7 @@ public final class ProducesRequestCondition extends AbstractRequestCondition<Pro
 		}
 
 		@Override
-		protected boolean matchMediaType(ServerWebExchange exchange) throws HttpMediaTypeNotAcceptableException {
+		protected boolean matchMediaType(ServerWebExchange exchange) throws NotAcceptableStatusException {
 			List<MediaType> acceptedMediaTypes = getAcceptedMediaTypes(exchange);
 			for (MediaType acceptedMediaType : acceptedMediaTypes) {
 				if (getMediaType().isCompatibleWith(acceptedMediaType)) {

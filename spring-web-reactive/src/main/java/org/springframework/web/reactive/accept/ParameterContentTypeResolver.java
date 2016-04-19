@@ -23,7 +23,7 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -75,8 +75,8 @@ public class ParameterContentTypeResolver extends AbstractMappingContentTypeReso
 	}
 
 	@Override
-	protected MediaType handleNoMatch(String key) throws HttpMediaTypeNotAcceptableException {
-		throw new HttpMediaTypeNotAcceptableException(getMediaTypes());
+	protected MediaType handleNoMatch(String key) throws NotAcceptableStatusException {
+		throw new NotAcceptableStatusException(getMediaTypes());
 	}
 
 }

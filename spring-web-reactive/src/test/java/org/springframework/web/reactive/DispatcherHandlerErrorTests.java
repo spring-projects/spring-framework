@@ -41,14 +41,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.HttpMediaTypeNotAcceptableException;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.reactive.result.method.annotation.ResponseBodyResultHandler;
+import org.springframework.web.server.NotAcceptableStatusException;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
@@ -60,7 +60,9 @@ import org.springframework.web.server.handler.FilteringWebHandler;
 import org.springframework.web.server.session.WebSessionManager;
 
 import static org.hamcrest.CoreMatchers.startsWith;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
@@ -109,8 +111,7 @@ public class DispatcherHandlerErrorTests {
 		Throwable ex = awaitErrorSignal(publisher);
 
 		assertEquals(ResponseStatusException.class, ex.getClass());
-		assertNotNull(ex.getCause());
-		assertEquals(HandlerNotFoundException.class, ex.getCause().getClass());
+		assertEquals(HttpStatus.NOT_FOUND, ((ResponseStatusException) ex).getStatus());
 	}
 
 	@Test
@@ -166,9 +167,7 @@ public class DispatcherHandlerErrorTests {
 		Mono<Void> publisher = this.dispatcherHandler.handle(this.exchange);
 		Throwable ex = awaitErrorSignal(publisher);
 
-		assertEquals(ResponseStatusException.class, ex.getClass());
-		assertNotNull(ex.getCause());
-		assertEquals(HttpMediaTypeNotAcceptableException.class, ex.getCause().getClass());
+		assertEquals(NotAcceptableStatusException.class, ex.getClass());
 	}
 
 	@Test
@@ -181,7 +180,6 @@ public class DispatcherHandlerErrorTests {
 
 		ex.printStackTrace();
 		assertSame(EXCEPTION, ex);
-
 	}
 
 	@Test

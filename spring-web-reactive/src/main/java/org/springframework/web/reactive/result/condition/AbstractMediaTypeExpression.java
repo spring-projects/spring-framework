@@ -20,9 +20,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import org.springframework.http.MediaType;
-import org.springframework.web.HttpMediaTypeException;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
 /**
  * Supports media type expressions as described in:
@@ -72,12 +73,16 @@ abstract class AbstractMediaTypeExpression implements Comparable<AbstractMediaTy
 			boolean match = matchMediaType(exchange);
 			return (!this.isNegated == match);
 		}
-		catch (HttpMediaTypeException ex) {
+		catch (NotAcceptableStatusException ex) {
+			return false;
+		}
+		catch (UnsupportedMediaTypeStatusException ex) {
 			return false;
 		}
 	}
 
-	protected abstract boolean matchMediaType(ServerWebExchange exchange) throws HttpMediaTypeException;
+	protected abstract boolean matchMediaType(ServerWebExchange exchange)
+			throws NotAcceptableStatusException, UnsupportedMediaTypeStatusException;
 
 
 	@Override

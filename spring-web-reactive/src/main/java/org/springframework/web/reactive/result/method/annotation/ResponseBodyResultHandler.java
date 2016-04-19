@@ -42,11 +42,11 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.util.Assert;
 import org.springframework.util.MimeType;
-import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.HandlerResultHandler;
+import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 
@@ -170,7 +170,7 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 			}
 		}
 		if (compatibleMediaTypes.isEmpty()) {
-			return Mono.error(new HttpMediaTypeNotAcceptableException(producibleMediaTypes));
+			return Mono.error(new NotAcceptableStatusException(producibleMediaTypes));
 		}
 
 		List<MediaType> mediaTypes = new ArrayList<>(compatibleMediaTypes);
@@ -200,7 +200,7 @@ public class ResponseBodyResultHandler implements HandlerResultHandler, Ordered 
 			}
 		}
 
-		return Mono.error(new HttpMediaTypeNotAcceptableException(this.allMediaTypes));
+		return Mono.error(new NotAcceptableStatusException(this.allMediaTypes));
 	}
 
 	private List<MediaType> getAcceptableMediaTypes(ServerHttpRequest request) {

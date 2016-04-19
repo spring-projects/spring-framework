@@ -26,9 +26,9 @@ import java.util.Set;
 
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
-import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.UnsupportedMediaTypeStatusException;
 
 /**
  * A logical disjunction (' || ') request condition to match a request's
@@ -217,14 +217,14 @@ public final class ConsumesRequestCondition extends AbstractRequestCondition<Con
 		}
 
 		@Override
-		protected boolean matchMediaType(ServerWebExchange exchange) throws HttpMediaTypeNotSupportedException {
+		protected boolean matchMediaType(ServerWebExchange exchange) throws UnsupportedMediaTypeStatusException {
 			try {
 				MediaType contentType = exchange.getRequest().getHeaders().getContentType();
 				contentType = (contentType != null ? contentType : MediaType.APPLICATION_OCTET_STREAM);
 				return getMediaType().includes(contentType);
 			}
 			catch (InvalidMediaTypeException ex) {
-				throw new HttpMediaTypeNotSupportedException("Can't parse Content-Type [" +
+				throw new UnsupportedMediaTypeStatusException("Can't parse Content-Type [" +
 						exchange.getRequest().getHeaders().getFirst("Content-Type") +
 						"]: " + ex.getMessage());
 			}

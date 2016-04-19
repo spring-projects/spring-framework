@@ -18,7 +18,7 @@ package org.springframework.web.reactive.accept;
 import java.util.List;
 
 import org.springframework.http.MediaType;
-import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -34,9 +34,8 @@ public interface ContentTypeResolver {
 	 * @param exchange the current exchange
 	 * @return the requested media types or an empty list
 	 *
-	 * @throws HttpMediaTypeNotAcceptableException if the requested media
-	 * types cannot be parsed
+	 * @throws NotAcceptableStatusException if the requested media types is invalid
 	 */
-	List<MediaType> resolveMediaTypes(ServerWebExchange exchange) throws HttpMediaTypeNotAcceptableException;
+	List<MediaType> resolveMediaTypes(ServerWebExchange exchange) throws NotAcceptableStatusException;
 
 }

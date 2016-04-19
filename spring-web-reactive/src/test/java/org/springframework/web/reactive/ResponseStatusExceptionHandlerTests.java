@@ -35,6 +35,8 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 /**
+ * Unit tests for {@link ResponseStatusExceptionHandler}.
+ *
  * @author Rossen Stoyanchev
  */
 public class ResponseStatusExceptionHandlerTests {
@@ -58,7 +60,7 @@ public class ResponseStatusExceptionHandlerTests {
 
 	@Test
 	public void handleException() throws Exception {
-		Throwable ex = new ResponseStatusException(HttpStatus.BAD_REQUEST);
+		Throwable ex = new ResponseStatusException(HttpStatus.BAD_REQUEST, "");
 		Mono<Void> publisher = this.handler.handle(this.exchange, ex);
 
 		publisher.get();

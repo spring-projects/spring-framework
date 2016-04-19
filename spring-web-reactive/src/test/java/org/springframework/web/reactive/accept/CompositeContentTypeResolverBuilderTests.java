@@ -26,7 +26,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.WebSessionManager;
@@ -102,7 +102,7 @@ public class CompositeContentTypeResolverBuilderTests {
 		assertEquals(Collections.emptyList(), resolver.resolveMediaTypes(exchange));
 	}
 
-	@Test(expected = HttpMediaTypeNotAcceptableException.class) // SPR-10170
+	@Test(expected = NotAcceptableStatusException.class) // SPR-10170
 	public void favorPathWithIgnoreUnknownPathExtensionTurnedOff() throws Exception {
 		CompositeContentTypeResolver resolver = new CompositeContentTypeResolverBuilder()
 				.favorPathExtension(true)
@@ -129,7 +129,7 @@ public class CompositeContentTypeResolverBuilderTests {
 				resolver.resolveMediaTypes(exchange));
 	}
 
-	@Test(expected = HttpMediaTypeNotAcceptableException.class) // SPR-10170
+	@Test(expected = NotAcceptableStatusException.class) // SPR-10170
 	public void favorParameterWithUnknownMediaType() throws Exception {
 		CompositeContentTypeResolver resolver = new CompositeContentTypeResolverBuilder()
 				.favorParameter(true)

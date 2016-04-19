@@ -23,7 +23,7 @@ import java.util.Set;
 
 import org.springframework.http.MediaType;
 import org.springframework.util.Assert;
-import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -71,7 +71,7 @@ public class CompositeContentTypeResolver implements MappingContentTypeResolver 
 
 
 	@Override
-	public List<MediaType> resolveMediaTypes(ServerWebExchange exchange) throws HttpMediaTypeNotAcceptableException {
+	public List<MediaType> resolveMediaTypes(ServerWebExchange exchange) throws NotAcceptableStatusException {
 		for (ContentTypeResolver resolver : this.resolvers) {
 			List<MediaType> mediaTypes = resolver.resolveMediaTypes(exchange);
 			if (mediaTypes.isEmpty() || (mediaTypes.size() == 1 && mediaTypes.contains(MediaType.ALL))) {

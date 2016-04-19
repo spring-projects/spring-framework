@@ -19,7 +19,7 @@ import java.util.List;
 
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
-import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -30,9 +30,7 @@ import org.springframework.web.server.ServerWebExchange;
 public class HeaderContentTypeResolver implements ContentTypeResolver {
 
 	@Override
-	public List<MediaType> resolveMediaTypes(ServerWebExchange exchange)
-			throws HttpMediaTypeNotAcceptableException {
-
+	public List<MediaType> resolveMediaTypes(ServerWebExchange exchange) throws NotAcceptableStatusException {
 		try {
 			List<MediaType> mediaTypes = exchange.getRequest().getHeaders().getAccept();
 			MediaType.sortBySpecificityAndQuality(mediaTypes);
@@ -40,8 +38,9 @@ public class HeaderContentTypeResolver implements ContentTypeResolver {
 		}
 		catch (InvalidMediaTypeException ex) {
 			String value = exchange.getRequest().getHeaders().getFirst("Accept");
-			throw new HttpMediaTypeNotAcceptableException(
+			throw new NotAcceptableStatusException(
 					"Could not parse 'Accept' header [" + value + "]: " + ex.getMessage());
 		}
 	}
+
 }

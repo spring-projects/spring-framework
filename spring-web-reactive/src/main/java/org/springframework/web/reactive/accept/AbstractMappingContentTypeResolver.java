@@ -29,7 +29,7 @@ import org.springframework.http.MediaType;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
-import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
@@ -85,7 +85,7 @@ public abstract class AbstractMappingContentTypeResolver implements MappingConte
 
 	@Override
 	public List<MediaType> resolveMediaTypes(ServerWebExchange exchange)
-			throws HttpMediaTypeNotAcceptableException {
+			throws NotAcceptableStatusException {
 
 		String key = extractKey(exchange);
 		return resolveMediaTypes(key);
@@ -95,11 +95,9 @@ public abstract class AbstractMappingContentTypeResolver implements MappingConte
 	 * An overloaded resolve method with a pre-resolved lookup key.
 	 * @param key the key for looking up media types
 	 * @return a list of resolved media types or an empty list
-	 * @throws HttpMediaTypeNotAcceptableException
+	 * @throws NotAcceptableStatusException
 	 */
-	public List<MediaType> resolveMediaTypes(String key)
-			throws HttpMediaTypeNotAcceptableException {
-
+	public List<MediaType> resolveMediaTypes(String key) throws NotAcceptableStatusException {
 		if (StringUtils.hasText(key)) {
 			MediaType mediaType = getMediaType(key);
 			if (mediaType != null) {
@@ -139,7 +137,7 @@ public abstract class AbstractMappingContentTypeResolver implements MappingConte
 	 * this method it will be added to the mappings.
 	 */
 	@SuppressWarnings("UnusedParameters")
-	protected MediaType handleNoMatch(String key) throws HttpMediaTypeNotAcceptableException {
+	protected MediaType handleNoMatch(String key) throws NotAcceptableStatusException {
 		return null;
 	}
 
