@@ -39,7 +39,6 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerMapping;
-import org.springframework.web.reactive.result.condition.NameValueExpression;
 import org.springframework.web.reactive.result.condition.ParamsRequestCondition;
 import org.springframework.web.server.BadRequestStatusException;
 import org.springframework.web.server.MethodNotAllowedException;
@@ -214,7 +213,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 
 		Set<MediaType> consumableMediaTypes;
 		Set<MediaType> producibleMediaTypes;
-		List<String[]> paramConditions;
+		List<List<String>> paramConditions;
 
 		if (patternAndMethodMatches.isEmpty()) {
 			consumableMediaTypes = getConsumableMediaTypes(exchange, patternMatches);
@@ -247,7 +246,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 								entry -> entry.getValue().toArray(new String[entry.getValue().size()]))
 				);
 				throw new BadRequestStatusException("Unsatisfied query parameter conditions: " +
-						paramConditions + ", actual: " + params);
+						paramConditions + ", actual parameters: " + params);
 			}
 			else {
 				return null;
@@ -279,23 +278,15 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 		return result;
 	}
 
-	private List<String[]> getRequestParams(ServerWebExchange exchange,
+	private List<List<String>> getRequestParams(ServerWebExchange exchange,
 			Set<RequestMappingInfo> partialMatches) {
 
-		List<String[]> result = new ArrayList<>();
-		for (RequestMappingInfo partialMatch : partialMatches) {
-			ParamsRequestCondition condition = partialMatch.getParamsCondition();
-			Set<NameValueExpression<String>> expressions = condition.getExpressions();
-			if (!CollectionUtils.isEmpty(expressions) && condition.getMatchingCondition(exchange) == null) {
-				int i = 0;
-				String[] array = new String[expressions.size()];
-				for (NameValueExpression<String> expression : expressions) {
-					array[i++] = expression.toString();
-				}
-				result.add(array);
-			}
-		}
-		return result;
+		return partialMatches.stream()
+				.map(RequestMappingInfo::getParamsCondition)
+				.filter(condition -> condition.getMatchingCondition(exchange) == null)
+				.map(ParamsRequestCondition::getExpressions)
+				.map(expressions -> expressions.stream().map(Object::toString).collect(Collectors.toList()))
+				.collect(Collectors.toList());
 	}
 
 

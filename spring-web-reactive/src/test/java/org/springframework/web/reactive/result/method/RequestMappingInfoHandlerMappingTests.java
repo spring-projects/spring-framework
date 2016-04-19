@@ -27,7 +27,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
@@ -60,7 +59,6 @@ import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.WebSessionManager;
 import org.springframework.web.util.HttpRequestPathHelper;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -211,7 +209,8 @@ public class RequestMappingInfoHandlerMappingTests {
 		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/params");
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
 		assertError(mono, BadRequestStatusException.class, ex -> {
-			assertThat(ex.getReason(), Matchers.startsWith("Unsatisfied query parameter conditions:"));
+			assertEquals(ex.getReason(), "Unsatisfied query parameter conditions: " +
+					"[[bar=baz], [foo=bar]], actual parameters: {}");
 		});
 	}
 
