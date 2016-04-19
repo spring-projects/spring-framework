@@ -23,7 +23,7 @@ import org.hamcrest.Matchers;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.SchedulerGroup;
+import reactor.core.publisher.Computations;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Timer;
 
@@ -42,7 +42,7 @@ import static org.junit.Assert.assertThat;
  */
 public class AsyncIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
-	private final Scheduler asyncGroup = SchedulerGroup.async();
+	private final Scheduler asyncGroup = Computations.parallel();
 
 	private final DataBufferAllocator allocator = new DefaultDataBufferAllocator();
 
