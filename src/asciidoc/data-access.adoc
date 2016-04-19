@@ -3435,7 +3435,7 @@ The batch update methods for this call returns an array of int arrays containing
 entry for each batch with an array of the number of affected rows for each update. The top
 level array's length indicates the number of batches executed and the second level array's
 length indicates the number of updates in that batch. The number of updates in each batch
-should be the the batch size provided for all batches except for the last one that might
+should be the batch size provided for all batches except for the last one that might
 be less, depending on the total number of update objects provided. The update count for
 each update statement is the one reported by the JDBC driver. If the count is not
 available, the JDBC driver returns a -2 value.

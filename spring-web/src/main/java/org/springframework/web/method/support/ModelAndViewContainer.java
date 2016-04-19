@@ -182,7 +182,7 @@ public class ModelAndViewContainer {
 
 	/**
 	 * Provide a separate model instance to use in a redirect scenario.
-	 * The provided additional model however is not used used unless
+	 * The provided additional model however is not used unless
 	 * {@link #setRedirectModelScenario(boolean)} gets set to {@code true} to signal
 	 * a redirect scenario.
 	 */

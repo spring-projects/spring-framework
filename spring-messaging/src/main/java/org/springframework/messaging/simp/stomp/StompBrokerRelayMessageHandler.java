@@ -60,7 +60,7 @@ import org.springframework.util.concurrent.ListenableFutureTask;
  *
  * <p>This class also automatically opens a default "system" TCP connection to the message
  * broker that is used for sending messages that originate from the server application (as
- * opposed to from a client). Such messages are are not associated with any client and
+ * opposed to from a client). Such messages are not associated with any client and
  * therefore do not have a session id header. The "system" connection is effectively
  * shared and cannot be used to receive messages. Several properties are provided to
  * configure the "system" connection including:

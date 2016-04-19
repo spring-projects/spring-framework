@@ -800,7 +800,7 @@ public abstract class AbstractNestablePropertyAccessor extends AbstractPropertyA
 
 	/**
 	 * Recursively navigate to return a property accessor for the nested property path.
-	 * @param propertyPath property property path, which may be nested
+	 * @param propertyPath property path, which may be nested
 	 * @return a property accessor for the target bean
 	 */
 	@SuppressWarnings("unchecked")  // avoid nested generic

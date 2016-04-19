@@ -221,7 +221,7 @@ class CacheAdviceParser extends AbstractSingleBeanDefinitionParser {
 			}
 			else {
 				if (this.caches == null) {
-					readerCtx.error("No cache specified specified for " + element.getNodeName(), element);
+					readerCtx.error("No cache specified for " + element.getNodeName(), element);
 				}
 			}
 			builder.setCacheNames(localCaches);

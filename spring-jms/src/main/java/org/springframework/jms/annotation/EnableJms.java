@@ -108,7 +108,7 @@ import org.springframework.context.annotation.Import;
  * <p>Annotated methods can use flexible signature; in particular, it is possible to use
  * the {@link org.springframework.messaging.Message Message} abstraction and related annotations,
  * see {@link JmsListener} Javadoc for more details. For instance, the following would
- * inject the content of the message and a a custom "myCounter" JMS header:
+ * inject the content of the message and a custom "myCounter" JMS header:
  *
  * <pre class="code">
  * &#064;JmsListener(containerFactory = "myJmsListenerContainerFactory", destination="myQueue")

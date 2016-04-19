@@ -55,7 +55,7 @@ import org.springframework.web.servlet.view.AbstractUrlBasedView;
  * An {@link AbstractUrlBasedView} subclass designed to run any template library
  * based on a JSR-223 script engine.
  *
- * <p>If not set, each property is auto-detected by looking up up a single
+ * <p>If not set, each property is auto-detected by looking up a single
  * {@link ScriptTemplateConfig} bean in the web application context and using
  * it to obtain the configured properties.
  *

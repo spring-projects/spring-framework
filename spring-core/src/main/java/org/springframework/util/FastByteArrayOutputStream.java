@@ -53,7 +53,7 @@ public class FastByteArrayOutputStream extends OutputStream {
 	// The size, in bytes, to use when allocating the first byte[]
 	private final int initialBlockSize;
 
-	// The size, in bytes, to use when allocating the next next byte[]
+	// The size, in bytes, to use when allocating the next byte[]
 	private int nextBlockSize = 0;
 
 	// The number of bytes in previous buffers.

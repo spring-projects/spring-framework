@@ -35,7 +35,7 @@ public abstract class AutoProxyUtils {
 	 * to be proxied with its target class (in case of it getting proxied in the first
 	 * place). The value is {@code Boolean.TRUE} or {@code Boolean.FALSE}.
 	 * <p>Proxy factories can set this attribute if they built a target class proxy
-	 * for a specific bean, and want to enforce that that bean can always be cast
+	 * for a specific bean, and want to enforce that bean can always be cast
 	 * to its target class (even if AOP advices get applied through auto-proxying).
 	 * @see #shouldProxyTargetClass
 	 */

@@ -260,7 +260,7 @@ container-managed transactions. All your custom business logic can be implemente
 simple POJOs and managed by Spring's IoC container. Additional services include support
 for sending email and validation that is independent of the web layer, which lets you
 choose where to execute validation rules. Spring's ORM support is integrated with JPA,
-Hibernate and and JDO; for example, when using Hibernate, you can continue to use
+Hibernate and JDO; for example, when using Hibernate, you can continue to use
 your existing mapping files and standard Hibernate `SessionFactory` configuration. Form
 controllers seamlessly integrate the web-layer with the domain model, removing the need
 for `ActionForms` or other classes that transform HTTP parameters to values for your

@@ -70,7 +70,7 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 	}
 
 	/**
-	 * Returns an instance which uses the the specified selector, as the name of the
+	 * Returns an instance which uses the specified selector, as the name of the
 	 * definition file(s). In the case of a name with a Spring "classpath*:" prefix,
 	 * or with no prefix, which is treated the same, the current thread's context class
 	 * loader's {@code getResources} method will be called with this value to get
@@ -112,7 +112,7 @@ public class ContextSingletonBeanFactoryLocator extends SingletonBeanFactoryLoca
 
 
 	/**
-	 * Constructor which uses the the specified name as the resource name
+	 * Constructor which uses the specified name as the resource name
 	 * of the definition file(s).
 	 * @param resourceLocation the Spring resource location to use
 	 * (either a URL or a "classpath:" / "classpath*:" pseudo URL)

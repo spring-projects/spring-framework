@@ -340,7 +340,7 @@ public class VelocityEngineFactory {
 	}
 
 	/**
-	 * To be implemented by subclasses that want to to perform custom
+	 * To be implemented by subclasses that want to perform custom
 	 * post-processing of the VelocityEngine after this FactoryBean
 	 * performed its default configuration (but before VelocityEngine.init).
 	 * <p>Called by {@code createVelocityEngine()}.

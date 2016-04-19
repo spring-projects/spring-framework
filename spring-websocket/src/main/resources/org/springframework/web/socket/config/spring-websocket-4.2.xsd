@@ -407,7 +407,7 @@
 	This is essentially the "Unbounded queues" strategy as explained in java.util.concurrent.ThreadPoolExecutor.
 	When this strategy is used, the max pool size is effectively ignored.
 	By default this is set to twice the value of Runtime.availableProcessors().
-	In an an application where tasks do not block frequently,
+	In an application where tasks do not block frequently,
 	the number should be closer to or equal to the number of available CPUs/cores.
                 ]]></xsd:documentation>
 			</xsd:annotation>
