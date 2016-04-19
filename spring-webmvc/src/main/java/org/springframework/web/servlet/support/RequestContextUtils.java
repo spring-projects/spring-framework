@@ -198,7 +198,7 @@ public abstract class RequestContextUtils {
 	 * <p>Consider using {@link org.springframework.context.i18n.LocaleContextHolder#getTimeZone()}
 	 * which will normally be populated with the same TimeZone: That method only
 	 * differs in terms of its fallback to the system time zone if the LocaleResolver
-	 * hasn't provided provided a specific time zone (instead of this method's {@code null}).
+	 * hasn't provided a specific time zone (instead of this method's {@code null}).
 	 * @param request current HTTP request
 	 * @return the current time zone for the given request, either from the
 	 * TimeZoneAwareLocaleResolver or {@code null} if none associated

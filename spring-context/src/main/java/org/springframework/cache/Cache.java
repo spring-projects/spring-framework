@@ -37,7 +37,7 @@ public interface Cache {
 	String getName();
 
 	/**
-	 * Return the the underlying native cache provider.
+	 * Return the underlying native cache provider.
 	 */
 	Object getNativeCache();
 

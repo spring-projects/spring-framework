@@ -358,12 +358,12 @@ public class FreeMarkerConfigurationFactory {
 	}
 
 	/**
-	 * To be overridden by subclasses that want to to register custom
+	 * To be overridden by subclasses that want to register custom
 	 * TemplateLoader instances after this factory created its default
 	 * template loaders.
 	 * <p>Called by {@code createConfiguration()}. Note that specified
 	 * "postTemplateLoaders" will be registered <i>after</i> any loaders
-	 * registered by this callback; as a consequence, they are are <i>not</i>
+	 * registered by this callback; as a consequence, they are <i>not</i>
 	 * included in the given List.
 	 * @param templateLoaders the current List of TemplateLoader instances,
 	 * to be modified by a subclass
@@ -395,7 +395,7 @@ public class FreeMarkerConfigurationFactory {
 	}
 
 	/**
-	 * To be overridden by subclasses that want to to perform custom
+	 * To be overridden by subclasses that want to perform custom
 	 * post-processing of the Configuration object after this factory
 	 * performed its default initialization.
 	 * <p>Called by {@code createConfiguration()}.

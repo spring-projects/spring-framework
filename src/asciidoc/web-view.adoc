@@ -34,7 +34,7 @@ is another view technology, supported by Spring. This template engine is a templ
 aimed at generating XML-like markup (XML, XHTML, HTML5, ...​), but that can be used to generate any
 text based content.
 
-This requires Groovy 2.3.1+ on the the classpath.
+This requires Groovy 2.3.1+ on the classpath.
 
 [[view-groovymarkup-configuration]]
 === Configuration

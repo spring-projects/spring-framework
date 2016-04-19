@@ -274,7 +274,7 @@ public abstract class CacheAspectSupport extends AbstractCacheInvoker
 	 * Return a bean with the specified name and type. Used to resolve services that
 	 * are referenced by name in a {@link CacheOperation}.
 	 * @param beanName the name of the bean, as defined by the operation
-	 * @param expectedType type type for the bean
+	 * @param expectedType type for the bean
 	 * @return the bean matching that name
 	 * @throws org.springframework.beans.factory.NoSuchBeanDefinitionException if such bean does not exist
 	 * @see CacheOperation#keyGenerator

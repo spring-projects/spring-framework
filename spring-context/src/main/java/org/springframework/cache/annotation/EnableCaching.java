@@ -99,7 +99,7 @@ import org.springframework.core.Ordered;
  * <p>For those that wish to establish a more direct relationship between
  * {@code @EnableCaching} and the exact cache manager bean to be used,
  * the {@link CachingConfigurer} callback interface may be implemented.
- * Notice the the {@code @Override}-annotated methods below:
+ * Notice the {@code @Override}-annotated methods below:
  *
  * <pre class="code">
  * &#064;Configuration

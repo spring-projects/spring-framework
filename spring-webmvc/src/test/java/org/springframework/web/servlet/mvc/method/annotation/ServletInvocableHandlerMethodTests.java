@@ -133,7 +133,7 @@ public class ServletInvocableHandlerMethodTests {
 		ServletInvocableHandlerMethod handlerMethod = getHandlerMethod(new Handler(), "responseStatusWithReason");
 		handlerMethod.invokeAndHandle(this.webRequest, this.mavContainer);
 
-		assertTrue("When a status reason w/ used, the the request is handled", this.mavContainer.isRequestHandled());
+		assertTrue("When a status reason w/ used, the request is handled", this.mavContainer.isRequestHandled());
 		assertEquals(HttpStatus.BAD_REQUEST.value(), this.response.getStatus());
 		assertEquals("400 Bad Request", this.response.getErrorMessage());
 	}

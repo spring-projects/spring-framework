@@ -100,7 +100,7 @@ public interface Scope {
 	 * at the appropriate time. If such a callback is not supported by the
 	 * underlying runtime environment at all, the callback <i>must be
 	 * ignored and a corresponding warning should be logged</i>.
-	 * <p>Note that 'destruction' refers to to automatic destruction of
+	 * <p>Note that 'destruction' refers to automatic destruction of
 	 * the object as part of the scope's own lifecycle, not to the individual
 	 * scoped object having been explicitly removed by the application.
 	 * If a scoped object gets removed via this facade's {@link #remove(String)}

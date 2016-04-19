@@ -38,7 +38,7 @@ import org.springframework.web.bind.WebDataBinder;
  * the bound {@link Collection}.
  * <h3>Approach Three</h3>
  * For any other bound value type, the '{@code input(checkbox)}' is marked as 'checked'
- * if the the configured {@link #setValue(Object) value} is equal to the bound value.
+ * if the configured {@link #setValue(Object) value} is equal to the bound value.
  *
  * @author Rob Harrop
  * @author Juergen Hoeller

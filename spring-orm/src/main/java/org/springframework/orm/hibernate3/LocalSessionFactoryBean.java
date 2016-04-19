@@ -521,7 +521,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 		}
 		if (this.lobHandler != null) {
 			// Make given LobHandler available for SessionFactory configuration.
-			// Do early because because mapping resource might refer to custom types.
+			// Do early because mapping resource might refer to custom types.
 			configTimeLobHandlerHolder.set(this.lobHandler);
 		}
 
@@ -754,7 +754,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	}
 
 	/**
-	 * To be implemented by subclasses that want to to register further mappings
+	 * To be implemented by subclasses that want to register further mappings
 	 * on the Configuration object after this FactoryBean registered its specified
 	 * mappings.
 	 * <p>Invoked <i>before</i> the {@code Configuration.buildMappings()} call,
@@ -767,7 +767,7 @@ public class LocalSessionFactoryBean extends AbstractSessionFactoryBean implemen
 	}
 
 	/**
-	 * To be implemented by subclasses that want to to perform custom
+	 * To be implemented by subclasses that want to perform custom
 	 * post-processing of the Configuration object after this FactoryBean
 	 * performed its default initialization.
 	 * <p>Invoked <i>after</i> the {@code Configuration.buildMappings()} call,

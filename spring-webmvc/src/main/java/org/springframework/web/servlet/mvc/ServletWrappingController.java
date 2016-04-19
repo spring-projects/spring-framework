@@ -153,7 +153,7 @@ public class ServletWrappingController extends AbstractController
 
 
 	/**
-	 * Invoke the the wrapped Servlet instance.
+	 * Invoke the wrapped Servlet instance.
 	 * @see javax.servlet.Servlet#service(javax.servlet.ServletRequest, javax.servlet.ServletResponse)
 	 */
 	@Override
