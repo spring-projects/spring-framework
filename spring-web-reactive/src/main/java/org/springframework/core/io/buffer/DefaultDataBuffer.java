@@ -179,7 +179,7 @@ public class DefaultDataBuffer implements DataBuffer {
 	}
 
 	/**
-	 * Internal write method that keeps track of the {@link #writePosition} befor eand
+	 * Internal write method that keeps track of the {@link #writePosition} before and
 	 * after applying the given function on {@link #byteBuffer}.
 	 */
 	private <T> T writeInternal(Function<ByteBuffer, T> function) {
@@ -239,7 +239,9 @@ public class DefaultDataBuffer implements DataBuffer {
 		}
 		else if (obj instanceof DefaultDataBuffer) {
 			DefaultDataBuffer other = (DefaultDataBuffer) obj;
-			return this.byteBuffer.equals(other.byteBuffer);
+			return this.readPosition == other.readPosition &&
+					this.writePosition == other.writePosition &&
+					this.byteBuffer.equals(other.byteBuffer);
 		}
 		return false;
 	}
