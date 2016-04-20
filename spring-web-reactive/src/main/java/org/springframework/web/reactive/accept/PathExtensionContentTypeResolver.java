@@ -13,23 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package org.springframework.web.reactive.accept;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Locale;
 import java.util.Map;
-import javax.activation.FileTypeMap;
-import javax.activation.MimetypesFileTypeMap;
+import java.util.Optional;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
+import org.springframework.http.support.MediaTypeUtils;
 import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
+import org.springframework.util.MimeType;
+import org.springframework.util.MimeTypeUtils2;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
@@ -47,12 +43,6 @@ import org.springframework.web.util.WebUtils;
  * @author Rossen Stoyanchev
  */
 public class PathExtensionContentTypeResolver extends AbstractMappingContentTypeResolver {
-
-	private static final Log logger = LogFactory.getLog(PathExtensionContentTypeResolver.class);
-
-	private static final boolean JAF_PRESENT = ClassUtils.isPresent("javax.activation.FileTypeMap",
-			PathExtensionContentTypeResolver.class.getClassLoader());
-
 
 	private boolean useJaf = true;
 
@@ -103,8 +93,9 @@ public class PathExtensionContentTypeResolver extends AbstractMappingContentType
 
 	@Override
 	protected MediaType handleNoMatch(String key) throws NotAcceptableStatusException {
-		if (this.useJaf && JAF_PRESENT) {
-			MediaType mediaType = JafMediaTypeFactory.getMediaType("file." + key);
+		if (this.useJaf) {
+			Optional<MimeType> mimeType = MimeTypeUtils2.getMimeType("file." + key);
+			MediaType mediaType = mimeType.map(MediaTypeUtils::toMediaType).orElse(null);
 			if (mediaType != null && !MediaType.APPLICATION_OCTET_STREAM.equals(mediaType)) {
 				return mediaType;
 			}
@@ -130,65 +121,15 @@ public class PathExtensionContentTypeResolver extends AbstractMappingContentType
 		if (extension != null) {
 			mediaType = getMediaType(extension);
 		}
-		if (mediaType == null && JAF_PRESENT) {
-			mediaType = JafMediaTypeFactory.getMediaType(filename);
+		if (mediaType == null) {
+			mediaType =
+					MimeTypeUtils2.getMimeType(filename).map(MediaTypeUtils::toMediaType)
+							.orElse(null);
 		}
 		if (MediaType.APPLICATION_OCTET_STREAM.equals(mediaType)) {
 			mediaType = null;
 		}
 		return mediaType;
-	}
-
-
-	/**
-	 * Inner class to avoid hard-coded dependency on JAF.
-	 */
-	private static class JafMediaTypeFactory {
-
-		private static final FileTypeMap fileTypeMap;
-
-		static {
-			fileTypeMap = initFileTypeMap();
-		}
-
-		/**
-		 * Find extended mime.types from the spring-context-support module.
-		 */
-		private static FileTypeMap initFileTypeMap() {
-			Resource resource = new ClassPathResource("org/springframework/mail/javamail/mime.types");
-			if (resource.exists()) {
-				if (logger.isTraceEnabled()) {
-					logger.trace("Loading JAF FileTypeMap from " + resource);
-				}
-				InputStream inputStream = null;
-				try {
-					inputStream = resource.getInputStream();
-					return new MimetypesFileTypeMap(inputStream);
-				}
-				catch (IOException ex) {
-					// ignore
-				}
-				finally {
-					if (inputStream != null) {
-						try {
-							inputStream.close();
-						}
-						catch (IOException ex) {
-							// ignore
-						}
-					}
-				}
-			}
-			if (logger.isTraceEnabled()) {
-				logger.trace("Loading default Java Activation Framework FileTypeMap");
-			}
-			return FileTypeMap.getDefaultFileTypeMap();
-		}
-
-		public static MediaType getMediaType(String filename) {
-			String mediaType = fileTypeMap.getContentType(filename);
-			return (StringUtils.hasText(mediaType) ? MediaType.parseMediaType(mediaType) : null);
-		}
 	}
 
 }

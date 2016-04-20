@@ -40,14 +40,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.Encoder;
+import org.springframework.core.codec.support.ByteBufferDecoder;
 import org.springframework.core.codec.support.ByteBufferEncoder;
+import org.springframework.core.codec.support.JacksonJsonDecoder;
 import org.springframework.core.codec.support.JacksonJsonEncoder;
+import org.springframework.core.codec.support.StringDecoder;
 import org.springframework.core.codec.support.StringEncoder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.core.convert.support.ReactiveStreamsToCompletableFutureConverter;
 import org.springframework.core.convert.support.ReactiveStreamsToRxJava1Converter;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
@@ -55,14 +59,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
+import org.springframework.http.converter.reactive.HttpMessageConverter;
+import org.springframework.http.converter.reactive.ResourceHttpMessageConverter;
 import org.springframework.http.server.reactive.AbstractHttpHandlerIntegrationTests;
 import org.springframework.http.server.reactive.HttpHandler;
+import org.springframework.http.server.reactive.ZeroCopyIntegrationTests;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.DispatcherHandler;
@@ -73,8 +82,7 @@ import org.springframework.web.reactive.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.reactive.view.freemarker.FreeMarkerViewResolver;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * @author Rossen Stoyanchev
@@ -84,6 +92,8 @@ import static org.junit.Assert.assertEquals;
 public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrationTests {
 
 	private AnnotationConfigApplicationContext wac;
+
+	private RestTemplate restTemplate = new RestTemplate();
 
 
 	@Override
@@ -100,9 +110,6 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 	@Test
 	public void helloWithQueryParam() throws Exception {
-
-		RestTemplate restTemplate = new RestTemplate();
-
 		URI url = new URI("http://localhost:" + port + "/param?name=George");
 		RequestEntity<Void> request = RequestEntity.get(url).build();
 		ResponseEntity<String> response = restTemplate.exchange(request, String.class);
@@ -112,9 +119,6 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 	@Test
 	public void rawPojoResponse() throws Exception {
-
-		RestTemplate restTemplate = new RestTemplate();
-
 		URI url = new URI("http://localhost:" + port + "/raw");
 		RequestEntity<Void> request =
 				RequestEntity.get(url).accept(MediaType.APPLICATION_JSON).build();
@@ -125,9 +129,6 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 	@Test
 	public void rawFluxResponse() throws Exception {
-
-		RestTemplate restTemplate = new RestTemplate();
-
 		URI url = new URI("http://localhost:" + port + "/raw-flux");
 		RequestEntity<Void> request = RequestEntity.get(url).build();
 		ResponseEntity<String> response = restTemplate.exchange(request, String.class);
@@ -137,9 +138,6 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 	@Test
 	public void rawObservableResponse() throws Exception {
-
-		RestTemplate restTemplate = new RestTemplate();
-
 		URI url = new URI("http://localhost:" + port + "/raw-observable");
 		RequestEntity<Void> request = RequestEntity.get(url).build();
 		ResponseEntity<String> response = restTemplate.exchange(request, String.class);
@@ -149,9 +147,6 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 	@Test
 	public void handleWithThrownException() throws Exception {
-
-		RestTemplate restTemplate = new RestTemplate();
-
 		URI url = new URI("http://localhost:" + port + "/thrown-exception");
 		RequestEntity<Void> request = RequestEntity.get(url).build();
 		ResponseEntity<String> response = restTemplate.exchange(request, String.class);
@@ -161,9 +156,6 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 	@Test
 	public void handleWithErrorSignal() throws Exception {
-
-		RestTemplate restTemplate = new RestTemplate();
-
 		URI url = new URI("http://localhost:" + port + "/error-signal");
 		RequestEntity<Void> request = RequestEntity.get(url).build();
 		ResponseEntity<String> response = restTemplate.exchange(request, String.class);
@@ -174,8 +166,6 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 	@Test
 	@Ignore
 	public void streamResult() throws Exception {
-		RestTemplate restTemplate = new RestTemplate();
-
 		URI url = new URI("http://localhost:" + port + "/stream-result");
 		RequestEntity<Void> request = RequestEntity.get(url).build();
 		ResponseEntity<String[]> response = restTemplate.exchange(request, String[].class);
@@ -295,9 +285,6 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 	@Test
 	public void html() throws Exception {
-
-		RestTemplate restTemplate = new RestTemplate();
-
 		URI url = new URI("http://localhost:" + port + "/html?name=Jason");
 		RequestEntity<Void> request = RequestEntity.get(url).accept(MediaType.TEXT_HTML).build();
 		ResponseEntity<String> response = restTemplate.exchange(request, String.class);
@@ -305,9 +292,20 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		assertEquals("<html><body>Hello: Jason!</body></html>", response.getBody());
 	}
 
+	@Test
+	public void resource() throws Exception {
+		URI url = new URI("http://localhost:" + port + "/resource");
+		RequestEntity<Void> request = RequestEntity.get(url).build();
+		ResponseEntity<byte[]> response = restTemplate.exchange(request, byte[].class);
+
+		assertTrue(response.hasBody());
+		assertEquals(951, response.getHeaders().getContentLength());
+		assertEquals(951, response.getBody().length);
+		assertEquals(new MediaType("image", "x-png"),
+				response.getHeaders().getContentType());
+	}
 
 	private void serializeAsPojo(String requestUrl) throws Exception {
-		RestTemplate restTemplate = new RestTemplate();
 		RequestEntity<Void> request = RequestEntity.get(new URI(requestUrl))
 				.accept(MediaType.APPLICATION_JSON)
 				.build();
@@ -317,7 +315,6 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 	}
 
 	private void serializeAsCollection(String requestUrl) throws Exception {
-		RestTemplate restTemplate = new RestTemplate();
 		RequestEntity<Void> request = RequestEntity.get(new URI(requestUrl))
 				.accept(MediaType.APPLICATION_JSON)
 				.build();
@@ -331,7 +328,6 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 
 	private void capitalizePojo(String requestUrl) throws Exception {
-		RestTemplate restTemplate = new RestTemplate();
 		RequestEntity<Person> request = RequestEntity.post(new URI(requestUrl))
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON)
@@ -342,7 +338,6 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 	}
 
 	private void capitalizeCollection(String requestUrl) throws Exception {
-		RestTemplate restTemplate = new RestTemplate();
 		RequestEntity<List<Person>> request = RequestEntity.post(new URI(requestUrl))
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON)
@@ -356,7 +351,6 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 	}
 
 	private void createJson(String requestUrl) throws Exception {
-		RestTemplate restTemplate = new RestTemplate();
 		URI url = new URI(requestUrl);
 		RequestEntity<List<Person>> request = RequestEntity.post(url)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -368,7 +362,6 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 	}
 
 	private void createXml(String requestUrl) throws Exception {
-		RestTemplate restTemplate = new RestTemplate();
 		URI url = new URI(requestUrl);
 		People people = new People();
 		people.getPerson().add(new Person("Robert"));
@@ -413,9 +406,16 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@Bean
 		public ResponseBodyResultHandler responseBodyResultHandler() {
-			List<Encoder<?>> encoders = Arrays.asList(new ByteBufferEncoder(),
-					new StringEncoder(), new JacksonJsonEncoder());
-			ResponseBodyResultHandler resultHandler = new ResponseBodyResultHandler(encoders, conversionService());
+			List<HttpMessageConverter<?>> converters =
+					Arrays.asList(new ResourceHttpMessageConverter(),
+							new CodecHttpMessageConverter<ByteBuffer>(
+									new ByteBufferEncoder(), new ByteBufferDecoder()),
+							new CodecHttpMessageConverter<String>(new StringEncoder(),
+									new StringDecoder()),
+							new CodecHttpMessageConverter<Object>(
+									new JacksonJsonEncoder(), new JacksonJsonDecoder()));
+			ResponseBodyResultHandler resultHandler =
+					new ResponseBodyResultHandler(converters, conversionService());
 			resultHandler.setOrder(1);
 			return resultHandler;
 		}
@@ -624,6 +624,12 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 		@ExceptionHandler
 		public Publisher<String> handleException(IllegalStateException ex) {
 			return Mono.just("Recovered from error: " + ex.getMessage());
+		}
+
+		@RequestMapping("/resource")
+		@ResponseBody
+		public Resource resource() {
+			return new ClassPathResource("spring.png", ZeroCopyIntegrationTests.class);
 		}
 
 		//TODO add mixed and T request mappings tests

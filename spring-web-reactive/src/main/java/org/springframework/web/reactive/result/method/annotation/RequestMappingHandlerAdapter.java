@@ -17,6 +17,7 @@
 package org.springframework.web.reactive.result.method.annotation;
 
 import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,16 +29,19 @@ import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.support.ByteBufferDecoder;
+import org.springframework.core.codec.support.ByteBufferEncoder;
 import org.springframework.core.codec.support.JacksonJsonDecoder;
+import org.springframework.core.codec.support.JacksonJsonEncoder;
 import org.springframework.core.codec.support.Jaxb2Decoder;
+import org.springframework.core.codec.support.Jaxb2Encoder;
 import org.springframework.core.codec.support.JsonObjectDecoder;
 import org.springframework.core.codec.support.StringDecoder;
+import org.springframework.core.codec.support.StringEncoder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
-import org.springframework.core.io.buffer.DataBufferAllocator;
-import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
+import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
+import org.springframework.http.converter.reactive.HttpMessageConverter;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.ObjectUtils;
@@ -61,8 +65,6 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 	private final List<HandlerMethodArgumentResolver> argumentResolvers = new ArrayList<>();
 
 	private ConversionService conversionService = new DefaultConversionService();
-
-	private DataBufferAllocator allocator = new DefaultDataBufferAllocator();
 
 	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache =
 			new ConcurrentHashMap<>(64);
@@ -92,20 +94,23 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 		return this.conversionService;
 	}
 
-	public void setAllocator(DataBufferAllocator allocator) {
-		this.allocator = allocator;
-	}
-
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (ObjectUtils.isEmpty(this.argumentResolvers)) {
+			List<HttpMessageConverter<?>> messageConverters = Arrays.asList(
+					new CodecHttpMessageConverter<ByteBuffer>(new ByteBufferEncoder(),
+							new ByteBufferDecoder()),
+					new CodecHttpMessageConverter<String>(new StringEncoder(),
+							new StringDecoder()),
+					new CodecHttpMessageConverter<Object>(new Jaxb2Encoder(),
+							new Jaxb2Decoder()),
+					new CodecHttpMessageConverter<Object>(new JacksonJsonEncoder(),
+							new JacksonJsonDecoder(new JsonObjectDecoder())));
 
-			List<Decoder<?>> decoders = Arrays.asList(new ByteBufferDecoder(),
-					new StringDecoder(), new Jaxb2Decoder(),
-					new JacksonJsonDecoder(new JsonObjectDecoder()));
 
 			this.argumentResolvers.add(new RequestParamArgumentResolver());
-			this.argumentResolvers.add(new RequestBodyArgumentResolver(decoders, this.conversionService));
+			this.argumentResolvers.add(new RequestBodyArgumentResolver(messageConverters,
+					this.conversionService));
 			this.argumentResolvers.add(new ModelArgumentResolver());
 		}
 	}
