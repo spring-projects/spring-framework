@@ -16,6 +16,10 @@
 
 package org.springframework.http.server.reactive;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.channels.FileChannel;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -25,12 +29,14 @@ import io.undertow.server.handlers.Cookie;
 import io.undertow.server.handlers.CookieImpl;
 import io.undertow.util.HttpString;
 import org.reactivestreams.Publisher;
+import org.xnio.channels.StreamSinkChannel;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.ZeroCopyHttpOutputMessage;
 import org.springframework.util.Assert;
 
 /**
@@ -39,19 +45,25 @@ import org.springframework.util.Assert;
  * @author Marek Hawrylczak
  * @author Rossen Stoyanchev
  */
-public class UndertowServerHttpResponse extends AbstractServerHttpResponse {
+public class UndertowServerHttpResponse extends AbstractServerHttpResponse
+		implements ZeroCopyHttpOutputMessage {
 
 	private final HttpServerExchange exchange;
+
+	private final StreamSinkChannel responseChannel;
 
 	private final Function<Publisher<DataBuffer>, Mono<Void>> responseBodyWriter;
 
 	public UndertowServerHttpResponse(HttpServerExchange exchange,
+			StreamSinkChannel responseChannel,
 			Function<Publisher<DataBuffer>, Mono<Void>> responseBodyWriter,
 			DataBufferAllocator allocator) {
 		super(allocator);
 		Assert.notNull(exchange, "'exchange' is required.");
+		Assert.notNull(responseChannel, "'responseChannel' must not be null");
 		Assert.notNull(responseBodyWriter, "'responseBodyWriter' must not be null");
 		this.exchange = exchange;
+		this.responseChannel = responseChannel;
 		this.responseBodyWriter = responseBodyWriter;
 	}
 
@@ -69,6 +81,26 @@ public class UndertowServerHttpResponse extends AbstractServerHttpResponse {
 	@Override
 	protected Mono<Void> setBodyInternal(Publisher<DataBuffer> publisher) {
 		return this.responseBodyWriter.apply(publisher);
+	}
+
+	@Override
+	public Mono<Void> setBody(File file, long position, long count) {
+		writeHeaders();
+		writeCookies();
+		try {
+			FileChannel in = new FileInputStream(file).getChannel();
+			long result = this.responseChannel.transferFrom(in, position, count);
+			if (result < count) {
+				return Mono.error(new IOException("Could only write " + result +
+						" out of " + count + " bytes"));
+			}
+			else {
+				return Mono.empty();
+			}
+		}
+		catch (IOException ex) {
+			return Mono.error(ex);
+		}
 	}
 
 	@Override

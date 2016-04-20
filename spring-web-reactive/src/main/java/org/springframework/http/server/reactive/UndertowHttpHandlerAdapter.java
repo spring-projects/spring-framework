@@ -67,9 +67,12 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 		requestBody.registerListener();
 		ServerHttpRequest request = new UndertowServerHttpRequest(exchange, requestBody);
 
-		ResponseBodySubscriber responseBody = new ResponseBodySubscriber(exchange);
+		StreamSinkChannel responseChannel = exchange.getResponseChannel();
+		ResponseBodySubscriber responseBody =
+				new ResponseBodySubscriber(exchange, responseChannel);
 		responseBody.registerListener();
-		ServerHttpResponse response = new UndertowServerHttpResponse(exchange,
+		ServerHttpResponse response =
+				new UndertowServerHttpResponse(exchange, responseChannel,
 				publisher -> Mono.from(subscriber -> publisher.subscribe(responseBody)),
 				allocator);
 
@@ -202,9 +205,10 @@ public class UndertowHttpHandlerAdapter implements io.undertow.server.HttpHandle
 
 		private Subscription subscription;
 
-		public ResponseBodySubscriber(HttpServerExchange exchange) {
+		public ResponseBodySubscriber(HttpServerExchange exchange,
+				StreamSinkChannel responseChannel) {
 			this.exchange = exchange;
-			this.responseChannel = exchange.getResponseChannel();
+			this.responseChannel = responseChannel;
 		}
 
 		public void registerListener() {
