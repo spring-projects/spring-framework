@@ -16,6 +16,8 @@
 
 package org.springframework.http.server.reactive;
 
+import java.io.File;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -31,6 +33,7 @@ import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.core.io.buffer.NettyDataBuffer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.ZeroCopyHttpOutputMessage;
 import org.springframework.util.Assert;
 
 /**
@@ -39,7 +42,8 @@ import org.springframework.util.Assert;
  * @author Stephane Maldini
  * @author Rossen Stoyanchev
  */
-public class ReactorServerHttpResponse extends AbstractServerHttpResponse {
+public class ReactorServerHttpResponse extends AbstractServerHttpResponse
+		implements ZeroCopyHttpOutputMessage {
 
 	private final HttpChannel channel;
 
@@ -98,5 +102,12 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse {
 		else {
 			return Unpooled.wrappedBuffer(buffer.asByteBuffer());
 		}
+	}
+
+	@Override
+	public Mono<Void> setBody(File file, long position, long count) {
+		return applyBeforeCommit().after(() -> {
+			return this.channel.sendFile(file, position, count);
+		});
 	}
 }

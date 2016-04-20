@@ -104,4 +104,35 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 		}
 	}
 
+/*
+	While the underlying implementation of {@link ZeroCopyHttpOutputMessage} seems to
+	work; it does bypass {@link #applyBeforeCommit} and more importantly it doesn't change
+	its {@linkplain #state()). Therefore it's commented out, for now.
+
+	We should revisit this code once
+	https://github.com/ReactiveX/RxNetty/issues/194 has been fixed.
+	
+
+	@Override
+	public Mono<Void> setBody(File file, long position, long count) {
+		Channel channel = this.response.unsafeNettyChannel();
+
+		HttpResponse httpResponse =
+				new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+		io.netty.handler.codec.http.HttpHeaders headers = httpResponse.headers();
+
+		for (Map.Entry<String, List<String>> header : getHeaders().entrySet()) {
+			String headerName = header.getKey();
+			for (String headerValue : header.getValue()) {
+				headers.add(headerName, headerValue);
+			}
+		}
+		Mono<Void> responseWrite = MonoChannelFuture.from(channel.write(httpResponse));
+
+		FileRegion fileRegion = new DefaultFileRegion(file, position, count);
+		Mono<Void> fileWrite = MonoChannelFuture.from(channel.writeAndFlush(fileRegion));
+
+		return Flux.concat(applyBeforeCommit(), responseWrite, fileWrite).after();
+	}
+*/
 }

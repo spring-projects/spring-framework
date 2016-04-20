@@ -94,7 +94,7 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 						applyBeforeCommit().after(() -> setBodyInternal(writePublisher)));
 	}
 
-	private Mono<Void> applyBeforeCommit() {
+	protected Mono<Void> applyBeforeCommit() {
 		Mono<Void> mono = Mono.empty();
 		if (this.state.compareAndSet(STATE_NEW, STATE_COMMITTING)) {
 			for (Supplier<? extends Mono<Void>> action : this.beforeCommitActions) {

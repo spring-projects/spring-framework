@@ -30,7 +30,7 @@ import reactor.core.util.SignalKind;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.codec.Encoder;
+import org.springframework.core.codec.support.StringDecoder;
 import org.springframework.core.codec.support.StringEncoder;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.io.buffer.DataBuffer;
@@ -38,6 +38,8 @@ import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
+import org.springframework.http.converter.reactive.HttpMessageConverter;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.stereotype.Controller;
@@ -230,8 +232,11 @@ public class DispatcherHandlerErrorTests {
 
 		@Bean
 		public ResponseBodyResultHandler resultHandler() {
-			List<Encoder<?>> encoders = Collections.singletonList(new StringEncoder());
-			return new ResponseBodyResultHandler(encoders, new DefaultConversionService());
+			List<HttpMessageConverter<?>> converters = Collections.singletonList(
+					new CodecHttpMessageConverter<>(new StringEncoder(),
+							new StringDecoder()));
+			return new ResponseBodyResultHandler(converters,
+					new DefaultConversionService());
 		}
 
 		@Bean

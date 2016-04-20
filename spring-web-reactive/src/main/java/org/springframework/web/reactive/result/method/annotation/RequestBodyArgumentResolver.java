@@ -24,10 +24,10 @@ import reactor.core.publisher.Mono;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ResolvableType;
-import org.springframework.core.codec.Decoder;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.reactive.HttpMessageConverter;
 import org.springframework.ui.ModelMap;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -40,15 +40,15 @@ import org.springframework.web.server.ServerWebExchange;
  */
 public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolver {
 
-	private final List<Decoder<?>> decoders;
+	private final List<HttpMessageConverter<?>> messageConverters;
 
 	private final ConversionService conversionService;
 
-
-	public RequestBodyArgumentResolver(List<Decoder<?>> decoders, ConversionService service) {
-		Assert.notEmpty(decoders, "At least one decoder is required.");
+	public RequestBodyArgumentResolver(List<HttpMessageConverter<?>> messageConverters,
+			ConversionService service) {
+		Assert.notEmpty(messageConverters, "At least one message converter is required.");
 		Assert.notNull(service, "'conversionService' is required.");
-		this.decoders = decoders;
+		this.messageConverters = messageConverters;
 		this.conversionService = service;
 	}
 
@@ -62,22 +62,29 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 	public Mono<Object> resolveArgument(MethodParameter parameter, ModelMap model,
 			ServerWebExchange exchange) {
 
+		ResolvableType type = ResolvableType.forMethodParameter(parameter);
+		ResolvableType elementType = type.hasGenerics() ? type.getGeneric(0) : type;
+
 		MediaType mediaType = exchange.getRequest().getHeaders().getContentType();
 		if (mediaType == null) {
 			mediaType = MediaType.APPLICATION_OCTET_STREAM;
 		}
-		ResolvableType type = ResolvableType.forMethodParameter(parameter);
-		Flux<DataBuffer> body = exchange.getRequest().getBody();
-		Flux<?> elementFlux = body;
-		ResolvableType elementType = type.hasGenerics() ? type.getGeneric(0) : type;
 
-		Decoder<?> decoder = resolveDecoder(elementType, mediaType);
-		if (decoder != null) {
-			elementFlux = decoder.decode(body, elementType, mediaType);
+		Flux<DataBuffer> body = exchange.getRequest().getBody();
+		Flux<?> elementFlux;
+
+		HttpMessageConverter<?> messageConverter =
+				resolveMessageConverter(elementType, mediaType);
+		if (messageConverter != null) {
+			elementFlux = messageConverter.read(elementType, exchange.getRequest());
+		}
+		else {
+			elementFlux = body;
 		}
 
 		if (this.conversionService.canConvert(Publisher.class, type.getRawClass())) {
-			return Mono.just(this.conversionService.convert(elementFlux, type.getRawClass()));
+			return Mono.just(this.conversionService
+					.convert(elementFlux, type.getRawClass()));
 		}
 		else if (type.getRawClass() == Flux.class) {
 			return Mono.just(elementFlux);
@@ -90,10 +97,11 @@ public class RequestBodyArgumentResolver implements HandlerMethodArgumentResolve
 		return elementFlux.next().map(o -> o);
 	}
 
-	private Decoder<?> resolveDecoder(ResolvableType type, MediaType mediaType, Object... hints) {
-		for (Decoder<?> decoder : this.decoders) {
-			if (decoder.canDecode(type, mediaType, hints)) {
-				return decoder;
+	private HttpMessageConverter<?> resolveMessageConverter(ResolvableType type,
+			MediaType mediaType) {
+		for (HttpMessageConverter<?> messageConverter : this.messageConverters) {
+			if (messageConverter.canRead(type, mediaType)) {
+				return messageConverter;
 			}
 		}
 		return null;

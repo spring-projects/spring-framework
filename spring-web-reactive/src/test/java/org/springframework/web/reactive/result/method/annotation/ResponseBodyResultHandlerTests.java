@@ -24,6 +24,7 @@ import org.reactivestreams.Publisher;
 import org.springframework.core.ResolvableType;
 import org.springframework.core.codec.support.StringEncoder;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.http.converter.reactive.CodecHttpMessageConverter;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.method.HandlerMethod;
@@ -41,7 +42,7 @@ public class ResponseBodyResultHandlerTests {
 	@Test
 	public void supports() throws NoSuchMethodException {
 		ResponseBodyResultHandler handler = new ResponseBodyResultHandler(Collections.singletonList(
-				new StringEncoder()),
+				new CodecHttpMessageConverter<String>(new StringEncoder(), null)),
 				new DefaultConversionService());
 		TestController controller = new TestController();
 
