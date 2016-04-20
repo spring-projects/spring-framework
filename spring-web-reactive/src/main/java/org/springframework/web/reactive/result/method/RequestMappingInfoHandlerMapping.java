@@ -43,7 +43,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.result.condition.ParamsRequestCondition;
-import org.springframework.web.server.BadRequestStatusException;
+import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
@@ -203,7 +203,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 	 * and HTTP method but not by consumable media types
 	 * @throws NotAcceptableStatusException if there are matches by URL and HTTP
 	 * method but not by producible media types
-	 * @throws BadRequestStatusException if there are matches by URL and HTTP
+	 * @throws ServerWebInputException if there are matches by URL and HTTP
 	 * method but not by query parameter conditions
 	 */
 	@Override
@@ -278,7 +278,7 @@ public abstract class RequestMappingInfoHandlerMapping extends AbstractHandlerMe
 						.collect(Collectors.toMap(Entry::getKey,
 								entry -> entry.getValue().toArray(new String[entry.getValue().size()]))
 				);
-				throw new BadRequestStatusException("Unsatisfied query parameter conditions: " +
+				throw new ServerWebInputException("Unsatisfied query parameter conditions: " +
 						paramConditions + ", actual parameters: " + params);
 			}
 			else {

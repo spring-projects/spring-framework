@@ -21,11 +21,13 @@ import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 
 /**
- * Exception for errors that fit response status 400 (bad request).
+ * Exception for errors that fit response status 400 (bad request) for use in
+ * Spring Web applications. The exception provides additional fields (e.g.
+ * an optional {@link MethodParameter} if related to the error).
  *
  * @author Rossen Stoyanchev
  */
-public class BadRequestStatusException extends ResponseStatusException {
+public class ServerWebInputException extends ResponseStatusException {
 
 	private final MethodParameter parameter;
 
@@ -33,21 +35,21 @@ public class BadRequestStatusException extends ResponseStatusException {
 	/**
 	 * Constructor with an explanation only.
 	 */
-	public BadRequestStatusException(String reason) {
+	public ServerWebInputException(String reason) {
 		this(reason, null);
 	}
 
 	/**
 	 * Constructor for a 400 error linked to a specific {@code MethodParameter}.
 	 */
-	public BadRequestStatusException(String reason, MethodParameter parameter) {
+	public ServerWebInputException(String reason, MethodParameter parameter) {
 		this(reason, parameter, null);
 	}
 
 	/**
 	 * Constructor for a 400 error with a root cause.
 	 */
-	public BadRequestStatusException(String reason, MethodParameter parameter, Throwable cause) {
+	public ServerWebInputException(String reason, MethodParameter parameter, Throwable cause) {
 		super(HttpStatus.BAD_REQUEST, reason, cause);
 		this.parameter = parameter;
 	}

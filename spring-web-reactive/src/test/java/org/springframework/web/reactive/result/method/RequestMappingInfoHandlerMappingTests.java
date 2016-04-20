@@ -50,7 +50,7 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerMapping;
 import org.springframework.web.reactive.HandlerResult;
 import org.springframework.web.reactive.result.method.RequestMappingInfo.BuilderConfiguration;
-import org.springframework.web.server.BadRequestStatusException;
+import org.springframework.web.server.ServerWebInputException;
 import org.springframework.web.server.MethodNotAllowedException;
 import org.springframework.web.server.NotAcceptableStatusException;
 import org.springframework.web.server.ServerWebExchange;
@@ -208,7 +208,7 @@ public class RequestMappingInfoHandlerMappingTests {
 	public void getHandlerUnsatisfiedServletRequestParameterException() throws Exception {
 		ServerWebExchange exchange = createExchange(HttpMethod.GET, "/params");
 		Mono<Object> mono = this.handlerMapping.getHandler(exchange);
-		assertError(mono, BadRequestStatusException.class, ex -> {
+		assertError(mono, ServerWebInputException.class, ex -> {
 			assertEquals(ex.getReason(), "Unsatisfied query parameter conditions: " +
 					"[[bar=baz], [foo=bar]], actual parameters: {}");
 		});
