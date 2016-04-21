@@ -39,10 +39,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.DispatcherHandler;
 import org.springframework.web.reactive.ResponseStatusExceptionHandler;
 import org.springframework.web.reactive.handler.SimpleUrlHandlerMapping;
-import org.springframework.web.reactive.result.SimpleResultHandler;
-import org.springframework.web.reactive.result.WebHandlerHandlerAdapter;
-import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -138,7 +136,7 @@ public class WebHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTe
 			map.put("/foo", new FooHandler());
 			map.put("/bar", new BarHandler());
 			map.put("/header", new HeaderSettingHandler());
-			setHandlers(map);
+			setUrlMap(map);
 		}
 	}
 

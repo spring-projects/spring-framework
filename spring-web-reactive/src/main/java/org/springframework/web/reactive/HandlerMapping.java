@@ -40,6 +40,17 @@ public interface HandlerMapping {
 	String BEST_MATCHING_PATTERN_ATTRIBUTE = HandlerMapping.class.getName() + ".bestMatchingPattern";
 
 	/**
+	 * Name of the {@link ServerWebExchange} attribute that contains the path
+	 * within the handler mapping, in case of a pattern match, or the full
+	 * relevant URI (typically within the DispatcherServlet's mapping) else.
+	 * <p>Note: This attribute is not required to be supported by all
+	 * HandlerMapping implementations. URL-based HandlerMappings will
+	 * typically support it, but handlers should not necessarily expect
+	 * this request attribute to be present in all scenarios.
+	 */
+	String PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE = HandlerMapping.class.getName() + ".pathWithinHandlerMapping";
+
+	/**
 	 * Name of the {@link ServerWebExchange} attribute that contains the URI
 	 * templates map, mapping variable names to values.
 	 * <p>Note: This attribute is not required to be supported by all
