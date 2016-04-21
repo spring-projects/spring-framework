@@ -45,7 +45,7 @@ public class StringEncoder extends AbstractEncoder<String> {
 	@Override
 	public boolean canEncode(ResolvableType type, MimeType mimeType, Object... hints) {
 		Class<?> clazz = type.getRawClass();
-		return (super.canEncode(type, mimeType, hints) && String.class.isAssignableFrom(clazz));
+		return (super.canEncode(type, mimeType, hints) && String.class.equals(clazz));
 	}
 
 	@Override

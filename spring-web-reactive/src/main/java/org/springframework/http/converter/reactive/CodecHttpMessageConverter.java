@@ -29,12 +29,16 @@ import org.springframework.core.codec.Decoder;
 import org.springframework.core.codec.Encoder;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ReactiveHttpInputMessage;
 import org.springframework.http.ReactiveHttpOutputMessage;
 import org.springframework.http.support.MediaTypeUtils;
 
 /**
+ * Implementation of the {@link HttpMessageConverter} interface that delegates to
+ * {@link Encoder} and {@link Decoder}.
+ *
  * @author Arjen Poutsma
  */
 public class CodecHttpMessageConverter<T> implements HttpMessageConverter<T> {
@@ -43,6 +47,32 @@ public class CodecHttpMessageConverter<T> implements HttpMessageConverter<T> {
 
 	private final Decoder<T> decoder;
 
+	/**
+	 * Create a {@code CodecHttpMessageConverter} with the given {@link Encoder}. When
+	 * using this constructor, all read-related methods will in {@code false} or an
+	 * {@link IllegalStateException}.
+	 * @param encoder the encoder to use
+	 */
+	public CodecHttpMessageConverter(Encoder<T> encoder) {
+		this(encoder, null);
+	}
+
+	/**
+	 * Create a {@code CodecHttpMessageConverter} with the given {@link Decoder}. When
+	 * using this constructor, all write-related methods will in {@code false} or an
+	 * {@link IllegalStateException}.
+	 * @param decoder the decoder to use
+	 */
+	public CodecHttpMessageConverter(Decoder<T> decoder) {
+		this(null, decoder);
+	}
+
+	/**
+	 * Create a {@code CodecHttpMessageConverter} with the given {@link Encoder} and
+	 * {@link Decoder}.
+	 * @param encoder the encoder to use, can be {@code null}
+	 * @param decoder the decoder to use, can be {@code null}
+	 */
 	public CodecHttpMessageConverter(Encoder<T> encoder, Decoder<T> decoder) {
 		this.encoder = encoder;
 		this.decoder = decoder;
@@ -94,9 +124,13 @@ public class CodecHttpMessageConverter<T> implements HttpMessageConverter<T> {
 		if (this.encoder == null) {
 			return Mono.error(new IllegalStateException("No decoder set"));
 		}
-		outputMessage.getHeaders().setContentType(contentType);
+		HttpHeaders headers = outputMessage.getHeaders();
+		if (headers.getContentType() == null) {
+			headers.setContentType(contentType);
+		}
 		DataBufferAllocator allocator = outputMessage.allocator();
-		Flux<DataBuffer> body = encoder.encode(inputStream, allocator, type, contentType);
+		Flux<DataBuffer> body =
+				this.encoder.encode(inputStream, allocator, type, contentType);
 		return outputMessage.setBody(body);
 	}
 }
