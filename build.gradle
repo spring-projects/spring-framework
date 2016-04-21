@@ -68,7 +68,7 @@ configure(allprojects) { project ->
 	ext.okhttp3Version       = "3.2.0"
 	ext.openjpaVersion       = "2.4.1"
 	ext.poiVersion           = "3.14"
-	ext.reactorVersion       = "2.0.7.RELEASE"
+	ext.reactorVersion       = "2.0.8.RELEASE"
 	ext.romeVersion          = "1.6.0"
 	ext.seleniumVersion      = "2.53.0"
 	ext.slf4jVersion         = "1.7.21"
