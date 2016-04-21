@@ -62,7 +62,7 @@ configure(allprojects) { project ->
 	ext.okhttpVersion        = "2.7.5"
 	ext.openjpaVersion       = "2.4.1"
 	ext.poiVersion           = "3.13"
-	ext.reactorVersion       = "2.0.7.RELEASE"
+	ext.reactorVersion       = "2.0.8.RELEASE"
 	ext.romeVersion          = "1.5.1"
 	ext.seleniumVersion      = "2.48.2"
 	ext.slf4jVersion         = "1.7.21"
@@ -383,7 +383,7 @@ project("spring-beans") {
 		optional("org.yaml:snakeyaml:${snakeyamlVersion}")
 		testCompile("log4j:log4j:1.2.17")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
-    }
+	}
 }
 
 project("spring-beans-groovy") {
@@ -783,7 +783,7 @@ project("spring-orm-hibernate4") {
 		optional("org.hibernate:hibernate-core:${hibernate4Version}")
 		optional("org.hibernate:hibernate-entitymanager:${hibernate4Version}")
 		optional("javax.servlet:javax.servlet-api:3.0.1")
-        optional("aopalliance:aopalliance:1.0")
+		optional("aopalliance:aopalliance:1.0")
 		testCompile("javax.validation:validation-api:1.1.0.GA")
 		testCompile("org.hibernate:hibernate-validator:${hibval5Version}")
 		testCompile("javax.el:javax.el-api:2.2.5")
@@ -1161,9 +1161,7 @@ configure(rootProject) {
 		separateOutputDirs = false
 		backends = ['docbook']
 		options doctype: 'book', eruby: 'erubis'
-		attributes 	'spring-version': project.version,
-					'revnumber' : project.version,
-					'docinfo' : ""
+		attributes 'spring-version': project.version, 'revnumber': project.version, 'docinfo': ""
 	}
 
 	reference {
@@ -1299,7 +1297,7 @@ configure(rootProject) {
 		baseName = "spring-framework"
 		classifier = "dist"
 		description = "Builds -${classifier} archive, containing all jars and docs, " +
-					"suitable for community download page."
+			"suitable for community download page."
 
 		ext.baseDir = "${baseName}-${project.version}";
 
