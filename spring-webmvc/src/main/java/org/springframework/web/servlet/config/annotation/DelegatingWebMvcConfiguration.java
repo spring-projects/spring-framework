@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -65,6 +65,11 @@ public class DelegatingWebMvcConfiguration extends WebMvcConfigurationSupport {
 	@Override
 	public void configureAsyncSupport(AsyncSupportConfigurer configurer) {
 		this.configurers.configureAsyncSupport(configurer);
+	}
+
+	@Override
+	public void configurePathMatch(PathMatchConfigurer configurer) {
+		this.configurers.configurePathMatch(configurer);
 	}
 
 	@Override

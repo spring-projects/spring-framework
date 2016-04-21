@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,16 +27,23 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.format.support.FormattingConversionService;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.mock.web.test.MockHttpServletRequest;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
 import org.springframework.validation.Validator;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
+import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.context.support.StaticWebApplicationContext;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.HandlerExecutionChain;
@@ -49,6 +56,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExc
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * A test fixture with an {@link WebMvcConfigurationSupport} instance.
@@ -163,6 +171,32 @@ public class WebMvcConfigurationSupportTests {
 		assertNotNull(eher.getApplicationContext());
 	}
 
+	@Test
+	public void defaultPathMatchConfiguration() throws Exception {
+		AnnotationConfigWebApplicationContext context = new AnnotationConfigWebApplicationContext();
+		context.setServletContext(new MockServletContext());
+		context.register(WebConfig.class);
+		context.refresh();
+
+		UrlPathHelper urlPathHelper = context.getBean(UrlPathHelper.class);
+		PathMatcher pathMatcher = context.getBean(PathMatcher.class);
+
+		assertNotNull(urlPathHelper);
+		assertNotNull(pathMatcher);
+		assertEquals(AntPathMatcher.class, pathMatcher.getClass());
+	}
+
+
+	@EnableWebMvc
+	@Configuration
+	@SuppressWarnings("unused")
+	static class WebConfig {
+
+		@Bean
+		public TestController testController() {
+			return new TestController();
+		}
+	}
 
 	@Controller
 	private static class TestController {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2013 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import java.util.Map;
 import org.w3c.dom.Element;
 
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.ManagedList;
 import org.springframework.beans.factory.support.ManagedMap;
@@ -62,10 +63,15 @@ class ResourcesBeanDefinitionParser implements BeanDefinitionParser {
 		}
 		urlMap.put(resourceRequestPath, resourceHandlerName);
 
+		RuntimeBeanReference pathMatcherRef = MvcNamespaceUtils.registerPathMatcher(null, parserContext, source);
+		RuntimeBeanReference pathHelperRef = MvcNamespaceUtils.registerUrlPathHelper(null, parserContext, source);
+
 		RootBeanDefinition handlerMappingDef = new RootBeanDefinition(SimpleUrlHandlerMapping.class);
 		handlerMappingDef.setSource(source);
 		handlerMappingDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
 		handlerMappingDef.getPropertyValues().add("urlMap", urlMap);
+		handlerMappingDef.getPropertyValues().add("pathMatcher", pathMatcherRef);
+		handlerMappingDef.getPropertyValues().add("urlPathHelper", pathHelperRef);
 
 		String order = element.getAttribute("order");
 		// use a default of near-lowest precedence, still allowing for even lower precedence in other mappings

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,9 +20,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.servlet.RequestDispatcher;
 import javax.validation.constraints.NotNull;
@@ -47,6 +49,7 @@ import org.springframework.mock.web.test.MockRequestDispatcher;
 import org.springframework.mock.web.test.MockServletContext;
 import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.PathMatcher;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
@@ -79,6 +82,7 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.servlet.resource.DefaultServletHttpRequestHandler;
 import org.springframework.web.servlet.resource.ResourceHttpRequestHandler;
 import org.springframework.web.servlet.theme.ThemeChangeInterceptor;
+import org.springframework.web.util.UrlPathHelper;
 
 import static org.junit.Assert.*;
 
@@ -88,6 +92,10 @@ import static org.junit.Assert.*;
  * @author Jeremy Grelle
  */
 public class MvcNamespaceTests {
+
+	private static final String VIEWCONTROLLER_BEAN_NAME =
+			"org.springframework.web.servlet.config.viewControllerHandlerMapping";
+
 
 	private GenericWebApplicationContext appContext;
 
@@ -234,7 +242,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testResources() throws Exception {
-		loadBeanDefinitions("mvc-config-resources.xml", 5);
+		loadBeanDefinitions("mvc-config-resources.xml", 7);
 
 		HttpRequestHandlerAdapter adapter = appContext.getBean(HttpRequestHandlerAdapter.class);
 		assertNotNull(adapter);
@@ -267,7 +275,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testResourcesWithOptionalAttributes() throws Exception {
-		loadBeanDefinitions("mvc-config-resources-optional-attrs.xml", 5);
+		loadBeanDefinitions("mvc-config-resources-optional-attrs.xml", 7);
 
 		SimpleUrlHandlerMapping mapping = appContext.getBean(SimpleUrlHandlerMapping.class);
 		assertNotNull(mapping);
@@ -349,7 +357,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testViewControllers() throws Exception {
-		loadBeanDefinitions("mvc-config-view-controllers.xml", 15);
+		loadBeanDefinitions("mvc-config-view-controllers.xml", 17);
 
 		RequestMappingHandlerMapping mapping = appContext.getBean(RequestMappingHandlerMapping.class);
 		assertNotNull(mapping);
@@ -409,7 +417,7 @@ public class MvcNamespaceTests {
 	/** WebSphere gives trailing servlet path slashes by default!! */
 	@Test
 	public void testViewControllersOnWebSphere() throws Exception {
-		loadBeanDefinitions("mvc-config-view-controllers.xml", 15);
+		loadBeanDefinitions("mvc-config-view-controllers.xml", 17);
 
 		SimpleUrlHandlerMapping mapping2 = appContext.getBean(SimpleUrlHandlerMapping.class);
 		SimpleControllerHandlerAdapter adapter = appContext.getBean(SimpleControllerHandlerAdapter.class);
@@ -453,7 +461,7 @@ public class MvcNamespaceTests {
 
 	@Test
 	public void testViewControllersDefaultConfig() {
-		loadBeanDefinitions("mvc-config-view-controllers-minimal.xml", 4);
+		loadBeanDefinitions("mvc-config-view-controllers-minimal.xml", 6);
 
 		BeanNameUrlHandlerMapping beanNameMapping = appContext.getBean(BeanNameUrlHandlerMapping.class);
 		assertNotNull(beanNameMapping);
@@ -490,6 +498,27 @@ public class MvcNamespaceTests {
 		DeferredResultProcessingInterceptor[] deferredResultInterceptors =
 				(DeferredResultProcessingInterceptor[]) fieldAccessor.getPropertyValue("deferredResultInterceptors");
 		assertEquals(1, deferredResultInterceptors.length);
+	}
+
+	@Test
+	public void testPathMatchingHandlerMappings() throws Exception {
+		loadBeanDefinitions("mvc-config-path-matching-mappings.xml", 19);
+
+		RequestMappingHandlerMapping requestMapping = appContext.getBean(RequestMappingHandlerMapping.class);
+		assertNotNull(requestMapping);
+		assertEquals(TestPathHelper.class, requestMapping.getUrlPathHelper().getClass());
+		assertEquals(TestPathMatcher.class, requestMapping.getPathMatcher().getClass());
+
+		SimpleUrlHandlerMapping viewController = appContext.getBean(VIEWCONTROLLER_BEAN_NAME, SimpleUrlHandlerMapping.class);
+		assertNotNull(viewController);
+		assertEquals(TestPathHelper.class, viewController.getUrlPathHelper().getClass());
+		assertEquals(TestPathMatcher.class, viewController.getPathMatcher().getClass());
+
+		for (SimpleUrlHandlerMapping handlerMapping : appContext.getBeansOfType(SimpleUrlHandlerMapping.class).values()) {
+			assertNotNull(handlerMapping);
+			assertEquals(TestPathHelper.class, handlerMapping.getUrlPathHelper().getClass());
+			assertEquals(TestPathMatcher.class, handlerMapping.getPathMatcher().getClass());
+		}
 	}
 
 
@@ -563,5 +592,46 @@ public class MvcNamespaceTests {
 	public static class TestCallableProcessingInterceptor extends CallableProcessingInterceptorAdapter { }
 
 	public static class TestDeferredResultProcessingInterceptor extends DeferredResultProcessingInterceptorAdapter { }
+
+	public static class TestPathMatcher implements PathMatcher {
+
+		@Override
+		public boolean isPattern(String path) {
+			return false;
+		}
+
+		@Override
+		public boolean match(String pattern, String path) {
+			return path.matches(pattern);
+		}
+
+		@Override
+		public boolean matchStart(String pattern, String path) {
+			return false;
+		}
+
+		@Override
+		public String extractPathWithinPattern(String pattern, String path) {
+			return null;
+		}
+
+		@Override
+		public Map<String, String> extractUriTemplateVariables(String pattern, String path) {
+			return null;
+		}
+
+		@Override
+		public Comparator<String> getPatternComparator(String path) {
+			return null;
+		}
+
+		@Override
+		public String combine(String pattern1, String pattern2) {
+			return null;
+		}
+	}
+
+	public static class TestPathHelper extends UrlPathHelper {
+	}
 
 }

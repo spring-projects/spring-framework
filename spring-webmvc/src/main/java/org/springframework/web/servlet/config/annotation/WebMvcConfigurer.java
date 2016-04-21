@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -78,6 +78,20 @@ public interface WebMvcConfigurer {
 	 * Configure asynchronous request handling options.
 	 */
 	void configureAsyncSupport(AsyncSupportConfigurer configurer);
+
+
+	/**
+	 * Helps with configuring HandlerMappings path matching options such as trailing slash match,
+	 * suffix registration, path matcher and path helper.
+	 * Configured path matcher and path helper instances are shared for:
+	 * <ul>
+	 * <li>RequestMappings</li>
+	 * <li>ViewControllerMappings</li>
+	 * <li>ResourcesMappings</li>
+	 * </ul>
+	 * @since 3.2.17
+	 */
+	void configurePathMatch(PathMatchConfigurer configurer);
 
 	/**
 	 * Add resolvers to support custom controller method argument types.

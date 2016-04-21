@@ -21,6 +21,62 @@
 		</xsd:annotation>
 		<xsd:complexType>
 			<xsd:all minOccurs="0">
+				<xsd:element name="path-matching" minOccurs="0">
+					<xsd:annotation>
+						<xsd:documentation><![CDATA[
+	Configures the path matching part of the Spring MVC Controller programming model.
+	Like annotation-driven, code-based alternatives are also documented in EnableWebMvc javadoc.
+						]]></xsd:documentation>
+					</xsd:annotation>
+					<xsd:complexType>
+						<xsd:attribute name="suffix-pattern" type="xsd:boolean">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	Whether to use suffix pattern match (".*") when matching patterns to requests. If enabled
+	a method mapped to "/users" also matches to "/users.*".
+	The default value is true.
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="trailing-slash" type="xsd:boolean">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	Whether to match to URLs irrespective of the presence of a trailing slash.
+	If enabled a method mapped to "/users" also matches to "/users/".
+	The default value is true.
+										]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="registered-suffixes-only" type="xsd:boolean">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	Whether suffix pattern matching should work only against path extensions
+	explicitly registered when you configure content negotiation.
+	This is generally recommended to reduce ambiguity and to
+	avoid issues such as when a "." appears in the path for other reasons.
+	The default value is false.
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="path-helper" type="xsd:string">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	The bean name of the UrlPathHelper to use for resolution of lookup paths.
+	Use this to override the default UrlPathHelper with a custom subclass, or to share common UrlPathHelper settings across
+	multiple HandlerMappings and MethodNameResolvers.
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+						<xsd:attribute name="path-matcher" type="xsd:string">
+							<xsd:annotation>
+								<xsd:documentation><![CDATA[
+	The bean name of the PathMatcher implementation to use for matching URL paths against registered URL patterns.
+	Default is AntPathMatcher.
+								]]></xsd:documentation>
+							</xsd:annotation>
+						</xsd:attribute>
+					</xsd:complexType>
+				</xsd:element>
 				<xsd:element name="message-converters" minOccurs="0">
 					<xsd:annotation>
 						<xsd:documentation><![CDATA[

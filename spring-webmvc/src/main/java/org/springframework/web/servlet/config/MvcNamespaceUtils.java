@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,12 +17,16 @@
 package org.springframework.web.servlet.config;
 
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.config.RuntimeBeanReference;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
 import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.beans.factory.xml.ParserContext;
+import org.springframework.util.AntPathMatcher;
+import org.springframework.util.PathMatcher;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter;
 import org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Convenience methods for use in MVC namespace BeanDefinitionParsers.
@@ -41,10 +45,68 @@ abstract class MvcNamespaceUtils {
 	private static final String HTTP_REQUEST_HANDLER_ADAPTER_BEAN_NAME =
 			HttpRequestHandlerAdapter.class.getName();
 
+	private static final String URL_PATH_HELPER_BEAN_NAME = "mvcUrlPathHelper";
+
+	private static final String PATH_MATCHER_BEAN_NAME = "mvcPathMatcher";
+
+
 	public static void registerDefaultComponents(ParserContext parserContext, Object source) {
 		registerBeanNameUrlHandlerMapping(parserContext, source);
 		registerHttpRequestHandlerAdapter(parserContext, source);
 		registerSimpleControllerHandlerAdapter(parserContext, source);
+	}
+
+
+	/**
+	 * Adds an alias to an existing well-known name or registers a new instance of a {@link UrlPathHelper}
+	 * under that well-known name, unless already registered.
+	 * @return a RuntimeBeanReference to this {@link UrlPathHelper} instance
+	 * @since 3.2.17
+	 */
+	public static RuntimeBeanReference registerUrlPathHelper(RuntimeBeanReference urlPathHelperRef,
+			ParserContext parserContext, Object source) {
+
+		if (urlPathHelperRef != null) {
+			if (parserContext.getRegistry().isAlias(URL_PATH_HELPER_BEAN_NAME)) {
+				parserContext.getRegistry().removeAlias(URL_PATH_HELPER_BEAN_NAME);
+			}
+			parserContext.getRegistry().registerAlias(urlPathHelperRef.getBeanName(), URL_PATH_HELPER_BEAN_NAME);
+		}
+		else if (!parserContext.getRegistry().isAlias(URL_PATH_HELPER_BEAN_NAME)
+				&& !parserContext.getRegistry().containsBeanDefinition(URL_PATH_HELPER_BEAN_NAME)) {
+			RootBeanDefinition urlPathHelperDef = new RootBeanDefinition(UrlPathHelper.class);
+			urlPathHelperDef.setSource(source);
+			urlPathHelperDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+			parserContext.getRegistry().registerBeanDefinition(URL_PATH_HELPER_BEAN_NAME, urlPathHelperDef);
+			parserContext.registerComponent(new BeanComponentDefinition(urlPathHelperDef, URL_PATH_HELPER_BEAN_NAME));
+		}
+		return new RuntimeBeanReference(URL_PATH_HELPER_BEAN_NAME);
+	}
+
+	/**
+	 * Adds an alias to an existing well-known name or registers a new instance of a {@link PathMatcher}
+	 * under that well-known name, unless already registered.
+	 * @return a RuntimeBeanReference to this {@link PathMatcher} instance
+	 * @since 3.2.17
+	 */
+	public static RuntimeBeanReference registerPathMatcher(RuntimeBeanReference pathMatcherRef,
+			ParserContext parserContext, Object source) {
+
+		if (pathMatcherRef != null) {
+			if (parserContext.getRegistry().isAlias(PATH_MATCHER_BEAN_NAME)) {
+				parserContext.getRegistry().removeAlias(PATH_MATCHER_BEAN_NAME);
+			}
+			parserContext.getRegistry().registerAlias(pathMatcherRef.getBeanName(), PATH_MATCHER_BEAN_NAME);
+		}
+		else if (!parserContext.getRegistry().isAlias(PATH_MATCHER_BEAN_NAME)
+				&& !parserContext.getRegistry().containsBeanDefinition(PATH_MATCHER_BEAN_NAME)) {
+			RootBeanDefinition pathMatcherDef = new RootBeanDefinition(AntPathMatcher.class);
+			pathMatcherDef.setSource(source);
+			pathMatcherDef.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
+			parserContext.getRegistry().registerBeanDefinition(PATH_MATCHER_BEAN_NAME, pathMatcherDef);
+			parserContext.registerComponent(new BeanComponentDefinition(pathMatcherDef, PATH_MATCHER_BEAN_NAME));
+		}
+		return new RuntimeBeanReference(PATH_MATCHER_BEAN_NAME);
 	}
 
 	/**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,9 @@ import org.springframework.http.converter.json.MappingJacksonHttpMessageConverte
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.PathMatcher;
 import org.springframework.validation.Errors;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.validation.Validator;
@@ -75,6 +77,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExc
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * This is the main class providing the configuration behind the MVC Java config.
@@ -163,6 +166,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 
 	private ContentNegotiationManager contentNegotiationManager;
 
+	private PathMatchConfigurer pathMatchConfigurer;
+
 	private List<HttpMessageConverter<?>> messageConverters;
 
 
@@ -191,6 +196,24 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		handlerMapping.setOrder(0);
 		handlerMapping.setInterceptors(getInterceptors());
 		handlerMapping.setContentNegotiationManager(mvcContentNegotiationManager());
+
+		PathMatchConfigurer configurer = getPathMatchConfigurer();
+		if (configurer.isUseSuffixPatternMatch() != null) {
+			handlerMapping.setUseSuffixPatternMatch(configurer.isUseSuffixPatternMatch());
+		}
+		if (configurer.isUseRegisteredSuffixPatternMatch() != null) {
+			handlerMapping.setUseRegisteredSuffixPatternMatch(configurer.isUseRegisteredSuffixPatternMatch());
+		}
+		if (configurer.isUseTrailingSlashMatch() != null) {
+			handlerMapping.setUseTrailingSlashMatch(configurer.isUseTrailingSlashMatch());
+		}
+		if (configurer.getPathMatcher() != null) {
+			handlerMapping.setPathMatcher(configurer.getPathMatcher());
+		}
+		if (configurer.getUrlPathHelper() != null) {
+			handlerMapping.setUrlPathHelper(configurer.getUrlPathHelper());
+		}
+
 		return handlerMapping;
 	}
 
@@ -260,6 +283,61 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 	}
 
 	/**
+	 * Callback for building the {@link PathMatchConfigurer}.
+	 * Delegates to {@link #configurePathMatch}.
+	 * @since 3.2.17
+	 */
+	protected PathMatchConfigurer getPathMatchConfigurer() {
+		if (this.pathMatchConfigurer == null) {
+			this.pathMatchConfigurer = new PathMatchConfigurer();
+			configurePathMatch(this.pathMatchConfigurer);
+		}
+		return this.pathMatchConfigurer;
+	}
+
+	/**
+	 * Override this method to configure path matching options.
+	 * @see PathMatchConfigurer
+	 * @since 3.2.17
+	 */
+	public void configurePathMatch(PathMatchConfigurer configurer) {
+	}
+
+	/**
+	 * Return a global {@link PathMatcher} instance for path matching
+	 * patterns in {@link HandlerMapping}s.
+	 * This instance can be configured using the {@link PathMatchConfigurer}
+	 * in {@link #configurePathMatch(PathMatchConfigurer)}.
+	 * @since 3.2.17
+	 */
+	@Bean
+	public PathMatcher mvcPathMatcher() {
+		if (getPathMatchConfigurer().getPathMatcher() != null) {
+			return getPathMatchConfigurer().getPathMatcher();
+		}
+		else {
+			return new AntPathMatcher();
+		}
+	}
+
+	/**
+	 * Return a global {@link UrlPathHelper} instance for path matching
+	 * patterns in {@link HandlerMapping}s.
+	 * This instance can be configured using the {@link PathMatchConfigurer}
+	 * in {@link #configurePathMatch(PathMatchConfigurer)}.
+	 * @since 3.2.17
+	 */
+	@Bean
+	public UrlPathHelper mvcUrlPathHelper() {
+		if (getPathMatchConfigurer().getUrlPathHelper() != null) {
+			return getPathMatchConfigurer().getUrlPathHelper();
+		}
+		else {
+			return new UrlPathHelper();
+		}
+	}
+
+	/**
 	 * Return a handler mapping ordered at 1 to map URL paths directly to
 	 * view names. To configure view controllers, override
 	 * {@link #addViewControllers}.
@@ -272,6 +350,8 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
 		handlerMapping = (handlerMapping != null ? handlerMapping : new EmptyHandlerMapping());
 		handlerMapping.setInterceptors(getInterceptors());
+		handlerMapping.setPathMatcher(mvcPathMatcher());
+		handlerMapping.setUrlPathHelper(mvcUrlPathHelper());
 		return handlerMapping;
 	}
 
@@ -305,7 +385,13 @@ public class WebMvcConfigurationSupport implements ApplicationContextAware, Serv
 		addResourceHandlers(registry);
 
 		AbstractHandlerMapping handlerMapping = registry.getHandlerMapping();
-		handlerMapping = (handlerMapping != null ? handlerMapping : new EmptyHandlerMapping());
+		if (handlerMapping != null) {
+			handlerMapping.setPathMatcher(mvcPathMatcher());
+			handlerMapping.setUrlPathHelper(mvcUrlPathHelper());
+		}
+		else {
+			handlerMapping = new EmptyHandlerMapping();
+		}
 		return handlerMapping;
 	}
 

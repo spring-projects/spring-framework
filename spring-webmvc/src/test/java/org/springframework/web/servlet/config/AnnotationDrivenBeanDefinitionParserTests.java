@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2012 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,14 @@
 package org.springframework.web.servlet.config;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.DirectFieldAccessor;
@@ -30,6 +33,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.validation.MessageCodesResolver;
 import org.springframework.web.bind.support.ConfigurableWebBindingInitializer;
 import org.springframework.web.bind.support.WebArgumentResolver;
@@ -42,7 +46,9 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
+import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.servlet.mvc.method.annotation.ServletWebArgumentResolverAdapter;
+import org.springframework.web.util.UrlPathHelper;
 
 /**
  * Test fixture for the configuration in mvc-config-annotation-driven.xml.
@@ -68,6 +74,21 @@ public class AnnotationDrivenBeanDefinitionParserTests {
 		assertNotNull(resolver);
 		assertEquals(TestMessageCodesResolver.class, resolver.getClass());
 		assertEquals(false, new DirectFieldAccessor(adapter).getPropertyValue("ignoreDefaultModelOnRedirect"));
+	}
+
+	@Test
+	public void testPathMatchingConfiguration() {
+		loadBeanDefinitions("mvc-config-path-matching.xml");
+		RequestMappingHandlerMapping hm = this.appContext.getBean(RequestMappingHandlerMapping.class);
+		assertNotNull(hm);
+		assertTrue(hm.useSuffixPatternMatch());
+		assertFalse(hm.useTrailingSlashMatch());
+		assertTrue(hm.useRegisteredSuffixPatternMatch());
+		assertThat(hm.getUrlPathHelper(), Matchers.instanceOf(TestPathHelper.class));
+		assertThat(hm.getPathMatcher(), Matchers.instanceOf(TestPathMatcher.class));
+		List<String> fileExtensions = hm.getContentNegotiationManager().getAllFileExtensions();
+		assertThat(fileExtensions, Matchers.contains("xml"));
+		assertThat(fileExtensions, Matchers.hasSize(1));
 	}
 
 	@Test
@@ -198,3 +219,7 @@ class TestMessageCodesResolver implements MessageCodesResolver {
 	}
 
 }
+
+class TestPathMatcher extends AntPathMatcher { }
+
+class TestPathHelper extends UrlPathHelper { }
