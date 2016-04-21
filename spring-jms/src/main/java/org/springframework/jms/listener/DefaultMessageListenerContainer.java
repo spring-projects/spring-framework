@@ -134,6 +134,11 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 	 */
 	public static final long DEFAULT_RECOVERY_INTERVAL = 5000;
 
+	/**
+	 * The default sleep interval: 1000 ms = 1 second.
+	 */
+	public static final long DEFAULT_SLEEP_INTERVAL = 1000;
+
 
 	/**
 	 * Constant that indicates to cache no JMS resources at all.
@@ -989,7 +994,14 @@ public class DefaultMessageListenerContainer extends AbstractPollingMessageListe
 		}
 		else {
 			try {
-				Thread.sleep(interval);
+				if (interval <= DEFAULT_SLEEP_INTERVAL) {
+					Thread.sleep(interval);
+				} else {
+					long deadLine = System.currentTimeMillis() + interval;
+					while (isRunning() && System.currentTimeMillis() < deadLine) {
+						Thread.sleep(DEFAULT_SLEEP_INTERVAL);
+					}
+				}
 			}
 			catch (InterruptedException interEx) {
 				// Re-interrupt current thread, to allow other threads to react.
