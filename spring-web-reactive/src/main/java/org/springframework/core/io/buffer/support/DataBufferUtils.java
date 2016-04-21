@@ -23,7 +23,6 @@ import java.io.SequenceInputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
@@ -36,6 +35,7 @@ import reactor.core.subscriber.SubscriberWithContext;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils2;
 
 /**i
  * Utility class for working with {@link DataBuffer}s.
@@ -67,7 +67,7 @@ public abstract class DataBufferUtils {
 				toIterable(1);
 
 		Enumeration<InputStream> enumeration =
-				new IteratorEnumeration<InputStream>(streams.iterator());
+				CollectionUtils2.toEnumeration(streams.iterator());
 
 		return new SequenceInputStream(enumeration);
 	}
@@ -167,29 +167,6 @@ public abstract class DataBufferUtils {
 				subscriber.onComplete();
 			}
 		});
-	}
-
-	/**
-	 * Enumeration wrapping an Iterator.
-	 */
-	// TODO: move to CollectionUtils when we merge with Spring Framework?
-	private static class IteratorEnumeration<T> implements Enumeration<T> {
-
-		private final Iterator<T> iterator;
-
-		public IteratorEnumeration(Iterator<T> iterator) {
-			this.iterator = iterator;
-		}
-
-		@Override
-		public boolean hasMoreElements() {
-			return this.iterator.hasNext();
-		}
-
-		@Override
-		public T nextElement() {
-			return this.iterator.next();
-		}
 	}
 
 	private static class ReadableByteChannelConsumer

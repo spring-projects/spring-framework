@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package org.springframework.core.codec.support;
+package org.springframework.util.xml;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLStreamConstants;
@@ -24,60 +23,26 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
 
-import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
- * TODO: move to org.springframework.util.xml when merging, hidden behind StaxUtils
- *
+ * Abstract base class for {@code XMLEventReader}s.
  * @author Arjen Poutsma
  */
-class ListBasedXMLEventReader implements XMLEventReader {
+abstract class AbstractXMLEventReader implements XMLEventReader {
 
-	private final XMLEvent[] events;
-
-	private int cursor = 0;
-
-	public ListBasedXMLEventReader(List<XMLEvent> events) {
-		Assert.notNull(events, "'events' must not be null");
-		this.events = events.toArray(new XMLEvent[events.size()]);
-	}
+	private boolean closed;
 
 	@Override
-	public boolean hasNext() {
-		Assert.notNull(events, "'events' must not be null");
-		return cursor != events.length;
-	}
-
-	@Override
-	public XMLEvent nextEvent() {
-		if (cursor < events.length) {
-			return events[cursor++];
+	public Object next() {
+		try {
+			return nextEvent();
 		}
-		else {
+		catch (XMLStreamException ex) {
 			throw new NoSuchElementException();
 		}
 	}
 
-	@Override
-	public XMLEvent peek() {
-		if (cursor < events.length) {
-			return events[cursor];
-		}
-		else {
-			return null;
-		}
-	}
-
-	@Override
-	public Object next() {
-		return nextEvent();
-	}
-
-	/**
-	 * Throws an {@code UnsupportedOperationException} when called.
-	 * @throws UnsupportedOperationException when called
-	 */
 	@Override
 	public void remove() {
 		throw new UnsupportedOperationException(
@@ -86,6 +51,7 @@ class ListBasedXMLEventReader implements XMLEventReader {
 
 	@Override
 	public String getElementText() throws XMLStreamException {
+		checkIfClosed();
 		if (!peek().isStartElement()) {
 			throw new XMLStreamException("Not at START_ELEMENT");
 		}
@@ -110,6 +76,7 @@ class ListBasedXMLEventReader implements XMLEventReader {
 
 	@Override
 	public XMLEvent nextTag() throws XMLStreamException {
+		checkIfClosed();
 		while (true) {
 			XMLEvent event = nextEvent();
 			switch (event.getEventType()) {
@@ -145,7 +112,28 @@ class ListBasedXMLEventReader implements XMLEventReader {
 		throw new IllegalArgumentException("Property not supported: [" + name + "]");
 	}
 
+	/**
+	 * Returns {@code true} if closed; {@code false} otherwise.
+	 * @see #close()
+	 */
+	protected boolean isClosed() {
+		return closed;
+	}
+
+	/**
+	 * Checks if the reader is closed, and throws a {@code XMLStreamException} if so.
+	 * @throws XMLStreamException if the reader is closed
+	 * @see #close()
+	 * @see #isClosed()
+	 */
+	protected void checkIfClosed() throws XMLStreamException {
+		if (isClosed()) {
+			throw new XMLStreamException("XMLEventReader has been closed");
+		}
+	}
+
 	@Override
 	public void close() {
+		closed = true;
 	}
 }
