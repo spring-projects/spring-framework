@@ -26,8 +26,13 @@ import java.util.Map;
 import org.springframework.util.Assert;
 
 /**
- * Default implementation of {@link UriTemplateHandler} that uses
+ * Default implementation of {@link UriTemplateHandler} based on the use of
  * {@link UriComponentsBuilder} to expand and encode variables.
+ *
+ * <p>There are also several properties to customize how URI template handling
+ * that include a {@link #setBaseUrl baseUrl} to be used as a prefix for all URI
+ * templates and a couple of encoding related options -- {@link #setParsePath
+ * parsePath} and {@link #setStrictEncoding strictEncoding} respectively.
  *
  * @author Rossen Stoyanchev
  * @since 4.2
@@ -35,6 +40,7 @@ import org.springframework.util.Assert;
 public class DefaultUriTemplateHandler implements UriTemplateHandler {
 
 	private String baseUrl;
+
 
 	private boolean parsePath;
 
@@ -152,7 +158,7 @@ public class DefaultUriTemplateHandler implements UriTemplateHandler {
 		else {
 			Map<String, Object> encodedUriVars = new HashMap<String, Object>(uriVariables.size());
 			for (Map.Entry<String, ?> entry : uriVariables.entrySet()) {
-				encodedUriVars.put(entry.getKey(), encodeValue(entry.getValue()));
+				encodedUriVars.put(entry.getKey(), applyStrictEncoding(entry.getValue()));
 			}
 			return builder.build().expand(encodedUriVars);
 		}
@@ -165,13 +171,13 @@ public class DefaultUriTemplateHandler implements UriTemplateHandler {
 		else {
 			Object[] encodedUriVars = new Object[uriVariables.length];
 			for (int i = 0; i < uriVariables.length; i++) {
-				encodedUriVars[i] = encodeValue(uriVariables[i]);
+				encodedUriVars[i] = applyStrictEncoding(uriVariables[i]);
 			}
 			return builder.build().expand(encodedUriVars);
 		}
 	}
 
-	private String encodeValue(Object value) {
+	private String applyStrictEncoding(Object value) {
 		String stringValue = (value != null ? value.toString() : "");
 		try {
 			return UriUtils.encode(stringValue, "UTF-8");
@@ -183,8 +189,8 @@ public class DefaultUriTemplateHandler implements UriTemplateHandler {
 	}
 
 	/**
-	 * Invoked after the URI template has been expanded and encoded to prepend
-	 * the configured {@link #setBaseUrl(String) baseUrl} if any.
+	 * Invoked after the URI template has been expanded and encoded to prefix it
+	 * with the configured {@link #setBaseUrl(String) baseUrl}, if any.
 	 * @param uriComponents the expanded and encoded URI
 	 * @return the final URI
 	 */

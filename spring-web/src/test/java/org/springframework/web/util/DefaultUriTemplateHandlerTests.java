@@ -25,6 +25,7 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * Unit tests for {@link DefaultUriTemplateHandler}.
+ *
  * @author Rossen Stoyanchev
  */
 public class DefaultUriTemplateHandlerTests {
@@ -33,35 +34,35 @@ public class DefaultUriTemplateHandlerTests {
 
 
 	@Test
-	public void baseUrl() throws Exception {
+	public void baseUrlWithoutPath() throws Exception {
 		this.handler.setBaseUrl("http://localhost:8080");
 		URI actual = this.handler.expand("/myapiresource");
-		URI expected = new URI("http://localhost:8080/myapiresource");
-		assertEquals(expected, actual);
+
+		assertEquals("http://localhost:8080/myapiresource", actual.toString());
 	}
 
 	@Test
-	public void baseUrlWithPartialPath() throws Exception {
+	public void baseUrlWithPath() throws Exception {
 		this.handler.setBaseUrl("http://localhost:8080/context");
 		URI actual = this.handler.expand("/myapiresource");
-		URI expected = new URI("http://localhost:8080/context/myapiresource");
-		assertEquals(expected, actual);
+
+		assertEquals("http://localhost:8080/context/myapiresource", actual.toString());
 	}
 
 	@Test
-	public void parsePathOff() throws Exception {
+	public void parsePathIsOff() throws Exception {
 		this.handler.setParsePath(false);
 		Map<String, String> vars = new HashMap<>(2);
 		vars.put("hotel", "1");
 		vars.put("publicpath", "pics/logo.png");
 		String template = "http://example.com/hotels/{hotel}/pic/{publicpath}";
 		URI actual = this.handler.expand(template, vars);
-		URI expected = new URI("http://example.com/hotels/1/pic/pics/logo.png");
-		assertEquals(expected, actual);
+
+		assertEquals("http://example.com/hotels/1/pic/pics/logo.png", actual.toString());
 	}
 
 	@Test
-	public void parsePathOn() throws Exception {
+	public void parsePathIsOn() throws Exception {
 		this.handler.setParsePath(true);
 		Map<String, String> vars = new HashMap<>(2);
 		vars.put("hotel", "1");
@@ -69,19 +70,28 @@ public class DefaultUriTemplateHandlerTests {
 		vars.put("scale", "150x150");
 		String template = "http://example.com/hotels/{hotel}/pic/{publicpath}/size/{scale}";
 		URI actual = this.handler.expand(template, vars);
-		URI expected = new URI("http://example.com/hotels/1/pic/pics%2Flogo.png/size/150x150");
-		assertEquals(expected, actual);
+
+		assertEquals("http://example.com/hotels/1/pic/pics%2Flogo.png/size/150x150", actual.toString());
 	}
 
 	@Test
-	public void strictEncodingOff() throws Exception {
+	public void strictEncodingIsOffWithMap() throws Exception {
 		this.handler.setStrictEncoding(false);
 		Map<String, String> vars = new HashMap<>(2);
 		vars.put("userId", "john;doe");
 		String template = "http://www.example.com/user/{userId}/dashboard";
 		URI actual = this.handler.expand(template, vars);
-		URI expected = new URI("http://www.example.com/user/john;doe/dashboard");
-		assertEquals(expected, actual);
+
+		assertEquals("http://www.example.com/user/john;doe/dashboard", actual.toString());
+	}
+
+	@Test
+	public void strictEncodingOffWithArray() throws Exception {
+		this.handler.setStrictEncoding(false);
+		String template = "http://www.example.com/user/{userId}/dashboard";
+		URI actual = this.handler.expand(template, "john;doe");
+
+		assertEquals("http://www.example.com/user/john;doe/dashboard", actual.toString());
 	}
 
 	@Test
@@ -91,8 +101,8 @@ public class DefaultUriTemplateHandlerTests {
 		vars.put("userId", "john;doe");
 		String template = "http://www.example.com/user/{userId}/dashboard";
 		URI actual = this.handler.expand(template, vars);
-		URI expected = new URI("http://www.example.com/user/john%3Bdoe/dashboard");
-		assertEquals(expected, actual);
+
+		assertEquals("http://www.example.com/user/john%3Bdoe/dashboard", actual.toString());
 	}
 
 	@Test
@@ -100,8 +110,8 @@ public class DefaultUriTemplateHandlerTests {
 		this.handler.setStrictEncoding(true);
 		String template = "http://www.example.com/user/{userId}/dashboard";
 		URI actual = this.handler.expand(template, "john;doe");
-		URI expected = new URI("http://www.example.com/user/john%3Bdoe/dashboard");
-		assertEquals(expected, actual);
+
+		assertEquals("http://www.example.com/user/john%3Bdoe/dashboard", actual.toString());
 	}
 
 }
