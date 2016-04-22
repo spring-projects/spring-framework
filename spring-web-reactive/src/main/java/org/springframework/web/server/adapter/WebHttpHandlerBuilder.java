@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,28 +31,20 @@ import org.springframework.web.server.handler.FilteringWebHandler;
 import org.springframework.web.server.session.WebSessionManager;
 
 /**
- * Build an {@link org.springframework.http.server.reactive.HttpHandler HttpHandler}
- * to handle requests with a  chain of {@link #filters(WebFilter...) web filters},
- * a target {@link #webHandler(WebHandler) web handler}, and apply one or more
- * {@link #exceptionHandlers(WebExceptionHandler...) exception handlers}.
- *
- * <p>Effective this sets up the following {@code WebHandler} delegation:<br>
- * {@link WebHttpHandlerAdapter} {@code -->}
- * {@link ExceptionHandlingWebHandler} {@code -->}
- * {@link FilteringWebHandler} {@code -->}
- * {@link WebHandler}
+ * Builder for an {@link HttpHandler} that adapts to a target {@link WebHandler}
+ * along with a chain of {@link WebFilter}s and a set of
+ * {@link WebExceptionHandler}s.
  *
  * <p>Example usage:
  * <pre>
- * WebFilter myFilter = ... ;
- * WebHandler myHandler = ... ;
+ * WebFilter filter = ... ;
+ * WebHandler webHandler = ... ;
+ * WebExceptionHandler exceptionHandler = ...;
  *
- * HttpHandler httpHandler = WebToHttpHandlerBuilder.webHandler(myHandler)
- *         .filters(myFilter)
- *         .exceptionHandlers(new ResponseStatusExceptionHandler())
+ * HttpHandler httpHandler = WebHttpHandlerBuilder.webHandler(webHandler)
+ *         .filters(filter)
+ *         .exceptionHandlers(exceptionHandler)
  *         .build();
- *
- * // Configure the HttpServer with the created httpHandler
  * </pre>
  *
  * @author Rossen Stoyanchev
@@ -70,7 +62,7 @@ public class WebHttpHandlerBuilder {
 
 	/**
 	 * Private constructor.
-	 * See static factory method {@link #webHandler(WebHandler)}.
+	 * See factory method {@link #webHandler(WebHandler)}.
 	 */
 	private WebHttpHandlerBuilder(WebHandler targetHandler) {
 		Assert.notNull(targetHandler, "'targetHandler' must not be null");
@@ -80,10 +72,10 @@ public class WebHttpHandlerBuilder {
 
 	/**
 	 * Factory method to create a new builder instance.
-	 * @param targetHandler the target handler to process requests with
+	 * @param webHandler the target handler for the request
 	 */
-	public static WebHttpHandlerBuilder webHandler(WebHandler targetHandler) {
-		return new WebHttpHandlerBuilder(targetHandler);
+	public static WebHttpHandlerBuilder webHandler(WebHandler webHandler) {
+		return new WebHttpHandlerBuilder(webHandler);
 	}
 
 
@@ -114,6 +106,7 @@ public class WebHttpHandlerBuilder {
 	 * {@link ServerWebExchange WebServerExchange}
 	 * created for each HTTP request.
 	 * @param sessionManager the session manager
+	 * @see HttpWebHandlerAdapter#setSessionManager(WebSessionManager)
 	 */
 	public WebHttpHandlerBuilder sessionManager(WebSessionManager sessionManager) {
 		this.sessionManager = sessionManager;
@@ -124,35 +117,20 @@ public class WebHttpHandlerBuilder {
 	 * Build the {@link HttpHandler}.
 	 */
 	public HttpHandler build() {
-		WebHandler handler = createWebHandler();
-		return adaptWebHandler(handler);
-	}
-
-	/**
-	 * Create the final (decorated) {@link WebHandler} to use.
-	 */
-	protected WebHandler createWebHandler() {
 		WebHandler webHandler = this.targetHandler;
-		if (!this.exceptionHandlers.isEmpty()) {
-			WebExceptionHandler[] array = new WebExceptionHandler[this.exceptionHandlers.size()];
-			webHandler = new ExceptionHandlingWebHandler(webHandler,  this.exceptionHandlers.toArray(array));
-		}
 		if (!this.filters.isEmpty()) {
 			WebFilter[] array = new WebFilter[this.filters.size()];
 			webHandler = new FilteringWebHandler(webHandler, this.filters.toArray(array));
 		}
-		return webHandler;
-	}
-
-	/**
-	 * Adapt the {@link WebHandler} to {@link HttpHandler}.
-	 */
-	protected WebHttpHandlerAdapter adaptWebHandler(WebHandler handler) {
-		WebHttpHandlerAdapter adapter = new WebHttpHandlerAdapter(handler);
-		if (this.sessionManager != null) {
-			adapter.setSessionManager(this.sessionManager);
+		if (!this.exceptionHandlers.isEmpty()) {
+			WebExceptionHandler[] array = new WebExceptionHandler[this.exceptionHandlers.size()];
+			webHandler = new ExceptionHandlingWebHandler(webHandler,  this.exceptionHandlers.toArray(array));
 		}
-		return adapter;
+		HttpWebHandlerAdapter httpHandler = new HttpWebHandlerAdapter(webHandler);
+		if (this.sessionManager != null) {
+			httpHandler.setSessionManager(this.sessionManager);
+		}
+		return httpHandler;
 	}
 
 }

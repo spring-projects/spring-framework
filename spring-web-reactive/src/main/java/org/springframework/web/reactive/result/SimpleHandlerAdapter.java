@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 package org.springframework.web.reactive.result;
 
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
@@ -27,15 +26,16 @@ import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * Adapter to use a {@link WebHandler} through the {@link DispatcherHandler}.
+ * HandlerAdapter that allows using the plain {@link WebHandler} contract with
+ * the generic {@link DispatcherHandler}.
  *
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
  */
-public class WebHandlerHandlerAdapter implements HandlerAdapter {
+public class SimpleHandlerAdapter implements HandlerAdapter {
 
-	private static final ResolvableType PUBLISHER_VOID = ResolvableType.forClassWithGenerics(
-			Publisher.class, Void.class);
+	private static final ResolvableType MONO_VOID = ResolvableType.forClassWithGenerics(
+			Mono.class, Void.class);
 
 
 	@Override
@@ -47,7 +47,7 @@ public class WebHandlerHandlerAdapter implements HandlerAdapter {
 	public Mono<HandlerResult> handle(ServerWebExchange exchange, Object handler) {
 		WebHandler webHandler = (WebHandler) handler;
 		Mono<Void> mono = webHandler.handle(exchange);
-		return Mono.just(new HandlerResult(webHandler, mono, PUBLISHER_VOID));
+		return Mono.just(new HandlerResult(webHandler, mono, MONO_VOID));
 	}
 
 }

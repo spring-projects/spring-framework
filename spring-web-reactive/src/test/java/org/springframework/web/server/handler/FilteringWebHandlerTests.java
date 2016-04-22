@@ -23,20 +23,25 @@ import org.apache.commons.logging.LogFactory;
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Mono;
+import reactor.core.test.TestSubscriber;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.http.server.reactive.MockServerHttpRequest;
 import org.springframework.http.server.reactive.MockServerHttpResponse;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.web.server.WebExceptionHandler;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -47,9 +52,9 @@ public class FilteringWebHandlerTests {
 	private static Log logger = LogFactory.getLog(FilteringWebHandlerTests.class);
 
 
-	private ServerHttpRequest request;
+	private MockServerHttpRequest request;
 
-	private ServerHttpResponse response;
+	private MockServerHttpResponse response;
 
 
 	@Before
@@ -108,6 +113,20 @@ public class FilteringWebHandlerTests {
 		assertTrue(webHandler.invoked());
 	}
 
+	@Test
+	public void handleErrorFromFilter() throws Exception {
+		TestExceptionHandler exceptionHandler = new TestExceptionHandler();
+		HttpHandler handler = WebHttpHandlerBuilder.webHandler(new StubWebHandler())
+				.filters(new ExceptionFilter()).exceptionHandlers(exceptionHandler).build();
+		handler.handle(this.request, this.response).get();
+
+		assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, this.response.getStatus());
+
+		Throwable savedException = exceptionHandler.ex;
+		assertNotNull(savedException);
+		assertEquals("boo", savedException.getMessage());
+	}
+
 	private HttpHandler createHttpHandler(StubWebHandler webHandler, WebFilter... filters) {
 		return WebHttpHandlerBuilder.webHandler(webHandler).filters(filters).build();
 	}
@@ -116,7 +135,6 @@ public class FilteringWebHandlerTests {
 	private static class TestFilter implements WebFilter {
 
 		private volatile boolean invoked;
-
 
 		public boolean invoked() {
 			return this.invoked;
@@ -156,6 +174,24 @@ public class FilteringWebHandlerTests {
 		}
 	}
 
+	private static class ExceptionFilter implements WebFilter {
+
+		@Override
+		public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+			return Mono.error(new IllegalStateException("boo"));
+		}
+	}
+
+	private static class TestExceptionHandler implements WebExceptionHandler {
+
+		private Throwable ex;
+
+		@Override
+		public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
+			this.ex = ex;
+			return Mono.error(ex);
+		}
+	}
 
 	private static class StubWebHandler implements WebHandler {
 

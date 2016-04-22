@@ -38,15 +38,15 @@ import org.springframework.web.server.session.WebSessionManager;
  *
  * @author Rossen Stoyanchev
  */
-public class WebHttpHandlerAdapter extends WebHandlerDecorator implements HttpHandler {
+public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHandler {
 
-	private static Log logger = LogFactory.getLog(WebHttpHandlerAdapter.class);
+	private static Log logger = LogFactory.getLog(HttpWebHandlerAdapter.class);
 
 
 	private WebSessionManager sessionManager = new DefaultWebSessionManager();
 
 
-	public WebHttpHandlerAdapter(WebHandler delegate) {
+	public HttpWebHandlerAdapter(WebHandler delegate) {
 		super(delegate);
 	}
 

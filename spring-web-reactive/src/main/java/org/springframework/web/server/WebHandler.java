@@ -18,19 +18,18 @@ package org.springframework.web.server;
 
 import reactor.core.publisher.Mono;
 
-import org.springframework.web.server.adapter.WebHttpHandlerAdapter;
+import org.springframework.web.server.adapter.HttpWebHandlerAdapter;
 import org.springframework.web.server.adapter.WebHttpHandlerBuilder;
 
 /**
- * Contract to handle a web server exchange.
+ * Contract to handle a web request.
  *
- * <p>Use {@link WebHttpHandlerAdapter} to adapt a {@code WebHandler} to an
+ * <p>Use {@link HttpWebHandlerAdapter} to adapt a {@code WebHandler} to an
  * {@link org.springframework.http.server.reactive.HttpHandler HttpHandler}.
  * The {@link WebHttpHandlerBuilder} provides a convenient way to do that while
  * also optionally configuring one or more filters and/or exception handlers.
  *
  * @author Rossen Stoyanchev
- * @see WebHttpHandlerBuilder
  */
 public interface WebHandler {
 

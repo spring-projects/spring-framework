@@ -48,7 +48,7 @@ import static org.junit.Assert.assertEquals;
 
 
 /**
- * Integration tests with simple WebHandler's processing requests.
+ * Integration tests with requests mapped to plain {@link WebHandler}s.
  *
  * @author Rossen Stoyanchev
  */
@@ -61,9 +61,9 @@ public class WebHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTe
 	protected HttpHandler createHttpHandler() {
 
 		StaticApplicationContext wac = new StaticApplicationContext();
-		wac.registerSingleton("hm", TestHandlerMapping.class);
-		wac.registerSingleton("ha", WebHandlerHandlerAdapter.class);
-		wac.registerSingleton("rh", SimpleResultHandler.class);
+		wac.registerSingleton("handlerMapping", TestSimpleUrlHandlerMapping.class);
+		wac.registerSingleton("handlerAdapter", SimpleHandlerAdapter.class);
+		wac.registerSingleton("resultHandler", SimpleResultHandler.class);
 		wac.refresh();
 
 		DispatcherHandler dispatcherHandler = new DispatcherHandler();
@@ -129,9 +129,9 @@ public class WebHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTe
 	}
 
 
-	private static class TestHandlerMapping extends SimpleUrlHandlerMapping {
+	private static class TestSimpleUrlHandlerMapping extends SimpleUrlHandlerMapping {
 
-		public TestHandlerMapping() {
+		public TestSimpleUrlHandlerMapping() {
 			Map<String, Object> map = new HashMap<>();
 			map.put("/foo", new FooHandler());
 			map.put("/bar", new BarHandler());
@@ -139,7 +139,6 @@ public class WebHandlerIntegrationTests extends AbstractHttpHandlerIntegrationTe
 			setUrlMap(map);
 		}
 	}
-
 
 	private static DataBuffer asDataBuffer(String text) {
 		return new DefaultDataBufferAllocator().allocateBuffer().write(text.getBytes(StandardCharsets.UTF_8));

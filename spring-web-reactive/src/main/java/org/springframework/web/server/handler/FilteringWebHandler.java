@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -27,8 +27,8 @@ import org.springframework.web.server.WebHandler;
 import org.springframework.web.server.ServerWebExchange;
 
 /**
- * WebHandler that delegates to a chain of {@link WebFilter} instances followed
- * by a target {@link WebHandler}.
+ * WebHandler that delegates to a chain of {@link WebFilter} instances and then
+ * to the target {@link WebHandler}.
  *
  * @author Rossen Stoyanchev
  */
