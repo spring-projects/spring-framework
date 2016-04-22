@@ -139,10 +139,10 @@ public abstract class DataBufferUtils {
 
 			@Override
 			public void onNext(DataBuffer dataBuffer) {
-				long currentCount =
-						this.byteCount.addAndGet(dataBuffer.readableByteCount());
+				int delta = dataBuffer.readableByteCount();
+				long currentCount = this.byteCount.addAndGet(delta);
 				if (currentCount > maxByteCount) {
-					int size = (int) (currentCount - maxByteCount + 1);
+					int size = (int) (maxByteCount - currentCount + delta);
 					ByteBuffer byteBuffer =
 							(ByteBuffer) dataBuffer.asByteBuffer().limit(size);
 					DataBuffer partialBuffer =
