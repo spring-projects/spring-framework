@@ -19,6 +19,7 @@ package org.springframework.web.util;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +42,7 @@ public class DefaultUriTemplateHandler implements UriTemplateHandler {
 
 	private String baseUrl;
 
+	private final Map<String, Object> defaultUriVariables = new HashMap<String, Object>();
 
 	private boolean parsePath;
 
@@ -70,6 +72,28 @@ public class DefaultUriTemplateHandler implements UriTemplateHandler {
 	 */
 	public String getBaseUrl() {
 		return this.baseUrl;
+	}
+
+	/**
+	 * Configure default URI variable values to use with every expanded URI
+	 * template. This default values apply only when expanding with a Map, and
+	 * not with an array, where the Map supplied to expand can override the
+	 * default values.
+	 * @param defaultUriVariables the default URI variable values
+	 * @since 4.3
+	 */
+	public void setDefaultUriVariables(Map<String, ?> defaultUriVariables) {
+		this.defaultUriVariables.clear();
+		if (defaultUriVariables != null) {
+			this.defaultUriVariables.putAll(defaultUriVariables);
+		}
+	}
+
+	/**
+	 * Return a read-only copy of the configured default URI variables.
+	 */
+	public Map<String, ?> getDefaultUriVariables() {
+		return Collections.unmodifiableMap(this.defaultUriVariables);
 	}
 
 	/**
@@ -152,15 +176,23 @@ public class DefaultUriTemplateHandler implements UriTemplateHandler {
 	}
 
 	protected UriComponents expandAndEncode(UriComponentsBuilder builder, Map<String, ?> uriVariables) {
-		if (!isStrictEncoding()) {
+		// Simple scenario: use the input map
+		if (getDefaultUriVariables().isEmpty() && !isStrictEncoding()) {
 			return builder.build().expand(uriVariables).encode();
 		}
+		// Create a new map
+		Map<String, Object> variablesToUse = new HashMap<String, Object>();
+		variablesToUse.putAll(getDefaultUriVariables());
+		variablesToUse.putAll(uriVariables);
+
+		if (!isStrictEncoding()) {
+			return builder.build().expand(variablesToUse).encode();
+		}
 		else {
-			Map<String, Object> encodedUriVars = new HashMap<String, Object>(uriVariables.size());
-			for (Map.Entry<String, ?> entry : uriVariables.entrySet()) {
-				encodedUriVars.put(entry.getKey(), applyStrictEncoding(entry.getValue()));
+			for (Map.Entry<String, ?> entry : variablesToUse.entrySet()) {
+				variablesToUse.put(entry.getKey(), applyStrictEncoding(entry.getValue()));
 			}
-			return builder.build().expand(encodedUriVars);
+			return builder.build().expand(variablesToUse);
 		}
 	}
 

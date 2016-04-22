@@ -237,6 +237,25 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	}
 
 	/**
+	 * Configure default URI variable values. This is a shortcut for:
+	 * <pre class="code">
+	 *
+	 * DefaultUriTemplateHandler handler = new DefaultUriTemplateHandler();
+	 * handler.setDefaultUriVariables(...);
+	 *
+	 * RestTemplate restTemplate = new RestTemplate();
+	 * restTemplate.setUriTemplateHandler(handler);
+	 * </pre>
+	 * @param defaultUriVariables the default URI variable values
+	 * @since 4.3
+	 */
+	public void setDefaultUriVariables(Map<String, ?> defaultUriVariables) {
+		Assert.isInstanceOf(DefaultUriTemplateHandler.class, this.uriTemplateHandler,
+				"Can only use this property in conjunction with a DefaultUriTemplateHandler.");
+		((DefaultUriTemplateHandler) this.uriTemplateHandler).setDefaultUriVariables(defaultUriVariables);
+	}
+
+	/**
 	 * Configure the {@link UriTemplateHandler} to use to expand URI templates.
 	 * By default the {@link DefaultUriTemplateHandler} is used which relies on
 	 * Spring's URI template support and exposes several useful properties that
