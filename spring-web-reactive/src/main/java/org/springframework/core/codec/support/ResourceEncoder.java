@@ -19,9 +19,7 @@ package org.springframework.core.codec.support;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.Resource;
@@ -37,7 +35,7 @@ import org.springframework.util.StreamUtils;
  * An encoder for {@link Resource}s.
  * @author Arjen Poutsma
  */
-public class ResourceEncoder extends AbstractEncoder<Resource> {
+public class ResourceEncoder extends AbstractSingleValueEncoder<Resource> {
 
 	public static final int DEFAULT_BUFFER_SIZE = StreamUtils.BUFFER_SIZE;
 
@@ -61,18 +59,10 @@ public class ResourceEncoder extends AbstractEncoder<Resource> {
 	}
 
 	@Override
-	public Flux<DataBuffer> encode(Publisher<? extends Resource> inputStream,
-			DataBufferAllocator allocator, ResolvableType type, MimeType mimeType,
-			Object... hints) {
-		return Flux.from(inputStream).
-				concatMap(resource -> {
-					try {
-						InputStream is = resource.getInputStream();
-						return DataBufferUtils.read(is, allocator, this.bufferSize);
-					}
-					catch (IOException ex) {
-						return Mono.error(ex);
-					}
-				});
+	protected Flux<DataBuffer> encode(Resource resource, DataBufferAllocator allocator,
+			ResolvableType type, MimeType mimeType, Object... hints) throws IOException {
+		InputStream is = resource.getInputStream();
+		return DataBufferUtils.read(is, allocator, bufferSize);
 	}
+
 }
