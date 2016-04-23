@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,45 +29,46 @@ import static org.junit.Assert.*;
 public class CronSequenceGeneratorTests {
 
 	@Test
-	public void testAt50Seconds() {
+	public void at50Seconds() {
 		assertEquals(new Date(2012, 6, 2, 1, 0),
 				new CronSequenceGenerator("*/15 * 1-4 * * *").next(new Date(2012, 6, 1, 9, 53, 50)));
 	}
 
 	@Test
-	public void testAt0Seconds() {
+	public void at0Seconds() {
 		assertEquals(new Date(2012, 6, 2, 1, 0),
 				new CronSequenceGenerator("*/15 * 1-4 * * *").next(new Date(2012, 6, 1, 9, 53)));
 	}
 
 	@Test
-	public void testAt0Minutes() {
+	public void at0Minutes() {
 		assertEquals(new Date(2012, 6, 2, 1, 0),
 				new CronSequenceGenerator("0 */2 1-4 * * *").next(new Date(2012, 6, 1, 9, 0)));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testWith0Increment() {
+	public void with0Increment() {
 		new CronSequenceGenerator("*/0 * * * * *").next(new Date(2012, 6, 1, 9, 0));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
-	public void testWithNegativeIncrement() {
+	public void withNegativeIncrement() {
 		new CronSequenceGenerator("*/-1 * * * * *").next(new Date(2012, 6, 1, 9, 0));
 	}
 
 	@Test
-	public void testValidExpression() {
+	public void validExpression() {
 		assertTrue(CronSequenceGenerator.isValidExpression("0 */2 1-4 * * *"));
 	}
 
 	@Test
-	public void testNotValidExpression() {
+	public void invalidExpression() {
 		assertFalse(CronSequenceGenerator.isValidExpression("0 */2 1-4 * * * *"));
 	}
 
 	@Test
-	public void testNullExpression() {
+	public void nullExpression() {
 		assertFalse(CronSequenceGenerator.isValidExpression(null));
 	}
+
 }
