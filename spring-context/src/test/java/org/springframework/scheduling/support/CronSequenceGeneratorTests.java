@@ -56,4 +56,18 @@ public class CronSequenceGeneratorTests {
 		new CronSequenceGenerator("*/-1 * * * * *").next(new Date(2012, 6, 1, 9, 0));
 	}
 
+	@Test
+	public void testValidExpression() {
+		assertTrue(CronSequenceGenerator.isValidExpression("0 */2 1-4 * * *"));
+	}
+
+	@Test
+	public void testNotValidExpression() {
+		assertFalse(CronSequenceGenerator.isValidExpression("0 */2 1-4 * * * *"));
+	}
+
+	@Test
+	public void testNullExpression() {
+		assertFalse(CronSequenceGenerator.isValidExpression(null));
+	}
 }

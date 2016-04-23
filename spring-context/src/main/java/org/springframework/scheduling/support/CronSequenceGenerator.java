@@ -149,6 +149,22 @@ public class CronSequenceGenerator {
 		return calendar.getTime();
 	}
 
+	/**
+	 * Indicates whether the specified cron expression can be parsed into a
+	 * valid cron sequence generator
+	 * @param cronExpression the expression to evaluate
+	 * @return a boolean indicating whether the given expression is a valid cron
+	 *         expression
+	 */
+	public static boolean isValidExpression(String cronExpression) {
+		String[] fields = StringUtils.tokenizeToStringArray(cronExpression, " ");
+		return validateCronFields(fields);
+	}
+
+	private static boolean validateCronFields(String[] fields) {
+		return fields != null && fields.length == 6;
+	}
+
 	private void doNext(Calendar calendar, int dot) {
 		List<Integer> resets = new ArrayList<Integer>();
 
@@ -262,7 +278,7 @@ public class CronSequenceGenerator {
 	 */
 	private void parse(String expression) throws IllegalArgumentException {
 		String[] fields = StringUtils.tokenizeToStringArray(expression, " ");
-		if (fields.length != 6) {
+		if (!validateCronFields(fields)) {
 			throw new IllegalArgumentException(String.format(
 					"Cron expression must consist of 6 fields (found %d in \"%s\")", fields.length, expression));
 		}
