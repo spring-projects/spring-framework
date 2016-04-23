@@ -28,12 +28,13 @@ import org.springframework.util.Assert;
 
 /**
  * Default implementation of {@link UriTemplateHandler} based on the use of
- * {@link UriComponentsBuilder} to expand and encode variables.
+ * {@link UriComponentsBuilder} for expanding and encoding variables.
  *
  * <p>There are also several properties to customize how URI template handling
- * that include a {@link #setBaseUrl baseUrl} to be used as a prefix for all URI
- * templates and a couple of encoding related options -- {@link #setParsePath
- * parsePath} and {@link #setStrictEncoding strictEncoding} respectively.
+ * is performed, including a {@link #setBaseUrl baseUrl} to be used as a prefix
+ * for all URI templates and a couple of encoding related options &mdash;
+ * {@link #setParsePath parsePath} and {@link #setStrictEncoding strictEncoding}
+ * respectively.
  *
  * @author Rossen Stoyanchev
  * @since 4.2
@@ -76,9 +77,9 @@ public class DefaultUriTemplateHandler implements UriTemplateHandler {
 
 	/**
 	 * Configure default URI variable values to use with every expanded URI
-	 * template. This default values apply only when expanding with a Map, and
-	 * not with an array, where the Map supplied to expand can override the
-	 * default values.
+	 * template. These default values apply only when expanding with a Map, and
+	 * not with an array, where the Map supplied to {@link #expand(String, Map)}
+	 * can override the default values.
 	 * @param defaultUriVariables the default URI variable values
 	 * @since 4.3
 	 */
