@@ -417,7 +417,8 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 * @throws JMSException if thrown by JMS methods
 	 */
 	protected Message receiveMessage(MessageConsumer consumer) throws JMSException {
-		return (this.receiveTimeout < 0 ? consumer.receive() : consumer.receive(this.receiveTimeout));
+		return (this.receiveTimeout < 0 ? consumer.receive() :
+			(this.receiveTimeout > 0 ? consumer.receive(this.receiveTimeout) : consumer.receiveNoWait()));
 	}
 
 	/**
