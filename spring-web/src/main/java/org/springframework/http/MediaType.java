@@ -41,9 +41,11 @@ import org.springframework.util.comparator.CompoundComparator;
  * @author Juergen Hoeller
  * @author Rossen Stoyanchev
  * @author Sebastien Deleuze
+ * @author Venil Noronha
  * @since 3.0
  * @see <a href="http://tools.ietf.org/html/rfc7231#section-3.1.1.1">HTTP 1.1: Semantics
  * and Content, section 3.1.1.1</a>
+ * @see <a href="https://tools.ietf.org/html/rfc7763">The text/markdown Media Type</a>
  */
 public class MediaType extends MimeType implements Serializable {
 
