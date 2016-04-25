@@ -33,6 +33,7 @@ import static org.junit.Assert.*;
 /**
  * @author Sebastien Deleuze
  * @author Brian Clozel
+ * @author Mark Paluch
  */
 public class StringDecoderTests extends AbstractAllocatingTestCase {
 
@@ -92,6 +93,15 @@ public class StringDecoderTests extends AbstractAllocatingTestCase {
 				MediaType.TEXT_PLAIN));
 		String result = single.toBlocking().value();
 		assertEquals("foobar", result);
+	}
+
+	@Test
+	public void decodeEmpty() throws InterruptedException {
+		Mono<DataBuffer> source = Mono.just(stringBuffer(""));
+		Flux<String> output =
+				this.decoder.decode(source, ResolvableType.forClass(String.class), null);
+		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
+		testSubscriber.bindTo(output).assertValues("");
 	}
 
 }

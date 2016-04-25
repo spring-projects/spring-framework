@@ -16,6 +16,7 @@
 
 package org.springframework.core.codec.support;
 
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -39,6 +40,7 @@ import org.springframework.util.MimeTypeUtils;
  * @author Sebastien Deleuze
  * @author Brian Clozel
  * @author Arjen Poutsma
+ * @author Mark Paluch
  * @see StringEncoder
  */
 public class StringDecoder extends AbstractDecoder<String> {
@@ -83,9 +85,8 @@ public class StringDecoder extends AbstractDecoder<String> {
 		}
 		Charset charset = getCharset(mimeType);
 		return inputFlux.map(content -> {
-			byte[] bytes = new byte[content.readableByteCount()];
-			content.read(bytes);
-			return new String(bytes, charset);
+			CharBuffer charBuffer = charset.decode(content.asByteBuffer());
+			return charBuffer.toString();
 		});
 	}
 
