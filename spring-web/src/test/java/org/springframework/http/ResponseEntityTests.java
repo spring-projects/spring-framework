@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -250,6 +250,24 @@ public class ResponseEntityTests {
 
 		String cacheControlHeader = responseEntity.getHeaders().getCacheControl();
 		assertThat(cacheControlHeader, Matchers.equalTo("no-store"));
+	}
+
+	@Test
+	public void statusCodeAsInt() {
+		Integer entity = new Integer(42);
+		ResponseEntity<Integer> responseEntity = ResponseEntity.status(200).body(entity);
+
+		assertEquals(200, responseEntity.getStatusCode().value());
+		assertEquals(entity, responseEntity.getBody());
+	}
+
+	@Test
+	public void customStatusCode() {
+		Integer entity = new Integer(42);
+		ResponseEntity<Integer> responseEntity = ResponseEntity.status(299).body(entity);
+
+		assertEquals(299, responseEntity.getStatusCodeValue());
+		assertEquals(entity, responseEntity.getBody());
 	}
 
 }

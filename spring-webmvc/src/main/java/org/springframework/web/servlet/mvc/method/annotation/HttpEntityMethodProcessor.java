@@ -184,9 +184,8 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 			}
 		}
 
-		Object body = responseEntity.getBody();
 		if (responseEntity instanceof ResponseEntity) {
-			outputMessage.setStatusCode(((ResponseEntity<?>) responseEntity).getStatusCode());
+			outputMessage.getServletResponse().setStatus(((ResponseEntity<?>) responseEntity).getStatusCodeValue());
 			HttpMethod method = inputMessage.getMethod();
 			boolean isGetOrHead = (HttpMethod.GET == method || HttpMethod.HEAD == method);
 			if (isGetOrHead && isResourceNotModified(inputMessage, outputMessage)) {
@@ -197,6 +196,8 @@ public class HttpEntityMethodProcessor extends AbstractMessageConverterMethodPro
 				return;
 			}
 		}
+
+		Object body = responseEntity.getBody();
 		if (inputMessage.getHeaders().containsKey(HttpHeaders.RANGE) &&
 				Resource.class.isAssignableFrom(body.getClass())) {
 			try {

@@ -130,9 +130,9 @@ public class ResponseBodyEmitterReturnValueHandler implements AsyncHandlerMethod
 		HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
 		ServerHttpResponse outputMessage = new ServletServerHttpResponse(response);
 
-		if (ResponseEntity.class.isAssignableFrom(returnValue.getClass())) {
+		if (returnValue instanceof ResponseEntity) {
 			ResponseEntity<?> responseEntity = (ResponseEntity<?>) returnValue;
-			outputMessage.setStatusCode(responseEntity.getStatusCode());
+			response.setStatus(responseEntity.getStatusCodeValue());
 			outputMessage.getHeaders().putAll(responseEntity.getHeaders());
 			returnValue = responseEntity.getBody();
 			if (returnValue == null) {
