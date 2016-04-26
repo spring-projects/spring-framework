@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2014 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,18 +113,14 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 	/**
 	 * Delegate the {@code ServletContext} to any {@link WebApplicationInitializer}
 	 * implementations present on the application classpath.
-	 *
 	 * <p>Because this class declares @{@code HandlesTypes(WebApplicationInitializer.class)},
 	 * Servlet 3.0+ containers will automatically scan the classpath for implementations
 	 * of Spring's {@code WebApplicationInitializer} interface and provide the set of all
 	 * such types to the {@code webAppInitializerClasses} parameter of this method.
-	 *
-	 * <p>If no {@code WebApplicationInitializer} implementations are found on the
-	 * classpath, this method is effectively a no-op. An INFO-level log message will be
-	 * issued notifying the user that the {@code ServletContainerInitializer} has indeed
-	 * been invoked but that no {@code WebApplicationInitializer} implementations were
-	 * found.
-	 *
+	 * <p>If no {@code WebApplicationInitializer} implementations are found on the classpath,
+	 * this method is effectively a no-op. An INFO-level log message will be issued notifying
+	 * the user that the {@code ServletContainerInitializer} has indeed been invoked but that
+	 * no {@code WebApplicationInitializer} implementations were found.
 	 * <p>Assuming that one or more {@code WebApplicationInitializer} types are detected,
 	 * they will be instantiated (and <em>sorted</em> if the @{@link
 	 * org.springframework.core.annotation.Order @Order} annotation is present or
@@ -134,7 +130,6 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 	 * that each instance may register and configure servlets such as Spring's
 	 * {@code DispatcherServlet}, listeners such as Spring's {@code ContextLoaderListener},
 	 * or any other Servlet API componentry such as filters.
-	 *
 	 * @param webAppInitializerClasses all implementations of
 	 * {@link WebApplicationInitializer} found on the application classpath
 	 * @param servletContext the servlet context to be initialized
@@ -168,9 +163,8 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 			return;
 		}
 
+		servletContext.log(initializers.size() + " Spring WebApplicationInitializers detected on classpath");
 		AnnotationAwareOrderComparator.sort(initializers);
-		servletContext.log("Spring WebApplicationInitializers detected on classpath: " + initializers);
-
 		for (WebApplicationInitializer initializer : initializers) {
 			initializer.onStartup(servletContext);
 		}
