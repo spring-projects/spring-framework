@@ -30,6 +30,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerMapping;
+import org.springframework.web.servlet.support.MatchableHandlerMapping;
+import org.springframework.web.servlet.support.RequestMatchResult;
 
 /**
  * Abstract base class for URL-mapped {@link org.springframework.web.servlet.HandlerMapping}
@@ -50,7 +52,8 @@ import org.springframework.web.servlet.HandlerMapping;
  * @author Arjen Poutsma
  * @since 16.04.2003
  */
-public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
+public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping
+		implements MatchableHandlerMapping {
 
 	private Object rootHandler;
 
@@ -277,6 +280,20 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping {
 	 */
 	protected void exposeUriTemplateVariables(Map<String, String> uriTemplateVariables, HttpServletRequest request) {
 		request.setAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE, uriTemplateVariables);
+	}
+
+	@Override
+	public RequestMatchResult match(HttpServletRequest request, String pattern) {
+		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
+		if (getPathMatcher().match(pattern, lookupPath)) {
+			return new RequestMatchResult(pattern, lookupPath, getPathMatcher());
+		}
+		else if (useTrailingSlashMatch()) {
+			if (!pattern.endsWith("/") && getPathMatcher().match(pattern + "/", lookupPath)) {
+				return new RequestMatchResult(pattern + "/", lookupPath, getPathMatcher());
+			}
+		}
+		return null;
 	}
 
 	/**

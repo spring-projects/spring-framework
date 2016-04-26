@@ -27,21 +27,21 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactoryUtils;
 import org.springframework.core.Ordered;
-import org.springframework.web.HttpRequestHandler;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.cors.CorsProcessor;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.Assert;
 import org.springframework.util.PathMatcher;
+import org.springframework.web.HttpRequestHandler;
 import org.springframework.web.context.request.WebRequestInterceptor;
 import org.springframework.web.context.support.WebApplicationObjectSupport;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.CorsProcessor;
+import org.springframework.web.cors.CorsUtils;
+import org.springframework.web.cors.DefaultCorsProcessor;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
-import org.springframework.web.cors.DefaultCorsProcessor;
-import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.util.UrlPathHelper;
 
 /**
@@ -471,7 +471,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	}
 
 
-	private class PreFlightHandler implements HttpRequestHandler {
+	private class PreFlightHandler implements HttpRequestHandler, CorsConfigurationSource {
 
 		private final CorsConfiguration config;
 
@@ -485,10 +485,15 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 
 			corsProcessor.processRequest(this.config, request, response);
 		}
+
+		@Override
+		public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+			return this.config;
+		}
 	}
 
 
-	private class CorsInterceptor extends HandlerInterceptorAdapter {
+	private class CorsInterceptor extends HandlerInterceptorAdapter implements CorsConfigurationSource {
 
 		private final CorsConfiguration config;
 
@@ -501,6 +506,11 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 				Object handler) throws Exception {
 
 			return corsProcessor.processRequest(this.config, request, response);
+		}
+
+		@Override
+		public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+			return this.config;
 		}
 	}
 
