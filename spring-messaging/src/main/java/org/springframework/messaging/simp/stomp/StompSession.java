@@ -94,7 +94,8 @@ public interface StompSession {
 	 * "client-individual" in order ot use this.
 	 * @param messageId the id of the message
 	 * @param consumed whether the message was consumed or not
-	 * @return a Receiptable for tracking events
+	 * @return a Receiptable for tracking receipts
+	 * @since 4.3
 	 */
 	Receiptable acknowledge(String messageId, boolean consumed);
 
