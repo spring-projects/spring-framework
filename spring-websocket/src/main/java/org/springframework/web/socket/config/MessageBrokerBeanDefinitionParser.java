@@ -590,10 +590,9 @@ class MessageBrokerBeanDefinitionParser implements BeanDefinitionParser {
 		if (context.getRegistry().containsBeanDefinition(name)) {
 			beanDef.getPropertyValues().add("outboundChannelExecutor", context.getRegistry().getBeanDefinition(name));
 		}
-		name = SCHEDULER_BEAN_NAME;
-		if (context.getRegistry().containsBeanDefinition(name)) {
-			beanDef.getPropertyValues().add("sockJsTaskScheduler", context.getRegistry().getBeanDefinition(name));
-		}
+		Object scheduler = WebSocketNamespaceUtils.registerScheduler(SCHEDULER_BEAN_NAME, context, source);
+		beanDef.getPropertyValues().add("sockJsTaskScheduler", scheduler);
+
 		registerBeanDefByName("webSocketMessageBrokerStats", beanDef, context, source);
 	}
 
