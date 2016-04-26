@@ -19,12 +19,9 @@ package org.springframework.web.util;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.springframework.util.Assert;
 
 /**
  * Default implementation of {@link UriTemplateHandler} based on the use of
@@ -39,63 +36,12 @@ import org.springframework.util.Assert;
  * @author Rossen Stoyanchev
  * @since 4.2
  */
-public class DefaultUriTemplateHandler implements UriTemplateHandler {
-
-	private String baseUrl;
-
-	private final Map<String, Object> defaultUriVariables = new HashMap<String, Object>();
+public class DefaultUriTemplateHandler extends AbstractUriTemplateHandler {
 
 	private boolean parsePath;
 
 	private boolean strictEncoding;
 
-
-	/**
-	 * Configure a base URL to prepend URI templates with. The base URL must
-	 * have a scheme and host but may optionally contain a port and a path.
-	 * The base URL must be fully expanded and encoded which can be done via
-	 * {@link UriComponentsBuilder}.
-	 * @param baseUrl the base URL.
-	 */
-	public void setBaseUrl(String baseUrl) {
-		if (baseUrl != null) {
-			UriComponents uriComponents = UriComponentsBuilder.fromUriString(baseUrl).build();
-			Assert.hasText(uriComponents.getScheme(), "'baseUrl' must have a scheme");
-			Assert.hasText(uriComponents.getHost(), "'baseUrl' must have a host");
-			Assert.isNull(uriComponents.getQuery(), "'baseUrl' cannot have a query");
-			Assert.isNull(uriComponents.getFragment(), "'baseUrl' cannot have a fragment");
-		}
-		this.baseUrl = baseUrl;
-	}
-
-	/**
-	 * Return the configured base URL.
-	 */
-	public String getBaseUrl() {
-		return this.baseUrl;
-	}
-
-	/**
-	 * Configure default URI variable values to use with every expanded URI
-	 * template. These default values apply only when expanding with a Map, and
-	 * not with an array, where the Map supplied to {@link #expand(String, Map)}
-	 * can override the default values.
-	 * @param defaultUriVariables the default URI variable values
-	 * @since 4.3
-	 */
-	public void setDefaultUriVariables(Map<String, ?> defaultUriVariables) {
-		this.defaultUriVariables.clear();
-		if (defaultUriVariables != null) {
-			this.defaultUriVariables.putAll(defaultUriVariables);
-		}
-	}
-
-	/**
-	 * Return a read-only copy of the configured default URI variables.
-	 */
-	public Map<String, ?> getDefaultUriVariables() {
-		return Collections.unmodifiableMap(this.defaultUriVariables);
-	}
 
 	/**
 	 * Whether to parse the path of a URI template string into path segments.
@@ -146,23 +92,23 @@ public class DefaultUriTemplateHandler implements UriTemplateHandler {
 
 
 	@Override
-	public URI expand(String uriTemplate, Map<String, ?> uriVariables) {
+	public URI expandInternal(String uriTemplate, Map<String, ?> uriVariables) {
 		UriComponentsBuilder uriComponentsBuilder = initUriComponentsBuilder(uriTemplate);
 		UriComponents uriComponents = expandAndEncode(uriComponentsBuilder, uriVariables);
-		return insertBaseUrl(uriComponents);
+		return createUri(uriComponents);
 	}
 
 	@Override
-	public URI expand(String uriTemplate, Object... uriVariables) {
+	public URI expandInternal(String uriTemplate, Object... uriVariables) {
 		UriComponentsBuilder uriComponentsBuilder = initUriComponentsBuilder(uriTemplate);
 		UriComponents uriComponents = expandAndEncode(uriComponentsBuilder, uriVariables);
-		return insertBaseUrl(uriComponents);
+		return createUri(uriComponents);
 	}
 
 	/**
-	 * Create a {@code UriComponentsBuilder} from the UriTemplate string. The
-	 * default implementation also parses the path into path segments if
-	 * {@link #setParsePath parsePath} is enabled.
+	 * Create a {@code UriComponentsBuilder} from the URI template string.
+	 * This implementation also breaks up the path into path segments depending
+	 * on whether {@link #setParsePath parsePath} is enabled.
 	 */
 	protected UriComponentsBuilder initUriComponentsBuilder(String uriTemplate) {
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(uriTemplate);
@@ -177,36 +123,28 @@ public class DefaultUriTemplateHandler implements UriTemplateHandler {
 	}
 
 	protected UriComponents expandAndEncode(UriComponentsBuilder builder, Map<String, ?> uriVariables) {
-		// Simple scenario: use the input map
-		if (getDefaultUriVariables().isEmpty() && !isStrictEncoding()) {
-			return builder.build().expand(uriVariables).encode();
-		}
-		// Create a new map
-		Map<String, Object> variablesToUse = new HashMap<String, Object>();
-		variablesToUse.putAll(getDefaultUriVariables());
-		variablesToUse.putAll(uriVariables);
-
 		if (!isStrictEncoding()) {
-			return builder.build().expand(variablesToUse).encode();
+			return builder.buildAndExpand(uriVariables).encode();
 		}
 		else {
-			for (Map.Entry<String, ?> entry : variablesToUse.entrySet()) {
-				variablesToUse.put(entry.getKey(), applyStrictEncoding(entry.getValue()));
+			Map<String, Object> encodedUriVars = new HashMap<String, Object>(uriVariables.size());
+			for (Map.Entry<String, ?> entry : uriVariables.entrySet()) {
+				encodedUriVars.put(entry.getKey(), applyStrictEncoding(entry.getValue()));
 			}
-			return builder.build().expand(variablesToUse);
+			return builder.buildAndExpand(encodedUriVars);
 		}
 	}
 
 	protected UriComponents expandAndEncode(UriComponentsBuilder builder, Object[] uriVariables) {
 		if (!isStrictEncoding()) {
-			return builder.build().expand(uriVariables).encode();
+			return builder.buildAndExpand(uriVariables).encode();
 		}
 		else {
 			Object[] encodedUriVars = new Object[uriVariables.length];
 			for (int i = 0; i < uriVariables.length; i++) {
 				encodedUriVars[i] = applyStrictEncoding(uriVariables[i]);
 			}
-			return builder.build().expand(encodedUriVars);
+			return builder.buildAndExpand(encodedUriVars);
 		}
 	}
 
@@ -221,22 +159,12 @@ public class DefaultUriTemplateHandler implements UriTemplateHandler {
 		}
 	}
 
-	/**
-	 * Invoked after the URI template has been expanded and encoded to prefix it
-	 * with the configured {@link #setBaseUrl(String) baseUrl}, if any.
-	 * @param uriComponents the expanded and encoded URI
-	 * @return the final URI
-	 */
-	protected URI insertBaseUrl(UriComponents uriComponents) {
-		String url = uriComponents.toUriString();
-		if (getBaseUrl() != null && uriComponents.getHost() == null) {
-			url = getBaseUrl() + url;
-		}
+	private URI createUri(UriComponents uriComponents) {
 		try {
-			return new URI(url);
+			return new URI(uriComponents.toUriString());
 		}
 		catch (URISyntaxException ex) {
-			throw new IllegalArgumentException("Invalid URL after inserting base URL: " + url, ex);
+			throw new IllegalStateException("Could not create URI object: " + ex.getMessage(), ex);
 		}
 	}
 

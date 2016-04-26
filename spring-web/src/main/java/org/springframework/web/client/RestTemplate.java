@@ -51,6 +51,7 @@ import org.springframework.http.converter.xml.MappingJackson2XmlHttpMessageConve
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.web.util.AbstractUriTemplateHandler;
 import org.springframework.web.util.DefaultUriTemplateHandler;
 import org.springframework.web.util.UriTemplateHandler;
 
@@ -250,9 +251,9 @@ public class RestTemplate extends InterceptingHttpAccessor implements RestOperat
 	 * @since 4.3
 	 */
 	public void setDefaultUriVariables(Map<String, ?> defaultUriVariables) {
-		Assert.isInstanceOf(DefaultUriTemplateHandler.class, this.uriTemplateHandler,
-				"Can only use this property in conjunction with a DefaultUriTemplateHandler.");
-		((DefaultUriTemplateHandler) this.uriTemplateHandler).setDefaultUriVariables(defaultUriVariables);
+		Assert.isInstanceOf(AbstractUriTemplateHandler.class, this.uriTemplateHandler,
+				"Can only use this property in conjunction with an AbstractUriTemplateHandler.");
+		((AbstractUriTemplateHandler) this.uriTemplateHandler).setDefaultUriVariables(defaultUriVariables);
 	}
 
 	/**
