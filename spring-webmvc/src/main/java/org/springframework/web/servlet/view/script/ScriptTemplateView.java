@@ -18,8 +18,6 @@ package org.springframework.web.servlet.view.script;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,7 +38,6 @@ import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.core.NamedThreadLocal;
-import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.scripting.support.StandardScriptEvalException;
@@ -96,7 +93,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 
 	private Charset charset;
 
-	private String resourceLoaderPath;
+	private String[] resourceLoaderPaths;
 
 	private ResourceLoader resourceLoader;
 
@@ -184,7 +181,16 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 	 * See {@link ScriptTemplateConfigurer#setResourceLoaderPath(String)} documentation.
 	 */
 	public void setResourceLoaderPath(String resourceLoaderPath) {
-		this.resourceLoaderPath = resourceLoaderPath;
+		String[] paths = StringUtils.commaDelimitedListToStringArray(resourceLoaderPath);
+		this.resourceLoaderPaths = new String[paths.length + 1];
+		this.resourceLoaderPaths[0] = "";
+		for (int i = 0; i < paths.length; i++) {
+			String path = paths[i];
+			if (!path.endsWith("/") && !path.endsWith(":")) {
+				path = path + "/";
+			}
+			this.resourceLoaderPaths[i + 1] = path;
+		}
 	}
 
 
@@ -214,12 +220,12 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		if (this.charset == null) {
 			this.charset = (viewConfig.getCharset() != null ? viewConfig.getCharset() : DEFAULT_CHARSET);
 		}
-		if (this.resourceLoaderPath == null) {
-			this.resourceLoaderPath = (viewConfig.getResourceLoaderPath() != null ?
-					viewConfig.getResourceLoaderPath() : DEFAULT_RESOURCE_LOADER_PATH);
+		if (this.resourceLoaderPaths == null) {
+			String resourceLoaderPath = viewConfig.getResourceLoaderPath();
+			setResourceLoaderPath(resourceLoaderPath == null ? DEFAULT_RESOURCE_LOADER_PATH : resourceLoaderPath);
 		}
 		if (this.resourceLoader == null) {
-			this.resourceLoader = new DefaultResourceLoader(createClassLoader());
+			this.resourceLoader = getApplicationContext();
 		}
 		if (this.sharedEngine == null && viewConfig.isSharedEngine() != null) {
 			this.sharedEngine = viewConfig.isSharedEngine();
@@ -282,10 +288,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		if (!ObjectUtils.isEmpty(this.scripts)) {
 			try {
 				for (String script : this.scripts) {
-					Resource resource = this.resourceLoader.getResource(script);
-					if (!resource.exists()) {
-						throw new IllegalStateException("Script resource [" + script + "] not found");
-					}
+					Resource resource = getResource(script);
 					engine.eval(new InputStreamReader(resource.getInputStream()));
 				}
 			}
@@ -295,26 +298,14 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 		}
 	}
 
-	protected ClassLoader createClassLoader() {
-		String[] paths = StringUtils.commaDelimitedListToStringArray(this.resourceLoaderPath);
-		List<URL> urls = new ArrayList<URL>();
-		try {
-			for (String path : paths) {
-				Resource[] resources = getApplicationContext().getResources(path);
-				if (resources.length > 0) {
-					for (Resource resource : resources) {
-						if (resource.exists()) {
-							urls.add(resource.getURL());
-						}
-					}
-				}
+	protected Resource getResource(String location) {
+		for (String path : this.resourceLoaderPaths) {
+			Resource resource = this.resourceLoader.getResource(path + location);
+			if (resource.exists()) {
+				return resource;
 			}
 		}
-		catch (IOException ex) {
-			throw new IllegalStateException("Cannot create class loader: " + ex.getMessage());
-		}
-		ClassLoader classLoader = getApplicationContext().getClassLoader();
-		return (urls.size() > 0 ? new URLClassLoader(urls.toArray(new URL[urls.size()]), classLoader) : classLoader);
+		throw new IllegalStateException("Resource [" + location + "] not found");
 	}
 
 	protected ScriptTemplateConfig autodetectViewConfig() throws BeansException {
@@ -328,7 +319,6 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 					"the usual implementation. This bean may have any name.", ex);
 		}
 	}
-
 
 	@Override
 	protected void prepareResponse(HttpServletRequest request, HttpServletResponse response) {
@@ -365,7 +355,7 @@ public class ScriptTemplateView extends AbstractUrlBasedView {
 	}
 
 	protected String getTemplate(String path) throws IOException {
-		Resource resource = this.resourceLoader.getResource(path);
+		Resource resource = getResource(path);
 		InputStreamReader reader = new InputStreamReader(resource.getInputStream(), this.charset);
 		return FileCopyUtils.copyToString(reader);
 	}
