@@ -462,11 +462,18 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		Set<Resource> result = new LinkedHashSet<Resource>(16);
 		for (Resource rootDirResource : rootDirResources) {
 			rootDirResource = resolveRootDirResource(rootDirResource);
-			if (rootDirResource.getURL().getProtocol().startsWith(ResourceUtils.URL_PROTOCOL_VFS)) {
-				result.addAll(VfsResourceMatchingDelegate.findMatchingResources(rootDirResource, subPattern, getPathMatcher()));
+			URL rootDirURL = rootDirResource.getURL();
+			if (equinoxResolveMethod != null) {
+				if (rootDirURL.getProtocol().startsWith("bundle")) {
+					rootDirURL = (URL) ReflectionUtils.invokeMethod(equinoxResolveMethod, null, rootDirURL);
+					rootDirResource = new UrlResource(rootDirURL);
+				}
 			}
-			else if (isJarResource(rootDirResource)) {
-				result.addAll(doFindPathMatchingJarResources(rootDirResource, subPattern));
+			if (rootDirURL.getProtocol().startsWith(ResourceUtils.URL_PROTOCOL_VFS)) {
+				result.addAll(VfsResourceMatchingDelegate.findMatchingResources(rootDirURL, subPattern, getPathMatcher()));
+			}
+			else if (ResourceUtils.isJarURL(rootDirURL) || isJarResource(rootDirResource)) {
+				result.addAll(doFindPathMatchingJarResources(rootDirResource, rootDirURL, subPattern));
 			}
 			else {
 				result.addAll(doFindPathMatchingFileResources(rootDirResource, subPattern));
@@ -504,52 +511,57 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 
 	/**
 	 * Resolve the specified resource for path matching.
-	 * <p>The default implementation detects an Equinox OSGi "bundleresource:"
-	 * / "bundleentry:" URL and resolves it into a standard jar file URL that
-	 * can be traversed using Spring's standard jar file traversal algorithm.
+	 * <p>By default, Equinox OSGi "bundleresource:" / "bundleentry:" URL will be
+	 * resolved into a standard jar file URL that be traversed using Spring's
+	 * standard jar file traversal algorithm. For any preceding custom resolution,
+	 * override this method and replace the resource handle accordingly.
 	 * @param original the resource to resolve
 	 * @return the resolved resource (may be identical to the passed-in resource)
 	 * @throws IOException in case of resolution failure
 	 */
 	protected Resource resolveRootDirResource(Resource original) throws IOException {
-		if (equinoxResolveMethod != null) {
-			URL url = original.getURL();
-			if (url.getProtocol().startsWith("bundle")) {
-				return new UrlResource((URL) ReflectionUtils.invokeMethod(equinoxResolveMethod, null, url));
-			}
-		}
 		return original;
 	}
 
 	/**
 	 * Return whether the given resource handle indicates a jar resource
 	 * that the {@code doFindPathMatchingJarResources} method can handle.
-	 * <p>The default implementation checks against the URL protocols
-	 * "jar", "zip" and "wsjar" (the latter are used by BEA WebLogic Server
-	 * and IBM WebSphere, respectively, but can be treated like jar files).
+	 * <p>By default, the URL protocols "jar", "zip", "vfszip and "wsjar"
+	 * will be treated as jar resources. This template method allows for
+	 * detecting further kinds of jar-like resources, e.g. through
+	 * {@code instanceof} checks on the resource handle type.
 	 * @param resource the resource handle to check
 	 * (usually the root directory to start path matching from)
 	 * @see #doFindPathMatchingJarResources
 	 * @see org.springframework.util.ResourceUtils#isJarURL
 	 */
 	protected boolean isJarResource(Resource resource) throws IOException {
-		return ResourceUtils.isJarURL(resource.getURL());
+		return false;
 	}
 
 	/**
 	 * Find all resources in jar files that match the given location pattern
 	 * via the Ant-style PathMatcher.
 	 * @param rootDirResource the root directory as Resource
+	 * @param rootDirURL the pre-resolved root directory URL
 	 * @param subPattern the sub pattern to match (below the root directory)
 	 * @return a mutable Set of matching Resource instances
 	 * @throws IOException in case of I/O errors
+	 * @since 4.3
 	 * @see java.net.JarURLConnection
 	 * @see org.springframework.util.PathMatcher
 	 */
-	protected Set<Resource> doFindPathMatchingJarResources(Resource rootDirResource, String subPattern)
+	@SuppressWarnings("deprecation")
+	protected Set<Resource> doFindPathMatchingJarResources(Resource rootDirResource, URL rootDirURL, String subPattern)
 			throws IOException {
 
-		URLConnection con = rootDirResource.getURL().openConnection();
+		// Check deprecated variant for potential overriding first...
+		Set<Resource> result = doFindPathMatchingJarResources(rootDirResource, subPattern);
+		if (result != null) {
+			return result;
+		}
+
+		URLConnection con = rootDirURL.openConnection();
 		JarFile jarFile;
 		String jarFileUrl;
 		String rootEntryPath;
@@ -570,7 +582,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 			// We'll assume URLs of the format "jar:path!/entry", with the protocol
 			// being arbitrary as long as following the entry format.
 			// We'll also handle paths with and without leading "file:" prefix.
-			String urlFile = rootDirResource.getURL().getFile();
+			String urlFile = rootDirURL.getFile();
 			try {
 				int separatorIndex = urlFile.indexOf(ResourceUtils.JAR_URL_SEPARATOR);
 				if (separatorIndex != -1) {
@@ -602,7 +614,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				// The Sun JRE does not return a slash here, but BEA JRockit does.
 				rootEntryPath = rootEntryPath + "/";
 			}
-			Set<Resource> result = new LinkedHashSet<Resource>(8);
+			result = new LinkedHashSet<Resource>(8);
 			for (Enumeration<JarEntry> entries = jarFile.entries(); entries.hasMoreElements();) {
 				JarEntry entry = entries.nextElement();
 				String entryPath = entry.getName();
@@ -620,6 +632,23 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 				jarFile.close();
 			}
 		}
+	}
+
+	/**
+	 * Find all resources in jar files that match the given location pattern
+	 * via the Ant-style PathMatcher.
+	 * @param rootDirResource the root directory as Resource
+	 * @param subPattern the sub pattern to match (below the root directory)
+	 * @return a mutable Set of matching Resource instances
+	 * @throws IOException in case of I/O errors
+	 * @deprecated as of Spring 4.3, in favor of
+	 * {@link #doFindPathMatchingJarResources(Resource, URL, String)}
+	 */
+	@Deprecated
+	protected Set<Resource> doFindPathMatchingJarResources(Resource rootDirResource, String subPattern)
+			throws IOException {
+
+		return null;
 	}
 
 	/**
@@ -778,8 +807,9 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	private static class VfsResourceMatchingDelegate {
 
 		public static Set<Resource> findMatchingResources(
-				Resource rootResource, String locationPattern, PathMatcher pathMatcher) throws IOException {
-			Object root = VfsPatternUtils.findRoot(rootResource.getURL());
+				URL rootDirURL, String locationPattern, PathMatcher pathMatcher) throws IOException {
+
+			Object root = VfsPatternUtils.findRoot(rootDirURL);
 			PatternVirtualFileVisitor visitor =
 					new PatternVirtualFileVisitor(VfsPatternUtils.getPath(root), locationPattern, pathMatcher);
 			VfsPatternUtils.visit(root, visitor);
