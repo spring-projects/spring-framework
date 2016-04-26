@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -308,6 +308,23 @@ public class DefaultStompSession implements ConnectionHandlingStompSession {
 		execute(message);
 
 		return subscription;
+	}
+
+	@Override
+	public Receiptable acknowledge(String messageId, boolean consumed) {
+		StompHeaders stompHeaders = new StompHeaders();
+		stompHeaders.setId(messageId);
+
+		String receiptId = checkOrAddReceipt(stompHeaders);
+		Receiptable receiptable = new ReceiptHandler(receiptId);
+
+		StompCommand command = (consumed ? StompCommand.ACK : StompCommand.NACK);
+		StompHeaderAccessor accessor = createHeaderAccessor(command);
+		accessor.addNativeHeaders(stompHeaders);
+		Message<byte[]> message = createMessage(accessor, null);
+		execute(message);
+
+		return receiptable;
 	}
 
 	private void unsubscribe(String id) {

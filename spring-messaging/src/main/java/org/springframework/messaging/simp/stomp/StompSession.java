@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,6 +85,18 @@ public interface StompSession {
 	 * @return a handle to use to unsubscribe and/or track receipts
 	 */
 	Subscription subscribe(StompHeaders headers, StompFrameHandler handler);
+
+	/**
+	 * Send an acknowledgement whether a message was consumed or not resulting
+	 * in an ACK or NACK frame respectively.
+	 * <p><strong>Note:</strong> to use this when subscribing you must set the
+	 * {@link StompHeaders#setAck(String) ack} header to "client" or
+	 * "client-individual" in order ot use this.
+	 * @param messageId the id of the message
+	 * @param consumed whether the message was consumed or not
+	 * @return a Receiptable for tracking events
+	 */
+	Receiptable acknowledge(String messageId, boolean consumed);
 
 	/**
 	 * Disconnect the session by sending a DISCONNECT frame.
