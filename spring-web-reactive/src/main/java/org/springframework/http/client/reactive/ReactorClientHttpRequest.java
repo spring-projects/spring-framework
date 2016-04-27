@@ -106,14 +106,14 @@ public class ReactorClientHttpRequest extends AbstractClientHttpRequest {
 						channel.removeTransferEncodingChunked();
 					}
 					return applyBeforeCommit()
-							.after(() -> {
+							.then(() -> {
 								getHeaders().entrySet().stream().forEach(e ->
 										channel.headers().set(e.getKey(), e.getValue()));
 								getCookies().values().stream().flatMap(Collection::stream).forEach(cookie ->
 										channel.addCookie(new DefaultCookie(cookie.getName(), cookie.getValue())));
 								return Mono.empty();
 							})
-							.after(() -> {
+							.then(() -> {
 								if (body != null) {
 									return channel.send(body);
 								}

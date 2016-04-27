@@ -103,7 +103,7 @@ public class RxNettyClientHttpRequest extends AbstractClientHttpRequest {
 					.createRequest(io.netty.handler.codec.http.HttpMethod.valueOf(this.httpMethod.name()), uri.getRawPath());
 
 			return applyBeforeCommit()
-					.after(() -> Mono.just(request))
+					.then(() -> Mono.just(request))
 					.map(req -> {
 						for (Map.Entry<String, List<String>> entry : getHeaders().entrySet()) {
 							for (String value : entry.getValue()) {

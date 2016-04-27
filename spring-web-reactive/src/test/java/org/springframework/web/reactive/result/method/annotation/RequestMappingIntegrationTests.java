@@ -572,7 +572,7 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@RequestMapping("/stream-create")
 		public Publisher<Void> streamCreate(@RequestBody Flux<Person> personStream) {
-			return personStream.toList().doOnSuccess(persons::addAll).after();
+			return personStream.toList().doOnSuccess(persons::addAll).then();
 		}
 
 		@RequestMapping("/person-capitalize")
@@ -598,12 +598,12 @@ public class RequestMappingIntegrationTests extends AbstractHttpHandlerIntegrati
 
 		@RequestMapping("/publisher-create")
 		public Publisher<Void> publisherCreate(@RequestBody Publisher<Person> personStream) {
-			return Flux.from(personStream).doOnNext(persons::add).after();
+			return Flux.from(personStream).doOnNext(persons::add).then();
 		}
 
 		@RequestMapping("/flux-create")
 		public Mono<Void> fluxCreate(@RequestBody Flux<Person> personStream) {
-			return personStream.doOnNext(persons::add).after();
+			return personStream.doOnNext(persons::add).then();
 		}
 
 		@RequestMapping("/observable-create")

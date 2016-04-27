@@ -160,7 +160,7 @@ public class WebSessionIntegrationTests extends AbstractHttpHandlerIntegrationTe
 				map.put("counter", value);
 				this.currentValue.set(value);
 				return session;
-			}).after();
+			}).then();
 		}
 	}
 

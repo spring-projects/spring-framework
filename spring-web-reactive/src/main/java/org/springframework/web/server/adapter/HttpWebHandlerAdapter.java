@@ -82,7 +82,7 @@ public class HttpWebHandlerAdapter extends WebHandlerDecorator implements HttpHa
 					response.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
 					return Mono.empty();
 				})
-				.after(response::setComplete);
+				.then(response::setComplete);
 	}
 
 	protected ServerWebExchange createExchange(ServerHttpRequest request, ServerHttpResponse response) {

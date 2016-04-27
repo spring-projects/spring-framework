@@ -106,7 +106,7 @@ public class ReactorServerHttpResponse extends AbstractServerHttpResponse
 
 	@Override
 	public Mono<Void> setBody(File file, long position, long count) {
-		return applyBeforeCommit().after(() -> {
+		return applyBeforeCommit().then(() -> {
 			return this.channel.sendFile(file, position, count);
 		});
 	}

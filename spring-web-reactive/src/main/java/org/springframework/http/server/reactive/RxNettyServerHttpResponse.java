@@ -67,7 +67,7 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 		Observable<ByteBuf> content =
 				RxJava1ObservableConverter.from(publisher).map(this::toByteBuf);
 		Observable<Void> completion = this.response.write(content);
-		return RxJava1ObservableConverter.from(completion).after();
+		return RxJava1ObservableConverter.from(completion).then();
 	}
 
 	private ByteBuf toByteBuf(DataBuffer buffer) {
@@ -132,7 +132,7 @@ public class RxNettyServerHttpResponse extends AbstractServerHttpResponse {
 		FileRegion fileRegion = new DefaultFileRegion(file, position, count);
 		Mono<Void> fileWrite = MonoChannelFuture.from(channel.writeAndFlush(fileRegion));
 
-		return Flux.concat(applyBeforeCommit(), responseWrite, fileWrite).after();
+		return Flux.concat(applyBeforeCommit(), responseWrite, fileWrite).then();
 	}
 */
 }

@@ -91,20 +91,20 @@ public abstract class AbstractServerHttpResponse implements ServerHttpResponse {
 	@Override
 	public Mono<Void> setBody(Publisher<DataBuffer> publisher) {
 		return new ChannelSendOperator<>(publisher, writePublisher ->
-						applyBeforeCommit().after(() -> setBodyInternal(writePublisher)));
+						applyBeforeCommit().then(() -> setBodyInternal(writePublisher)));
 	}
 
 	protected Mono<Void> applyBeforeCommit() {
 		Mono<Void> mono = Mono.empty();
 		if (this.state.compareAndSet(STATE_NEW, STATE_COMMITTING)) {
 			for (Supplier<? extends Mono<Void>> action : this.beforeCommitActions) {
-				mono = mono.after(action);
+				mono = mono.then(action);
 			}
 			mono = mono.otherwise(ex -> {
 				// Ignore errors from beforeCommit actions
 				return Mono.empty();
 			});
-			mono = mono.after(() -> {
+			mono = mono.then(() -> {
 				this.state.set(STATE_COMMITTED);
 				writeHeaders();
 				writeCookies();

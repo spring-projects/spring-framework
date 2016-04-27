@@ -76,14 +76,14 @@ public abstract class AbstractClientHttpRequest implements ClientHttpRequest {
 		Mono<Void> mono = Mono.empty();
 		if (this.state.compareAndSet(State.NEW, State.COMMITTING)) {
 			for (Supplier<? extends Mono<Void>> action : this.beforeCommitActions) {
-				mono = mono.after(() -> action.get());
+				mono = mono.then(() -> action.get());
 			}
 			return mono
 					.otherwise(ex -> {
 						// Ignore errors from beforeCommit actions
 						return Mono.empty();
 					})
-					.after(() -> {
+					.then(() -> {
 						this.state.set(State.COMITTED);
 						//writeHeaders();
 						//writeCookies();

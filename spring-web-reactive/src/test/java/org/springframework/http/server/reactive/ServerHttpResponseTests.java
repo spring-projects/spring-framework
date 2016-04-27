@@ -170,7 +170,7 @@ public class ServerHttpResponseTests {
 			return Flux.from(publisher).map(b -> {
 				this.content.add(b);
 				return b;
-			}).after();
+			}).then();
 		}
 	}
 
