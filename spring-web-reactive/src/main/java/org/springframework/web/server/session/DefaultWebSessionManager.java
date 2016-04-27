@@ -110,7 +110,7 @@ public class DefaultWebSessionManager implements WebSessionManager {
 	protected Mono<WebSession> validateSession(ServerWebExchange exchange, WebSession session) {
 		if (session.isExpired()) {
 			this.sessionIdResolver.setSessionId(exchange, "");
-			return this.sessionStore.removeSession(session.getId()).then(Mono::empty);
+			return this.sessionStore.removeSession(session.getId()).cast(WebSession.class);
 		}
 		else {
 			return Mono.just(session);
