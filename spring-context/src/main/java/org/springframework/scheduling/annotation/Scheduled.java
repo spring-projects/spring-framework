@@ -24,12 +24,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotation that marks a method to be scheduled. Exactly one of the
- * {@link #cron()}, {@link #fixedDelay()}, or {@link #fixedRate()}
+ * An annotation that marks a method to be scheduled. Exactly one of
+ * the {@link #cron()}, {@link #fixedDelay()}, or {@link #fixedRate()}
  * attributes must be specified.
  *
- * <p>The annotated method must expect no arguments and have a
- * {@code void} return type.
+ * <p>The annotated method must expect no arguments. It will typically have
+ * a {@code void} return type; if not, the returned value will be ignored
+ * when called through the scheduler.
  *
  * <p>Processing of {@code @Scheduled} annotations is performed by
  * registering a {@link ScheduledAnnotationBeanPostProcessor}. This can be
