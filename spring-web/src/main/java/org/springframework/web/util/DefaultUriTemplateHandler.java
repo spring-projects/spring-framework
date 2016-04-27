@@ -92,14 +92,14 @@ public class DefaultUriTemplateHandler extends AbstractUriTemplateHandler {
 
 
 	@Override
-	public URI expandInternal(String uriTemplate, Map<String, ?> uriVariables) {
+	protected URI expandInternal(String uriTemplate, Map<String, ?> uriVariables) {
 		UriComponentsBuilder uriComponentsBuilder = initUriComponentsBuilder(uriTemplate);
 		UriComponents uriComponents = expandAndEncode(uriComponentsBuilder, uriVariables);
 		return createUri(uriComponents);
 	}
 
 	@Override
-	public URI expandInternal(String uriTemplate, Object... uriVariables) {
+	protected URI expandInternal(String uriTemplate, Object... uriVariables) {
 		UriComponentsBuilder uriComponentsBuilder = initUriComponentsBuilder(uriTemplate);
 		UriComponents uriComponents = expandAndEncode(uriComponentsBuilder, uriVariables);
 		return createUri(uriComponents);
@@ -161,6 +161,7 @@ public class DefaultUriTemplateHandler extends AbstractUriTemplateHandler {
 
 	private URI createUri(UriComponents uriComponents) {
 		try {
+			// Avoid further encoding (in the case of strictEncoding=true)
 			return new URI(uriComponents.toUriString());
 		}
 		catch (URISyntaxException ex) {
