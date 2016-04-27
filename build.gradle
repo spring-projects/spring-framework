@@ -32,7 +32,7 @@ configure(allprojects) { project ->
 	version = qualifyVersionIfNecessary(version)
 
 	ext.aspectjVersion       = "1.8.9"
-	ext.caffeineVersion      = "2.2.7"
+	ext.caffeineVersion      = "2.3.0"
 	ext.eclipselinkVersion   = "2.4.2"
 	ext.ehcacheVersion       = "2.10.1"
 	ext.ehcachejcacheVersion = "1.0.1"
@@ -389,7 +389,7 @@ project("spring-beans") {
 		optional("org.yaml:snakeyaml:${snakeyamlVersion}")
 		testCompile("log4j:log4j:1.2.17")
 		testCompile("org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}")
-    }
+	}
 }
 
 project("spring-beans-groovy") {
@@ -1162,9 +1162,7 @@ configure(rootProject) {
 		separateOutputDirs = false
 		backends = ['docbook']
 		options doctype: 'book', eruby: 'erubis'
-		attributes 	'spring-version': project.version,
-					'revnumber' : project.version,
-					'docinfo' : ""
+		attributes 'spring-version': project.version, 'revnumber': project.version, 'docinfo': ""
 	}
 
 	reference {
@@ -1300,7 +1298,7 @@ configure(rootProject) {
 		baseName = "spring-framework"
 		classifier = "dist"
 		description = "Builds -${classifier} archive, containing all jars and docs, " +
-					"suitable for community download page."
+			"suitable for community download page."
 
 		ext.baseDir = "${baseName}-${project.version}";
 
