@@ -204,6 +204,7 @@ public class ServletWebRequestHttpMethodsTests {
 		assertEquals(dateFormat.format(currentDate.getTime()), servletResponse.getHeader("Last-Modified"));
 	}
 
+	// SPR-14224
 	@Test
 	public void checkNotModifiedETagAndModifiedTimestamp() {
 		String eTag = "\"Foo\"";
@@ -212,9 +213,9 @@ public class ServletWebRequestHttpMethodsTests {
 		long oneMinuteAgo = currentEpoch - (1000 * 60);
 		servletRequest.addHeader("If-Modified-Since", oneMinuteAgo);
 
-		assertFalse(request.checkNotModified(eTag, currentEpoch));
+		assertTrue(request.checkNotModified(eTag, currentEpoch));
 
-		assertEquals(200, servletResponse.getStatus());
+		assertEquals(304, servletResponse.getStatus());
 		assertEquals(eTag, servletResponse.getHeader("ETag"));
 		assertEquals(dateFormat.format(currentEpoch), servletResponse.getHeader("Last-Modified"));
 	}

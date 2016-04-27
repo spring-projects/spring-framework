@@ -237,7 +237,12 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		if (StringUtils.hasLength(etag) && !this.notModified) {
 			if (isCompatibleWithConditionalRequests(response)) {
 				etag = addEtagPadding(etag);
-				this.notModified = isEtagNotModified(etag) && isTimestampNotModified(lastModifiedTimestamp);
+				if (hasRequestHeader(HEADER_IF_NONE_MATCH)) {
+					this.notModified = isEtagNotModified(etag);
+				}
+				else if (hasRequestHeader(HEADER_IF_MODIFIED_SINCE)) {
+					this.notModified = isTimestampNotModified(lastModifiedTimestamp);
+				}
 				if (response != null) {
 					if (supportsNotModifiedStatus()) {
 						if (this.notModified) {
@@ -287,6 +292,10 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 		return (response.getHeader(header) == null);
 	}
 
+	private boolean hasRequestHeader(String headerName) {
+		return StringUtils.hasLength(getHeader(headerName));
+	}
+
 	private boolean supportsNotModifiedStatus() {
 		String method = getRequest().getMethod();
 		return (METHOD_GET.equals(method) || METHOD_HEAD.equals(method));
@@ -294,9 +303,8 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 	private boolean supportsConditionalUpdate() {
 		String method = getRequest().getMethod();
-		String ifUnmodifiedHeader = getRequest().getHeader(HEADER_IF_UNMODIFIED_SINCE);
 		return (METHOD_POST.equals(method) || METHOD_PUT.equals(method) || METHOD_DELETE.equals(method))
-				&& StringUtils.hasLength(ifUnmodifiedHeader);
+				&& hasRequestHeader(HEADER_IF_UNMODIFIED_SINCE);
 	}
 
 	private boolean isTimestampNotModified(long lastModifiedTimestamp) {
@@ -318,7 +326,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 			dateValue = getRequest().getDateHeader(headerName);
 		}
 		catch (IllegalArgumentException ex) {
-			String headerValue = getRequest().getHeader(headerName);
+			String headerValue = getHeader(headerName);
 			// Possibly an IE 10 style value: "Wed, 09 Apr 2014 09:57:42 GMT; length=13774"
 			int separatorIndex = headerValue.indexOf(';');
 			if (separatorIndex != -1) {
@@ -336,7 +344,7 @@ public class ServletWebRequest extends ServletRequestAttributes implements Nativ
 
 	private boolean isEtagNotModified(String etag) {
 		if (StringUtils.hasLength(etag)) {
-			String ifNoneMatch = getRequest().getHeader(HEADER_IF_NONE_MATCH);
+			String ifNoneMatch = getHeader(HEADER_IF_NONE_MATCH);
 			if (StringUtils.hasLength(ifNoneMatch)) {
 				String[] clientEtags = StringUtils.delimitedListToStringArray(ifNoneMatch, ",", " ");
 				for (String clientEtag : clientEtags) {
