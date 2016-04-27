@@ -91,6 +91,8 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 
 	private long receiveTimeout = DEFAULT_RECEIVE_TIMEOUT;
 
+	private long pollingDelay;
+
 	private volatile Boolean commitAfterNoMessageReceived;
 
 
@@ -180,6 +182,32 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 		return this.receiveTimeout;
 	}
 
+	/**
+	 * Set the client-side delay between polls in <b>milliseconds</b>.
+	 * The default is 0 ms. This can be used as an alternative to
+	 * receive timeout. In general it is better to use receive timeout,
+	 * but in some cases (for example AQ JMS) it can be expensive to
+	 * keep a large number of threads waiting inside the messaging
+	 * system. In that case use a negative receive timeout (return
+	 * immediately) combined with a client-side delay.
+	 * <p>
+	 * The delay is only applied when no message is returned, so it
+	 * does not affect performance during peaks.
+	 * @see #setReceiveTimeout(long)
+	 * @since 4.3
+	 */
+	public void setPollingDelay(long pollingDelay) {
+		this.pollingDelay = pollingDelay;
+	}
+
+	/**
+	 * Return the delay in milliseconds after a poll that returned
+	 * without a message.
+	 * @since 4.3
+	 */
+	protected long getPollingDelay() {
+		return this.pollingDelay;
+	}
 
 	@Override
 	public void initialize() {
@@ -228,11 +256,10 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 	 */
 	protected boolean receiveAndExecute(Object invoker, Session session, MessageConsumer consumer)
 			throws JMSException {
-
+		boolean messageReceived;
 		if (this.transactionManager != null) {
 			// Execute receive within transaction.
 			TransactionStatus status = this.transactionManager.getTransaction(this.transactionDefinition);
-			boolean messageReceived;
 			try {
 				messageReceived = doReceiveAndExecute(invoker, session, consumer, status);
 			}
@@ -249,13 +276,24 @@ public abstract class AbstractPollingMessageListenerContainer extends AbstractMe
 				throw err;
 			}
 			this.transactionManager.commit(status);
-			return messageReceived;
 		}
-
 		else {
 			// Execute receive outside of transaction.
-			return doReceiveAndExecute(invoker, session, consumer, null);
+			messageReceived = doReceiveAndExecute(invoker, session, consumer, null);
 		}
+		if(! messageReceived && pollingDelay > 0) {
+			// Sleep outside transaction when no message was returned
+			try {
+				if(logger.isDebugEnabled()) {
+					logger.debug("No message, sleeping for " + pollingDelay + " ms...");
+				}
+				Thread.sleep(pollingDelay);
+			}
+			catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			}
+		}
+		return messageReceived;
 	}
 
 	/**
