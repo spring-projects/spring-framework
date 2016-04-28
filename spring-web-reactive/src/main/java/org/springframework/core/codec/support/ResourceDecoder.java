@@ -16,7 +16,7 @@
 
 package org.springframework.core.codec.support;
 
-import java.io.InputStream;
+import java.io.ByteArrayInputStream;
 
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
@@ -55,20 +55,24 @@ public class ResourceDecoder extends AbstractDecoder<Resource> {
 			MimeType mimeType, Object... hints) {
 		Class<?> clazz = type.getRawClass();
 
-		Flux<DataBuffer> body = Flux.from(inputStream);
+		Mono<byte[]> byteArray = Flux.from(inputStream).
+				reduce(DataBuffer::write).
+				map(dataBuffer -> {
+					byte[] bytes = new byte[dataBuffer.readableByteCount()];
+					dataBuffer.read(bytes);
+					DataBufferUtils.release(dataBuffer);
+					return bytes;
+				});
+
 
 		if (InputStreamResource.class.equals(clazz)) {
-			InputStream is = DataBufferUtils.toInputStream(body);
-			return Flux.just(new InputStreamResource(is));
+			return Flux.from(byteArray.
+					map(ByteArrayInputStream::new).
+					map(InputStreamResource::new));
 		}
 		else if (clazz.isAssignableFrom(ByteArrayResource.class)) {
-			Mono<DataBuffer> singleBuffer = body.reduce(DataBuffer::write);
-			return Flux.from(singleBuffer.map(buffer -> {
-				byte[] bytes = new byte[buffer.readableByteCount()];
-				buffer.read(bytes);
-				DataBufferUtils.release(buffer);
-				return new ByteArrayResource(bytes);
-			}));
+			return Flux.from(byteArray.
+					map(ByteArrayResource::new));
 		}
 		else {
 			return Flux.error(new IllegalStateException(

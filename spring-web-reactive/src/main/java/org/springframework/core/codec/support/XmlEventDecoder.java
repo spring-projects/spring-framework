@@ -16,7 +16,6 @@
 
 package org.springframework.core.codec.support;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -76,6 +75,8 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 
 	private static final XMLInputFactory inputFactory = XMLInputFactory.newFactory();
 
+	boolean useAalto = true;
+
 	public XmlEventDecoder() {
 		super(MimeTypeUtils.APPLICATION_XML, MimeTypeUtils.TEXT_XML);
 	}
@@ -83,21 +84,25 @@ public class XmlEventDecoder extends AbstractDecoder<XMLEvent> {
 	@Override
 	public Flux<XMLEvent> decode(Publisher<DataBuffer> inputStream, ResolvableType type,
 			MimeType mimeType, Object... hints) {
-		if (aaltoPresent) {
-			return Flux.from(inputStream).flatMap(new AaltoDataBufferToXmlEvent());
+		Flux<DataBuffer> flux = Flux.from(inputStream);
+		if (useAalto && aaltoPresent) {
+			return flux.flatMap(new AaltoDataBufferToXmlEvent());
 		}
 		else {
-			try {
-				InputStream blockingStream = DataBufferUtils.toInputStream(inputStream);
-
-				XMLEventReader eventReader =
-						inputFactory.createXMLEventReader(blockingStream);
-
-				return Flux.fromIterable((Iterable<XMLEvent>) () -> eventReader);
-			}
-			catch (XMLStreamException ex) {
-				return Flux.error(ex);
-			}
+			Mono<DataBuffer> singleBuffer = flux.reduce(DataBuffer::write);
+			return singleBuffer.
+					map(DataBuffer::asInputStream).
+					flatMap(is -> {
+						try {
+							XMLEventReader eventReader =
+									inputFactory.createXMLEventReader(is);
+							return Flux
+									.fromIterable((Iterable<XMLEvent>) () -> eventReader);
+						}
+						catch (XMLStreamException ex) {
+							return Mono.error(ex);
+						}
+					});
 		}
 	}
 

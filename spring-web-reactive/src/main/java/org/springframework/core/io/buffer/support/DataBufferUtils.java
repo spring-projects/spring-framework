@@ -19,11 +19,9 @@ package org.springframework.core.io.buffer.support;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.SequenceInputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-import java.util.Enumeration;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
@@ -37,7 +35,6 @@ import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;
 import org.springframework.core.io.buffer.PooledDataBuffer;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils2;
 
 /**i
  * Utility class for working with {@link DataBuffer}s.
@@ -55,24 +52,6 @@ public abstract class DataBufferUtils {
 		catch (IOException ignored) {
 		}
 	};
-
-
-	/**
-	 * Returns the given data buffer publisher as a blocking input stream, streaming over
-	 * all underlying buffers when available.
-	 * @param publisher the publisher to create the input stream for
-	 * @return the input stream
-	 */
-	public static InputStream toInputStream(Publisher<DataBuffer> publisher) {
-		Iterable<InputStream> streams = Flux.from(publisher).
-				map(DataBuffer::asInputStream).
-				toIterable(1);
-
-		Enumeration<InputStream> enumeration =
-				CollectionUtils2.toEnumeration(streams.iterator());
-
-		return new SequenceInputStream(enumeration);
-	}
 
 	/**
 	 * Reads the given {@code ReadableByteChannel} into a {@code Flux} of

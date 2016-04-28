@@ -41,7 +41,7 @@ public class XmlEventDecoderTests extends AbstractDataBufferAllocatingTestCase {
 	private XmlEventDecoder decoder = new XmlEventDecoder();
 
 	@Test
-	public void toXMLEvents() {
+	public void toXMLEventsAalto() {
 
 		Flux<XMLEvent> events =
 				this.decoder.decode(Flux.just(stringBuffer(XML)), null, null);
@@ -59,6 +59,28 @@ public class XmlEventDecoderTests extends AbstractDataBufferAllocatingTestCase {
 						e -> assertCharacters(e, "barbar"),
 						e -> assertEndElement(e, "bar"),
 						e -> assertEndElement(e, "pojo"));
+	}
+
+	@Test
+	public void toXMLEventsNonAalto() {
+		decoder.useAalto = false;
+
+		Flux<XMLEvent> events =
+				this.decoder.decode(Flux.just(stringBuffer(XML)), null, null);
+
+		TestSubscriber<XMLEvent> testSubscriber = new TestSubscriber<>();
+		testSubscriber.bindTo(events).
+				assertNoError().
+				assertComplete().
+				assertValuesWith(e -> assertTrue(e.isStartDocument()),
+						e -> assertStartElement(e, "pojo"),
+						e -> assertStartElement(e, "foo"),
+						e -> assertCharacters(e, "foofoo"),
+						e -> assertEndElement(e, "foo"),
+						e -> assertStartElement(e, "bar"),
+						e -> assertCharacters(e, "barbar"),
+						e -> assertEndElement(e, "bar"), e -> assertEndElement(e, "pojo"),
+						e -> assertTrue(e.isEndDocument()));
 	}
 
 	private static void assertStartElement(XMLEvent event, String expectedLocalName) {
