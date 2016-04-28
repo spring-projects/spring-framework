@@ -18,6 +18,8 @@ package org.springframework.context.expression;
 
 import java.util.Map;
 
+import org.springframework.core.DefaultParameterNameDiscoverer;
+import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.util.Assert;
@@ -35,12 +37,14 @@ public abstract class CachedExpressionEvaluator {
 
 	private final SpelExpressionParser parser;
 
+	private final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
+
 
 	/**
 	 * Create a new instance with the specified {@link SpelExpressionParser}.
 	 */
 	protected CachedExpressionEvaluator(SpelExpressionParser parser) {
-		Assert.notNull(parser, "Parser must not be null");
+		Assert.notNull(parser, "SpelExpressionParser must not be null");
 		this.parser = parser;
 	}
 
@@ -57,6 +61,14 @@ public abstract class CachedExpressionEvaluator {
 	 */
 	protected SpelExpressionParser getParser() {
 		return this.parser;
+	}
+
+	/**
+	 * Return a shared parameter name discoverer which caches data internally.
+	 * @since 4.3
+	 */
+	protected ParameterNameDiscoverer getParameterNameDiscoverer() {
+		return this.parameterNameDiscoverer;
 	}
 
 
