@@ -18,6 +18,7 @@ package org.springframework.tests.sample.beans;
 
 import java.io.Serializable;
 
+import org.springframework.aop.support.annotation.NopAnnotation;
 import org.springframework.util.ObjectUtils;
 
 /**
@@ -56,6 +57,7 @@ public class SerializablePerson implements Person, Serializable {
 	}
 
 	@Override
+	@NopAnnotation
 	public Object echo(Object o) throws Throwable {
 		if (o instanceof Throwable) {
 			throw (Throwable) o;
