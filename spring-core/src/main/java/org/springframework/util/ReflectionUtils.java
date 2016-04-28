@@ -807,7 +807,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Pre-built FieldFilter that matches all non-static, non-final fields.
 	 */
-	public static FieldFilter COPYABLE_FIELDS = new FieldFilter() {
+	public static final FieldFilter COPYABLE_FIELDS = new FieldFilter() {
 
 		@Override
 		public boolean matches(Field field) {
@@ -819,7 +819,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Pre-built MethodFilter that matches all non-bridge methods.
 	 */
-	public static MethodFilter NON_BRIDGED_METHODS = new MethodFilter() {
+	public static final MethodFilter NON_BRIDGED_METHODS = new MethodFilter() {
 
 		@Override
 		public boolean matches(Method method) {
@@ -832,7 +832,7 @@ public abstract class ReflectionUtils {
 	 * Pre-built MethodFilter that matches all non-bridge methods
 	 * which are not declared on {@code java.lang.Object}.
 	 */
-	public static MethodFilter USER_DECLARED_METHODS = new MethodFilter() {
+	public static final MethodFilter USER_DECLARED_METHODS = new MethodFilter() {
 
 		@Override
 		public boolean matches(Method method) {
