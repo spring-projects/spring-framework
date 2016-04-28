@@ -31,6 +31,7 @@ import org.springframework.core.codec.support.jaxb.XmlRootElementWithNameAndName
 import org.springframework.core.codec.support.jaxb.XmlType;
 import org.springframework.core.codec.support.jaxb.XmlTypeWithName;
 import org.springframework.core.codec.support.jaxb.XmlTypeWithNameAndNamespace;
+import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 
@@ -39,7 +40,7 @@ import static org.junit.Assert.*;
 /**
  * @author Sebastien Deleuze
  */
-public class Jaxb2DecoderTests extends AbstractAllocatingTestCase {
+public class Jaxb2DecoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	private static final String POJO_ROOT = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
 			"<pojo>" +
@@ -67,25 +68,25 @@ public class Jaxb2DecoderTests extends AbstractAllocatingTestCase {
 
 	@Test
 	public void canDecode() {
-		assertTrue(decoder.canDecode(ResolvableType.forClass(Pojo.class),
+		assertTrue(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
 				MediaType.APPLICATION_XML));
-		assertTrue(decoder.canDecode(ResolvableType.forClass(Pojo.class),
+		assertTrue(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
 				MediaType.TEXT_XML));
-		assertFalse(decoder.canDecode(ResolvableType.forClass(Pojo.class),
+		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
 				MediaType.APPLICATION_JSON));
 
-		assertTrue(decoder.canDecode(ResolvableType.forClass(TypePojo.class),
+		assertTrue(this.decoder.canDecode(ResolvableType.forClass(TypePojo.class),
 				MediaType.APPLICATION_XML));
 
-		assertFalse(decoder.canDecode(ResolvableType.forClass(getClass()),
+		assertFalse(this.decoder.canDecode(ResolvableType.forClass(getClass()),
 				MediaType.APPLICATION_XML));
 	}
 
 	@Test
 	public void splitOneBranches() {
-		Flux<XMLEvent> xmlEvents =
-				xmlEventDecoder.decode(Flux.just(stringBuffer(POJO_ROOT)), null, null);
-		Flux<List<XMLEvent>> result = decoder.split(xmlEvents, new QName("pojo"));
+		Flux<XMLEvent> xmlEvents = this.xmlEventDecoder
+				.decode(Flux.just(stringBuffer(POJO_ROOT)), null, null);
+		Flux<List<XMLEvent>> result = this.decoder.split(xmlEvents, new QName("pojo"));
 
 		TestSubscriber<List<XMLEvent>> resultSubscriber = new TestSubscriber<>();
 		resultSubscriber.bindTo(result).
@@ -108,9 +109,9 @@ public class Jaxb2DecoderTests extends AbstractAllocatingTestCase {
 
 	@Test
 	public void splitMultipleBranches() {
-		Flux<XMLEvent> xmlEvents =
-				xmlEventDecoder.decode(Flux.just(stringBuffer(POJO_CHILD)), null, null);
-		Flux<List<XMLEvent>> result = decoder.split(xmlEvents, new QName("pojo"));
+		Flux<XMLEvent> xmlEvents = this.xmlEventDecoder
+				.decode(Flux.just(stringBuffer(POJO_CHILD)), null, null);
+		Flux<List<XMLEvent>> result = this.decoder.split(xmlEvents, new QName("pojo"));
 
 		TestSubscriber<List<XMLEvent>> resultSubscriber = new TestSubscriber<>();
 		resultSubscriber.bindTo(result).
@@ -158,7 +159,7 @@ public class Jaxb2DecoderTests extends AbstractAllocatingTestCase {
 	public void decodeSingleXmlRootElement() throws Exception {
 		Flux<DataBuffer> source = Flux.just(stringBuffer(POJO_ROOT));
 		Flux<Object> output =
-				decoder.decode(source, ResolvableType.forClass(Pojo.class), null);
+				this.decoder.decode(source, ResolvableType.forClass(Pojo.class), null);
 
 		TestSubscriber<Object> testSubscriber = new TestSubscriber<>();
 
@@ -173,8 +174,8 @@ public class Jaxb2DecoderTests extends AbstractAllocatingTestCase {
 	@Test
 	public void decodeSingleXmlTypeElement() throws Exception {
 		Flux<DataBuffer> source = Flux.just(stringBuffer(POJO_ROOT));
-		Flux<Object> output =
-				decoder.decode(source, ResolvableType.forClass(TypePojo.class), null);
+		Flux<Object> output = this.decoder
+				.decode(source, ResolvableType.forClass(TypePojo.class), null);
 
 		TestSubscriber<Object> testSubscriber = new TestSubscriber<>();
 
@@ -190,7 +191,7 @@ public class Jaxb2DecoderTests extends AbstractAllocatingTestCase {
 	public void decodeMultipleXmlRootElement() throws Exception {
 		Flux<DataBuffer> source = Flux.just(stringBuffer(POJO_CHILD));
 		Flux<Object> output =
-				decoder.decode(source, ResolvableType.forClass(Pojo.class), null);
+				this.decoder.decode(source, ResolvableType.forClass(Pojo.class), null);
 
 		TestSubscriber<Object> testSubscriber = new TestSubscriber<>();
 
@@ -205,8 +206,8 @@ public class Jaxb2DecoderTests extends AbstractAllocatingTestCase {
 	@Test
 	public void decodeMultipleXmlTypeElement() throws Exception {
 		Flux<DataBuffer> source = Flux.just(stringBuffer(POJO_CHILD));
-		Flux<Object> output =
-				decoder.decode(source, ResolvableType.forClass(TypePojo.class), null);
+		Flux<Object> output = this.decoder
+				.decode(source, ResolvableType.forClass(TypePojo.class), null);
 
 		TestSubscriber<Object> testSubscriber = new TestSubscriber<>();
 
@@ -220,21 +221,22 @@ public class Jaxb2DecoderTests extends AbstractAllocatingTestCase {
 
 	@Test
 	public void toExpectedQName() {
-		assertEquals(new QName("pojo"), decoder.toQName(Pojo.class));
-		assertEquals(new QName("pojo"), decoder.toQName(TypePojo.class));
+		assertEquals(new QName("pojo"), this.decoder.toQName(Pojo.class));
+		assertEquals(new QName("pojo"), this.decoder.toQName(TypePojo.class));
 
 		assertEquals(new QName("namespace", "name"),
-				decoder.toQName(XmlRootElementWithNameAndNamespace.class));
+				this.decoder.toQName(XmlRootElementWithNameAndNamespace.class));
 		assertEquals(new QName("namespace", "name"),
-				decoder.toQName(XmlRootElementWithName.class));
+				this.decoder.toQName(XmlRootElementWithName.class));
 		assertEquals(new QName("namespace", "xmlRootElement"),
-				decoder.toQName(XmlRootElement.class));
+				this.decoder.toQName(XmlRootElement.class));
 
 		assertEquals(new QName("namespace", "name"),
-				decoder.toQName(XmlTypeWithNameAndNamespace.class));
+				this.decoder.toQName(XmlTypeWithNameAndNamespace.class));
 		assertEquals(new QName("namespace", "name"),
-				decoder.toQName(XmlTypeWithName.class));
-		assertEquals(new QName("namespace", "xmlType"), decoder.toQName(XmlType.class));
+				this.decoder.toQName(XmlTypeWithName.class));
+		assertEquals(new QName("namespace", "xmlType"),
+				this.decoder.toQName(XmlType.class));
 
 	}
 

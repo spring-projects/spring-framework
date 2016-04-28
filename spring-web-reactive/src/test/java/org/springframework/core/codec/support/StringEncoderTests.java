@@ -26,6 +26,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.test.TestSubscriber;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.http.MediaType;
 
 import static org.junit.Assert.assertFalse;
@@ -35,26 +36,29 @@ import static org.junit.Assert.assertTrue;
  * @author Sebastien Deleuze
  */
 @RunWith(Parameterized.class)
-public class StringEncoderTests extends AbstractAllocatingTestCase {
+public class StringEncoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	private StringEncoder encoder;
 
 	@Before
 	public void createEncoder() {
-		encoder = new StringEncoder();
+		this.encoder = new StringEncoder();
 	}
 
 	@Test
 	public void canWrite() {
-		assertTrue(encoder.canEncode(ResolvableType.forClass(String.class), MediaType.TEXT_PLAIN));
-		assertFalse(encoder.canEncode(ResolvableType.forClass(Integer.class), MediaType.TEXT_PLAIN));
-		assertFalse(encoder.canEncode(ResolvableType.forClass(String.class), MediaType.APPLICATION_JSON));
+		assertTrue(this.encoder
+				.canEncode(ResolvableType.forClass(String.class), MediaType.TEXT_PLAIN));
+		assertFalse(this.encoder
+				.canEncode(ResolvableType.forClass(Integer.class), MediaType.TEXT_PLAIN));
+		assertFalse(this.encoder.canEncode(ResolvableType.forClass(String.class),
+				MediaType.APPLICATION_JSON));
 	}
 
 	@Test
 	public void write() throws InterruptedException {
-		Flux<String> output =
-				Flux.from(encoder.encode(Flux.just("foo"), allocator, null, null))
+		Flux<String> output = Flux.from(
+				this.encoder.encode(Flux.just("foo"), this.allocator, null, null))
 						.map(chunk -> {
 			byte[] b = new byte[chunk.readableByteCount()];
 			chunk.read(b);

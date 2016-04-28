@@ -26,7 +26,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.test.TestSubscriber;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.support.DataBufferTestUtils;
+import org.springframework.core.io.buffer.support.DataBufferUtils;
 import org.springframework.http.MediaType;
 
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
@@ -38,46 +41,50 @@ import static org.junit.Assert.assertTrue;
  * @author Sebastien Deleuze
  * @author Arjen Poutsma
  */
-public class Jaxb2EncoderTests extends AbstractAllocatingTestCase {
+public class Jaxb2EncoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	private Jaxb2Encoder encoder;
 
 	@Before
 	public void createEncoder() {
-		encoder = new Jaxb2Encoder();
+		this.encoder = new Jaxb2Encoder();
 	}
 
 	@Test
 	public void canEncode() {
-		assertTrue(encoder.canEncode(ResolvableType.forClass(Pojo.class),
+		assertTrue(this.encoder.canEncode(ResolvableType.forClass(Pojo.class),
 				MediaType.APPLICATION_XML));
-		assertTrue(encoder.canEncode(ResolvableType.forClass(Pojo.class),
+		assertTrue(this.encoder.canEncode(ResolvableType.forClass(Pojo.class),
 				MediaType.TEXT_XML));
-		assertFalse(encoder.canEncode(ResolvableType.forClass(Pojo.class),
+		assertFalse(this.encoder.canEncode(ResolvableType.forClass(Pojo.class),
 				MediaType.APPLICATION_JSON));
 
-		assertTrue(encoder.canEncode(
+		assertTrue(this.encoder.canEncode(
 				ResolvableType.forClass(Jaxb2DecoderTests.TypePojo.class),
 				MediaType.APPLICATION_XML));
 
-		assertFalse(encoder.canEncode(ResolvableType.forClass(getClass()),
+		assertFalse(this.encoder.canEncode(ResolvableType.forClass(getClass()),
 				MediaType.APPLICATION_XML));
 	}
 
 	@Test
 	public void encode() {
 		Flux<Pojo> source = Flux.just(new Pojo("foofoo", "barbar"), new Pojo("foofoofoo", "barbarbar"));
-		Flux<String> output =
-				encoder.encode(source, allocator, ResolvableType.forClass(Pojo.class),
-						MediaType.APPLICATION_XML).map(chunk -> DataBufferTestUtils
-						.dumpString(chunk, StandardCharsets.UTF_8));
-		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(output).assertValuesWith(s -> {
+		Flux<DataBuffer> output = this.encoder
+				.encode(source, this.allocator, ResolvableType.forClass(Pojo.class),
+						MediaType.APPLICATION_XML);
+		TestSubscriber<DataBuffer> testSubscriber = new TestSubscriber<>();
+		testSubscriber.bindTo(output).assertValuesWith(dataBuffer -> {
 			try {
+				String s = DataBufferTestUtils
+						.dumpString(dataBuffer, StandardCharsets.UTF_8);
 				assertXMLEqual("<pojo><bar>barbar</bar><foo>foofoo</foo></pojo>", s);
 			}
 			catch (SAXException | IOException e) {
 				fail(e.getMessage());
+			}
+			finally {
+				DataBufferUtils.release(dataBuffer);
 			}
 		});
 	}

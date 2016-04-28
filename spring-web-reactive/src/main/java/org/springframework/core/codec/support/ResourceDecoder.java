@@ -66,6 +66,7 @@ public class ResourceDecoder extends AbstractDecoder<Resource> {
 			return Flux.from(singleBuffer.map(buffer -> {
 				byte[] bytes = new byte[buffer.readableByteCount()];
 				buffer.read(bytes);
+				DataBufferUtils.release(buffer);
 				return new ByteArrayResource(bytes);
 			}));
 		}

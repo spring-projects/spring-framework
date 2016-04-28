@@ -26,6 +26,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 import org.springframework.util.StreamUtils;
@@ -35,19 +36,22 @@ import static org.junit.Assert.*;
 /**
  * @author Arjen Poutsma
  */
-public class ResourceDecoderTests extends AbstractAllocatingTestCase {
+public class ResourceDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	private final ResourceDecoder decoder = new ResourceDecoder();
 
 	@Test
 	public void canDecode() throws Exception {
-		assertTrue(decoder.canDecode(ResolvableType.forClass(InputStreamResource.class),
+		assertTrue(
+				this.decoder.canDecode(ResolvableType.forClass(InputStreamResource.class),
 				MediaType.TEXT_PLAIN));
-		assertTrue(decoder.canDecode(ResolvableType.forClass(ByteArrayResource.class),
+		assertTrue(
+				this.decoder.canDecode(ResolvableType.forClass(ByteArrayResource.class),
 				MediaType.TEXT_PLAIN));
-		assertTrue(decoder.canDecode(ResolvableType.forClass(Resource.class),
+		assertTrue(this.decoder.canDecode(ResolvableType.forClass(Resource.class),
 				MediaType.TEXT_PLAIN));
-		assertTrue(decoder.canDecode(ResolvableType.forClass(InputStreamResource.class),
+		assertTrue(
+				this.decoder.canDecode(ResolvableType.forClass(InputStreamResource.class),
 				MediaType.APPLICATION_JSON));
 	}
 
@@ -57,8 +61,8 @@ public class ResourceDecoderTests extends AbstractAllocatingTestCase {
 		DataBuffer barBuffer = stringBuffer("bar");
 		Flux<DataBuffer> source = Flux.just(fooBuffer, barBuffer);
 
-		Flux<Resource> result =
-				decoder.decode(source, ResolvableType.forClass(Resource.class), null);
+		Flux<Resource> result = this.decoder
+				.decode(source, ResolvableType.forClass(Resource.class), null);
 
 		TestSubscriber<Resource> testSubscriber = new TestSubscriber<>();
 		testSubscriber.bindTo(result).

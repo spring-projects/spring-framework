@@ -14,25 +14,27 @@
  * limitations under the License.
  */
 
-package org.springframework.core.codec.support;
+package org.springframework.core.io.buffer;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.function.Consumer;
 
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferAllocator;
-import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
-import org.springframework.core.io.buffer.NettyDataBufferAllocator;
+import org.springframework.core.io.buffer.support.DataBufferTestUtils;
+import org.springframework.core.io.buffer.support.DataBufferUtils;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Arjen Poutsma
  */
 @RunWith(Parameterized.class)
-public abstract class AbstractAllocatingTestCase {
+public abstract class AbstractDataBufferAllocatingTestCase {
 
 	@Parameterized.Parameter
 	public DataBufferAllocator allocator;
@@ -50,10 +52,28 @@ public abstract class AbstractAllocatingTestCase {
 		};
 	}
 
+	protected DataBuffer createDataBuffer(int capacity) {
+		return this.allocator.allocateBuffer(capacity);
+	}
+
 	protected DataBuffer stringBuffer(String value) {
 		byte[] bytes = value.getBytes(StandardCharsets.UTF_8);
-		DataBuffer buffer = allocator.allocateBuffer(bytes.length);
+		DataBuffer buffer = this.allocator.allocateBuffer(bytes.length);
 		buffer.write(bytes);
 		return buffer;
 	}
+
+	protected void release(DataBuffer... buffers) {
+		Arrays.stream(buffers).forEach(DataBufferUtils::release);
+	}
+
+	protected Consumer<DataBuffer> stringConsumer(String expected) {
+		return dataBuffer -> {
+			String value =
+					DataBufferTestUtils.dumpString(dataBuffer, StandardCharsets.UTF_8);
+			assertEquals(expected, value);
+			DataBufferUtils.release(dataBuffer);
+		};
+	}
+
 }

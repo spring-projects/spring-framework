@@ -25,6 +25,7 @@ import reactor.core.test.TestSubscriber;
 import rx.Single;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 
@@ -35,23 +36,28 @@ import static org.junit.Assert.*;
  * @author Brian Clozel
  * @author Mark Paluch
  */
-public class StringDecoderTests extends AbstractAllocatingTestCase {
+public class StringDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	private StringDecoder decoder;
 
 	@Before
 	public void createEncoder() {
-		decoder = new StringDecoder();
+		this.decoder = new StringDecoder();
 	}
 
 
 	@Test
 	public void canDecode() {
-		assertTrue(decoder.canDecode(ResolvableType.forClass(String.class), MediaType.TEXT_PLAIN));
-		assertTrue(decoder.canDecode(ResolvableType.forClass(String.class), MediaType.TEXT_HTML));
-		assertTrue(decoder.canDecode(ResolvableType.forClass(String.class), MediaType.APPLICATION_JSON));
-		assertFalse(decoder.canDecode(ResolvableType.forClass(Integer.class), MediaType.TEXT_PLAIN));
-		assertFalse(decoder.canDecode(ResolvableType.forClass(Pojo.class), MediaType.APPLICATION_JSON));
+		assertTrue(this.decoder
+				.canDecode(ResolvableType.forClass(String.class), MediaType.TEXT_PLAIN));
+		assertTrue(this.decoder
+				.canDecode(ResolvableType.forClass(String.class), MediaType.TEXT_HTML));
+		assertTrue(this.decoder.canDecode(ResolvableType.forClass(String.class),
+				MediaType.APPLICATION_JSON));
+		assertFalse(this.decoder
+				.canDecode(ResolvableType.forClass(Integer.class), MediaType.TEXT_PLAIN));
+		assertFalse(this.decoder.canDecode(ResolvableType.forClass(Pojo.class),
+				MediaType.APPLICATION_JSON));
 	}
 
 	@Test

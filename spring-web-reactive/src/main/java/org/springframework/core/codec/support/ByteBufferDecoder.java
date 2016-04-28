@@ -23,11 +23,13 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.support.DataBufferUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
 /**
  * @author Sebastien Deleuze
+ * @author Arjen Poutsma
  */
 public class ByteBufferDecoder extends AbstractDecoder<ByteBuffer> {
 
@@ -46,7 +48,13 @@ public class ByteBufferDecoder extends AbstractDecoder<ByteBuffer> {
 	@Override
 	public Flux<ByteBuffer> decode(Publisher<DataBuffer> inputStream, ResolvableType type,
 			MimeType mimeType, Object... hints) {
-		return Flux.from(inputStream).map(DataBuffer::asByteBuffer);
+		return Flux.from(inputStream).map((dataBuffer) -> {
+			ByteBuffer copy = ByteBuffer.allocate(dataBuffer.readableByteCount());
+			copy.put(dataBuffer.asByteBuffer());
+			copy.flip();
+			DataBufferUtils.release(dataBuffer);
+			return copy;
+		});
 	}
 
 }

@@ -18,16 +18,10 @@ package org.springframework.core.io.buffer.support;
 
 import java.nio.charset.StandardCharsets;
 
-import io.netty.buffer.PooledByteBufAllocator;
-import io.netty.buffer.UnpooledByteBufAllocator;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
+import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
-import org.springframework.core.io.buffer.DataBufferAllocator;
-import org.springframework.core.io.buffer.DefaultDataBufferAllocator;
-import org.springframework.core.io.buffer.NettyDataBufferAllocator;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -35,45 +29,32 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Arjen Poutsma
  */
-@RunWith(Parameterized.class)
-public class DataBufferTestUtilsTests {
-
-	@Parameterized.Parameter
-	public DataBufferAllocator allocator;
-
-	@Parameterized.Parameters(name = "{0}")
-	public static Object[][] buffers() {
-
-		return new Object[][]{
-				{new NettyDataBufferAllocator(new UnpooledByteBufAllocator(true))},
-				{new NettyDataBufferAllocator(new UnpooledByteBufAllocator(false))},
-				{new NettyDataBufferAllocator(new PooledByteBufAllocator(true))},
-				{new NettyDataBufferAllocator(new PooledByteBufAllocator(false))},
-				{new DefaultDataBufferAllocator(true)},
-				{new DefaultDataBufferAllocator(false)}};
-	}
+public class DataBufferTestUtilsTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void dumpBytes() {
-		DataBuffer buffer = allocator.allocateBuffer(4);
+		DataBuffer buffer = this.allocator.allocateBuffer(4);
 		byte[] source = {'a', 'b', 'c', 'd'};
 		buffer.write(source);
 
 		byte[] result = DataBufferTestUtils.dumpBytes(buffer);
 
 		assertArrayEquals(source, result);
+
+		release(buffer);
 	}
 
 	@Test
 	public void dumpString() {
-		DataBuffer buffer = allocator.allocateBuffer(4);
+		DataBuffer buffer = this.allocator.allocateBuffer(4);
 		String source = "abcd";
 		buffer.write(source.getBytes(StandardCharsets.UTF_8));
 
 		String result = DataBufferTestUtils.dumpString(buffer, StandardCharsets.UTF_8);
 
-
 		assertEquals(source, result);
+
+		release(buffer);
 	}
 
 }

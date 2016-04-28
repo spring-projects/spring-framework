@@ -26,6 +26,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.test.TestSubscriber;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 
@@ -34,20 +35,23 @@ import static org.junit.Assert.*;
 /**
  * @author Sebastien Deleuze
  */
-public class ByteBufferEncoderTests extends AbstractAllocatingTestCase {
+public class ByteBufferEncoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	private ByteBufferEncoder encoder;
 
 	@Before
 	public void createEncoder() {
-		encoder = new ByteBufferEncoder();
+		this.encoder = new ByteBufferEncoder();
 	}
 
 	@Test
 	public void canEncode() {
-		assertTrue(encoder.canEncode(ResolvableType.forClass(ByteBuffer.class), MediaType.TEXT_PLAIN));
-		assertFalse(encoder.canEncode(ResolvableType.forClass(Integer.class), MediaType.TEXT_PLAIN));
-		assertTrue(encoder.canEncode(ResolvableType.forClass(ByteBuffer.class), MediaType.APPLICATION_JSON));
+		assertTrue(this.encoder.canEncode(ResolvableType.forClass(ByteBuffer.class),
+				MediaType.TEXT_PLAIN));
+		assertFalse(this.encoder
+				.canEncode(ResolvableType.forClass(Integer.class), MediaType.TEXT_PLAIN));
+		assertTrue(this.encoder.canEncode(ResolvableType.forClass(ByteBuffer.class),
+				MediaType.APPLICATION_JSON));
 	}
 
 	@Test
@@ -57,7 +61,7 @@ public class ByteBufferEncoderTests extends AbstractAllocatingTestCase {
 		Flux<ByteBuffer> source =
 				Flux.just(ByteBuffer.wrap(fooBytes), ByteBuffer.wrap(barBytes));
 
-		Flux<DataBuffer> output = encoder.encode(source, allocator,
+		Flux<DataBuffer> output = this.encoder.encode(source, this.allocator,
 				ResolvableType.forClassWithGenerics(Publisher.class, ByteBuffer.class),
 				null);
 		TestSubscriber<DataBuffer> testSubscriber = new TestSubscriber<>();

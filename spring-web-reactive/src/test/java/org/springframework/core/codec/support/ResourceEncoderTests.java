@@ -27,6 +27,7 @@ import org.springframework.core.ResolvableType;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 
@@ -35,19 +36,22 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Arjen Poutsma
  */
-public class ResourceEncoderTests extends AbstractAllocatingTestCase {
+public class ResourceEncoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	private final ResourceEncoder encoder = new ResourceEncoder();
 
 	@Test
 	public void canEncode() throws Exception {
-		assertTrue(encoder.canEncode(ResolvableType.forClass(InputStreamResource.class),
+		assertTrue(
+				this.encoder.canEncode(ResolvableType.forClass(InputStreamResource.class),
 				MediaType.TEXT_PLAIN));
-		assertTrue(encoder.canEncode(ResolvableType.forClass(ByteArrayResource.class),
+		assertTrue(
+				this.encoder.canEncode(ResolvableType.forClass(ByteArrayResource.class),
 				MediaType.TEXT_PLAIN));
-		assertTrue(encoder.canEncode(ResolvableType.forClass(Resource.class),
+		assertTrue(this.encoder.canEncode(ResolvableType.forClass(Resource.class),
 				MediaType.TEXT_PLAIN));
-		assertTrue(encoder.canEncode(ResolvableType.forClass(InputStreamResource.class),
+		assertTrue(
+				this.encoder.canEncode(ResolvableType.forClass(InputStreamResource.class),
 				MediaType.APPLICATION_JSON));
 	}
 
@@ -58,13 +62,13 @@ public class ResourceEncoderTests extends AbstractAllocatingTestCase {
 
 		Mono<Resource> source = Mono.just(resource);
 
-		Flux<DataBuffer> output =
-				encoder.encode(source, allocator, ResolvableType.forClass(Resource.class),
+		Flux<DataBuffer> output = this.encoder
+				.encode(source, this.allocator, ResolvableType.forClass(Resource.class),
 						null);
 
 		TestSubscriber<DataBuffer> testSubscriber = new TestSubscriber<>();
 		testSubscriber.bindTo(output).assertNoError().assertComplete()
-				.assertValues(stringBuffer(s));
+				.assertValuesWith(stringConsumer(s));
 
 	}
 

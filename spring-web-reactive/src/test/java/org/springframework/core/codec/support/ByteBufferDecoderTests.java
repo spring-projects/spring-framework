@@ -21,26 +21,31 @@ import java.nio.ByteBuffer;
 import org.junit.Test;
 import org.reactivestreams.Publisher;
 import reactor.core.publisher.Flux;
+import reactor.core.test.TestSubscriber;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 
-import static org.junit.Assert.*;
-import reactor.core.test.TestSubscriber;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Sebastien Deleuze
  */
-public class ByteBufferDecoderTests extends AbstractAllocatingTestCase {
+public class ByteBufferDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	private final ByteBufferDecoder decoder = new ByteBufferDecoder();
 
 	@Test
 	public void canDecode() {
-		assertTrue(decoder.canDecode(ResolvableType.forClass(ByteBuffer.class), MediaType.TEXT_PLAIN));
-		assertFalse(decoder.canDecode(ResolvableType.forClass(Integer.class), MediaType.TEXT_PLAIN));
-		assertTrue(decoder.canDecode(ResolvableType.forClass(ByteBuffer.class), MediaType.APPLICATION_JSON));
+		assertTrue(this.decoder.canDecode(ResolvableType.forClass(ByteBuffer.class),
+				MediaType.TEXT_PLAIN));
+		assertFalse(this.decoder
+				.canDecode(ResolvableType.forClass(Integer.class), MediaType.TEXT_PLAIN));
+		assertTrue(this.decoder.canDecode(ResolvableType.forClass(ByteBuffer.class),
+				MediaType.APPLICATION_JSON));
 	}
 
 	@Test
@@ -48,20 +53,12 @@ public class ByteBufferDecoderTests extends AbstractAllocatingTestCase {
 		DataBuffer fooBuffer = stringBuffer("foo");
 		DataBuffer barBuffer = stringBuffer("bar");
 		Flux<DataBuffer> source = Flux.just(fooBuffer, barBuffer);
-		Flux<ByteBuffer> output = decoder.decode(source, ResolvableType.forClassWithGenerics(Publisher.class, ByteBuffer.class), null);
+		Flux<ByteBuffer> output = this.decoder.decode(source,
+				ResolvableType.forClassWithGenerics(Publisher.class, ByteBuffer.class),
+				null);
 		TestSubscriber<ByteBuffer> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(output)
-				.assertValuesWith(b -> assertBufferEquals(fooBuffer, b), b -> assertBufferEquals(barBuffer, b));
+		testSubscriber.bindTo(output).assertNoError().assertComplete()
+				.assertValues(ByteBuffer.wrap("foo".getBytes()),
+						ByteBuffer.wrap("bar".getBytes()));
 	}
-
-	public void assertBufferEquals(DataBuffer expected, ByteBuffer actual) {
-		byte[] byteBufferBytes = new byte[actual.remaining()];
-		actual.get(byteBufferBytes);
-
-		byte[] dataBufferBytes = new byte[expected.readableByteCount()];
-		expected.read(dataBufferBytes);
-
-		assertArrayEquals(dataBufferBytes, byteBufferBytes);
-	}
-
 }

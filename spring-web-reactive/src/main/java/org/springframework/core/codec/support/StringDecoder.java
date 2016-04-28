@@ -25,6 +25,7 @@ import reactor.core.publisher.Flux;
 
 import org.springframework.core.ResolvableType;
 import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.support.DataBufferUtils;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
 
@@ -84,8 +85,9 @@ public class StringDecoder extends AbstractDecoder<String> {
 			inputFlux = Flux.from(inputFlux.reduce(DataBuffer::write));
 		}
 		Charset charset = getCharset(mimeType);
-		return inputFlux.map(content -> {
-			CharBuffer charBuffer = charset.decode(content.asByteBuffer());
+		return inputFlux.map(dataBuffer -> {
+			CharBuffer charBuffer = charset.decode(dataBuffer.asByteBuffer());
+			DataBufferUtils.release(dataBuffer);
 			return charBuffer.toString();
 		});
 	}

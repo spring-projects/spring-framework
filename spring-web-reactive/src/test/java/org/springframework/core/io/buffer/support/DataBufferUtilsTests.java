@@ -26,7 +26,7 @@ import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.test.TestSubscriber;
 
-import org.springframework.core.codec.support.AbstractAllocatingTestCase;
+import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 
 import static org.junit.Assert.assertFalse;
@@ -34,7 +34,7 @@ import static org.junit.Assert.assertFalse;
 /**
  * @author Arjen Poutsma
  */
-public class DataBufferUtilsTests extends AbstractAllocatingTestCase {
+public class DataBufferUtilsTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void readChannel() throws Exception {
@@ -42,14 +42,14 @@ public class DataBufferUtilsTests extends AbstractAllocatingTestCase {
 				.toURI();
 		FileChannel channel = FileChannel.open(Paths.get(uri), StandardOpenOption.READ);
 
-		Flux<DataBuffer> flux = DataBufferUtils.read(channel, allocator, 4);
+		Flux<DataBuffer> flux = DataBufferUtils.read(channel, this.allocator, 4);
 
 		TestSubscriber<DataBuffer> testSubscriber = new TestSubscriber<>();
 		testSubscriber.bindTo(flux).
 				assertNoError().
 				assertComplete().
-				assertValues(stringBuffer("foo\n"), stringBuffer("bar\n"),
-						stringBuffer("baz\n"), stringBuffer("qux\n"));
+				assertValuesWith(stringConsumer("foo\n"), stringConsumer("bar\n"),
+						stringConsumer("baz\n"), stringConsumer("qux\n"));
 
 		assertFalse(channel.isOpen());
 	}
@@ -60,15 +60,15 @@ public class DataBufferUtilsTests extends AbstractAllocatingTestCase {
 				.toURI();
 		FileChannel channel = FileChannel.open(Paths.get(uri), StandardOpenOption.READ);
 
-		Flux<DataBuffer> flux = DataBufferUtils.read(channel, allocator, 3);
+		Flux<DataBuffer> flux = DataBufferUtils.read(channel, this.allocator, 3);
 
 		TestSubscriber<DataBuffer> testSubscriber = new TestSubscriber<>();
 		testSubscriber.bindTo(flux).
 				assertNoError().
 				assertComplete().
-				assertValues(stringBuffer("foo"), stringBuffer("\nba"),
-						stringBuffer("r\nb"), stringBuffer("az\n"), stringBuffer("qux"),
-						stringBuffer("\n"));
+				assertValuesWith(stringConsumer("foo"), stringConsumer("\nba"),
+						stringConsumer("r\nb"), stringConsumer("az\n"),
+						stringConsumer("qux"), stringConsumer("\n"));
 
 		assertFalse(channel.isOpen());
 	}
@@ -78,37 +78,22 @@ public class DataBufferUtilsTests extends AbstractAllocatingTestCase {
 		InputStream is = DataBufferUtilsTests.class
 				.getResourceAsStream("DataBufferUtilsTests.txt");
 
-		Flux<DataBuffer> flux = DataBufferUtils.read(is, allocator, 4);
+		Flux<DataBuffer> flux = DataBufferUtils.read(is, this.allocator, 4);
 
 		TestSubscriber<DataBuffer> testSubscriber = new TestSubscriber<>();
 		testSubscriber.bindTo(flux).
 				assertNoError().
 				assertComplete().
-				assertValues(stringBuffer("foo\n"), stringBuffer("bar\n"),
-						stringBuffer("baz\n"), stringBuffer("qux\n"));
+				assertValuesWith(stringConsumer("foo\n"), stringConsumer("bar\n"),
+						stringConsumer("baz\n"), stringConsumer("qux\n"));
 	}
-
-	@Test
-	public void readUnalignedInputStream() throws Exception {
-		InputStream is = DataBufferUtilsTests.class
-				.getResourceAsStream("DataBufferUtilsTests.txt");
-
-		Flux<DataBuffer> flux = DataBufferUtils.read(is, allocator, 3);
-
-		TestSubscriber<DataBuffer> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(flux).
-				assertNoError().
-				assertComplete().
-				assertValues(stringBuffer("foo"), stringBuffer("\nba"),
-						stringBuffer("r\nb"), stringBuffer("az\n"), stringBuffer("qux"),
-						stringBuffer("\n"));
-	}
-
 
 	@Test
 	public void takeUntilByteCount() {
-		Flux<DataBuffer> flux =
-				Flux.just(stringBuffer("foo"), stringBuffer("bar"), stringBuffer("baz"));
+		DataBuffer foo = stringBuffer("foo");
+		DataBuffer bar = stringBuffer("bar");
+		DataBuffer baz = stringBuffer("baz");
+		Flux<DataBuffer> flux = Flux.just(foo, bar, baz);
 
 		Flux<DataBuffer> result = DataBufferUtils.takeUntilByteCount(flux, 5L);
 
@@ -116,7 +101,9 @@ public class DataBufferUtilsTests extends AbstractAllocatingTestCase {
 		testSubscriber.bindTo(result).
 				assertNoError().
 				assertComplete().
-				assertValues(stringBuffer("foo"), stringBuffer("ba"));
+				assertValuesWith(stringConsumer("foo"), stringConsumer("ba"));
+
+		release(bar, baz);
 	}
 
 

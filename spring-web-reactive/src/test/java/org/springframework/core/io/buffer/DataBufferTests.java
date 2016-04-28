@@ -22,13 +22,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import io.netty.buffer.PooledByteBufAllocator;
-import io.netty.buffer.UnpooledByteBufAllocator;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import org.springframework.core.io.buffer.support.DataBufferUtils;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -36,31 +30,7 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Arjen Poutsma
  */
-@RunWith(Parameterized.class)
-public class DataBufferTests {
-
-	@Parameterized.Parameter
-	public DataBufferAllocator allocator;
-
-	@Parameterized.Parameters(name = "{0}")
-	public static Object[][] buffers() {
-
-		return new Object[][]{
-				{new NettyDataBufferAllocator(new UnpooledByteBufAllocator(true))},
-				{new NettyDataBufferAllocator(new UnpooledByteBufAllocator(false))},
-				{new NettyDataBufferAllocator(new PooledByteBufAllocator(true))},
-				{new NettyDataBufferAllocator(new PooledByteBufAllocator(false))},
-				{new DefaultDataBufferAllocator(true)},
-				{new DefaultDataBufferAllocator(false)}};
-	}
-
-	private DataBuffer createDataBuffer(int capacity) {
-		return allocator.allocateBuffer(capacity);
-	}
-
-	private void release(DataBuffer... buffers) {
-		Arrays.stream(buffers).forEach(DataBufferUtils::release);
-	}
+public class DataBufferTests extends AbstractDataBufferAllocatingTestCase {
 
 	@Test
 	public void writeAndRead() {

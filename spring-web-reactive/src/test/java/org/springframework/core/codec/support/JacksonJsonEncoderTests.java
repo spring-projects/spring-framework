@@ -16,13 +16,13 @@
 
 package org.springframework.core.codec.support;
 
-import java.nio.charset.StandardCharsets;
-
 import org.junit.Before;
 import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.test.TestSubscriber;
 
+import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 
 import static org.junit.Assert.assertFalse;
@@ -31,33 +31,36 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Sebastien Deleuze
  */
-public class JacksonJsonEncoderTests extends AbstractAllocatingTestCase {
+public class JacksonJsonEncoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	private JacksonJsonEncoder encoder;
 
 	@Before
 	public void createEncoder() {
-		encoder = new JacksonJsonEncoder();
+		this.encoder = new JacksonJsonEncoder();
 	}
 
 	@Test
 	public void canWrite() {
-		assertTrue(encoder.canEncode(null, MediaType.APPLICATION_JSON));
-		assertFalse(encoder.canEncode(null, MediaType.APPLICATION_XML));
+		assertTrue(this.encoder.canEncode(null, MediaType.APPLICATION_JSON));
+		assertFalse(this.encoder.canEncode(null, MediaType.APPLICATION_XML));
 	}
 
 	@Test
 	public void write() {
 		Flux<Pojo> source = Flux.just(new Pojo("foofoo", "barbar"), new Pojo("foofoofoo", "barbarbar"));
-		Flux<String> output = encoder.encode(source, allocator, null, null).map(chunk -> {
-			byte[] b = new byte[chunk.readableByteCount()];
-			chunk.read(b);
-			return new String(b, StandardCharsets.UTF_8);
-		});
-		TestSubscriber<String> testSubscriber = new TestSubscriber<>();
-		testSubscriber.bindTo(output)
-				.assertValues("[", "{\"foo\":\"foofoo\",\"bar\":\"barbar\"}", ",",
-						"{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}", "]");
+
+		Flux<DataBuffer> output = this.encoder.encode(source, this.allocator, null, null);
+
+		TestSubscriber<DataBuffer> testSubscriber = new TestSubscriber<>();
+		testSubscriber.bindTo(output).
+				assertComplete().
+				assertNoError().
+				assertValuesWith(stringConsumer("["),
+						stringConsumer("{\"foo\":\"foofoo\",\"bar\":\"barbar\"}"),
+						stringConsumer(","),
+						stringConsumer("{\"foo\":\"foofoofoo\",\"bar\":\"barbarbar\"}"),
+						stringConsumer("]"));
 	}
 
 }

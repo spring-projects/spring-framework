@@ -22,13 +22,15 @@ import org.junit.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.test.TestSubscriber;
 
+import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
  * @author Arjen Poutsma
  */
-public class XmlEventDecoderTests extends AbstractAllocatingTestCase {
+public class XmlEventDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	private static final String XML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
 			"<pojo>" +
@@ -41,7 +43,8 @@ public class XmlEventDecoderTests extends AbstractAllocatingTestCase {
 	@Test
 	public void toXMLEvents() {
 
-		Flux<XMLEvent> events = decoder.decode(Flux.just(stringBuffer(XML)), null, null);
+		Flux<XMLEvent> events =
+				this.decoder.decode(Flux.just(stringBuffer(XML)), null, null);
 
 		TestSubscriber<XMLEvent> testSubscriber = new TestSubscriber<>();
 		testSubscriber.bindTo(events).

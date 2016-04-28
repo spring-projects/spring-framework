@@ -18,32 +18,35 @@ package org.springframework.core.codec.support;
 
 import org.junit.Test;
 import reactor.core.publisher.Flux;
+import reactor.core.test.TestSubscriber;
 
 import org.springframework.core.ResolvableType;
+import org.springframework.core.io.buffer.AbstractDataBufferAllocatingTestCase;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
 
-import static org.junit.Assert.*;
-import reactor.core.test.TestSubscriber;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Sebastien Deleuze
  */
-public class JacksonJsonDecoderTests extends AbstractAllocatingTestCase {
+public class JacksonJsonDecoderTests extends AbstractDataBufferAllocatingTestCase {
 
 	private final JacksonJsonDecoder decoder = new JacksonJsonDecoder();
 
 	@Test
 	public void canDecode() {
-		assertTrue(decoder.canDecode(null, MediaType.APPLICATION_JSON));
-		assertFalse(decoder.canDecode(null, MediaType.APPLICATION_XML));
+		assertTrue(this.decoder.canDecode(null, MediaType.APPLICATION_JSON));
+		assertFalse(this.decoder.canDecode(null, MediaType.APPLICATION_XML));
 	}
 
 	@Test
 	public void decode() {
 		Flux<DataBuffer> source =
 				Flux.just(stringBuffer("{\"foo\": \"foofoo\", \"bar\": \"barbar\"}"));
-		Flux<Object> output = decoder.decode(source, ResolvableType.forClass(Pojo.class), null);
+		Flux<Object> output =
+				this.decoder.decode(source, ResolvableType.forClass(Pojo.class), null);
 		TestSubscriber<Object> testSubscriber = new TestSubscriber<>();
 		testSubscriber.bindTo(output).assertValues(new Pojo("foofoo", "barbar"));
 	}
