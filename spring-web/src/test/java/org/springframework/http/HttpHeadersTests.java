@@ -32,6 +32,7 @@ import java.util.TimeZone;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
 
 /**
@@ -39,11 +40,19 @@ import static org.junit.Assert.*;
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @author Brian Clozel
  */
 public class HttpHeadersTests {
 
 	private final HttpHeaders headers = new HttpHeaders();
 
+
+	@Test
+	public void getFirst() {
+		headers.add(HttpHeaders.CACHE_CONTROL, "max-age=1000, public");
+		headers.add(HttpHeaders.CACHE_CONTROL, "s-maxage=1000");
+		assertThat(headers.getFirst(HttpHeaders.CACHE_CONTROL), is("max-age=1000, public"));
+	}
 
 	@Test
 	public void accept() {
@@ -133,6 +142,29 @@ public class HttpHeadersTests {
 	}
 
 	@Test
+	public void ifMatch() {
+		String ifMatch = "\"v2.6\"";
+		headers.setIfMatch(ifMatch);
+		assertEquals("Invalid If-Match header", ifMatch, headers.getIfMatch().get(0));
+		assertEquals("Invalid If-Match header", "\"v2.6\"", headers.getFirst("If-Match"));
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void ifMatchIllegalHeader() {
+		headers.setIfMatch("Illegal");
+		headers.getIfMatch();
+	}
+
+	@Test
+	public void ifMatchMultipleHeaders() {
+		headers.add(HttpHeaders.IF_MATCH, "\"v2,0\"");
+		headers.add(HttpHeaders.IF_MATCH, "W/\"v2,1\", \"v2,2\"");
+		assertEquals("Invalid If-Match header", "\"v2,0\"", headers.get(HttpHeaders.IF_MATCH).get(0));
+		assertEquals("Invalid If-Match header", "W/\"v2,1\", \"v2,2\"", headers.get(HttpHeaders.IF_MATCH).get(1));
+		assertThat(headers.getIfMatch(), Matchers.contains("\"v2,0\"", "W/\"v2,1\"", "\"v2,2\""));
+	}
+
+	@Test
 	public void ifNoneMatch() {
 		String ifNoneMatch = "\"v2.6\"";
 		headers.setIfNoneMatch(ifNoneMatch);
@@ -141,15 +173,23 @@ public class HttpHeadersTests {
 	}
 
 	@Test
+	public void ifNoneMatchWildCard() {
+		String ifNoneMatch = "*";
+		headers.setIfNoneMatch(ifNoneMatch);
+		assertEquals("Invalid If-None-Match header", ifNoneMatch, headers.getIfNoneMatch().get(0));
+		assertEquals("Invalid If-None-Match header", "*", headers.getFirst("If-None-Match"));
+	}
+
+	@Test
 	public void ifNoneMatchList() {
 		String ifNoneMatch1 = "\"v2.6\"";
-		String ifNoneMatch2 = "\"v2.7\"";
+		String ifNoneMatch2 = "\"v2.7\", \"v2.8\"";
 		List<String> ifNoneMatchList = new ArrayList<String>(2);
 		ifNoneMatchList.add(ifNoneMatch1);
 		ifNoneMatchList.add(ifNoneMatch2);
 		headers.setIfNoneMatch(ifNoneMatchList);
-		assertEquals("Invalid If-None-Match header", ifNoneMatchList, headers.getIfNoneMatch());
-		assertEquals("Invalid If-None-Match header", "\"v2.6\", \"v2.7\"", headers.getFirst("If-None-Match"));
+		assertThat(headers.getIfNoneMatch(), Matchers.contains("\"v2.6\"", "\"v2.7\"", "\"v2.8\""));
+		assertEquals("Invalid If-None-Match header", "\"v2.6\", \"v2.7\", \"v2.8\"", headers.getFirst("If-None-Match"));
 	}
 
 	@Test
@@ -256,6 +296,13 @@ public class HttpHeadersTests {
 	}
 
 	@Test
+	public void cacheControlAllValues() {
+		headers.add(HttpHeaders.CACHE_CONTROL, "max-age=1000, public");
+		headers.add(HttpHeaders.CACHE_CONTROL, "s-maxage=1000");
+		assertThat(headers.getCacheControl(), is("max-age=1000, public, s-maxage=1000"));
+	}
+
+	@Test
 	public void contentDisposition() {
 		headers.setContentDispositionFormData("name", null);
 		assertEquals("Invalid Content-Disposition header", "form-data; name=\"name\"",
@@ -288,6 +335,16 @@ public class HttpHeadersTests {
 		headers.setAccessControlAllowHeaders(Arrays.asList("header1", "header2"));
 		allowedHeaders = headers.getAccessControlAllowHeaders();
 		assertEquals(allowedHeaders, Arrays.asList("header1", "header2"));
+	}
+
+	@Test
+	public void accessControlAllowHeadersMultipleValues() {
+		List<String> allowedHeaders = headers.getAccessControlAllowHeaders();
+		assertThat(allowedHeaders, Matchers.emptyCollectionOf(String.class));
+		headers.add(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, "header1, header2");
+		headers.add(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, "header3");
+		allowedHeaders = headers.getAccessControlAllowHeaders();
+		assertEquals(Arrays.asList("header1", "header2", "header3"), allowedHeaders);
 	}
 
 	@Test

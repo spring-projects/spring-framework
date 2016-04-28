@@ -34,6 +34,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.util.Assert;
 import org.springframework.util.LinkedCaseInsensitiveMap;
@@ -55,6 +57,7 @@ import org.springframework.util.StringUtils;
  *
  * @author Arjen Poutsma
  * @author Sebastien Deleuze
+ * @author Brian Clozel
  * @since 3.0
  */
 public class HttpHeaders implements MultiValueMap<String, String>, Serializable {
@@ -372,6 +375,12 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 			"EEE MMM dd HH:mm:ss yyyy"
 	};
 
+	/**
+	 * Pattern matching ETag multiple field values in headers such as "If-Match", "If-None-Match"
+	 * @see <a href="https://tools.ietf.org/html/rfc7232#section-2.3">Section 2.3 of RFC 7232</a>
+	 */
+	private static final Pattern ETAG_HEADER_VALUE_PATTERN = Pattern.compile("\\*|\\s*((W\\/)?(\"[^\"]*\"))\\s*,?");
+
 	private static TimeZone GMT = TimeZone.getTimeZone("GMT");
 
 
@@ -459,7 +468,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Returns the value of the {@code Access-Control-Allow-Headers} response header.
 	 */
 	public List<String> getAccessControlAllowHeaders() {
-		return getFirstValueAsList(ACCESS_CONTROL_ALLOW_HEADERS);
+		return getValuesAsList(ACCESS_CONTROL_ALLOW_HEADERS);
 	}
 
 	/**
@@ -476,7 +485,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		List<HttpMethod> result = new ArrayList<HttpMethod>();
 		String value = getFirst(ACCESS_CONTROL_ALLOW_METHODS);
 		if (value != null) {
-			String[] tokens = value.split(",\\s*");
+			String[] tokens = StringUtils.tokenizeToStringArray(value, ",", true, true);
 			for (String token : tokens) {
 				HttpMethod resolved = HttpMethod.resolve(token);
 				if (resolved != null) {
@@ -498,7 +507,23 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Return the value of the {@code Access-Control-Allow-Origin} response header.
 	 */
 	public String getAccessControlAllowOrigin() {
-		return getFirst(ACCESS_CONTROL_ALLOW_ORIGIN);
+		return getFieldValues(ACCESS_CONTROL_ALLOW_ORIGIN);
+	}
+
+	protected String getFieldValues(String headerName) {
+		List<String> headerValues = this.headers.get(headerName);
+		if (headerValues != null) {
+			StringBuilder builder = new StringBuilder();
+			for (Iterator<String> iterator = headerValues.iterator(); iterator.hasNext(); ) {
+				String ifNoneMatch = iterator.next();
+				builder.append(ifNoneMatch);
+				if (iterator.hasNext()) {
+					builder.append(", ");
+				}
+			}
+			return builder.toString();
+		}
+		return null;
 	}
 
 	/**
@@ -512,7 +537,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Returns the value of the {@code Access-Control-Expose-Headers} response header.
 	 */
 	public List<String> getAccessControlExposeHeaders() {
-		return getFirstValueAsList(ACCESS_CONTROL_EXPOSE_HEADERS);
+		return getValuesAsList(ACCESS_CONTROL_EXPOSE_HEADERS);
 	}
 
 	/**
@@ -542,7 +567,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Returns the value of the {@code Access-Control-Request-Headers} request header.
 	 */
 	public List<String> getAccessControlRequestHeaders() {
-		return getFirstValueAsList(ACCESS_CONTROL_REQUEST_HEADERS);
+		return getValuesAsList(ACCESS_CONTROL_REQUEST_HEADERS);
 	}
 
 	/**
@@ -643,7 +668,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Return the value of the {@code Cache-Control} header.
 	 */
 	public String getCacheControl() {
-		return getFirst(CACHE_CONTROL);
+		return getFieldValues(CACHE_CONTROL);
 	}
 
 	/**
@@ -664,7 +689,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Return the value of the {@code Connection} header.
 	 */
 	public List<String> getConnection() {
-		return getFirstValueAsList(CONNECTION);
+		return getValuesAsList(CONNECTION);
 	}
 
 	/**
@@ -783,6 +808,64 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	}
 
 	/**
+	 * Set the (new) value of the {@code If-Match} header.
+	 */
+	public void setIfMatch(String ifMatch) {
+		set(IF_MATCH, ifMatch);
+	}
+
+	/**
+	 * Set the (new) value of the {@code If-Match} header.
+	 */
+	public void setIfMatch(List<String> ifMatchList) {
+		set(IF_MATCH, toCommaDelimitedString(ifMatchList));
+	}
+
+	protected String toCommaDelimitedString(List<String> list) {
+		StringBuilder builder = new StringBuilder();
+		for (Iterator<String> iterator = list.iterator(); iterator.hasNext(); ) {
+			String ifNoneMatch = iterator.next();
+			builder.append(ifNoneMatch);
+			if (iterator.hasNext()) {
+				builder.append(", ");
+			}
+		}
+		return builder.toString();
+	}
+
+	/**
+	 * Return the value of the {@code If-Match} header.
+	 */
+	public List<String> getIfMatch() {
+		return getETagValuesAsList(IF_MATCH);
+	}
+
+	protected List<String> getETagValuesAsList(String headerName) {
+		List<String> values = get(headerName);
+		if (values != null) {
+			List<String> result = new ArrayList<String>();
+			for (String value : values) {
+				if (value != null) {
+					Matcher matcher = ETAG_HEADER_VALUE_PATTERN.matcher(value);
+					while (matcher.find()) {
+						if ("*".equals(matcher.group())) {
+							result.add(matcher.group());
+						}
+						else {
+							result.add(matcher.group(1));
+						}
+					}
+					if(result.size() == 0) {
+						throw new IllegalArgumentException("Could not parse '" + headerName + "' value=" + value);
+					}
+				}
+			}
+			return result;
+		}
+		return Collections.emptyList();
+	}
+
+	/**
 	 * Set the (new) value of the {@code If-Modified-Since} header.
 	 * <p>The date should be specified as the number of milliseconds since
 	 * January 1, 1970 GMT.
@@ -814,35 +897,51 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 		set(IF_NONE_MATCH, toCommaDelimitedString(ifNoneMatchList));
 	}
 
-	protected String toCommaDelimitedString(List<String> list) {
-		StringBuilder builder = new StringBuilder();
-		for (Iterator<String> iterator = list.iterator(); iterator.hasNext();) {
-			String ifNoneMatch = iterator.next();
-			builder.append(ifNoneMatch);
-			if (iterator.hasNext()) {
-				builder.append(", ");
-			}
-		}
-		return builder.toString();
-	}
-
 	/**
 	 * Return the value of the {@code If-None-Match} header.
 	 */
 	public List<String> getIfNoneMatch() {
-		return getFirstValueAsList(IF_NONE_MATCH);
+		return getETagValuesAsList(IF_NONE_MATCH);
 	}
 
-	protected List<String> getFirstValueAsList(String header) {
-		List<String> result = new ArrayList<String>();
-		String value = getFirst(header);
-		if (value != null) {
-			String[] tokens = value.split(",\\s*");
-			for (String token : tokens) {
-				result.add(token);
+	/**
+	 * Return all values of a given header name,
+	 * even if this header is set multiple times.
+	 * @since 4.3.0
+	 */
+	public List<String> getValuesAsList(String headerName) {
+		List<String> values = get(headerName);
+		if (values != null) {
+			List<String> result = new ArrayList<String>();
+			for (String value : values) {
+				if (value != null) {
+					String[] tokens = StringUtils.tokenizeToStringArray(value, ",");
+					for (String token : tokens) {
+						result.add(token);
+					}
+				}
 			}
+			return result;
 		}
-		return result;
+		return Collections.emptyList();
+	}
+
+	/**
+	 * Set the (new) value of the {@code If-Unmodified-Since} header.
+	 * <p>The date should be specified as the number of milliseconds since
+	 * January 1, 1970 GMT.
+	 */
+	public void setIfUnmodifiedSince(long ifUnmodifiedSince) {
+		setDate(IF_UNMODIFIED_SINCE, ifUnmodifiedSince);
+	}
+
+	/**
+	 * Return the value of the {@code If-Unmodified-Since} header.
+	 * <p>The date is returned as the number of milliseconds since
+	 * January 1, 1970 GMT. Returns -1 when the date is unknown.
+	 */
+	public long getIfUnmodifiedSince() {
+		return getFirstDate(IF_UNMODIFIED_SINCE, false);
 	}
 
 	/**
@@ -957,7 +1056,7 @@ public class HttpHeaders implements MultiValueMap<String, String>, Serializable 
 	 * Return the request header names subject to content negotiation.
 	 */
 	public List<String> getVary() {
-		return getFirstValueAsList(VARY);
+		return getValuesAsList(VARY);
 	}
 
 	/**
