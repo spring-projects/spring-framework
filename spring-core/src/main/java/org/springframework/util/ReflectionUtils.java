@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -265,7 +265,8 @@ public abstract class ReflectionUtils {
 	 * checked exception is expected to be thrown by the target method.
 	 * <p>Throws the underlying RuntimeException or Error in case of an
 	 * InvocationTargetException with such a root cause. Throws an
-	 * IllegalStateException with an appropriate message else.
+	 * IllegalStateException with an appropriate message or
+	 * UndeclaredThrowableException otherwise.
 	 * @param ex the reflection exception to handle
 	 */
 	public static void handleReflectionException(Exception ex) {
@@ -288,7 +289,7 @@ public abstract class ReflectionUtils {
 	 * Handle the given invocation target exception. Should only be called if no
 	 * checked exception is expected to be thrown by the target method.
 	 * <p>Throws the underlying RuntimeException or Error in case of such a root
-	 * cause. Throws an IllegalStateException else.
+	 * cause. Throws an UndeclaredThrowableException otherwise.
 	 * @param ex the invocation target exception to handle
 	 */
 	public static void handleInvocationTargetException(InvocationTargetException ex) {
@@ -300,8 +301,9 @@ public abstract class ReflectionUtils {
 	 * <em>target exception</em> of an {@link InvocationTargetException}.
 	 * Should only be called if no checked exception is expected to be thrown
 	 * by the target method.
-	 * <p>Rethrows the underlying exception cast to an {@link RuntimeException} or
-	 * {@link Error} if appropriate; otherwise, throws an {@link IllegalStateException}.
+	 * <p>Rethrows the underlying exception cast to a {@link RuntimeException} or
+	 * {@link Error} if appropriate; otherwise, throws an
+	 * {@link UndeclaredThrowableException}.
 	 * @param ex the exception to rethrow
 	 * @throws RuntimeException the rethrown exception
 	 */
@@ -321,7 +323,8 @@ public abstract class ReflectionUtils {
 	 * Should only be called if no checked exception is expected to be thrown
 	 * by the target method.
 	 * <p>Rethrows the underlying exception cast to an {@link Exception} or
-	 * {@link Error} if appropriate; otherwise, throws an {@link IllegalStateException}.
+	 * {@link Error} if appropriate; otherwise, throws an
+	 * {@link UndeclaredThrowableException}.
 	 * @param ex the exception to rethrow
 	 * @throws Exception the rethrown exception (in case of a checked exception)
 	 */
@@ -804,7 +807,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Pre-built FieldFilter that matches all non-static, non-final fields.
 	 */
-	public static FieldFilter COPYABLE_FIELDS = new FieldFilter() {
+	public static final FieldFilter COPYABLE_FIELDS = new FieldFilter() {
 
 		@Override
 		public boolean matches(Field field) {
@@ -816,7 +819,7 @@ public abstract class ReflectionUtils {
 	/**
 	 * Pre-built MethodFilter that matches all non-bridge methods.
 	 */
-	public static MethodFilter NON_BRIDGED_METHODS = new MethodFilter() {
+	public static final MethodFilter NON_BRIDGED_METHODS = new MethodFilter() {
 
 		@Override
 		public boolean matches(Method method) {
@@ -829,7 +832,7 @@ public abstract class ReflectionUtils {
 	 * Pre-built MethodFilter that matches all non-bridge methods
 	 * which are not declared on {@code java.lang.Object}.
 	 */
-	public static MethodFilter USER_DECLARED_METHODS = new MethodFilter() {
+	public static final MethodFilter USER_DECLARED_METHODS = new MethodFilter() {
 
 		@Override
 		public boolean matches(Method method) {
