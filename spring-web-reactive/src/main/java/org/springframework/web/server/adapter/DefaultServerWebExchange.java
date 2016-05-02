@@ -19,8 +19,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-import reactor.core.publisher.EmitterProcessor;
-import reactor.core.publisher.FluxProcessor;
 import reactor.core.publisher.Mono;
 
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -89,8 +87,7 @@ public class DefaultServerWebExchange implements ServerWebExchange {
 		if (this.sessionMono == null) {
 			synchronized (this.createSessionLock) {
 				if (this.sessionMono == null) {
-					FluxProcessor<WebSession, WebSession> replay = EmitterProcessor.replay(1);
-					this.sessionMono = this.sessionManager.getSession(this).subscribeWith(replay).next();
+					this.sessionMono = this.sessionManager.getSession(this).cache();
 				}
 			}
 		}
