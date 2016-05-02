@@ -27,7 +27,7 @@ repositories {
 }
 
 ext {
-	springVersion = '4.3.0.RC1'
+	springVersion = '4.3.0.BUILD-SNAPSHOT'
 	reactorVersion = '2.5.0.BUILD-SNAPSHOT'
 	reactorNettyVersion = '2.5.0.BUILD-SNAPSHOT'
 	tomcatVersion = '8.0.33'

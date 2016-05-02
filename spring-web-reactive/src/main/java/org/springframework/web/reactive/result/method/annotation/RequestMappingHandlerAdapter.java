@@ -28,7 +28,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import reactor.core.publisher.Mono;
 
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.core.codec.support.ByteBufferDecoder;
 import org.springframework.core.codec.support.ByteBufferEncoder;
 import org.springframework.core.codec.support.JacksonJsonDecoder;
@@ -57,7 +61,7 @@ import org.springframework.web.server.ServerWebExchange;
 /**
  * @author Rossen Stoyanchev
  */
-public class RequestMappingHandlerAdapter implements HandlerAdapter, InitializingBean {
+public class RequestMappingHandlerAdapter implements HandlerAdapter, BeanFactoryAware, InitializingBean {
 
 	private static Log logger = LogFactory.getLog(RequestMappingHandlerAdapter.class);
 
@@ -68,6 +72,9 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 
 	private final Map<Class<?>, ExceptionHandlerMethodResolver> exceptionHandlerCache =
 			new ConcurrentHashMap<>(64);
+
+	private ConfigurableBeanFactory beanFactory;
+
 
 
 	/**
@@ -94,24 +101,52 @@ public class RequestMappingHandlerAdapter implements HandlerAdapter, Initializin
 		return this.conversionService;
 	}
 
+	/**
+	 * A {@link ConfigurableBeanFactory} is expected for resolving expressions
+	 * in method argument default values.
+	 */
+	@Override
+	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+		if (beanFactory instanceof ConfigurableBeanFactory) {
+			this.beanFactory = (ConfigurableBeanFactory) beanFactory;
+		}
+	}
+
+	public ConfigurableBeanFactory getBeanFactory() {
+		return beanFactory;
+	}
+
+
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		if (ObjectUtils.isEmpty(this.argumentResolvers)) {
-			List<HttpMessageConverter<?>> messageConverters = Arrays.asList(
-					new CodecHttpMessageConverter<ByteBuffer>(new ByteBufferEncoder(),
-							new ByteBufferDecoder()),
-					new CodecHttpMessageConverter<String>(new StringEncoder(),
-							new StringDecoder()),
-					new CodecHttpMessageConverter<Object>(new Jaxb2Encoder(),
-							new Jaxb2Decoder()),
+
+			List<HttpMessageConverter<?>> converters = Arrays.asList(
+					new CodecHttpMessageConverter<ByteBuffer>(new ByteBufferEncoder(), new ByteBufferDecoder()),
+					new CodecHttpMessageConverter<String>(new StringEncoder(), new StringDecoder()),
+					new CodecHttpMessageConverter<Object>(new Jaxb2Encoder(), new Jaxb2Decoder()),
 					new CodecHttpMessageConverter<Object>(new JacksonJsonEncoder(),
 							new JacksonJsonDecoder(new JsonObjectDecoder())));
 
+			// Annotation-based argument resolution
+			ConversionService cs = getConversionService();
+			this.argumentResolvers.add(new RequestParamMethodArgumentResolver(cs, getBeanFactory(), false));
+			this.argumentResolvers.add(new RequestParamMapMethodArgumentResolver());
+			this.argumentResolvers.add(new PathVariableMethodArgumentResolver(cs, getBeanFactory()));
+			this.argumentResolvers.add(new PathVariableMapMethodArgumentResolver());
+			this.argumentResolvers.add(new RequestBodyArgumentResolver(converters, cs));
+			this.argumentResolvers.add(new RequestHeaderMethodArgumentResolver(cs, getBeanFactory()));
+			this.argumentResolvers.add(new RequestHeaderMapMethodArgumentResolver());
+			this.argumentResolvers.add(new CookieValueMethodArgumentResolver(cs, getBeanFactory()));
+			this.argumentResolvers.add(new ExpressionValueMethodArgumentResolver(cs, getBeanFactory()));
+			this.argumentResolvers.add(new SessionAttributeMethodArgumentResolver(cs, getBeanFactory()));
+			this.argumentResolvers.add(new RequestAttributeMethodArgumentResolver(cs , getBeanFactory()));
 
-			this.argumentResolvers.add(new RequestParamArgumentResolver());
-			this.argumentResolvers.add(new RequestBodyArgumentResolver(messageConverters,
-					this.conversionService));
+			// Type-based argument resolution
 			this.argumentResolvers.add(new ModelArgumentResolver());
+
+			// Catch-all
+			this.argumentResolvers.add(new RequestParamMethodArgumentResolver(cs, getBeanFactory(), true));
 		}
 	}
 

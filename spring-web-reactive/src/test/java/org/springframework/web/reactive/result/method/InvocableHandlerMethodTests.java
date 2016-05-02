@@ -28,14 +28,16 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.Signal;
 import reactor.core.util.SignalKind;
 
+import org.springframework.core.convert.support.GenericConversionService;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.ui.ExtendedModelMap;
 import org.springframework.ui.ModelMap;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerResult;
-import org.springframework.web.reactive.result.method.annotation.RequestParamArgumentResolver;
+import org.springframework.web.reactive.result.method.annotation.RequestParamMethodArgumentResolver;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.adapter.DefaultServerWebExchange;
 import org.springframework.web.server.session.WebSessionManager;
@@ -82,8 +84,10 @@ public class InvocableHandlerMethodTests {
 	@Test
 	public void resolveArgToZeroValues() throws Exception {
 		when(this.request.getURI()).thenReturn(new URI("http://localhost:8080/path"));
+		when(this.request.getQueryParams()).thenReturn(new LinkedMultiValueMap<>());
 		InvocableHandlerMethod hm = createHandlerMethod("singleArg", String.class);
-		hm.setHandlerMethodArgumentResolvers(Collections.singletonList(new RequestParamArgumentResolver()));
+		hm.setHandlerMethodArgumentResolvers(Collections.singletonList(
+				new RequestParamMethodArgumentResolver(new GenericConversionService(), null, false)));
 
 		Mono<HandlerResult> mono = hm.invokeForRequest(this.exchange, this.model);
 		HandlerResult value = mono.get();
