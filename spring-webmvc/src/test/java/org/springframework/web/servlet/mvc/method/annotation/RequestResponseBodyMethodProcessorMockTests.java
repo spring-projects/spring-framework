@@ -36,7 +36,6 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
-import org.springframework.http.HttpRangeResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -311,37 +310,6 @@ public class RequestResponseBodyMethodProcessorMockTests {
 		then(resourceMessageConverter).should(times(1)).write(any(ByteArrayResource.class),
 				eq(MediaType.APPLICATION_OCTET_STREAM), any(HttpOutputMessage.class));
 		assertEquals(200, servletResponse.getStatus());
-	}
-
-	@Test
-	public void handleReturnTypeResourceByteRange() throws Exception {
-		Resource returnValue = new ByteArrayResource("Content".getBytes(Charset.forName("UTF-8")));
-		servletRequest.addHeader("Range", "bytes=0-5");
-
-		given(resourceMessageConverter.canWrite(HttpRangeResource.class, null)).willReturn(true);
-		given(resourceMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.ALL));
-		given(resourceMessageConverter.canWrite(HttpRangeResource.class, MediaType.APPLICATION_OCTET_STREAM)).willReturn(true);
-
-		processor.handleReturnValue(returnValue, returnTypeResource, mavContainer, webRequest);
-
-		then(resourceMessageConverter).should(times(1)).write(any(ByteArrayResource.class),
-				eq(MediaType.APPLICATION_OCTET_STREAM), any(HttpOutputMessage.class));
-		assertEquals(206, servletResponse.getStatus());
-	}
-
-	@Test
-	public void handleReturnTypeResourceIllegalByteRange() throws Exception {
-		Resource returnValue = new ByteArrayResource("Content".getBytes(Charset.forName("UTF-8")));
-		servletRequest.addHeader("Range", "illegal");
-
-		given(resourceMessageConverter.canWrite(ByteArrayResource.class, null)).willReturn(true);
-		given(resourceMessageConverter.getSupportedMediaTypes()).willReturn(Collections.singletonList(MediaType.ALL));
-
-		processor.handleReturnValue(returnValue, returnTypeResource, mavContainer, webRequest);
-
-		then(resourceMessageConverter).should(never()).write(any(ByteArrayResource.class),
-				eq(MediaType.APPLICATION_OCTET_STREAM), any(HttpOutputMessage.class));
-		assertEquals(416, servletResponse.getStatus());
 	}
 
 	// SPR-9841

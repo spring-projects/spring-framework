@@ -27,25 +27,18 @@ import static org.mockito.Mockito.mock;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.List;
 
-import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpRange;
-import org.springframework.http.HttpRangeResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.MockHttpInputMessage;
 import org.springframework.http.MockHttpOutputMessage;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.util.StringUtils;
 
 /**
  * @author Arjen Poutsma
@@ -96,116 +89,6 @@ public class ResourceHttpMessageConverterTests {
 		assertEquals("Invalid content-type", MediaType.IMAGE_JPEG,
 				outputMessage.getHeaders().getContentType());
 		assertEquals("Invalid content-length", body.getFile().length(), outputMessage.getHeaders().getContentLength());
-	}
-
-	@Test
-	public void shouldWritePartialContentByteRange() throws Exception {
-		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		Resource body = new ClassPathResource("byterangeresource.txt", getClass());
-		List<HttpRange> httpRangeList = HttpRange.parseRanges("bytes=0-5");
-
-		converter.write(new HttpRangeResource(httpRangeList, body), MediaType.TEXT_PLAIN, outputMessage);
-
-		HttpHeaders headers = outputMessage.getHeaders();
-		assertThat(headers.getContentType(), is(MediaType.TEXT_PLAIN));
-		assertThat(headers.getContentLength(), is(6L));
-		assertThat(headers.get(HttpHeaders.CONTENT_RANGE).size(), is(1));
-		assertThat(headers.get(HttpHeaders.CONTENT_RANGE).get(0), is("bytes 0-5/39"));
-		assertThat(outputMessage.getBodyAsString(Charset.forName("UTF-8")), is("Spring"));
-	}
-
-	@Test
-	public void shouldWritePartialContentByteRangeNoEnd() throws Exception {
-		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		Resource body = new ClassPathResource("byterangeresource.txt", getClass());
-		List<HttpRange> httpRangeList = HttpRange.parseRanges("bytes=7-");
-
-		converter.write(new HttpRangeResource(httpRangeList, body), MediaType.TEXT_PLAIN, outputMessage);
-
-		HttpHeaders headers = outputMessage.getHeaders();
-		assertThat(headers.getContentType(), is(MediaType.TEXT_PLAIN));
-		assertThat(headers.getContentLength(), is(32L));
-		assertThat(headers.get(HttpHeaders.CONTENT_RANGE).size(), is(1));
-		assertThat(headers.get(HttpHeaders.CONTENT_RANGE).get(0), is("bytes 7-38/39"));
-		assertThat(outputMessage.getBodyAsString(Charset.forName("UTF-8")), is("Framework test resource content."));
-	}
-
-	@Test
-	public void shouldWritePartialContentByteRangeLargeEnd() throws Exception {
-		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		Resource body = new ClassPathResource("byterangeresource.txt", getClass());
-		List<HttpRange> httpRangeList = HttpRange.parseRanges("bytes=7-10000");
-
-		converter.write(new HttpRangeResource(httpRangeList, body), MediaType.TEXT_PLAIN, outputMessage);
-
-		HttpHeaders headers = outputMessage.getHeaders();
-		assertThat(headers.getContentType(), is(MediaType.TEXT_PLAIN));
-		assertThat(headers.getContentLength(), is(32L));
-		assertThat(headers.get(HttpHeaders.CONTENT_RANGE).size(), is(1));
-		assertThat(headers.get(HttpHeaders.CONTENT_RANGE).get(0), is("bytes 7-38/39"));
-		assertThat(outputMessage.getBodyAsString(Charset.forName("UTF-8")), is("Framework test resource content."));
-	}
-
-	@Test
-	public void shouldWritePartialContentSuffixRange() throws Exception {
-		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		Resource body = new ClassPathResource("byterangeresource.txt", getClass());
-		List<HttpRange> httpRangeList = HttpRange.parseRanges("bytes=-8");
-
-		converter.write(new HttpRangeResource(httpRangeList, body), MediaType.TEXT_PLAIN, outputMessage);
-
-		HttpHeaders headers = outputMessage.getHeaders();
-		assertThat(headers.getContentType(), is(MediaType.TEXT_PLAIN));
-		assertThat(headers.getContentLength(), is(8L));
-		assertThat(headers.get(HttpHeaders.CONTENT_RANGE).size(), is(1));
-		assertThat(headers.get(HttpHeaders.CONTENT_RANGE).get(0), is("bytes 31-38/39"));
-		assertThat(outputMessage.getBodyAsString(Charset.forName("UTF-8")), is("content."));
-	}
-
-	@Test
-	public void shouldWritePartialContentSuffixRangeLargeSuffix() throws Exception {
-		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		Resource body = new ClassPathResource("byterangeresource.txt", getClass());
-		List<HttpRange> httpRangeList = HttpRange.parseRanges("bytes=-50");
-
-		converter.write(new HttpRangeResource(httpRangeList, body), MediaType.TEXT_PLAIN, outputMessage);
-
-		HttpHeaders headers = outputMessage.getHeaders();
-		assertThat(headers.getContentType(), is(MediaType.TEXT_PLAIN));
-		assertThat(headers.getContentLength(), is(39L));
-		assertThat(headers.get(HttpHeaders.CONTENT_RANGE).size(), is(1));
-		assertThat(headers.get(HttpHeaders.CONTENT_RANGE).get(0), is("bytes 0-38/39"));
-		assertThat(outputMessage.getBodyAsString(Charset.forName("UTF-8")), is("Spring Framework test resource content."));
-	}
-
-	@Test
-	public void partialContentMultipleByteRanges() throws Exception {
-		MockHttpOutputMessage outputMessage = new MockHttpOutputMessage();
-		Resource body = new ClassPathResource("byterangeresource.txt", getClass());
-		List<HttpRange> httpRangeList = HttpRange.parseRanges("bytes=0-5, 7-15, 17-20");
-
-		converter.write(new HttpRangeResource(httpRangeList, body), MediaType.TEXT_PLAIN, outputMessage);
-
-		HttpHeaders headers = outputMessage.getHeaders();
-		assertThat(headers.getContentType().toString(), Matchers.startsWith("multipart/byteranges;boundary="));
-		String boundary = "--" + headers.getContentType().toString().substring(30);
-		String content = outputMessage.getBodyAsString(Charset.forName("UTF-8"));
-		String[] ranges = StringUtils.tokenizeToStringArray(content, "\r\n", false, true);
-
-		assertThat(ranges[0], is(boundary));
-		assertThat(ranges[1], is("Content-Type: text/plain"));
-		assertThat(ranges[2], is("Content-Range: bytes 0-5/39"));
-		assertThat(ranges[3], is("Spring"));
-
-		assertThat(ranges[4], is(boundary));
-		assertThat(ranges[5], is("Content-Type: text/plain"));
-		assertThat(ranges[6], is("Content-Range: bytes 7-15/39"));
-		assertThat(ranges[7], is("Framework"));
-
-		assertThat(ranges[8], is(boundary));
-		assertThat(ranges[9], is("Content-Type: text/plain"));
-		assertThat(ranges[10], is("Content-Range: bytes 17-20/39"));
-		assertThat(ranges[11], is("test"));
 	}
 
 	@Test  // SPR-10848

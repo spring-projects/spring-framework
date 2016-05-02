@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.servlet.ServletException;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -30,12 +31,13 @@ import org.apache.commons.logging.LogFactory;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.ResourceRegion;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpRange;
-import org.springframework.http.HttpRangeResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
+import org.springframework.http.converter.ResourceRegionHttpMessageConverter;
 import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.util.Assert;
@@ -105,6 +107,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	private ResourceHttpMessageConverter resourceHttpMessageConverter;
 
+	private ResourceRegionHttpMessageConverter resourceRegionHttpMessageConverter;
+
 	private ContentNegotiationManager contentNegotiationManager;
 
 	private CorsConfiguration corsConfiguration;
@@ -169,7 +173,7 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 	/**
 	 * Configure the {@link ResourceHttpMessageConverter} to use.
 	 * <p>By default a {@link ResourceHttpMessageConverter} will be configured.
-	 * @since 4.3
+	 * @since 4.3.0
 	 */
 	public void setResourceHttpMessageConverter(ResourceHttpMessageConverter resourceHttpMessageConverter) {
 		this.resourceHttpMessageConverter = resourceHttpMessageConverter;
@@ -177,6 +181,20 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 
 	public ResourceHttpMessageConverter getResourceHttpMessageConverter() {
 		return this.resourceHttpMessageConverter;
+	}
+
+	/**
+	 * Configure the {@link ResourceRegionHttpMessageConverter} to use.
+	 * <p>By default a {@link ResourceRegionHttpMessageConverter} will be configured.
+	 * @since 4.3.0
+	 */
+	public ResourceRegionHttpMessageConverter getResourceRegionHttpMessageConverter() {
+		return resourceRegionHttpMessageConverter;
+	}
+
+	public void setResourceRegionHttpMessageConverter(
+			ResourceRegionHttpMessageConverter resourceRegionHttpMessageConverter) {
+		this.resourceRegionHttpMessageConverter = resourceRegionHttpMessageConverter;
 	}
 
 	/**
@@ -225,12 +243,14 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			this.resourceResolvers.add(new PathResourceResolver());
 		}
 		initAllowedLocations();
-
 		if (this.contentNegotiationManager == null) {
 			this.contentNegotiationManager = initContentNegotiationManager();
 		}
 		if (this.resourceHttpMessageConverter == null) {
 			this.resourceHttpMessageConverter = new ResourceHttpMessageConverter();
+		}
+		if(this.resourceRegionHttpMessageConverter == null) {
+			this.resourceRegionHttpMessageConverter = new ResourceRegionHttpMessageConverter();
 		}
 	}
 
@@ -328,6 +348,8 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 		}
 
 		ServletServerHttpResponse outputMessage = new ServletServerHttpResponse(response);
+		outputMessage.getHeaders().add(HttpHeaders.ACCEPT_RANGES, "bytes");
+
 		if (request.getHeader(HttpHeaders.RANGE) == null) {
 			setHeaders(response, resource, mediaType);
 			this.resourceHttpMessageConverter.write(resource, mediaType, outputMessage);
@@ -336,9 +358,15 @@ public class ResourceHttpRequestHandler extends WebContentGenerator
 			ServletServerHttpRequest inputMessage = new ServletServerHttpRequest(request);
 			try {
 				List<HttpRange> httpRanges = inputMessage.getHeaders().getRange();
-				HttpRangeResource rangeResource = new HttpRangeResource(httpRanges, resource);
 				response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-				this.resourceHttpMessageConverter.write(rangeResource, mediaType, outputMessage);
+				if(httpRanges.size() == 1) {
+					ResourceRegion resourceRegion = httpRanges.get(0).toResourceRegion(resource);
+					this.resourceRegionHttpMessageConverter.write(resourceRegion, mediaType, outputMessage);
+				}
+				else {
+					this.resourceRegionHttpMessageConverter
+							.write(HttpRange.toResourceRegions(httpRanges, resource), mediaType, outputMessage);
+				}
 			}
 			catch (IllegalArgumentException ex) {
 				response.addHeader("Content-Range", "bytes */" + resource.contentLength());
