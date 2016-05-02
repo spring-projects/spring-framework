@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2015 the original author or authors.
+ * Copyright 2002-2016 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -91,7 +91,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	 * @param webSocketClient the WebSocket client to connect with
 	 */
 	public WebSocketStompClient(WebSocketClient webSocketClient) {
-		Assert.notNull(webSocketClient, "'webSocketClient' is required.");
+		Assert.notNull(webSocketClient, "WebSocketClient is required");
 		this.webSocketClient = webSocketClient;
 		setDefaultHeartbeat(new long[] {0, 0});
 	}
@@ -153,11 +153,6 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		return this.autoStartup;
 	}
 
-	@Override
-	public boolean isRunning() {
-		return this.running;
-	}
-
 	/**
 	 * Specify the phase in which the WebSocket client should be started and
 	 * subsequently closed. The startup order proceeds from lowest to highest,
@@ -201,9 +196,15 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 	@Override
 	public void stop(Runnable callback) {
-		this.stop();
+		stop();
 		callback.run();
 	}
+
+	@Override
+	public boolean isRunning() {
+		return this.running;
+	}
+
 
 	/**
 	 * Connect to the given WebSocket URL and notify the given
@@ -249,7 +250,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	public ListenableFuture<StompSession> connect(String url, WebSocketHttpHeaders handshakeHeaders,
 			StompHeaders connectHeaders, StompSessionHandler handler, Object... uriVariables) {
 
-		Assert.notNull(url, "uriTemplate must not be null");
+		Assert.notNull(url, "'url' must not be null");
 		URI uri = UriComponentsBuilder.fromUriString(url).buildAndExpand(uriVariables).encode().toUri();
 		return connect(uri, handshakeHeaders, connectHeaders, handler);
 	}
@@ -267,7 +268,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	public ListenableFuture<StompSession> connect(URI url, WebSocketHttpHeaders handshakeHeaders,
 			StompHeaders connectHeaders, StompSessionHandler sessionHandler) {
 
-		Assert.notNull(url, "'uri' must not be null");
+		Assert.notNull(url, "'url' must not be null");
 		ConnectionHandlingStompSession session = createSession(connectHeaders, sessionHandler);
 		WebSocketTcpConnectionHandlerAdapter adapter = new WebSocketTcpConnectionHandlerAdapter(session);
 		getWebSocketClient().doHandshake(adapter, handshakeHeaders, url).addCallback(adapter);
@@ -278,7 +279,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 	protected StompHeaders processConnectHeaders(StompHeaders connectHeaders) {
 		connectHeaders = super.processConnectHeaders(connectHeaders);
 		if (connectHeaders.isHeartbeatEnabled()) {
-			Assert.notNull(getTaskScheduler(), "TaskScheduler cannot be null if heartbeats are enabled.");
+			Assert.state(getTaskScheduler() != null, "TaskScheduler must be set if heartbeats are enabled");
 		}
 		return connectHeaders;
 	}
@@ -303,7 +304,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 		private final List<ScheduledFuture<?>> inactivityTasks = new ArrayList<ScheduledFuture<?>>(2);
 
 		public WebSocketTcpConnectionHandlerAdapter(TcpConnectionHandler<byte[]> connectionHandler) {
-			Assert.notNull(connectionHandler);
+			Assert.notNull(connectionHandler, "TcpConnectionHandler must not be null");
 			this.connectionHandler = connectionHandler;
 		}
 
@@ -397,7 +398,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 		@Override
 		public void onReadInactivity(final Runnable runnable, final long duration) {
-			Assert.notNull(getTaskScheduler(), "No scheduler configured.");
+			Assert.state(getTaskScheduler() != null, "No TaskScheduler configured");
 			this.lastReadTime = System.currentTimeMillis();
 			this.inactivityTasks.add(getTaskScheduler().scheduleWithFixedDelay(new Runnable() {
 				@Override
@@ -418,7 +419,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 		@Override
 		public void onWriteInactivity(final Runnable runnable, final long duration) {
-			Assert.notNull(getTaskScheduler(), "No scheduler configured.");
+			Assert.state(getTaskScheduler() != null, "No TaskScheduler configured");
 			this.lastWriteTime = System.currentTimeMillis();
 			this.inactivityTasks.add(getTaskScheduler().scheduleWithFixedDelay(new Runnable() {
 				@Override
@@ -491,7 +492,7 @@ public class WebSocketStompClient extends StompClientSupport implements SmartLif
 
 		public WebSocketMessage<?> encode(Message<byte[]> message, Class<? extends WebSocketSession> sessionType) {
 			StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
-			Assert.notNull(accessor);
+			Assert.notNull(accessor, "No StompHeaderAccessor available");
 			byte[] payload = message.getPayload();
 			byte[] bytes = ENCODER.encode(accessor.getMessageHeaders(), payload);
 
