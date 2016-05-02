@@ -159,7 +159,7 @@ class ConfigurationClassEnhancer {
 	 * Conditional {@link Callback}.
 	 * @see ConditionalCallbackFilter
 	 */
-	private static interface ConditionalCallback extends Callback {
+	private interface ConditionalCallback extends Callback {
 
 		boolean isMatch(Method candidateMethod);
 	}
@@ -343,7 +343,8 @@ class ConfigurationClassEnhancer {
 				// The factory is calling the bean method in order to instantiate and register the bean
 				// (i.e. via a getBean() call) -> invoke the super implementation of the method to actually
 				// create the bean instance.
-				if (BeanFactoryPostProcessor.class.isAssignableFrom(beanMethod.getReturnType())) {
+				if (logger.isWarnEnabled() &&
+						BeanFactoryPostProcessor.class.isAssignableFrom(beanMethod.getReturnType())) {
 					logger.warn(String.format("@Bean method %s.%s is non-static and returns an object " +
 							"assignable to Spring's BeanFactoryPostProcessor interface. This will " +
 							"result in a failure to process annotations such as @Autowired, " +
