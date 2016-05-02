@@ -34,7 +34,6 @@ import static org.junit.Assert.*;
 import static org.mockito.BDDMockito.*;
 
 /**
- *
  * @author Stephane Nicoll
  */
 public class DefaultMessageListenerContainerTests {
@@ -103,6 +102,7 @@ public class DefaultMessageListenerContainerTests {
 		runnable2.waitForCompletion();
 	}
 
+
 	private DefaultMessageListenerContainer createRunningContainer() {
 		DefaultMessageListenerContainer container = createContainer(createSuccessfulConnectionFactory());
 		container.afterPropertiesSet();
@@ -111,9 +111,7 @@ public class DefaultMessageListenerContainerTests {
 	}
 
 	private DefaultMessageListenerContainer createContainer(ConnectionFactory connectionFactory) {
-
 		Destination destination = new Destination() {};
-
 
 		DefaultMessageListenerContainer container = new DefaultMessageListenerContainer();
 		container.setConnectionFactory(connectionFactory);
@@ -133,8 +131,8 @@ public class DefaultMessageListenerContainerTests {
 			});
 			return connectionFactory;
 		}
-		catch (JMSException e) {
-			throw new IllegalStateException(); // never happen
+		catch (JMSException ex) {
+			throw new IllegalStateException(ex);  // never happen
 		}
 	}
 
@@ -143,7 +141,6 @@ public class DefaultMessageListenerContainerTests {
 			ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
 			given(connectionFactory.createConnection()).will(new Answer<Object>() {
 				int currentAttempts = 0;
-
 				@Override
 				public Object answer(InvocationOnMock invocation) throws Throwable {
 					currentAttempts++;
@@ -157,8 +154,8 @@ public class DefaultMessageListenerContainerTests {
 			});
 			return connectionFactory;
 		}
-		catch (JMSException e) {
-			throw new IllegalStateException(); // never happen
+		catch (JMSException ex) {
+			throw new IllegalStateException(ex);  // never happen
 		}
 	}
 
@@ -168,12 +165,14 @@ public class DefaultMessageListenerContainerTests {
 			given(connectionFactory.createConnection()).willReturn(mock(Connection.class));
 			return connectionFactory;
 		}
-		catch (JMSException e) {
-			throw new IllegalStateException(); // never happen
+		catch (JMSException ex) {
+			throw new IllegalStateException(ex);  // never happen
 		}
 	}
 
+
 	private static class TestRunnable implements Runnable {
+
 		private final CountDownLatch countDownLatch = new CountDownLatch(1);
 
 		@Override
@@ -185,7 +184,6 @@ public class DefaultMessageListenerContainerTests {
 			this.countDownLatch.await(2, TimeUnit.SECONDS);
 			assertEquals("callback was not invoked", 0, this.countDownLatch.getCount());
 		}
-
 	}
 
 }
