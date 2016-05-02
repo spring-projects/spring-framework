@@ -273,13 +273,6 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 	}
 
 	@Override
-	public final boolean isRunning() {
-		synchronized (this.lifecycleMonitor) {
-			return this.running;
-		}
-	}
-
-	@Override
 	public final void start() {
 		synchronized (this.lifecycleMonitor) {
 			this.clientInboundChannel.subscribe(this);
@@ -300,6 +293,13 @@ public class SimpAnnotationMethodMessageHandler extends AbstractMethodMessageHan
 		synchronized (this.lifecycleMonitor) {
 			stop();
 			callback.run();
+		}
+	}
+
+	@Override
+	public final boolean isRunning() {
+		synchronized (this.lifecycleMonitor) {
+			return this.running;
 		}
 	}
 
