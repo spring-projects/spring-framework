@@ -114,6 +114,13 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 	}
 
 	/**
+	 * Return the configured encoding for requests and/or responses
+	 */
+	public String getEncoding() {
+		return encoding;
+	}
+
+	/**
 	 * Set whether the configured {@link #setEncoding encoding} of this filter
 	 * is supposed to override existing request and response encodings.
 	 * <p>Default is "false", i.e. do not modify the encoding if
@@ -144,6 +151,13 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 	}
 
 	/**
+	 * Return whether the encoding should be forced on requests
+	 */
+	public boolean isForceRequestEncoding() {
+		return forceRequestEncoding;
+	}
+
+	/**
 	 * Set whether the configured {@link #setEncoding encoding} of this filter
 	 * is supposed to override existing response encodings.
 	 * <p>Default is "false", i.e. do not modify the encoding.
@@ -153,6 +167,13 @@ public class CharacterEncodingFilter extends OncePerRequestFilter {
 	 */
 	public void setForceResponseEncoding(boolean forceResponseEncoding) {
 		this.forceResponseEncoding = forceResponseEncoding;
+	}
+
+	/**
+	 * Return whether the encoding should be forced on responses
+	 */
+	public boolean isForceResponseEncoding() {
+		return forceResponseEncoding;
 	}
 
 	@Override
