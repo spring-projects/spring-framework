@@ -23,12 +23,16 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * <p>Test annotation to indicate that the annotated {@code void} method
+ * <p>Test annotation which indicates that the annotated {@code void} method
  * should be executed <em>before</em> a transaction is started for a test method
- * configured to run within a transaction via the {@code @Transactional} annotation.
+ * configured to run within a transaction via Spring's {@code @Transactional}
+ * annotation.
  *
- * <p>The {@code @BeforeTransaction} methods of superclasses will be executed
- * before those of the current class.
+ * <p>As of Spring Framework 4.3, {@code @BeforeTransaction} may be declared on
+ * Java 8 based interface default methods.
+ *
+ * <p>{@code @BeforeTransaction} methods declared in superclasses or as interface
+ * default methods will be executed before those of the current test class.
  *
  * <p>As of Spring Framework 4.0, this annotation may be used as a
  * <em>meta-annotation</em> to create custom <em>composed annotations</em>.

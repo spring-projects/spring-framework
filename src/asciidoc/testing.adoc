@@ -854,9 +854,12 @@ method, potentially overriding class-level `@Rollback` or `@Commit` semantics.
 
 +
 
-Indicates that the annotated `void` method should be executed __before__ a
-transaction is started for test methods configured to run within a transaction via the
-`@Transactional` annotation.
+Indicates that the annotated `void` method should be executed __before__ a transaction
+is started for test methods configured to run within a transaction via Spring's
+`@Transactional` annotation. As of Spring Framework 4.3, `@BeforeTransaction` methods
+are not required to be `public` and may be declared on Java 8 based interface default
+methods.
+
 
 +
 
@@ -873,9 +876,11 @@ transaction is started for test methods configured to run within a transaction v
 
 +
 
-Indicates that the annotated `void` method should be executed __after__ a
-transaction has ended for test methods configured to run within a transaction via the
-`@Transactional` annotation.
+Indicates that the annotated `void` method should be executed __after__ a transaction
+is ended for test methods configured to run within a transaction via Spring's
+`@Transactional` annotation. As of Spring Framework 4.3, `@AfterTransaction` methods
+are not required to be `public` and may be declared on Java 8 based interface default
+methods.
 
 +
 
@@ -3210,12 +3215,12 @@ javadocs for `TestTransaction` for further details.
 Occasionally you need to execute certain code before or after a transactional test method
 but outside the transactional context -- for example, to verify the initial database state
 prior to execution of your test or to verify expected transactional commit behavior after
-test execution (if the test was configured not to roll back the transaction).
+test execution (if the test was configured to commit the transaction).
 `TransactionalTestExecutionListener` supports the `@BeforeTransaction` and
 `@AfterTransaction` annotations exactly for such scenarios. Simply annotate any `void`
-method in your test class with one of these annotations, and the
-`TransactionalTestExecutionListener` ensures that your __before transaction method__ or
-__after transaction method__ is executed at the appropriate time.
+method in a test class or any `void` default method in a test interface with one of these
+annotations, and the `TransactionalTestExecutionListener` ensures that your __before
+transaction method__ or __after transaction method__ is executed at the appropriate time.
 
 [TIP]
 ====

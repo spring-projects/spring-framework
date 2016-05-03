@@ -694,8 +694,9 @@ Spring 4.3 also improves the caching abstraction as follows:
 * New `SpringRunner` _alias_ for the `SpringJUnit4ClassRunner`.
 * An empty declaration of `@ContextConfiguration` can now be completely omitted if default
   XML files, Groovy scripts, or `@Configuration` classes are detected.
-* `@Transactional` test methods are no longer required to be `public` (in TestNG and JUnit 5).
-* `@BeforeTransaction` and `@AfterTransaction` methods are no longer required to be `public`.
+* `@Transactional` test methods are no longer required to be `public` (e.g., in TestNG and JUnit 5).
+* `@BeforeTransaction` and `@AfterTransaction` methods are no longer required to be `public`
+  and may now be declared on Java 8 based interface default methods.
 * The `ApplicationContext` cache in the _Spring TestContext Framework_ is now bounded with a
   default maximum size of 32 and a _least recently used_ eviction policy. The maximum size
   can be configured by setting a JVM system property or Spring property called

@@ -20,7 +20,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -245,13 +244,11 @@ public class TransactionalTestExecutionListenerTests {
 		assertAfterTestMethod(AfterTransactionDeclaredViaMetaAnnotationTestCase.class);
 	}
 
-	@Ignore("Disabled until @BeforeTransaction is supported on interface default methods")
 	@Test
 	public void beforeTestMethodWithBeforeTransactionDeclaredAsInterfaceDefaultMethod() throws Exception {
 		assertBeforeTestMethod(BeforeTransactionDeclaredAsInterfaceDefaultMethodTestCase.class);
 	}
 
-	@Ignore("Disabled until @AfterTransaction is supported on interface default methods")
 	@Test
 	public void afterTestMethodWithAfterTransactionDeclaredAsInterfaceDefaultMethod() throws Exception {
 		assertAfterTestMethod(AfterTransactionDeclaredAsInterfaceDefaultMethodTestCase.class);
