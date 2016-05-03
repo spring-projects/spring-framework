@@ -48,6 +48,11 @@ import org.springframework.web.util.NestedServletException;
  * expense of being tied to Java. Nevertheless, it is as easy to set up as
  * Hessian and Burlap, which is its main advantage compared to RMI.
  *
+ * <p><b>WARNING: Be aware of vulnerabilities due to unsafe Java deserialization:
+ * Manipulated input streams could lead to unwanted code execution on the server
+ * during the deserialization step. As a consequence, do not expose HTTP invoker
+ * endpoints to untrusted clients but rather just between your own services.</b>
+ *
  * @author Juergen Hoeller
  * @since 1.1
  * @see HttpInvokerClientInterceptor
