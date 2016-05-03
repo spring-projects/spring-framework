@@ -21,7 +21,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import org.springframework.aop.scope.ScopedProxyUtils;
@@ -34,7 +33,6 @@ import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.config.ConstructorArgumentValues;
 import org.springframework.context.annotation.AnnotationConfigUtils;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.annotation.AliasFor;
 
 import static org.junit.Assert.*;
 
@@ -51,8 +49,6 @@ public class QualifierAnnotationAutowireContextTests {
 	private static final String JUERGEN = "juergen";
 
 	private static final String MARK = "mark";
-
-	private static final String SAM = "sam";
 
 
 	@Test

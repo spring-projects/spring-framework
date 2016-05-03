@@ -16,25 +16,32 @@
 
 package org.springframework.validation.beanvalidation;
 
+import java.lang.annotation.Documented;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Repeatable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+import java.util.Locale;
+import javax.validation.Constraint;
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
+import javax.validation.Payload;
+import javax.validation.Validation;
+import javax.validation.constraints.Size;
+
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
+
 import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.context.support.StaticMessageSource;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 
-import javax.validation.*;
-import javax.validation.constraints.Size;
-import java.lang.annotation.*;
-import java.util.Locale;
-
-import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertThat;
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import static org.hamcrest.core.Is.*;
+import static org.junit.Assert.*;
 
 /**
  * @author Kazuki Shimizu
@@ -42,16 +49,14 @@ import static org.junit.Assert.assertThat;
  */
 public class SpringValidatorAdapterTests {
 
-	private SpringValidatorAdapter validatorAdapter;
+	private final SpringValidatorAdapter validatorAdapter = new SpringValidatorAdapter(
+			Validation.buildDefaultValidatorFactory().getValidator());
 
-	private StaticMessageSource messageSource;
+	private final StaticMessageSource messageSource = new StaticMessageSource();
 
 
 	@Before
 	public void setupSpringValidatorAdapter() {
-		validatorAdapter = new SpringValidatorAdapter(Validation.buildDefaultValidatorFactory().getValidator());
-
-		messageSource = new StaticMessageSource();
 		messageSource.addMessage("Size", Locale.ENGLISH, "Size of {0} is must be between {2} and {1}");
 		messageSource.addMessage("Same", Locale.ENGLISH, "{2} must be same value with {1}");
 		messageSource.addMessage("password", Locale.ENGLISH, "Password");
@@ -155,7 +160,7 @@ public class SpringValidatorAdapterTests {
 	@Target({TYPE, ANNOTATION_TYPE})
 	@Retention(RUNTIME)
 	@Repeatable(SameGroup.class)
-	public @interface Same {
+	@interface Same {
 
 		String message() default "{org.springframework.validation.beanvalidation.Same.message}";
 
@@ -180,7 +185,7 @@ public class SpringValidatorAdapterTests {
 	@Inherited
 	@Retention(RUNTIME)
 	@Target({TYPE, ANNOTATION_TYPE})
-	public @interface SameGroup {
+	@interface SameGroup {
 
 		Same[] value();
 	}
