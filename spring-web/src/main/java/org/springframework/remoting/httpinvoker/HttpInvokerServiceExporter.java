@@ -202,9 +202,11 @@ public class HttpInvokerServiceExporter extends RemoteInvocationSerializingExpor
 		return os;
 	}
 
+
 	/**
-	 * Decorate an OutputStream to guard against {@code flush()} calls, which
-	 * are turned into no-ops.
+	 * Decorate an {@code OutputStream} to guard against {@code flush()} calls,
+	 * which are turned into no-ops.
+	 *
 	 * <p>Because {@link ObjectOutputStream#close()} will in fact flush/drain
 	 * the underlying stream twice, this {@link FilterOutputStream} will
 	 * guard against individual flush calls. Multiple flush calls can lead
@@ -212,14 +214,15 @@ public class HttpInvokerServiceExporter extends RemoteInvocationSerializingExpor
 	 *
 	 * @see <a href="https://jira.spring.io/browse/SPR-14040">SPR-14040</a>
 	 */
-	class FlushGuardedOutputStream extends FilterOutputStream {
+	private static class FlushGuardedOutputStream extends FilterOutputStream {
+
 		public FlushGuardedOutputStream(OutputStream out) {
 			super(out);
 		}
 
 		@Override
 		public void flush() throws IOException {
-			// Do nothing
+			// Do nothing on flush
 		}
 	}
 
