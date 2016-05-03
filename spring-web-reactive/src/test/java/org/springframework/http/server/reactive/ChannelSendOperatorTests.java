@@ -108,13 +108,14 @@ public class ChannelSendOperatorTests {
 	@Test
 	public void errorAfterMultipleItems() throws Exception {
 		IllegalStateException error = new IllegalStateException("boo");
-		Flux<String> publisher = Flux.create(subscriber -> {
-			int i = subscriber.context().incrementAndGet();
+		Flux<String> publisher = Flux.generate(() -> 0, (idx , subscriber) -> {
+			int i = ++idx;
 			subscriber.onNext(String.valueOf(i));
 			if (i == 3) {
 				subscriber.onError(error);
 			}
-		}, subscriber -> new AtomicInteger());
+			return i;
+		});
 		Mono<Void> completion = publisher.as(this::sendOperator);
 		Signal<Void> signal = completion.materialize().get();
 

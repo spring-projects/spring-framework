@@ -73,8 +73,8 @@ public class JacksonJsonEncoder extends AbstractEncoder<Object> {
 		else {
 			// array
 			Mono<DataBuffer> startArray = Mono.just(allocator.wrap(START_ARRAY_BUFFER));
-			Flux<DataBuffer> arraySeparators =
-					Flux.create(sub -> sub.onNext(allocator.wrap(SEPARATOR_BUFFER)));
+			Flux<DataBuffer> arraySeparators = Mono.just(allocator.wrap(SEPARATOR_BUFFER))
+			                                       .repeat();
 			Mono<DataBuffer> endArray = Mono.just(allocator.wrap(END_ARRAY_BUFFER));
 
 			Flux<DataBuffer> serializedObjects =

@@ -22,6 +22,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 import org.reactivestreams.Publisher;
@@ -29,7 +30,7 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.FluxSource;
-import reactor.core.subscriber.SubscriberWithContext;
+import reactor.core.publisher.GenerateOutput;
 
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferAllocator;
@@ -83,8 +84,9 @@ public abstract class DataBufferUtils {
 		Assert.notNull(channel, "'channel' must not be null");
 		Assert.notNull(allocator, "'allocator' must not be null");
 
-		return Flux.create(new ReadableByteChannelConsumer(allocator, bufferSize),
-				subscriber -> channel, CLOSE_CONSUMER);
+		return Flux.generate(() -> channel,
+				new ReadableByteChannelGenerator(allocator, bufferSize),
+				CLOSE_CONSUMER);
 	}
 
 	/**
@@ -172,24 +174,25 @@ public abstract class DataBufferUtils {
 		}
 	}
 
-	private static class ReadableByteChannelConsumer
-			implements Consumer<SubscriberWithContext<DataBuffer, ReadableByteChannel>> {
+	private static class ReadableByteChannelGenerator
+			implements BiFunction<ReadableByteChannel, GenerateOutput<DataBuffer>,
+			ReadableByteChannel> {
 
 		private final DataBufferAllocator allocator;
 
 		private final int chunkSize;
 
-		public ReadableByteChannelConsumer(DataBufferAllocator allocator, int chunkSize) {
+		public ReadableByteChannelGenerator(DataBufferAllocator allocator, int chunkSize) {
 			this.allocator = allocator;
 			this.chunkSize = chunkSize;
 		}
 
 		@Override
-		public void accept(SubscriberWithContext<DataBuffer, ReadableByteChannel> sub) {
+		public ReadableByteChannel apply(ReadableByteChannel
+				channel, GenerateOutput<DataBuffer>	sub) {
 			try {
 				ByteBuffer byteBuffer = ByteBuffer.allocate(chunkSize);
 				int read;
-				ReadableByteChannel channel = sub.context();
 				if ((read = channel.read(byteBuffer)) > 0) {
 					byteBuffer.flip();
 					boolean release = true;
@@ -212,6 +215,7 @@ public abstract class DataBufferUtils {
 			catch (IOException ex) {
 				sub.onError(ex);
 			}
+			return channel;
 		}
 	}
 
