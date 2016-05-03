@@ -364,7 +364,7 @@ public class TransactionalTestExecutionListener extends AbstractTestExecutionLis
 	/**
 	 * Determine whether or not to rollback transactions by default for the
 	 * supplied {@linkplain TestContext test context}.
-	 * <p>Supports {@link Rollback @Rollback} or
+	 * <p>Supports {@link Rollback @Rollback}, {@link Commit @Commit}, or
 	 * {@link TransactionConfiguration @TransactionConfiguration} at the
 	 * class-level.
 	 * @param testContext the test context for which the default rollback flag
