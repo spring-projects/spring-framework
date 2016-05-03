@@ -287,6 +287,39 @@ public class SendToMethodReturnValueHandlerTests {
 		assertResponse(this.userDefaultOverrideAnnotation, sessionId, 1, "/user/sess1/dest4");
 	}
 
+	@Test // SPR-14238
+	public void sendToUserWithSendToDefaultOverride() throws Exception {
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
+
+		Class<?> clazz = SendToUserWithSendToOverrideTestBean.class;
+		Method method = clazz.getDeclaredMethod("handleAndSendToDefaultDestination");
+		MethodParameter parameter = new SynthesizingMethodParameter(method, -1);
+
+		String sessionId = "sess1";
+		Message<?> inputMessage = createMessage(sessionId, "sub1", null, null, null);
+		this.handler.handleReturnValue(PAYLOAD, parameter, inputMessage);
+
+		verify(this.messageChannel, times(1)).send(this.messageCaptor.capture());
+		assertResponse(parameter, sessionId, 0, "/user/sess1/dest-default");
+	}
+
+	@Test // SPR-14238
+	public void sendToUserWithSendToOverride() throws Exception {
+		given(this.messageChannel.send(any(Message.class))).willReturn(true);
+
+		Class<?> clazz = SendToUserWithSendToOverrideTestBean.class;
+		Method method = clazz.getDeclaredMethod("handleAndSendToOverride");
+		MethodParameter parameter = new SynthesizingMethodParameter(method, -1);
+
+		String sessionId = "sess1";
+		Message<?> inputMessage = createMessage(sessionId, "sub1", null, null, null);
+		this.handler.handleReturnValue(PAYLOAD, parameter, inputMessage);
+
+		verify(this.messageChannel, times(2)).send(this.messageCaptor.capture());
+		assertResponse(parameter, sessionId, 0, "/dest3");
+		assertResponse(parameter, sessionId, 1, "/dest4");
+	}
+
 
 	private void assertResponse(MethodParameter methodParameter, String sessionId,
 			int index, String destination) {
@@ -552,7 +585,7 @@ public class SendToMethodReturnValueHandlerTests {
 
 	@SendTo
 	@Retention(RetentionPolicy.RUNTIME)
-	public @interface MySendTo {
+	@interface MySendTo {
 
 		@AliasFor(annotation = SendTo.class, attribute = "value")
 		String[] dest();
@@ -560,7 +593,7 @@ public class SendToMethodReturnValueHandlerTests {
 
 	@SendToUser
 	@Retention(RetentionPolicy.RUNTIME)
-	public @interface MySendToUser {
+	@interface MySendToUser {
 
 		@AliasFor(annotation = SendToUser.class, attribute = "destinations")
 		String[] dest();
@@ -568,47 +601,47 @@ public class SendToMethodReturnValueHandlerTests {
 
 
 	@SuppressWarnings("unused")
-	public String handleNoAnnotations() {
+	String handleNoAnnotations() {
 		return PAYLOAD;
 	}
 
 	@SendTo @SuppressWarnings("unused")
-	public String handleAndSendToDefaultDestination() {
+	String handleAndSendToDefaultDestination() {
 		return PAYLOAD;
 	}
 
 	@SendTo({"/dest1", "/dest2"}) @SuppressWarnings("unused")
-	public String handleAndSendTo() {
+	String handleAndSendTo() {
 		return PAYLOAD;
 	}
 
 	@SendTo("/topic/chat.message.filtered.{roomName}") @SuppressWarnings("unused")
-	public String handleAndSendToWithPlaceholders() {
+	String handleAndSendToWithPlaceholders() {
 		return PAYLOAD;
 	}
 
 	@SendToUser @SuppressWarnings("unused")
-	public String handleAndSendToUserDefaultDestination() {
+	String handleAndSendToUserDefaultDestination() {
 		return PAYLOAD;
 	}
 
 	@SendToUser(broadcast = false) @SuppressWarnings("unused")
-	public String handleAndSendToUserDefaultDestinationSingleSession() {
+	String handleAndSendToUserDefaultDestinationSingleSession() {
 		return PAYLOAD;
 	}
 
 	@SendToUser({"/dest1", "/dest2"}) @SuppressWarnings("unused")
-	public String handleAndSendToUser() {
+	String handleAndSendToUser() {
 		return PAYLOAD;
 	}
 
 	@SendToUser(destinations = { "/dest1", "/dest2" }, broadcast = false) @SuppressWarnings("unused")
-	public String handleAndSendToUserSingleSession() {
+	String handleAndSendToUserSingleSession() {
 		return PAYLOAD;
 	}
 
 	@JsonView(MyJacksonView1.class) @SuppressWarnings("unused")
-	public JacksonViewBean handleAndSendToJsonView() {
+	JacksonViewBean handleAndSendToJsonView() {
 		JacksonViewBean payload = new JacksonViewBean();
 		payload.setWithView1("with");
 		payload.setWithView2("with");
@@ -620,17 +653,17 @@ public class SendToMethodReturnValueHandlerTests {
 	@MySendTo(dest = "/dest-default") @SuppressWarnings("unused")
 	private static class SendToTestBean {
 
-		public String handleNoAnnotation() {
+		String handleNoAnnotation() {
 			return PAYLOAD;
 		}
 
 		@SendTo
-		public String handleAndSendToDefaultDestination() {
+		String handleAndSendToDefaultDestination() {
 			return PAYLOAD;
 		}
 
 		@MySendTo(dest = {"/dest3", "/dest4"})
-		public String handleAndSendToOverride() {
+		String handleAndSendToOverride() {
 			return PAYLOAD;
 		}
 	}
@@ -638,17 +671,31 @@ public class SendToMethodReturnValueHandlerTests {
 	@MySendToUser(dest = "/dest-default") @SuppressWarnings("unused")
 	private static class SendToUserTestBean {
 
-		public String handleNoAnnotation() {
+		String handleNoAnnotation() {
 			return PAYLOAD;
 		}
 
 		@SendToUser
-		public String handleAndSendToDefaultDestination() {
+		String handleAndSendToDefaultDestination() {
 			return PAYLOAD;
 		}
 
 		@MySendToUser(dest = {"/dest3", "/dest4"})
-		public String handleAndSendToOverride() {
+		String handleAndSendToOverride() {
+			return PAYLOAD;
+		}
+	}
+
+	@MySendToUser(dest = "/dest-default") @SuppressWarnings("unused")
+	private static class SendToUserWithSendToOverrideTestBean {
+
+		@SendTo
+		String handleAndSendToDefaultDestination() {
+			return PAYLOAD;
+		}
+
+		@MySendTo(dest = {"/dest3", "/dest4"})
+		String handleAndSendToOverride() {
 			return PAYLOAD;
 		}
 	}
@@ -672,23 +719,23 @@ public class SendToMethodReturnValueHandlerTests {
 			return withView1;
 		}
 
-		public void setWithView1(String withView1) {
+		void setWithView1(String withView1) {
 			this.withView1 = withView1;
 		}
 
-		public String getWithView2() {
+		String getWithView2() {
 			return withView2;
 		}
 
-		public void setWithView2(String withView2) {
+		void setWithView2(String withView2) {
 			this.withView2 = withView2;
 		}
 
-		public String getWithoutView() {
+		String getWithoutView() {
 			return withoutView;
 		}
 
-		public void setWithoutView(String withoutView) {
+		void setWithoutView(String withoutView) {
 			this.withoutView = withoutView;
 		}
 	}

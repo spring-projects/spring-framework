@@ -151,9 +151,10 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 		MessageHeaders headers = message.getHeaders();
 		String sessionId = SimpMessageHeaderAccessor.getSessionId(headers);
 		PlaceholderResolver varResolver = initVarResolver(headers);
-		SendToUser sendToUser = getSendToUser(returnType);
+		Object annotation = findAnnotation(returnType);
 
-		if (sendToUser != null) {
+		if (annotation != null && annotation instanceof SendToUser) {
+			SendToUser sendToUser = (SendToUser) annotation;
 			boolean broadcast = sendToUser.broadcast();
 			String user = getUserName(message, headers);
 			if (user == null) {
@@ -177,13 +178,42 @@ public class SendToMethodReturnValueHandler implements HandlerMethodReturnValueH
 			}
 		}
 		else {
-			SendTo sendTo = getSendTo(returnType);
+			SendTo sendTo = (SendTo) annotation;
 			String[] destinations = getTargetDestinations(sendTo, message, this.defaultDestinationPrefix);
 			for (String destination : destinations) {
 				destination = this.placeholderHelper.replacePlaceholders(destination, varResolver);
 				this.messagingTemplate.convertAndSend(destination, returnValue, createHeaders(sessionId, returnType));
 			}
 		}
+	}
+
+	private Object findAnnotation(MethodParameter returnType) {
+		Annotation[] annot = new Annotation[4];
+		annot[0] = AnnotatedElementUtils.findMergedAnnotation(returnType.getMethod(), SendToUser.class);
+		annot[1] = AnnotatedElementUtils.findMergedAnnotation(returnType.getMethod(), SendTo.class);
+		annot[2] = AnnotatedElementUtils.findMergedAnnotation(returnType.getDeclaringClass(), SendToUser.class);
+		annot[3] = AnnotatedElementUtils.findMergedAnnotation(returnType.getDeclaringClass(), SendTo.class);
+
+		if (annot[0] != null && !ObjectUtils.isEmpty(((SendToUser) annot[0]).value())) {
+			return annot[0];
+		}
+		if (annot[1] != null && !ObjectUtils.isEmpty(((SendTo) annot[1]).value())) {
+			return annot[1];
+		}
+		if (annot[2] != null && !ObjectUtils.isEmpty(((SendToUser) annot[2]).value())) {
+			return annot[2];
+		}
+		if (annot[3] != null && !ObjectUtils.isEmpty(((SendTo) annot[3]).value())) {
+			return annot[3];
+		}
+
+		for (int i=0; i < 4; i++) {
+			if (annot[i] != null) {
+				return annot[i];
+			}
+		}
+
+		return null;
 	}
 
 	private SendToUser getSendToUser(MethodParameter returnType) {
